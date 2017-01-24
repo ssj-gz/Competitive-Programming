@@ -701,7 +701,7 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         const auto remainderOfCurrentTransition = substringCursor.remainderOfCurrentTransition();
         int newLengthSoFar = lengthSoFar + 1;
         // TODO - optimise this - a closed-form solution is possible.
-        long sizeOfConcatenatedStringsIncrease = 0;
+        //long sizeOfConcatenatedStringsIncrease = 0;
         //cout << "Bloop: remainderOfCurrentTransition().length() " << remainderOfCurrentTransition.length() << " lengthSoFar: " << lengthSoFar << endl;
         for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
         {
@@ -716,21 +716,24 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
                 //cout << "Letter: " << substring[indexInSubstring] << endl;
                 return substring[indexInSubstring];
             }
-            sizeOfConcatenatedStringsIncrease += newLengthSoFar;
+            //sizeOfConcatenatedStringsIncrease += newLengthSoFar;
             //cout << " added: " << newLengthSoFar << endl;
             newLengthSoFar++;
-            substringCursor.followNextLetter();
+            //substringCursor.followNextLetter();
         }
-        sizeOfConcatenatedStrings += sizeOfConcatenatedStringsIncrease;
         auto sumOfUpToN = [](const long n)
         {
             return n * (n + 1) / 2;
         };
         const long sizeOfConcatenatedStringsIncreaseOptimised = sumOfUpToN(lengthSoFar + remainderOfCurrentTransition.length()) - sumOfUpToN(lengthSoFar);
-        assert(sizeOfConcatenatedStringsIncreaseOptimised == sizeOfConcatenatedStringsIncrease);
+        const long newLengthSoFarOptimised = lengthSoFar + remainderOfCurrentTransition.length();
+        auto cursorAfter(substringCursor);
+        cursorAfter.followNextLetters(remainderOfCurrentTransition.length());
+        //assert(sizeOfConcatenatedStringsIncreaseOptimised == sizeOfConcatenatedStringsIncrease);
+        sizeOfConcatenatedStrings += sizeOfConcatenatedStringsIncreaseOptimised;
         //cout << "sizeOfConcatenatedStringsIncrease: " << sizeOfConcatenatedStringsIncrease << "  sizeOfConcatenatedStringsIncreaseOptimised: " << sizeOfConcatenatedStringsIncreaseOptimised << endl;
         //cout << " after: " << substringCursor.dbgStringFollowed() << endl;
-        const char result = computeResultAux(s, k, substringCursor, newLengthSoFar, sizeOfConcatenatedStrings);
+        const char result = computeResultAux(s, k, cursorAfter, newLengthSoFarOptimised, sizeOfConcatenatedStrings);
         if (result)
             return result;
     }
