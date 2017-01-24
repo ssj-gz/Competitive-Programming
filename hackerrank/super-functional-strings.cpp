@@ -688,7 +688,7 @@ long power(long n, long p)
     return result;
 }
 
-long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& result, vector<bool> letterUsed, int numLettersUsed, const int lengthSoFar,  const vector<vector<int>>& nextPosOfLetterAfterPos)
+long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& result, vector<bool> letterUsed, int numLettersUsed, const int lengthSoFar,  const vector<vector<int>>& nextPosOfLetterAfterPos, const vector<vector<long>>& sumsOfPowers)
 {
     assert(lengthSoFar == cursor.dbgStringFollowed().length());
     //cout << "computeResultAux: cursor: " << cursor.id() << " lengthSoFar: " << lengthSoFar << " result: " << result << " string followed so far: " << cursor.dbgStringFollowed() << endl;
@@ -705,14 +705,14 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             if (letterUsed[letterIndex])
             {
                 result = (result + power(lengthSoFar + 1, numLettersUsed)) % m;
-                computeResultAux(s, cursorAfterLetter,  result, letterUsed, numLettersUsed, lengthSoFar + 1, nextPosOfLetterAfterPos);
+                computeResultAux(s, cursorAfterLetter,  result, letterUsed, numLettersUsed, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             }
             else
             {
                 result = (result + power(lengthSoFar + 1, numLettersUsed + 1)) % m;
                 vector<bool> newLetterUsed(letterUsed);
                 newLetterUsed[letterIndex] = true;
-                computeResultAux(s, cursorAfterLetter, result, newLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos);
+                computeResultAux(s, cursorAfterLetter, result, newLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             }
         }
     }
@@ -734,7 +734,7 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             result = (result + power(lengthSoFar + 1, numLettersUsed + 1)) % m;
             vector<bool> newLetterUsed(letterUsed);
             newLetterUsed[currentLetterIndex] = true;
-            computeResultAux(s, cursorAfterLetter, result, newLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos);
+            computeResultAux(s, cursorAfterLetter, result, newLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
         for (int letterIndex = 0; letterIndex < numDistinctLettersInString; letterIndex++)
@@ -777,7 +777,7 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             cursor.followLetter(newLetter);
             newLengthSoFar++;
             result = (result + power(newLengthSoFar, numLettersUsed)) % m;
-            computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos);
+            computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
         else
@@ -786,15 +786,27 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             int newLengthSoFar = lengthSoFar;
             //cout << "No new letters on this transition: " << cursor.id() << " num remaining chars: " << substringRemainingOnTransition.length() << endl;
             long resultIncrease = 0;
+            //cout << "Bloop lengthSoFar:" << lengthSoFar << " substringRemainingOnTransition.length() " << substringRemainingOnTransition.length()<< endl;
             for (int i = 1; i <= substringRemainingOnTransition.length(); i++)
             {
                 newLengthSoFar++;
                 resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
+                //cout << "Added " << newLengthSoFar << " ^ " << numLettersUsed  << " = " << power(newLengthSoFar, numLettersUsed) << endl;
             }
             result += resultIncrease;
+
+
+            //cout << "numLettersUsed: " << numLettersUsed << endl;
+            //cout << "sumsOfPowers[numLettersUsed].size(): " << sumsOfPowers[numLettersUsed].size() << endl;
+            long optimisedResultIncrease = sumsOfPowers[numLettersUsed][lengthSoFar + substringRemainingOnTransition.length()] - sumsOfPowers[numLettersUsed][lengthSoFar];
+            //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
+            //cout << "resultIncrease: " << resultIncrease << endl;
+            assert(optimisedResultIncrease == resultIncrease);
+
+
             cursor.followNextLetters(substringRemainingOnTransition.length());
             assert(cursor.isOnExplicitState());
-            computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos);
+            computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
     }
@@ -825,7 +837,6 @@ long computeResult(const string& originalString)
     suffixTree.appendString(s);
     //suffixTree.dumpGraph();
 
-    long result = 0;
     vector<vector<int>> nextPosOfLetterAfterPos(numDistinctLetters, vector<int>(s.size(), -1));
     //cout << "Building nextPosOfLetterAfterPos" << endl;
     for (int letterIndex = 0; letterIndex < numDistinctLetters; letterIndex++)
@@ -850,8 +861,19 @@ long computeResult(const string& originalString)
             nextPosOfLetterAfterPos[letterIndex][pos] = nextPosOfLetter;
         }
     }
+
+    vector<vector<long>> sumsOfPowers(numDistinctLetters + 1, vector<long>(s.size() + 1, 0));
+    cout << "numDistinctLetters: " << numDistinctLetters << endl;
+    for (int power = 0; power < sumsOfPowers.size(); power++)
+    {
+        for (int i = 1; i < sumsOfPowers[power].size(); i++)
+        {
+            sumsOfPowers[power][i] = (sumsOfPowers[power][i - 1] + lengthToPowerDistinct(i, power)) % m;
+        }
+    }
     vector<bool> letterUsed(numDistinctLetters, false);
-    computeResultAux(s, suffixTree.initialCursor(), result, letterUsed, 0, 0, nextPosOfLetterAfterPos);
+    long result = 0;
+    computeResultAux(s, suffixTree.initialCursor(), result, letterUsed, 0, 0, nextPosOfLetterAfterPos, sumsOfPowers);
     return result;
 }
 
