@@ -703,29 +703,32 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         // TODO - optimise this - a closed-form solution is possible.
         //long sizeOfConcatenatedStringsIncrease = 0;
         //cout << "Bloop: remainderOfCurrentTransition().length() " << remainderOfCurrentTransition.length() << " lengthSoFar: " << lengthSoFar << endl;
-        for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
-        {
-            //cout << "i: " << i << " remainderOfCurrentTransition.length(): " << remainderOfCurrentTransition.length() << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
-            if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
-            {
-                //cout << "Found: sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << " (sizeOfConcatenatedStrings + newLengthSoFar): " << (sizeOfConcatenatedStrings + newLengthSoFar) << endl;
-                const auto substring = substringCursor.dbgStringFollowed() + s.substr(remainderOfCurrentTransition.startIndex() + i, remainderOfCurrentTransition.length() - i);
-                //cout << "substring: " << substring << endl;
-                const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                //cout << "Index in substring: " << indexInSubstring << endl;
-                //cout << "Letter: " << substring[indexInSubstring] << endl;
-                return substring[indexInSubstring];
-            }
-            //sizeOfConcatenatedStringsIncrease += newLengthSoFar;
-            //cout << " added: " << newLengthSoFar << endl;
-            newLengthSoFar++;
-            //substringCursor.followNextLetter();
-        }
         auto sumOfUpToN = [](const long n)
         {
             return n * (n + 1) / 2;
         };
         const long sizeOfConcatenatedStringsIncreaseOptimised = sumOfUpToN(lengthSoFar + remainderOfCurrentTransition.length()) - sumOfUpToN(lengthSoFar);
+        if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + sizeOfConcatenatedStringsIncreaseOptimised)
+        {
+            for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
+            {
+                //cout << "i: " << i << " remainderOfCurrentTransition.length(): " << remainderOfCurrentTransition.length() << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
+                if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
+                {
+                    //cout << "Found: sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << " (sizeOfConcatenatedStrings + newLengthSoFar): " << (sizeOfConcatenatedStrings + newLengthSoFar) << endl;
+                    const auto substring = substringCursor.dbgStringFollowed() + s.substr(remainderOfCurrentTransition.startIndex() + i, remainderOfCurrentTransition.length() - i);
+                    //cout << "substring: " << substring << endl;
+                    const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
+                    //cout << "Index in substring: " << indexInSubstring << endl;
+                    //cout << "Letter: " << substring[indexInSubstring] << endl;
+                    return substring[indexInSubstring];
+                }
+                //sizeOfConcatenatedStringsIncrease += newLengthSoFar;
+                //cout << " added: " << newLengthSoFar << endl;
+                //newLengthSoFar++;
+                //substringCursor.followNextLetter();
+            }
+        }
         const long newLengthSoFarOptimised = lengthSoFar + remainderOfCurrentTransition.length();
         auto cursorAfter(substringCursor);
         cursorAfter.followNextLetters(remainderOfCurrentTransition.length());
