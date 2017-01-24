@@ -702,6 +702,7 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         int newLengthSoFar = lengthSoFar + 1;
         // TODO - optimise this - a closed-form solution is possible.
         long sizeOfConcatenatedStringsIncrease = 0;
+        //cout << "Bloop: remainderOfCurrentTransition().length() " << remainderOfCurrentTransition.length() << " lengthSoFar: " << lengthSoFar << endl;
         for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
         {
             //cout << "i: " << i << " remainderOfCurrentTransition.length(): " << remainderOfCurrentTransition.length() << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
@@ -716,10 +717,18 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
                 return substring[indexInSubstring];
             }
             sizeOfConcatenatedStringsIncrease += newLengthSoFar;
+            //cout << " added: " << newLengthSoFar << endl;
             newLengthSoFar++;
             substringCursor.followNextLetter();
         }
         sizeOfConcatenatedStrings += sizeOfConcatenatedStringsIncrease;
+        auto sumOfUpToN = [](const long n)
+        {
+            return n * (n + 1) / 2;
+        };
+        const long sizeOfConcatenatedStringsIncreaseOptimised = sumOfUpToN(lengthSoFar + remainderOfCurrentTransition.length()) - sumOfUpToN(lengthSoFar);
+        assert(sizeOfConcatenatedStringsIncreaseOptimised == sizeOfConcatenatedStringsIncrease);
+        //cout << "sizeOfConcatenatedStringsIncrease: " << sizeOfConcatenatedStringsIncrease << "  sizeOfConcatenatedStringsIncreaseOptimised: " << sizeOfConcatenatedStringsIncreaseOptimised << endl;
         //cout << " after: " << substringCursor.dbgStringFollowed() << endl;
         const char result = computeResultAux(s, k, substringCursor, newLengthSoFar, sizeOfConcatenatedStrings);
         if (result)
