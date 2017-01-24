@@ -798,7 +798,7 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
 
             //cout << "numLettersUsed: " << numLettersUsed << endl;
             //cout << "sumsOfPowers[numLettersUsed].size(): " << sumsOfPowers[numLettersUsed].size() << endl;
-            long optimisedResultIncrease = sumsOfPowers[numLettersUsed][lengthSoFar + substringRemainingOnTransition.length()] - sumsOfPowers[numLettersUsed][lengthSoFar];
+            long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][lengthSoFar + substringRemainingOnTransition.length()] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
             //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
             //cout << "resultIncrease: " << resultIncrease << endl;
             assert(optimisedResultIncrease == resultIncrease);
