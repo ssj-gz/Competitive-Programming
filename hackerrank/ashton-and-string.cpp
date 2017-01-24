@@ -656,8 +656,8 @@ char bruteForce(const string& s, long k)
         concatenatedSubstrings += substring;
         concatenatedSubstringsWithBreaks += substring + "|";
     }
-    cout << "concatenatedSubstrings: " << concatenatedSubstrings << " concatenatedSubstrings.size(): " << concatenatedSubstrings.size() << endl;
-    cout << "concatenatedSubstringsWithBreaks: " << concatenatedSubstringsWithBreaks << endl;
+    //cout << "concatenatedSubstrings: " << concatenatedSubstrings << " concatenatedSubstrings.size(): " << concatenatedSubstrings.size() << endl;
+    //cout << "concatenatedSubstringsWithBreaks: " << concatenatedSubstringsWithBreaks << endl;
 
     if (k >= concatenatedSubstrings.size())
         return '\0';
@@ -665,11 +665,11 @@ char bruteForce(const string& s, long k)
     return concatenatedSubstrings[k - 1];
 }
 
-//#define EXHAUSTIVE
+#define EXHAUSTIVE
 
 char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substringCursor, int lengthSoFar, long& sizeOfConcatenatedStrings)
 {
-    cout << "computeResultAux: cursor: " << substringCursor.description() << " followed: " << substringCursor.dbgStringFollowed() << " lengthSoFar: " << lengthSoFar << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
+    //cout << "computeResultAux: cursor: " << substringCursor.description() << " followed: " << substringCursor.dbgStringFollowed() << " lengthSoFar: " << lengthSoFar << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
     if (substringCursor.isOnExplicitState())
     {
         vector<char> sortedNextLetters = substringCursor.nextLetters();
@@ -679,12 +679,12 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         {
             if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
             {
-                cout << "Found during thingy: lengthSoFar: " << lengthSoFar << " followed: " << substringCursor.dbgStringFollowed() << endl;
+                //cout << "Found during thingy: lengthSoFar: " << lengthSoFar << " followed: " << substringCursor.dbgStringFollowed() << endl;
                 const auto substring = substringCursor.dbgStringFollowed() + nextLetter;
-                cout << "substring: " << substring << endl;
+                //cout << "substring: " << substring << endl;
                 const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                cout << "Index in substring: " << indexInSubstring << endl;
-                cout << "Letter: " << substring[indexInSubstring] << endl;
+                //cout << "Index in substring: " << indexInSubstring << endl;
+                //cout << "Letter: " << substring[indexInSubstring] << endl;
                 return substring[indexInSubstring];
             }
             sizeOfConcatenatedStrings += newLengthSoFar;
@@ -700,24 +700,27 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         const long originalSizeOfConcatenatedStrings = sizeOfConcatenatedStrings;
         const auto remainderOfCurrentTransition = substringCursor.remainderOfCurrentTransition();
         int newLengthSoFar = lengthSoFar + 1;
+        // TODO - optimise this - a closed-form solution is possible.
+        long sizeOfConcatenatedStringsIncrease = 0;
         for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
         {
-            cout << "i: " << i << " remainderOfCurrentTransition.length(): " << remainderOfCurrentTransition.length() << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
+            //cout << "i: " << i << " remainderOfCurrentTransition.length(): " << remainderOfCurrentTransition.length() << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
             if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
             {
-                cout << "Found: sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << " (sizeOfConcatenatedStrings + newLengthSoFar): " << (sizeOfConcatenatedStrings + newLengthSoFar) << endl;
+                //cout << "Found: sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << " (sizeOfConcatenatedStrings + newLengthSoFar): " << (sizeOfConcatenatedStrings + newLengthSoFar) << endl;
                 const auto substring = substringCursor.dbgStringFollowed() + s.substr(remainderOfCurrentTransition.startIndex() + i, remainderOfCurrentTransition.length() - i);
-                cout << "substring: " << substring << endl;
+                //cout << "substring: " << substring << endl;
                 const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                cout << "Index in substring: " << indexInSubstring << endl;
-                cout << "Letter: " << substring[indexInSubstring] << endl;
+                //cout << "Index in substring: " << indexInSubstring << endl;
+                //cout << "Letter: " << substring[indexInSubstring] << endl;
                 return substring[indexInSubstring];
             }
-            sizeOfConcatenatedStrings += newLengthSoFar;
+            sizeOfConcatenatedStringsIncrease += newLengthSoFar;
             newLengthSoFar++;
             substringCursor.followNextLetter();
         }
-        cout << " after: " << substringCursor.dbgStringFollowed() << endl;
+        sizeOfConcatenatedStrings += sizeOfConcatenatedStringsIncrease;
+        //cout << " after: " << substringCursor.dbgStringFollowed() << endl;
         const char result = computeResultAux(s, k, substringCursor, newLengthSoFar, sizeOfConcatenatedStrings);
         if (result)
             return result;
@@ -729,7 +732,7 @@ char computeResult(const string& s, long k)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
-    suffixTree.dumpGraph();
+    //suffixTree.dumpGraph();
 
     long sizeOfConcatenatedStrings = 0;
     return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
@@ -757,13 +760,24 @@ int main() {
     const int numLetters = 3;
     while (true)
     {
-        cout << "s: " << s << endl;
+        cout << "s: " << s <<  " size: " << s.size() << endl;
 
-        const auto result = computeResult(s);
-        const auto bruteForceResult = bruteForce(s, k);
-        cout << "optimised result: " << result << endl;
-        cout << "Brute force: " << bruteForceResult << endl;
-        assert(result == bruteForceResult);
+        long k = 1;
+        while (true)
+        {
+            //cout << " k: " << k << endl;
+            const auto result = computeResult(s, k);
+            const auto bruteForceResult = bruteForce(s, k);
+            if (bruteForceResult == '\0')
+            {
+                assert(result == bruteForceResult);
+                break;
+            }
+            cout << "optimised result: " << result << endl;
+            cout << "Brute force: " << bruteForceResult << endl;
+            assert(result == bruteForceResult);
+            k++;
+        }
 
         int index = 0;
         while (index < s.size() && s[index] == 'a' + numLetters)
