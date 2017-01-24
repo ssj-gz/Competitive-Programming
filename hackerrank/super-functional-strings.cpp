@@ -757,21 +757,22 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             // TODO - optimise this - there's a closed-form solution for it.
             //cout << "New letter on this transition" << endl;
             assert(nextUnusedLetterPos > currentCursorPos);
-            int newLengthSoFar = lengthSoFar;
-            long resultIncrease = 0;
+            int newLengthSoFar = lengthSoFar + nextUnusedLetterPos - currentCursorPos;
+            //long resultIncrease = 0;
             //cout << "Bloop lengthSoFar: " << lengthSoFar << " currentCursorPos:" << currentCursorPos << " nextUnusedLetterPos " << nextUnusedLetterPos << endl;
             for (int i = currentCursorPos; i < nextUnusedLetterPos; i++)
             {
-                newLengthSoFar++;
-                resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
+                //newLengthSoFar++;
+                //resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
                 //cout << "Added " << newLengthSoFar << " ^ " << numLettersUsed  << " = " << power(newLengthSoFar, numLettersUsed) << endl;
                 //cursor.followNextLetter();
             }
-            result += resultIncrease;
-            long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][lengthSoFar + nextUnusedLetterPos - currentCursorPos] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
+            //result += resultIncrease;
+            long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][newLengthSoFar] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
+            result = (result + optimisedResultIncrease) % m;
             //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
             //cout << "resultIncrease: " << resultIncrease << endl;
-            assert(optimisedResultIncrease == resultIncrease);
+            //assert(optimisedResultIncrease == resultIncrease);
 
 
             cursor.followNextLetters(nextUnusedLetterPos - currentCursorPos);
