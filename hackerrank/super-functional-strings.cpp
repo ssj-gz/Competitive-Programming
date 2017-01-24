@@ -270,6 +270,18 @@ class SuffixTreeBuilder
                     assert(nextLetters.size() == 1);
                     followLetter(nextLetters.front());
                 }
+                void followNextLetters(int numLetters)
+                {
+                    assert(m_transition);
+                    assert(remainderOfCurrentTransition().length() >= numLetters);
+                    m_posInTransition += numLetters;
+                    const int transitionStringLength = m_transition->substringLength(m_string->size());
+                    if (m_posInTransition == transitionStringLength)
+                    {
+                        m_state = m_transition->nextState;
+                        movedToExplicitState();
+                    }
+                }
                 class Substring
                 {
                     public:
@@ -750,8 +762,10 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             {
                 newLengthSoFar++;
                 result = (result + power(newLengthSoFar, numLettersUsed)) % m;
-                cursor.followNextLetter();
+                //cursor.followNextLetter();
             }
+
+            cursor.followNextLetters(nextUnusedLetterPos - currentCursorPos);
             //cout << "Followed up to (not including) new letter: " << cursor.id() << " followed: " << cursor.dbgStringFollowed() <<  endl;
             const char newLetter = s[nextUnusedLetterPos];
             const int newLetterIndex = newLetter - 'a';
@@ -773,8 +787,8 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             {
                 newLengthSoFar++;
                 result = (result + power(newLengthSoFar, numLettersUsed)) % m;
-                cursor.followNextLetter();
             }
+            cursor.followNextLetters(substringRemainingOnTransition.length());
             assert(cursor.isOnExplicitState());
             computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos);
             return result;
