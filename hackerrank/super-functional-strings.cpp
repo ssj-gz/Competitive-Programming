@@ -759,13 +759,20 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             assert(nextUnusedLetterPos > currentCursorPos);
             int newLengthSoFar = lengthSoFar;
             long resultIncrease = 0;
+            //cout << "Bloop lengthSoFar: " << lengthSoFar << " currentCursorPos:" << currentCursorPos << " nextUnusedLetterPos " << nextUnusedLetterPos << endl;
             for (int i = currentCursorPos; i < nextUnusedLetterPos; i++)
             {
                 newLengthSoFar++;
                 resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
+                //cout << "Added " << newLengthSoFar << " ^ " << numLettersUsed  << " = " << power(newLengthSoFar, numLettersUsed) << endl;
                 //cursor.followNextLetter();
             }
             result += resultIncrease;
+            long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][lengthSoFar + nextUnusedLetterPos - currentCursorPos] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
+            //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
+            //cout << "resultIncrease: " << resultIncrease << endl;
+            assert(optimisedResultIncrease == resultIncrease);
+
 
             cursor.followNextLetters(nextUnusedLetterPos - currentCursorPos);
             //cout << "Followed up to (not including) new letter: " << cursor.id() << " followed: " << cursor.dbgStringFollowed() <<  endl;
