@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #define NO_VERIFY_UKKONEN
@@ -875,7 +875,7 @@ long computeResult(const string& originalString)
     }
 
     vector<vector<long>> sumsOfPowers(numDistinctLetters + 1, vector<long>(s.size() + 1, 0));
-    cout << "numDistinctLetters: " << numDistinctLetters << endl;
+    //cout << "numDistinctLetters: " << numDistinctLetters << endl;
     for (int power = 0; power < sumsOfPowers.size(); power++)
     {
         for (int i = 1; i < sumsOfPowers[power].size(); i++)
@@ -889,7 +889,7 @@ long computeResult(const string& originalString)
     return result;
 }
 
-#define EXHAUSTIVE
+//#define EXHAUSTIVE
 
 int main() {
 #ifndef EXHAUSTIVE
@@ -901,9 +901,13 @@ int main() {
         cin >> s;
         //cout << "s: " << s << endl;
         const long result = computeResult(s);
+#ifndef SUBMISSION
         const long bruteForceResult = bruteForce(s);
         cout << "optimised result: " << result << endl;
         cout << "Brute force: " << bruteForceResult << endl;
+#else 
+        cout << result << endl;
+#endif
     }
 #else
     string s = "a";
