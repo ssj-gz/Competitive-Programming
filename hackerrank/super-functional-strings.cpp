@@ -16,7 +16,6 @@
 #include <cassert>
 
 using namespace std;
-
 const long m = 1'000'000'007;
 const int numLetters = 26;
 
@@ -37,6 +36,7 @@ long lengthToPowerDistinct(long length, long numDistinctLetters)
  * This is almost a straight transcription of the algorithm
  * from this paper into C++, so please refer to that if
  * you want to know how it works! 
+ * @author Simon St James, Jan 2017.
  */
 class SuffixTreeBuilder
 {
@@ -117,6 +117,9 @@ class SuffixTreeBuilder
         {
             finaliseAux(m_root, nullptr);
         }
+        /**
+         * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
+         */
         class Cursor
         {
             public:
@@ -179,7 +182,6 @@ class SuffixTreeBuilder
                 } 
                 void followLetter(char letter)
                 {
-                    //cout << "following letter: " << letter << endl;
                     assert(canFollowLetter(letter));
                     if (m_transition == nullptr)
                     {
@@ -401,7 +403,7 @@ class SuffixTreeBuilder
                     }
                     return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
                 }
-                string id()
+                string description()
                 {
                     stringstream idStream;
                     idStream << "state: " << m_state << " transition: " << m_transition << " m_posInTransition: " << m_posInTransition;
@@ -647,37 +649,6 @@ class SuffixTreeBuilder
         }
 };
 
-long bruteForce(const string& s)
-{
-    set<string> allSubstrings;
-    for (int i = 0; i < s.size(); i++)
-    {
-        for (int j = i; j < s.size(); j++)
-        {
-            const string substring = s.substr(i, j - i + 1);
-            allSubstrings.insert(substring);
-        }
-    }
-    long result = 0;
-    for (const auto& substring : allSubstrings)
-    {
-        bool usedLetter[numLetters] = {};
-        int numDistinctLetters = 0;
-        for (const auto character : substring)
-        {
-            const int letterIndex = character -'a';
-            if (!usedLetter[letterIndex])
-            {
-                usedLetter[letterIndex] = true;
-                numDistinctLetters++;
-            }
-        }
-        //cout << "substring: " << substring << " numDistinctLetters: " << numDistinctLetters << " length: " << substring.size() << endl;
-        result  = (result + lengthToPowerDistinct(substring.size(), numDistinctLetters)) % m;
-    }
-    return result;
-}
-
 long power(long n, long p)
 {
     long result = 1;
@@ -688,137 +659,105 @@ long power(long n, long p)
     return result;
 }
 
-long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& result, vector<bool> letterUsed, int numLettersUsed, const int lengthSoFar,  const vector<vector<int>>& nextPosOfLetterAfterPos, const vector<vector<long>>& sumsOfPowers)
+long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& result, vector<bool> isLetterUsed, int numLettersUsed, const int lengthSoFar,  const vector<vector<int>>& nextPosOfLetterAfterPos, const vector<vector<long>>& sumsOfPowers)
 {
     assert(lengthSoFar == cursor.dbgStringFollowed().length());
-    //cout << "computeResultAux: cursor: " << cursor.id() << " lengthSoFar: " << lengthSoFar << " result: " << result << " string followed so far: " << cursor.dbgStringFollowed() << endl;
     if (cursor.isOnExplicitState())
     {
-        //cout << "cursor is explicit" << endl;
         const vector<char>& nextLetters = cursor.nextLetters();
         for (const auto letter : nextLetters)
         {
             const int letterIndex = letter - 'a';
             auto cursorAfterLetter(cursor);
             cursorAfterLetter.followLetter(letter);
-            //cout << "cursorAfterLetter: " << cursorAfterLetter.id() << endl;
-            if (letterUsed[letterIndex])
+            if (isLetterUsed[letterIndex])
             {
                 result = (result + power(lengthSoFar + 1, numLettersUsed)) % m;
-                computeResultAux(s, cursorAfterLetter,  result, letterUsed, numLettersUsed, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
+                computeResultAux(s, cursorAfterLetter,  result, isLetterUsed, numLettersUsed, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             }
             else
             {
+                // This letter is new; recurse with updated isLetterUsed.
                 result = (result + power(lengthSoFar + 1, numLettersUsed + 1)) % m;
-                vector<bool> newLetterUsed(letterUsed);
-                newLetterUsed[letterIndex] = true;
-                computeResultAux(s, cursorAfterLetter, result, newLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
+                vector<bool> newIsLetterUsed(isLetterUsed);
+                newIsLetterUsed[letterIndex] = true;
+                computeResultAux(s, cursorAfterLetter, result, newIsLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             }
         }
     }
     else
     {
         const auto substringRemainingOnTransition = cursor.remainderOfCurrentTransition();
-        //cout << "substringRemainingOnTransition: " << substringRemainingOnTransition.startIndex() << "," << substringRemainingOnTransition.endIndex() << " " << s.substr(substringRemainingOnTransition.startIndex(), substringRemainingOnTransition.length()) << endl;
-        const int numDistinctLettersInString = letterUsed.size();
-        int nextUnusedLetter = -1;
-        int nextUnusedLetterPos = numeric_limits<int>::max();
+        const int numDistinctLettersInString = isLetterUsed.size();
         const int currentCursorPos = substringRemainingOnTransition.startIndex();
         assert(currentCursorPos > 0);
-        //cout << "currentCursorPos: " << currentCursorPos << endl;
         const int currentLetterIndex = s[currentCursorPos] - 'a';
-        if (!letterUsed[currentLetterIndex])
+        if (!isLetterUsed[currentLetterIndex])
         {
+            // First letter of this transition has not been used yet; calculate its contribution, update the list of used letters
+            // and recurse.
             auto cursorAfterLetter(cursor);
             cursorAfterLetter.followLetter(s[currentCursorPos]);
             result = (result + power(lengthSoFar + 1, numLettersUsed + 1)) % m;
-            vector<bool> newLetterUsed(letterUsed);
-            newLetterUsed[currentLetterIndex] = true;
-            computeResultAux(s, cursorAfterLetter, result, newLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
+            vector<bool> newIsLetterUsed(isLetterUsed);
+            newIsLetterUsed[currentLetterIndex] = true;
+            computeResultAux(s, cursorAfterLetter, result, newIsLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
-        for (int letterIndex = 0; letterIndex < numDistinctLettersInString; letterIndex++)
+        // Find the position of the next letter that has not yet been used.
+        int nextUnusedLetter = -1;
+        int nextUnusedLetterPos = numeric_limits<int>::max();
+        for (int unusedLetterIndex = 0; unusedLetterIndex < numDistinctLettersInString; unusedLetterIndex++)
         {
-            if (letterUsed[letterIndex])
+            if (isLetterUsed[unusedLetterIndex])
                 continue;
 
-            const int nextPosOfLetter = nextPosOfLetterAfterPos[letterIndex][currentCursorPos];
-            //cout << "candidate unused letter: " << static_cast<char>(letterIndex + 'a') << " nextPosOfLetter: " << nextPosOfLetter << endl;
+            const int nextPosOfLetter = nextPosOfLetterAfterPos[unusedLetterIndex][currentCursorPos];
             assert(nextPosOfLetter == -1 || nextPosOfLetter > currentCursorPos);
             if (nextPosOfLetter < nextUnusedLetterPos)
             {
-                nextUnusedLetter = letterIndex;
+                nextUnusedLetter = unusedLetterIndex;
                 nextUnusedLetterPos = nextPosOfLetter;
             }
         }
-        //cout << "nextUnusedLetter: " << static_cast<char>(nextUnusedLetter + 'a') << " nextUnusedLetterPos: " << nextUnusedLetterPos << endl;
         if (nextUnusedLetterPos <= substringRemainingOnTransition.endIndex())
         {
-            // TODO - optimise this - there's a closed-form solution for it.
-            //cout << "New letter on this transition" << endl;
+            // There is an occurrence of a letter not yet used before, in the remainder of the transition.
+            // Use the sums of powers to compute the contribution of those remaining letters that *have* been
+            // used before, and swallow them ...
+
             assert(nextUnusedLetterPos > currentCursorPos);
             int newLengthSoFar = lengthSoFar + nextUnusedLetterPos - currentCursorPos;
-            //long resultIncrease = 0;
-            //cout << "Bloop lengthSoFar: " << lengthSoFar << " currentCursorPos:" << currentCursorPos << " nextUnusedLetterPos " << nextUnusedLetterPos << endl;
-            for (int i = currentCursorPos; i < nextUnusedLetterPos; i++)
-            {
-                //newLengthSoFar++;
-                //resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
-                //cout << "Added " << newLengthSoFar << " ^ " << numLettersUsed  << " = " << power(newLengthSoFar, numLettersUsed) << endl;
-                //cursor.followNextLetter();
-            }
-            //result += resultIncrease;
-            long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][newLengthSoFar] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
-            result = (result + optimisedResultIncrease) % m;
-            //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
-            //cout << "resultIncrease: " << resultIncrease << endl;
-            //assert(optimisedResultIncrease == resultIncrease);
-
-
+            const long resultIncrease = (sumsOfPowers[numLettersUsed][newLengthSoFar] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
+            result = (result + resultIncrease) % m;
             cursor.followNextLetters(nextUnusedLetterPos - currentCursorPos);
-            //cout << "Followed up to (not including) new letter: " << cursor.id() << " followed: " << cursor.dbgStringFollowed() <<  endl;
+
+            // ... and then add the contribution of the new, unused letter, and swallow it.
             const char newLetter = s[nextUnusedLetterPos];
             const int newLetterIndex = newLetter - 'a';
-            assert(!letterUsed[newLetterIndex]);
-            letterUsed[newLetterIndex] = true;
+            assert(!isLetterUsed[newLetterIndex]);
+            isLetterUsed[newLetterIndex] = true;
             numLettersUsed++;
             cursor.followLetter(newLetter);
             newLengthSoFar++;
             result = (result + power(newLengthSoFar, numLettersUsed)) % m;
-            computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos, sumsOfPowers);
+            // Recurse.
+            computeResultAux(s, cursor, result, isLetterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
         else
         {
-            // TODO - optimise this - there's a closed-form solution for it.
-            int newLengthSoFar = lengthSoFar;
-            //cout << "No new letters on this transition: " << cursor.id() << " num remaining chars: " << substringRemainingOnTransition.length() << endl;
-            //long resultIncrease = 0;
-            //cout << "Bloop lengthSoFar:" << lengthSoFar << " substringRemainingOnTransition.length() " << substringRemainingOnTransition.length()<< endl;
-            for (int i = 1; i <= substringRemainingOnTransition.length(); i++)
-            {
-                //newLengthSoFar++;
-                //resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
-                //cout << "Added " << newLengthSoFar << " ^ " << numLettersUsed  << " = " << power(newLengthSoFar, numLettersUsed) << endl;
-            }
-            //result += resultIncrease;
-            //cout << "Added " << (newLengthSoFar - lengthSoFar) << " to length" << endl;
-
-            newLengthSoFar = lengthSoFar + substringRemainingOnTransition.length();
-
-
-            //cout << "numLettersUsed: " << numLettersUsed << endl;
-            //cout << "sumsOfPowers[numLettersUsed].size(): " << sumsOfPowers[numLettersUsed].size() << endl;
-            long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][lengthSoFar + substringRemainingOnTransition.length()] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
-            result = (result + optimisedResultIncrease) % m;
-            //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
-            //cout << "resultIncrease: " << resultIncrease << endl;
-            //assert(optimisedResultIncrease == resultIncrease);
-
+            // There are no occurrences of any letter not yet used before, in the remainder of this transition.
+            // Swallow the remainder, using the sums of powers to compute the contribution of the remaining letters
+            // to the result.
+            const long newLengthSoFar = lengthSoFar + substringRemainingOnTransition.length();
+            const long resultIncrease = (sumsOfPowers[numLettersUsed][lengthSoFar + substringRemainingOnTransition.length()] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
+            result = (result + resultIncrease) % m;
 
             cursor.followNextLetters(substringRemainingOnTransition.length());
             assert(cursor.isOnExplicitState());
-            computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos, sumsOfPowers);
+            // Recurse.
+            computeResultAux(s, cursor, result, isLetterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
     }
@@ -831,10 +770,10 @@ long computeResult(const string& originalString)
     string s = originalString;
     char mappedLetter[numLetters] = {};
     int numDistinctLetters = 0;
+    // Change string so that it uses the letters and just the letters from 'a' to 'blah' 
+    // for some letter 'blah' e.g. 'bddkklb' -> 'abbccda'
     for (auto& character : s)
     {
-        // Change string so that it uses the letters and just the letters from 'a' to 'blah' 
-        // for some letter 'blah' e.g. 'bddkklb' -> 'abbccda'
         const int letterIndex = character -'a';
         if (mappedLetter[letterIndex] == '\0')
         {
@@ -843,24 +782,20 @@ long computeResult(const string& originalString)
         }
         character = mappedLetter[letterIndex];
     }
-    //cout << "s adjusted: " << s << endl;
-    //cout << "numDistinctLetters: " << numDistinctLetters << endl;
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
-    //suffixTree.dumpGraph();
 
+    // Build table of nextPosOfLetterAfterPos.  nextPosOfLetterAfterPos[letterIndex][pos]
+    // gives the position of the next letter with letter - 'a' == letterIndex occuring
+    // *after* (i.e. strictly after) pos.
     vector<vector<int>> nextPosOfLetterAfterPos(numDistinctLetters, vector<int>(s.size(), -1));
-    //cout << "Building nextPosOfLetterAfterPos" << endl;
     for (int letterIndex = 0; letterIndex < numDistinctLetters; letterIndex++)
     {
-        //cout << "Letter: " << static_cast<char>(letterIndex + 'a') << endl;
         int nextPosOfLetter = -1;
         for (int pos = 0; pos < s.size(); pos++)
         {
-            //cout << "Pos: " << pos << " nextPosOfLetter: " << nextPosOfLetter << endl;
             if (nextPosOfLetter == -1 || pos >= nextPosOfLetter)
             {
-                //cout << "Need to find nextPosOfLetter" << endl;
                 if (nextPosOfLetter == -1)
                     nextPosOfLetter = pos;
                 do
@@ -868,14 +803,13 @@ long computeResult(const string& originalString)
                     nextPosOfLetter++;
                 }
                 while (nextPosOfLetter != s.size() && s[nextPosOfLetter] - 'a' != letterIndex);
-                //cout << "nextPosOfLetter: " << nextPosOfLetter << " s.size(): " << s.size() << endl;
             }
             nextPosOfLetterAfterPos[letterIndex][pos] = nextPosOfLetter;
         }
     }
 
+    // Compute table of sums of powers - sumsOfPowers[power][n] = 1^power + 2^power + ... + n^power.
     vector<vector<long>> sumsOfPowers(numDistinctLetters + 1, vector<long>(s.size() + 1, 0));
-    //cout << "numDistinctLetters: " << numDistinctLetters << endl;
     for (int power = 0; power < sumsOfPowers.size(); power++)
     {
         for (int i = 1; i < sumsOfPowers[power].size(); i++)
@@ -883,61 +817,22 @@ long computeResult(const string& originalString)
             sumsOfPowers[power][i] = (sumsOfPowers[power][i - 1] + lengthToPowerDistinct(i, power)) % m;
         }
     }
-    vector<bool> letterUsed(numDistinctLetters, false);
+    vector<bool> isLetterUsed(numDistinctLetters, false);
     long result = 0;
-    computeResultAux(s, suffixTree.initialCursor(), result, letterUsed, 0, 0, nextPosOfLetterAfterPos, sumsOfPowers);
+    computeResultAux(s, suffixTree.initialCursor(), result, isLetterUsed, 0, 0, nextPosOfLetterAfterPos, sumsOfPowers);
     return result;
 }
 
-//#define EXHAUSTIVE
-
 int main() {
-#ifndef EXHAUSTIVE
     int T;
     cin >> T;
     for (int t = 0; t < T; t++)
     {
         string s;
         cin >> s;
-        //cout << "s: " << s << endl;
         const long result = computeResult(s);
-#ifndef SUBMISSION
-        const long bruteForceResult = bruteForce(s);
-        cout << "optimised result: " << result << endl;
-        cout << "Brute force: " << bruteForceResult << endl;
-#else 
         cout << result << endl;
-#endif
     }
-#else
-    string s = "a";
-    const int numLetters = 3;
-    while (true)
-    {
-        cout << "s: " << s << endl;
-
-        const long result = computeResult(s);
-        const long bruteForceResult = bruteForce(s);
-        cout << "optimised result: " << result << endl;
-        cout << "Brute force: " << bruteForceResult << endl;
-        assert(result == bruteForceResult);
-
-        int index = 0;
-        while (index < s.size() && s[index] == 'a' + numLetters)
-        {
-            s[index] = 'a';
-            index++;
-        }
-        if (index == s.size())
-        {
-            s.push_back('a');
-        }
-        else
-        {
-            s[index]++;
-        }
-    }
-#endif
     return 0;
 }
 
