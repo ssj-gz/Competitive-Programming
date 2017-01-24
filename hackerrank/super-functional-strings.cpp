@@ -758,12 +758,14 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             //cout << "New letter on this transition" << endl;
             assert(nextUnusedLetterPos > currentCursorPos);
             int newLengthSoFar = lengthSoFar;
+            long resultIncrease = 0;
             for (int i = currentCursorPos; i < nextUnusedLetterPos; i++)
             {
                 newLengthSoFar++;
-                result = (result + power(newLengthSoFar, numLettersUsed)) % m;
+                resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
                 //cursor.followNextLetter();
             }
+            result += resultIncrease;
 
             cursor.followNextLetters(nextUnusedLetterPos - currentCursorPos);
             //cout << "Followed up to (not including) new letter: " << cursor.id() << " followed: " << cursor.dbgStringFollowed() <<  endl;
@@ -783,11 +785,13 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             // TODO - optimise this - there's a closed-form solution for it.
             int newLengthSoFar = lengthSoFar;
             //cout << "No new letters on this transition: " << cursor.id() << " num remaining chars: " << substringRemainingOnTransition.length() << endl;
+            long resultIncrease = 0;
             for (int i = 1; i <= substringRemainingOnTransition.length(); i++)
             {
                 newLengthSoFar++;
-                result = (result + power(newLengthSoFar, numLettersUsed)) % m;
+                resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
             }
+            result += resultIncrease;
             cursor.followNextLetters(substringRemainingOnTransition.length());
             assert(cursor.isOnExplicitState());
             computeResultAux(s, cursor, result, letterUsed, numLettersUsed, newLengthSoFar, nextPosOfLetterAfterPos);
