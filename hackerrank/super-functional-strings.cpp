@@ -792,23 +792,27 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             // TODO - optimise this - there's a closed-form solution for it.
             int newLengthSoFar = lengthSoFar;
             //cout << "No new letters on this transition: " << cursor.id() << " num remaining chars: " << substringRemainingOnTransition.length() << endl;
-            long resultIncrease = 0;
+            //long resultIncrease = 0;
             //cout << "Bloop lengthSoFar:" << lengthSoFar << " substringRemainingOnTransition.length() " << substringRemainingOnTransition.length()<< endl;
             for (int i = 1; i <= substringRemainingOnTransition.length(); i++)
             {
-                newLengthSoFar++;
-                resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
+                //newLengthSoFar++;
+                //resultIncrease = (resultIncrease + power(newLengthSoFar, numLettersUsed)) % m;
                 //cout << "Added " << newLengthSoFar << " ^ " << numLettersUsed  << " = " << power(newLengthSoFar, numLettersUsed) << endl;
             }
-            result += resultIncrease;
+            //result += resultIncrease;
+            //cout << "Added " << (newLengthSoFar - lengthSoFar) << " to length" << endl;
+
+            newLengthSoFar = lengthSoFar + substringRemainingOnTransition.length();
 
 
             //cout << "numLettersUsed: " << numLettersUsed << endl;
             //cout << "sumsOfPowers[numLettersUsed].size(): " << sumsOfPowers[numLettersUsed].size() << endl;
             long optimisedResultIncrease = (sumsOfPowers[numLettersUsed][lengthSoFar + substringRemainingOnTransition.length()] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
+            result = (result + optimisedResultIncrease) % m;
             //cout << "optimisedResultIncrease: "  << optimisedResultIncrease << endl;
             //cout << "resultIncrease: " << resultIncrease << endl;
-            assert(optimisedResultIncrease == resultIncrease);
+            //assert(optimisedResultIncrease == resultIncrease);
 
 
             cursor.followNextLetters(substringRemainingOnTransition.length());
