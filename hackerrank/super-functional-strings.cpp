@@ -704,7 +704,8 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
             computeResultAux(s, cursorAfterLetter, result, newIsLetterUsed, numLettersUsed + 1, lengthSoFar + 1, nextPosOfLetterAfterPos, sumsOfPowers);
             return result;
         }
-        // Find the position of the next letter that has not yet been used.
+        // Find the position of the next letter that has not yet been used, using our lookup table.  This takes O(|alphabet|) i.e. independent of the 
+        // number of letters in the transition which is O(n).
         int nextUnusedLetter = -1;
         int nextUnusedLetterPos = numeric_limits<int>::max();
         for (int unusedLetterIndex = 0; unusedLetterIndex < numDistinctLettersInString; unusedLetterIndex++)
@@ -722,10 +723,9 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
         }
         if (nextUnusedLetterPos <= substringRemainingOnTransition.endIndex())
         {
-            // There is an occurrence of a letter not yet used before, in the remainder of the transition.
+            // There is an occurrence of a letter, not yet used in the current string, in the remainder of the transition.
             // Use the sums of powers to compute the contribution of those remaining letters that *have* been
             // used before, and swallow them ...
-
             assert(nextUnusedLetterPos > currentCursorPos);
             int newLengthSoFar = lengthSoFar + nextUnusedLetterPos - currentCursorPos;
             const long resultIncrease = (sumsOfPowers[numLettersUsed][newLengthSoFar] - sumsOfPowers[numLettersUsed][lengthSoFar] + m) % m;
@@ -747,7 +747,7 @@ long computeResultAux(const string& s, SuffixTreeBuilder::Cursor cursor, long& r
         }
         else
         {
-            // There are no occurrences of any letter not yet used before, in the remainder of this transition.
+            // There are no occurrences of any letter, not yet used in the current string, in the remainder of this transition.
             // Swallow the remainder, using the sums of powers to compute the contribution of the remaining letters
             // to the result.
             const long newLengthSoFar = lengthSoFar + substringRemainingOnTransition.length();
@@ -824,6 +824,23 @@ long computeResult(const string& originalString)
 }
 
 int main() {
+    // Fairly easy one.  Imagine that we do a depth first search, character by character, of the suffix tree representation
+    // of s, starting from the root, and tracking the length of the current string and the number of letters it uses
+    // at step; we'd then be easily able to compute the result (such a depth-first search explores all distinct substrings,
+    // character by character, once and only once).  Unfortunately, this would be O(n^2).
+    // Now imagine we have explored, during our DFS, a substring s' of s, and that s' uses d distinct letters and has length l.  
+    // Imagine further that we can somehow deduce how many steps (call it x) in the DFS will pass before we reach a letter that is
+    // not in s', and that we could skip x steps in the DFS in constant time.  Then we could skip the x steps, and calculate the 
+    // contribution to result; it would be:
+    //  v = (l + 1) ^ d + (l + 2) ^ d + ... + (l + x - 1) ^ d.  
+    // By preconstructing a lookup table of sums of powers, we could calculate v in constant time.
+    // Now during a DFS, we will of course end up traversing transitions of the suffix tree, of which there are O(n).  By following
+    // the above approach,  we visit each transition once and only once, and spend O(|letters unused in s'|) == O(|alphabet|) time there, 
+    // giving us a linear-time method of computing the result.
+    // Since each transition is represented by a pair of startIndex, endIndex in the original string s, we can easily decide 
+    // (in O(|alphabet|) where the next letter unused by s' so far occurs in that transition by precomputing a lookup table 
+    // (nextPosOfLetterAfterPos).  This gives us everything we  need for a linear-time (well - O(|alphabet|x n) solution.
+
     int T;
     cin >> T;
     for (int t = 0; t < T; t++)
