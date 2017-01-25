@@ -66,6 +66,7 @@ class SuffixTreeBuilder
             State* parent = nullptr;
         };
     public:
+        static const char markerChar = '#';
         SuffixTreeBuilder()
         {
             // Perform the initial steps (i.e. those occurring before the "while" loop)
@@ -450,7 +451,7 @@ class SuffixTreeBuilder
             return strings;
         }
     private:
-        static const int alphabetSize = 26;
+        static const int alphabetSize = 27; // 'a' - 'z', plus markerChar.
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
@@ -571,9 +572,16 @@ class SuffixTreeBuilder
         };
         int t(int i)
         {
-            // Ukkonen's algorithm uses 1-indexed strings and 1-indexed alphabet
+            // Ukkonen's algorithm uses 1-indexed strings throughout; adjust for this.
+            return letterIndex(m_currentString[i - 1]);
+        }
+        int letterIndex(char letter)
+        {
+            // Ukkonen's algorithm uses 1-indexed alphabet
             // throughout; adjust for this.
-            return m_currentString[i - 1] - 'a' + 1;
+            if (letter == markerChar)
+                return 28;
+            return letter - 'a' + 1;
         }
 
         void dumpGraphAux(State* s, const string& indent)
@@ -705,13 +713,21 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
     return '\0';
 }
 
-char computeResult(const string& s, long k)
+vector<string> computeResult(const vector<string>& w, const vector<long>& k)
 {
     SuffixTreeBuilder suffixTree;
-    suffixTree.appendString(s);
+    string markerDelimitedConcat;
+    for (const auto& s : w)
+    {
+        markerDelimitedConcat += s + SuffixTreeBuilder::markerChar;
+    }
+    cout << "markerDelimitedConcat: " << markerDelimitedConcat << endl;
+    suffixTree.appendString(markerDelimitedConcat);
+    suffixTree.dumpGraph();
 
-    long sizeOfConcatenatedStrings = 0;
-    return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
+    //long sizeOfConcatenatedStrings = 0;
+    //return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
+    return vector<string>();
 }
 
 vector<string> bruteForce(const vector<string>& w, const vector<long>& k)
@@ -767,6 +783,7 @@ int main() {
     {
         cout << bruteForceResult << endl;
     }
+    computeResult(w, k);
     return 0;
 }
 
