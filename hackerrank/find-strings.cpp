@@ -106,6 +106,18 @@ class SuffixTreeBuilder
         {
             finaliseAux(m_root, nullptr);
         }
+        void truncateStringsContainingMarker()
+        {
+            vector<int> orderedMarkerPositions;
+            int currentPos = 0;
+            while (m_currentString.find(markerChar, currentPos) != string::npos)
+            {
+                const int markerPos = m_currentString.find(markerChar, currentPos);
+                orderedMarkerPositions.push_back(markerPos);
+                currentPos = markerPos + 1;
+            }
+            truncateStringsContainingMarkerAux(m_root, orderedMarkerPositions);
+        }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
          */
@@ -637,6 +649,47 @@ class SuffixTreeBuilder
             }
         }
 
+        void truncateStringsContainingMarkerAux(State* state, const vector<int>& orderedMarkerPositions)
+        {
+            cout << "truncateStringsContainingMarkerAux" << endl;
+            bool transitionRemoved = false;
+            do
+            {
+                transitionRemoved = false;
+                for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
+                {
+                    Transition& transition = *transitionIter;
+                    const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
+                    const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
+                    cout << "transition: " << substringStartIndex << "," << substringEndIndex << endl;
+                    const auto candidateMarkerPosIter = lower_bound(orderedMarkerPositions.begin(), orderedMarkerPositions.end(), substringStartIndex);
+                    if (candidateMarkerPosIter != orderedMarkerPositions.end())
+                    {
+                        const auto candidateMarkerPos = *candidateMarkerPosIter;
+                        if (candidateMarkerPos > substringEndIndex)
+                            continue;
+                        if (candidateMarkerPos == substringStartIndex)
+                        {
+                            state->transitions.erase(transitionIter);
+                            cout << "removed transition" << endl;
+                            transitionRemoved = true;
+                            break;
+                        }
+                        else
+                        {
+                            transition.substringFollowed.endIndex = candidateMarkerPos;
+                            cout << "truncated transition" << endl;
+                        }
+                    }
+                }
+            } while (transitionRemoved);
+            for (auto& transition : state->transitions)
+            {
+                truncateStringsContainingMarkerAux(transition.nextState, orderedMarkerPositions);
+            }
+
+        }
+
         long findStateIndex(State* s)
         {
             auto statePos = find_if(m_states.begin(), m_states.end(), [s](const unique_ptr<State>& state) { return state.get() == s; });
@@ -723,6 +776,10 @@ vector<string> computeResult(const vector<string>& w, const vector<long>& k)
     }
     cout << "markerDelimitedConcat: " << markerDelimitedConcat << endl;
     suffixTree.appendString(markerDelimitedConcat);
+    cout << "Before removal of markers" << endl;
+    suffixTree.dumpGraph();
+    cout << "After removal of markers" << endl;
+    suffixTree.truncateStringsContainingMarker();
     suffixTree.dumpGraph();
 
     //long sizeOfConcatenatedStrings = 0;
