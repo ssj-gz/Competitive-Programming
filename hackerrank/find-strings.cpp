@@ -404,7 +404,7 @@ class SuffixTreeBuilder
                         return charFollowed;
                     }
                 }
-                string dbgStringFollowed() const
+                string stringFollowed() const
                 {
                     Cursor copy(*this);
                     string stringFollowedReversed;
@@ -733,7 +733,6 @@ void buildSubstringsGeneratedAfterStateTable(SuffixTreeBuilder::Cursor substring
 
 string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vector<long>& numSubstringsGeneratedAtStateId)
 {
-    //cout << "findString: " << k << " cursor: " << cursor.description() << endl;
     auto cursorAfterFollowingLetterToNextState = [](const SuffixTreeBuilder::Cursor& cursor, char letter)
     {
         auto cursorAfterTransition(cursor);
@@ -751,10 +750,13 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
         // This state has generated a number of substrings in excess of k (or maybe equal to).  The desired result is
         // the current substring pointed to by cursor, with the last "overshotBy" characters
         // removed (each such character would have been responsible for generated one substring).
-        return cursor.dbgStringFollowed().substr(0, cursor.dbgStringFollowed().size() - overshotBy);
+        const auto stringFollowed = cursor.stringFollowed();
+        return stringFollowed.substr(0, stringFollowed.size() - overshotBy);
     }
     char nextLetterToFollow = '\0';
     long minStringsGeneratorByChildGreaterThanK = numeric_limits<long>::max();
+    // Find the letter that leads to a state with has numSubstringsGeneratedAtState at least k,
+    // and which has minimal numSubstringsGeneratedAtState among all such states.
     for (const auto nextLetter : nextLetters)
     {
         const auto cursorAfterTransition = cursorAfterFollowingLetterToNextState(cursor, nextLetter);
@@ -775,65 +777,67 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
     return findString(k, cursorAfterTransition, numSubstringsGeneratedAtStateId);
 }
 
-vector<string> computeResult(const vector<string>& w, const vector<long>& k)
+void printResults(const vector<string>& w, const vector<long>& ks)
 {
-    SuffixTreeBuilder suffixTree;
+    SuffixTreeBuilder unionOfWSuffixTree;
     string markerDelimitedConcat;
     for (const auto& s : w)
     {
         markerDelimitedConcat += s + SuffixTreeBuilder::markerChar;
     }
-    suffixTree.appendString(markerDelimitedConcat);
+    unionOfWSuffixTree.appendString(markerDelimitedConcat);
     // After truncating the strings containing marker, the suffix tree will represent
     // exactly the union of all the substrings of all of the w's.
-    suffixTree.truncateStringsContainingMarker();
+    unionOfWSuffixTree.truncateStringsContainingMarker();
 
-    // For each state, find out how many substrings would have been generated in a DFS
+    // For each state, find out how many substrings would have been generated in a (lexicographic) DFS
     // when all children of that state have been explored.
-    vector<long> numSubstringsGeneratedAtStateId(suffixTree.numStates(), -1);
+    vector<long> numSubstringsGeneratedAtStateId(unionOfWSuffixTree.numStates(), -1);
     long numSubstringsGenerated = 0;
-    buildSubstringsGeneratedAfterStateTable(suffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
+    buildSubstringsGeneratedAfterStateTable(unionOfWSuffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
 
-    vector<string> results;
-    for (const auto i : k)
+    for (const auto k : ks)
     {
-        results.push_back(findString(i, suffixTree.initialCursor(), numSubstringsGeneratedAtStateId));
+        cout << findString(k, unionOfWSuffixTree.initialCursor(), numSubstringsGeneratedAtStateId) << endl;
     }
-    return results;
-}
-
-vector<string> bruteForce(const vector<string>& w, const vector<long>& k)
-{
-    set<string> allSubstringsSet;
-    for (const auto& s : w)
-    {
-        for (int i = 0; i < s.size(); i++)
-        {
-            for (int j = i; j < s.size(); j++)
-            {
-                const string substring = s.substr(i, j - i + 1);
-                allSubstringsSet.insert(substring);
-            }
-        }
-    }
-    vector<string> orderedSubstrings(allSubstringsSet.begin(), allSubstringsSet.end());
-    vector<string> results;
-    for (auto i : k)
-    {
-        i--;
-        if (i >= orderedSubstrings.size())
-        {
-            results.push_back("INVALID");
-        }
-        else
-        {
-            results.push_back(orderedSubstrings[i]);
-        }
-    }
-    return results;
 }
 
 int main() {
+    // Fairly easy one.  Firstly, we have the issue of forming a suffix tree that represents the
+    // union of all substrings of all of the w's.  This can be formed quite easily: nominate a 
+    // markerChar - a character that won't appear in any of the w's; '#' is chosen here - 
+    // and concatenate all the w's together into one string s, separated by markerChars 
+    // ie if w = { 'aa', 'abc', 'def' } (n = 3), then the string s formed would be aa#abc#def#
+    // (the trailing # can be removed if you want; I didn't bother).
+    // Then add s to a suffix tree, and perform an operation that does a DFS on the suffix 
+    // tree, stopping whenever we encounter a markerChar and truncating the transition
+    // that leads to it to one character before the markerChar; this will give us
+    // the desired unionOfWSuffixTree.  A naive implementation of this DFS will take O(|s|^2), 
+    // but a bit of cunning allows us to determine the first location of a markerChar in a transition 
+    // in the suffix tree in O(log(n)) (n = number of strings, remember), so the whole process
+    // is O(|S|xlog(n)).  This is all handled via truncateStringsContainingMarker().
+    // So: we have a suffix tree representing precisely all substrings of all n w's.  Imagine performing a 
+    // DFS on this tree where, whenever we encounter a choice of which letter to follow next,
+    // we choose them in alphabetical order: this DFS would sketch out all substrings in 
+    // lexicographical order.  We can count the number of substrings generated as we go (each char we follow
+    // would generate one extra substring), and  we can also speed up from O(|s|^2) to O(|s|) by not following 
+    // transitions character by character/ but instead adding the number of characters in each transition to 
+    // the count of the number of substrings.  For each *explicit* state, we associate a count of the number
+    // of substrings that would have been generated in the DFS when all children of that state have been explored.
+    // This is handled by buildSubstringsGeneratedAfterStateTable(), and the results for each state 
+    // stored in numSubstringsGeneratedAtStateId.
+
+    // Finally, we can use this numSubstringsGeneratedAtStateId to find the kth string by performing 
+    // (yet another!) DFS of the suffix tree: this time, when given a choice of the next letter to pick, we choose
+    // the one that leads to the state *whose numSubstringsGeneratedAtStateId is at least k, and whose 
+    // numSubstringsGeneratedAtStateId is minimal among such states*.  Transitions are simply skipped; we 
+    // care only about explicit states.  If there is no such letter i.e. all child states have 
+    // numSubstringsGeneratedAtStateId strictly less than k, there we can stop: there is no kth word.
+    // When we reach a terminal state, the kth element will be some prefix of the current substring that we've 
+    // followed so far. Noting that each successive character in this substring adds one extra substring to the list 
+    // of those found, we simply truncate the current substring by the value of 
+    // numSubstringsGeneratedAtStateId - k for this terminal state, and that is the answer!
+
     long n;
     cin >> n;
     vector<string> w;
@@ -850,20 +854,7 @@ int main() {
     {
         cin >> k[i];
     }
-#ifndef SUBMISSION
-    const auto bruteForceResults = bruteForce(w, k);
-    cout << "bruteForceResults:" << endl;
-    for (const auto& bruteForceResult : bruteForceResults)
-    {
-        cout << bruteForceResult << endl;
-    }
-    cout << "optimisedResults:" << endl;
-#endif
-    const auto optimisedResults = computeResult(w, k);
-    for (const auto& optimisedResult : optimisedResults)
-    {
-        cout << optimisedResult << endl;
-    }
+    printResults(w, k);
     return 0;
 }
 
