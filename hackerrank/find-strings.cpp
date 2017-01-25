@@ -734,11 +734,19 @@ void buildSubstringsGeneratedAfterStateTable(SuffixTreeBuilder::Cursor substring
 string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vector<long>& numSubstringsGeneratedAtStateId)
 {
     //cout << "findString: " << k << " cursor: " << cursor.description() << endl;
+    auto cursorAfterFollowingLetterToNextState = [](const SuffixTreeBuilder::Cursor& cursor, char letter)
+    {
+        auto cursorAfterTransition(cursor);
+        cursorAfterTransition.followLetter(letter);
+        if (!cursorAfterTransition.isOnExplicitState())
+            cursorAfterTransition.followToTransitionEnd();
+        return cursorAfterTransition;
+    };
     assert(cursor.isOnExplicitState());
     const vector<char>& nextLetters = cursor.nextLetters();
     if (nextLetters.empty())
     {
-        const int numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursor.stateId()];
+        const long numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursor.stateId()];
         if (numSubstringsGeneratedAtState == k)
             return cursor.dbgStringFollowed();
         else
@@ -749,14 +757,11 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
         }
     }
     char nextLetterToFollow = '\0';
-    int minGreaterThanK = numeric_limits<int>::max();
+    long minGreaterThanK = numeric_limits<long>::max();
     for (const auto nextLetter : nextLetters)
     {
-        auto cursorAfterTransition(cursor);
-        cursorAfterTransition.followLetter(nextLetter);
-        if (!cursorAfterTransition.isOnExplicitState())
-            cursorAfterTransition.followToTransitionEnd();
-        const int numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursorAfterTransition.stateId()];
+        const auto cursorAfterTransition = cursorAfterFollowingLetterToNextState(cursor, nextLetter);
+        const long numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursorAfterTransition.stateId()];
         if (numSubstringsGeneratedAtState >= k && numSubstringsGeneratedAtState <= minGreaterThanK)
         {
             minGreaterThanK = numSubstringsGeneratedAtState;
@@ -767,10 +772,7 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
     {
         return "INVALID";
     }
-    auto cursorAfterTransition(cursor);
-    cursorAfterTransition.followLetter(nextLetterToFollow);
-    if (!cursorAfterTransition.isOnExplicitState())
-        cursorAfterTransition.followToTransitionEnd();
+    const auto cursorAfterTransition = cursorAfterFollowingLetterToNextState(cursor, nextLetterToFollow);
     return findString(k, cursorAfterTransition, numSubstringsGeneratedAtStateId);
 }
 
@@ -782,24 +784,17 @@ vector<string> computeResult(const vector<string>& w, const vector<long>& k)
     {
         markerDelimitedConcat += s + SuffixTreeBuilder::markerChar;
     }
-    //cout << "markerDelimitedConcat: " << markerDelimitedConcat << endl;
     suffixTree.appendString(markerDelimitedConcat);
-    //cout << "Before removal of markers" << endl;
-    //suffixTree.dumpGraph();
-    //cout << "After removal of markers" << endl;
+    // After truncating the strings containing marker, the suffix tree will represent
+    // exactly the union of all the substrings of all of the w's.
     suffixTree.truncateStringsContainingMarker();
-    //suffixTree.dumpGraph();
 
-    //long sizeOfConcatenatedStrings = 0;
-    //return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
+    // For each state, find out how many substrings would have been generated in a DFS
+    // when all children of that state have been explored.
     vector<long> numSubstringsGeneratedAtStateId(suffixTree.numStates(), -1);
     long numSubstringsGenerated = 0;
     buildSubstringsGeneratedAfterStateTable(suffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
-    //cout << "Num generated at each state: " << endl;
-    for (int i = 0; i < numSubstringsGeneratedAtStateId.size(); i++)
-    {
-        //cout << " stateId:" << i << " numSubstringsGeneratedAtStateId: " << numSubstringsGeneratedAtStateId[i] << endl;
-    }
+
     vector<string> results;
     for (const auto i : k)
     {
