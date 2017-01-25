@@ -747,31 +747,30 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
     if (nextLetters.empty())
     {
         const long numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursor.stateId()];
-        if (numSubstringsGeneratedAtState == k)
-            return cursor.dbgStringFollowed();
-        else
-        {
-            //cout << "TODO - " + cursor.dbgStringFollowed() << " " << numSubstringsGeneratedAtState << endl;
-            //return "TODO - " + cursor.dbgStringFollowed();
-            return cursor.dbgStringFollowed().substr(0, cursor.dbgStringFollowed().size() - numSubstringsGeneratedAtState + k);
-        }
+        const long overshotBy = numSubstringsGeneratedAtState - k;
+        // This state has generated a number of substrings in excess of k (or maybe equal to).  The desired result is
+        // the current substring pointed to by cursor, with the last "overshotBy" characters
+        // removed (each such character would have been responsible for generated one substring).
+        return cursor.dbgStringFollowed().substr(0, cursor.dbgStringFollowed().size() - overshotBy);
     }
     char nextLetterToFollow = '\0';
-    long minGreaterThanK = numeric_limits<long>::max();
+    long minStringsGeneratorByChildGreaterThanK = numeric_limits<long>::max();
     for (const auto nextLetter : nextLetters)
     {
         const auto cursorAfterTransition = cursorAfterFollowingLetterToNextState(cursor, nextLetter);
         const long numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursorAfterTransition.stateId()];
-        if (numSubstringsGeneratedAtState >= k && numSubstringsGeneratedAtState <= minGreaterThanK)
+        if (numSubstringsGeneratedAtState >= k && numSubstringsGeneratedAtState <= minStringsGeneratorByChildGreaterThanK)
         {
-            minGreaterThanK = numSubstringsGeneratedAtState;
+            minStringsGeneratorByChildGreaterThanK = numSubstringsGeneratedAtState;
             nextLetterToFollow = nextLetter;
         }
     }
     if (!nextLetterToFollow)
     {
+        // If we're here, then K is greater than the number of strings generated at *any* state.
         return "INVALID";
     }
+    // Recurse into next state.
     const auto cursorAfterTransition = cursorAfterFollowingLetterToNextState(cursor, nextLetterToFollow);
     return findString(k, cursorAfterTransition, numSubstringsGeneratedAtStateId);
 }
