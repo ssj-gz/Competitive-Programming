@@ -1,4 +1,4 @@
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #define NO_VERIFY_UKKONEN
@@ -64,6 +64,7 @@ class SuffixTreeBuilder
             vector<Transition> transitions;
             State* suffixLink = nullptr;
             State* parent = nullptr;
+            int index = -1;
         };
     public:
         static const char markerChar = '#';
@@ -569,6 +570,7 @@ class SuffixTreeBuilder
             m_states.push_back(make_unique<State>());
             State *newState = m_states.back().get();
             newState->parent = parent;
+            newState->index = m_states.size() - 1;
             return newState;
         }
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
@@ -651,7 +653,6 @@ class SuffixTreeBuilder
 
         void truncateStringsContainingMarkerAux(State* state, const vector<int>& orderedMarkerPositions)
         {
-            cout << "truncateStringsContainingMarkerAux" << endl;
             bool transitionRemoved = false;
             do
             {
@@ -661,7 +662,6 @@ class SuffixTreeBuilder
                     Transition& transition = *transitionIter;
                     const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
                     const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                    cout << "transition: " << substringStartIndex << "," << substringEndIndex << endl;
                     const auto candidateMarkerPosIter = lower_bound(orderedMarkerPositions.begin(), orderedMarkerPositions.end(), substringStartIndex);
                     if (candidateMarkerPosIter != orderedMarkerPositions.end())
                     {
@@ -671,14 +671,12 @@ class SuffixTreeBuilder
                         if (candidateMarkerPos == substringStartIndex)
                         {
                             state->transitions.erase(transitionIter);
-                            cout << "removed transition" << endl;
                             transitionRemoved = true;
                             break;
                         }
                         else
                         {
                             transition.substringFollowed.endIndex = candidateMarkerPos;
-                            cout << "truncated transition" << endl;
                         }
                     }
                 }
@@ -687,83 +685,39 @@ class SuffixTreeBuilder
             {
                 truncateStringsContainingMarkerAux(transition.nextState, orderedMarkerPositions);
             }
-
         }
 
         long findStateIndex(State* s)
         {
             auto statePos = find_if(m_states.begin(), m_states.end(), [s](const unique_ptr<State>& state) { return state.get() == s; });
             assert(statePos != m_states.end());
+            assert(s->index == statePos - m_states.begin());
             return statePos - m_states.begin();
         }
 };
 
-char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substringCursor, int lengthSoFar, long& sizeOfConcatenatedStrings)
+void computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substringCursor, int lengthSoFar, long& sizeOfConcatenatedStrings)
 {
     assert(lengthSoFar == substringCursor.dbgStringFollowed().size());
     if (substringCursor.isOnExplicitState())
     {
         vector<char> sortedNextLetters = substringCursor.nextLetters();
         sort(sortedNextLetters.begin(), sortedNextLetters.end());
-        const long newLengthSoFar = lengthSoFar + 1;
         for (const auto nextLetter : sortedNextLetters)
         {
-            if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
-            {
-                // Following this letter makes the length of the concatenated string exceed k; compute
-                // the final result.
-                const auto substringFollowedToExceedK = substringCursor.dbgStringFollowed() + nextLetter;
-                assert(substring.length() == newLengthSoFar);
-                const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                return substringFollowedToExceedK[indexInSubstring];
-            }
-            sizeOfConcatenatedStrings += newLengthSoFar;
             auto cursorAfterLetter(substringCursor);
             cursorAfterLetter.followLetter(nextLetter);
-            const char result = computeResultAux(s, k, cursorAfterLetter, newLengthSoFar, sizeOfConcatenatedStrings);
-            if (result)
-                return result;
+            computeResultAux(s, k, cursorAfterLetter, lengthSoFar + 1, sizeOfConcatenatedStrings);
         }
     }
     else
     {
-        auto sumOfUpToN = [](long n)
-        {
-            return n * (n + 1) / 2;
-        };
         const auto remainderOfCurrentTransition = substringCursor.remainderOfCurrentTransition();
-        // Use closed-form computation to compute the increase in the length of the concatenated string if we followed the
-        // current transition character-by-character.
-        const long increaseInConcatenatedStringLength = sumOfUpToN(lengthSoFar + remainderOfCurrentTransition.length()) - sumOfUpToN(lengthSoFar);
-        if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + increaseInConcatenatedStringLength)
-        {
-            // Following this transition would make the current concatenated string exceed k.
-            int newLengthSoFar = lengthSoFar + 1;
-            for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
-            {
-                if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
-                {
-                    // Following i characters from the transition makes the concatenated string length exceed k;
-                    // compute the final result.
-                    substringCursor.followNextLetters(i);
-                    const auto substringFollowedToExceedK = substringCursor.dbgStringFollowed() + s.substr(remainderOfCurrentTransition.startIndex() + i, remainderOfCurrentTransition.length() - i);
-                    const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                    return substringFollowedToExceedK[indexInSubstring];
-                }
-                sizeOfConcatenatedStrings += newLengthSoFar;
-                newLengthSoFar++;
-            }
-            assert(false);
-        }
         // Follow remainder of transition in constant time and recurse.
-        sizeOfConcatenatedStrings += increaseInConcatenatedStringLength;
         auto cursorAfter(substringCursor);
         cursorAfter.followNextLetters(remainderOfCurrentTransition.length());
-        const char result = computeResultAux(s, k, cursorAfter, lengthSoFar + remainderOfCurrentTransition.length(), sizeOfConcatenatedStrings);
-        if (result)
-            return result;
+        computeResultAux(s, k, cursorAfter, lengthSoFar + remainderOfCurrentTransition.length(), sizeOfConcatenatedStrings);
     }
-    return '\0';
 }
 
 vector<string> computeResult(const vector<string>& w, const vector<long>& k)
