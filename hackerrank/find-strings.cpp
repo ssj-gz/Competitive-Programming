@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #define NO_VERIFY_UKKONEN
@@ -733,7 +733,7 @@ void buildSubstringsGeneratedAfterStateTable(SuffixTreeBuilder::Cursor substring
 
 string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vector<long>& numSubstringsGeneratedAtStateId)
 {
-    cout << "findString: " << k << " cursor: " << cursor.description() << endl;
+    //cout << "findString: " << k << " cursor: " << cursor.description() << endl;
     assert(cursor.isOnExplicitState());
     const vector<char>& nextLetters = cursor.nextLetters();
     if (nextLetters.empty())
@@ -743,7 +743,7 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
             return cursor.dbgStringFollowed();
         else
         {
-            cout << "TODO - " + cursor.dbgStringFollowed() << " " << numSubstringsGeneratedAtState << endl;
+            //cout << "TODO - " + cursor.dbgStringFollowed() << " " << numSubstringsGeneratedAtState << endl;
             return "TODO - " + cursor.dbgStringFollowed();
         }
     }
@@ -781,23 +781,23 @@ vector<string> computeResult(const vector<string>& w, const vector<long>& k)
     {
         markerDelimitedConcat += s + SuffixTreeBuilder::markerChar;
     }
-    cout << "markerDelimitedConcat: " << markerDelimitedConcat << endl;
+    //cout << "markerDelimitedConcat: " << markerDelimitedConcat << endl;
     suffixTree.appendString(markerDelimitedConcat);
-    cout << "Before removal of markers" << endl;
-    suffixTree.dumpGraph();
-    cout << "After removal of markers" << endl;
+    //cout << "Before removal of markers" << endl;
+    //suffixTree.dumpGraph();
+    //cout << "After removal of markers" << endl;
     suffixTree.truncateStringsContainingMarker();
-    suffixTree.dumpGraph();
+    //suffixTree.dumpGraph();
 
     //long sizeOfConcatenatedStrings = 0;
     //return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
     vector<long> numSubstringsGeneratedAtStateId(suffixTree.numStates(), -1);
     long numSubstringsGenerated = 0;
     buildSubstringsGeneratedAfterStateTable(suffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
-    cout << "Num generated at each state: " << endl;
+    //cout << "Num generated at each state: " << endl;
     for (int i = 0; i < numSubstringsGeneratedAtStateId.size(); i++)
     {
-        cout << " stateId:" << i << " numSubstringsGeneratedAtStateId: " << numSubstringsGeneratedAtStateId[i] << endl;
+        //cout << " stateId:" << i << " numSubstringsGeneratedAtStateId: " << numSubstringsGeneratedAtStateId[i] << endl;
     }
     vector<string> results;
     for (const auto i : k)
@@ -855,6 +855,7 @@ int main() {
     {
         cin >> k[i];
     }
+#ifndef SUBMISSION
     const auto bruteForceResults = bruteForce(w, k);
     cout << "bruteForceResults:" << endl;
     for (const auto& bruteForceResult : bruteForceResults)
@@ -862,6 +863,7 @@ int main() {
         cout << bruteForceResult << endl;
     }
     cout << "optimisedResults:" << endl;
+#endif
     const auto optimisedResults = computeResult(w, k);
     for (const auto& optimisedResult : optimisedResults)
     {
