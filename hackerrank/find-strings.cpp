@@ -603,7 +603,7 @@ class SuffixTreeBuilder
             // Ukkonen's algorithm uses 1-indexed alphabet
             // throughout; adjust for this.
             if (letter == markerChar)
-                return 28;
+                return 27;
             return letter - 'a' + 1;
         }
 
@@ -744,7 +744,8 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
         else
         {
             //cout << "TODO - " + cursor.dbgStringFollowed() << " " << numSubstringsGeneratedAtState << endl;
-            return "TODO - " + cursor.dbgStringFollowed();
+            //return "TODO - " + cursor.dbgStringFollowed();
+            return cursor.dbgStringFollowed().substr(0, cursor.dbgStringFollowed().size() - numSubstringsGeneratedAtState + k);
         }
     }
     char nextLetterToFollow = '\0';
