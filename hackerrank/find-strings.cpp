@@ -119,6 +119,10 @@ class SuffixTreeBuilder
             }
             truncateStringsContainingMarkerAux(m_root, orderedMarkerPositions);
         }
+        int numStates() const
+        {
+            return m_states.size();
+        }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
          */
@@ -155,6 +159,11 @@ class SuffixTreeBuilder
                 bool isOnExplicitState() const
                 {
                     return (m_transition == nullptr);
+                }
+                int stateId() const
+                {
+                    const int stateId = m_state->index;
+                    return stateId;
                 }
                 int posInTransition() const
                 {
@@ -696,9 +705,8 @@ class SuffixTreeBuilder
         }
 };
 
-void computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substringCursor, int lengthSoFar, long& sizeOfConcatenatedStrings)
+void computeResultAux(SuffixTreeBuilder::Cursor substringCursor, long& numSubstringsGenerated, vector<long>& numSubstringsGeneratedAtStateId)
 {
-    assert(lengthSoFar == substringCursor.dbgStringFollowed().size());
     if (substringCursor.isOnExplicitState())
     {
         vector<char> sortedNextLetters = substringCursor.nextLetters();
@@ -707,16 +715,19 @@ void computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         {
             auto cursorAfterLetter(substringCursor);
             cursorAfterLetter.followLetter(nextLetter);
-            computeResultAux(s, k, cursorAfterLetter, lengthSoFar + 1, sizeOfConcatenatedStrings);
+            numSubstringsGenerated++;
+            computeResultAux(cursorAfterLetter, numSubstringsGenerated, numSubstringsGeneratedAtStateId);
         }
+        numSubstringsGeneratedAtStateId[substringCursor.stateId()] = numSubstringsGenerated;
     }
     else
     {
         const auto remainderOfCurrentTransition = substringCursor.remainderOfCurrentTransition();
         // Follow remainder of transition in constant time and recurse.
+        numSubstringsGenerated += remainderOfCurrentTransition.length();
         auto cursorAfter(substringCursor);
         cursorAfter.followNextLetters(remainderOfCurrentTransition.length());
-        computeResultAux(s, k, cursorAfter, lengthSoFar + remainderOfCurrentTransition.length(), sizeOfConcatenatedStrings);
+        computeResultAux(cursorAfter, numSubstringsGenerated, numSubstringsGeneratedAtStateId);
     }
 }
 
@@ -738,6 +749,14 @@ vector<string> computeResult(const vector<string>& w, const vector<long>& k)
 
     //long sizeOfConcatenatedStrings = 0;
     //return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
+    vector<long> numSubstringsGeneratedAtStateId(suffixTree.numStates(), -1);
+    long numSubstringsGenerated = 0;
+    computeResultAux(suffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
+    cout << "Num generated at each state: " << endl;
+    for (int i = 0; i < numSubstringsGeneratedAtStateId.size(); i++)
+    {
+        cout << " stateId:" << i << " numSubstringsGeneratedAtStateId: " << numSubstringsGeneratedAtStateId[i] << endl;
+    }
     return vector<string>();
 }
 
