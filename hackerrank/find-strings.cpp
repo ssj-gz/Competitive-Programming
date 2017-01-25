@@ -414,7 +414,7 @@ class SuffixTreeBuilder
                     }
                     return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
                 }
-                string description()
+                string description() const
                 {
                     stringstream idStream;
                     idStream << "state: " << m_state << " transition: " << m_transition << " m_posInTransition: " << m_posInTransition;
@@ -705,7 +705,7 @@ class SuffixTreeBuilder
         }
 };
 
-void computeResultAux(SuffixTreeBuilder::Cursor substringCursor, long& numSubstringsGenerated, vector<long>& numSubstringsGeneratedAtStateId)
+void buildSubstringsGeneratedAfterStateTable(SuffixTreeBuilder::Cursor substringCursor, long& numSubstringsGenerated, vector<long>& numSubstringsGeneratedAtStateId)
 {
     if (substringCursor.isOnExplicitState())
     {
@@ -716,7 +716,7 @@ void computeResultAux(SuffixTreeBuilder::Cursor substringCursor, long& numSubstr
             auto cursorAfterLetter(substringCursor);
             cursorAfterLetter.followLetter(nextLetter);
             numSubstringsGenerated++;
-            computeResultAux(cursorAfterLetter, numSubstringsGenerated, numSubstringsGeneratedAtStateId);
+            buildSubstringsGeneratedAfterStateTable(cursorAfterLetter, numSubstringsGenerated, numSubstringsGeneratedAtStateId);
         }
         numSubstringsGeneratedAtStateId[substringCursor.stateId()] = numSubstringsGenerated;
     }
@@ -727,8 +727,50 @@ void computeResultAux(SuffixTreeBuilder::Cursor substringCursor, long& numSubstr
         numSubstringsGenerated += remainderOfCurrentTransition.length();
         auto cursorAfter(substringCursor);
         cursorAfter.followNextLetters(remainderOfCurrentTransition.length());
-        computeResultAux(cursorAfter, numSubstringsGenerated, numSubstringsGeneratedAtStateId);
+        buildSubstringsGeneratedAfterStateTable(cursorAfter, numSubstringsGenerated, numSubstringsGeneratedAtStateId);
     }
+}
+
+string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vector<long>& numSubstringsGeneratedAtStateId)
+{
+    cout << "findString: " << k << " cursor: " << cursor.description() << endl;
+    assert(cursor.isOnExplicitState());
+    const vector<char>& nextLetters = cursor.nextLetters();
+    if (nextLetters.empty())
+    {
+        const int numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursor.stateId()];
+        if (numSubstringsGeneratedAtState == k)
+            return cursor.dbgStringFollowed();
+        else
+        {
+            cout << "TODO - " + cursor.dbgStringFollowed() << " " << numSubstringsGeneratedAtState << endl;
+            return "TODO - " + cursor.dbgStringFollowed();
+        }
+    }
+    char nextLetterToFollow = '\0';
+    int minGreaterThanK = numeric_limits<int>::max();
+    for (const auto nextLetter : nextLetters)
+    {
+        auto cursorAfterTransition(cursor);
+        cursorAfterTransition.followLetter(nextLetter);
+        if (!cursorAfterTransition.isOnExplicitState())
+            cursorAfterTransition.followToTransitionEnd();
+        const int numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursorAfterTransition.stateId()];
+        if (numSubstringsGeneratedAtState >= k && numSubstringsGeneratedAtState <= minGreaterThanK)
+        {
+            minGreaterThanK = numSubstringsGeneratedAtState;
+            nextLetterToFollow = nextLetter;
+        }
+    }
+    if (!nextLetterToFollow)
+    {
+        return "INVALID";
+    }
+    auto cursorAfterTransition(cursor);
+    cursorAfterTransition.followLetter(nextLetterToFollow);
+    if (!cursorAfterTransition.isOnExplicitState())
+        cursorAfterTransition.followToTransitionEnd();
+    return findString(k, cursorAfterTransition, numSubstringsGeneratedAtStateId);
 }
 
 vector<string> computeResult(const vector<string>& w, const vector<long>& k)
@@ -751,13 +793,18 @@ vector<string> computeResult(const vector<string>& w, const vector<long>& k)
     //return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
     vector<long> numSubstringsGeneratedAtStateId(suffixTree.numStates(), -1);
     long numSubstringsGenerated = 0;
-    computeResultAux(suffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
+    buildSubstringsGeneratedAfterStateTable(suffixTree.initialCursor(), numSubstringsGenerated, numSubstringsGeneratedAtStateId);
     cout << "Num generated at each state: " << endl;
     for (int i = 0; i < numSubstringsGeneratedAtStateId.size(); i++)
     {
         cout << " stateId:" << i << " numSubstringsGeneratedAtStateId: " << numSubstringsGeneratedAtStateId[i] << endl;
     }
-    return vector<string>();
+    vector<string> results;
+    for (const auto i : k)
+    {
+        results.push_back(findString(i, suffixTree.initialCursor(), numSubstringsGeneratedAtStateId));
+    }
+    return results;
 }
 
 vector<string> bruteForce(const vector<string>& w, const vector<long>& k)
@@ -809,11 +856,17 @@ int main() {
         cin >> k[i];
     }
     const auto bruteForceResults = bruteForce(w, k);
+    cout << "bruteForceResults:" << endl;
     for (const auto& bruteForceResult : bruteForceResults)
     {
         cout << bruteForceResult << endl;
     }
-    computeResult(w, k);
+    cout << "optimisedResults:" << endl;
+    const auto optimisedResults = computeResult(w, k);
+    for (const auto& optimisedResult : optimisedResults)
+    {
+        cout << optimisedResult << endl;
+    }
     return 0;
 }
 
