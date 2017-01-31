@@ -79,6 +79,7 @@ class SuffixTreeBuilder
             // from Algorithm 2.
             m_root = createNewState();
             m_auxiliaryState = createNewState();
+            cout << "m_auxiliaryState: " << m_auxiliaryState << endl;
 
             for (int i = 0; i < alphabetSize; i++)
             {
@@ -350,87 +351,36 @@ class SuffixTreeBuilder
                 }
                 void followSuffixLink()
                 {
-                    cout << "followSuffixLink " << description() << " " << stringFollowed() << endl;
-                    if (isOnExplicitState() && m_state->suffixLink)
+                    auto state = m_state;
+                    vector<SuffixTreeBuilder::Substring> substringsFollowedUpToAncestor;
+                    if (!isOnExplicitState())
                     {
-                        cout << "isOnExplicitState && m_state->suffixLink" << endl;
-                        if (m_state->suffixLink)
-                        {
-                            m_state = m_state->suffixLink;
-                            movedToExplicitState();
-                        }
+                        auto substringFromExplicit = m_transition->substringFollowed;
+                        substringFromExplicit.endIndex = substringFromExplicit.startIndex + m_posInTransition;
+                        substringsFollowedUpToAncestor.push_back(substringFromExplicit);
                     }
-                    else
+                    while (!state->suffixLink)
                     {
-                        //assert((m_state->suffixLink == nullptr) == m_state->transitions.empty());
-                        if (isOnExplicitState())
-                        {
-                            cout << "isOnExplicitState" << endl;
-                            assert(m_state->parent && m_state->parent->suffixLink);
-                            auto parentsSuffixLink = m_state->parent->suffixLink;
-                            const Transition* transitionFromParent = findTransitionFromParent();
-                            cout << "parentsSuffixLink: " << parentsSuffixLink << endl;
-                            if (m_state->parent == m_root)
-                            {
-                                cout << "!parentsSuffixLink" << endl;
-                                auto substringToFollow = transitionFromParent->substringFollowed;
-                                substringToFollow.startIndex++;
-                                cout << "string followed: " << stringFollowed() << endl;
-                                auto suffixLinkCursor = Cursor(m_root, *m_string, m_root);
-                                cout << "Trying to follow letters from root : " << substringToFollow.startIndex << "," << substringToFollow.endIndex << endl;
+                        const Transition* transitionFromParent = findTransitionFromParent(state);
 
-                                suffixLinkCursor.followLetters(*m_string, substringToFollow.startIndex - 1, substringToFollow.length(m_string->length()));
-                                cout << " .. .done trying to follow letters from root" << endl;
-                                *this = suffixLinkCursor;
-                            }
-                            else
-                            {
-                                auto suffixLinkCursor = Cursor(parentsSuffixLink, *m_string, m_root);
-                                const auto substringToFollow = transitionFromParent->substringFollowed;
-                                suffixLinkCursor.followLetters(*m_string, substringToFollow.startIndex - 1, substringToFollow.length(m_string->length()));
-                                *this = suffixLinkCursor; 
-                            }
-                        }
-                        else if (!m_state->suffixLink)
-                        {
-                            assert(m_state->parent && m_state->parent->suffixLink);
-                            auto parentsSuffixLink = m_state->parent->suffixLink;
-                            const Transition* transitionFromParent = findTransitionFromParent();
-                            cout << "Non-explicit state with no suffix link" << description() << " " << stringFollowed() << endl;
-                            cout << "parentsSuffixLink: " << parentsSuffixLink << endl;
-                            Cursor suffixLinkCursor;
-                            if (m_state->parent == m_root)
-                            {
-                                cout << "!parentsSuffixLink" << endl;
-                                auto substringToFollow = transitionFromParent->substringFollowed;
-                                substringToFollow.startIndex++;
-                                cout << "string followed: " << stringFollowed() << endl;
-                                suffixLinkCursor = Cursor(m_root, *m_string, m_root);
-                                cout << "Trying to follow letters from root : " << substringToFollow.startIndex << "," << substringToFollow.endIndex << endl;
-
-                                suffixLinkCursor.followLetters(*m_string, substringToFollow.startIndex - 1, substringToFollow.length(m_string->length()));
-                                assert(m_transition);
-                                cout << " .. .done trying to follow letters from root" << endl;
-                            }
-                            else
-                            {
-                                suffixLinkCursor = Cursor(parentsSuffixLink, *m_string, m_root);
-                                const auto substringToFollow = transitionFromParent->substringFollowed;
-                                suffixLinkCursor.followLetters(*m_string, substringToFollow.startIndex - 1, substringToFollow.length(m_string->length()));
-                            }
-                            suffixLinkCursor.followLetters(*m_string, m_transition->substringFollowed.startIndex - 1, m_posInTransition);
-                            cout << "suffixLinkCursor: " << suffixLinkCursor.stringFollowed() << endl;
-                            *this = suffixLinkCursor; 
-                        }
-                        else
-                        {
-                            assert(m_state->suffixLink);
-                            auto suffixLinkCursor = Cursor(m_state->suffixLink, *m_string, m_root);
-                            const auto substringToFollow = SuffixTreeBuilder::Substring(m_transition->substringFollowed.startIndex, m_transition->substringFollowed.startIndex + m_posInTransition + -1);
-                            suffixLinkCursor.followLetters(*m_string, substringToFollow.startIndex - 1, substringToFollow.endIndex - substringToFollow.startIndex + 1);
-                            *this = suffixLinkCursor; 
-                        }
+                        state = state->parent;
+                        substringsFollowedUpToAncestor.insert(substringsFollowedUpToAncestor.begin(), transitionFromParent->substringFollowed);
                     }
+                    auto ancestorsSuffixLink = state->suffixLink;
+                    if (state == m_root && !substringsFollowedUpToAncestor.empty())
+                    {
+                        assert(ancestorsSuffixLink);
+                        substringsFollowedUpToAncestor.front().startIndex++;
+                        ancestorsSuffixLink = m_root;
+                    }
+                    cout << "ancestorsSuffixLink: " << ancestorsSuffixLink << endl;
+                    Cursor suffixLinkCursor = Cursor(ancestorsSuffixLink, *m_string, m_root);
+                    cout << "Working our way back up from ancestor suffix link" << endl;
+                    for(const auto substring : substringsFollowedUpToAncestor)
+                    {
+                        suffixLinkCursor.followLetters(*m_string, substring.startIndex - 1, substring.length(m_string->length()));
+                    }
+                    *this = suffixLinkCursor;
                 }
                 bool canMoveUp()
                 {
@@ -499,8 +449,10 @@ class SuffixTreeBuilder
                     m_posInTransition = -1;
                 }
 
-                Transition* findTransitionFromParent()
+                Transition* findTransitionFromParent(State* state = nullptr)
                 {
+                    if (!state)
+                        state = m_state;
                     cout << "findTransitionFromParent: m_state: " << m_state << " parent state: " << m_state->parent << endl;
                     Transition* transitionFromParent = nullptr;
                     for (Transition& transition : m_state->parent->transitions)
