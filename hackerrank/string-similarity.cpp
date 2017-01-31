@@ -752,31 +752,9 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-long bruteForce(const string& s)
-{
-    long result = 0;
-    for (int i = 0; i < s.size(); i++)
-    {
-        const string suffix = s.substr(i);
-        int commonPrefixLength = 0;
-        for (int i = 0; i < suffix.length(); i++)
-        {
-            if (suffix[i] == s[i])
-            {
-                commonPrefixLength++;
-            }
-            else
-                break;
-        }
-        //cout << "commonPrefixLength: " << commonPrefixLength << endl;
-        result += commonPrefixLength;
-    }
-    return result;
-}
-
 void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s, const vector<bool>& isStateWIthIdFinal, long& result, int depth)
 {
-    // This would be a relatively straightforward recursive algorithm, but annoyingly in some testcases we need 10's of thousands of levels 
+    // This would be a relatively straightforward recursive algorithm, but annoyingly, in some testcases, we need 10s of thousands of levels 
     // of recursion, leading to stack overflow :(
     // Simulate recursion ourselves using a stack.
     struct State
@@ -789,6 +767,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
         bool haveRecursed = false;
     };
 
+    // "State"s are essentially stack-frames, not to be be confused with "States" of the suffix tree!
     State initialState;
     initialState.cursor = rootCursor;
     initialState.numLettersFollowed = 0;
@@ -808,11 +787,14 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
                 currentState.indexIntoNextLetters = 0;
                 if (isFinalState)
                 {
+                    // Reached a final state; the string we've followed is a suffix of s.
+                    // Update the result.
                     result += currentState.lengthOfPrefixOfSFollowed;
                 }
             }
             if (currentState.indexIntoNextLetters == currentState.nextLetters.size())
             {
+                // Done exploring this state.
                 states.pop();
                 continue;
             }
@@ -835,6 +817,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
         {
             if (currentState.haveRecursed)
             {
+                // Done exploring.
                 states.pop();
                 continue;
             }
@@ -844,6 +827,8 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
             int newLengthOfPrefixOfSFollowed = currentState.lengthOfPrefixOfSFollowed;
             if (haveFollowedPrefixOfS)
             {
+                // Follow as many chars in the continuation of s on this transition as we can, updating newLengthOfPrefixOfSFollowed and newNumLettersFollowed
+                // accordingly.
                 while (currentState.lengthOfPrefixOfSFollowed < s.length() && nextCursor.canFollowLetter(s[currentState.lengthOfPrefixOfSFollowed]) && !nextCursor.isOnExplicitState())
                 {
                     followedLetters = true;
@@ -864,6 +849,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
             newState.numLettersFollowed = newNumLettersFollowed;
             newState.lengthOfPrefixOfSFollowed = newLengthOfPrefixOfSFollowed;
             states.push(newState);
+            // Make a note that we've already explored this state.
             currentState.haveRecursed = true;
             continue;
         }
@@ -875,6 +861,8 @@ long computeSumOfCommonPrefixLengths(const string& s)
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
 
+    // Build the table of which states (by stateId) are final states.
+    // This requires all such states to be explicit.
     suffixTree.makeFinalStatesExplicit();
     vector<bool> isStateWIthIdFinal(suffixTree.numStates(), false);
     auto finalStateCursor = suffixTree.rootCursor();
@@ -892,6 +880,29 @@ long computeSumOfCommonPrefixLengths(const string& s)
 
 
 int main() {
+    // Fundamentally not that hard, as long as we can find all "final" states of the suffix tree representing s and 
+    // make them explicit! This is accomplished via makeFinalStatesExplicit() which just finds all final states
+    // (i.e. any state reached by following a suffix of s from the root) by following the full string s from the root state
+    // of the suffix tree and then using repeated applications of followSuffixLink() to find the final states reached by each 
+    // of the shorter suffixes of s, and splits any non-explicit such states along the way.
+    // So: we have a suffix tree representing s, and all its final states are made explicit, and each such state is easily
+    // identifiable (via the easily-computed isStateWIthIdFinal lookup).
+    // Imagine if we performed a character-by-character DFS of this suffix tree, and reached a state marked final after following 
+    // a word w: by definition of a final state, w is a suffix of s, and so if we compute the common prefix of w with s
+    // and add it to the result, we will have our answer.  However, this is about o(|s|^3): O(|s|^2) for a character-by-character
+    // DFS of the suffix tree, and a further O(|s|) for comparing prefixes of w and s.
+    // We can be smarter about computing the common prefix of w and s, though: as we traverse, simply keep track of both the size of w
+    // (easy) and the size of the common prefix of w and s (a little trickier, but note that if we are to follow a next letter x, 
+    // the size of the common prefix of wx and s is the size of the common prefix of w and s plus one, provided that a)
+    // w is so far a prefix of s [easily kept tracked of as we go along - see haveFollowedPrefixOfS] and b) so is wx (again, very easily checked).
+    // This would then give us a O(|s|^2) algorithm due to the character-by-character DFS of the suffix tree.
+    // But, as always, we can often skip the character-by-character exploration of a transition: if the current w is not a prefix
+    // of s (and remember, we've been updating this boolean as we go along), then we can just jump straight down the transition.
+    // If w *is* a prefix of s, then we need only follow the transition character-by-character until w and s diverge: note
+    // that we need do this for at most O(|s|), giving a total runtime of O(|s|).  Hooray!
+    // As an annoying complication, the suffix trees formed for some testcases require us to recurse a large number of times (overflowing
+    // the stack) so I had to simulate recursion using std::stack :(
+
     long T;
     cin >> T;
     for (int t = 0; t < T; t++)
