@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #define NO_VERIFY_UKKONEN
@@ -925,7 +925,7 @@ int computeSumOfCommonPrefixLengths(const string& s)
     return result;
 }
 
-#define EXHAUSTIVE
+//#define EXHAUSTIVE
 
 int main() {
 #ifndef EXHAUSTIVE
