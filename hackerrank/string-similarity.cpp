@@ -495,57 +495,51 @@ class SuffixTreeBuilder
         }
         void makeFinalStatesExplicit()
         {
+            Cursor finalState = rootCursor();
+            finalState.followLetters(m_currentString);
+            assert(finalState.isOnExplicitState());
+            State* previousState = nullptr;
+            while (finalState != rootCursor())
             {
-                Cursor finalState = rootCursor();
-                finalState.followLetters(m_currentString);
-                assert(finalState.isOnExplicitState());
-                State* previousState = nullptr;
-                while (finalState != rootCursor())
+                if (!finalState.isOnExplicitState())
                 {
-                    if (!finalState.isOnExplicitState())
+                    // Need to split this state at the current Cursor position.
+                    auto state = finalState.m_state;
+                    assert(state->suffixLink);
+                    auto transition = finalState.m_transition;
+                    auto posInTransition = finalState.posInTransition();
+                    auto newExplicitState = createNewState(state);
+                    auto originalNextState = transition->nextState;
+                    const bool transitionWasOpen = (transition->substringFollowed.endIndex == openTransitionEnd);
+                    const auto originalTransitionSubstring = transition->substringFollowed;
+
+                    // Adjust (truncate, and re-route to newExplicitState) the old transition.
+                    transition->nextState = newExplicitState;
+                    transition->substringFollowed.endIndex = transition->substringFollowed.startIndex + posInTransition - 1;
+
+                    // Create new transition from new state to the old destination of the original transition we were on.
+                    Transition newTransition(originalNextState, originalTransitionSubstring);
+                    newTransition.substringFollowed.startIndex += posInTransition;
+                    if (transitionWasOpen)
+                        newTransition.substringFollowed.endIndex = openTransitionEnd;
+                    newExplicitState->transitions.push_back(newTransition);
+                    originalNextState->parent = newExplicitState;
+                    assert(newTransition.substringFollowed.length(m_currentString.size()) > 0);
+
+                    finalState = Cursor(newExplicitState, m_currentString, m_root);
+
+                    if (previousState)
                     {
-                        // Need to split this state at the current Cursor position.
-                        auto state = finalState.m_state;
-                        assert(state->suffixLink);
-                        auto transition = finalState.m_transition;
-                        auto posInTransition = finalState.posInTransition();
-                        auto newExplicitState = createNewState(state);
-                        auto originalNextState = transition->nextState;
-                        const bool transitionWasOpen = (transition->substringFollowed.endIndex == openTransitionEnd);
-                        const auto originalTransitionSubstring = transition->substringFollowed;
-                        // Adjust (truncate, and re-route to newExplicitState) the old transition.
-                        transition->nextState = newExplicitState;
-                        transition->substringFollowed.endIndex = transition->substringFollowed.startIndex + posInTransition - 1;
-
-
-                        // Create new transition from new state to the old destination of the original transition we were on.
-                        Transition newTransition(originalNextState, originalTransitionSubstring);
-                        newTransition.substringFollowed.startIndex += posInTransition;
-                        if (transitionWasOpen)
-                            newTransition.substringFollowed.endIndex = openTransitionEnd;
-                        newExplicitState->transitions.push_back(newTransition);
-                        originalNextState->parent = newExplicitState;
-                        assert(newTransition.substringFollowed.length(m_currentString.size()) > 0);
-
-                        finalState = Cursor(newExplicitState, m_currentString, m_root);
-
-                        Cursor suffixLink(state, m_currentString, m_root);
-                        suffixLink.followLetters(m_currentString, transition->substringFollowed.startIndex - 1, posInTransition);
-                        finalState = suffixLink;
-                        assert(finalState.isOnExplicitState());
-                        if (previousState)
-                        {
-                            // Update the suffix link for the state we are the suffix for ;)
-                            previousState->suffixLink = finalState.m_state;
-                        }
+                        // Update the suffix link for the state we are the suffix for ;)
+                        previousState->suffixLink = finalState.m_state;
                     }
-                    previousState = finalState.m_state;
-                    finalState.followSuffixLink();
                 }
+                previousState = finalState.m_state;
+                finalState.followSuffixLink();
             }
         };
     private:
-        static const int alphabetSize = 27; // 'a' - 'z', plus markerChar.
+        static const int alphabetSize = 26;
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
@@ -667,16 +661,8 @@ class SuffixTreeBuilder
         };
         int t(int i)
         {
-            // Ukkonen's algorithm uses 1-indexed strings throughout; adjust for this.
-            return letterIndex(m_currentString[i - 1]);
-        }
-        int letterIndex(char letter)
-        {
-            // Ukkonen's algorithm uses 1-indexed alphabet
-            // throughout; adjust for this.
-            if (letter == markerChar)
-                return 27;
-            return letter - 'a' + 1;
+            // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
+            return m_currentString[i - 1] - 'a' + 1;
         }
 
         void dumpGraphAux(State* s, const string& indent)
