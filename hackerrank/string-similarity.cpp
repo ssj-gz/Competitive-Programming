@@ -79,7 +79,7 @@ class SuffixTreeBuilder
             // from Algorithm 2.
             m_root = createNewState();
             m_auxiliaryState = createNewState();
-            cout << "m_auxiliaryState: " << m_auxiliaryState << endl;
+            //cout << "m_auxiliaryState: " << m_auxiliaryState << endl;
 
             for (int i = 0; i < alphabetSize; i++)
             {
@@ -251,7 +251,7 @@ class SuffixTreeBuilder
                     {
                         numLetters = letters.size();
                     }
-                    cout << "Need to follow letters: " << letters.substr(startIndex, numLetters) << " (" << numLetters << " of them)" << endl;
+                    //cout << "Need to follow letters: " << letters.substr(startIndex, numLetters) << " (" << numLetters << " of them)" << endl;
 #ifndef NO_VERIFY_UKKONEN
                     Cursor verify(*this);
                     for (auto index = startIndex; index != startIndex + numLetters; index++)
@@ -351,49 +351,49 @@ class SuffixTreeBuilder
                 }
                 void followSuffixLink()
                 {
-                    cout << "followSuffixLink: " << description() << " " << stringFollowed() << endl;
+                    //cout << "followSuffixLink: " << description() << " " << stringFollowed() << endl;
                     auto state = m_state;
                     vector<SuffixTreeBuilder::Substring> substringsToFollowFromAncestorSuffixLink;
                     if (!isOnExplicitState())
                     {
                         auto substringFromExplicit = m_transition->substringFollowed;
                         substringFromExplicit.endIndex = substringFromExplicit.startIndex + m_posInTransition;
-                        cout << "Adding up to explicit: " << substringFromExplicit.startIndex << "," << substringFromExplicit.endIndex << endl;
+                        //cout << "Adding up to explicit: " << substringFromExplicit.startIndex << "," << substringFromExplicit.endIndex << endl;
                         substringsToFollowFromAncestorSuffixLink.push_back(substringFromExplicit);
                     }
                     while (!state->suffixLink)
                     {
-                        cout << "followSuffixLink loop - state: " << state << endl;
+                        //cout << "followSuffixLink loop - state: " << state << endl;
                         const Transition* transitionFromParent = findTransitionFromParent(state);
-                        cout << "state: " << state << " transitionFromParent: " << transitionFromParent << endl;
+                        //cout << "state: " << state << " transitionFromParent: " << transitionFromParent << endl;
 
-                        cout << "Prepending transition from parent (state = " << state << "): " << transitionFromParent->substringFollowed.startIndex << "," << transitionFromParent->substringFollowed.endIndex << endl;
+                        //cout << "Prepending transition from parent (state = " << state << "): " << transitionFromParent->substringFollowed.startIndex << "," << transitionFromParent->substringFollowed.endIndex << endl;
                         substringsToFollowFromAncestorSuffixLink.insert(substringsToFollowFromAncestorSuffixLink.begin(), transitionFromParent->substringFollowed);
 
                         state = state->parent;
-                        cout << "Ascended to parent: " << state << endl;
+                        //cout << "Ascended to parent: " << state << endl;
                     }
                     auto ancestorsSuffixLink = state->suffixLink;
-                    cout << "substringsToFollowFromAncestorSuffixLink.size(): " << substringsToFollowFromAncestorSuffixLink.size() << endl;
-                    cout << "stopped at " << state << endl;
+                    //cout << "substringsToFollowFromAncestorSuffixLink.size(): " << substringsToFollowFromAncestorSuffixLink.size() << endl;
+                    //cout << "stopped at " << state << endl;
                     if (state == m_root)
                     {
-                        cout << "Reached root" << endl;
+                        //cout << "Reached root" << endl;
                         assert(ancestorsSuffixLink);
                         if (!substringsToFollowFromAncestorSuffixLink.empty())
                         {
-                            cout << "Original first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
+                            //cout << "Original first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
                             substringsToFollowFromAncestorSuffixLink.front().startIndex++;
-                            cout << "Adjusted first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
+                            //cout << "Adjusted first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
                         }
                         ancestorsSuffixLink = m_root;
                     }
-                    cout << "ancestorsSuffixLink: " << ancestorsSuffixLink << endl;
+                    //cout << "ancestorsSuffixLink: " << ancestorsSuffixLink << endl;
                     Cursor suffixLinkCursor = Cursor(ancestorsSuffixLink, *m_string, m_root);
-                    cout << "Working our way back up from ancestor suffix link" << endl;
+                    //cout << "Working our way back up from ancestor suffix link" << endl;
                     for(const auto substring : substringsToFollowFromAncestorSuffixLink)
                     {
-                        cout << " substring: " << substring.startIndex << "," << substring.endIndex << endl;
+                        //cout << " substring: " << substring.startIndex << "," << substring.endIndex << endl;
                         suffixLinkCursor.followLetters(*m_string, substring.startIndex - 1, substring.length(m_string->length()));
                     }
                     *this = suffixLinkCursor;
@@ -469,7 +469,7 @@ class SuffixTreeBuilder
                 {
                     if (!state)
                         state = m_state;
-                    cout << "findTransitionFromParent: m_state: " << state << " parent state: " << state->parent << endl;
+                    //cout << "findTransitionFromParent: m_state: " << state << " parent state: " << state->parent << endl;
                     Transition* transitionFromParent = nullptr;
                     for (Transition& transition : state->parent->transitions)
                     {
@@ -514,28 +514,28 @@ class SuffixTreeBuilder
                 assert(finalState.isOnExplicitState());
                 while (finalState != rootCursor())
                 {
-                    cout << "final state: " << finalState.stringFollowed() << endl;
+                    //cout << "final state: " << finalState.stringFollowed() << endl;
                     if (!finalState.isOnExplicitState())
                     {
-                        cout << "Need to split state: " << finalState.stringFollowed() << endl;
+                        //cout << "Need to split state: " << finalState.stringFollowed() << endl;
                         auto state = finalState.m_state;
                         assert(state->suffixLink);
                         auto transition = finalState.m_transition;
                         auto posInTransition = finalState.posInTransition();
                         auto newExplicitState = createNewState(state);
                         auto originalNextState = transition->nextState;
-                        cout << "posInTransition: " << posInTransition << endl;
+                        //cout << "posInTransition: " << posInTransition << endl;
                         transition->nextState = newExplicitState;
-                        cout << "Original substring: " << transition->substringFollowed.startIndex << "," << transition->substringFollowed.endIndex << endl;
+                        //cout << "Original substring: " << transition->substringFollowed.startIndex << "," << transition->substringFollowed.endIndex << endl;
                         const bool transitionWasOpen = (transition->substringFollowed.endIndex == openTransitionEnd);
                         const auto originalTransitionSubstring = transition->substringFollowed;
-                        cout << "transitionWasOpen: " << transitionWasOpen << endl;
+                        //cout << "transitionWasOpen: " << transitionWasOpen << endl;
                         //if (!transitionWasOpen)
                             //transition->substringFollowed.endIndex -= posInTransition;
                         //else
                             transition->substringFollowed.endIndex = transition->substringFollowed.startIndex + posInTransition - 1;
 
-                        cout << "Adjusted to substring: " << transition->substringFollowed.startIndex << "," << transition->substringFollowed.endIndex << endl;
+                        //cout << "Adjusted to substring: " << transition->substringFollowed.startIndex << "," << transition->substringFollowed.endIndex << endl;
 
                         Transition newTransition(originalNextState, originalTransitionSubstring);
                         newTransition.substringFollowed.startIndex += posInTransition;
@@ -543,46 +543,46 @@ class SuffixTreeBuilder
                             newTransition.substringFollowed.endIndex = openTransitionEnd;
                         newExplicitState->transitions.push_back(newTransition);
                         originalNextState->parent = newExplicitState;
-                        cout << "newly added transition: " << newTransition.substringFollowed.startIndex << "," << newTransition.substringFollowed.endIndex << endl;
+                        //cout << "newly added transition: " << newTransition.substringFollowed.startIndex << "," << newTransition.substringFollowed.endIndex << endl;
                         assert(newTransition.substringFollowed.length(m_currentString.size()) > 0);
 
                         finalState = Cursor(newExplicitState, m_currentString, m_root);
-                        cout << "Bleep :" << finalState.isOnExplicitState() << endl;
-                        cout << "Created new final state: " << finalState.stringFollowed() << " " << newExplicitState << endl;
-                        dumpGraph();
+                        //cout << "Bleep :" << finalState.isOnExplicitState() << endl;
+                        //cout << "Created new final state: " << finalState.stringFollowed() << " " << newExplicitState << endl;
+                        //dumpGraph();
                         Cursor suffixLink(state, m_currentString, m_root);
                         suffixLink.followLetters(m_currentString, transition->substringFollowed.startIndex - 1, posInTransition);
                         finalState = suffixLink;
-                        cout << "About to follow suffix link from " << finalState.description() << endl;
+                        //cout << "About to follow suffix link from " << finalState.description() << endl;
                         finalState.followSuffixLink();
-                        cout << "followed suffix link; now : " << finalState.description() << endl;
+                        //cout << "followed suffix link; now : " << finalState.description() << endl;
                     }
                     else
                     {
-                        cout << "About to follow suffix link from " << finalState.description() << endl;
+                        //cout << "About to follow suffix link from " << finalState.description() << endl;
                         finalState.followSuffixLink();
-                        cout << "followed suffix link; now : " << finalState.description() << endl;
+                        //cout << "followed suffix link; now : " << finalState.description() << endl;
                     }
                 }
             }
             // Correct suffix links.
             {
-                cout << "Correcting suffix links" << endl;
-                dumpGraph();
+                //cout << "Correcting suffix links" << endl;
+                //dumpGraph();
                 Cursor finalState = rootCursor();
                 finalState.followLetters(m_currentString);
                 Cursor prevFinalState(finalState);
-                cout << "Shifting final state to suffix link" << endl;
+                //cout << "Shifting final state to suffix link" << endl;
                 finalState.followSuffixLink();
                 assert(finalState.stringFollowed() != m_currentString);
                 do 
                 {
-                    cout << "Loop: finalState: " << finalState.stringFollowed() << " prevFinalState: " << prevFinalState.stringFollowed() << endl;
+                    //cout << "Loop: finalState: " << finalState.stringFollowed() << " prevFinalState: " << prevFinalState.stringFollowed() << endl;
                     assert(finalState.isOnExplicitState());
                     assert(prevFinalState.isOnExplicitState());
                     assert(finalState != prevFinalState);
 
-                    cout << "setting suffixLink for state " << prevFinalState.m_state << " to " << finalState.m_state << endl;
+                    //cout << "setting suffixLink for state " << prevFinalState.m_state << " to " << finalState.m_state << endl;
                     prevFinalState.m_state->suffixLink = finalState.m_state;
 
                     prevFinalState.followSuffixLink();
@@ -843,7 +843,7 @@ int bruteForce(const string& s)
             else
                 break;
         }
-        cout << "commonPrefixLength: " << commonPrefixLength << endl;
+        //cout << "commonPrefixLength: " << commonPrefixLength << endl;
         result += commonPrefixLength;
     }
     return result;
@@ -851,21 +851,21 @@ int bruteForce(const string& s)
 
 void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLettersFollowed, int lengthOfPrefixOfSFollowed, const vector<int>& finalStateSuffixLengths, int& result)
 {
-    cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.stringFollowed() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() <<  endl;
+    //cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.stringFollowed() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() <<  endl;
     const auto haveFollowedPrefixOfS = (lengthOfPrefixOfSFollowed == numLettersFollowed);
     if (cursor.isOnExplicitState())
     {
         const auto isFinalState = (finalStateSuffixLengths[cursor.stateId()] != -1);
-        cout << "finalStateSuffixLengths[cursor.stateId()]: " << finalStateSuffixLengths[cursor.stateId()] << endl;
+        //cout << "finalStateSuffixLengths[cursor.stateId()]: " << finalStateSuffixLengths[cursor.stateId()] << endl;
         if (isFinalState)
         {
-            cout << "reached final state: " << cursor.stringFollowed() << " prefix of S so far: " << lengthOfPrefixOfSFollowed << endl;
+            //cout << "reached final state: " << cursor.stringFollowed() << " prefix of S so far: " << lengthOfPrefixOfSFollowed << endl;
             result += lengthOfPrefixOfSFollowed;
         }
         const vector<char>& nextLetters = cursor.nextLetters();
         for (const auto nextLetter : nextLetters)
         {
-            cout << "Next letter: " << nextLetter << endl; 
+            //cout << "Next letter: " << nextLetter << endl; 
             const auto doesLetterContinueS = haveFollowedPrefixOfS && 
                                           (s[numLettersFollowed] == nextLetter);
             const auto newLengthOfPrefixOfSFollowed = (doesLetterContinueS ? lengthOfPrefixOfSFollowed + 1 : lengthOfPrefixOfSFollowed);
@@ -902,23 +902,23 @@ int computeSumOfCommonPrefixLengths(const string& s)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
-    suffixTree.dumpGraph();
+    //suffixTree.dumpGraph();
     suffixTree.makeFinalStatesExplicit();
-    suffixTree.dumpGraph();
+    //suffixTree.dumpGraph();
     vector<int> finalStateSuffixLengths(suffixTree.numStates(), -1);
     auto finalStateCursor = suffixTree.rootCursor();
     finalStateCursor.followLetters(s);
     int suffixLength = s.length();
     while (finalStateCursor != suffixTree.rootCursor())
     {
-        cout << "finalStateCursor: " << finalStateCursor.stringFollowed() << endl;
-        cout << "stateId: " << finalStateCursor.stateId() << endl;
+        //cout << "finalStateCursor: " << finalStateCursor.stringFollowed() << endl;
+        //cout << "stateId: " << finalStateCursor.stateId() << endl;
         finalStateSuffixLengths[finalStateCursor.stateId()] = suffixLength;
         finalStateCursor.followSuffixLink();
     }
     for (auto blah : finalStateSuffixLengths)
     {
-        cout << "Blah: " << blah << endl;
+        //cout << "Blah: " << blah << endl;
     }
     int result = 0;
     computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, 0, 0, finalStateSuffixLengths, result);
