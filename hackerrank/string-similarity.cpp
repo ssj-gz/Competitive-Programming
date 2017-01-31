@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdio>
 #include <vector>
+#include <stack>
 #include <set>
 #include <map>
 #include <iostream>
@@ -508,10 +509,12 @@ class SuffixTreeBuilder
         }
         void makeFinalStatesExplicit()
         {
+            //cout << "makeFinalStatesExplicit" << endl;
             {
                 Cursor finalState = rootCursor();
                 finalState.followLetters(m_currentString);
                 assert(finalState.isOnExplicitState());
+                State* previousState = nullptr;
                 while (finalState != rootCursor())
                 {
                     //cout << "final state: " << finalState.stringFollowed() << endl;
@@ -554,17 +557,38 @@ class SuffixTreeBuilder
                         suffixLink.followLetters(m_currentString, transition->substringFollowed.startIndex - 1, posInTransition);
                         finalState = suffixLink;
                         //cout << "About to follow suffix link from " << finalState.description() << endl;
+                        assert(finalState.isOnExplicitState());
+                        if (previousState)
+                        {
+                            previousState->suffixLink = finalState.m_state;
+                        }
+                        previousState = finalState.m_state;
                         finalState.followSuffixLink();
                         //cout << "followed suffix link; now : " << finalState.description() << endl;
                     }
                     else
                     {
                         //cout << "About to follow suffix link from " << finalState.description() << endl;
+                        previousState = finalState.m_state;
                         finalState.followSuffixLink();
                         //cout << "followed suffix link; now : " << finalState.description() << endl;
                     }
                 }
             }
+#if 0
+            {
+                cout << "Whizzing through suffix links" << endl;
+                Cursor finalState = rootCursor();
+                finalState.followLetters(m_currentString);
+                int dbgIterNum = 0;
+                while (finalState != rootCursor())
+                {
+                    cout << "Following ... "  << dbgIterNum++ << endl;
+                    finalState.followSuffixLink();
+                    cout << "... done" << endl;
+                }
+            }
+            cout << "Correcting suffix links" << endl;
             // Correct suffix links.
             {
                 //cout << "Correcting suffix links" << endl;
@@ -575,9 +599,11 @@ class SuffixTreeBuilder
                 //cout << "Shifting final state to suffix link" << endl;
                 finalState.followSuffixLink();
                 assert(finalState.stringFollowed() != m_currentString);
+                int dbgIterNum = 0;
                 do 
                 {
                     //cout << "Loop: finalState: " << finalState.stringFollowed() << " prevFinalState: " << prevFinalState.stringFollowed() << endl;
+                    cout << "finalState : " << finalState.description() << " iter: " << dbgIterNum++ << endl;
                     assert(finalState.isOnExplicitState());
                     assert(prevFinalState.isOnExplicitState());
                     assert(finalState != prevFinalState);
@@ -590,6 +616,7 @@ class SuffixTreeBuilder
                 }
                 while (finalState != rootCursor());
             }
+#endif
 
         };
     private:
@@ -849,9 +876,106 @@ int bruteForce(const string& s)
     return result;
 }
 
-void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLettersFollowed, int lengthOfPrefixOfSFollowed, const vector<int>& finalStateSuffixLengths, int& result, int depth)
+void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, const vector<int>& finalStateSuffixLengths, int& result, int depth)
 {
-    cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.description() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() << " depth: " << depth <<  endl;
+    //cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.description() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() << " depth: " << depth <<  endl;
+    struct State
+    {
+        Cursor cursor;
+        int numLettersFollowed = -1;
+        int lengthOfPrefixOfSFollowed = -1;
+        vector<char> nextLetters;
+        int indexIntoNextLetters = -1;
+        bool haveRecursed = false;
+    };
+
+    State initialState;
+    initialState.cursor = cursor;
+    initialState.numLettersFollowed = 0;
+    initialState.lengthOfPrefixOfSFollowed = 0;
+    stack<State> states;
+    states.push(initialState);
+    while (!states.empty())
+    {
+        State& currentState = states.top();
+        const auto haveFollowedPrefixOfS = (currentState.lengthOfPrefixOfSFollowed == currentState.numLettersFollowed);
+        //cout << "Loop; #states: " << states.size() << " cursor: " << currentState.cursor.stringFollowed() << " haveFollowedPrefixOfS: " << haveFollowedPrefixOfS << " lengthOfPrefixOfSFollowed: " << currentState.lengthOfPrefixOfSFollowed << " numLettersFollowed: " << currentState.numLettersFollowed << endl;
+        if (currentState.cursor.isOnExplicitState())
+        {
+            const auto isFinalState = (finalStateSuffixLengths[currentState.cursor.stateId()] != -1);
+            if (currentState.indexIntoNextLetters == -1)
+            {
+                currentState.nextLetters = currentState.cursor.nextLetters();
+                currentState.indexIntoNextLetters = 0;
+                if (isFinalState)
+                {
+                    result += currentState.lengthOfPrefixOfSFollowed;
+                    //cout << "added " << currentState.lengthOfPrefixOfSFollowed << " to result; now: " << result << endl;
+                }
+            }
+            if (currentState.indexIntoNextLetters == currentState.nextLetters.size())
+            {
+                states.pop();
+                continue;
+            }
+            const auto nextLetter = currentState.nextLetters[currentState.indexIntoNextLetters];
+            const auto doesLetterContinueS = haveFollowedPrefixOfS && 
+                                          (s[currentState.numLettersFollowed] == nextLetter);
+            const auto newLengthOfPrefixOfSFollowed = (doesLetterContinueS ? currentState.lengthOfPrefixOfSFollowed + 1 : currentState.lengthOfPrefixOfSFollowed);
+            auto cursorAfterLetter = currentState.cursor;
+            cursorAfterLetter.followLetter(nextLetter);
+            State newState;
+            newState.cursor = cursorAfterLetter;
+            newState.numLettersFollowed = currentState.numLettersFollowed + 1;
+            newState.lengthOfPrefixOfSFollowed = newLengthOfPrefixOfSFollowed;
+            states.push(newState);
+
+            currentState.indexIntoNextLetters++;
+            continue;
+        }
+        else
+        {
+            //cout << "Not explicit" << endl;
+            if (currentState.haveRecursed)
+            {
+                states.pop();
+                continue;
+            }
+            Cursor nextCursor(currentState.cursor);
+            bool followedLetters = false;
+            int newNumLettersFollowed = currentState.numLettersFollowed;
+            int newLengthOfPrefixOfSFollowed = currentState.lengthOfPrefixOfSFollowed;
+            if (haveFollowedPrefixOfS)
+            {
+                //cout << "Finding extra prefix letters in non-explicit" << endl;
+                while (currentState.lengthOfPrefixOfSFollowed < s.length() && nextCursor.canFollowLetter(s[currentState.lengthOfPrefixOfSFollowed]) && !nextCursor.isOnExplicitState())
+                {
+                    //cout << "Found new!" << endl;
+                    followedLetters = true;
+                    nextCursor.followLetter(s[currentState.lengthOfPrefixOfSFollowed]);
+                    newLengthOfPrefixOfSFollowed++;
+                    newNumLettersFollowed++;
+                }
+            }
+            if (!followedLetters)
+            {
+                //cout << "didn't follow letters" << endl;
+                const auto remainderOfTransition = nextCursor.remainderOfCurrentTransition();
+                nextCursor.followNextLetters(remainderOfTransition.length());
+                newNumLettersFollowed += remainderOfTransition.length();
+                assert(nextCursor.isOnExplicitState());
+            }
+            State newState;
+            newState.cursor = nextCursor;
+            newState.numLettersFollowed = newNumLettersFollowed;
+            newState.lengthOfPrefixOfSFollowed = newLengthOfPrefixOfSFollowed;
+            states.push(newState);
+            currentState.haveRecursed = true;
+            continue;
+        }
+    }
+    return;
+#if 0
     const auto haveFollowedPrefixOfS = (lengthOfPrefixOfSFollowed == numLettersFollowed);
     if (cursor.isOnExplicitState())
     {
@@ -897,17 +1021,18 @@ void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLe
         computeSumOfCommonPrefixLengthAux(cursor, s, numLettersFollowed, lengthOfPrefixOfSFollowed, finalStateSuffixLengths, result, depth + 1);
         
     }
+#endif
 }
 int computeSumOfCommonPrefixLengths(const string& s)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
     //suffixTree.dumpGraph();
-    cout << "numStates original: " << suffixTree.numStates() << endl;
+    //cout << "numStates original: " << suffixTree.numStates() << endl;
     suffixTree.makeFinalStatesExplicit();
     //suffixTree.dumpGraph();
     vector<int> finalStateSuffixLengths(suffixTree.numStates(), -1);
-    cout << "numStates: " << suffixTree.numStates() << endl;
+    //cout << "numStates: " << suffixTree.numStates() << endl;
     auto finalStateCursor = suffixTree.rootCursor();
     finalStateCursor.followLetters(s);
     int suffixLength = s.length();
@@ -922,8 +1047,9 @@ int computeSumOfCommonPrefixLengths(const string& s)
     {
         //cout << "Blah: " << blah << endl;
     }
+    //cout << "About to compute result" << endl;
     int result = 0;
-    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, 0, 0, finalStateSuffixLengths, result, 0);
+    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, finalStateSuffixLengths, result, 0);
     return result;
 }
 
