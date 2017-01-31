@@ -352,31 +352,31 @@ class SuffixTreeBuilder
                 void followSuffixLink()
                 {
                     auto state = m_state;
-                    vector<SuffixTreeBuilder::Substring> substringsFollowedUpToAncestor;
+                    vector<SuffixTreeBuilder::Substring> substringsToFollowFromAncestorSuffixLink;
                     if (!isOnExplicitState())
                     {
                         auto substringFromExplicit = m_transition->substringFollowed;
                         substringFromExplicit.endIndex = substringFromExplicit.startIndex + m_posInTransition;
-                        substringsFollowedUpToAncestor.push_back(substringFromExplicit);
+                        substringsToFollowFromAncestorSuffixLink.push_back(substringFromExplicit);
                     }
                     while (!state->suffixLink)
                     {
                         const Transition* transitionFromParent = findTransitionFromParent(state);
 
                         state = state->parent;
-                        substringsFollowedUpToAncestor.insert(substringsFollowedUpToAncestor.begin(), transitionFromParent->substringFollowed);
+                        substringsToFollowFromAncestorSuffixLink.insert(substringsToFollowFromAncestorSuffixLink.begin(), transitionFromParent->substringFollowed);
                     }
                     auto ancestorsSuffixLink = state->suffixLink;
-                    if (state == m_root && !substringsFollowedUpToAncestor.empty())
+                    if (state == m_root && !substringsToFollowFromAncestorSuffixLink.empty())
                     {
                         assert(ancestorsSuffixLink);
-                        substringsFollowedUpToAncestor.front().startIndex++;
+                        substringsToFollowFromAncestorSuffixLink.front().startIndex++;
                         ancestorsSuffixLink = m_root;
                     }
                     cout << "ancestorsSuffixLink: " << ancestorsSuffixLink << endl;
                     Cursor suffixLinkCursor = Cursor(ancestorsSuffixLink, *m_string, m_root);
                     cout << "Working our way back up from ancestor suffix link" << endl;
-                    for(const auto substring : substringsFollowedUpToAncestor)
+                    for(const auto substring : substringsToFollowFromAncestorSuffixLink)
                     {
                         suffixLinkCursor.followLetters(*m_string, substring.startIndex - 1, substring.length(m_string->length()));
                     }
@@ -388,7 +388,7 @@ class SuffixTreeBuilder
                 }
                 char moveUp()
                 {
-                    cout << "canMoveUp: " << description() << endl;
+                    //cout << "canMoveUp: " << description() << endl;
                     assert(canMoveUp());
                     if (m_transition)
                     {
@@ -453,11 +453,11 @@ class SuffixTreeBuilder
                 {
                     if (!state)
                         state = m_state;
-                    cout << "findTransitionFromParent: m_state: " << m_state << " parent state: " << m_state->parent << endl;
+                    //cout << "findTransitionFromParent: m_state: " << m_state << " parent state: " << m_state->parent << endl;
                     Transition* transitionFromParent = nullptr;
                     for (Transition& transition : m_state->parent->transitions)
                     {
-                        cout << " nextState: " << transition.nextState << endl;
+                        //cout << " nextState: " << transition.nextState << endl;
                         if (transition.nextState == m_state)
                         {
                             transitionFromParent = &transition;
@@ -512,20 +512,23 @@ class SuffixTreeBuilder
                         transition->nextState = newExplicitState;
                         cout << "Original substring: " << transition->substringFollowed.startIndex << "," << transition->substringFollowed.endIndex << endl;
                         const bool transitionWasOpen = (transition->substringFollowed.endIndex == openTransitionEnd);
+                        const auto originalTransitionSubstring = transition->substringFollowed;
                         cout << "transitionWasOpen: " << transitionWasOpen << endl;
-                        if (!transitionWasOpen)
-                            transition->substringFollowed.endIndex -= posInTransition - 1;
-                        else
+                        //if (!transitionWasOpen)
+                            //transition->substringFollowed.endIndex -= posInTransition;
+                        //else
                             transition->substringFollowed.endIndex = transition->substringFollowed.startIndex + posInTransition - 1;
 
                         cout << "Adjusted to substring: " << transition->substringFollowed.startIndex << "," << transition->substringFollowed.endIndex << endl;
 
-                        Transition newTransition(originalNextState, transition->substringFollowed);
+                        Transition newTransition(originalNextState, originalTransitionSubstring);
                         newTransition.substringFollowed.startIndex += posInTransition;
                         if (transitionWasOpen)
                             newTransition.substringFollowed.endIndex = openTransitionEnd;
                         newExplicitState->transitions.push_back(newTransition);
                         originalNextState->parent = newExplicitState;
+                        cout << "newly added transition: " << newTransition.substringFollowed.startIndex << "," << newTransition.substringFollowed.endIndex << endl;
+                        assert(newTransition.substringFollowed.length(m_currentString.size()) > 0);
 
                         finalState = Cursor(newExplicitState, m_currentString, m_root);
                         cout << "Bleep :" << finalState.isOnExplicitState() << endl;
@@ -898,21 +901,57 @@ int computeSumOfCommonPrefixLengths(const string& s)
     return result;
 }
 
-
+#define EXHAUSTIVE
 
 int main() {
+#ifndef EXHAUSTIVE
     long T;
     cin >> T;
     for (int t = 0; t < T; t++)
     {
         string s;
         cin >> s;
+#ifndef SUBMISSION
+        const auto bruteForceResult = bruteForce(s);
+        cout << "bruteForceResult: " << bruteForceResult << endl;
+#endif
+        const auto optimisedResult = computeSumOfCommonPrefixLengths(s);
+#ifndef SUBMISSION
+        cout << "optimisedResult: " << optimisedResult << endl;
+        assert(bruteForceResult == optimisedResult);
+#else
+        cout << optimisedResult << endl;
+#endif
+        //assert(bruteForceResult == optimisedResult);
+    }
+#else
+    string s = "aa";
+    const int numLetters = 3;
+    while (true)
+    {
+        cout << "s: " << s <<  " size: " << s.size() << endl;
         const auto bruteForceResult = bruteForce(s);
         cout << "bruteForceResult: " << bruteForceResult << endl;
         const auto optimisedResult = computeSumOfCommonPrefixLengths(s);
         cout << "optimisedResult: " << optimisedResult << endl;
         assert(bruteForceResult == optimisedResult);
+
+        int index = 0;
+        while (index < s.size() && s[index] == 'a' + numLetters)
+        {
+            s[index] = 'a';
+            index++;
+        }
+        if (index == s.size())
+        {
+            s.push_back('a');
+        }
+        else
+        {
+            s[index]++;
+        }
     }
+#endif
     return 0;
 }
 
