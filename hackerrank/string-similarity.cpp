@@ -375,13 +375,17 @@ class SuffixTreeBuilder
                     }
                     auto ancestorsSuffixLink = state->suffixLink;
                     cout << "substringsToFollowFromAncestorSuffixLink.size(): " << substringsToFollowFromAncestorSuffixLink.size() << endl;
-                    if (state == m_root && !substringsToFollowFromAncestorSuffixLink.empty())
+                    cout << "stopped at " << state << endl;
+                    if (state == m_root)
                     {
                         cout << "Reached root" << endl;
                         assert(ancestorsSuffixLink);
-                        cout << "Original first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
-                        substringsToFollowFromAncestorSuffixLink.front().startIndex++;
-                        cout << "Adjusted first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
+                        if (!substringsToFollowFromAncestorSuffixLink.empty())
+                        {
+                            cout << "Original first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
+                            substringsToFollowFromAncestorSuffixLink.front().startIndex++;
+                            cout << "Adjusted first substring to follow: " << substringsToFollowFromAncestorSuffixLink.front().startIndex << "," << substringsToFollowFromAncestorSuffixLink.front().endIndex << endl;
+                        }
                         ancestorsSuffixLink = m_root;
                     }
                     cout << "ancestorsSuffixLink: " << ancestorsSuffixLink << endl;
@@ -945,7 +949,7 @@ int main() {
         //assert(bruteForceResult == optimisedResult);
     }
 #else
-    string s = "aa";
+    string s = "a";
     const int numLetters = 3;
     while (true)
     {
