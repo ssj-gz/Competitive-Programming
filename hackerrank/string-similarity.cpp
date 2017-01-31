@@ -73,7 +73,6 @@ class SuffixTreeBuilder
             int index = -1;
         };
     public:
-        static const char markerChar = '#';
         SuffixTreeBuilder()
         {
             // Perform the initial steps (i.e. those occurring before the "while" loop)
@@ -112,18 +111,6 @@ class SuffixTreeBuilder
         void finalise()
         {
             finaliseAux(m_root, nullptr);
-        }
-        void truncateStringsContainingMarker()
-        {
-            vector<int> orderedMarkerPositions;
-            int currentPos = 0;
-            while (m_currentString.find(markerChar, currentPos) != string::npos)
-            {
-                const int markerPos = m_currentString.find(markerChar, currentPos);
-                orderedMarkerPositions.push_back(markerPos);
-                currentPos = markerPos + 1;
-            }
-            truncateStringsContainingMarkerAux(m_root, orderedMarkerPositions);
         }
         int numStates() const
         {
