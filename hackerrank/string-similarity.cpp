@@ -538,14 +538,9 @@ class SuffixTreeBuilder
                             // Update the suffix link for the state we are the suffix for ;)
                             previousState->suffixLink = finalState.m_state;
                         }
-                        previousState = finalState.m_state;
-                        finalState.followSuffixLink();
                     }
-                    else
-                    {
-                        previousState = finalState.m_state;
-                        finalState.followSuffixLink();
-                    }
+                    previousState = finalState.m_state;
+                    finalState.followSuffixLink();
                 }
             }
         };
