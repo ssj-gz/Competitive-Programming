@@ -774,7 +774,7 @@ long bruteForce(const string& s)
     return result;
 }
 
-void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, const vector<int>& finalStateSuffixLengths, long& result, int depth)
+void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s, const vector<bool>& isStateWIthIdFinal, long& result, int depth)
 {
     // This would be a relatively straightforward recursive algorithm, but annoyingly in some testcases we need 10's of thousands of levels 
     // of recursion, leading to stack overflow :(
@@ -790,7 +790,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, con
     };
 
     State initialState;
-    initialState.cursor = cursor;
+    initialState.cursor = rootCursor;
     initialState.numLettersFollowed = 0;
     initialState.lengthOfPrefixOfSFollowed = 0;
     stack<State> states;
@@ -801,7 +801,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, con
         const auto haveFollowedPrefixOfS = (currentState.lengthOfPrefixOfSFollowed == currentState.numLettersFollowed);
         if (currentState.cursor.isOnExplicitState())
         {
-            const auto isFinalState = (finalStateSuffixLengths[currentState.cursor.stateId()] != -1);
+            const auto isFinalState = isStateWIthIdFinal[currentState.cursor.stateId()];
             if (currentState.indexIntoNextLetters == -1)
             {
                 currentState.nextLetters = currentState.cursor.nextLetters();
@@ -876,18 +876,17 @@ long computeSumOfCommonPrefixLengths(const string& s)
     suffixTree.appendString(s);
 
     suffixTree.makeFinalStatesExplicit();
-    vector<int> finalStateSuffixLengths(suffixTree.numStates(), -1);
+    vector<bool> isStateWIthIdFinal(suffixTree.numStates(), false);
     auto finalStateCursor = suffixTree.rootCursor();
     finalStateCursor.followLetters(s);
-    int suffixLength = s.length();
     while (finalStateCursor != suffixTree.rootCursor())
     {
-        finalStateSuffixLengths[finalStateCursor.stateId()] = suffixLength;
+        isStateWIthIdFinal[finalStateCursor.stateId()] = true;
         finalStateCursor.followSuffixLink();
     }
 
     long result = 0;
-    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, finalStateSuffixLengths, result, 0);
+    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, isStateWIthIdFinal, result, 0);
     return result;
 }
 
