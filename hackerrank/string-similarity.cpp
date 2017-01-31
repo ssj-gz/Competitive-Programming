@@ -854,9 +854,9 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-int bruteForce(const string& s)
+long bruteForce(const string& s)
 {
-    int result = 0;
+    long result = 0;
     for (int i = 0; i < s.size(); i++)
     {
         const string suffix = s.substr(i);
@@ -876,14 +876,14 @@ int bruteForce(const string& s)
     return result;
 }
 
-void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, const vector<int>& finalStateSuffixLengths, int& result, int depth)
+void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, const vector<int>& finalStateSuffixLengths, long& result, int depth)
 {
     //cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.description() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() << " depth: " << depth <<  endl;
     struct State
     {
         Cursor cursor;
-        int numLettersFollowed = -1;
-        int lengthOfPrefixOfSFollowed = -1;
+        long numLettersFollowed = -1;
+        long lengthOfPrefixOfSFollowed = -1;
         vector<char> nextLetters;
         int indexIntoNextLetters = -1;
         bool haveRecursed = false;
@@ -1023,7 +1023,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor cursor, const string& s, con
     }
 #endif
 }
-int computeSumOfCommonPrefixLengths(const string& s)
+long computeSumOfCommonPrefixLengths(const string& s)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
@@ -1048,7 +1048,7 @@ int computeSumOfCommonPrefixLengths(const string& s)
         //cout << "Blah: " << blah << endl;
     }
     //cout << "About to compute result" << endl;
-    int result = 0;
+    long result = 0;
     computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, finalStateSuffixLengths, result, 0);
     return result;
 }
