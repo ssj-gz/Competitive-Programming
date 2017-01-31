@@ -849,9 +849,9 @@ int bruteForce(const string& s)
     return result;
 }
 
-void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLettersFollowed, int lengthOfPrefixOfSFollowed, const vector<int>& finalStateSuffixLengths, int& result)
+void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLettersFollowed, int lengthOfPrefixOfSFollowed, const vector<int>& finalStateSuffixLengths, int& result, int depth)
 {
-    //cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.stringFollowed() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() <<  endl;
+    cout << "computeSumOfCommonPrefixLengthAux: cursor: " << cursor.description() << " numLettersFollowed: " << numLettersFollowed << " lengthOfPrefixOfSFollowed: " << lengthOfPrefixOfSFollowed << " isOnExplicitState: " << cursor.isOnExplicitState() << " depth: " << depth <<  endl;
     const auto haveFollowedPrefixOfS = (lengthOfPrefixOfSFollowed == numLettersFollowed);
     if (cursor.isOnExplicitState())
     {
@@ -871,7 +871,7 @@ void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLe
             const auto newLengthOfPrefixOfSFollowed = (doesLetterContinueS ? lengthOfPrefixOfSFollowed + 1 : lengthOfPrefixOfSFollowed);
             auto cursorAfterLetter = cursor;
             cursorAfterLetter.followLetter(nextLetter);
-            computeSumOfCommonPrefixLengthAux(cursorAfterLetter, s, numLettersFollowed + 1, newLengthOfPrefixOfSFollowed, finalStateSuffixLengths, result);
+            computeSumOfCommonPrefixLengthAux(cursorAfterLetter, s, numLettersFollowed + 1, newLengthOfPrefixOfSFollowed, finalStateSuffixLengths, result, depth + 1);
         }
     }
     else
@@ -894,7 +894,7 @@ void computeSumOfCommonPrefixLengthAux(Cursor cursor, const string& s, int numLe
             numLettersFollowed += remainderOfTransition.length();
             assert(cursor.isOnExplicitState());
         }
-        computeSumOfCommonPrefixLengthAux(cursor, s, numLettersFollowed, lengthOfPrefixOfSFollowed, finalStateSuffixLengths, result);
+        computeSumOfCommonPrefixLengthAux(cursor, s, numLettersFollowed, lengthOfPrefixOfSFollowed, finalStateSuffixLengths, result, depth + 1);
         
     }
 }
@@ -903,9 +903,11 @@ int computeSumOfCommonPrefixLengths(const string& s)
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
     //suffixTree.dumpGraph();
+    cout << "numStates original: " << suffixTree.numStates() << endl;
     suffixTree.makeFinalStatesExplicit();
     //suffixTree.dumpGraph();
     vector<int> finalStateSuffixLengths(suffixTree.numStates(), -1);
+    cout << "numStates: " << suffixTree.numStates() << endl;
     auto finalStateCursor = suffixTree.rootCursor();
     finalStateCursor.followLetters(s);
     int suffixLength = s.length();
@@ -921,7 +923,7 @@ int computeSumOfCommonPrefixLengths(const string& s)
         //cout << "Blah: " << blah << endl;
     }
     int result = 0;
-    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, 0, 0, finalStateSuffixLengths, result);
+    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, 0, 0, finalStateSuffixLengths, result, 0);
     return result;
 }
 
@@ -936,17 +938,17 @@ int main() {
         string s;
         cin >> s;
 #ifndef SUBMISSION
-        const auto bruteForceResult = bruteForce(s);
-        cout << "bruteForceResult: " << bruteForceResult << endl;
+        //const auto bruteForceResult = bruteForce(s);
+        //cout << "bruteForceResult: " << bruteForceResult << endl;
 #endif
+        //cout << "s: " << s << endl;
         const auto optimisedResult = computeSumOfCommonPrefixLengths(s);
 #ifndef SUBMISSION
         cout << "optimisedResult: " << optimisedResult << endl;
-        assert(bruteForceResult == optimisedResult);
+        //assert(bruteForceResult == optimisedResult);
 #else
         cout << optimisedResult << endl;
 #endif
-        //assert(bruteForceResult == optimisedResult);
     }
 #else
     string s = "a";
