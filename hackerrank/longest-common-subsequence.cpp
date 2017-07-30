@@ -50,7 +50,6 @@ int main()
     {
         for (int j = b.size() - 1; j >= 0; j--)
         {
-            //cout << "i: " << i << " a[i]: " << a[i] << " j: " << j << " b[j]: " << b[j] << endl;
             const int longestIfSkipA = commonSubsequenceInLast[i + 1][j].longest;
             CommonSubsequenceInfo commonSubsequenceInfo;
             commonSubsequenceInfo.longest = longestIfSkipA;
@@ -63,7 +62,6 @@ int main()
                 commonSubsequenceInfo.longest = longestIfSkipB;
                 commonSubsequenceInfo.next_i = i;
                 commonSubsequenceInfo.next_j = j + 1;
-                
             }
             if (a[i] == b[j])
             {
