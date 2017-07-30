@@ -31,6 +31,8 @@ int main()
     {
         cin >> b[j];
     }
+    // Was rather surprised about the low completion rate on this one, but having completed it and looked
+    // in the discussions, it turns out that the checker was buggy for a long time XD
     // commonSubsequenceInLast[i][j] represents the info about the largest common subsequence in the suffix of a
     // of length i and the suffix of b of length j.
     // The "xxx.size() + 1" is because we must deal with suffixes of length 0, 1, ... xxx.size().
