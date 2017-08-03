@@ -31,10 +31,8 @@ vector<vector<int>> findMaxCommonChildInFirstChars(const string& a, const string
         {
             int maxCommonChildUpToHere = max(maxCommonChildInFirstChars[i - 1][j],
                     maxCommonChildInFirstChars[i][j - 1]);
-            //cout << "i: " << i << " j: " << j << " maxCommonChildUpToHere: " << maxCommonChildUpToHere << endl;
             if (a[i - 1] == b[j - 1])
             {
-                //cout << "i: " << i << " j: " << j << " match: " << maxCommonChildUpToHere << endl;
                 maxCommonChildUpToHere = max(maxCommonChildUpToHere, 1 + maxCommonChildInFirstChars[i - 1][j - 1]);
             }
             maxCommonChildInFirstChars[i][j] = maxCommonChildUpToHere;
@@ -45,17 +43,55 @@ vector<vector<int>> findMaxCommonChildInFirstChars(const string& a, const string
 
 int main()
 {
+    // Fairly easy one, I thought, though a couple of silly mis-steps along the way! Surprised at the comparatively
+    // low completion rate (about 28% at the time of writing).
+    // So: imagine we add some letter x at index posToAddAt in A, and it increases the LCS of A & B by one.
+    // It's easy to prove the following by contradiction:
+    //   - The added letter x is part of the new, longer LCS; and
+    //   - Adding x can't increase the LCS by more than 1.
+    //
+    // Since x is part of the new, longer LCS, it must be "matched" with some letter in B; the one at
+    // index bPosToMatchWith, say.  Thus, x must be b[bPosToMatchWith]. Therefore, we could just
+    // simply try all |A| + 1 values of posToAddAt combined with all |B| values of bPosToMatchWith and
+    // see the LCS of all resulting strings (taking care not to count adding the same value of x at the
+    // same position more than once), but this would of course be rather inefficient :)
+    // 
+    // Consider the case where we've added the letter c at the ^'d position in A (originallly abdef), and matched it against
+    // the *'d letter c in B:
+    //
+    //     abcdef
+    //       ^
+    //     bcdf
+    //      *
+    // Can we use information about the original LCS of A and B to quickly deduce the LCS of the new A and B? Yes :)
+    //
+    //     [ab]c[def]
+    //         ^
+    //     [b]c[df]
+    //        *
+    // It's hopefully easily seen that the LCS increases by 1 if and only if the LCS of the first chars in A and B before the ^ and *
+    // (that is, ab from A, b from B) and the LCS of the last chars in A and B after the ^ and * (that is, def from A and df from B)
+    // sum to the original LCS: combined with the newly-matched c in A & B, this would give a new LCS one greater than the original.
+    // And that's about it: computing the matches for the first i chars in A and j chars in B is pretty typically for LCS
+    // calculations, and computing the matches for the *last* chars in A and B is exactly the same, except that we operate on reversed
+    // versions of A and B.
+
+
+    auto reversed = [](const string& s)
+    {
+        return string(s.rbegin(), s.rend());
+    };
+
     string a, b;
     cin >> a >> b;
     const auto maxCommonChildInFirstChars = findMaxCommonChildInFirstChars(a, b);
-    const auto maxCommonChildInLastChars = findMaxCommonChildInFirstChars(string(a.rbegin(), a.rend()), string(b.rbegin(), b.rend()));
+    const auto maxCommonChildInLastChars = findMaxCommonChildInFirstChars(reversed(a), reversed(b));
     const int maxCommonChildLength = maxCommonChildInLastChars[a.size()][b.size()];
     assert(maxCommonChildLength == maxCommonChildInFirstChars[a.size()][b.size()]);
 
 
     int numWaysOfAddingToIncreaseCommonChildLength = 0;
     const int numLetters = 26 + 10 + 26; // Alphanumeric - a-zA-Z0-9
-
     auto getLetterIndex = [numLetters](const char letter)
     {
         int letterIndex = -1;
@@ -71,23 +107,26 @@ int main()
 
     for (int posToAddAt = 0; posToAddAt <= a.size(); posToAddAt++)
     {
-        bool letterIndicesUsed[numLetters] = {};
+        bool letterIndexAlreadyAddedAtThisPos[numLetters] = {};
         for (int bPosToMatchWith = 0; bPosToMatchWith < b.size(); bPosToMatchWith++)
         {
             const int letterToAddIndex = getLetterIndex(b[bPosToMatchWith]);
-            if (letterIndicesUsed[letterToAddIndex])
+            if (letterIndexAlreadyAddedAtThisPos[letterToAddIndex])
                 continue;
 #ifndef NDEBUG
             const string withAdded = a.substr(0, posToAddAt) + b[bPosToMatchWith] + a.substr(posToAddAt);
             assert(withAdded.size() == a.size() + 1);
 #endif
-            if (maxCommonChildInFirstChars[posToAddAt][bPosToMatchWith] + maxCommonChildInLastChars[a.size() - posToAddAt][b.size() - 1 - bPosToMatchWith] == maxCommonChildLength)
+            const int maxCommonChildBeforeNewlyAddedAndMatched = maxCommonChildInFirstChars[posToAddAt][bPosToMatchWith];
+            const int maxCommonChildAfterNewlyAddedAndMatched = maxCommonChildInLastChars[a.size() - posToAddAt][b.size() - 1 - bPosToMatchWith];
+            if (maxCommonChildBeforeNewlyAddedAndMatched + maxCommonChildAfterNewlyAddedAndMatched == maxCommonChildLength)
             {
                 numWaysOfAddingToIncreaseCommonChildLength++;
                 assert(findMaxCommonChildInFirstChars(withAdded, b)[withAdded.size()][b.size()] == maxCommonChildLength + 1);
-                letterIndicesUsed[letterToAddIndex] = true;
+                letterIndexAlreadyAddedAtThisPos[letterToAddIndex] = true;
             }
         }
     }
     cout << numWaysOfAddingToIncreaseCommonChildLength << endl;
 }
+
