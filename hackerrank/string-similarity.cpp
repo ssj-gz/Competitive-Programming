@@ -53,9 +53,11 @@ class SuffixTreeBuilder
         };
         struct Transition
         {
-            Transition(State *nextState, const Substring& substringFollowed)
+            Transition(State *nextState, const Substring& substringFollowed, const string& currentString)
                 : nextState(nextState), substringFollowed(substringFollowed)
             {
+                if (substringFollowed.startIndex >= 1)
+                    firstLetter = currentString[substringFollowed.startIndex - 1];
             }
             int substringLength(int fullStringLength) const
             {
@@ -64,6 +66,7 @@ class SuffixTreeBuilder
 
             State *nextState = nullptr;
             Substring substringFollowed;
+            char firstLetter;
         };
         struct State
         {
@@ -71,6 +74,7 @@ class SuffixTreeBuilder
             State* suffixLink = nullptr;
             State* parent = nullptr;
             int index = -1;
+            bool isFinal = false; // Only holds correct value if "makeFinalStatesExplicitAndMarkThemAsFinal" is called.
         };
     public:
         SuffixTreeBuilder()
@@ -82,7 +86,7 @@ class SuffixTreeBuilder
 
             for (int i = 0; i < alphabetSize; i++)
             {
-                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1))));
+                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
             }
             m_root->suffixLink = m_auxiliaryState;
 
@@ -93,7 +97,6 @@ class SuffixTreeBuilder
         void appendLetter(char letter)
         {
             m_currentString += letter;
-
             const auto updateResult = update(m_s, m_k, m_currentString.size());
             m_s = updateResult.first;
             m_k = updateResult.second;
@@ -108,13 +111,56 @@ class SuffixTreeBuilder
                 appendLetter(letter);
             }
         }
-        void finalise()
-        {
-            finaliseAux(m_root, nullptr);
-        }
         int numStates() const
         {
             return m_states.size();
+        }
+        void makeFinalStatesExplicitAndMarkThemAsFinal()
+        {
+            // Trick described in Ukkonen's paper - add an unused character - '{', here, as it's 'z' + 1:
+            // then all final states will become explicit.  Obviously, doesn't work if the input string
+            // has actually used '{'!
+            // We can then delete all '{' transitions, and make explicit states that had a '{' transition
+            // final, and all states that were originally followed by a transition ending in '{' final.
+
+            const char unusedLetter = '{';
+            appendLetter(unusedLetter);
+
+            for (auto& state : m_states)
+            {
+                for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
+                {
+                    const Transition& transition = *transitionIter;
+                    if (transition.substringFollowed.startIndex < 1)
+                    {
+                        transitionIter++;
+                        continue;
+                    }
+                    const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
+                    const char lastCharInTransition = m_currentString[realEndIndex];
+                    bool needToRemoveTransition = false;
+                    if (lastCharInTransition == unusedLetter)
+                    {
+                        const bool transitionConsistsSolelyOfUnusedChar = (transition.substringFollowed.length(m_currentString.size()) == 1);
+                        if (transitionConsistsSolelyOfUnusedChar)
+                        {
+                            needToRemoveTransition = true;
+                            state.isFinal = true;
+                        }
+                        else
+                        {
+                            transition.nextState->isFinal = true;
+                        }
+                    }
+
+                    if (needToRemoveTransition)
+                        transitionIter = state.transitions.erase(transitionIter);
+                    else
+                        transitionIter++;
+                }
+            }
+
+            m_currentString.pop_back(); // Remove the unusedLetter we just added.
         }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
@@ -158,6 +204,11 @@ class SuffixTreeBuilder
                 {
                     return (m_transition == nullptr);
                 }
+                bool isOnFinalState() const
+                {
+                    assert(isOnExplicitState());
+                    return m_state->isFinal;
+                }
                 int stateId() const
                 {
                     const int stateId = m_state->index;
@@ -170,28 +221,40 @@ class SuffixTreeBuilder
                 }
                 vector<char> nextLetters() const
                 {
-                    vector<char> nextLetters;
+                    char nextLetters[27];
+                    const int numNextLetters = this->nextLetters(nextLetters);
+                    return vector<char>(nextLetters, nextLetters + numNextLetters);
+                }
+                int nextLetters(char* dest) const
+                {
+                    int numNextLetters = 0;
                     if (m_transition == nullptr)
                     {
                         for (const auto& transition : m_state->transitions)
                         {
-                            nextLetters.push_back((*m_string)[transition.substringFollowed.startIndex - 1]);
+                            const char letter = (*m_string)[transition.substringFollowed.startIndex - 1];
+                            *dest = letter;
+                            dest++;
+                            numNextLetters++;
                         }
                     }
                     else
                     {
-                        nextLetters.push_back((*m_string)[m_transition->substringFollowed.startIndex + m_posInTransition - 1]);
+                        *dest = (*m_string)[m_transition->substringFollowed.startIndex + m_posInTransition - 1];
+                        dest++;
+                        numNextLetters++;
                     }
-                    return nextLetters;
+                    return numNextLetters;
                 }
                 bool canFollowLetter(char letter)
                 {   
                     const vector<char>& nextLetters = this->nextLetters();
                     return find(nextLetters.begin(), nextLetters.end(), letter) != nextLetters.end();
                 } 
+
                 void followLetter(char letter)
                 {
-                    assert(canFollowLetter(letter));
+                    const string& theString = *m_string;
                     if (m_transition == nullptr)
                     {
                         for (auto& transition : m_state->transitions)
@@ -201,10 +264,14 @@ class SuffixTreeBuilder
                                 m_transition = &transition;
                                 break;
                             }
-                            if ((*m_string)[transition.substringFollowed.startIndex - 1] == letter)
+                            else 
                             {
-                                m_transition = &transition;
-                                break;
+                                assert(theString[transition.substringFollowed.startIndex - 1] == transition.firstLetter);
+                                if (transition.firstLetter == letter)
+                                {
+                                    m_transition = &transition;
+                                    break;
+                                }
                             }
                         }
                         assert(m_transition);
@@ -237,13 +304,6 @@ class SuffixTreeBuilder
                     {
                         numLetters = letters.size();
                     }
-#ifndef NO_VERIFY_UKKONEN
-                    Cursor verify(*this);
-                    for (auto index = startIndex; index != startIndex + numLetters; index++)
-                    {
-                        verify.followLetter(letters[index]);
-                    }
-#endif
                     while (numLetters > 0)
                     {
                         if (m_transition)
@@ -271,15 +331,10 @@ class SuffixTreeBuilder
                             startIndex += 1;
                         }
                     }
-#ifndef NO_VERIFY_UKKONEN
-                    assert(verify == *this);
-#endif
                 }
                 void followNextLetter()
                 {
-                    const auto nextLetters = this->nextLetters();
-                    assert(nextLetters.size() == 1);
-                    followLetter(nextLetters.front());
+                    followNextLetters(1);
                 }
                 void followNextLetters(int numLetters)
                 {
@@ -292,6 +347,42 @@ class SuffixTreeBuilder
                         m_state = m_transition->nextState;
                         movedToExplicitState();
                     }
+                }
+                class NextLetterIterator
+                {
+                    public:
+                        bool hasNext()
+                        {
+                            return transitionIterator != endtransitionIterator;
+                        }
+                        char nextLetter()
+                        {
+                            return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex - 1];
+                        }
+                        Cursor afterFollowingNextLetter()
+                        {
+                            Cursor afterCursor(*cursor);
+                            afterCursor.enterTransitionAndSkipLetter(*transitionIterator);
+                            transitionIterator++;
+                            return afterCursor;
+                        }
+                    private:
+                        NextLetterIterator(vector<Transition>& transitions, const Cursor* cursor)
+                            : transitionIterator(transitions.begin()),
+                            endtransitionIterator(transitions.end()),
+                            cursor(cursor)
+                    {
+                    };
+                        friend class Cursor;
+                        vector<Transition>::iterator transitionIterator;
+                        vector<Transition>::iterator endtransitionIterator;
+                        const Cursor* cursor;
+                };
+                friend class NextLetterIterator;
+                NextLetterIterator getNextLetterIterator() const
+                {
+                    assert(isOnExplicitState());
+                    return NextLetterIterator(m_state->transitions, this);
                 }
                 class Substring
                 {
@@ -334,98 +425,6 @@ class SuffixTreeBuilder
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 }
-                void followSuffixLink()
-                {
-                    // Basic algorithm: if no suffixLink exists for state s, find nearest ancestor s' of s which does
-                    // have a suffix link, computing a presentation of the word w that leads from s' to s as we go,
-                    // then follow that suffix link and follow w.
-                    // A special case occurs for the case where s' is the root: here, we follow the suffix w' of w i.e. 
-                    // the w' such that w = xw' for some single letter x.
-                    auto state = m_state;
-                    vector<SuffixTreeBuilder::Substring> substringsToFollowFromAncestorSuffixLink;
-                    if (!isOnExplicitState())
-                    {
-                        auto substringFromExplicit = m_transition->substringFollowed;
-                        substringFromExplicit.endIndex = substringFromExplicit.startIndex + m_posInTransition;
-                        substringsToFollowFromAncestorSuffixLink.push_back(substringFromExplicit);
-                    }
-                    while (!state->suffixLink)
-                    {
-                        const Transition* transitionFromParent = findTransitionFromParent(state);
-                        substringsToFollowFromAncestorSuffixLink.insert(substringsToFollowFromAncestorSuffixLink.begin(), transitionFromParent->substringFollowed);
-                        state = state->parent;
-                    }
-                    auto ancestorsSuffixLink = state->suffixLink;
-                    if (state == m_root)
-                    {
-                        assert(ancestorsSuffixLink);
-                        if (!substringsToFollowFromAncestorSuffixLink.empty())
-                        {
-                            // Ensure that we follow w' instead of w.
-                            substringsToFollowFromAncestorSuffixLink.front().startIndex++;
-                        }
-                        // Follow w' from the root, not the auxilliary state!
-                        ancestorsSuffixLink = m_root;
-                    }
-                    Cursor suffixLinkCursor = Cursor(ancestorsSuffixLink, *m_string, m_root);
-                    // Follow w/ w'.
-                    for(const auto substring : substringsToFollowFromAncestorSuffixLink)
-                    {
-                        suffixLinkCursor.followLetters(*m_string, substring.startIndex - 1, substring.length(m_string->length()));
-                    }
-                    *this = suffixLinkCursor;
-                }
-                bool canMoveUp()
-                {
-                    return (m_state != m_root || m_transition);
-                }
-                char moveUp()
-                {
-                    assert(canMoveUp());
-                    if (m_transition)
-                    {
-                        assert(m_posInTransition > 0);
-                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition - 1];
-                        if (m_posInTransition != 1)
-                        {
-                            m_posInTransition--;
-                        }
-                        else
-                        {
-                            movedToExplicitState();
-                        }
-                        return charFollowed;
-                    }
-                    else
-                    {
-                        Transition* transitionFromParent = findTransitionFromParent();
-                        m_state = m_state->parent;
-                        m_transition = transitionFromParent;
-                        m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
-                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition];
-                        if (m_posInTransition == 0)
-                        {
-                            movedToExplicitState();
-                        }
-                        return charFollowed;
-                    }
-                }
-                string stringFollowed() const
-                {
-                    Cursor copy(*this);
-                    string stringFollowedReversed;
-                    while (copy.canMoveUp())
-                    {
-                        stringFollowedReversed += copy.moveUp();
-                    }
-                    return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
-                }
-                string description() const
-                {
-                    stringstream idStream;
-                    idStream << "state: " << m_state << " transition: " << m_transition << " m_posInTransition: " << m_posInTransition;
-                    return idStream.str();
-                }
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -439,6 +438,19 @@ class SuffixTreeBuilder
                     assert(m_state);
                     m_transition = nullptr;
                     m_posInTransition = -1;
+                }
+
+                void enterTransitionAndSkipLetter(Transition& transition)
+                {
+                    m_transition = &transition;
+                    if (m_transition->substringLength(m_string->size()) == 1)
+                    {
+                        followToTransitionEnd();
+                    }
+                    else
+                    {
+                        m_posInTransition = 1; // We've just followed the 0th.
+                    }
                 }
 
                 Transition* findTransitionFromParent(State* state = nullptr)
@@ -469,69 +481,13 @@ class SuffixTreeBuilder
         {
             return Cursor(m_root, m_currentString, m_root);
         }
-        void dumpGraph()
-        {
-            dumpGraphAux(m_root, "");
-        }
-        vector<string> dumpExplicitStrings()
-        {
-            vector<string> strings;
-            dumpExplicitStringsAux(m_root, "", strings);
-            sort(strings.begin(), strings.end(), [](const string& lhs, const string& rhs) { return lhs.size() < rhs.size(); });
-            return strings;
-        }
-        void makeFinalStatesExplicit()
-        {
-            Cursor finalState = rootCursor();
-            finalState.followLetters(m_currentString);
-            assert(finalState.isOnExplicitState());
-            State* previousState = nullptr;
-            while (finalState != rootCursor())
-            {
-                if (!finalState.isOnExplicitState())
-                {
-                    // Need to split this state at the current Cursor position.
-                    auto state = finalState.m_state;
-                    assert(state->suffixLink);
-                    auto transition = finalState.m_transition;
-                    auto posInTransition = finalState.posInTransition();
-                    auto newExplicitState = createNewState(state);
-                    auto originalNextState = transition->nextState;
-                    const bool transitionWasOpen = (transition->substringFollowed.endIndex == openTransitionEnd);
-                    const auto originalTransitionSubstring = transition->substringFollowed;
-
-                    // Adjust (truncate, and re-route to newExplicitState) the old transition.
-                    transition->nextState = newExplicitState;
-                    transition->substringFollowed.endIndex = transition->substringFollowed.startIndex + posInTransition - 1;
-
-                    // Create new transition from new state to the old destination of the original transition we were on.
-                    Transition newTransition(originalNextState, originalTransitionSubstring);
-                    newTransition.substringFollowed.startIndex += posInTransition;
-                    if (transitionWasOpen)
-                        newTransition.substringFollowed.endIndex = openTransitionEnd;
-                    newExplicitState->transitions.push_back(newTransition);
-                    originalNextState->parent = newExplicitState;
-                    assert(newTransition.substringFollowed.length(m_currentString.size()) > 0);
-
-                    finalState = Cursor(newExplicitState, m_currentString, m_root);
-
-                    if (previousState)
-                    {
-                        // Update the suffix link for the state we are the suffix for ;)
-                        previousState->suffixLink = finalState.m_state;
-                    }
-                }
-                previousState = finalState.m_state;
-                finalState.followSuffixLink();
-            }
-        };
     private:
-        static const int alphabetSize = 26;
+        static const int alphabetSize = 27; // Include the magic '{' for making final states explicit - assumes the input string has no '{''s, obviously!
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
 
-        vector<unique_ptr<State>> m_states;
+        deque<State> m_states;
         State *m_root = nullptr;
         State *m_auxiliaryState = nullptr;
 
@@ -548,7 +504,7 @@ class SuffixTreeBuilder
             while (!isEndPoint)
             {
                 auto rPrime = createNewState(r);
-                r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd)));
+                r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), m_currentString));
                 if (oldr != m_root)
                 {
                     oldr->suffixLink = r;
@@ -586,8 +542,8 @@ class SuffixTreeBuilder
                 {
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
-                    s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k)));
-                    r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime)));
+                    s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), m_currentString));
+                    r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
                     sPrime->parent = r;
                     return {false, r};
                 }
@@ -629,8 +585,8 @@ class SuffixTreeBuilder
         }
         State *createNewState(State* parent = nullptr)
         {
-            m_states.push_back(make_unique<State>());
-            State *newState = m_states.back().get();
+            m_states.push_back(State());
+            State *newState = &(m_states.back());
             newState->parent = parent;
             newState->index = m_states.size() - 1;
             return newState;
@@ -639,7 +595,10 @@ class SuffixTreeBuilder
         {
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
             {
-                if (t(transitionIter->substringFollowed.startIndex) == letterIndex || transitionIter->substringFollowed.startIndex == -letterIndex)
+                if (transitionIter->substringFollowed.startIndex >= 0 && t(transitionIter->substringFollowed.startIndex) == letterIndex)
+                    return transitionIter;
+
+                if (transitionIter->substringFollowed.startIndex == -letterIndex)
                     return transitionIter;
             }
             if (assertFound)
@@ -651,108 +610,12 @@ class SuffixTreeBuilder
             // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
             return m_currentString[i - 1] - 'a' + 1;
         }
-
-        void dumpGraphAux(State* s, const string& indent)
-        {
-            cout << indent << "state: " << s << " " << findStateIndex(s) << " suffix link: " << (s->suffixLink ? findStateIndex(s->suffixLink) : 0) << " parent: " << (s->parent ? findStateIndex(s->parent) : 0);
-            const bool isTerminal = (s->transitions.empty());
-            //assert((s->suffixLink == nullptr) == isTerminal);
-            if (isTerminal)
-            {
-                cout << " (terminal)" << endl;
-                return;
-            }
-            cout << endl;
-            for (const auto& transition : s->transitions)
-            {
-                const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
-                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                cout << indent + " " << "transition: " << &transition << " " << substringStartIndex << "," << substringEndIndex << (substringEndIndex == m_currentString.size() - 1 ? " (open) " : "") << " " << m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1) << " next state: " << findStateIndex(transition.nextState) << endl;
-                dumpGraphAux(transition.nextState, indent + "  ");
-            }
-        }
-        void dumpExplicitStringsAux(State* s, const string& currentString, vector<string>& destStrings)
-        {
-            if (s->transitions.empty())
-            {
-                destStrings.push_back(currentString);
-                return;
-            }
-            for (const auto& transition : s->transitions)
-            {
-                const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
-                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                const auto newCurrentString = currentString + m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1);
-                dumpExplicitStringsAux(transition.nextState, newCurrentString, destStrings);
-            }
-        }
-
-        void finaliseAux(State* state, Transition* transitionFromParent)
-        {
-            if (!state->suffixLink)
-            {
-                assert(state->transitions.empty());
-                // Change the Substring end.
-                assert(transitionFromParent->substringFollowed.endIndex == openTransitionEnd);
-                transitionFromParent->substringFollowed.endIndex = m_currentString.size(); // 1-relative.
-            }
-            else
-            {
-                for (auto& transition : state->transitions)
-                {
-                    finaliseAux(transition.nextState, &transition);
-                }
-            }
-        }
-
-        void truncateStringsContainingMarkerAux(State* state, const vector<int>& orderedMarkerPositions)
-        {
-            bool transitionRemoved = false;
-            do
-            {
-                transitionRemoved = false;
-                for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
-                {
-                    Transition& transition = *transitionIter;
-                    const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
-                    const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                    const auto candidateMarkerPosIter = lower_bound(orderedMarkerPositions.begin(), orderedMarkerPositions.end(), substringStartIndex);
-                    if (candidateMarkerPosIter != orderedMarkerPositions.end())
-                    {
-                        const auto candidateMarkerPos = *candidateMarkerPosIter;
-                        if (candidateMarkerPos > substringEndIndex)
-                            continue;
-                        if (candidateMarkerPos == substringStartIndex)
-                        {
-                            state->transitions.erase(transitionIter);
-                            transitionRemoved = true;
-                            break;
-                        }
-                        else
-                        {
-                            transition.substringFollowed.endIndex = candidateMarkerPos;
-                        }
-                    }
-                }
-            } while (transitionRemoved);
-            for (auto& transition : state->transitions)
-            {
-                truncateStringsContainingMarkerAux(transition.nextState, orderedMarkerPositions);
-            }
-        }
-
-        long findStateIndex(State* s)
-        {
-            auto statePos = find_if(m_states.begin(), m_states.end(), [s](const unique_ptr<State>& state) { return state.get() == s; });
-            assert(statePos != m_states.end());
-            assert(s->index == statePos - m_states.begin());
-            return statePos - m_states.begin();
-        }
 };
+
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s, const vector<bool>& isStateWIthIdFinal, long& result, int depth)
+void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s, long& result, int depth)
 {
     // This would be a relatively straightforward recursive algorithm, but annoyingly, in some testcases, we need 10s of thousands of levels 
     // of recursion, leading to stack overflow :(
@@ -780,7 +643,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
         const auto haveFollowedPrefixOfS = (currentState.lengthOfPrefixOfSFollowed == currentState.numLettersFollowed);
         if (currentState.cursor.isOnExplicitState())
         {
-            const auto isFinalState = isStateWIthIdFinal[currentState.cursor.stateId()];
+            const auto isFinalState = currentState.cursor.isOnFinalState();
             if (currentState.indexIntoNextLetters == -1)
             {
                 currentState.nextLetters = currentState.cursor.nextLetters();
@@ -861,20 +724,10 @@ long computeSumOfCommonPrefixLengths(const string& s)
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
 
-    // Build the table of which states (by stateId) are final states.
-    // This requires all such states to be explicit.
-    suffixTree.makeFinalStatesExplicit();
-    vector<bool> isStateWIthIdFinal(suffixTree.numStates(), false);
-    auto finalStateCursor = suffixTree.rootCursor();
-    finalStateCursor.followLetters(s);
-    while (finalStateCursor != suffixTree.rootCursor())
-    {
-        isStateWIthIdFinal[finalStateCursor.stateId()] = true;
-        finalStateCursor.followSuffixLink();
-    }
+    suffixTree.makeFinalStatesExplicitAndMarkThemAsFinal();
 
     long result = 0;
-    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, isStateWIthIdFinal, result, 0);
+    computeSumOfCommonPrefixLengthAux(suffixTree.rootCursor(), s, result, 0);
     return result;
 }
 
