@@ -79,6 +79,7 @@ class SuffixTreeBuilder
     public:
         SuffixTreeBuilder()
         {
+            m_states.reserve(1'000'000);
             // Perform the initial steps (i.e. those occurring before the "while" loop)
             // from Algorithm 2.
             m_root = createNewState();
@@ -246,11 +247,28 @@ class SuffixTreeBuilder
                     }
                     return numNextLetters;
                 }
-                bool canFollowLetter(char letter)
-                {   
-                    const vector<char>& nextLetters = this->nextLetters();
-                    return find(nextLetters.begin(), nextLetters.end(), letter) != nextLetters.end();
-                } 
+                bool canFollowLetter(char letter) const
+                {
+                    if (isOnExplicitState())
+                    {
+                        auto nextLetterIterator = getNextLetterIterator();
+                        while (nextLetterIterator.hasNext())
+                        {
+                            if (nextLetterIterator.nextLetter() == letter)
+                                return true;
+                            nextLetterIterator++;
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        char nextLetter;
+                        nextLetters(&nextLetter);
+                        return nextLetter == letter;
+
+                    }
+                }
+
 
                 void followLetter(char letter)
                 {
@@ -351,6 +369,10 @@ class SuffixTreeBuilder
                 class NextLetterIterator
                 {
                     public:
+                        NextLetterIterator()
+                            : cursor{nullptr}
+                        {
+                        }
                         bool hasNext()
                         {
                             return transitionIterator != endtransitionIterator;
@@ -363,8 +385,12 @@ class SuffixTreeBuilder
                         {
                             Cursor afterCursor(*cursor);
                             afterCursor.enterTransitionAndSkipLetter(*transitionIterator);
-                            transitionIterator++;
                             return afterCursor;
+                        }
+                        NextLetterIterator operator++(int)
+                        {
+                            transitionIterator++;
+                            return *this;
                         }
                     private:
                         NextLetterIterator(vector<Transition>& transitions, const Cursor* cursor)
@@ -487,7 +513,7 @@ class SuffixTreeBuilder
 
         string m_currentString;
 
-        deque<State> m_states;
+        vector<State> m_states;
         State *m_root = nullptr;
         State *m_auxiliaryState = nullptr;
 
@@ -625,7 +651,7 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
         Cursor cursor;
         long numLettersFollowed = -1;
         long lengthOfPrefixOfSFollowed = -1;
-        vector<char> nextLetters;
+        Cursor::NextLetterIterator nextLetterIterator;
         int indexIntoNextLetters = -1;
         bool haveRecursed = false;
     };
@@ -646,7 +672,8 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
             const auto isFinalState = currentState.cursor.isOnFinalState();
             if (currentState.indexIntoNextLetters == -1)
             {
-                currentState.nextLetters = currentState.cursor.nextLetters();
+                //currentState.nextLetters = currentState.cursor.nextLetters();
+                currentState.nextLetterIterator = currentState.cursor.getNextLetterIterator();
                 currentState.indexIntoNextLetters = 0;
                 if (isFinalState)
                 {
@@ -655,25 +682,26 @@ void computeSumOfCommonPrefixLengthAux(const Cursor rootCursor, const string& s,
                     result += currentState.lengthOfPrefixOfSFollowed;
                 }
             }
-            if (currentState.indexIntoNextLetters == currentState.nextLetters.size())
+            if (!currentState.nextLetterIterator.hasNext())
             {
                 // Done exploring this state.
                 states.pop();
                 continue;
             }
-            const auto nextLetter = currentState.nextLetters[currentState.indexIntoNextLetters];
+            const auto nextLetter = currentState.nextLetterIterator.nextLetter();
             const auto doesLetterContinueS = haveFollowedPrefixOfS && 
                                           (s[currentState.numLettersFollowed] == nextLetter);
             const auto newLengthOfPrefixOfSFollowed = (doesLetterContinueS ? currentState.lengthOfPrefixOfSFollowed + 1 : currentState.lengthOfPrefixOfSFollowed);
-            auto cursorAfterLetter = currentState.cursor;
-            cursorAfterLetter.followLetter(nextLetter);
+            const auto cursorAfterLetter = currentState.nextLetterIterator.afterFollowingNextLetter();
+            //cursorAfterLetter.followLetter(nextLetter);
             State newState;
             newState.cursor = cursorAfterLetter;
             newState.numLettersFollowed = currentState.numLettersFollowed + 1;
             newState.lengthOfPrefixOfSFollowed = newLengthOfPrefixOfSFollowed;
             states.push(newState);
 
-            currentState.indexIntoNextLetters++;
+            currentState.nextLetterIterator++;
+            //currentState.indexIntoNextLetters++;
             continue;
         }
         else
