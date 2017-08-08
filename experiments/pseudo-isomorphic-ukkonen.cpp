@@ -699,7 +699,7 @@ class SuffixTreeBuilder
             if (k <= p)
             {
                 cout << " not character after state" << endl;
-                const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
+                const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString[k - 1]).back();
                 cout << "m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " s wordlength: " << s->data.wordLength << " string: " << m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) << " canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength)) <<  " current suffix canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
                 //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
                 cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
@@ -735,10 +735,10 @@ class SuffixTreeBuilder
             else
             {
                 cout << " not character after state" << endl;
-                const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
-                cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
+                //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString[k - 1]).back();
+                //cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
 #ifdef PSEUDO_ISOMORPHIC
-                const auto tTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1, false);
+                const auto tTransitionIter = findTransitionIter(s, letterIndex, false);
 #else
                 const auto tTransitionIter = findTransitionIter(s, letterIndex, false);
 #endif
@@ -755,7 +755,7 @@ class SuffixTreeBuilder
                 return {s, k};
             else
             {
-                const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
+                const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed) + m_currentString[k - 1])[s->data.wordLength];
 #ifdef PSEUDO_ISOMORPHIC
                 auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
 #else
@@ -770,7 +770,7 @@ class SuffixTreeBuilder
                     s = sPrime;
                     if (k <= p)
                     {
-                        const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
+                        const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed) + m_currentString[k - 1])[s->data.wordLength];
 #ifdef PSEUDO_ISOMORPHIC
                         auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
 #else
@@ -794,12 +794,14 @@ class SuffixTreeBuilder
         }
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
         {
+            cout << " findTransitionIter letterIndex: " << letterIndex << endl;
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
             {
 #ifdef PSEUDO_ISOMORPHIC
                 if (transitionIter->substringFollowed.startIndex >= 0)
                 {
                     string blah = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, state->data.wordLength) + m_currentString[transitionIter->substringFollowed.startIndex - 1]);
+                    cout << "  transition letter canonical :" << blah.back() << endl;
                     if (blah.back() - 'a' + 1 == letterIndex)
                     {
                         return transitionIter;
