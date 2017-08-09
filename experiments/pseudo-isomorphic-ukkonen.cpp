@@ -605,21 +605,33 @@ class SuffixTreeBuilder
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
-            cout << "update: " << i << endl;
+            cout << "update: " << " k: " << k << " i: " << i << endl;
             State* oldr = m_root;
 #ifdef PSEUDO_ISOMORPHIC
             //const int letterIndex = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, i - 1 - m_numSuffixLinksTraversed)).back() + 1;
             cout << "suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << " canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
-            const int letterIndex = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+            //const int letterIndex = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+            //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+            Cursor blah(s, m_currentString, m_root);
+            auto flopple = blah.stringFollowed() + '|' + m_currentString.substr(k - 1, i - k + 0) + '|' + m_currentString[i - 1]; 
+            cout << " flopple: " << flopple << endl;
+            flopple.erase(remove(flopple.begin(), flopple.end(), '|'), flopple.end());
+            cout << " flopple canonical: " << canonicaliseString(flopple) << endl;
+            //const int letterIndex = canonicaliseString(flopple).back()  - 'a' + 1;
+            const int letterIndex = canonicaliseString(canonicaliseString(blah.stringFollowed() + m_currentString.substr(k - 1, i - k)) + m_currentString[i - 1]).back() - 'a' + 1;
+            cout << "letterIndex: " << letterIndex << endl;
+            //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+            //const int letterIndex2 = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(blah.stringFollowed() + m_currentString[i - 1]).back() - 'a' + 1;
+            //assert(letterIndex == letterIndex2);
 #else
             const int letterIndex = t(i);
 #endif
             const auto testAndSplitResult = testAndSplit(s, k, i - 1, letterIndex);
             //int suffixBeginPos = i - (s->data.wordLength + k);
-            auto blah = [i](State* s, int k)
-            {
-                return i - (s->data.wordLength + (k - 1));
-            };
+            //auto blah = [i](State* s, int k)
+            //{
+                //return i - (s->data.wordLength + (k - 1));
+            //};
             //cout << "s: " << s << endl;
             //int suffixBeginPos = blah(s, k);
             //cout << "s->data.wordLength: " << s->data.wordLength << " k: " << k << " suffixBeginPos: " << suffixBeginPos << endl;
@@ -630,6 +642,10 @@ class SuffixTreeBuilder
             {
                 auto rPrime = createNewState(r);
                 rPrime->data.wordLength = -1;
+                {
+                    Cursor rblah(r, m_currentString, m_root);
+                    cout << " r: " << rblah.stringFollowed() << " canonicalised: " << canonicaliseString(rblah.stringFollowed()) << endl;
+                }
                 r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), m_currentString));
                 verifyStateTransitions(r);
                 if (oldr != m_root)
@@ -670,6 +686,7 @@ class SuffixTreeBuilder
                 const auto canonizeResult = canonize(s->suffixLink, k, i - 1);
                 s = canonizeResult.first;
                 k = canonizeResult.second;
+                cout << " traversed suffix link" << endl;
                 //cout << " s: " << s << endl;
                 //cout << " s->data.wordLength: " << s->data.wordLength << " k: " << k << " suffixBeginPos: " << suffixBeginPos << " i: " << i << " isroot: " << (s == m_root) << " is aux: " << (s == m_auxiliaryState) << endl;
                 //cout << " blah: " << blah(s, k) << endl;
@@ -686,7 +703,13 @@ class SuffixTreeBuilder
                     cout << "Empty suffix!" << endl;
                 }
                 //assert(!m_currentString.substr(m_numSuffixLinksTraversed).empty());
-                const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+                Cursor blah(s, m_currentString, m_root);
+                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 :canonicaliseString(blah.stringFollowed() + m_currentString.substr(k - 1, i - k + 0) + m_currentString[i - 1]).back() - 'a' + 1;
+                const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(canonicaliseString(blah.stringFollowed() + m_currentString.substr(k - 1, i - k)) + m_currentString[i - 1]).back() - 'a' + 1;
+                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
+                //const int letterIndex2 = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(blah.stringFollowed() + m_currentString[i - 1]).back() - 'a' + 1;
+                //assert(letterIndex == letterIndex2);
 #else
                 const int letterIndex = t(i);
 #endif
@@ -714,7 +737,8 @@ class SuffixTreeBuilder
             if (k <= p)
             {
                 cout << " not character after state" << endl;
-                const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString[k - 1]).back();
+                //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString[k - 1]).back();
+                const char letterToFollowFromState = canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength)) + m_currentString[k - 1]).back();
                 cout << "m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " s wordlength: " << s->data.wordLength << " string: " << m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) << " canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength)) <<  " current suffix canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
                 //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
                 cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
@@ -736,10 +760,10 @@ class SuffixTreeBuilder
                 cout << " blooPrime2: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) +  m_currentString.substr(kPrime - 1, pPrime - kPrime + 1)) << endl;
                 cout << "flarp: " << (canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString.substr(kPrime - 1, pPrime - kPrime + 1)).back() - 'a' + 1) << endl;
                 cout << "p - k: " << (p - k) << " m_currentString.substr(kPrime - 1): " <<  m_currentString.substr(kPrime - 1) << " length: " <<  m_currentString.substr(kPrime - 1).length() << endl;
-                cout << " flarpPrime: " << (canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString.substr(kPrime - 1, p - k))) << endl;
+                cout << " flarpPrime: " << (canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString.substr(kPrime - 1, p - k + 2))) << endl;
                 
 #ifdef PSEUDO_ISOMORPHIC
-                if (letterIndex == canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString.substr(kPrime - 1, p - k  + 1)).back() - 'a' + 1) // TODO - this probably isn't right.
+                if (letterIndex ==  canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength)) + m_currentString.substr(kPrime - 1, p - k + 2)).back() - 'a' + 1) // TODO - this probably isn't right.
                 {
                     cout << " is end point!" << endl;
                     return {true, s};
@@ -750,6 +774,7 @@ class SuffixTreeBuilder
 #endif
                 else
                 {
+                    cout << "Splitting" << endl;
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
                     r->data.wordLength = s->data.wordLength + p - k + 1;
@@ -758,6 +783,8 @@ class SuffixTreeBuilder
                     r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
                     verifyStateTransitions(r);
                     sPrime->parent = r;
+                    Cursor blah(r, m_currentString, m_root);
+                    cout << " New state: " << blah.stringFollowed() << " canonicalised: " << canonicaliseString(blah.stringFollowed()) << endl;
                     cout << " is not end point!" << endl;
                     return {false, r};
                 }
@@ -856,6 +883,7 @@ class SuffixTreeBuilder
         }
         void verifyStateTransitions(State* state)
         {
+            cout << "verifyStateTransitions" << endl;
             Cursor blah(state, m_currentString, m_root);
             set<char> canonicalNextChars;
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
@@ -864,6 +892,7 @@ class SuffixTreeBuilder
                 {
                     string blah2 = canonicaliseString(blah.stringFollowed() + m_currentString[transitionIter->substringFollowed.startIndex - 1]);
                     const char canonicalNextChar = blah2.back();
+                    cout << " canonicalNextChar: " << canonicalNextChar << " string followed: " << blah.stringFollowed() << "  canonical string followed: " << blah.stringFollowed() << " actual char: " << m_currentString[transitionIter->substringFollowed.startIndex - 1] << endl;
                     assert(canonicalNextChars.find(canonicalNextChar) == canonicalNextChars.end());
                     canonicalNextChars.insert(canonicalNextChar);
                 }
@@ -982,6 +1011,7 @@ void verify(Cursor cursor, int wordLength)
 
 void doStuff(const string& s)
 {
+    cout << "doStuff: " << s << endl;
     SuffixTreeBuilder treeBuilder;
     treeBuilder.appendString(s);
 
@@ -1028,6 +1058,7 @@ int main()
     {
         string s;
         cin >> s;
+
 
         doStuff(s);
 
