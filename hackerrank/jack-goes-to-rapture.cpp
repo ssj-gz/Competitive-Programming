@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2017-08-12 11:13
 #include <iostream>
 #include <vector>
-#include <set>
+#include <queue>
 #include <cassert>
 
 using namespace std;
@@ -64,27 +64,27 @@ int main() {
     auto edgeCompare = [](const Edge* lhs, const Edge* rhs)
     {
         if (lhs->fare != rhs->fare)
-            return lhs->fare < rhs->fare;
+            return lhs->fare > rhs->fare;
 
         // Allow us to store multiple edges with the same
         // fare.
-        return lhs < rhs;
+        return lhs > rhs;
     };
 
-    set<Edge*, decltype(edgeCompare)> unprocessedEdges(edgeCompare);
+    priority_queue<Edge*, vector<Edge*>, decltype(edgeCompare)> unaddedLinks(edgeCompare);
 
     vector<vector<Station*>> stationsInComponent;
 
     for (auto& edge : allEdges)
     {
-        unprocessedEdges.insert(&edge);
+        unaddedLinks.push(&edge);
     }
 
     int smallestFare = -1;
-    while (!unprocessedEdges.empty())
+    while (!unaddedLinks.empty())
     {
-        const Edge* edge = *unprocessedEdges.begin();
-        unprocessedEdges.erase(unprocessedEdges.begin());
+        const Edge* edge = unaddedLinks.top();
+        unaddedLinks.pop();
 
         Station *stationA = edge->stationA;
         Station *stationB = edge->stationB;
@@ -99,7 +99,7 @@ int main() {
         }
         if (stationA->componentNum == stationB->componentNum)
         {
-            // Don't create a cycle.
+            // This link doesn't do anything; ignore.
             continue;
         }
         // Have two stations, at least one of which is in a component, and they are
