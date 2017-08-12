@@ -1,10 +1,11 @@
-// Simon St James (ssjgz) - 2017-08-12
+// Simon St James (ssjgz) - 2017-08-12 11:13
 #include <iostream>
 #include <vector>
 #include <set>
 #include <cassert>
 
 using namespace std;
+
 struct Station;
 struct Edge
 {
@@ -25,6 +26,19 @@ struct Station
 };
 
 int main() {
+    // A nice, easy 80 points :)
+    // Firstly: the rather cryptic description of fares boils down to "the fare of a path P from station A to station B
+    // is equal to the largest fare between consecutive stations in P" - this is almost easily spottable
+    // from the example they give, and also is very easily proven by induction on the length of P (proof omitted).
+    // Now: imagine we add links between stations in order of the (direct) cost between them: if firstStation and lastStation
+    // end up in the same component when we add in link X, then that means that there is a path P from firstStation to lastStation
+    // where all cost are at most equal to the cost of link X i.e. there is a path P from firstStation to lastStation whose
+    // total fare is the cost of link X.
+    // But adding in links successively in order of cost and tracking which nodes belong to the same component is almost precisely
+    // Kruskal's algorithm - we just need to modify it to stop when firstStation and lastStation are in the same component!
+    // So I pretty much just copied my solution from "Kruskal's Really Special Subtree" XD
+    // If firstStation and lastStation never end up in the same component after adding all links, then there cannot be a path between
+    // them.
     int N, E;
     cin >> N >> E;
     vector<Station> allStation(N, Station{});
@@ -45,6 +59,7 @@ int main() {
     Station* firstStation = &(allStation.front());
     Station* lastStation = &(allStation.back());
 
+    // Start preparing for Kruskal.
     auto edgeCompare = [](const Edge* lhs, const Edge* rhs)
     {
         if (lhs->fare != rhs->fare)
@@ -57,7 +72,7 @@ int main() {
 
     set<Edge*, decltype(edgeCompare)> unprocessedEdges(edgeCompare);
 
-    vector<vector<Station*>> nodesInComponent;
+    vector<vector<Station*>> stationsInComponent;
 
     for (auto& edge : allEdges)
     {
@@ -75,10 +90,10 @@ int main() {
 
         if (stationA->componentNum == -1 && stationB->componentNum == -1)
         {
-            // Join nodes, and create brand-new component.
-            nodesInComponent.push_back({stationA, stationB});
-            stationA->componentNum = nodesInComponent.size() - 1;
-            stationB->componentNum = nodesInComponent.size() - 1;
+            // Join stations, and create brand-new component.
+            stationsInComponent.push_back({stationA, stationB});
+            stationA->componentNum = stationsInComponent.size() - 1;
+            stationB->componentNum = stationsInComponent.size() - 1;
             continue;
         }
         if (stationA->componentNum == stationB->componentNum)
@@ -86,42 +101,43 @@ int main() {
             // Don't create a cycle.
             continue;
         }
-        // Have two nodes, at least one of which is in a component, and they are
+        // Have two stations, at least one of which is in a component, and they are
         // not in the same component.
         int absorbingComponent = -1;
         int absorbedComponent = -1;
-        Station *absorbedNode = nullptr;
-        // If either Station has no component, then it is absorbed into the other nodes' component; otherwise, the larger
+        Station *absorbedStation = nullptr;
+        // If either Station has no component, then it is absorbed into the other stations' component; otherwise, the larger
         // component absorbs the smaller.
-        if (stationA->componentNum == -1 || (stationB->componentNum != -1 && nodesInComponent[stationA->componentNum].size() < nodesInComponent[stationB->componentNum].size() ))
+        if (stationA->componentNum == -1 || (stationB->componentNum != -1 && stationsInComponent[stationA->componentNum].size() < stationsInComponent[stationB->componentNum].size() ))
         {
             absorbingComponent = stationB->componentNum;
             absorbedComponent = stationA->componentNum;
-            absorbedNode = stationA;
+            absorbedStation = stationA;
         }
         else
         {
             absorbingComponent = stationA->componentNum;
             absorbedComponent = stationB->componentNum;
-            absorbedNode = stationB;
+            absorbedStation = stationB;
         }
         assert(absorbingComponent != -1);
         if (absorbedComponent != -1)
         {
-            for (auto nodeToAbsorb : nodesInComponent[absorbedComponent])
+            for (auto stationToAbsorb : stationsInComponent[absorbedComponent])
             {
-                nodeToAbsorb->componentNum = absorbingComponent;
-                nodesInComponent[absorbingComponent].push_back(nodeToAbsorb);
+                stationToAbsorb->componentNum = absorbingComponent;
+                stationsInComponent[absorbingComponent].push_back(stationToAbsorb);
             }
         }
         else
         {
-            absorbedNode->componentNum = absorbingComponent;
-            nodesInComponent[absorbingComponent].push_back(absorbedNode);
+            absorbedStation->componentNum = absorbingComponent;
+            stationsInComponent[absorbingComponent].push_back(absorbedStation);
         }
 
         if ((firstStation->componentNum != -1 && lastStation->componentNum != -1) && firstStation->componentNum == lastStation->componentNum)
         {
+            // We've found the cheapest path between firstStation and lastStation - stop here!
             smallestFare = edge->fare;
             break;
         }
@@ -132,9 +148,6 @@ int main() {
     else
         cout << "NO PATH EXISTS" << endl;
 
-
     return 0;
 }
-
-
 
