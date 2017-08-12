@@ -39,6 +39,7 @@ int main() {
     // So I pretty much just copied my solution from "Kruskal's Really Special Subtree" XD
     // If firstStation and lastStation never end up in the same component after adding all links, then there cannot be a path between
     // them.
+    ios::sync_with_stdio(false);
     int N, E;
     cin >> N >> E;
     vector<Station> allStation(N, Station{});
