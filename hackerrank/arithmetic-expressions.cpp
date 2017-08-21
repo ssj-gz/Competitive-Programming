@@ -58,14 +58,14 @@ int main()
     // Backtrack through the operations needed to form the desired "current value" (mod m) - 0, in this case,
     // as we want the value to be divisible by m.
     int currentValue = 0;
-    string expression;
+    vector<char> operationsReversed;
+    operationsReversed.reserve(N - 1);
     for (int numberIndex = N - 1; numberIndex >= 0; numberIndex--)
     {
         const int number = numbers[numberIndex];
-        expression = to_string(number) + expression;
         assert(operatorCharToReachValue[numberIndex][currentValue] != invalidOp && "There's supposed to always be a solution!");
         if (numberIndex != 0) // Don't print the initial, "dummy" op.
-            expression = operatorCharToReachValue[numberIndex][currentValue] + expression;
+            operationsReversed.push_back(operatorCharToReachValue[numberIndex][currentValue]);
         switch (operatorCharToReachValue[numberIndex][currentValue])
         {
             case '+':
@@ -88,5 +88,11 @@ int main()
         }
         currentValue %= m;
     }
-    cout << expression << endl;
+    // Print out the solution.
+    for (int numberIndex = 0; numberIndex < N; numberIndex++)
+    {
+        cout << numbers[numberIndex];
+        if (numberIndex != N - 1)
+            cout << operationsReversed[N - 2 - numberIndex];
+    }
 }
