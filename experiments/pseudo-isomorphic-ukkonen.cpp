@@ -18,7 +18,29 @@ struct StateData
     int wordLength = 0;
 };
 
-string canonicaliseString(const string& s)
+class LetterPermutation
+{
+    public:
+        LetterPermutation() = default;
+        void setPermutedLetter(const char originalLetter, const char permutedLetter)
+        {
+            assert(m_permutedLetter[originalLetter - 'a'] == '\0');
+            m_permutedLetter[originalLetter - 'a'] = permutedLetter;
+        }
+        bool hasPermutedLetter(const char originalLetter)
+        {
+            return m_permutedLetter[originalLetter - 'a'] != '\0';
+        }
+        char permutedLetter(const char originalLetter)
+        {
+            assert(hasPermutedLetter(originalLetter));
+            return m_permutedLetter[originalLetter - 'a'];
+        }
+    private:
+        char m_permutedLetter[alphabetSize] = {};
+};
+
+string canonicaliseString(const string& s, LetterPermutation* destPermutation = nullptr)
 {
     const int numLetters = 26;
     char letterPermutation[numLetters] = {};
@@ -32,6 +54,10 @@ string canonicaliseString(const string& s)
         if (letterPermutation[letterIndex] == '\0')
         {
             letterPermutation[letterIndex] = 'a' + numLettersUsed;
+            if (destPermutation)
+            {
+                destPermutation->setPermutedLetter(letter, letterPermutation[letterIndex]);
+            }
             numLettersUsed++;
         }
         canonicalised += letterPermutation[letterIndex];
@@ -131,6 +157,15 @@ class SuffixTreeBuilder
             {
                 appendLetter(letter);
             }
+        }
+        void computeSuffixNormalisationPermutations(const string& s)
+        {
+            m_normalisedSuffixPermutations.resize(s.size());
+            for (int i = 0; i <= s.size(); i++)
+            {
+               canonicaliseString(s.substr(i), &(m_normalisedSuffixPermutations[i]));
+            }
+
         }
         int numStates() const
         {
@@ -603,6 +638,8 @@ class SuffixTreeBuilder
         int m_k;
         int m_numSuffixLinksTraversed = 0;
 
+        vector<LetterPermutation> m_normalisedSuffixPermutations;
+
         std::pair<State*, int> update(State* s, int k, int i)
         {
             cout << "update: " << " k: " << k << " i: " << i << endl;
@@ -1023,6 +1060,7 @@ void doStuff(const string& s)
 {
     cout << "doStuff: " << s << endl;
     SuffixTreeBuilder treeBuilder;
+    treeBuilder.computeSuffixNormalisationPermutations(s);
     treeBuilder.appendString(s);
 
     verify(treeBuilder.rootCursor(), 0);
