@@ -22,10 +22,11 @@ class LetterPermutation
 {
     public:
         LetterPermutation() = default;
-        void setPermutedLetter(const char originalLetter, const char permutedLetter)
+        void permuteUnpermutedLetter(const char originalLetter)
         {
-            assert(m_permutedLetter[originalLetter - 'a'] == '\0');
-            m_permutedLetter[originalLetter - 'a'] = permutedLetter;
+            assert(!hasPermutedLetter(originalLetter));
+            m_permutedLetter[originalLetter - 'a'] = 'a' + m_numLettersPermuted;
+            m_numLettersPermuted++;
         }
         bool hasPermutedLetter(const char originalLetter)
         {
@@ -38,29 +39,25 @@ class LetterPermutation
         }
     private:
         char m_permutedLetter[alphabetSize] = {};
+        int m_numLettersPermuted = 0;
 };
 
-string canonicaliseString(const string& s, LetterPermutation* destPermutation = nullptr)
+string canonicaliseString(const string& s, LetterPermutation* letterPermutation = nullptr)
 {
-    const int numLetters = 26;
-    char letterPermutation[numLetters] = {};
+    LetterPermutation letterPermutationLocal;
+    LetterPermutation* letterPermutationToUse = letterPermutation;
+    if (!letterPermutationToUse)
+        letterPermutationToUse = &letterPermutationLocal;
 
-    int numLettersUsed = 0;
     string canonicalised;
 
     for (const auto letter : s)
     {
-        const int letterIndex = letter - 'a';
-        if (letterPermutation[letterIndex] == '\0')
+        if (!letterPermutationToUse->hasPermutedLetter(letter))
         {
-            letterPermutation[letterIndex] = 'a' + numLettersUsed;
-            if (destPermutation)
-            {
-                destPermutation->setPermutedLetter(letter, letterPermutation[letterIndex]);
-            }
-            numLettersUsed++;
+            letterPermutationToUse->permuteUnpermutedLetter(letter); 
         }
-        canonicalised += letterPermutation[letterIndex];
+        canonicalised += letterPermutationToUse->permutedLetter(letter);
     }
     return canonicalised;
 }
@@ -111,6 +108,7 @@ class SuffixTreeBuilder
             State *nextState = nullptr;
             Substring substringFollowed;
             char firstLetter;
+            LetterPermutation* letterPermutation = nullptr;
         };
         struct State
         {
