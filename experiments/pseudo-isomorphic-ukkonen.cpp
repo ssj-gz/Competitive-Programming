@@ -554,6 +554,27 @@ class SuffixTreeBuilder
                     }
                     return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
                 }
+                string canonicalisedStringFollowed() const
+                {
+                    Cursor copy(*this);
+                    string stringFollowed;
+                    while (!(copy.m_state == m_root && copy.isOnExplicitState()))
+                    {
+                        if (copy.isOnExplicitState())
+                        {
+                            auto transitionFromParent = findTransitionFromParent();
+                            stringFollowed = canonicaliseString(m_string->substr(transitionFromParent->substringFollowed.startIndex - 1, transitionFromParent->substringFollowed.length(m_string->size())),  transitionFromParent->letterPermutation) + stringFollowed;
+                            copy.m_state = copy.m_state->parent;
+                        }
+                        else
+                        {
+                            assert(m_transition->substringFollowed.startIndex >= 0);
+                            stringFollowed = canonicaliseString(m_string->substr(m_transition->substringFollowed.startIndex - 1 + m_posInTransition, m_transition->substringFollowed.length(m_string->size())),  m_transition->letterPermutation) + stringFollowed;
+                            copy.movedToExplicitState();
+                        }
+                    }
+                    return stringFollowed;
+                }
 
             private:
                 Cursor(State* state, const string& str, State* root)
@@ -586,9 +607,13 @@ class SuffixTreeBuilder
 
                 Transition* findTransitionFromParent(State* state = nullptr)
                 {
+                    return const_cast<Transition*>(const_cast<const Cursor*>(this)->findTransitionFromParent(state));
+                }
+                const Transition* findTransitionFromParent(State* state = nullptr) const
+                {
                     if (!state)
                         state = m_state;
-                    Transition* transitionFromParent = nullptr;
+                    const Transition* transitionFromParent = nullptr;
                     for (Transition& transition : state->parent->transitions)
                     {
                         if (transition.nextState == state)
