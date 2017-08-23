@@ -42,7 +42,7 @@ class LetterPermutation
         int m_numLettersPermuted = 0;
 };
 
-string canonicaliseString(const string& s, LetterPermutation* letterPermutation = nullptr)
+string canonicaliseString(const string& s, LetterPermutation* letterPermutation = nullptr, bool assertNoUnknown = false)
 {
     LetterPermutation letterPermutationLocal;
     LetterPermutation* letterPermutationToUse = letterPermutation;
@@ -55,6 +55,11 @@ string canonicaliseString(const string& s, LetterPermutation* letterPermutation 
     {
         if (!letterPermutationToUse->hasPermutedLetter(letter))
         {
+            if (assertNoUnknown)
+            {
+                cout << "Error: letter " << letter << " has no permutation!" << endl;
+                assert(false);
+            }
             letterPermutationToUse->permuteUnpermutedLetter(letter); 
         }
         canonicalised += letterPermutationToUse->permutedLetter(letter);
