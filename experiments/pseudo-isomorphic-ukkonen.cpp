@@ -934,9 +934,7 @@ class SuffixTreeBuilder
             {
                 if (transitionIter->substringFollowed.startIndex >= 0)
                 {
-                    //string blah2 = canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString[transitionIter->substringFollowed.startIndex - 1]);
-                    string blah2 = canonicaliseString(blah.stringFollowed() + m_currentString[transitionIter->substringFollowed.startIndex - 1]);
-                    const char canonicalNextChar = blah2.back();
+                    const char canonicalNextChar = transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]);
                     cout << " canonicalNextChar: " << canonicalNextChar << " string followed: " << blah.stringFollowed() << "  canonical string followed: " << canonicaliseString(blah.stringFollowed()) << " actual char: " << m_currentString[transitionIter->substringFollowed.startIndex - 1] << " (" << transitionIter->substringFollowed.startIndex << ")" << endl;
                     assert(canonicalNextChars.find(canonicalNextChar) == canonicalNextChars.end());
                     canonicalNextChars.insert(canonicalNextChar);
@@ -947,15 +945,13 @@ class SuffixTreeBuilder
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
         {
             cout << " findTransitionIter letterIndex: " << letterIndex << endl;
-            Cursor blah(state, m_currentString, m_root);
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
             {
 #ifdef PSEUDO_ISOMORPHIC
                 if (transitionIter->substringFollowed.startIndex >= 0)
                 {
-                    string blah2 = canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString[transitionIter->substringFollowed.startIndex - 1]);
-                    cout << "  transition letter canonical :" << blah2.back() << endl;
-                    if (blah2.back() - 'a' + 1 == letterIndex)
+                    assert(transitionIter->substringFollowed.startIndex != 0);
+                    if (transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]))
                     {
                         return transitionIter;
                     }
