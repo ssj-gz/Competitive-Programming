@@ -59,7 +59,7 @@ class LetterPermutation
 
 string canonicaliseString(const string& s, LetterPermutation* letterPermutation = nullptr, bool assertNoUnknown = false)
 {
-    cout << " canonicaliseString: " << s << " letterPermutation: " << letterPermutation << endl;
+    //cout << " canonicaliseString: " << s << " letterPermutation: " << letterPermutation << endl;
     LetterPermutation letterPermutationLocal;
     LetterPermutation* letterPermutationToUse = letterPermutation;
     if (!letterPermutationToUse)
@@ -149,6 +149,7 @@ class SuffixTreeBuilder
             m_root = createNewState();
             //m_root->data.wordLength = 1;
             m_auxiliaryState = createNewState();
+            cout << " m_auxiliaryState: " << m_auxiliaryState << endl;
 
             for (int i = 0; i < alphabetSize; i++)
             {
@@ -590,8 +591,9 @@ class SuffixTreeBuilder
                 {
                     Cursor copy(*this);
                     string stringFollowed;
-                    while (!(copy.m_state == m_root && copy.isOnExplicitState()))
+                    while (!(!copy.m_state->parent && copy.isOnExplicitState()))
                     {
+                        //cout << " copy state: " << copy.m_state << " root: " << m_root << endl;
                         if (copy.isOnExplicitState())
                         {
                             auto transitionFromParent = findTransitionFromParent();
@@ -705,7 +707,7 @@ class SuffixTreeBuilder
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
-            cout << "update: " << " k: " << k << " i: " << i << endl;
+            cout << "update: " << " k: " << k << " i: " << i << " suffix: " << m_currentString.substr(i - 1) << endl;
             State* oldr = m_root;
 #ifdef PSEUDO_ISOMORPHIC
             //const int letterIndex = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, i - 1 - m_numSuffixLinksTraversed)).back() + 1;
@@ -855,6 +857,9 @@ class SuffixTreeBuilder
         {
             assert(s);
             cout << "testAndSplit: adding letter: " << static_cast<char>(letterIndex - 1 + 'a') << " index: " << letterIndex << endl;
+            Cursor blah(s, m_currentString, m_root);
+            cout << "state canonicalisedStringFollowed: " << blah.canonicalisedStringFollowed() << endl;
+            cout << " s: " << s << " root: " << m_root << endl;
             cout << "k: " << k << " p: " << p << endl;
             if (k <= p)
             {
@@ -1099,7 +1104,7 @@ class SuffixTreeBuilder
             }
             else
             {
-                const string normalisedRemainderOfTransition = canonicaliseString(m_currentString.substr(cursor.remainderOfCurrentTransition().startIndex() - 1, cursor.remainderOfCurrentTransition().length()), cursor.letterPermutation(), true);
+                const string normalisedRemainderOfTransition = canonicaliseString(m_currentString.substr(cursor.remainderOfCurrentTransition().startIndex(), cursor.remainderOfCurrentTransition().length()), cursor.letterPermutation(), true);
                 string normalisedString = s;
                 for (int i = 0; i < normalisedRemainderOfTransition.length() - 1; i++)
                 {
@@ -1169,6 +1174,12 @@ void verify(Cursor cursor, int wordLength)
 void doStuff(const string& s)
 {
     cout << "doStuff: " << s << endl;
+    //cout << "brute force: " << endl;
+    bruteForce(s);
+    //for (const auto& str : bruteForce(s))
+    //{
+        //cout << " " << str << endl;
+    //}
     SuffixTreeBuilder treeBuilder;
     treeBuilder.computeSuffixNormalisationPermutations(s);
     treeBuilder.appendString(s);
