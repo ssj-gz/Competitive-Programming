@@ -1043,7 +1043,7 @@ class SuffixTreeBuilder
                 if (transitionIter->substringFollowed.startIndex >= 0)
                 {
                     assert(transitionIter->substringFollowed.startIndex != 0);
-                    if (transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]))
+                    if (transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]) - 'a' + 1 == letterIndex)
                     {
                         return transitionIter;
                     }
