@@ -34,6 +34,11 @@ class LetterPermutation
         }
         char permutedLetter(const char originalLetter)
         {
+            assert(originalLetter >= 'a' && originalLetter <= 'z');
+            if (!hasPermutedLetter(originalLetter))
+            {
+                cout << "letter " << originalLetter << " has no permutation!" << endl;
+            }
             assert(hasPermutedLetter(originalLetter));
             return m_permutedLetter[originalLetter - 'a'];
         }
@@ -713,6 +718,7 @@ class SuffixTreeBuilder
                     cout << " r: " << rblah.stringFollowed() << " canonicalised: " << canonicaliseString(rblah.stringFollowed()) << endl;
                 }
                 r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), m_currentString));
+                r->transitions.back().letterPermutation = &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]);
                 verifyStateTransitions(r);
                 if (oldr != m_root)
                 {
@@ -837,7 +843,7 @@ class SuffixTreeBuilder
                 
 #ifdef PSEUDO_ISOMORPHIC
                 //if (letterIndex ==  canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString.substr(kPrime - 1, p - k + 2)).back() - 'a' + 1) // TODO - this probably isn't right.
-                if (letterIndex == m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(kPrime + p - k) - 'a' + 1) // TODO - this probably isn't right.
+                if (letterIndex == m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[kPrime + p - k]) - 'a' + 1) // TODO - this probably isn't right.
                 {
                     cout << " is end point!" << endl;
                     return {true, s};
@@ -849,12 +855,15 @@ class SuffixTreeBuilder
                 else
                 {
                     cout << "Splitting" << endl;
+                    LetterPermutation* letterPermutationOnTransition = tkTransitionIter->letterPermutation;
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
                     r->data.wordLength = s->data.wordLength + p - k + 1;
                     s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), m_currentString));
+                    s->transitions.back().letterPermutation = letterPermutationOnTransition;
                     verifyStateTransitions(s);
                     r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
+                    r->transitions.back().letterPermutation = letterPermutationOnTransition;
                     verifyStateTransitions(r);
                     sPrime->parent = r;
                     Cursor blah(r, m_currentString, m_root);
@@ -967,6 +976,7 @@ class SuffixTreeBuilder
             {
                 if (transitionIter->substringFollowed.startIndex >= 0)
                 {
+                    assert(transitionIter->letterPermutation);
                     const char canonicalNextChar = transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]);
                     cout << " canonicalNextChar: " << canonicalNextChar << " string followed: " << blah.stringFollowed() << "  canonical string followed: " << canonicaliseString(blah.stringFollowed()) << " actual char: " << m_currentString[transitionIter->substringFollowed.startIndex - 1] << " (" << transitionIter->substringFollowed.startIndex << ")" << endl;
                     assert(canonicalNextChars.find(canonicalNextChar) == canonicalNextChars.end());
@@ -1099,13 +1109,13 @@ void doStuff(const string& s)
 int main()
 {
     //bruteForce("abcdefgdsfsdfskldhygauslkjglksjvlksjfdvh");
-//#define EXHAUSTIVE
+#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
     while (true)
     {
-        //cout << "s: " << s <<  " size: " << s.size() << endl;
+        cout << "s: " << s <<  " size: " << s.size() << endl;
 
         doStuff(s);
 
