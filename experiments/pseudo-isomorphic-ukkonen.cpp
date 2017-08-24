@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <list>
 #include <set>
 #include <string>
 #include <limits>
@@ -680,10 +679,10 @@ class SuffixTreeBuilder
         {
             dumpGraphAux(m_root, "");
         }
-        list<string> dumpNormalisedStrings()
+        set<string> dumpNormalisedStrings()
         {
             cout << "dumpNormalisedStrings: " << m_currentString << endl;
-            list<string> normalisedStrings;
+            set<string> normalisedStrings;
             dumpNormalisedStringsAux(rootCursor(), "", normalisedStrings);
             return normalisedStrings;
         }
@@ -1089,10 +1088,14 @@ class SuffixTreeBuilder
                 dumpGraphAux(transition.nextState, indent + "  ");
             }
         }
-        void dumpNormalisedStringsAux(Cursor cursor, const string& s, list<string>& normalisedStrings)
+        void dumpNormalisedStringsAux(Cursor cursor, const string& s, set<string>& normalisedStrings)
         {
-            cout << " normalised string (explicit): " << s << endl;
-            normalisedStrings.push_back(s);
+            if (!s.empty())
+            {
+                cout << " normalised string (explicit): " << s << endl;
+                assert(normalisedStrings.find(s) == normalisedStrings.end());
+                normalisedStrings.insert(s);
+            }
             if (cursor.isOnExplicitState())
             {
                 auto nextLetterIterator = cursor.getNextLetterIterator();
@@ -1110,7 +1113,8 @@ class SuffixTreeBuilder
                 {
                     normalisedString += normalisedRemainderOfTransition[i];
                     cout << " normalised string (non-explicit): " << normalisedString << endl;
-                    normalisedStrings.push_back(normalisedString);
+                    assert(normalisedStrings.find(normalisedString) == normalisedStrings.end());
+                    normalisedStrings.insert(normalisedString);
                 }
 
                 Cursor nextExplicitState(cursor);
@@ -1140,7 +1144,7 @@ set<string> bruteForce(const string& s)
         }
     }
     cout << " # distinct canonicalised substrings: " << canonicalisedSubstrings.size() << " # distinct substrings: " << substrings.size() << endl;
-    return substrings;
+    return canonicalisedSubstrings;
 }
 
 
@@ -1175,7 +1179,7 @@ void doStuff(const string& s)
 {
     cout << "doStuff: " << s << endl;
     //cout << "brute force: " << endl;
-    bruteForce(s);
+    set<string> normalisedStringsBruteForce = bruteForce(s);
     //for (const auto& str : bruteForce(s))
     //{
         //cout << " " << str << endl;
@@ -1185,7 +1189,17 @@ void doStuff(const string& s)
     treeBuilder.appendString(s);
 
     verify(treeBuilder.rootCursor(), 0);
-    treeBuilder.dumpNormalisedStrings();
+    set<string> normalisedStringsOptimised = treeBuilder.dumpNormalisedStrings();
+    for (const auto& str : normalisedStringsOptimised)
+    {
+        cout << " looking for " << str << " in brute forced:" << endl;
+        assert(normalisedStringsBruteForce.find(str) != normalisedStringsBruteForce.end());
+    }
+    for (const auto& str : normalisedStringsBruteForce)
+    {
+        cout << " looking for " << str << " in optimised:" << endl;
+        assert(normalisedStringsOptimised.find(str) != normalisedStringsOptimised.end());
+    }
 
     //cout << "s: " << s << " canonicalised: " << canonicaliseString(s) << endl;
 }
