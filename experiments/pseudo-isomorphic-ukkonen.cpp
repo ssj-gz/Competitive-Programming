@@ -1066,24 +1066,24 @@ class SuffixTreeBuilder
             return m_currentString[i - 1] - 'a' + 1;
         }
         void dumpGraphAux(State* s, const string& indent)
-                            {
-                                cout << indent << "state: " << s << " " << s->index << " suffix link: " << (s->suffixLink ? s->suffixLink->index : 0) << " parent: " << (s->parent ? s->parent->index : 0);
-                                const bool isTerminal = (s->transitions.empty());
-                                assert((s->suffixLink == nullptr) == isTerminal);
-                                if (isTerminal)
-                                {
-                                    cout << " (terminal)" << endl;
-                                    return;
-                                }
-                                cout << endl;
-                                for (const auto& transition : s->transitions)
-                                {
-                                    const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
-                                    const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                                    cout << indent + " " << "transition: " << substringStartIndex << "," << substringEndIndex << (substringEndIndex == m_currentString.size() - 1 ? " (open) " : "") << " " << m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1) << " next state: " << transition.nextState->index << endl;
-                                    dumpGraphAux(transition.nextState, indent + "  ");
-                                }
-                            }
+        {
+            cout << indent << "state: " << s << " " << s->index << " suffix link: " << (s->suffixLink ? s->suffixLink->index : 0) << " parent: " << (s->parent ? s->parent->index : 0);
+            const bool isTerminal = (s->transitions.empty());
+            assert((s->suffixLink == nullptr) == isTerminal);
+            if (isTerminal)
+            {
+                cout << " (terminal)" << endl;
+                return;
+            }
+            cout << endl;
+            for (const auto& transition : s->transitions)
+            {
+                const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
+                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
+                cout << indent + " " << "transition: " << substringStartIndex << "," << substringEndIndex << (substringEndIndex == m_currentString.size() - 1 ? " (open) " : "") << " " << m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1) << " next state: " << transition.nextState->index << endl;
+                dumpGraphAux(transition.nextState, indent + "  ");
+            }
+        }
         void dumpNormalisedStringsAux(Cursor cursor, const string& s, list<string>& normalisedStrings)
         {
             cout << " normalised string (explicit): " << s << endl;
