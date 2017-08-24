@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <list>
 #include <set>
 #include <string>
 #include <limits>
@@ -26,7 +27,7 @@ class LetterPermutation
         {
             assert(!hasPermutedLetter(originalLetter));
             m_permutedLetter[originalLetter - 'a'] = 'a' + m_numLettersPermuted;
-            cout << " permutation: " << this << " char " << originalLetter << " permuted to " << permutedLetter(originalLetter) << endl;
+            //cout << " permutation: " << this << " char " << originalLetter << " permuted to " << permutedLetter(originalLetter) << endl;
             m_numLettersPermuted++;
         }
         void permuteUnpermutedLetter(const char originalLetter, char permutedLetter)
@@ -46,7 +47,7 @@ class LetterPermutation
                 cout << "letter " << originalLetter << " has no permutation!" << endl;
             }
             assert(hasPermutedLetter(originalLetter));
-            cout << " permutation: " << this << " permutedLetter: " << originalLetter << " = " << m_permutedLetter[originalLetter - 'a'] << endl;
+            //cout << " permutation: " << this << " permutedLetter: " << originalLetter << " = " << m_permutedLetter[originalLetter - 'a'] << endl;
             assert(m_permutedLetter[originalLetter - 'a'] >= 'a');
             assert(m_permutedLetter[originalLetter - 'a'] <= 'z');
             return m_permutedLetter[originalLetter - 'a'];
@@ -287,6 +288,12 @@ class SuffixTreeBuilder
                     assert(isOnExplicitState());
                     return m_state->isFinal;
                 }
+                LetterPermutation* letterPermutation()
+                {
+                    assert(m_transition);
+                    assert(m_transition->letterPermutation);
+                    return m_transition->letterPermutation;
+                }
                 StateData& stateData()
                 {
                     assert(isOnExplicitState());
@@ -462,7 +469,8 @@ class SuffixTreeBuilder
                         }
                         char nextLetter()
                         {
-                            return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex - 1];
+                            assert(transitionIterator->letterPermutation);
+                            return transitionIterator->letterPermutation->permutedLetter((*(cursor->m_string))[transitionIterator->substringFollowed.startIndex - 1]);
                         }
                         NextLetterIterator operator++(int)
                         {
@@ -670,6 +678,13 @@ class SuffixTreeBuilder
         {
             dumpGraphAux(m_root, "");
         }
+        list<string> dumpNormalisedStrings()
+        {
+            cout << "dumpNormalisedStrings: " << m_currentString << endl;
+            list<string> normalisedStrings;
+            dumpNormalisedStringsAux(rootCursor(), "", normalisedStrings);
+            return normalisedStrings;
+        }
 
     private:
         static const int openTransitionEnd = numeric_limits<int>::max();
@@ -744,6 +759,7 @@ class SuffixTreeBuilder
                 }
                 oldr = r;
 
+#if 0
                 if (r != m_auxiliaryState)
                 {
                     Cursor blah(r, m_currentString, m_root);
@@ -770,6 +786,7 @@ class SuffixTreeBuilder
                         //assert(m_currentString.substr(m_numSuffixLinksTraversed) == blah.stringFollowed());
                     }
                 }
+#endif
                 assert(s->suffixLink);
                 //suffixBeginPos++;
                 m_numSuffixLinksTraversed++;
@@ -849,8 +866,8 @@ class SuffixTreeBuilder
                 //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
                 cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
                 Cursor blah(s, m_currentString, m_root);
-                cout << " to s: " << blah.stringFollowed()  << endl;
-                cout << " canonicalised to s: " << canonicaliseString(blah.stringFollowed()) << endl;
+                //cout << " to s: " << blah.stringFollowed()  << endl;
+                //cout << " canonicalised to s: " << canonicaliseString(blah.stringFollowed()) << endl;
 #ifdef PSEUDO_ISOMORPHIC
                 const auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
 #else
@@ -1067,8 +1084,35 @@ class SuffixTreeBuilder
                                     dumpGraphAux(transition.nextState, indent + "  ");
                                 }
                             }
+        void dumpNormalisedStringsAux(Cursor cursor, const string& s, list<string>& normalisedStrings)
+        {
+            cout << " normalised string (explicit): " << s << endl;
+            normalisedStrings.push_back(s);
+            if (cursor.isOnExplicitState())
+            {
+                auto nextLetterIterator = cursor.getNextLetterIterator();
+                while (nextLetterIterator.hasNext())
+                {
+                    dumpNormalisedStringsAux(nextLetterIterator.afterFollowingNextLetter(), s + nextLetterIterator.nextLetter(), normalisedStrings);
+                    nextLetterIterator++;
+                }
+            }
+            else
+            {
+                const string normalisedRemainderOfTransition = canonicaliseString(m_currentString.substr(cursor.remainderOfCurrentTransition().startIndex() - 1, cursor.remainderOfCurrentTransition().length()), cursor.letterPermutation(), true);
+                string normalisedString = s;
+                for (int i = 0; i < normalisedRemainderOfTransition.length() - 1; i++)
+                {
+                    normalisedString += normalisedRemainderOfTransition[i];
+                    cout << " normalised string (non-explicit): " << normalisedString << endl;
+                    normalisedStrings.push_back(normalisedString);
+                }
 
-
+                Cursor nextExplicitState(cursor);
+                nextExplicitState.followToTransitionEnd();
+                dumpNormalisedStringsAux(nextExplicitState, s + normalisedRemainderOfTransition, normalisedStrings);
+            }
+        }
 };
 
 using Cursor = SuffixTreeBuilder::Cursor;
@@ -1108,10 +1152,7 @@ void verify(Cursor cursor, int wordLength)
         auto nextLetterIterator = cursor.getNextLetterIterator();
         while (nextLetterIterator.hasNext())
         {
-            const auto nextLetter = nextLetterIterator.nextLetter();
-            Cursor nextCursor(cursor);
-            nextCursor.followLetter(nextLetter);
-            verify(nextCursor, wordLength + 1);
+            verify(nextLetterIterator.afterFollowingNextLetter(), wordLength + 1);
 
             nextLetterIterator++;
         }
@@ -1133,6 +1174,7 @@ void doStuff(const string& s)
     treeBuilder.appendString(s);
 
     verify(treeBuilder.rootCursor(), 0);
+    treeBuilder.dumpNormalisedStrings();
 
     //cout << "s: " << s << " canonicalised: " << canonicaliseString(s) << endl;
 }
