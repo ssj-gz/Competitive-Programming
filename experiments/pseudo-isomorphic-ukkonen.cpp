@@ -86,6 +86,11 @@ string canonicaliseString(const string& s, LetterPermutation* letterPermutation 
     return canonicalised;
 }
 
+void assertIsCanonical(const string& s)
+{
+    assert(s == canonicaliseString(s));
+}
+
 /**
  * Simple implementation of Ukkonen's algorithm:
  *  https://en.wikipedia.org/wiki/Ukkonen's_algorithm
@@ -599,7 +604,7 @@ class SuffixTreeBuilder
                 {
                     Cursor copy(*this);
                     string stringFollowed;
-                    cout << "canonicalisedStringFollowed!" << endl;
+                    //cout << "canonicalisedStringFollowed!" << endl;
                     while (!(!copy.m_state->parent && copy.isOnExplicitState()))
                     {
                         //cout << " copy state: " << copy.m_state << " root: " << m_root << endl;
@@ -616,8 +621,9 @@ class SuffixTreeBuilder
                             stringFollowed = canonicaliseString(m_string->substr(m_transition->substringFollowed.startIndex - 1 + m_posInTransition, m_transition->substringFollowed.length(m_string->size() - m_posInTransition)),  m_transition->letterPermutation, true) + stringFollowed;
                             copy.movedToExplicitState();
                         }
-                        cout << " stringFollowed: " << stringFollowed << endl;
+                        //cout << " stringFollowed: " << stringFollowed << endl;
                     }
+                    assertIsCanonical(stringFollowed);
                     return stringFollowed;
                 }
 
@@ -919,9 +925,9 @@ class SuffixTreeBuilder
                             cout << " firstLetterOnTransition: " << firstLetterOnTransition << endl;
                             const auto firstLetterOnTransitionPermuted = transition.letterPermutation->permutedLetter(firstLetterOnTransition);
                             cout << " firstLetterOnTransitionPermuted: " << firstLetterOnTransitionPermuted << endl;
-                            const auto firstLetterOnTransitionCompoundPermuted = suffixPermutation->permutedLetter(firstLetterOnTransitionPermuted);
-                            cout << " firstLetterOnTransitionCompoundPermuted: " << firstLetterOnTransitionCompoundPermuted << endl;
-                            compoundPermutation.permuteUnpermutedLetter(firstLetterOnTransition, firstLetterOnTransitionCompoundPermuted);
+                            //const auto firstLetterOnTransitionCompoundPermuted = suffixPermutation->permutedLetter(firstLetterOnTransitionPermuted);
+                            //cout << " firstLetterOnTransitionCompoundPermuted: " << firstLetterOnTransitionCompoundPermuted << endl;
+                            //compoundPermutation.permuteUnpermutedLetter(firstLetterOnTransition, firstLetterOnTransitionCompoundPermuted);
                             cout << " transition to oldr - startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
                             cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
                             auto suffixLink = oldrParent->suffixLink == m_auxiliaryState ? m_root : oldrParent->suffixLink;
@@ -931,9 +937,11 @@ class SuffixTreeBuilder
 
                             // Need to find the suffix link for testAndSplitResult.second, too :(
                             oldr->suffixLink = testAndSplitResult.second;
-                            foundTransition = true;
-                            cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << endl;
+                            cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
                             dumpGraph();
+                            //assert(testAndSplitResult.second->data.wordLength <= 1);
+                            testAndSplitResult.second->suffixLink = m_root; // TODO - this is wrong!
+                            foundTransition = true;
                             break;
                         }
                     }
@@ -1153,6 +1161,10 @@ class SuffixTreeBuilder
                     canonicalNextChars.insert(canonicalNextChar);
                 }
             }
+            if (state->suffixLink)
+            {
+                assert(state == m_root ||  normalisedStringToState(state->suffixLink) == canonicaliseString(normalisedStringToState(state).substr(1)));
+            }
 
         }
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
@@ -1328,7 +1340,7 @@ void doStuff(const string& s)
 int main()
 {
     //bruteForce("abcdefgdsfsdfskldhygauslkjglksjvlksjfdvh");
-//#define EXHAUSTIVE
+#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
