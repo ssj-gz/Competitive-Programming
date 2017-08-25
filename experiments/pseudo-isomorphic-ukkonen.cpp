@@ -817,6 +817,8 @@ class SuffixTreeBuilder
                 }
 #endif
                 cout << " s: " << s << " s->suffixLink: " << s->suffixLink << endl;
+                if (!s->suffixLink)
+                    addSuffixLink(s, m_numSuffixLinksTraversed);
                 assert(s->suffixLink);
                 //suffixBeginPos++;
                 m_numSuffixLinksTraversed++;
@@ -908,65 +910,70 @@ class SuffixTreeBuilder
                     cout << "Whoops - suffix links are wrong!" << endl;
                     cout << "oldr: " << oldr << " s: " << s << endl;
                     dumpGraph();
-                    auto oldrParent = oldr->parent;
-                    bool foundTransition = false;
-                    for (const auto& transition : oldrParent->transitions)
-                    {
-                        if (transition.nextState == oldr)
-                        {
-                            //const auto canonizeResult = canonize(s->suffixLink, k, i - 1, m_numSuffixLinksTraversed >= m_normalisedSuffixPermutations.size() ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
-                            LetterPermutation compoundPermutation;
-                            LetterPermutation* suffixPermutation = (m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]) : &allLettersToA);
-                            //for (int i = 0; i < alphabetSize; i++)
-                            //{
-                                //compoundPermutation.permuteUnpermutedLetter('a' + i, suffixPermutation->permutedLetter(transition->
-                            //}
-                            const auto firstLetterOnTransition = m_currentString[transition.substringFollowed.startIndex - 1];
-                            cout << " firstLetterOnTransition: " << firstLetterOnTransition << endl;
-                            const auto firstLetterOnTransitionPermuted = transition.letterPermutation->permutedLetter(firstLetterOnTransition);
-                            cout << " firstLetterOnTransitionPermuted: " << firstLetterOnTransitionPermuted << endl;
-                            //const auto firstLetterOnTransitionCompoundPermuted = suffixPermutation->permutedLetter(firstLetterOnTransitionPermuted);
-                            //cout << " firstLetterOnTransitionCompoundPermuted: " << firstLetterOnTransitionCompoundPermuted << endl;
-                            //compoundPermutation.permuteUnpermutedLetter(firstLetterOnTransition, firstLetterOnTransitionCompoundPermuted);
-                            cout << " transition to oldr - startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
-                            cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
-                            auto suffixLink = oldrParent->suffixLink == m_auxiliaryState ? m_root : oldrParent->suffixLink;
-                            //const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, alphabetSize, &compoundPermutation);
-                            // This is almost certainly wrong - surely, must need to use the compoundPermutation???
-                            const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
-
-                            // Need to find the suffix link for testAndSplitResult.second, too :(
-                            oldr->suffixLink = testAndSplitResult.second;
-                            cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
-                            dumpGraph();
-                            //assert(testAndSplitResult.second->data.wordLength <= 1);
-                            testAndSplitResult.second->suffixLink = m_root; // TODO - this is wrong!
-                            foundTransition = true;
-                            break;
-                        }
-                    }
-                    assert(foundTransition);
                 }
                 else
                 {
                     oldr->suffixLink = s;
 
                 }
-                assert(oldr->suffixLink);
-                cout << " made suffix link from " << oldr << " to " << oldr->suffixLink << endl;
-                cout << "normalisedStringToState(oldr): " << normalisedStringToState(oldr) << " normalisedStringToState(s): " << normalisedStringToState(oldr->suffixLink) << endl;
+                //assert(oldr->suffixLink);
+                //cout << " made suffix link from " << oldr << " to " << oldr->suffixLink << endl;
+                //cout << "normalisedStringToState(oldr): " << normalisedStringToState(oldr) << " normalisedStringToState(s): " << normalisedStringToState(oldr->suffixLink) << endl;
 
-                if (normalisedStringToState(oldr).size() != normalisedStringToState(oldr->suffixLink).size() + 1)
-                {
-                    cout << "Uh - oh! "<< endl;
-                    dumpGraph();
-                }
-                assert(oldr->data.wordLength == oldr->suffixLink->data.wordLength + 1);
-                assert(normalisedStringToState(oldr).size() == normalisedStringToState(oldr->suffixLink).size() + 1);
+                //if (normalisedStringToState(oldr).size() != normalisedStringToState(oldr->suffixLink).size() + 1)
+                //{
+                    //cout << "Uh - oh! "<< endl;
+                    //dumpGraph();
+                //}
+                //assert(oldr->data.wordLength == oldr->suffixLink->data.wordLength + 1);
+                //assert(normalisedStringToState(oldr).size() == normalisedStringToState(oldr->suffixLink).size() + 1);
             }
             return {s, k};
 
 
+        }
+
+        void addSuffixLink(State* s, int numSuffixLinksTraversed)
+        {
+            assert(s && !s->suffixLink);
+            auto sParent = s->parent;
+            bool foundTransition = false;
+            for (const auto& transition : sParent->transitions)
+            {
+                if (transition.nextState == s)
+                {
+                    //const auto canonizeResult = canonize(s->suffixLink, k, i - 1, m_numSuffixLinksTraversed >= m_normalisedSuffixPermutations.size() ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
+                    LetterPermutation compoundPermutation;
+                    LetterPermutation* suffixPermutation = (numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[numSuffixLinksTraversed]) : &allLettersToA);
+                    //for (int i = 0; i < alphabetSize; i++)
+                    //{
+                    //compoundPermutation.permuteUnpermutedLetter('a' + i, suffixPermutation->permutedLetter(transition->
+                    //}
+                    const auto firstLetterOnTransition = m_currentString[transition.substringFollowed.startIndex - 1];
+                    cout << " firstLetterOnTransition: " << firstLetterOnTransition << endl;
+                    const auto firstLetterOnTransitionPermuted = transition.letterPermutation->permutedLetter(firstLetterOnTransition);
+                    cout << " firstLetterOnTransitionPermuted: " << firstLetterOnTransitionPermuted << endl;
+                    //const auto firstLetterOnTransitionCompoundPermuted = suffixPermutation->permutedLetter(firstLetterOnTransitionPermuted);
+                    //cout << " firstLetterOnTransitionCompoundPermuted: " << firstLetterOnTransitionCompoundPermuted << endl;
+                    //compoundPermutation.permuteUnpermutedLetter(firstLetterOnTransition, firstLetterOnTransitionCompoundPermuted);
+                    cout << " transition to oldr - startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
+                    cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
+                    auto suffixLink = sParent->suffixLink == m_auxiliaryState ? m_root : sParent->suffixLink;
+                    //const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, alphabetSize, &compoundPermutation);
+                    // This is almost certainly wrong - surely, must need to use the compoundPermutation???
+                    const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
+
+                    // Need to find the suffix link for testAndSplitResult.second, too :(
+                    s->suffixLink = testAndSplitResult.second;
+                    cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
+                    dumpGraph();
+                    //assert(testAndSplitResult.second->data.wordLength <= 1);
+                    //testAndSplitResult.second->suffixLink = m_root; // TODO - this is wrong!
+                    foundTransition = true;
+                    break;
+                }
+            }
+            assert(foundTransition);
         }
         pair<bool, State*> testAndSplit(State* s, int k, int p, int letterIndex, LetterPermutation* letterPermutation)
         {
