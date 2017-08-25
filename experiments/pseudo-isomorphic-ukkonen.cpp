@@ -198,6 +198,7 @@ class SuffixTreeBuilder
             for (int i = 0; i < s.size(); i++)
             {
                canonicaliseString(s.substr(i), &(m_normalisedSuffixPermutations[i]));
+               assert(canonicaliseString(s.substr(i)) == canonicaliseString(canonicaliseString(s).substr(i)));
             }
             for (int i = 0; i < alphabetSize; i++)
             {
@@ -817,6 +818,7 @@ class SuffixTreeBuilder
                     }
                 }
 #endif
+                assert(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).find(normalisedStringToState(s)) == 0);
                 cout << " s: " << s << " s->suffixLink: " << s->suffixLink << endl;
                 if (!s->suffixLink)
                     addSuffixLink(s, m_numSuffixLinksTraversed);
@@ -908,6 +910,7 @@ class SuffixTreeBuilder
                 assert(s == r);
                 if(oldr->data.wordLength != s->data.wordLength + 1)
                 {
+                    assert(!oldr->suffixLink);
                     cout << "Whoops - suffix links are wrong!" << endl;
                     cout << "oldr: " << oldr << " s: " << s << endl;
                     dumpGraph();
@@ -936,9 +939,19 @@ class SuffixTreeBuilder
 
         void addSuffixLink(State* s, int numSuffixLinksTraversed)
         {
+            //numSuffixLinksTraversed++;
             assert(s && !s->suffixLink);
+            cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << endl;
+            dumpGraph();
             auto sParent = s->parent;
+            cout << "sParent: " << sParent << " to sParent: " << normalisedStringToState(sParent) << endl;
             bool foundTransition = false;
+            verifyStateTransitions(sParent);
+            for (int i = 0; i < m_currentString.size(); i++)
+            {
+                cout << " Normalised suffix i: " << i << " " << canonicaliseString(m_currentString.substr(i)) <<  " orig: " << m_currentString.substr(i) << endl;
+                assert(canonicaliseString(m_currentString.substr(i)) == canonicaliseString(canonicaliseString(m_currentString).substr(i)));
+            }
             for (const auto& transition : sParent->transitions)
             {
                 if (transition.nextState == s)
@@ -959,12 +972,19 @@ class SuffixTreeBuilder
                     //compoundPermutation.permuteUnpermutedLetter(firstLetterOnTransition, firstLetterOnTransitionCompoundPermuted);
                     cout << " transition to oldr - startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
                     cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
-                    auto suffixLink = sParent->suffixLink == m_auxiliaryState ? m_root : sParent->suffixLink;
+                    auto parentSuffixLink = sParent->suffixLink == m_auxiliaryState ? m_root : sParent->suffixLink;
+                    assert(parentSuffixLink);
+                    cout << " sParent suffix link: " << parentSuffixLink  << " to sParent suffix link: " << normalisedStringToState(parentSuffixLink) << endl;
+                    if (sParent != m_root)
+                        assert(normalisedStringToState(parentSuffixLink) == canonicaliseString(normalisedStringToState(sParent).substr(1)));
+
                     //const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, alphabetSize, &compoundPermutation);
-                    // This is almost certainly wrong - surely, must need to use the compoundPermutation???
-                    const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
+                    // TODO - This is almost certainly wrong - surely, must need to use the compoundPermutation???
+                    // TODO - doesn't handle case where we need to follow just one letter from parentSuffixLink and it doesn't involve a split.
+                    const auto testAndSplitResult = testAndSplit(parentSuffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
 
                     // Need to find the suffix link for testAndSplitResult.second, too :(
+                    assert(!testAndSplitResult.first);
                     s->suffixLink = testAndSplitResult.second;
                     cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
                     dumpGraph();
@@ -975,6 +995,9 @@ class SuffixTreeBuilder
                 }
             }
             assert(foundTransition);
+            cout << "normalisedStringToState(s): " << normalisedStringToState(s) << " new normalisedStringToState(s->suffixLink): " << normalisedStringToState(s->suffixLink) << endl;
+            assert(normalisedStringToState(s->suffixLink).size() + 1 == normalisedStringToState(s).size());
+            assert(normalisedStringToState(s->suffixLink) == canonicaliseString(normalisedStringToState(s).substr(1)));
         }
         pair<bool, State*> testAndSplit(State* s, int k, int p, int letterIndex, LetterPermutation* letterPermutation)
         {
@@ -1376,7 +1399,7 @@ int main()
     }
     return 0;
 #endif
-//#define RANDOM
+#define RANDOM
 #ifdef RANDOM
     while (true)
     {
@@ -1384,7 +1407,7 @@ int main()
         string s(n, '\0');
         for (int i = 0; i < n; i++)
         {
-            s[i] = 'a' + rand() % 26;
+            s[i] = 'a' + rand() % 6;
         }
         doStuff(s);
     }
