@@ -193,6 +193,7 @@ class SuffixTreeBuilder
         }
         void computeSuffixNormalisationPermutations(const string& s)
         {
+            cout << "Blee: " << s.size() << endl;
             m_normalisedSuffixPermutations.resize(s.size());
             for (int i = 0; i < s.size(); i++)
             {
@@ -1375,6 +1376,21 @@ int main()
     }
     return 0;
 #endif
+//#define RANDOM
+#ifdef RANDOM
+    while (true)
+    {
+        const int n = rand() % 100;
+        string s(n, '\0');
+        for (int i = 0; i < n; i++)
+        {
+            s[i] = 'a' + rand() % 26;
+        }
+        doStuff(s);
+    }
+    return 0;
+#endif
+
     int T;
     cin >> T;
     for (int t = 1; t <= T; t++)
