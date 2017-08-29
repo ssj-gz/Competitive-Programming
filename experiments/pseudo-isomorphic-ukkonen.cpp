@@ -828,6 +828,7 @@ class SuffixTreeBuilder
                 if (!s->suffixLink)
                     addSuffixLink(s, m_numSuffixLinksTraversed);
                 assert(s->suffixLink);
+                assert(normalisedStringToState(s->suffixLink) == canonicaliseString(normalisedStringToState(s).substr(1)));
                 //suffixBeginPos++;
                 m_numSuffixLinksTraversed++;
                 const bool emptySuffix = m_currentString.substr(m_numSuffixLinksTraversed).empty();
@@ -1016,26 +1017,31 @@ class SuffixTreeBuilder
                     // TODO - doesn't handle case where we need to follow just one letter from parentSuffixLink and it doesn't involve a split.
                     //const auto testAndSplitResult = testAndSplit(parentSuffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
                     // TODO - fill out compoundPermutation so it is defined for all letters; canonize parentSuffixLink,transition.substringFollowed.startIndex.
-                    const auto p = transition.substringFollowed.endIndex - 1;
-                    const auto canonizeResult = canonize(parentSuffixLink, transition.substringFollowed.startIndex, p, &compoundPermutation);
+                    const auto p = transition.substringFollowed.endIndex;
+                    const auto oldK = transition.substringFollowed.startIndex;
+                    const auto preCanonizeLength = p - oldK;
+                    const auto canonizeResult = canonize(parentSuffixLink, oldK, p, &compoundPermutation);
                     const auto parentSuffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
+                    const auto postCanonizeLength = p - kCanonized;
+                    const auto numLettersFollowedDuringCanonization = preCanonizeLength - postCanonizeLength;
+                    cout << " preCanonizeLength: " << preCanonizeLength << " postCanonizeLength: " << postCanonizeLength << " numLettersFollowedDuringCanonization: " << numLettersFollowedDuringCanonization << endl;
                     cout << " parentSuffixLink canonized from " << parentSuffixLink << " (" << normalisedStringToState(parentSuffixLink) << ") to " << parentSuffixLinkCanonized << " (" << normalisedStringToState(parentSuffixLinkCanonized) << ")" << " k went from " << transition.substringFollowed.startIndex << " to " << kCanonized << endl;
                     cout << " m_currentString[kCanonized - 1]: " << m_currentString[kCanonized - 1] << endl;
                     const auto transitionFromParentSuffixLink = findTransitionIter(parentSuffixLinkCanonized, compoundPermutation.permutedLetter(m_currentString[kCanonized - 1]) - 'a' + 1);
                     cout << " transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()): " << transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()) << endl;
-                    if ((p - kCanonized + 1) == transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()))
+                    if (postCanonizeLength == transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()))
                     {
                         cout << " following to state at end of transition: " << parentSuffixLinkCanonized << " follows transition to " << transitionFromParentSuffixLink->nextState << endl;
                         s->suffixLink = transitionFromParentSuffixLink->nextState;
                     }
 #if 1
-                    else if (p < kCanonized)
+                    else if (postCanonizeLength == 0)
                     {
                         cout << " Hmmm .... next letter after state" << endl;
                         //s->suffixLink = transitionFromParentSuffixLink->nextState;
                         //s->suffixLink = parentSuffixLinkCanonized;
-                        const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p + 1, alphabetSize, &compoundPermutation);
+                        const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
 
                         // Need to find the suffix link for testAndSplitResult.second, too :(
                         assert(!testAndSplitResult.first);
@@ -1045,7 +1051,7 @@ class SuffixTreeBuilder
 #endif
                     else
                     {
-                        const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
+                        const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p - 1, alphabetSize, &compoundPermutation);
 
                         // Need to find the suffix link for testAndSplitResult.second, too :(
                         assert(!testAndSplitResult.first);
@@ -1436,7 +1442,7 @@ void doStuff(const string& s)
 int main()
 {
     //bruteForce("abcdefgdsfsdfskldhygauslkjglksjvlksjfdvh");
-//#define EXHAUSTIVE
+#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
