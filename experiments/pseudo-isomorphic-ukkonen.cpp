@@ -55,6 +55,11 @@ class LetterPermutation
             }
             return result;
         }
+        void clear()
+        {
+            m_numLettersPermuted = 0;
+            std::fill(begin(m_permutedLetter), end(m_permutedLetter), '\0');
+        }
     private:
         char m_permutedLetter[alphabetSize] = {'\0'};
         int m_numLettersPermuted = 0;
@@ -941,7 +946,7 @@ class SuffixTreeBuilder
         {
             //numSuffixLinksTraversed++;
             assert(s && !s->suffixLink);
-            cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << endl;
+            cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << " m_currentString: " << m_currentString << endl;
             dumpGraph();
             auto sParent = s->parent;
             cout << "sParent: " << sParent << " to sParent: " << normalisedStringToState(sParent) << endl;
@@ -958,6 +963,7 @@ class SuffixTreeBuilder
                 {
                     //const auto canonizeResult = canonize(s->suffixLink, k, i - 1, m_numSuffixLinksTraversed >= m_normalisedSuffixPermutations.size() ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
                     LetterPermutation compoundPermutation;
+                    cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
                     LetterPermutation* oldSuffixPermutation = (numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[numSuffixLinksTraversed]) : &allLettersToA);
                     LetterPermutation* newSuffixPermutation = ((numSuffixLinksTraversed + 1) < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[numSuffixLinksTraversed + 1]) : &allLettersToA);
                     //for (int i = 0; i < alphabetSize; i++)
@@ -985,6 +991,10 @@ class SuffixTreeBuilder
                             cout << " compoundPermutedLetter maps " << originalLetter << " to " << compoundPermutedLetter << endl;
                             compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
                         }
+                        else
+                        {
+                            compoundPermutation.permuteUnpermutedLetter(originalLetter, 'a');
+                        }
                     }
                     //const auto firstLetterOnTransition = m_currentString[transition.substringFollowed.startIndex - 1];
                     //cout << " firstLetterOnTransition: " << firstLetterOnTransition << endl;
@@ -1011,6 +1021,7 @@ class SuffixTreeBuilder
                     const auto parentSuffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
                     cout << " parentSuffixLink canonized from " << parentSuffixLink << " (" << normalisedStringToState(parentSuffixLink) << ") to " << parentSuffixLinkCanonized << " (" << normalisedStringToState(parentSuffixLinkCanonized) << ")" << " k went from " << transition.substringFollowed.startIndex << " to " << kCanonized << endl;
+                    cout << " m_currentString[kCanonized - 1]: " << m_currentString[kCanonized - 1] << endl;
                     const auto transitionFromParentSuffixLink = findTransitionIter(parentSuffixLinkCanonized, compoundPermutation.permutedLetter(m_currentString[kCanonized - 1]) - 'a' + 1);
                     cout << " transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()): " << transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()) << endl;
                     if ((p - kCanonized + 1) == transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()))
