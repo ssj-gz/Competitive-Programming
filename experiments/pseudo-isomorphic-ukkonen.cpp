@@ -939,7 +939,7 @@ class SuffixTreeBuilder
 
         void addSuffixLink(State* s, int numSuffixLinksTraversed)
         {
-            //numSuffixLinksTraversed++;
+            numSuffixLinksTraversed++;
             assert(s && !s->suffixLink);
             cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << endl;
             dumpGraph();
@@ -963,15 +963,34 @@ class SuffixTreeBuilder
                     //{
                     //compoundPermutation.permuteUnpermutedLetter('a' + i, suffixPermutation->permutedLetter(transition->
                     //}
-                    const auto firstLetterOnTransition = m_currentString[transition.substringFollowed.startIndex - 1];
-                    cout << " firstLetterOnTransition: " << firstLetterOnTransition << endl;
-                    const auto firstLetterOnTransitionPermuted = transition.letterPermutation->permutedLetter(firstLetterOnTransition);
-                    cout << " firstLetterOnTransitionPermuted: " << firstLetterOnTransitionPermuted << endl;
+                    for (int i = 0; i < alphabetSize; i++)
+                    {
+                        const char originalLetter = 'a' + i;
+                        char compoundPermutedLetter = '\0';
+                        if (transition.letterPermutation->hasPermutedLetter(originalLetter))
+                        {
+                            compoundPermutedLetter = transition.letterPermutation->permutedLetter(originalLetter);
+                            if (suffixPermutation->hasPermutedLetter(compoundPermutedLetter))
+                            {
+                                compoundPermutedLetter = suffixPermutation->permutedLetter(compoundPermutedLetter);
+                            }
+                            else
+                            {
+                                compoundPermutedLetter = '\0';
+                            }
+                        }
+                        if (compoundPermutedLetter != '\0')
+                            compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
+                    }
+                    //const auto firstLetterOnTransition = m_currentString[transition.substringFollowed.startIndex - 1];
+                    //cout << " firstLetterOnTransition: " << firstLetterOnTransition << endl;
+                    //const auto firstLetterOnTransitionPermuted = transition.letterPermutation->permutedLetter(firstLetterOnTransition);
+                    //cout << " firstLetterOnTransitionPermuted: " << firstLetterOnTransitionPermuted << endl;
                     //const auto firstLetterOnTransitionCompoundPermuted = suffixPermutation->permutedLetter(firstLetterOnTransitionPermuted);
                     //cout << " firstLetterOnTransitionCompoundPermuted: " << firstLetterOnTransitionCompoundPermuted << endl;
                     //compoundPermutation.permuteUnpermutedLetter(firstLetterOnTransition, firstLetterOnTransitionCompoundPermuted);
-                    cout << " transition to oldr - startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
-                    cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
+                    //cout << " transition to s - startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
+                    //cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
                     auto parentSuffixLink = sParent->suffixLink == m_auxiliaryState ? m_root : sParent->suffixLink;
                     assert(parentSuffixLink);
                     cout << " sParent suffix link: " << parentSuffixLink  << " to sParent suffix link: " << normalisedStringToState(parentSuffixLink) << endl;
@@ -981,12 +1000,31 @@ class SuffixTreeBuilder
                     //const auto testAndSplitResult = testAndSplit(suffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, alphabetSize, &compoundPermutation);
                     // TODO - This is almost certainly wrong - surely, must need to use the compoundPermutation???
                     // TODO - doesn't handle case where we need to follow just one letter from parentSuffixLink and it doesn't involve a split.
-                    const auto testAndSplitResult = testAndSplit(parentSuffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
+                    //const auto testAndSplitResult = testAndSplit(parentSuffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, alphabetSize, transition.letterPermutation);
+                    // TODO - fill out compoundPermutation so it is defined for all letters; canonize parentSuffixLink,transition.substringFollowed.startIndex.
+                    const auto canonizeResult = canonize(parentSuffixLink, transition.substringFollowed.startIndex, transition.substringFollowed.endIndex - 1, &compoundPermutation);
+                    const auto parentSuffixLinkCanonized = canonizeResult.first;
+                    cout << " parentSuffixLink canonized from " << parentSuffixLink << " to " << parentSuffixLinkCanonized << endl;
+                    const auto kCanonized = canonizeResult.second;
+                    const auto pCanonized = transition.substringFollowed.endIndex - 1;
+                    const auto transitionFromParentSuffixLink = findTransitionIter(parentSuffixLinkCanonized, compoundPermutation.permutedLetter(m_currentString[transition.substringFollowed.startIndex - 1]) - 'a' + 1);
+                    if (transition.substringFollowed.length(m_currentString.length()) == transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()))
+                    {
+                        s->suffixLink = transitionFromParentSuffixLink->nextState;
+                    }
+                    else if (pCanonized < kCanonized)
+                    {
+                        s->suffixLink = transitionFromParentSuffixLink->nextState;
+                    }
+                    else
+                    {
+                        const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, transition.substringFollowed.endIndex - 1, alphabetSize, &compoundPermutation);
 
-                    // Need to find the suffix link for testAndSplitResult.second, too :(
-                    assert(!testAndSplitResult.first);
-                    s->suffixLink = testAndSplitResult.second;
-                    cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
+                        // Need to find the suffix link for testAndSplitResult.second, too :(
+                        assert(!testAndSplitResult.first);
+                        s->suffixLink = testAndSplitResult.second;
+                        cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
+                    }
                     dumpGraph();
                     //assert(testAndSplitResult.second->data.wordLength <= 1);
                     //testAndSplitResult.second->suffixLink = m_root; // TODO - this is wrong!
@@ -1028,7 +1066,7 @@ class SuffixTreeBuilder
                 auto kPrime = tkTransitionIter->substringFollowed.startIndex;
                 auto pPrime = tkTransitionIter->substringFollowed.endIndex;
                 cout << "kPrime: " << kPrime << " pPrime: " << pPrime << endl;
-                assert(pPrime < 0 || (p - k <= pPrime - kPrime));
+                //assert(pPrime < 0 || (p - k <= pPrime - kPrime));
 
                 //cout << " kPrime: " << kPrime << " pPrime: " << pPrime << endl;
                 //Cursor blahPrime(sPrime, m_currentString, m_root);
@@ -1371,7 +1409,7 @@ void doStuff(const string& s)
 int main()
 {
     //bruteForce("abcdefgdsfsdfskldhygauslkjglksjvlksjfdvh");
-#define EXHAUSTIVE
+//#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
@@ -1399,7 +1437,7 @@ int main()
     }
     return 0;
 #endif
-#define RANDOM
+//#define RANDOM
 #ifdef RANDOM
     while (true)
     {
