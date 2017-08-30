@@ -1210,7 +1210,7 @@ class SuffixTreeBuilder
                 }
                 //const char letterToFollowFromState =  (s == m_auxiliaryState) ? 'a' : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
 #ifdef PSEUDO_ISOMORPHIC
-                const char letterToFollowFromState =  (s == m_auxiliaryState) ? 'a' : letterPermutation->permutedLetter(m_currentString[k - 1]);
+                const char letterToFollowFromState =  /*(s == m_auxiliaryState) ? 'a' :*/ letterPermutation->permutedLetter(m_currentString[k - 1]);
                 //cout << " canonize letterToFollowFromState: " << letterToFollowFromState << " suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << " suffix canonical: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << " wordLength: " << s->data.wordLength  << endl;
                 assert(letterToFollowFromState >= 'a' && letterToFollowFromState <= 'z');
                 auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
@@ -1460,7 +1460,7 @@ void doStuff(const string& s)
 int main()
 {
     //bruteForce("abcdefgdsfsdfskldhygauslkjglksjvlksjfdvh");
-//#define EXHAUSTIVE
+#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
