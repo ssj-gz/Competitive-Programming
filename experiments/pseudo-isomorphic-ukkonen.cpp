@@ -1234,7 +1234,7 @@ class SuffixTreeBuilder
                         assert(s != m_auxiliaryState);
                         //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
                         //const char letterToFollowFromState =  (s == m_auxiliaryState) ? 'a' : canonicaliseString(blah.stringFollowed() + m_currentString[k - 1]).back();
-                        const char letterToFollowFromState =  (s == m_auxiliaryState) ? 'a' : letterPermutation->permutedLetter(m_currentString[k - 1]);
+                        const char letterToFollowFromState =   letterPermutation->permutedLetter(m_currentString[k - 1]);
                         //cout << " canonize letterToFollowFromState: " << letterToFollowFromState << " suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << " suffix canonical: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << " wordLength: " << s->data.wordLength  << endl;
                         assert(letterToFollowFromState >= 'a' && letterToFollowFromState <= 'z');
                         auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
