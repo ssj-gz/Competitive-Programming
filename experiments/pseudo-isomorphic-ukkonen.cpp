@@ -993,6 +993,7 @@ class SuffixTreeBuilder
                     }
                     else
                     {
+#if 0
                         LetterPermutation* oldSuffixPermutation = (numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[numSuffixLinksTraversed]) : &allLettersToA);
                         LetterPermutation* newSuffixPermutation = ((numSuffixLinksTraversed + 1) < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[numSuffixLinksTraversed + 1]) : &allLettersToA);
                         //for (int i = 0; i < alphabetSize; i++)
@@ -1026,6 +1027,38 @@ class SuffixTreeBuilder
                                 compoundPermutation.permuteUnpermutedLetter(originalLetter, 'a');
                             }
                         }
+#endif
+                        LetterPermutation suffixIncreasePermutation;
+                        // TODO - optimise this!
+                        canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation);
+                        for (int i = 0; i < alphabetSize; i++)
+                        {
+                            const char originalLetter = 'a' + i;
+                            char compoundPermutedLetter = '\0';
+                            if (transition.letterPermutation->hasPermutedLetter(originalLetter))
+                            {
+                                compoundPermutedLetter = transition.letterPermutation->permutedLetter(originalLetter);
+                                if (suffixIncreasePermutation.hasPermutedLetter(compoundPermutedLetter))
+                                //if (newSuffixPermutation->hasPermutedLetter(originalLetter))
+                                {
+                                    compoundPermutedLetter = suffixIncreasePermutation.permutedLetter(compoundPermutedLetter);
+                                }
+                                else
+                                {
+                                    compoundPermutedLetter = '\0';
+                                }
+                            }
+                            if (compoundPermutedLetter != '\0')
+                            {
+                                //cout << " compoundPermutedLetter maps " << originalLetter << " to " << compoundPermutedLetter << endl;
+                                compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
+                            }
+                            else
+                            {
+                                compoundPermutation.permuteUnpermutedLetter(originalLetter, 'a');
+                            }
+                        }
+
                         cout << "Compound permutation: " << endl;
                         for (int i = 0; i < alphabetSize; i++)
                         {
@@ -1521,7 +1554,7 @@ int main()
     }
     return 0;
 #endif
-//#define RANDOM
+#define RANDOM
 #ifdef RANDOM
     while (true)
     {
