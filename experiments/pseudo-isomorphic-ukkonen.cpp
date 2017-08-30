@@ -1052,7 +1052,7 @@ class SuffixTreeBuilder
                         {
                             s->suffixLink = transitionFromParentSuffixLink->nextState;
                         }
-#if 1
+#if 0
                         else if (postCanonizeLength == 1)
                         {
                             cout << " Hmmm .... next letter after state" << endl;
