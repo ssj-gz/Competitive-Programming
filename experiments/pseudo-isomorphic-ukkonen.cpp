@@ -183,7 +183,7 @@ class SuffixTreeBuilder
             const auto canonizeResult = canonize(m_s, m_k, m_currentString.size(),(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ?  &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]) : &allLettersToA));
             m_s = canonizeResult.first;
             m_k = canonizeResult.second;
-            dumpGraph();
+            //dumpGraph();
             dumpNormalisedStrings();
         }
         void appendString(const string& stringToAppend)
@@ -850,7 +850,7 @@ class SuffixTreeBuilder
                 if (!(normalisedStringToS.size() == normalisedStringToSuffixLink.size() + 1 || (s == m_root)))
                 {
                     cout << "Uh-oh!" << endl;
-                    dumpGraph();
+                    //dumpGraph();
                 }
                 assert(normalisedStringToS.size() == normalisedStringToSuffixLink.size() + 1 || (s == m_root));
                 s = canonizeResult.first;
@@ -919,7 +919,7 @@ class SuffixTreeBuilder
                     assert(!oldr->suffixLink);
                     cout << "Whoops - suffix links are wrong!" << endl;
                     cout << "oldr: " << oldr << " s: " << s << endl;
-                    dumpGraph();
+                    //dumpGraph();
                 }
                 else
                 {
@@ -948,14 +948,14 @@ class SuffixTreeBuilder
             //numSuffixLinksTraversed++;
             assert(s && !s->suffixLink);
             cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << " m_currentString: " << m_currentString << endl;
-            dumpGraph();
+            //dumpGraph();
             auto sParent = s->parent;
             cout << "sParent: " << sParent << " to sParent: " << normalisedStringToState(sParent) << endl;
             bool foundTransition = false;
             verifyStateTransitions(sParent);
             for (int i = 0; i < m_currentString.size(); i++)
             {
-                cout << " Normalised suffix i: " << i << " " << canonicaliseString(m_currentString.substr(i)) <<  " orig: " << m_currentString.substr(i) << endl;
+                //cout << " Normalised suffix i: " << i << " " << canonicaliseString(m_currentString.substr(i)) <<  " orig: " << m_currentString.substr(i) << endl;
                 assert(canonicaliseString(m_currentString.substr(i)) == canonicaliseString(canonicaliseString(m_currentString).substr(i)));
             }
             for (const auto& transition : sParent->transitions)
@@ -964,6 +964,11 @@ class SuffixTreeBuilder
                 {
                     //const auto canonizeResult = canonize(s->suffixLink, k, i - 1, m_numSuffixLinksTraversed >= m_normalisedSuffixPermutations.size() ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
                     auto parentSuffixLink = sParent->suffixLink;
+                    if (!parentSuffixLink)
+                    {
+                        addSuffixLink(sParent, numSuffixLinksTraversed);
+                        parentSuffixLink = sParent->suffixLink;
+                    }
                     assert(parentSuffixLink);
                     LetterPermutation compoundPermutation;
                     cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
@@ -1142,7 +1147,7 @@ class SuffixTreeBuilder
                             cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
                         }
                     }
-                    dumpGraph();
+                    //dumpGraph();
                     //assert(testAndSplitResult.second->data.wordLength <= 1);
                     //testAndSplitResult.second->suffixLink = m_root; // TODO - this is wrong!
                     foundTransition = true;
@@ -1409,7 +1414,7 @@ class SuffixTreeBuilder
         {
             if (!s.empty())
             {
-                cout << " normalised string (explicit): " << s << endl;
+                //cout << " normalised string (explicit): " << s << endl;
                 assert(normalisedStrings.find(s) == normalisedStrings.end());
                 normalisedStrings.insert(s);
             }
@@ -1429,7 +1434,7 @@ class SuffixTreeBuilder
                 for (int i = 0; i < normalisedRemainderOfTransition.length() - 1; i++)
                 {
                     normalisedString += normalisedRemainderOfTransition[i];
-                    cout << " normalised string (non-explicit): " << normalisedString << endl;
+                    //cout << " normalised string (non-explicit): " << normalisedString << endl;
                     assert(normalisedStrings.find(normalisedString) == normalisedStrings.end());
                     normalisedStrings.insert(normalisedString);
                 }
@@ -1454,7 +1459,7 @@ set<string> bruteForce(const string& s)
         for (int j = 0; i + j < s.size(); j++)
         {
             substring.push_back(s[i + j]);
-            cout << "substring: " << substring << " canonicalised: " << canonicaliseString(substring) << endl;
+            //cout << "substring: " << substring << " canonicalised: " << canonicaliseString(substring) << endl;
             const string canonicalisedSubstring = canonicaliseString(substring);
             substrings.insert(substring);
             canonicalisedSubstrings.insert(canonicalisedSubstring);
@@ -1558,7 +1563,7 @@ int main()
 #ifdef RANDOM
     while (true)
     {
-        const int n = rand() % 100;
+        const int n = rand() % 1000;
         string s(n, '\0');
         for (int i = 0; i < n; i++)
         {
