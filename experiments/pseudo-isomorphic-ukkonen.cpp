@@ -4,6 +4,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <array>
 #include <deque>
 #include <set>
 #include <string>
