@@ -168,9 +168,7 @@ class PseudoIsomorphicSuffixTree
             m_states.reserve(1'000'000);
 
             m_root = createNewState();
-            //m_root->data.wordLength = 1;
             m_auxiliaryState = createNewState();
-            cout << " m_auxiliaryState: " << m_auxiliaryState << endl;
 
             for (int i = 0; i < alphabetSize; i++)
             {
@@ -221,8 +219,6 @@ class PseudoIsomorphicSuffixTree
             const auto canonizeResult = canonize(m_s, m_k, m_currentString.size(),(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ?  &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]) : &allLettersToA));
             m_s = canonizeResult.first;
             m_k = canonizeResult.second;
-            //dumpGraph();
-            //dumpNormalisedStrings();
         }
         void appendString(const string& stringToAppend)
         {
