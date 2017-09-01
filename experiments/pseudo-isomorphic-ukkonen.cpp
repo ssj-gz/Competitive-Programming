@@ -1,3 +1,7 @@
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <deque>
@@ -6,6 +10,7 @@
 #include <limits>
 #include <memory>
 #include <algorithm>
+#include <chrono>
 #include <cassert>
 
 using namespace std;
@@ -981,7 +986,8 @@ class PseudoIsomorphicSuffixTree
         {
             //numSuffixLinksTraversed++;
             assert(s && !s->suffixLink);
-            cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << " m_currentString: " << m_currentString << endl;
+            //cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << " m_currentString: " << m_currentString << endl;
+            cout << "addSuffixLink: " << s << " to s with size: " << m_currentString.size() << endl;
             //dumpGraph();
             auto sParent = s->parent;
             cout << "sParent: " << sParent << " to sParent: " << normalisedStringToState(sParent) << endl;
@@ -1041,7 +1047,9 @@ class PseudoIsomorphicSuffixTree
                         cout << "glarp: " << canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1)) << endl;
                         LetterPermutation suffixIncreasePermutation;
                         // TODO - optimise this!
+#if 0
                         canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
+#endif
                         LetterPermutation suffixIncreasePermutationOpt;
                         const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
                         const char glarp = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[m_numSuffixLinksTraversed]);
@@ -1082,6 +1090,7 @@ class PseudoIsomorphicSuffixTree
                             suffixIncreasePermutationOpt.permuteUnpermutedLetter(glarp, 'a' + blee + 1);
                             cout << " hard mapping " << glarp << " to " << suffixIncreasePermutationOpt.permutedLetter(glarp) << endl;
                         }
+#if 0
                         for (int i = 0; i < alphabetSize; i++)
                         {
                             const char letter = 'a' + i;
@@ -1104,6 +1113,8 @@ class PseudoIsomorphicSuffixTree
                                 assert(suffixIncreasePermutation.permutedLetter(letter) == suffixIncreasePermutationOpt.permutedLetter(letter));
                             }
                         }
+#endif
+                        suffixIncreasePermutation = suffixIncreasePermutationOpt;
 
                         for (int i = 0; i < alphabetSize; i++)
                         {
@@ -1508,16 +1519,25 @@ void verify(Cursor cursor, int wordLength)
 void doStuff(const string& s)
 {
     cout << "doStuff: " << s << endl;
+//#define BRUTE_FORCE
+#ifdef BRUTE_FORCE
     //cout << "brute force: " << endl;
     set<string> normalisedStringsBruteForce = bruteForce(s);
+#endif
     //for (const auto& str : bruteForce(s))
     //{
-        //cout << " " << str << endl;
+    //cout << " " << str << endl;
     //}
     PseudoIsomorphicSuffixTree treeBuilder;
     //treeBuilder.computeSuffixNormalisationPermutations(s);
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     treeBuilder.appendString(s);
 
+    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+    std::cout << "Time to build PseudoIsomorphicSuffixTree = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 <<std::endl;
+
+#ifdef BRUTE_FORCE
     treeBuilder.dumpGraph();
     verify(treeBuilder.rootCursor(), 0);
     set<string> normalisedStringsOptimised = treeBuilder.dumpNormalisedStrings();
@@ -1531,6 +1551,7 @@ void doStuff(const string& s)
         cout << " looking for " << str << " in optimised:" << endl;
         assert(normalisedStringsOptimised.find(str) != normalisedStringsOptimised.end());
     }
+#endif
 
     //cout << "s: " << s << " canonicalised: " << canonicaliseString(s) << endl;
 }
@@ -1567,11 +1588,11 @@ int main()
     }
     return 0;
 #endif
-#define RANDOM
+//#define RANDOM
 #ifdef RANDOM
     while (true)
     {
-        const int n = rand() % 300;
+        const int n = rand() % 6000;
         const int m = rand() % 26 + 1;
         string s(n, '\0');
         for (int i = 0; i < n; i++)
