@@ -29,15 +29,12 @@ class LetterPermutation
         LetterPermutation() = default;
         void permuteUnpermutedLetter(const char originalLetter)
         {
-            //cout << " permuteUnpermutedLetter: " << originalLetter << " " << this << endl;
             assert(!hasPermutedLetter(originalLetter));
             m_permutedLetter[originalLetter - 'a'] = 'a' + m_numLettersPermuted;
-            //cout << " permutation: " << this << " char " << originalLetter << " permuted to " << permutedLetter(originalLetter) << endl;
             m_numLettersPermuted++;
         }
         void permuteUnpermutedLetter(const char originalLetter, char permutedLetter)
         {
-            //cout << " permuteUnpermutedLetter: " << originalLetter << " " << this << endl;
             assert(!hasPermutedLetter(originalLetter));
             m_permutedLetter[originalLetter - 'a'] = permutedLetter;
         }
@@ -54,7 +51,6 @@ class LetterPermutation
             }
             assert(hasPermutedLetter(originalLetter));
             const char result = m_permutedLetter[originalLetter - 'a'];
-            //cout << " permutation: " << this << " permutedLetter: " << originalLetter << " = " << m_permutedLetter[originalLetter - 'a'] << endl;
             if (!(result >= 'a' && result <= '{'))
             {
                 cout << " permutation: " << this << " invalid mapping from " << originalLetter << " to " << result << endl;
@@ -74,7 +70,6 @@ class LetterPermutation
 
 string canonicaliseString(const string& s, LetterPermutation* letterPermutation = nullptr, bool assertNoUnknown = false, bool readOnly = true)
 {
-    //cout << " canonicaliseString: " << s << " letterPermutation: " << letterPermutation << endl;
     LetterPermutation letterPermutationLocal;
     LetterPermutation* letterPermutationToUse = letterPermutation;
     if (letterPermutation && readOnly)
@@ -193,20 +188,17 @@ class PseudoIsomorphicSuffixTree
             auto& permutationsMissingLetter = m_permutationsMissingLetter[letter - 'a'];
             for (auto permutationMissingLetter : permutationsMissingLetter)
             {
-                //cout << " adding " << letter << " to LetterPermutation: " << permutationMissingLetter << endl;
                 permutationMissingLetter->permuteUnpermutedLetter(letter);
             }
             permutationsMissingLetter.clear();
 
             m_normalisedSuffixPermutations.push_back(LetterPermutation());
             LetterPermutation* newSuffixPermutation = &(m_normalisedSuffixPermutations.back());
-            //cout << " adding " << letter << " to LetterPermutation: " << newSuffixPermutation << endl;
             newSuffixPermutation->permuteUnpermutedLetter(letter);
             for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
             {
                 if (letterIndex != letter - 'a')
                 {
-                    //cout << " registered permutation " << newSuffixPermutation << " as missing letter " << static_cast<char>((letterIndex + 'a')) << endl;
                     m_permutationsMissingLetter[letterIndex].push_back(newSuffixPermutation);
                 }
             }
@@ -237,7 +229,6 @@ class PseudoIsomorphicSuffixTree
             int numAppended = 0;
             for (auto letter : stringToAppend)
             {
-                //cout << "Appending " << (numAppended + 1) << " of " << stringToAppend.size() << " : " << letter << endl;
                 appendLetter(letter);
                 numAppended++;
             }
@@ -413,7 +404,6 @@ class PseudoIsomorphicSuffixTree
 
                 void followLetter(char letter)
                 {
-                    //cout << "follow letter: " << letter << endl;
                     const string& theString = *m_string;
                     if (m_transition == nullptr)
                     {
@@ -460,7 +450,6 @@ class PseudoIsomorphicSuffixTree
                 }
                 void followLetters(const string& letters, string::size_type startIndex = 0, string::size_type numLetters = string::npos)
                 {
-                    //cout << "follow letters" << endl;
                     if (numLetters == string::npos)
                     {
                         numLetters = letters.size();
@@ -642,10 +631,8 @@ class PseudoIsomorphicSuffixTree
                 {
                     Cursor copy(*this);
                     string stringFollowed;
-                    //cout << "canonicalisedStringFollowed!" << endl;
                     while (!(!copy.m_state->parent && copy.isOnExplicitState()))
                     {
-                        //cout << " copy state: " << copy.m_state << " root: " << m_root << endl;
                         if (copy.isOnExplicitState())
                         {
                             auto transitionFromParent = findTransitionFromParent(copy.m_state);
@@ -659,7 +646,6 @@ class PseudoIsomorphicSuffixTree
                             stringFollowed = canonicaliseString(m_string->substr(m_transition->substringFollowed.startIndex - 1 + m_posInTransition, m_transition->substringFollowed.length(m_string->size() - m_posInTransition)),  m_transition->letterPermutation, true) + stringFollowed;
                             copy.movedToExplicitState();
                         }
-                        //cout << " stringFollowed: " << stringFollowed << endl;
                     }
                     assertIsCanonical(stringFollowed);
                     return stringFollowed;
@@ -774,36 +760,11 @@ class PseudoIsomorphicSuffixTree
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
-            //cout << "update: " << " k: " << k << " i: " << i << " suffix: " << m_currentString.substr(i - 1) << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " s: " << s << endl;
             State* oldr = m_root;
-            //const int letterIndex = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, i - 1 - m_numSuffixLinksTraversed)).back() + 1;
-            //cout << "suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << " canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
-            //const int letterIndex = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
-            //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
-            //Cursor blah(s, m_currentString, m_root);
-            //auto flopple = blah.stringFollowed() + '|' + m_currentString.substr(k - 1, i - k + 1); 
-            //cout << " flopple: " << flopple << endl;
-            //flopple.erase(remove(flopple.begin(), flopple.end(), '|'), flopple.end());
-            //cout << " flopple canonical: " << canonicaliseString(flopple) << endl;
-            //const int letterIndex = canonicaliseString(flopple).back()  - 'a' + 1;
-            //const int letterIndex = canonicaliseString(canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString.substr(k - 1, i - k)) + m_currentString[i - 1]).back() - 'a' + 1;
-            //const int letterIndex = canonicaliseString(blah.stringFollowed() + m_currentString.substr(k - 1, i - k + 1)).back() - 'a' + 1;
             assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
             const int letterIndex = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]) - 'a' + 1;
-            //cout << "letterIndex: " << letterIndex << endl;
-            //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
-            //const int letterIndex2 = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(blah.stringFollowed() + m_currentString[i - 1]).back() - 'a' + 1;
-            //assert(letterIndex == letterIndex2);
             assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
             const auto testAndSplitResult = testAndSplit(s, k, i - 1, letterIndex, &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
-            //int suffixBeginPos = i - (s->data.wordLength + k);
-            //auto blah = [i](State* s, int k)
-            //{
-                //return i - (s->data.wordLength + (k - 1));
-            //};
-            //cout << "s: " << s << endl;
-            //int suffixBeginPos = blah(s, k);
-            //cout << "s->data.wordLength: " << s->data.wordLength << " k: " << k << " suffixBeginPos: " << suffixBeginPos << endl;
             auto isEndPoint = testAndSplitResult.first;
             auto r = testAndSplitResult.second;
             assert(r);
@@ -811,134 +772,36 @@ class PseudoIsomorphicSuffixTree
             {
                 auto rPrime = createNewState(r);
                 rPrime->data.wordLength = -1;
-                {
-                    Cursor rblah(r, m_currentString, m_root);
-                    //cout << " r: " << rblah.stringFollowed() << " canonicalised: " << canonicaliseString(rblah.stringFollowed()) << endl;
-                }
                 r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]), m_currentString));
                 assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
                 verifyStateTransitions(r);
                 if (oldr != m_root)
                 {
                     oldr->suffixLink = r;
-                    //cout << " made suffix link from " << oldr << " to " << r << endl;
                     assert(normalisedStringToState(oldr).size() == normalisedStringToState(r).size() + 1);
                 }
                 oldr = r;
-                //cout << " oldr now: " << r << endl;
 
-#if 0
-                if (r != m_auxiliaryState)
-                {
-                    Cursor blah(r, m_currentString, m_root);
-                    const char nextLetter = m_currentString[m_numSuffixLinksTraversed];
-                    //cout << "Blee: " << m_currentString.substr(m_numSuffixLinksTraversed) << endl;
-                    //cout << " s is root: " << (r == m_root) << endl;
-                    auto nextLetterIterator = blah.getNextLetterIterator();
-                    //cout << " letters from here: " << endl;
-                    //while (nextLetterIterator.hasNext())
-                    //{
-                    //}
-                    //cout << "Followed a suffix link: " << blah.stringFollowed() << endl;
-                    const auto remainder = m_currentString.substr(m_numSuffixLinksTraversed + r->data.wordLength, k);
-                    //cout << " remainder: " <<  remainder << endl;
-                    //cout << " r->data.wordLength: " << r->data.wordLength << endl;
-                    //cout << "m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
-                    blah.followLetters(remainder);
-                    //cout << " followed remainder: " << blah.stringFollowed() << endl;
-
-                    if (!m_currentString.substr(m_numSuffixLinksTraversed).empty())
-                    {
-                        cout << "blee: " << m_currentString.substr(m_numSuffixLinksTraversed) << " bloo: " << blah.stringFollowed() << endl;
-                        //assert(m_currentString.substr(m_numSuffixLinksTraversed).find(blah.stringFollowed()) == 0);
-                        //assert(m_currentString.substr(m_numSuffixLinksTraversed) == blah.stringFollowed());
-                    }
-                }
-#endif
                 assert(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).find(normalisedStringToState(s)) == 0);
-                //cout << " s: " << s << " s->suffixLink: " << s->suffixLink << endl;
                 if (!s->suffixLink)
                     addSuffixLink(s, m_numSuffixLinksTraversed);
                 assert(s->suffixLink);
                 assert(normalisedStringToState(s).size() <= 1 || normalisedStringToState(s->suffixLink) == canonicaliseString(normalisedStringToState(s).substr(1)));
-                //suffixBeginPos++;
                 m_numSuffixLinksTraversed++;
-                //cout << " bumped m_numSuffixLinksTraversed to " << m_numSuffixLinksTraversed << endl;
                 const bool emptySuffix = m_currentString.substr(m_numSuffixLinksTraversed).empty();
-                //cout << " emptySuffix? " << emptySuffix << " suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << endl;
-                //const auto oldNormalised = 
-                //assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
-                const auto normalisedStringToS = normalisedStringToState(s);
-                const auto normalisedStringToSuffixLink = normalisedStringToState(s->suffixLink);
-                //cout << " normalisedStringToS: " << normalisedStringToS << endl;
-                //cout << " normalisedStringToSuffixLink: " << normalisedStringToSuffixLink << endl;
-                //cout << " s->suffixLink == m_auxiliaryState? " << (s->suffixLink == m_auxiliaryState) << endl;
                 const auto canonizeResult = canonize(s->suffixLink, k, i - 1, (s->suffixLink == m_auxiliaryState) ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
-                if (s->suffixLink == m_auxiliaryState)
-                {
-                    //cout << "s suffixlink = aux (" << m_auxiliaryState << ") canonize: " << canonizeResult.first << " k: " << k << " i: " << i << endl;
-                }
 
                 const auto oldK = k;
-                //cout << "s: " << s << " root: " << m_root << " aux: " << m_auxiliaryState << " suffix link: " << s->suffixLink << endl;
-                //cout << " old k: " << oldK << endl;
-                if (!(normalisedStringToS.size() == normalisedStringToSuffixLink.size() + 1 || (s == m_root)))
-                {
-                    //cout << "Uh-oh!" << endl;
-                    //dumpGraph();
-                }
-                assert(normalisedStringToS.size() == normalisedStringToSuffixLink.size() + 1 || (s == m_root));
                 s = canonizeResult.first;
                 k = canonizeResult.second;
                 assert(emptySuffix || canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).find(normalisedStringToState(s)) == 0);
-                //cout << " new k: " << k << endl;
-                //assert(normalisedStringToS.size() + oldK == normalisedStringToState(s).size() + k + 0 || (s == m_root));
-                //cout << " traversed suffix link: s now: " << s << endl;
-                //cout << " s: " << s << endl;
-                //cout << " s->data.wordLength: " << s->data.wordLength << " k: " << k << " suffixBeginPos: " << suffixBeginPos << " i: " << i << " isroot: " << (s == m_root) << " is aux: " << (s == m_auxiliaryState) << endl;
-                //cout << " blah: " << blah(s, k) << endl;
-                //assert(k != 0);
-                //assert(s->data.wordLength + k == suffixBeginPos || s == m_auxiliaryState);
-                //assert(blah(s, k) == suffixBeginPos);
-                //cout << " blee: " << (blah(s, k) - suffixBeginPos) << endl;
 
-                //cout << "suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << endl;
-                if (emptySuffix)
-                {
-                    //cout << "Empty suffix!" << endl;
-                    assert(s == m_auxiliaryState);
-                    //cout << " m_currentString[i - 1]: " << m_currentString[i - 1] << endl;
-                }
-                else
-                {
-                    //cout << " not empty suffix!" << endl;
-                }
-                //assert(!m_currentString.substr(m_numSuffixLinksTraversed).empty());
-                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
-                //Cursor blah(s, m_currentString, m_root);
-                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 :canonicaliseString(blah.stringFollowed() + m_currentString.substr(k - 1, i - k + 0) + m_currentString[i - 1]).back() - 'a' + 1;
-                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString.substr(k - 1, i - k)) + m_currentString[i - 1]).back() - 'a' + 1;
-                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString.substr(k - 1, i - k + 1)).back() - 'a' + 1;
-                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 :canonicaliseString(blah.stringFollowed() + m_currentString.substr(k - 1, i - k + 1)).back() - 'a' + 1;
-                //const int letterIndex = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).back() - 'a' + 1;
-                //const int letterIndex2 = m_currentString.substr(m_numSuffixLinksTraversed).empty() ? 1 : canonicaliseString(blah.stringFollowed() + m_currentString[i - 1]).back() - 'a' + 1;
-                //assert(letterIndex == letterIndex2);
-                //cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " m_normalisedSuffixPermutations.size(): " << m_normalisedSuffixPermutations.size() << endl;
                 assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() || emptySuffix);
-                //cout << " still in update: " << " k: " << k << " i: " << i << " suffix: " << m_currentString.substr(i - 1) << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " s: " << s << endl;
                 const int letterIndex = emptySuffix ? 1 : m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]) - 'a' + 1;
-                //cout << "letterIndex: " << letterIndex << " m_currentString[i - 1]: " << m_currentString[i - 1] << endl;
                 const auto testAndSplitResult = testAndSplit(s, k, i - 1, letterIndex, emptySuffix ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
                 isEndPoint = testAndSplitResult.first;
                 r = testAndSplitResult.second;
                 assert(r);
-                //dumpGraph();
-                //cout << "isEndPoint? " << isEndPoint << endl;
-                if (isEndPoint)
-                {
-                    assert(s == r);
-                }
-                //cout << " r: " << r << endl;
             }
 
             if (oldr != m_root)
@@ -947,26 +810,12 @@ class PseudoIsomorphicSuffixTree
                 if(oldr->data.wordLength != s->data.wordLength + 1)
                 {
                     assert(!oldr->suffixLink);
-                    //cout << "Whoops - suffix links are wrong!" << endl;
-                    //cout << "oldr: " << oldr << " s: " << s << endl;
-                    //dumpGraph();
                 }
                 else
                 {
                     oldr->suffixLink = s;
 
                 }
-                //assert(oldr->suffixLink);
-                //cout << " made suffix link from " << oldr << " to " << oldr->suffixLink << endl;
-                //cout << "normalisedStringToState(oldr): " << normalisedStringToState(oldr) << " normalisedStringToState(s): " << normalisedStringToState(oldr->suffixLink) << endl;
-
-                //if (normalisedStringToState(oldr).size() != normalisedStringToState(oldr->suffixLink).size() + 1)
-                //{
-                    //cout << "Uh - oh! "<< endl;
-                    //dumpGraph();
-                //}
-                //assert(oldr->data.wordLength == oldr->suffixLink->data.wordLength + 1);
-                //assert(normalisedStringToState(oldr).size() == normalisedStringToState(oldr->suffixLink).size() + 1);
             }
             return {s, k};
 
@@ -975,25 +824,17 @@ class PseudoIsomorphicSuffixTree
 
         void addSuffixLink(State* s, int numSuffixLinksTraversed)
         {
-            //numSuffixLinksTraversed++;
             assert(s && !s->suffixLink);
-            //cout << "addSuffixLink: " << s << " to s: " << normalisedStringToState(s) << " m_currentString: " << m_currentString << endl;
-            //cout << "addSuffixLink: " << s << " to s with size: " << m_currentString.size() << endl;
-            //dumpGraph();
             auto sParent = s->parent;
-            //cout << "sParent: " << sParent << " to sParent: " << normalisedStringToState(sParent) << endl;
-            bool foundTransition = false;
             verifyStateTransitions(sParent);
             for (int i = 0; i < m_currentString.size(); i++)
             {
-                //cout << " Normalised suffix i: " << i << " " << canonicaliseString(m_currentString.substr(i)) <<  " orig: " << m_currentString.substr(i) << endl;
                 assert(canonicaliseString(m_currentString.substr(i)) == canonicaliseString(canonicaliseString(m_currentString).substr(i)));
             }
             for (const auto& transition : sParent->transitions)
             {
                 if (transition.nextState == s)
                 {
-                    //const auto canonizeResult = canonize(s->suffixLink, k, i - 1, m_numSuffixLinksTraversed >= m_normalisedSuffixPermutations.size() ? &allLettersToA : &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]));
                     auto parentSuffixLink = sParent->suffixLink;
                     if (!parentSuffixLink)
                     {
@@ -1002,45 +843,8 @@ class PseudoIsomorphicSuffixTree
                     }
                     assert(parentSuffixLink);
                     LetterPermutation compoundPermutation;
-                    //cout << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << endl;
-#if 0
-#   ifndef NDEBUG
                     {
-                        LetterPermutation* oldSuffixPermutation = (numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ? &(m_normalisedSuffixPermutations[numSuffixLinksTraversed]) : &allLettersToA);
-                        for (int i = transition.substringFollowed.startIndex - 1; i < transition.substringFollowed.endIndex; i++)
-                        {
-                            const char letter = m_currentString[i];
-                            cout << " letter: " << letter << " oldSuffixPermutation->hasPermutedLetter(letter): " << oldSuffixPermutation->hasPermutedLetter(letter) << " transition.letterPermutation->hasPermutedLetter(letter): " << transition.letterPermutation->hasPermutedLetter(letter) << endl;
-                            assert(oldSuffixPermutation->hasPermutedLetter(letter) == transition.letterPermutation->hasPermutedLetter(letter));
-                            if (oldSuffixPermutation->hasPermutedLetter(letter))
-                            {
-                                cout << "  letter: " << letter << " oldSuffixPermutation->permutedLetter(letter): " << oldSuffixPermutation->permutedLetter(letter) << " transition.letterPermutation->permutedLetter(letter): " << transition.letterPermutation->permutedLetter(letter) << endl;
-                                assert(oldSuffixPermutation->permutedLetter(letter) == transition.letterPermutation->permutedLetter(letter));
-                            }
-                        }
-                    }
-#   endif
-#endif
-                    //if (parentSuffixLink == m_auxiliaryState)
-                    //{
-                        // TODO - optimise this - with a proper lookup, should be doable in O(alphabetSize).
-                        //cout << " parentSuffixLink == m_auxiliaryState!" << endl;
-                        //canonicaliseString(m_currentString.substr(transition.substringFollowed.startIndex - 1 + 1, transition.substringFollowed.length(m_currentString.length())), &compoundPermutation);
-                    //}
-                    //else
-                    {
-                        //m_numSuffixLinksTraversed = 0;
-                        //m_currentString = "kprmnopkl";
-                        //m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].clear();
-                        //canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed), &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]), false, false);
-                        //cout << "glorp: " << m_currentString.substr(m_numSuffixLinksTraversed) << endl;
-                        //cout << "glerp: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
-                        //cout << "glarp: " << canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1)) << endl;
                         LetterPermutation suffixIncreasePermutation;
-                        // TODO - optimise this!
-#if 0
-                        canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
-#endif
                         // Very hard to document, but this essentially performs the equivalent of:
                         //  canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
                         // It's essentially used to map a sequence of letters from the old suffix to the new suffix.
@@ -1077,30 +881,6 @@ class PseudoIsomorphicSuffixTree
                         {
                             suffixIncreasePermutationOpt.permuteUnpermutedLetter(firstLetterPermuted, 'a' + largestMappedToLetterIndexBeforeNextFirstLetter + 1);
                         }
-#if 0
-                        for (int i = 0; i < alphabetSize; i++)
-                        {
-                            const char letter = 'a' + i;
-
-                            cout << "suffixIncreasePermutation hasPermutedLetter " << letter << " " << suffixIncreasePermutation.hasPermutedLetter(letter) << endl;
-                            cout << "suffixIncreasePermutationOpt hasPermutedLetter " << letter << " " << suffixIncreasePermutationOpt.hasPermutedLetter(letter) << endl;
-                            if (suffixIncreasePermutation.hasPermutedLetter(letter) && suffixIncreasePermutationOpt.hasPermutedLetter(letter))
-                            {
-                                cout << " suffixIncreasePermutation " << letter << ": " << suffixIncreasePermutation.permutedLetter(letter) << " suffixIncreasePermutationOpt " << letter << ": " << suffixIncreasePermutationOpt.permutedLetter(letter) << endl;
-
-                            }
-                        }
-                        for (int i = 0; i < alphabetSize; i++)
-                        {
-                            const char letter = 'a' + i;
-                            cout << " verifying " << letter << endl;
-                            assert(suffixIncreasePermutation.hasPermutedLetter(letter) == suffixIncreasePermutationOpt.hasPermutedLetter(letter));
-                            if (suffixIncreasePermutation.hasPermutedLetter(letter))
-                            {
-                                assert(suffixIncreasePermutation.permutedLetter(letter) == suffixIncreasePermutationOpt.permutedLetter(letter));
-                            }
-                        }
-#endif
                         suffixIncreasePermutation = suffixIncreasePermutationOpt;
 
                         for (int i = 0; i < alphabetSize; i++)
@@ -1154,20 +934,6 @@ class PseudoIsomorphicSuffixTree
                         {
                             s->suffixLink = transitionFromParentSuffixLink->nextState;
                         }
-#if 0
-                        else if (postCanonizeLength == 1)
-                        {
-                            cout << " Hmmm .... next letter after state" << endl;
-                            //s->suffixLink = transitionFromParentSuffixLink->nextState;
-                            //s->suffixLink = parentSuffixLinkCanonized;
-                            const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p + 0, alphabetSize, &compoundPermutation);
-
-                            // Need to find the suffix link for testAndSplitResult.second, too :(
-                            assert(!testAndSplitResult.first);
-                            s->suffixLink = testAndSplitResult.second;
-                            //cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
-                        }
-#endif
                         else
                         {
                             const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p - 0, alphabetSize, &compoundPermutation);
@@ -1175,101 +941,52 @@ class PseudoIsomorphicSuffixTree
                             // Need to find the suffix link for testAndSplitResult.second, too :(
                             assert(!testAndSplitResult.first);
                             s->suffixLink = testAndSplitResult.second;
-                            //cout << " repaired(?) suffix links!" << " added new state: " << testAndSplitResult.second << " - " << normalisedStringToState(testAndSplitResult.second) << endl;
                         }
                     }
-                    //dumpGraph();
-                    //assert(testAndSplitResult.second->data.wordLength <= 1);
-                    //testAndSplitResult.second->suffixLink = m_root; // TODO - this is wrong!
-                    foundTransition = true;
                     break;
                 }
             }
-            assert(foundTransition);
-            //cout << "normalisedStringToState(s): " << normalisedStringToState(s) << " new normalisedStringToState(s->suffixLink): " << normalisedStringToState(s->suffixLink) << endl;
             assert(normalisedStringToState(s->suffixLink).size() + 1 == normalisedStringToState(s).size());
             assert(normalisedStringToState(s->suffixLink) == canonicaliseString(normalisedStringToState(s).substr(1)));
         }
         pair<bool, State*> testAndSplit(State* s, int k, int p, int letterIndex, LetterPermutation* letterPermutation)
         {
             assert(s);
-            //cout << "testAndSplit: adding letter: " << static_cast<char>(letterIndex - 1 + 'a') << " index: " << letterIndex << endl;
-            //Cursor blah(s, m_currentString, m_root);
-            //cout << "state canonicalisedStringFollowed: " << blah.canonicalisedStringFollowed() << endl;
-            //cout << " s: " << s << " root: " << m_root << endl;
-            //cout << "k: " << k << " p: " << p << endl;
             if (k <= p)
             {
-                //cout << " not character after state" << endl;
-                //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString[k - 1]).back();
-                //const char letterToFollowFromState = canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength)) + m_currentString[k - 1]).back();
                 const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
-                //cout << "m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " s wordlength: " << s->data.wordLength << " string: " << m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) << " canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength)) <<  " current suffix canonicalised: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
-                //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
-                //cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
-                //Cursor blah(s, m_currentString, m_root);
-                //cout << " to s: " << blah.stringFollowed()  << endl;
-                //cout << " canonicalised to s: " << canonicaliseString(blah.stringFollowed()) << endl;
                 const auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
                 auto sPrime = tkTransitionIter->nextState;
                 auto kPrime = tkTransitionIter->substringFollowed.startIndex;
                 auto pPrime = tkTransitionIter->substringFollowed.endIndex;
-                //cout << "kPrime: " << kPrime << " pPrime: " << pPrime << endl;
-                //assert(pPrime < 0 || (p - k <= pPrime - kPrime));
-
-                //cout << " kPrime: " << kPrime << " pPrime: " << pPrime << endl;
-                //Cursor blahPrime(sPrime, m_currentString, m_root);
-                //cout << " blahPrime: " << blahPrime.stringFollowed() << endl;
-                //const string bloo = 
-                //cout << " blooPrime: " << m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) +  '|' + m_currentString.substr(kPrime - 1, pPrime - kPrime + 1) << endl;
-                //cout << " blooPrime2: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) +  m_currentString.substr(kPrime - 1, pPrime - kPrime + 1)) << endl;
-                //cout << "flarp: " << (canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString.substr(kPrime - 1, pPrime - kPrime + 1)).back() - 'a' + 1) << endl;
-                //cout << "p - k: " << (p - k) << " m_currentString.substr(kPrime - 1): " <<  m_currentString.substr(kPrime - 1) << " length: " <<  m_currentString.substr(kPrime - 1).length() << endl;
-                //cout << " flarpPrime: " << (canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString.substr(kPrime - 1, p - k + 2))) << endl;
-                //cout << "gleep: " << canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString.substr(kPrime - 1, p - k + 2)) << endl;
-                //cout << "gloop: " << canonicaliseString(blah.stringFollowed() + m_currentString.substr(kPrime - 1, p - k + 2)) << endl;
-                
-                //if (letterIndex ==  canonicaliseString(canonicaliseString(blah.stringFollowed()) + m_currentString.substr(kPrime - 1, p - k + 2)).back() - 'a' + 1) // TODO - this probably isn't right.
-                //if (letterIndex == letterPermutation->permutedLetter(m_currentString[kPrime + p - k]) - 'a' + 1) // TODO - this probably isn't right.
                 assert(tkTransitionIter->letterPermutation);
                 if (letterIndex == tkTransitionIter->letterPermutation->permutedLetter(m_currentString[kPrime + p - k]) - 'a' + 1)
                 {
-                    //cout << " is end point!" << endl;
                     return {true, s};
                 }
                 else
                 {
-                    //cout << "Splitting" << endl;
                     LetterPermutation* letterPermutationOnTransition = tkTransitionIter->letterPermutation;
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
-                    //cout << " created new split state: " << r << endl;
                     r->data.wordLength = s->data.wordLength + p - k + 1;
                     s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), letterPermutationOnTransition, m_currentString));
                     verifyStateTransitions(s);
                     r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), letterPermutationOnTransition, m_currentString));
                     verifyStateTransitions(r);
                     sPrime->parent = r;
-                    //cout << " New middle state: " << blah.stringFollowed() << " canonicalised: " << canonicaliseString(blah.stringFollowed()) << endl;
-                    //cout << " sPrime : " << blahPrime.stringFollowed() << " canonicalised: " << canonicaliseString(blahPrime.stringFollowed()) << endl;
-                    //cout << " is not end point!" << endl;
                     return {false, r};
                 }
             }
             else
             {
-                //cout << " character after state" << endl;
-                //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed, s->data.wordLength) + m_currentString[k - 1]).back();
-                //cout << " letterToFollowFromState: " << letterToFollowFromState << endl;
                 const auto tTransitionIter = findTransitionIter(s, letterIndex, false);
                 if (tTransitionIter == s->transitions.end())
                 {
-                    //cout << " is not end point!" << endl;
                     return {false, s};
                 }
                 else
                 {
-                    //cout << " is end point!" << endl;
                     return {true, s};
                 }
             }
@@ -1277,28 +994,12 @@ class PseudoIsomorphicSuffixTree
         std::pair<State*, int> canonize(State* s, int k, int p, LetterPermutation* letterPermutation)
         {
             assert(s);
-            //Cursor blah(s, m_currentString, m_root);
             const auto originalS = s;
-            //const auto canonicalOriginal = canonicaliseString((s == m_auxiliaryState ? "" :  blah.stringFollowed()) + m_currentString.substr(k - 1, p - k + 1)); 
-            //const auto canonicalOriginal = canonicaliseString((s == m_auxiliaryState ? "" :  blah.stringFollowed()) + m_currentString.substr(k - 1, p - k + 1)); 
-            //cout << " Bloop: " << m_currentString.substr(k - 1, p - k + 1) << endl;
-#ifndef NDEBUG
-            const auto canonicalOriginal = normalisedStringToState(s) + canonicaliseString(m_currentString.substr(k - 1, p - k + 1), letterPermutation);
-#endif
-            //cout << "canonize - canonicalOriginal: " << canonicalOriginal << " k: " << k << " p: " << p << endl;
-            //cout << " canonize - originalS: " << originalS << " normalisedStringToState(originalS) " << normalisedStringToState(originalS) << " k: " << k << " p: " << p << endl;
             if (p < k)
                 return {s, k};
             else
             {
-                Cursor blah(s, m_currentString, m_root);
-                if (s != m_auxiliaryState)
-                {
-                    //cout << " canonize: s: " << blah.stringFollowed() << " canonical s: " << canonicaliseString(blah.stringFollowed()) << " k: " << k << " p: " << p << endl;
-                }
-                //const char letterToFollowFromState =  (s == m_auxiliaryState) ? 'a' : canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
-                const char letterToFollowFromState =  /*(s == m_auxiliaryState) ? 'a' :*/ letterPermutation->permutedLetter(m_currentString[k - 1]);
-                //cout << " canonize letterToFollowFromState: " << letterToFollowFromState << " suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << " suffix canonical: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << " wordLength: " << s->data.wordLength  << endl;
+                const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
                 assert(letterToFollowFromState >= 'a' && letterToFollowFromState <= 'z');
                 auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
                 auto sPrime = tkTransitionIter->nextState;
@@ -1309,31 +1010,15 @@ class PseudoIsomorphicSuffixTree
                 {
                     k = k + pPrime - kPrime + 1;
                     s = sPrime;
-                    //Cursor blah(s, m_currentString, m_root);
-                    //cout << " canonize: s: " << blah.stringFollowed() << " canonical s: " << canonicaliseString(blah.stringFollowed()) << " k: " << k << " p: " << p << endl;
                     if (k <= p)
                     {
-                        //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed) + m_currentString[k - 1])[s->data.wordLength];
                         assert(s != m_auxiliaryState);
-                        //const char letterToFollowFromState = canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed))[s->data.wordLength];
-                        //const char letterToFollowFromState =  (s == m_auxiliaryState) ? 'a' : canonicaliseString(blah.stringFollowed() + m_currentString[k - 1]).back();
                         const char letterToFollowFromState =   letterPermutation->permutedLetter(m_currentString[k - 1]);
-                        //cout << " canonize letterToFollowFromState: " << letterToFollowFromState << " suffix: " << m_currentString.substr(m_numSuffixLinksTraversed) << " suffix canonical: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << " wordLength: " << s->data.wordLength  << endl;
-                        assert(letterToFollowFromState >= 'a' && letterToFollowFromState <= 'z');
                         auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
                         sPrime = tkTransitionIter->nextState;
                         kPrime = tkTransitionIter->substringFollowed.startIndex;
                         pPrime = tkTransitionIter->substringFollowed.endIndex;
                     }
-#ifndef NDEBUG
-                    if (!sWasAux)
-                    {
-                        cout << " canonize - normalisedStringToState(s): " << normalisedStringToState(s) << endl;
-                        const auto canonizedNew = normalisedStringToState(s) + canonicaliseString(m_currentString.substr(k - 1, p - k + 1), letterPermutation);
-                        cout << " canonizedNew: " << canonizedNew  << " canonicalOriginal: " << canonicalOriginal << " s changed: " << (s != originalS) << endl;
-                        assert(canonizedNew == canonicalOriginal);
-                    }
-#endif
                     sWasAux = false;
                 }
             }
@@ -1349,7 +1034,6 @@ class PseudoIsomorphicSuffixTree
         }
         void verifyStateTransitions(State* state)
         {
-            //cout << "verifyStateTransitions: " << state << endl;
             Cursor blah(state, m_currentString, m_root);
             set<char> canonicalNextChars;
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
@@ -1358,7 +1042,6 @@ class PseudoIsomorphicSuffixTree
                 {
                     assert(transitionIter->letterPermutation);
                     const char canonicalNextChar = transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]);
-                    //cout << " canonicalNextChar: " << canonicalNextChar << " string followed: " << blah.stringFollowed() << " actual char: " << m_currentString[transitionIter->substringFollowed.startIndex - 1] << " (" << transitionIter->substringFollowed.startIndex << ")" << endl;
                     assert(canonicalNextChars.find(canonicalNextChar) == canonicalNextChars.end());
                     canonicalNextChars.insert(canonicalNextChar);
                 }
@@ -1371,14 +1054,12 @@ class PseudoIsomorphicSuffixTree
         }
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
         {
-            //cout << " findTransitionIter letterIndex: " << letterIndex << endl;
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
             {
                 if (transitionIter->substringFollowed.startIndex >= 0)
                 {
                     assert(transitionIter->substringFollowed.startIndex != 0);
                     const char transitionLetter = transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]);
-                    //cout << " found: " << transitionLetter << " index: " << (transitionLetter - 'a' + 1) << endl;
                     if (transitionLetter - 'a' + 1 == letterIndex)
                     {
                         return transitionIter;
@@ -1420,7 +1101,6 @@ class PseudoIsomorphicSuffixTree
         {
             if (!s.empty())
             {
-                //cout << " normalised string (explicit): " << s << endl;
                 assert(normalisedStrings.find(s) == normalisedStrings.end());
                 normalisedStrings.insert(s);
             }
@@ -1440,7 +1120,6 @@ class PseudoIsomorphicSuffixTree
                 for (int i = 0; i < normalisedRemainderOfTransition.length() - 1; i++)
                 {
                     normalisedString += normalisedRemainderOfTransition[i];
-                    //cout << " normalised string (non-explicit): " << normalisedString << endl;
                     assert(normalisedStrings.find(normalisedString) == normalisedStrings.end());
                     normalisedStrings.insert(normalisedString);
                 }
@@ -1465,7 +1144,6 @@ set<string> bruteForce(const string& s)
         for (int j = 0; i + j < s.size(); j++)
         {
             substring.push_back(s[i + j]);
-            //cout << "substring: " << substring << " canonicalised: " << canonicaliseString(substring) << endl;
             const string canonicalisedSubstring = canonicaliseString(substring, nullptr, false, false);
             substrings.insert(substring);
             canonicalisedSubstrings.insert(canonicalisedSubstring);
@@ -1508,12 +1186,10 @@ void doStuff(const string& s)
     cout << "doStuff: " << s << endl;
 #define BRUTE_FORCE
 #ifdef BRUTE_FORCE
-    //cout << "brute force: " << endl;
     set<string> normalisedStringsBruteForce = bruteForce(s);
 #endif
     //for (const auto& str : bruteForce(s))
     //{
-    //cout << " " << str << endl;
     //}
     PseudoIsomorphicSuffixTree treeBuilder;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -1539,7 +1215,6 @@ void doStuff(const string& s)
     }
 #endif
 
-    //cout << "s: " << s << " canonicalised: " << canonicaliseString(s) << endl;
 }
 
 
