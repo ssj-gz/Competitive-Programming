@@ -71,8 +71,14 @@ string canonicaliseString(const string& s, LetterPermutation* letterPermutation 
     //cout << " canonicaliseString: " << s << " letterPermutation: " << letterPermutation << endl;
     LetterPermutation letterPermutationLocal;
     LetterPermutation* letterPermutationToUse = letterPermutation;
+    if (letterPermutation && readOnly)
+    {
+        letterPermutationLocal = *letterPermutation;
+    }
     if (!letterPermutationToUse)
+    {
         letterPermutationToUse = &letterPermutationLocal;
+    }
 
     string canonicalised;
 
@@ -85,10 +91,7 @@ string canonicaliseString(const string& s, LetterPermutation* letterPermutation 
                 cout << "Error: letter " << letter << " has no permutation in permutation: " << letterPermutationToUse << endl;
                 assert(false);
             }
-            if (!(readOnly && letterPermutationToUse == letterPermutation))
-            {
-                letterPermutationToUse->permuteUnpermutedLetter(letter); 
-            }
+            letterPermutationToUse->permuteUnpermutedLetter(letter); 
         }
         canonicalised += letterPermutationToUse->permutedLetter(letter);
     }
