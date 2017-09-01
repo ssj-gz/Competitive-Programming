@@ -106,7 +106,7 @@ void assertIsCanonical(const string& s)
  * for online construction of suffix trees.
  * @author Simon St James, Jan 2017.
  */
-class SuffixTreeBuilder
+class PseudoIsomorphicSuffixTree
 {
     private:
         struct State;
@@ -159,7 +159,7 @@ class SuffixTreeBuilder
             StateData data;
         };
     public:
-        SuffixTreeBuilder()
+        PseudoIsomorphicSuffixTree()
         {
             m_states.reserve(1'000'000);
 
@@ -178,7 +178,7 @@ class SuffixTreeBuilder
             m_s = m_root;
             m_k = 1;
         }
-        SuffixTreeBuilder(const SuffixTreeBuilder& other) = delete;
+        PseudoIsomorphicSuffixTree(const PseudoIsomorphicSuffixTree& other) = delete;
         void appendLetter(char letter)
         {
             auto& permutationsMissingLetter = m_permutationsMissingLetter[letter - 'a'];
@@ -706,7 +706,7 @@ class SuffixTreeBuilder
                     return transitionFromParent;
                 }
 
-                friend class SuffixTreeBuilder;
+                friend class PseudoIsomorphicSuffixTree;
                 State *m_state = nullptr;
                 Transition *m_transition = nullptr;
                 int m_posInTransition = -1;
@@ -1367,7 +1367,7 @@ class SuffixTreeBuilder
         }
 };
 
-using Cursor = SuffixTreeBuilder::Cursor;
+using Cursor = PseudoIsomorphicSuffixTree::Cursor;
 
 
 set<string> bruteForce(const string& s)
@@ -1427,7 +1427,7 @@ void doStuff(const string& s)
     //{
         //cout << " " << str << endl;
     //}
-    SuffixTreeBuilder treeBuilder;
+    PseudoIsomorphicSuffixTree treeBuilder;
     //treeBuilder.computeSuffixNormalisationPermutations(s);
     treeBuilder.appendString(s);
 
