@@ -849,7 +849,6 @@ class PseudoIsomorphicSuffixTree
                         LetterPermutation suffixIncreasePermutationOpt;
                         LetterPermutation& oldSuffixPermutation = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed];
                         const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
-
                         const char firstLetterPermuted = oldSuffixPermutation.permutedLetter(firstLetter);
                         int largestMappedToLetterIndexBeforeNextFirstLetter = -1;
                         int nextOccurrenceOfFirstLetter = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
@@ -858,9 +857,9 @@ class PseudoIsomorphicSuffixTree
                             const char letter = 'a' + i;
                             if (letter != firstLetter)
                             {
-                                if (m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].hasPermutedLetter(letter))
+                                if (oldSuffixPermutation.hasPermutedLetter(letter))
                                 {
-                                    const char mappedByOldSuffix = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(letter);
+                                    const char mappedByOldSuffix = oldSuffixPermutation.permutedLetter(letter);
                                     if (nextOccurrenceOfFirstLetter != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > nextOccurrenceOfFirstLetter)
                                     {
                                         suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
