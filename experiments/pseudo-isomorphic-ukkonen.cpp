@@ -141,8 +141,8 @@ class PseudoIsomorphicSuffixTree
         };
         struct Transition
         {
-            Transition(State *nextState, const Substring& substringFollowed, const string& currentString)
-                : nextState(nextState), substringFollowed(substringFollowed)
+            Transition(State *nextState, const Substring& substringFollowed, LetterPermutation* letterPermutation, const string& currentString)
+                : nextState(nextState), substringFollowed(substringFollowed), letterPermutation{letterPermutation}
             {
                 if (substringFollowed.startIndex >= 1)
                     firstLetter = currentString[substringFollowed.startIndex - 1];
@@ -179,7 +179,7 @@ class PseudoIsomorphicSuffixTree
 
             for (int i = 0; i < alphabetSize; i++)
             {
-                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
+                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), &allLettersToA, m_currentString));
                 allLettersToA.permuteUnpermutedLetter('a' + i, 'a');
             }
             m_root->suffixLink = m_auxiliaryState;
@@ -815,9 +815,8 @@ class PseudoIsomorphicSuffixTree
                     Cursor rblah(r, m_currentString, m_root);
                     //cout << " r: " << rblah.stringFollowed() << " canonicalised: " << canonicaliseString(rblah.stringFollowed()) << endl;
                 }
-                r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), m_currentString));
+                r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]), m_currentString));
                 assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
-                r->transitions.back().letterPermutation = &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]);
                 verifyStateTransitions(r);
                 if (oldr != m_root)
                 {
@@ -1246,15 +1245,11 @@ class PseudoIsomorphicSuffixTree
                     auto r = createNewState(s);
                     //cout << " created new split state: " << r << endl;
                     r->data.wordLength = s->data.wordLength + p - k + 1;
-                    s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), m_currentString));
-                    s->transitions.back().letterPermutation = letterPermutationOnTransition;
+                    s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), letterPermutationOnTransition, m_currentString));
                     verifyStateTransitions(s);
-                    r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
-                    r->transitions.back().letterPermutation = letterPermutationOnTransition;
+                    r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), letterPermutationOnTransition, m_currentString));
                     verifyStateTransitions(r);
                     sPrime->parent = r;
-                    Cursor blah(r, m_currentString, m_root);
-                    Cursor blahPrime(sPrime, m_currentString, m_root);
                     //cout << " New middle state: " << blah.stringFollowed() << " canonicalised: " << canonicaliseString(blah.stringFollowed()) << endl;
                     //cout << " sPrime : " << blahPrime.stringFollowed() << " canonicalised: " << canonicaliseString(blahPrime.stringFollowed()) << endl;
                     //cout << " is not end point!" << endl;
@@ -1511,7 +1506,7 @@ void verify(Cursor cursor, int wordLength)
 void doStuff(const string& s)
 {
     cout << "doStuff: " << s << endl;
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
     //cout << "brute force: " << endl;
     set<string> normalisedStringsBruteForce = bruteForce(s);
