@@ -1,4 +1,4 @@
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -1041,45 +1041,41 @@ class PseudoIsomorphicSuffixTree
 #if 0
                         canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
 #endif
+                        // Very hard to document, but this essentially performs the equivalent of:
+                        //  canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
+                        // It's essentially used to map a sequence of letters from the old suffix to the new suffix.
+                        // It kind of just maps a letter to the letter before it i.e. b -> a, c -> b, d -> c or itself (b -> b, c -> c, etc) depending on each letters
+                        // next occurence compared to nextOccurrenceOfFirstLetter.
                         LetterPermutation suffixIncreasePermutationOpt;
+                        LetterPermutation& oldSuffixPermutation = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed];
                         const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
-                        const char glarp = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[m_numSuffixLinksTraversed]);
-                        int blee = -1;
-                        int bloo = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
-                        //cout << " bloo: " << bloo << " m_currentString: " << m_currentString << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " first letter: " << m_currentString[m_numSuffixLinksTraversed] << endl;
-                        //cout << " blaa: " << m_currentString.find(m_currentString[m_numSuffixLinksTraversed], m_numSuffixLinksTraversed + 1) << endl;
+
+                        const char firstLetterPermuted = oldSuffixPermutation.permutedLetter(firstLetter);
+                        int largestMappedToLetterIndexBeforeNextFirstLetter = -1;
+                        int nextOccurrenceOfFirstLetter = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
                         for (int i = 0; i < alphabetSize; i++)
                         {
                             const char letter = 'a' + i;
-                            //cout << " raw letter: " << letter << " occurrence in suffix: " << m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed] << endl;
-                            if (m_currentString[m_numSuffixLinksTraversed] != letter)
+                            if (letter != firstLetter)
                             {
                                 if (m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].hasPermutedLetter(letter))
                                 {
-                                    //cout << " raw letter " << letter << " mapped to " << m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(letter) << " by old suffix" << endl;
                                     const char mappedByOldSuffix = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(letter);
-                                    if (bloo != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > bloo)
+                                    if (nextOccurrenceOfFirstLetter != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > nextOccurrenceOfFirstLetter)
                                     {
-                                        //cout << " mapping " << mappedByOldSuffix << " to itself" << endl;
                                         suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
                                     }
                                     else
                                     {
                                         suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix - 1);
-                                        //cout << " mapping " << mappedByOldSuffix << " to " << suffixIncreasePermutationOpt.permutedLetter(mappedByOldSuffix) << endl; 
-                                        blee = max(blee, mappedByOldSuffix - 1 - 'a');
+                                        largestMappedToLetterIndexBeforeNextFirstLetter = max(largestMappedToLetterIndexBeforeNextFirstLetter, mappedByOldSuffix - 1 - 'a');
                                     }
-                                }
-                                else 
-                                {
-                                    //cout << " raw letter " << letter << " not mapped by old suffix" << endl;
                                 }
                             }
                         }
-                        if (bloo != -1)
+                        if (nextOccurrenceOfFirstLetter != -1)
                         {
-                            suffixIncreasePermutationOpt.permuteUnpermutedLetter(glarp, 'a' + blee + 1);
-                            //cout << " hard mapping " << glarp << " to " << suffixIncreasePermutationOpt.permutedLetter(glarp) << endl;
+                            suffixIncreasePermutationOpt.permuteUnpermutedLetter(firstLetterPermuted, 'a' + largestMappedToLetterIndexBeforeNextFirstLetter + 1);
                         }
 #if 0
                         for (int i = 0; i < alphabetSize; i++)
@@ -1586,7 +1582,7 @@ int main()
 #ifdef RANDOM
     while (true)
     {
-        const int n = rand() % 100000;
+        const int n = rand() % 1000;
         const int m = rand() % 26 + 1;
         string s(n, '\0');
         for (int i = 0; i < n; i++)
