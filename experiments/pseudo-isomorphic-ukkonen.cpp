@@ -205,6 +205,19 @@ class PseudoIsomorphicSuffixTree
                 }
             }
 
+            for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
+            {
+                m_nextOccurenceOfLetterIndexAtOrAfter[letterIndex].push_back(-1);
+            }
+            auto nextOccurenceOfLetterIndexAtOrAfterRevIter = m_nextOccurenceOfLetterIndexAtOrAfter[letter - 'a'].rbegin();
+            cout << " glump: " << *nextOccurenceOfLetterIndexAtOrAfterRevIter << endl;
+            while (nextOccurenceOfLetterIndexAtOrAfterRevIter != m_nextOccurenceOfLetterIndexAtOrAfter[letter - 'a'].rend() && *nextOccurenceOfLetterIndexAtOrAfterRevIter == -1)
+            {
+                cout << " shorp!" << endl;
+                *nextOccurenceOfLetterIndexAtOrAfterRevIter = m_currentString.size();
+                nextOccurenceOfLetterIndexAtOrAfterRevIter++;
+            }
+
             m_currentString += letter;
             const auto updateResult = update(m_s, m_k, m_currentString.size());
             m_s = updateResult.first;
@@ -213,7 +226,7 @@ class PseudoIsomorphicSuffixTree
             m_s = canonizeResult.first;
             m_k = canonizeResult.second;
             //dumpGraph();
-            dumpNormalisedStrings();
+            //dumpNormalisedStrings();
         }
         void appendString(const string& stringToAppend)
         {
@@ -754,6 +767,7 @@ class PseudoIsomorphicSuffixTree
         deque<LetterPermutation> m_normalisedSuffixPermutations;
         LetterPermutation allLettersToA;
         array<deque<LetterPermutation*>, alphabetSize> m_permutationsMissingLetter;
+        array<deque<int>, alphabetSize> m_nextOccurenceOfLetterIndexAtOrAfter;
 
         string normalisedStringToState(State* s)
         {
@@ -1018,9 +1032,79 @@ class PseudoIsomorphicSuffixTree
                     //}
                     //else
                     {
+                        //m_numSuffixLinksTraversed = 0;
+                        //m_currentString = "kprmnopkl";
+                        //m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].clear();
+                        //canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed), &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]), false, false);
+                        cout << "glorp: " << m_currentString.substr(m_numSuffixLinksTraversed) << endl;
+                        cout << "glerp: " << canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)) << endl;
+                        cout << "glarp: " << canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1)) << endl;
                         LetterPermutation suffixIncreasePermutation;
                         // TODO - optimise this!
                         canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
+                        LetterPermutation suffixIncreasePermutationOpt;
+                        const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
+                        const char glarp = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[m_numSuffixLinksTraversed]);
+                        int blee = -1;
+                        int bloo = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
+                        cout << " bloo: " << bloo << " m_currentString: " << m_currentString << " m_numSuffixLinksTraversed: " << m_numSuffixLinksTraversed << " first letter: " << m_currentString[m_numSuffixLinksTraversed] << endl;
+                        cout << " blaa: " << m_currentString.find(m_currentString[m_numSuffixLinksTraversed], m_numSuffixLinksTraversed + 1) << endl;
+                        for (int i = 0; i < alphabetSize; i++)
+                        {
+                            const char letter = 'a' + i;
+                            cout << " raw letter: " << letter << " occurrence in suffix: " << m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed] << endl;
+                            if (m_currentString[m_numSuffixLinksTraversed] != letter)
+                            {
+                                if (m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].hasPermutedLetter(letter))
+                                {
+                                    cout << " raw letter " << letter << " mapped to " << m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(letter) << " by old suffix" << endl;
+                                    const char mappedByOldSuffix = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(letter);
+                                    if (bloo != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > bloo)
+                                    {
+                                        cout << " mapping " << mappedByOldSuffix << " to itself" << endl;
+                                        suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
+                                    }
+                                    else
+                                    {
+                                        suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix - 1);
+                                        cout << " mapping " << mappedByOldSuffix << " to " << suffixIncreasePermutationOpt.permutedLetter(mappedByOldSuffix) << endl; 
+                                        blee = max(blee, mappedByOldSuffix - 1 - 'a');
+                                    }
+                                }
+                                else 
+                                {
+                                    cout << " raw letter " << letter << " not mapped by old suffix" << endl;
+                                }
+                            }
+                        }
+                        if (bloo != -1)
+                        {
+                            suffixIncreasePermutationOpt.permuteUnpermutedLetter(glarp, 'a' + blee + 1);
+                            cout << " hard mapping " << glarp << " to " << suffixIncreasePermutationOpt.permutedLetter(glarp) << endl;
+                        }
+                        for (int i = 0; i < alphabetSize; i++)
+                        {
+                            const char letter = 'a' + i;
+
+                            cout << "suffixIncreasePermutation hasPermutedLetter " << letter << " " << suffixIncreasePermutation.hasPermutedLetter(letter) << endl;
+                            cout << "suffixIncreasePermutationOpt hasPermutedLetter " << letter << " " << suffixIncreasePermutationOpt.hasPermutedLetter(letter) << endl;
+                            if (suffixIncreasePermutation.hasPermutedLetter(letter) && suffixIncreasePermutationOpt.hasPermutedLetter(letter))
+                            {
+                                cout << " suffixIncreasePermutation " << letter << ": " << suffixIncreasePermutation.permutedLetter(letter) << " suffixIncreasePermutationOpt " << letter << ": " << suffixIncreasePermutationOpt.permutedLetter(letter) << endl;
+
+                            }
+                        }
+                        for (int i = 0; i < alphabetSize; i++)
+                        {
+                            const char letter = 'a' + i;
+                            cout << " verifying " << letter << endl;
+                            assert(suffixIncreasePermutation.hasPermutedLetter(letter) == suffixIncreasePermutationOpt.hasPermutedLetter(letter));
+                            if (suffixIncreasePermutation.hasPermutedLetter(letter))
+                            {
+                                assert(suffixIncreasePermutation.permutedLetter(letter) == suffixIncreasePermutationOpt.permutedLetter(letter));
+                            }
+                        }
+
                         for (int i = 0; i < alphabetSize; i++)
                         {
                             const char originalLetter = 'a' + i;
