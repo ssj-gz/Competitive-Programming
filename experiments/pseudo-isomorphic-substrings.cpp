@@ -1015,7 +1015,7 @@ void doStuff(const string& s)
     PseudoIsomorphicSuffixTree treeBuilder;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    vector<int> optimisedResults;
+    vector<int64_t> optimisedResults;
     for (const auto letter : s)
     {
         treeBuilder.appendLetter(letter);
