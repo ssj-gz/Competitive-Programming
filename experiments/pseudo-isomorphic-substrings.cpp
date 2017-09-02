@@ -18,11 +18,6 @@
 using namespace std;
 
 const int alphabetSize = 27; // Include the magic '{' for making final states explicit - assumes the input string has no '{''s, obviously!
-struct StateData
-{
-    char letterPermutation[alphabetSize] = {};
-    int wordLength = 0;
-};
 
 class LetterPermutation
 {
@@ -147,8 +142,7 @@ class PseudoIsomorphicSuffixTree
             State* parent = nullptr;
             int index = -1;
             bool isFinal = false;
-
-            StateData data;
+            int wordLength = 0;
         };
     public:
         PseudoIsomorphicSuffixTree()
@@ -258,11 +252,6 @@ class PseudoIsomorphicSuffixTree
                     assert(m_transition);
                     assert(m_transition->letterPermutation);
                     return m_transition->letterPermutation;
-                }
-                StateData& stateData()
-                {
-                    assert(isOnExplicitState());
-                    return m_state->data;
                 }
                 int stateId() const
                 {
@@ -503,7 +492,7 @@ class PseudoIsomorphicSuffixTree
             while (!isEndPoint)
             {
                 auto rPrime = createNewState(r);
-                rPrime->data.wordLength = -1;
+                rPrime->wordLength = -1;
                 r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]), m_currentString));
                 assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
                 m_numLeafStates++;
@@ -539,7 +528,7 @@ class PseudoIsomorphicSuffixTree
             if (oldr != m_root)
             {
                 assert(s == r);
-                if(oldr->data.wordLength != s->data.wordLength + 1)
+                if(oldr->wordLength != s->wordLength + 1)
                 {
                     assert(!oldr->suffixLink);
                 }
@@ -697,7 +686,7 @@ class PseudoIsomorphicSuffixTree
                     LetterPermutation* letterPermutationOnTransition = tkTransitionIter->letterPermutation;
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
-                    r->data.wordLength = s->data.wordLength + p - k + 1;
+                    r->wordLength = s->wordLength + p - k + 1;
                     s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), letterPermutationOnTransition, m_currentString));
                     r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), letterPermutationOnTransition, m_currentString));
                     sPrime->parent = r;
