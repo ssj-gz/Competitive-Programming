@@ -202,7 +202,7 @@ class PseudoIsomorphicSuffixTree
             m_s = canonizeResult.first;
             m_k = canonizeResult.second;
 
-            m_numDistinctWords += m_numLeafStates;
+            m_numNonPseudoIsomorphicSubstrings += m_numLeafStates;
         }
         void appendString(const string& stringToAppend)
         {
@@ -213,9 +213,9 @@ class PseudoIsomorphicSuffixTree
                 numAppended++;
             }
         }
-        int64_t numDistinctWords() const
+        int64_t numNonPseudoIsomorphicSubstrings() const
         {
-            return m_numDistinctWords;
+            return m_numNonPseudoIsomorphicSubstrings;
         }
         string currentString() const
         {
@@ -385,7 +385,7 @@ class PseudoIsomorphicSuffixTree
         array<deque<int>, alphabetSize> m_nextOccurenceOfLetterIndexAtOrAfter;
 
         int64_t m_numLeafStates = 0;
-        int64_t m_numDistinctWords = 0;
+        int64_t m_numNonPseudoIsomorphicSubstrings = 0;
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
@@ -648,7 +648,7 @@ int main()
     for (const auto letter : s)
     {
         treeBuilder.appendLetter(letter);
-        cout << treeBuilder.numDistinctWords() << endl;
+        cout << treeBuilder.numNonPseudoIsomorphicSubstrings() << endl;
     }
 }
 
