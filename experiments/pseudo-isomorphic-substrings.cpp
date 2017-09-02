@@ -530,10 +530,10 @@ class PseudoIsomorphicSuffixTree
                         parentSuffixLink = m_root;
                     // Follow the letters on the transition, mapped to letters in the next suffix (and canonize, of course).
                     const auto canonizeResult = canonize(parentSuffixLink, k, p, &compoundPermutation);
-                    const auto parentSuffixLinkCanonized = canonizeResult.first;
+                    const auto suffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
-                    // The parent suffix link may not be explicit; (ab?)use testAndSplitResult to ensure it so.
-                    const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
+                    // The suffix link may not be explicit; (ab?)use testAndSplitResult to ensure it so.
+                    const auto testAndSplitResult = testAndSplit(suffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
                     s->suffixLink = testAndSplitResult.second;
                     break;
                 }
