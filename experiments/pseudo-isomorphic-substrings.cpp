@@ -454,10 +454,6 @@ class PseudoIsomorphicSuffixTree
         {
             assert(s && !s->suffixLink);
             auto sParent = s->parent;
-            for (int i = 0; i < m_currentString.size(); i++)
-            {
-                assert(isoNormaliseString(m_currentString.substr(i)) == isoNormaliseString(isoNormaliseString(m_currentString).substr(i)));
-            }
             for (const auto& transition : sParent->transitions)
             {
                 if (transition.nextState == s)
@@ -475,12 +471,11 @@ class PseudoIsomorphicSuffixTree
                     // It's essentially used to map a sequence of letters from the old suffix to the new suffix.
                     // It kind of just maps a letter to the letter before it i.e. b -> a, c -> b, d -> c or itself (b -> b, c -> c, etc) depending on each letters
                     // next occurence compared to nextOccurrenceOfFirstLetter.
-                    LetterPermutation suffixIncreasePermutationOpt;
                     LetterPermutation& oldSuffixPermutation = m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed];
                     const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
                     const char firstLetterPermuted = oldSuffixPermutation.permutedLetter(firstLetter);
                     int largestMappedToLetterIndexBeforeNextFirstLetter = -1;
-                    int nextOccurrenceOfFirstLetter = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
+                    const int nextOccurrenceOfFirstLetter = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
                     for (int i = 0; i < alphabetSize; i++)
                     {
                         const char letter = 'a' + i;
@@ -491,11 +486,11 @@ class PseudoIsomorphicSuffixTree
                                 const char mappedByOldSuffix = oldSuffixPermutation.permutedLetter(letter);
                                 if (nextOccurrenceOfFirstLetter != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > nextOccurrenceOfFirstLetter)
                                 {
-                                    suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
+                                    suffixIncreasePermutation.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
                                 }
                                 else
                                 {
-                                    suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix - 1);
+                                    suffixIncreasePermutation.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix - 1);
                                     largestMappedToLetterIndexBeforeNextFirstLetter = max(largestMappedToLetterIndexBeforeNextFirstLetter, mappedByOldSuffix - 1 - 'a');
                                 }
                             }
@@ -503,13 +498,12 @@ class PseudoIsomorphicSuffixTree
                     }
                     if (nextOccurrenceOfFirstLetter != -1)
                     {
-                        suffixIncreasePermutationOpt.permuteUnpermutedLetter(firstLetterPermuted, 'a' + largestMappedToLetterIndexBeforeNextFirstLetter + 1);
+                        suffixIncreasePermutation.permuteUnpermutedLetter(firstLetterPermuted, 'a' + largestMappedToLetterIndexBeforeNextFirstLetter + 1);
                     }
-                    suffixIncreasePermutation = suffixIncreasePermutationOpt;
 
                     // The compoundPermutation permutation essentially translates from letters on the transition from s's parent to s to 
                     // letters in the next suffix; following the letters on the transition with this permutation
-                    // applied gets us towards our suffix link.
+                    // applied from parentSuffixLink gets us towards our suffix link for s.
                     LetterPermutation compoundPermutation;
                     for (int i = 0; i < alphabetSize; i++)
                     {
@@ -530,15 +524,15 @@ class PseudoIsomorphicSuffixTree
                         assert(isoNormalisedStringToState(parentSuffixLink) == isoNormaliseString(isoNormalisedStringToState(sParent).substr(1)));
 
                     const auto p = transition.substringFollowed.endIndex;
-                    const auto oldK = (parentSuffixLink == m_auxiliaryState ? transition.substringFollowed.startIndex + 1 : transition.substringFollowed.startIndex);
-                    const auto preCanonizeLength = p - oldK + 1;
+                    const auto k = (parentSuffixLink == m_auxiliaryState ? transition.substringFollowed.startIndex + 1 : transition.substringFollowed.startIndex);
+                    const auto preCanonizeLength = p - k + 1;
                     if (parentSuffixLink == m_auxiliaryState)
                         parentSuffixLink = m_root;
                     // Follow the letters on the transition, mapped to letters in the next suffix (and canonize, of course).
-                    const auto canonizeResult = canonize(parentSuffixLink, oldK, p, &compoundPermutation);
+                    const auto canonizeResult = canonize(parentSuffixLink, k, p, &compoundPermutation);
                     const auto parentSuffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
-                    // The parent suffix link is not explicit; (ab?)use testAndSplitResult to make it so.
+                    // The parent suffix link may not be explicit; (ab?)use testAndSplitResult to ensure it so.
                     const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
                     s->suffixLink = testAndSplitResult.second;
                     break;
