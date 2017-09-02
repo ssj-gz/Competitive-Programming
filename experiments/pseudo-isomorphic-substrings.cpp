@@ -445,6 +445,15 @@ class PseudoIsomorphicSuffixTree
 
         void addSuffixLink(State* s, int numSuffixLinksTraversed)
         {
+            // This is a new addition, and was not needed in Ukkonnen's original algorithm.
+            // The basic approach is to find the parent of s; find this parent's suffix link
+            // (recursively computing it if it is not already defined); work out the 
+            // substring of m_currentString that we have to follow from s's parent to s; translate
+            // this to the sequence of letters we'd have to follow from s's parent's suffix link
+            // (recall: traversing a suffix link changes the current suffix of m_currentString we are
+            // following, and hence the LetterPermutation); and replaying this translated sequence of chars
+            // from s's parent's suffix link to get the suffix link of s (after canonizing and potentially 
+            // making it explict, of course!).
             assert(s && !s->suffixLink);
             auto sParent = s->parent;
             for (const auto& transition : sParent->transitions)
