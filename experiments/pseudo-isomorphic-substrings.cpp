@@ -46,17 +46,8 @@ class LetterPermutation
         char permutedLetter(const char originalLetter)
         {
             assert(originalLetter >= 'a' && originalLetter <= '{');
-            if (!hasPermutedLetter(originalLetter))
-            {
-                cout << "letter " << originalLetter << " has no permutation!" << endl;
-            }
             assert(hasPermutedLetter(originalLetter));
             const char result = m_permutedLetter[originalLetter - 'a'];
-            if (!(result >= 'a' && result <= '{'))
-            {
-                cout << " permutation: " << this << " invalid mapping from " << originalLetter << " to " << result << endl;
-                assert(false);
-            }
             return result;
         }
         void clear()
@@ -104,6 +95,7 @@ string canonicaliseString(const string& s, LetterPermutation* letterPermutation 
  * Simple implementation of Ukkonen's algorithm:
  *  https://en.wikipedia.org/wiki/Ukkonen's_algorithm
  * for online construction of suffix trees.
+ * Modified for use with "Pseudo-Ismorphic" Strings.
  * @author Simon St James, Jan 2017.
  */
 class PseudoIsomorphicSuffixTree
@@ -179,6 +171,7 @@ class PseudoIsomorphicSuffixTree
         PseudoIsomorphicSuffixTree(const PseudoIsomorphicSuffixTree& other) = delete;
         void appendLetter(char letter)
         {
+            // "Fill-in" permutations that were waiting for this letter.
             auto& permutationsMissingLetter = m_permutationsMissingLetter[letter - 'a'];
             for (auto permutationMissingLetter : permutationsMissingLetter)
             {
@@ -186,6 +179,8 @@ class PseudoIsomorphicSuffixTree
             }
             permutationsMissingLetter.clear();
 
+            // Make a note that the permutation for this new suffix is missing every letter but
+            // the one we've just added!
             m_normalisedSuffixPermutations.push_back(LetterPermutation());
             LetterPermutation* newSuffixPermutation = &(m_normalisedSuffixPermutations.back());
             newSuffixPermutation->permuteUnpermutedLetter(letter);
@@ -197,6 +192,7 @@ class PseudoIsomorphicSuffixTree
                 }
             }
 
+            // Keep nextOccurenceOfLetterIndexAtOrAfter up-to-date.
             for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
             {
                 m_nextOccurenceOfLetterIndexAtOrAfter[letterIndex].push_back(-1);
@@ -208,6 +204,7 @@ class PseudoIsomorphicSuffixTree
                 nextOccurenceOfLetterIndexAtOrAfterRevIter++;
             }
 
+            // Add to the Suffix Tree!
             m_currentString += letter;
             const auto updateResult = update(m_s, m_k, m_currentString.size());
             m_s = updateResult.first;
@@ -239,49 +236,6 @@ class PseudoIsomorphicSuffixTree
         {
             return m_states.size();
         }
-        void makeFinalStatesExplicitAndMarkThemAsFinal()
-        {
-            // Trick described in Ukkonen's paper.
-            const char unusedLetter = '{';
-            appendLetter(unusedLetter);
-
-            // Remove the unused letter again!
-            for (auto& state : m_states)
-            {
-                for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
-                {
-                    const Transition& transition = *transitionIter;
-                    if (transition.substringFollowed.startIndex < 1)
-                    {
-                        transitionIter++;
-                        continue;
-                    }
-                    const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
-                    const char lastCharInTransition = m_currentString[realEndIndex];
-                    bool needToRemoveTransition = false;
-                    if (lastCharInTransition == unusedLetter)
-                    {
-                        const bool transitionConsistsSolelyOfUnusedChar = (transition.substringFollowed.length(m_currentString.size()) == 1);
-                        if (transitionConsistsSolelyOfUnusedChar)
-                        {
-                            needToRemoveTransition = true;
-                            state.isFinal = true;
-                        }
-                        else
-                        {
-                            transition.nextState->isFinal = true;
-                        }
-                    }
-
-                    if (needToRemoveTransition)
-                        transitionIter = state.transitions.erase(transitionIter);
-                    else
-                        transitionIter++;
-                }
-            }
-
-            m_currentString.pop_back(); // Remove the unusedLetter we just added.
-        }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
          */
@@ -290,40 +244,6 @@ class PseudoIsomorphicSuffixTree
             public:
                 Cursor() = default;
                 Cursor(const Cursor& other) = default;
-                bool operator==(const Cursor& other) const
-                {
-                    if (m_state != other.m_state)
-                        return false;
-                    if (m_transition != other.m_transition)
-                        return false;
-                    if (m_posInTransition != other.m_posInTransition)
-                        return false;
-                    return true;
-                }
-                bool operator!=(const Cursor& other) const
-                {
-                    return !(*this == other);
-                }
-                bool operator<(const Cursor& other) const
-                {
-                    if (m_state < other.m_state)
-                        return true;
-                    if (m_state > other.m_state)
-                        return false;
-                    if (m_transition < other.m_transition)
-                        return true;
-                    if (m_transition > other.m_transition)
-                        return false;
-                    if (m_posInTransition < other.m_posInTransition)
-                        return true;
-                    if (m_posInTransition > other.m_posInTransition)
-                        return false;
-                    return false;
-                }
-                bool isValid() const
-                {
-                    return m_isValid;
-                }
                 bool isOnExplicitState() const
                 {
                     return (m_transition == nullptr);
@@ -482,74 +402,6 @@ class PseudoIsomorphicSuffixTree
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 }
-                bool canMoveUp()
-                {
-                    return (m_state != m_root || m_transition);
-                }
-                char moveUp()
-                {
-                    assert(canMoveUp());
-                    if (m_transition)
-                    {
-                        assert(m_posInTransition > 0);
-                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition - 1];
-                        if (m_posInTransition != 1)
-                        {
-                            m_posInTransition--;
-                        }
-                        else
-                        {
-                            movedToExplicitState();
-                        }
-                        return charFollowed;
-                    }
-                    else
-                    {
-                        Transition* transitionFromParent = findTransitionFromParent();
-                        m_state = m_state->parent;
-                        m_transition = transitionFromParent;
-                        m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
-                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition];
-                        if (m_posInTransition == 0)
-                        {
-                            movedToExplicitState();
-                        }
-                        return charFollowed;
-                    }
-                }
-                string stringFollowed() const
-                {
-                    Cursor copy(*this);
-                    string stringFollowedReversed;
-                    while (copy.canMoveUp())
-                    {
-                        stringFollowedReversed += copy.moveUp();
-                    }
-                    return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
-                }
-                string canonicalisedStringFollowed() const
-                {
-                    Cursor copy(*this);
-                    string stringFollowed;
-                    while (!(!copy.m_state->parent && copy.isOnExplicitState()))
-                    {
-                        if (copy.isOnExplicitState())
-                        {
-                            auto transitionFromParent = findTransitionFromParent(copy.m_state);
-                            stringFollowed = canonicaliseString(m_string->substr(transitionFromParent->substringFollowed.startIndex - 1, transitionFromParent->substringFollowed.length(m_string->size())),  transitionFromParent->letterPermutation, true) + stringFollowed;
-                            copy.m_state = copy.m_state->parent;
-                        }
-                        else
-                        {
-                            assert(false); // Don't use m_transition, m_posInTransition!!
-                            assert(m_transition->substringFollowed.startIndex >= 0);
-                            stringFollowed = canonicaliseString(m_string->substr(m_transition->substringFollowed.startIndex - 1 + m_posInTransition, m_transition->substringFollowed.length(m_string->size() - m_posInTransition)),  m_transition->letterPermutation, true) + stringFollowed;
-                            copy.movedToExplicitState();
-                        }
-                    }
-                    return stringFollowed;
-                }
-
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -616,14 +468,6 @@ class PseudoIsomorphicSuffixTree
         {
             return Cursor();
         }
-        set<string> dumpNormalisedStrings()
-        {
-            cout << "dumpNormalisedStrings: " << m_currentString << endl;
-            set<string> normalisedStrings;
-            dumpNormalisedStringsAux(rootCursor(), "", normalisedStrings);
-            return normalisedStrings;
-        }
-
     private:
         static const int openTransitionEnd = numeric_limits<int>::max();
 
@@ -642,18 +486,9 @@ class PseudoIsomorphicSuffixTree
         LetterPermutation allLettersToA;
         array<deque<LetterPermutation*>, alphabetSize> m_permutationsMissingLetter;
         array<deque<int>, alphabetSize> m_nextOccurenceOfLetterIndexAtOrAfter;
+
         int64_t m_numLeafStates = 0;
         int64_t m_numDistinctWords = 0;
-
-        string normalisedStringToState(State* s)
-        {
-#ifndef NDEBUG
-            Cursor blah(s, m_currentString, m_root);
-            return blah.canonicalisedStringFollowed();
-#else 
-            return "";
-#endif
-        }
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
@@ -739,69 +574,67 @@ class PseudoIsomorphicSuffixTree
                     }
                     assert(parentSuffixLink);
                     LetterPermutation compoundPermutation;
+                    LetterPermutation suffixIncreasePermutation;
+                    // Very hard to document, but this essentially performs the equivalent of:
+                    //  canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
+                    // It's essentially used to map a sequence of letters from the old suffix to the new suffix.
+                    // It kind of just maps a letter to the letter before it i.e. b -> a, c -> b, d -> c or itself (b -> b, c -> c, etc) depending on each letters
+                    // next occurence compared to nextOccurrenceOfFirstLetter.
+                    LetterPermutation suffixIncreasePermutationOpt;
+                    LetterPermutation& oldSuffixPermutation = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed];
+                    const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
+                    const char firstLetterPermuted = oldSuffixPermutation.permutedLetter(firstLetter);
+                    int largestMappedToLetterIndexBeforeNextFirstLetter = -1;
+                    int nextOccurrenceOfFirstLetter = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
+                    for (int i = 0; i < alphabetSize; i++)
                     {
-                        LetterPermutation suffixIncreasePermutation;
-                        // Very hard to document, but this essentially performs the equivalent of:
-                        //  canonicaliseString(canonicaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).substr(1), &suffixIncreasePermutation, false, false);
-                        // It's essentially used to map a sequence of letters from the old suffix to the new suffix.
-                        // It kind of just maps a letter to the letter before it i.e. b -> a, c -> b, d -> c or itself (b -> b, c -> c, etc) depending on each letters
-                        // next occurence compared to nextOccurrenceOfFirstLetter.
-                        LetterPermutation suffixIncreasePermutationOpt;
-                        LetterPermutation& oldSuffixPermutation = m_normalisedSuffixPermutations[m_numSuffixLinksTraversed];
-                        const char firstLetter = m_currentString[m_numSuffixLinksTraversed];
-                        const char firstLetterPermuted = oldSuffixPermutation.permutedLetter(firstLetter);
-                        int largestMappedToLetterIndexBeforeNextFirstLetter = -1;
-                        int nextOccurrenceOfFirstLetter = m_nextOccurenceOfLetterIndexAtOrAfter[firstLetter - 'a'][m_numSuffixLinksTraversed + 1];
-                        for (int i = 0; i < alphabetSize; i++)
+                        const char letter = 'a' + i;
+                        if (letter != firstLetter)
                         {
-                            const char letter = 'a' + i;
-                            if (letter != firstLetter)
+                            if (oldSuffixPermutation.hasPermutedLetter(letter))
                             {
-                                if (oldSuffixPermutation.hasPermutedLetter(letter))
+                                const char mappedByOldSuffix = oldSuffixPermutation.permutedLetter(letter);
+                                if (nextOccurrenceOfFirstLetter != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > nextOccurrenceOfFirstLetter)
                                 {
-                                    const char mappedByOldSuffix = oldSuffixPermutation.permutedLetter(letter);
-                                    if (nextOccurrenceOfFirstLetter != -1 && m_nextOccurenceOfLetterIndexAtOrAfter[i][m_numSuffixLinksTraversed + 1] > nextOccurrenceOfFirstLetter)
-                                    {
-                                        suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
-                                    }
-                                    else
-                                    {
-                                        suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix - 1);
-                                        largestMappedToLetterIndexBeforeNextFirstLetter = max(largestMappedToLetterIndexBeforeNextFirstLetter, mappedByOldSuffix - 1 - 'a');
-                                    }
-                                }
-                            }
-                        }
-                        if (nextOccurrenceOfFirstLetter != -1)
-                        {
-                            suffixIncreasePermutationOpt.permuteUnpermutedLetter(firstLetterPermuted, 'a' + largestMappedToLetterIndexBeforeNextFirstLetter + 1);
-                        }
-                        suffixIncreasePermutation = suffixIncreasePermutationOpt;
-
-                        for (int i = 0; i < alphabetSize; i++)
-                        {
-                            const char originalLetter = 'a' + i;
-                            char compoundPermutedLetter = '\0';
-                            if (transition.letterPermutation->hasPermutedLetter(originalLetter))
-                            {
-                                compoundPermutedLetter = transition.letterPermutation->permutedLetter(originalLetter);
-                                if (suffixIncreasePermutation.hasPermutedLetter(compoundPermutedLetter))
-                                {
-                                    compoundPermutedLetter = suffixIncreasePermutation.permutedLetter(compoundPermutedLetter);
+                                    suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix);
                                 }
                                 else
                                 {
-                                    compoundPermutedLetter = '\0';
+                                    suffixIncreasePermutationOpt.permuteUnpermutedLetter(mappedByOldSuffix, mappedByOldSuffix - 1);
+                                    largestMappedToLetterIndexBeforeNextFirstLetter = max(largestMappedToLetterIndexBeforeNextFirstLetter, mappedByOldSuffix - 1 - 'a');
                                 }
                             }
-                            if (compoundPermutedLetter != '\0')
+                        }
+                    }
+                    if (nextOccurrenceOfFirstLetter != -1)
+                    {
+                        suffixIncreasePermutationOpt.permuteUnpermutedLetter(firstLetterPermuted, 'a' + largestMappedToLetterIndexBeforeNextFirstLetter + 1);
+                    }
+                    suffixIncreasePermutation = suffixIncreasePermutationOpt;
+
+                    for (int i = 0; i < alphabetSize; i++)
+                    {
+                        const char originalLetter = 'a' + i;
+                        char compoundPermutedLetter = '\0';
+                        if (transition.letterPermutation->hasPermutedLetter(originalLetter))
+                        {
+                            compoundPermutedLetter = transition.letterPermutation->permutedLetter(originalLetter);
+                            if (suffixIncreasePermutation.hasPermutedLetter(compoundPermutedLetter))
                             {
-                                compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
+                                compoundPermutedLetter = suffixIncreasePermutation.permutedLetter(compoundPermutedLetter);
                             }
                             else
                             {
-                                compoundPermutation.permuteUnpermutedLetter(originalLetter, 'a');
+                                compoundPermutedLetter = '\0';
                             }
+                        }
+                        if (compoundPermutedLetter != '\0')
+                        {
+                            compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
+                        }
+                        else
+                        {
+                            compoundPermutation.permuteUnpermutedLetter(originalLetter, 'a');
                         }
                     }
                     assert(parentSuffixLink);
@@ -951,169 +784,20 @@ class PseudoIsomorphicSuffixTree
             // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
             return m_currentString[i - 1] - 'a' + 1;
         }
-        void dumpNormalisedStringsAux(Cursor cursor, const string& s, set<string>& normalisedStrings)
-        {
-            if (!s.empty())
-            {
-                assert(normalisedStrings.find(s) == normalisedStrings.end());
-                normalisedStrings.insert(s);
-            }
-            if (cursor.isOnExplicitState())
-            {
-                auto nextLetterIterator = cursor.getNextLetterIterator();
-                while (nextLetterIterator.hasNext())
-                {
-                    dumpNormalisedStringsAux(nextLetterIterator.afterFollowingNextLetter(), s + nextLetterIterator.nextLetter(), normalisedStrings);
-                    nextLetterIterator++;
-                }
-            }
-            else
-            {
-                const string normalisedRemainderOfTransition = canonicaliseString(m_currentString.substr(cursor.remainderOfCurrentTransition().startIndex(), cursor.remainderOfCurrentTransition().length()), cursor.letterPermutation(), true);
-                string normalisedString = s;
-                for (int i = 0; i < normalisedRemainderOfTransition.length() - 1; i++)
-                {
-                    normalisedString += normalisedRemainderOfTransition[i];
-                    assert(normalisedStrings.find(normalisedString) == normalisedStrings.end());
-                    normalisedStrings.insert(normalisedString);
-                }
-
-                Cursor nextExplicitState(cursor);
-                nextExplicitState.followToTransitionEnd();
-                dumpNormalisedStringsAux(nextExplicitState, s + normalisedRemainderOfTransition, normalisedStrings);
-            }
-        }
 };
 
 using Cursor = PseudoIsomorphicSuffixTree::Cursor;
 
-set<string> bruteForce(const string& s)
+int main()
 {
-    set<string> substrings;
-    set<string> canonicalisedSubstrings;
-    for (int i = 0; i < s.size(); i++)
-    {
-        string substring;
-        for (int j = 0; i + j < s.size(); j++)
-        {
-            substring.push_back(s[i + j]);
-            const string canonicalisedSubstring = canonicaliseString(substring, nullptr, false, false);
-            substrings.insert(substring);
-            canonicalisedSubstrings.insert(canonicalisedSubstring);
-        }
-    }
-    cout << " # distinct canonicalised substrings: " << canonicalisedSubstrings.size() << " # distinct substrings: " << substrings.size() << endl;
-    return canonicalisedSubstrings;
-}
+    string s;
+    cin >> s;
 
-void doStuff(const string& s)
-{
-//#define BRUTE_FORCE_UKKONNEN_VERIFY
-#ifdef BRUTE_FORCE_UKKONNEN_VERIFY
-    set<string> normalisedStringsBruteForce = bruteForce(s);
-#endif
     PseudoIsomorphicSuffixTree treeBuilder;
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-    vector<int64_t> optimisedResults;
     for (const auto letter : s)
     {
         treeBuilder.appendLetter(letter);
-        optimisedResults.push_back(treeBuilder.numDistinctWords());
-//#define BRUTE_FORCE
-#ifdef BRUTE_FORCE
-        const int64_t bruteForceResult = bruteForce(treeBuilder.currentString()).size();
-        cout << " current string: " << treeBuilder.currentString() << " match: " << (bruteForceResult == optimisedResults.back()) << endl;
-        assert(bruteForceResult == optimisedResults.back());
-#endif
-    }
-
-    for (const auto result : optimisedResults)
-    {
-        cout << result << endl;
-    }
-
-#if 0
-    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-    std::cout << "Time to build PseudoIsomorphicSuffixTree = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 << " for string of length: " << s.size() << std::endl;
-#endif
-
-
-#ifdef BRUTE_FORCE_UKKONNEN_VERIFY
-    //treeBuilder.dumpGraph();
-    verify(treeBuilder.rootCursor(), 0);
-    set<string> normalisedStringsOptimised = treeBuilder.dumpNormalisedStrings();
-    for (const auto& str : normalisedStringsOptimised)
-    {
-        cout << " looking for " << str << " in brute forced:" << endl;
-        assert(normalisedStringsBruteForce.find(str) != normalisedStringsBruteForce.end());
-    }
-    for (const auto& str : normalisedStringsBruteForce)
-    {
-        cout << " looking for " << str << " in optimised:" << endl;
-        assert(normalisedStringsOptimised.find(str) != normalisedStringsOptimised.end());
-    }
-#endif
-
-}
-
-
-int main()
-{
-    //bruteForce("abcdefgdsfsdfskldhygauslkjglksjvlksjfdvh");
-//#define EXHAUSTIVE
-#ifdef EXHAUSTIVE
-    string s = "a";
-    const int numLetters = 4;
-    while (true)
-    {
-        cout << "s: " << s <<  " size: " << s.size() << endl;
-
-        doStuff(s);
-
-        int index = 0;
-        while (index < s.size() && s[index] == 'a' + numLetters)
-        {
-            s[index] = 'a';
-            index++;
-        }
-        if (index == s.size())
-        {
-            s.push_back('a');
-            cout << "string length: " << s.length() << endl;
-        }
-        else
-        {
-            s[index]++;
-        }
-    }
-    return 0;
-#endif
-//#define RANDOM
-#ifdef RANDOM
-    while (true)
-    {
-        const int n = rand() % 100000;
-        const int m = rand() % 26 + 1;
-        string s(n, '\0');
-        for (int i = 0; i < n; i++)
-        {
-            s[i] = 'a' + rand() % m;
-        }
-        doStuff(s);
-    }
-    return 0;
-#endif
-
-    //int T;
-    //cin >> T;
-    //for (int t = 1; t <= T; t++)
-    {
-        string s;
-        cin >> s;
-
-
-        doStuff(s);
-
+        cout << treeBuilder.numDistinctWords() << endl;
     }
 }
+
