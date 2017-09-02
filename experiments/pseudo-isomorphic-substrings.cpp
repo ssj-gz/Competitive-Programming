@@ -596,7 +596,7 @@ class PseudoIsomorphicSuffixTree
                     if (k <= p)
                     {
                         assert(s != m_auxiliaryState);
-                        const char letterToFollowFromState =   letterPermutation->permutedLetter(m_currentString[k - 1]);
+                        const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
                         auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
                         sPrime = tkTransitionIter->nextState;
                         kPrime = tkTransitionIter->substringFollowed.startIndex;
