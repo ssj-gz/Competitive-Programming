@@ -533,7 +533,7 @@ class PseudoIsomorphicSuffixTree
                     const auto suffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
                     // The suffix link may not be explicit; (ab?)use testAndSplitResult to ensure it so.
-                    const char unusedChar = 'a' + alphabetSize;
+                    const char unusedChar = 'a' + alphabetSize - 1;
                     const auto testAndSplitResult = testAndSplit(suffixLinkCanonized, kCanonized, p, unusedChar - 'a' + 1, &compoundPermutation);
                     s->suffixLink = testAndSplitResult.second;
                     break;
