@@ -538,29 +538,9 @@ class PseudoIsomorphicSuffixTree
                     const auto canonizeResult = canonize(parentSuffixLink, oldK, p, &compoundPermutation);
                     const auto parentSuffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
-                    const auto postCanonizeLength = p - kCanonized + 1;
-                    const auto numLettersFollowedDuringCanonization = preCanonizeLength - postCanonizeLength;
-                    if (postCanonizeLength == 0)
-                    {
-                        s->suffixLink = parentSuffixLinkCanonized;
-                    }
-                    else
-                    {
-                        const auto transitionFromParentSuffixLink = findTransitionIter(parentSuffixLinkCanonized, compoundPermutation.permutedLetter(m_currentString[kCanonized - 1]) - 'a' + 1);
-                        if (postCanonizeLength == transitionFromParentSuffixLink->substringFollowed.length(m_currentString.length()))
-                        {
-                            s->suffixLink = transitionFromParentSuffixLink->nextState;
-                        }
-                        else
-                        {
-                            // The parent suffix link is not explicit; (ab?)use testAndSplitResult to make it so.
-                            const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p - 0, alphabetSize, &compoundPermutation);
-
-                            // Need to find the suffix link for testAndSplitResult.second, too :(
-                            assert(!testAndSplitResult.first);
-                            s->suffixLink = testAndSplitResult.second;
-                        }
-                    }
+                    // The parent suffix link is not explicit; (ab?)use testAndSplitResult to make it so.
+                    const auto testAndSplitResult = testAndSplit(parentSuffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
+                    s->suffixLink = testAndSplitResult.second;
                     break;
                 }
             }
