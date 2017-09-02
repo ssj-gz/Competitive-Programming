@@ -528,12 +528,13 @@ class PseudoIsomorphicSuffixTree
                     const auto preCanonizeLength = p - k + 1;
                     if (parentSuffixLink == m_auxiliaryState)
                         parentSuffixLink = m_root;
-                    // Follow the letters on the transition, mapped to letters in the next suffix (and canonize, of course).
+                    // Follow the letters on the transition, mapped to letters in the next suffix, (mis?)using canonize.
                     const auto canonizeResult = canonize(parentSuffixLink, k, p, &compoundPermutation);
                     const auto suffixLinkCanonized = canonizeResult.first;
                     const auto kCanonized = canonizeResult.second;
                     // The suffix link may not be explicit; (ab?)use testAndSplitResult to ensure it so.
-                    const auto testAndSplitResult = testAndSplit(suffixLinkCanonized, kCanonized, p, alphabetSize, &compoundPermutation);
+                    const char unusedChar = 'a' + alphabetSize;
+                    const auto testAndSplitResult = testAndSplit(suffixLinkCanonized, kCanonized, p, unusedChar - 'a' + 1, &compoundPermutation);
                     s->suffixLink = testAndSplitResult.second;
                     break;
                 }
