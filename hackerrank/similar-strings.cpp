@@ -714,6 +714,10 @@ int main()
     string s;
     cin >> s;
 
+    PseudoIsomorphicSuffixTree treeBuilder;
+    treeBuilder.appendString(s);
+    treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
+
     for (int i = 0; i < q; i++)
     {
         int l, r;
@@ -721,6 +725,9 @@ int main()
         l--;
         r--;
 
+#define BRUTE_FORCE
+#ifdef BRUTE_FORCE
         cout << bruteForce(s, l, r) << endl;
+#endif
     }
 }
