@@ -219,6 +219,9 @@ class PseudoIsomorphicSuffixTree
             const auto canonizeResult = canonize(m_s, m_k, m_currentString.size(),(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size() ?  &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]) : &allLettersToA));
             m_s = canonizeResult.first;
             m_k = canonizeResult.second;
+
+            m_numDistinctWords += m_numLeafStates;
+            cout << "string size: " << m_currentString.size() << " num distinct words: " << m_numDistinctWords << endl;
         }
         void appendString(const string& stringToAppend)
         {
@@ -228,6 +231,14 @@ class PseudoIsomorphicSuffixTree
                 appendLetter(letter);
                 numAppended++;
             }
+        }
+        int64_t numDistinctWords() const
+        {
+            return m_numDistinctWords;
+        }
+        string currentString() const
+        {
+            return m_currentString;
         }
         int numStates() const
         {
@@ -743,6 +754,8 @@ class PseudoIsomorphicSuffixTree
         LetterPermutation allLettersToA;
         array<deque<LetterPermutation*>, alphabetSize> m_permutationsMissingLetter;
         array<deque<int>, alphabetSize> m_nextOccurenceOfLetterIndexAtOrAfter;
+        int64_t m_numLeafStates = 0;
+        int64_t m_numDistinctWords = 0;
 
         string normalisedStringToState(State* s)
         {
@@ -771,6 +784,7 @@ class PseudoIsomorphicSuffixTree
                 r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), &(m_normalisedSuffixPermutations[m_numSuffixLinksTraversed]), m_currentString));
                 assert(m_numSuffixLinksTraversed < m_normalisedSuffixPermutations.size());
                 verifyStateTransitions(r);
+                m_numLeafStates++;
                 if (oldr != m_root)
                 {
                     oldr->suffixLink = r;
@@ -1179,8 +1193,8 @@ void verify(Cursor cursor, int wordLength)
 void doStuff(const string& s)
 {
     cout << "doStuff: " << s << endl;
-#define BRUTE_FORCE
-#ifdef BRUTE_FORCE
+//#define BRUTE_FORCE_UKKONNEN_VERIFY
+#ifdef BRUTE_FORCE_UKKONNEN_VERIFY
     set<string> normalisedStringsBruteForce = bruteForce(s);
 #endif
     //for (const auto& str : bruteForce(s))
@@ -1189,12 +1203,23 @@ void doStuff(const string& s)
     PseudoIsomorphicSuffixTree treeBuilder;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    treeBuilder.appendString(s);
+    vector<int> optimisedResults;
+    for (const auto letter : s)
+    {
+        treeBuilder.appendLetter(letter);
+        optimisedResults.push_back(treeBuilder.numDistinctWords());
+#define BRUTE_FORCE
+#ifdef BRUTE_FORCE
+        const int64_t bruteForceResult = bruteForce(treeBuilder.currentString()).size();
+        cout << " current string: " << treeBuilder.currentString() << " match: " << (bruteForceResult == optimisedResults.back()) << endl;
+        assert(bruteForceResult == optimisedResults.back());
+#endif
+    }
 
     std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
     std::cout << "Time to build PseudoIsomorphicSuffixTree = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 << " for string of length: " << s.size() << std::endl;
 
-#ifdef BRUTE_FORCE
+#ifdef BRUTE_FORCE_UKKONNEN_VERIFY
     treeBuilder.dumpGraph();
     verify(treeBuilder.rootCursor(), 0);
     set<string> normalisedStringsOptimised = treeBuilder.dumpNormalisedStrings();
