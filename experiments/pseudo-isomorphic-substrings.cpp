@@ -514,7 +514,7 @@ class PseudoIsomorphicSuffixTree
                     for (int i = 0; i < alphabetSize; i++)
                     {
                         const char originalLetter = 'a' + i;
-                        char compoundPermutedLetter = '\0';
+                        char compoundPermutedLetter = 'a';
                         if (transition.letterPermutation->hasPermutedLetter(originalLetter))
                         {
                             compoundPermutedLetter = transition.letterPermutation->permutedLetter(originalLetter);
@@ -522,19 +522,8 @@ class PseudoIsomorphicSuffixTree
                             {
                                 compoundPermutedLetter = suffixIncreasePermutation.permutedLetter(compoundPermutedLetter);
                             }
-                            else
-                            {
-                                compoundPermutedLetter = '\0';
-                            }
                         }
-                        if (compoundPermutedLetter != '\0')
-                        {
-                            compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
-                        }
-                        else
-                        {
-                            compoundPermutation.permuteUnpermutedLetter(originalLetter, 'a');
-                        }
+                        compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
                     }
                     assert(parentSuffixLink);
                     if (sParent != m_root)
