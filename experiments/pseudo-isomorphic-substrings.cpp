@@ -685,6 +685,7 @@ int main()
     //    add wx to new_substrings, labelled with (k).
     //    k = k - 1
     //   substrings = new_substrings
+    //
     // This isn't strictly accurate in general (it works here as wx never already exists), but it seems like we are starting
     // with the longest string w in the old list of substrings, adding wx to the new list of substrings, and setting w = w.substr(1)
     // i.e. setting w to its next suffix, and repeating until we can't go any further.
@@ -692,20 +693,24 @@ int main()
     // corresponds to a leaf-state, S say; adding x to it would consist of adding 1 to the end index of the transition leading to S;
     // setting w to w.substr(1) would correspond to jumping to the state S->suffixLink, and we'd stop when there are no
     // further suffix links to traverse.*
+    //
     // Ukkonnen's algorithm basically follows the algorithm above translated using to a Suffix Automaton rather than a list of words.
     // This algorithm would be O(|s|^2) (for each new letter of S, we have to add it to O(|S|) words i.e. bump the end index of O(|S|) 
     // leaf states, but Ukkonnen exploits two clever tricks; firstly, it notes that if in running the algorithm we find that 
     // wx already exists for some w, then we can stop following suffix links for this new letter: intuitively, if wx already exists,
     // then it was added in a previous iteration.  But then, if wx was added in a previous iteration, so were all suffixes of wx.
     // Thus, there is no point trying to add the remaining suffixes of wx!
+    //
     // Secondly, it notes that many leaf states can never be extended (by adding x) to a word that is already in the suffix automaton;
     // for example, the state corresponding to the longest word so far certainly can't, as all words expressed in the automaton
     // must be strictly shorter than that word! Thus, we don't "really" have to bump the end index for these states:
     // we just mark the end index as ∞ (I actually use "-1" in my implementation) which has the implicit meaning "imagine we
     // bumped the end index by one for each new letter, but didn't really do it!".
+    //
     // For a full understanding, I recommend studying Ukkonnen's original paper, but suffice to say that the naive algorithm
     // couple with these two implementations gives us a linear-time, online algorithm for computing the automaton representing each
     // successive prefix P of S, right up to S itself.
+    //
     // The algorithm, with these optimisations, looks a little like this:
     //   For each letter x of s:
     //     Skip M suffix links for some known M (in my implementation, M == m_numSuffixLinksTraversed) so we end up in some state S;
@@ -720,6 +725,7 @@ int main()
     // which represents a new word being added to the list of substrings contained in the suffix automaton.
     // So, if we wanted, at each x in S, to know the number of substrings contained in the automaton, we might do something
     // like this:
+    //
     //    numLeafStates = 0
     //    numSubstrings = 0
     //    For each letter x of s:
@@ -727,7 +733,9 @@ int main()
     //       incorporate x into suffix automaton, as described earlier;
     //       numSubstrings += number of new leaf states just added.      
     //       numLeafStates += number of new leaf states just added.
+    //
     // As it happens, M + number of new leaf states just added is precisely equal to the current numLeafStates, so we can simplify:
+    //
     //    numLeafStates = 0
     //    numSubstrings = 0
     //    For each letter x of s:
@@ -735,16 +743,20 @@ int main()
     //       numLeafStates += number of new leaf states just added.
     //       numSubstrings += numLeafStates.      
     // so this tells us how to answer the question in O(|s|) for the non-pseudo-isomorphic case.
+    //
     // So, how does pseudo-isomorphism come into things?
+    //
     // Firstly, note that two strings s = s1s2...sn and t = t1t2...tn where si, ti belong to the alphabet Σ if and only if there is 
     // some permutation π: Σ -> Σ such that π(s1)π(s2)...π(sn) = t1t2...tn and that, as a consequence, the relation of pseudo-isomorphism
     // is an equivalence relation over the set of strings over Σ.   Now, if R is an equivalence class, then we can normalise each word
     // w in R in such a way that, if isoNormaliseString(w) is the normalisation procedure, then w, w' are in R (i.e. are pseudo-isomorphic)
     // if and only if isoNormaliseString(w) == isoNormaliseString(w').  We define isoNormaliseString(w) as follows:
+    //
     //  Let π be an (initially empty) permutation π: Σ -> Σ.
     //  For each successive letter x in w:
     //   if π(x) is not yet defined, define π(x) to be the first letter in the alphabet that is not yet a target of a mapping from π.
     //   add π(x) to the result.
+    //
     // For example, if w = xklxl:
     //  first letter is x; π is empty, so doesn't map x to anything.  The first letter in the alphabet that is not yet a target of a mapping from
     //   π is a; therefore, set π(x) = a.  Add π(x) = a to the output; output is now 'a'.
@@ -754,9 +766,83 @@ int main()
     //  next letter is k, and we defined π(k) = b earlier; add π(k) to output; output is now 'abcb'.
     //  next letter is x, and we defined π(x) = a earlier; add π(x) to output; output is now 'abcba'
     //  next letter is l, and we defined π(l) = c earlier; add π(l) to output; output is now 'abcbac'
+    //
     // Thus, isoNormaliseString(xklxl) = abcbac, and in normalising xklxl, we have implicitly generated a permutation π which maps x -> a, 
     // k -> b, l -> c.
-
+    //
+    // Now, if we could, for each successive prefix P of S, construct an automaton that represented precisely the set of isoNormaliseString(w) where
+    // w is a substring of P, and if we could easily calculate the number of strings represented by this automaton, we'd be done: each string
+    // represented by the automaton would be non-pseudo-isomorphic to each other string represented by the automaton.
+    //
+    // Let's change tack slightly and go back to creating the lists of words in each P by adding each new letter to the list of words to
+    // in the previous P, except this time, instead of the raw list of words, we'll store isonormalised versions of the words.  Let S = xkxl.
+    //
+    // P = x:
+    //  a (0) (original word: x).
+    // P = xk:
+    //  a (1) (original word: k).
+    //  ab (0) (original word: xk).
+    // P = xkx:
+    //  a (2) (original word: x)
+    //  ab (1) (original word: kx).
+    //  aba (0) (original word: xkx).
+    // P = xkxl:
+    //  a (3) (original word: l)
+    //  ab (2) (original word: xl)
+    //  abc (1) (original word: kxl).
+    //  abac (0) (original word: xkxl).
+    //
+    // This gives us the complete list of isonormalised (and thus, mutually non-pseudo-ismorphic) words substrings of each P using much the same 
+    // algorithm as we used to find distinct substrings of each P ignoring pseudo-ismorphism.  In fact, we can use (almost!) the *exact same* insights
+    // as Ukkonnen did in the non-isomorphic case to create an online, O(|s|) algorithm for creating a suffix automaton representing the iso-normalised
+    // substrings of each P, *and* use the exact same procedure (tracking the number of leaf nodes after adding each letter of s) to calculate, for each
+    // P, the *number* of distinct iso-normalised substrings of P!  The differences from standard Ukkonnen are fairly minor; let's examine them.
+    //
+    // Note that when adding the new letter x to the original word w (labelled (k), say) and renormalising, the new word (still labelled (k)) does not
+    // change in the first |w| letters; that is, isoNormaliseString(w) and isoNormaliseString(wx) share the same first |w| letters.
+    // So we don't really need to re-normalise: instead, we can track the current permutation π of the alphabet induced by the word labelled (k), and
+    // when we add x to it, update the permutation of the word labelled (k) if it doesn't already map x, and then add π(x) to isoNormaliseString(w)
+    // to efficiently give us isoNormaliseString(wx).  For example, let's go from P = xkx to xkxl again, this time tracking the permutations:
+    // P = xkx:
+    //  a (2) (original word: x; permutation x -> a)
+    //  ab (1) (original word: kx; permutation k -> a, x -> b).
+    //  aba (0) (original word: xkx; permutation x -> a, k -> b).
+    // P = xkxl; adding 'l'.
+    //  a (3) (original word: l; permutation l -> a)
+    //  ab (2) (original word: xl; permutation x -> a, l -> b)
+    //  abc (1) (original word: kxl; permutation k -> a, x -> b, l -> c).
+    //  abac (0) (original word: xkxl; permutation x -> a, k -> b, l -> c).
+    //
+    // 'l' hadn't been seen before, so we had to augment each permutation with it.  In our implementation, permutations of letters are stored in LetterPermutation.
+    //
+    // As mentioned, the word labelled (k) ultimately corresponds to the suffix s.subtr(k).  Here, it also has a LetterPermutation that is 
+    // added to or left alone (but not "changed") with each successive letter; i.e. every suffix of s has its own LetterPermutation.
+    // This LetterPermutation for each suffix is one of the major enhancements to Ukonnen needed to get it working with pseudo-isomorphism and
+    // in my implementation is represented by m_isoNormalisedSuffixPermutations and is crucial to the workings of Ukkonnen's canonize() and
+    // testAndSplit() - these both involve answering a question along the lines of "I have an iso-normalised suffix of s, and need to extend
+    // it by following some transition beginning with some raw letter x: which one do I follow so that I am still following
+    // the same iso-normalised suffix of s?".  *Which* iso-normalised suffix of s we are currently following is determined by how many
+    // suffix links we have followed so far: this is stored in m_numSuffixLinksTraversed and we see frequent references to
+    // m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed] throughout the code.  This is all rather hard to explain, sadly:
+    // a good understanding of the original Ukkonnen helps, here, but it's still a bit of a pig :/
+    // Another change to Ukkonnen's algorithm is that each transition, in addition to a start index and end index, now must
+    // have a LetterPermutation added to it; without this, it is probably impossible to have a suffix automaton that
+    // represents the set of isoNormalised substrings of s.  The final important change is that, in Ukkonnen's original algorithm,
+    // when we needed to follow a suffix link from a state, we could depend on it having already been computed; for reasons that
+    // are not 100% clear to me, this is not the case in the pseudo-isomorphic variant, so a addSuffixLink() method needed to be added.
+    // 
+    // That's about it - clear as mud, I'm afraid :/ As a brief re-cap: Ukkonnen's method takes a very simple-minded, O(|s|^2) algorithm
+    // for online computation of a suffix automaton representing a string s (where each new letter in x is added, by traversing
+    // suffix links starting with the longest suffix in the automaton, to each suffix already represented by the automaton) and adds a couple
+    // optimisations that bring this done to O(|s|), and also allows us to easily compute the number of distinct words represented by 
+    // the automaton simply by tracking the number of "leaf" states in the automaton.
+    // As it happens, using the same simple-minded algorithm but this time computing a suffix automaton that represents the *isonormalised*
+    // substrings of s rather than the raw substrings of is amenable to the same optimisations and can be made O(|s|) and, further,
+    // enables us to compute the number of distinct isonormalised substrings using exactly the same procedure.  The changes to Ukkonnen's algorithm
+    // include tracking the number of suffixes traversed so that we know the LetterPermutation corresponding to the current 
+    // suffix of s we are extending by x and incorporating LetterPermutation's into each transition we add.   Using this modified 
+    // version of Ukkonnen's algorithm, we can find the number of isonormalised substrings of each prefix of s by calling numNonPseudoIsomorphicSubstrings(),
+    // which is exactly what we want.
 
     // * This isn't strictly true; in an efficient Suffix Automaton, there is not a one-to-one correspondence between words in s
     // and states (there would be O(|s|^2) states!) - Ukonnen uses "reference pairs" to get around this.  For simplicity, though, let's 
