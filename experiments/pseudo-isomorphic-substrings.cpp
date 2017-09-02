@@ -507,23 +507,23 @@ class PseudoIsomorphicSuffixTree
                     }
                     suffixIncreasePermutation = suffixIncreasePermutationOpt;
 
-                    // The compoundPermutation permutation essentially translates from letters on the current transition to 
+                    // The compoundPermutation permutation essentially translates from letters on the transition from s's parent to s to 
                     // letters in the next suffix; following the letters on the transition with this permutation
                     // applied gets us towards our suffix link.
                     LetterPermutation compoundPermutation;
                     for (int i = 0; i < alphabetSize; i++)
                     {
                         const char originalLetter = 'a' + i;
-                        char compoundPermutedLetter = 'a';
+                        char compoundPermutedLetter = 'z';
                         if (transition.letterPermutation->hasPermutedLetter(originalLetter))
                         {
                             compoundPermutedLetter = transition.letterPermutation->permutedLetter(originalLetter);
                             if (suffixIncreasePermutation.hasPermutedLetter(compoundPermutedLetter))
                             {
                                 compoundPermutedLetter = suffixIncreasePermutation.permutedLetter(compoundPermutedLetter);
+                                compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
                             }
                         }
-                        compoundPermutation.permuteUnpermutedLetter(originalLetter, compoundPermutedLetter);
                     }
                     assert(parentSuffixLink);
                     if (sParent != m_root)
