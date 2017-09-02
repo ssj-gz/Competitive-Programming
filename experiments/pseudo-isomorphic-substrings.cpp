@@ -45,11 +45,6 @@ class LetterPermutation
             const char result = m_permutedLetter[originalLetter - 'a'];
             return result;
         }
-        void clear()
-        {
-            m_numLettersPermuted = 0;
-            std::fill(begin(m_permutedLetter), end(m_permutedLetter), '\0');
-        }
     private:
         char m_permutedLetter[alphabetSize] = {'\0'};
         int m_numLettersPermuted = 0;
@@ -263,94 +258,7 @@ class PseudoIsomorphicSuffixTree
                     assert(!isOnExplicitState());
                     return m_posInTransition;
                 }
-                vector<char> nextLetters() const
-                {
-                    char nextLetters[27];
-                    const int numNextLetters = this->nextLetters(nextLetters);
-                    return vector<char>(nextLetters, nextLetters + numNextLetters);
-                }
-                int nextLetters(char* dest) const
-                {
-                    int numNextLetters = 0;
-                    if (m_transition == nullptr)
-                    {
-                        for (const auto& transition : m_state->transitions)
-                        {
-                            const char letter = (*m_string)[transition.substringFollowed.startIndex - 1];
-                            *dest = letter;
-                            dest++;
-                            numNextLetters++;
-                        }
-                    }
-                    else
-                    {
-                        *dest = (*m_string)[m_transition->substringFollowed.startIndex + m_posInTransition - 1];
-                        dest++;
-                        numNextLetters++;
-                    }
-                    return numNextLetters;
-                }
 
-                void followNextLetter()
-                {
-                    followNextLetters(1);
-                }
-                void followNextLetters(int numLetters)
-                {
-                    assert(m_transition);
-                    assert(remainderOfCurrentTransition().length() >= numLetters);
-                    m_posInTransition += numLetters;
-                    const int transitionStringLength = m_transition->substringLength(m_string->size());
-                    if (m_posInTransition == transitionStringLength)
-                    {
-                        m_state = m_transition->nextState;
-                        movedToExplicitState();
-                    }
-                }
-                class NextLetterIterator
-                {
-                    public:
-                        NextLetterIterator()
-                        {
-                        }
-                        bool hasNext()
-                        {
-                            return transitionIterator != endtransitionIterator;
-                        }
-                        char nextLetter()
-                        {
-                            assert(transitionIterator->letterPermutation);
-                            return transitionIterator->letterPermutation->permutedLetter((*(cursor->m_string))[transitionIterator->substringFollowed.startIndex - 1]);
-                        }
-                        NextLetterIterator operator++(int)
-                        {
-                            transitionIterator++;
-                            return *this;
-                        }
-                        Cursor afterFollowingNextLetter()
-                        {
-                            Cursor afterCursor(*cursor);
-                            afterCursor.enterTransitionAndSkipLetter(*transitionIterator);
-                            return afterCursor;
-                        }
-                    private:
-                        NextLetterIterator(vector<Transition>& transitions, const Cursor* cursor)
-                            : transitionIterator(transitions.begin()),
-                            endtransitionIterator(transitions.end()),
-                            cursor(cursor)
-                    {
-                    };
-                        friend class Cursor;
-                        vector<Transition>::iterator transitionIterator;
-                        vector<Transition>::iterator endtransitionIterator;
-                        const Cursor* cursor = nullptr;
-                };
-                friend class NextLetterIterator;
-                NextLetterIterator getNextLetterIterator() const
-                {
-                    assert(isOnExplicitState());
-                    return NextLetterIterator(m_state->transitions, this);
-                }
                 class Substring
                 {
                     public:
