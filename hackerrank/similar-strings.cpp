@@ -96,6 +96,11 @@ string isoNormaliseString(const string& s, LetterPermutation* letterPermutation 
  */
 class PseudoIsomorphicSuffixTree
 {
+    public:
+        struct StateData
+        {
+            array<int, log2MaxN> stateIdJumpLookup;
+        };
     private:
         struct State;
         struct Substring
@@ -144,6 +149,8 @@ class PseudoIsomorphicSuffixTree
             int index = -1;
             bool isFinal = false;
             int wordLength = 0;
+
+            StateData stateData;
         };
     public:
         PseudoIsomorphicSuffixTree()
@@ -290,6 +297,11 @@ class PseudoIsomorphicSuffixTree
                     assert(m_transition->letterPermutation);
                     return m_transition->letterPermutation;
                 }
+                StateData stateData()
+                {
+                    assert(isOnExplicitState());
+                    return m_state->stateData;
+                }
                 int stateId() const
                 {
                     const int stateId = m_state->index;
@@ -402,6 +414,10 @@ class PseudoIsomorphicSuffixTree
         Cursor rootCursor() const
         {
             return Cursor(m_root, m_currentString, m_root);
+        }
+        Cursor cursorFromStateId(int stateId)
+        {
+            return Cursor(&(m_states[stateId]), m_currentString, m_root);
         }
         static Cursor invalidCursor()
         {
