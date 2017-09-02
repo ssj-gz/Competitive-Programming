@@ -18,6 +18,13 @@ using namespace std;
 
 const int alphabetSize = 27; // Include the magic '{' for making final states explicit - assumes the input string has no '{''s, obviously!
 
+constexpr int maxN = 50'000;
+constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
+{
+    return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
+}
+constexpr int log2MaxN = log2(maxN);
+
 class LetterPermutation
 {
     public:
@@ -717,6 +724,8 @@ int main()
     PseudoIsomorphicSuffixTree treeBuilder;
     treeBuilder.appendString(s);
     treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
+
+    cout << "log2MaxN: " << log2MaxN << endl;
 
     for (int i = 0; i < q; i++)
     {
