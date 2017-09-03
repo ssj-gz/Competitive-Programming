@@ -234,6 +234,8 @@ class PseudoIsomorphicSuffixTree
         }
         void makeFinalStatesExplicitAndMarkThemAsFinal()
         {
+            if (m_currentString.empty())
+                return;
             cout << " makeFinalStatesExplicitAndMarkThemAsFinal" << endl;
             State* fullStringFinalState = nullptr;
             // Update wordLength for leaf states.
@@ -932,7 +934,13 @@ int bruteForce(const string& s, int l, int r)
 
 using Cursor = PseudoIsomorphicSuffixTree::Cursor;
 
-int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tree, Cursor cursor, vector<Cursor>& finalStateForSuffix)
+struct Ancestor
+{
+    Cursor explicitStateCursor;
+    char letterFollowed = '\0';
+};
+
+int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tree, Cursor cursor, vector<Cursor>& finalStateForSuffix, vector<Ancestor>& ancestors)
 {
     assert(cursor.isOnExplicitState());
     int64_t numReachableFinalStates = 0;
@@ -945,13 +953,58 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
         assert(suffixBeginPos >= 0 && suffixBeginPos < finalStateForSuffix.size());
         finalStateForSuffix[suffixBeginPos] = cursor;
     }
+    if (!ancestors.empty())
+    {
+        //for (int i = 0; i < ancestors.size(); i++)
+        //{
+            //cout << " ancestor # " << (i + 1) << " of " << ancestors.size() << " wordLength: " << ancestors[i].explicitStateCursor.wordLength() << endl;
+        //}
+        int powerOf2 = 1;
+        for (int i = 0; i < log2MaxN; i++)
+        {
+            const int targetAncestorWordLength = cursor.wordLength() - powerOf2;
+            if (targetAncestorWordLength < 0)
+                continue;
+            //cout << " powerOf2: " << powerOf2 << " targetAncestorWordLength:" << targetAncestorWordLength << endl;
+            auto targetAncestorPointer = lower_bound(ancestors.begin(), ancestors.end(), targetAncestorWordLength, [](const Ancestor& ancestor, const int targetAncestorWordLength)
+                    {
+                    return targetAncestorWordLength > ancestor.explicitStateCursor.wordLength();
+                    }
+                    );
+            if (targetAncestorPointer == ancestors.end())
+            {
+                targetAncestorPointer--;
+            }
+            if (targetAncestorPointer->explicitStateCursor.wordLength() > targetAncestorWordLength)
+            {
+                if (targetAncestorPointer != ancestors.begin())
+                {
+                    //cout << " rolling back from " << targetAncestorPointer->explicitStateCursor.wordLength() << endl;
+                    targetAncestorPointer--;
+                }
+            }
+            //cout << " Found ancestor wordLength: " << targetAncestorPointer->explicitStateCursor.wordLength() << endl;
+            assert(targetAncestorPointer->explicitStateCursor.wordLength() <= targetAncestorWordLength);
+            cursor.stateData().stateIdJumpLookup[i] = targetAncestorPointer->explicitStateCursor.stateId();
+            powerOf2 *= 2;
+        }
+    }
     auto nextLetterIterator = cursor.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
         Cursor nextExplicitStateCursor = nextLetterIterator.afterFollowingNextLetter();
         if (!nextExplicitStateCursor.isOnExplicitState())
             nextExplicitStateCursor.followToTransitionEnd();
-        numReachableFinalStates += findReachableFinalStatesAndBuildLookupAux(tree, nextExplicitStateCursor, finalStateForSuffix);
+
+        Ancestor us;
+        us.explicitStateCursor = cursor;
+        us.letterFollowed = nextLetterIterator.nextLetter();
+        ancestors.push_back(us);
+
+        numReachableFinalStates += findReachableFinalStatesAndBuildLookupAux(tree, nextExplicitStateCursor, finalStateForSuffix, ancestors);
+
+        ancestors.pop_back();
+
 
         nextLetterIterator++;
     }
@@ -962,13 +1015,37 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
 void findReachableFinalStatesAndBuildLookup(PseudoIsomorphicSuffixTree& tree)
 {
     vector<Cursor> finalStateForSuffix(tree.currentString().size() + 1); // The "+1" is because there are |s|+1 suffixes: empty suffix (at 0) to full suffix (at |s|).
-    findReachableFinalStatesAndBuildLookupAux(tree, tree.rootCursor(), finalStateForSuffix);
+    vector<Ancestor> ancestors;
+    findReachableFinalStatesAndBuildLookupAux(tree, tree.rootCursor(), finalStateForSuffix, ancestors);
+    assert(ancestors.empty());
 }
 
 
 int main()
 {
-//#define EXHAUSTIVE
+//#define RANDOM
+#ifdef RANDOM
+    {
+        while (true)
+        {
+            const int n = rand() % 1000;
+            const int m = rand() % 26 + 1;
+            string s(n, '\0');
+            for (int i = 0; i < n; i++)
+            {
+                s[i] = 'a' + rand() % m;
+            }
+            cout << "s: " << s << endl;
+            PseudoIsomorphicSuffixTree treeBuilder;
+            treeBuilder.appendString(s);
+            treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
+            findReachableFinalStatesAndBuildLookup(treeBuilder);
+        }
+        return 0;
+    }
+#endif
+
+    //#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
