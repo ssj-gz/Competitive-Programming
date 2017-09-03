@@ -832,47 +832,46 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
 {
     assert(cursor.isOnExplicitState());
     int64_t numReachableFinalStates = 0;
-    //cout << " word length: " << cursor.wordLength() << endl;
     if (cursor.isOnFinalState())
     {
         const int suffixBeginPos = tree.currentString().size() - cursor.wordLength();
-        //cout << " found final state for suffix: " << suffixBeginPos << endl;
-        //cout << " finalStateForSuffix size: " << finalStateForSuffix.size() << endl;
         assert(suffixBeginPos >= 0 && suffixBeginPos < finalStateForSuffix.size());
         finalStateForSuffix[suffixBeginPos] = cursor;
         numReachableFinalStates++; // We can reach ourselves :)
     }
     if (!ancestors.empty())
     {
-        //for (int i = 0; i < ancestors.size(); i++)
-        //{
-            //cout << " ancestor # " << (i + 1) << " of " << ancestors.size() << " wordLength: " << ancestors[i].explicitStateCursor.wordLength() << endl;
-        //}
+        // Build up ancestorJumpLookup (see the definition of ancestorJumpLookup for what it does!).
+        // Note: if we need to jump up by e.g. 512 letters, but no ancestor has word length precisely
+        // equal to the desired targetAncestorWordLength = wordLength - 512, then we go to the ancestor
+        // with the *highest word length that is less than targetAncestorWordLength"; then, when
+        // we come to look up the ancestor, we can just jump up to that ancestor we found (overshooting) and then 
+        // jump down (using letterFollowed) to the next ancestor: this is a bit  hard to explain, but suffice
+        // to say it's a little more efficient this way!
         int powerOf2 = 1;
         for (int i = 0; i < log2MaxN; i++)
         {
             const int targetAncestorWordLength = cursor.wordLength() - powerOf2;
             if (targetAncestorWordLength < 0)
                 continue;
-            //cout << " powerOf2: " << powerOf2 << " targetAncestorWordLength:" << targetAncestorWordLength << endl;
-            auto targetAncestorPointer = lower_bound(ancestors.begin(), ancestors.end(), targetAncestorWordLength, [](const Ancestor& ancestor, const int targetAncestorWordLength)
+            auto targetAncestorPointer = lower_bound(ancestors.begin(), ancestors.end(), targetAncestorWordLength, 
+                    [](const Ancestor& ancestor, const int targetAncestorWordLength)
                     {
-                    return targetAncestorWordLength > ancestor.explicitStateCursor.wordLength();
+                        return targetAncestorWordLength > ancestor.explicitStateCursor.wordLength();
                     }
-                    );
+                );
             if (targetAncestorPointer == ancestors.end())
             {
                 targetAncestorPointer--;
             }
             if (targetAncestorPointer->explicitStateCursor.wordLength() > targetAncestorWordLength)
             {
+                // Pick the next highest.
                 if (targetAncestorPointer != ancestors.begin())
                 {
-                    //cout << " rolling back from " << targetAncestorPointer->explicitStateCursor.wordLength() << endl;
                     targetAncestorPointer--;
                 }
             }
-            //cout << " Found ancestor wordLength: " << targetAncestorPointer->explicitStateCursor.wordLength() << endl;
             assert(targetAncestorPointer->explicitStateCursor.wordLength() <= targetAncestorWordLength);
             cursor.stateData().ancestorJumpLookup[i].ancestorStateId = targetAncestorPointer->explicitStateCursor.stateId();
             cursor.stateData().ancestorJumpLookup[i].letterFollowed = targetAncestorPointer->letterFollowed;
@@ -891,10 +890,10 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
         us.letterFollowed = nextLetterIterator.nextLetter();
         ancestors.push_back(us);
 
+        // Recurse.
         numReachableFinalStates += findReachableFinalStatesAndBuildLookupAux(tree, nextExplicitStateCursor, finalStateForSuffix, ancestors);
 
         ancestors.pop_back();
-
 
         nextLetterIterator++;
     }
@@ -913,6 +912,34 @@ vector<Cursor> buildFinalStatesForSuffixLookup(PseudoIsomorphicSuffixTree& tree)
 
 int main()
 {
+    // Pretty easy one, *provided* we can build a suffix automaton consisting of the "iso-normalised" substrings of s, rather
+    // than the plain substrings of s: this is accomplished via PseudoIsomorphicSuffixTree, which I wrote to solve the
+    // "Pseudo-Isomorphic Substrings" challenge - see that for more details!
+    // Solving it in the case where we don't deal with "string similarity" (i.e. pseudo-isomorphism) is a bit easier to explain
+    // and incorporating pseudo-isomorphism into this solution poses no additional problems, so let's do that!
+    // So: we have lots and lots (q) of queries, where each one tells us to find the number of occurrences of a given substring in s,
+    // where the substring is provided in the form of a range s[l, r].
+    // This is easy to compute naively: just follow this substring s[l, r] in the suffix automaton representing s, and then
+    // find the number of final states reachable from where we are (if we end up on a transition, then follow it to the next
+    // explicit state).  Computing the number of final states reachable from each explicit state is trivially accomplishable
+    // via a DFS (see findReachableFinalStatesAndBuildLookupAux) in O(|s|), but following s[l, r] can be O(|s|), and since O(|s| * q)
+    // is too big, this is not feasible.
+    // Now, imagine we followed s[l, ...] in the automaton i.e. the suffix of s beginning at l.  This would lead us to the final
+    // state finalStateForSuffix[l] - call it S.  If we could backtrack from S, down the path from root to S, by r - l + 1 letters,
+    // we'd end up precisely at the position (could be on an explicit state; could be on a transition) we'd reach by following
+    // s[l, r].  This would still take O(|s|), though, so no immediate help.
+    // However, with a bit of craftiness, we can build a lookup table for each state S' (ancestorJumpLookup) that lets it immediately jump to an ancestor
+    // that represents a word 1, 2, 4, 8, 16, 32 ... log2MaxN etc letters "shorter" than the word represented by S', and then use that to
+    // jump up r - l + 1 letters in O(log2|s|) i.e. if we need to jump up 1076 letters, we could use our lookup to jump up by 1024, then
+    // by 32, then by 16, then by 4 and end up in the right place, which would give us exactly what we need.
+    // Actually, things are a little more complex than that: we might not have an (explicit) ancestor state that is exactly e.g. 1024
+    // letters shorter than we are, but if not, we *will* have a pair of successive ancestors who have word lengths less than 1024 less than ours
+    // and greater than 1024 less than ours (respectively), in which case we add the shorter of the two in our "1024" slot in ancestorJumpLookup:
+    // following this for our "jump 1024 up" will overshoot (i.e. lead to a state representing a word shorter than we wanted), but if we 
+    // store the letter followed for each ancestor, we can instantly jump down along the transition followed to the correct point.
+    // And that's about it - once we can jump to the state or transition representing s[l, r], it's trivial to find the number of 
+    // reachable final states from here.
+
     int n, q;
     cin >> n >> q;
 
