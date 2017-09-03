@@ -178,7 +178,6 @@ class PseudoIsomorphicSuffixTree
             auto& permutationsMissingLetter = m_permutationsMissingLetter[letter - 'a'];
             for (auto permutationMissingLetter : permutationsMissingLetter)
             {
-                cout << " letter: " << letter << " added to permutation: " << permutationMissingLetter << endl;
                 permutationMissingLetter->permuteUnpermutedLetter(letter);
             }
             permutationsMissingLetter.clear();
@@ -259,10 +258,10 @@ class PseudoIsomorphicSuffixTree
                     fullStringFinalState = &state;
                 }
             }
-            dumpGraph();
-            cout << " gloop: " << fullStringFinalState << endl;
+            //dumpGraph();
+            //cout << " gloop: " << fullStringFinalState << endl;
             //m_numSuffixLinksTraversed = 0;
-            cout << " string size: " << m_currentString.size() << endl;
+            //cout << " string size: " << m_currentString.size() << endl;
             //const auto canonizeResult = canonize(m_root, 1, m_currentString.size(), &(m_isoNormalisedSuffixPermutations[0]));
             //cout << " blee: " << canonizeResult.first->wordLength << endl;
             //cout << " blaa: " << canonizeResult.second << endl;
@@ -271,7 +270,7 @@ class PseudoIsomorphicSuffixTree
             int numSuffixLinksTraversed = 0;
             while (finalState != m_root)
             {
-                cout << " finalState" << finalState << " numSuffixLinksTraversed: " << numSuffixLinksTraversed << " root: " << m_root << " m_auxiliaryState: " << m_auxiliaryState << " to final state: " << isoNormalisedStringToState(finalState) << endl;
+                //cout << " finalState" << finalState << " numSuffixLinksTraversed: " << numSuffixLinksTraversed << " root: " << m_root << " m_auxiliaryState: " << m_auxiliaryState << " to final state: " << isoNormalisedStringToState(finalState) << endl;
                 finalState->isFinal = true;
                 if (!finalState->suffixLink)
                     addSuffixLink(finalState, numSuffixLinksTraversed);
@@ -614,7 +613,6 @@ class PseudoIsomorphicSuffixTree
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
-            cout << "update" << endl;
             State* oldr = m_root;
             assert(m_numSuffixLinksTraversed < m_isoNormalisedSuffixPermutations.size());
             const int letterIndex = m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]) - 'a' + 1;
@@ -625,7 +623,6 @@ class PseudoIsomorphicSuffixTree
             assert(r);
             while (!isEndPoint)
             {
-                cout << " update loop" << endl;
                 auto rPrime = createNewState(r);
                 rPrime->wordLength = -1;
                 r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), &(m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed]), m_currentString));
@@ -769,10 +766,7 @@ class PseudoIsomorphicSuffixTree
                         assert(isoNormalisedStringToState(parentSuffixLink) == isoNormaliseString(isoNormalisedStringToState(sParent).substr(1)));
 
                     const int p = transition.substringFollowed.endIndex;
-                    cout << " p: " << p << endl;
                     const auto k = (parentSuffixLink == m_auxiliaryState ? transition.substringFollowed.startIndex + 1 : transition.substringFollowed.startIndex);
-                    cout << " addSuffixLink: k " << k << endl;
-                    cout << " parent: " << s->parent << " parentSuffixLink: " << parentSuffixLink << endl;
                     const auto preCanonizeLength = p - k + 1;
                     if (parentSuffixLink == m_auxiliaryState)
                         parentSuffixLink = m_root;
@@ -793,7 +787,6 @@ class PseudoIsomorphicSuffixTree
         pair<bool, State*> testAndSplit(State* s, int k, int p, int letterIndex, LetterPermutation* letterPermutation)
         {
             assert(s);
-            cout << "testAndSplit: letterIndex = " << letterIndex << " letter: " << static_cast<char>('a' + letterIndex - 1) << endl;
             if (k <= p)
             {
                 const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
@@ -803,10 +796,7 @@ class PseudoIsomorphicSuffixTree
                 auto pPrime = tkTransitionIter->substringFollowed.endIndex;
                 assert(tkTransitionIter->letterPermutation);
                 if (letterIndex == tkTransitionIter->letterPermutation->permutedLetter(m_currentString[kPrime + p - k]) - 'a' + 1)
-                {
-                    cout << " testAndSplit: already here!" << endl;
                     return {true, s};
-                }
                 else
                 {
                     LetterPermutation* letterPermutationOnTransition = tkTransitionIter->letterPermutation;
@@ -825,10 +815,7 @@ class PseudoIsomorphicSuffixTree
                 if (tTransitionIter == s->transitions.end())
                     return {false, s};
                 else
-                {
-                    cout << " testAndSplit: already here!" << endl;
                     return {true, s};
-                }
             }
         }
         std::pair<State*, int> canonize(State* s, int k, int p, LetterPermutation* letterPermutation)
@@ -864,7 +851,6 @@ class PseudoIsomorphicSuffixTree
         }
         State *createNewState(State* parent = nullptr)
         {
-            cout << " creating new state" << endl;
             m_states.push_back(State());
             State *newState = &(m_states.back());
             newState->parent = parent;
