@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -950,11 +950,11 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
 {
     assert(cursor.isOnExplicitState());
     int64_t numReachableFinalStates = 0;
-    cout << " word length: " << cursor.wordLength() << endl;
+    //cout << " word length: " << cursor.wordLength() << endl;
     if (cursor.isOnFinalState())
     {
         const int suffixBeginPos = tree.currentString().size() - cursor.wordLength();
-        cout << " found final state for suffix: " << suffixBeginPos << endl;
+        //cout << " found final state for suffix: " << suffixBeginPos << endl;
         //cout << " finalStateForSuffix size: " << finalStateForSuffix.size() << endl;
         assert(suffixBeginPos >= 0 && suffixBeginPos < finalStateForSuffix.size());
         finalStateForSuffix[suffixBeginPos] = cursor;
@@ -1029,15 +1029,24 @@ vector<Cursor> buildFinalStatesForSuffixLookup(PseudoIsomorphicSuffixTree& tree)
     return finalStateForSuffix;
 }
 
-void doStuff(const string& s)
+void doStuff(const string& s, int q)
 {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     cout << "s: " << s << endl;
     PseudoIsomorphicSuffixTree treeBuilder;
     treeBuilder.appendString(s);
+    cout << " built thing" << endl;
     treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
+    cout << " made things explict" << endl;
     const auto finalStateForSuffixes = buildFinalStatesForSuffixLookup(treeBuilder);
+    cout << " built final states etc" << endl;
 
     cout << "log2MaxN: " << log2MaxN << endl;
+
+    int numComputed = 0;
+
+
+
 
 #define ALL_SUBSTRINGS
 #ifdef ALL_SUBSTRINGS
@@ -1066,7 +1075,7 @@ void doStuff(const string& s)
             int powerOf2 = 1;
             for (int i = 0; i < log2MaxN; i++)
             {
-                if (wordCursor.wordLength() - powerOf2 * 2 < targetAncestorWordLength)
+                if ((wordCursor.wordLength() - powerOf2 * 2 < targetAncestorWordLength) || (i == log2MaxN - 1))
                 {
                     //cout << " jumping up " << powerOf2 << endl;
                     letterToFollow = wordCursor.stateData().stateIdJumpLookup[i].second;
@@ -1093,8 +1102,15 @@ void doStuff(const string& s)
         }
         const int optimisedResult = wordCursor.stateData().numReachableFinalStates;
         cout << " optimisedResult: " << optimisedResult << endl;
+        numComputed++;
+        if (numComputed % 1000 == 0)
+        {
+            std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+            std::cout << "Time to compute stuff = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 << " for string of length: " << s.size() << std::endl;
+            begin = std::chrono::steady_clock::now();
+        }
 
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
         const int bruteForceResult = bruteForce(s, l, r);
         cout << "bruteForceResult: " << bruteForceResult  << endl;
@@ -1111,20 +1127,20 @@ int main()
     {
         while (true)
         {
-            const int n = rand() % 100;
+            const int n = rand() % 100'000;
             const int m = rand() % 26 + 1;
             string s(n, '\0');
             for (int i = 0; i < n; i++)
             {
                 s[i] = 'a' + rand() % m;
             }
-            doStuff(s);
+            doStuff(s, -1);
         }
         return 0;
     }
 #endif
 
-#define EXHAUSTIVE
+//#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
@@ -1159,7 +1175,7 @@ int main()
     string s;
     cin >> s;
 
-    doStuff(s);
+    doStuff(s, q);
 #endif
 
 }
