@@ -99,6 +99,7 @@ class PseudoIsomorphicSuffixTree
     public:
         struct StateData
         {
+            int numReachableFinalStates = -1;
             array<int, log2MaxN> stateIdJumpLookup;
         };
     private:
@@ -359,7 +360,7 @@ class PseudoIsomorphicSuffixTree
                     assert(m_transition->letterPermutation);
                     return m_transition->letterPermutation;
                 }
-                StateData stateData()
+                StateData& stateData()
                 {
                     assert(isOnExplicitState());
                     return m_state->stateData;
@@ -954,6 +955,7 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
 
         nextLetterIterator++;
     }
+    cursor.stateData().numReachableFinalStates = numReachableFinalStates;
     return numReachableFinalStates;
 }
 
