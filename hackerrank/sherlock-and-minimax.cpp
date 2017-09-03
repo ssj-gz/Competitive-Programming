@@ -27,15 +27,18 @@ int bruteForce(const vector<int>& a, int P, int Q)
     return (largestMinIndex); 
 }
 
-int optimised(const vector<int>& a, int P, int Q)
+int optimised(const vector<int>& aOriginal, int64_t P, int64_t Q)
 {
+    vector<int64_t> a(aOriginal.begin(), aOriginal.end());
+    a.insert(a.begin(), numeric_limits<int>::min());
+    a.push_back(numeric_limits<int>::max());
     int indexBeforeP = -1;
     int indexAfterQ = -1;
     int largestGapInABetweenPAndQ = -1;
     int indexOfLargestGapInABetweenPAndQ = -1;
 
     int largestMinPos = -1;
-    int largestMin = numeric_limits<int>::max();
+    int largestMin = std::numeric_limits<int>::min();
 
     auto updateLargestMin = [&largestMin, &largestMinPos](int newMin, int newMinPos)
     {
@@ -50,25 +53,40 @@ int optimised(const vector<int>& a, int P, int Q)
         }
     };
 
-    for (int i = 0; i < a.size(); i++)
+    for (int i = 1; i < a.size(); i++)
     {
-        if (a[i] < P)
-            indexBeforeP = i;
-        if (i > 0 && a[i - 1] >= P && a[i] <= Q)
+        int64_t centrePos = a[i - 1] + (a[i] - a[i - 1]) / 2;
+        //cout << " i: " << i << " a[i - 1] " << a[i - 1] << endl;
+        //cout << " centrePos unadjusted: " << centrePos << endl;
+        centrePos = max(centrePos, P);
+        centrePos = min(centrePos, Q);
+        //cout << " i: " << i << " a[i]: " << a[i] << " centrePos: " << centrePos << endl;
+        if (centrePos < a[i - 1] || centrePos > a[i])
         {
-            const int gapSize = a[i] - a[i - 1];
-            if (gapSize > largestGapInABetweenPAndQ)
-            {
-                largestGapInABetweenPAndQ = gapSize;
-                indexOfLargestGapInABetweenPAndQ = i;
-            }
+            //cout << " out of range" << endl;
+            continue;
         }
-        if (a[i] > Q)
+        int64_t gap = numeric_limits<int>::max();
+        assert(centrePos >= a[i - 1]);
+        assert(centrePos <= a[i]);
+        if (a[i - 1] != numeric_limits<int>::min())
         {
-            indexAfterQ = i;
-            break;
+            gap  = min(gap, centrePos - a[i - 1]);
         }
+        if (a[i] != numeric_limits<int>::max())
+        {
+            gap = min(gap, a[i] - centrePos);
+        }
+        //cout << " gap: " << gap << endl;
+        if (gap > largestMin)
+        {
+            //cout << " found new best: " << gap << " at " << centrePos << endl;
+            largestMinPos = centrePos;
+            largestMin = gap;
+        }
+
     }
+#if 0
     if (indexOfLargestGapInABetweenPAndQ != -1)
     {
         updateLargestMin(largestGapInABetweenPAndQ / 2, (a[indexOfLargestGapInABetweenPAndQ] + a[indexOfLargestGapInABetweenPAndQ - 1]) / 2);
@@ -97,6 +115,7 @@ int optimised(const vector<int>& a, int P, int Q)
         int QAdjustedDiff = max(a[indexAfterQ] - QAdjustedDiff, QAdjustedDiff - a[indexAfterQ - 1]);
         updateLargestMin(QAdjustedDiff, QAdjusted);
     }
+#endif
     return largestMinPos;
 }
 
