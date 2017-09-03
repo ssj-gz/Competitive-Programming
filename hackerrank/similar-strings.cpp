@@ -17,7 +17,7 @@
 
 using namespace std;
 
-const int alphabetSize = 27; // Include the magic '{' for making final states explicit - assumes the input string has no '{''s, obviously!
+const int alphabetSize = 27; // Include the magic '{' for ensuring newly-added suffix links are explicit - assumes the input string has no '{''s, obviously!
 
 constexpr int maxN = 50'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
@@ -101,7 +101,13 @@ class PseudoIsomorphicSuffixTree
         struct StateData
         {
             int numReachableFinalStates = -1;
-            array<pair<int, char>, log2MaxN> stateIdJumpLookup;
+            struct Ancestor
+            {
+                int ancestorStateId;
+                char letterFollowed;
+            };
+            // 
+            array<Ancestor, log2MaxN> ancestorJumpLookup;
         };
     private:
         struct State;
@@ -238,7 +244,8 @@ class PseudoIsomorphicSuffixTree
             if (m_currentString.empty())
                 return;
             State* fullStringFinalState = nullptr;
-            // Update wordLength for leaf states.
+            // Update wordLength for leaf states; give correct endIndex for open-ended transitions; find the
+            // final state corresponding to m_currentString.
             for (auto& state : m_states)
             {
                 for (auto& transition : state.transitions)
@@ -260,6 +267,7 @@ class PseudoIsomorphicSuffixTree
                 }
             }
             assert(fullStringFinalState);
+            // Ensure all final states are explicit.
             State* finalState = fullStringFinalState;
             int numSuffixLinksTraversed = 0;
             while (finalState != m_root)
@@ -421,29 +429,6 @@ class PseudoIsomorphicSuffixTree
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 }
-                string isoNormalisedStringFollowed() const
-                {
-                    Cursor copy(*this);
-                    string stringFollowed;
-                    while (!(!copy.m_state->parent && copy.isOnExplicitState()))
-                    {
-                        if (copy.isOnExplicitState())
-                        {
-                            auto transitionFromParent = findTransitionFromParent(copy.m_state);
-                            stringFollowed = isoNormaliseString(m_string->substr(transitionFromParent->substringFollowed.startIndex - 1, transitionFromParent->substringFollowed.length(m_string->size())),  transitionFromParent->letterPermutation, true) + stringFollowed;
-                            copy.m_state = copy.m_state->parent;
-                        }
-                        else
-                        {
-                            assert(false); // Don't use m_transition, m_posInTransition!!
-                            assert(m_transition->substringFollowed.startIndex >= 0);
-                            stringFollowed = isoNormaliseString(m_string->substr(m_transition->substringFollowed.startIndex - 1 + m_posInTransition, m_transition->substringFollowed.length(m_string->size() - m_posInTransition)),  m_transition->letterPermutation, true) + stringFollowed;
-                            copy.movedToExplicitState();
-                        }
-                    }
-                    return stringFollowed;
-                }
-
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -535,17 +520,6 @@ class PseudoIsomorphicSuffixTree
 
         int64_t m_numLeafStates = 0;
         int64_t m_numNonPseudoIsomorphicSubstrings = 0;
-
-        string isoNormalisedStringToState(State* s)
-        {
-#ifndef NDEBUG
-            Cursor blah(s, m_currentString, m_root);
-            return blah.isoNormalisedStringFollowed();
-#else
-            return "";
-#endif
-        }
-
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
@@ -900,8 +874,8 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
             }
             //cout << " Found ancestor wordLength: " << targetAncestorPointer->explicitStateCursor.wordLength() << endl;
             assert(targetAncestorPointer->explicitStateCursor.wordLength() <= targetAncestorWordLength);
-            cursor.stateData().stateIdJumpLookup[i].first = targetAncestorPointer->explicitStateCursor.stateId();
-            cursor.stateData().stateIdJumpLookup[i].second = targetAncestorPointer->letterFollowed;
+            cursor.stateData().ancestorJumpLookup[i].ancestorStateId = targetAncestorPointer->explicitStateCursor.stateId();
+            cursor.stateData().ancestorJumpLookup[i].letterFollowed = targetAncestorPointer->letterFollowed;
             powerOf2 *= 2;
         }
     }
@@ -937,154 +911,64 @@ vector<Cursor> buildFinalStatesForSuffixLookup(PseudoIsomorphicSuffixTree& tree)
     return finalStateForSuffix;
 }
 
-void doStuff(const string& s, int q)
-{
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    //cout << "s: " << s << endl;
-    PseudoIsomorphicSuffixTree treeBuilder;
-    treeBuilder.appendString(s);
-    //cout << " built thing" << endl;
-    treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
-    //cout << " made things explict" << endl;
-    const auto finalStateForSuffixes = buildFinalStatesForSuffixLookup(treeBuilder);
-    //cout << " built final states etc" << endl;
-
-    //cout << "log2MaxN: " << log2MaxN << endl;
-
-    int numComputed = 0;
-
-
-
-
-//#define ALL_SUBSTRINGS
-#ifdef ALL_SUBSTRINGS
-    for (int l = 0; l < s.size(); l++)
-        for (int r = l; r < s.size(); r++)
-        {
-            cout << " l: " << l << " r: " << r << endl;
-#else
-    for (int i = 0; i < q; i++)
-    {
-        int l, r;
-        cin >> l >> r;
-        l--;
-        r--;
-#endif
-
-        const int suffixBeginPos = l;
-        auto finalStateForSuffix = finalStateForSuffixes[suffixBeginPos];
-        auto wordCursor = finalStateForSuffix;
-        char letterToFollow = '\0';
-        const int targetAncestorWordLength = r - l + 1;
-
-        while (wordCursor.wordLength() > targetAncestorWordLength)
-        {
-            //cout << " wordCursor beginning of loop: wordLength: " << wordCursor.wordLength() << " target: " << targetAncestorWordLength << endl;
-            int powerOf2 = 1;
-            for (int i = 0; i < log2MaxN; i++)
-            {
-                if ((wordCursor.wordLength() - powerOf2 * 2 < targetAncestorWordLength) || (i == log2MaxN - 1))
-                {
-                    //cout << " jumping up " << powerOf2 << endl;
-                    letterToFollow = wordCursor.stateData().stateIdJumpLookup[i].second;
-                    wordCursor = treeBuilder.cursorFromStateId(wordCursor.stateData().stateIdJumpLookup[i].first);
-                    assert(wordCursor.isValid());
-                    assert(letterToFollow != '\0');
-                    break;
-                }
-                powerOf2 *= 2;
-            }
-
-            //cout << " after jumping up wordLength: " << wordCursor.wordLength() << endl;
-
-            if (wordCursor.wordLength() < targetAncestorWordLength)
-            {
-                //cout << " overshot: need to follow letter " << letterToFollow << endl;
-                //const auto oldWordCursor = wordCursor;
-                wordCursor.followLetter(letterToFollow);
-                wordCursor.followToTransitionEnd();
-                //cout << " after jumping forward wordLength: " << wordCursor.wordLength() << endl;
-                assert(wordCursor.wordLength() >= targetAncestorWordLength);
-                break;
-            }
-        }
-        const int optimisedResult = wordCursor.stateData().numReachableFinalStates;
-        //cout << " optimisedResult: " << optimisedResult << endl;
-        cout << optimisedResult << endl;
-        numComputed++;
-        if (numComputed % 1000 == 0)
-        {
-            std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-            //std::cout << "Time to compute stuff = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 << " for string of length: " << s.size() << std::endl;
-            begin = std::chrono::steady_clock::now();
-        }
-
-//#define BRUTE_FORCE
-#ifdef BRUTE_FORCE
-        const int bruteForceResult = bruteForce(s, l, r);
-        cout << "bruteForceResult: " << bruteForceResult  << endl;
-        assert(bruteForceResult == optimisedResult);
-#endif
-    }
-}
-
-
 int main()
 {
-//#define RANDOM
-#ifdef RANDOM
-    {
-        while (true)
-        {
-            const int n = rand() % 100'000;
-            const int m = rand() % 26 + 1;
-            string s(n, '\0');
-            for (int i = 0; i < n; i++)
-            {
-                s[i] = 'a' + rand() % m;
-            }
-            doStuff(s, -1);
-        }
-        return 0;
-    }
-#endif
-
-//#define EXHAUSTIVE
-#ifdef EXHAUSTIVE
-    string s = "a";
-    const int numLetters = 4;
-    while (true)
-    {
-        cout << "s: " << s <<  " size: " << s.size() << endl;
-
-        doStuff(s);
-
-        int index = 0;
-        while (index < s.size() && s[index] == 'a' + numLetters)
-        {
-            s[index] = 'a';
-            index++;
-        }
-        if (index == s.size())
-        {
-            s.push_back('a');
-            cout << "string length: " << s.length() << endl;
-        }
-        else
-        {
-            s[index]++;
-        }
-    }
-    return 0;
-
-#else
     int n, q;
     cin >> n >> q;
 
     string s;
     cin >> s;
 
-    doStuff(s, q);
-#endif
+    PseudoIsomorphicSuffixTree treeBuilder;
+    treeBuilder.appendString(s);
+    treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
+    const auto finalStateForSuffixes = buildFinalStatesForSuffixLookup(treeBuilder);
+
+    for (int i = 0; i < q; i++)
+    {
+        int l, r;
+        cin >> l >> r;
+        // Make l, r 0-relative.
+        l--;
+        r--;
+
+        // Finding the state corresponding to following s[l, r] is the same as finding the state reached by following
+        // s[l, ...] and then jumping up (in the automaton) r - l + 1 letters.
+        const int suffixBeginPos = l;
+        auto finalStateForSuffix = finalStateForSuffixes[suffixBeginPos];
+        auto wordCursor = finalStateForSuffix;
+        char letterToFollowIfOvershoot = '\0';
+        const int targetAncestorWordLength = r - l + 1;
+
+        // Use ancestorJumpLookup to efficiently (in O(log2 wordLength) == O(log2 |s|)) find the ancestor 
+        // of wordCursor whose corresponding word has length targetAncestorWordLength.
+        while (wordCursor.wordLength() > targetAncestorWordLength)
+        {
+            int powerOf2 = 1;
+            for (int i = 0; i < log2MaxN; i++)
+            {
+                if ((wordCursor.wordLength() - powerOf2 * 2 < targetAncestorWordLength) || (i == log2MaxN - 1))
+                {
+                    letterToFollowIfOvershoot = wordCursor.stateData().ancestorJumpLookup[i].letterFollowed;
+                    wordCursor = treeBuilder.cursorFromStateId(wordCursor.stateData().ancestorJumpLookup[i].ancestorStateId);
+                    assert(wordCursor.isValid());
+                    assert(letterToFollowIfOvershoot != '\0');
+                    break;
+                }
+                powerOf2 *= 2;
+            }
+
+            if (wordCursor.wordLength() < targetAncestorWordLength)
+            {
+                // Overshot!
+                wordCursor.followLetter(letterToFollowIfOvershoot);
+                wordCursor.followToTransitionEnd();
+                assert(wordCursor.wordLength() >= targetAncestorWordLength);
+                break;
+            }
+        }
+        const int optimisedResult = wordCursor.stateData().numReachableFinalStates;
+        cout << optimisedResult << endl;
+    }
 
 }
