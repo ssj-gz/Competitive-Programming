@@ -1,4 +1,4 @@
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -223,7 +223,7 @@ class PseudoIsomorphicSuffixTree
         {
             return m_numNonPseudoIsomorphicSubstrings;
         }
-        string currentString() const
+        const string& currentString() const
         {
             return m_currentString;
         }
@@ -307,11 +307,76 @@ class PseudoIsomorphicSuffixTree
                     const int stateId = m_state->index;
                     return stateId;
                 }
+                int wordLength() const
+                {
+                    assert(isOnExplicitState());
+                    return m_state->wordLength;
+                }
                 int posInTransition() const
                 {
                     assert(!isOnExplicitState());
                     return m_posInTransition;
                 }
+                void followLetter(char letter)
+                {
+                    assert(isOnExplicitState());
+                    auto nextLetterIterator = getNextLetterIterator();
+                    while (nextLetterIterator.hasNext())
+                    {
+                        if (nextLetterIterator.nextLetter() == letter)
+                        {
+                            *this = nextLetterIterator.afterFollowingNextLetter();
+                            return;
+                        }
+                    }
+                    assert(false && "Could not follow letter!");
+                }
+
+                class NextLetterIterator
+                {
+                    public:
+                        NextLetterIterator()
+                        {
+                        }
+                        bool hasNext()
+                        {
+                            return transitionIterator != endtransitionIterator;
+                        }
+                        char nextLetter()
+                        {
+                            assert(transitionIterator->letterPermutation);
+                            return transitionIterator->letterPermutation->permutedLetter((*(cursor->m_string))[transitionIterator->substringFollowed.startIndex - 1]);
+                        }
+                        NextLetterIterator operator++(int)
+                        {
+                            transitionIterator++;
+                            return *this;
+                        }
+                        Cursor afterFollowingNextLetter()
+                        {
+                            Cursor afterCursor(*cursor);
+                            afterCursor.enterTransitionAndSkipLetter(*transitionIterator);
+                            return afterCursor;
+                        }
+                    private:
+                        NextLetterIterator(vector<Transition>& transitions, const Cursor* cursor)
+                            : transitionIterator(transitions.begin()),
+                            endtransitionIterator(transitions.end()),
+                            cursor(cursor)
+                    {
+                    };
+                        friend class Cursor;
+                        vector<Transition>::iterator transitionIterator;
+                        vector<Transition>::iterator endtransitionIterator;
+                        const Cursor* cursor = nullptr;
+                };
+                friend class NextLetterIterator;
+                NextLetterIterator getNextLetterIterator() const
+                {
+                    assert(isOnExplicitState());
+                    return NextLetterIterator(m_state->transitions, this);
+                }
+
 
                 class Substring
                 {
@@ -353,6 +418,29 @@ class PseudoIsomorphicSuffixTree
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 }
+                string isoNormalisedStringFollowed() const
+                {
+                    Cursor copy(*this);
+                    string stringFollowed;
+                    while (!(!copy.m_state->parent && copy.isOnExplicitState()))
+                    {
+                        if (copy.isOnExplicitState())
+                        {
+                            auto transitionFromParent = findTransitionFromParent(copy.m_state);
+                            stringFollowed = isoNormaliseString(m_string->substr(transitionFromParent->substringFollowed.startIndex - 1, transitionFromParent->substringFollowed.length(m_string->size())),  transitionFromParent->letterPermutation, true) + stringFollowed;
+                            copy.m_state = copy.m_state->parent;
+                        }
+                        else
+                        {
+                            assert(false); // Don't use m_transition, m_posInTransition!!
+                            assert(m_transition->substringFollowed.startIndex >= 0);
+                            stringFollowed = isoNormaliseString(m_string->substr(m_transition->substringFollowed.startIndex - 1 + m_posInTransition, m_transition->substringFollowed.length(m_string->size() - m_posInTransition)),  m_transition->letterPermutation, true) + stringFollowed;
+                            copy.movedToExplicitState();
+                        }
+                    }
+                    return stringFollowed;
+                }
+
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -444,6 +532,17 @@ class PseudoIsomorphicSuffixTree
 
         int64_t m_numLeafStates = 0;
         int64_t m_numNonPseudoIsomorphicSubstrings = 0;
+
+                string isoNormalisedStringToState(State* s)
+                            {
+#ifndef NDEBUG
+                                            Cursor blah(s, m_currentString, m_root);
+                                                        return blah.isoNormalisedStringFollowed();
+#else
+                                                                    return "";
+#endif
+                                                                            }
+
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
@@ -728,6 +827,26 @@ int bruteForce(const string& s, int l, int r)
 }
 
 using Cursor = PseudoIsomorphicSuffixTree::Cursor;
+
+int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tree, Cursor cursor, vector<Cursor>& finalStateForSuffix)
+{
+    assert(cursor.isOnExplicitState());
+    int64_t numReachableFinalStates = 0;
+    if (cursor.isOnFinalState())
+    {
+        const int suffixBeginPos = tree.currentString().size() - cursor.wordLength();
+        assert(suffixBeginPos >= 0 && suffixBeginPos < tree.currentString().size());
+        finalStateForSuffix[suffixBeginPos] = cursor;
+    }
+    return numReachableFinalStates;
+}
+
+void findReachableFinalStatesAndBuildLookup(PseudoIsomorphicSuffixTree& tree)
+{
+    vector<Cursor> finalStateForSuffix(tree.currentString().size());
+    findReachableFinalStatesAndBuildLookupAux(tree, tree.rootCursor(), finalStateForSuffix);
+}
+
 
 int main()
 {
