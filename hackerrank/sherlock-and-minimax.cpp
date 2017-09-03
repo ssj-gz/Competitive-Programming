@@ -38,10 +38,12 @@ int optimised(const vector<int>& aOriginal, int64_t P, int64_t Q)
             continue;
         }
 
+        // Find the min distance from centrePosInPQ to the surrounding a[i - 1] and a[i]
+        // (ignoring the sentinels we added!).
         int64_t minGap = numeric_limits<int>::max();
         if (a[i - 1] != numeric_limits<int>::min()) // Ignore sentinel at beginning.
         {
-            minGap  = min(minGap, centrePosInPQ - a[i - 1]);
+            minGap = min(minGap, centrePosInPQ - a[i - 1]);
         }
         if (a[i] != numeric_limits<int>::max()) // Ignore sentinel at end.
         {
