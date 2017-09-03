@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int optimised(const vector<int>& aOriginal, int64_t P, int64_t Q)
+int findPosOfLargestMinGap(const vector<int>& aOriginal, int64_t P, int64_t Q)
 {
     vector<int64_t> a(aOriginal.begin(), aOriginal.end());
     // Insert "sentinel" values of a at the beginning and end - helps to cut down
@@ -84,6 +84,5 @@ int main()
     int P, Q;
     cin >> P >> Q;
 
-    const int optimisedResult = optimised(a, P, Q);
-    cout << optimisedResult << endl;
+    cout << findPosOfLargestMinGap(a, P, Q) << endl;
 }
