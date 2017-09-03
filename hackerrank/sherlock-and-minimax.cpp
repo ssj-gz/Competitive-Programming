@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) 2017-09-03
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -32,26 +33,9 @@ int optimised(const vector<int>& aOriginal, int64_t P, int64_t Q)
     vector<int64_t> a(aOriginal.begin(), aOriginal.end());
     a.insert(a.begin(), numeric_limits<int>::min());
     a.push_back(numeric_limits<int>::max());
-    int indexBeforeP = -1;
-    int indexAfterQ = -1;
-    int largestGapInABetweenPAndQ = -1;
-    int indexOfLargestGapInABetweenPAndQ = -1;
 
     int largestMinPos = -1;
     int largestMin = std::numeric_limits<int>::min();
-
-    auto updateLargestMin = [&largestMin, &largestMinPos](int newMin, int newMinPos)
-    {
-        if (newMin > largestMin)
-        {
-            largestMin = newMin;
-            largestMinPos = newMinPos;
-        }
-        else if (newMinPos == largestMin)
-        {
-            largestMinPos = min(largestMinPos, newMinPos);
-        }
-    };
 
     for (int i = 1; i < a.size(); i++)
     {
@@ -86,36 +70,6 @@ int optimised(const vector<int>& aOriginal, int64_t P, int64_t Q)
         }
 
     }
-#if 0
-    if (indexOfLargestGapInABetweenPAndQ != -1)
-    {
-        updateLargestMin(largestGapInABetweenPAndQ / 2, (a[indexOfLargestGapInABetweenPAndQ] + a[indexOfLargestGapInABetweenPAndQ - 1]) / 2);
-    }
-    if (indexBeforeP == -1)
-    {
-        assert(a[0] >= P);
-        updateLargestMin(a[0] - P, P);
-    }
-    else if (indexBeforeP != a.size() - 1)
-    {
-        int PAdjusted = max(P, (a[indexBeforeP + 1] - a[indexBeforeP]) / 2);
-        assert(PAdjusted >= a[indexBeforeP] && PAdjusted <= a[indexBeforeP + 1]);
-        int PAdjustedDiff = max(a[indexBeforeP + 1] - PAdjustedDiff, PAdjustedDiff - a[indexBeforeP]);
-        updateLargestMin(PAdjustedDiff, PAdjusted);
-    }
-    if (indexAfterQ == -1)
-    {
-        assert(Q >= a.back());
-        updateLargestMin(Q - a.back(), Q);
-    }
-    else if (indexAfterQ != 0)
-    {
-        int QAdjusted = min(Q, (a[indexAfterQ] - a[indexAfterQ - 1]) / 2);
-        assert(QAdjusted >= a[indexAfterQ - 1] && QAdjusted <= a[indexAfterQ]);
-        int QAdjustedDiff = max(a[indexAfterQ] - QAdjustedDiff, QAdjustedDiff - a[indexAfterQ - 1]);
-        updateLargestMin(QAdjustedDiff, QAdjusted);
-    }
-#endif
     return largestMinPos;
 }
 
@@ -129,7 +83,7 @@ int main()
         cin >> a[i];
     }
     sort(a.begin(), a.end());
-#define ALL_PAIRS
+//#define ALL_PAIRS
 #ifdef ALL_PAIRS
     for (int P = 1; P < a.back() + 100; P++)
         for (int Q = P; Q < a.back() + 100; Q++)
@@ -142,11 +96,12 @@ int main()
 #endif
 
     {
-        cout << " P: " << P << " Q: " << Q << endl;
+        //cout << " P: " << P << " Q: " << Q << endl;
         const int optimisedResult = optimised(a, P, Q);
-        cout << "optimisedResult: " << optimisedResult << endl;
+        //cout << "optimisedResult: " << optimisedResult << endl;
+        cout << optimisedResult << endl;
     
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
     const int bruteForceResult = bruteForce(a, P, Q);
     cout << "bruteForceResult: " << bruteForceResult << endl;
