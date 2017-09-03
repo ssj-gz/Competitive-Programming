@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) 2017-09-03
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -236,7 +237,6 @@ class PseudoIsomorphicSuffixTree
         {
             if (m_currentString.empty())
                 return;
-            cout << " makeFinalStatesExplicitAndMarkThemAsFinal" << endl;
             State* fullStringFinalState = nullptr;
             // Update wordLength for leaf states.
             for (auto& state : m_states)
@@ -252,8 +252,6 @@ class PseudoIsomorphicSuffixTree
                     if (transitionFromParent)
                         state.wordLength = state.parent->wordLength + transitionFromParent->substringFollowed.length(m_currentString.size());
                 }
-                //if (state.transitions.empty())
-                    //assert(state.isFinal);
 
                 if (state.wordLength == m_currentString.size())
                 {
@@ -261,83 +259,17 @@ class PseudoIsomorphicSuffixTree
                     fullStringFinalState = &state;
                 }
             }
-            //dumpGraph();
-            //cout << " gloop: " << fullStringFinalState << endl;
-            //m_numSuffixLinksTraversed = 0;
-            //cout << " string size: " << m_currentString.size() << endl;
-            //const auto canonizeResult = canonize(m_root, 1, m_currentString.size(), &(m_isoNormalisedSuffixPermutations[0]));
-            //cout << " blee: " << canonizeResult.first->wordLength << endl;
-            //cout << " blaa: " << canonizeResult.second << endl;
             assert(fullStringFinalState);
             State* finalState = fullStringFinalState;
             int numSuffixLinksTraversed = 0;
             while (finalState != m_root)
             {
-                //cout << " finalState" << finalState << " numSuffixLinksTraversed: " << numSuffixLinksTraversed << " root: " << m_root << " m_auxiliaryState: " << m_auxiliaryState << " to final state: " << isoNormalisedStringToState(finalState) << endl;
                 finalState->isFinal = true;
                 if (!finalState->suffixLink)
                     addSuffixLink(finalState, numSuffixLinksTraversed);
                 finalState = finalState->suffixLink;
                 numSuffixLinksTraversed++;
             }
-            //const char nextChar = m_isoNormalisedSuffixPermutations[0]
-#if 0
-            cout << " makeFinalStatesExplicitAndMarkThemAsFinal" << endl;
-            // Trick described in Ukkonen's paper.
-            const char unusedLetter = '{';
-            appendLetter(unusedLetter);
-
-            // Remove the unused letter again!
-            for (auto& state : m_states)
-            {
-                for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
-                {
-                    const Transition& transition = *transitionIter;
-                    if (transition.substringFollowed.startIndex < 1)
-                    {
-                        transitionIter++;
-                        continue;
-                    }
-                    const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
-                    const char lastCharInTransition = m_currentString[realEndIndex];
-                    bool needToRemoveTransition = false;
-                    if (lastCharInTransition == unusedLetter)
-                    {
-                        const bool transitionConsistsSolelyOfUnusedChar = (transition.substringFollowed.length(m_currentString.size()) == 1);
-                        if (transitionConsistsSolelyOfUnusedChar)
-                        {
-                            needToRemoveTransition = true;
-                            state.isFinal = true;
-                        }
-                        else
-                        {
-                            transition.nextState->isFinal = true;
-                        }
-                    }
-
-                    if (needToRemoveTransition)
-                        transitionIter = state.transitions.erase(transitionIter);
-                    else
-                        transitionIter++;
-                }
-            }
-            m_currentString.pop_back(); // Remove the unusedLetter we just added.
-            //dumpGraph();
-
-            // Update wordLength for final states.
-            for (auto& state : m_states)
-            {
-                if (state.wordLength == -1)
-                {
-                    const auto transitionFromParent = findTransitionFromParent(&state);
-                    if (transitionFromParent)
-                        state.wordLength = state.parent->wordLength + transitionFromParent->substringFollowed.length(m_currentString.size());
-                }
-                if (state.transitions.empty())
-                    assert(state.isFinal);
-            }
-
-#endif
         }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
@@ -582,11 +514,6 @@ class PseudoIsomorphicSuffixTree
         {
             return Cursor();
         }
-                void dumpGraph()
-                {
-                    dumpGraphAux(m_root, "");
-                }
-
     private:
         static const int openTransitionEnd = numeric_limits<int>::max();
 
@@ -903,25 +830,6 @@ class PseudoIsomorphicSuffixTree
                 assert(false);
             return state->transitions.end();
         };
-        void dumpGraphAux(State* s, const string& indent)
-        {
-            cout << indent << "state: " << s << " " << s->index << " suffix link: " << (s->suffixLink ? s->suffixLink->index : 0) << " parent: " << (s->parent ? s->parent->index : 0);
-            const bool isTerminal = (s->transitions.empty());
-            //assert((s->suffixLink == nullptr) == isTerminal);
-            if (isTerminal)
-            {
-                cout << " (terminal)" << endl;
-                return;
-            }
-            cout << endl;
-            for (const auto& transition : s->transitions)
-            {
-                const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
-                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                cout << indent + " " << "transition: " << substringStartIndex << "," << substringEndIndex << (substringEndIndex == m_currentString.size() - 1 ? " (open) " : "") << " " << m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1) << " normalised: " << isoNormaliseString(m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1), transition.letterPermutation, true) << " next state: " << transition.nextState->index << endl;
-                dumpGraphAux(transition.nextState, indent + "  ");
-            }
-        }
 
 };
 
@@ -1032,23 +940,23 @@ vector<Cursor> buildFinalStatesForSuffixLookup(PseudoIsomorphicSuffixTree& tree)
 void doStuff(const string& s, int q)
 {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    cout << "s: " << s << endl;
+    //cout << "s: " << s << endl;
     PseudoIsomorphicSuffixTree treeBuilder;
     treeBuilder.appendString(s);
-    cout << " built thing" << endl;
+    //cout << " built thing" << endl;
     treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
-    cout << " made things explict" << endl;
+    //cout << " made things explict" << endl;
     const auto finalStateForSuffixes = buildFinalStatesForSuffixLookup(treeBuilder);
-    cout << " built final states etc" << endl;
+    //cout << " built final states etc" << endl;
 
-    cout << "log2MaxN: " << log2MaxN << endl;
+    //cout << "log2MaxN: " << log2MaxN << endl;
 
     int numComputed = 0;
 
 
 
 
-#define ALL_SUBSTRINGS
+//#define ALL_SUBSTRINGS
 #ifdef ALL_SUBSTRINGS
     for (int l = 0; l < s.size(); l++)
         for (int r = l; r < s.size(); r++)
@@ -1101,12 +1009,13 @@ void doStuff(const string& s, int q)
             }
         }
         const int optimisedResult = wordCursor.stateData().numReachableFinalStates;
-        cout << " optimisedResult: " << optimisedResult << endl;
+        //cout << " optimisedResult: " << optimisedResult << endl;
+        cout << optimisedResult << endl;
         numComputed++;
         if (numComputed % 1000 == 0)
         {
             std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-            std::cout << "Time to compute stuff = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 << " for string of length: " << s.size() << std::endl;
+            //std::cout << "Time to compute stuff = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 << " for string of length: " << s.size() << std::endl;
             begin = std::chrono::steady_clock::now();
         }
 
@@ -1122,7 +1031,7 @@ void doStuff(const string& s, int q)
 
 int main()
 {
-#define RANDOM
+//#define RANDOM
 #ifdef RANDOM
     {
         while (true)
