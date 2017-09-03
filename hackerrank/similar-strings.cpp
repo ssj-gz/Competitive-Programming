@@ -912,6 +912,7 @@ vector<Cursor> buildFinalStatesForSuffixLookup(PseudoIsomorphicSuffixTree& tree)
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
     // Pretty easy one, *provided* we can build a suffix automaton consisting of the "iso-normalised" substrings of s, rather
     // than the plain substrings of s: this is accomplished via PseudoIsomorphicSuffixTree, which I wrote to solve the
     // "Pseudo-Isomorphic Substrings" challenge - see that for more details!
