@@ -100,7 +100,7 @@ class PseudoIsomorphicSuffixTree
         struct StateData
         {
             int numReachableFinalStates = -1;
-            array<int, log2MaxN> stateIdJumpLookup;
+            array<pair<int, char>, log2MaxN> stateIdJumpLookup;
         };
     private:
         struct State;
@@ -347,6 +347,11 @@ class PseudoIsomorphicSuffixTree
             public:
                 Cursor() = default;
                 Cursor(const Cursor& other) = default;
+                bool isValid() const
+                {
+                    return m_isValid;
+                }
+
                 bool isOnExplicitState() const
                 {
                     return (m_transition == nullptr);
@@ -393,6 +398,7 @@ class PseudoIsomorphicSuffixTree
                             *this = nextLetterIterator.afterFollowingNextLetter();
                             return;
                         }
+                        nextLetterIterator++;
                     }
                     assert(false && "Could not follow letter!");
                 }
@@ -952,6 +958,7 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
         //cout << " finalStateForSuffix size: " << finalStateForSuffix.size() << endl;
         assert(suffixBeginPos >= 0 && suffixBeginPos < finalStateForSuffix.size());
         finalStateForSuffix[suffixBeginPos] = cursor;
+        numReachableFinalStates++; // We can reach ourselves :)
     }
     if (!ancestors.empty())
     {
@@ -985,7 +992,8 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
             }
             //cout << " Found ancestor wordLength: " << targetAncestorPointer->explicitStateCursor.wordLength() << endl;
             assert(targetAncestorPointer->explicitStateCursor.wordLength() <= targetAncestorWordLength);
-            cursor.stateData().stateIdJumpLookup[i] = targetAncestorPointer->explicitStateCursor.stateId();
+            cursor.stateData().stateIdJumpLookup[i].first = targetAncestorPointer->explicitStateCursor.stateId();
+            cursor.stateData().stateIdJumpLookup[i].second = targetAncestorPointer->letterFollowed;
             powerOf2 *= 2;
         }
     }
@@ -1012,40 +1020,111 @@ int64_t findReachableFinalStatesAndBuildLookupAux(PseudoIsomorphicSuffixTree& tr
     return numReachableFinalStates;
 }
 
-void findReachableFinalStatesAndBuildLookup(PseudoIsomorphicSuffixTree& tree)
+vector<Cursor> buildFinalStatesForSuffixLookup(PseudoIsomorphicSuffixTree& tree)
 {
     vector<Cursor> finalStateForSuffix(tree.currentString().size() + 1); // The "+1" is because there are |s|+1 suffixes: empty suffix (at 0) to full suffix (at |s|).
     vector<Ancestor> ancestors;
     findReachableFinalStatesAndBuildLookupAux(tree, tree.rootCursor(), finalStateForSuffix, ancestors);
     assert(ancestors.empty());
+    return finalStateForSuffix;
+}
+
+void doStuff(const string& s)
+{
+    cout << "s: " << s << endl;
+    PseudoIsomorphicSuffixTree treeBuilder;
+    treeBuilder.appendString(s);
+    treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
+    const auto finalStateForSuffixes = buildFinalStatesForSuffixLookup(treeBuilder);
+
+    cout << "log2MaxN: " << log2MaxN << endl;
+
+#define ALL_SUBSTRINGS
+#ifdef ALL_SUBSTRINGS
+    for (int l = 0; l < s.size(); l++)
+        for (int r = l; r < s.size(); r++)
+        {
+            cout << " l: " << l << " r: " << r << endl;
+#else
+    for (int i = 0; i < q; i++)
+    {
+        int l, r;
+        cin >> l >> r;
+        l--;
+        r--;
+#endif
+
+        const int suffixBeginPos = l;
+        auto finalStateForSuffix = finalStateForSuffixes[suffixBeginPos];
+        auto wordCursor = finalStateForSuffix;
+        char letterToFollow = '\0';
+        const int targetAncestorWordLength = r - l + 1;
+
+        while (wordCursor.wordLength() > targetAncestorWordLength)
+        {
+            //cout << " wordCursor beginning of loop: wordLength: " << wordCursor.wordLength() << " target: " << targetAncestorWordLength << endl;
+            int powerOf2 = 1;
+            for (int i = 0; i < log2MaxN; i++)
+            {
+                if (wordCursor.wordLength() - powerOf2 * 2 < targetAncestorWordLength)
+                {
+                    //cout << " jumping up " << powerOf2 << endl;
+                    letterToFollow = wordCursor.stateData().stateIdJumpLookup[i].second;
+                    wordCursor = treeBuilder.cursorFromStateId(wordCursor.stateData().stateIdJumpLookup[i].first);
+                    assert(wordCursor.isValid());
+                    assert(letterToFollow != '\0');
+                    break;
+                }
+                powerOf2 *= 2;
+            }
+
+            //cout << " after jumping up wordLength: " << wordCursor.wordLength() << endl;
+
+            if (wordCursor.wordLength() < targetAncestorWordLength)
+            {
+                //cout << " overshot: need to follow letter " << letterToFollow << endl;
+                //const auto oldWordCursor = wordCursor;
+                wordCursor.followLetter(letterToFollow);
+                wordCursor.followToTransitionEnd();
+                //cout << " after jumping forward wordLength: " << wordCursor.wordLength() << endl;
+                assert(wordCursor.wordLength() >= targetAncestorWordLength);
+                break;
+            }
+        }
+        const int optimisedResult = wordCursor.stateData().numReachableFinalStates;
+        cout << " optimisedResult: " << optimisedResult << endl;
+
+#define BRUTE_FORCE
+#ifdef BRUTE_FORCE
+        const int bruteForceResult = bruteForce(s, l, r);
+        cout << "bruteForceResult: " << bruteForceResult  << endl;
+        assert(bruteForceResult == optimisedResult);
+#endif
+    }
 }
 
 
 int main()
 {
-//#define RANDOM
+#define RANDOM
 #ifdef RANDOM
     {
         while (true)
         {
-            const int n = rand() % 1000;
+            const int n = rand() % 100;
             const int m = rand() % 26 + 1;
             string s(n, '\0');
             for (int i = 0; i < n; i++)
             {
                 s[i] = 'a' + rand() % m;
             }
-            cout << "s: " << s << endl;
-            PseudoIsomorphicSuffixTree treeBuilder;
-            treeBuilder.appendString(s);
-            treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
-            findReachableFinalStatesAndBuildLookup(treeBuilder);
+            doStuff(s);
         }
         return 0;
     }
 #endif
 
-    //#define EXHAUSTIVE
+#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
     string s = "a";
     const int numLetters = 4;
@@ -1053,12 +1132,7 @@ int main()
     {
         cout << "s: " << s <<  " size: " << s.size() << endl;
 
-        cout << "s: " << s << endl;
-        PseudoIsomorphicSuffixTree treeBuilder;
-        treeBuilder.appendString(s);
-        treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
-        findReachableFinalStatesAndBuildLookup(treeBuilder);
-
+        doStuff(s);
 
         int index = 0;
         while (index < s.size() && s[index] == 'a' + numLetters)
@@ -1085,25 +1159,7 @@ int main()
     string s;
     cin >> s;
 
-    cout << "s: " << s << endl;
-    PseudoIsomorphicSuffixTree treeBuilder;
-    treeBuilder.appendString(s);
-    treeBuilder.makeFinalStatesExplicitAndMarkThemAsFinal();
-    findReachableFinalStatesAndBuildLookup(treeBuilder);
-
-    cout << "log2MaxN: " << log2MaxN << endl;
-
-    for (int i = 0; i < q; i++)
-    {
-        int l, r;
-        cin >> l >> r;
-        l--;
-        r--;
-
-#define BRUTE_FORCE
-#ifdef BRUTE_FORCE
-        cout << bruteForce(s, l, r) << endl;
+    doStuff(s);
 #endif
-    }
-#endif
+
 }
