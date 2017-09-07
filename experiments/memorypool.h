@@ -47,17 +47,3 @@ class MemoryPool
         unsigned char* m_memoryBegin = nullptr;
 };
 
-int main()
-{
-    MemoryPool m(100, 3);
-    void *blee = m.allocChunk();
-    void *bloo = m.allocChunk();
-    void *blaa = m.allocChunk();
-    cout << "Got chunks: " << blee << "," << bloo << "," << blaa << endl;
-    cout << "gloop: " << (static_cast<unsigned char*>(blaa) - static_cast<unsigned char*>(bloo)) << endl;
-    m.dealloc(blaa);
-    m.dealloc(blaa);
-    void *blii = m.allocChunk();
-    cout << "Got chunk: " << blii << endl;
-
-}
