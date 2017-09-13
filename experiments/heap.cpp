@@ -30,23 +30,24 @@ class Heap
         };
         Handle add(const ValueType& value)
         {
-            assert(m_elements.size() < m_maxElements);
+            assert(m_numElements < m_maxElements);
             return Handle{};
         }
         int size()
         {
-            return m_elements.size();
+            return m_numElements;
         }
         const ValueType& min()
         {
-            return ValueType();
-        }
-        Handle minHandle()
-        {
-            return Handle();
+            assert(m_numElements > 0);
+            return *(m_elements[0]->value);
         }
         void extractMin()
         {
+            assert(m_numElements > 0);
+            m_elements[0] = m_elements[m_numElements - 1];
+            m_numElements--;
+            minHeapify(0);
         }
         template <typename DecreaseBy>
         void decreaseKey(const Handle& valueHandle, const DecreaseBy& decreaseBy)
@@ -55,6 +56,7 @@ class Heap
         }
     private:
         int m_maxElements = -1;
+        int m_numElements = 0;
         MemoryPool m_memoryPool;
         struct Element
         {
@@ -65,6 +67,47 @@ class Heap
         vector<Element> m_elements;
         Compare m_comparator;
         KeyDecrease m_keyDecreaser;
+
+        void minHeapify(int heapIndex)
+        {
+            int leftIndex = left(heapIndex);
+            int rightIndex = right(heapIndex);
+            int indexOfSmallest = -1;
+            if (leftIndex < m_numElements && m_comparator(*m_elements[heapIndex]->value, *m_elements[leftIndex]->value))
+            {
+                indexOfSmallest = heapIndex;
+            }
+            else
+            {
+                indexOfSmallest = leftIndex;
+            }
+            if (rightIndex < m_numElements && m_comparator(*m_elements[rightIndex], *m_elements[indexOfSmallest]))
+            {
+                indexOfSmallest = rightIndex;
+            }
+            if (indexOfSmallest != heapIndex)
+            {
+                swap(m_elements[heapIndex], m_elements[indexOfSmallest]);
+                minHeapify(indexOfSmallest);
+            }
+
+        }
+        int parent(int heapIndex)
+        {
+            return heapIndex / 2;
+        }
+        int left(int heapIndex)
+        {
+            return heapIndex * 2;
+        }
+        int right(int heapIndex)
+        {
+            return heapIndex * 2 + 1;
+        }
+        void verifyHeap()
+        {
+        }
+
 };
 
 struct A
