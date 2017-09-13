@@ -35,6 +35,7 @@ class Heap
             m_elements[m_numElements].value = new (blah) ValueType(value);
             onKeyDecreased(m_numElements);
             m_numElements++;
+            verifyHeap();
 
             return Handle{};
         }
@@ -54,6 +55,7 @@ class Heap
             m_elements[0] = m_elements[m_numElements - 1];
             m_numElements--;
             minHeapify(0);
+            verifyHeap();
         }
         template <typename DecreaseBy>
         void decreaseKey(const Handle& valueHandle, const DecreaseBy& decreaseBy)
@@ -80,7 +82,7 @@ class Heap
             int leftIndex = left(heapIndex);
             int rightIndex = right(heapIndex);
             int indexOfSmallest = -1;
-            if (leftIndex < m_numElements && m_comparator(*m_elements[heapIndex].value, *m_elements[leftIndex].value))
+            if (leftIndex < m_numElements && m_comparator(*m_elements[leftIndex].value, *m_elements[heapIndex].value))
             {
                 indexOfSmallest = leftIndex;
             }
@@ -129,6 +131,19 @@ class Heap
         }
         void verifyHeap()
         {
+            cout << "Verify heap: " << endl;
+            for (int i = 0; i < m_numElements; i++)
+            {
+                cout << " i: " << i << " element keyValue: " << m_elements[i].value->keyValue << endl;
+            }
+            for (int i = 0; i < m_numElements; i++)
+            {
+                if (left(i) < m_numElements && right(i) < m_numElements)
+                {
+                    assert(!m_comparator(*m_elements[left(i)].value, *m_elements[i].value));
+                    assert(!m_comparator(*m_elements[right(i)].value, *m_elements[i].value));
+                }
+            }
         }
 
 };
