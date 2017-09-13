@@ -23,17 +23,23 @@ class Heap
                 }
                 ~Handle()
                 {
-
+                    m_handleImpl->decRefCount();
+                }
+                bool isValid() const
+                {
+                    return m_handleImpl->isValid();
                 }
                 const ValueType& value() const
                 {
+                    assert(m_handleImpl->isValid());
+                    return m_handleImpl->value();
                 }
             private:
                 Handle(HandleImpl* handleImpl)
                     : m_handleImpl(handleImpl)
                 {
                     m_isValid = true;
-                    m_handleImpl->refCount++;
+                    m_handleImpl->incRefCount();
                 };
                 bool m_isValid = false;
                 HandleImpl* m_handleImpl = nullptr;
@@ -43,12 +49,13 @@ class Heap
         {
             assert(m_numElements < m_maxElements);
             m_elements[m_numElements].value = new (m_valueMemoryPool.allocChunk()) ValueType(value);
-            m_elements[m_numElements].handleImpl = new (m_handleImplMemoryPool.allocChunk()) HandleImpl(m_numElements, m_handleImplMemoryPool);
+            m_elements[m_numElements].handleImpl = new (m_handleImplMemoryPool.allocChunk()) HandleImpl(&(m_elements[m_numElements]), m_handleImplMemoryPool);
+            Handle newValueHandle{m_elements[m_numElements].handleImpl};
             onKeyDecreased(m_numElements);
             m_numElements++;
             verifyHeap();
 
-            return Handle{};
+            return newValueHandle;
         }
         int size()
         {
@@ -63,6 +70,7 @@ class Heap
         {
             assert(m_numElements > 0);
             m_valueMemoryPool.dealloc(m_elements[0].value);
+            m_elements[0].handleImpl->m_heapElement = nullptr;
             m_elements[0] = m_elements[m_numElements - 1];
             m_numElements--;
             minHeapify(0);
@@ -71,20 +79,34 @@ class Heap
         template <typename DecreaseBy>
         void decreaseKey(const Handle& valueHandle, const DecreaseBy& decreaseBy)
         {
-            m_keyDecreaser(*(valueHandle.m_value), decreaseBy);
+            assert(valueHandle.isValid());
+            m_keyDecreaser(valueHandle.m_handleImpl->value(), decreaseBy);
+            const int heapIndex = valueHandle.m_handleImpl->m_heapElement - m_elements.data();
+            onKeyDecreased(heapIndex);
         }
     private:
+        struct Element;
         struct HandleImpl
         {
-            HandleImpl(int heapIndex, MemoryPool& memoryPool)
-                : m_heapIndex{heapIndex}, m_memoryPool(memoryPool)
+            HandleImpl(Element* heapElement, MemoryPool& memoryPool)
+                : m_heapElement{heapElement}, m_memoryPool(memoryPool)
             {
             }
-            int incRefCount()
+            bool isValid() const
+            {
+                return (m_heapElement != nullptr);
+            }
+            ValueType& value()
+            {
+                assert(isValid());
+                return *m_heapElement->value;
+
+            }
+            void incRefCount()
             {
                 m_refCount++;
             }
-            int decRefCount()
+            void decRefCount()
             {
                 m_refCount--;
                 if (m_refCount == 0)
@@ -95,8 +117,9 @@ class Heap
             }
         private:
             int m_refCount = 0;
-            int m_heapIndex = 0;
+            Element* m_heapElement = nullptr;
             MemoryPool& m_memoryPool;
+            friend class Heap;
         };
         int m_maxElements = -1;
         int m_numElements = 0;
@@ -113,7 +136,6 @@ class Heap
 
         void minHeapify(int heapIndex)
         {
-            //assert(heapIndex < m_numElements);
             int leftIndex = left(heapIndex);
             int rightIndex = right(heapIndex);
             int indexOfSmallest = -1;
@@ -130,16 +152,10 @@ class Heap
                 indexOfSmallest = rightIndex;
             }
             assert(indexOfSmallest != -1);
-            cout << "indexOfSmallest: " << indexOfSmallest << " heapIndex: " << heapIndex << " num elements: " << m_numElements << endl;
             if (indexOfSmallest != heapIndex)
             {
-                cout << " recursing" << endl;
                 swapElements(heapIndex, indexOfSmallest);
                 minHeapify(indexOfSmallest);
-            }
-            else
-            {
-                cout << " not recursing" << endl;
             }
         }
         void onKeyDecreased(int keyIndex)
@@ -166,11 +182,6 @@ class Heap
         }
         void verifyHeap()
         {
-            cout << "Verify heap: " << endl;
-            for (int i = 0; i < m_numElements; i++)
-            {
-                cout << " i: " << i << " element keyValue: " << m_elements[i].value->keyValue << endl;
-            }
             for (int i = 0; i < m_numElements; i++)
             {
                 if (left(i) < m_numElements && right(i) < m_numElements)
@@ -182,6 +193,8 @@ class Heap
         }
         void swapElements(int element1Index, int element2Index)
         {
+            m_elements[element1Index].handleImpl->m_heapElement = &(m_elements[element2Index]);
+            m_elements[element2Index].handleImpl->m_heapElement = &(m_elements[element1Index]);
             swap(m_elements[element1Index], m_elements[element2Index]);
         }
 
@@ -212,19 +225,27 @@ int main()
     //Handle a2Handle = heapOfA.add(a2);
     //cout << "blee: " << heapOfA.min().keyValue << endl;
     vector<A> as;
-    for (int i = 0; i < 100; i++)
+    Handle wee = heapOfA.add(10);
+    for (int i = 0; i < 99; i++)
     {
         as.emplace_back(rand() % 20);
         heapOfA.add(as.back());
     }
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 99; i++)
     {
         cout << "a[" << i << "] = " << as[i].keyValue << endl;
     }
-    for (int i = 0; i < 100; i++)
+    cout << " gloop: " << wee.value().keyValue << endl;
+    heapOfA.decreaseKey(wee, 5);
+    cout << " gloop: " << wee.value().keyValue << endl;
+    for (int i = 0; i < 99; i++)
     {
         cout << " min: " << heapOfA.min().keyValue << endl;
         heapOfA.extractMin();
+        if (wee.isValid())
+            cout << " gloop: " << wee.value().keyValue << endl;
+        else
+            cout << " gloop: " << " not valid!" << endl;
     }
 
 }
