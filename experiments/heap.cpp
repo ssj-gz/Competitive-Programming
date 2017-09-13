@@ -76,25 +76,33 @@ class Heap
 
         void minHeapify(int heapIndex)
         {
+            //assert(heapIndex < m_numElements);
             int leftIndex = left(heapIndex);
             int rightIndex = right(heapIndex);
             int indexOfSmallest = -1;
             if (leftIndex < m_numElements && m_comparator(*m_elements[heapIndex].value, *m_elements[leftIndex].value))
             {
-                indexOfSmallest = heapIndex;
+                indexOfSmallest = leftIndex;
             }
             else
             {
-                indexOfSmallest = leftIndex;
+                indexOfSmallest = heapIndex;
             }
             if (rightIndex < m_numElements && m_comparator(*m_elements[rightIndex].value, *m_elements[indexOfSmallest].value))
             {
                 indexOfSmallest = rightIndex;
             }
+            assert(indexOfSmallest != -1);
+            cout << "indexOfSmallest: " << indexOfSmallest << " heapIndex: " << heapIndex << " num elements: " << m_numElements << endl;
             if (indexOfSmallest != heapIndex)
             {
+                cout << " recursing" << endl;
                 swap(m_elements[heapIndex], m_elements[indexOfSmallest]);
                 minHeapify(indexOfSmallest);
+            }
+            else
+            {
+                cout << " not recursing" << endl;
             }
         }
         void onKeyDecreased(int keyIndex)
