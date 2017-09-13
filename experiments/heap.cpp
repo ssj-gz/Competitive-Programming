@@ -31,6 +31,10 @@ class Heap
         Handle add(const ValueType& value)
         {
             assert(m_numElements < m_maxElements);
+            m_elements[m_numElements].value = new (m_memoryPool.allocChunk()) ValueType(value);
+            onKeyDecreased(m_numElements);
+            m_numElements++;
+
             return Handle{};
         }
         int size()
@@ -45,6 +49,7 @@ class Heap
         void extractMin()
         {
             assert(m_numElements > 0);
+            m_memoryPool.dealloc(m_elements[0]->value);
             m_elements[0] = m_elements[m_numElements - 1];
             m_numElements--;
             minHeapify(0);
@@ -73,7 +78,7 @@ class Heap
             int leftIndex = left(heapIndex);
             int rightIndex = right(heapIndex);
             int indexOfSmallest = -1;
-            if (leftIndex < m_numElements && m_comparator(*m_elements[heapIndex]->value, *m_elements[leftIndex]->value))
+            if (leftIndex < m_numElements && m_comparator(*m_elements[heapIndex].value, *m_elements[leftIndex].value))
             {
                 indexOfSmallest = heapIndex;
             }
@@ -90,19 +95,28 @@ class Heap
                 swap(m_elements[heapIndex], m_elements[indexOfSmallest]);
                 minHeapify(indexOfSmallest);
             }
-
+        }
+        void onKeyDecreased(int keyIndex)
+        {
+            int index = keyIndex;
+            while (index > 0 && m_comparator(*m_elements[index].value, *m_elements[parent(index)].value))
+            {
+                swap(m_elements[index], m_elements[parent(index)]);
+                index = parent(index);
+            }
         }
         int parent(int heapIndex)
         {
-            return heapIndex / 2;
+            assert(heapIndex != 0);
+            return (heapIndex - 1) / 2;
         }
         int left(int heapIndex)
         {
-            return heapIndex * 2;
+            return (heapIndex + 1) * 2 - 1;
         }
         int right(int heapIndex)
         {
-            return heapIndex * 2 + 1;
+            return (heapIndex + 1) * 2;
         }
         void verifyHeap()
         {
