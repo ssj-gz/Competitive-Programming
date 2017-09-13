@@ -182,6 +182,7 @@ class Heap
         }
         void verifyHeap()
         {
+#ifndef NDEBUG
             for (int i = 0; i < m_numElements; i++)
             {
                 if (left(i) < m_numElements && right(i) < m_numElements)
@@ -190,6 +191,7 @@ class Heap
                     assert(!m_comparator(*m_elements[right(i)].value, *m_elements[i].value));
                 }
             }
+#endif
         }
         void swapElements(int element1Index, int element2Index)
         {
@@ -238,7 +240,7 @@ int main()
     cout << " gloop: " << wee.value().keyValue << endl;
     heapOfA.decreaseKey(wee, 5);
     cout << " gloop: " << wee.value().keyValue << endl;
-    for (int i = 0; i < 99; i++)
+    for (int i = 0; i < 100; i++)
     {
         cout << " min: " << heapOfA.min().keyValue << endl;
         heapOfA.extractMin();
