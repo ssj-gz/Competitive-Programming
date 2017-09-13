@@ -3,12 +3,14 @@
 template <typename ValueType, typename Compare, typename KeyDecrease>
 class Heap
 {
+    private:
+        struct HandleImpl;
     public:
         Heap(int maxElements, Compare comparator, KeyDecrease keyDecreaser)
             : m_maxElements{maxElements}, 
-              m_memoryPool{sizeof(ValueType), maxElements},
+              m_valueMemoryPool{sizeof(ValueType), maxElements},
+              m_handleImplMemoryPool{sizeof(HandleImpl), maxElements},
               m_elements(maxElements),
-              m_handles(maxElements),
               m_comparator{comparator},
               m_keyDecreaser{keyDecreaser}
         {
@@ -19,20 +21,29 @@ class Heap
                 Handle()
                 {
                 }
+                ~Handle()
+                {
+
+                }
                 const ValueType& value() const
                 {
                 }
             private:
+                Handle(HandleImpl* handleImpl)
+                    : m_handleImpl(handleImpl)
+                {
+                    m_isValid = true;
+                    m_handleImpl->refCount++;
+                };
                 bool m_isValid = false;
-                ValueType* m_value;
+                HandleImpl* m_handleImpl = nullptr;
                 friend class Heap;
         };
         Handle add(const ValueType& value)
         {
             assert(m_numElements < m_maxElements);
-            void* blah = m_memoryPool.allocChunk();
-            cout << " blah: " << blah << endl;
-            m_elements[m_numElements].value = new (blah) ValueType(value);
+            m_elements[m_numElements].value = new (m_valueMemoryPool.allocChunk()) ValueType(value);
+            m_elements[m_numElements].handleImpl = new (m_handleImplMemoryPool.allocChunk()) HandleImpl(m_numElements, m_handleImplMemoryPool);
             onKeyDecreased(m_numElements);
             m_numElements++;
             verifyHeap();
@@ -51,7 +62,7 @@ class Heap
         void extractMin()
         {
             assert(m_numElements > 0);
-            m_memoryPool.dealloc(m_elements[0].value);
+            m_valueMemoryPool.dealloc(m_elements[0].value);
             m_elements[0] = m_elements[m_numElements - 1];
             m_numElements--;
             minHeapify(0);
@@ -63,15 +74,39 @@ class Heap
             m_keyDecreaser(*(valueHandle.m_value), decreaseBy);
         }
     private:
+        struct HandleImpl
+        {
+            HandleImpl(int heapIndex, MemoryPool& memoryPool)
+                : m_heapIndex{heapIndex}, m_memoryPool(memoryPool)
+            {
+            }
+            int incRefCount()
+            {
+                m_refCount++;
+            }
+            int decRefCount()
+            {
+                m_refCount--;
+                if (m_refCount == 0)
+                {
+                    m_memoryPool.dealloc(this);
+                }
+                this->~HandleImpl();
+            }
+        private:
+            int m_refCount = 0;
+            int m_heapIndex = 0;
+            MemoryPool& m_memoryPool;
+        };
         int m_maxElements = -1;
         int m_numElements = 0;
-        MemoryPool m_memoryPool;
+        MemoryPool m_valueMemoryPool;
+        MemoryPool m_handleImplMemoryPool;
         struct Element
         {
             ValueType* value;
-            Handle* handle;
+            HandleImpl* handleImpl;
         };
-        vector<Handle> m_handles;
         vector<Element> m_elements;
         Compare m_comparator;
         KeyDecrease m_keyDecreaser;
@@ -99,7 +134,7 @@ class Heap
             if (indexOfSmallest != heapIndex)
             {
                 cout << " recursing" << endl;
-                swap(m_elements[heapIndex], m_elements[indexOfSmallest]);
+                swapElements(heapIndex, indexOfSmallest);
                 minHeapify(indexOfSmallest);
             }
             else
@@ -112,7 +147,7 @@ class Heap
             int index = keyIndex;
             while (index > 0 && m_comparator(*m_elements[index].value, *m_elements[parent(index)].value))
             {
-                swap(m_elements[index], m_elements[parent(index)]);
+                swapElements(index, parent(index));
                 index = parent(index);
             }
         }
@@ -145,6 +180,10 @@ class Heap
                 }
             }
         }
+        void swapElements(int element1Index, int element2Index)
+        {
+            swap(m_elements[element1Index], m_elements[element2Index]);
+        }
 
 };
 
@@ -173,16 +212,16 @@ int main()
     //Handle a2Handle = heapOfA.add(a2);
     //cout << "blee: " << heapOfA.min().keyValue << endl;
     vector<A> as;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 100; i++)
     {
-        as.emplace_back(rand() % 10);
+        as.emplace_back(rand() % 20);
         heapOfA.add(as.back());
     }
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 100; i++)
     {
         cout << "a[" << i << "] = " << as[i].keyValue << endl;
     }
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 100; i++)
     {
         cout << " min: " << heapOfA.min().keyValue << endl;
         heapOfA.extractMin();
