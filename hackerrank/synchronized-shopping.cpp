@@ -150,9 +150,8 @@ int main()
     vector<long> minEndingsWithFishCollection(maxFishCollectionValue + 1, std::numeric_limits<long>::max());
     long minFullFishEndingTime = std::numeric_limits<long>::max();
     initialNode.d = 0;
-    struct NodeDComparison
-    {
-        bool operator()(const Node* lhs, const Node* rhs) const
+
+    auto compareNodes = [](const Node* lhs, const Node* rhs)
         { 
             // Want to sort by d ...
             if (lhs->d != rhs->d)
@@ -161,13 +160,13 @@ int main()
             }
             // ... but may want to include multiple nodes with same "d"!
             return lhs < rhs;
-        }
-    };
+        };
+
     auto decreaseKeyBy = [](Node* nodeToDecrease, int decreaseKeyBy)
-    {
-        nodeToDecrease->d -= decreaseKeyBy;
-    };
-    Heap<Node*, NodeDComparison, decltype(decreaseKeyBy) > nodesByD(graph.size() * graph[0].size(), NodeDComparison(), decreaseKeyBy);
+        {
+            nodeToDecrease->d -= decreaseKeyBy;
+        };
+    Heap<Node*, decltype(compareNodes), decltype(decreaseKeyBy) > nodesByD(graph.size() * graph[0].size(), compareNodes, decreaseKeyBy);
     nodesByD.add(&initialNode);
 
     while (!nodesByD.empty())
