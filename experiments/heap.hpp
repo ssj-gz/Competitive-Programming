@@ -57,9 +57,13 @@ class Heap
 
             return newValueHandle;
         }
-        int size()
+        int size() const
         {
             return m_numElements;
+        }
+        bool empty() const
+        {
+            return (m_numElements == 0);
         }
         const ValueType& min()
         {
