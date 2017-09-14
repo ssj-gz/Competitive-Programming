@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
-#define VERIFY_DEALLOCS
+//#define VERIFY_DEALLOCS
 
 using namespace std;
 
