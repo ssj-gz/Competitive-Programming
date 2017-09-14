@@ -9,11 +9,11 @@ class Heap
         Heap(int maxElements, Compare comparator, KeyDecrease keyDecreaser)
             : m_maxElements{maxElements}, 
               m_valueMemoryPool{sizeof(ValueType), maxElements},
-              m_handleImplMemoryPool{sizeof(HandleImpl), maxElements},
               m_elements(maxElements),
               m_comparator{comparator},
               m_keyDecreaser{keyDecreaser}
         {
+            m_handleImpls.reserve(maxElements);
         }
         class Handle
         {
@@ -23,7 +23,6 @@ class Heap
                 }
                 ~Handle()
                 {
-                    m_handleImpl->decRefCount();
                 }
                 bool isValid() const
                 {
@@ -39,7 +38,6 @@ class Heap
                     : m_handleImpl(handleImpl)
                 {
                     m_isValid = true;
-                    m_handleImpl->incRefCount();
                 };
                 bool m_isValid = false;
                 HandleImpl* m_handleImpl = nullptr;
@@ -47,9 +45,11 @@ class Heap
         };
         Handle add(const ValueType& value)
         {
-            assert(m_numElements < m_maxElements);
+            assert(m_totalElementsAdded < m_maxElements);
+            m_totalElementsAdded++;
             m_elements[m_numElements].value = new (m_valueMemoryPool.allocChunk()) ValueType(value);
-            m_elements[m_numElements].handleImpl = new (m_handleImplMemoryPool.allocChunk()) HandleImpl(&(m_elements[m_numElements]), m_handleImplMemoryPool);
+            m_handleImpls.emplace_back(&(m_elements[m_numElements]));
+            m_elements[m_numElements].handleImpl = &(m_handleImpls.back());
             Handle newValueHandle{m_elements[m_numElements].handleImpl};
             onKeyDecreased(m_numElements);
             m_numElements++;
@@ -88,8 +88,8 @@ class Heap
         struct Element;
         struct HandleImpl
         {
-            HandleImpl(Element* heapElement, MemoryPool& memoryPool)
-                : m_heapElement{heapElement}, m_memoryPool(memoryPool)
+            HandleImpl(Element* heapElement)
+                : m_heapElement{heapElement}
             {
             }
             bool isValid() const
@@ -102,35 +102,21 @@ class Heap
                 return *m_heapElement->value;
 
             }
-            void incRefCount()
-            {
-                m_refCount++;
-            }
-            void decRefCount()
-            {
-                m_refCount--;
-                if (m_refCount == 0)
-                {
-                    m_memoryPool.dealloc(this);
-                }
-                this->~HandleImpl();
-            }
         private:
-            int m_refCount = 0;
             Element* m_heapElement = nullptr;
-            MemoryPool& m_memoryPool;
             friend class Heap;
         };
+        int m_totalElementsAdded = 0;
         int m_maxElements = -1;
         int m_numElements = 0;
         MemoryPool m_valueMemoryPool;
-        MemoryPool m_handleImplMemoryPool;
         struct Element
         {
             ValueType* value;
             HandleImpl* handleImpl;
         };
         vector<Element> m_elements;
+        vector<HandleImpl> m_handleImpls;
         Compare m_comparator;
         KeyDecrease m_keyDecreaser;
 
