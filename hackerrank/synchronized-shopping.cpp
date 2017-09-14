@@ -1,10 +1,14 @@
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <list>
-#include <set>
 #include <map>
 #include <utility>
 #include <limits>
+#include "experiments/heap.hpp"
 
 using namespace std;
 
@@ -98,6 +102,8 @@ int main()
         // For Dijkstra's Algorithm.
         long d = std::numeric_limits<long>::max();
         bool completed = false;
+        bool isInHeap = false;
+        int heapHandleId = -1;
     };
 
     // Main "graph": each cell is a Node, and is indexed by shoppingCenterId x fishCollection.
@@ -157,13 +163,18 @@ int main()
             return lhs < rhs;
         }
     };
-    set<Node*, NodeDComparison> nodesByD;
-    nodesByD.insert(&initialNode);
+    auto decreaseKeyBy = [](Node* nodeToDecrease, int decreaseKeyBy)
+    {
+        nodeToDecrease->d -= decreaseKeyBy;
+    };
+    Heap<Node*, NodeDComparison, decltype(decreaseKeyBy) > nodesByD(graph.size() * graph[0].size(), NodeDComparison(), decreaseKeyBy);
+    nodesByD.add(&initialNode);
 
     while (!nodesByD.empty())
     {
-        Node *lowestDNode = *nodesByD.begin();
-        nodesByD.erase(nodesByD.begin());
+        //cout << " # nodes in heap: " << nodesByD.size() << endl;
+        Node *lowestDNode = nodesByD.min();
+        nodesByD.extractMin();
 
         // Optimise: don't process nodes that can't possibly beat the current record.
         if (lowestDNode->d >= minFullFishEndingTime)
@@ -176,20 +187,31 @@ int main()
             if (otherNode->completed)
                 continue;
 
-            if (otherNode->d > lowestDNode->d + edge.travelTime)
+            const int otherNodeNewMinDist = lowestDNode->d + edge.travelTime;
+            if (otherNode->d > otherNodeNewMinDist)
             {
-                // Must remove otherNode from the set as its d is out of date.
-                nodesByD.erase(otherNode);
-                otherNode->d = lowestDNode->d + edge.travelTime;
+                if (otherNode->isInHeap)
+                {
+                    nodesByD.decreaseKey(nodesByD.handleById(otherNode->heapHandleId), otherNode->d - otherNodeNewMinDist);
+                }
+                otherNode->d = otherNodeNewMinDist;
             }
             // Optimise: don't add nodes that can't possibly beat the current record.
             if (otherNode->d <= minFullFishEndingTime)
                 newNodes.push_back(otherNode);
         }
 
-        nodesByD.insert(newNodes.begin(), newNodes.end());
-
         lowestDNode->completed = true;
+
+        for (auto newNode : newNodes)
+        {
+            if (newNode->completed || newNode->isInHeap)
+                continue;
+            const int handleId = nodesByD.add(newNode).id();
+            newNode->heapHandleId = handleId;
+            newNode->isInHeap = true;
+        }
+
 
         if (lowestDNode->shoppingCenterId == endingShoppingCentreId)
         {
