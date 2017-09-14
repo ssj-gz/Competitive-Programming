@@ -16,13 +16,10 @@ class MemoryPool
             m_memoryVector.resize(m_chunkSize * m_numChunks);
             m_freeChunks.reserve(m_numChunks);
             m_memoryBegin = static_cast<unsigned char*>(m_memoryVector.data());
-            cout << " m_memoryBegin: " << static_cast<void*>(m_memoryBegin) << endl;
             for (int i = 0; i < m_numChunks; i++)
             {
                 m_freeChunks.push_back(m_memoryBegin + i * m_chunkSize);
             }
-            cout << " floop: " << m_freeChunks.front() << endl;
-
         }
         void* allocChunk()
         {
