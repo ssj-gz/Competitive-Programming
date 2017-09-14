@@ -33,6 +33,11 @@ class Heap
                     assert(m_handleImpl->isValid());
                     return m_handleImpl->value();
                 }
+                int id() const
+                {
+                    assert(m_handleImpl->isValid());
+                    return m_handleImpl->id();
+                }
             private:
                 Handle(HandleImpl* handleImpl)
                     : m_handleImpl(handleImpl)
@@ -46,16 +51,21 @@ class Heap
         Handle add(const ValueType& value)
         {
             assert(m_totalElementsAdded < m_maxElements);
-            m_totalElementsAdded++;
             m_elements[m_numElements].value = new (m_valueMemoryPool.allocChunk()) ValueType(value);
-            m_handleImpls.emplace_back(&(m_elements[m_numElements]));
+            m_handleImpls.emplace_back(&(m_elements[m_numElements]), m_totalElementsAdded);
             m_elements[m_numElements].handleImpl = &(m_handleImpls.back());
             Handle newValueHandle{m_elements[m_numElements].handleImpl};
             onKeyDecreased(m_numElements);
+
             m_numElements++;
+            m_totalElementsAdded++;
             verifyHeap();
 
             return newValueHandle;
+        }
+        Handle handleById(int handleId)
+        {
+            return Handle{&(m_handleImpls[handleId])};
         }
         int size() const
         {
@@ -92,8 +102,8 @@ class Heap
         struct Element;
         struct HandleImpl
         {
-            HandleImpl(Element* heapElement)
-                : m_heapElement{heapElement}
+            HandleImpl(Element* heapElement, int id)
+                : m_heapElement{heapElement}, m_id(id)
             {
             }
             bool isValid() const
@@ -106,8 +116,13 @@ class Heap
                 return *m_heapElement->value;
 
             }
+            int id() const
+            {
+                return m_id;
+            }
         private:
             Element* m_heapElement = nullptr;
+            int m_id = -1;
             friend class Heap;
         };
         int m_totalElementsAdded = 0;
