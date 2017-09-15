@@ -7,6 +7,44 @@ using namespace std;
 const int numRows = 10;
 const int numCols = 10;
 
+enum Direction { LeftToRight, TopToBottom };
+
+bool canFitWord(const vector<string>& crossword, const string& word, int startRow, int startCol, Direction direction)
+{
+    if (direction == LeftToRight)
+    {
+        if (startCol + word.length() > numCols)
+            return false;
+    }
+    else
+    {
+        if (startRow + word.length() > numRows)
+            return false;
+    }
+    for (int letterIndex = 0; letterIndex < word.size(); letterIndex++)
+    {
+        const auto letterInCrossword =  direction == LeftToRight ? crossword[startRow][startCol + letterIndex]
+                                                                 : crossword[startRow + letterIndex][startCol];
+        if (letterInCrossword != '-' && letterInCrossword != word[letterIndex])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+vector<string> addWord(const vector<string>& crossword, const string& word, int startRow, int startCol, Direction direction)
+{
+    auto newCrossword = crossword;
+    for (int letterIndex = 0; letterIndex < word.size(); letterIndex++)
+    {
+        auto& letterInCrossword =  direction == LeftToRight ? newCrossword[startRow][startCol + letterIndex]
+                                                                 : newCrossword[startRow + letterIndex][startCol];
+        letterInCrossword = word[letterIndex];
+    }
+    return newCrossword;
+}
+
 void printCrosswordSolution(const vector<string>& crossword, const vector<string>& words, vector<string>::const_iterator nextWordIter)
 {
     if (nextWordIter == words.cend())
@@ -17,57 +55,19 @@ void printCrosswordSolution(const vector<string>& crossword, const vector<string
         }
         return;
     }
-    const string nextWord = *nextWordIter;
-    // Left-to-right.
-    for (int row = 0; row < numRows; row++)
+    const string word = *nextWordIter;
+    for (int startRow = 0; startRow < numRows; startRow++)
     {
-        for (int startCol = 0; startCol < numCols - nextWord.size() + 1; startCol++)
+        for (int startCol = 0; startCol < numCols; startCol++)
         {
-            bool wordFitsHere = true;
-            for (int letterIndex = 0; letterIndex < nextWord.size(); letterIndex++)
+            if (canFitWord(crossword, word, startRow, startCol, LeftToRight))
             {
-                const auto letterInCrossword = crossword[row][startCol + letterIndex];
-                if (letterInCrossword != '-' && letterInCrossword != nextWord[letterIndex])
-                {
-                    wordFitsHere = false;
-                    break;
-                }
-            }
-            if (wordFitsHere)
-            {
-                // Found a place.
-                vector<string> newCrossword = crossword;
-                for (int letterIndex = 0; letterIndex < nextWord.size(); letterIndex++)
-                {
-                    newCrossword[row][startCol + letterIndex] = nextWord[letterIndex];
-                }
+                const auto newCrossword = addWord(crossword, word, startRow, startCol, LeftToRight);
                 printCrosswordSolution(newCrossword, words, nextWordIter + 1);
             }
-        }
-    }
-    // Top-to-bottom.
-    for (int col = 0; col < numCols; col++)
-    {
-        for (int startRow = 0; startRow < numRows - nextWord.length() + 1; startRow++)
-        {
-            bool wordFitsHere = true;
-            for (int letterIndex = 0; letterIndex < nextWord.size(); letterIndex++)
+            if (canFitWord(crossword, word, startRow, startCol, TopToBottom))
             {
-                const auto letterInCrossword = crossword[startRow + letterIndex][col];
-                if (letterInCrossword != '-' && letterInCrossword != nextWord[letterIndex])
-                {
-                    wordFitsHere = false;
-                    break;
-                }
-            }
-            if (wordFitsHere)
-            {
-                // Found a place.
-                vector<string> newCrossword = crossword;
-                for (int letterIndex = 0; letterIndex < nextWord.size(); letterIndex++)
-                {
-                    newCrossword[startRow + letterIndex][col] = nextWord[letterIndex];
-                }
+                const auto newCrossword = addWord(crossword, word, startRow, startCol, TopToBottom);
                 printCrosswordSolution(newCrossword, words, nextWordIter + 1);
             }
         }
