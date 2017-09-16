@@ -34,12 +34,6 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
                     bestValuesUsed = valuesUsed;
             }
         }
-        //cout << " Found!" << endl;
-        for (const auto valueIndex : valuesUsed)
-        {
-            //cout << values[valueIndex] << " ";
-        }
-        //cout << endl;
         return;
     }
     for (int valueIndex = valueIndexStart; valueIndex < valuesPrimeFactorisations.size(); valueIndex++)
@@ -52,6 +46,7 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
             newDestPrimeFactorisation[primeFactorIndex] -= valuePrimeFactorisation[primeFactorIndex];
             if (newDestPrimeFactorisation[primeFactorIndex] < 0)
             {
+                // This value doesn't divide into the value represented  by destPrimeFactorisation.
                 canUseValue = false;
                 break;
             }
@@ -59,6 +54,9 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
         if (canUseValue)
         {
             valuesUsed.push_back(values[valueIndex]);
+            // We can assume that the best solution will have the values in order (otherwise, the solution where the
+            // values are sorted will be lexically less than it), so don't allow value indices less than valueIndex
+            // to be explored subsequently.
             kFactorise(newDestPrimeFactorisation, valuesPrimeFactorisations, values, valueIndex, valuesUsed, bestValuesUsed);
 
             valuesUsed.pop_back();
