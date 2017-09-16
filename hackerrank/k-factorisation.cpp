@@ -8,7 +8,10 @@ using namespace std;
 void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<int>>& valuesPrimeFactorisations, const vector<int>& values, int valueIndexStart, vector<int>& valuesUsed, vector<int>& bestValuesUsed)
 {
     if (!bestValuesUsed.empty() && valuesUsed.size() > bestValuesUsed.size())
+    {
+        // We've already exceeded the length of the best; no point exploring further.
         return;
+    }
     bool found = true;
     for (const auto primePower : destPrimeFactorisation)
     {
@@ -20,11 +23,12 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
     }
     if (found)
     {
+        // The dest value is 1, so we're done.
         if (bestValuesUsed.empty())
             bestValuesUsed = valuesUsed;
         else
         {
-            if (bestValuesUsed.size() > valuesUsed.size())
+            if (valuesUsed.size() < bestValuesUsed.size())
             {
                 bestValuesUsed = valuesUsed;
             }
@@ -43,6 +47,7 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
         bool canUseValue = true;
         for (int primeFactorIndex = 0; primeFactorIndex < valuePrimeFactorisation.size(); primeFactorIndex++)
         {
+            // "Divide" the destination number by value, if we can.
             newDestPrimeFactorisation[primeFactorIndex] -= valuePrimeFactorisation[primeFactorIndex];
             if (newDestPrimeFactorisation[primeFactorIndex] < 0)
             {
@@ -64,8 +69,39 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
     }
 }
 
+vector<int> primeFactorisation(int x, const vector<int>& primes, int* xWithoutPrimes = nullptr)
+{
+    vector<int> primeFactorisation(primes.size());
+    int primeFactorIndex = 0;
+    for (const auto prime : primes)
+    {
+        while ((x % prime) == 0)
+        {
+            x /= prime;
+            primeFactorisation[primeFactorIndex]++;
+        }
+        primeFactorIndex++;
+    }
+    if (xWithoutPrimes)
+        *xWithoutPrimes = x;
+
+    return primeFactorisation;
+}
+
 int main()
 {
+    // Fairly easy one: essentially, gather a list of primes that appear in values of a, and call them
+    // p1, p2 ... pm.
+    // A prime factorisation of a number x is then the m-vector l1, l2 ... lm such that p1^l1 * p2^l2 * ... * pm^lm = x.
+    // v1 * v2 * ... * vp = x if and only if the sums of prime factorisations of the vi's is equal to the prime factorisation
+    // of x.  Similarly, we can "divide" v1 by v2 by subtracting the prime factorisation of v2 from v1; if any of the li's of 
+    // the resulting prime factorisation are < 0, then v1 was not divisible by v2.
+    // We then basically just do a trial-and-error search for a product of numbers in a that equals N, but instead of 
+    // actually multiplying, we "divide" N by numbers in a, aiming for "1": this way, we can detect an impossible state a little easier
+    // i.e. if the current prime factorisation (representing N divided by the product of some numbers in a) has any li < 0,
+    // we can stop: we've overshot this the power of pi in N.
+    // That's about it: there's also a few tricks to immediately filter out certain kinds of impossibility or values of a that can't 
+    // possibly be part of a solution, etc.
     int N, K;
     cin >> N >> K;
     vector<int> a(K);
@@ -87,7 +123,7 @@ int main()
             {
                 if ((N % prime) != 0)
                 {
-                    //cout << "erasing value: " << *valueIter << endl;
+                    // This value contains a prime that N does not, so cannot be part of a solution; remove it.
                     valueIter = a.erase(valueIter);
                     erasedValue = true;
                 }
@@ -102,53 +138,33 @@ int main()
     }
     if (primesInA.empty())
     {
+        // All values contain primes that N does not; can't do it.
         cout << -1 << endl;
         return 0;
     }
-    int tempN = N;
-    vector<int> nPrimeFactorisation(primesInA.size());
-    int primeFactorIndex = 0;
-    for (const auto prime : primesInA)
+    int nWithoutPrimesInA = N;
+    const vector<int> nPrimeFactorisation = primeFactorisation(N, primesInA, &nWithoutPrimesInA);
+    if (nWithoutPrimesInA != 1)
     {
-        while ((tempN % prime) == 0)
-        {
-            tempN /= prime;
-            nPrimeFactorisation[primeFactorIndex]++;
-        }
-        primeFactorIndex++;
-    }
-    if (tempN != 1)
-    {
+        // N contains primes that do not appear amongst the a's, so we cannot form N from the a's.
         cout << -1 << endl;
         return 0;
     }
     vector<vector<int>> valuePrimesFactorisations;
     for (auto value : a)
     {
-        vector<int> valuePrimeFactorisation(primesInA.size());
-        int primeFactorIndex = 0;
-        for (const auto prime : primesInA)
-        {
-            while ((value % prime) == 0)
-            {
-                value /= prime;
-                valuePrimeFactorisation[primeFactorIndex]++;
-            }
-            primeFactorIndex++;
-        }
-        valuePrimesFactorisations.push_back(valuePrimeFactorisation);
+        valuePrimesFactorisations.push_back(primeFactorisation(value, primesInA));
     }
     vector<int> empty;
-    vector<int> best;
-    kFactorise(nPrimeFactorisation, valuePrimesFactorisations, a, 0, empty, best);
-    //cout << "best" << endl;
-    if (best.size() == 0)
+    vector<int> bestValues;
+    kFactorise(nPrimeFactorisation, valuePrimesFactorisations, a, 0, empty, bestValues);
+    if (bestValues.empty())
         cout << -1 << endl;
     else
     {
         int value = 1;
         cout << value << " ";
-        for (const auto valueUsed : best)
+        for (const auto valueUsed : bestValues)
         {
             value *= valueUsed;
             cout << value << " ";
