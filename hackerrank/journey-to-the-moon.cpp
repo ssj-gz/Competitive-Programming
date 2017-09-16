@@ -29,6 +29,16 @@ struct Astronaut
 };
 
 int main() {
+    // Easy one, though, yet again, plenty of schoolboy mistakes along the way XD
+    // "Belongs to same country" is an equivalence relation, and can be modelled
+    // as a graph where the vertices are Astronauts: the explicit information that 
+    // two astronauts A and B are in the same country means that we add an edge between
+    // nodes A and B; then astronauts are in the same country if and only if they
+    // are in the same connected component.
+    // Calculating the number of pairs where astronauts are in different countries is then
+    // easy: calculate the total number of ways of choosing any pairs of astronauts 
+    // (ignoring their countries), and then correct the error by subtracting the number of 
+    // ways of choosing astronauts in the same country (i.e. connected component).
     int N, P;
     cin >> N >> P;
     vector<Astronaut> allAstronaut(N);
@@ -64,6 +74,7 @@ int main() {
         }
         if (astronautA->componentNum == astronautB->componentNum)
         {
+            // We already know they're in the same country!
             continue;
         }
         // Have two astronauts, at least one of which is in a component, and they are
@@ -103,6 +114,7 @@ int main() {
     }
 
     // Pick up the astronauts that are each in their own country.
+    // This is important as it affects the value of numCountries.
     for (auto& astronaut : allAstronaut)
     {
         if (astronaut.componentNum == -1)
