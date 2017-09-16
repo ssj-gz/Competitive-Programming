@@ -7,9 +7,7 @@
 
 using namespace std;
 
-map<int64_t, int64_t> maxMovesForPileSizeLookup;
-
-int64_t findMaxMoves(const vector<int64_t>& s, int sElementBeginIndex, int64_t numMovesSoFar, int depth, const map<int64_t, int64_t>& pileSizeHistogram, int64_t& highestMoves)
+int64_t findMaxMoves(const vector<int64_t>& s, const map<int64_t, int64_t>& pileSizeHistogram, map<int64_t, int64_t>& maxMovesForPileSizeLookup)
 {
     int64_t numMoves = 0;
     for (auto& pileSizeFrequency : pileSizeHistogram)
@@ -36,7 +34,7 @@ int64_t findMaxMoves(const vector<int64_t>& s, int sElementBeginIndex, int64_t n
                 auto lookedup = maxMovesForPileSizeLookup.find(newPilesSize);
                 if (lookedup == maxMovesForPileSizeLookup.end())
                 {
-                    const int64_t maxMoves = findMaxMoves(s, sElementBeginIndex, numMovesSoFar + originalNumPiles, depth + 1, newPileSizeHistogram, highestMoves);
+                    const int64_t maxMoves = findMaxMoves(s, newPileSizeHistogram, maxMovesForPileSizeLookup);
                     maxMovesForPileSizeLookup[newPilesSize] = maxMoves;
                     lookedup = maxMovesForPileSizeLookup.find(newPilesSize);
                 }
@@ -56,7 +54,6 @@ int main()
     cin >> q;
     for (int t = 0; t < q; t++)
     {
-        maxMovesForPileSizeLookup.clear();
         int64_t n, m;
         cin >> n >> m;
         vector<int64_t> s(m);
@@ -67,9 +64,9 @@ int main()
         sort(s.begin(), s.end());
         map<int64_t, int64_t> pileSizeHistogram;
         pileSizeHistogram[n] = 1;
-        int64_t highestMoves = 0;
-        const int64_t blah = findMaxMoves(s, 0, 0, 0, pileSizeHistogram, highestMoves);
-        cout << blah << endl;
+        map<int64_t, int64_t> maxMovesForPileSizeLookup;
+        const int64_t maxMoves = findMaxMoves(s, pileSizeHistogram, maxMovesForPileSizeLookup);
+        cout << maxMoves << endl;
     }
 
 }
