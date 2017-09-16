@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<int>>& valuesPrimeFactorisations, const vector<int>& values, vector<int>& valuesUsed, vector<int>& bestValuesUsed)
+void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<int>>& valuesPrimeFactorisations, const vector<int>& values, int valueIndexStart, vector<int>& valuesUsed, vector<int>& bestValuesUsed)
 {
     if (!bestValuesUsed.empty() && valuesUsed.size() > bestValuesUsed.size())
         return;
@@ -42,7 +42,7 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
         //cout << endl;
         return;
     }
-    for (int valueIndex = 0; valueIndex < valuesPrimeFactorisations.size(); valueIndex++)
+    for (int valueIndex = valueIndexStart; valueIndex < valuesPrimeFactorisations.size(); valueIndex++)
     {
         vector<int> newDestPrimeFactorisation(destPrimeFactorisation);
         const auto& valuePrimeFactorisation = valuesPrimeFactorisations[valueIndex];
@@ -59,7 +59,7 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
         if (canUseValue)
         {
             valuesUsed.push_back(values[valueIndex]);
-            kFactorise(newDestPrimeFactorisation, valuesPrimeFactorisations, values, valuesUsed, bestValuesUsed);
+            kFactorise(newDestPrimeFactorisation, valuesPrimeFactorisations, values, valueIndex, valuesUsed, bestValuesUsed);
 
             valuesUsed.pop_back();
         }
@@ -142,7 +142,7 @@ int main()
     }
     vector<int> empty;
     vector<int> best;
-    kFactorise(nPrimeFactorisation, valuePrimesFactorisations, a, empty, best);
+    kFactorise(nPrimeFactorisation, valuePrimesFactorisations, a, 0, empty, best);
     //cout << "best" << endl;
     if (best.size() == 0)
         cout << -1 << endl;
