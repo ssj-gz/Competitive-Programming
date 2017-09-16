@@ -129,7 +129,8 @@ int main()
                 }
                 else
                 {
-                    primesInA.push_back(*valueIter);
+                    if (find(primesInA.begin(), primesInA.end(), prime) == primesInA.end())
+                        primesInA.push_back(prime);
                 }
             }
             if (!erasedValue)
