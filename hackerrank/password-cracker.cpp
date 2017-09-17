@@ -16,15 +16,7 @@ vector<string> findPasswordSequence(const string& loginAttempt, const vector<str
         const int newSequenceSoFarNumChars = sequenceSoFarNumChars + password.length();
         if (newSequenceSoFarNumChars <= loginAttempt.length() && !isSuffixBlacklisted[newSequenceSoFarNumChars])
         {
-            bool passwordFits = true;
-            for (int passwordPos = 0; passwordPos < password.length(); passwordPos++)
-            {
-                if (password[passwordPos] != loginAttempt[sequenceSoFarNumChars + passwordPos])
-                {
-                    passwordFits = false;
-                    break;
-                }
-            }
+            const bool passwordFits = (loginAttempt.find(password, sequenceSoFarNumChars) == sequenceSoFarNumChars);
             if (passwordFits)
             {
                 sequenceSoFar.push_back(password);
