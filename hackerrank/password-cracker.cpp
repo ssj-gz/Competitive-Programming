@@ -27,17 +27,17 @@ vector<string> findPasswordSequence(const string& loginAttempt, const vector<str
             }
             if (passwordFits)
             {
-            sequenceSoFar.push_back(password);
+                sequenceSoFar.push_back(password);
 
-            const auto result = findPasswordSequence(loginAttempt, passwords, sequenceSoFar, newSequenceSoFarNumChars, isSuffixBlacklisted);
+                const auto result = findPasswordSequence(loginAttempt, passwords, sequenceSoFar, newSequenceSoFarNumChars, isSuffixBlacklisted);
 
-            sequenceSoFar.pop_back();
+                sequenceSoFar.pop_back();
 
-            if (!result.empty())
-            {
-            // Found!
-            return result;
-            }
+                if (!result.empty())
+                {
+                    // Found!
+                    return result;
+                }
             }
         }
     }
@@ -48,6 +48,7 @@ vector<string> findPasswordSequence(const string& loginAttempt, const vector<str
 
 int main()
 {
+    // Very easy one; code is pretty much self-explanatory, I think :)
     int T;
     cin >> T;
 
