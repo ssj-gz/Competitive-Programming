@@ -102,6 +102,10 @@ int main()
     // we can stop: we've overshot this the power of pi in N.
     // That's about it: there's also a few tricks to immediately filter out certain kinds of impossibility or values of a that can't 
     // possibly be part of a solution, etc.
+    //
+    // Update: very, very weak testcases on this one: my first correct submission, for example, had a hilarious mistake in it
+    // which went completely undetected.  A quick spot-check of other people's solution shows quite a few people's break down
+    // on very simple testcases that others have posted.
     int N, K;
     cin >> N >> K;
     vector<int> a(K);
