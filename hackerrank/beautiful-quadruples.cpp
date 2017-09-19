@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -42,11 +42,11 @@ uint64_t optimised(const array<int, numComponents>& maxComponentValues)
     uint64_t numUnbeautiful = 0;
     uint64_t numDistinct = 0;
     uint64_t numDistinctWX = 0; // Total number of pairs W, X (W <= X, W <= maxComponentValues[0], X <= maxComponentValues[1]) we've seen so far.
-    int numWXXorsWithValue[maxXor] = {};
+    int numWXXorsWithValue[maxXor + 1] = {};
     for (int Y = 1; Y <= maxComponentValues[2]; Y++)
     {
         uint64_t numDistinctYZForThisY = 0; // Num distinct pairs Y, Z for this Y.
-        int numYZXorsWithValueForThisY[maxXor] = {};
+        int numYZXorsWithValueForThisY[maxXor + 1] = {};
         // Generate Y ^ Z for this Y.
         for (int Z = Y; Z <= maxComponentValues[3]; Z++)
         {
@@ -78,8 +78,8 @@ uint64_t optimised(const array<int, numComponents>& maxComponentValues)
 
 int main()
 {
-#define BRUTE_FORCE
-#define RANDOM
+//#define BRUTE_FORCE
+//#define RANDOM
     array<int, numComponents> maxComponentValues;
 #ifdef RANDOM
     while (true) 
