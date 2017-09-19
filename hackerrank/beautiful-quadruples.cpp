@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2017-09-19 13:41
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -11,30 +12,6 @@
 using namespace std;
 
 constexpr int numComponents = 4;
-
-uint64_t bruteForce(const array<int, numComponents>& maxComponentValues)
-{
-    uint64_t numBeautiful = 0;
-    uint64_t numDistinct = 0;
-    for (int i = 1; i <= maxComponentValues[0]; i++)
-    {
-        for (int j = i; j <= maxComponentValues[1]; j++)
-        {
-            for (int k = j; k <= maxComponentValues[2]; k++)
-            {
-                for (int l = k; l <= maxComponentValues[3]; l++)
-                {
-                    const bool isBeautiful = ((i ^ j ^ k ^ l) != 0);
-                    if (isBeautiful)
-                        numBeautiful++;
-                    numDistinct++;
-                }
-            }
-        }
-    }
-    //cout << "numDistinct: " << numDistinct << " numBeautiful: " << numBeautiful << " num non-beautiful: " << (numDistinct - numBeautiful)  << endl;
-    return numBeautiful;
-}
 
 uint64_t optimised(const array<int, numComponents>& maxComponentValues)
 {
@@ -55,8 +32,8 @@ uint64_t optimised(const array<int, numComponents>& maxComponentValues)
         }
         if (maxComponentValues[1] >= Y)
         {
-            // Bump W; xor it with all X satisfying X <= maxComponentValues[0] and X <= W (<= Y) to find
-            // numYZXorsWithValue.
+            // Bump X; xor it with all W satisfying W <= maxComponentValues[0] and W <= X (<= Y) to incrementally update
+            // numWXXorsWithValue.
             for (int X = 1; X <= min(maxComponentValues[0], Y); X++)
             {
                 numWXXorsWithValue[X ^ Y]++;
@@ -72,38 +49,53 @@ uint64_t optimised(const array<int, numComponents>& maxComponentValues)
         numUnbeautiful += numUnbeautifulForThisY;
         numDistinct += (numDistinctWX * numDistinctYZForThisY);
     }
-    //cout << "numDistinct: " << numDistinct << endl;
     return numDistinct - numUnbeautiful;
 }
 
 int main()
 {
-//#define BRUTE_FORCE
-//#define RANDOM
+    // Fairly tricky one.  Firstly, note that xor is commutative, so we can re-order W,X,Y and Z in any
+    // way we want  and get the same xor i.e. let ᴨ be a permutation of W,X, Y and Z; 
+    // then ᴨ(W)^ᴨ(X)^ᴨ(Y)^ᴨ(Z) = W^X^Y^Z.
+    //
+    // So let A', B', C', D' be A, B, C, D in sorted order.  Let (W, X, Y, Z) be a quadruple with
+    // W <= A, X <= B, Y <= C, Z <= D, and let ᴨ be a permutation that sorts W, X, Y, Z (i.e. ᴨ(W)<=ᴨ(X)<=ᴨ(Y)<=ᴨ); 
+    // then it can be shown that ᴨ(W) ^ ᴨ(X) ^  ᴨ(Y) ^ ᴨ(Z)) =  W ^ X ^ Y ^ Z and ᴨ(W) <= A', ᴨ(X) <= B', ᴨ(Y) <= C', ᴨ(Z) <= D' i.e..
+    // (ᴨ(W), ᴨ(X), ᴨ(Y), ᴨ(Z)) is beautiful using the sorted A', B', C', D' as the component max bounds.
+    //
+    // Now, (W1, X1, Y1, Z1) is equivalent to (W2, X2, Y2, Z2) if and only if they are equal once you sort
+    // the components i.e. (1, 5, 7, 3) is equivalent to (7, 5, 3, 1) since sorting the components of the 
+    // first gives (1, 3, 5, 7) and sorting the components of the 2nd also gives (1, 3, 5, 7). Thus, if we consider
+    // only distinct (W1, X1, Y1, Z1) subject to W1<=X1<=Y1<=Z1, we'll never generate equivalent quadruples.
+    //
+    // So, to re-cap: to solve the problem, we need to sort A, B, C, D to give A',B',C',D', and then find
+    // all (W,X,Y,Z) with W^X^Y^Z != 0 and W<=X<=Y<=Z and W<=A', X<=B', Y<=C' and Z<=D'.
+    // If we can find all such (W,X,Y,Z) with W^X^Y^Z == 0 and subtract that from the number of such (W,X,Y,Z),
+    // then we're done.
+    //
+    // Now, W^X^Y^Z == 0 if and only if W^X == Y^Z, so for each Y = 1, 2, ... , C', find, for all possible values of v (0 ... maxXor),
+    // the number of ways of picking W,X with W^X = v and W<=A', X<=B', W<=X, X<=Y) (numWXXorsWithValue) and the number of ways of picking
+    // Z (we've "fixed" Y) with Z>=Y and Z<=D' such that Y^Z == value (numYZXorsWithValueForThisY): then the number of all quadruples (W', X', Y, Z')
+    // with W', X', Y, Z' subject to the standard constraints and which are not beautiful for this Y is
+    // numWXXorsWithValue * numYZXorsWithValueForThisY.
+    //
+    // This process be performed very efficiently: for each of the C' Y, we do the following:
+    //
+    //  - find values that can be obtained by Y^Z and how many times that value can be obtained for Z >= Y, Z<=D' (O(D'));
+    //  - find values that can be obtained by W^X and how many times that value can be obtained for W<=X, X<=Y, W<= A', X<=B' (O(A' * B')).
+    //
+    // In total, this is O(C' * (D' + A' * B')), which is too large (can be ~ 3000 * 3000 * 3000).
+    // However, the latter step can be computed efficiently: if we've computed all such values from W, X where X <= Y-1,
+    // we can use this to compute the values for X <= Y in O(A').
+    // And that's about it!
+     
     array<int, numComponents> maxComponentValues;
-#ifdef RANDOM
-    while (true) 
-    {
-        for (int i = 0; i < numComponents; i++)
-        {
-            maxComponentValues[i] = rand() % 100 + 1;
-        }
-#else
     for (int i = 0; i < numComponents; i++)
     {
         cin >> maxComponentValues[i];
     }
-#endif
     sort(maxComponentValues.begin(), maxComponentValues.end());
 
     const auto numBeautifulOptimised = optimised(maxComponentValues);
     cout << numBeautifulOptimised << endl;
-#ifdef BRUTE_FORCE
-    const auto numBeautifulBruteForce = bruteForce(maxComponentValues);
-    cout << "numBeautifulBruteForce: " << numBeautifulBruteForce << " numBeautifulOptimised: " << numBeautifulOptimised << endl;
-    assert(numBeautifulBruteForce == numBeautifulOptimised);
-#endif
-#ifdef RANDOM
-    }
-#endif
 }
