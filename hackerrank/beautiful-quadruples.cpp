@@ -24,12 +24,11 @@ int computeMaxXor(const array<int, numComponents>& maxComponentValues)
     {
         maxXor |= i;
     }
-    cout << maxXor << endl;
 
     return maxXor;
 }
 
-uint64_t optimised(const array<int, numComponents>& maxComponentValues)
+uint64_t findNumBeautifulQuadruples(const array<int, numComponents>& maxComponentValues)
 {
     const int maxXor = computeMaxXor(maxComponentValues);
 
@@ -113,6 +112,5 @@ int main()
     }
     sort(maxComponentValues.begin(), maxComponentValues.end());
 
-    const auto numBeautifulOptimised = optimised(maxComponentValues);
-    cout << numBeautifulOptimised << endl;
+    cout << findNumBeautifulQuadruples(maxComponentValues) << endl;
 }
