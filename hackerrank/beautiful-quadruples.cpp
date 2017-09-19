@@ -5,6 +5,7 @@
 #endif
 #include <iostream>
 #include <array>
+#include <vector>
 #include <map>
 #include <algorithm>
 #include <cassert>
@@ -13,17 +14,33 @@ using namespace std;
 
 constexpr int numComponents = 4;
 
+int computeMaxXor(const array<int, numComponents>& maxComponentValues)
+{
+    const auto largestMaxComponentValue = *std::max_element(maxComponentValues.begin(), maxComponentValues.end());
+    // Given the constraints, it is guaranteed that 0 <= W^X <= maxXor and 0 <= Y^Z <= maxXor
+    // (NB: we don't bother finding an optimal bound).
+    int maxXor = 0;
+    for (int i = 0; i <= largestMaxComponentValue; i++)
+    {
+        maxXor |= i;
+    }
+    cout << maxXor << endl;
+
+    return maxXor;
+}
+
 uint64_t optimised(const array<int, numComponents>& maxComponentValues)
 {
-    constexpr int maxXor = 4095;
+    const int maxXor = computeMaxXor(maxComponentValues);
+
     uint64_t numUnbeautiful = 0;
     uint64_t numDistinct = 0;
     uint64_t numDistinctWX = 0; // Total number of pairs W, X (W <= X, W <= maxComponentValues[0], X <= maxComponentValues[1]) we've seen so far.
-    int numWXXorsWithValue[maxXor + 1] = {};
+    vector<int> numWXXorsWithValue(maxXor + 1, 0);
     for (int Y = 1; Y <= maxComponentValues[2]; Y++)
     {
         uint64_t numDistinctYZForThisY = 0; // Num distinct pairs Y, Z for this Y.
-        int numYZXorsWithValueForThisY[maxXor + 1] = {};
+        vector<int> numYZXorsWithValueForThisY(maxXor + 1, 0);
         // Generate Y ^ Z for this Y.
         for (int Z = Y; Z <= maxComponentValues[3]; Z++)
         {
