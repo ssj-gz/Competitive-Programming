@@ -48,11 +48,12 @@ uint64_t findNumBeautifulQuadruples(const array<int, numComponents>& maxComponen
         }
         if (maxComponentValues[1] >= Y)
         {
-            // Bump X; xor it with all W satisfying W <= maxComponentValues[0] and W <= X (<= Y) to incrementally update
+            // Bump X up to Y; xor it with all W satisfying W <= maxComponentValues[0] and W <= X (== Y) to incrementally update
             // numWXXorsWithValue.
-            for (int X = 1; X <= min(maxComponentValues[0], Y); X++)
+            const int X = Y;
+            for (int W = 1; W <= min(maxComponentValues[0], X); W++)
             {
-                numWXXorsWithValue[X ^ Y]++;
+                numWXXorsWithValue[W ^ X]++;
                 numDistinctWX++;
             } 
         }
