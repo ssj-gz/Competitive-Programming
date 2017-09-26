@@ -145,7 +145,7 @@ int main()
     //
     // Define numCorrectGuessesIfRoot(r) to be the number of correct guesses if
     // node r was the root of the DFS: this is very easy to calculate in O(n) using a DFS (findNumCorrectGuesses).
-    // To solve the problem by brute force, we could simply find, for each node r the number of r's for which 
+    // To solve the problem by brute force, we could simply find the number of r's for which 
     // numCorrectGuessesIfRoot(r) >= k (call this numMatchingRootNodes) and output the cancelled fraction 
     // numMatchingRootNodes/n.  This, of course, would be O(n^2) in total.
     //
@@ -156,10 +156,11 @@ int main()
     //
     // Let CE = u'v' be an edge; in a DFS from a node r, CE would be traversed either in the order u'v' or in the order v'u':
     // call these two possibilities the "direction" in which CE is traversed.  Clearly, the contribution of CE
-    // to numCorrectGuessesIfRoot(r) is dependent on whether the direction in which a DFS from r traverses CE is a guess or not.
+    // to numCorrectGuessesIfRoot(r) is dependent on whether the direction in which a DFS from r traverses CE is a guess or not
+    // i.e. on whether u' = parent(v') and/ or v' = parent(u') are guesses or not.
     //
-    // Assume that we just happen to know numCorrectGuessesIfRoot(u). If CE != e, and if P is the path from u to CE, 
-    // then we have two possibilities: either P passes through v, or it does not.
+    // Let u and v be nodes connected by an edge e.  Assume that we just happen to know numCorrectGuessesIfRoot(u). 
+    // If CE = u'v' is any edge != e, and if P is the path from u to CE, then we have two possibilities: either P passes through v, or it does not.
     //
     // If P passes through v, then v is the second element in P, and the path P' = P with the first vertex (u) removed would 
     // be a path from v that passes through CE in the same direction as P.
@@ -168,17 +169,17 @@ int main()
     //
     // Thus, for all edges CE != e, CE is traversed in the same direction if v were root as for if u were root,
     // so the contribution of CE to numCorrectGuessesIfRoot(u) is equal to the contribution of CE to numCorrectGuessesIfRoot(v)
-    // i.e. ignoring the contribution of e, so far we have numCorrectGuessesIfRoot(u) == numCorrectGuessesIfRoot(v).
+    // i.e. ignoring the contribution of e we have, so far, numCorrectGuessesIfRoot(u) == numCorrectGuessesIfRoot(v).
     //
     // How do we deal with e? Well, if one of the guesses was that u was v's parent, then we'd have to subtract
     // one from numCorrectGuessesIfRoot(v); this would be a correct guess if v were root, but an incorrect guess if u were root.
-    // Conversely, if one of the guesses was that u were v's parent, we'd have to add one to numCorrectGuessesIfRoot(v);
+    // Conversely, if one of the guesses was that v were u's parent, we'd have to add one to numCorrectGuessesIfRoot(v);
     // this would be an incorrect guess if u were root, but correct if v were.
     //
     // Thus, given u and v connected by an edge e:
     //  
-    //   numCorrectGuessesIfRoot(v) = numCorrectGuessesIfRoot(u) + 1 if u = parent(v) is a guess and
-    //                                                           - 1 if v = parent(u) is a guess.
+    //   numCorrectGuessesIfRoot(v) = numCorrectGuessesIfRoot(u) - 1 if u = parent(v) is a guess and
+    //                                                           + 1 if v = parent(u) is a guess.
     //
     // Now, we need only pick some arbitrary root node r, find numCorrectGuessesIfRoot(r) (O(n)), then recursively update
     // its descendants using the formula above (a further O(n)), and we're done :)
