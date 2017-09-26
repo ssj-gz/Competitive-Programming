@@ -1,3 +1,8 @@
+// Simon St James (ssjgz) 2017-09-26 10:41
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#endif
 #include <iostream>
 #include <map>
 #include <vector>
@@ -66,6 +71,53 @@ int findNumRootNodesBruteForce(const vector<Node>& nodes, int numCorrectGuessedR
     return numRootNodes;
 }
 
+void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int& numMatching, int rootNumCorrectGuesses, const Node* parentNode = nullptr, const Edge* edgeTravelledFromParent = nullptr, int numCorrectlyGuessedForParentNode = -1)
+{
+    int numCorrectlyGuessed = 0;
+    if (parentNode)
+    {
+        numCorrectlyGuessed = numCorrectlyGuessedForParentNode;
+        if ((edgeTravelledFromParent->guessedNode1ParentofNode2 && edgeTravelledFromParent->node1 == parentNode && edgeTravelledFromParent->node2 == node) ||
+            (edgeTravelledFromParent->guessedNode2ParentofNode1 && edgeTravelledFromParent->node2 == parentNode && edgeTravelledFromParent->node1 == node)   )
+        {
+            numCorrectlyGuessed--;
+        }
+        if ((edgeTravelledFromParent->guessedNode1ParentofNode2 && edgeTravelledFromParent->node2 == parentNode && edgeTravelledFromParent->node1 == node) ||
+            (edgeTravelledFromParent->guessedNode2ParentofNode1 && edgeTravelledFromParent->node1 == parentNode && edgeTravelledFromParent->node2 == node)   )
+        {
+            numCorrectlyGuessed++;
+        }
+    }
+    else
+    {
+        // I'm root.
+        numCorrectlyGuessed = rootNumCorrectGuesses;
+    }
+    if (numCorrectlyGuessed >= numCorrectGuessedRequired)
+    {
+        numMatching++;
+    }
+    for (const auto& edge : node->neighbours)
+    {
+        if (edge->node1 == parentNode || edge->node2 == parentNode)
+            continue;
+
+        const Node* childNode = (edge->node1 == node ? edge->node2 : edge->node1);
+
+        findMatchingRootNodes(childNode, numCorrectGuessedRequired, numMatching, rootNumCorrectGuesses, node, edge, numCorrectlyGuessed);
+    }
+
+}
+
+int findNumRootNodes(const vector<Node>& nodes, int numCorrectGuessedRequired)
+{
+    const Node* rootNode = &(nodes.front());
+    const int numCorrectGuessesRootNode = findNumCorrectGuessed(rootNode);
+    int numRootNodes = 0;
+    findMatchingRootNodes(rootNode, numCorrectGuessedRequired, numRootNodes, numCorrectGuessesRootNode);
+    return numRootNodes;
+}
+
 int main()
 {
     int Q;
@@ -117,8 +169,8 @@ int main()
             edge->guessedNode2ParentofNode1 |= (edge->node2 == parentNode && edge->node1 == childNode);
         }
 
-        const auto numMatchingRootNodes = findNumRootNodesBruteForce(nodes, k);
-        int numerator = numMatchingRootNodes;
+        const auto numMatchingRootNodesOptimised = findNumRootNodes(nodes, k);
+        int numerator = numMatchingRootNodesOptimised;
         int denominator = n;
         for (int i = 2; i <= sqrt(n); i++)
         {
@@ -129,6 +181,12 @@ int main()
             }
         }
         cout << numerator << "/" << denominator << endl;
+//#define BRUTE_FORCE
+#ifdef BRUTE_FORCE
+        const auto numMatchingRootNodesBruteForce = findNumRootNodesBruteForce(nodes, k);
+        cout << "numMatchingRootNodesBruteForce: " << numMatchingRootNodesBruteForce << " numMatchingRootNodesOptimised: " << numMatchingRootNodesOptimised << endl;
+        assert(numMatchingRootNodesBruteForce == numMatchingRootNodesOptimised);
+#endif
     }
 }
 
