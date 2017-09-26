@@ -28,32 +28,29 @@ namespace
     };
 }
 
+bool isCorrectGuess(const Edge* edge, const Node* parentNode, const Node* childNode)
+{
+    if (edge->guessedNode1ParentofNode2 && edge->node1 == parentNode && edge->node2 == childNode)
+        return true;
+    if (edge->guessedNode2ParentofNode1 && edge->node2 == parentNode && edge->node1 == childNode)
+        return true;
+
+    return false;
+}
+
 int findNumCorrectGuessed(const Node* node, const Node* parentNode = nullptr, const Edge* edgeTravelledFromParent = nullptr)
 {
-    //cout << "findNumCorrectGuessed: " << node << endl;
     int numCorrectGuessed = 0;
     for (const auto& edge : node->neighbours)
     {
         if (edge->node1 == parentNode || edge->node2 == parentNode)
             continue;
 
-        //cout << " edge: " << edge << " guessedNode1ParentofNode2: " << edge->guessedNode1ParentofNode2 << " guessedNode2ParentofNode1: " << edge->guessedNode2ParentofNode1 << endl;
-
         const Node* childNode = (edge->node1 == node ? edge->node2 : edge->node1);
-        if (edge->guessedNode1ParentofNode2 && edge->node1 == node && edge->node2 == childNode)
-        {
-            //cout << " found correct guess" << endl;
+        if (isCorrectGuess(edge, node, childNode))
             numCorrectGuessed++;
-        }
-        if (edge->guessedNode2ParentofNode1 && edge->node2 == node && edge->node1 == childNode)
-        {
-            //cout << " found correct guess" << endl;
-            numCorrectGuessed++;
-        }
 
-        //cout << " recursing into: " << childNode << endl;
         numCorrectGuessed += findNumCorrectGuessed(childNode, node, edge);
-
     }
     return numCorrectGuessed;
 }
@@ -77,13 +74,11 @@ void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int&
     if (parentNode)
     {
         numCorrectlyGuessed = numCorrectlyGuessedForParentNode;
-        if ((edgeTravelledFromParent->guessedNode1ParentofNode2 && edgeTravelledFromParent->node1 == parentNode && edgeTravelledFromParent->node2 == node) ||
-            (edgeTravelledFromParent->guessedNode2ParentofNode1 && edgeTravelledFromParent->node2 == parentNode && edgeTravelledFromParent->node1 == node)   )
+        if (isCorrectGuess(edgeTravelledFromParent, parentNode, node))
         {
             numCorrectlyGuessed--;
         }
-        if ((edgeTravelledFromParent->guessedNode1ParentofNode2 && edgeTravelledFromParent->node2 == parentNode && edgeTravelledFromParent->node1 == node) ||
-            (edgeTravelledFromParent->guessedNode2ParentofNode1 && edgeTravelledFromParent->node1 == parentNode && edgeTravelledFromParent->node2 == node)   )
+        if (isCorrectGuess(edgeTravelledFromParent, node, parentNode))
         {
             numCorrectlyGuessed++;
         }
@@ -181,12 +176,6 @@ int main()
             }
         }
         cout << numerator << "/" << denominator << endl;
-//#define BRUTE_FORCE
-#ifdef BRUTE_FORCE
-        const auto numMatchingRootNodesBruteForce = findNumRootNodesBruteForce(nodes, k);
-        cout << "numMatchingRootNodesBruteForce: " << numMatchingRootNodesBruteForce << " numMatchingRootNodesOptimised: " << numMatchingRootNodesOptimised << endl;
-        assert(numMatchingRootNodesBruteForce == numMatchingRootNodesOptimised);
-#endif
     }
 }
 
