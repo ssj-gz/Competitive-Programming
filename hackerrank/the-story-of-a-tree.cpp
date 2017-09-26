@@ -4,7 +4,6 @@
 #define NDEBUG
 #endif
 #include <iostream>
-#include <map>
 #include <vector>
 #include <cmath>
 #include <cassert>
@@ -17,6 +16,8 @@ namespace
     struct Node
     {
         vector<Edge*> neighbours;
+        Node* parentNode = nullptr;
+        Edge* edgeFollowedFromParent = nullptr;
     };
 
     struct Edge
@@ -25,7 +26,7 @@ namespace
         Node *node2 = nullptr;
         bool guessedNode1ParentofNode2 = false;
         bool guessedNode2ParentofNode1 = false;
-        const Node* otherNode(const Node* node)
+        Node* otherNode(const Node* node)
         {
             return (node == node1 ? node2 : node1);
         }
@@ -42,9 +43,40 @@ bool isCorrectGuess(const Edge* edge, const Node* parentNode, const Node* childN
     return false;
 }
 
-// NB: this returns the correct answer *only* for the "root" node i.e. the node in the initial call which has no parents.
-int findNumCorrectGuesses(const Node* node, const Node* parentNode = nullptr, const Edge* edgeTravelledFromParent = nullptr)
+Edge* findEdgeBetweenNodes(Node* node1, Node* node2)
 {
+    Edge *edge = nullptr;
+    if (node2->parentNode == node1)
+    {
+        edge = node2->edgeFollowedFromParent;
+    }
+    else if (node1->parentNode == node2)
+    {
+        edge = node1->edgeFollowedFromParent;
+    }
+    assert(edge && "Make sure you've called fillInParentNode first!");
+    return edge;
+}
+
+void fillInParentNode(Node* node, Node* parentNode = nullptr, Edge* edgeFollowedFromParent = nullptr)
+{
+    node->parentNode = parentNode;
+    node->edgeFollowedFromParent = edgeFollowedFromParent;
+
+    for (const auto& edge : node->neighbours)
+    {
+        if (edge->node1 == parentNode || edge->node2 == parentNode)
+            continue;
+
+        Node* childNode = edge->otherNode(node);
+        fillInParentNode(childNode, node, edge);
+    }
+}
+
+// NB: this returns the correct answer *only* for the "root" node i.e. the node in the initial call which has no parents.
+int findNumCorrectGuesses(const Node* node)
+{
+    const Node* parentNode = node->parentNode;
     int numCorrectGuessed = 0;
     for (const auto& edge : node->neighbours)
     {
@@ -55,22 +87,25 @@ int findNumCorrectGuesses(const Node* node, const Node* parentNode = nullptr, co
         if (isCorrectGuess(edge, node, childNode))
             numCorrectGuessed++;
 
-        numCorrectGuessed += findNumCorrectGuesses(childNode, node, edge);
+        numCorrectGuessed += findNumCorrectGuesses(childNode);
     }
     return numCorrectGuessed;
 }
 
-void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int& numMatching, int rootNumCorrectGuesses, const Node* parentNode = nullptr, const Edge* edgeTravelledFromParent = nullptr, int numCorrectlyGuessedForParentNode = -1)
+void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int& numMatching, int rootNumCorrectGuesses, int numCorrectlyGuessedForParentNode = -1)
 {
+    const Node* parentNode = node->parentNode;
+    const Edge* edgeFollowedFromParent = node->edgeFollowedFromParent;
+
     int numCorrectlyGuessed = 0;
     if (parentNode)
     {
         numCorrectlyGuessed = numCorrectlyGuessedForParentNode;
-        if (isCorrectGuess(edgeTravelledFromParent, parentNode, node))
+        if (isCorrectGuess(edgeFollowedFromParent, parentNode, node))
         {
             numCorrectlyGuessed--;
         }
-        if (isCorrectGuess(edgeTravelledFromParent, node, parentNode))
+        if (isCorrectGuess(edgeFollowedFromParent, node, parentNode))
         {
             numCorrectlyGuessed++;
         }
@@ -91,14 +126,13 @@ void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int&
 
         const Node* childNode = edge->otherNode(node);
 
-        findMatchingRootNodes(childNode, numCorrectGuessedRequired, numMatching, rootNumCorrectGuesses, node, edge, numCorrectlyGuessed);
+        findMatchingRootNodes(childNode, numCorrectGuessedRequired, numMatching, rootNumCorrectGuesses, numCorrectlyGuessed);
     }
 
 }
 
-int findNumRootNodes(const vector<Node>& nodes, int numCorrectGuessedRequired)
+int findNumRootNodes(const Node* rootNode, int numCorrectGuessedRequired)
 {
-    const Node* rootNode = &(nodes.front());
     const int numCorrectGuessesRootNode = findNumCorrectGuesses(rootNode);
     int numRootNodes = 0;
     findMatchingRootNodes(rootNode, numCorrectGuessedRequired, numRootNodes, numCorrectGuessesRootNode);
@@ -158,7 +192,6 @@ int main()
 
         vector<Node> nodes(n);
         vector<Edge> edges(n - 1);
-        map<pair<int, int>, Edge*> nodePairToEdge;
 
         // Read in graph.
         for (int i = 0; i < n - 1; i++)
@@ -173,16 +206,17 @@ int main()
             edge.node2 = &(nodes[v]);
             nodes[u].neighbours.push_back(&edge);
             nodes[v].neighbours.push_back(&edge);
-
-            nodePairToEdge[make_pair(u, v)] = &edge;
-            nodePairToEdge[make_pair(v, u)] = &edge;
         }
-
 
         int g, k;
         cin >> g >> k;
 
-        // Read in guesses.
+        Node* rootNode = &(nodes.front());
+        // We use fillInParentNode so that we can find, in O(1), the edge connecting any two connected
+        // nodes (needed for efficient updating of guessedNode1ParentofNode2 and guessedNode2ParentofNode1 
+        // from the list of guesses!).
+        fillInParentNode(rootNode);
+
         for (int i = 0; i < g; i++)
         {
             int parentNodeIndex, childNodeIndex;
@@ -193,13 +227,14 @@ int main()
             Node* parentNode = &(nodes[parentNodeIndex]);
             Node* childNode = &(nodes[childNodeIndex]);
 
-            Edge* edge = nodePairToEdge[make_pair(parentNodeIndex, childNodeIndex)];
-            assert(edge);
+            Edge* edge = findEdgeBetweenNodes(parentNode, childNode);
+
             edge->guessedNode1ParentofNode2 |= (edge->node1 == parentNode && edge->node2 == childNode);
             edge->guessedNode2ParentofNode1 |= (edge->node2 == parentNode && edge->node1 == childNode);
         }
 
-        const auto numMatchingRootNodes = findNumRootNodes(nodes, k);
+
+        const auto numMatchingRootNodes = findNumRootNodes(rootNode, k);
         // Cancel fraction numMatchingRootNodes/n.
         int numerator = numMatchingRootNodes;
         int denominator = n;
