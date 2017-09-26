@@ -25,6 +25,10 @@ namespace
         Node *node2 = nullptr;
         bool guessedNode1ParentofNode2 = false;
         bool guessedNode2ParentofNode1 = false;
+        const Node* otherNode(const Node* node)
+        {
+            return (node == node1 ? node2 : node1);
+        }
     };
 }
 
@@ -46,26 +50,13 @@ int findNumCorrectGuessed(const Node* node, const Node* parentNode = nullptr, co
         if (edge->node1 == parentNode || edge->node2 == parentNode)
             continue;
 
-        const Node* childNode = (edge->node1 == node ? edge->node2 : edge->node1);
+        const Node* childNode = edge->otherNode(node);
         if (isCorrectGuess(edge, node, childNode))
             numCorrectGuessed++;
 
         numCorrectGuessed += findNumCorrectGuessed(childNode, node, edge);
     }
     return numCorrectGuessed;
-}
-
-int findNumRootNodesBruteForce(const vector<Node>& nodes, int numCorrectGuessedRequired)
-{
-    int numRootNodes = 0;
-    for (const auto& node : nodes)
-    {
-        if (findNumCorrectGuessed(&node, nullptr, nullptr) >= numCorrectGuessedRequired)
-        {
-            numRootNodes++;
-        }
-    }
-    return numRootNodes;
 }
 
 void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int& numMatching, int rootNumCorrectGuesses, const Node* parentNode = nullptr, const Edge* edgeTravelledFromParent = nullptr, int numCorrectlyGuessedForParentNode = -1)
@@ -97,7 +88,7 @@ void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int&
         if (edge->node1 == parentNode || edge->node2 == parentNode)
             continue;
 
-        const Node* childNode = (edge->node1 == node ? edge->node2 : edge->node1);
+        const Node* childNode = edge->otherNode(node);
 
         findMatchingRootNodes(childNode, numCorrectGuessedRequired, numMatching, rootNumCorrectGuesses, node, edge, numCorrectlyGuessed);
     }
@@ -127,6 +118,7 @@ int main()
         vector<Edge> edges(n - 1);
         map<pair<int, int>, Edge*> nodePairToEdge;
 
+        // Read in graph.
         for (int i = 0; i < n - 1; i++)
         {
             int u, v;
@@ -148,6 +140,7 @@ int main()
         int g, k;
         cin >> g >> k;
 
+        // Read in guesses.
         for (int i = 0; i < g; i++)
         {
             int parentNodeIndex, childNodeIndex;
@@ -164,8 +157,9 @@ int main()
             edge->guessedNode2ParentofNode1 |= (edge->node2 == parentNode && edge->node1 == childNode);
         }
 
-        const auto numMatchingRootNodesOptimised = findNumRootNodes(nodes, k);
-        int numerator = numMatchingRootNodesOptimised;
+        const auto numMatchingRootNodes = findNumRootNodes(nodes, k);
+        // Cancel fraction numMatchingRootNodes/n.
+        int numerator = numMatchingRootNodes;
         int denominator = n;
         for (int i = 2; i <= sqrt(n); i++)
         {
