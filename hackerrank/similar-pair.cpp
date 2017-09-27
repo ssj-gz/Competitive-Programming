@@ -25,14 +25,15 @@ class NumberTracker
         NumberTracker(int maxNumber)
             : m_maxNumber{maxNumber}
         {
-            int log2 = 0;
+            int exponentOfPowerOf2 = 0;
             int powerOf2 = 1;
             while (maxNumber > powerOf2)
             {
-                log2++;
+                exponentOfPowerOf2++;
                 powerOf2 *= 2;
             }
             m_powerOf2BiggerThanMaxNumber = powerOf2;
+            m_exponentOfPowerOf2BiggerThanMaxNumber = exponentOfPowerOf2;
             // Build cell matrix.
             int numCellsInThisRow = 1;
             powerOf2 = m_powerOf2BiggerThanMaxNumber;
@@ -59,6 +60,7 @@ class NumberTracker
         }
     private:
         int m_powerOf2BiggerThanMaxNumber;
+        int m_exponentOfPowerOf2BiggerThanMaxNumber;
         int m_maxNumber;
         struct Cell
         {
@@ -68,16 +70,16 @@ class NumberTracker
         void addOrRemoveNumber(int n, bool add)
         {
             int cellRow = 0;
-            int powerOf2 = m_powerOf2BiggerThanMaxNumber;
+            int exponentOfPowerOf2 = m_exponentOfPowerOf2BiggerThanMaxNumber;
             const int numRows = m_cellMatrix.size();
             const int numToAdd = (add ? 1 : -1);
             while (cellRow < numRows)
             {
-                int cellIndex = n / powerOf2;
+                int cellIndex = n >> exponentOfPowerOf2;
                 m_cellMatrix[cellRow][cellIndex].numNumbersInRange += numToAdd;
 
                 cellRow++;
-                powerOf2 >>= 1;
+                exponentOfPowerOf2--;
             }
         }
         int countNumbersInRange(int start, int end, int cellRow, int powerOf2)
@@ -93,7 +95,7 @@ class NumberTracker
             if (end + 1 - start < powerOf2)
             {
                 // Gap between start and end is too small; recurse with smaller power of 2.
-                return countNumbersInRange(start, end, cellRow + 1, powerOf2 / 2);
+                return countNumbersInRange(start, end, cellRow + 1, powerOf2 >> 1);
             }
             int numberInRange = 0;
             if ((start % powerOf2) == 0)
@@ -105,7 +107,7 @@ class NumberTracker
                     numberInRange += cellContents;
                     start += powerOf2;
                 }
-                return numberInRange + countNumbersInRange(start, end, cellRow + 1, powerOf2 / 2);
+                return numberInRange + countNumbersInRange(start, end, cellRow + 1, powerOf2 >> 1);
             }
             if (((end + 1) % powerOf2) == 0)
             {
@@ -116,7 +118,7 @@ class NumberTracker
                     numberInRange += cellContents;
                     end -= powerOf2;
                 }
-                return numberInRange + countNumbersInRange(start, end, cellRow + 1, powerOf2 / 2);
+                return numberInRange + countNumbersInRange(start, end, cellRow + 1, powerOf2 >> 1);
             }
             // Neither start nor end is a multiple of powerOf2: sum up the complete cells in between (if any) ...
             const int powerOf2AfterStart = (start / powerOf2 + 1) * powerOf2;
@@ -127,7 +129,7 @@ class NumberTracker
             }
             // ... and then split into two, and recurse: for each of two split regions, at least one of the start or end will be a multiple of powerOf2, so they
             // will not split further.
-            return numberInRange + countNumbersInRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 / 2) + countNumbersInRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 / 2);
+            return numberInRange + countNumbersInRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 >> 1) + countNumbersInRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1);
         }
 };
 
