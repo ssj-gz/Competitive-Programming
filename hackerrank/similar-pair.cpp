@@ -191,9 +191,9 @@ class NumberTracker
 #endif
 };
 
-int numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
+int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
 {
-    int numSimilarPairs = numberTracker.countNumbersInRange(max(0, root->nodeNumber - k), min(root->nodeNumber + k, numberTracker.maxNumber()));
+    int64_t numSimilarPairs = numberTracker.countNumbersInRange(max(0, root->nodeNumber - k), min(root->nodeNumber + k, numberTracker.maxNumber()));
     numberTracker.addNumber(root->nodeNumber);
     for (auto child : root->children)
     {
@@ -260,7 +260,7 @@ int main()
     }
     assert(root);
     NumberTracker numberTracker(n);
-    const int numSimilarPairs = ::numSimilarPairs(root, k, numberTracker);
+    const int64_t numSimilarPairs = ::numSimilarPairs(root, k, numberTracker);
     cout << numSimilarPairs << endl;
 
 #ifdef BRUTE_FORCE
