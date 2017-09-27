@@ -1,3 +1,12 @@
+// Simon St James (ssjgz) 2017-09-27 11:31
+#define BRUTE_FORCE
+#define VERIFY_NUMBER_TRACKER
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#undef VERIFY_NUMBER_TRACKER
+#endif
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -33,12 +42,11 @@ int numSimilarPairsBruteForce(Node* root, int k, vector<Node*>& ancestors)
 
 }
 
-#define VERIFY_NUMBER_TRACKER
-
 class NumberTracker
 {
     public:
         NumberTracker(int maxNumber)
+            : m_maxNumber{maxNumber}
         {
             int log2 = 0;
             int powerOf2 = 1;
@@ -62,7 +70,7 @@ class NumberTracker
             }
             //cout << "m_nextPowerOf2: " << m_nextPowerOf2 << endl;
 #ifdef VERIFY_NUMBER_TRACKER
-            m_numOfNumber.resize(maxNumber + 1);
+            m_numOfNumber.resize(m_nextPowerOf2 + 1);
 #endif
         }
         void addNumber(int n)
@@ -82,13 +90,18 @@ class NumberTracker
             {
                 dbgNum += m_numOfNumber[i];
             }
+            //cout << " countNumbersInRange: start: " << start << " end: " << end << " num: " << num << " dbgNum: " << dbgNum << endl;
             assert(num == dbgNum);
-            cout << " countNumbersInRange: start: " << start << " end: " << end << " num: " << num << " dbgNum: " << dbgNum << endl;
 #endif
             return num;
         }
+        int maxNumber() const
+        {
+            return m_maxNumber;
+        }
     private:
         int m_nextPowerOf2;
+        int m_maxNumber;
         struct Cell
         {
             int numNumbersInRange = 0;
@@ -96,6 +109,7 @@ class NumberTracker
         vector<vector<Cell>> m_cellMatrix;
         void addOrRemoveNumber(int n, bool add)
         {
+            //cout << "addOrRemoveNumber: " << n << " : " << add << endl;
             int cellRow = 0;
             int powerOf2 = m_nextPowerOf2;
             while (cellRow < m_cellMatrix.size())
@@ -117,7 +131,7 @@ class NumberTracker
                 //cout << endl;
             }
 #ifdef VERIFY_NUMBER_TRACKER
-            m_numOfNumber[n] += (add ? 1 : 0);
+            m_numOfNumber[n] += (add ? 1 : -1);
 #endif
         }
         int countNumbersInRange(int start, int end, int cellRow, int powerOf2)
@@ -177,10 +191,25 @@ class NumberTracker
 #endif
 };
 
+int numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
+{
+    int numSimilarPairs = numberTracker.countNumbersInRange(max(0, root->nodeNumber - k), min(root->nodeNumber + k, numberTracker.maxNumber()));
+    numberTracker.addNumber(root->nodeNumber);
+    for (auto child : root->children)
+    {
+        numSimilarPairs += ::numSimilarPairs(child, k, numberTracker);
+
+    }
+    numberTracker.removeNumber(root->nodeNumber);
+    return numSimilarPairs;
+
+}
+
+
 
 int main()
 {
-#if 1
+#if 0
     while (true)
     {
         const int trackerSize = 1000;
@@ -230,11 +259,15 @@ int main()
         }
     }
     assert(root);
+    NumberTracker numberTracker(n);
+    const int numSimilarPairs = ::numSimilarPairs(root, k, numberTracker);
+    cout << numSimilarPairs << endl;
 
-#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
     vector<Node*> ancestors;
     const int numSimilarPairsBruteForce = ::numSimilarPairsBruteForce(root, k, ancestors);
+    cout << "numSimilarPairs: " << numSimilarPairs << " numSimilarPairsBruteForce: " << numSimilarPairsBruteForce << endl;
+    assert(numSimilarPairsBruteForce == numSimilarPairs);
     cout << numSimilarPairsBruteForce << endl;
 #endif
 
