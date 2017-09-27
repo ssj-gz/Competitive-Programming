@@ -71,14 +71,12 @@ class NumberTracker
         {
             int cellRow = 0;
             int exponentOfPowerOf2 = m_exponentOfPowerOf2BiggerThanMaxNumber;
-            const int numRows = m_cellMatrix.size();
             const int numToAdd = (add ? 1 : -1);
-            while (cellRow < numRows)
+            for (auto& cellRow : m_cellMatrix)
             {
                 int cellIndex = n >> exponentOfPowerOf2;
-                m_cellMatrix[cellRow][cellIndex].numNumbersInRange += numToAdd;
+                cellRow[cellIndex].numNumbersInRange += numToAdd;
 
-                cellRow++;
                 exponentOfPowerOf2--;
             }
         }
