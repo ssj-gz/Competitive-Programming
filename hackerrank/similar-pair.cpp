@@ -69,13 +69,15 @@ class NumberTracker
         {
             int cellRow = 0;
             int powerOf2 = m_powerOf2BiggerThanMaxNumber;
-            while (cellRow < m_cellMatrix.size())
+            const int numRows = m_cellMatrix.size();
+            const int numToAdd = (add ? 1 : -1);
+            while (cellRow < numRows)
             {
                 int cellIndex = n / powerOf2;
-                m_cellMatrix[cellRow][cellIndex].numNumbersInRange += (add ? 1 : -1);
+                m_cellMatrix[cellRow][cellIndex].numNumbersInRange += numToAdd;
 
                 cellRow++;
-                powerOf2 /= 2;
+                powerOf2 >>= 1;
             }
         }
         int countNumbersInRange(int start, int end, int cellRow, int powerOf2)
@@ -206,6 +208,7 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
 
 int main()
 {
+    ios::sync_with_stdio(false);
     int n, k;
     cin >> n >> k;
 
