@@ -1,11 +1,7 @@
 // Simon St James (ssjgz) 2017-09-27 11:31
-#define BRUTE_FORCE
-#define VERIFY_NUMBER_TRACKER
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
-#undef BRUTE_FORCE
-#undef VERIFY_NUMBER_TRACKER
 #endif
 #include <iostream>
 #include <vector>
@@ -21,28 +17,8 @@ struct Node
     bool isRoot = true;
 };
 
-
-int numSimilarPairsBruteForce(Node* root, int k, vector<Node*>& ancestors)
-{
-    int numSimilarPairs = 0;
-    for (const auto& ancestor : ancestors)
-    {
-        if (abs(root->nodeNumber - ancestor->nodeNumber) <= k)
-        {
-            numSimilarPairs++;
-        }
-    }
-    ancestors.push_back(root);
-    for (auto child : root->children)
-    {
-        numSimilarPairs += numSimilarPairsBruteForce(child, k, ancestors);
-
-    }
-    ancestors.pop_back();
-    return numSimilarPairs;
-
-}
-
+// Add or remove a number 0< = n <= maxNumber in O(log(maxNumber)); count number of numbers
+// in range start,end (inclusive) in O(log(maxNumber))
 class NumberTracker
 {
     public:
@@ -56,13 +32,10 @@ class NumberTracker
                 log2++;
                 powerOf2 *= 2;
             }
-            m_nextPowerOf2 = powerOf2;
-            //if (powerOf2 != maxNumber)
-            //{
-                //m_nextPowerOf2 *= 2;
-            //}
+            m_powerOf2BiggerThanMaxNumber = powerOf2;
+            // Build cell matrix.
             int numCellsInThisRow = 1;
-            powerOf2 = m_nextPowerOf2;
+            powerOf2 = m_powerOf2BiggerThanMaxNumber;
             while (powerOf2 > 0)
             {
                 m_cellMatrix.push_back(vector<Cell>(numCellsInThisRow));
@@ -80,16 +53,12 @@ class NumberTracker
         }
         int countNumbersInRange(int start, int end)
         {
-            start = max(0, start);
+            start = max(0, start); // Snap start and end to interval.
             end  = min(end, m_maxNumber);
-            return countNumbersInRange(start, end, 0, m_nextPowerOf2);
-        }
-        int maxNumber() const
-        {
-            return m_maxNumber;
+            return countNumbersInRange(start, end, 0, m_powerOf2BiggerThanMaxNumber);
         }
     private:
-        int m_nextPowerOf2;
+        int m_powerOf2BiggerThanMaxNumber;
         int m_maxNumber;
         struct Cell
         {
@@ -99,7 +68,7 @@ class NumberTracker
         void addOrRemoveNumber(int n, bool add)
         {
             int cellRow = 0;
-            int powerOf2 = m_nextPowerOf2;
+            int powerOf2 = m_powerOf2BiggerThanMaxNumber;
             while (cellRow < m_cellMatrix.size())
             {
                 int cellIndex = n / powerOf2;
@@ -121,6 +90,7 @@ class NumberTracker
                 return 0;
             if (end + 1 - start < powerOf2)
             {
+                // Gap between start and end is too small; recurse with smaller power of 2.
                 return countNumbersInRange(start, end, cellRow + 1, powerOf2 / 2);
             }
             int numberInRange = 0;
@@ -162,6 +132,7 @@ class NumberTracker
 int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
 {
     // This would be a nice, simple recursive function looking like this:
+    //
     //    int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
     //    {
     //        int64_t numSimilarPairs = numberTracker.countNumbersInRange(root->nodeNumber - k, root->nodeNumber + k);
@@ -196,12 +167,14 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
         StackFrame& currentStackFrame = stackFrames.top();
         if (currentStackFrame.childIndex == -1)
         {
+            // First time dealing with this node/ stack frame.
             currentStackFrame.numSimilarPairs = numberTracker.countNumbersInRange(currentStackFrame.currentNode->nodeNumber - k, currentStackFrame.currentNode->nodeNumber + k);
             currentStackFrame.childIndex = 0;
             numberTracker.addNumber(currentStackFrame.currentNode->nodeNumber);
         }
         if (currentStackFrame.waitingForChild)
         {
+            // Add the result from this child, and prepare to move onto the next.
             currentStackFrame.waitingForChild = false;
             assert(childReturnValue != -1);
             currentStackFrame.numSimilarPairs += childReturnValue;
@@ -210,6 +183,7 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
         }
         if (currentStackFrame.childIndex != currentStackFrame.currentNode->children.size())
         {
+            // Process this child.
             Node* child = currentStackFrame.currentNode->children[currentStackFrame.childIndex];
             StackFrame nextStackFrame;
             nextStackFrame.currentNode = child;
@@ -218,6 +192,7 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
         }
         else
         {
+            // Finished with this stack frame; "return" the value.
             childReturnValue = currentStackFrame.numSimilarPairs;
             numberTracker.removeNumber(currentStackFrame.currentNode->nodeNumber);
             stackFrames.pop();
@@ -228,8 +203,6 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
     return childReturnValue;
 
 }
-
-
 
 int main()
 {
