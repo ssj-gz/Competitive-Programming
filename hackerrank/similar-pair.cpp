@@ -69,9 +69,6 @@ class NumberTracker
                 numCellsInThisRow *= 2;
                 powerOf2 /= 2;
             }
-#ifdef VERIFY_NUMBER_TRACKER
-            m_numOfNumber.resize(m_nextPowerOf2 + 1);
-#endif
         }
         void addNumber(int n)
         {
@@ -83,16 +80,9 @@ class NumberTracker
         }
         int countNumbersInRange(int start, int end)
         {
-            const int num = countNumbersInRange(start, end, 0, m_nextPowerOf2);
-#ifdef VERIFY_NUMBER_TRACKER
-            int dbgNum = 0;
-            for (int i = start; i <= end; i++)
-            {
-                dbgNum += m_numOfNumber[i];
-            }
-            assert(num == dbgNum);
-#endif
-            return num;
+            start = max(0, start);
+            end  = min(end, m_maxNumber);
+            return countNumbersInRange(start, end, 0, m_nextPowerOf2);
         }
         int maxNumber() const
         {
@@ -167,16 +157,25 @@ class NumberTracker
             // will not split further.
             return numberInRange + countNumbersInRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 / 2) + countNumbersInRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 / 2);
         }
-        bool isPowerOf2(int n)
-        {
-            if ((n % 2) == 1)
-                return false;
-            return isPowerOf2(n / 2);
-        }
 };
 
 int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
 {
+    // This would be a nice, simple recursive function looking like this:
+    //    int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
+    //    {
+    //        int64_t numSimilarPairs = numberTracker.countNumbersInRange(root->nodeNumber - k, root->nodeNumber + k);
+    //        numberTracker.addNumber(root->nodeNumber);
+    //        for (auto child : root->children)
+    //        {
+    //            numSimilarPairs += ::numSimilarPairs(child, k, numberTracker);
+    //    
+    //        }
+    //        numberTracker.removeNumber(root->nodeNumber);
+    //        return numSimilarPairs;
+    //    }
+    //
+    // but unfortunately, the depth of the graph is too big and causes a stack overflow :/ So we have to emulate recursion ourselves.
     struct StackFrame
     {
         int childIndex = -1;
@@ -195,11 +194,9 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
     while (!stackFrames.empty())
     {
         StackFrame& currentStackFrame = stackFrames.top();
-        //cout << "stack frames size: " << stackFrames.size() << " current node: " << currentStackFrame.currentNode << " child: " << currentStackFrame.childIndex << " # children: " << currentStackFrame.currentNode->children.size() << endl;
         if (currentStackFrame.childIndex == -1)
         {
-            currentStackFrame.numSimilarPairs = numberTracker.countNumbersInRange(max(0, currentStackFrame.currentNode->nodeNumber - k), min(currentStackFrame.currentNode->nodeNumber + k, numberTracker.maxNumber()));
-            //cout << " currentStackFrame.numSimilarPairs: " << currentStackFrame.numSimilarPairs << endl;
+            currentStackFrame.numSimilarPairs = numberTracker.countNumbersInRange(currentStackFrame.currentNode->nodeNumber - k, currentStackFrame.currentNode->nodeNumber + k);
             currentStackFrame.childIndex = 0;
             numberTracker.addNumber(currentStackFrame.currentNode->nodeNumber);
         }
@@ -214,7 +211,6 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
         if (currentStackFrame.childIndex != currentStackFrame.currentNode->children.size())
         {
             Node* child = currentStackFrame.currentNode->children[currentStackFrame.childIndex];
-            //cout << " node: " << currentStackFrame.currentNode << " pushing child: " << child << endl;
             StackFrame nextStackFrame;
             nextStackFrame.currentNode = child;
             currentStackFrame.waitingForChild = true;
