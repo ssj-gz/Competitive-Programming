@@ -9,6 +9,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <cassert>
 
 using namespace std;
@@ -193,15 +194,60 @@ class NumberTracker
 
 int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
 {
-    int64_t numSimilarPairs = numberTracker.countNumbersInRange(max(0, root->nodeNumber - k), min(root->nodeNumber + k, numberTracker.maxNumber()));
-    numberTracker.addNumber(root->nodeNumber);
-    for (auto child : root->children)
+    struct StackFrame
     {
-        numSimilarPairs += ::numSimilarPairs(child, k, numberTracker);
+        int childIndex = -1;
+        int64_t numSimilarPairs = 0;
+        bool waitingForChild = false;
+        Node* currentNode = nullptr;
+    };
+    stack<StackFrame> stackFrames;
 
+    StackFrame initialStackFrame;
+    initialStackFrame.currentNode = root;
+    stackFrames.push(initialStackFrame);
+
+
+    int64_t childReturnValue = -1;
+    while (!stackFrames.empty())
+    {
+        StackFrame& currentStackFrame = stackFrames.top();
+        //cout << "stack frames size: " << stackFrames.size() << " current node: " << currentStackFrame.currentNode << " child: " << currentStackFrame.childIndex << " # children: " << currentStackFrame.currentNode->children.size() << endl;
+        if (currentStackFrame.childIndex == -1)
+        {
+            currentStackFrame.numSimilarPairs = numberTracker.countNumbersInRange(max(0, currentStackFrame.currentNode->nodeNumber - k), min(currentStackFrame.currentNode->nodeNumber + k, numberTracker.maxNumber()));
+            //cout << " currentStackFrame.numSimilarPairs: " << currentStackFrame.numSimilarPairs << endl;
+            currentStackFrame.childIndex = 0;
+            numberTracker.addNumber(currentStackFrame.currentNode->nodeNumber);
+        }
+        if (currentStackFrame.waitingForChild)
+        {
+            currentStackFrame.waitingForChild = false;
+            assert(childReturnValue != -1);
+            currentStackFrame.numSimilarPairs += childReturnValue;
+            currentStackFrame.childIndex++;
+            childReturnValue = -1;
+        }
+        if (currentStackFrame.childIndex != currentStackFrame.currentNode->children.size())
+        {
+            Node* child = currentStackFrame.currentNode->children[currentStackFrame.childIndex];
+            //cout << " node: " << currentStackFrame.currentNode << " pushing child: " << child << endl;
+            StackFrame nextStackFrame;
+            nextStackFrame.currentNode = child;
+            currentStackFrame.waitingForChild = true;
+            stackFrames.push(nextStackFrame);
+        }
+        else
+        {
+            childReturnValue = currentStackFrame.numSimilarPairs;
+            //cout << " node: " << currentStackFrame.currentNode << " returning: " << childReturnValue << endl;
+            numberTracker.removeNumber(currentStackFrame.currentNode->nodeNumber);
+            stackFrames.pop();
+        }
     }
-    numberTracker.removeNumber(root->nodeNumber);
-    return numSimilarPairs;
+
+
+    return childReturnValue;
 
 }
 
