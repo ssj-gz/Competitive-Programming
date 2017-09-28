@@ -133,6 +133,7 @@ int main()
         const int almostChloeNumber = almostChloeNumbers[i];
         for (int digit = 0; digit <= 9; digit++)
         {
+            // If d is digit, and almostChloeNumber = ABCD, then extendedAlmostChloeNumber = dABCD.
             const int extendedAlmostChloeNumber = (digit * 10000) + almostChloeNumber;
             int digitSum = 0;
             for (const auto digitChar : to_string(extendedAlmostChloeNumber))
@@ -142,8 +143,7 @@ int main()
             if (isPrime(digitSum))
             {
                 // If d is digit, then the almostChloeNumber ABCD can be extended to dABCD (extendedAlmostChloeNumber) which has a prime sum.
-                // Note that dABCD is a Chloe Number (albeit possibly with leading 0) if and only if dABC is an Almost
-                // Chloe Number.  dABCD is extendedAlmostChloeNumber / 10.
+                // Note that in this case, dABCD is a semi-Chloe Number if and only if dABC is an Almost Chloe Number.  dABC is extendedAlmostChloeNumber / 10.
                 const auto shiftedAlmostChloeNumberIter = find(almostChloeNumbers.begin(), almostChloeNumbers.end(), extendedAlmostChloeNumber / 10);
                 if (shiftedAlmostChloeNumberIter != almostChloeNumbers.end())
                 {
