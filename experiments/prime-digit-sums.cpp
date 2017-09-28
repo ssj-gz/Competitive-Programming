@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 // Just experimenting for now.
 bool isPrime(int n)
 {
@@ -24,6 +25,8 @@ bool isPrime(int n)
 
 int main()
 {
+    const int64_t modulus = 1'000'000'007ULL;
+    if (false)
     {
         int numSatisfying = 0;
         const int numDigits = 10;
@@ -204,10 +207,11 @@ out:
 
     }
 #endif
+    const int maxN = 400'000;
 
     vector<vector<int>> chloeNumberExtensionIndexLookup(fourDigitChloeNumbers.size());
-    const int n = 12;
-    vector<int> blah(fourDigitChloeNumbers.size(), 1);
+    const int n = 10000;
+    vector<int64_t> blah(fourDigitChloeNumbers.size(), 1);
     for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
     {
         const int chloeNumber = fourDigitChloeNumbers[j];
@@ -236,25 +240,44 @@ out:
     }
 
 
+    vector<int64_t> numChloeNumbersWithNDigits;
+    numChloeNumbersWithNDigits.push_back(0);
+    numChloeNumbersWithNDigits.push_back(0);
+    numChloeNumbersWithNDigits.push_back(0);
+    numChloeNumbersWithNDigits.push_back(0);
 
     for (int i = 0; i < n - 5; i++)
     {
-        int total = 0;
+        int64_t total = 0;
         for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
         {
             const int wee = fourDigitChloeNumbers[j];
             if (wee >= 1000)
-                total += blah[j];
+                total = (total + blah[j]) % modulus;
         }
         cout << "i: " << i << " total: " << total << endl;
-        vector<int> nextBlah(fourDigitChloeNumbers.size());
+        numChloeNumbersWithNDigits.push_back(total);
+        vector<int64_t> nextBlah(fourDigitChloeNumbers.size());
         for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
         {
             for (const auto k : chloeNumberExtensionIndexLookup[j])
             {
-                nextBlah[k] += blah[j];
+                nextBlah[k] = (nextBlah[k] + blah[j]) % modulus;
             }
         }
         blah = nextBlah;
     }
+
+    int Q;
+    cin >> Q;
+
+    for (int q = 0; q < Q; q++)
+    {
+        int n;
+        cin >> n;
+        cout << "n: " << n << endl;
+        cout << numChloeNumbersWithNDigits[n] << endl;
+    }
+
+
 }
