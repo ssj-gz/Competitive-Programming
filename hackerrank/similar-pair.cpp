@@ -131,20 +131,20 @@ class NumberTracker
         }
 };
 
-int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
+int64_t numSimilarPairs(Node* root, int k, NumberTracker& ancestorTracker)
 {
     // This would be a nice, simple recursive function looking like this:
     //
-    //    int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
+    //    int64_t numSimilarPairs(Node* root, int k, NumberTracker& ancestorTracker)
     //    {
-    //        int64_t numSimilarPairs = numberTracker.countNumbersInRange(root->nodeNumber - k, root->nodeNumber + k);
-    //        numberTracker.addNumber(root->nodeNumber);
+    //        int64_t numSimilarPairs = ancestorTracker.countNumbersInRange(root->nodeNumber - k, root->nodeNumber + k);
+    //        ancestorTracker.addNumber(root->nodeNumber);
     //        for (auto child : root->children)
     //        {
     //            numSimilarPairs += ::numSimilarPairs(child, k, numberTracker);
     //    
     //        }
-    //        numberTracker.removeNumber(root->nodeNumber);
+    //        ancestorTracker.removeNumber(root->nodeNumber);
     //        return numSimilarPairs;
     //    }
     //
@@ -152,8 +152,6 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
     struct StackFrame
     {
         int childIndex = -1;
-        int64_t numSimilarPairs = 0;
-        bool waitingForChild = false;
         Node* currentNode = nullptr;
     };
     stack<StackFrame> stackFrames;
@@ -162,6 +160,7 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
     initialStackFrame.currentNode = root;
     stackFrames.push(initialStackFrame);
 
+    int64_t numSimilarPairs = 0;
 
     int64_t childReturnValue = -1;
     while (!stackFrames.empty())
@@ -170,18 +169,9 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
         if (currentStackFrame.childIndex == -1)
         {
             // First time dealing with this node/ stack frame.
-            currentStackFrame.numSimilarPairs = numberTracker.countNumbersInRange(currentStackFrame.currentNode->nodeNumber - k, currentStackFrame.currentNode->nodeNumber + k);
+            numSimilarPairs += ancestorTracker.countNumbersInRange(currentStackFrame.currentNode->nodeNumber - k, currentStackFrame.currentNode->nodeNumber + k);
             currentStackFrame.childIndex = 0;
-            numberTracker.addNumber(currentStackFrame.currentNode->nodeNumber);
-        }
-        if (currentStackFrame.waitingForChild)
-        {
-            // Add the result from this child, and prepare to move onto the next.
-            currentStackFrame.waitingForChild = false;
-            assert(childReturnValue != -1);
-            currentStackFrame.numSimilarPairs += childReturnValue;
-            currentStackFrame.childIndex++;
-            childReturnValue = -1;
+            ancestorTracker.addNumber(currentStackFrame.currentNode->nodeNumber);
         }
         if (currentStackFrame.childIndex != currentStackFrame.currentNode->children.size())
         {
@@ -189,20 +179,20 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& numberTracker)
             Node* child = currentStackFrame.currentNode->children[currentStackFrame.childIndex];
             StackFrame nextStackFrame;
             nextStackFrame.currentNode = child;
-            currentStackFrame.waitingForChild = true;
             stackFrames.push(nextStackFrame);
+            currentStackFrame.childIndex++;
         }
         else
         {
-            // Finished with this stack frame; "return" the value.
-            childReturnValue = currentStackFrame.numSimilarPairs;
-            numberTracker.removeNumber(currentStackFrame.currentNode->nodeNumber);
+            // Finished with this stack frame; pop the stackframe from the stack and the node from the
+            // ancestor tracker.
+            ancestorTracker.removeNumber(currentStackFrame.currentNode->nodeNumber);
             stackFrames.pop();
         }
     }
 
 
-    return childReturnValue;
+    return numSimilarPairs;
 
 }
 
@@ -240,8 +230,8 @@ int main()
         }
     }
     assert(root);
-    NumberTracker numberTracker(n);
-    const int64_t numSimilarPairs = ::numSimilarPairs(root, k, numberTracker);
+    NumberTracker ancestorTracker(n);
+    const int64_t numSimilarPairs = ::numSimilarPairs(root, k, ancestorTracker);
     cout << numSimilarPairs << endl;
 
 }
