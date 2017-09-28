@@ -7,8 +7,6 @@
 
 using namespace std;
 
-
-// Just experimenting for now.
 bool isPrime(int n)
 {
     if (n < 2)
@@ -25,6 +23,40 @@ bool isPrime(int n)
 
 int main()
 {
+    // Fairly tricky. As an intermediate step, introduce "almost-Chloe numbers" : these are 4-digit numbers
+    // (possibly with leading 0s) with each consecutive triple of digits and each consecutive quadruple of 
+    // digits summing to primes e.g. 0025, 0302 and 6526 are all almost-Chloe numbers. Let semi-Chloe numbers
+    // be Chloe numbers which may begin with 0.
+    // The first four digits of any Chloe Number is always an almost-Chloe number. Conversely, let 
+    // ABCDxxxxx be any semi-Chloe number (i.e. A = 0 is allowed); then, prepending a digit
+    // d (possibly with d = 0) will give a semi-Chloe-number if and only if
+    // d + A + B + C + D is prime and dABC is an almost-Chloe number (simple; proof is left as an exercise for the reader ;)).
+    //
+    // So imagine we maintained, for each successive number of digits n, an array (a, say) where the ABCDth entry (ABCD is a 4-digit number, so 
+    // the array would have 10000 entries) is the number of semi-Chloe-numbers with n digits beginning with ABCD. 
+    // How do we update this numbers with n + 1 digits?
+    //
+    // Well, for each of the ABCDs, we could try prepending each digit d = 0 ... 9 in turn; we know that we'll have a semi-Chloe-number 
+    // if and only if d + A + B + C is prime and dABC is an almost-Chloe number; a simple
+    // recurrence relation. Then we'll easily be able to use this to build a lookup, for each n, of the number of Chloe numbers
+    // with n digits (it's the sum over all ABCD, A != 0, of a[ABCD]).
+    //
+    // Unfortunately, this is a little computationally intractable; there are 10000 steps to build the array for each successive
+    // number of digits, and 400'000 digits - far too big :/
+    //
+    // Of course, we don't actually need all 10000 quadruples ABCD in our array a; we could instead index into a with the
+    // index of the almost-Chloe number ABCD in the list of all almost-Chloe numbers.  The number of almost-Chloe numbers 
+    // is much less than 10000, so this becomes more tractable.
+    //
+    // But we can do better: we don't need to find all d to prepend at every iteration; rather, we can build a lookup table of dABC for
+    // each ABCD such that d + A + B + C is prime and dABC is an almost-Chloe number.  This is almostChloeNumberExtensionIndexLookup,
+    // and if ABCD has index i in the list of all almost-Chloe numbers, and if d1, ... dk are digits that satisfy di + A + B + C
+    // and diABC is an almost-Chloe number with index ji, then almostChloeNumberExtensionIndexLookup[i] would give the list j1, j2 ... jk.
+    // This lookup table allows us to be even more efficient.
+    //
+    // And that's it: once we have the numChloeNumbersWithNDigits array built up with our recurrence relation and the step that filters out
+    // numbers that are semi-Chloe but not full-Chloe, we just have to look this up for each query n.
+
     const int64_t modulus = 1'000'000'007ULL;
     const int numCounterDigits = 4;
     vector<int> digits(numCounterDigits);
@@ -60,12 +92,8 @@ int main()
                     isAlmostChloeNumber = false;
                     if (i + numInSequence <= numDigits)
                     {
-                        //cout << "not almostChloeNumber with " << numDigits << " digits: ";
-                        //for (int i = numCounterDigits - 1; i >= 0; i--)
-                        //{
-                            //cout << static_cast<char>(digits[i] + '0');
-                        //}
-                        //cout << endl;
+                        // Looks like Chloe-ness is actually an "innocent until proven guilty" kind of thing, so
+                        // a number with 3 digits can be a Chloe number.
                         isAlmostChloeNumberIgnoringLeading0s = false;
                     }
                     break;
@@ -85,12 +113,6 @@ int main()
         if (isAlmostChloeNumberIgnoringLeading0s)
         {
             numChloeNumbersWithNDigits[numDigits]++;
-            //cout << "almostChloeNumber with " << numDigits << " digits: ";
-            //for (int i = numCounterDigits - 1; i >= 0; i--)
-            //{
-                //cout << static_cast<char>(digits[i] + '0');
-            //}
-            //cout << endl;
         }
 
         int digitIndex = 0;
@@ -103,8 +125,8 @@ int main()
             break;
         digits[digitIndex]++;
     }
-    const int maxN = 400'000;
 
+    // Build the lookup table, almostChloeNumberExtensionIndexLookup.
     vector<vector<int>> almostChloeNumberExtensionIndexLookup(almostChloeNumbers.size());
     for (int i = 0; i < almostChloeNumbers.size(); i++)
     {
@@ -120,7 +142,7 @@ int main()
             if (isPrime(digitSum))
             {
                 // If d is digit, then the almostChloeNumber ABCD can be extended to dABCD (extendedAlmostChloeNumber) which has a prime sum.
-                // Note that dABCD is an Chloe Number (albeit possibly with leading 0) if and only if dABC is an Almost
+                // Note that dABCD is a Chloe Number (albeit possibly with leading 0) if and only if dABC is an Almost
                 // Chloe Number.  dABCD is extendedAlmostChloeNumber / 10.
                 const auto shiftedAlmostChloeNumberIter = find(almostChloeNumbers.begin(), almostChloeNumbers.end(), extendedAlmostChloeNumber / 10);
                 if (shiftedAlmostChloeNumberIter != almostChloeNumbers.end())
@@ -132,9 +154,9 @@ int main()
         }
     }
 
-
     // Will be updated for each new digit, via nextNumChloeNumbersBeginningWithAlmostChloeNumber.  Actually, numChloeNumbersBeginningWithAlmostChloeNumber[i]
     // is the number of numbers with the current number of digits beginning with the almostChloeNumber with index i.
+    const int maxN = 400'000;
     vector<int64_t> numChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size(), 1); 
 
     for (int numDigits = 5; numDigits <= maxN + 1 ; numDigits++)
@@ -166,9 +188,6 @@ int main()
     {
         int n;
         cin >> n;
-        //cout << "n: " << n << " blah: " << numChloeNumbersWithNDigits[n] << endl;
         cout << numChloeNumbersWithNDigits[n] << endl;
     }
-
-
 }
