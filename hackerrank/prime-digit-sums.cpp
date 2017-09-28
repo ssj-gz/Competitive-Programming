@@ -154,9 +154,9 @@ int main()
         }
     }
 
-    // Will be updated for each new digit, via nextNumChloeNumbersBeginningWithAlmostChloeNumber.  Actually, numChloeNumbersBeginningWithAlmostChloeNumber[i]
-    // is the number of numbers with the current number of digits beginning with the almostChloeNumber with index i.
     const int maxN = 400'000;
+    // Will be updated for each new digit, via nextNumChloeNumbersBeginningWithAlmostChloeNumber.  Actually, numChloeNumbersBeginningWithAlmostChloeNumber[i]
+    // is the number of numbers with the current number of digits, beginning with the almostChloeNumber with index i.
     vector<int64_t> numChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size(), 1); 
 
     for (int numDigits = 5; numDigits <= maxN + 1 ; numDigits++)
