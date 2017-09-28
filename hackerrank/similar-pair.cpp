@@ -92,13 +92,14 @@ class NumberTracker
                 return 0;
             if (end + 1 - start < powerOf2)
             {
-                // Gap between start and end is too small; recurse with smaller power of 2.
+                // Gap between start and end is too small; recurse with next row.
                 return countNumbersInRange(start, end, cellRow + 1, powerOf2 >> 1);
             }
             int numberInRange = 0;
             if ((start % powerOf2) == 0)
             {
                 // Advance start by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
+                // Generally, we'll advance 0 or 1 places - I don't think 2 is a possibility.
                 while (start <= end - powerOf2)
                 {
                     const int cellContents = m_cellMatrix[cellRow][start/powerOf2].numNumbersInRange;
@@ -110,6 +111,7 @@ class NumberTracker
             if (((end + 1) % powerOf2) == 0)
             {
                 // Unadvance end by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
+                // Again, I don't think it's possible to iterate two or more times.
                 while (start <= end - powerOf2)
                 {
                     const int cellContents = m_cellMatrix[cellRow][end/powerOf2].numNumbersInRange;
@@ -198,6 +200,47 @@ int64_t numSimilarPairs(Node* root, int k, NumberTracker& ancestorTracker)
 
 int main()
 {
+    // Fairly easy one - I actually solved it in my head ages ago (sometime in 2016, I think) before I knew about
+    // segment trees and whatnot.  The problem description tells you to look into Binary Indexed Trees but, of course,
+    // I consider that cheating and wanted to figure out my own approach :)
+    // So: if we could do a DFS and, in sub-linear time, find out how many ancestor nodes had nodeNumbers in the range
+    // currentNode->nodeNumber - k ... currentNode->nodeNumber + k (inclusive), we'd be done.  A kind of "NumberTracker" data structure where
+    // we can add a number (when the node with that nodeNumber is added to the ancestor stack); check how many numbers 
+    // have been added in a range; and then remove the number (when the node with that nodeNumber is popped from the stack)
+    // each in O(log(N)) would be nice :)
+    //
+    // The approach I used is as follows.  Find the maximum number we wish to store (N), and find the lowest power of 2
+    // greater than or equal to that - e.g. if the maxNumber is 2000, we pick 2048.  Create a matrix of "cells" where
+    // each cell represents a range.  Well, it's not really a matrix since each row has a different number of columns,
+    // but that's close enough :)  The topmost row consists of a single cell which (in our example where 2000 is the max) 
+    // represents the range 0 ... 2047. The next row has two cells (twice as many as the last): one representing 0 ... 1023, 
+    // the other 1024 ... 2047. The next row has four cells (again, twice as many as the last), representing 0 ... 511,
+    // 512 ... 1023, 1024 ... 1535 and 1536 ... 2047, respectively.  In general, each row has twice as many cells as the previous
+    // one, and each cell represents a range half the size of those on the previous row, until we get rows of width 1 in the final
+    // row.  The number of rows is O(log2(2048)) ~ O(log(N)).
+    //
+    // Let's add a node with nodeNumber 300 to our ancestorTracker.  This would add 1 to the numNumbersInRange to the cell in the first row
+    // representing 0 ... 2047; 1 to the cell in the second row representing 0 ... 511 (the first in the row); 1 to the cell in the third row
+    // representing 256 ... 511 (the second in the row); 1 to the cell in the fourth row representing 256 ... 383 (the third in the row)
+    // etc, all the way down to adding 1 to the 300th cell in the last row.  Likewise, removing 300 from the ancestorTracker would subtract
+    // 1 from the same set of cells.  Adding or removing a number from our NumberTracker takes O(log(N)) (we process one cell per row, and there
+    // are O(log(N)) rows).
+    //
+    // How do we find how many numbers were added in a given range? Say we've added 300, and want to count the numbers in the range 212 - 312.
+    // The cell in the first row tells us that there is one number in the range 0 ... 2047, which doesn't really help! Let's drop to the next row: 
+    // The first cell in the second row tells us that there is one number in the range 0 ... 1023 (we're not interested in the range 
+    // 1024 ... 2047, obviously!), which again doesn't really help us - let's try the next row.   This tells us that is a number in the range 0 ... 511; still
+    // not very helpful; let's try the next row.  This tells us that there is 1 in the range 256 ... 511 (and none elsewhere); still not that helpful; let's try the next
+    // row.  This tells us that there is 1 in the range 256 ... 384; getting closer - next row!
+    //
+    // The next row tells us that there is 1 in the range 256 ... 319; still not that helpful; next row! The next row tells us that there is 1 in the range 288 - 319.
+    // The next row tells us that there is 1 in the range 288 ... 303, and none elsewhere.  Next row - 1 in the range 296 - 304, none elsewhere.
+    // Next row - etc, etc.  Actually, this was a pretty bad example, but you can see that you can gradually narrow down a range as we go down the rows.
+    // In a properly chosen example, we'd see that we can often narrow down the range dramatically i.e. if the range was 256 - 1023, then by the time we get to the 
+    // third row, the number in the range is given by the number in the range (256 ... 511) plus the number in the range (512 ... 1023), but the latter is 
+    // just numNumbersInRange for the 2nd cell in the row, so now we just have to compute the number in the range 256 ... 511.
+    // Anyway, that's about it - sorry for the crap example!
+
     ios::sync_with_stdio(false);
     int n, k;
     cin >> n >> k;
