@@ -26,15 +26,29 @@ bool isPrime(int n)
 int main()
 {
     const int64_t modulus = 1'000'000'007ULL;
-    const int numDigits = 4;
-    vector<int> digits(numDigits);
+    const int numCounterDigits = 4;
+    vector<int> digits(numCounterDigits);
     vector<int> almostChloeNumbers;
+
+    vector<int64_t> numChloeNumbersWithNDigits;
+    numChloeNumbersWithNDigits.push_back(0);
+    numChloeNumbersWithNDigits.push_back(0);
+    numChloeNumbersWithNDigits.push_back(0);
+    numChloeNumbersWithNDigits.push_back(0);
+
     while (true)
     {
         bool isAlmostChloeNumber = true;
+        bool isAlmostChloeNumberIgnoringLeading0s = true;
+        int numDigits = 0;
+        for (int i = 0; i < numCounterDigits; i++)
+        {
+            if (digits[i] != 0)
+                numDigits = i + 1;
+        }
         for (int numInSequence = 3; numInSequence <= 5; numInSequence++)
         {
-            for (int i = 0; i < numDigits - numInSequence + 1; i++)
+            for (int i = 0; i < numCounterDigits - numInSequence + 1; i++)
             {
                 int sequenceSum = 0;
                 for (int j = i; j < i + numInSequence; j++)
@@ -44,6 +58,16 @@ int main()
                 if (!isPrime(sequenceSum))
                 {
                     isAlmostChloeNumber = false;
+                    if (i + numInSequence <= numDigits)
+                    {
+                        //cout << "not almostChloeNumber with " << numDigits << " digits: ";
+                        //for (int i = numCounterDigits - 1; i >= 0; i--)
+                        //{
+                            //cout << static_cast<char>(digits[i] + '0');
+                        //}
+                        //cout << endl;
+                        isAlmostChloeNumberIgnoringLeading0s = false;
+                    }
                     break;
                 }
             }
@@ -58,14 +82,24 @@ int main()
             }
             almostChloeNumbers.push_back(almostChloeNumber);
         }
+        if (isAlmostChloeNumberIgnoringLeading0s)
+        {
+            numChloeNumbersWithNDigits[numDigits]++;
+            //cout << "almostChloeNumber with " << numDigits << " digits: ";
+            //for (int i = numCounterDigits - 1; i >= 0; i--)
+            //{
+                //cout << static_cast<char>(digits[i] + '0');
+            //}
+            //cout << endl;
+        }
 
         int digitIndex = 0;
-        while (digitIndex < numDigits && digits[digitIndex] == 9)
+        while (digitIndex < numCounterDigits && digits[digitIndex] == 9)
         {
             digits[digitIndex] = 0;
             digitIndex++;
         }
-        if (digitIndex == numDigits)
+        if (digitIndex == numCounterDigits)
             break;
         digits[digitIndex]++;
     }
@@ -98,12 +132,6 @@ int main()
         }
     }
 
-
-    vector<int64_t> numChloeNumbersWithNDigits;
-    numChloeNumbersWithNDigits.push_back(0);
-    numChloeNumbersWithNDigits.push_back(0);
-    numChloeNumbersWithNDigits.push_back(0);
-    numChloeNumbersWithNDigits.push_back(0);
 
     // Will be updated for each new digit, via nextNumChloeNumbersBeginningWithAlmostChloeNumber.  Actually, numChloeNumbersBeginningWithAlmostChloeNumber[i]
     // is the number of numbers with the current number of digits beginning with the almostChloeNumber with index i.
@@ -138,6 +166,7 @@ int main()
     {
         int n;
         cin >> n;
+        //cout << "n: " << n << " blah: " << numChloeNumbersWithNDigits[n] << endl;
         cout << numChloeNumbersWithNDigits[n] << endl;
     }
 
