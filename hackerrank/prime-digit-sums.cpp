@@ -26,83 +26,6 @@ bool isPrime(int n)
 int main()
 {
     const int64_t modulus = 1'000'000'007ULL;
-    if (false)
-    {
-        int numSatisfying = 0;
-        const int numDigits = 10;
-        vector<int> digits(numDigits);
-        while (true)
-        {
-
-            bool satisfiesChloesRules = true;
-            if (digits[numDigits - 1] == 0)
-            {
-                satisfiesChloesRules = false;
-            }
-            else
-            {
-                for (int numInSequence = 3; numInSequence <= 5; numInSequence++)
-                {
-                    //cout << "numInSequence: " << numInSequence << endl;
-                    for (int i = 0; i < numDigits - numInSequence + 1; i++)
-                    {
-                        //cout << " i: " << i << endl;
-                        int sequenceSum = 0;
-                        for (int j = i; j < i + numInSequence; j++)
-                        {
-                            //cout << "  j: " << j << endl;
-                            sequenceSum += digits[j];
-                        }
-                        //cout << "sequenceSum: " << sequenceSum << " isprime: " << isPrime(sequenceSum) << endl;
-                        if (!isPrime(sequenceSum))
-                        {
-                            satisfiesChloesRules = false;
-                            //cout << " rule violation - sum: " << sequenceSum << endl;
-                            goto out1;
-                        }
-                    }
-                }
-            }
-out1:
-            if (satisfiesChloesRules)
-            {
-#if 0
-                cout << "Woo! ";
-                int chloeNumber = 0;
-                for (const auto digit : vector<int>(digits.rbegin(), digits.rend()))
-                {
-                    chloeNumber *= 10;
-                    chloeNumber += digit;
-                    cout << static_cast<char>(digit + '0');
-                }
-                cout << endl;
-#endif
-                numSatisfying++;
-                //cout << chloeNumber << endl;
-            }
-            else
-            {
-#if 0
-                cout << "does not satisfy rules: ";
-                for (const auto digit : vector<int>(digits.rbegin(), digits.rend()))
-                {
-                    cout << static_cast<char>(digit + '0');
-                }
-                cout << endl;
-#endif
-            }
-            int digitIndex = 0;
-            while (digitIndex < numDigits && digits[digitIndex] == 9)
-            {
-                digits[digitIndex] = 0;
-                digitIndex++;
-            }
-            if (digitIndex == numDigits)
-                break;
-            digits[digitIndex]++;
-        }
-        cout << numSatisfying << endl; 
-    }
     const int numDigits = 4;
     vector<int> digits(numDigits);
     vector<int> fourDigitChloeNumbers;
@@ -110,57 +33,38 @@ out1:
     {
 
         bool satisfiesChloesRules = true;
-        //if (digits[numDigits - 1] == 0)
-        //{
-        //satisfiesChloesRules = false;
-        //}
-        //else
-        {
             for (int numInSequence = 3; numInSequence <= 5; numInSequence++)
             {
-                //cout << "numInSequence: " << numInSequence << endl;
                 for (int i = 0; i < numDigits - numInSequence + 1; i++)
                 {
-                    //cout << " i: " << i << endl;
                     int sequenceSum = 0;
                     for (int j = i; j < i + numInSequence; j++)
                     {
-                        //cout << "  j: " << j << endl;
                         sequenceSum += digits[j];
                     }
-                    //cout << "sequenceSum: " << sequenceSum << " isprime: " << isPrime(sequenceSum) << endl;
                     if (!isPrime(sequenceSum))
                     {
                         satisfiesChloesRules = false;
-                        //cout << " rule violation - sum: " << sequenceSum << endl;
                         goto out;
                     }
                 }
-            }
         }
 out:
         if (satisfiesChloesRules)
         {
-            cout << "Woo! ";
             int chloeNumber = 0;
             for (const auto digit : vector<int>(digits.rbegin(), digits.rend()))
             {
                 chloeNumber *= 10;
                 chloeNumber += digit;
-                cout << static_cast<char>(digit + '0');
+                //cout << static_cast<char>(digit + '0');
             }
-            cout << endl;
-            cout << chloeNumber << endl;
+            //cout << endl;
+            //cout << chloeNumber << endl;
             fourDigitChloeNumbers.push_back(chloeNumber);
         }
         else
         {
-            cout << "does not satisfy rules: ";
-            for (const auto digit : vector<int>(digits.rbegin(), digits.rend()))
-            {
-                cout << static_cast<char>(digit + '0');
-            }
-            cout << endl;
         }
 
         int digitIndex = 0;
@@ -173,40 +77,6 @@ out:
             break;
         digits[digitIndex]++;
     }
-#if 0
-    vector<int> extensible4DigitChloeNumbers;
-    for (const auto chloeNumber : fourDigitChloeNumbers)
-    {
-        for (int digit = 1; digit <= 9; digit++) // No leading 0's.
-        {
-            const int extendedChloeNumber = (digit * 1000) + (chloeNumber / 10);
-            if (find(fourDigitChloeNumbers.begin(), fourDigitChloeNumbers.end(), extendedChloeNumber)  != fourDigitChloeNumbers.end())
-            {
-                extensible4DigitChloeNumbers.push_back(chloeNumber);
-                cout << "wee: " << chloeNumber << " " << extendedChloeNumber << endl;
-            }
-        }
-    }
-#endif
-#if 0
-    vector<vector<int>> chloeNumberExtensionIndexLookup(fourDigitChloeNumbers.size());
-    for (int i = 0; i < fourDigitChloeNumbers.size(); i++)
-    {
-        const int chloeNumber = fourDigitChloeNumbers[i];
-        cout << "extensible4DigitChloeNumbers #" << i << " = " << chloeNumber << endl;
-        for (int digit = 0; digit <= 9; digit++)
-        {
-            const int extendedChloeNumber = (digit * 10000) + chloeNumber;
-            const auto extendedChloeNumberIterator = find(fourDigitChloeNumbers.begin(), fourDigitChloeNumbers.end(), extendedChloeNumber);
-            if (extendedChloeNumberIterator == fourDigitChloeNumbers.end())
-                continue;
-            const int extendedChloeNumberIndex = distance(fourDigitChloeNumbers.begin(), extendedChloeNumberIterator);
-            chloeNumberExtensionIndexLookup[i].push_back(extendedChloeNumberIndex);
-            cout << " mapped to " << extendedChloeNumberIndex << endl;
-        }
-
-    }
-#endif
     const int maxN = 400'000;
 
     vector<vector<int>> chloeNumberExtensionIndexLookup(fourDigitChloeNumbers.size());
@@ -223,7 +93,7 @@ out:
             {
                 digitSum += digitChar - '0';
             }
-            cout << "chloeNumber: " << chloeNumber << " extended: " << extendedChloeNumber << " digit sum:" << digitSum << endl;
+            //cout << "chloeNumber: " << chloeNumber << " extended: " << extendedChloeNumber << " digit sum:" << digitSum << endl;
             if (isPrime(digitSum))
             {
                 //assert(find(fourDigitChloeNumbers.begin(), fourDigitChloeNumbers.end(), extendedChloeNumber / 10) != fourDigitChloeNumbers.end());
@@ -232,7 +102,7 @@ out:
                 {
                     int index = distance(fourDigitChloeNumbers.begin(), blahIter);
                     //blah[index]++;
-                    cout << "waa: " << index << " " << blah[index] << endl;
+                    //cout << "waa: " << index << " " << blah[index] << endl;
                     chloeNumberExtensionIndexLookup[j].push_back(index);
                 }
             }
@@ -255,7 +125,7 @@ out:
             if (wee >= 1000)
                 total = (total + blah[j]) % modulus;
         }
-        cout << "i: " << i << " total: " << total << endl;
+        //cout << "i: " << i << " total: " << total << endl;
         numChloeNumbersWithNDigits.push_back(total);
         vector<int64_t> nextBlah(fourDigitChloeNumbers.size());
         for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
@@ -275,7 +145,7 @@ out:
     {
         int n;
         cin >> n;
-        cout << "n: " << n << endl;
+        //cout << "n: " << n << endl;
         cout << numChloeNumbersWithNDigits[n] << endl;
     }
 
