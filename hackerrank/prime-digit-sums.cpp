@@ -63,6 +63,9 @@ int main()
     vector<int> almostChloeNumbers;
 
     vector<int64_t> numChloeNumbersWithNDigits;
+    // Looks like Chloe-ness is actually an "innocent until proven guilty" kind of thing, so
+    // a number with 3 digits can be a Chloe number; we'll fill in the first 4 entries of 
+    // numChloeNumbersWithNDigits while finding all the almost-Chloe numbers.
     numChloeNumbersWithNDigits.push_back(0);
     numChloeNumbersWithNDigits.push_back(0);
     numChloeNumbersWithNDigits.push_back(0);
@@ -92,8 +95,6 @@ int main()
                     isAlmostChloeNumber = false;
                     if (i + numInSequence <= numDigits)
                     {
-                        // Looks like Chloe-ness is actually an "innocent until proven guilty" kind of thing, so
-                        // a number with 3 digits can be a Chloe number.
                         isAlmostChloeNumberIgnoringLeading0s = false;
                     }
                     break;
