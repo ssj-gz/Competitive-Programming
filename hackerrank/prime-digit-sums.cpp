@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) 2017-09-28 15:00
+// Simon St James (ssjgz) 2017-09-28 15:21
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -71,9 +71,7 @@ int main()
     }
     const int maxN = 400'000;
 
-    vector<vector<int>> chloeNumberExtensionIndexLookup(almostChloeNumbers.size());
-    vector<int64_t> numChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size(), 1);
-    cout << "almostChloeNumbers.size()" << almostChloeNumbers.size() << endl;
+    vector<vector<int>> almostChloeNumberExtensionIndexLookup(almostChloeNumbers.size());
     for (int i = 0; i < almostChloeNumbers.size(); i++)
     {
         const int almostChloeNumber = almostChloeNumbers[i];
@@ -94,7 +92,7 @@ int main()
                 if (shiftedAlmostChloeNumberIter != almostChloeNumbers.end())
                 {
                     const int shiftedAlmostChloeNumberIndex = distance(almostChloeNumbers.begin(), shiftedAlmostChloeNumberIter);
-                    chloeNumberExtensionIndexLookup[i].push_back(shiftedAlmostChloeNumberIndex);
+                    almostChloeNumberExtensionIndexLookup[i].push_back(shiftedAlmostChloeNumberIndex);
                 }
             }
         }
@@ -107,28 +105,31 @@ int main()
     numChloeNumbersWithNDigits.push_back(0);
     numChloeNumbersWithNDigits.push_back(0);
 
-    for (int i = 0; i < maxN - 5; i++)
+    // Will be updated for each new digit, via nextNumChloeNumbersBeginningWithAlmostChloeNumber.  Actually, numChloeNumbersBeginningWithAlmostChloeNumber[i]
+    // is the number of numbers with the current number of digits beginning with the almostChloeNumber with index i.
+    vector<int64_t> numChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size(), 1); 
+
+    for (int numDigits = 5; numDigits <= maxN + 1 ; numDigits++)
     {
-        //cout << "i: " << i << endl;
         int64_t numChloeNumbers = 0;
-        for (int j = 0; j < almostChloeNumbers.size(); j++)
+        for (int almostChloeNumberIndex = 0; almostChloeNumberIndex < almostChloeNumbers.size(); almostChloeNumberIndex++)
         {
-            const int almostChloeNumber = almostChloeNumbers[j];
+            const int almostChloeNumber = almostChloeNumbers[almostChloeNumberIndex];
             if (almostChloeNumber >= 1000) // Only count those without leading 0's.
-                numChloeNumbers = (numChloeNumbers + numChloeNumbersBeginningWithAlmostChloeNumber[j]) % modulus;
+                numChloeNumbers = (numChloeNumbers + numChloeNumbersBeginningWithAlmostChloeNumber[almostChloeNumberIndex]) % modulus;
         }
         numChloeNumbersWithNDigits.push_back(numChloeNumbers);
         vector<int64_t> nextNumChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size());
-        for (int j = 0; j < almostChloeNumbers.size(); j++)
+        for (int almostChloeNumberIndex = 0; almostChloeNumberIndex < almostChloeNumbers.size(); almostChloeNumberIndex++)
         {
-            for (const auto k : chloeNumberExtensionIndexLookup[j])
+            for (const auto extendedAlmostChloeNumberIndex : almostChloeNumberExtensionIndexLookup[almostChloeNumberIndex])
             {
-                nextNumChloeNumbersBeginningWithAlmostChloeNumber[k] = (nextNumChloeNumbersBeginningWithAlmostChloeNumber[k] + numChloeNumbersBeginningWithAlmostChloeNumber[j]) % modulus;
+                nextNumChloeNumbersBeginningWithAlmostChloeNumber[extendedAlmostChloeNumberIndex] = (nextNumChloeNumbersBeginningWithAlmostChloeNumber[extendedAlmostChloeNumberIndex] + numChloeNumbersBeginningWithAlmostChloeNumber[almostChloeNumberIndex]) % modulus;
             }
         }
         numChloeNumbersBeginningWithAlmostChloeNumber = nextNumChloeNumbersBeginningWithAlmostChloeNumber;
     }
-    //assert(numChloeNumbersWithNDigits.size() == maxN);
+    assert(numChloeNumbersWithNDigits.size() == maxN + 1);
 
     int Q;
     cin >> Q;
