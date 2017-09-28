@@ -1,4 +1,3 @@
-Prime Digit Sums (50) [50]
-Toll Cost Digit (60) [110]
-Absolute Element Sums (70) [180]
-Xor and Sum (50) [230]
+Toll Cost Digit (60) [60]
+Absolute Element Sums (70) [130]
+Xor and Sum (50) [180]
