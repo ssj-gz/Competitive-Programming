@@ -1,4 +1,4 @@
-// Simon St James (ssjgz).
+// Simon St James (ssjgz) 2017-09-28 15:00
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -28,43 +28,35 @@ int main()
     const int64_t modulus = 1'000'000'007ULL;
     const int numDigits = 4;
     vector<int> digits(numDigits);
-    vector<int> fourDigitChloeNumbers;
+    vector<int> almostChloeNumbers;
     while (true)
     {
-
-        bool satisfiesChloesRules = true;
-            for (int numInSequence = 3; numInSequence <= 5; numInSequence++)
-            {
-                for (int i = 0; i < numDigits - numInSequence + 1; i++)
-                {
-                    int sequenceSum = 0;
-                    for (int j = i; j < i + numInSequence; j++)
-                    {
-                        sequenceSum += digits[j];
-                    }
-                    if (!isPrime(sequenceSum))
-                    {
-                        satisfiesChloesRules = false;
-                        goto out;
-                    }
-                }
-        }
-out:
-        if (satisfiesChloesRules)
+        bool isAlmostChloeNumber = true;
+        for (int numInSequence = 3; numInSequence <= 5; numInSequence++)
         {
-            int chloeNumber = 0;
+            for (int i = 0; i < numDigits - numInSequence + 1; i++)
+            {
+                int sequenceSum = 0;
+                for (int j = i; j < i + numInSequence; j++)
+                {
+                    sequenceSum += digits[j];
+                }
+                if (!isPrime(sequenceSum))
+                {
+                    isAlmostChloeNumber = false;
+                    break;
+                }
+            }
+        }
+        if (isAlmostChloeNumber)
+        {
+            int almostChloeNumber = 0;
             for (const auto digit : vector<int>(digits.rbegin(), digits.rend()))
             {
-                chloeNumber *= 10;
-                chloeNumber += digit;
-                //cout << static_cast<char>(digit + '0');
+                almostChloeNumber *= 10;
+                almostChloeNumber += digit;
             }
-            //cout << endl;
-            //cout << chloeNumber << endl;
-            fourDigitChloeNumbers.push_back(chloeNumber);
-        }
-        else
-        {
+            almostChloeNumbers.push_back(almostChloeNumber);
         }
 
         int digitIndex = 0;
@@ -79,31 +71,30 @@ out:
     }
     const int maxN = 400'000;
 
-    vector<vector<int>> chloeNumberExtensionIndexLookup(fourDigitChloeNumbers.size());
-    const int n = 10000;
-    vector<int64_t> blah(fourDigitChloeNumbers.size(), 1);
-    for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
+    vector<vector<int>> chloeNumberExtensionIndexLookup(almostChloeNumbers.size());
+    vector<int64_t> numChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size(), 1);
+    cout << "almostChloeNumbers.size()" << almostChloeNumbers.size() << endl;
+    for (int i = 0; i < almostChloeNumbers.size(); i++)
     {
-        const int chloeNumber = fourDigitChloeNumbers[j];
+        const int almostChloeNumber = almostChloeNumbers[i];
         for (int digit = 0; digit <= 9; digit++)
         {
-            const int extendedChloeNumber = (digit * 10000) + chloeNumber;
+            const int extendedAlmostChloeNumber = (digit * 10000) + almostChloeNumber;
             int digitSum = 0;
-            for (const auto digitChar : to_string(extendedChloeNumber))
+            for (const auto digitChar : to_string(extendedAlmostChloeNumber))
             {
                 digitSum += digitChar - '0';
             }
-            //cout << "chloeNumber: " << chloeNumber << " extended: " << extendedChloeNumber << " digit sum:" << digitSum << endl;
             if (isPrime(digitSum))
             {
-                //assert(find(fourDigitChloeNumbers.begin(), fourDigitChloeNumbers.end(), extendedChloeNumber / 10) != fourDigitChloeNumbers.end());
-                const auto blahIter = find(fourDigitChloeNumbers.begin(), fourDigitChloeNumbers.end(), extendedChloeNumber / 10);
-                if (blahIter != fourDigitChloeNumbers.end())
+                // If d is digit, then the almostChloeNumber ABCD can be extended to dABCD (extendedAlmostChloeNumber) which has a prime sum.
+                // Note that dABCD is an Chloe Number (albeit possibly with leading 0) if and only if dABC is an Almost
+                // Chloe Number.  dABCD is extendedAlmostChloeNumber / 10.
+                const auto shiftedAlmostChloeNumberIter = find(almostChloeNumbers.begin(), almostChloeNumbers.end(), extendedAlmostChloeNumber / 10);
+                if (shiftedAlmostChloeNumberIter != almostChloeNumbers.end())
                 {
-                    int index = distance(fourDigitChloeNumbers.begin(), blahIter);
-                    //blah[index]++;
-                    //cout << "waa: " << index << " " << blah[index] << endl;
-                    chloeNumberExtensionIndexLookup[j].push_back(index);
+                    const int shiftedAlmostChloeNumberIndex = distance(almostChloeNumbers.begin(), shiftedAlmostChloeNumberIter);
+                    chloeNumberExtensionIndexLookup[i].push_back(shiftedAlmostChloeNumberIndex);
                 }
             }
         }
@@ -116,27 +107,28 @@ out:
     numChloeNumbersWithNDigits.push_back(0);
     numChloeNumbersWithNDigits.push_back(0);
 
-    for (int i = 0; i < n - 5; i++)
+    for (int i = 0; i < maxN - 5; i++)
     {
-        int64_t total = 0;
-        for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
+        //cout << "i: " << i << endl;
+        int64_t numChloeNumbers = 0;
+        for (int j = 0; j < almostChloeNumbers.size(); j++)
         {
-            const int wee = fourDigitChloeNumbers[j];
-            if (wee >= 1000)
-                total = (total + blah[j]) % modulus;
+            const int almostChloeNumber = almostChloeNumbers[j];
+            if (almostChloeNumber >= 1000) // Only count those without leading 0's.
+                numChloeNumbers = (numChloeNumbers + numChloeNumbersBeginningWithAlmostChloeNumber[j]) % modulus;
         }
-        //cout << "i: " << i << " total: " << total << endl;
-        numChloeNumbersWithNDigits.push_back(total);
-        vector<int64_t> nextBlah(fourDigitChloeNumbers.size());
-        for (int j = 0; j < fourDigitChloeNumbers.size(); j++)
+        numChloeNumbersWithNDigits.push_back(numChloeNumbers);
+        vector<int64_t> nextNumChloeNumbersBeginningWithAlmostChloeNumber(almostChloeNumbers.size());
+        for (int j = 0; j < almostChloeNumbers.size(); j++)
         {
             for (const auto k : chloeNumberExtensionIndexLookup[j])
             {
-                nextBlah[k] = (nextBlah[k] + blah[j]) % modulus;
+                nextNumChloeNumbersBeginningWithAlmostChloeNumber[k] = (nextNumChloeNumbersBeginningWithAlmostChloeNumber[k] + numChloeNumbersBeginningWithAlmostChloeNumber[j]) % modulus;
             }
         }
-        blah = nextBlah;
+        numChloeNumbersBeginningWithAlmostChloeNumber = nextNumChloeNumbersBeginningWithAlmostChloeNumber;
     }
+    //assert(numChloeNumbersWithNDigits.size() == maxN);
 
     int Q;
     cin >> Q;
@@ -145,7 +137,6 @@ out:
     {
         int n;
         cin >> n;
-        //cout << "n: " << n << endl;
         cout << numChloeNumbersWithNDigits[n] << endl;
     }
 
