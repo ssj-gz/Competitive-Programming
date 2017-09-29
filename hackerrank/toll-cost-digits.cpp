@@ -40,6 +40,8 @@ int main()
         bool reached = false;
     };
 
+    ios::sync_with_stdio(false);
+
     int n, e;
     cin >> n >> e;
 
