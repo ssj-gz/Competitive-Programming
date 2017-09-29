@@ -1,9 +1,7 @@
 // Simon St James (ssjgz) 2017-09-29 14:20
 #include <iostream>
 #include <vector>
-#include <chrono>
 #include <algorithm>
-#include <cassert>
 
 using namespace std;
 
@@ -56,20 +54,13 @@ int main()
     vector<vector<char>> isJunctionIndexReachableFromRootWithCost(10, vector<char>(n));
 
 
-    for (int rootNodeIndex = 0; rootNodeIndex < n; rootNodeIndex++)
+    for (int rootJunctionIndex = 0; rootJunctionIndex < n; rootJunctionIndex++)
     {
-        if (junctions[rootNodeIndex].reached)
+        if (junctions[rootJunctionIndex].reached)
             continue;
-        Junction* rootJunction = &(junctions[rootNodeIndex]);
-        //cout << "rootJunction: " << rootJunction << endl;
+        Junction* rootJunction = &(junctions[rootJunctionIndex]);
 
         int64_t numJunctionsReachableFromRootWithCost[10] = {};
-
-        //auto begin = chrono::high_resolution_clock::now();    
-        //auto end = chrono::high_resolution_clock::now();    
-        //auto dur = end - begin;
-        //auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
-        //cout << "allocating took: " << ms << "ms" <<  endl;
 
         struct JunctionAndCost
         {
@@ -112,50 +103,22 @@ int main()
             junctionsAndCostsToExplore = nextJunctionsAndCostsToExplore;
         }
 
-        //const auto countTrue = [](const vector<char>& bools)
-        //{
-            //int64_t numTrue = 0;
-            //for (const auto boolValue : bools)
-            //{
-                //if (boolValue)
-                    //numTrue++;
-            //}
-            //return numTrue;
-        //};
 
-
-#if 0
+        vector<int> rootJunctionSelfLoopCosts;
         for (int cost = 0; cost <= 9; cost++)
         {
-            cout << "cost: " << cost << " reachable node indices: (#" << countTrue(isJunctionIndexReachableFromRootWithCost[cost]) << ")" << endl;
-            for (int nodeIndex = 0; nodeIndex < n; nodeIndex++)
-            {
-                if (isJunctionIndexReachableFromRootWithCost[cost][nodeIndex])
-                    cout << nodeIndex << " ";
-
-            }
-            cout << endl;
-        }
-#endif
-
-        vector<int> rootNodeSelfLoopCosts;
-        for (int cost = 0; cost <= 9; cost++)
-        {
-            //cout << "Blee:" << countTrue(isJunctionIndexReachableFromRootWithCost[cost]) << " blaa: " << numJunctionsReachableFromRootWithCost[cost] << endl;
-            //assert(countTrue(isJunctionIndexReachableFromRootWithCost[cost]) == numJunctionsReachableFromRootWithCost[cost]);
             if (isJunctionIndexReachableFromRootWithCost[cost][rootJunction->index])
             {
-                rootNodeSelfLoopCosts.push_back(cost);
+                rootJunctionSelfLoopCosts.push_back(cost);
             }
         }
 
-        //cout << "Main bit" << endl;
         for (int cost = 0; cost <= 9; cost++)
         {
             vector<int> processedXCosts;
             int xCost = 0;
             int yCost = xCost + cost;
-            const bool junctionsReachableWithXAndYCostAreEqual = (find(rootNodeSelfLoopCosts.begin(), rootNodeSelfLoopCosts.end(), cost) != rootNodeSelfLoopCosts.end());
+            const bool junctionsReachableWithXAndYCostAreEqual = (find(rootJunctionSelfLoopCosts.begin(), rootJunctionSelfLoopCosts.end(), cost) != rootJunctionSelfLoopCosts.end());
 
             int64_t numPairs = 0;
             bool alreadyHandledEquvialent = false;
@@ -163,9 +126,9 @@ int main()
             {
                 for (const auto processedXCost : processedXCosts)
                 {
-                    for (const auto rootNodeSelfLoopCost : rootNodeSelfLoopCosts)
+                    for (const auto rootJunctionSelfLoopCost : rootJunctionSelfLoopCosts)
                     {
-                        if ((processedXCost + rootNodeSelfLoopCost) % 10 == xCost)
+                        if ((processedXCost + rootJunctionSelfLoopCost) % 10 == xCost)
                         {
                             alreadyHandledEquvialent = true;
                         }
@@ -174,13 +137,6 @@ int main()
                 if (!alreadyHandledEquvialent)
                 {
                     numPairs += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
-                    //int overCount = 0;
-                    //for (int nodeIndex = 0; nodeIndex < n; nodeIndex++)
-                    //{
-                        //if (isJunctionIndexReachableFromRootWithCost[yCost][nodeIndex] && isJunctionIndexReachableFromRootWithCost[xCost][nodeIndex])
-                            //overCount++;
-                    //}
-                    //assert(overCount == (junctionsReachableWithXAndYCostAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0));
                     const int64_t overCount = (junctionsReachableWithXAndYCostAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0);
                     numPairs -= overCount;
 
