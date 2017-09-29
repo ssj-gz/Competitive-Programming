@@ -52,6 +52,10 @@ int main()
 
     int64_t numPairsWithCost[10] = {};
 
+    // We use char as bool is *vastly* slower.
+    vector<vector<char>> isJunctionIndexReachableFromRootWithCost(10, vector<char>(n));
+
+
     for (int rootNodeIndex = 0; rootNodeIndex < n; rootNodeIndex++)
     {
         if (junctions[rootNodeIndex].reached)
@@ -77,9 +81,6 @@ int main()
         rootJunctionAndCost.junction = rootJunction;
 
         vector<JunctionAndCost> junctionsAndCostsToExplore = { rootJunctionAndCost };
-
-        // We use char as bool is *vastly* slower.
-        vector<vector<char>> isJunctionIndexReachableFromRootWithCost(10, vector<char>(n));
 
 
         while (!junctionsAndCostsToExplore.empty())
