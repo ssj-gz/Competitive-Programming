@@ -145,10 +145,9 @@ int main()
             int cost = 0;
         };
 
+        // Use a BFS to compute numJunctionsReachableFromRootWithCost.
         JunctionAndCost rootJunctionAndCost(componentRoot, 0);
-
         vector<JunctionAndCost> junctionsAndCostsToExplore = { rootJunctionAndCost };
-
         while (!junctionsAndCostsToExplore.empty())
         {
             vector<JunctionAndCost> nextJunctionsAndCostsToExplore;
@@ -158,8 +157,8 @@ int main()
                 const auto costToReachJunction = junctionAndCost.cost;
                 if (isJunctionIndexReachableFromRootWithCost[costToReachJunction][junction->index])
                     continue;
-                isJunctionIndexReachableFromRootWithCost[costToReachJunction][junction->index] = true;
-                junction->reached = true;
+                isJunctionIndexReachableFromRootWithCost[costToReachJunction][junction->index] = true; // Mark as explored so we don't re-explore it!
+                junction->reached = true; // This junction is in this component, so don't pick it as the root of another component!
                 numJunctionsReachableFromRootWithCost[costToReachJunction]++;
 
                 for (const auto& road : junction->neighbours)
