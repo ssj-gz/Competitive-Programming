@@ -190,14 +190,14 @@ int main()
             int yCost = xCost + cost;
             const bool junctionsReachableWithXAndYCostsAreEqual = (find(rootSelfLoopCosts.begin(), rootSelfLoopCosts.end(), cost) != rootSelfLoopCosts.end());
 
-            int64_t numPairs = 0;
+            int64_t numPairsWithThisCost = 0;
             while (xCost <= 9)
             {
-                numPairs += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
+                numPairsWithThisCost += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
                 // The product above will count pairs where the junctions are the same; subtract this overcount.
-                // The overCount is the number of vertices that are reachable with both xCost and yCost.
+                // The overCount is the number of junctions that are reachable from componentRoot with costs of both xCost and yCost.
                 const int64_t overCount = (junctionsReachableWithXAndYCostsAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0);
-                numPairs -= overCount;
+                numPairsWithThisCost -= overCount;
 
                 xCost++;
                 yCost = (yCost + 1) % 10;
@@ -205,12 +205,12 @@ int main()
             // For each pair (xCost, yCost) we would have counted (rootSelfLoopCosts.size() - 1) "equivalent" pairs
             // (xCost', yCost') (where xCost' - xCost = yCost' - yCost == some number that is in rootSelfLoopCosts).
             // Divide through to undo this overcounting.
-            numPairs /= rootSelfLoopCosts.size(); 
-            numPairsWithCost[cost] += numPairs;
+            numPairsWithThisCost /= rootSelfLoopCosts.size(); 
+            numPairsWithCost[cost] += numPairsWithThisCost;
         }
     }
-    for (const auto numPairs : numPairsWithCost)
+    for (const auto numPairsWithThisCost : numPairsWithCost)
     {
-        cout << numPairs << endl;
+        cout << numPairsWithThisCost << endl;
     }
 }
