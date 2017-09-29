@@ -186,28 +186,16 @@ int main()
 
         for (int cost = 0; cost <= 9; cost++)
         {
-            vector<int> processedXCosts;
             int xCost = 0;
             int yCost = xCost + cost;
             const bool junctionsReachableWithXAndYCostsAreEqual = (find(rootSelfLoopCosts.begin(), rootSelfLoopCosts.end(), cost) != rootSelfLoopCosts.end());
 
             int64_t numPairs = 0;
             bool alreadyHandledEquivalent = false;
+            bool isEquivalentXCostHandled[10] = {};
             while (xCost <= 9)
             {
-                for (const auto processedXCost : processedXCosts)
-                {
-                    for (const auto rootJunctionSelfLoopCost : rootSelfLoopCosts)
-                    {
-                        if ((processedXCost + rootJunctionSelfLoopCost) % 10 == xCost)
-                        {
-                            // i.e. if we've already handled xCost = 1, and there is a root self-loop with cost 5, don't handle xCost = 6;
-                            // we'll overcount pairs.
-                            alreadyHandledEquivalent = true;
-                        }
-                    }
-                }
-                if (!alreadyHandledEquivalent)
+                if (!isEquivalentXCostHandled[xCost])
                 {
                     numPairs += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
                     // The product above will count pairs where the junctions are the same; subtract this overcount.
@@ -215,8 +203,13 @@ int main()
                     const int64_t overCount = (junctionsReachableWithXAndYCostsAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0);
                     numPairs -= overCount;
 
+                    // Make sure the we don't handle "equivalent" pairs of xCost and yCost (it would lead to over-counting).
+                    for (const auto rootSelfLoopCost : rootSelfLoopCosts)
+                    {
+                        isEquivalentXCostHandled[(xCost + rootSelfLoopCost) % 10] = true;
+                    }
                 }
-                processedXCosts.push_back(xCost);
+
                 xCost++;
                 yCost = (yCost + 1) % 10;
             }
