@@ -48,14 +48,14 @@ int main()
         junctions[y].neighbours.push_back(roadYX);
     }
 
-    int numPairsWithCost[10] = {};
+    int64_t numPairsWithCost[10] = {};
 
     for (int rootNodeIndex = 0; rootNodeIndex < n; rootNodeIndex++)
     {
         if (junctions[rootNodeIndex].reached)
             continue;
         Junction* rootJunction = &(junctions[rootNodeIndex]);
-        //cout << "rootJunction index: " << rootJunction->index << endl;
+        cout << "rootJunction: " << rootJunction << endl;
 
         auto begin = chrono::high_resolution_clock::now();    
         // We use char as bool is *vastly* slower.
@@ -63,7 +63,7 @@ int main()
         auto end = chrono::high_resolution_clock::now();    
         auto dur = end - begin;
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
-        //cout << "allocating took: " << ms << "ms" <<  endl;
+        cout << "allocating took: " << ms << "ms" <<  endl;
 
         struct JunctionAndCost
         {
@@ -104,10 +104,22 @@ int main()
             junctionsAndCostsToExplore = nextJunctionsAndCostsToExplore;
         }
 
+        const auto countTrue = [](const vector<char>& bools)
+        {
+            int64_t numTrue = 0;
+            for (const auto boolValue : bools)
+            {
+                if (boolValue)
+                    numTrue++;
+            }
+            return numTrue;
+        };
+
+
 #if 0
         for (int cost = 0; cost <= 9; cost++)
         {
-            cout << "cost: " << cost << " reachable node indices:" << endl;
+            cout << "cost: " << cost << " reachable node indices: (#" << countTrue(isJunctionIndexReachableFromRootWithCost[cost]) << ")" << endl;
             for (int nodeIndex = 0; nodeIndex < n; nodeIndex++)
             {
                 if (isJunctionIndexReachableFromRootWithCost[cost][nodeIndex])
@@ -127,21 +139,9 @@ int main()
             }
         }
 
-        const auto countTrue = [](const vector<char>& bools)
-        {
-            int numTrue = 0;
-            for (const auto boolValue : bools)
-            {
-                if (boolValue)
-                    numTrue++;
-            }
-            return numTrue;
-        };
-
         //cout << "Main bit" << endl;
         for (int cost = 0; cost <= 9; cost++)
         {
-            //cout << "cost: " << cost << endl;
             vector<int> processedXCosts;
             int xCost = 0;
             int yCost = xCost + cost;
@@ -150,7 +150,6 @@ int main()
             bool alreadyHandledEquvialent = false;
             while (xCost <= 9)
             {
-                //cout << " xCost" << xCost << endl;
                 for (const auto processedXCost : processedXCosts)
                 {
                     for (const auto rootNodeSelfLoopCost : rootNodeSelfLoopCosts)
@@ -164,11 +163,13 @@ int main()
                 if (!alreadyHandledEquvialent)
                 {
                     numPairs += countTrue(isJunctionIndexReachableFromRootWithCost[yCost]) * countTrue(isJunctionIndexReachableFromRootWithCost[xCost]);
+                    int overCount = 0;
                     for (int nodeIndex = 0; nodeIndex < n; nodeIndex++)
                     {
                         if (isJunctionIndexReachableFromRootWithCost[yCost][nodeIndex] && isJunctionIndexReachableFromRootWithCost[xCost][nodeIndex])
-                            numPairs--;
+                            overCount++;
                     }
+                    numPairs -= overCount;
 
                 }
                 processedXCosts.push_back(xCost);
