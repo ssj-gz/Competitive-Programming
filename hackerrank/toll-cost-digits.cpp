@@ -193,12 +193,11 @@ int main()
             int64_t numPairs = 0;
             while (xCost <= 9)
             {
-                    numPairs += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
-                    // The product above will count pairs where the junctions are the same; subtract this overcount.
-                    // The overCount is the number of vertices that are reachable with both xCost and yCost.
-                    const int64_t overCount = (junctionsReachableWithXAndYCostsAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0);
-                    numPairs -= overCount;
-                }
+                numPairs += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
+                // The product above will count pairs where the junctions are the same; subtract this overcount.
+                // The overCount is the number of vertices that are reachable with both xCost and yCost.
+                const int64_t overCount = (junctionsReachableWithXAndYCostsAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0);
+                numPairs -= overCount;
 
                 xCost++;
                 yCost = (yCost + 1) % 10;
