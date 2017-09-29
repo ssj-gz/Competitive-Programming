@@ -191,28 +191,22 @@ int main()
             const bool junctionsReachableWithXAndYCostsAreEqual = (find(rootSelfLoopCosts.begin(), rootSelfLoopCosts.end(), cost) != rootSelfLoopCosts.end());
 
             int64_t numPairs = 0;
-            bool alreadyHandledEquivalent = false;
-            bool isEquivalentXCostHandled[10] = {};
             while (xCost <= 9)
             {
-                if (!isEquivalentXCostHandled[xCost])
-                {
                     numPairs += numJunctionsReachableFromRootWithCost[yCost] * numJunctionsReachableFromRootWithCost[xCost];
                     // The product above will count pairs where the junctions are the same; subtract this overcount.
                     // The overCount is the number of vertices that are reachable with both xCost and yCost.
                     const int64_t overCount = (junctionsReachableWithXAndYCostsAreEqual ? numJunctionsReachableFromRootWithCost[xCost] : 0);
                     numPairs -= overCount;
-
-                    // Make sure the we don't handle "equivalent" pairs of xCost and yCost (it would lead to over-counting).
-                    for (const auto rootSelfLoopCost : rootSelfLoopCosts)
-                    {
-                        isEquivalentXCostHandled[(xCost + rootSelfLoopCost) % 10] = true;
-                    }
                 }
 
                 xCost++;
                 yCost = (yCost + 1) % 10;
             }
+            // For each pair (xCost, yCost) we would have counted (rootSelfLoopCosts.size() - 1) "equivalent" pairs
+            // (xCost', yCost') (where xCost' - xCost = yCost' - yCost == some number that is in rootSelfLoopCosts).
+            // Divide through to undo this overcounting.
+            numPairs /= rootSelfLoopCosts.size(); 
             numPairsWithCost[cost] += numPairs;
         }
     }
