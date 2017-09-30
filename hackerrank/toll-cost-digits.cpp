@@ -137,17 +137,20 @@ int main()
 
         struct JunctionAndCost
         {
-            JunctionAndCost(Junction* junction, int cost)
-                : junction{junction}, cost{cost}
-            {
-            }
-            Junction *junction = nullptr;
-            int cost = 0;
+            //JunctionAndCost(Junction* junction, int cost)
+                //: junction{junction}, cost{cost}
+            //{
+            //}
+            Junction *junction;// = nullptr;
+            int cost;// = 0;
         };
 
         // Use a BFS to compute numJunctionsReachableFromRootWithCost.
-        JunctionAndCost rootJunctionAndCost(componentRoot, 0);
+        JunctionAndCost rootJunctionAndCost = {componentRoot, 0};
         vector<JunctionAndCost> junctionsAndCostsToExplore = { rootJunctionAndCost };
+
+        //junctionsAndCostsToExplore.push_back({nullptr, 4});
+
         while (!junctionsAndCostsToExplore.empty())
         {
             vector<JunctionAndCost> nextJunctionsAndCostsToExplore;
@@ -167,8 +170,8 @@ int main()
                     const auto costToReachNeighbour = (costToReachJunction + road.cost) % 10;
                     if (!isJunctionIndexReachableFromRootWithCost[costToReachNeighbour][neighbourJunction->index])
                     {
-                        JunctionAndCost neighbourJunctionAndCost(neighbourJunction, costToReachNeighbour);
-                        nextJunctionsAndCostsToExplore.push_back(neighbourJunctionAndCost);
+                        //JunctionAndCost neighbourJunctionAndCost = {};
+                        nextJunctionsAndCostsToExplore.push_back({neighbourJunction, costToReachNeighbour});
                     }
                 }
             }
