@@ -61,13 +61,38 @@ int main()
 
     const int smallestElement = *min_element(A.begin(), A.end());
     const int largestElement = *max_element(A.begin(), A.end());
+    cout << "smallestElement: " << smallestElement << " largestElement: " << largestElement << endl;
 
     std::chrono::steady_clock::time_point lookupBegin = std::chrono::steady_clock::now();
+    // absoluteSumLookup[i] = absoluteSumBruteForce(A, i - largestElement).
     vector<int64_t> absoluteSumLookup(largestElement - smallestElement + 1);
-    for (int i = -largestElement; i <= -smallestElement; i++)
+    int64_t currentSum = 0;
+    for (auto& value : A)
     {
-        assert(i + largestElement >= 0 && i + largestElement < absoluteSumLookup.size());
-        absoluteSumLookup[i + largestElement] = bruteForce(A, i);
+        value -= largestElement;
+        //cout << "abs(value) : " << abs(value) << endl;
+        currentSum += abs(value);
+    }
+    //cout << "reduced A:" << endl;
+    for (const auto& value : A)
+    {
+        //cout << value << " ";
+    }
+    cout  << endl;
+    int firstPositiveIndex = N; // One-past-the-end i.e. there are no positive values.
+    for (int i = 0; i <= largestElement - smallestElement; i++)
+    {
+        //assert(i + largestElement >= 0 && i + largestElement < absoluteSumLookup.size());
+        absoluteSumLookup[i] = currentSum;
+        //cout << "currentSum: " << currentSum << " bruteForce(A, i): " << bruteForce(A, i) << endl;
+        assert(absoluteSumLookup[i] == bruteForce(A, i));
+        while (firstPositiveIndex > 0 && A[firstPositiveIndex - 1] + i >= 0)
+        {
+            firstPositiveIndex--;
+        }
+        const int numPositive = N - firstPositiveIndex;
+        currentSum += numPositive;
+        currentSum -= (N - numPositive);
     }
     std::chrono::steady_clock::time_point lookupEnd = std::chrono::steady_clock::now();
     std::cout << "lookup took (ms) " << std::chrono::duration_cast<std::chrono::milliseconds>(lookupEnd - lookupBegin).count() <<std::endl;
@@ -75,7 +100,7 @@ int main()
     int Q;
     cin >> Q;
 
-    int totalX = 0; 
+    int64_t totalX = 0; 
 #if 1
     for (int i = 0; i < Q; i++)
     {
@@ -92,14 +117,17 @@ int main()
         int64_t absoluteSum = 0;
         if (totalX >= -largestElement && totalX <= -smallestElement)
         {
+            cout << "lookup" << endl;
             absoluteSum = absoluteSumLookup[totalX + largestElement];
         }
         else if (totalX > -smallestElement)
         {
+            cout << "totalX > -smallestElement" << endl;
             absoluteSum = absoluteSumLookup.back() + N * (totalX - -smallestElement);
         }
         else if (totalX < -largestElement)
         {
+            cout << "totalX < -largestElement" << endl;
             absoluteSum = absoluteSumLookup.front() + N * (-largestElement - totalX);
         }
         else
@@ -108,10 +136,10 @@ int main()
         }
 
         cout << absoluteSum << endl;
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
-        const auto absoluteSumBruteForce = bruteForce(A, totalX);
-        cout << "absoluteSumBruteForce: " << absoluteSumBruteForce << " absoluteSum: " << absoluteSum << endl;
+        const auto absoluteSumBruteForce = bruteForce(A, totalX + largestElement);
+        cout << "totalX: " << totalX << " absoluteSumBruteForce: " << absoluteSumBruteForce << " absoluteSum: " << absoluteSum << endl;
         assert(absoluteSum == absoluteSumBruteForce);
 #endif
     }
