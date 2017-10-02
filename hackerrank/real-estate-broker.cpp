@@ -1,9 +1,12 @@
 // Simon St James (ssjgz) - 2017-10-02
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
-#include <list>
-#include <set>
 #include <algorithm>
+#include <chrono>
 #include <cassert>
 
 using namespace std;
@@ -77,9 +80,9 @@ struct PathElement
     int followedEdgeIndex = -1;
 };
 
-bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode, vector<PathElement>& pathSoFar)
+bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode, vector<PathElement>& pathSoFar, vector<NetworkFlow::Edge*>& visitedEdges)
 {
-    const auto indent = string(pathSoFar.size(), ' ');
+    //const auto indent = string(pathSoFar.size(), ' ');
     //cout << indent << "findAugmentPath: currentNode:" << currentNode << " sinkNode: " << sinkNode << endl;
     if (currentNode == sinkNode)
     {
@@ -96,16 +99,19 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
     for (int i = 0; i < currentNode->edgesRightWay.size(); i++)
     {
         auto edge = currentNode->edgesRightWay[i];
-        //assert(!edge->isInMatching);
+        assert(!edge->isInMatching);
         if (edge->hasBeenVisitedInAugmentingPath)
             continue;
+        //if (edge->isInMatching)
+            //continue;
         //cout << indent << " following Right edge #" << i << " = " << edge << endl;
         pathSoFar.back().followedEdgeIndex = i;
         edge->hasBeenVisitedInAugmentingPath = true;
+        visitedEdges.push_back(edge);
         assert(edge->sourceNode == currentNode);
         auto otherNode = edge->destNode;
-        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar);
-        edge->hasBeenVisitedInAugmentingPath = false;
+        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedEdges);
+        //edge->hasBeenVisitedInAugmentingPath = false;
         if (augmentingPathFound)
             return true;
     }
@@ -118,13 +124,16 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
         //assert(edge->isInMatching);
         if (edge->hasBeenVisitedInAugmentingPath)
             continue;
+        if (!edge->isInMatching)
+            continue;
         //cout << indent << " following Wrong edge #" << i << " = " << edge << endl;
         pathSoFar.back().followedEdgeIndex = i;
         edge->hasBeenVisitedInAugmentingPath = true;
+        visitedEdges.push_back(edge);
         assert(edge->destNode == currentNode);
         auto otherNode = edge->sourceNode;
-        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar);
-        edge->hasBeenVisitedInAugmentingPath = false;
+        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedEdges);
+        //edge->hasBeenVisitedInAugmentingPath = false;
         if (augmentingPathFound)
             return true;
     }
@@ -136,7 +145,17 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
 vector<PathElement> findAugmentPath(NetworkFlow::Node* sourceNode, NetworkFlow::Node* sinkNode)
 {
     vector<PathElement> augmentingPath;
-    if (findAugmentPath(sourceNode, sinkNode, augmentingPath))
+    vector<NetworkFlow::Edge*> visitedEdges;
+    augmentingPath.reserve(1000000);
+    visitedEdges.reserve(1000000);
+    const bool found = findAugmentPath(sourceNode, sinkNode, augmentingPath, visitedEdges);
+
+    for (auto edge : visitedEdges)
+    {
+        edge->hasBeenVisitedInAugmentingPath = false;
+    }
+
+    if (found)
         return augmentingPath;
     else 
         return vector<PathElement>();
@@ -147,19 +166,21 @@ int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sour
     // Use Ford-Fulkerson to see if we can find targetNumMatches matchings.
     using NetworkFlow::Node;
     using NetworkFlow::Edge;
-    set<Edge*> allEdges;
+    //set<Edge*> allEdges;
     for (auto node : allNodes)
     {
         for (auto edge : node->edges)
         {
-            allEdges.insert(edge);
+            //allEdges.insert(edge);
+            node->edgesRightWay.reserve(node->edges.size()/ 2);
+            node->edgesWrongWay.reserve(node->edges.size()/ 2);
             if (edge->sourceNode == node)
             {
                 node->edgesRightWay.push_back(edge);
             }
             else
             {
-                node->edgesWrongWay.push_back(edge);
+                //node->edgesWrongWay.push_back(edge);
             }
         }
     }
@@ -260,21 +281,25 @@ int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sour
                 auto node = augmentingPathElement.node;
                 Edge* edgeFollowed = (followedEdgeCorrectWay ? node->edgesRightWay[augmentingPathElement.followedEdgeIndex] :
                                                   node->edgesWrongWay[augmentingPathElement.followedEdgeIndex]);
-                //auto otherNode = (edgeFollowed->sourceNode == node ? edgeFollowed->destNode : edgeFollowed->sourceNode); 
+                auto otherNode = (edgeFollowed->sourceNode == node ? edgeFollowed->destNode : edgeFollowed->sourceNode); 
                 //cout << " node: " << node << " followedEdgeCorrectWay: " << followedEdgeCorrectWay << " edge index: " << augmentingPathElement.followedEdgeIndex << " edge: " << edgeFollowed << endl;
-                //assert(edgeFollowed->isInMatching == !followedEdgeCorrectWay);
+                assert(edgeFollowed->isInMatching == !followedEdgeCorrectWay);
                 //edgeFollowed->isInMatching = followedEdgeCorrectWay;
                 edgeFollowed->isInMatching = !edgeFollowed->isInMatching;
 
                 if (followedEdgeCorrectWay)
                 {
-                    assert(find(node->edgesRightWay.begin(), node->edgesRightWay.end(), edgeFollowed) != node->edgesRightWay.end());
+                    //assert(find(node->edgesRightWay.begin(), node->edgesRightWay.end(), edgeFollowed) != node->edgesRightWay.end());
                     node->edgesRightWay.erase(node->edgesRightWay.begin() + augmentingPathElement.followedEdgeIndex);
+                    //assert(find(otherNode->edgesWrongWay.begin(), otherNode->edgesWrongWay.end(), edgeFollowed) == otherNode->edgesWrongWay.end());
+                    otherNode->edgesWrongWay.push_back(edgeFollowed);
                 }
                 else
                 {
-                    assert(find(node->edgesWrongWay.begin(), node->edgesWrongWay.end(), edgeFollowed) != node->edgesWrongWay.end());
+                    //assert(find(node->edgesWrongWay.begin(), node->edgesWrongWay.end(), edgeFollowed) != node->edgesWrongWay.end());
                     node->edgesWrongWay.erase(node->edgesWrongWay.begin() + augmentingPathElement.followedEdgeIndex);
+                    //assert(find(otherNode->edgesRightWay.begin(), otherNode->edgesRightWay.end(), edgeFollowed) == otherNode->edgesRightWay.end());
+                    otherNode->edgesRightWay.push_back(edgeFollowed);
                 }
             }
             numMatches++;
@@ -304,6 +329,7 @@ int maxMatch(vector<Client> clients, vector<House> houses)
     // when doing the Ford-Fulkerson run) - doing it every time is not exactly efficient!
     // Note that there are some minor optimisations here based on the fact that the capacities are always
     // either 0 or 1 (so we use a boolean isInMatching instead of integral flows).
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     vector<NetworkFlow::Node*> nfClientNodes;
     vector<NetworkFlow::Node*> nfHouseNodes;
 
@@ -352,6 +378,9 @@ int maxMatch(vector<Client> clients, vector<House> houses)
     allNFNodes.insert(allNFNodes.end(), nfHouseNodes.begin(), nfHouseNodes.end());
     allNFNodes.push_back(sourceNode);
     allNFNodes.push_back(sinkNode);
+    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+
+    //std::cout << "Building network took (ms) = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() <<std::endl;
 
     return maxMatch(allNFNodes, sourceNode, sinkNode);
 }
