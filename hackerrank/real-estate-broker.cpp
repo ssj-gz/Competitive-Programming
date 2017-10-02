@@ -63,7 +63,7 @@ struct PathElement
 {
     NetworkFlow::Node* node = nullptr;
     NetworkFlow::Edge* edgeFollowed = nullptr;
-    bool followedEdgeCorrectWay = true;
+    bool followedEdgeRightWay = true;
     int followedEdgeIndex = -1;
 };
 
@@ -94,7 +94,7 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
             return true;
     }
     // Wrong direction.
-    pathSoFar.back().followedEdgeCorrectWay = false;
+    pathSoFar.back().followedEdgeRightWay = false;
     for (int i = 0; i < currentNode->edgesWrongWay.size(); i++)
     {
         auto edge = currentNode->edgesWrongWay[i];
@@ -142,11 +142,8 @@ int maxMatch(vector<NetworkFlow::Node>& allNodes, NetworkFlow::Node* sourceNode,
     {
         for (auto edge : node.edges)
         {
-            //cout << "floop" << endl;
-            //cout << "node: " << &node << " sourceNode: " << edge->sourceNode << endl;
             if (edge->sourceNode == &node)
             {
-                //cout << "fleep" << endl;
                 node.edgesRightWay.push_back(edge);
             }
         }
@@ -163,22 +160,28 @@ int maxMatch(vector<NetworkFlow::Node>& allNodes, NetworkFlow::Node* sourceNode,
             reverse(augmentingPath.begin(), augmentingPath.end());
             for (const auto& augmentingPathElement : augmentingPath)
             {
-                const bool followedEdgeCorrectWay = augmentingPathElement.followedEdgeCorrectWay;
+                const bool followedEdgeRightWay = augmentingPathElement.followedEdgeRightWay;
                 auto node = augmentingPathElement.node;
-                Edge* edgeFollowed = (followedEdgeCorrectWay ? node->edgesRightWay[augmentingPathElement.followedEdgeIndex] :
+                Edge* edgeFollowed = (followedEdgeRightWay ? node->edgesRightWay[augmentingPathElement.followedEdgeIndex] :
                                                   node->edgesWrongWay[augmentingPathElement.followedEdgeIndex]);
                 auto otherNode = (edgeFollowed->sourceNode == node ? edgeFollowed->destNode : edgeFollowed->sourceNode); 
-                assert(edgeFollowed->isInMatching == !followedEdgeCorrectWay);
+                assert(edgeFollowed->isInMatching == !followedEdgeRightWay);
                 edgeFollowed->isInMatching = !edgeFollowed->isInMatching;
 
-                if (followedEdgeCorrectWay)
+                if (followedEdgeRightWay)
                 {
-                    node->edgesRightWay.erase(node->edgesRightWay.begin() + augmentingPathElement.followedEdgeIndex);
+                    // Erase the followed edge from the list of edges we can follow in the wrong direction.
+                    swap(node->edgesRightWay[augmentingPathElement.followedEdgeIndex], node->edgesRightWay.back());
+                    node->edgesRightWay.pop_back();
+
+                    // ... add add to the list of edges that the other node can follow in the wrong direction.
                     otherNode->edgesWrongWay.push_back(edgeFollowed);
                 }
                 else
                 {
-                    node->edgesWrongWay.erase(node->edgesWrongWay.begin() + augmentingPathElement.followedEdgeIndex);
+                    swap(node->edgesWrongWay[augmentingPathElement.followedEdgeIndex], node->edgesWrongWay.back());
+                    node->edgesWrongWay.pop_back();
+
                     otherNode->edgesRightWay.push_back(edgeFollowed);
                 }
             }
@@ -266,7 +269,6 @@ int maxMatch(vector<Client> clients, vector<House> houses)
             }
         }
     }
-    cout << "# edges: " << allEdges.size() << " numEdges: " << numEdges << endl;
     return maxMatch(allNodes, sourceNode, sinkNode);
 }
 
