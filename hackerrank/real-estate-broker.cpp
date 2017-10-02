@@ -6,7 +6,6 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <chrono>
 #include <cassert>
 
 using namespace std;
@@ -60,18 +59,6 @@ namespace NetworkFlow
     };
 }
 
-struct Pairing
-{
-    long bikeId;
-    long riderId;
-    long weight;
-};
-
-bool operator<(const Pairing& lhs, const Pairing& rhs)
-{
-    return lhs.weight < rhs.weight;
-}
-
 struct PathElement
 {
     NetworkFlow::Node* node = nullptr;
@@ -82,19 +69,13 @@ struct PathElement
 
 bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode, vector<PathElement>& pathSoFar, vector<NetworkFlow::Edge*>& visitedEdges)
 {
-    //const auto indent = string(pathSoFar.size(), ' ');
-    //cout << indent << "findAugmentPath: currentNode:" << currentNode << " sinkNode: " << sinkNode << endl;
     if (currentNode == sinkNode)
-    {
         return true;
-    }
 
     PathElement pathElement;
     pathElement.node = currentNode;
     pathSoFar.push_back(pathElement);
 
-
-    //cout << indent << " trying correct direction" << endl;
     // Try going in the right direction first.
     for (int i = 0; i < currentNode->edgesRightWay.size(); i++)
     {
@@ -102,38 +83,31 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
         assert(!edge->isInMatching);
         if (edge->hasBeenVisitedInAugmentingPath)
             continue;
-        //if (edge->isInMatching)
-            //continue;
-        //cout << indent << " following Right edge #" << i << " = " << edge << endl;
+
         pathSoFar.back().followedEdgeIndex = i;
         edge->hasBeenVisitedInAugmentingPath = true;
         visitedEdges.push_back(edge);
         assert(edge->sourceNode == currentNode);
         auto otherNode = edge->destNode;
         const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedEdges);
-        //edge->hasBeenVisitedInAugmentingPath = false;
         if (augmentingPathFound)
             return true;
     }
     // Wrong direction.
-    //cout << indent << " trying wrong direction" << endl;
     pathSoFar.back().followedEdgeCorrectWay = false;
     for (int i = 0; i < currentNode->edgesWrongWay.size(); i++)
     {
         auto edge = currentNode->edgesWrongWay[i];
-        //assert(edge->isInMatching);
         if (edge->hasBeenVisitedInAugmentingPath)
             continue;
         if (!edge->isInMatching)
             continue;
-        //cout << indent << " following Wrong edge #" << i << " = " << edge << endl;
         pathSoFar.back().followedEdgeIndex = i;
         edge->hasBeenVisitedInAugmentingPath = true;
         visitedEdges.push_back(edge);
         assert(edge->destNode == currentNode);
         auto otherNode = edge->sourceNode;
         const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedEdges);
-        //edge->hasBeenVisitedInAugmentingPath = false;
         if (augmentingPathFound)
             return true;
     }
@@ -146,8 +120,6 @@ vector<PathElement> findAugmentPath(NetworkFlow::Node* sourceNode, NetworkFlow::
 {
     vector<PathElement> augmentingPath;
     vector<NetworkFlow::Edge*> visitedEdges;
-    augmentingPath.reserve(1000000);
-    visitedEdges.reserve(1000000);
     const bool found = findAugmentPath(sourceNode, sinkNode, augmentingPath, visitedEdges);
 
     for (auto edge : visitedEdges)
@@ -166,115 +138,26 @@ int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sour
     // Use Ford-Fulkerson to see if we can find targetNumMatches matchings.
     using NetworkFlow::Node;
     using NetworkFlow::Edge;
-    //set<Edge*> allEdges;
     for (auto node : allNodes)
     {
         for (auto edge : node->edges)
         {
-            //allEdges.insert(edge);
-            node->edgesRightWay.reserve(node->edges.size()/ 2);
-            node->edgesWrongWay.reserve(node->edges.size()/ 2);
             if (edge->sourceNode == node)
             {
                 node->edgesRightWay.push_back(edge);
-            }
-            else
-            {
-                //node->edgesWrongWay.push_back(edge);
             }
         }
     }
     long numMatches = 0;
     while (true)
     {
-#if 0
-        // Find augmenting path.
-        list<Node*> nodesToExplore;
-        nodesToExplore.push_back(sourceNode);
-        bool foundAugmentingPath = false;
-        for (auto edge : allEdges)
-        {
-            edge->hasBeenVisitedInAugmentingPath = false;
-        }
-
-        while (!nodesToExplore.empty())
-        {
-            list<Node*> newNodesToExplore;
-            for (auto node : nodesToExplore)
-            {
-                for (auto edge : node->edges)
-                {
-                    const bool isForwardFlow = (edge->sourceNode == node);
-                    Node *otherNode = (isForwardFlow ? edge->destNode : edge->sourceNode);
-                    if (edge->hasBeenVisitedInAugmentingPath)
-                    {
-                        continue;
-                    }
-                    edge->hasBeenVisitedInAugmentingPath = true;
-                    if (edge->isInMatching == isForwardFlow)
-                    {
-                        continue;
-                    }
-                    newNodesToExplore.push_back(otherNode);
-                    otherNode->prevEdgeInAugmentingPath = edge;
-                    otherNode->prevNodeInAugmentingPath = node;
-                    if (otherNode == sinkNode)
-                    {
-                        // Check.
-                        bool ok = true;
-                        {
-                            // Incorporate augmenting path into current matching.
-                            Node *nodeInAugmentingPath = sinkNode;
-                            while (nodeInAugmentingPath != sourceNode)
-                            {
-                                auto edgeInAugmentingPath = nodeInAugmentingPath->prevEdgeInAugmentingPath;
-                                if (edgeInAugmentingPath->isInMatching)
-                                {
-                                    ok = false;
-                                    break;
-                                }
-                                nodeInAugmentingPath = nodeInAugmentingPath->prevNodeInAugmentingPath;
-                            }
-                        }
-                        if (ok)
-                        {
-                            foundAugmentingPath = true;
-                            numMatches++;
-                            //cout << "Reached sink node" << endl;
-                                // Incorporate augmenting path into current matching.
-                                Node *nodeInAugmentingPath = sinkNode;
-                                while (nodeInAugmentingPath != sourceNode)
-                                {
-                                    auto edgeInAugmentingPath = nodeInAugmentingPath->prevEdgeInAugmentingPath;
-                                    edgeInAugmentingPath->isInMatching = !edgeInAugmentingPath->isInMatching;
-                                    nodeInAugmentingPath = nodeInAugmentingPath->prevNodeInAugmentingPath;
-                                }
-                        }
-                        //break;
-                    }
-                }
-            }
-            if (foundAugmentingPath)
-                break;
-            nodesToExplore = newNodesToExplore;
-        }
-        if (!foundAugmentingPath)
-        {
-            return numMatches;
-        }
-        //numMatches++;
-        cout << "numMatches:" << numMatches << endl;
-#endif
         auto augmentingPath = findAugmentPath(sourceNode, sinkNode);
         if (augmentingPath.empty())
             break;
         else
         {
-            //cout << "Found path size: " << augmentingPath.size() << endl;
             // Incorporate augmenting path into current matching.
             reverse(augmentingPath.begin(), augmentingPath.end());
-
-            //cout << "Incorporating augmenting path" << endl;
             for (const auto& augmentingPathElement : augmentingPath)
             {
                 const bool followedEdgeCorrectWay = augmentingPathElement.followedEdgeCorrectWay;
@@ -282,38 +165,21 @@ int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sour
                 Edge* edgeFollowed = (followedEdgeCorrectWay ? node->edgesRightWay[augmentingPathElement.followedEdgeIndex] :
                                                   node->edgesWrongWay[augmentingPathElement.followedEdgeIndex]);
                 auto otherNode = (edgeFollowed->sourceNode == node ? edgeFollowed->destNode : edgeFollowed->sourceNode); 
-                //cout << " node: " << node << " followedEdgeCorrectWay: " << followedEdgeCorrectWay << " edge index: " << augmentingPathElement.followedEdgeIndex << " edge: " << edgeFollowed << endl;
                 assert(edgeFollowed->isInMatching == !followedEdgeCorrectWay);
-                //edgeFollowed->isInMatching = followedEdgeCorrectWay;
                 edgeFollowed->isInMatching = !edgeFollowed->isInMatching;
 
                 if (followedEdgeCorrectWay)
                 {
-                    //assert(find(node->edgesRightWay.begin(), node->edgesRightWay.end(), edgeFollowed) != node->edgesRightWay.end());
                     node->edgesRightWay.erase(node->edgesRightWay.begin() + augmentingPathElement.followedEdgeIndex);
-                    //assert(find(otherNode->edgesWrongWay.begin(), otherNode->edgesWrongWay.end(), edgeFollowed) == otherNode->edgesWrongWay.end());
                     otherNode->edgesWrongWay.push_back(edgeFollowed);
                 }
                 else
                 {
-                    //assert(find(node->edgesWrongWay.begin(), node->edgesWrongWay.end(), edgeFollowed) != node->edgesWrongWay.end());
                     node->edgesWrongWay.erase(node->edgesWrongWay.begin() + augmentingPathElement.followedEdgeIndex);
-                    //assert(find(otherNode->edgesRightWay.begin(), otherNode->edgesRightWay.end(), edgeFollowed) == otherNode->edgesRightWay.end());
                     otherNode->edgesRightWay.push_back(edgeFollowed);
                 }
             }
             numMatches++;
-            //cout << "numMatches: " << numMatches << endl;
-            
-#if 0
-            Node *nodeInAugmentingPath = sinkNode;
-            while (nodeInAugmentingPath != sourceNode)
-            {
-                auto edgeInAugmentingPath = nodeInAugmentingPath->prevEdgeInAugmentingPath;
-                edgeInAugmentingPath->isInMatching = !edgeInAugmentingPath->isInMatching;
-                nodeInAugmentingPath = nodeInAugmentingPath->prevNodeInAugmentingPath;
-            }
-#endif
         }
 
 
@@ -323,13 +189,6 @@ int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sour
 
 int maxMatch(vector<Client> clients, vector<House> houses)
 {
-    // Convert our original graph of Clients and Racers and Pairings to a NetworkFlow graph.
-    // A "flow" goes from source -> one of the clients -> one of the houses -> sink.
-    // TODO - we only really need to do this once (we can efficiently filter out the edges > maxWeight
-    // when doing the Ford-Fulkerson run) - doing it every time is not exactly efficient!
-    // Note that there are some minor optimisations here based on the fact that the capacities are always
-    // either 0 or 1 (so we use a boolean isInMatching instead of integral flows).
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     vector<NetworkFlow::Node*> nfClientNodes;
     vector<NetworkFlow::Node*> nfHouseNodes;
 
@@ -378,9 +237,6 @@ int maxMatch(vector<Client> clients, vector<House> houses)
     allNFNodes.insert(allNFNodes.end(), nfHouseNodes.begin(), nfHouseNodes.end());
     allNFNodes.push_back(sourceNode);
     allNFNodes.push_back(sinkNode);
-    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-
-    //std::cout << "Building network took (ms) = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() <<std::endl;
 
     return maxMatch(allNFNodes, sourceNode, sinkNode);
 }
