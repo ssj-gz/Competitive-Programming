@@ -39,8 +39,6 @@ namespace NetworkFlow
             {
             }
             vector<Edge*> edges;
-            Edge *prevEdgeInAugmentingPath = nullptr;
-            Node *prevNodeInAugmentingPath = nullptr;
 
             vector<Edge*> edgesRightWay;
             vector<Edge*> edgesWrongWay;
@@ -135,7 +133,7 @@ vector<PathElement> findAugmentPath(NetworkFlow::Node* sourceNode, NetworkFlow::
 
 int maxMatch(vector<NetworkFlow::Node>& allNodes, NetworkFlow::Node* sourceNode, NetworkFlow::Node* sinkNode)
 {
-    // Use Ford-Fulkerson to see if we can find targetNumMatches matchings.
+    // Use Ford-Fulkerson to find the maximal match.
     using NetworkFlow::Node;
     using NetworkFlow::Edge;
     for (auto& node : allNodes)
@@ -187,14 +185,13 @@ int maxMatch(vector<NetworkFlow::Node>& allNodes, NetworkFlow::Node* sourceNode,
             }
             numMatches++;
         }
-
-
     }
     return numMatches;
 }
 
 int maxMatch(vector<Client> clients, vector<House> houses)
 {
+    // Build the flow network representing the possible matchings between clients and houses.
     const int numNodes = 1 + // Source
                          1 + // Sink
                          clients.size() +
@@ -269,11 +266,18 @@ int maxMatch(vector<Client> clients, vector<House> houses)
             }
         }
     }
+    // Find max matchings for this network.
     return maxMatch(allNodes, sourceNode, sinkNode);
 }
 
 int main()
 {
+    // "Easy" one; just need to be careful with implementation!
+    // It's basically just a standard maximal matching problem; I use Ford-Fulkerson
+    // with a depth-first search to find the augmenting path, and some
+    // optimisations (edgesRightWay, etc) for cutting down the number of 
+    // edges we need to explore from each Node.
+    // Not much to say beyond that!
     int numClients, numHouses;
     cin >> numClients >> numHouses;
 
