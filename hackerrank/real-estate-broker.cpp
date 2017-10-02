@@ -133,18 +133,21 @@ vector<PathElement> findAugmentPath(NetworkFlow::Node* sourceNode, NetworkFlow::
         return vector<PathElement>();
 }
 
-int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sourceNode, NetworkFlow::Node* sinkNode)
+int maxMatch(vector<NetworkFlow::Node>& allNodes, NetworkFlow::Node* sourceNode, NetworkFlow::Node* sinkNode)
 {
     // Use Ford-Fulkerson to see if we can find targetNumMatches matchings.
     using NetworkFlow::Node;
     using NetworkFlow::Edge;
-    for (auto node : allNodes)
+    for (auto& node : allNodes)
     {
-        for (auto edge : node->edges)
+        for (auto edge : node.edges)
         {
-            if (edge->sourceNode == node)
+            //cout << "floop" << endl;
+            //cout << "node: " << &node << " sourceNode: " << edge->sourceNode << endl;
+            if (edge->sourceNode == &node)
             {
-                node->edgesRightWay.push_back(edge);
+                //cout << "fleep" << endl;
+                node.edgesRightWay.push_back(edge);
             }
         }
     }
@@ -189,32 +192,62 @@ int maxMatch(const vector<NetworkFlow::Node*>& allNodes, NetworkFlow::Node* sour
 
 int maxMatch(vector<Client> clients, vector<House> houses)
 {
-    vector<NetworkFlow::Node*> nfClientNodes;
-    vector<NetworkFlow::Node*> nfHouseNodes;
+    const int numNodes = 1 + // Source
+                         1 + // Sink
+                         clients.size() +
+                         houses.size();
+
+    vector<NetworkFlow::Node> allNodes;
+    allNodes.reserve(numNodes);
+
+    allNodes.push_back(NetworkFlow::Node{});
+    auto sourceNode = &(allNodes.back());
+    allNodes.push_back(NetworkFlow::Node{});
+    auto sinkNode = &(allNodes.back());
 
     for (auto& client : clients)
     {
-        nfClientNodes.push_back(new NetworkFlow::Node());
-        client.networkFlowNode = nfClientNodes.back();
+        allNodes.push_back(NetworkFlow::Node{});
+        client.networkFlowNode = &(allNodes.back());
     }
     for (auto& house : houses)
     {
-        nfHouseNodes.push_back(new NetworkFlow::Node());
-        house.networkFlowNode = nfHouseNodes.back();
+        allNodes.push_back(NetworkFlow::Node{});
+        house.networkFlowNode = &(allNodes.back());
     }
-    NetworkFlow::Node *sourceNode = new NetworkFlow::Node();
-    NetworkFlow::Node *sinkNode = new NetworkFlow::Node();
+    int numEdges = clients.size() + // Source -> Client
+                   houses.size();   // House -> Sink.
+
+    auto canMatchHouseAndClient = [](const Client& client, const House& house)
+        {
+            return (house.price <= client.maxPrice && house.area >= client.minArea);
+        };
+
+    for (auto& client : clients)
+    {
+        for (auto& house : houses)
+        {
+            if (canMatchHouseAndClient(client, house))
+                numEdges++;
+        }
+    }
+
+    vector<NetworkFlow::Edge> allEdges;
+    allEdges.reserve(numEdges);
+
     for (auto& client : clients)
     {
         auto clientNode = client.networkFlowNode;
-        NetworkFlow::Edge * sourceClientEdge = new NetworkFlow::Edge(sourceNode, clientNode);
+        allEdges.push_back(NetworkFlow::Edge(sourceNode, clientNode));
+        auto sourceClientEdge = &(allEdges.back());
         sourceNode->edges.push_back(sourceClientEdge);
         clientNode->edges.push_back(sourceClientEdge);
     }
     for (auto& house : houses)
     {
         auto houseNode = house.networkFlowNode;
-        NetworkFlow::Edge * houseSinkEdge = new NetworkFlow::Edge(houseNode, sinkNode);
+        allEdges.push_back(NetworkFlow::Edge(houseNode, sinkNode));
+        auto houseSinkEdge = &(allEdges.back());
         houseNode->edges.push_back(houseSinkEdge);
         sinkNode->edges.push_back(houseSinkEdge);
     }
@@ -224,21 +257,17 @@ int maxMatch(vector<Client> clients, vector<House> houses)
         for (auto& house : houses)
         {
             auto houseNode = house.networkFlowNode;
-            if (house.price <= client.maxPrice && house.area >= client.minArea)
+            if (canMatchHouseAndClient(client, house))
             {
-                //cout << "Could match house " << house.price << "," << house.area << " with client: " << client.maxPrice << "," << client.minArea << endl;
-                NetworkFlow::Edge * clientHouseEdge = new NetworkFlow::Edge(clientNode, houseNode);
+                allEdges.push_back(NetworkFlow::Edge(clientNode, houseNode));
+                auto clientHouseEdge = &(allEdges.back());
                 clientNode->edges.push_back(clientHouseEdge);
                 houseNode->edges.push_back(clientHouseEdge);
             }
         }
     }
-    vector<NetworkFlow::Node*> allNFNodes(nfClientNodes);
-    allNFNodes.insert(allNFNodes.end(), nfHouseNodes.begin(), nfHouseNodes.end());
-    allNFNodes.push_back(sourceNode);
-    allNFNodes.push_back(sinkNode);
-
-    return maxMatch(allNFNodes, sourceNode, sinkNode);
+    cout << "# edges: " << allEdges.size() << " numEdges: " << numEdges << endl;
+    return maxMatch(allNodes, sourceNode, sinkNode);
 }
 
 int main()
