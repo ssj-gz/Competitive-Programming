@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) 2017-10-02
 #include <iostream>
 #include <vector>
 
