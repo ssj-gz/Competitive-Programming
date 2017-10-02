@@ -11,19 +11,6 @@
 
 using namespace std;
 
-int64_t calcUnfairness(const vector<int64_t>& numCandiesInPacket, int indexOfLastPacket, int K)
-{
-    int64_t dbgUnfairness = 0;
-    for (int j = indexOfLastPacket - K + 1; j <= indexOfLastPacket; j++)
-    {
-        for (int l = j + 1; l <= indexOfLastPacket; l++)
-        {
-            dbgUnfairness += numCandiesInPacket[l] - numCandiesInPacket[j];
-        }
-    }
-    return dbgUnfairness;
-}
-
 int main()
 {
     int N, K;
@@ -38,28 +25,25 @@ int main()
 
     sort(numCandiesInPacket.begin(), numCandiesInPacket.end());
 
+    // Calculate totalKSum/ totalUnfairness for initial (leftmost) block of K.
     int64_t totalKSum = 0;
     int64_t totalUnfairness = 0;
-    auto minUnfairness = numeric_limits<int64_t>::max();
-
     for (int i = 0; i < K; i++)
     {
         totalUnfairness += min(i, K) * numCandiesInPacket[i] - totalKSum;
         totalKSum += numCandiesInPacket[i];
     }
-    minUnfairness = min(minUnfairness, totalUnfairness);
+    auto minUnfairness = totalUnfairness;
 
-    assert(totalUnfairness == calcUnfairness(numCandiesInPacket, K - 1, K));
-
+    // Calculate unfairness for remaining blocks of K.
     for (int i = K; i < N; i++)
     {
-        const int64_t amountGained = (numCandiesInPacket[i] * (K - 1) - (totalKSum - 1 * numCandiesInPacket[i - K]));
-        const int64_t amountLost = totalKSum - numCandiesInPacket[i - K] - (K - 1) * numCandiesInPacket[i - K];
+        const int64_t numInPacketLost = numCandiesInPacket[i - K];
+        const int64_t amountGained = (numCandiesInPacket[i] * (K - 1) - (totalKSum - numInPacketLost));
+        const int64_t amountLost = totalKSum - numInPacketLost - (K - 1) * numInPacketLost;
         totalUnfairness = totalUnfairness + amountGained - amountLost;
         totalKSum -= numCandiesInPacket[i - K];
         totalKSum += numCandiesInPacket[i];
-
-        assert(totalUnfairness == calcUnfairness(numCandiesInPacket, i, K));
 
         minUnfairness = min(minUnfairness, totalUnfairness);
     }
