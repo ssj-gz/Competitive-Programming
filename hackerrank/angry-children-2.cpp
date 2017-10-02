@@ -5,7 +5,9 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <limits>
+#include <cassert>
 
 using namespace std;
 
@@ -16,7 +18,6 @@ int64_t calcUnfairness(const vector<int64_t>& numCandiesInPacket, int indexOfLas
     {
         for (int l = j + 1; l <= indexOfLastPacket; l++)
         {
-            //cout << "j: " << j << " l: " << l << " numCandiesInPacket[l]: " << numCandiesInPacket[l] << " numCandiesInPacket[j]: " << numCandiesInPacket[j] << endl;
             dbgUnfairness += numCandiesInPacket[l] - numCandiesInPacket[j];
         }
     }
@@ -50,8 +51,6 @@ int main()
 
     assert(totalUnfairness == calcUnfairness(numCandiesInPacket, K - 1, K));
 
-    //cout << "Initial dbgUnfairness: " << dbgUnfairness << endl;
-    //cout << "Initial totalKSum: " << totalKSum << endl;
     for (int i = K; i < N; i++)
     {
         const int64_t amountGained = (numCandiesInPacket[i] * (K - 1) - (totalKSum - 1 * numCandiesInPacket[i - K]));
@@ -60,15 +59,8 @@ int main()
         totalKSum -= numCandiesInPacket[i - K];
         totalKSum += numCandiesInPacket[i];
 
-        int64_t dbgTotalKSum = 0;
-        for (int j = i - K + 1; j <= i; j++)
-        {
-            dbgTotalKSum += numCandiesInPacket[j];
-        }
-        //cout << "i: " << i << " totalKSum: " << totalKSum << " dbgTotalKSum: " << dbgTotalKSum << endl;
-
         assert(totalUnfairness == calcUnfairness(numCandiesInPacket, i, K));
-        //cout << "i: " << i << " totalUnfairness: " << totalUnfairness << " dbgUnfairness: " << dbgUnfairness << endl;
+
         minUnfairness = min(minUnfairness, totalUnfairness);
     }
     cout << minUnfairness << endl;
