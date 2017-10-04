@@ -136,7 +136,7 @@ int main()
         int64_t absoluteSum = 0;
         if (totalX > -smallestElement)
         {
-            // All elements are positive.  The first element in absoluteSumLookup is ABS(original A + -smallestElement).
+            // All elements are positive.  The last element in absoluteSumLookup is ABS(original A + -smallestElement).
             absoluteSum = absoluteSumLookup.back() + N * (totalX - -smallestElement);
         }
         else if (totalX < -largestElement)
