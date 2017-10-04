@@ -1,3 +1,2 @@
-Angry Children 2 (50) [50]
-Demanding Money (50) [100]
-Substring Diff (60) [160]
+Demanding Money (50) [50]
+Substring Diff (60) [110]
