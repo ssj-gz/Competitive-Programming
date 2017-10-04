@@ -5,25 +5,17 @@
 
 using namespace std;
 
-void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<int>>& valuesPrimeFactorisations, const vector<int>& values, int valueIndexStart, vector<int>& valuesUsed, vector<int>& bestValuesUsed)
+void kFactorise(const vector<int>& targetPrimeFactorisation, const vector<vector<int>>& valuesPrimeFactorisations, const vector<int>& values, int valueIndexStart, vector<int>& valuesUsed, vector<int>& bestValuesUsed)
 {
     if (!bestValuesUsed.empty() && valuesUsed.size() > bestValuesUsed.size())
     {
         // We've already exceeded the length of the best; no point exploring further.
         return;
     }
-    bool found = true;
-    for (const auto primePower : destPrimeFactorisation)
+    const bool hitTarget = find_if(targetPrimeFactorisation.begin(), targetPrimeFactorisation.end(), [](const auto primePower) { return primePower != 0; }) == targetPrimeFactorisation.end();
+    if (hitTarget)
     {
-        if (primePower != 0)
-        {
-            found = false;
-            break;
-        }
-    }
-    if (found)
-    {
-        // The dest value is 1, so we're done.
+        // The target value is 1, so we're done.
         if (bestValuesUsed.empty())
             bestValuesUsed = valuesUsed;
         else
@@ -42,16 +34,16 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
     }
     for (int valueIndex = valueIndexStart; valueIndex < valuesPrimeFactorisations.size(); valueIndex++)
     {
-        vector<int> newDestPrimeFactorisation(destPrimeFactorisation);
+        vector<int> newTargetPrimeFactorisation(targetPrimeFactorisation);
         const auto& valuePrimeFactorisation = valuesPrimeFactorisations[valueIndex];
         bool canUseValue = true;
         for (int primeFactorIndex = 0; primeFactorIndex < valuePrimeFactorisation.size(); primeFactorIndex++)
         {
-            // "Divide" the destination number by value, if we can.
-            newDestPrimeFactorisation[primeFactorIndex] -= valuePrimeFactorisation[primeFactorIndex];
-            if (newDestPrimeFactorisation[primeFactorIndex] < 0)
+            // "Divide" the target number by value, if we can.
+            newTargetPrimeFactorisation[primeFactorIndex] -= valuePrimeFactorisation[primeFactorIndex];
+            if (newTargetPrimeFactorisation[primeFactorIndex] < 0)
             {
-                // This value doesn't divide into the value represented  by destPrimeFactorisation.
+                // This value doesn't divide into the value represented by targetPrimeFactorisation.
                 canUseValue = false;
                 break;
             }
@@ -61,8 +53,8 @@ void kFactorise(const vector<int>& destPrimeFactorisation, const vector<vector<i
             valuesUsed.push_back(values[valueIndex]);
             // We can assume that the best solution will have the values in order (otherwise, the solution where the
             // values are sorted will be lexically less than it), so don't allow value indices less than valueIndex
-            // to be explored subsequently.
-            kFactorise(newDestPrimeFactorisation, valuesPrimeFactorisations, values, valueIndex, valuesUsed, bestValuesUsed);
+            // to be explored subsequently i.e. recurse with valueIndexStart = valueIndex.
+            kFactorise(newTargetPrimeFactorisation, valuesPrimeFactorisations, values, valueIndex, valuesUsed, bestValuesUsed);
 
             valuesUsed.pop_back();
         }
