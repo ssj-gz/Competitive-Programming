@@ -14,7 +14,7 @@ using namespace std;
 int main()
 {
     // Fairly easy one, though the proof of why it works is fairly involved.
-    // First, sort the numCandiesInPacket; then essentially: it can be proven that 
+    // First, sort the numCandiesInPacket; then essentially it can be proven that 
     // given any distribution with minimum unfairness, if the distribution doesn't consist
     // of consecutive elements over the (sorted) numCandiesInPacket, then it can be
     // transformed into a distribution, also optimal, which does consist of consecutive
@@ -49,7 +49,7 @@ int main()
     //   (K - 1)(C(pk) - C(p1)) + Unf({p2, .... pk-1}).
     //
     // Corollary
-    //   If D = {p1, p2, ... , pk}, then the given p'1 = p2 - 1 and p'k = pk-1 + 1,  Unf({p'1, p2, p3, ... ,pk-1, pk-1 + 1}) <= Unf(D).
+    //   If D = {p1, p2, ... , pk}, then given p'1 = p2 - 1 and p'k = pk-1 + 1,  Unf({p'1, p2, p3, ... ,pk-1, pk-1 + 1}) <= Unf(D).
     //
     // Proof
     //
@@ -73,7 +73,7 @@ int main()
     //
     // Thus, (k - 1)(C(pk) - C(p1)) + Unf{p'2, ... p'k-1} <= Unf(D).
     //
-    // From the other corrolary, setting p'1 = p'2 - 1 and p'k = p'k-1 + 1 cannot increase this expression i.e.
+    // From the corrolary, setting p'1 = p'2 - 1 and p'k = p'k-1 + 1 cannot increase this expression i.e.
 
     // (k - 1)(C(p'k) - C(p'1)) + Unf{p'2, ... p'k-1} <= (k - 1)(C(pk) - C(p1)) + Unf{p'2, ... p'k-1} <= Unf(D).
     //
@@ -84,9 +84,9 @@ int main()
     // Thus, when trying to find the mininum unfairness, we need only consider consecutive elements.  Let D = {p1, p2, ... pk} with pi+1 = pi + 1 i = 1, ... k-1.
     // We can abbreviate this to D(l) i.e. D(l) = {l, l + 1, ... l + k - 1}. Let total(D(l)) = sum [ l <= i <= l + k - 1] {C(i)}
     //
-    // Now, if we knew UNf(D(l)), how could we efficiently compute Unf(D(l+1))? (D(l + 1) = {l + 1, l + 2, ... l + k}.
+    // Now, if we knew Unf(D(l)), how could we efficiently compute Unf(D(l+1))? (D(l + 1) = {l + 1, l + 2, ... l + k}.
     //
-    //   D(l + 1) = sum [ l + 1 <= i < j <= l + k ] {C(j) - C(i)}
+    //   Unf(D(l + 1)) = sum [ l + 1 <= i < j <= l + k ] {C(j) - C(i)}
     //  = sum [l + 1 <= i < j <= l + k - 1] {C(j) - C(i)} + sum [ l + 1 <= i <= l + k - 1] {C(l + k) - C(i)}
     //  = sum [l <= i < j <= l + k - 1] {C(j) - C(i)} - sum [ l + 1 <= i <= l + k - 1 ] {c(i) - c(l)}  + sum [ l + 1 <= i <= l + k - 1] {C(l + k) - C(i)}
     //  = Unf(D(l) - sum [ l + 1 <= i <= l + k - 1 ] {c(i) - c(l)}  + sum [ l + 1 <= i <= l + k - 1] {C(l + k) - C(i)}
@@ -100,7 +100,7 @@ int main()
     //
     // So, if numInPacketLost = C(l) and numInPacketGained = C(l + k) when transitioning from D(l) to D(l + 1), then:
     //
-    //  Unf(D(l + 1) = Unf(D(l)) + (k + 1) * numInPacketLost + (k - 1) * C(l + k) - 2 * total(D(l))
+    //  Unf(D(l + 1) = Unf(D(l)) + (k + 1) * numInPacketLost + (k - 1) * numInPacketGained - 2 * total(D(l))
     //
     // and that's about it: the minimum unfairness over all possible distributions is the min [l = 1 ... n - k + 1] {Unf(d(l))}.
     int N, K;
