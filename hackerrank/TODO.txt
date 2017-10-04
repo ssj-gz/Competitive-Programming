@@ -1,2 +1,7 @@
 Demanding Money (50) [50]
 Substring Diff (60) [110]
+The Value of Friendship (55) [165]
+Sherlock's Merging Algorithm (60) [225]
+Coprime Paths (80) [305]
+Hackerrank City (50) [355]
+Kingdom Connectivity (75) [430]
