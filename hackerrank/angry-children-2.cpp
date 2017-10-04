@@ -1,13 +1,11 @@
 // Simon St James (ssjgz) 2017-10-02
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <limits>
-#include <cassert>
 
 using namespace std;
 
