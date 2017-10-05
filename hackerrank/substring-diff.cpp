@@ -4,9 +4,36 @@
 
 using namespace std;
 
+int bruteForce(const string& a, const string& b, int S)
+{
+    int maxL = 0;
+    for (int i = 0; i < a.size(); i++)
+    {
+        for (int j = 0; j < b.size(); j++)
+        {
+            int length = 0;
+            int k = 0;
+            int numMismatches = 0;
+            while (i + k < a.size() && j + k < b.size())
+            {
+                if (a[i + k] != b[j + k])
+                {
+                    numMismatches++;
+                }
+                if (numMismatches <= S)
+                {
+                    length++;
+                    maxL = max(maxL, length);
+                }
+                k++;
+            }
+        }
+    }
+    return maxL;
+}
+
 int blah(const string& a, const string& b, int S)
 {
-    //const int maxSizeDiffAB = abs(static_cast<long>(a.size() - b.size()));
     const int maxSizeDiffAB = a.size();
 
     int maxLWitNumMismatchesLessThanS = 0;
@@ -23,9 +50,9 @@ int blah(const string& a, const string& b, int S)
 
         while (i >= 0)
         {
-            cout << "S: " << S << " sizeDiffAB: "<< sizeDiffAB << " i = " << i << " j = " << j << " a.size(): " << a.size() << " b.size(): " << b.size() << " Comparing: " << endl;
-            cout << a.substr(i) << endl;
-            cout << b.substr(j) << endl;
+            //cout << "S: " << S << " sizeDiffAB: "<< sizeDiffAB << " i = " << i << " j = " << j << " a.size(): " << a.size() << " b.size(): " << b.size() << " Comparing: " << endl;
+            //cout << a.substr(i) << endl;
+            //cout << b.substr(j) << endl;
             commonSuffixLength++;
             if (a[i] != b[j])
             {
@@ -37,13 +64,13 @@ int blah(const string& a, const string& b, int S)
                 numMismatches++;
                 if (numMismatches > S)
                 {
-                    cout << "Exceeded mismatches; last commonSuffixLength: " << commonSuffixLength << endl;
+                    //cout << "Exceeded mismatches; last commonSuffixLength: " << commonSuffixLength << endl;
                     numMismatches--;
                     assert(lastIndexInAOfMismatch != -1 && lastIndexInBOfMismatch != -1);
                     assert(lastIndexInAOfMismatch >= i);
                     commonSuffixLength = (lastIndexInAOfMismatch - i);
 
-                    cout << "new commonSuffixLength: " << commonSuffixLength << endl;
+                    //cout << "new commonSuffixLength: " << commonSuffixLength << endl;
 
                     //while (lastIndexInAOfMismatch - 1 >= i && lastIndexInBOfMismatch - 1 >= j)
                     while (lastIndexInAOfMismatch - 1 >= 0 && lastIndexInBOfMismatch - 1 >= 0)
@@ -55,7 +82,7 @@ int blah(const string& a, const string& b, int S)
                             break;
                         }
                     }
-                    cout << "new lastIndexInAOfMismatch: " << lastIndexInAOfMismatch << " new lastIndexInBOfMismatch: " << lastIndexInBOfMismatch << endl;
+                    //cout << "new lastIndexInAOfMismatch: " << lastIndexInAOfMismatch << " new lastIndexInBOfMismatch: " << lastIndexInBOfMismatch << endl;
                 }
             }
             else
@@ -63,8 +90,8 @@ int blah(const string& a, const string& b, int S)
                 //commonSuffixLength++;
             }
 
-            cout << "commonSuffixLength: " << commonSuffixLength << endl;
-            cout << "numMismatches: " << numMismatches << endl;
+            //cout << "commonSuffixLength: " << commonSuffixLength << endl;
+            //cout << "numMismatches: " << numMismatches << endl;
 
             maxLWitNumMismatchesLessThanS = max(maxLWitNumMismatchesLessThanS, commonSuffixLength);
             i--;
@@ -119,6 +146,27 @@ int main()
         cout << maxL << endl;
 #endif
         cout << max(blah(a, b, S), blah(b, a, S)) << endl;
+        cout << "brute force: " << bruteForce(a, b, S) << endl;
+
+        while (true)
+        {
+            const int N = rand() % 100 + 1;
+            const int M = rand() % 100 + 1;
+            const int alphabetSize = 5;
+
+            string a;
+            for (int i = 0; i < N; i++)
+            {
+                a += static_cast<char>('a' + rand() % alphabetSize);
+            }
+            string b;
+            for (int j = 0; j < N; j++)
+            {
+                b += static_cast<char>('a' + rand() % alphabetSize);
+            }
+            assert(max(blah(a, b, S), blah(b, a, S)) == bruteForce(a, b, S));
+            cout << "a: " << a << " b: " << b << " wee: " << bruteForce(a, b, S) << " woo: "<< max(blah(a, b, S), blah(b, a, S)) << endl;
+        }
 
     }
 }
