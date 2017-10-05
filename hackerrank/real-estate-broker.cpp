@@ -42,6 +42,8 @@ namespace NetworkFlow
 
             vector<Edge*> edgesRightWay;
             vector<Edge*> edgesWrongWay;
+            
+            bool hasBeenVisitedInAugmentingPath = false;
     };
     class Edge
     {
@@ -53,7 +55,7 @@ namespace NetworkFlow
             Node *sourceNode;
             Node *destNode;
             bool isInMatching = false;
-            bool hasBeenVisitedInAugmentingPath = false;
+            //bool hasBeenVisitedInAugmentingPath = false;
     };
 }
 
@@ -65,10 +67,15 @@ struct PathElement
     int followedEdgeIndex = -1;
 };
 
-bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode, vector<PathElement>& pathSoFar, vector<NetworkFlow::Edge*>& visitedEdges)
+bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode, vector<PathElement>& pathSoFar, vector<NetworkFlow::Node*>& visitedNodes)
 {
     if (currentNode == sinkNode)
         return true;
+    if (currentNode->hasBeenVisitedInAugmentingPath)
+        return false;
+
+    currentNode->hasBeenVisitedInAugmentingPath = true;
+    visitedNodes.push_back(currentNode);
 
     PathElement pathElement;
     pathElement.node = currentNode;
@@ -79,15 +86,10 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
     {
         auto edge = currentNode->edgesRightWay[i];
         assert(!edge->isInMatching);
-        if (edge->hasBeenVisitedInAugmentingPath)
-            continue;
-
         pathSoFar.back().followedEdgeIndex = i;
-        edge->hasBeenVisitedInAugmentingPath = true;
-        visitedEdges.push_back(edge);
         assert(edge->sourceNode == currentNode);
         auto otherNode = edge->destNode;
-        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedEdges);
+        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedNodes);
         if (augmentingPathFound)
             return true;
     }
@@ -96,16 +98,12 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
     for (int i = 0; i < currentNode->edgesWrongWay.size(); i++)
     {
         auto edge = currentNode->edgesWrongWay[i];
-        if (edge->hasBeenVisitedInAugmentingPath)
-            continue;
         if (!edge->isInMatching)
             continue;
         pathSoFar.back().followedEdgeIndex = i;
-        edge->hasBeenVisitedInAugmentingPath = true;
-        visitedEdges.push_back(edge);
         assert(edge->destNode == currentNode);
         auto otherNode = edge->sourceNode;
-        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedEdges);
+        const bool augmentingPathFound = findAugmentPath(otherNode, sinkNode, pathSoFar, visitedNodes);
         if (augmentingPathFound)
             return true;
     }
@@ -117,14 +115,13 @@ bool findAugmentPath(NetworkFlow::Node* currentNode, NetworkFlow::Node* sinkNode
 vector<PathElement> findAugmentPath(NetworkFlow::Node* sourceNode, NetworkFlow::Node* sinkNode)
 {
     vector<PathElement> augmentingPath;
-    vector<NetworkFlow::Edge*> visitedEdges;
-    const bool found = findAugmentPath(sourceNode, sinkNode, augmentingPath, visitedEdges);
+    vector<NetworkFlow::Node*> visitedNodes;
+    const bool found = findAugmentPath(sourceNode, sinkNode, augmentingPath, visitedNodes);
 
-    for (auto edge : visitedEdges)
+    for (auto node : visitedNodes)
     {
-        edge->hasBeenVisitedInAugmentingPath = false;
+        node->hasBeenVisitedInAugmentingPath = false;
     }
-
     if (found)
         return augmentingPath;
     else 
