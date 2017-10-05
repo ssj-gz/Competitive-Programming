@@ -1,78 +1,68 @@
+// Simon St James (ssjgz) - 2017-10-05 14:30
+#define BRUTE_FORCE
+//#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cassert>
 
 using namespace std;
 
-int bruteForce(const string& a, const string& b, int S)
-{
-    int maxL = 0;
-    for (int i = 0; i < a.size(); i++)
-    {
-        for (int j = 0; j < b.size(); j++)
-        {
-            int length = 0;
-            int k = 0;
-            int numMismatches = 0;
-            while (i + k < a.size() && j + k < b.size())
-            {
-                if (a[i + k] != b[j + k])
-                {
-                    numMismatches++;
-                }
-                if (numMismatches <= S)
-                {
-                    length++;
-                    maxL = max(maxL, length);
-                }
-                k++;
-            }
-        }
-    }
-    return maxL;
-}
-
-int blah(const string& a, const string& b, int S)
+// Calculates the largest L with M(i, j, L) <= S *and* i <= j.
+int findLongestWithiLessThanj(const string& a, const string& b, int S)
 {
     const int maxSizeDiffAB = a.size();
 
-    int maxLWitNumMismatchesLessThanS = 0;
+    int maxLengthWithAllowedMismatches = 0;
     for (int sizeDiffAB = 0; sizeDiffAB <= maxSizeDiffAB; sizeDiffAB++)
     {
+        // Consider all suffixes were the suffix of a is sizeDiffAB larger
+        // than the suffix of b.
         int lastIndexInAOfMismatch = -1;
         int lastIndexInBOfMismatch = -1;
 
         int i = a.size() - 1 - sizeDiffAB;
         int j = b.size() - 1;
 
-        int commonSuffixLength = 0;
+        int currentLengthWithAllowedMismatches = 0;
         int numMismatches = 0;
 
+        // Consider all pairs of suffix begin positions, working backwards, which give length of 
+        // suffix of a = length of suffix of b + sizeDiffAB.
         while (i >= 0)
         {
-            //cout << "S: " << S << " sizeDiffAB: "<< sizeDiffAB << " i = " << i << " j = " << j << " a.size(): " << a.size() << " b.size(): " << b.size() << " Comparing: " << endl;
-            //cout << a.substr(i) << endl;
-            //cout << b.substr(j) << endl;
-            commonSuffixLength++;
+            // Bump currentLengthWithAllowedMismatches indiscriminately; we'll adjust it if need be.
+            currentLengthWithAllowedMismatches++;
+
             if (a[i] != b[j])
             {
+                // Mismatch!
+                numMismatches++;
                 if (lastIndexInAOfMismatch == -1 || lastIndexInBOfMismatch == -1)
                 {
                     lastIndexInAOfMismatch = i;
                     lastIndexInBOfMismatch = j;
                 }
-                numMismatches++;
+
                 if (numMismatches > S)
                 {
-                    //cout << "Exceeded mismatches; last commonSuffixLength: " << commonSuffixLength << endl;
-                    numMismatches--;
                     assert(lastIndexInAOfMismatch != -1 && lastIndexInBOfMismatch != -1);
                     assert(lastIndexInAOfMismatch >= i);
-                    commonSuffixLength = (lastIndexInAOfMismatch - i);
+                    assert(lastIndexInBOfMismatch == lastIndexInAOfMismatch + sizeDiffAB);
 
-                    //cout << "new commonSuffixLength: " << commonSuffixLength << endl;
+                    // Knock off the last mismatch between the suffixes of A and B, reducing the number of mismatches by 1 ...
+                    numMismatches--;
+                    // ... and use the position of this last mismatch to compute the new largest match between the current
+                    // suffixes of a and b.
+                    currentLengthWithAllowedMismatches = (lastIndexInAOfMismatch - i);
 
-                    //while (lastIndexInAOfMismatch - 1 >= i && lastIndexInBOfMismatch - 1 >= j)
+                    // Update lastIndexInAOfMismatch, lastIndexInBOfMismatch.  Note that, amortised over a given sizeDiffAB, 
+                    // this takes time O(max(a.size(), b.size()) as, intuitively, for a given sizeDiffAB, they
+                    // pass over no more values than do i and j.
                     while (lastIndexInAOfMismatch - 1 >= 0 && lastIndexInBOfMismatch - 1 >= 0)
                     {
                         lastIndexInAOfMismatch--;
@@ -82,23 +72,15 @@ int blah(const string& a, const string& b, int S)
                             break;
                         }
                     }
-                    //cout << "new lastIndexInAOfMismatch: " << lastIndexInAOfMismatch << " new lastIndexInBOfMismatch: " << lastIndexInBOfMismatch << endl;
                 }
             }
-            else
-            {
-                //commonSuffixLength++;
-            }
 
-            //cout << "commonSuffixLength: " << commonSuffixLength << endl;
-            //cout << "numMismatches: " << numMismatches << endl;
-
-            maxLWitNumMismatchesLessThanS = max(maxLWitNumMismatchesLessThanS, commonSuffixLength);
+            maxLengthWithAllowedMismatches = max(maxLengthWithAllowedMismatches, currentLengthWithAllowedMismatches);
             i--;
             j--;
         }
     }
-    return maxLWitNumMismatchesLessThanS;
+    return maxLengthWithAllowedMismatches;
 }
 
 int main()
@@ -113,60 +95,7 @@ int main()
         string a, b;
         cin >> a >> b;
 
-#if 0
-        vector<vector<int>> numMatchingAfterIndices(a.size() + 1, vector<int>(b.size() + 1));
-        for (int i = a.size() - 1; i >= 0; i--)
-        {
-            for (int j = b.size() - 1; j >= 0; j--)
-            {
-                const bool charsMatch = (a[i] == b[j]);
-                numMatchingAfterIndices[i][j] = (charsMatch ? 1 : 0) + numMatchingAfterIndices[i + 1][j + 1];
-            }
-        }
-        int maxL = 0;
-        for (int i = 0; i < a.size(); i++)
-        {
-            for (int j = 0; j < b.size(); j++)
-            {
-                const int commonSuffixLength = min(a.size() - i, b.size() - j);
-                const int numMismatches = commonSuffixLength - numMatchingAfterIndices[i][j];
-                int dbgNumMismatches = 0;
-                const auto dbA = a.substr(i, commonSuffixLength);
-                const auto dbB = b.substr(j, commonSuffixLength);
-                for (int k = 0; k < commonSuffixLength; k++)
-                {
-                    if (dbA[k] != dbB[k])
-                        dbgNumMismatches++;
-                }
-                assert(dbgNumMismatches == numMismatches);
-                if (numMismatches <= S)
-                    maxL = max(maxL, commonSuffixLength);
-            }
-        }
-        cout << maxL << endl;
-#endif
-        cout << max(blah(a, b, S), blah(b, a, S)) << endl;
-        cout << "brute force: " << bruteForce(a, b, S) << endl;
-
-        while (true)
-        {
-            const int N = rand() % 100 + 1;
-            const int M = rand() % 100 + 1;
-            const int alphabetSize = 5;
-
-            string a;
-            for (int i = 0; i < N; i++)
-            {
-                a += static_cast<char>('a' + rand() % alphabetSize);
-            }
-            string b;
-            for (int j = 0; j < N; j++)
-            {
-                b += static_cast<char>('a' + rand() % alphabetSize);
-            }
-            assert(max(blah(a, b, S), blah(b, a, S)) == bruteForce(a, b, S));
-            cout << "a: " << a << " b: " << b << " wee: " << bruteForce(a, b, S) << " woo: "<< max(blah(a, b, S), blah(b, a, S)) << endl;
-        }
-
+        const auto result = max(findLongestWithiLessThanj(a, b, S), findLongestWithiLessThanj(b, a, S));
+        cout <<  result << endl;
     }
 }
