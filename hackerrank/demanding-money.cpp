@@ -10,6 +10,8 @@ struct House
     vector<House*> neighbours;
 };
 
+const int memoiseLastNHouses = 12;
+
 pair<int, int> findMaxMoney(const int currentHouseIndex, const int64_t availableHouses, const vector<House>& houses)
 {
     if (currentHouseIndex == houses.size())
@@ -18,14 +20,16 @@ pair<int, int> findMaxMoney(const int currentHouseIndex, const int64_t available
     }
     const auto resultIfNotChoseThis = findMaxMoney(currentHouseIndex + 1, availableHouses, houses);
 
-    const bool houseIsAvailable = ((availableHouses & (1 << currentHouseIndex)) != 0);
+    const bool houseIsAvailable = ((availableHouses & (static_cast<int64_t>(1) << currentHouseIndex)) != 0);
     if (!houseIsAvailable)
+    {
         return resultIfNotChoseThis;
+    }
 
     int64_t availableHousesIfChoseThis = availableHouses;
     for (const auto neighbour : houses[currentHouseIndex].neighbours)
     {
-        availableHousesIfChoseThis -= (availableHousesIfChoseThis & (1 << neighbour->houseIndex));
+        availableHousesIfChoseThis -= (availableHousesIfChoseThis & (static_cast<int64_t>(1) << neighbour->houseIndex));
     }
     auto resultIfChoseThis = findMaxMoney(currentHouseIndex + 1, availableHousesIfChoseThis, houses);
     resultIfChoseThis.first += houses[currentHouseIndex].money;
@@ -69,7 +73,7 @@ int main()
         houses[b].neighbours.push_back(&(houses[a]));
     }
 
-    int64_t availableHouses = (1 << (N + 1)) - 1;
+    int64_t availableHouses = (static_cast<int64_t>(1) << (N + 1)) - 1;
     const auto result = findMaxMoney(0, availableHouses, houses);
 
     cout << result.first << " " << result.second << endl;
