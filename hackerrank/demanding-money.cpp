@@ -1,3 +1,8 @@
+// Simon St James (ssjgz) 2017-10-05 10:24
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -13,9 +18,9 @@ struct House
 
 const int memoiseLastNHouses = 12;
 
-vector<vector<pair<int, int>>> memoisedResultForHouseIndexAndAvailableHouses;
+vector<vector<pair<int64_t, int64_t>>> memoisedResultForHouseIndexAndAvailableHouses;
 
-pair<int, int> findMaxMoney(const int currentHouseIndex, const uint64_t availableHouses, const vector<House>& houses)
+pair<int64_t, int64_t> findMaxMoney(const int currentHouseIndex, const uint64_t availableHouses, const vector<House>& houses)
 {
     //cout << " currentHouseIndex: " << currentHouseIndex << " availableHouses: " << availableHouses << endl;
     if (currentHouseIndex == houses.size())
@@ -58,7 +63,7 @@ pair<int, int> findMaxMoney(const int currentHouseIndex, const uint64_t availabl
     auto resultIfChoseThis = findMaxMoney(currentHouseIndex + 1, availableHousesIfChoseThis, houses);
     resultIfChoseThis.first += houses[currentHouseIndex].money;
 
-    pair<int, int> result;
+    pair<int64_t, int64_t> result;
     if (resultIfNotChoseThis.first > resultIfChoseThis.first)
     {
         result = resultIfNotChoseThis;
@@ -111,7 +116,7 @@ int main()
     for (int i = 0; i < memoiseLastNHouses; i++)
     {
         const uint64_t numPossibleValues = 1 << (memoiseLastNHouses - i);
-        memoisedResultForHouseIndexAndAvailableHouses[i] = vector<pair<int, int>>(numPossibleValues, {-1, -1});
+        memoisedResultForHouseIndexAndAvailableHouses[i] = vector<pair<int64_t, int64_t>>(numPossibleValues, {-1, -1});
     }
     uint64_t availableHouses = (static_cast<uint64_t>(1) << (N + 0)) - 1;
     const auto result = findMaxMoney(0, availableHouses, houses);
