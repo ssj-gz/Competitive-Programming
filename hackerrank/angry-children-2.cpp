@@ -130,8 +130,8 @@ int main()
         const int64_t numInPacketGained = numCandiesInPacket[i];
         const int64_t changeInUnfairness = (K + 1) * numInPacketLost + (K - 1) * numInPacketGained - 2 * totalKSum;
         totalUnfairness = totalUnfairness + changeInUnfairness;
-        totalKSum -= numCandiesInPacket[i - K];
-        totalKSum += numCandiesInPacket[i];
+        totalKSum -= numInPacketLost;
+        totalKSum += numInPacketGained;
 
         minUnfairness = min(minUnfairness, totalUnfairness);
     }
