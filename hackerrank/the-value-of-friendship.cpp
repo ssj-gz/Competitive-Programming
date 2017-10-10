@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2017-10-10 10:04
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -117,7 +118,7 @@ int main()
             const auto numNodesInComponent = componentInfo.numNodes;
             int64_t valueOfThisComponent = 0;
             const int numEdgesInComponentMST = componentInfo.numNodes - 1;
-            for (int i = 1; i <= numEdgesInComponentMST; i++)
+            for (int64_t i = 1; i <= numEdgesInComponentMST; i++)
             {
                 valueOfThisComponent = (i + 1) * i;
                 //cout << "i: " << i << " valueOfThisComponent: " << valueOfThisComponent << endl;
