@@ -115,7 +115,7 @@ int main()
     //   so that T1+T2 was grown in a connected fashion.  If there is are still at T'1 and T'2 that are the first
     //   trees to be joined in our solution, we can repeat until one of these is eliminated; and so on.
     //   Eventually, we transform our original "optimal" solution into one of at least equal value that was grown
-    //   in connectedly.
+    //   connectedly.
     // - If Ci has l nodes, then the optimal order for filling in SP(Ci) (growing it "connectedly", as described above)
     //   adds, ignoring any other components for the time being, 2 * (2 - 1) + 3 * (3 - 1) + ... + l * (l - 1) value
     //   (easy to see).
@@ -175,7 +175,7 @@ int main()
             {
                 value += valuesOfProcessedComponents + (i + 1) * i;
             }
-            const int64_t valueOfThisComponent = (numEdgesInComponentMST + 1) * numEdgesInComponentMST;
+            const int64_t valueOfThisComponent = static_cast<int64_t>(numEdgesInComponentMST + 1) * numEdgesInComponentMST;
             valuesOfProcessedComponents += valueOfThisComponent;
         }
         // Add contribution of remaining reinforcing edges.
