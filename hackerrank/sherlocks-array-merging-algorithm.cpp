@@ -39,13 +39,40 @@ int64_t nCr(int64_t n, int64_t r)
     return result;
 }
 
+int64_t quickPower(int64_t n, int64_t m)
+{
+    // Raise n to the m mod modulus using as few multiplications as 
+    // we can e.g. n ^ 8 ==  (((n^2)^2)^2).
+    long result = 1;
+    int power = 0;
+    while (m > 0)
+    {
+        if (m & 1)
+        {
+            long subResult = n;
+            for (int i = 0; i < power; i++)
+            {
+                subResult = (subResult * subResult) % mymodulus;
+            }
+            result = (result * subResult) % mymodulus;
+        }
+        m >>= 1;
+        power++;
+    }
+    return result;
+}
+
 int64_t power(int64_t base, int64_t exponent)
 {
-    int64_t result = 1;
+#if 0
+    int64_t dbgResult = 1;
     for (int i = 0; i < exponent; i++)
     {
-        result = (result * base) % mymodulus;
+        dbgResult = (dbgResult * base) % mymodulus;
     }
+    assert(dbgResult == quickPower(base, exponent));
+#endif
+    auto result = quickPower(base, exponent);
     return result;
 }
 
@@ -94,6 +121,7 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, int prev
                 }
             }
 #endif
+#if 1
             newPosInArray++;
             bool ok = true;
             for (int k = 0; k < numInLayer - 1; k++)
@@ -105,6 +133,9 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, int prev
                 }
                 newPosInArray++;
             }
+#else
+            newPosInArray = posInArray + numWithLayerSize * numInLayer;
+#endif
             //assert(ok == dbgOk);
             //assert(newPosInArray == dbgNewPosInArray);
             if (!ok)
