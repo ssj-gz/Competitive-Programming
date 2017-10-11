@@ -59,7 +59,7 @@ int64_t quickPower(int64_t base, int64_t exponent, int64_t modulus)
 
 vector<vector<int64_t>> lookup;
 
-int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, int64_t modulus)
+int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(const vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, int64_t modulus)
 {
     assert(remaining >= 0 && remaining < lookup.size());
     assert(layerSize >= 1 && layerSize < lookup[0].size());
