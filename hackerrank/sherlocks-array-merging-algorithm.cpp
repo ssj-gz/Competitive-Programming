@@ -10,13 +10,15 @@ struct ArrayInfo
     int numArraysWithSize = -1;
 };
 
+const int64_t mymodulus = 1'000'000'007;
+
 int64_t factorial(int64_t n)
 {
     assert(n >= 0);
     int64_t result = 1;
     for (int64_t i = 1; i <= n; i++)
     {
-        result *= i;
+        result  = (result * i) % mymodulus;
     }
     //cout << " factorial " << n << " = " << result << endl;
     return result;
@@ -39,24 +41,38 @@ int64_t power(int64_t base, int64_t exponent)
     int64_t result = 1;
     for (int i = 0; i < exponent; i++)
     {
-        result *= base;
+        result = (result * base) % mymodulus;
     }
     return result;
 }
 
-int64_t solve(vector<int>& array, const int posInArray,  int remaining, bool isFirst, int maxLayerLength, int previousLayerLength, string indent = string())
+vector<vector<int64_t>> lookup;
+
+int64_t solve(vector<int>& array, const int posInArray,  int remaining, int previousLayerLength, string indent = string())
 {
     if (remaining == 0)
     {
-        cout << indent << "woo!" << endl;
+        //cout << indent << "woo!" << endl;
         return 1;
     }
+    assert(remaining < lookup.size());
+    assert(previousLayerLength == -1 || previousLayerLength < lookup[0].size());
+    if (previousLayerLength != -1)
+    {
+        if (lookup[remaining][previousLayerLength] != -1)
+        {
+            //cout << "returning precomputed" << endl;
+            return lookup[remaining][previousLayerLength];
+        }
+    }
+    //cout << "previousLayerLength: " << previousLayerLength << " remaining: " << remaining << endl;
     int64_t result = 0;
+    const int maxLayerLength = (previousLayerLength == -1 ? remaining : previousLayerLength - 1);
     for (int numInLayer = 1; numInLayer <= maxLayerLength; numInLayer++)
     {
         for (int numWithLayerSize = 1; numWithLayerSize <= remaining; numWithLayerSize++)
         {
-            cout << indent << "remaining: " << remaining << " posInArray: " << posInArray << " previousLayerLength: " << previousLayerLength << " numInLayer: " << numInLayer << " numWithLayerSize: " << numWithLayerSize << endl;
+            //cout << indent << "remaining: " << remaining << " posInArray: " << posInArray << " previousLayerLength: " << previousLayerLength << " numInLayer: " << numInLayer << " numWithLayerSize: " << numWithLayerSize << endl;
             bool ok = true;
             int newPosInArray = posInArray;
             for (int i = 0; i < numWithLayerSize; i++)
@@ -67,7 +83,7 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, bool isF
                     if (newPosInArray == array.size() || array[newPosInArray] < array[newPosInArray - 1])
                     {
                         ok = false;
-                        cout << indent << "not ok" << endl;
+                        //cout << indent << "not ok" << endl;
                     }
                     newPosInArray++;
                 }
@@ -89,19 +105,25 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, bool isF
                 numPermutationForTheseLayers = power(factorial(numInLayer), numWithLayerSize);
             }
             int64_t contributionFromFirstLayer = (previousLayerLength == -1 ? 1 : nCr(previousLayerLength - numInLayer, previousLayerLength));
-            cout << indent << "numPermutationForTheseLayers: " << numPermutationForTheseLayers << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
-            const int nextRemaining = remaining - (numInLayer * numWithLayerSize);
+            //cout << indent << "numPermutationForTheseLayers: " << numPermutationForTheseLayers << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
+            const int nextRemaining = remaining - (numInLayer * numWithLayerSize) % mymodulus;
             if (nextRemaining >= 0)
             {
                 assert(newPosInArray == posInArray + numWithLayerSize * numInLayer);
                 const auto oldResult = result;
-                result +=  numPermutationForTheseLayers * contributionFromFirstLayer * solve(array, newPosInArray, nextRemaining, false, numInLayer - 1, numInLayer, indent + " ");
-                cout << indent << "result bumped to : " << result << " from " << oldResult << endl;
+                result +=  (((numPermutationForTheseLayers * contributionFromFirstLayer) % mymodulus) * solve(array, newPosInArray, nextRemaining, numInLayer, indent + " ")) % mymodulus;
+                //cout << indent << "result bumped to : " << result << " from " << oldResult << endl;
 
             }
         }
     }
-    cout << indent << "returning " << result << endl;
+    if (previousLayerLength != -1)
+    {
+        assert(result != -1);
+        //cout << "storing previousLayerLength: " << previousLayerLength << " remaining: " << remaining << " result: " << result << endl;
+        lookup[remaining][previousLayerLength] = result;
+    }
+    //cout << indent << "returning " << result << endl;
     return result;
 }
 
@@ -117,6 +139,8 @@ int main()
         cin >> array[i];
     }
 
+    lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
+
     vector<ArrayInfo> arrayInfoSoFar;
     ArrayInfo blah;
     blah.arraySize = 0;
@@ -124,7 +148,7 @@ int main()
     arrayInfoSoFar.push_back(blah);
     //int64_t result = 0;
     //solve(M, arrayInfoSoFar, M, result);
-    const auto result = solve(array, 0, M, true, M, -1);
+    const auto result = solve(array, 0, M, -1);
     cout << result << endl;
 }
 
