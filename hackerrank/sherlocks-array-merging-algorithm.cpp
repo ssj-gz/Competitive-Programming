@@ -2,11 +2,12 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <algorithm>
 #include <cassert>
 
 using namespace std;
 
-const int64_t mymodulus = 1'000'000'007ULL;
+const int64_t mymodulus = 1000000007ULL;
 //const int64_t mymodulus = 1061;
 vector<int64_t> factorialLookup;
 vector<int64_t> factorialInverseLookup;
@@ -111,7 +112,7 @@ bool operator<(const Solution& lhs, const Solution& rhs)
 
 bool isValidSolution(const Solution& solution, const vector<int>& array)
 {
-    cout << "validating: " << solution << endl;
+    //cout << "validating: " << solution << endl;
     int posInArray = 0;
     Solution solutionCopy(solution);
     while (!solutionCopy.vectorContents.empty())
@@ -148,20 +149,20 @@ bool isValidSolution(const Solution& solution, const vector<int>& array)
             assert(posInArray < array.size());
             if (array[posInArray] != element)
             {
-                cout << " not valid" << endl;
+                //cout << " not valid" << endl;
                 return false;
             }
             posInArray++;
         }
     }
-    cout << " valid" << endl;
+    //cout << " valid" << endl;
     return true;
 }
 int64_t bruteForce(const vector<int>& array)
 {
     set<Solution> solutions;
     vector<int> arrayCopy(array);
-    sort(arrayCopy.begin(), arrayCopy.end());
+    //sort(arrayCopy.begin(), arrayCopy.end());
     while (true)
     {
         for (int numVectors = 1; numVectors <= arrayCopy.size(); numVectors++)
@@ -171,17 +172,17 @@ int64_t bruteForce(const vector<int>& array)
             {
                 Solution solution;
                 solution.vectorContents.resize(numVectors);
-                cout << "Candidate solution: " << endl;
+                //cout << "Candidate solution: " << endl;
                 for (int i = 0; i < vecIndexForarrayCopyElement.size(); i++)
                 {
-                    cout << "arrayCopy element " << arrayCopy[i] << " placed in vector: " << vecIndexForarrayCopyElement[i] << endl;
+                    //cout << "arrayCopy element " << arrayCopy[i] << " placed in vector: " << vecIndexForarrayCopyElement[i] << endl;
                     solution.vectorContents[vecIndexForarrayCopyElement[i]].push_back(arrayCopy[i]);
                 }
                 solution.stripEmpties();
                 if (isValidSolution(solution, array))
                 {
                     solutions.insert(solution);
-                    cout << "adding solution " << solution << endl;
+                    //cout << "adding solution " << solution << endl;
                 }
                 int arrayCopyIndex = 0;
                 while (arrayCopyIndex != arrayCopy.size() && vecIndexForarrayCopyElement[arrayCopyIndex] == numVectors - 1)
@@ -195,7 +196,7 @@ int64_t bruteForce(const vector<int>& array)
 
             }
         }
-        if (!next_permutation(arrayCopy.begin(), arrayCopy.end()))
+        //if (!next_permutation(arrayCopy.begin(), arrayCopy.end()))
             break;
     }
     for (const auto& solution : solutions)
@@ -234,13 +235,13 @@ int64_t quickPower(int64_t n, int64_t m)
 {
     // Raise n to the m mod modulus using as few multiplications as 
     // we can e.g. n ^ 8 ==  (((n^2)^2)^2).
-    long result = 1;
-    int power = 0;
+    int64_t result = 1;
+    int64_t power = 0;
     while (m > 0)
     {
         if (m & 1)
         {
-            long subResult = n;
+            int64_t subResult = n;
             for (int i = 0; i < power; i++)
             {
                 subResult = (subResult * subResult) % mymodulus;
@@ -300,8 +301,12 @@ int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remai
             {
                 //int64_t contributionFromFirstLayer = (isFirst ? 1 : nCr(layerSize, layerSize - nextLayerSize));
                 auto contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize);
+                const auto blah = (numPermutationsForThisLayer * contributionFromFirstLayer) % mymodulus;
+                const auto subresult = solve2(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, indent + " ");
+                const auto blah2 = (blah * subresult) % mymodulus;
                 //cout << indent << "trying next layer size: " << nextLayerSize << " numPermutationsForThisLayer: " << numPermutationsForThisLayer << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
-                result = (result + (((numPermutationsForThisLayer * contributionFromFirstLayer) % mymodulus) * solve2(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, indent + " ") % mymodulus)) % mymodulus;
+                result = (result + blah2) % mymodulus;
+                //result = (result + (((numPermutationsForThisLayer * contributionFromFirstLayer) % mymodulus) *  % mymodulus)) % mymodulus;
             }
         }
         else
@@ -312,7 +317,7 @@ int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remai
     }
     else
     {
-        cout << "layer not in order" << endl;
+        //cout << "layer not in order" << endl;
     }
     //cout << indent << "returning " << result << endl;
     assert(result >= 0 && result < mymodulus);
@@ -344,7 +349,7 @@ int main()
     for (int64_t i = 1; i <= M; i++)
     {
         factorial = (factorial * i) % mymodulus;
-        cout << "factorial: " << factorial << endl;
+        //cout << "factorial: " << factorial << endl;
         factorialLookup[i] = factorial;
         const auto factorialInverse = quickPower(factorial, mymodulus - 2);
         assert((factorial * factorialInverse) % mymodulus == 1);
@@ -355,10 +360,12 @@ int main()
     int64_t result = 0;
     for (int i = 1; i <= M; i++)
     {
-        result += solve2(array, 0, true, M, i);
+        result = (result + solve2(array, 0, true, M, i)) % mymodulus;
     }
-    const auto bruteForceResult  = bruteForce(array);
-    cout << "brute force: " << bruteForceResult << endl;
-    cout << "result: " << result << endl;
+    //const auto bruteForceResult  = bruteForce(array);
+    //cout << "brute force: " << bruteForceResult << endl;
+    //cout << "result: " << result << endl;
+    //cout << "mymodulus: " << mymodulus << endl;
+    cout << result << endl;
 }
 
