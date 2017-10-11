@@ -63,22 +63,22 @@ namespace
     vector<int> a;
 }
 
-int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(bool isFirst, int remaining, int layerSize)
+int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int layerSize)
 {
-    assert(remaining >= 0 && remaining < lookup.size());
+    assert(numRemaining >= 0 && numRemaining < lookup.size());
     assert(layerSize >= 1 && layerSize < lookup[0].size());
-    if (remaining == 0)
+    if (numRemaining == 0)
         return 1;
-    if (remaining < layerSize)
+    if (numRemaining < layerSize)
         return 0; 
 
-    int64_t& memoiseEntryRef = lookup[remaining][layerSize];
+    int64_t& memoiseEntryRef = lookup[numRemaining][layerSize];
     if (memoiseEntryRef != -1)
         return memoiseEntryRef;
 
     int64_t result = 0;
     bool layerIsInOrder = true;
-    const int posInArray = a.size() - remaining;
+    const int posInArray = a.size() - numRemaining;
     for (int i = posInArray + 1; i < posInArray + layerSize; i++)
     {
         assert(i < a.size());
@@ -91,18 +91,15 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(bool isFirst, int rem
     }
     if (layerIsInOrder)
     {
-        int64_t numPermutationsForThisLayer = 1;
-        if (!isFirst)
-        {
-            numPermutationsForThisLayer = factorial(layerSize);
-        }
-        if (remaining != layerSize)
+        const bool isFirst = (numRemaining == a.size());
+        const int64_t numPermutationsForThisLayer = isFirst ? 1 : factorial(layerSize);
+        if (numRemaining != layerSize)
         {
             for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
             {
                 const auto contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize, ::modulus);
                 const auto permutationFactor = (numPermutationsForThisLayer * contributionFromFirstLayer) % ::modulus;
-                const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(false, remaining - layerSize, nextLayerSize);
+                const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(numRemaining - layerSize, nextLayerSize);
                 const auto adjustedNextLayerResult = (permutationFactor * nextLayerResult) % ::modulus;
                 result = (result + adjustedNextLayerResult) % ::modulus;
             }
@@ -151,7 +148,7 @@ int main()
     int64_t result = 0;
     for (int bottomLayerSize = 1; bottomLayerSize <= M; bottomLayerSize++)
     {
-        result = (result + findNumWaysOfFillingRemainingStartingWithLayerSize(true, M, bottomLayerSize)) % ::modulus;
+        result = (result + findNumWaysOfFillingRemainingStartingWithLayerSize(M, bottomLayerSize)) % ::modulus;
     }
     cout << result << endl;
 }
