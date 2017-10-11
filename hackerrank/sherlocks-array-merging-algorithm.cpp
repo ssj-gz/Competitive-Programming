@@ -13,53 +13,57 @@ using namespace std;
 
 const int64_t modulus = 1'000'000'007ULL;
 
-vector<int64_t> factorialLookup;
-vector<int64_t> factorialInverseLookup;
-
-int64_t factorial(int64_t n)
+namespace 
 {
-    assert(n >= 0 && n < factorialLookup.size());
-    return factorialLookup[n];
-}
+    vector<int64_t> factorialLookup;
+    vector<int64_t> factorialInverseLookup;
 
-int64_t nCr(int64_t n, int64_t r, int64_t modulus)
-{
-    assert(n >= 0 && r >= 0);
-    assert(n >= r);
-    int64_t result = factorialLookup[n];
-    assert(r < factorialInverseLookup.size());
-    assert(n - r < factorialInverseLookup.size());
-    result = (result * factorialInverseLookup[n - r]) % modulus;
-    result = (result * factorialInverseLookup[r] ) % modulus;
-    return result;
-}
-
-int64_t quickPower(int64_t base, int64_t exponent, int64_t modulus)
-{
-    // Raise base to the exponent mod modulus using as few multiplications as 
-    // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
-    int64_t result = 1;
-    int64_t power = 0;
-    while (exponent > 0)
+    int64_t factorial(int64_t n)
     {
-        if (exponent & 1)
-        {
-            int64_t subResult = base;
-            for (int i = 0; i < power; i++)
-            {
-                subResult = (subResult * subResult) % modulus;
-            }
-            result = (result * subResult) % modulus;
-        }
-        exponent >>= 1;
-        power++;
+        assert(n >= 0 && n < factorialLookup.size());
+        return factorialLookup[n];
     }
-    return result;
+
+    int64_t nCr(int64_t n, int64_t r, int64_t modulus)
+    {
+        assert(n >= 0 && r >= 0);
+        assert(n >= r);
+        int64_t result = factorialLookup[n];
+        assert(r < factorialInverseLookup.size());
+        assert(n - r < factorialInverseLookup.size());
+        result = (result * factorialInverseLookup[n - r]) % modulus;
+        result = (result * factorialInverseLookup[r] ) % modulus;
+        return result;
+    }
+
+    int64_t quickPower(int64_t base, int64_t exponent, int64_t modulus)
+    {
+        // Raise base to the exponent mod modulus using as few multiplications as 
+        // we can e.g. base ^ 8 ==  (((base^2)^2)^2).
+        int64_t result = 1;
+        int64_t power = 0;
+        while (exponent > 0)
+        {
+            if (exponent & 1)
+            {
+                int64_t subResult = base;
+                for (int i = 0; i < power; i++)
+                {
+                    subResult = (subResult * subResult) % modulus;
+                }
+                result = (result * subResult) % modulus;
+            }
+            exponent >>= 1;
+            power++;
+        }
+        return result;
+    }
+
+    vector<vector<int64_t>> lookup;
+    vector<int> a;
 }
 
-vector<vector<int64_t>> lookup;
-
-int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(const vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, int64_t modulus)
+int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(const int posInArray, bool isFirst, int remaining, int layerSize)
 {
     assert(remaining >= 0 && remaining < lookup.size());
     assert(layerSize >= 1 && layerSize < lookup[0].size());
@@ -76,9 +80,9 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(const vector<int>& ar
     bool layerIsInOrder = true;
     for (int i = posInArray + 1; i < posInArray + layerSize; i++)
     {
-        assert(i < array.size());
+        assert(i < a.size());
         assert(i - 1 >= 0);
-        if (array[i] < array[i - 1])
+        if (a[i] < a[i - 1])
         {
             layerIsInOrder = false;
             break;
@@ -95,11 +99,11 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(const vector<int>& ar
         {
             for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
             {
-                const auto contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize, modulus);
-                const auto permutationFactor = (numPermutationsForThisLayer * contributionFromFirstLayer) % modulus;
-                const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, modulus);
-                const auto adjustedNextLayerResult = (permutationFactor * nextLayerResult) % modulus;
-                result = (result + adjustedNextLayerResult) % modulus;
+                const auto contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize, ::modulus);
+                const auto permutationFactor = (numPermutationsForThisLayer * contributionFromFirstLayer) % ::modulus;
+                const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(posInArray + layerSize, false, remaining - layerSize, nextLayerSize);
+                const auto adjustedNextLayerResult = (permutationFactor * nextLayerResult) % ::modulus;
+                result = (result + adjustedNextLayerResult) % ::modulus;
             }
         }
         else
@@ -109,7 +113,7 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(const vector<int>& ar
         }
     }
 
-    assert(result >= 0 && result < modulus);
+    assert(result >= 0 && result < ::modulus);
     assert(memoiseEntryRef == -1);
     memoiseEntryRef = result;
     return result;
@@ -121,11 +125,10 @@ int main()
     int M;
     cin >> M;
 
-    vector<int> array(M);
-
+    a.resize(M);
     for (int i = 0; i < M; i++)
     {
-        cin >> array[i];
+        cin >> a[i];
     }
 
     lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
@@ -147,7 +150,7 @@ int main()
     int64_t result = 0;
     for (int i = 1; i <= M; i++)
     {
-        result = (result + findNumWaysOfFillingRemainingStartingWithLayerSize(array, 0, true, M, i, ::modulus)) % ::modulus;
+        result = (result + findNumWaysOfFillingRemainingStartingWithLayerSize(0, true, M, i)) % ::modulus;
     }
     cout << result << endl;
 }
