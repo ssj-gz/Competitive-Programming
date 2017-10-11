@@ -149,9 +149,9 @@ int main()
     }
 
     int64_t result = 0;
-    for (int i = 1; i <= M; i++)
+    for (int bottomLayerSize = 1; bottomLayerSize <= M; bottomLayerSize++)
     {
-        result = (result + findNumWaysOfFillingRemainingStartingWithLayerSize(true, M, i)) % ::modulus;
+        result = (result + findNumWaysOfFillingRemainingStartingWithLayerSize(true, M, bottomLayerSize)) % ::modulus;
     }
     cout << result << endl;
 }
