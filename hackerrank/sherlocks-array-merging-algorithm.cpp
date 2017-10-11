@@ -78,6 +78,52 @@ int64_t power(int64_t base, int64_t exponent)
 
 vector<vector<int64_t>> lookup;
 
+int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, string indent = string())
+{
+    //cout << indent << "remaining: " << remaining << " posInArray: " << posInArray << " layerSize: " << layerSize << " isFirst: " << isFirst << endl;
+    if (remaining == 0)
+    {
+        //cout << indent << "returning 1 as remaining == 0" << endl;
+        return 1;
+    }
+    if (remaining < layerSize)
+    {
+        //cout << indent << "returning 0 as remaining < layerSize" << endl;
+       return 0; 
+    }
+    for (int i = posInArray + 1; i < posInArray + layerSize; i++)
+    {
+        if (array[i] < array[i - 1])
+        {
+            //cout << indent << "returning 0 as the next layerSize are not in order" << endl;
+            return 0;
+        }
+    }
+    int64_t numPermutationsForThisLayer = 1;
+    if (!isFirst)
+    {
+        numPermutationsForThisLayer = factorial(layerSize);
+    }
+    int64_t result = 0;
+    if (remaining != layerSize)
+    {
+        for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
+        {
+            //int64_t contributionFromFirstLayer = (isFirst ? 1 : nCr(layerSize, layerSize - nextLayerSize));
+            int64_t contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize);
+            //cout << indent << "trying next layer size: " << nextLayerSize << " numPermutationsForThisLayer: " << numPermutationsForThisLayer << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
+            result += numPermutationsForThisLayer * contributionFromFirstLayer * solve2(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, indent + " ");
+        }
+    }
+    else
+    {
+        //cout << indent << "returning " << numPermutationsForThisLayer << " as remaining == layerSize " << numPermutationsForThisLayer << endl;
+        return numPermutationsForThisLayer;
+    }
+    //cout << indent << "returning " << result << endl;
+    return result;
+
+}
 int64_t solve(vector<int>& array, const int posInArray,  int remaining, int previousLayerLength, string indent = string())
 {
     if (remaining == 0)
@@ -100,6 +146,7 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, int prev
     const int maxLayerLength = (previousLayerLength == -1 ? remaining : previousLayerLength - 1);
     for (int numInLayer = 1; numInLayer <= maxLayerLength; numInLayer++)
     {
+        vector<int64_t> results;
         int newPosInArray = posInArray;
         for (int numWithLayerSize = 1; numWithLayerSize <= remaining; numWithLayerSize++)
         {
@@ -136,6 +183,7 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, int prev
 #else
             newPosInArray = posInArray + numWithLayerSize * numInLayer;
 #endif
+            cout << "At " << newPosInArray << " with layer size: " << numInLayer << endl;
             //assert(ok == dbgOk);
             //assert(newPosInArray == dbgNewPosInArray);
             if (!ok)
@@ -207,7 +255,12 @@ int main()
     arrayInfoSoFar.push_back(blah);
     //int64_t result = 0;
     //solve(M, arrayInfoSoFar, M, result);
-    const auto result = solve(array, 0, M, -1);
+    //const auto result = solve(array, 0, M, -1);
+    int64_t result = 0;
+    for (int i = 1; i <= M; i++)
+    {
+        result += solve2(array, 0, true, M, i);
+    }
     cout << result << endl;
 }
 
