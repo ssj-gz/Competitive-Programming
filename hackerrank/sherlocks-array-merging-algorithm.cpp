@@ -11,16 +11,19 @@ struct ArrayInfo
 };
 
 const int64_t mymodulus = 1'000'000'007;
+vector<int64_t> factorialLookup;
 
 int64_t factorial(int64_t n)
 {
     assert(n >= 0);
+    return factorialLookup[n];
     int64_t result = 1;
     for (int64_t i = 1; i <= n; i++)
     {
         result  = (result * i) % mymodulus;
     }
     //cout << " factorial " << n << " = " << result << endl;
+    assert(result == factorialLookup[n]);
     return result;
 }
 
@@ -70,24 +73,40 @@ int64_t solve(vector<int>& array, const int posInArray,  int remaining, int prev
     const int maxLayerLength = (previousLayerLength == -1 ? remaining : previousLayerLength - 1);
     for (int numInLayer = 1; numInLayer <= maxLayerLength; numInLayer++)
     {
+        int newPosInArray = posInArray;
         for (int numWithLayerSize = 1; numWithLayerSize <= remaining; numWithLayerSize++)
         {
             //cout << indent << "remaining: " << remaining << " posInArray: " << posInArray << " previousLayerLength: " << previousLayerLength << " numInLayer: " << numInLayer << " numWithLayerSize: " << numWithLayerSize << endl;
-            bool ok = true;
-            int newPosInArray = posInArray;
+#if 0
+            bool dbgOk = true;
+            int dbgNewPosInArray = posInArray;
             for (int i = 0; i < numWithLayerSize; i++)
             {
-                newPosInArray++;
+                dbgNewPosInArray++;
                 for (int k = 0; k < numInLayer - 1; k++)
                 {
-                    if (newPosInArray == array.size() || array[newPosInArray] < array[newPosInArray - 1])
+                    if (dbgNewPosInArray == array.size() || array[dbgNewPosInArray] < array[dbgNewPosInArray - 1])
                     {
-                        ok = false;
+                        dbgOk = false;
                         //cout << indent << "not ok" << endl;
                     }
-                    newPosInArray++;
+                    dbgNewPosInArray++;
                 }
             }
+#endif
+            newPosInArray++;
+            bool ok = true;
+            for (int k = 0; k < numInLayer - 1; k++)
+            {
+                if (newPosInArray == array.size() || array[newPosInArray] < array[newPosInArray - 1])
+                {
+                    ok = false;
+                    //cout << indent << "not ok" << endl;
+                }
+                newPosInArray++;
+            }
+            //assert(ok == dbgOk);
+            //assert(newPosInArray == dbgNewPosInArray);
             if (!ok)
                 break;
             int64_t numPermutationForTheseLayers = 1;
@@ -140,6 +159,15 @@ int main()
     }
 
     lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
+
+    factorialLookup.resize(M + 1);
+    factorialLookup[0] = 1;
+    int64_t factorial = 1;
+    for (int i = 1; i <= M; i++)
+    {
+        factorial = (factorial * i) % mymodulus;
+        factorialLookup[i] = factorial;
+    }
 
     vector<ArrayInfo> arrayInfoSoFar;
     ArrayInfo blah;
