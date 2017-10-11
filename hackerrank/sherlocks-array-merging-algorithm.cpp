@@ -68,8 +68,8 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(vector<int>& array, c
     if (remaining < layerSize)
         return 0; 
 
-    int64_t& memoEntryRef = lookup[remaining][layerSize];
-    if (lookup[remaining][layerSize] != -1)
+    int64_t& memoiseEntryRef = lookup[remaining][layerSize];
+    if (memoiseEntryRef != -1)
         return lookup[remaining][layerSize];
 
     int64_t result = 0;
@@ -110,8 +110,8 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(vector<int>& array, c
     }
 
     assert(result >= 0 && result < modulus);
-    assert(lookup[remaining][layerSize] == -1);
-    lookup[remaining][layerSize] = result;
+    assert(memoiseEntryRef == -1);
+    memoiseEntryRef = result;
     return result;
 
 }
