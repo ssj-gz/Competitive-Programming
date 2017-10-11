@@ -80,6 +80,8 @@ vector<vector<int64_t>> lookup;
 
 int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, string indent = string())
 {
+    assert(remaining >= 0 && remaining < lookup.size());
+    assert(layerSize >= 1 && layerSize < lookup[0].size());
     //cout << indent << "remaining: " << remaining << " posInArray: " << posInArray << " layerSize: " << layerSize << " isFirst: " << isFirst << endl;
     if (remaining == 0)
     {
@@ -89,38 +91,48 @@ int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remai
     if (remaining < layerSize)
     {
         //cout << indent << "returning 0 as remaining < layerSize" << endl;
-       return 0; 
+        return 0; 
     }
+    if (lookup[remaining][layerSize] != -1)
+        return lookup[remaining][layerSize];
+
+    int64_t result = 0;
+    bool layerIsInOrder = true;
     for (int i = posInArray + 1; i < posInArray + layerSize; i++)
     {
         if (array[i] < array[i - 1])
         {
             //cout << indent << "returning 0 as the next layerSize are not in order" << endl;
-            return 0;
+            layerIsInOrder = false;
+            break;
         }
     }
-    int64_t numPermutationsForThisLayer = 1;
-    if (!isFirst)
+    if (layerIsInOrder)
     {
-        numPermutationsForThisLayer = factorial(layerSize);
-    }
-    int64_t result = 0;
-    if (remaining != layerSize)
-    {
-        for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
+        int64_t numPermutationsForThisLayer = 1;
+        if (!isFirst)
         {
-            //int64_t contributionFromFirstLayer = (isFirst ? 1 : nCr(layerSize, layerSize - nextLayerSize));
-            int64_t contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize);
-            //cout << indent << "trying next layer size: " << nextLayerSize << " numPermutationsForThisLayer: " << numPermutationsForThisLayer << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
-            result += numPermutationsForThisLayer * contributionFromFirstLayer * solve2(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, indent + " ");
+            numPermutationsForThisLayer = factorial(layerSize);
         }
-    }
-    else
-    {
-        //cout << indent << "returning " << numPermutationsForThisLayer << " as remaining == layerSize " << numPermutationsForThisLayer << endl;
-        return numPermutationsForThisLayer;
+        if (remaining != layerSize)
+        {
+            for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
+            {
+                //int64_t contributionFromFirstLayer = (isFirst ? 1 : nCr(layerSize, layerSize - nextLayerSize));
+                int64_t contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize);
+                //cout << indent << "trying next layer size: " << nextLayerSize << " numPermutationsForThisLayer: " << numPermutationsForThisLayer << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
+                result = (result + (((numPermutationsForThisLayer * contributionFromFirstLayer) % mymodulus) * solve2(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, indent + " ") % mymodulus)) % mymodulus;
+            }
+        }
+        else
+        {
+            //cout << indent << "returning " << numPermutationsForThisLayer << " as remaining == layerSize " << numPermutationsForThisLayer << endl;
+            result = numPermutationsForThisLayer;
+        }
     }
     //cout << indent << "returning " << result << endl;
+    assert(lookup[remaining][layerSize] == -1);
+    lookup[remaining][layerSize] = result;
     return result;
 
 }
