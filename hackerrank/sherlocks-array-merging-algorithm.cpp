@@ -57,19 +57,20 @@ int64_t quickPower(int64_t base, int64_t exponent, int64_t modulus)
     return result;
 }
 
-vector<vector<vector<int64_t>>> lookup;
+vector<vector<int64_t>> lookup;
 
 int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, int64_t modulus)
 {
-    assert(remaining >= 0 && remaining < lookup[0].size());
-    assert(layerSize >= 1 && layerSize < lookup[0][0].size());
+    assert(remaining >= 0 && remaining < lookup.size());
+    assert(layerSize >= 1 && layerSize < lookup[0].size());
     if (remaining == 0)
         return 1;
     if (remaining < layerSize)
         return 0; 
 
-    if (lookup[isFirst][remaining][layerSize] != -1)
-        return lookup[isFirst][remaining][layerSize];
+    int64_t& memoEntryRef = lookup[remaining][layerSize];
+    if (lookup[remaining][layerSize] != -1)
+        return lookup[remaining][layerSize];
 
     int64_t result = 0;
     bool layerIsInOrder = true;
@@ -109,8 +110,8 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(vector<int>& array, c
     }
 
     assert(result >= 0 && result < modulus);
-    assert(lookup[isFirst][remaining][layerSize] == -1);
-    lookup[isFirst][remaining][layerSize] = result;
+    assert(lookup[remaining][layerSize] == -1);
+    lookup[remaining][layerSize] = result;
     return result;
 
 }
@@ -127,7 +128,7 @@ int main()
         cin >> array[i];
     }
 
-    lookup.resize(2, vector<vector<int64_t>>(M + 1, vector<int64_t>(M + 1, -1)));
+    lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
 
     factorialLookup.resize(M + 1);
     factorialLookup[0] = 1;
