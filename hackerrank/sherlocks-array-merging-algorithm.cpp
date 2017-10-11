@@ -12,6 +12,7 @@ struct ArrayInfo
 
 const int64_t mymodulus = 1'000'000'007;
 vector<int64_t> factorialLookup;
+vector<int64_t> factorialInverseLookup;
 
 int64_t factorial(int64_t n)
 {
@@ -33,8 +34,8 @@ int64_t nCr(int64_t n, int64_t r)
         swap(n, r);
     assert(n >= 0 && r >= 0);
     int64_t result = factorial(n);
-    result /= factorial(n - r);
-    result /= factorial(r);
+    result = (result * factorialInverseLookup[n - r]) % mymodulus;
+    result = (result * factorialInverseLookup[r] ) % mymodulus;
     //cout << " nCr " << n << "," << r << " = " << result << endl;
     return result;
 }
@@ -252,12 +253,17 @@ int main()
     lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
 
     factorialLookup.resize(M + 1);
+    factorialInverseLookup.resize(M + 1);
     factorialLookup[0] = 1;
+    factorialInverseLookup[0] = 1;
     int64_t factorial = 1;
     for (int i = 1; i <= M; i++)
     {
         factorial = (factorial * i) % mymodulus;
         factorialLookup[i] = factorial;
+        const auto factorialInverse = quickPower(factorial, mymodulus - 2);
+        assert((factorial * factorialInverse) % mymodulus == 1);
+        factorialInverseLookup[i] = factorialInverse;
     }
 
     vector<ArrayInfo> arrayInfoSoFar;
