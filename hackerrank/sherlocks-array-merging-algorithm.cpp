@@ -28,7 +28,7 @@ namespace
     {
         assert(n >= 0 && r >= 0);
         assert(n >= r);
-        int64_t result = factorialLookup[n];
+        int64_t result = factorial(n);
         assert(r < factorialInverseLookup.size());
         assert(n - r < factorialInverseLookup.size());
         result = (result * factorialInverseLookup[n - r]) % modulus;
