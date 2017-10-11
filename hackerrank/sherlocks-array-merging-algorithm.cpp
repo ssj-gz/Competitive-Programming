@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-10-11 15:10
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -130,8 +130,8 @@ int main()
     lookup.resize(2, vector<vector<int64_t>>(M + 1, vector<int64_t>(M + 1, -1)));
 
     factorialLookup.resize(M + 1);
-    factorialInverseLookup.resize(M + 1);
     factorialLookup[0] = 1;
+    factorialInverseLookup.resize(M + 1);
     factorialInverseLookup[0] = 1;
     int64_t factorial = 1;
     for (int64_t i = 1; i <= M; i++)
