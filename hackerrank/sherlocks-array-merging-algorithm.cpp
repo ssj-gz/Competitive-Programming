@@ -70,7 +70,7 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(vector<int>& array, c
 
     int64_t& memoiseEntryRef = lookup[remaining][layerSize];
     if (memoiseEntryRef != -1)
-        return lookup[remaining][layerSize];
+        return memoiseEntryRef;
 
     int64_t result = 0;
     bool layerIsInOrder = true;
