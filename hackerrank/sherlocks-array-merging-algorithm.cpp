@@ -6,6 +6,7 @@
 using namespace std;
 
 const int64_t mymodulus = 1'000'000'007;
+//const int64_t mymodulus = 1061;
 vector<int64_t> factorialLookup;
 vector<int64_t> factorialInverseLookup;
 
@@ -13,21 +14,14 @@ int64_t factorial(int64_t n)
 {
     assert(n >= 0);
     return factorialLookup[n];
-    int64_t result = 1;
-    for (int64_t i = 1; i <= n; i++)
-    {
-        result  = (result * i) % mymodulus;
-    }
-    //cout << " factorial " << n << " = " << result << endl;
-    assert(result == factorialLookup[n]);
-    return result;
 }
 
 int64_t nCr(int64_t n, int64_t r)
 {
-    if (n < r)
-        swap(n, r);
+    //if ()
+        //swap(n, r);
     assert(n >= 0 && r >= 0);
+    assert(n >= r);
     int64_t result = factorial(n);
     result = (result * factorialInverseLookup[n - r]) % mymodulus;
     result = (result * factorialInverseLookup[r] ) % mymodulus;
@@ -58,26 +52,13 @@ int64_t quickPower(int64_t n, int64_t m)
     return result;
 }
 
-int64_t power(int64_t base, int64_t exponent)
-{
-#if 0
-    int64_t dbgResult = 1;
-    for (int i = 0; i < exponent; i++)
-    {
-        dbgResult = (dbgResult * base) % mymodulus;
-    }
-    assert(dbgResult == quickPower(base, exponent));
-#endif
-    auto result = quickPower(base, exponent);
-    return result;
-}
-
-vector<vector<int64_t>> lookup;
+vector<vector<vector<int64_t>>> lookup;
 
 int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remaining, int layerSize, string indent = string())
 {
-    assert(remaining >= 0 && remaining < lookup.size());
-    assert(layerSize >= 1 && layerSize < lookup[0].size());
+    //cout << "indent.size(): " << indent.size() << endl;
+    assert(remaining >= 0 && remaining < lookup[0].size());
+    assert(layerSize >= 1 && layerSize < lookup[0][0].size());
     //cout << indent << "remaining: " << remaining << " posInArray: " << posInArray << " layerSize: " << layerSize << " isFirst: " << isFirst << endl;
     if (remaining == 0)
     {
@@ -89,13 +70,15 @@ int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remai
         //cout << indent << "returning 0 as remaining < layerSize" << endl;
         return 0; 
     }
-    if (lookup[remaining][layerSize] != -1)
-        return lookup[remaining][layerSize];
+    if (lookup[isFirst][remaining][layerSize] != -1)
+        return lookup[isFirst][remaining][layerSize];
 
     int64_t result = 0;
     bool layerIsInOrder = true;
     for (int i = posInArray + 1; i < posInArray + layerSize; i++)
     {
+        assert(i < array.size());
+        assert(i - 1 >= 0);
         if (array[i] < array[i - 1])
         {
             //cout << indent << "returning 0 as the next layerSize are not in order" << endl;
@@ -115,7 +98,7 @@ int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remai
             for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
             {
                 //int64_t contributionFromFirstLayer = (isFirst ? 1 : nCr(layerSize, layerSize - nextLayerSize));
-                int64_t contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize);
+                auto contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize);
                 //cout << indent << "trying next layer size: " << nextLayerSize << " numPermutationsForThisLayer: " << numPermutationsForThisLayer << " contributionFromFirstLayer: " << contributionFromFirstLayer << endl;
                 result = (result + (((numPermutationsForThisLayer * contributionFromFirstLayer) % mymodulus) * solve2(array, posInArray + layerSize, false, remaining - layerSize, nextLayerSize, indent + " ") % mymodulus)) % mymodulus;
             }
@@ -126,9 +109,14 @@ int64_t solve2(vector<int>& array, const int posInArray, bool isFirst, int remai
             result = numPermutationsForThisLayer;
         }
     }
+    else
+    {
+        cout << "layer not in order" << endl;
+    }
     //cout << indent << "returning " << result << endl;
-    assert(lookup[remaining][layerSize] == -1);
-    lookup[remaining][layerSize] = result;
+    assert(result >= 0 && result < mymodulus);
+    assert(lookup[isFirst][remaining][layerSize] == -1);
+    lookup[isFirst][remaining][layerSize] = result;
     return result;
 
 }
@@ -145,7 +133,7 @@ int main()
         cin >> array[i];
     }
 
-    lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
+    lookup.resize(2, vector<vector<int64_t>>(M + 1, vector<int64_t>(M + 1, -1)));
 
     factorialLookup.resize(M + 1);
     factorialInverseLookup.resize(M + 1);
@@ -158,6 +146,7 @@ int main()
         factorialLookup[i] = factorial;
         const auto factorialInverse = quickPower(factorial, mymodulus - 2);
         assert((factorial * factorialInverse) % mymodulus == 1);
+        assert(factorialInverse >= 0 && factorialInverse < mymodulus);
         factorialInverseLookup[i] = factorialInverse;
     }
 
