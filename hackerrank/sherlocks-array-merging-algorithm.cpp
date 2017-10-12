@@ -47,7 +47,7 @@ namespace
             if (exponent & 1)
             {
                 int64_t subResult = base;
-                for (int i = 0; i < power; i++)
+                for (auto i = 0; i < power; i++)
                 {
                     subResult = (subResult * subResult) % modulus;
                 }
@@ -66,7 +66,7 @@ namespace
         factorialInverseLookup.resize(maxN + 1);
         factorialInverseLookup[0] = 1;
         int64_t factorial = 1;
-        for (int64_t i = 1; i <= maxN; i++)
+        for (auto i = 1; i <= maxN; i++)
         {
             factorial = (factorial * i) % ::modulus;
             factorialLookup[i] = factorial;
@@ -91,14 +91,14 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int
     if (numRemaining < layerSize)
         return 0; 
 
-    int64_t& memoiseEntryRef = lookup[numRemaining][layerSize];
+    auto& memoiseEntryRef = lookup[numRemaining][layerSize];
     if (memoiseEntryRef != -1)
         return memoiseEntryRef;
 
     int64_t result = 0;
-    bool layerIsInOrder = true;
-    const int posInArray = a.size() - numRemaining;
-    for (int i = posInArray + 1; i < posInArray + layerSize; i++)
+    auto layerIsInOrder = true;
+    const auto posInArray = a.size() - numRemaining;
+    for (auto i = posInArray + 1; i < posInArray + layerSize; i++)
     {
         assert(i < a.size());
         assert(i - 1 >= 0);
@@ -110,8 +110,8 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int
     }
     if (layerIsInOrder)
     {
-        const bool isBottomLayer = (numRemaining == a.size());
-        const int64_t numPermutationsForThisLayer = isBottomLayer ? 1 : factorial(layerSize);
+        const auto isBottomLayer = (numRemaining == a.size());
+        const auto numPermutationsForThisLayer = isBottomLayer ? 1 : factorial(layerSize);
         if (numRemaining != layerSize)
         {
             for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
