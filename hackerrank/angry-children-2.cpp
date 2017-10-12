@@ -82,7 +82,7 @@ int main()
     // Thus, when trying to find the mininum unfairness, we need only consider consecutive elements.  Let D = {p1, p2, ... pk} with pi+1 = pi + 1 i = 1, ... k-1.
     // We can abbreviate this to D(l) i.e. D(l) = {l, l + 1, ... l + k - 1}. Let total(D(l)) = sum [ l <= i <= l + k - 1] {C(i)}
     //
-    // Now, if we knew Unf(D(l)), how could we efficiently compute Unf(D(l+1))? (D(l + 1) = {l + 1, l + 2, ... l + k}.
+    // Now, if we knew Unf(D(l)), how could we efficiently compute Unf(D(l+1))? (D(l + 1) = {l + 1, l + 2, ... l + k}).
     //
     //   Unf(D(l + 1)) = sum [ l + 1 <= i < j <= l + k ] {C(j) - C(i)}
     //  = sum [l + 1 <= i < j <= l + k - 1] {C(j) - C(i)} + sum [ l + 1 <= i <= l + k - 1] {C(l + k) - C(i)}
@@ -100,7 +100,7 @@ int main()
     //
     //  Unf(D(l + 1) = Unf(D(l)) + (k + 1) * numInPacketLost + (k - 1) * numInPacketGained - 2 * total(D(l))
     //
-    // and that's about it: the minimum unfairness over all possible distributions is the min [l = 1 ... n - k + 1] {Unf(d(l))}.
+    // and that's about it: the minimum unfairness over all possible distributions is the min [l = 1 ... n - k + 1] {Unf(D(l))}.
     int N, K;
     cin >> N >> K;
 
