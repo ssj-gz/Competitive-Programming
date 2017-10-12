@@ -59,8 +59,27 @@ namespace
         return result;
     }
 
+    void buildFactorialLookups(int maxN)
+    {
+        factorialLookup.resize(maxN + 1);
+        factorialLookup[0] = 1;
+        factorialInverseLookup.resize(maxN + 1);
+        factorialInverseLookup[0] = 1;
+        int64_t factorial = 1;
+        for (int64_t i = 1; i <= maxN; i++)
+        {
+            factorial = (factorial * i) % ::modulus;
+            factorialLookup[i] = factorial;
+            const auto factorialInverse = quickPower(factorial, ::modulus - 2, ::modulus);
+            assert((factorial * factorialInverse) % ::modulus == 1);
+            factorialInverseLookup[i] = factorialInverse;
+        }
+
+    }
+
     vector<vector<int64_t>> lookup;
     vector<int> a;
+
 }
 
 int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int layerSize)
@@ -131,19 +150,7 @@ int main()
 
     lookup.resize(M + 1, vector<int64_t>(M + 1, -1));
 
-    factorialLookup.resize(M + 1);
-    factorialLookup[0] = 1;
-    factorialInverseLookup.resize(M + 1);
-    factorialInverseLookup[0] = 1;
-    int64_t factorial = 1;
-    for (int64_t i = 1; i <= M; i++)
-    {
-        factorial = (factorial * i) % ::modulus;
-        factorialLookup[i] = factorial;
-        const auto factorialInverse = quickPower(factorial, ::modulus - 2, ::modulus);
-        assert((factorial * factorialInverse) % ::modulus == 1);
-        factorialInverseLookup[i] = factorialInverse;
-    }
+    buildFactorialLookups(M);
 
     int64_t result = 0;
     for (int bottomLayerSize = 1; bottomLayerSize <= M; bottomLayerSize++)
