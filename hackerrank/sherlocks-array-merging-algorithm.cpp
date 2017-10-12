@@ -110,14 +110,14 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int
     }
     if (layerIsInOrder)
     {
-        const bool isFirst = (numRemaining == a.size());
-        const int64_t numPermutationsForThisLayer = isFirst ? 1 : factorial(layerSize);
+        const bool isBottomLayer = (numRemaining == a.size());
+        const int64_t numPermutationsForThisLayer = isBottomLayer ? 1 : factorial(layerSize);
         if (numRemaining != layerSize)
         {
             for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
             {
-                const auto contributionFromFirstLayer = nCr(layerSize, layerSize - nextLayerSize, ::modulus);
-                const auto permutationFactor = (numPermutationsForThisLayer * contributionFromFirstLayer) % ::modulus;
+                const auto contributionFromBottomLayer = nCr(layerSize, layerSize - nextLayerSize, ::modulus);
+                const auto permutationFactor = (numPermutationsForThisLayer * contributionFromBottomLayer) % ::modulus;
                 const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(numRemaining - layerSize, nextLayerSize);
                 const auto adjustedNextLayerResult = (permutationFactor * nextLayerResult) % ::modulus;
                 result = (result + adjustedNextLayerResult) % ::modulus;
