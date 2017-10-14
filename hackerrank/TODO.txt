@@ -1,4 +1,3 @@
-Sherlock's Merging Algorithm (60) [60]
-Coprime Paths (80) [140]
-Hackerrank City (50) [190]
-Kingdom Connectivity (75) [265]
+Coprime Paths (80) [80]
+Hackerrank City (50) [130]
+Kingdom Connectivity (75) [205]
