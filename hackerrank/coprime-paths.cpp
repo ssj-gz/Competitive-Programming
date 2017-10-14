@@ -26,6 +26,7 @@ struct Node
     int primeFactorBitmask = 0;
 
     int height = -1;
+    Node* parent = nullptr;
 
     array<Node*, log2MaxNodes> ancestorPowerOf2Above;
 };
@@ -34,6 +35,7 @@ void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors)
 {
     const int height = ancestors.size();
     node->height = height;
+    node->parent = parent;
 
     int powerOf2 = 1;
     for (int exponent = 0; exponent < log2MaxNodes; exponent++)
@@ -112,8 +114,15 @@ Node* findLCA(Node* node1, Node* node2)
         const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
         cout << "minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
         cout << "lca node1: " << node1->index << " node2: " << node2->index << endl;
+        if (node1 != node2 && node1->parent == node2->parent)
+        {
+            cout << "wee" << endl;
+            return node1->parent;
+        }
+
         if (heightDecrease == 0)
         {
+            assert(node1 == node2);
             break;
         }
         const int nodesAncestorHeight = currentNodesHeight - heightDecrease;
@@ -128,7 +137,7 @@ Node* findLCA(Node* node1, Node* node2)
         }
         else
         {
-            currentNodesHeight = nodesAncestorHeight;
+            currentNodesHeight = nodesAncestorHeight - 1;
             maxLCAHeight = currentNodesHeight;
             node1 = node1Ancestor;
             node2 = node2Ancestor;
