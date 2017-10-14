@@ -39,9 +39,10 @@ struct Node
     Node* parent = nullptr;
 
     array<Node*, log2MaxNodes> ancestorPowerOf2Above;
+    array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot;
 };
 
-void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors)
+void fillInAncestors(Node* node, Node* parent, const array<int, numNodePrimeFactorCombinations>& numPrimesWithCombinationToRoot, vector<Node*>& ancestors)
 {
     const int height = ancestors.size();
     node->height = height;
@@ -62,11 +63,14 @@ void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors)
     }
 
     ancestors.push_back(node);
+    array<int, numNodePrimeFactorCombinations> nextNumPrimesWithCombinationToRoot = numPrimesWithCombinationToRoot;
+    nextNumPrimesWithCombinationToRoot[node->primeFactorBitmask]++;
+    node->numPrimesWithCombinationToRoot = nextNumPrimesWithCombinationToRoot;
     for (auto neighbour : node->neighbours)
     {
         if (neighbour == parent)
             continue;
-        fillInAncestors(neighbour, node, ancestors);
+        fillInAncestors(neighbour, node, nextNumPrimesWithCombinationToRoot, ancestors);
     }
     ancestors.pop_back();
 
@@ -250,7 +254,6 @@ int main()
         int nodeValue;
         cin >> nodeValue;
         nodes[i].value = nodeValue;
-        maxNodeValue = max(maxNodeValue, nodeValue);
         nodes[i].index = i + 1;
     }
     for (int i = 0; i < n - 1; i++)
@@ -270,132 +273,203 @@ int main()
     srand(time(0));
     while (true)
     {
-    //n = 9;
-    n = rand() % 100 + 1;
-    cout << "n: " << n << endl;
-    vector<Node> nodes;
-    nodes.reserve(n);
-    nodes.push_back(Node());
-    nodes.front().index = 0;
-    for (int i = 1; i < n; i++)
-    {
-        int parentIndex = rand() % i;
-        nodes.push_back(Node());
-
-        auto node1 = &(nodes[i]);
-        auto node2 = &(nodes[parentIndex]);
-        node1->index = i;
-
-        node1->neighbours.push_back(node2);
-        node2->neighbours.push_back(node1);
-
-        //cout << "node " << i << " has parent: " << parentIndex << endl;
-    }
-#endif
-
-    int maxNodeValue = 0;
-    for (auto& node : nodes)
-    {
-        maxNodeValue = max(node.value, maxNodeValue);
-    }
-
-    const int primeLimit = sqrt(maxNodeValue);
-    vector<bool> isPrime(maxNodeValue + 1, true);
-    for (int factor = 2; factor <= primeLimit; factor++)
-    {
-        int i = 2 * factor;
-        while (i <= maxNodeValue)
+        //n = 9;
+        n = rand() % 100 + 1;
+        cout << "n: " << n << endl;
+        const int numPrimes = (rand() % 3) + 1;
+        vector<int> primesToUse;
+        for (int i = 0; i < numPrimes; i++)
         {
-            isPrime[i] = false;
-            i += factor;
-        }
-    }
-
-    vector<int> primesUpToMaxValue;
-    for (int i = 2; i < isPrime.size(); i++)
-    {
-        if (isPrime[i])
-            primesUpToMaxValue.push_back(i);
-    }
-
-    vector<int> sharedNodePrimeFactors;
-    for (auto& node : nodes)
-    {
-        auto nodeValue = node.value;
-        vector<int> primeFactors;
-        for (auto prime : primesUpToMaxValue)
-        {
-            if (nodeValue == 1)
-                break;
-            if (prime * prime > nodeValue)
+            while (true)
             {
-                primeFactors.push_back(nodeValue);
-                break;
-            }
-            if ((nodeValue % prime) == 0)
-            {
-                primeFactors.push_back(prime);
-                while ((nodeValue % prime) == 0)
+                const int prime = rand() % 10'000;
+                if (isPrime(prime))
                 {
-                    nodeValue /= prime;
+                    primesToUse.push_back(prime);
+                    cout << " using prime: " << prime << endl;
+                    break;
                 }
             }
         }
-        for (const auto primeFactor : primeFactors)
+        cout << "#primesToUse: " << primesToUse.size() << endl;
+        vector<Node> nodes;
+        nodes.reserve(n);
+        nodes.push_back(Node());
+        nodes.front().index = 0;
+        for (int i = 1; i < n; i++)
         {
-            const auto occurrenceInSharedNodePrimeFactors = find(sharedNodePrimeFactors.begin(), sharedNodePrimeFactors.end(), primeFactor);
-            int indexInSharedNodePrimeFactors = -1;
-            if (occurrenceInSharedNodePrimeFactors == sharedNodePrimeFactors.end())
-            {
-                indexInSharedNodePrimeFactors = sharedNodePrimeFactors.size();
-                sharedNodePrimeFactors.push_back(primeFactor);
-                assert(sharedNodePrimeFactors.size() <= maxTotalPrimeFactorsOfAllNodes);
-            }
-            else
-            {
-                indexInSharedNodePrimeFactors = distance(sharedNodePrimeFactors.begin(), occurrenceInSharedNodePrimeFactors);
-            }
-            node.primeFactorBitmask |= (1 << indexInSharedNodePrimeFactors);
-        }
-    }
+            int parentIndex = rand() % i;
+            nodes.push_back(Node());
 
-    vector<Node*> ancestors;
-    auto rootNode = &(nodes.front());
-    cout << " rootNode: " << rootNode << endl;
-    fillInAncestors(rootNode, nullptr, ancestors);
-
-    for (int i = 0; i < q; i++)
-    {
-        int u, v;
-        cin >> u >> v;
-        u--;
-        v--;
-
-        auto node1 = &(nodes[u]);
-        auto node2 = &(nodes[v]);
-
-        cout << "node1: " << node1->index << " node2: " << node2->index << endl;
-        const auto bruteForceResult = bruteForce(node1, node2);
-        cout << "bruteForceResult: " << bruteForceResult << endl;
-        const auto lcaOpt = findLCA(node1, node2);
-        const auto lcaBruteForce = findLCABruteForce(node1, node2);
-        cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
-        assert(lcaOpt == lcaBruteForce);
-    }
-#define EXHAUSTIVE
-#ifdef EXHAUSTIVE
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
             auto node1 = &(nodes[i]);
-            auto node2 = &(nodes[j]);
+            auto node2 = &(nodes[parentIndex]);
+            node1->index = i;
+
+
+            node1->neighbours.push_back(node2);
+            node2->neighbours.push_back(node1);
+
+            //cout << "node " << i << " has parent: " << parentIndex << endl;
+        }
+        for (auto& node : nodes)
+        {
+            int64_t nodeValue = 1;
+            while (true)
+            {
+                nodeValue = 1;
+                bool wentBust = false;
+                for (const auto prime : primesToUse)
+                {
+                    int exponent = rand() % 3;
+                    for (int j = 0; j < exponent; j++)
+                    {
+                        nodeValue *= prime;
+                        if (nodeValue > 10'000'000)
+                        {
+                            wentBust = true;
+                            break;
+                        }
+                        assert(nodeValue > 0);
+                    }
+                }
+                cout << "candidate nodeValue: " << nodeValue << endl;
+                if (!wentBust && 1 <= nodeValue && nodeValue <= 10'000'000)
+                    break;
+            }
+            node.value = nodeValue;
+            cout << "using " << nodeValue << endl;
+        }
+#endif
+
+        int largestNodeValue = 0;
+        for (auto& node : nodes)
+        {
+            largestNodeValue = max(node.value, largestNodeValue);
+        }
+
+        const int primeLimit = sqrt(largestNodeValue);
+        vector<bool> isPrime(largestNodeValue + 1, true);
+        for (int factor = 2; factor <= primeLimit; factor++)
+        {
+            int i = 2 * factor;
+            while (i <= largestNodeValue)
+            {
+                isPrime[i] = false;
+                i += factor;
+            }
+        }
+
+        vector<int> primesUpToMaxValue;
+        for (int i = 2; i < isPrime.size(); i++)
+        {
+            if (isPrime[i])
+                primesUpToMaxValue.push_back(i);
+        }
+
+        vector<int> sharedNodePrimeFactors;
+        for (auto& node : nodes)
+        {
+            auto nodeValue = node.value;
+            const auto originalNodeValue = nodeValue;
+            vector<int> primeFactors;
+            for (auto prime : primesUpToMaxValue)
+            {
+                if (nodeValue == 1)
+                    break;
+                if (prime * prime > nodeValue)
+                {
+                    primeFactors.push_back(nodeValue);
+                    break;
+                }
+                if ((nodeValue % prime) == 0)
+                {
+                    primeFactors.push_back(prime);
+                    while ((nodeValue % prime) == 0)
+                    {
+                        nodeValue /= prime;
+                    }
+                }
+            }
+            for (const auto primeFactor : primeFactors)
+            {
+                const auto occurrenceInSharedNodePrimeFactors = find(sharedNodePrimeFactors.begin(), sharedNodePrimeFactors.end(), primeFactor);
+                int indexInSharedNodePrimeFactors = -1;
+                if (occurrenceInSharedNodePrimeFactors == sharedNodePrimeFactors.end())
+                {
+                    indexInSharedNodePrimeFactors = sharedNodePrimeFactors.size();
+                    cout << "Found new prime factor: " << primeFactor << " for nodeValue: " << originalNodeValue << endl;
+                    sharedNodePrimeFactors.push_back(primeFactor);
+                    assert(sharedNodePrimeFactors.size() <= maxTotalPrimeFactorsOfAllNodes);
+                }
+                else
+                {
+                    indexInSharedNodePrimeFactors = distance(sharedNodePrimeFactors.begin(), occurrenceInSharedNodePrimeFactors);
+                }
+                node.primeFactorBitmask |= (1 << indexInSharedNodePrimeFactors);
+            }
+        }
+
+        vector<Node*> ancestors;
+        auto rootNode = &(nodes.front());
+        cout << " rootNode: " << rootNode << endl;
+        array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot = {};
+        fillInAncestors(rootNode, nullptr, numPrimesWithCombinationToRoot, ancestors);
+
+        for (int i = 0; i < q; i++)
+        {
+            int u, v;
+            cin >> u >> v;
+            u--;
+            v--;
+
+            auto node1 = &(nodes[u]);
+            auto node2 = &(nodes[v]);
+
+            cout << "node1: " << node1->index << " node2: " << node2->index << endl;
+            const auto bruteForceResult = bruteForce(node1, node2);
+            cout << "bruteForceResult: " << bruteForceResult << endl;
             const auto lcaOpt = findLCA(node1, node2);
             const auto lcaBruteForce = findLCABruteForce(node1, node2);
             cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
             assert(lcaOpt == lcaBruteForce);
+
         }
-    }
+#define EXHAUSTIVE
+#ifdef EXHAUSTIVE
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                auto node1 = &(nodes[i]);
+                auto node2 = &(nodes[j]);
+                const auto lcaOpt = findLCA(node1, node2);
+                const auto lcaBruteForce = findLCABruteForce(node1, node2);
+                cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
+                assert(lcaOpt == lcaBruteForce);
+                array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationAlongPath = {};
+                for (int i = 0; i < numNodePrimeFactorCombinations; i++)
+                {
+                    cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lcaOpt->numPrimesWithCombinationToRoot[i]: " << lcaOpt->numPrimesWithCombinationToRoot[i] << endl;
+                    numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i] - lcaOpt->numPrimesWithCombinationToRoot[i];
+                    numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i] - lcaOpt->numPrimesWithCombinationToRoot[i];
+                    assert(numPrimesWithCombinationAlongPath[i] >= 0);
+                }
+                const auto bruteForceResult = bruteForce(node1, node2);
+                int64_t optimisedResult = 0;
+                for (int i = 0; i < numNodePrimeFactorCombinations; i++)
+                {
+                    for (int j = 0; j < numNodePrimeFactorCombinations; j++)
+                    {
+                        if ((i & j) == 0)
+                        {
+                            optimisedResult += numPrimesWithCombinationAlongPath[i] * numPrimesWithCombinationAlongPath[j];
+                        }
+                    }
+                }
+                cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
+
+            }
+        }
 #endif
 #ifdef RANDOM
     }
