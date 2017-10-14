@@ -134,7 +134,7 @@ Node* findLCA(Node* node1, Node* node2)
         const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
         cout << "minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
         cout << "lca node1: " << node1->index << " node2: " << node2->index << endl;
-        if (node1 != node2 && node1->parent == node2->parent)
+        if (node1 != node2 && node1->parent == node2->parent && node1->parent)
         {
             cout << "wee" << endl;
             return node1->parent;
@@ -143,7 +143,7 @@ Node* findLCA(Node* node1, Node* node2)
         if (heightDecrease == 0)
         {
             assert(node1 == node2);
-            break;
+            return node1;;
         }
         const int nodesAncestorHeight = currentNodesHeight - heightDecrease;
         auto node1Ancestor = findKthAncestor(node1, heightDecrease);
@@ -163,6 +163,7 @@ Node* findLCA(Node* node1, Node* node2)
             node2 = node2Ancestor;
         }
     }
+    assert(false);
     return nullptr;
 }
 
@@ -328,10 +329,12 @@ int main()
         auto node1 = &(nodes[u]);
         auto node2 = &(nodes[v]);
 
+        cout << "node1: " << node1->index << " node2: " << node2->index << endl;
         const auto bruteForceResult = bruteForce(node1, node2);
         cout << "bruteForceResult: " << bruteForceResult << endl;
         const auto lcaOpt = findLCA(node1, node2);
         const auto lcaBruteForce = findLCABruteForce(node1, node2);
+        cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
         assert(lcaOpt == lcaBruteForce);
     }
 
