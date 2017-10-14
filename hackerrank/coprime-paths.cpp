@@ -18,6 +18,16 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 constexpr int log2MaxNodes = log2(maxNodes);
 
 
+bool isPrime(int n)
+{
+    for (int i = 2; i <= sqrt(n) + 1; i++)
+    {
+        if (i < n && (n % i) == 0)
+            return false;
+    }
+    return true;
+}
+
 struct Node
 {
     int index = -1;
@@ -107,6 +117,7 @@ Node* findLCABruteForce(Node* node1, Node* node2)
 
 Node* findLCA(Node* node1, Node* node2)
 {
+    cout << "findLCA original node1 : " << node1->index << " original node2 : " << node2->index << endl;
     cout << "findLCA original node1 height: " << node1->height << " original node2 height: " << node2->height << endl;
     if (node1->height != node2->height)
     {
@@ -132,8 +143,10 @@ Node* findLCA(Node* node1, Node* node2)
     while (true)
     {
         const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
-        cout << "minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
-        cout << "lca node1: " << node1->index << " node2: " << node2->index << endl;
+        cout << " minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
+        cout << " lca node1: " << node1->index << " node2: " << node2->index << endl;
+        assert(node1->height == node2->height);
+        assert(node1->height == currentNodesHeight); 
         if (node1 != node2 && node1->parent == node2->parent && node1->parent)
         {
             cout << "wee" << endl;
@@ -142,6 +155,8 @@ Node* findLCA(Node* node1, Node* node2)
 
         if (heightDecrease == 0)
         {
+            if (node1 != node2)
+                cout << "whoops" << endl;
             assert(node1 == node2);
             return node1;;
         }
@@ -159,8 +174,8 @@ Node* findLCA(Node* node1, Node* node2)
         {
             currentNodesHeight = nodesAncestorHeight - 1;
             maxLCAHeight = currentNodesHeight;
-            node1 = node1Ancestor;
-            node2 = node2Ancestor;
+            node1 = node1Ancestor->parent;
+            node2 = node2Ancestor->parent;
         }
     }
     assert(false);
@@ -206,8 +221,6 @@ int64_t bruteForce(Node* node1, Node* node2)
     }
     cout << endl;
 
-
-
     int64_t result = 0;
     for (auto nodeInPathIndex = 0; nodeInPathIndex < pathBetweenNodes.size(); nodeInPathIndex++)
     {
@@ -226,11 +239,12 @@ int64_t bruteForce(Node* node1, Node* node2)
 int main()
 {
     int n, q;
+#define RANDOM
+#ifndef RANDOM
     cin >> n >> q;
 
     vector<Node> nodes(n);
 
-    int maxNodeValue = 0;
     for (int i = 0; i < n; i++)
     {
         int nodeValue;
@@ -238,6 +252,51 @@ int main()
         nodes[i].value = nodeValue;
         maxNodeValue = max(maxNodeValue, nodeValue);
         nodes[i].index = i + 1;
+    }
+    for (int i = 0; i < n - 1; i++)
+    {
+        int u, v;
+        cin >> u >> v;
+        u--;
+        v--;
+
+        auto node1 = &(nodes[u]);
+        auto node2 = &(nodes[v]);
+
+        node1->neighbours.push_back(node2);
+        node2->neighbours.push_back(node1);
+    }
+#else
+    srand(time(0));
+    while (true)
+    {
+    //n = 9;
+    n = rand() % 100 + 1;
+    cout << "n: " << n << endl;
+    vector<Node> nodes;
+    nodes.reserve(n);
+    nodes.push_back(Node());
+    nodes.front().index = 0;
+    for (int i = 1; i < n; i++)
+    {
+        int parentIndex = rand() % i;
+        nodes.push_back(Node());
+
+        auto node1 = &(nodes[i]);
+        auto node2 = &(nodes[parentIndex]);
+        node1->index = i;
+
+        node1->neighbours.push_back(node2);
+        node2->neighbours.push_back(node1);
+
+        //cout << "node " << i << " has parent: " << parentIndex << endl;
+    }
+#endif
+
+    int maxNodeValue = 0;
+    for (auto& node : nodes)
+    {
+        maxNodeValue = max(node.value, maxNodeValue);
     }
 
     const int primeLimit = sqrt(maxNodeValue);
@@ -300,20 +359,6 @@ int main()
         }
     }
 
-    for (int i = 0; i < n - 1; i++)
-    {
-        int u, v;
-        cin >> u >> v;
-        u--;
-        v--;
-
-        auto node1 = &(nodes[u]);
-        auto node2 = &(nodes[v]);
-
-        node1->neighbours.push_back(node2);
-        node2->neighbours.push_back(node1);
-    }
-
     vector<Node*> ancestors;
     auto rootNode = &(nodes.front());
     cout << " rootNode: " << rootNode << endl;
@@ -337,6 +382,24 @@ int main()
         cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
         assert(lcaOpt == lcaBruteForce);
     }
+#define EXHAUSTIVE
+#ifdef EXHAUSTIVE
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            auto node1 = &(nodes[i]);
+            auto node2 = &(nodes[j]);
+            const auto lcaOpt = findLCA(node1, node2);
+            const auto lcaBruteForce = findLCABruteForce(node1, node2);
+            cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
+            assert(lcaOpt == lcaBruteForce);
+        }
+    }
+#endif
+#ifdef RANDOM
+    }
+#endif
 
 }
 
