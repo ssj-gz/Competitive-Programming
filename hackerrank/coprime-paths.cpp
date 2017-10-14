@@ -240,10 +240,53 @@ int64_t bruteForce(Node* node1, Node* node2)
     return result;
 }
 
+int64_t findNumCoprimePairsAlongPath(Node* node1, Node* node2)
+{
+    const auto lca = findLCA(node1, node2);
+    int64_t optimisedResult = 0;
+    if (node1 != node2)
+    {
+        array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationAlongPath = {};
+        for (int i = 0; i < numNodePrimeFactorCombinations; i++)
+        {
+            cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lca->numPrimesWithCombinationToRoot[i]: " << lca->numPrimesWithCombinationToRoot[i] << " node1 == lca? " << (node1 == lca) << " node2 == lca? " << (node2 == lca) << endl;
+            if (node1 != lca && node2 != lca)
+            {
+                numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i];
+                numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i];
+                numPrimesWithCombinationAlongPath[i] -= lca->numPrimesWithCombinationToRoot[i];
+                numPrimesWithCombinationAlongPath[i] -= (lca->parent ? lca->parent->numPrimesWithCombinationToRoot[i] : 0);
+            }
+            else if (node1 == lca)
+            {
+                numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i] - (lca->parent ? lca->parent->numPrimesWithCombinationToRoot[i] : 0);
+            }
+            else if (node2 == lca)
+            {
+                numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i] - (lca->parent ? lca->parent->numPrimesWithCombinationToRoot[i] : 0);
+            }
+            assert(numPrimesWithCombinationAlongPath[i] >= 0);
+        }
+        for (int i = 0; i < numNodePrimeFactorCombinations; i++)
+        {
+            for (int j = 0; j < numNodePrimeFactorCombinations; j++)
+            {
+                if ((i & j) == 0)
+                {
+                    optimisedResult += numPrimesWithCombinationAlongPath[i] * numPrimesWithCombinationAlongPath[j];
+                }
+            }
+        }
+        optimisedResult -= numPrimesWithCombinationAlongPath[0];
+    }
+    optimisedResult /= 2;
+    return optimisedResult;
+}
+
 int main()
 {
     int n, q;
-#define RANDOM
+//#define RANDOM
 #ifndef RANDOM
     cin >> n >> q;
 
@@ -274,7 +317,7 @@ int main()
     while (true)
     {
         //n = 9;
-        n = rand() % 10 + 1;
+        n = rand() % 1000 + 1;
         cout << "n: " << n << endl;
         const int numPrimes = (rand() % 3) + 1;
         vector<int> primesToUse;
@@ -428,14 +471,15 @@ int main()
 
             cout << "node1: " << node1->index << " node2: " << node2->index << endl;
             const auto bruteForceResult = bruteForce(node1, node2);
-            cout << "bruteForceResult: " << bruteForceResult << endl;
+            const auto optimisedResult = findNumCoprimePairsAlongPath(node1, node2);
+            cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
             const auto lcaOpt = findLCA(node1, node2);
             const auto lcaBruteForce = findLCABruteForce(node1, node2);
             cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
             assert(lcaOpt == lcaBruteForce);
 
         }
-#define EXHAUSTIVE
+//#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
         for (int i = 0; i < n; i++)
         {
@@ -448,44 +492,8 @@ int main()
                 cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
                 assert(lcaOpt == lcaBruteForce);
                 const auto bruteForceResult = bruteForce(node1, node2);
-                int64_t optimisedResult = 0;
-                if (node1 != node2)
-                {
-                    array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationAlongPath = {};
-                    for (int i = 0; i < numNodePrimeFactorCombinations; i++)
-                    {
-                        cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lcaOpt->numPrimesWithCombinationToRoot[i]: " << lcaOpt->numPrimesWithCombinationToRoot[i] << " node1 == lcaOpt? " << (node1 == lcaOpt) << " node2 == lcaOpt? " << (node2 == lcaOpt) << endl;
-                        if (node1 != lcaOpt && node2 != lcaOpt)
-                        {
-                            numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i];
-                            numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i];
-                            numPrimesWithCombinationAlongPath[i] -= lcaOpt->numPrimesWithCombinationToRoot[i];
-                            numPrimesWithCombinationAlongPath[i] -= (lcaOpt->parent ? lcaOpt->parent->numPrimesWithCombinationToRoot[i] : 0);
-                        }
-                        else if (node1 == lcaOpt)
-                        {
-                            numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i] - (lcaOpt->parent ? lcaOpt->parent->numPrimesWithCombinationToRoot[i] : 0);
-                        }
-                        else if (node2 == lcaOpt)
-                        {
-                            numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i] - (lcaOpt->parent ? lcaOpt->parent->numPrimesWithCombinationToRoot[i] : 0);
-                        }
-                        assert(numPrimesWithCombinationAlongPath[i] >= 0);
-                    }
-                    for (int i = 0; i < numNodePrimeFactorCombinations; i++)
-                    {
-                        for (int j = 0; j < numNodePrimeFactorCombinations; j++)
-                        {
-                            if ((i & j) == 0)
-                            {
-                                optimisedResult += numPrimesWithCombinationAlongPath[i] * numPrimesWithCombinationAlongPath[j];
-                            }
-                        }
-                    }
-                    optimisedResult -= numPrimesWithCombinationAlongPath[0];
-                }
+                const auto optimisedResult = findNumCoprimePairsAlongPath(node1, node2);
                 //assert(optimisedResult % 2 == 0);
-                optimisedResult /= 2;
                 cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
                 assert(bruteForceResult == optimisedResult);
 
