@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -9,27 +10,146 @@ using namespace std;
 const auto maxTotalPrimeFactorsOfAllNodes = 3;
 const auto numNodePrimeFactorCombinations = (1 << maxTotalPrimeFactorsOfAllNodes) - 1;
 
+constexpr int maxNodes = 25'000;
+constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
+{
+        return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
+}
+constexpr int log2MaxNodes = log2(maxNodes);
+
+
 struct Node
 {
     int index = -1;
     int value = -1;
     vector<Node*> neighbours;
     int primeFactorBitmask = 0;
+
+    int height = -1;
+
+    array<Node*, log2MaxNodes> ancestorPowerOf2Above;
 };
 
-vector<Node*> path(Node* root, Node* destNode, Node* parent, vector<Node*>& pathSoFar)
+void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors)
 {
-    pathSoFar.push_back(root);
+    const int height = ancestors.size();
+    node->height = height;
 
-    if (root == destNode)
+    int powerOf2 = 1;
+    for (int exponent = 0; exponent < log2MaxNodes; exponent++)
+    {
+        if (ancestors.size() >= powerOf2)
+        {
+            node->ancestorPowerOf2Above[exponent] = ancestors[ancestors.size() - powerOf2];
+        }
+        else
+        {
+            node->ancestorPowerOf2Above[exponent] = nullptr;
+        }
+        powerOf2 *= 2;
+    }
+
+    ancestors.push_back(node);
+    for (auto neighbour : node->neighbours)
+    {
+        if (neighbour == parent)
+            continue;
+        fillInAncestors(neighbour, node, ancestors);
+    }
+    ancestors.pop_back();
+
+}
+
+Node* findKthAncestor(Node* node, int k)
+{
+    cout << "originalK: " << k << endl;
+    const auto originalHeight = node->height;
+    const auto originalK = k;
+    Node* ancestor = node;
+    for (int exponent = log2MaxNodes - 1; exponent >= 0; exponent--)
+    {
+        const auto powerOf2 = (1 << exponent);
+        //cout << " exponent: " << exponent << " powerOf2: " << powerOf2 << endl;
+        if (k >= powerOf2) 
+        {
+            assert(ancestor->ancestorPowerOf2Above[exponent] && ancestor->ancestorPowerOf2Above[exponent]->height == ancestor->height - powerOf2);
+            ancestor = ancestor->ancestorPowerOf2Above[exponent];
+            k -= powerOf2;
+        }
+    }
+    cout << "ancestor height: " << ancestor->height << " original height: " << originalHeight << " originalK: " << originalK << endl;
+    assert(ancestor);
+    assert(ancestor->height == originalHeight - originalK);
+    return ancestor;
+}
+
+Node* findLCA(Node* node1, Node* node2)
+{
+    cout << "findLCA original node1 height: " << node1->height << " original node2 height: " << node2->height << endl;
+    if (node1->height != node2->height)
+    {
+        if (node1->height > node2->height)
+        {
+            cout << "adjusting node1" << endl;
+            node1 = findKthAncestor(node1, node1->height - node2->height);
+        }
+        else
+        {
+            cout << "adjusting node2" << endl;
+            node2 = findKthAncestor(node2, node2->height - node1->height);
+            cout << "New node2 height: " << node2->height << endl;
+        }
+    }
+    assert(node1 && node2);
+    assert(node1->height == node2->height);
+
+    int currentNodesHeight = node1->height;
+    int minLCAHeight = 0;
+    int maxLCAHeight = currentNodesHeight;
+    bool found = false;
+    while (true)
+    {
+        const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
+        cout << "minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
+        cout << "lca node1: " << node1->index << " node2: " << node2->index << endl;
+        if (heightDecrease == 0)
+        {
+            break;
+        }
+        const int nodesAncestorHeight = currentNodesHeight - heightDecrease;
+        auto node1Ancestor = findKthAncestor(node1, heightDecrease);
+        auto node2Ancestor = findKthAncestor(node2, heightDecrease);
+        cout << "node1Ancestor: " << node1Ancestor << " node2Ancestor: " << node2Ancestor << endl;
+        assert(node1Ancestor && node2Ancestor);
+
+        if (node1Ancestor == node2Ancestor)
+        {
+            minLCAHeight = nodesAncestorHeight;
+        }
+        else
+        {
+            currentNodesHeight = nodesAncestorHeight;
+            maxLCAHeight = currentNodesHeight;
+            node1 = node1Ancestor;
+            node2 = node2Ancestor;
+        }
+    }
+    return nullptr;
+}
+
+vector<Node*> path(Node* node, Node* destNode, Node* parent, vector<Node*>& pathSoFar)
+{
+    pathSoFar.push_back(node);
+
+    if (node == destNode)
         return pathSoFar;
 
-    for (auto neighbour : root->neighbours)
+    for (auto neighbour : node->neighbours)
     {
         if (neighbour == parent)
             continue;
 
-        const auto pathToDestNode = path(neighbour, destNode, root, pathSoFar);
+        const auto pathToDestNode = path(neighbour, destNode, node, pathSoFar);
 
         if (!pathToDestNode.empty())
         {
@@ -164,6 +284,11 @@ int main()
         node2->neighbours.push_back(node1);
     }
 
+    vector<Node*> ancestors;
+    auto rootNode = &(nodes.front());
+    cout << " rootNode: " << rootNode << endl;
+    fillInAncestors(rootNode, nullptr, ancestors);
+
     for (int i = 0; i < q; i++)
     {
         int u, v;
@@ -176,6 +301,7 @@ int main()
 
         const auto bruteForceResult = bruteForce(node1, node2);
         cout << "bruteForceResult: " << bruteForceResult << endl;
+        findLCA(node1, node2);
     }
 
 }
