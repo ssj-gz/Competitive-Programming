@@ -51,7 +51,7 @@ int main()
             primesUpToMaxValue.push_back(i);
     }
 
-    vector<int> primeFactorsOfNodes;
+    vector<int> sharedNodePrimeFactors;
     for (auto& node : nodes)
     {
         auto nodeValue = node.value;
@@ -63,6 +63,7 @@ int main()
             if (prime * prime > nodeValue)
             {
                 primeFactors.push_back(nodeValue);
+                break;
             }
             if ((nodeValue % prime) == 0)
             {
@@ -75,19 +76,19 @@ int main()
         }
         for (const auto primeFactor : primeFactors)
         {
-            const auto occurrenceInPrimeFactorsOfNodes = find(primeFactorsOfNodes.begin(), primeFactorsOfNodes.end(), primeFactor);
-            int indexOfPrimeFactorInPrimeFactorsOfNodes = -1;
-            if (occurrenceInPrimeFactorsOfNodes == primeFactorsOfNodes.end())
+            const auto occurrenceInSharedNodePrimeFactors = find(sharedNodePrimeFactors.begin(), sharedNodePrimeFactors.end(), primeFactor);
+            int indexInSharedNodePrimeFactors = -1;
+            if (occurrenceInSharedNodePrimeFactors == sharedNodePrimeFactors.end())
             {
-                indexOfPrimeFactorInPrimeFactorsOfNodes = primeFactorsOfNodes.size();
-                primeFactorsOfNodes.push_back(primeFactor);
-                assert(primeFactorsOfNodes.size() <= maxTotalPrimeFactorsOfAllNodes);
+                indexInSharedNodePrimeFactors = sharedNodePrimeFactors.size();
+                sharedNodePrimeFactors.push_back(primeFactor);
+                assert(sharedNodePrimeFactors.size() <= maxTotalPrimeFactorsOfAllNodes);
             }
             else
             {
-                indexOfPrimeFactorInPrimeFactorsOfNodes = distance(primeFactorsOfNodes.begin(), occurrenceInPrimeFactorsOfNodes);
+                indexInSharedNodePrimeFactors = distance(sharedNodePrimeFactors.begin(), occurrenceInSharedNodePrimeFactors);
             }
-            node.primeFactorBitmask |= (1 << indexOfPrimeFactorInPrimeFactorsOfNodes);
+            node.primeFactorBitmask |= (1 << indexInSharedNodePrimeFactors);
         }
     }
 
