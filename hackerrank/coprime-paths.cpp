@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) 2017-10-14
 #include <iostream>
 #include <vector>
 #include <array>
@@ -16,7 +17,6 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
         return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
 constexpr int log2MaxNodes = log2(maxNodes);
-
 
 bool isPrime(int n)
 {
@@ -73,12 +73,11 @@ void fillInAncestors(Node* node, Node* parent, const array<int, numNodePrimeFact
         fillInAncestors(neighbour, node, nextNumPrimesWithCombinationToRoot, ancestors);
     }
     ancestors.pop_back();
-
 }
 
 Node* findKthAncestor(Node* node, int k)
 {
-    cout << "originalK: " << k << endl;
+    //cout << "originalK: " << k << endl;
     const auto originalHeight = node->height;
     const auto originalK = k;
     Node* ancestor = node;
@@ -93,7 +92,7 @@ Node* findKthAncestor(Node* node, int k)
             k -= powerOf2;
         }
     }
-    cout << "ancestor height: " << ancestor->height << " original height: " << originalHeight << " originalK: " << originalK << endl;
+    //cout << "ancestor height: " << ancestor->height << " original height: " << originalHeight << " originalK: " << originalK << endl;
     assert(ancestor);
     assert(ancestor->height == originalHeight - originalK);
     return ancestor;
@@ -121,20 +120,20 @@ Node* findLCABruteForce(Node* node1, Node* node2)
 
 Node* findLCA(Node* node1, Node* node2)
 {
-    cout << "findLCA original node1 : " << node1->index << " original node2 : " << node2->index << endl;
-    cout << "findLCA original node1 height: " << node1->height << " original node2 height: " << node2->height << endl;
+    //cout << "findLCA original node1 : " << node1->index << " original node2 : " << node2->index << endl;
+    //cout << "findLCA original node1 height: " << node1->height << " original node2 height: " << node2->height << endl;
     if (node1->height != node2->height)
     {
         if (node1->height > node2->height)
         {
-            cout << "adjusting node1" << endl;
+            //cout << "adjusting node1" << endl;
             node1 = findKthAncestor(node1, node1->height - node2->height);
         }
         else
         {
-            cout << "adjusting node2" << endl;
+            //cout << "adjusting node2" << endl;
             node2 = findKthAncestor(node2, node2->height - node1->height);
-            cout << "New node2 height: " << node2->height << endl;
+            //cout << "New node2 height: " << node2->height << endl;
         }
     }
     assert(node1 && node2);
@@ -147,27 +146,25 @@ Node* findLCA(Node* node1, Node* node2)
     while (true)
     {
         const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
-        cout << " minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
-        cout << " lca node1: " << node1->index << " node2: " << node2->index << endl;
+        //cout << " minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
+        //cout << " lca node1: " << node1->index << " node2: " << node2->index << endl;
         assert(node1->height == node2->height);
         assert(node1->height == currentNodesHeight); 
         if (node1 != node2 && node1->parent == node2->parent && node1->parent)
         {
-            cout << "wee" << endl;
+            //cout << "wee" << endl;
             return node1->parent;
         }
 
         if (heightDecrease == 0)
         {
-            if (node1 != node2)
-                cout << "whoops" << endl;
             assert(node1 == node2);
             return node1;;
         }
         const int nodesAncestorHeight = currentNodesHeight - heightDecrease;
         auto node1Ancestor = findKthAncestor(node1, heightDecrease);
         auto node2Ancestor = findKthAncestor(node2, heightDecrease);
-        cout << "node1Ancestor: " << node1Ancestor << " node2Ancestor: " << node2Ancestor << endl;
+       // cout << "node1Ancestor: " << node1Ancestor << " node2Ancestor: " << node2Ancestor << endl;
         assert(node1Ancestor && node2Ancestor);
 
         if (node1Ancestor == node2Ancestor)
@@ -249,7 +246,7 @@ int64_t findNumCoprimePairsAlongPath(Node* node1, Node* node2)
         array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationAlongPath = {};
         for (int i = 0; i < numNodePrimeFactorCombinations; i++)
         {
-            cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lca->numPrimesWithCombinationToRoot[i]: " << lca->numPrimesWithCombinationToRoot[i] << " node1 == lca? " << (node1 == lca) << " node2 == lca? " << (node2 == lca) << endl;
+           // cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lca->numPrimesWithCombinationToRoot[i]: " << lca->numPrimesWithCombinationToRoot[i] << " node1 == lca? " << (node1 == lca) << " node2 == lca? " << (node2 == lca) << endl;
             if (node1 != lca && node2 != lca)
             {
                 numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i];
@@ -441,7 +438,7 @@ int main()
                 if (occurrenceInSharedNodePrimeFactors == sharedNodePrimeFactors.end())
                 {
                     indexInSharedNodePrimeFactors = sharedNodePrimeFactors.size();
-                    cout << "Found new prime factor: " << primeFactor << " for nodeValue: " << originalNodeValue << endl;
+                    //cout << "Found new prime factor: " << primeFactor << " for nodeValue: " << originalNodeValue << endl;
                     sharedNodePrimeFactors.push_back(primeFactor);
                     assert(sharedNodePrimeFactors.size() <= maxTotalPrimeFactorsOfAllNodes);
                 }
@@ -455,7 +452,7 @@ int main()
 
         vector<Node*> ancestors;
         auto rootNode = &(nodes.front());
-        cout << " rootNode: " << rootNode << endl;
+        //cout << " rootNode: " << rootNode << endl;
         array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot = {};
         fillInAncestors(rootNode, nullptr, numPrimesWithCombinationToRoot, ancestors);
 
@@ -468,15 +465,19 @@ int main()
 
             auto node1 = &(nodes[u]);
             auto node2 = &(nodes[v]);
-
-            cout << "node1: " << node1->index << " node2: " << node2->index << endl;
-            const auto bruteForceResult = bruteForce(node1, node2);
             const auto optimisedResult = findNumCoprimePairsAlongPath(node1, node2);
+//#define BRUTE_FORCE
+#ifdef BRUTE_FORCE
+            const auto bruteForceResult = bruteForce(node1, node2);
             cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
-            const auto lcaOpt = findLCA(node1, node2);
             const auto lcaBruteForce = findLCABruteForce(node1, node2);
+            const auto lcaOpt = findLCA(node1, node2);
+            cout << "node1: " << node1->index << " node2: " << node2->index << endl;
             cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
             assert(lcaOpt == lcaBruteForce);
+#endif
+            cout << optimisedResult << endl;
+
 
         }
 //#define EXHAUSTIVE
