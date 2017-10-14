@@ -82,22 +82,22 @@ namespace
 
 }
 
-int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int layerSize)
+int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemainingInArray, int layerSize)
 {
-    assert(numRemaining >= 0 && numRemaining < lookup.size());
+    assert(numRemainingInArray >= 0 && numRemainingInArray < lookup.size());
     assert(layerSize >= 1 && layerSize < lookup[0].size());
-    if (numRemaining == 0)
+    if (numRemainingInArray == 0)
         return 1;
-    if (numRemaining < layerSize)
+    if (numRemainingInArray < layerSize)
         return 0; 
 
-    auto& memoiseEntryRef = lookup[numRemaining][layerSize];
+    auto& memoiseEntryRef = lookup[numRemainingInArray][layerSize];
     if (memoiseEntryRef != -1)
         return memoiseEntryRef;
 
     int64_t result = 0;
     auto layerIsInOrder = true;
-    const auto posInArray = a.size() - numRemaining;
+    const auto posInArray = a.size() - numRemainingInArray;
     for (auto i = posInArray + 1; i < posInArray + layerSize; i++)
     {
         assert(i < a.size());
@@ -110,15 +110,15 @@ int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemaining, int
     }
     if (layerIsInOrder)
     {
-        const auto isBottomLayer = (numRemaining == a.size());
+        const auto isBottomLayer = (numRemainingInArray == a.size());
         const auto numPermutationsForThisLayer = isBottomLayer ? 1 : factorial(layerSize);
-        if (numRemaining != layerSize)
+        if (numRemainingInArray != layerSize)
         {
             for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
             {
                 const auto contributionFromBottomLayer = nCr(layerSize, layerSize - nextLayerSize, ::modulus);
                 const auto permutationFactor = (numPermutationsForThisLayer * contributionFromBottomLayer) % ::modulus;
-                const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(numRemaining - layerSize, nextLayerSize);
+                const auto nextLayerResult = findNumWaysOfFillingRemainingStartingWithLayerSize(numRemainingInArray - layerSize, nextLayerSize);
                 const auto adjustedNextLayerResult = (permutationFactor * nextLayerResult) % ::modulus;
                 result = (result + adjustedNextLayerResult) % ::modulus;
             }
@@ -152,14 +152,15 @@ int main()
     //
     // Overall, a bit of a disaster - fun problem, though :)
     //
-    // So: let V = [ v1, v2, .... vk ] for some k be a vector vectors, and let SM(V) be the array
+    // So: let V = [ v1, v2, .... vk ] for some k be a vector of vectors, and let SM(V) be the array
     // created by applying Sherlock's merging algorithm to V.  We need to find the number of 
     // *distinct* V such that SM(V) = a.  We're are given the rules under which V1 and V2 are 
     // equivalent and, as is often the case with equivalence relations, it's handy to pick a normalisation 
-    // procedure such that the normalisation
-    // of two *equivalent* solutions A and B are *equal*.  In this case, it's easy to see what procedure
-    // to use; take a solution; sort its vectors by size and then, if there is a run of vectors of the 
-    // same size, then ensure that they are ordered in order of their *first* (i.e. bottom-most) element.
+    // procedure such that the normalisations of two *equivalent* solutions A and B are *equal*.  
+    // In this case, it's easy to see what procedure to use: take a solution; sort its vectors by size and then, 
+    // if there is a run of vectors of the same size, ensure that they are ordered in order of their *first* 
+    // (i.e. bottom-most) element.
+    //
     // A normalised vector V = [ v1, v2, ... vk ] will satisfy |vi+1| >= |vi| for i = 1, ... k-1 and
     // whenever |vi+1| = |vi|, we have that vi+1[0] >= vi[0].  
     //
@@ -172,12 +173,10 @@ int main()
     // which we can place the elements 1 ... M.  For example, if M = 26, a candidate solution
     // might look like this:
     //
-    //
     //       XXXX
     //    XXXXXXX
     //    XXXXXXX
     //   XXXXXXXX
-    //
     //
     // Here, V = [ v1, v2, v2, ... v8 ], and |v1| = 1, |v2| = |v2| = |v3| =|v4| = 3 and
     //  |v5| = |v6| = |v7| = |v8| = 4.
@@ -187,13 +186,13 @@ int main()
     // Note that we could describe the solution template as a vector containing the *lengths* of the vi
     // i.e. the template of V = [1, 3, 3, 3, 4, 4, 4, 4], but as we'll see, it's more useful to 
     // describe it via the lengths of the *layers*, starting at the bottom (length = 8) and ending at 
-    // the top (length = 4).
+    // the top (length = 4).  Here, layerSize[0] = 8, layerSize[1] = 7, layerSize[2] = 7 and layerSize[3] = 4.
     //
-    // Applying Sherlock's algorithm to V would place the bottom layer (8 elements) into the array after sorting
-    // the bottom layer.  If the first 8 elements of a are not in sorted order, then clearly there is 
+    // Applying Sherlock's algorithm to V would place the elements in the bottom layer (layerSize[0] = 8 elements) into 
+    // the array after sorting them.  If the first 8 elements of a are not in sorted order, then clearly there is 
     // no way of putting 1 ... 26 into V's template such that SM(V) = a.  If the first 8 elements of a are in
     // sorted order, then it looks like we can slot any of the 8! arrangements of the first 8 elements of a
-    // into V: however, there's a subtlety here , affecting only the base layer, involving the fact that we only want to
+    // into V: however, there's a subtlety here, affecting only the base layer, involving the fact that we only want to
     // generate normalised V that restricts this: let's skip it for now and come back to it later.
     //
     // Assume that the number of ways of adding the first 8 elements of a to the base layer of V's template is K.
@@ -213,6 +212,68 @@ int main()
     // Finally, we reach the final layer (length 4): these will be placed in indices 22, 23, .... 25 of the output array,
     // and if a[22], a[23], .... a[25] are not in sorted order then get can't get SM(V) = a, else there are 
     // 4! ways of adding a[22], a[23], .... a[25] to the last layer of V.
+    //
+    // So, if the template of V has layer sizes (from bottom to top) layerSize[0], layerSize[1], ... , layerSize[l],
+    // then for each i = 0 ... l, we need to check whether the elements of a from sum [ 0 <= j < i {layerSize[j]} to
+    // sum [ 0 <= j < i {layerSize[j]} + layerSize[i] - 1 are sorted; if not, there are no solutions with this template.
+    // Otherwise, for each layer i = 1 ... l (the bottom layer, i = 0, is deal with separately), we see that there
+    // are layerSize[i]! ways of assigning numbers to that layer.  What about the bottom layer?
+    //
+    // As mentioned, we are only considering normalised V, so we may not add elements to the bottom layer in a way
+    // that contravenes this i.e. in such a way that the first elements of vectors of the same size do not occur in
+    // sorted order.  We see that there is a relation between the number of vectors of the same size and the layer
+    // sizes:
+    //
+    //       XXXX
+    //    XXXXXXX
+    //    XXXXXXX
+    //   ABBBCCCC
+    //
+    // to make it more obvious, the bottom elements of this template are marked with the same letter if they are the first
+    // letter of vectors with the same length.  The correspondence should hopefully be clear: the points where vector
+    // lengths change are the points where the sizes of consecutive layers change, and the size of the runs of same-length vectors matches
+    // changes in layer size between consecutive layers.  If the first x1 vectors are the same size, then we must assign
+    // elements of a to these x1 places so that they are in sorted order; there are layerSize[0] choose x1 ways to do this.
+    // If the next x2 vectors are the same size, then there are layerSize[0] - x1 choose x2 ways of doing this. If the next x3
+    // vectors have the same size, then there are layerSize[0] - (x1 + x2) choose x3 ways of doing  this; etc.
+    //
+    // In general, noting the correspondence between lengths of runs of vectors of the same size and the difference between
+    // sizes of consecutive layers, and the fact that n choose 0 is always 1, we see that the number of ways
+    // of assigning values to the bottom layer is:
+    //
+    // sum [ i = 1 ... l ] { (layerSize[0] - sum [ 1 <= j < i ] { layerSize[j] - layerSize[j - 1]}) choose (layerSize[i] - layerSize[i - 1]}.
+    //
+    // Putting this all together, for a V with a template with layer sizes layerSize[0], layerSize[1], ... , layerSize[l], the number of 
+    // ways of filling the template, provided it is not determined to be 0 because a required range of a is not in sorted order, is:
+    //
+    // sum [ i = 1 ... l ] { (layerSize[0] - sum [ 1 <= j < i ] { layerSize[j] - layerSize[j - 1]}) choose (layerSize[i] - layerSize[i - 1]} * 
+    // sum [ i = 1 ... l ] { layerSize[i]!}
+    //
+    // So one approach would be to generate all templates, then, once we've generated each template, use the process above (check whether there
+    // are any ways at all of populating the template such that SM(V) = a, then use the formula above to find how many ways there are).  Generating
+    // all possible templates layer-by-layer (starting with the base layer) is easy:
+    //
+    //  int64_t findNumWaysOfFillingRemainingStartingWithLayerSize(int numRemainingInArray, int layerSize, vector<int> layerSizesSoFar)
+    //  {
+    //     if (numRemainingInArray == 0)
+    //     {
+    //         // We have a full template that can accommodate all elements of the array. 
+    //         return num ways of populating this template (the template is described by layerSizesSoFar), which could be 0 if any required range of 
+    //                a is not in sorted order. 
+    //
+    //     }
+    //     int64_t result;
+    //     for (int nextLayerSize = layerSize; nextLayerSize >= 1; nextLayerSize--)
+    //     {
+    //        result += findNumWaysOfFillingRemainingStartingWithLayerSize(numRemainingInArray - layerSize, nextLayerSize, layerSizesSoFar << layerSize);
+    //     }
+    //     return result;
+    //  }
+    //
+    // But the computation of the number of ways of filling a layer can also be computed layer-by-layer, so we can actually do them both in
+    // tandem (including the check whether the required range of a is sorted).
+    //
+    // Hopefully, with all this background and the comments, the final code is clear :)
     int M;
     cin >> M;
 
