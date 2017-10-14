@@ -451,7 +451,7 @@ int main()
                 {
                     cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lcaOpt->numPrimesWithCombinationToRoot[i]: " << lcaOpt->numPrimesWithCombinationToRoot[i] << endl;
                     numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i] - lcaOpt->numPrimesWithCombinationToRoot[i];
-                    numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i] - lcaOpt->numPrimesWithCombinationToRoot[i];
+                    numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i] /*- lcaOpt->numPrimesWithCombinationToRoot[i]*/;
                     assert(numPrimesWithCombinationAlongPath[i] >= 0);
                 }
                 const auto bruteForceResult = bruteForce(node1, node2);
@@ -466,6 +466,7 @@ int main()
                         }
                     }
                 }
+                optimisedResult /= 2;
                 cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
 
             }
