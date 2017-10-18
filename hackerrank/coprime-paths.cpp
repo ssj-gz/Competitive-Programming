@@ -40,9 +40,12 @@ struct Node
 
     array<Node*, log2MaxNodes> ancestorPowerOf2Above;
     array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot;
+
+    int startIndexInDFSArray = -1;
+    int endIndexInDFSArray = -1;
 };
 
-void fillInAncestors(Node* node, Node* parent, const array<int, numNodePrimeFactorCombinations>& numPrimesWithCombinationToRoot, vector<Node*>& ancestors)
+void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors, int& indexInDFSArray)
 {
     const int height = ancestors.size();
     node->height = height;
@@ -63,15 +66,16 @@ void fillInAncestors(Node* node, Node* parent, const array<int, numNodePrimeFact
     }
 
     ancestors.push_back(node);
-    array<int, numNodePrimeFactorCombinations> nextNumPrimesWithCombinationToRoot = numPrimesWithCombinationToRoot;
-    nextNumPrimesWithCombinationToRoot[node->primeFactorBitmask]++;
-    node->numPrimesWithCombinationToRoot = nextNumPrimesWithCombinationToRoot;
+    node->startIndexInDFSArray = indexInDFSArray;
+    indexInDFSArray++;
     for (auto neighbour : node->neighbours)
     {
         if (neighbour == parent)
             continue;
-        fillInAncestors(neighbour, node, nextNumPrimesWithCombinationToRoot, ancestors);
+        fillInAncestors(neighbour, node, ancestors, indexInDFSArray);
     }
+    node->endIndexInDFSArray = indexInDFSArray;
+    indexInDFSArray++;
     ancestors.pop_back();
 }
 
@@ -280,6 +284,57 @@ int64_t findNumCoprimePairsAlongPath(Node* node1, Node* node2)
     return optimisedResult;
 }
 
+struct Query
+{
+    Node *node1 = nullptr;
+    Node *node2 = nullptr;
+    int originalQueryIndex = -1;
+};
+
+vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
+{
+    const int n = nodes.size();
+    auto rootNode = &(nodes.front());
+    int indexInDFSArray = 0;
+    vector<Node*> ancestors;
+    fillInAncestors(rootNode, nullptr, ancestors, indexInDFSArray);
+    vector<Query> rearrangedQueries = queries;
+    for (auto& query : rearrangedQueries)
+    {
+        if (query.node1->endIndexInDFSArray > query.node2->endIndexInDFSArray)
+            swap(query.node1, query.node2);
+    }
+
+    vector<Node*> dfsArray(indexInDFSArray);
+    for (auto& node : nodes)
+    {
+        dfsArray[node.startIndexInDFSArray] = &node;
+        dfsArray[node.endIndexInDFSArray] = &node;
+    }
+    cout << "dfsArray: " << endl;
+    for (const auto& node : dfsArray)
+    {
+        cout << node->index << " "; 
+    }
+    cout << endl;
+
+    const int sqrtN = sqrt(n);
+    auto mosAlgorithmOrdering = [sqrtN](const Query& lhs, const Query& rhs)
+        {
+            const int lhsBucket = lhs.node1->endIndexInDFSArray / sqrtN;
+            const int rhsBucket = rhs.node1->endIndexInDFSArray / sqrtN;
+            if (lhsBucket != rhsBucket)
+            {
+                return lhsBucket < rhsBucket;
+            }
+            return lhs.node2->startIndexInDFSArray < rhs.node2->startIndexInDFSArray;
+        };
+
+    sort(rearrangedQueries.begin(), rearrangedQueries.end(), mosAlgorithmOrdering);
+    vector<int64_t> querySolutions;
+    return querySolutions;
+}
+
 int main()
 {
     int n, q;
@@ -450,12 +505,14 @@ int main()
             }
         }
 
-        vector<Node*> ancestors;
-        auto rootNode = &(nodes.front());
+        //vector<Node*> ancestors;
+        //auto rootNode = &(nodes.front());
         //cout << " rootNode: " << rootNode << endl;
-        array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot = {};
-        fillInAncestors(rootNode, nullptr, numPrimesWithCombinationToRoot, ancestors);
+        //array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot = {};
+        //fillInAncestors(rootNode, nullptr, numPrimesWithCombinationToRoot, ancestors);
 
+        vector<Query> queries;
+#ifndef RANDOM
         for (int i = 0; i < q; i++)
         {
             int u, v;
@@ -480,6 +537,25 @@ int main()
 
 
         }
+#else
+        q = rand() % n * n;
+        for (int i = 0; i < q; i++)
+        {
+            while(true)
+            {
+                int u = rand() % n;
+                int v = rand() % n;
+                if (u == v)
+                    continue;
+                Query query;
+                query.node1 = &(nodes[u]);
+                query.node2 = &(nodes[v]);
+                query.originalQueryIndex = i;
+                queries.push_back(query);
+                break;
+            }
+        }
+#endif
 //#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
         for (int i = 0; i < n; i++)
