@@ -28,6 +28,40 @@ bool isPrime(int n)
     return true;
 }
 
+vector<int> primeFactors(int n)
+{
+    cout << "prime factors of " << n << endl;
+    bool addedPrime = false;
+    vector<int> primeFactors;
+    int factor = 2;
+    while (factor * factor <= n)
+    {
+        addedPrime = false;
+        while ((n % factor) == 0)
+        {
+            assert(isPrime(factor));
+            if (!addedPrime)
+            {
+                primeFactors.push_back(factor);
+                addedPrime = true;
+            }
+            n /= factor;
+        }
+        factor++;
+    }
+    if (n != 1)
+    {
+        assert(isPrime(n));
+        primeFactors.push_back(n);
+    }
+    for (const auto prime : primeFactors)
+    {
+        cout << prime << " ";
+    }
+    cout << endl;
+    return primeFactors;
+}
+
 struct Node
 {
     int index = -1;
@@ -338,7 +372,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 int main()
 {
     int n, q;
-//#define RANDOM
+#define RANDOM
 #ifndef RANDOM
     cin >> n >> q;
 
@@ -371,22 +405,6 @@ int main()
         //n = 9;
         n = rand() % 1000 + 1;
         cout << "n: " << n << endl;
-        const int numPrimes = (rand() % 3) + 1;
-        vector<int> primesToUse;
-        for (int i = 0; i < numPrimes; i++)
-        {
-            while (true)
-            {
-                const int prime = rand() % 10'000;
-                if (isPrime(prime))
-                {
-                    primesToUse.push_back(prime);
-                    cout << " using prime: " << prime << endl;
-                    break;
-                }
-            }
-        }
-        cout << "#primesToUse: " << primesToUse.size() << endl;
         vector<Node> nodes;
         nodes.reserve(n);
         nodes.push_back(Node());
@@ -411,28 +429,11 @@ int main()
             int64_t nodeValue = 1;
             while (true)
             {
-                nodeValue = 1;
-                bool wentBust = false;
-                for (const auto prime : primesToUse)
-                {
-                    int exponent = rand() % 3;
-                    for (int j = 0; j < exponent; j++)
-                    {
-                        nodeValue *= prime;
-                        if (nodeValue > 10'000'000 || nodeValue <= 0)
-                        {
-                            wentBust = true;
-                            break;
-                        }
-                        assert(nodeValue > 0);
-                    }
-                }
-                cout << "candidate nodeValue: " << nodeValue << endl;
-                if (!wentBust && 1 <= nodeValue && nodeValue <= 10'000'000)
+                nodeValue = rand() % 1'000'000;
+                if (primeFactors(nodeValue).size() <= 3)
                     break;
             }
             node.value = nodeValue;
-            node.value = 1;
             cout << "using " << nodeValue << " for node: " << node.index << endl;
         }
 #endif
@@ -462,6 +463,7 @@ int main()
                 primesUpToMaxValue.push_back(i);
         }
 
+#if 0
         vector<int> sharedNodePrimeFactors;
         for (auto& node : nodes)
         {
@@ -504,6 +506,7 @@ int main()
                 node.primeFactorBitmask |= (1 << indexInSharedNodePrimeFactors);
             }
         }
+#endif
 
         //vector<Node*> ancestors;
         //auto rootNode = &(nodes.front());
