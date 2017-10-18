@@ -396,57 +396,40 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     set<Node*> nodesInPath;
     auto onNodeAddedToPath = [&nodesInPath](const auto& node)
     {
-        cout << " node with index " << node->index << " added to path" << endl;
         nodesInPath.insert(node);
     };
     auto onNodeRemovedFromPath = [&nodesInPath](const auto& node)
     {
-        cout << " node with index " << node->index << " removed from path" << endl;
         assert(nodesInPath.find(node) != nodesInPath.end());
         nodesInPath.erase(nodesInPath.find(node));
     };
 
-    auto removeNode = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node)
+    auto addNodeCount = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node, int increase)
     {
-        cout << " removing node with index: " << node->index << endl;
-        if (nodeCountInRange[node->index] == 1)
-        {
-            onNodeRemovedFromPath(node);
-        }
-        nodeCountInRange[node->index]--;
-        //assert(nodeCountInRange[node->index] >= 0);
-        if (nodeCountInRange[node->index] == 1)
-        {
-            onNodeAddedToPath(node);
-        }
-    };
-    auto addNode = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node)
-    {
-        cout << " adding node with index: " << node->index << endl;
-        cout << " count for node index  " << node->index << " was: " << nodeCountInRange[node->index] << endl;
+        assert(increase != 0);
         if (nodeCountInRange[node->index] == 1)
             onNodeRemovedFromPath(node);
-        nodeCountInRange[node->index]++;
-        assert(nodeCountInRange[node->index] <= 2);
-        cout << " count for node index  " << node->index << " now: " << nodeCountInRange[node->index] << endl;
+        nodeCountInRange[node->index] += increase;
+        //assert(nodeCountInRange[node->index] <= 2);
+        //cout << " count for node index  " << node->index << " now: " << nodeCountInRange[node->index] << endl;
         if (nodeCountInRange[node->index] == 1)
             onNodeAddedToPath(node);
     };
-    addNode(dfsArray[leftPointer]);
+    addNodeCount(dfsArray[leftPointer], 1);
     //addNode(dfsArray[leftPointer]);
     for (const auto query : rearrangedQueries)
     {
-        cout << " loop!" << endl;
+        //cout << " loop!" << endl;
         const int newLeftPointer = query.leftIndex;
         const int newRightPointer = query.rightIndex;
         auto lca = findLCA(query.node1, query.node2);
-        cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
-        cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
+        //cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
+        //cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
 
         while (leftPointer < newLeftPointer)
         {
-            cout << "incrementing left pointer" << endl;
-            removeNode(dfsArray[leftPointer]);
+            //cout << "incrementing left pointer" << endl;
+            addNodeCount(dfsArray[leftPointer], -1);
             leftPointer++;
             //addNode(dfsArray[leftPointer]);
         }
@@ -454,24 +437,24 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         {
             //removeNode(dfsArray[leftPointer]);
             leftPointer--;
-            cout << "decrementing left pointer" << endl;
-            addNode(dfsArray[leftPointer]);
+            //cout << "decrementing left pointer" << endl;
+            addNodeCount(dfsArray[leftPointer], 1);
         }
         while (rightPointer < newRightPointer)
         {
             //removeNode(dfsArray[rightPointer]);
-            cout << "incrementing right pointer" << endl;
+            //cout << "incrementing right pointer" << endl;
             rightPointer++;
-            addNode(dfsArray[rightPointer]);
+            addNodeCount(dfsArray[rightPointer], 1);
         }
         while (rightPointer > newRightPointer)
         {
-            removeNode(dfsArray[rightPointer]);
+            addNodeCount(dfsArray[rightPointer], -1);
             rightPointer--;
-            cout << "decrementing right pointer" << endl;
+            //cout << "decrementing right pointer" << endl;
             //addNode(dfsArray[rightPointer]);
         }
-        cout << "Finished pointer adjustment" << endl;
+        //cout << "Finished pointer adjustment" << endl;
 
         const bool needToAddLCA = (query.lca != query.node1);
         if (needToAddLCA)
@@ -536,7 +519,7 @@ int main()
     while (true)
     {
         //n = 9;
-        n = rand() % 3 + 2;
+        n = rand() % 100 + 2;
         cout << "n: " << n << endl;
         vector<Node> nodes;
         nodes.reserve(n);
