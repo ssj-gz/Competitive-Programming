@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <set>
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -322,6 +323,7 @@ struct Query
 {
     Node *node1 = nullptr;
     Node *node2 = nullptr;
+    Node *lca = nullptr;
     int originalQueryIndex = -1;
 
     int leftIndex = -1;
@@ -338,11 +340,27 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     vector<Query> rearrangedQueries = queries;
     for (auto& query : rearrangedQueries)
     {
+        //if (query.node1->startIndexInDFSArray > query.node2->startIndexInDFSArray)
+            //swap(query.node1, query.node2);
+
+        //query.leftIndex = query.node1->startIndexInDFSArray;
+        //query.rightIndex = query.node2->endIndexInDFSArray;
         if (query.node1->startIndexInDFSArray > query.node2->startIndexInDFSArray)
             swap(query.node1, query.node2);
 
-        query.leftIndex = query.node1->startIndexInDFSArray;
-        query.rightIndex = query.node2->endIndexInDFSArray;
+        query.lca = findLCA(query.node1, query.node2);
+        assert((query.lca != query.node1 && query.lca != query.node2) || query.lca == query.node1);
+
+        if (query.lca == query.node1)
+        {
+            query.leftIndex = query.node1->startIndexInDFSArray;
+            query.rightIndex = query.node2->startIndexInDFSArray;
+        }
+        else
+        {
+            query.leftIndex = query.node1->endIndexInDFSArray;
+            query.rightIndex = query.node2->startIndexInDFSArray;
+        }
     }
 
     vector<Node*> dfsArray(indexInDFSArray);
@@ -375,43 +393,74 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     int rightPointer = rearrangedQueries.front().leftIndex;
     vector<int> nodeCountInRange(nodes.size());
     cout << "About to do  thing" << endl;
-    auto removeNode = [&nodeCountInRange](const auto& node)
+    set<Node*> nodesInPath;
+    auto onNodeAddedToPath = [&nodesInPath](const auto& node)
+    {
+        cout << " node with index " << node->index << " added to path" << endl;
+        nodesInPath.insert(node);
+    };
+    auto onNodeRemovedFromPath = [&nodesInPath](const auto& node)
+    {
+        cout << " node with index " << node->index << " removed from path" << endl;
+        assert(nodesInPath.find(node) != nodesInPath.end());
+        nodesInPath.erase(nodesInPath.find(node));
+    };
+
+    auto removeNode = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node)
     {
         cout << " removing node with index: " << node->index << endl;
+        if (nodeCountInRange[node->index] == 1)
+        {
+            onNodeRemovedFromPath(node);
+        }
         nodeCountInRange[node->index]--;
-        assert(nodeCountInRange[node->index] >= 0);
+        //assert(nodeCountInRange[node->index] >= 0);
+        if (nodeCountInRange[node->index] == 1)
+        {
+            onNodeAddedToPath(node);
+        }
     };
-    auto addNode = [&nodeCountInRange](const auto& node)
+    auto addNode = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node)
     {
         cout << " adding node with index: " << node->index << endl;
         cout << " count for node index  " << node->index << " was: " << nodeCountInRange[node->index] << endl;
+        if (nodeCountInRange[node->index] == 1)
+            onNodeRemovedFromPath(node);
         nodeCountInRange[node->index]++;
-        cout << " count for node index  " << node->index << " now: " << nodeCountInRange[node->index] << endl;
         assert(nodeCountInRange[node->index] <= 2);
+        cout << " count for node index  " << node->index << " now: " << nodeCountInRange[node->index] << endl;
+        if (nodeCountInRange[node->index] == 1)
+            onNodeAddedToPath(node);
     };
     addNode(dfsArray[leftPointer]);
-    addNode(dfsArray[leftPointer]);
+    //addNode(dfsArray[leftPointer]);
     for (const auto query : rearrangedQueries)
     {
+        cout << " loop!" << endl;
         const int newLeftPointer = query.leftIndex;
         const int newRightPointer = query.rightIndex;
+        auto lca = findLCA(query.node1, query.node2);
+        cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
         cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
 
         while (leftPointer < newLeftPointer)
         {
+            cout << "incrementing left pointer" << endl;
             removeNode(dfsArray[leftPointer]);
             leftPointer++;
-            addNode(dfsArray[leftPointer]);
+            //addNode(dfsArray[leftPointer]);
         }
         while (leftPointer > newLeftPointer)
         {
-            removeNode(dfsArray[leftPointer]);
+            //removeNode(dfsArray[leftPointer]);
             leftPointer--;
+            cout << "decrementing left pointer" << endl;
             addNode(dfsArray[leftPointer]);
         }
         while (rightPointer < newRightPointer)
         {
-            removeNode(dfsArray[rightPointer]);
+            //removeNode(dfsArray[rightPointer]);
+            cout << "incrementing right pointer" << endl;
             rightPointer++;
             addNode(dfsArray[rightPointer]);
         }
@@ -419,9 +468,35 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         {
             removeNode(dfsArray[rightPointer]);
             rightPointer--;
-            addNode(dfsArray[rightPointer]);
+            cout << "decrementing right pointer" << endl;
+            //addNode(dfsArray[rightPointer]);
         }
+        cout << "Finished pointer adjustment" << endl;
 
+        const bool needToAddLCA = (query.lca != query.node1);
+        if (needToAddLCA)
+        {
+            assert(nodesInPath.find(query.lca) == nodesInPath.end());
+            nodesInPath.insert(lca);
+        }
+        vector<Node*> pathSoFar;
+        const auto dbgPath = path(query.node1, query.node2, nullptr, pathSoFar);
+        set<Node*> dbgPathNodes(dbgPath.begin(), dbgPath.end());
+        cout << " current path nodes: " << endl;
+        for (const auto& node : nodesInPath)
+        {
+            cout << node->index << " ";
+        }
+        cout << endl;
+        cout << " current dbgPath nodes: " << endl;
+        for (const auto& node : dbgPath)
+        {
+            cout << node->index << " ";
+        }
+        cout << endl;
+        assert(dbgPathNodes == nodesInPath);
+        if (needToAddLCA)
+            nodesInPath.erase(nodesInPath.find(lca));
     }
     vector<int64_t> querySolutions;
     return querySolutions;
@@ -461,7 +536,7 @@ int main()
     while (true)
     {
         //n = 9;
-        n = rand() % 10 + 2;
+        n = rand() % 3 + 2;
         cout << "n: " << n << endl;
         vector<Node> nodes;
         nodes.reserve(n);
@@ -600,7 +675,7 @@ int main()
 
         }
 #else
-        q = rand() % n * n + 1;
+        q = n;
         for (int i = 0; i < q; i++)
         {
             while(true)
