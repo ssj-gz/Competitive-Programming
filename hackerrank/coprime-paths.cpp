@@ -372,23 +372,30 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 
     sort(rearrangedQueries.begin(), rearrangedQueries.end(), mosAlgorithmOrdering);
     int leftPointer = rearrangedQueries.front().leftIndex;
-    int rightPointer = rearrangedQueries.front().rightIndex;
+    int rightPointer = rearrangedQueries.front().leftIndex;
     vector<int> nodeCountInRange(nodes.size());
-    nodeCountInRange[dfsArray[leftPointer]->index]++;
+    cout << "About to do  thing" << endl;
     auto removeNode = [&nodeCountInRange](const auto& node)
     {
+        cout << " removing node with index: " << node->index << endl;
         nodeCountInRange[node->index]--;
         assert(nodeCountInRange[node->index] >= 0);
     };
     auto addNode = [&nodeCountInRange](const auto& node)
     {
+        cout << " adding node with index: " << node->index << endl;
+        cout << " count for node index  " << node->index << " was: " << nodeCountInRange[node->index] << endl;
         nodeCountInRange[node->index]++;
+        cout << " count for node index  " << node->index << " now: " << nodeCountInRange[node->index] << endl;
         assert(nodeCountInRange[node->index] <= 2);
     };
+    addNode(dfsArray[leftPointer]);
+    addNode(dfsArray[leftPointer]);
     for (const auto query : rearrangedQueries)
     {
         const int newLeftPointer = query.leftIndex;
         const int newRightPointer = query.rightIndex;
+        cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
 
         while (leftPointer < newLeftPointer)
         {
@@ -454,12 +461,12 @@ int main()
     while (true)
     {
         //n = 9;
-        n = rand() % 10 + 1;
+        n = rand() % 10 + 2;
         cout << "n: " << n << endl;
         vector<Node> nodes;
         nodes.reserve(n);
         nodes.push_back(Node());
-        nodes.front().index = 1;
+        nodes.front().index = 0;
         for (int i = 1; i < n; i++)
         {
             int parentIndex = rand() % i;
@@ -467,13 +474,13 @@ int main()
 
             auto node1 = &(nodes[i]);
             auto node2 = &(nodes[parentIndex]);
-            node1->index = i + 1;
+            node1->index = i;
 
 
             node1->neighbours.push_back(node2);
             node2->neighbours.push_back(node1);
 
-            cout << "node " << node1->index << " has parent: " << nodes[parentIndex].index << endl;
+            cout << "node with index " << node1->index << " has parent with index: " << nodes[parentIndex].index << endl;
         }
         for (auto& node : nodes)
         {
@@ -483,6 +490,7 @@ int main()
                 nodeValue = rand() % 1'000'000;
                 if (primeFactors(nodeValue).size() <= 3)
                     break;
+                cout << " does not have 3 prime factors" << endl;
             }
             node.value = nodeValue;
             cout << "using " << nodeValue << " for node: " << node.index << endl;
@@ -592,7 +600,7 @@ int main()
 
         }
 #else
-        q = rand() % n * n;
+        q = rand() % n * n + 1;
         for (int i = 0; i < q; i++)
         {
             while(true)
