@@ -31,7 +31,7 @@ bool isPrime(int n)
 
 vector<int> primeFactors(int n)
 {
-    cout << "prime factors of " << n << endl;
+    //cout << "prime factors of " << n << endl;
     bool addedPrime = false;
     vector<int> primeFactors;
     int factor = 2;
@@ -55,11 +55,11 @@ vector<int> primeFactors(int n)
         assert(isPrime(n));
         primeFactors.push_back(n);
     }
-    for (const auto prime : primeFactors)
-    {
-        cout << prime << " ";
-    }
-    cout << endl;
+    //for (const auto prime : primeFactors)
+    //{
+        //cout << prime << " ";
+    //}
+    //cout << endl;
     return primeFactors;
 }
 
@@ -472,7 +472,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         }
         cout << endl;
         cout << " current dbgPath nodes: " << endl;
-        for (const auto& node : dbgPath)
+        for (const auto& node : dbgPathNodes)
         {
             cout << node->index << " ";
         }
@@ -487,6 +487,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 
 int main()
 {
+    const int maxValue = 10'000'000;
     int n, q;
 #define RANDOM
 #ifndef RANDOM
@@ -516,6 +517,18 @@ int main()
     }
 #else
     srand(time(0));
+#if 0
+    vector<int> numbersWithAtMost3Primes;
+    for (int i = 2; i < maxValue; i++)
+    {
+        if ((i % 10000) == 0)
+            cout << i << endl;
+        if (primeFactors(i).size() <= 3)
+        {
+            numbersWithAtMost3Primes.push_back(i);
+        }
+    }
+#endif
     while (true)
     {
         //n = 9;
@@ -548,10 +561,10 @@ int main()
                 nodeValue = rand() % 1'000'000;
                 if (primeFactors(nodeValue).size() <= 3)
                     break;
-                cout << " does not have 3 prime factors" << endl;
+                //cout << " does not have 3 prime factors" << endl;
             }
             node.value = nodeValue;
-            cout << "using " << nodeValue << " for node: " << node.index << endl;
+            //cout << "using " << nodeValue << " for node: " << node.index << endl;
         }
 #endif
 
