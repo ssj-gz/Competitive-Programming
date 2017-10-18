@@ -323,6 +323,9 @@ struct Query
     Node *node1 = nullptr;
     Node *node2 = nullptr;
     int originalQueryIndex = -1;
+
+    int leftIndex = -1;
+    int rightIndex = -1;
 };
 
 vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
@@ -335,8 +338,11 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     vector<Query> rearrangedQueries = queries;
     for (auto& query : rearrangedQueries)
     {
-        if (query.node1->endIndexInDFSArray > query.node2->endIndexInDFSArray)
+        if (query.node1->startIndexInDFSArray > query.node2->startIndexInDFSArray)
             swap(query.node1, query.node2);
+
+        query.leftIndex = query.node1->startIndexInDFSArray;
+        query.rightIndex = query.node2->endIndexInDFSArray;
     }
 
     vector<Node*> dfsArray(indexInDFSArray);
@@ -355,16 +361,61 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     const int sqrtN = sqrt(n);
     auto mosAlgorithmOrdering = [sqrtN](const Query& lhs, const Query& rhs)
         {
-            const int lhsBucket = lhs.node1->endIndexInDFSArray / sqrtN;
-            const int rhsBucket = rhs.node1->endIndexInDFSArray / sqrtN;
+            const int lhsBucket = lhs.leftIndex / sqrtN;
+            const int rhsBucket = rhs.leftIndex / sqrtN;
             if (lhsBucket != rhsBucket)
             {
                 return lhsBucket < rhsBucket;
             }
-            return lhs.node2->startIndexInDFSArray < rhs.node2->startIndexInDFSArray;
+            return lhs.rightIndex < rhs.rightIndex;
         };
 
     sort(rearrangedQueries.begin(), rearrangedQueries.end(), mosAlgorithmOrdering);
+    int leftPointer = rearrangedQueries.front().leftIndex;
+    int rightPointer = rearrangedQueries.front().rightIndex;
+    vector<int> nodeCountInRange(nodes.size());
+    nodeCountInRange[dfsArray[leftPointer]->index]++;
+    auto removeNode = [&nodeCountInRange](const auto& node)
+    {
+        nodeCountInRange[node->index]--;
+        assert(nodeCountInRange[node->index] >= 0);
+    };
+    auto addNode = [&nodeCountInRange](const auto& node)
+    {
+        nodeCountInRange[node->index]++;
+        assert(nodeCountInRange[node->index] <= 2);
+    };
+    for (const auto query : rearrangedQueries)
+    {
+        const int newLeftPointer = query.leftIndex;
+        const int newRightPointer = query.rightIndex;
+
+        while (leftPointer < newLeftPointer)
+        {
+            removeNode(dfsArray[leftPointer]);
+            leftPointer++;
+            addNode(dfsArray[leftPointer]);
+        }
+        while (leftPointer > newLeftPointer)
+        {
+            removeNode(dfsArray[leftPointer]);
+            leftPointer--;
+            addNode(dfsArray[leftPointer]);
+        }
+        while (rightPointer < newRightPointer)
+        {
+            removeNode(dfsArray[rightPointer]);
+            rightPointer++;
+            addNode(dfsArray[rightPointer]);
+        }
+        while (rightPointer > newRightPointer)
+        {
+            removeNode(dfsArray[rightPointer]);
+            rightPointer--;
+            addNode(dfsArray[rightPointer]);
+        }
+
+    }
     vector<int64_t> querySolutions;
     return querySolutions;
 }
@@ -403,12 +454,12 @@ int main()
     while (true)
     {
         //n = 9;
-        n = rand() % 1000 + 1;
+        n = rand() % 10 + 1;
         cout << "n: " << n << endl;
         vector<Node> nodes;
         nodes.reserve(n);
         nodes.push_back(Node());
-        nodes.front().index = 0;
+        nodes.front().index = 1;
         for (int i = 1; i < n; i++)
         {
             int parentIndex = rand() % i;
@@ -416,13 +467,13 @@ int main()
 
             auto node1 = &(nodes[i]);
             auto node2 = &(nodes[parentIndex]);
-            node1->index = i;
+            node1->index = i + 1;
 
 
             node1->neighbours.push_back(node2);
             node2->neighbours.push_back(node1);
 
-            cout << "node " << i << " has parent: " << parentIndex << endl;
+            cout << "node " << node1->index << " has parent: " << nodes[parentIndex].index << endl;
         }
         for (auto& node : nodes)
         {
@@ -558,6 +609,7 @@ int main()
                 break;
             }
         }
+        solve(queries, nodes);
 #endif
 //#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
