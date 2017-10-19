@@ -286,6 +286,9 @@ class NumCoprimePairsInPathTracker
     private:
         int numNodesInPath = 0;
         int64_t resultForPath = 0;
+        // For each node N in the path, add one to numGeneratedByNodesInPath[x] where 
+        // x is any of the numbers that can be formed by multiplying the primes in the 
+        // prime factorisation of N's node-value.
         vector<int> numGeneratedByNodesInPath;
         int64_t changeInSumIfNodeAddedToPath(const Node* node)
         {
@@ -294,15 +297,20 @@ class NumCoprimePairsInPathTracker
             switch(node->numPrimeFactors)
             {
                 case 1:
+                    // We share a factor with all nodes in the path that also have this prime factor.
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
                     break;
                 case 2:
+                    // We share a factor with all nodes in the path that also any of these two prime factors ...
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[1]];
 
+                    // ... but we'll overcount by the number of nodes in the path that have *both* of these prime
+                    // factors.
                     numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
                     break;
                 case 3:
+                    // As in case 2 ...
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[1]];
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[2]];
@@ -311,6 +319,8 @@ class NumCoprimePairsInPathTracker
                     numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]];
                     numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]];
 
+                    // ... but in subtracting our overcount, we'll *undercount* by the number of nodes in the path that
+                    // share all 3 factors with node XD
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]];
                     break;
             }
@@ -320,6 +330,7 @@ class NumCoprimePairsInPathTracker
         };
         void updateNumGeneratedByNodesAlongPath(const Node* node, int numCopiesOfNodeAdded)
         {
+            // See comment for numGeneratedByNodesInPath.
             const auto nodePrimeFactors = node->primeFactors;
             switch(node->numPrimeFactors)
             {
@@ -342,12 +353,11 @@ class NumCoprimePairsInPathTracker
                     break;
             }
         };
-
 };
 
 vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 {
-    const int n = nodes.size();
+    const int numNodes = nodes.size();
 
     const auto dfsArray = buildDFSArray(nodes);
     const auto rearrangedQueries = rearrangedQueriesWithMosAlgorithm(queries, nodes.size());
@@ -355,11 +365,13 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     int leftPointer = rearrangedQueries.front().leftIndex;
     int rightPointer = rearrangedQueries.front().leftIndex;
 
-    NumCoprimePairsInPathTracker resultTracker{n};
-    vector<int> nodeCountInRange(n);
+    NumCoprimePairsInPathTracker resultTracker(numNodes);
+    vector<int> nodeCountInRange(numNodes);
 
     auto addNodeCount = [&resultTracker, &nodeCountInRange](const auto& node, int increase)
     {
+        // The nodes is in the path if and only if it occurs exactly once in the range leftPointer - rightPointer
+        // in dfsArray.
         assert(increase != 0);
         if (nodeCountInRange[node->index] == 1)
             resultTracker.onNodeRemovedFromPath(node);
@@ -369,6 +381,8 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     };
     addNodeCount(dfsArray[leftPointer], 1);
     vector<int64_t> querySolutions(queries.size());
+    // Generate paths - by calling onNodeAddedToPath and onNodeRemovedFromPath on resultTracker -
+    // by using the algorithm for processing queries ordered by Mo's Algorithm.
     for (const auto query : rearrangedQueries)
     {
         const int newLeftPointer = query.leftIndex;
@@ -447,7 +461,6 @@ int main()
         node.numPrimeFactors = nodeValuePrimeFactors.size();
         std::copy(nodeValuePrimeFactors.begin(), nodeValuePrimeFactors.end(), node.primeFactors);
     }
-
 
     vector<Query> queries;
     for (int i = 0; i < q; i++)
