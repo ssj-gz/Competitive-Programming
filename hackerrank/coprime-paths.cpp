@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) 2017-10-14
 #define SUBMISSION
 #ifdef SUBMISSION
-//#define NDEBUG
+#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -290,27 +290,28 @@ class NumCoprimePairsInPathTracker
         int64_t changeInSumIfNodeAddedToPath(const Node* node)
         {
             int64_t numNonCoPrimeNodes = 0;
+            const auto nodePrimeFactors = node->primeFactors;
             switch(node->numPrimeFactors)
             {
                 case 1:
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
                     break;
                 case 2:
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0]];
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[1]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[1]];
 
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]];
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
                     break;
                 case 3:
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0]];
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[1]];
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[2]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[1]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[2]];
 
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]];
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[2]];
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[1] * node->primeFactors[2]];
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]];
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]];
 
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]];
                     break;
             }
             int64_t increaseInSum = numNodesInPath - numNonCoPrimeNodes;
@@ -319,24 +320,25 @@ class NumCoprimePairsInPathTracker
         };
         void updateNumGeneratedByNodesAlongPath(const Node* node, int numCopiesOfNodeAdded)
         {
+            const auto nodePrimeFactors = node->primeFactors;
             switch(node->numPrimeFactors)
             {
                 case 1:
-                    numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
                     break;
                 case 2:
-                    numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]] += numCopiesOfNodeAdded;
                     break;
                 case 3:
-                    numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[2]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[2]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
                     break;
             }
         };
