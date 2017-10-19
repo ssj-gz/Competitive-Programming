@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) 2017-10-14
+#define BRUTE_FORCE
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <array>
@@ -30,7 +36,6 @@ bool isPrime(int n)
 
 vector<int> primeFactors(int n)
 {
-    //cout << "prime factors of " << n << endl;
     bool addedPrime = false;
     vector<int> primeFactors;
     int factor = 2;
@@ -54,11 +59,6 @@ vector<int> primeFactors(int n)
         assert(isPrime(n));
         primeFactors.push_back(n);
     }
-    //for (const auto prime : primeFactors)
-    //{
-        //cout << prime << " ";
-    //}
-    //cout << endl;
     return primeFactors;
 }
 
@@ -81,7 +81,7 @@ struct Node
     int endIndexInDFSArray = -1;
 };
 
-void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors, int& indexInDFSArray)
+void fillInDFSInfo(Node* node, Node* parent, vector<Node*>& ancestors, int& indexInDFSArray)
 {
     const int height = ancestors.size();
     node->height = height;
@@ -108,7 +108,7 @@ void fillInAncestors(Node* node, Node* parent, vector<Node*>& ancestors, int& in
     {
         if (neighbour == parent)
             continue;
-        fillInAncestors(neighbour, node, ancestors, indexInDFSArray);
+        fillInDFSInfo(neighbour, node, ancestors, indexInDFSArray);
     }
     node->endIndexInDFSArray = indexInDFSArray;
     indexInDFSArray++;
@@ -372,7 +372,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     auto rootNode = &(nodes.front());
     int indexInDFSArray = 0;
     vector<Node*> ancestors;
-    fillInAncestors(rootNode, nullptr, ancestors, indexInDFSArray);
+    fillInDFSInfo(rootNode, nullptr, ancestors, indexInDFSArray);
     vector<Query> rearrangedQueries = queries;
     for (auto& query : rearrangedQueries)
     {
@@ -405,12 +405,12 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         dfsArray[node.startIndexInDFSArray] = &node;
         dfsArray[node.endIndexInDFSArray] = &node;
     }
-    cout << "dfsArray: " << endl;
+    //cout << "dfsArray: " << endl;
     for (const auto& node : dfsArray)
     {
-        cout << node->index << " "; 
+        //cout << node->index << " "; 
     }
-    cout << endl;
+    //cout << endl;
 
     const int sqrtN = sqrt(n);
     auto mosAlgorithmOrdering = [sqrtN](const Query& lhs, const Query& rhs)
@@ -428,13 +428,13 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     int leftPointer = rearrangedQueries.front().leftIndex;
     int rightPointer = rearrangedQueries.front().leftIndex;
     vector<int> nodeCountInRange(nodes.size());
-    cout << "About to do  thing" << endl;
+    //cout << "About to do  thing" << endl;
     set<Node*> nodesInPath;
     int64_t resultForPath = 0;
     vector<int> numGeneratedByNodesInPath(maxNodeValue + 1);
     auto changeInSumIfNodeAddedToPath = [&numGeneratedByNodesInPath, &nodesInPath](const auto& node) -> int64_t 
         {
-            cout << " changeInSumIfNodeAddedToPath for node: " << node->index << endl;
+            //cout << " changeInSumIfNodeAddedToPath for node: " << node->index << endl;
             int64_t numNonCoPrimeNodes = 0;
             switch(node->numPrimeFactors)
             {
@@ -460,8 +460,8 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
                     break;
             }
             int64_t increaseInSum = nodesInPath.size() - numNonCoPrimeNodes;
-            cout << " #nodesInPath: " << nodesInPath.size() << endl;
-            cout << " numNonCoPrimeNodes: " << numNonCoPrimeNodes << endl;
+            //cout << " #nodesInPath: " << nodesInPath.size() << endl;
+            //cout << " numNonCoPrimeNodes: " << numNonCoPrimeNodes << endl;
 
 
             return increaseInSum;
@@ -520,13 +520,13 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     vector<int64_t> querySolutions(queries.size());
     for (const auto query : rearrangedQueries)
     {
-        cout << " loop!" << endl;
+        //cout << " loop!" << endl;
         const int newLeftPointer = query.leftIndex;
         const int newRightPointer = query.rightIndex;
         auto lca = findLCA(query.node1, query.node2);
-        cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
-        cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
-        cout << "resultForPath: " << resultForPath << endl;
+        //cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
+        //cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
+        //cout << "resultForPath: " << resultForPath << endl;
         //assert(find(nodes.begin(), nodes.end(), query.node1) != nodes.end());
         //assert(find(nodes.begin(), nodes.end(), query.node2) != nodes.end());
 
@@ -566,6 +566,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
             assert(nodesInPath.find(query.lca) == nodesInPath.end());
             nodesInPath.insert(lca);
         }
+#ifdef BRUTE_FORCE
         vector<Node*> pathSoFar;
         const auto dbgPath = path(query.node1, query.node2, nullptr, pathSoFar);
         set<Node*> dbgPathNodes(dbgPath.begin(), dbgPath.end());
@@ -582,13 +583,16 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         }
         cout << endl;
         assert(dbgPathNodes == nodesInPath);
+#endif
         if (needToAddLCA)
             nodesInPath.erase(nodesInPath.find(lca));
         const auto finalResultForPath = resultForPath + (!needToAddLCA ? 0 : changeInSumIfNodeAddedToPath(lca));
+#ifdef BRUTE_FORCE
         cout << "finalResultForPath: " << finalResultForPath << endl;
         const auto dbgResultForPath = valueForPath(dbgPath);
         cout << "dbgResultForPath: " << dbgResultForPath << endl;
         assert(dbgResultForPath == finalResultForPath);
+#endif
         assert(query.originalQueryIndex >= 0 && query.originalQueryIndex < querySolutions.size());
         querySolutions[query.originalQueryIndex] = finalResultForPath;
     }
@@ -610,7 +614,6 @@ int main()
         cin >> nodeValue;
         nodes[i].value = nodeValue;
         nodes[i].index = i;
-        cout << "node " << i << &(nodes[i]) << endl;
     }
     for (int i = 0; i < n - 1; i++)
     {
@@ -627,18 +630,6 @@ int main()
     }
 #else
     srand(time(0));
-#if 0
-    vector<int> numbersWithAtMost3Primes;
-    for (int i = 2; i < maxNodeValue; i++)
-    {
-        if ((i % 10000) == 0)
-            cout << i << endl;
-        if (primeFactors(i).size() <= 3)
-        {
-            numbersWithAtMost3Primes.push_back(i);
-        }
-    }
-#endif
 #error sausage
     while (true)
     {
@@ -679,32 +670,6 @@ int main()
         }
 #endif
 
-#if 0
-        int largestNodeValue = 0;
-        for (auto& node : nodes)
-        {
-            largestNodeValue = max(node.value, largestNodeValue);
-        }
-
-        const int primeLimit = sqrt(largestNodeValue);
-        vector<bool> isPrime(largestNodeValue + 1, true);
-        for (int factor = 2; factor <= primeLimit; factor++)
-        {
-            int i = 2 * factor;
-            while (i <= largestNodeValue)
-            {
-                isPrime[i] = false;
-                i += factor;
-            }
-        }
-
-        vector<int> primesUpToMaxValue;
-        for (int i = 2; i < isPrime.size(); i++)
-        {
-            if (isPrime[i])
-                primesUpToMaxValue.push_back(i);
-        }
-#endif
         for (auto& node : nodes)
         {
             const auto nodeValuePrimeFactors = primeFactors(node.value);
@@ -713,57 +678,6 @@ int main()
             std::copy(nodeValuePrimeFactors.begin(), nodeValuePrimeFactors.end(), node.primeFactors);
         }
 
-
-#if 0
-        vector<int> sharedNodePrimeFactors;
-        for (auto& node : nodes)
-        {
-            auto nodeValue = node.value;
-            const auto originalNodeValue = nodeValue;
-            vector<int> primeFactors;
-            for (auto prime : primesUpToMaxValue)
-            {
-                if (nodeValue == 1)
-                    break;
-                if (prime * prime > nodeValue)
-                {
-                    primeFactors.push_back(nodeValue);
-                    break;
-                }
-                if ((nodeValue % prime) == 0)
-                {
-                    primeFactors.push_back(prime);
-                    while ((nodeValue % prime) == 0)
-                    {
-                        nodeValue /= prime;
-                    }
-                }
-            }
-            for (const auto primeFactor : primeFactors)
-            {
-                const auto occurrenceInSharedNodePrimeFactors = find(sharedNodePrimeFactors.begin(), sharedNodePrimeFactors.end(), primeFactor);
-                int indexInSharedNodePrimeFactors = -1;
-                if (occurrenceInSharedNodePrimeFactors == sharedNodePrimeFactors.end())
-                {
-                    indexInSharedNodePrimeFactors = sharedNodePrimeFactors.size();
-                    //cout << "Found new prime factor: " << primeFactor << " for nodeValue: " << originalNodeValue << endl;
-                    sharedNodePrimeFactors.push_back(primeFactor);
-                    assert(sharedNodePrimeFactors.size() <= maxTotalPrimeFactorsOfAllNodes);
-                }
-                else
-                {
-                    indexInSharedNodePrimeFactors = distance(sharedNodePrimeFactors.begin(), occurrenceInSharedNodePrimeFactors);
-                }
-                node.primeFactorBitmask |= (1 << indexInSharedNodePrimeFactors);
-            }
-        }
-#endif
-
-        //vector<Node*> ancestors;
-        //auto rootNode = &(nodes.front());
-        //cout << " rootNode: " << rootNode << endl;
-        //array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot = {};
-        //fillInAncestors(rootNode, nullptr, numPrimesWithCombinationToRoot, ancestors);
 
         vector<Query> queries;
 #ifndef RANDOM
@@ -782,15 +696,15 @@ int main()
             query.originalQueryIndex = i;
             queries.push_back(query);
 //#define BRUTE_FORCE
-#ifdef BRUTE_FORCE
-            const auto bruteForceResult = bruteForce(node1, node2);
-            cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
-            const auto lcaBruteForce = findLCABruteForce(node1, node2);
-            const auto lcaOpt = findLCA(node1, node2);
-            cout << "node1: " << node1->index << " node2: " << node2->index << endl;
-            cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
-            assert(lcaOpt == lcaBruteForce);
-#endif
+//#ifdef BRUTE_FORCE
+            //const auto bruteForceResult = bruteForce(node1, node2);
+            //cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
+            //const auto lcaBruteForce = findLCABruteForce(node1, node2);
+            //const auto lcaOpt = findLCA(node1, node2);
+            //cout << "node1: " << node1->index << " node2: " << node2->index << endl;
+            //cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
+            //assert(lcaOpt == lcaBruteForce);
+//#endif
             //cout << optimisedResult << endl;
 
 
