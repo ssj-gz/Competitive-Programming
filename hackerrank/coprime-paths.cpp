@@ -1,8 +1,6 @@
 // Simon St James (ssjgz) 2017-10-14
-#define BRUTE_FORCE
 #define SUBMISSION
 #ifdef SUBMISSION
-#define NDEBUG
 #undef BRUTE_FORCE
 #endif
 #include <iostream>
@@ -81,6 +79,7 @@ struct Node
     int endIndexInDFSArray = -1;
 };
 
+// Fill in ancestor info for each node, and also set start/endIndexInDFSArray.
 void fillInDFSInfo(Node* node, Node* parent, vector<Node*>& ancestors, int& indexInDFSArray)
 {
     const int height = ancestors.size();
@@ -117,14 +116,12 @@ void fillInDFSInfo(Node* node, Node* parent, vector<Node*>& ancestors, int& inde
 
 Node* findKthAncestor(Node* node, int k)
 {
-    //cout << "originalK: " << k << endl;
     const auto originalHeight = node->height;
     const auto originalK = k;
     Node* ancestor = node;
     for (int exponent = log2MaxNodes - 1; exponent >= 0; exponent--)
     {
         const auto powerOf2 = (1 << exponent);
-        //cout << " exponent: " << exponent << " powerOf2: " << powerOf2 << endl;
         if (k >= powerOf2) 
         {
             assert(ancestor->ancestorPowerOf2Above[exponent] && ancestor->ancestorPowerOf2Above[exponent]->height == ancestor->height - powerOf2);
@@ -132,53 +129,33 @@ Node* findKthAncestor(Node* node, int k)
             k -= powerOf2;
         }
     }
-    //cout << "ancestor height: " << ancestor->height << " original height: " << originalHeight << " originalK: " << originalK << endl;
     assert(ancestor);
     assert(ancestor->height == originalHeight - originalK);
     return ancestor;
 }
 
-Node* findLCABruteForce(Node* node1, Node* node2)
-{
-    while (node1->height > node2->height)
-    {
-        node1 = node1->parent;
-    }
-    while (node2->height > node1->height)
-    {
-        node2 = node2->parent;
-    }
-    while (node1 != node2)
-    {
-        node1 = node1->parent;
-        node2 = node2->parent;
-    }
-    assert(node1 && node2);
-    assert(node1->height == node2->height);
-    return node1;
-}
 
 Node* findLCA(Node* node1, Node* node2)
 {
-    //cout << "findLCA original node1 : " << node1->index << " original node2 : " << node2->index << endl;
-    //cout << "findLCA original node1 height: " << node1->height << " original node2 height: " << node2->height << endl;
+    // Equalise node heights.
     if (node1->height != node2->height)
     {
         if (node1->height > node2->height)
         {
-            //cout << "adjusting node1" << endl;
             node1 = findKthAncestor(node1, node1->height - node2->height);
         }
         else
         {
-            //cout << "adjusting node2" << endl;
             node2 = findKthAncestor(node2, node2->height - node1->height);
-            //cout << "New node2 height: " << node2->height << endl;
         }
     }
     assert(node1 && node2);
     assert(node1->height == node2->height);
 
+    // Use a binary search to find the common ancestor: since the 
+    // nodes always have the same height, if we jump both nodes up by x places
+    // and they are still not equal, then the lca is still above them: if they
+    // do become equal, the the lca is at or below them.
     int currentNodesHeight = node1->height;
     int minLCAHeight = 0;
     int maxLCAHeight = currentNodesHeight;
@@ -186,15 +163,10 @@ Node* findLCA(Node* node1, Node* node2)
     while (true)
     {
         const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
-        //cout << " minLCAHeight: " << minLCAHeight << " currentNodesHeight: " << currentNodesHeight << " heightDecrease: " << heightDecrease << endl; 
-        //cout << " lca node1: " << node1->index << " node2: " << node2->index << endl;
         assert(node1->height == node2->height);
         assert(node1->height == currentNodesHeight); 
         if (node1 != node2 && node1->parent == node2->parent && node1->parent)
-        {
-            //cout << "wee" << endl;
             return node1->parent;
-        }
 
         if (heightDecrease == 0)
         {
@@ -204,7 +176,6 @@ Node* findLCA(Node* node1, Node* node2)
         const int nodesAncestorHeight = currentNodesHeight - heightDecrease;
         auto node1Ancestor = findKthAncestor(node1, heightDecrease);
         auto node2Ancestor = findKthAncestor(node2, heightDecrease);
-       // cout << "node1Ancestor: " << node1Ancestor << " node2Ancestor: " << node2Ancestor << endl;
         assert(node1Ancestor && node2Ancestor);
 
         if (node1Ancestor == node2Ancestor)
@@ -219,141 +190,9 @@ Node* findLCA(Node* node1, Node* node2)
             node2 = node2Ancestor->parent;
         }
     }
-    assert(false);
+    assert(false && "Shouldn't be able to reach here!");
     return nullptr;
 }
-
-vector<Node*> path(Node* node, Node* destNode, Node* parent, vector<Node*>& pathSoFar)
-{
-    cout << " path: node " << node->index << " " << node << endl;
-    pathSoFar.push_back(node);
-
-    if (node == destNode)
-        return pathSoFar;
-
-    for (auto neighbour : node->neighbours)
-    {
-        cout << "neighbour: " << neighbour << endl;
-        if (neighbour == parent)
-            continue;
-
-        const auto pathToDestNode = path(neighbour, destNode, node, pathSoFar);
-
-        if (!pathToDestNode.empty())
-        {
-            return pathToDestNode;
-        }
-
-    }
-    pathSoFar.pop_back();
-
-    return vector<Node*>();
-
-}
-
-int64_t valueForPath(const vector<Node*>& path)
-{
-    int64_t result = 0;
-    for (auto nodeInPathIndex = 0; nodeInPathIndex < path.size(); nodeInPathIndex++)
-    {
-        for (auto nodeInPathIndex2 = nodeInPathIndex + 1; nodeInPathIndex2 < path.size(); nodeInPathIndex2++)
-        {
-            auto nodeInPath1 = path[nodeInPathIndex];
-            auto nodeInPath2 = path[nodeInPathIndex2];
-
-            bool areCoprime = true;
-            for (auto primeIndex1 = 0; primeIndex1 < nodeInPath1->numPrimeFactors; primeIndex1++)
-            {
-                for (auto primeIndex2 = 0; primeIndex2 < nodeInPath2->numPrimeFactors; primeIndex2++)
-                {
-                    if (nodeInPath1->primeFactors[primeIndex1] == nodeInPath2->primeFactors[primeIndex2])
-                    {
-                        areCoprime = false;
-                    }
-                }
-            }
-
-            cout << "pair: " << nodeInPath1->index << "[" << nodeInPath1->value << "]," << nodeInPath2->index << "[" << nodeInPath2->value << "]" << " coprime? " << areCoprime << endl;
-
-            if (areCoprime)
-                result++;
-        }
-    }
-    return result;
-}
-
-int64_t bruteForce(Node* node1, Node* node2)
-{
-    vector<Node*> pathSoFar;
-    const auto pathBetweenNodes = path(node1, node2, nullptr, pathSoFar);
-    assert(node1 == node2 || !pathBetweenNodes.empty());
-
-    cout << "Path between nodes with indices " << node1->index << " and " << node2->index << endl; 
-    for  (const auto node : pathBetweenNodes)
-    {
-        cout << node->index << " ";
-    }
-    cout << endl;
-
-    int64_t result = 0;
-    for (auto nodeInPathIndex = 0; nodeInPathIndex < pathBetweenNodes.size(); nodeInPathIndex++)
-    {
-        for (auto nodeInPathIndex2 = nodeInPathIndex + 1; nodeInPathIndex2 < pathBetweenNodes.size(); nodeInPathIndex2++)
-        {
-            auto nodeInPath1 = pathBetweenNodes[nodeInPathIndex];
-            auto nodeInPath2 = pathBetweenNodes[nodeInPathIndex2];
-
-            if ((nodeInPath1->primeFactorBitmask & nodeInPath2->primeFactorBitmask) == 0)
-                result++;
-        }
-    } 
-    return result;
-}
-
-#if 0
-int64_t findNumCoprimePairsAlongPath(Node* node1, Node* node2)
-{
-    const auto lca = findLCA(node1, node2);
-    int64_t optimisedResult = 0;
-    if (node1 != node2)
-    {
-        array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationAlongPath = {};
-        for (int i = 0; i < numNodePrimeFactorCombinations; i++)
-        {
-           // cout << "i: " << i << " node1->numPrimesWithCombinationToRoot[i]: " << node1->numPrimesWithCombinationToRoot[i] << "  node2->numPrimesWithCombinationToRoot[i]: " << node2->numPrimesWithCombinationToRoot[i] << " lca->numPrimesWithCombinationToRoot[i]: " << lca->numPrimesWithCombinationToRoot[i] << " node1 == lca? " << (node1 == lca) << " node2 == lca? " << (node2 == lca) << endl;
-            if (node1 != lca && node2 != lca)
-            {
-                numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i];
-                numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i];
-                numPrimesWithCombinationAlongPath[i] -= lca->numPrimesWithCombinationToRoot[i];
-                numPrimesWithCombinationAlongPath[i] -= (lca->parent ? lca->parent->numPrimesWithCombinationToRoot[i] : 0);
-            }
-            else if (node1 == lca)
-            {
-                numPrimesWithCombinationAlongPath[i] += node2->numPrimesWithCombinationToRoot[i] - (lca->parent ? lca->parent->numPrimesWithCombinationToRoot[i] : 0);
-            }
-            else if (node2 == lca)
-            {
-                numPrimesWithCombinationAlongPath[i] += node1->numPrimesWithCombinationToRoot[i] - (lca->parent ? lca->parent->numPrimesWithCombinationToRoot[i] : 0);
-            }
-            assert(numPrimesWithCombinationAlongPath[i] >= 0);
-        }
-        for (int i = 0; i < numNodePrimeFactorCombinations; i++)
-        {
-            for (int j = 0; j < numNodePrimeFactorCombinations; j++)
-            {
-                if ((i & j) == 0)
-                {
-                    optimisedResult += numPrimesWithCombinationAlongPath[i] * numPrimesWithCombinationAlongPath[j];
-                }
-            }
-        }
-        optimisedResult -= numPrimesWithCombinationAlongPath[0];
-    }
-    optimisedResult /= 2;
-    return optimisedResult;
-}
-#endif
 
 struct Query
 {
@@ -366,21 +205,31 @@ struct Query
     int rightIndex = -1;
 };
 
-vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
-{
-    const int n = nodes.size();
+vector<Node*> buildDFSArray(vector<Node>& nodes)
+{    
     auto rootNode = &(nodes.front());
     int indexInDFSArray = 0;
     vector<Node*> ancestors;
     fillInDFSInfo(rootNode, nullptr, ancestors, indexInDFSArray);
+    vector<Node*> dfsArray(indexInDFSArray);
+    for (auto& node : nodes)
+    {
+        dfsArray[node.startIndexInDFSArray] = &node;
+        dfsArray[node.endIndexInDFSArray] = &node;
+    }
+    return dfsArray;
+}
+
+vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
+{
+    const int n = nodes.size();
+
+    const auto dfsArray = buildDFSArray(nodes);
+
     vector<Query> rearrangedQueries = queries;
     for (auto& query : rearrangedQueries)
     {
-        //if (query.node1->startIndexInDFSArray > query.node2->startIndexInDFSArray)
-            //swap(query.node1, query.node2);
-
-        //query.leftIndex = query.node1->startIndexInDFSArray;
-        //query.rightIndex = query.node2->endIndexInDFSArray;
+        // Things are simpler if we can assume that node1 is first reached before node2 in the DFS.
         if (query.node1->startIndexInDFSArray > query.node2->startIndexInDFSArray)
             swap(query.node1, query.node2);
 
@@ -399,20 +248,8 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         }
     }
 
-    vector<Node*> dfsArray(indexInDFSArray);
-    for (auto& node : nodes)
-    {
-        dfsArray[node.startIndexInDFSArray] = &node;
-        dfsArray[node.endIndexInDFSArray] = &node;
-    }
-    //cout << "dfsArray: " << endl;
-    for (const auto& node : dfsArray)
-    {
-        //cout << node->index << " "; 
-    }
-    //cout << endl;
 
-    const int sqrtN = sqrt(n);
+    const int sqrtN = sqrt(nodes.size());
     auto mosAlgorithmOrdering = [sqrtN](const Query& lhs, const Query& rhs)
         {
             const int lhsBucket = lhs.leftIndex / sqrtN;
