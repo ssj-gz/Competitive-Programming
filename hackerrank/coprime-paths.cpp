@@ -6,7 +6,6 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <set>
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -271,14 +270,12 @@ class NumCoprimePairsInPathTracker
         void onNodeAddedToPath(const Node* node)
         {
             resultForPath += changeInSumIfNodeAddedToPath(node);
-            assert(nodesInPath.find(node) == nodesInPath.end());
-            nodesInPath.insert(node);
+            numNodesInPath++;
             updateNumGeneratedByNodesAlongPath(node, 1);
         };
         void onNodeRemovedFromPath(const Node* node)
         {
-            assert(nodesInPath.find(node) != nodesInPath.end());
-            nodesInPath.erase(nodesInPath.find(node));
+            numNodesInPath--;
             updateNumGeneratedByNodesAlongPath(node, -1);
             resultForPath -= changeInSumIfNodeAddedToPath(node);
         };
@@ -287,7 +284,7 @@ class NumCoprimePairsInPathTracker
             return resultForPath;
         }
     private:
-        set<const Node*> nodesInPath;
+        int numNodesInPath = 0;
         int64_t resultForPath = 0;
         vector<int> numGeneratedByNodesInPath;
         int64_t changeInSumIfNodeAddedToPath(const Node* node)
@@ -316,7 +313,7 @@ class NumCoprimePairsInPathTracker
                     numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]];
                     break;
             }
-            int64_t increaseInSum = nodesInPath.size() - numNonCoPrimeNodes;
+            int64_t increaseInSum = numNodesInPath - numNonCoPrimeNodes;
 
             return increaseInSum;
         };
