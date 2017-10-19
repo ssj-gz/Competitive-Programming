@@ -230,6 +230,7 @@ vector<Query> rearrangedQueriesWithMosAlgorithm(const vector<Query>& queries, in
         query.lca = findLCA(query.node1, query.node2);
         assert((query.lca != query.node1 && query.lca != query.node2) || query.lca == query.node1);
 
+        // See the documentation on the codeforces article.
         if (query.lca == query.node1)
         {
             query.leftIndex = query.node1->startIndexInDFSArray;
@@ -430,6 +431,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 
 int main()
 {
+    // http://codeforces.com/blog/entry/43230
     int n, q;
     cin >> n >> q;
     assert(n <= maxNumNodes);
