@@ -14,12 +14,12 @@ using namespace std;
 
 const int maxNodeValue = 10'000'000;
 
-constexpr int maxNodes = 25'000;
+constexpr int maxNumNodes = 25'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
         return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
-constexpr int log2MaxNodes = log2(maxNodes);
+constexpr int log2MaxNumNodes = log2(maxNumNodes);
 
 bool isPrime(int n)
 {
@@ -72,7 +72,7 @@ struct Node
     int height = -1;
     Node* parent = nullptr;
 
-    array<Node*, log2MaxNodes> ancestorPowerOf2Above;
+    array<Node*, log2MaxNumNodes> ancestorPowerOf2Above;
 
     int startIndexInDFSArray = -1;
     int endIndexInDFSArray = -1;
@@ -86,7 +86,7 @@ void fillInDFSInfo(Node* node, Node* parent, vector<Node*>& ancestors, int& inde
     node->parent = parent;
 
     int powerOf2 = 1;
-    for (int exponent = 0; exponent < log2MaxNodes; exponent++)
+    for (int exponent = 0; exponent < log2MaxNumNodes; exponent++)
     {
         if (ancestors.size() >= powerOf2)
         {
@@ -118,7 +118,7 @@ Node* findKthAncestor(Node* node, int k)
     const auto originalHeight = node->height;
     const auto originalK = k;
     Node* ancestor = node;
-    for (int exponent = log2MaxNodes - 1; exponent >= 0; exponent--)
+    for (int exponent = log2MaxNumNodes - 1; exponent >= 0; exponent--)
     {
         const auto powerOf2 = (1 << exponent);
         if (k >= powerOf2) 
@@ -432,6 +432,7 @@ int main()
 {
     int n, q;
     cin >> n >> q;
+    assert(n <= maxNumNodes);
 
     vector<Node> nodes(n);
 
@@ -439,6 +440,7 @@ int main()
     {
         int nodeValue;
         cin >> nodeValue;
+        assert(nodeValue <= maxNodeValue);
         nodes[i].value = nodeValue;
         nodes[i].index = i;
     }
