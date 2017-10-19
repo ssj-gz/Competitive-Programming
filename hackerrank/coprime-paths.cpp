@@ -225,6 +225,7 @@ Node* findLCA(Node* node1, Node* node2)
 
 vector<Node*> path(Node* node, Node* destNode, Node* parent, vector<Node*>& pathSoFar)
 {
+    cout << " path: node " << node->index << " " << node << endl;
     pathSoFar.push_back(node);
 
     if (node == destNode)
@@ -232,6 +233,7 @@ vector<Node*> path(Node* node, Node* destNode, Node* parent, vector<Node*>& path
 
     for (auto neighbour : node->neighbours)
     {
+        cout << "neighbour: " << neighbour << endl;
         if (neighbour == parent)
             continue;
 
@@ -515,6 +517,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     };
     addNodeCount(dfsArray[leftPointer], 1);
     //addNode(dfsArray[leftPointer]);
+    vector<int64_t> querySolutions(queries.size());
     for (const auto query : rearrangedQueries)
     {
         cout << " loop!" << endl;
@@ -524,6 +527,8 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
         cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
         cout << "resultForPath: " << resultForPath << endl;
+        //assert(find(nodes.begin(), nodes.end(), query.node1) != nodes.end());
+        //assert(find(nodes.begin(), nodes.end(), query.node2) != nodes.end());
 
         while (leftPointer < newLeftPointer)
         {
@@ -584,15 +589,16 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         const auto dbgResultForPath = valueForPath(dbgPath);
         cout << "dbgResultForPath: " << dbgResultForPath << endl;
         assert(dbgResultForPath == finalResultForPath);
+        assert(query.originalQueryIndex >= 0 && query.originalQueryIndex < querySolutions.size());
+        querySolutions[query.originalQueryIndex] = finalResultForPath;
     }
-    vector<int64_t> querySolutions;
     return querySolutions;
 }
 
 int main()
 {
     int n, q;
-#define RANDOM
+//#define RANDOM
 #ifndef RANDOM
     cin >> n >> q;
 
@@ -603,7 +609,8 @@ int main()
         int nodeValue;
         cin >> nodeValue;
         nodes[i].value = nodeValue;
-        nodes[i].index = i + 1;
+        nodes[i].index = i;
+        cout << "node " << i << &(nodes[i]) << endl;
     }
     for (int i = 0; i < n - 1; i++)
     {
@@ -632,6 +639,7 @@ int main()
         }
     }
 #endif
+#error sausage
     while (true)
     {
         //n = 9;
@@ -768,7 +776,11 @@ int main()
 
             auto node1 = &(nodes[u]);
             auto node2 = &(nodes[v]);
-            const auto optimisedResult = findNumCoprimePairsAlongPath(node1, node2);
+            Query query;
+            query.node1 = node1;
+            query.node2 = node2;
+            query.originalQueryIndex = i;
+            queries.push_back(query);
 //#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
             const auto bruteForceResult = bruteForce(node1, node2);
@@ -779,7 +791,7 @@ int main()
             cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
             assert(lcaOpt == lcaBruteForce);
 #endif
-            cout << optimisedResult << endl;
+            //cout << optimisedResult << endl;
 
 
         }
@@ -801,8 +813,12 @@ int main()
                 break;
             }
         }
-        solve(queries, nodes);
 #endif
+        const auto solutions = solve(queries, nodes);
+        for (const auto solution : solutions)
+        {
+            cout << solution << endl;
+        }
 //#define EXHAUSTIVE
 #ifdef EXHAUSTIVE
         for (int i = 0; i < n; i++)
