@@ -249,6 +249,35 @@ vector<Node*> path(Node* node, Node* destNode, Node* parent, vector<Node*>& path
 
 }
 
+int64_t valueForPath(const vector<Node*>& path)
+{
+    int64_t result = 0;
+    for (auto nodeInPathIndex = 0; nodeInPathIndex < path.size(); nodeInPathIndex++)
+    {
+        for (auto nodeInPathIndex2 = nodeInPathIndex + 1; nodeInPathIndex2 < path.size(); nodeInPathIndex2++)
+        {
+            auto nodeInPath1 = path[nodeInPathIndex];
+            auto nodeInPath2 = path[nodeInPathIndex2];
+
+            bool areCoprime = true;
+            for (auto primeIndex1 = 0; primeIndex1 < nodeInPath1->numPrimeFactors; primeIndex1++)
+            {
+                for (auto primeIndex2 = 0; primeIndex2 < nodeInPath2->numPrimeFactors; primeIndex2++)
+                {
+                    if (nodeInPath1->primeFactors[primeIndex1] == nodeInPath2->primeFactors[primeIndex2])
+                    {
+                        areCoprime = false;
+                    }
+                }
+            }
+
+            if (areCoprime)
+                result++;
+        }
+    }
+    return result;
+}
+
 int64_t bruteForce(Node* node1, Node* node2)
 {
     vector<Node*> pathSoFar;
@@ -542,6 +571,9 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         assert(dbgPathNodes == nodesInPath);
         if (needToAddLCA)
             nodesInPath.erase(nodesInPath.find(lca));
+        cout << "result for path: " << resultForPath << endl;
+        const auto dbgResultForPath = valueForPath(dbgPath);
+        cout << "dbgResultForPath for path: " << dbgResultForPath << endl;
     }
     vector<int64_t> querySolutions;
     return querySolutions;
