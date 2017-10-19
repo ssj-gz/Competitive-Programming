@@ -271,6 +271,8 @@ int64_t valueForPath(const vector<Node*>& path)
                 }
             }
 
+            cout << "pair: " << nodeInPath1->index << "[" << nodeInPath1->value << "]," << nodeInPath2->index << "[" << nodeInPath2->value << "]" << " coprime? " << areCoprime << endl;
+
             if (areCoprime)
                 result++;
         }
@@ -430,6 +432,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     vector<int> numGeneratedByNodesInPath(maxNodeValue + 1);
     auto changeInSumIfNodeAddedToPath = [&numGeneratedByNodesInPath, &nodesInPath](const auto& node) -> int64_t 
         {
+            cout << " changeInSumIfNodeAddedToPath for node: " << node->index << endl;
             int64_t numNonCoPrimeNodes = 0;
             switch(node->numPrimeFactors)
             {
@@ -455,6 +458,9 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
                     break;
             }
             int64_t increaseInSum = nodesInPath.size() - numNonCoPrimeNodes;
+            cout << " #nodesInPath: " << nodesInPath.size() << endl;
+            cout << " numNonCoPrimeNodes: " << numNonCoPrimeNodes << endl;
+
 
             return increaseInSum;
         };
@@ -468,7 +474,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
             case 2:
                 numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
                 numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[0]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
                 break;
             case 3:
                 numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
@@ -484,6 +490,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     auto onNodeAddedToPath = [&nodesInPath, &resultForPath, &changeInSumIfNodeAddedToPath, &updateNumGeneratedByNodesAlongPath](const auto& node)
     {
         resultForPath += changeInSumIfNodeAddedToPath(node);
+        assert(nodesInPath.find(node) == nodesInPath.end());
         nodesInPath.insert(node);
         updateNumGeneratedByNodesAlongPath(node, 1);
     };
@@ -510,12 +517,13 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     //addNode(dfsArray[leftPointer]);
     for (const auto query : rearrangedQueries)
     {
-        //cout << " loop!" << endl;
+        cout << " loop!" << endl;
         const int newLeftPointer = query.leftIndex;
         const int newRightPointer = query.rightIndex;
         auto lca = findLCA(query.node1, query.node2);
-        //cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
-        //cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
+        cout << " node1 index: " << query.node1->index << " node2 index: " << query.node2->index << " lca index: " << lca->index << endl;
+        cout << " leftPointer: " << leftPointer << " rightPointer: " << rightPointer << " newLeftPointer: " << newLeftPointer << " newRightPointer: " << newRightPointer << endl;
+        cout << "resultForPath: " << resultForPath << endl;
 
         while (leftPointer < newLeftPointer)
         {
@@ -559,7 +567,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         cout << " current path nodes: " << endl;
         for (const auto& node : nodesInPath)
         {
-            cout << node->index << " ";
+            cout << "node" << node->index << "[" << node->value << "] ";
         }
         cout << endl;
         cout << " current dbgPath nodes: " << endl;
@@ -571,9 +579,11 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         assert(dbgPathNodes == nodesInPath);
         if (needToAddLCA)
             nodesInPath.erase(nodesInPath.find(lca));
-        cout << "result for path: " << resultForPath << endl;
+        const auto finalResultForPath = resultForPath + (!needToAddLCA ? 0 : changeInSumIfNodeAddedToPath(lca));
+        cout << "finalResultForPath: " << finalResultForPath << endl;
         const auto dbgResultForPath = valueForPath(dbgPath);
-        cout << "dbgResultForPath for path: " << dbgResultForPath << endl;
+        cout << "dbgResultForPath: " << dbgResultForPath << endl;
+        assert(dbgResultForPath == finalResultForPath);
     }
     vector<int64_t> querySolutions;
     return querySolutions;
@@ -625,7 +635,7 @@ int main()
     while (true)
     {
         //n = 9;
-        n = rand() % 100 + 2;
+        n = rand() % 1000 + 2;
         cout << "n: " << n << endl;
         vector<Node> nodes;
         nodes.reserve(n);
