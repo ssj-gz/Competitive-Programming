@@ -9,8 +9,7 @@
 
 using namespace std;
 
-const auto maxTotalPrimeFactorsOfAllNodes = 3;
-const auto numNodePrimeFactorCombinations = (1 << maxTotalPrimeFactorsOfAllNodes) - 1;
+const int maxNodeValue = 10'000'000;
 
 constexpr int maxNodes = 25'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
@@ -65,8 +64,11 @@ vector<int> primeFactors(int n)
 
 struct Node
 {
-    int index = -1;
     int value = -1;
+    int numPrimeFactors = 0;
+    int primeFactors[3] = {};
+
+    int index = -1;
     vector<Node*> neighbours;
     int primeFactorBitmask = 0;
 
@@ -74,7 +76,6 @@ struct Node
     Node* parent = nullptr;
 
     array<Node*, log2MaxNodes> ancestorPowerOf2Above;
-    array<int, numNodePrimeFactorCombinations> numPrimesWithCombinationToRoot;
 
     int startIndexInDFSArray = -1;
     int endIndexInDFSArray = -1;
@@ -276,6 +277,7 @@ int64_t bruteForce(Node* node1, Node* node2)
     return result;
 }
 
+#if 0
 int64_t findNumCoprimePairsAlongPath(Node* node1, Node* node2)
 {
     const auto lca = findLCA(node1, node2);
@@ -318,6 +320,7 @@ int64_t findNumCoprimePairsAlongPath(Node* node1, Node* node2)
     optimisedResult /= 2;
     return optimisedResult;
 }
+#endif
 
 struct Query
 {
@@ -394,14 +397,73 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
     vector<int> nodeCountInRange(nodes.size());
     cout << "About to do  thing" << endl;
     set<Node*> nodesInPath;
-    auto onNodeAddedToPath = [&nodesInPath](const auto& node)
+    int64_t resultForPath = 0;
+    vector<int> numGeneratedByNodesInPath(maxNodeValue + 1);
+    auto changeInSumIfNodeAddedToPath = [&numGeneratedByNodesInPath, &nodesInPath](const auto& node) -> int64_t 
+        {
+            int64_t numNonCoPrimeNodes = 0;
+            switch(node->numPrimeFactors)
+            {
+                case 1:
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0]];
+                    break;
+                case 2:
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[1]];
+
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]];
+                    break;
+                case 3:
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[1]];
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[2]];
+
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]];
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[2]];
+                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[node->primeFactors[1] * node->primeFactors[2]];
+
+                    numNonCoPrimeNodes += numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]];
+                    break;
+            }
+            int64_t increaseInSum = nodesInPath.size() - numNonCoPrimeNodes;
+
+            return increaseInSum;
+        };
+    auto updateNumGeneratedByNodesAlongPath = [&numGeneratedByNodesInPath](const auto& node, int numCopiesOfNodeAdded)
     {
-        nodesInPath.insert(node);
+        switch(node->numPrimeFactors)
+        {
+            case 1:
+                numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                break;
+            case 2:
+                numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[0]] += numCopiesOfNodeAdded;
+                break;
+            case 3:
+                numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[2]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                break;
+        }
     };
-    auto onNodeRemovedFromPath = [&nodesInPath](const auto& node)
+    auto onNodeAddedToPath = [&nodesInPath, &resultForPath, &changeInSumIfNodeAddedToPath, &updateNumGeneratedByNodesAlongPath](const auto& node)
+    {
+        resultForPath += changeInSumIfNodeAddedToPath(node);
+        nodesInPath.insert(node);
+        updateNumGeneratedByNodesAlongPath(node, 1);
+    };
+    auto onNodeRemovedFromPath = [&nodesInPath, &resultForPath, &changeInSumIfNodeAddedToPath, &updateNumGeneratedByNodesAlongPath](const auto& node)
     {
         assert(nodesInPath.find(node) != nodesInPath.end());
         nodesInPath.erase(nodesInPath.find(node));
+        updateNumGeneratedByNodesAlongPath(node, -1);
+        resultForPath -= changeInSumIfNodeAddedToPath(node);
     };
 
     auto addNodeCount = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node, int increase)
@@ -487,7 +549,6 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 
 int main()
 {
-    const int maxValue = 10'000'000;
     int n, q;
 #define RANDOM
 #ifndef RANDOM
@@ -519,7 +580,7 @@ int main()
     srand(time(0));
 #if 0
     vector<int> numbersWithAtMost3Primes;
-    for (int i = 2; i < maxValue; i++)
+    for (int i = 2; i < maxNodeValue; i++)
     {
         if ((i % 10000) == 0)
             cout << i << endl;
@@ -568,6 +629,7 @@ int main()
         }
 #endif
 
+#if 0
         int largestNodeValue = 0;
         for (auto& node : nodes)
         {
@@ -592,6 +654,15 @@ int main()
             if (isPrime[i])
                 primesUpToMaxValue.push_back(i);
         }
+#endif
+        for (auto& node : nodes)
+        {
+            const auto nodeValuePrimeFactors = primeFactors(node.value);
+            assert(nodeValuePrimeFactors.size() <= 3);
+            node.numPrimeFactors = nodeValuePrimeFactors.size();
+            std::copy(nodeValuePrimeFactors.begin(), nodeValuePrimeFactors.end(), node.primeFactors);
+        }
+
 
 #if 0
         vector<int> sharedNodePrimeFactors;
