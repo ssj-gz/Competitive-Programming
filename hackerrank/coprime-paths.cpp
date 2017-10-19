@@ -264,32 +264,32 @@ class NumCoprimePairsInPathTracker
 {
     public:
         NumCoprimePairsInPathTracker(const int numNodes)
-            : numGeneratedByNodesInPath(maxNodeValue + 1)
+            : m_numGeneratedByNodesInPath(maxNodeValue + 1)
         {
         }
         void onNodeAddedToPath(const Node* node)
         {
-            resultForPath += changeInSumIfNodeAddedToPath(node);
-            numNodesInPath++;
+            m_resultForPath += changeInSumIfNodeAddedToPath(node);
+            m_numNodesInPath++;
             updateNumGeneratedByNodesAlongPath(node, 1);
         };
         void onNodeRemovedFromPath(const Node* node)
         {
-            numNodesInPath--;
+            m_numNodesInPath--;
             updateNumGeneratedByNodesAlongPath(node, -1);
-            resultForPath -= changeInSumIfNodeAddedToPath(node);
+            m_resultForPath -= changeInSumIfNodeAddedToPath(node);
         };
-        int64_t getResultForPath() const
+        int64_t resultForPath() const
         {
-            return resultForPath;
+            return m_resultForPath;
         }
     private:
-        int numNodesInPath = 0;
-        int64_t resultForPath = 0;
-        // For each node N in the path, add one to numGeneratedByNodesInPath[x] where 
+        int m_numNodesInPath = 0;
+        int64_t m_resultForPath = 0;
+        // For each node N in the path, add one to m_numGeneratedByNodesInPath[x] where 
         // x is any of the numbers that can be formed by multiplying the primes in the 
         // prime factorisation of N's node-value.
-        vector<int> numGeneratedByNodesInPath;
+        vector<int> m_numGeneratedByNodesInPath;
         int64_t changeInSumIfNodeAddedToPath(const Node* node)
         {
             int64_t numNonCoPrimeNodes = 0;
@@ -298,58 +298,60 @@ class NumCoprimePairsInPathTracker
             {
                 case 1:
                     // We share a factor with all nodes in the path that also have this prime factor.
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[0]];
                     break;
                 case 2:
                     // We share a factor with all nodes in the path that also any of these two prime factors ...
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[1]];
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[0]];
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[1]];
 
                     // ... but we'll overcount by the number of nodes in the path that have *both* of these prime
                     // factors.
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
+                    numNonCoPrimeNodes -= m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
                     break;
                 case 3:
-                    // As in case 2 ...
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0]];
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[1]];
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[2]];
+                    // As in case 2, but this time with 3 primes ...
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[0]];
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[1]];
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[2]];
 
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]];
-                    numNonCoPrimeNodes -= numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]];
+                    // ... correct overcount ...
+                    numNonCoPrimeNodes -= m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]];
+                    numNonCoPrimeNodes -= m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]];
+                    numNonCoPrimeNodes -= m_numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]];
 
                     // ... but in subtracting our overcount, we'll *undercount* by the number of nodes in the path that
                     // share all 3 factors with node XD
-                    numNonCoPrimeNodes += numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]];
+                    numNonCoPrimeNodes += m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]];
                     break;
             }
-            int64_t increaseInSum = numNodesInPath - numNonCoPrimeNodes;
+            int64_t increaseInSum = m_numNodesInPath - numNonCoPrimeNodes;
 
             return increaseInSum;
         };
         void updateNumGeneratedByNodesAlongPath(const Node* node, int numCopiesOfNodeAdded)
         {
-            // See comment for numGeneratedByNodesInPath.
+            assert(numCopiesOfNodeAdded == 1 || numCopiesOfNodeAdded == -1);
+            // See comment for m_numGeneratedByNodesInPath.
             const auto nodePrimeFactors = node->primeFactors;
             switch(node->numPrimeFactors)
             {
                 case 1:
-                    numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
                     break;
                 case 2:
-                    numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[1]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]] += numCopiesOfNodeAdded;
                     break;
                 case 3:
-                    numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[1]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[2]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
-                    numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[1] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
+                    m_numGeneratedByNodesInPath[nodePrimeFactors[0] * nodePrimeFactors[1] * nodePrimeFactors[2]] += numCopiesOfNodeAdded;
                     break;
             }
         };
@@ -416,7 +418,7 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
             resultTracker.onNodeAddedToPath(query.lca);
         }
 
-        const auto finalResultForPath = resultTracker.getResultForPath();
+        const auto finalResultForPath = resultTracker.resultForPath();
         assert(query.originalQueryIndex >= 0 && query.originalQueryIndex < querySolutions.size());
         querySolutions[query.originalQueryIndex] = finalResultForPath;
 
