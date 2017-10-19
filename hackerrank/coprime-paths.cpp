@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) 2017-10-14
 #define SUBMISSION
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -261,20 +261,36 @@ vector<Query> rearrangedQueriesWithMosAlgorithm(const vector<Query>& queries, in
     return rearrangedQueries;
 }
 
-vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
+class NumCoprimePairsInPathTracker
 {
-    const int n = nodes.size();
-
-    const auto dfsArray = buildDFSArray(nodes);
-    const auto rearrangedQueries = rearrangedQueriesWithMosAlgorithm(queries, nodes.size());
-
-    int leftPointer = rearrangedQueries.front().leftIndex;
-    int rightPointer = rearrangedQueries.front().leftIndex;
-    vector<int> nodeCountInRange(nodes.size());
-    set<Node*> nodesInPath;
-    int64_t resultForPath = 0;
-    vector<int> numGeneratedByNodesInPath(maxNodeValue + 1);
-    auto changeInSumIfNodeAddedToPath = [&numGeneratedByNodesInPath, &nodesInPath](const auto& node) -> int64_t 
+    public:
+        NumCoprimePairsInPathTracker(const int numNodes)
+            : numGeneratedByNodesInPath(maxNodeValue + 1)
+        {
+        }
+        void onNodeAddedToPath(const Node* node)
+        {
+            resultForPath += changeInSumIfNodeAddedToPath(node);
+            assert(nodesInPath.find(node) == nodesInPath.end());
+            nodesInPath.insert(node);
+            updateNumGeneratedByNodesAlongPath(node, 1);
+        };
+        void onNodeRemovedFromPath(const Node* node)
+        {
+            assert(nodesInPath.find(node) != nodesInPath.end());
+            nodesInPath.erase(nodesInPath.find(node));
+            updateNumGeneratedByNodesAlongPath(node, -1);
+            resultForPath -= changeInSumIfNodeAddedToPath(node);
+        };
+        int64_t getResultForPath() const
+        {
+            return resultForPath;
+        }
+    private:
+        set<const Node*> nodesInPath;
+        int64_t resultForPath = 0;
+        vector<int> numGeneratedByNodesInPath;
+        int64_t changeInSumIfNodeAddedToPath(const Node* node)
         {
             int64_t numNonCoPrimeNodes = 0;
             switch(node->numPrimeFactors)
@@ -304,52 +320,53 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 
             return increaseInSum;
         };
-    auto updateNumGeneratedByNodesAlongPath = [&numGeneratedByNodesInPath](const auto& node, int numCopiesOfNodeAdded)
-    {
-        switch(node->numPrimeFactors)
+        void updateNumGeneratedByNodesAlongPath(const Node* node, int numCopiesOfNodeAdded)
         {
-            case 1:
-                numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
-                break;
-            case 2:
-                numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
-                break;
-            case 3:
-                numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[2]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[2]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
-                numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
-                break;
-        }
-    };
-    auto onNodeAddedToPath = [&nodesInPath, &resultForPath, &changeInSumIfNodeAddedToPath, &updateNumGeneratedByNodesAlongPath](const auto& node)
-    {
-        resultForPath += changeInSumIfNodeAddedToPath(node);
-        assert(nodesInPath.find(node) == nodesInPath.end());
-        nodesInPath.insert(node);
-        updateNumGeneratedByNodesAlongPath(node, 1);
-    };
-    auto onNodeRemovedFromPath = [&nodesInPath, &resultForPath, &changeInSumIfNodeAddedToPath, &updateNumGeneratedByNodesAlongPath](const auto& node)
-    {
-        assert(nodesInPath.find(node) != nodesInPath.end());
-        nodesInPath.erase(nodesInPath.find(node));
-        updateNumGeneratedByNodesAlongPath(node, -1);
-        resultForPath -= changeInSumIfNodeAddedToPath(node);
-    };
+            switch(node->numPrimeFactors)
+            {
+                case 1:
+                    numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                    break;
+                case 2:
+                    numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
+                    break;
+                case 3:
+                    numGeneratedByNodesInPath[node->primeFactors[0]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                    numGeneratedByNodesInPath[node->primeFactors[0] * node->primeFactors[1] * node->primeFactors[2]] += numCopiesOfNodeAdded;
+                    break;
+            }
+        };
 
-    auto addNodeCount = [&nodeCountInRange, &onNodeAddedToPath, &onNodeRemovedFromPath](const auto& node, int increase)
+};
+
+vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
+{
+    const int n = nodes.size();
+
+    const auto dfsArray = buildDFSArray(nodes);
+    const auto rearrangedQueries = rearrangedQueriesWithMosAlgorithm(queries, nodes.size());
+
+    int leftPointer = rearrangedQueries.front().leftIndex;
+    int rightPointer = rearrangedQueries.front().leftIndex;
+
+    NumCoprimePairsInPathTracker resultTracker{n};
+    vector<int> nodeCountInRange(n);
+
+    auto addNodeCount = [&resultTracker, &nodeCountInRange](const auto& node, int increase)
     {
         assert(increase != 0);
         if (nodeCountInRange[node->index] == 1)
-            onNodeRemovedFromPath(node);
+            resultTracker.onNodeRemovedFromPath(node);
         nodeCountInRange[node->index] += increase;
         if (nodeCountInRange[node->index] == 1)
-            onNodeAddedToPath(node);
+            resultTracker.onNodeAddedToPath(node);
     };
     addNodeCount(dfsArray[leftPointer], 1);
     vector<int64_t> querySolutions(queries.size());
@@ -383,14 +400,15 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
         const bool needToAddLCA = (query.lca != query.node1);
         if (needToAddLCA)
         {
-            assert(nodesInPath.find(query.lca) == nodesInPath.end());
-            nodesInPath.insert(lca);
+            resultTracker.onNodeAddedToPath(query.lca);
         }
-        if (needToAddLCA)
-            nodesInPath.erase(nodesInPath.find(lca));
-        const auto finalResultForPath = resultForPath + (!needToAddLCA ? 0 : changeInSumIfNodeAddedToPath(lca));
+
+        const auto finalResultForPath = resultTracker.getResultForPath();
         assert(query.originalQueryIndex >= 0 && query.originalQueryIndex < querySolutions.size());
         querySolutions[query.originalQueryIndex] = finalResultForPath;
+
+        if (needToAddLCA)
+            resultTracker.onNodeRemovedFromPath(query.lca);
     }
     return querySolutions;
 }
