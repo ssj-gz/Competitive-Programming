@@ -630,7 +630,6 @@ int main()
     }
 #else
     srand(time(0));
-#error sausage
     while (true)
     {
         //n = 9;
@@ -695,19 +694,6 @@ int main()
             query.node2 = node2;
             query.originalQueryIndex = i;
             queries.push_back(query);
-//#define BRUTE_FORCE
-//#ifdef BRUTE_FORCE
-            //const auto bruteForceResult = bruteForce(node1, node2);
-            //cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
-            //const auto lcaBruteForce = findLCABruteForce(node1, node2);
-            //const auto lcaOpt = findLCA(node1, node2);
-            //cout << "node1: " << node1->index << " node2: " << node2->index << endl;
-            //cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
-            //assert(lcaOpt == lcaBruteForce);
-//#endif
-            //cout << optimisedResult << endl;
-
-
         }
 #else
         q = n;
@@ -733,27 +719,6 @@ int main()
         {
             cout << solution << endl;
         }
-//#define EXHAUSTIVE
-#ifdef EXHAUSTIVE
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                auto node1 = &(nodes[i]);
-                auto node2 = &(nodes[j]);
-                const auto lcaOpt = findLCA(node1, node2);
-                const auto lcaBruteForce = findLCABruteForce(node1, node2);
-                cout << "lcaOpt index: " << lcaOpt->index << " lcaBruteForce index: " << lcaBruteForce->index << endl;
-                assert(lcaOpt == lcaBruteForce);
-                const auto bruteForceResult = bruteForce(node1, node2);
-                const auto optimisedResult = findNumCoprimePairsAlongPath(node1, node2);
-                //assert(optimisedResult % 2 == 0);
-                cout << "bruteForceResult: " << bruteForceResult << " optimisedResult: " << optimisedResult << endl;
-                assert(bruteForceResult == optimisedResult);
-
-            }
-        }
-#endif
 #ifdef RANDOM
     }
 #endif
