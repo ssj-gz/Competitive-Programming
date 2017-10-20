@@ -1,3 +1,2 @@
-Coprime Paths (80) [80]
-Hackerrank City (50) [130]
-Kingdom Connectivity (75) [205]
+Hackerrank City (50) [50]
+Kingdom Connectivity (75) [125]
