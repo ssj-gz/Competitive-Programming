@@ -431,7 +431,28 @@ vector<int64_t> solve(const vector<Query>& queries, vector<Node>& nodes)
 
 int main()
 {
-    // http://codeforces.com/blog/entry/43230
+    // Oh boy - completely misinterpreted this one - when it said that each node value was a "product of 
+    // at most three primes", I assumed it meant the same primes - i.e that each testcase had its own
+    // implicit primes p1, p2, and p3, and all node values for that testcase where a product of one or more
+    // of these XD
+    //
+    // Ultimately, sadly, I had to look at hints for this one, and apparently this class of problem is very
+    // common - so common that there's an outline of the general approach for them: http://codeforces.com/blog/entry/43230
+    // I *might* have come up with the range-rules for the DFS ordering myself given time, but probably not Mo's Algorithm :/
+    //
+    // Anyway, I won't add much documentation for this beyond the codeforces link above (but in broad overview: the
+    // technique described in the codeforces link gives a means for describing the contents of paths based 
+    // on a DFS array and the start/ end indices of each node in this array and, coupled with Mo's algorithm,
+    // allows us to incrementally construct all paths described by queries in O((Q + N) * sqrt(N))).
+    //
+    // If we can efficiently incrementally compute all paths (that is, by adding/ removing one node at a time), then it is
+    // trivial to compute the new values for the number of coprime pairs in the path after adding/ removing a node: 
+    // updateNumGeneratedByNodesAlongPath and changeInSumIfNodeAddedToPath are the main mechanisms for this, and 
+    // are hopefully documented well enough to need no further comments here.
+    //
+    // And that's it - a bit of a shame that I didn't figure all this out myself, but the fact that it requires coming up
+    // with an algorithm that's named after someone takes the edge off a little :)
+
     int n, q;
     cin >> n >> q;
     assert(n <= maxNumNodes);
