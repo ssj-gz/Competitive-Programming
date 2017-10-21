@@ -29,11 +29,12 @@ int main()
         cout << "sumCornerToCorner: " << sumCornerToCorner << endl;
         int64_t newNumNodes = 4 * numNodes + 2;
         int64_t newSumOfAllPaths = 4 * sumOfAllPaths + 
-            (3 * numNodes + 2 * sumOfPathsToCorner) * 4 + 6 * numNodes * sumOfPathsToCorner + 
+            (3 * numNodes * A[i] + 2 * sumOfPathsToCorner) * 4 + 
+            2 * 6 * numNodes * sumOfPathsToCorner + 
             (3 + 2 + 3 + 3 + 2 + 3) * (A[i] * numNodes * numNodes) +
             A[i];
         newSumOfAllPaths %= modulus;
-        int64_t newSumOfPathsToCorner = 3 * sumOfPathsToCorner + (8 * A[i] + sumCornerToCorner) * numNodes + 3 * A[i] + 2 * sumCornerToCorner;
+        int64_t newSumOfPathsToCorner = 4 * sumOfPathsToCorner + ((3 + 2 + 3) * A[i] + sumCornerToCorner) * numNodes + 3 * A[i] + 2 * sumCornerToCorner;
         int64_t newSumCornerToCorner = 2 * sumCornerToCorner + 3 * A[i];
 
         cout << "newNumNodes: " << newNumNodes << endl;
