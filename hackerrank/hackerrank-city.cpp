@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const int64_t modulus = 10'000'000'007ULL;
+const int64_t modulus = 1'000'000'007ULL;
 
 class ModNum
 {
@@ -53,7 +53,7 @@ int main()
     int N;
     cin >> N;
 
-    vector<int> A(N);
+    vector<int64_t> A(N);
     for (int i = 0; i < N; i++)
     {
         cin >> A[i];
@@ -67,23 +67,24 @@ int main()
 
     for (int i = 0; i < N; i++)
     {
-        cout << "numNodes: " << numNodes << endl;
-        cout << "sumOfAllPaths: " << sumOfAllPaths << endl;
-        cout << "sumOfPathsToCorner: " << sumOfPathsToCorner << endl;
-        cout << "sumCornerToCorner: " << sumCornerToCorner << endl;
-        ModNum newNumNodes = 4 * numNodes + 2;
-        ModNum newSumOfAllPaths = 4 * sumOfAllPaths + 
-            (3 * numNodes * A[i] + 2 * sumOfPathsToCorner) * 4 + 
+        //cout << "i: " << i << " A[i]: " << A[i] << endl;
+        //cout << "numNodes: " << numNodes << endl;
+        //cout << "sumOfAllPaths: " << sumOfAllPaths << endl;
+        //cout << "sumOfPathsToCorner: " << sumOfPathsToCorner << endl;
+        //cout << "sumCornerToCorner: " << sumCornerToCorner << endl;
+        const ModNum newNumNodes = 4 * numNodes + 2;
+        const ModNum newSumOfAllPaths = 4 * sumOfAllPaths + 
+            4 * (3 * numNodes * A[i] + 2 * sumOfPathsToCorner) + 
             2 * 6 * numNodes * sumOfPathsToCorner + 
             (3 + 2 + 3 + 3 + 2 + 3) * (A[i] * numNodes * numNodes) +
             A[i];
-        ModNum newSumOfPathsToCorner = 4 * sumOfPathsToCorner + (2 * A[i] + sumCornerToCorner) + (A[i] + sumCornerToCorner) + numNodes * ((3 + 3 + 2) * A[i] + sumCornerToCorner);
-        ModNum newSumCornerToCorner = 2 * sumCornerToCorner + 3 * A[i];
+        const ModNum newSumOfPathsToCorner = 4 * sumOfPathsToCorner + 3 * A[i] + 2 * sumCornerToCorner + numNodes * ((3 + 3 + 2) * A[i] + 3 * sumCornerToCorner);
+        const ModNum newSumCornerToCorner = 2 * sumCornerToCorner + 3 * A[i];
 
-        cout << "newNumNodes: " << newNumNodes << endl;
-        cout << "newSumOfAllPaths: " << newSumOfAllPaths << endl;
-        cout << "newSumOfPathsToCorner: " << newSumOfPathsToCorner << endl;
-        cout << "newSumCornerToCorner: " << newSumCornerToCorner << endl;
+        //cout << "newNumNodes: " << newNumNodes << endl;
+        //cout << "newSumOfAllPaths: " << newSumOfAllPaths << endl;
+        //cout << "newSumOfPathsToCorner: " << newSumOfPathsToCorner << endl;
+        //cout << "newSumCornerToCorner: " << newSumCornerToCorner << endl;
 
 
         numNodes = newNumNodes;
