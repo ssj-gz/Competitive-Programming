@@ -1,2 +1,1 @@
-Hackerrank City (50) [50]
-Kingdom Connectivity (75) [125]
+Kingdom Connectivity (75) [75]
