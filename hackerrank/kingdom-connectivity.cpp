@@ -5,7 +5,7 @@
 
 using namespace std;
 
-const int64_t modulus = 1'000'000'007ULL;
+const int64_t modulus = 1'000'000'000ULL;
 
 struct City
 {
@@ -29,8 +29,8 @@ void setCanReachW(City* currentCity, City* parent)
     currentCity->canReachW = true;
     for (const auto neighbourIn : currentCity->neighboursIn)
     {
-        if (neighbourIn == parent)
-            continue;
+        //if (neighbourIn == parent)
+            //continue;
         setCanReachW(neighbourIn, currentCity);
     }
 }
@@ -51,8 +51,8 @@ int64_t findNumWaysOfReachingW(City* currentCity, City* parent, City* targetCity
     currentCity->visitedInDFS = true;
     for (const auto child : currentCity->neighboursOut)
     {
-        if (child == parent)
-            continue;
+        //if (child == parent)
+            //continue;
         const auto childResult = findNumWaysOfReachingW(child, currentCity, targetCity);
         assert(childResult == -1 || (childResult >= 0 && childResult < ::modulus));
         if (childResult == -1)
@@ -102,9 +102,12 @@ int main()
 
     setCanReachW(warfareCity, nullptr);
 
+    int numCannotReach = 0;
     for (auto& city : cities)
     {
         city.visitedInDFS = false;
+        if (!city.canReachW)
+            numCannotReach++;
     }
     const auto numWaysFromFinancialToWarfare = findNumWaysOfReachingW(financialCity, nullptr, warfareCity);
     if (numWaysFromFinancialToWarfare == -1)
