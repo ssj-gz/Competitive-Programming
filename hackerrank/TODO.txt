@@ -7,4 +7,7 @@ Maximising Mission Points (70) [445]
 Police Operation (100) [545]
 New Year Present (80) [625]
 Travel in Hackerland (80) [705]
-Jeanie's Router (80) [785]
+Jumping Rooks (80) [785]
+Jeanie's Route (80) 
+Computer Game (80)
+Find The Path (75)
