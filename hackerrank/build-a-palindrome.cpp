@@ -109,6 +109,7 @@ class SuffixTreeBuilder
 
             cout << "Floop" << endl;
 
+#if 1
             // Truncate transitions containing stringConcatMarker, and mark the state they lead to as isFinalX.
             for (auto& state : m_states)
             {
@@ -139,8 +140,10 @@ class SuffixTreeBuilder
                         else
                         {
                             transition.nextState->data.isFinalX = true;
+                            transition.nextState->data.isFinalY = false;
                         }
                         cout << "marking as isFinalX" << endl;
+                        transition.nextState->transitions.clear();
                     }
 
                     if (needToRemoveTransition)
@@ -149,19 +152,17 @@ class SuffixTreeBuilder
                         transitionIter++;
                 }
             }
+#endif
             for (auto& state : m_states)
             {
                 for (auto& transition : state.transitions)
                 {
                     if (transition.nextState->data.wordLength == -1)
                     {
-                        cout << "updating state " << transition.nextState << endl;
                         transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
                     }
                 }
             }
-            cout << "wee" << endl;
-
         }
         void appendLetter(char letter)
         {
@@ -634,7 +635,7 @@ class SuffixTreeBuilder
             return Cursor();
         }
     private:
-        static const int alphabetSize = 28; // Include the magic '{' for making final states explicit and the magic '}' for acting as string concatenation marker - assumes the input string has no '{''s or '}''s, obviously!
+        static const int alphabetSize = 28; // Include the magic '{' for making final states explicit and the magic '|' for acting as string concatenation marker - assumes the input string has no '{''s or '|''s, obviously!
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
@@ -777,6 +778,7 @@ using SuffixPositions = set<pair<int, SubstringMemberShip>>;
 
 SuffixPositions  blah(Cursor cursor, int stringLength)
 {
+    assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
     cout << "cursor: " << cursor.dbgStringFollowed() << endl;
     assert(cursor.isOnExplicitState());
     assert(cursor.stateData().wordLength != -1);
@@ -791,7 +793,9 @@ SuffixPositions  blah(Cursor cursor, int stringLength)
     }
     if (cursor.stateData().isFinalY)
     {
-        const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
+        assert(cursor.isOnFinalState());
+        //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
+        const auto positionInY = stringLength - cursor.stateData().wordLength;
         result.insert({positionInY, partOfY});
         cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
@@ -813,6 +817,16 @@ SuffixPositions  blah(Cursor cursor, int stringLength)
     {
         for (const auto suffix : childSuffixPos)
         {
+            if (suffix.second == partOfY)
+            {
+                const bool found = result.find({stringLength - suffix.first, partOfX}) != result.end();
+                cout << "Found " << cursor.dbgStringFollowed() << endl;
+            }
+            else 
+            {
+                const bool found = result.find({stringLength - suffix.first, partOfY}) != result.end();
+                cout << "Found " << cursor.dbgStringFollowed() << endl;
+            }
             result.insert(suffix);
         }
     }
