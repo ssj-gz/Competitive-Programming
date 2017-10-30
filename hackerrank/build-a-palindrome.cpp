@@ -776,13 +776,16 @@ enum SubstringMemberShip
 
 using SuffixPositions = set<pair<int, SubstringMemberShip>>;
 
-SuffixPositions  blah(Cursor cursor, int stringLength)
+SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
 {
     assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
     cout << "cursor: " << cursor.dbgStringFollowed() << endl;
     assert(cursor.isOnExplicitState());
     assert(cursor.stateData().wordLength != -1);
     vector<SuffixPositions> childSuffixPositions;
+
+    const auto dbgReversedString = string(dbgString.rbegin(), dbgString.rend());
+
 
     SuffixPositions result;
     if (cursor.stateData().isFinalX)
@@ -806,7 +809,7 @@ SuffixPositions  blah(Cursor cursor, int stringLength)
         auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
         if (!nextCursor.isOnExplicitState())
             nextCursor.followToTransitionEnd();
-        childSuffixPositions.push_back(blah(nextCursor, stringLength));
+        childSuffixPositions.push_back(blah(nextCursor, stringLength, dbgString));
 
         nextLetterIterator++;
     }
@@ -819,13 +822,26 @@ SuffixPositions  blah(Cursor cursor, int stringLength)
         {
             if (suffix.second == partOfY)
             {
-                const bool found = result.find({stringLength - suffix.first, partOfX}) != result.end();
-                cout << "Found " << cursor.dbgStringFollowed() << endl;
+                assert(dbgReversedString.substr(suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
+                const bool found = result.find({stringLength - suffix.first - 1, partOfX}) != result.end();
+                if (found)
+                {
+                    cout << "Found " << cursor.dbgStringFollowed() << endl;
+                    cout << "occurs in reversed: " << suffix.first << " occurs in string: " << (stringLength - suffix.first) << endl;
+                    //assert(dbgString.substr(stringLength - suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
+                }
+                //if (found)
             }
-            else 
+            else if (suffix.second == partOfX)
             {
-                const bool found = result.find({stringLength - suffix.first, partOfY}) != result.end();
-                cout << "Found " << cursor.dbgStringFollowed() << endl;
+                assert(dbgString.substr(suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
+                const bool found = result.find({stringLength - suffix.first - 1, partOfY}) != result.end();
+                if (found)
+                {
+                    cout << "Found " << cursor.dbgStringFollowed() << endl;
+                    cout << "occurs in string: " << suffix.first << " occurs in reversed: " << (stringLength - suffix.first) << endl;
+                    //assert(dbgReversedString.substr(stringLength - suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
+                }
             }
             result.insert(suffix);
         }
@@ -837,9 +853,11 @@ SuffixPositions  blah(Cursor cursor, int stringLength)
 
 string findLongestPalindrome(const string&a, const string& b)
 {
+    cout << "a: " << a << " size: " << a.size() << endl;
+    cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, string(a.rbegin(), a.rend()));
-    blah(suffixTree.rootCursor(), a.size());
+    blah(suffixTree.rootCursor(), a.size(), a);
     return "";
 }
 
