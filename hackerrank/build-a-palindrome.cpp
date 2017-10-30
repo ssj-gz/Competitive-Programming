@@ -78,6 +78,7 @@ class SuffixTreeBuilder
             m_states.reserve(1'000'000);
 
             m_root = createNewState();
+            m_root->data.wordLength = 0;
             m_auxiliaryState = createNewState();
 
             for (int i = 0; i < alphabetSize; i++)
@@ -94,6 +95,7 @@ class SuffixTreeBuilder
         {
             const auto unusedLetter = '{';
             const auto pairConcat = x + unusedLetter + y;
+            cout << "pairConcat: " << pairConcat << endl;
             const auto unusedLetterPos = x.length();
             appendString(pairConcat);
 
@@ -110,14 +112,17 @@ class SuffixTreeBuilder
                     }
                     const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
                     transition.substringFollowed.endIndex = realEndIndex + 1;
+                    cout << "transition start-end (0-relative): " << transition.substringFollowed.startIndex - 1 << "," << transition.substringFollowed.endIndex - 1 << endl;
+                    cout << "unusedLetterPos: " << unusedLetterPos << endl;
                     bool needToRemoveTransition = false;
-                    const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 >= unusedLetterPos && realEndIndex <= unusedLetterPos);
+                    const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 <= unusedLetterPos && realEndIndex >= unusedLetterPos);
                     if (containsUnusedChar)
                     {
                         transition.substringFollowed.endIndex = unusedLetterPos;
-                        const bool transitionNeedsToBeErased = (transition.substringFollowed.startIndex - 1 == unusedLetterPos);
-                        if (transitionNeedsToBeErased)
+                        const auto transitionBeginsWithUnusedChar = (transition.substringFollowed.startIndex - 1 == unusedLetterPos);
+                        if (transitionBeginsWithUnusedChar)
                         {
+                            cout << "marking as isFinalX" << endl;
                             needToRemoveTransition = true;
                             state.data.isFinalX = true;
                         }
@@ -125,10 +130,6 @@ class SuffixTreeBuilder
                         {
                             transition.nextState->data.isFinalX = true;
                         }
-                    }
-                    if (transition.nextState->data.wordLength == -1)
-                    {
-                        transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
                     }
 
                     if (needToRemoveTransition)
@@ -139,6 +140,12 @@ class SuffixTreeBuilder
             }
 
             makeFinalStatesExplicitAndMarkThemAsFinal();
+
+            for (auto& state : m_states)
+            {
+                if (state.isFinal)
+                    state.data.isFinalY = true;
+            }
         }
         void appendLetter(char letter)
         {
@@ -194,12 +201,21 @@ class SuffixTreeBuilder
                             transition.nextState->isFinal = true;
                         }
                     }
+                    if (transition.nextState->data.wordLength == -1)
+                    {
+                        cout << "updating state " << transition.nextState << endl;
+                        transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
+                    }
 
                     if (needToRemoveTransition)
                         transitionIter = state.transitions.erase(transitionIter);
                     else
                         transitionIter++;
                 }
+            }
+            for (auto& state : m_states)
+            {
+                //cout << "state: " << &state << " wordLength: " << state.data.wordLength << endl;
             }
 
             m_currentString.pop_back(); // Remove the unusedLetter we just added.
@@ -532,7 +548,7 @@ class SuffixTreeBuilder
                         return charFollowed;
                     }
                 }
-                string stringFollowed() const
+                string dbgStringFollowed() const
                 {
                     Cursor copy(*this);
                     string stringFollowedReversed;
@@ -748,29 +764,47 @@ enum SubstringMemberShip
 
 using SuffixPositions = set<pair<int, SubstringMemberShip>>;
 
-SuffixPositions  blah(Cursor cursor, int stringXLength, int stringYLength)
+SuffixPositions  blah(Cursor cursor, int stringLength)
 {
+    cout << "cursor: " << cursor.dbgStringFollowed() << endl;
     assert(cursor.isOnExplicitState());
+    assert(cursor.stateData().wordLength != -1);
     vector<SuffixPositions> childSuffixPositions;
 
     SuffixPositions result;
     if (cursor.stateData().isFinalX)
     {
-        result.insert({stringXLength - cursor.stateData().wordLength, partOfX});
+        const auto positionInX = stringLength - cursor.stateData().wordLength;
+        result.insert({positionInX, partOfX});
+        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
     }
     if (cursor.stateData().isFinalY)
     {
-        result.insert({stringYLength - cursor.stateData().wordLength, partOfY});
+        const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
+        result.insert({positionInY, partOfY});
+        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
 
     auto nextLetterIterator = cursor.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
-        const auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
-        childSuffixPositions.push_back(blah(nextCursor, stringXLength, stringYLength));
+        auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
+        if (!nextCursor.isOnExplicitState())
+            nextCursor.followToTransitionEnd();
+        childSuffixPositions.push_back(blah(nextCursor, stringLength));
+
+        nextLetterIterator++;
     }
 
     sort(childSuffixPositions.begin(), childSuffixPositions.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
+
+    for (const auto& childSuffixPos : childSuffixPositions)
+    {
+        for (const auto suffix : childSuffixPos)
+        {
+            result.insert(suffix);
+        }
+    }
 
     return result;
 }
@@ -780,6 +814,7 @@ string findLongestPalindrome(const string&a, const string& b)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, string(a.rbegin(), a.rend()));
+    blah(suffixTree.rootCursor(), a.size());
     return "";
 }
 
