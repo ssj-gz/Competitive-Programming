@@ -1,8 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <set>
 #include <limits>
 #include <cassert>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -107,6 +109,7 @@ class SuffixTreeBuilder
                         continue;
                     }
                     const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
+                    transition.substringFollowed.endIndex = realEndIndex + 1;
                     bool needToRemoveTransition = false;
                     const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 >= unusedLetterPos && realEndIndex <= unusedLetterPos);
                     if (containsUnusedChar)
@@ -122,6 +125,10 @@ class SuffixTreeBuilder
                         {
                             transition.nextState->data.isFinalX = true;
                         }
+                    }
+                    if (transition.nextState->data.wordLength == -1)
+                    {
+                        transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
                     }
 
                     if (needToRemoveTransition)
@@ -731,9 +738,48 @@ class SuffixTreeBuilder
         }
 };
 
+using Cursor = SuffixTreeBuilder::Cursor;
+
+enum SubstringMemberShip
+{
+    partOfX,
+    partOfY
+};
+
+using SuffixPositions = set<pair<int, SubstringMemberShip>>;
+
+SuffixPositions  blah(Cursor cursor, int stringXLength, int stringYLength)
+{
+    assert(cursor.isOnExplicitState());
+    vector<SuffixPositions> childSuffixPositions;
+
+    SuffixPositions result;
+    if (cursor.stateData().isFinalX)
+    {
+        result.insert({stringXLength - cursor.stateData().wordLength, partOfX});
+    }
+    if (cursor.stateData().isFinalY)
+    {
+        result.insert({stringYLength - cursor.stateData().wordLength, partOfY});
+    }
+
+    auto nextLetterIterator = cursor.getNextLetterIterator();
+    while (nextLetterIterator.hasNext())
+    {
+        const auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
+        childSuffixPositions.push_back(blah(nextCursor, stringXLength, stringYLength));
+    }
+
+    sort(childSuffixPositions.begin(), childSuffixPositions.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
+
+    return result;
+}
+
 
 string findLongestPalindrome(const string&a, const string& b)
 {
+    SuffixTreeBuilder suffixTree;
+    suffixTree.addStringPairAndMarkFinalStates(a, string(a.rbegin(), a.rend()));
     return "";
 }
 
