@@ -93,13 +93,23 @@ class SuffixTreeBuilder
         SuffixTreeBuilder(const SuffixTreeBuilder& other) = delete;
         void addStringPairAndMarkFinalStates(const string& x, const string& y)
         {
-            const auto unusedLetter = '{';
-            const auto pairConcat = x + unusedLetter + y;
+            const auto stringConcatMarker = '|';
+            const auto pairConcat = x + stringConcatMarker + y;
             cout << "pairConcat: " << pairConcat << endl;
-            const auto unusedLetterPos = x.length();
+            const auto stringConcatPos = x.length();
             appendString(pairConcat);
 
-            // Truncate transitions containing unusedLetter, and mark the state they lead to as isFinalX.
+            makeFinalStatesExplicitAndMarkThemAsFinal();
+
+            for (auto& state : m_states)
+            {
+                if (state.isFinal)
+                    state.data.isFinalY = true;
+            }
+
+            cout << "Floop" << endl;
+
+            // Truncate transitions containing stringConcatMarker, and mark the state they lead to as isFinalX.
             for (auto& state : m_states)
             {
                 for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
@@ -113,16 +123,16 @@ class SuffixTreeBuilder
                     const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
                     transition.substringFollowed.endIndex = realEndIndex + 1;
                     cout << "transition start-end (0-relative): " << transition.substringFollowed.startIndex - 1 << "," << transition.substringFollowed.endIndex - 1 << endl;
-                    cout << "unusedLetterPos: " << unusedLetterPos << endl;
+                    cout << "stringConcatPos: " << stringConcatPos << endl;
                     bool needToRemoveTransition = false;
-                    const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 <= unusedLetterPos && realEndIndex >= unusedLetterPos);
+                    const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 <= stringConcatPos && realEndIndex >= stringConcatPos);
                     if (containsUnusedChar)
                     {
-                        transition.substringFollowed.endIndex = unusedLetterPos;
-                        const auto transitionBeginsWithUnusedChar = (transition.substringFollowed.startIndex - 1 == unusedLetterPos);
+                        transition.substringFollowed.endIndex = stringConcatPos;
+                        const auto transitionBeginsWithUnusedChar = (transition.substringFollowed.startIndex - 1 == stringConcatPos);
                         if (transitionBeginsWithUnusedChar)
                         {
-                            cout << "marking as isFinalX" << endl;
+                            cout << "need to remove transition" << endl;
                             needToRemoveTransition = true;
                             state.data.isFinalX = true;
                         }
@@ -130,6 +140,7 @@ class SuffixTreeBuilder
                         {
                             transition.nextState->data.isFinalX = true;
                         }
+                        cout << "marking as isFinalX" << endl;
                     }
 
                     if (needToRemoveTransition)
@@ -138,14 +149,19 @@ class SuffixTreeBuilder
                         transitionIter++;
                 }
             }
-
-            makeFinalStatesExplicitAndMarkThemAsFinal();
-
             for (auto& state : m_states)
             {
-                if (state.isFinal)
-                    state.data.isFinalY = true;
+                for (auto& transition : state.transitions)
+                {
+                    if (transition.nextState->data.wordLength == -1)
+                    {
+                        cout << "updating state " << transition.nextState << endl;
+                        transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
+                    }
+                }
             }
+            cout << "wee" << endl;
+
         }
         void appendLetter(char letter)
         {
@@ -200,11 +216,6 @@ class SuffixTreeBuilder
                         {
                             transition.nextState->isFinal = true;
                         }
-                    }
-                    if (transition.nextState->data.wordLength == -1)
-                    {
-                        cout << "updating state " << transition.nextState << endl;
-                        transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
                     }
 
                     if (needToRemoveTransition)
@@ -623,7 +634,7 @@ class SuffixTreeBuilder
             return Cursor();
         }
     private:
-        static const int alphabetSize = 27; // Include the magic '{' for making final states explicit - assumes the input string has no '{''s, obviously!
+        static const int alphabetSize = 28; // Include the magic '{' for making final states explicit and the magic '}' for acting as string concatenation marker - assumes the input string has no '{''s or '}''s, obviously!
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
