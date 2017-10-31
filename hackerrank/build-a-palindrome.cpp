@@ -843,6 +843,13 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
     if (cursor.stateData().wordLength != 0)
     {
         sort(childrenOccurences.begin(), childrenOccurences.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
+        if (!childrenOccurences.empty())
+        {
+            // At this point, occurencesOfWord will contain at most two elements.  Since the asymptotic guarantees rely on never (or rarely) having a large
+            // set copied element by element into a small set, and since the largest element of childrenOccurences will almost certainly be bigger than
+            // two elements, we swap occurencesOfWord and the largest child.
+            swap(occurencesOfWord, *childrenOccurences.begin());
+        }
 
         for (const auto& childOccurences : childrenOccurences)
         {
@@ -903,6 +910,10 @@ string findLongestPalindrome(const string&a, const string& b)
     maxOddPalindromeAt.resize(a.size());
     maxEvenPalindromeAt.resize(a.size());
     findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
+    for (int i = 0; i < maxOddPalindromeAt.size(); i++)
+    {
+        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << endl;
+    }
     return "";
 }
 
