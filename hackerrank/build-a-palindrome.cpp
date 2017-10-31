@@ -820,28 +820,13 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
     {
         for (const auto suffix : childSuffixPos)
         {
-            if (suffix.second == partOfY)
+            // Odd-length palindromes.
+            const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - suffix.second);
+            const auto otherStringPos = stringLength - suffix.first - 1;
+            const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
+            if (foundOtherHalfOfPalindrome)
             {
-                assert(dbgReversedString.substr(suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
-                const bool found = result.find({stringLength - suffix.first - 1, partOfX}) != result.end();
-                if (found)
-                {
-                    cout << "Found " << cursor.dbgStringFollowed() << endl;
-                    cout << "occurs in reversed: " << suffix.first << " occurs in string: " << (stringLength - suffix.first) << endl;
-                    //assert(dbgString.substr(stringLength - suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
-                }
-                //if (found)
-            }
-            else if (suffix.second == partOfX)
-            {
-                assert(dbgString.substr(suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
-                const bool found = result.find({stringLength - suffix.first - 1, partOfY}) != result.end();
-                if (found)
-                {
-                    cout << "Found " << cursor.dbgStringFollowed() << endl;
-                    cout << "occurs in string: " << suffix.first << " occurs in reversed: " << (stringLength - suffix.first) << endl;
-                    //assert(dbgReversedString.substr(stringLength - suffix.first, cursor.stateData().wordLength) == cursor.dbgStringFollowed());
-                }
+                cout << "Found " << cursor.dbgStringFollowed() << endl;
             }
             result.insert(suffix);
         }
