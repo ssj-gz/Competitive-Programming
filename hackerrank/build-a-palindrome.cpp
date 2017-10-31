@@ -822,11 +822,22 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
         {
             // Odd-length palindromes.
             const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - suffix.second);
-            const auto otherStringPos = stringLength - suffix.first - 1;
-            const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
-            if (foundOtherHalfOfPalindrome)
             {
-                cout << "Found " << cursor.dbgStringFollowed() << endl;
+                const auto otherStringPos = stringLength - suffix.first - 1;
+                const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
+                if (foundOtherHalfOfPalindrome)
+                {
+                    cout << "Found odd " << cursor.dbgStringFollowed() << endl;
+                }
+            }
+            // Even-length palindromes.
+            {
+                const auto otherStringPos = stringLength - suffix.first;
+                const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
+                if (foundOtherHalfOfPalindrome)
+                {
+                    cout << "Found even " << cursor.dbgStringFollowed() << endl;
+                }
             }
             result.insert(suffix);
         }
