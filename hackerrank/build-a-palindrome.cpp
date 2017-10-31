@@ -780,24 +780,39 @@ enum SubstringMemberShip
     partOfY
 };
 
-using SuffixPositions = set<pair<int, SubstringMemberShip>>;
+struct Occurrence
+{
+    Occurrence(int posInString, SubstringMemberShip containingString)
+       : containingString{containingString}, posInString{posInString} 
+    {
+    }
+    SubstringMemberShip containingString;
+    int posInString = -1;
+};
 
-SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
+bool operator<(const Occurrence& lhs, const Occurrence& rhs)
+{
+    if (lhs.containingString != rhs.containingString)
+        return lhs.containingString < rhs.containingString;
+    return lhs.posInString < rhs.posInString;
+}
+
+set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int stringLength, const string& dbgString)
 {
     //assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
     //cout << "cursor: " << cursor.dbgStringFollowed() << endl;
     assert(cursor.isOnExplicitState());
     assert(cursor.stateData().wordLength != -1);
-    vector<SuffixPositions> childSuffixPositions;
+    vector<set<Occurrence>> childrenOccurences;
 
     //const auto dbgReversedString = string(dbgString.rbegin(), dbgString.rend());
 
 
-    SuffixPositions result;
+    set<Occurrence> occurencesOfWord;
     if (cursor.stateData().isFinalX)
     {
         const auto positionInX = stringLength - cursor.stateData().wordLength;
-        result.insert({positionInX, partOfX});
+        occurencesOfWord.insert({positionInX, partOfX});
         //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
     }
     if (cursor.stateData().isFinalY)
@@ -805,7 +820,7 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
         assert(cursor.isOnFinalState());
         //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
         const auto positionInY = stringLength - cursor.stateData().wordLength;
-        result.insert({positionInY, partOfY});
+        occurencesOfWord.insert({positionInY, partOfY});
         //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
 
@@ -815,41 +830,41 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
         auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
         if (!nextCursor.isOnExplicitState())
             nextCursor.followToTransitionEnd();
-        childSuffixPositions.push_back(blah(nextCursor, stringLength, dbgString));
+        childrenOccurences.push_back(findOccurrencesOfWordCorrespondingToCursor(nextCursor, stringLength, dbgString));
 
         nextLetterIterator++;
     }
 
-    sort(childSuffixPositions.begin(), childSuffixPositions.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
+    sort(childrenOccurences.begin(), childrenOccurences.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
 
-    for (const auto& childSuffixPos : childSuffixPositions)
+    for (const auto& childOccurences : childrenOccurences)
     {
-        for (const auto suffix : childSuffixPos)
+        for (const auto occurrence : childOccurences)
         {
             // Odd-length palindromes.
-            const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - suffix.second);
+            const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - occurrence.containingString);
             {
-                const auto otherStringPos = stringLength - suffix.first - 1;
-                const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
+                const auto otherStringPos = stringLength - occurrence.posInString - 1;
+                const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
                 if (foundOtherHalfOfPalindrome)
                 {
-                    //cout << "Found odd " << cursor.dbgStringFollowed() << endl;
+                    cout << "Found odd " << cursor.dbgStringFollowed() << endl;
                 }
             }
             // Even-length palindromes.
             {
-                const auto otherStringPos = stringLength - suffix.first;
-                const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
+                const auto otherStringPos = stringLength - occurrence.posInString;
+                const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
                 if (foundOtherHalfOfPalindrome)
                 {
-                    //cout << "Found even " << cursor.dbgStringFollowed() << endl;
+                    cout << "Found even " << cursor.dbgStringFollowed() << endl;
                 }
             }
-            result.insert(suffix);
+            occurencesOfWord.insert(occurrence);
         }
     }
 
-    return result;
+    return occurencesOfWord;
 }
 
 
@@ -859,7 +874,7 @@ string findLongestPalindrome(const string&a, const string& b)
     cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, string(a.rbegin(), a.rend()));
-    blah(suffixTree.rootCursor(), a.size(), a);
+    findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
     return "";
 }
 
