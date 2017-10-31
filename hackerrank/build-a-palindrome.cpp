@@ -1,3 +1,9 @@
+#define BRUTE_FORCE
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <set>
@@ -95,7 +101,7 @@ class SuffixTreeBuilder
         {
             const auto stringConcatMarker = '|';
             const auto pairConcat = x + stringConcatMarker + y;
-            cout << "pairConcat: " << pairConcat << endl;
+            //cout << "pairConcat: " << pairConcat << endl;
             const auto stringConcatPos = x.length();
             appendString(pairConcat);
 
@@ -107,7 +113,7 @@ class SuffixTreeBuilder
                     state.data.isFinalY = true;
             }
 
-            cout << "Floop" << endl;
+            //cout << "Floop" << endl;
 
 #if 1
             // Truncate transitions containing stringConcatMarker, and mark the state they lead to as isFinalX.
@@ -123,8 +129,8 @@ class SuffixTreeBuilder
                     }
                     const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
                     transition.substringFollowed.endIndex = realEndIndex + 1;
-                    cout << "transition start-end (0-relative): " << transition.substringFollowed.startIndex - 1 << "," << transition.substringFollowed.endIndex - 1 << endl;
-                    cout << "stringConcatPos: " << stringConcatPos << endl;
+                    //cout << "transition start-end (0-relative): " << transition.substringFollowed.startIndex - 1 << "," << transition.substringFollowed.endIndex - 1 << endl;
+                    //cout << "stringConcatPos: " << stringConcatPos << endl;
                     bool needToRemoveTransition = false;
                     const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 <= stringConcatPos && realEndIndex >= stringConcatPos);
                     if (containsUnusedChar)
@@ -133,7 +139,7 @@ class SuffixTreeBuilder
                         const auto transitionBeginsWithUnusedChar = (transition.substringFollowed.startIndex - 1 == stringConcatPos);
                         if (transitionBeginsWithUnusedChar)
                         {
-                            cout << "need to remove transition" << endl;
+                            //cout << "need to remove transition" << endl;
                             needToRemoveTransition = true;
                             state.data.isFinalX = true;
                         }
@@ -142,7 +148,7 @@ class SuffixTreeBuilder
                             transition.nextState->data.isFinalX = true;
                             transition.nextState->data.isFinalY = false;
                         }
-                        cout << "marking as isFinalX" << endl;
+                        //cout << "marking as isFinalX" << endl;
                         transition.nextState->transitions.clear();
                     }
 
@@ -778,13 +784,13 @@ using SuffixPositions = set<pair<int, SubstringMemberShip>>;
 
 SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
 {
-    assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
-    cout << "cursor: " << cursor.dbgStringFollowed() << endl;
+    //assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
+    //cout << "cursor: " << cursor.dbgStringFollowed() << endl;
     assert(cursor.isOnExplicitState());
     assert(cursor.stateData().wordLength != -1);
     vector<SuffixPositions> childSuffixPositions;
 
-    const auto dbgReversedString = string(dbgString.rbegin(), dbgString.rend());
+    //const auto dbgReversedString = string(dbgString.rbegin(), dbgString.rend());
 
 
     SuffixPositions result;
@@ -792,7 +798,7 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
     {
         const auto positionInX = stringLength - cursor.stateData().wordLength;
         result.insert({positionInX, partOfX});
-        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
+        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
     }
     if (cursor.stateData().isFinalY)
     {
@@ -800,7 +806,7 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
         //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
         const auto positionInY = stringLength - cursor.stateData().wordLength;
         result.insert({positionInY, partOfY});
-        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
+        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
 
     auto nextLetterIterator = cursor.getNextLetterIterator();
@@ -827,7 +833,7 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
                 const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
                 if (foundOtherHalfOfPalindrome)
                 {
-                    cout << "Found odd " << cursor.dbgStringFollowed() << endl;
+                    //cout << "Found odd " << cursor.dbgStringFollowed() << endl;
                 }
             }
             // Even-length palindromes.
@@ -836,7 +842,7 @@ SuffixPositions  blah(Cursor cursor, int stringLength, const string& dbgString)
                 const bool foundOtherHalfOfPalindrome = (result.find({otherStringPos, otherStringMembership}) != result.end());
                 if (foundOtherHalfOfPalindrome)
                 {
-                    cout << "Found even " << cursor.dbgStringFollowed() << endl;
+                    //cout << "Found even " << cursor.dbgStringFollowed() << endl;
                 }
             }
             result.insert(suffix);
@@ -889,6 +895,18 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
 
 int main()
 {
+#if 0
+    const int numLetters = 3;
+    const int n = 100'000;
+    string s;
+    for (int i = 0; i < n; i++)
+    {
+        s += static_cast<char>(rand() % numLetters + 'a');
+    }
+    cout << s << endl;
+    return 0;
+
+#endif
     int q;
     cin >> q;
 
@@ -902,7 +920,6 @@ int main()
         cout << "a: " << a << " b: " << b << endl;
 
         const auto result = findLongestPalindrome(a, b);
-#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
         const auto resultBruteForce = findLongestPalindromeBruteForce(a, b);
         cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl; 
