@@ -774,10 +774,10 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-enum SubstringMemberShip
+enum class SubstringMemberShip
 {
-    partOfX,
-    partOfY
+    OriginalString,
+    ReversedString
 };
 
 struct Occurrence
@@ -797,6 +797,9 @@ bool operator<(const Occurrence& lhs, const Occurrence& rhs)
     return lhs.posInString < rhs.posInString;
 }
 
+vector<int> maxEvenPalindromeAt;
+vector<int> maxOddPalindromeAt;
+
 set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int stringLength, const string& dbgString)
 {
     //assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
@@ -807,20 +810,22 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
 
     //const auto dbgReversedString = string(dbgString.rbegin(), dbgString.rend());
 
+    const auto wordLength = cursor.stateData().wordLength;
+
 
     set<Occurrence> occurencesOfWord;
     if (cursor.stateData().isFinalX)
     {
-        const auto positionInX = stringLength - cursor.stateData().wordLength;
-        occurencesOfWord.insert({positionInX, partOfX});
+        const auto positionInX = stringLength - wordLength;
+        occurencesOfWord.insert({positionInX, SubstringMemberShip::OriginalString});
         //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
     }
     if (cursor.stateData().isFinalY)
     {
         assert(cursor.isOnFinalState());
         //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
-        const auto positionInY = stringLength - cursor.stateData().wordLength;
-        occurencesOfWord.insert({positionInY, partOfY});
+        const auto positionInY = stringLength - wordLength;
+        occurencesOfWord.insert({positionInY, SubstringMemberShip::ReversedString});
         //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
 
@@ -835,32 +840,53 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
         nextLetterIterator++;
     }
 
-    sort(childrenOccurences.begin(), childrenOccurences.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
-
-    for (const auto& childOccurences : childrenOccurences)
+    if (cursor.stateData().wordLength != 0)
     {
-        for (const auto occurrence : childOccurences)
+        sort(childrenOccurences.begin(), childrenOccurences.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
+
+        for (const auto& childOccurences : childrenOccurences)
         {
-            // Odd-length palindromes.
-            const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - occurrence.containingString);
+            for (const auto occurrence : childOccurences)
             {
-                const auto otherStringPos = stringLength - occurrence.posInString - 1;
-                const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
-                if (foundOtherHalfOfPalindrome)
+                // Odd-length palindromes.
+                const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - static_cast<int>(occurrence.containingString));
                 {
-                    cout << "Found odd " << cursor.dbgStringFollowed() << endl;
+                    const auto otherStringPos = stringLength - occurrence.posInString - 1;
+                    const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
+                    if (foundOtherHalfOfPalindrome)
+                    {
+                        const int palindromeLength = wordLength * 2 - 1;
+                        cout << "Found odd " << cursor.dbgStringFollowed() << endl;
+                        if (occurrence.containingString == SubstringMemberShip::OriginalString)
+                        {
+                            maxOddPalindromeAt[occurrence.posInString] = max(maxOddPalindromeAt[occurrence.posInString], palindromeLength);
+                        }
+                        else
+                        {
+                            maxOddPalindromeAt[otherStringPos] = max(maxOddPalindromeAt[otherStringPos], palindromeLength);
+                        }
+                    }
                 }
-            }
-            // Even-length palindromes.
-            {
-                const auto otherStringPos = stringLength - occurrence.posInString;
-                const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
-                if (foundOtherHalfOfPalindrome)
+                // Even-length palindromes.
                 {
-                    cout << "Found even " << cursor.dbgStringFollowed() << endl;
+                    const auto otherStringPos = stringLength - occurrence.posInString;
+                    const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
+                    if (foundOtherHalfOfPalindrome)
+                    {
+                        const int palindromeLength = wordLength * 2;
+                        cout << "Found even " << cursor.dbgStringFollowed() << endl;
+                        if (occurrence.containingString == SubstringMemberShip::OriginalString)
+                        {
+                            maxEvenPalindromeAt[occurrence.posInString] = max(maxEvenPalindromeAt[occurrence.posInString], palindromeLength);
+                        }
+                        else
+                        {
+                            maxEvenPalindromeAt[otherStringPos] = max(maxEvenPalindromeAt[otherStringPos], palindromeLength);
+                        }
+                    }
                 }
+                occurencesOfWord.insert(occurrence);
             }
-            occurencesOfWord.insert(occurrence);
         }
     }
 
@@ -874,6 +900,8 @@ string findLongestPalindrome(const string&a, const string& b)
     cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, string(a.rbegin(), a.rend()));
+    maxOddPalindromeAt.resize(a.size());
+    maxEvenPalindromeAt.resize(a.size());
     findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
     return "";
 }
