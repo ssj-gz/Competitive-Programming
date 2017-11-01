@@ -1101,7 +1101,32 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
         cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
         assert(b.find(extension) != string::npos);
         const auto palindrome = extension + a.substr(posOfExtension + 1, maxPalindromeAroundPos) + string(extension.rbegin(), extension.rend());
-        cout << "palindrome: " << palindrome << endl;
+        cout << "odd palindrome: " << palindrome << endl;
+        assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
+        updateResult(result, palindrome);
+    }
+    // Even palindromes.
+    cout << "even palindromes" << endl;
+    for (int i = 0; i < maxEvenPalindromeAt.size(); i++)
+    {
+        const int maxPalindromeAroundPos = maxEvenPalindromeAt[i];
+        const int maxHalfPalindromeAroundPos = maxPalindromeAroundPos / 2;
+        const int posOfExtension = i - maxHalfPalindromeAroundPos;
+        const int posOfExtensionInReversed = a.size() - posOfExtension;
+        if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size())
+        {
+            continue;
+        }
+        const int maxPalindromeExtensionLength = largestSuffixOfAInBAtPos[posOfExtensionInReversed];
+        const auto extension = aReversed.substr(posOfExtensionInReversed, maxPalindromeExtensionLength);
+        cout << "i: " << i << " maxPalindromeAroundPos: " << maxPalindromeAroundPos << " extension: " << extension << endl;
+        cout << "posOfExtension: " << posOfExtension << endl;
+        cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
+        assert(b.find(extension) != string::npos);
+        const auto palindromeAroundPos = a.substr(posOfExtension, maxPalindromeAroundPos);
+        cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
+        const auto palindrome = extension + palindromeAroundPos + string(extension.rbegin(), extension.rend());
+        cout << "even palindrome: " << palindrome << endl;
         assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
         updateResult(result, palindrome);
     }
