@@ -891,46 +891,24 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
             for (const auto occurrence : childOccurences)
             {
                 //cout << " occurrence: " << occurrence.posInString << " in " << (occurrence.containingString == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << " wordLength: " << wordLength << endl;
-                // Odd-length palindromes.
-                const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - static_cast<int>(occurrence.containingString));
+                for (auto checkingOddLengthPalindrome : { true, false})
                 {
-                    const auto otherStringPos = stringLength - occurrence.posInString - 1;
+                    const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - static_cast<int>(occurrence.containingString));
+                    const auto otherStringPos = stringLength - occurrence.posInString - (checkingOddLengthPalindrome ? 1 : 0);
                     const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
                     if (foundOtherHalfOfPalindrome)
                     {
-                        const int palindromeLength = wordLength * 2 - 1;
+                        const int palindromeLength = wordLength * 2 - (checkingOddLengthPalindrome ? 1 : 0);
                         //cout << "  Found odd " << cursor.dbgStringFollowed() << endl;
+                        auto& maxPalindromeAt = (checkingOddLengthPalindrome ? maxOddPalindromeAt : maxEvenPalindromeAt);
                         if (occurrence.containingString == SubstringMemberShip::OriginalString)
                         {
-                            maxOddPalindromeAt[occurrence.posInString] = max(maxOddPalindromeAt[occurrence.posInString], palindromeLength);
+                            maxPalindromeAt[occurrence.posInString] = max(maxPalindromeAt[occurrence.posInString], palindromeLength);
                         }
                         else
                         {
-                            maxOddPalindromeAt[otherStringPos] = max(maxOddPalindromeAt[otherStringPos], palindromeLength);
+                            maxPalindromeAt[otherStringPos] = max(maxPalindromeAt[otherStringPos], palindromeLength);
                         }
-                    }
-                }
-                // Even-length palindromes.
-                {
-                    const auto otherStringPos = stringLength - occurrence.posInString;
-                    //cout << "  For even, need to find " << otherStringPos << " in " << (otherStringMembership == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << endl;
-                    const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
-                    if (foundOtherHalfOfPalindrome)
-                    {
-                        const int palindromeLength = wordLength * 2;
-                        //cout << "  Found even " << cursor.dbgStringFollowed() << endl;
-                        if (occurrence.containingString == SubstringMemberShip::OriginalString)
-                        {
-                            maxEvenPalindromeAt[occurrence.posInString] = max(maxEvenPalindromeAt[occurrence.posInString], palindromeLength);
-                        }
-                        else
-                        {
-                            maxEvenPalindromeAt[otherStringPos] = max(maxEvenPalindromeAt[otherStringPos], palindromeLength);
-                        }
-                    }
-                    else
-                    {
-                        //cout << "  did not find even" << endl;
                     }
                 }
                 occurencesOfWord.insert(occurrence);
@@ -1252,7 +1230,7 @@ int main()
         cin >> a >> b;
 #else
         const int numLetters = 3;
-        const int n = 20;
+        const int n = 100;
         for (int j = 1; j <= 2; j++)
         {
             string s;
