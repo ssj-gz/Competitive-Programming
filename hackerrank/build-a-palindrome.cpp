@@ -846,7 +846,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
     {
         const auto positionInX = stringLength - wordLength;
         occurencesOfWord.insert({positionInX, SubstringMemberShip::OriginalString});
-        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
+        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
     }
     if (cursor.stateData().isFinalY)
     {
@@ -854,7 +854,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
         //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
         const auto positionInY = stringLength - wordLength;
         occurencesOfWord.insert({positionInY, SubstringMemberShip::ReversedString});
-        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
+        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
 
     auto nextLetterIterator = cursor.getNextLetterIterator();
@@ -889,7 +889,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
         {
             for (const auto occurrence : childOccurences)
             {
-                cout << " occurrence: " << occurrence.posInString << " in " << (occurrence.containingString == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << " wordLength: " << wordLength << endl;
+                //cout << " occurrence: " << occurrence.posInString << " in " << (occurrence.containingString == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << " wordLength: " << wordLength << endl;
                 // Odd-length palindromes.
                 const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - static_cast<int>(occurrence.containingString));
                 {
@@ -898,7 +898,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
                     if (foundOtherHalfOfPalindrome)
                     {
                         const int palindromeLength = wordLength * 2 - 1;
-                        cout << "  Found odd " << cursor.dbgStringFollowed() << endl;
+                        //cout << "  Found odd " << cursor.dbgStringFollowed() << endl;
                         if (occurrence.containingString == SubstringMemberShip::OriginalString)
                         {
                             maxOddPalindromeAt[occurrence.posInString] = max(maxOddPalindromeAt[occurrence.posInString], palindromeLength);
@@ -912,12 +912,12 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
                 // Even-length palindromes.
                 {
                     const auto otherStringPos = stringLength - occurrence.posInString;
-                    cout << "  For even, need to find " << otherStringPos << " in " << (otherStringMembership == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << endl;
+                    //cout << "  For even, need to find " << otherStringPos << " in " << (otherStringMembership == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << endl;
                     const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
                     if (foundOtherHalfOfPalindrome)
                     {
                         const int palindromeLength = wordLength * 2;
-                        cout << "  Found even " << cursor.dbgStringFollowed() << endl;
+                        //cout << "  Found even " << cursor.dbgStringFollowed() << endl;
                         if (occurrence.containingString == SubstringMemberShip::OriginalString)
                         {
                             maxEvenPalindromeAt[occurrence.posInString] = max(maxEvenPalindromeAt[occurrence.posInString], palindromeLength);
@@ -929,7 +929,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
                     }
                     else
                     {
-                        cout << "  did not find even" << endl;
+                        //cout << "  did not find even" << endl;
                     }
                 }
                 occurencesOfWord.insert(occurrence);
@@ -981,7 +981,7 @@ vector<int> maxOddPalindromesBruteForce(const string& a)
 void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const int lengthOfA, vector<int>& results)
 {
     assert(cursor.isOnExplicitState());
-    cout << "string: " << cursor.dbgStringFollowed() << " lengthOfSubstringOfBSoFar: " << lengthOfSubstringOfBSoFar << " isSubstringOfX? " << cursor.stateData().isSubstringOfX << " isSubstringOfY? " << cursor.stateData().isSubstringOfY << endl;
+    //cout << "string: " << cursor.dbgStringFollowed() << " lengthOfSubstringOfBSoFar: " << lengthOfSubstringOfBSoFar << " isSubstringOfX? " << cursor.stateData().isSubstringOfX << " isSubstringOfY? " << cursor.stateData().isSubstringOfY << endl;
     if (cursor.stateData().isFinalX)
     {
         //cout << "string: " << cursor.dbgStringFollowed() << " is suffix of A" << endl;
@@ -999,7 +999,7 @@ void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const
         const auto nextLengthOfSubstringOfBSoFar = (nextCursor.stateData().isSubstringOfY ? nextCursor.stateData().wordLength : lengthOfSubstringOfBSoFar);
         if (nextCursor.stateData().isSubstringOfY)
         {
-            cout << "string " << nextCursor.dbgStringFollowed() << " is substring of B" << endl;
+            //cout << "string " << nextCursor.dbgStringFollowed() << " is substring of B" << endl;
         }
         findLargestSuffixOfAInB(nextCursor, nextLengthOfSubstringOfBSoFar, lengthOfA, results);
 
@@ -1029,7 +1029,7 @@ vector<int> findLargestSuffixOfAInBBruteForce(const string& a, const string& b)
         {
             const auto suffix = a.substr(suffixBeginPos, suffixLength);
             const auto inB = (b.find(suffix) != string::npos);
-            cout << "suffix: " << suffix << " in b?" << inB << endl;
+            //cout << "suffix: " << suffix << " in b?" << inB << endl;
             if (inB)
             {
                 result[suffixBeginPos] = suffixLength;
@@ -1041,14 +1041,24 @@ vector<int> findLargestSuffixOfAInBBruteForce(const string& a, const string& b)
     return result;
 }
 
-
-string findLongestPalindrome(const string&a, const string& b)
+void updateResult(string& result, const string& newCandidateResult)
 {
+    if (newCandidateResult.length() > result.length())
+        result = newCandidateResult;
+    else if (newCandidateResult.length() == result.length())
+        result = min(result, newCandidateResult);
+}
+
+string findLongestAHeavyPalindrome(const string&a, const string& b)
+{
+    string result;
     cout << "a: " << a << " size: " << a.size() << endl;
     cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
     const auto aReversed = string(a.rbegin(), a.rend());
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, aReversed);
+    maxOddPalindromeAt.clear();
+    maxEvenPalindromeAt.clear();
     maxOddPalindromeAt.resize(a.size());
     maxEvenPalindromeAt.resize(a.size());
     findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
@@ -1072,11 +1082,45 @@ string findLongestPalindrome(const string&a, const string& b)
     }
     assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
-    return "";
+
+    // Odd palindromes.
+    for (int i = 0; i < maxOddPalindromeAt.size(); i++)
+    {
+        const int maxPalindromeAroundPos = maxOddPalindromeAt[i];
+        const int maxHalfPalindromeAroundPos = (maxPalindromeAroundPos - 1) / 2;
+        const int posOfExtension = i - maxHalfPalindromeAroundPos - 1;
+        const int posOfExtensionInReversed = a.size() - posOfExtension;
+        if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size())
+        {
+            continue;
+        }
+        const int maxPalindromeExtensionLength = largestSuffixOfAInBAtPos[posOfExtensionInReversed];
+        const auto extension = aReversed.substr(posOfExtensionInReversed, maxPalindromeExtensionLength);
+        cout << "i: " << i << " maxPalindromeAroundPos: " << maxPalindromeAroundPos << " extension: " << extension << endl;
+        cout << "posOfExtension: " << posOfExtension << endl;
+        cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
+        assert(b.find(extension) != string::npos);
+        const auto palindrome = extension + a.substr(posOfExtension + 1, maxPalindromeAroundPos) + string(extension.rbegin(), extension.rend());
+        cout << "palindrome: " << palindrome << endl;
+        assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
+        updateResult(result, palindrome);
+    }
+    return result;
 }
+
+string findLongestPalindrome(const string&a, const string& b)
+{
+    string result;
+    updateResult(result, findLongestAHeavyPalindrome(a, b));
+    updateResult(result, findLongestAHeavyPalindrome(string(b.rbegin(), b.rend()), string(a.rbegin(), a.rend())));
+
+    return result;
+}
+
 
 string findLongestPalindromeBruteForce(const string&a, const string& b)
 {
+    cout << "findLongestPalindromeBruteForce" << endl;
     string result;
     for (int aSuffix = 0; aSuffix < a.size(); aSuffix++)
     {
@@ -1084,7 +1128,7 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
         for (int aLength = 1; aSuffix + aLength <= a.size(); aLength++)
         {
             const auto sA = a.substr(aSuffix, aLength);
-            cout << " aLength: " << aLength << endl;
+            //cout << " aLength: " << aLength << endl;
             for (int bSuffix = 0; bSuffix < b.size(); bSuffix++)
             {
                 for (int bLength = 1; bSuffix + bLength <= b.size(); bLength++)
@@ -1093,9 +1137,14 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
                     const auto sAB = sA + sB;
                     if (sAB == string(sAB.rbegin(), sAB.rend()) && sAB.length() >= result.length())
                     {
+                        const string oldResult = result;
                         if (sAB.length() > result.length())
                             result = sAB;
                         result = min(result, sAB);
+                        if (oldResult != result)
+                        {
+                            cout << "Found new best: " << sA << "|" << sB << endl;
+                        }
                     }
                 }
             }
@@ -1112,7 +1161,7 @@ int main()
 #if 0
     srand(time(0));
     const int numLetters = 3;
-    const int n = 10;
+    const int n = 100'000;
     string s;
     for (int i = 0; i < n; i++)
     {
