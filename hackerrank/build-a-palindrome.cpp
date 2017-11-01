@@ -1104,7 +1104,9 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
         assert(b.find(extension) != string::npos);
         const auto palindromeAroundPos = a.substr(posOfExtension + 1, maxPalindromeAroundPos);
         cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
-        const auto palindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos + extension;
+        const auto aPortionOfPalindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos;
+        assert(a.find(aPortionOfPalindrome) != string::npos);
+        const auto palindrome =aPortionOfPalindrome + extension;
         cout << "odd palindrome: " << palindrome << endl;
         assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
         updateResult(result, palindrome);
@@ -1115,9 +1117,11 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
     {
         const int maxPalindromeAroundPos = maxEvenPalindromeAt[i];
         const int maxHalfPalindromeAroundPos = maxPalindromeAroundPos / 2;
-        const int posOfExtension = i - maxHalfPalindromeAroundPos;
+        const int posOfExtension = i - maxHalfPalindromeAroundPos - 1;
+        if (posOfExtension == string::npos)
+            continue;
         const int posOfExtensionInReversed = a.size() - 1 - posOfExtension;
-        if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size())
+        if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size() || posOfExtensionInReversed < 0)
         {
             continue;
         }
@@ -1127,9 +1131,12 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
         cout << "posOfExtension: " << posOfExtension << endl;
         cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
         assert(b.find(extension) != string::npos);
-        const auto palindromeAroundPos = a.substr(posOfExtension, maxPalindromeAroundPos);
+        const auto palindromeAroundPos = a.substr(posOfExtension + 1, maxPalindromeAroundPos);
         cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
-        const auto palindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos + extension;
+        const auto aPortionOfPalindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos;
+        cout << "aPortionOfPalindrome: " << aPortionOfPalindrome << endl;
+        assert(a.find(aPortionOfPalindrome) != string::npos);
+        const auto palindrome = aPortionOfPalindrome + extension;
         cout << "even palindrome: " << palindrome << endl;
         assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
         updateResult(result, palindrome);
