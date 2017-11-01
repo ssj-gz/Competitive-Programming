@@ -843,7 +843,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
     {
         const auto positionInX = stringLength - wordLength;
         occurencesOfWord.insert({positionInX, SubstringMemberShip::OriginalString});
-        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
+        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
     }
     if (cursor.stateData().isFinalY)
     {
@@ -851,7 +851,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
         //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
         const auto positionInY = stringLength - wordLength;
         occurencesOfWord.insert({positionInY, SubstringMemberShip::ReversedString});
-        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
+        cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
     }
 
     auto nextLetterIterator = cursor.getNextLetterIterator();
@@ -875,11 +875,18 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
             // two elements, we swap occurencesOfWord and the largest child.
             swap(occurencesOfWord, *childrenOccurences.begin());
         }
+        else
+        {
+            // A bit of a hack, but ensure each of the (up to two) elements of occurencesOfWord due to this being a final state are compared against each other.
+            childrenOccurences.push_back(occurencesOfWord);
+            occurencesOfWord.clear();
+        }
 
         for (const auto& childOccurences : childrenOccurences)
         {
             for (const auto occurrence : childOccurences)
             {
+                cout << " occurrence: " << occurrence.posInString << " in " << (occurrence.containingString == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << " wordLength: " << wordLength << endl;
                 // Odd-length palindromes.
                 const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - static_cast<int>(occurrence.containingString));
                 {
@@ -888,7 +895,7 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
                     if (foundOtherHalfOfPalindrome)
                     {
                         const int palindromeLength = wordLength * 2 - 1;
-                        cout << "Found odd " << cursor.dbgStringFollowed() << endl;
+                        cout << "  Found odd " << cursor.dbgStringFollowed() << endl;
                         if (occurrence.containingString == SubstringMemberShip::OriginalString)
                         {
                             maxOddPalindromeAt[occurrence.posInString] = max(maxOddPalindromeAt[occurrence.posInString], palindromeLength);
@@ -902,11 +909,12 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
                 // Even-length palindromes.
                 {
                     const auto otherStringPos = stringLength - occurrence.posInString;
+                    cout << "  For even, need to find " << otherStringPos << " in " << (otherStringMembership == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << endl;
                     const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
                     if (foundOtherHalfOfPalindrome)
                     {
                         const int palindromeLength = wordLength * 2;
-                        cout << "Found even " << cursor.dbgStringFollowed() << endl;
+                        cout << "  Found even " << cursor.dbgStringFollowed() << endl;
                         if (occurrence.containingString == SubstringMemberShip::OriginalString)
                         {
                             maxEvenPalindromeAt[occurrence.posInString] = max(maxEvenPalindromeAt[occurrence.posInString], palindromeLength);
@@ -915,6 +923,10 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
                         {
                             maxEvenPalindromeAt[otherStringPos] = max(maxEvenPalindromeAt[otherStringPos], palindromeLength);
                         }
+                    }
+                    else
+                    {
+                        cout << "  did not find even" << endl;
                     }
                 }
                 occurencesOfWord.insert(occurrence);
