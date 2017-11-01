@@ -1083,13 +1083,15 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
     assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
 
+    cout << "constructing palindromes a: " << a << " b: " << b << endl;
+    cout << "odd palindromes" << endl;
     // Odd palindromes.
     for (int i = 0; i < maxOddPalindromeAt.size(); i++)
     {
         const int maxPalindromeAroundPos = maxOddPalindromeAt[i];
         const int maxHalfPalindromeAroundPos = (maxPalindromeAroundPos - 1) / 2;
         const int posOfExtension = i - maxHalfPalindromeAroundPos - 1;
-        const int posOfExtensionInReversed = a.size() - posOfExtension;
+        const int posOfExtensionInReversed = a.size() -1 - posOfExtension;
         if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size())
         {
             continue;
@@ -1100,7 +1102,9 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
         cout << "posOfExtension: " << posOfExtension << endl;
         cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
         assert(b.find(extension) != string::npos);
-        const auto palindrome = extension + a.substr(posOfExtension + 1, maxPalindromeAroundPos) + string(extension.rbegin(), extension.rend());
+        const auto palindromeAroundPos = a.substr(posOfExtension + 1, maxPalindromeAroundPos);
+        cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
+        const auto palindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos + extension;
         cout << "odd palindrome: " << palindrome << endl;
         assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
         updateResult(result, palindrome);
@@ -1112,7 +1116,7 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
         const int maxPalindromeAroundPos = maxEvenPalindromeAt[i];
         const int maxHalfPalindromeAroundPos = maxPalindromeAroundPos / 2;
         const int posOfExtension = i - maxHalfPalindromeAroundPos;
-        const int posOfExtensionInReversed = a.size() - posOfExtension;
+        const int posOfExtensionInReversed = a.size() - 1 - posOfExtension;
         if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size())
         {
             continue;
@@ -1125,7 +1129,7 @@ string findLongestAHeavyPalindrome(const string&a, const string& b)
         assert(b.find(extension) != string::npos);
         const auto palindromeAroundPos = a.substr(posOfExtension, maxPalindromeAroundPos);
         cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
-        const auto palindrome = extension + palindromeAroundPos + string(extension.rbegin(), extension.rend());
+        const auto palindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos + extension;
         cout << "even palindrome: " << palindrome << endl;
         assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
         updateResult(result, palindrome);
@@ -1138,6 +1142,7 @@ string findLongestPalindrome(const string&a, const string& b)
     string result;
     updateResult(result, findLongestAHeavyPalindrome(a, b));
     updateResult(result, findLongestAHeavyPalindrome(string(b.rbegin(), b.rend()), string(a.rbegin(), a.rend())));
+    //updateResult(result, findLongestAHeavyPalindrome(b, a));
 
     return result;
 }
@@ -1147,16 +1152,17 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
 {
     cout << "findLongestPalindromeBruteForce" << endl;
     string result;
+    const int minLength = 0;
     for (int aSuffix = 0; aSuffix < a.size(); aSuffix++)
     {
         cout << "aSuffix: " << aSuffix << endl;
-        for (int aLength = 1; aSuffix + aLength <= a.size(); aLength++)
+        for (int aLength = minLength; aSuffix + aLength <= a.size(); aLength++)
         {
             const auto sA = a.substr(aSuffix, aLength);
             //cout << " aLength: " << aLength << endl;
             for (int bSuffix = 0; bSuffix < b.size(); bSuffix++)
             {
-                for (int bLength = 1; bSuffix + bLength <= b.size(); bLength++)
+                for (int bLength = minLength; bSuffix + bLength <= b.size(); bLength++)
                 {
                     const auto sB = b.substr(bSuffix, bLength);
                     const auto sAB = sA + sB;
@@ -1186,13 +1192,21 @@ int main()
 #if 0
     srand(time(0));
     const int numLetters = 3;
-    const int n = 100'000;
-    string s;
-    for (int i = 0; i < n; i++)
+    const int n = 100;
+    const int numTestcases = 10;
+    cout << numTestcases << endl;
+    for (int i = 0; i < numTestcases; i++)
     {
-        s += static_cast<char>(rand() % numLetters + 'a');
+        for (int j = 1; j <= 2; j++)
+        {
+            string s;
+            for (int i = 0; i < n; i++)
+            {
+                s += static_cast<char>(rand() % numLetters + 'a');
+            }
+            cout << s << endl;
+        }
     }
-    cout << s << endl;
     return 0;
 
 #endif
@@ -1212,6 +1226,7 @@ int main()
 #ifdef BRUTE_FORCE
         const auto resultBruteForce = findLongestPalindromeBruteForce(a, b);
         cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl; 
+        assert(result == resultBruteForce);
 #endif
     }
 }
