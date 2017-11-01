@@ -19,6 +19,9 @@ struct StateData
     int wordLength = -1;
     bool isFinalX = false;
     bool isFinalY = false;
+
+    bool isSubstringOfX = false;
+    bool isSubstringOfY = false;
 };
 
 /**
@@ -166,6 +169,28 @@ class SuffixTreeBuilder
                     if (transition.nextState->data.wordLength == -1)
                     {
                         transition.nextState->data.wordLength = state.data.wordLength + transition.substringFollowed.length(m_currentString.size());
+                    }
+                }
+            }
+            for (auto& state : m_states)
+            {
+                if (state.data.isFinalX)
+                {
+                    auto stateToMark = &state;
+                    while (stateToMark && !stateToMark->data.isSubstringOfX)
+                    {
+                        stateToMark->data.isSubstringOfX = true;
+                        stateToMark = stateToMark->parent;
+                    }
+
+                }
+                if (state.data.isFinalY)
+                {
+                    auto stateToMark = &state;
+                    while (stateToMark && !stateToMark->data.isSubstringOfY)
+                    {
+                        stateToMark->data.isSubstringOfY = true;
+                        stateToMark = stateToMark->parent;
                     }
                 }
             }
@@ -938,13 +963,76 @@ vector<int> maxOddPalindromesBruteForce(const string& a)
     return result;
 }
 
+void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const int lengthOfA, vector<int>& results)
+{
+    assert(cursor.isOnExplicitState());
+    //cout << "string: " << cursor.dbgStringFollowed() << " lengthOfSubstringOfBSoFar: " << lengthOfSubstringOfBSoFar << endl;
+    if (cursor.stateData().isFinalX)
+    {
+        //cout << "string: " << cursor.dbgStringFollowed() << " is suffix of A" << endl;
+        const int suffixBeginPos = lengthOfA - cursor.stateData().wordLength;
+        results[suffixBeginPos] = lengthOfSubstringOfBSoFar;
+        cout << "Setting " << suffixBeginPos << " to " << lengthOfSubstringOfBSoFar << endl;
+    }
+    auto nextLetterIterator = cursor.getNextLetterIterator();
+    while (nextLetterIterator.hasNext())
+    {
+        auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
+        if (!nextCursor.isOnExplicitState())
+            nextCursor.followToTransitionEnd();
+
+        const auto nextLengthOfSubstringOfBSoFar = lengthOfSubstringOfBSoFar + (nextCursor.stateData().isSubstringOfY ? nextCursor.stateData().wordLength : 0);
+        if (nextCursor.stateData().isSubstringOfY)
+        {
+            //cout << "string " << cursor.dbgStringFollowed() << " is substring of B" << endl;
+        }
+        findLargestSuffixOfAInB(nextCursor, nextLengthOfSubstringOfBSoFar, lengthOfA, results);
+
+        nextLetterIterator++;
+    }
+}
+
+vector<int> findLargestSuffixOfAInB(const string& a, const string& b)
+{
+    SuffixTreeBuilder suffixTree;
+    suffixTree.addStringPairAndMarkFinalStates(a, b);
+
+    vector<int> result(a.size() + 1);
+
+    findLargestSuffixOfAInB(suffixTree.rootCursor(), 0, a.size(), result);
+
+    return result;
+}
+
+vector<int> findLargestSuffixOfAInBBruteForce(const string& a, const string& b)
+{
+    vector<int> result(a.size() + 1);
+    for (int suffixBeginPos = 0; suffixBeginPos <= a.size(); suffixBeginPos++)
+    {
+        for (int suffixLength = 0; suffixBeginPos + suffixLength <= a.size(); suffixLength++)
+        {
+            const auto suffix = a.substr(suffixBeginPos, suffixLength);
+            const auto inB = (b.find(suffix) != string::npos);
+            cout << "suffix: " << suffix << " in b?" << inB << endl;
+            if (inB)
+            {
+                result[suffixBeginPos] = suffixLength;
+            }
+            else
+                break;
+        }
+    }
+    return result;
+}
+
 
 string findLongestPalindrome(const string&a, const string& b)
 {
     cout << "a: " << a << " size: " << a.size() << endl;
     cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
+    const auto aReversed = string(a.rbegin(), a.rend());
     SuffixTreeBuilder suffixTree;
-    suffixTree.addStringPairAndMarkFinalStates(a, string(a.rbegin(), a.rend()));
+    suffixTree.addStringPairAndMarkFinalStates(a, aReversed);
     maxOddPalindromeAt.resize(a.size());
     maxEvenPalindromeAt.resize(a.size());
     findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
@@ -958,6 +1046,15 @@ string findLongestPalindrome(const string&a, const string& b)
     }
     assert(maxOddPalindromeAt == maxOddPalindromesBruteForce);
     assert(maxEvenPalindromeAt == maxEvenPalindromesBruteForce);
+#endif
+    const auto largestSuffixOfAInBAtPos = findLargestSuffixOfAInB(aReversed, b);
+#ifdef BRUTE_FORCE
+    const auto largestSuffixOfAInBAtPosBruteForce = findLargestSuffixOfAInBBruteForce(aReversed, b);
+    for (int i = 0; i < largestSuffixOfAInBAtPos.size(); i++)
+    {
+        cout << "i: " << i << " largestSuffixOfAInBAtPos: " << largestSuffixOfAInBAtPos[i] << " largestSuffixOfAInBAtPosBruteForce: " << largestSuffixOfAInBAtPosBruteForce[i] << endl;
+    }
+    assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
     return "";
 }
@@ -995,8 +1092,9 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
 int main()
 {
 #if 0
+    srand(time(0));
     const int numLetters = 3;
-    const int n = 100'000;
+    const int n = 10;
     string s;
     for (int i = 0; i < n; i++)
     {
