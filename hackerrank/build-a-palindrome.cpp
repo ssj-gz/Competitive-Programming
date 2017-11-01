@@ -1,5 +1,5 @@
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -900,6 +900,44 @@ set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int s
     return occurencesOfWord;
 }
 
+vector<int> maxEvenPalindromesBruteForce(const string& a)
+{
+    vector<int> result(a.size());
+    for (int i = 0; i < a.size(); i++)
+    {
+        int right = i;
+        int left = i - 1;
+        int size = 0;
+        while (left >= 0 && right < a.size() && a[left] == a[right])
+        {
+            size += 2;
+            left--;
+            right++;
+        }
+        result[i] = size;
+    }
+    return result;
+}
+
+vector<int> maxOddPalindromesBruteForce(const string& a)
+{
+    vector<int> result(a.size());
+    for (int i = 0; i < a.size(); i++)
+    {
+        int right = i + 1;
+        int left = i - 1;
+        int size = 1;
+        while (left >= 0 && right < a.size() && a[left] == a[right])
+        {
+            size += 2;
+            left--;
+            right++;
+        }
+        result[i] = size;
+    }
+    return result;
+}
+
 
 string findLongestPalindrome(const string&a, const string& b)
 {
@@ -910,10 +948,17 @@ string findLongestPalindrome(const string&a, const string& b)
     maxOddPalindromeAt.resize(a.size());
     maxEvenPalindromeAt.resize(a.size());
     findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
+#ifdef BRUTE_FORCE
+    const auto maxEvenPalindromesBruteForce = ::maxEvenPalindromesBruteForce(a);
+    const auto maxOddPalindromesBruteForce = ::maxOddPalindromesBruteForce(a);
     for (int i = 0; i < maxOddPalindromeAt.size(); i++)
     {
-        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << endl;
+        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << " maxOddPalindromesBruteForce: " << maxOddPalindromesBruteForce[i] << endl;
+        cout << "i: " << i << " maxEvenPalindromeAt: " << maxEvenPalindromeAt[i] << " maxEvenPalindromesBruteForce: " << maxEvenPalindromesBruteForce[i] << endl;
     }
+    assert(maxOddPalindromeAt == maxOddPalindromesBruteForce);
+    assert(maxEvenPalindromeAt == maxEvenPalindromesBruteForce);
+#endif
     return "";
 }
 
