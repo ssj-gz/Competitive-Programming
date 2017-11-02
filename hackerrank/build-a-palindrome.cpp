@@ -1,9 +1,10 @@
 #define BRUTE_FORCE
 #define RANDOM
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
+#undef RANDOM
 #endif
 #include <iostream>
 #include <vector>
@@ -110,6 +111,8 @@ class SuffixTreeBuilder
             //cout << "pairConcat: " << pairConcat << endl;
             const auto stringConcatPos = x.length();
             appendString(pairConcat);
+
+            cout << "# states: " << m_states.size() << endl;
 
             makeFinalStatesExplicitAndMarkThemAsFinal();
 
@@ -1067,7 +1070,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
 
-    cout << "constructing palindromes a: " << a << " b: " << b << endl;
+    //cout << "constructing palindromes a: " << a << " b: " << b << endl;
     for (auto checkingOddLengthPalindrome : { true, false })
     {
         for (int i = 0; i < maxOddPalindromeAt.size(); i++)
@@ -1106,7 +1109,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
             const auto aPortion = reversed(bPortion);
             assert(a.find(aPortion) != string::npos);
             const auto palindrome = aPortion + bPortion;
-            cout << "balanced palindrome: " << palindrome << endl;
+            //cout << "balanced palindrome: " << palindrome << endl;
             assert(palindrome == reversed(palindrome));
             updateResult(result, palindrome);
         }
@@ -1131,7 +1134,7 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
 {
     //cout << "findLongestPalindromeBruteForce" << endl;
     string result;
-    const int minLength = 0;
+    const int minLength = 1;
     for (int aSuffix = 0; aSuffix < a.size(); aSuffix++)
     {
         //cout << "aSuffix: " << aSuffix << endl;
@@ -1153,7 +1156,7 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
                         result = min(result, sAB);
                         if (oldResult != result)
                         {
-                            cout << "Found new best: " << sA << "|" << sB << endl;
+                            //cout << "Found new best: " << sA << "|" << sB << endl;
                         }
                     }
                 }
@@ -1170,7 +1173,7 @@ int main()
 {
 #if 0
     const int numLetters = 3;
-    const int n = 100;
+    const int n = 100000;
     const int numTestcases = 10;
     cout << numTestcases << endl;
     for (int i = 0; i < numTestcases; i++)
@@ -1205,15 +1208,16 @@ int main()
 #ifndef RANDOM
         cin >> a >> b;
 #else
-        const int numLetters = 3;
-        const int n = 100;
+        const int maxAlphabetSize = 5;
+        const int maxNumLetters = 20;
         for (int j = 1; j <= 2; j++)
         {
             string s;
-            const int num = rand() % n + 1;
-            for (int i = 0; i < num; i++)
+            const int numLetters = rand() % maxNumLetters + 1;
+            const int alphabetSize = rand() % maxAlphabetSize + 1;
+            for (int i = 0; i < numLetters; i++)
             {
-                s += static_cast<char>(rand() % numLetters + 'a');
+                s += static_cast<char>(rand() % alphabetSize + 'a');
             }
             if (j == 1)
                 a = s;
@@ -1222,9 +1226,10 @@ int main()
         }
 #endif
 
-        cout << "a: " << a << " b: " << b << endl;
+        //cout << "a: " << a << " b: " << b << endl;
 
         const auto result = findLongestPalindrome(a, b);
+        cout << result << endl;
 #ifdef BRUTE_FORCE
         const auto resultBruteForce = findLongestPalindromeBruteForce(a, b);
         cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl; 
