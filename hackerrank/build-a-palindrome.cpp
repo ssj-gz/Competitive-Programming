@@ -1,6 +1,6 @@
 #define BRUTE_FORCE
 #define RANDOM
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -1049,6 +1049,25 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     maxOddPalindromeAt.resize(a.size());
     maxEvenPalindromeAt.resize(a.size());
     findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
+
+    const int alphabetSize = 26;
+    bool isLetterIndexUsedInB[alphabetSize] = {};
+    for (const auto letter : b)
+    {
+        isLetterIndexUsedInB[letter - 'a'] = true;
+    }
+    vector<vector<int>> nextOccurenceOfLetterIndexAtOrAfter(alphabetSize, vector<int>(a.size()));
+    for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
+    {
+        int nextOccurenceOfLetter = -1;
+        for (int i = a.size() - 1; i >= 0; i--)
+        {
+            if (a[i] -'a' == letterIndex)
+                nextOccurenceOfLetter = i;
+            nextOccurenceOfLetterIndexAtOrAfter[letterIndex][i] = nextOccurenceOfLetter;
+            assert(nextOccurenceOfLetterIndexAtOrAfter[letterIndex][i] == -1 || nextOccurenceOfLetterIndexAtOrAfter[letterIndex][i] >= i);
+        }
+    }
 #ifdef BRUTE_FORCE
     const auto maxEvenPalindromesBruteForce = ::maxEvenPalindromesBruteForce(a);
     const auto maxOddPalindromesBruteForce = ::maxOddPalindromesBruteForce(a);
@@ -1070,7 +1089,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
 
-    //cout << "constructing palindromes a: " << a << " b: " << b << endl;
+    cout << "constructing palindromes a: " << a << " b: " << b << endl;
     for (auto checkingOddLengthPalindrome : { true, false })
     {
         for (int i = 0; i < maxOddPalindromeAt.size(); i++)
@@ -1081,19 +1100,60 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
             if (maxSurroundingPalindromeBeginPos == string::npos)
                 continue;
             assert(a.substr(maxSurroundingPalindromeBeginPos, maxSurroundingPalindromeLength) == reversed(a.substr(maxSurroundingPalindromeBeginPos, maxSurroundingPalindromeLength)));
-            const int posOfExtensionInReversed = a.size() - maxSurroundingPalindromeBeginPos;
+            int posOfExtensionInReversed = a.size() - maxSurroundingPalindromeBeginPos;
             const int maxPalindromeExtensionLength = largestSuffixOfAInBAtPos[posOfExtensionInReversed];
-            const int constructedPalindromeLength = maxSurroundingPalindromeLength + 2 * maxPalindromeExtensionLength;
+
+            int surroundingPalindromeLength = maxSurroundingPalindromeLength;
+            int surroundingPalindromeBeginPos = maxSurroundingPalindromeBeginPos;
+            int extensionLength = maxPalindromeExtensionLength;
+
+            if (extensionLength == 0)
+            {
+                //cout << "maxSurroundingPalindromeLength is 0!" << endl;
+                // Choosing the maximal surrounding palindrome will leave to empty sB, which is not allowed.
+                // We must instead shrink the surrounding palindrome until it loses a letter that is in B,
+                // then pick that letter as the extension.
+                int posOfEarliestBLetterInSurroundingPalindrome = numeric_limits<int>::max();
+                for (int bLetterIndex = 0; bLetterIndex < alphabetSize; bLetterIndex++)
+                {
+                    if (!isLetterIndexUsedInB[bLetterIndex])
+                        continue;
+
+                    const int posOfBLetterInSurroundingPalindrome = nextOccurenceOfLetterIndexAtOrAfter[bLetterIndex][surroundingPalindromeBeginPos];
+                    if (posOfBLetterInSurroundingPalindrome == -1)
+                        continue;
+                    //cout << " found b-letter " << static_cast<char>('a' + bLetterIndex) << " at index: " << posOfBLetterInSurroundingPalindrome << endl;
+                    posOfEarliestBLetterInSurroundingPalindrome = min(posOfEarliestBLetterInSurroundingPalindrome, posOfBLetterInSurroundingPalindrome);
+                }
+                if (posOfEarliestBLetterInSurroundingPalindrome >= i)
+                {
+                    // Can't use this surrounding palindrome to construct a palindrome with non-empty sB.
+                    continue;
+                }
+                const int moveLeftOfSurroundingPalindromeBy = posOfEarliestBLetterInSurroundingPalindrome + 1 - surroundingPalindromeBeginPos;
+                assert(moveLeftOfSurroundingPalindromeBy > 0);
+                //cout << "moveLeftOfSurroundingPalindromeBy: " << moveLeftOfSurroundingPalindromeBy << endl;
+                surroundingPalindromeBeginPos += moveLeftOfSurroundingPalindromeBy;
+                surroundingPalindromeLength -= 2 * moveLeftOfSurroundingPalindromeBy;
+                posOfExtensionInReversed -= moveLeftOfSurroundingPalindromeBy;
+                extensionLength = 1; 
+            }
+
+            const int constructedPalindromeLength = surroundingPalindromeLength + 2 * extensionLength;
             if (constructedPalindromeLength >= result.length())
             {
-                const auto surroundingPalindrome = a.substr(maxSurroundingPalindromeBeginPos, maxSurroundingPalindromeLength);
-                const auto extension = aReversed.substr(posOfExtensionInReversed, maxPalindromeExtensionLength);
+                const auto surroundingPalindrome = a.substr(surroundingPalindromeBeginPos, surroundingPalindromeLength);
+                assert(surroundingPalindrome == reversed(surroundingPalindrome));
+                const auto extension = aReversed.substr(posOfExtensionInReversed, extensionLength);
+                //cout << "extension: " << extension << " posOfExtensionInReversed: " << posOfExtensionInReversed << " extensionLength: " << extensionLength << endl;
                 const auto aPortionOfConstructed = reversed(extension) + surroundingPalindrome;
                 assert(a.find(aPortionOfConstructed) != string::npos);
                 const auto bPortionOfConstructed = extension;
                 assert(b.find(bPortionOfConstructed) != string::npos);
                 const auto constructedPalindrome = aPortionOfConstructed + bPortionOfConstructed;
                 assert(constructedPalindrome == reversed(constructedPalindrome));
+                assert(constructedPalindrome.size() == constructedPalindromeLength);
+                //cout << "constructedPalindrome: " << constructedPalindrome << " extension: " << extension << " surroundingPalindrome: " << surroundingPalindrome << endl;
                 updateResult(result, constructedPalindrome);
             }
         }
