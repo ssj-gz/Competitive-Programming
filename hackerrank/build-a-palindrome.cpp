@@ -1146,11 +1146,13 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
                 assert(surroundingPalindrome == reversed(surroundingPalindrome));
                 const auto extension = aReversed.substr(posOfExtensionInReversed, extensionLength);
                 //cout << "extension: " << extension << " posOfExtensionInReversed: " << posOfExtensionInReversed << " extensionLength: " << extensionLength << endl;
-                const auto aPortionOfConstructed = reversed(extension) + surroundingPalindrome;
-                assert(a.find(aPortionOfConstructed) != string::npos);
-                const auto bPortionOfConstructed = extension;
-                assert(b.find(bPortionOfConstructed) != string::npos);
-                const auto constructedPalindrome = aPortionOfConstructed + bPortionOfConstructed;
+                const auto sA = reversed(extension) + surroundingPalindrome;
+                assert(!sA.empty());
+                assert(a.find(sA) != string::npos);
+                const auto sB = extension;
+                assert(!sB.empty());
+                assert(b.find(sB) != string::npos);
+                const auto constructedPalindrome = sA + sB;
                 assert(constructedPalindrome == reversed(constructedPalindrome));
                 assert(constructedPalindrome.size() == constructedPalindromeLength);
                 //cout << "constructedPalindrome: " << constructedPalindrome << " extension: " << extension << " surroundingPalindrome: " << surroundingPalindrome << endl;
@@ -1162,13 +1164,15 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     for (int i = 0; i < largestSuffixOfAInBAtPos.size(); i++)
     {
         const int palindromeLength = 2 * largestSuffixOfAInBAtPos[i];
-        if (palindromeLength >= result.length())
+        if (palindromeLength > 0 && palindromeLength >= result.length())
         {
-            const auto bPortion = aReversed.substr(i, palindromeLength / 2);
-            assert(b.find(bPortion) != string::npos);
-            const auto aPortion = reversed(bPortion);
-            assert(a.find(aPortion) != string::npos);
-            const auto palindrome = aPortion + bPortion;
+            const auto sB = aReversed.substr(i, palindromeLength / 2);
+            assert(!sB.empty());
+            assert(b.find(sB) != string::npos);
+            const auto sA = reversed(sB);
+            assert(!sA.empty());
+            assert(a.find(sA) != string::npos);
+            const auto palindrome = sA + sB;
             //cout << "balanced palindrome: " << palindrome << endl;
             assert(palindrome == reversed(palindrome));
             updateResult(result, palindrome);
