@@ -1120,6 +1120,8 @@ string findLongestPalindrome(const string&a, const string& b)
     updateResult(result, findLongestAHeavyOrBalancedPalindrome(a, b));
     updateResult(result, findLongestAHeavyOrBalancedPalindrome(reversed(b), reversed(a)));
     //updateResult(result, findLongestAHeavyPalindrome(b, a));
+    if (result.empty())
+        result = "-1";
 
     return result;
 }
