@@ -1038,7 +1038,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     string result;
     //cout << "a: " << a << " size: " << a.size() << endl;
     //cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
-    const auto aReversed = string(a.rbegin(), a.rend());
+    const auto aReversed = reversed(a);
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, aReversed);
     maxOddPalindromeAt.clear();
@@ -1085,7 +1085,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
             {
                 const auto surroundingPalindrome = a.substr(maxSurroundingPalindromeBeginPos, maxSurroundingPalindromeLength);
                 const auto extension = aReversed.substr(posOfExtensionInReversed, maxPalindromeExtensionLength);
-                const auto aPortionOfConstructed = string(extension.rbegin(), extension.rend()) + surroundingPalindrome;
+                const auto aPortionOfConstructed = reversed(extension) + surroundingPalindrome;
                 assert(a.find(aPortionOfConstructed) != string::npos);
                 const auto bPortionOfConstructed = extension;
                 assert(b.find(bPortionOfConstructed) != string::npos);
@@ -1095,65 +1095,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
             }
         }
     }
-#if 0
-    cout << "odd palindromes" << endl;
-    // Odd palindromes.
-    for (int i = 0; i < maxOddPalindromeAt.size(); i++)
-    {
-        const int maxPalindromeAroundPos = maxOddPalindromeAt[i];
-        const int maxHalfPalindromeAroundPos = (maxPalindromeAroundPos - 1) / 2;
-        const int posOfExtension = i - maxHalfPalindromeAroundPos - 1;
-        const int posOfExtensionInReversed = a.size() -1 - posOfExtension;
-        if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size())
-        {
-            continue;
-        }
-        const int maxPalindromeExtensionLength = largestSuffixOfAInBAtPos[posOfExtensionInReversed];
-        const auto extension = aReversed.substr(posOfExtensionInReversed, maxPalindromeExtensionLength);
-        cout << "i: " << i << " maxPalindromeAroundPos: " << maxPalindromeAroundPos << " extension: " << extension << endl;
-        cout << "posOfExtension: " << posOfExtension << endl;
-        cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
-        assert(b.find(extension) != string::npos);
-        const auto palindromeAroundPos = a.substr(posOfExtension + 1, maxPalindromeAroundPos);
-        cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
-        const auto aPortionOfPalindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos;
-        assert(a.find(aPortionOfPalindrome) != string::npos);
-        const auto palindrome =aPortionOfPalindrome + extension;
-        cout << "odd palindrome: " << palindrome << endl;
-        assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
-        updateResult(result, palindrome);
-    }
-    // Even palindromes.
-    cout << "even palindromes" << endl;
-    for (int i = 0; i < maxEvenPalindromeAt.size(); i++)
-    {
-        const int maxPalindromeAroundPos = maxEvenPalindromeAt[i];
-        const int maxHalfPalindromeAroundPos = maxPalindromeAroundPos / 2;
-        const int posOfExtension = i - maxHalfPalindromeAroundPos - 1;
-        if (posOfExtension == string::npos) 
-            continue;// No, this isn't right - in this situation, we have an extension size of 0, which we can't just ignore.
-        const int posOfExtensionInReversed = a.size() - 1 - posOfExtension;
-        if (posOfExtensionInReversed >= largestSuffixOfAInBAtPos.size() || posOfExtensionInReversed < 0)
-        {
-            continue;
-        }
-        const int maxPalindromeExtensionLength = largestSuffixOfAInBAtPos[posOfExtensionInReversed];
-        const auto extension = aReversed.substr(posOfExtensionInReversed, maxPalindromeExtensionLength);
-        cout << "i: " << i << " maxPalindromeAroundPos: " << maxPalindromeAroundPos << " extension: " << extension << endl;
-        cout << "posOfExtension: " << posOfExtension << endl;
-        cout << "maxPalindromeExtensionLength: " << maxPalindromeExtensionLength << endl;
-        assert(b.find(extension) != string::npos);
-        const auto palindromeAroundPos = a.substr(posOfExtension + 1, maxPalindromeAroundPos);
-        cout << "palindromeAroundPos: " << palindromeAroundPos << endl;
-        const auto aPortionOfPalindrome = string(extension.rbegin(), extension.rend()) + palindromeAroundPos;
-        cout << "aPortionOfPalindrome: " << aPortionOfPalindrome << endl;
-        assert(a.find(aPortionOfPalindrome) != string::npos);
-        const auto palindrome = aPortionOfPalindrome + extension;
-        cout << "even palindrome: " << palindrome << endl;
-        assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
-        updateResult(result, palindrome);
-    }
-#endif
     // Balanced palindromes.
     for (int i = 0; i < largestSuffixOfAInBAtPos.size(); i++)
     {
@@ -1162,15 +1103,14 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
         {
             const auto bPortion = aReversed.substr(i, palindromeLength / 2);
             assert(b.find(bPortion) != string::npos);
-            const auto aPortion = string(bPortion.rbegin(), bPortion.rend());
+            const auto aPortion = reversed(bPortion);
             assert(a.find(aPortion) != string::npos);
             const auto palindrome = aPortion + bPortion;
             cout << "balanced palindrome: " << palindrome << endl;
-            assert(palindrome == string(palindrome.rbegin(), palindrome.rend()));
+            assert(palindrome == reversed(palindrome));
             updateResult(result, palindrome);
         }
     }
-
     return result;
 }
 
@@ -1178,7 +1118,7 @@ string findLongestPalindrome(const string&a, const string& b)
 {
     string result;
     updateResult(result, findLongestAHeavyOrBalancedPalindrome(a, b));
-    updateResult(result, findLongestAHeavyOrBalancedPalindrome(string(b.rbegin(), b.rend()), string(a.rbegin(), a.rend())));
+    updateResult(result, findLongestAHeavyOrBalancedPalindrome(reversed(b), reversed(a)));
     //updateResult(result, findLongestAHeavyPalindrome(b, a));
 
     return result;
@@ -1203,7 +1143,7 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
                 {
                     const auto sB = b.substr(bSuffix, bLength);
                     const auto sAB = sA + sB;
-                    if (sAB == string(sAB.rbegin(), sAB.rend()) && sAB.length() >= result.length())
+                    if (sAB == reversed(sAB) && sAB.length() >= result.length())
                     {
                         const string oldResult = result;
                         if (sAB.length() > result.length())
