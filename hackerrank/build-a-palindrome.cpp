@@ -1036,6 +1036,64 @@ string reversed(const string& s)
     return {s.rbegin(), s.rend()};
 }
 
+void findLongestPalindromes(const string& a)
+{
+    // Manacher's Algorithm: see https://en.wikipedia.org/wiki/Longest_palindromic_substring for details.
+    maxOddPalindromeAt.clear();
+    maxEvenPalindromeAt.clear();
+
+    string s2(a.size() * 2 + 1, '\0');
+    // Add boundaries.
+    for (int i = 0; i<(s2.length()-1); i = i+2) {
+        s2[i] = '|';
+        s2[i+1] = a[i/2];
+    }
+    s2[s2.length()-1] = '|';
+
+    vector<int> p(s2.length());
+    int c = 0, r = 0; // Here the first element in s2 has been processed.
+    int m = 0, n = 0; // The walking indices to compare if two elements are the same
+    for (int i = 1; i<s2.length(); i++) {
+        if (i>r) {
+            p[i] = 0; m = i-1; n = i+1;
+        } else {
+            int i2 = c*2-i;
+            if (p[i2]<(r-i-1)) {
+                p[i] = p[i2];
+                m = -1; // This signals bypassing the while loop below. 
+            } else {
+                p[i] = r-i;
+                n = r+1; m = i*2-n;
+            }
+        }
+        while (m>=0 && n<s2.length() && s2[m]==s2[n]) {
+            p[i]++; m--; n++;
+        }
+        if ((i+p[i])>r) {
+            c = i; r = i+p[i];
+        }
+    }
+    maxEvenPalindromeAt.resize(a.size());
+    maxOddPalindromeAt.resize(a.size());
+    for (int i = 0; i < a.size(); i++)
+    {
+        maxEvenPalindromeAt[i] = p[i * 2];
+        maxOddPalindromeAt[i] = p[i * 2 + 1];
+    }
+    //maxOddPalindromeAt = p;
+    //maxEvenPalindromeAt = p;
+#if 0
+    int len = 0; c = 0;
+    for (int i = 1; i<s2.length(); i++) {
+        if (len<p[i]) {
+            len = p[i]; c = i;
+        }
+    }
+    char[] ss = Arrays.copyOfRange(s2, c-len, c+len+1);
+    return String.valueOf(removeBoundaries(ss));
+#endif
+}
+
 string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
 {
     string result;
@@ -1069,15 +1127,27 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
         }
     }
 #ifdef BRUTE_FORCE
+    findLongestPalindromes(a);
     const auto maxEvenPalindromesBruteForce = ::maxEvenPalindromesBruteForce(a);
     const auto maxOddPalindromesBruteForce = ::maxOddPalindromesBruteForce(a);
+#if 0
     for (int i = 0; i < maxOddPalindromeAt.size(); i++)
     {
-        //cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << " maxOddPalindromesBruteForce: " << maxOddPalindromesBruteForce[i] << endl;
-        //cout << "i: " << i << " maxEvenPalindromeAt: " << maxEvenPalindromeAt[i] << " maxEvenPalindromesBruteForce: " << maxEvenPalindromesBruteForce[i] << endl;
+        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << " maxOddPalindromesBruteForce: " << maxOddPalindromesBruteForce[i] << endl;
+        cout << "i: " << i << " maxEvenPalindromeAt: " << maxEvenPalindromeAt[i] << " maxEvenPalindromesBruteForce: " << maxEvenPalindromesBruteForce[i] << endl;
     }
-    assert(maxOddPalindromeAt == maxOddPalindromesBruteForce);
-    assert(maxEvenPalindromeAt == maxEvenPalindromesBruteForce);
+#endif
+    for (int i = 0; i < maxEvenPalindromesBruteForce.size(); i++)
+    {
+        cout << "i: " << i << " maxOddPalindromesBruteForce: " << maxOddPalindromesBruteForce[i] << endl;
+        cout << "i: " << i << " maxEvenPalindromesBruteForce: " << maxEvenPalindromesBruteForce[i] << endl;
+    }
+    for (int i = 0; i < maxOddPalindromeAt.size(); i++)
+    {
+        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << endl;
+    }
+    //assert(maxOddPalindromeAt == maxOddPalindromesBruteForce);
+    //assert(maxEvenPalindromeAt == maxEvenPalindromesBruteForce);
 #endif
     const auto largestSuffixOfAInBAtPos = findLargestSuffixOfAInB(aReversed, b);
 #ifdef BRUTE_FORCE
