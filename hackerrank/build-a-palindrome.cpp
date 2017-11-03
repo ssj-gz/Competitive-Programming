@@ -1001,7 +1001,9 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
 
     for (auto checkingOddLengthPalindrome : { true, false })
     {
-        for (int i = 0; i < maxOddPalindromeAt.size(); i++)
+        // Go front back to front; otherwise, we might enter a situation where the extensions we find are suffixes of each other, leading to a performance problem when
+        // we update the result.
+        for (int i = maxOddPalindromeAt.size() - 1; i >= 0; i--) 
         {
             const int maxSurroundingPalindromeLength = (checkingOddLengthPalindrome ? maxOddPalindromeAt[i] : maxEvenPalindromeAt[i]);
             const int maxSurroundingPalindromeBeginPos = (checkingOddLengthPalindrome ? i - (maxSurroundingPalindromeLength - 1) / 2 : i - (maxSurroundingPalindromeLength / 2));
