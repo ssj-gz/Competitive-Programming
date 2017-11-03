@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2017-11-03 09:48
 #define BRUTE_FORCE
 #define RANDOM
 #define SUBMISSION
@@ -806,121 +807,8 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-enum class SubstringMemberShip
-{
-    OriginalString,
-    ReversedString
-};
-
-struct Occurrence
-{
-    Occurrence(int posInString, SubstringMemberShip containingString)
-       : containingString{containingString}, posInString{posInString} 
-    {
-    }
-    SubstringMemberShip containingString;
-    int posInString = -1;
-};
-
-bool operator<(const Occurrence& lhs, const Occurrence& rhs)
-{
-    if (lhs.containingString != rhs.containingString)
-        return lhs.containingString < rhs.containingString;
-    return lhs.posInString < rhs.posInString;
-}
-
 vector<int> maxEvenPalindromeAt;
 vector<int> maxOddPalindromeAt;
-
-set<Occurrence>  findOccurrencesOfWordCorrespondingToCursor(Cursor cursor, int stringLength, const string& dbgString)
-{
-    //assert(cursor.stateData().wordLength == cursor.dbgStringFollowed().length());
-    //cout << "cursor: " << cursor.dbgStringFollowed() << endl;
-    assert(cursor.isOnExplicitState());
-    assert(cursor.stateData().wordLength != -1);
-    vector<set<Occurrence>> childrenOccurences;
-
-    //const auto dbgReversedString = string(dbgString.rbegin(), dbgString.rend());
-
-    const auto wordLength = cursor.stateData().wordLength;
-
-
-    set<Occurrence> occurencesOfWord;
-    if (cursor.stateData().isFinalX)
-    {
-        const auto positionInX = stringLength - wordLength;
-        occurencesOfWord.insert({positionInX, SubstringMemberShip::OriginalString});
-        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInX << " in string" << endl;
-    }
-    if (cursor.stateData().isFinalY)
-    {
-        assert(cursor.isOnFinalState());
-        //const auto positionInY = 2 * stringLength + 1 - cursor.stateData().wordLength;
-        const auto positionInY = stringLength - wordLength;
-        occurencesOfWord.insert({positionInY, SubstringMemberShip::ReversedString});
-        //cout << "substring " << cursor.dbgStringFollowed() << " occurs at position " << positionInY << " in reversed string" << endl;
-    }
-
-    auto nextLetterIterator = cursor.getNextLetterIterator();
-    while (nextLetterIterator.hasNext())
-    {
-        auto nextCursor = nextLetterIterator.afterFollowingNextLetter();
-        if (!nextCursor.isOnExplicitState())
-            nextCursor.followToTransitionEnd();
-        childrenOccurences.push_back(findOccurrencesOfWordCorrespondingToCursor(nextCursor, stringLength, dbgString));
-
-        nextLetterIterator++;
-    }
-
-    if (cursor.stateData().wordLength != 0)
-    {
-        sort(childrenOccurences.begin(), childrenOccurences.end(), [](const auto& lhs, const auto& rhs) { return rhs.size() > lhs.size(); });
-        if (!childrenOccurences.empty())
-        {
-            // At this point, occurencesOfWord will contain at most two elements.  Since the asymptotic guarantees rely on never (or rarely) having a large
-            // set copied element by element into a small set, and since the largest element of childrenOccurences will almost certainly be bigger than
-            // two elements, we swap occurencesOfWord and the largest child.
-            swap(occurencesOfWord, *childrenOccurences.begin());
-        }
-        else
-        {
-            // A bit of a hack, but ensure each of the (up to two) elements of occurencesOfWord due to this being a final state are compared against each other.
-            childrenOccurences.push_back(occurencesOfWord);
-            occurencesOfWord.clear();
-        }
-
-        for (const auto& childOccurences : childrenOccurences)
-        {
-            for (const auto occurrence : childOccurences)
-            {
-                //cout << " occurrence: " << occurrence.posInString << " in " << (occurrence.containingString == SubstringMemberShip::OriginalString ? "Original" : "Reversed") << " wordLength: " << wordLength << endl;
-                for (auto checkingOddLengthPalindrome : { true, false})
-                {
-                    const SubstringMemberShip otherStringMembership = static_cast<SubstringMemberShip>(1 - static_cast<int>(occurrence.containingString));
-                    const auto otherStringPos = stringLength - occurrence.posInString - (checkingOddLengthPalindrome ? 1 : 0);
-                    const bool foundOtherHalfOfPalindrome = (occurencesOfWord.find({otherStringPos, otherStringMembership}) != occurencesOfWord.end());
-                    if (foundOtherHalfOfPalindrome)
-                    {
-                        const int palindromeLength = wordLength * 2 - (checkingOddLengthPalindrome ? 1 : 0);
-                        //cout << "  Found odd " << cursor.dbgStringFollowed() << endl;
-                        auto& maxPalindromeAt = (checkingOddLengthPalindrome ? maxOddPalindromeAt : maxEvenPalindromeAt);
-                        if (occurrence.containingString == SubstringMemberShip::OriginalString)
-                        {
-                            maxPalindromeAt[occurrence.posInString] = max(maxPalindromeAt[occurrence.posInString], palindromeLength);
-                        }
-                        else
-                        {
-                            maxPalindromeAt[otherStringPos] = max(maxPalindromeAt[otherStringPos], palindromeLength);
-                        }
-                    }
-                }
-                occurencesOfWord.insert(occurrence);
-            }
-        }
-    }
-
-    return occurencesOfWord;
-}
 
 vector<int> maxEvenPalindromesBruteForce(const string& a)
 {
@@ -963,13 +851,10 @@ vector<int> maxOddPalindromesBruteForce(const string& a)
 void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const int lengthOfA, vector<int>& results)
 {
     assert(cursor.isOnExplicitState());
-    //cout << "string: " << cursor.dbgStringFollowed() << " lengthOfSubstringOfBSoFar: " << lengthOfSubstringOfBSoFar << " isSubstringOfX? " << cursor.stateData().isSubstringOfX << " isSubstringOfY? " << cursor.stateData().isSubstringOfY << endl;
     if (cursor.stateData().isFinalX)
     {
-        //cout << "string: " << cursor.dbgStringFollowed() << " is suffix of A" << endl;
         const int suffixBeginPos = lengthOfA - cursor.stateData().wordLength;
         results[suffixBeginPos] = lengthOfSubstringOfBSoFar;
-        //cout << "Setting " << suffixBeginPos << " to " << lengthOfSubstringOfBSoFar << endl;
     }
     auto nextLetterIterator = cursor.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
@@ -979,10 +864,6 @@ void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const
             nextCursor.followToTransitionEnd();
 
         const auto nextLengthOfSubstringOfBSoFar = (nextCursor.stateData().isSubstringOfY ? nextCursor.stateData().wordLength : lengthOfSubstringOfBSoFar);
-        if (nextCursor.stateData().isSubstringOfY)
-        {
-            //cout << "string " << nextCursor.dbgStringFollowed() << " is substring of B" << endl;
-        }
         findLargestSuffixOfAInB(nextCursor, nextLengthOfSubstringOfBSoFar, lengthOfA, results);
 
         nextLetterIterator++;
@@ -1006,12 +887,10 @@ vector<int> findLargestSuffixOfAInBBruteForce(const string& a, const string& b)
     vector<int> result(a.size() + 1);
     for (int suffixBeginPos = 0; suffixBeginPos <= a.size(); suffixBeginPos++)
     {
-        //cout << "suffixBeginPos: " <<suffixBeginPos << endl;
         for (int suffixLength = 0; suffixBeginPos + suffixLength <= a.size(); suffixLength++)
         {
             const auto suffix = a.substr(suffixBeginPos, suffixLength);
             const auto inB = (b.find(suffix) != string::npos);
-            //cout << "suffix: " << suffix << " in b?" << inB << endl;
             if (inB)
             {
                 result[suffixBeginPos] = suffixLength;
@@ -1080,33 +959,14 @@ void findLongestPalindromes(const string& a)
         maxEvenPalindromeAt[i] = p[i * 2];
         maxOddPalindromeAt[i] = p[i * 2 + 1];
     }
-    //maxOddPalindromeAt = p;
-    //maxEvenPalindromeAt = p;
-#if 0
-    int len = 0; c = 0;
-    for (int i = 1; i<s2.length(); i++) {
-        if (len<p[i]) {
-            len = p[i]; c = i;
-        }
-    }
-    char[] ss = Arrays.copyOfRange(s2, c-len, c+len+1);
-    return String.valueOf(removeBoundaries(ss));
-#endif
 }
 
 string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
 {
     string result;
-    //cout << "a: " << a << " size: " << a.size() << endl;
-    //cout << "a reversed: " << string(a.rbegin(), a.rend()) << endl;
     const auto aReversed = reversed(a);
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, aReversed);
-    //maxOddPalindromeAt.clear();
-    //maxEvenPalindromeAt.clear();
-    //maxOddPalindromeAt.resize(a.size());
-    //maxEvenPalindromeAt.resize(a.size());
-    //findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
     findLongestPalindromes(a);
 
     const int alphabetSize = 26;
@@ -1130,43 +990,21 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
 #ifdef BRUTE_FORCE
     const auto maxEvenPalindromesBruteForce = ::maxEvenPalindromesBruteForce(a);
     const auto maxOddPalindromesBruteForce = ::maxOddPalindromesBruteForce(a);
-#if 0
-    for (int i = 0; i < maxOddPalindromeAt.size(); i++)
-    {
-        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << " maxOddPalindromesBruteForce: " << maxOddPalindromesBruteForce[i] << endl;
-        cout << "i: " << i << " maxEvenPalindromeAt: " << maxEvenPalindromeAt[i] << " maxEvenPalindromesBruteForce: " << maxEvenPalindromesBruteForce[i] << endl;
-    }
-#endif
-    for (int i = 0; i < maxEvenPalindromesBruteForce.size(); i++)
-    {
-        cout << "i: " << i << " maxOddPalindromesBruteForce: " << maxOddPalindromesBruteForce[i] << endl;
-        cout << "i: " << i << " maxEvenPalindromesBruteForce: " << maxEvenPalindromesBruteForce[i] << endl;
-    }
-    for (int i = 0; i < maxOddPalindromeAt.size(); i++)
-    {
-        cout << "i: " << i << " maxOddPalindromeAt: " << maxOddPalindromeAt[i] << endl;
-    }
-    //assert(maxOddPalindromeAt == maxOddPalindromesBruteForce);
-    //assert(maxEvenPalindromeAt == maxEvenPalindromesBruteForce);
+    assert(maxEvenPalindromesBruteForce == maxEvenPalindromeAt);
+    assert(maxOddPalindromesBruteForce == maxOddPalindromeAt);
 #endif
     const auto largestSuffixOfAInBAtPos = findLargestSuffixOfAInB(aReversed, b);
 #ifdef BRUTE_FORCE
     const auto largestSuffixOfAInBAtPosBruteForce = findLargestSuffixOfAInBBruteForce(aReversed, b);
-    for (int i = 0; i < largestSuffixOfAInBAtPos.size(); i++)
-    {
-        //cout << "i: " << i << " largestSuffixOfAInBAtPos: " << largestSuffixOfAInBAtPos[i] << " largestSuffixOfAInBAtPosBruteForce: " << largestSuffixOfAInBAtPosBruteForce[i] << endl;
-    }
     assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
 
-    //cout << "constructing palindromes a: " << a << " b: " << b << endl;
     for (auto checkingOddLengthPalindrome : { true, false })
     {
         for (int i = 0; i < maxOddPalindromeAt.size(); i++)
         {
             const int maxSurroundingPalindromeLength = (checkingOddLengthPalindrome ? maxOddPalindromeAt[i] : maxEvenPalindromeAt[i]);
             const int maxSurroundingPalindromeBeginPos = (checkingOddLengthPalindrome ? i - (maxSurroundingPalindromeLength - 1) / 2 : i - (maxSurroundingPalindromeLength / 2));
-            //cout << "is odd? " << checkingOddLengthPalindrome << " i: " << i << " maxSurroundingPalindromeLength: " << maxSurroundingPalindromeLength << " maxSurroundingPalindromeBeginPos: " << maxSurroundingPalindromeBeginPos << endl;
             if (maxSurroundingPalindromeBeginPos == string::npos)
                 continue;
             assert(a.substr(maxSurroundingPalindromeBeginPos, maxSurroundingPalindromeLength) == reversed(a.substr(maxSurroundingPalindromeBeginPos, maxSurroundingPalindromeLength)));
@@ -1179,7 +1017,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
 
             if (extensionLength == 0)
             {
-                //cout << "maxSurroundingPalindromeLength is 0!" << endl;
                 // Choosing the maximal surrounding palindrome will leave to empty sB, which is not allowed.
                 // We must instead shrink the surrounding palindrome until it loses a letter that is in B,
                 // then pick that letter as the extension.
@@ -1192,7 +1029,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
                     const int posOfBLetterInSurroundingPalindrome = nextOccurenceOfLetterIndexAtOrAfter[bLetterIndex][surroundingPalindromeBeginPos];
                     if (posOfBLetterInSurroundingPalindrome == -1)
                         continue;
-                    //cout << " found b-letter " << static_cast<char>('a' + bLetterIndex) << " at index: " << posOfBLetterInSurroundingPalindrome << endl;
                     posOfEarliestBLetterInSurroundingPalindrome = min(posOfEarliestBLetterInSurroundingPalindrome, posOfBLetterInSurroundingPalindrome);
                 }
                 if (posOfEarliestBLetterInSurroundingPalindrome >= i)
@@ -1202,7 +1038,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
                 }
                 const int moveLeftOfSurroundingPalindromeBy = posOfEarliestBLetterInSurroundingPalindrome + 1 - surroundingPalindromeBeginPos;
                 assert(moveLeftOfSurroundingPalindromeBy > 0);
-                //cout << "moveLeftOfSurroundingPalindromeBy: " << moveLeftOfSurroundingPalindromeBy << endl;
                 surroundingPalindromeBeginPos += moveLeftOfSurroundingPalindromeBy;
                 surroundingPalindromeLength -= 2 * moveLeftOfSurroundingPalindromeBy;
                 posOfExtensionInReversed -= moveLeftOfSurroundingPalindromeBy;
@@ -1215,7 +1050,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
                 const auto surroundingPalindrome = a.substr(surroundingPalindromeBeginPos, surroundingPalindromeLength);
                 assert(surroundingPalindrome == reversed(surroundingPalindrome));
                 const auto extension = aReversed.substr(posOfExtensionInReversed, extensionLength);
-                //cout << "extension: " << extension << " posOfExtensionInReversed: " << posOfExtensionInReversed << " extensionLength: " << extensionLength << endl;
                 const auto sA = reversed(extension) + surroundingPalindrome;
                 assert(!sA.empty());
                 assert(a.find(sA) != string::npos);
@@ -1225,7 +1059,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
                 const auto constructedPalindrome = sA + sB;
                 assert(constructedPalindrome == reversed(constructedPalindrome));
                 assert(constructedPalindrome.size() == constructedPalindromeLength);
-                //cout << "constructedPalindrome: " << constructedPalindrome << " extension: " << extension << " surroundingPalindrome: " << surroundingPalindrome << endl;
                 updateResult(result, constructedPalindrome);
             }
         }
@@ -1243,7 +1076,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
             assert(!sA.empty());
             assert(a.find(sA) != string::npos);
             const auto palindrome = sA + sB;
-            //cout << "balanced palindrome: " << palindrome << endl;
             assert(palindrome == reversed(palindrome));
             updateResult(result, palindrome);
         }
@@ -1256,7 +1088,6 @@ string findLongestPalindrome(const string&a, const string& b)
     string result;
     updateResult(result, findLongestAHeavyOrBalancedPalindrome(a, b));
     updateResult(result, findLongestAHeavyOrBalancedPalindrome(reversed(b), reversed(a)));
-    //updateResult(result, findLongestAHeavyPalindrome(b, a));
     if (result.empty())
         result = "-1";
 
@@ -1266,16 +1097,13 @@ string findLongestPalindrome(const string&a, const string& b)
 
 string findLongestPalindromeBruteForce(const string&a, const string& b)
 {
-    //cout << "findLongestPalindromeBruteForce" << endl;
     string result;
     const int minLength = 1;
     for (int aSuffix = 0; aSuffix < a.size(); aSuffix++)
     {
-        //cout << "aSuffix: " << aSuffix << endl;
         for (int aLength = minLength; aSuffix + aLength <= a.size(); aLength++)
         {
             const auto sA = a.substr(aSuffix, aLength);
-            //cout << " aLength: " << aLength << endl;
             for (int bSuffix = 0; bSuffix < b.size(); bSuffix++)
             {
                 for (int bLength = minLength; bSuffix + bLength <= b.size(); bLength++)
@@ -1288,10 +1116,6 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
                         if (sAB.length() > result.length())
                             result = sAB;
                         result = min(result, sAB);
-                        if (oldResult != result)
-                        {
-                            //cout << "Found new best: " << sA << "|" << sB << endl;
-                        }
                     }
                 }
             }
@@ -1305,26 +1129,6 @@ string findLongestPalindromeBruteForce(const string&a, const string& b)
 
 int main()
 {
-#if 0
-    const int numLetters = 3;
-    const int n = 100000;
-    const int numTestcases = 10;
-    cout << numTestcases << endl;
-    for (int i = 0; i < numTestcases; i++)
-    {
-        for (int j = 1; j <= 2; j++)
-        {
-            string s;
-            for (int i = 0; i < n; i++)
-            {
-                s += static_cast<char>(rand() % numLetters + 'a');
-            }
-            cout << s << endl;
-        }
-    }
-    return 0;
-
-#endif
 #ifndef RANDOM
     int q;
     cin >> q;
@@ -1359,9 +1163,6 @@ int main()
                 b = s;
         }
 #endif
-
-        //cout << "a: " << a << " b: " << b << endl;
-
         const auto result = findLongestPalindrome(a, b);
         cout << result << endl;
 #ifdef BRUTE_FORCE
