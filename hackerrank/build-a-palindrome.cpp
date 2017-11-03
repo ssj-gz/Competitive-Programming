@@ -1,11 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-03 09:48
-#define BRUTE_FORCE
-#define RANDOM
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
-#undef BRUTE_FORCE
-#undef RANDOM
 #endif
 #include <iostream>
 #include <vector>
@@ -109,11 +105,8 @@ class SuffixTreeBuilder
         {
             const auto stringConcatMarker = '|';
             const auto pairConcat = x + stringConcatMarker + y;
-            //cout << "pairConcat: " << pairConcat << endl;
             const auto stringConcatPos = x.length();
             appendString(pairConcat);
-
-            //cout << "# states: " << m_states.size() << endl;
 
             makeFinalStatesExplicitAndMarkThemAsFinal();
 
@@ -123,9 +116,7 @@ class SuffixTreeBuilder
                     state.data.isFinalY = true;
             }
 
-            //cout << "Floop" << endl;
 
-#if 1
             // Truncate transitions containing stringConcatMarker, and mark the state they lead to as isFinalX.
             for (auto& state : m_states)
             {
@@ -139,8 +130,6 @@ class SuffixTreeBuilder
                     }
                     const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
                     transition.substringFollowed.endIndex = realEndIndex + 1;
-                    //cout << "transition start-end (0-relative): " << transition.substringFollowed.startIndex - 1 << "," << transition.substringFollowed.endIndex - 1 << endl;
-                    //cout << "stringConcatPos: " << stringConcatPos << endl;
                     bool needToRemoveTransition = false;
                     const auto containsUnusedChar = (transition.substringFollowed.startIndex - 1 <= stringConcatPos && realEndIndex >= stringConcatPos);
                     if (containsUnusedChar)
@@ -149,16 +138,15 @@ class SuffixTreeBuilder
                         const auto transitionBeginsWithUnusedChar = (transition.substringFollowed.startIndex - 1 == stringConcatPos);
                         if (transitionBeginsWithUnusedChar)
                         {
-                            //cout << "need to remove transition" << endl;
                             needToRemoveTransition = true;
                             state.data.isFinalX = true;
                         }
                         else
                         {
                             transition.nextState->data.isFinalX = true;
+                            // The state nextState has been truncated to before the word separator, so it can't be a final state for Y.
                             transition.nextState->data.isFinalY = false;
                         }
-                        //cout << "marking as isFinalX" << endl;
                         transition.nextState->transitions.clear();
                         transition.nextState->data.isPruned = true;
                     }
@@ -169,7 +157,7 @@ class SuffixTreeBuilder
                         transitionIter++;
                 }
             }
-#endif
+            // Ensure we have a wordLength for all states.
             for (auto& state : m_states)
             {
                 for (auto& transition : state.transitions)
@@ -180,6 +168,7 @@ class SuffixTreeBuilder
                     }
                 }
             }
+            // Update isSubstringOfX/isSubstringOfY for all reachable states.
             for (auto& state : m_states)
             {
                 if (state.data.isFinalX)
@@ -564,53 +553,6 @@ class SuffixTreeBuilder
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 } 
-                bool canMoveUp()
-                {
-                    return (m_state != m_root || m_transition);
-                }
-                char moveUp()
-                {
-                    assert(canMoveUp());
-                    if (m_transition)
-                    {
-                        assert(m_posInTransition > 0);
-                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition - 1];
-                        if (m_posInTransition != 1)
-                        {
-                            m_posInTransition--;
-                        }
-                        else
-                        {
-                            movedToExplicitState();
-                        }
-                        return charFollowed;
-                    }
-                    else
-                    {
-                        Transition* transitionFromParent = findTransitionFromParent();
-                        m_state = m_state->parent;
-                        m_transition = transitionFromParent;
-                        m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
-                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition];
-                        if (m_posInTransition == 0)
-                        {
-                            movedToExplicitState();
-                        }
-                        return charFollowed;
-                    }
-                }
-                string dbgStringFollowed() const
-                {
-                    Cursor copy(*this);
-                    string stringFollowedReversed;
-                    while (copy.canMoveUp())
-                    {
-                        stringFollowedReversed += copy.moveUp();
-                    }
-                    return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
-                }
-
-
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -807,47 +749,6 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-vector<int> maxEvenPalindromeAt;
-vector<int> maxOddPalindromeAt;
-
-vector<int> maxEvenPalindromesBruteForce(const string& a)
-{
-    vector<int> result(a.size());
-    for (int i = 0; i < a.size(); i++)
-    {
-        int right = i;
-        int left = i - 1;
-        int size = 0;
-        while (left >= 0 && right < a.size() && a[left] == a[right])
-        {
-            size += 2;
-            left--;
-            right++;
-        }
-        result[i] = size;
-    }
-    return result;
-}
-
-vector<int> maxOddPalindromesBruteForce(const string& a)
-{
-    vector<int> result(a.size());
-    for (int i = 0; i < a.size(); i++)
-    {
-        int right = i + 1;
-        int left = i - 1;
-        int size = 1;
-        while (left >= 0 && right < a.size() && a[left] == a[right])
-        {
-            size += 2;
-            left--;
-            right++;
-        }
-        result[i] = size;
-    }
-    return result;
-}
-
 void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const int lengthOfA, vector<int>& results)
 {
     assert(cursor.isOnExplicitState());
@@ -870,6 +771,8 @@ void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const
     }
 }
 
+// For each suffixBeginPos = 0, ... , a.size(), find the largest prefix of the suffix of a beginning
+// at suffixBeginPos that is a substring of b.
 vector<int> findLargestSuffixOfAInB(const string& a, const string& b)
 {
     SuffixTreeBuilder suffixTree;
@@ -882,25 +785,6 @@ vector<int> findLargestSuffixOfAInB(const string& a, const string& b)
     return result;
 }
 
-vector<int> findLargestSuffixOfAInBBruteForce(const string& a, const string& b)
-{
-    vector<int> result(a.size() + 1);
-    for (int suffixBeginPos = 0; suffixBeginPos <= a.size(); suffixBeginPos++)
-    {
-        for (int suffixLength = 0; suffixBeginPos + suffixLength <= a.size(); suffixLength++)
-        {
-            const auto suffix = a.substr(suffixBeginPos, suffixLength);
-            const auto inB = (b.find(suffix) != string::npos);
-            if (inB)
-            {
-                result[suffixBeginPos] = suffixLength;
-            }
-            else
-                break;
-        }
-    }
-    return result;
-}
 
 void updateResult(string& result, const string& newCandidateResult)
 {
@@ -915,11 +799,9 @@ string reversed(const string& s)
     return {s.rbegin(), s.rend()};
 }
 
-void findLongestPalindromes(const string& a)
+auto findLongestPalindromes(const string& a)
 {
     // Manacher's Algorithm: see https://en.wikipedia.org/wiki/Longest_palindromic_substring for details.
-    maxOddPalindromeAt.clear();
-    maxEvenPalindromeAt.clear();
 
     string s2(a.size() * 2 + 1, '\0');
     // Add boundaries.
@@ -952,13 +834,14 @@ void findLongestPalindromes(const string& a)
             c = i; r = i+p[i];
         }
     }
-    maxEvenPalindromeAt.resize(a.size());
-    maxOddPalindromeAt.resize(a.size());
+    vector<int> maxOddPalindromeAt(a.size());
+    vector<int> maxEvenPalindromeAt(a.size());
     for (int i = 0; i < a.size(); i++)
     {
-        maxEvenPalindromeAt[i] = p[i * 2];
         maxOddPalindromeAt[i] = p[i * 2 + 1];
+        maxEvenPalindromeAt[i] = p[i * 2];
     }
+    return make_pair(maxOddPalindromeAt, maxEvenPalindromeAt);
 }
 
 string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
@@ -967,8 +850,12 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     const auto aReversed = reversed(a);
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, aReversed);
-    findLongestPalindromes(a);
+    const auto longestPalindromes = findLongestPalindromes(a);
+    const auto maxOddPalindromeAt = longestPalindromes.first;
+    const auto maxEvenPalindromeAt = longestPalindromes.second;
 
+    // Make a lookup table so we can rapidly find the earliest occurrence in A of a letter in B in a given
+    // range of A.
     const int alphabetSize = 26;
     bool isLetterIndexUsedInB[alphabetSize] = {};
     for (const auto letter : b)
@@ -987,17 +874,8 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
             assert(nextOccurenceOfLetterIndexAtOrAfter[letterIndex][i] == -1 || nextOccurenceOfLetterIndexAtOrAfter[letterIndex][i] >= i);
         }
     }
-#ifdef BRUTE_FORCE
-    const auto maxEvenPalindromesBruteForce = ::maxEvenPalindromesBruteForce(a);
-    const auto maxOddPalindromesBruteForce = ::maxOddPalindromesBruteForce(a);
-    assert(maxEvenPalindromesBruteForce == maxEvenPalindromeAt);
-    assert(maxOddPalindromesBruteForce == maxOddPalindromeAt);
-#endif
+
     const auto largestSuffixOfAInBAtPos = findLargestSuffixOfAInB(aReversed, b);
-#ifdef BRUTE_FORCE
-    const auto largestSuffixOfAInBAtPosBruteForce = findLargestSuffixOfAInBBruteForce(aReversed, b);
-    assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
-#endif
 
     for (auto checkingOddLengthPalindrome : { true, false })
     {
@@ -1019,6 +897,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
 
             if (extensionLength == 0)
             {
+                // sB is the extension, so this would result in an empty sB, which is forbidden.
                 // Choosing the maximal surrounding palindrome will leave to empty sB, which is not allowed.
                 // We must instead shrink the surrounding palindrome until it loses a letter that is in B,
                 // then pick that letter as the extension.
@@ -1085,7 +964,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     return result;
 }
 
-string findLongestPalindrome(const string&a, const string& b)
+string findLongestConstructiblePalindrome(const string&a, const string& b)
 {
     string result;
     updateResult(result, findLongestAHeavyOrBalancedPalindrome(a, b));
@@ -1096,81 +975,19 @@ string findLongestPalindrome(const string&a, const string& b)
     return result;
 }
 
-
-string findLongestPalindromeBruteForce(const string&a, const string& b)
-{
-    string result;
-    const int minLength = 1;
-    for (int aSuffix = 0; aSuffix < a.size(); aSuffix++)
-    {
-        for (int aLength = minLength; aSuffix + aLength <= a.size(); aLength++)
-        {
-            const auto sA = a.substr(aSuffix, aLength);
-            for (int bSuffix = 0; bSuffix < b.size(); bSuffix++)
-            {
-                for (int bLength = minLength; bSuffix + bLength <= b.size(); bLength++)
-                {
-                    const auto sB = b.substr(bSuffix, bLength);
-                    const auto sAB = sA + sB;
-                    if (sAB == reversed(sAB) && sAB.length() >= result.length())
-                    {
-                        const string oldResult = result;
-                        if (sAB.length() > result.length())
-                            result = sAB;
-                        result = min(result, sAB);
-                    }
-                }
-            }
-        }
-    }
-    if (result.empty())
-        result = "-1";
-    return result;
-}
-
-
 int main()
 {
-#ifndef RANDOM
     int q;
     cin >> q;
 
     for (int i = 0; i < q; i++)
     {
-#else
-    srand(time(0));
-    while (true)
-    {
-#endif
         string a;
         string b;
 
-#ifndef RANDOM
         cin >> a >> b;
-#else
-        const int maxAlphabetSize = 5;
-        const int maxNumLetters = 20;
-        for (int j = 1; j <= 2; j++)
-        {
-            string s;
-            const int numLetters = rand() % maxNumLetters + 1;
-            const int alphabetSize = rand() % maxAlphabetSize + 1;
-            for (int i = 0; i < numLetters; i++)
-            {
-                s += static_cast<char>(rand() % alphabetSize + 'a');
-            }
-            if (j == 1)
-                a = s;
-            else 
-                b = s;
-        }
-#endif
-        const auto result = findLongestPalindrome(a, b);
+
+        const auto result = findLongestConstructiblePalindrome(a, b);
         cout << result << endl;
-#ifdef BRUTE_FORCE
-        const auto resultBruteForce = findLongestPalindromeBruteForce(a, b);
-        cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl; 
-        assert(result == resultBruteForce);
-#endif
     }
 }
