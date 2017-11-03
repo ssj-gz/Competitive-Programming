@@ -1,6 +1,6 @@
 #define BRUTE_FORCE
 #define RANDOM
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -112,7 +112,7 @@ class SuffixTreeBuilder
             const auto stringConcatPos = x.length();
             appendString(pairConcat);
 
-            cout << "# states: " << m_states.size() << endl;
+            //cout << "# states: " << m_states.size() << endl;
 
             makeFinalStatesExplicitAndMarkThemAsFinal();
 
@@ -1102,11 +1102,12 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     const auto aReversed = reversed(a);
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, aReversed);
-    maxOddPalindromeAt.clear();
-    maxEvenPalindromeAt.clear();
-    maxOddPalindromeAt.resize(a.size());
-    maxEvenPalindromeAt.resize(a.size());
-    findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
+    //maxOddPalindromeAt.clear();
+    //maxEvenPalindromeAt.clear();
+    //maxOddPalindromeAt.resize(a.size());
+    //maxEvenPalindromeAt.resize(a.size());
+    //findOccurrencesOfWordCorrespondingToCursor(suffixTree.rootCursor(), a.size(), a);
+    findLongestPalindromes(a);
 
     const int alphabetSize = 26;
     bool isLetterIndexUsedInB[alphabetSize] = {};
@@ -1127,7 +1128,6 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
         }
     }
 #ifdef BRUTE_FORCE
-    findLongestPalindromes(a);
     const auto maxEvenPalindromesBruteForce = ::maxEvenPalindromesBruteForce(a);
     const auto maxOddPalindromesBruteForce = ::maxOddPalindromesBruteForce(a);
 #if 0
@@ -1159,7 +1159,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
     assert(largestSuffixOfAInBAtPos == largestSuffixOfAInBAtPosBruteForce);
 #endif
 
-    cout << "constructing palindromes a: " << a << " b: " << b << endl;
+    //cout << "constructing palindromes a: " << a << " b: " << b << endl;
     for (auto checkingOddLengthPalindrome : { true, false })
     {
         for (int i = 0; i < maxOddPalindromeAt.size(); i++)
