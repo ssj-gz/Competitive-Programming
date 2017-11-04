@@ -749,7 +749,7 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const int lengthOfA, vector<int>& results)
+void findLargestSuffixOfReversedAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const int lengthOfA, vector<int>& results)
 {
     assert(cursor.isOnExplicitState());
     if (cursor.stateData().isFinalX)
@@ -765,7 +765,7 @@ void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const
             nextCursor.followToTransitionEnd();
 
         const auto nextLengthOfSubstringOfBSoFar = (nextCursor.stateData().isSubstringOfY ? nextCursor.stateData().wordLength : lengthOfSubstringOfBSoFar);
-        findLargestSuffixOfAInB(nextCursor, nextLengthOfSubstringOfBSoFar, lengthOfA, results);
+        findLargestSuffixOfReversedAInB(nextCursor, nextLengthOfSubstringOfBSoFar, lengthOfA, results);
 
         nextLetterIterator++;
     }
@@ -773,14 +773,14 @@ void findLargestSuffixOfAInB(Cursor cursor, int lengthOfSubstringOfBSoFar, const
 
 // For each suffixBeginPos = 0, ... , a.size(), find the largest prefix of the suffix of a beginning
 // at suffixBeginPos that is a substring of b.
-vector<int> findLargestSuffixOfAInB(const string& a, const string& b)
+vector<int> findLargestSuffixOfReversedAInB(const string& a, const string& b)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.addStringPairAndMarkFinalStates(a, b);
 
     vector<int> result(a.size() + 1);
 
-    findLargestSuffixOfAInB(suffixTree.rootCursor(), 0, a.size(), result);
+    findLargestSuffixOfReversedAInB(suffixTree.rootCursor(), 0, a.size(), result);
 
     return result;
 }
@@ -875,7 +875,7 @@ string findLongestAHeavyOrBalancedPalindrome(const string&a, const string& b)
         }
     }
 
-    const auto largestSuffixOfAInBAtPos = findLargestSuffixOfAInB(aReversed, b);
+    const auto largestSuffixOfAInBAtPos = findLargestSuffixOfReversedAInB(aReversed, b);
 
     for (auto checkingOddLengthPalindrome : { true, false })
     {
@@ -977,6 +977,80 @@ string findLongestConstructiblePalindrome(const string&a, const string& b)
 
 int main()
 {
+    // Slightly disappointed with this one; as we'll see, the problem largely reduces to finding, for 
+    // all positions in a string, the largest odd palindrome "centered" around that position and the largest
+    // even one: I knew that there was a linear-time algorithm for this (Manacher's Algorithm) but, of course,
+    // I consider using other people's algorithms cheating, so I didn't want to do this :)
+    //
+    // After a while, I figured out a way of doing this using suffix trees in O(N * (log N)^2) but, sadly,
+    // this wasn't quite fast enough (perhaps a factor of two to slow) so I had to resort to Manacher's after all :(
+    //
+    // Anyway, so: how do we solve the actual problem? Let sA be a string in A and sB a string in B; if sA + sB is a 
+    // palindrome P, then we call P a "constructed palindrome".  The aim is to find the largest such P.
+    //
+    // There are three possibilities for P = sA + sB: |sA| > |sB|; |sA| == |sB|; and |sA| < |sB|.  We say that such a P
+    // is A-heavy, balanced, and B-heavy, respectively.  Let's deal with the first one (P is A-heavy) first; the second is
+    // easy, and the third follows from the first.  The full problem requires that |sB| > 0; for the time being, let's
+    // ignore this and allow an empty sB.
+    //
+    // So let N be the length of the maximum constructed palindrome, and let P be any A-heavy palindrome of length N.  If P
+    // can be constructed in more than one way, pick the one with the smallest sB.  If |P| is odd, then say that P is odd; else
+    // say that P is even; we'll deal only with the odd case as the even follows from it very easily (NB: an odd constructed 
+    // palindrome cannot be balanced, so can only be A-heavy or B-heavy).
+    //
+    // Clearly, P can be expressed as reversed(sB).P'.sB for some odd-length string P', where sA = reversed(sB).P' and the centre of P
+    // is the centre of P'.  Let i be the position of sA in A; then again it is clear that the centre of P (and so, the centre of P') 
+    // is at c = i + |sB| + |P' - 1| / 2.  Additionally, P' must itself be a palindrome since P is a palindrome and peeling off the last and
+    // first elements of a palindrome still gives a palindrome; peeling off the first and last |sB| elements gives P'.
+    //
+    // Further, we see that, if we allow empty sB, then P' is the largest palindrome centred at c.  Assume otherwise; then there is some P''
+    // such that |P''| == |P'| + 1, P'' is palindromic, and P'' is centred on c.  Let sB' be sB with the first letter removed; then
+    // we can set sA' = reversed(sB').P'' and we see that P = sA' + sB' and |sB'| < |sB|, contradicting minimality of sB.
+    //
+    // We call P' the "surrounding palindrome" of c, and sB the "extension" of P'.  We have that reversed(extension) occurs in A and ends just
+    // before P', and extension occurs in B.  It's easily seen that if P is maximal, then extension is the longest such string; assume otherwise:
+    // then there is some sB', |sB'| > |sB|, such that reversed(sB') occurs in A and ends just before P' and sB' is in B: but then
+    // we could construct a new palindrome with reversed(sB').P'.sB' that would be two longer than P, a contradiction.
+    //
+    // Putting all this together, we see that if we want to find the longest A-heavy odd-length constructed palindrome in A where we allow empty sB,
+    // we need only, for each position c in A:
+    // 
+    //  1) find the longest surrounding palindrome P' around c;
+    //  2) find the longest "extension", which is a substring of B such that reversed(sB) occurs in A and ends directly before P' in A.
+    //
+    // 1) is trivial using Manacher's Algorithm; but what of 2)?
+    //
+    // If we reverse A, it is equivalent to finding, for each prefix p of the suffix of reversed(A) ending just after P' in reversed(A'), the longest
+    // p which is a substring of B.  This is fairly easy: let X = reversed(A), Y = B, and take the combined string X#Y, where "#" is a special symbol that does not occur in
+    // X or Y, and find the suffix tree; then every string represented by this tree will either be a substring of X; a substring of Y; a substring of both X and Y; or 
+    // a substring that contains the "#" symbol.  Say we did a DFS on the tree and reached a state s with a transition t that led to s' and included the "#" symbol
+    // (determining whether t includes # can be trivially done in O(1)): if we truncated t to form a new transition t' that stopped just before the # and erased
+    // t' if it ended up being empty, then we'd eradicate all substrings that contained #, leaving only substrings of X, Y, or both: additionally, 
+    // we'd see that the string followed to s' (or s, if t' ended up being erased) is a suffix of X, so all ancestors of s (or s'!) are substrings of X.
+    // In this way, we can obtain a suffix tree where the word leading to any state s is a substring of X, Y or both, and we can mark all s accordingly.
+    // This is performed in addStringPairAndMarkFinalStates() (although technically we don't bother with doing a DFS and take an equivalent approach).
+    //
+    // It's then trivial to do another DFS from the root and find out, for each suffix of X, the largest prefix p of that suffix of X such that p is a substring of Y:
+    // this is done in findLargestSuffixOfReversedAInB(). It's hopefully obvious that we need only consider explicit states in this DFS; for any words w and w' that
+    // end up partially along the same transition t, w is a substring of X if and only if w' is a substring of X, and the same for Y.  
+    
+    // Since X = reversed(A), Y = B, we see that for any suffix of reversed(A), it's easy to find the largest prefix of that suffix that is a substring of B.
+    //
+    // So we can now find the largest odd-length A-heavy constructed palindrome P as long as we allow sB to be empty.  What if we don't allow empty sB?
+    // We've seen that we can find the max P by, for each position c, finding the max surrounding palindrome P' and setting P = reversed(extension).P'.extension.
+    // What if this gives an empty extension? Then its easy to see that the max constructable palindrome around c is formed by progressively shrinking P' (by trimming off
+    // the pair of first and last letters) until the pair that we trim off are equal to a letter in B, b say: we then set P = b.P''.b, where P'' is the
+    // trimmed P'.
+    //
+    // Dealing with even-length palindromes is pretty much identical so we omit it.  Dealing with balanced palindromes is easy: here, sB = reversed(sA),
+    // and since reversed(sA) is a substring of reversed(A), and a substring of a string is a prefix of a suffix of that string, we need 
+    // to find the largest prefix of a suffix of reversed(A) which is a substring of B; i.e. we just need the result of findLargestSuffixOfReversedAInB().
+    //
+    // What about the final case, B-heavy palindromes? Just note that if A' = reversed(B) and B' = reversed(A), then P is an B-heavy palindrome constructible
+    // from A and B  if and only P is a A'-Heavy palindrome constructible from A' and B' i.e. we just swap A and B, reverse them, and go through
+    // the whole process again, picking the best result out of both approaches.
+    //
+    // And that's it!
     int q;
     cin >> q;
 
