@@ -48,7 +48,7 @@ int findResultBruteForce(int r1, int c1, int r2, int c2)
         for (int j = c1; j <= c2; j++)
         {
             const auto gcdEntry = gcd(a[i], b[j]);
-            cout << "i: " << i << " j: " << j << " gcdEntry: " << gcdEntry << endl;
+            cout << "i: " << i << " j: " << j << "a: " << a[i] << " b: " << b[j] << " gcdEntry: " << gcdEntry << endl;
             gcds.insert(gcdEntry);
         }
     }
@@ -156,6 +156,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
     if (primeIndexIter == primeIndicesThatDivideAAndB.end())
     {
         cout << "end - productSoFar: " << productSoFar << endl;
+        //if (productSoFar == 1 && aAndBWithGCD
         generatedGcds[productSoFar] = true;
         return;
     }
@@ -166,7 +167,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
 
     // Don't include this prime.
     const int nextMaxPrimeIndex = *primeIndexIter - 1;
-    findResult(aAndBWithGCD, productSoFar, nextMaxPrimeIndex, generatedGcds);
+    //findResult(aAndBWithGCD, prime * productSoFar, nextMaxPrimeIndex, generatedGcds);
 
     int primePower = 1;
     int primeToPower = prime;
@@ -232,12 +233,46 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         primeToPower *= prime;
     }
 
+    auto eraseDivisibleBy = [](vector<int>& array, int divisor)
+    {
+        array.erase(remove_if(array.begin(), array.end(), [divisor](const int value) { return (value % divisor) == 0;}), array.end());
+    };
+
+    primeToPower = 1;
+    for (int primePower = 0; primePower <= maxPowerOfPrime; primePower++)
+    {
+        cout << "prime: " << prime << " primePower: " << primePower << endl;
+        if (primePower < asWithPrimePower.size())
+        {
+            eraseDivisibleBy(asWithPrimePower[primePower], primeToPower * prime);
+            cout << "asWithPrimePower: " << endl;
+            for (const auto aElement : asWithPrimePower[primePower])
+            {
+                cout << aElement << " ";
+            }
+            cout << endl;
+        }
+        if (primePower < bsWithPrimePower.size())
+        {
+            eraseDivisibleBy(bsWithPrimePower[primePower], primeToPower * prime);
+            cout << "bsWithPrimePower: " << endl;
+            for (const auto bElement : bsWithPrimePower[primePower])
+            {
+                cout << bElement << " ";
+            }
+            cout << endl;
+        }
+
+        primeToPower *= prime;
+    }
+
     primeToPower = prime;
     cout << " computing permutations; prime: " << prime << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
     for (int primePower = 1; primePower <= maxPowerOfPrime; primePower++)
     {
-        cout << "  primePower: " << primePower << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
+        cout << "prime: " << prime << "  primePower: " << primePower << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
         const int nextProductSoFar = productSoFar * primeToPower;
+        cout << "nextProductSoFar: " << nextProductSoFar << endl;
         if (primePower < asWithPrimePower.size())
         {
             // As with primePower; Bs with >= primePower.
@@ -245,10 +280,14 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             const auto asWithCurrentPrimePower = asWithPrimePower[primePower];
             for (int bPrimePower = primePower; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
             {
-                cout << "   Power of prime for b: " << bPrimePower << endl; const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
-                AAndBWithGCD nextAAndBWithGCD;
-                nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
-                findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
+                cout << "   Power of prime for b: " << bPrimePower << endl; 
+                const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
+                if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
+                {
+                    AAndBWithGCD nextAAndBWithGCD;
+                    nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
+                    findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
+                }
             }
         }
         if (primePower < bsWithPrimePower.size())
@@ -260,9 +299,12 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             {
                 cout << "   Power of prime for a: " << aPrimePower << endl;
                 const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
-                AAndBWithGCD nextAAndBWithGCD;
-                nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
-                findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
+                if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
+                {
+                    AAndBWithGCD nextAAndBWithGCD;
+                    nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
+                    findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
+                }
             }
         }
 
@@ -278,6 +320,18 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
     vector<int> bSubset;
     for (int j = c1; j <= c2; j++)
         bSubset.push_back(b[j]);
+
+
+    cout << "findResult:" << endl;
+    cout << "aSubset: " << endl;
+    for (const auto a : aSubset)
+        cout << a << " ";
+    cout << endl;
+    cout << "bSubset: " << endl;
+    for (const auto b : bSubset)
+        cout << b << " ";
+    cout << endl;
+
     vector<bool> generatedGcds(maxValue + 1);
     AAndBWithGCD aAndBWithGCD;
     aAndBWithGCD.setAAndB(aSubset, bSubset);
@@ -294,11 +348,43 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc == 2)
+    {
+        srand(time(0));
+        const int maxGenValue = 100'000;
+        const int n = rand() % 100 + 1;
+        const int m = rand() % 100+ 1;
+        const int q = rand() % 100 + 1;
+        cout << n << " " << m << " " << q << " " << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout  << (rand() % maxGenValue) + 1 << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < m; i++)
+        {
+            cout  << (rand() % maxGenValue) + 1 << " ";
+        }
+        for (int i = 0; i < q; i++)
+        {
+            int r1 = rand() % n;
+            int r2 = rand() % n;
+            if (r2 < r1)
+                swap(r1, r2);
+            int c1 = rand() % m;
+            int c2 = rand() % m;
+            if (c2 < c1)
+                swap(c1, c2);
+            cout << r1 << " " << c1 << " " << r2 << " " << c2 << endl;
+        }
+        return 0;
+    }
     int n, m, q;
 
     cin >> n >> m >> q;
+    cout << "n: " << n << " m: " << m << " q: " << q << endl;
 
     a.resize(n);
     for (int i = 0; i < n; i++)
@@ -339,10 +425,16 @@ int main()
 
         cin >> r1 >> c1 >> r2 >> c2;
 
+        cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << r2 << " c2: " << c2 << endl;
+
         const auto result = findResult(r1, c1, r2, c2, maxValue);
+        cout << result << endl;
+#ifdef BRUTE_FORCE
         const auto resultBruteForce = findResultBruteForce(r1, c1, r2, c2);
         cout << "result: " << result << endl;
         cout << "resultBruteForce: " << resultBruteForce << endl;
+        assert(result == resultBruteForce);
+#endif
     }
 }
 
