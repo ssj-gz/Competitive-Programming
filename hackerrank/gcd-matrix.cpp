@@ -265,7 +265,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         if (primePower < asWithPrimePower.size())
         {
             eraseDivisibleBy(asWithPrimePower[primePower], primeToPower * prime);
-#if 1
+#if 0
             cout << "asWithPrimePower: " << endl;
             for (const auto aElement : asWithPrimePower[primePower])
             {
@@ -276,8 +276,8 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         }
         if (primePower < bsWithPrimePower.size())
         {
-#if 1
             eraseDivisibleBy(bsWithPrimePower[primePower], primeToPower * prime);
+#if 0
             cout << "bsWithPrimePower: " << endl;
             for (const auto bElement : bsWithPrimePower[primePower])
             {
@@ -347,7 +347,7 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
 
 
     cout << "findResult:" << endl;
-#if 1
+#if 0
     cout << "aSubset: " << endl;
     for (const auto a : aSubset)
         cout << a << " ";
@@ -389,7 +389,7 @@ int main(int argc, char** argv)
         const int maxGenValue = 100'000;
         const int n = rand() % 100 + 1;
         const int m = rand() % 100 + 1;
-        const int q = rand() % 100 + 1;
+        const int q = rand() % 1000 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
         {
