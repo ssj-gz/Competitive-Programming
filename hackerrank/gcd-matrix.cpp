@@ -302,16 +302,18 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             // As with primePower; Bs with >= primePower.
             cout << "  Power of prime for a: " << primePower << endl;
             const auto asWithCurrentPrimePower = asWithPrimePower[primePower];
+            vector<int> bsWithGreaterOrEqualPrimerPower;
             for (int bPrimePower = primePower; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
             {
                 cout << "   Power of prime for b: " << bPrimePower << endl; 
-                const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
-                if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
-                {
-                    AAndBWithGCD nextAAndBWithGCD;
-                    nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
-                    findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
-                }
+                //const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
+                bsWithGreaterOrEqualPrimerPower.insert(bsWithGreaterOrEqualPrimerPower.end(), bsWithPrimePower[bPrimePower].begin(), bsWithPrimePower[bPrimePower].end());
+            }
+            if (!asWithCurrentPrimePower.empty() && !bsWithGreaterOrEqualPrimerPower.empty())
+            {
+                AAndBWithGCD nextAAndBWithGCD;
+                nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithGreaterOrEqualPrimerPower);
+                findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
             }
         }
         if (primePower < bsWithPrimePower.size())
@@ -319,16 +321,18 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             // Bs with primePower; As with > primePower.
             cout << "  Power of prime for b: " << primePower << endl;
             const auto bsWithCurrentPrimePower = bsWithPrimePower[primePower];
+            vector<int> asWithGreaterPrimePower;
             for (int aPrimePower = primePower + 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
             {
                 cout << "   Power of prime for a: " << aPrimePower << endl;
-                const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
-                if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
-                {
-                    AAndBWithGCD nextAAndBWithGCD;
-                    nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
-                    findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
-                }
+                asWithGreaterPrimePower.insert(asWithGreaterPrimePower.end(), asWithPrimePower[aPrimePower].begin(), asWithPrimePower[aPrimePower].end());
+                //const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
+            }
+            if (!asWithGreaterPrimePower.empty() && !bsWithCurrentPrimePower.empty())
+            {
+                AAndBWithGCD nextAAndBWithGCD;
+                nextAAndBWithGCD.setAAndB(asWithGreaterPrimePower, bsWithCurrentPrimePower);
+                findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
             }
         }
 
@@ -387,9 +391,9 @@ int main(int argc, char** argv)
     {
         srand(time(0));
         const int maxGenValue = 100'000;
-        const int n = rand() % 1000 + 1;
-        const int m = rand() % 1000 + 1;
-        const int q = rand() % 1000 + 1;
+        const int n = rand() % 5000 + 1;
+        const int m = rand() % 5000 + 1;
+        const int q = rand() % 10 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
         {
