@@ -1,5 +1,5 @@
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -49,7 +49,7 @@ int findResultBruteForce(int r1, int c1, int r2, int c2)
         for (int j = c1; j <= c2; j++)
         {
             const auto gcdEntry = gcd(a[i], b[j]);
-            cout << "i: " << i << " j: " << j <<  "a: " << a[i] << " b: " << b[j] << " gcdEntry: " << gcdEntry << endl;
+            cout << "i: " << i << " j: " << j <<  " a: " << a[i] << " b: " << b[j] << " gcdEntry: " << gcdEntry << endl;
             gcds.insert(gcdEntry);
         }
     }
@@ -62,8 +62,13 @@ class AAndBWithGCD
         void setAAndB(const vector<int>& A, const vector<int>& B)
         {
             //cout << "setAAndB" << endl;
+            //static int addedToSet = 0;
+            //const auto justAddedToSet = A.size() + B.size();
+            //addedToSet += justAddedToSet;
+            //cout << "addedToSet: " << addedToSet << endl;
             m_A = A;
             m_B = B;
+            static int addedToMaps = 0;
             for (const auto a : A)
             {
                 //cout << " a: " << a << endl;
@@ -72,6 +77,7 @@ class AAndBWithGCD
                     //cout << "  primeFactorOfAIndex: " << primeFactorOfAIndex << endl;
                     m_AsWithPrimeFactorIndex[primeFactorOfAIndex].push_back(a);
                     m_primeIndicesThatDivideAAndB.insert(primeFactorOfAIndex);
+                    addedToMaps += 2;
                 }
             }
             for (const auto b : B)
@@ -82,8 +88,11 @@ class AAndBWithGCD
                     //cout << "  primeFactorOfBIndex: " << primeFactorOfBIndex << endl;
                     m_BsWithPrimeFactorIndex[primeFactorOfBIndex].push_back(b);
                     m_primeIndicesThatDivideAAndB.insert(primeFactorOfBIndex);
+                    addedToMaps += 2;
                 }
             }
+
+            //cout << "addedToMaps: " << addedToMaps << endl;
 
             auto primeIndexIter = m_primeIndicesThatDivideAAndB.begin();
             while (primeIndexIter != m_primeIndicesThatDivideAAndB.end())
@@ -124,7 +133,7 @@ class AAndBWithGCD
         {
             return m_B;
         }
-        set<int> primeIndicesThatDivideAAndB() const
+        const set<int>& primeIndicesThatDivideAAndB() const
         {
             return m_primeIndicesThatDivideAAndB;
         }
@@ -137,26 +146,26 @@ class AAndBWithGCD
 
 };
 
-void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrimeIndex, vector<bool>& generatedGcds)
+void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex, vector<bool>& generatedGcds)
 {
-    const auto primeIndicesThatDivideAAndB = aAndBWithGCD.primeIndicesThatDivideAAndB();
-    auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(maxPrimeIndex);
+    const auto& primeIndicesThatDivideAAndB = aAndBWithGCD.primeIndicesThatDivideAAndB();
+    auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(minPrimeIndex);
 
-    if (primeIndexIter == primeIndicesThatDivideAAndB.end() && primeIndexIter != primeIndicesThatDivideAAndB.begin())
-        primeIndexIter--;
-    while (primeIndexIter != primeIndicesThatDivideAAndB.end() && *primeIndexIter > maxPrimeIndex)
-    {
+    //if (primeIndexIter == primeIndicesThatDivideAAndB.end() && primeIndexIter != primeIndicesThatDivideAAndB.begin())
+        //primeIndexIter--;
+    //while (primeIndexIter != primeIndicesThatDivideAAndB.end() && *primeIndexIter > maxPrimeIndex)
+    //{
         //cout << "Need to walk back: " << *primeIndexIter << endl;
-        if (primeIndexIter != primeIndicesThatDivideAAndB.begin())
-            primeIndexIter--;
-        else
-        {
-            primeIndexIter = primeIndicesThatDivideAAndB.end();
-            break;
-        }
+        //if (primeIndexIter != primeIndicesThatDivideAAndB.begin())
+            //primeIndexIter--;
+        //else
+        //{
+            //primeIndexIter = primeIndicesThatDivideAAndB.end();
+            //break;
+        //}
         //else
         //primeIndexIter = primeIndicesThatDivideAAndB.end();
-    }
+    //}
 
 #if 0
     cout << " productSoFar: " << productSoFar << " maxPrimeIndex: " << maxPrimeIndex << " primeIndicesThatDivideAAndB: " << endl;
@@ -177,12 +186,12 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         return;
     }
 
-    assert(*primeIndexIter <= maxPrimeIndex);
+    assert(*primeIndexIter >= minPrimeIndex);
     const auto prime = primesUpToMaxValue[*primeIndexIter];
     //cout << " prime: " << prime << endl;
 
     // Don't include this prime.
-    const int nextMaxPrimeIndex = *primeIndexIter - 1;
+    const int nextMinPrimeIndex = *primeIndexIter + 1;
     //findResult(aAndBWithGCD, prime * productSoFar, nextMaxPrimeIndex, generatedGcds);
 
     int primePower = 1;
@@ -191,6 +200,22 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
     //vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bsWithPrimeFactorIndex(*primeIndexIter);
     vector<int> asWithCurrentPrimePower = aAndBWithGCD.as();
     vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bs();
+#if 0
+    for (const auto a : asWithCurrentPrimePower)
+    {
+        if ((a % prime) == 0)
+            cout << a << " is in a and divisible by " << prime << " productSoFar: " << productSoFar << endl;
+    }
+    for (const auto b : bsWithCurrentPrimePower)
+    {
+        if ((b % prime) == 0)
+            cout << b << " is in b and divisible by " << prime << " productSoFar: " << productSoFar << endl;
+    }
+#endif
+    const int numCopied = asWithCurrentPrimePower.size() + bsWithCurrentPrimePower.size();
+    static int totalCopied = 0;
+    totalCopied += numCopied;
+    //cout << "totalCopied: " << totalCopied << endl;
     assert(!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty());
     int maxPowerOfPrime = primePower;
 
@@ -313,7 +338,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             {
                 AAndBWithGCD nextAAndBWithGCD;
                 nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithGreaterOrEqualPrimerPower);
-                findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
+                findResult(nextAAndBWithGCD, nextProductSoFar, nextMinPrimeIndex, generatedGcds);
             }
         }
         if (primePower < bsWithPrimePower.size())
@@ -332,7 +357,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             {
                 AAndBWithGCD nextAAndBWithGCD;
                 nextAAndBWithGCD.setAAndB(asWithGreaterPrimePower, bsWithCurrentPrimePower);
-                findResult(nextAAndBWithGCD, nextProductSoFar, nextMaxPrimeIndex, generatedGcds);
+                findResult(nextAAndBWithGCD, nextProductSoFar, nextMinPrimeIndex, generatedGcds);
             }
         }
 
@@ -351,7 +376,7 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
 
 
     cout << "findResult:" << endl;
-#if 0
+#if 1
     cout << "aSubset: " << endl;
     for (const auto a : aSubset)
         cout << a << " ";
@@ -366,7 +391,7 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
     AAndBWithGCD aAndBWithGCD;
     aAndBWithGCD.setAAndB(aSubset, bSubset);
     const int maxPrimeIndex = primesUpToMaxValue.size() - 1;
-    findResult(aAndBWithGCD, 1, maxPrimeIndex, generatedGcds);
+    findResult(aAndBWithGCD, 1, 0, generatedGcds);
 
     int numDistinctGCDS = 0;
     for (const auto generatedGCD : generatedGcds)
@@ -390,10 +415,10 @@ int main(int argc, char** argv)
     if (argc == 2)
     {
         srand(time(0));
-        const int maxGenValue = 100'000;
+        const int maxGenValue = 100000;
         const int n = rand() % 5000 + 1;
         const int m = rand() % 5000 + 1;
-        const int q = rand() % 10 + 1;
+        const int q = rand() % 100 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
         {
@@ -404,6 +429,7 @@ int main(int argc, char** argv)
         {
             cout  << (rand() % maxGenValue) + 1 << " ";
         }
+        cout << endl;
         for (int i = 0; i < q; i++)
         {
             int r1 = rand() % n;
@@ -456,13 +482,18 @@ int main(int argc, char** argv)
         }
     }
 
+    for (int i = 0; i < primesUpToMaxValue.size(); i++)
+    {
+        cout << "i: " << i << " primesUpToMaxValue: " << primesUpToMaxValue[i] << endl;
+    }
+
     for (int i = 0; i < q; i++)
     {
         int r1, c1, r2, c2;
 
         cin >> r1 >> c1 >> r2 >> c2;
 
-        cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << r2 << " c2: " << c2 << endl;
+        cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << " c2: " << c2 << endl;
 
         const auto result = findResult(r1, c1, r2, c2, maxValue);
         cout << "result: " << result << endl;
