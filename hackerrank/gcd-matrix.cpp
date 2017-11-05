@@ -316,10 +316,10 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         }
         if (primePower < bsWithPrimePower.size())
         {
-            // Bs with primePower; As with >= primePower.
+            // Bs with primePower; As with > primePower.
             cout << "  Power of prime for b: " << primePower << endl;
             const auto bsWithCurrentPrimePower = bsWithPrimePower[primePower];
-            for (int aPrimePower = primePower; aPrimePower < asWithPrimePower.size(); aPrimePower++)
+            for (int aPrimePower = primePower + 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
             {
                 cout << "   Power of prime for a: " << aPrimePower << endl;
                 const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
@@ -387,8 +387,8 @@ int main(int argc, char** argv)
     {
         srand(time(0));
         const int maxGenValue = 100'000;
-        const int n = rand() % 100 + 1;
-        const int m = rand() % 100 + 1;
+        const int n = rand() % 1000 + 1;
+        const int m = rand() % 1000 + 1;
         const int q = rand() % 1000 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
