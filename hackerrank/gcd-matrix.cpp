@@ -49,7 +49,7 @@ int findResultBruteForce(int r1, int c1, int r2, int c2)
         for (int j = c1; j <= c2; j++)
         {
             const auto gcdEntry = gcd(a[i], b[j]);
-            cout << "i: " << i << " j: " << j << "a: " << a[i] << " b: " << b[j] << " gcdEntry: " << gcdEntry << endl;
+            cout << "i: " << i << " j: " << j <<  "a: " << a[i] << " b: " << b[j] << " gcdEntry: " << gcdEntry << endl;
             gcds.insert(gcdEntry);
         }
     }
@@ -158,7 +158,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         //primeIndexIter = primeIndicesThatDivideAAndB.end();
     }
 
-#if 1
+#if 0
     cout << " productSoFar: " << productSoFar << " maxPrimeIndex: " << maxPrimeIndex << " primeIndicesThatDivideAAndB: " << endl;
     cout << "  ";
     for (const auto primeIndex : primeIndicesThatDivideAAndB)
@@ -194,7 +194,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
     assert(!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty());
     int maxPowerOfPrime = primePower;
 
-#if 1
+#if 0
     cout << "prime: " << prime << " productSoFar: " << productSoFar << " as: " << endl;
     for (const auto aElement : asWithCurrentPrimePower)
     {
@@ -306,7 +306,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             {
                 cout << "   Power of prime for b: " << bPrimePower << endl; 
                 const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
-                //if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
+                if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
                 {
                     AAndBWithGCD nextAAndBWithGCD;
                     nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
@@ -316,14 +316,14 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         }
         if (primePower < bsWithPrimePower.size())
         {
-            // Bs with primePower; As with > primePower.
+            // Bs with primePower; As with >= primePower.
             cout << "  Power of prime for b: " << primePower << endl;
             const auto bsWithCurrentPrimePower = bsWithPrimePower[primePower];
-            for (int aPrimePower = primePower + 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
+            for (int aPrimePower = primePower; aPrimePower < asWithPrimePower.size(); aPrimePower++)
             {
                 cout << "   Power of prime for a: " << aPrimePower << endl;
                 const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
-                //if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
+                if (!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty())
                 {
                     AAndBWithGCD nextAAndBWithGCD;
                     nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithCurrentPrimePower);
@@ -387,9 +387,9 @@ int main(int argc, char** argv)
     {
         srand(time(0));
         const int maxGenValue = 100'000;
-        const int n = rand() % 100'000 + 1;
-        const int m = rand() % 100'000+ 1;
-        const int q = rand() % 10 + 1;
+        const int n = rand() % 100 + 1;
+        const int m = rand() % 100 + 1;
+        const int q = rand() % 100 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
         {
