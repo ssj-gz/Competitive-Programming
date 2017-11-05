@@ -1,5 +1,5 @@
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -146,7 +146,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         primeIndexIter--;
     while (primeIndexIter != primeIndicesThatDivideAAndB.end() && *primeIndexIter > maxPrimeIndex)
     {
-        cout << "Need to walk back: " << *primeIndexIter << endl;
+        //cout << "Need to walk back: " << *primeIndexIter << endl;
         if (primeIndexIter != primeIndicesThatDivideAAndB.begin())
             primeIndexIter--;
         else
@@ -170,7 +170,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
 
     if (primeIndexIter == primeIndicesThatDivideAAndB.end())
     {
-        cout << "end - productSoFar: " << productSoFar << endl;
+        //cout << "end - productSoFar: " << productSoFar << endl;
         //if (productSoFar == 1 && aAndBWithGCD
         assert(productSoFar < generatedGcds.size());
         generatedGcds[productSoFar] = true;
@@ -179,7 +179,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
 
     assert(*primeIndexIter <= maxPrimeIndex);
     const auto prime = primesUpToMaxValue[*primeIndexIter];
-    cout << " prime: " << prime << endl;
+    //cout << " prime: " << prime << endl;
 
     // Don't include this prime.
     const int nextMaxPrimeIndex = *primeIndexIter - 1;
@@ -220,7 +220,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         vector<int> asWithNextPrimePower;
         vector<int> bsWithNextPrimePower;
 
-        cout << "primeToPower: " << primeToPower << endl;
+        //cout << "primeToPower: " << primeToPower << endl;
 
         for (const auto a : asWithCurrentPrimePower)
         {
@@ -245,7 +245,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
             maxPowerOfPrime = primePower;
         else
         {
-            cout << "Neither a nor b divisble by primeToPower" << endl;
+            //cout << "Neither a nor b divisble by primeToPower" << endl;
             break;
         }
 
@@ -261,7 +261,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
     primeToPower = 1;
     for (int primePower = 0; primePower <= maxPowerOfPrime; primePower++)
     {
-        cout << "prime: " << prime << " primePower: " << primePower << endl;
+        //cout << "prime: " << prime << " primePower: " << primePower << endl;
         if (primePower < asWithPrimePower.size())
         {
             eraseDivisibleBy(asWithPrimePower[primePower], primeToPower * prime);
@@ -291,21 +291,21 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
     }
 
     primeToPower = 1;
-    cout << " computing permutations; prime: " << prime << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
+    //cout << " computing permutations; prime: " << prime << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
     for (int primePower = 0; primePower <= maxPowerOfPrime; primePower++)
     {
-        cout << "prime: " << prime << "  primePower: " << primePower << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
+        //cout << "prime: " << prime << "  primePower: " << primePower << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
         const int nextProductSoFar = productSoFar * primeToPower;
-        cout << "nextProductSoFar: " << nextProductSoFar << endl;
+        //cout << "nextProductSoFar: " << nextProductSoFar << endl;
         if (primePower < asWithPrimePower.size())
         {
             // As with primePower; Bs with >= primePower.
-            cout << "  Power of prime for a: " << primePower << endl;
+            //cout << "  Power of prime for a: " << primePower << endl;
             const auto asWithCurrentPrimePower = asWithPrimePower[primePower];
             vector<int> bsWithGreaterOrEqualPrimerPower;
             for (int bPrimePower = primePower; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
             {
-                cout << "   Power of prime for b: " << bPrimePower << endl; 
+                //cout << "   Power of prime for b: " << bPrimePower << endl; 
                 //const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
                 bsWithGreaterOrEqualPrimerPower.insert(bsWithGreaterOrEqualPrimerPower.end(), bsWithPrimePower[bPrimePower].begin(), bsWithPrimePower[bPrimePower].end());
             }
@@ -319,12 +319,12 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int maxPrime
         if (primePower < bsWithPrimePower.size())
         {
             // Bs with primePower; As with > primePower.
-            cout << "  Power of prime for b: " << primePower << endl;
+            //cout << "  Power of prime for b: " << primePower << endl;
             const auto bsWithCurrentPrimePower = bsWithPrimePower[primePower];
             vector<int> asWithGreaterPrimePower;
             for (int aPrimePower = primePower + 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
             {
-                cout << "   Power of prime for a: " << aPrimePower << endl;
+                //cout << "   Power of prime for a: " << aPrimePower << endl;
                 asWithGreaterPrimePower.insert(asWithGreaterPrimePower.end(), asWithPrimePower[aPrimePower].begin(), asWithPrimePower[aPrimePower].end());
                 //const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
             }
@@ -465,7 +465,7 @@ int main(int argc, char** argv)
         cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << r2 << " c2: " << c2 << endl;
 
         const auto result = findResult(r1, c1, r2, c2, maxValue);
-        cout << result << endl;
+        cout << "result: " << result << endl;
 #ifdef BRUTE_FORCE
         const auto resultBruteForce = findResultBruteForce(r1, c1, r2, c2);
         cout << "result: " << result << endl;
