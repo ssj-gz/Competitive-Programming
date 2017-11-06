@@ -182,6 +182,38 @@ class AAndBWithGCD
             }
             m_B.push_back(b);
         }
+        void removeFromA(int a)
+        {
+            assert(find(m_A.begin(), m_A.end(), a) != m_A.end());
+            int i = 0;
+            for (const auto primeFactorIndex : primeFactorIndices[a])
+            {
+                m_AsWithPrimeFactorIndex[primeFactorIndex].erase(m_AsPrimeIndexIterators[primeFactorIndex][i]);
+                if (m_AsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_BsWithPrimeFactorIndex[primeFactorIndex].empty())
+                {
+                    assert(m_primeIndicesThatDivideAAndB.find(primeFactorIndex) != m_primeIndicesThatDivideAAndB.end());
+                    m_primeIndicesThatDivideAAndB.erase(primeFactorIndex);
+                }
+                i++;
+            }
+            m_AsPrimeIndexIterators.clear();
+        }
+        void removeFromB(int b)
+        {
+            assert(find(m_B.begin(), m_B.end(), b) != m_B.end());
+            int i = 0;
+            for (const auto primeFactorIndex : primeFactorIndices[b])
+            {
+                m_BsWithPrimeFactorIndex[primeFactorIndex].erase(m_BsPrimeIndexIterators[primeFactorIndex][i]);
+                if (m_BsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_AsWithPrimeFactorIndex[primeFactorIndex].empty())
+                {
+                    assert(m_primeIndicesThatDivideAAndB.find(primeFactorIndex) != m_primeIndicesThatDivideAAndB.end());
+                    m_primeIndicesThatDivideAAndB.erase(primeFactorIndex);
+                }
+                i++;
+            }
+            m_AsPrimeIndexIterators.clear();
+        }
 #if 0
         vector<int> asWithPrimeFactorIndex(int primeFactorIndex) const
         {
