@@ -167,6 +167,16 @@ class AAndBWithGCD
             }
             return result;
         }
+        void addToA(const vector<int>& as)
+        {
+            for (const auto a : as)
+                addToA(a);
+        }
+        void addToB(const vector<int>& bs)
+        {
+            for (const auto b : bs)
+                addToB(b);
+        }
         void addToA(int a)
         {
             cout << "addToA " << a << " m_AsPrimeIndexIterators.size(): " << m_AsPrimeIndexIterators.size() << endl;
@@ -205,6 +215,16 @@ class AAndBWithGCD
 #ifndef NDEBUG
             m_dbgB.push_back(b);
 #endif
+        }
+        void removeFromA(const vector<int>& as)
+        {
+            for (const auto a : as)
+                removeFromA(a);
+        }
+        void removeFromB(const vector<int>& bs)
+        {
+            for (const auto a : bs)
+                removeFromB(b);
         }
         void removeFromA(int a)
         {
@@ -434,8 +454,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     // Ensure that a has no elements divisible by current prime.
     for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
     {
-        for (const auto x : asWithPrimePower[primePower])
-            aAndBWithGCD.removeFromA(x);
+        aAndBWithGCD.removeFromA(asWithPrimePower[primePower]);
     }
     // Recurse - this will find some of the gcds that are not divisible by this prime.
     findResult(aAndBWithGCD, productSoFar, nextMinPrimeIndex, generatedGcds);
@@ -444,11 +463,9 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         assert(!asWithPrimePower[primePower].empty() && !bsWithPrimePower[primePower].empty());
         if (primePower > 1)
         {
-            for (const auto x : asWithPrimePower[primePower - 1])
-                aAndBWithGCD.removeFromA(x);
+                aAndBWithGCD.removeFromA(asWithPrimePower[primePower - 1]);
         }
-        for (const auto x : asWithPrimePower[primePower])
-            aAndBWithGCD.addToA(x);
+        aAndBWithGCD.addToA(asWithPrimePower[primePower]);
     }
 
 #if 0
