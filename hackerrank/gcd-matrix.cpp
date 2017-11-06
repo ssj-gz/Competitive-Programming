@@ -73,9 +73,9 @@ class AAndBWithGCD
             //const auto justAddedToSet = A.size() + B.size();
             //addedToSet += justAddedToSet;
             //cout << "addedToSet: " << addedToSet << endl;
-            m_A = A;
-            m_B = B;
-            static int addedToMaps = 0;
+            //m_A = A;
+            //m_B = B;
+            //static int addedToMaps = 0;
 #if 0
             for (const auto a : A)
             {
@@ -126,38 +126,33 @@ class AAndBWithGCD
             for (const auto b : B)
                 addToB(b);
         }
-        vector<int> asWithPrimeFactor(int prime, int power)
+        vector<int> asWithPrimeFactor(int primeFactorIndex, int power)
         {
-            int primeToPower = 1;
-            for (int i = 0; i < power; i++)
-                primeToPower *= prime;
-            vector<int> result;
-            for (const auto a : m_A)
-            {
-                if ((a % primeToPower) == 0 && !((a % (primeToPower * prime)) == 0))
-                {
-                    result.push_back(a);
-                } 
-            }
-            return result;
+            return elementsWithPrimeFactor(primeFactorIndex, power, m_AsWithPrimeFactorIndex[primeFactorIndex]);
         }
-        vector<int> bsWithPrimeFactor(int prime, int power)
+        vector<int> bsWithPrimeFactor(int primeFactorIndex, int power)
         {
+            return elementsWithPrimeFactor(primeFactorIndex, power, m_BsWithPrimeFactorIndex[primeFactorIndex]);
+        }
+        vector<int> elementsWithPrimeFactor(int primeFactorIndex, int power, const list<int>& elementsWithPrimeFactorIndex)
+        {
+            const int prime = primesUpToMaxValue[primeFactorIndex];
             int primeToPower = 1;
             for (int i = 0; i < power; i++)
                 primeToPower *= prime;
             vector<int> result;
-            for (const auto b : m_B)
+            for (const auto x : elementsWithPrimeFactorIndex)
             {
-                if ((b % primeToPower) == 0 && !((b % (primeToPower * prime)) == 0))
+                if ((x % primeToPower) == 0 && !((x % (primeToPower * prime)) == 0))
                 {
-                    result.push_back(b);
+                    result.push_back(x);
                 } 
             }
             return result;
         }
         void addToA(int a)
         {
+            assert(find(m_A.begin(), m_A.end(), a) == m_A.end());
             for (const auto primeFactorIndex : primeFactorIndices[a])
             {
                 const bool needToAddThing = (m_AsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_BsWithPrimeFactorIndex[primeFactorIndex].empty());
@@ -169,9 +164,23 @@ class AAndBWithGCD
                     m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
                 }
             }
+            m_A.push_back(a);
         }
         void addToB(int b)
         {
+            assert(find(m_B.begin(), m_B.end(), b) == m_B.end());
+            for (const auto primeFactorIndex : primeFactorIndices[b])
+            {
+                const bool needToAddThing = (m_BsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_AsWithPrimeFactorIndex[primeFactorIndex].empty());
+                const auto addedPrimeFactorIterIter = m_AsWithPrimeFactorIndex[primeFactorIndex].insert(m_AsWithPrimeFactorIndex[primeFactorIndex].end(), b);
+                m_AsPrimeIndexIterators[b].push_back(addedPrimeFactorIterIter);
+                if (needToAddThing)
+                {
+                    assert(m_primeIndicesThatDivideAAndB.find(primeFactorIndex) == m_primeIndicesThatDivideAAndB.end());
+                    m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
+                }
+            }
+            m_B.push_back(b);
         }
 #if 0
         vector<int> asWithPrimeFactorIndex(int primeFactorIndex) const
