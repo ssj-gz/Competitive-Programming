@@ -74,8 +74,8 @@ class AAndBWithGCD
             //const auto justAddedToSet = A.size() + B.size();
             //addedToSet += justAddedToSet;
             //cout << "addedToSet: " << addedToSet << endl;
-            //m_A = A;
-            //m_B = B;
+            //m_dbgA = A;
+            //m_dbgB = B;
             //static int addedToMaps = 0;
 #if 0
             for (const auto a : A)
@@ -158,7 +158,7 @@ class AAndBWithGCD
         void addToA(int a)
         {
             cout << "addToA " << a << " m_AsPrimeIndexIterators.size(): " << m_AsPrimeIndexIterators.size() << endl;
-            assert(find(m_A.begin(), m_A.end(), a) == m_A.end());
+            assert(find(m_dbgA.begin(), m_dbgA.end(), a) == m_dbgA.end());
             assert(a < m_AsPrimeIndexIterators.size());
             for (const auto primeFactorIndex : primeFactorIndices[a])
             {
@@ -173,12 +173,12 @@ class AAndBWithGCD
                 }
             }
 #ifndef NDEBUG
-            m_A.push_back(a);
+            m_dbgA.push_back(a);
 #endif
         }
         void addToB(int b)
         {
-            assert(find(m_B.begin(), m_B.end(), b) == m_B.end());
+            assert(find(m_dbgB.begin(), m_dbgB.end(), b) == m_dbgB.end());
             for (const auto primeFactorIndex : primeFactorIndices[b])
             {
                 const bool needToAddThing = (m_BsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_AsWithPrimeFactorIndex[primeFactorIndex].empty());
@@ -192,14 +192,14 @@ class AAndBWithGCD
                 }
             }
 #ifndef NDEBUG
-            m_B.push_back(b);
+            m_dbgB.push_back(b);
 #endif
         }
         void removeFromA(int a)
         {
             cout << "removeFromA: " << a << endl;
             assert(a < m_AsPrimeIndexIterators.size());
-            assert(find(m_A.begin(), m_A.end(), a) != m_A.end());
+            assert(find(m_dbgA.begin(), m_dbgA.end(), a) != m_dbgA.end());
             int i = 0;
             for (const auto primeFactorIndex : primeFactorIndices[a])
             {
@@ -216,12 +216,12 @@ class AAndBWithGCD
             }
             m_AsPrimeIndexIterators[a].clear();
 #ifndef NDEBUG
-            m_A.erase(find(m_A.begin(), m_A.end(), a), m_A.end());
+            m_dbgA.erase(find(m_dbgA.begin(), m_dbgA.end(), a), m_dbgA.end());
 #endif
         }
         void removeFromB(int b)
         {
-            assert(find(m_B.begin(), m_B.end(), b) != m_B.end());
+            assert(find(m_dbgB.begin(), m_dbgB.end(), b) != m_dbgB.end());
             int i = 0;
             for (const auto primeFactorIndex : primeFactorIndices[b])
             {
@@ -235,7 +235,7 @@ class AAndBWithGCD
             }
             m_AsPrimeIndexIterators[b].clear();
 #ifndef NDEBUG
-            m_B.erase(find(m_B.begin(), m_B.end(), b), m_B.end());
+            m_dbgB.erase(find(m_dbgB.begin(), m_dbgB.end(), b), m_dbgB.end());
 #endif
         }
         void assertHasIterator(list<int>& l, list<int>::iterator it)
@@ -264,14 +264,16 @@ class AAndBWithGCD
             return bsIter->second;
         }
 #endif
+#ifndef NDEBUG
         vector<int> as() const
         {
-            return m_A;
+            return m_dbgA;
         }
         vector<int> bs() const
         {
-            return m_B;
+            return m_dbgB;
         }
+#endif
         const set<int>& primeIndicesThatDivideAAndB() const
         {
             return m_primeIndicesThatDivideAAndB;
@@ -283,8 +285,10 @@ class AAndBWithGCD
         map<int, list<int>> m_BsWithPrimeFactorIndex;
         vector<vector<list<int>::iterator>> m_AsPrimeIndexIterators;
         vector<vector<list<int>::iterator>> m_BsPrimeIndexIterators;
-        vector<int> m_A;
-        vector<int> m_B;
+#ifndef NDEBUG
+        vector<int> m_dbgA;
+        vector<int> m_dbgB;
+#endif
 
 };
 
