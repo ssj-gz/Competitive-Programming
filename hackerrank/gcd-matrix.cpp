@@ -61,9 +61,7 @@ class AAndBWithGCD
 {
     public:
         AAndBWithGCD(int maxValue)
-            : maxValue{maxValue}
         {
-            cout << "maxValue: " << maxValue << endl;
         }
         void setAAndB(const vector<int>& A, const vector<int>& B)
         {
@@ -124,6 +122,22 @@ class AAndBWithGCD
                 addToA(a);
             for (const auto b : B)
                 addToB(b);
+        }
+        void moveAsFrom(AAndBWithGCD& source)
+        {
+            m_AsWithPrimeFactorIndex = std::move(source.m_AsWithPrimeFactorIndex);
+            m_AsPrimeIndexIterators = std::move(source.m_AsPrimeIndexIterators);
+#ifndef NDEBUG
+            m_dbgA = std::move(source.m_dbgA);
+#endif
+        }
+        void moveBsFrom(AAndBWithGCD& source)
+        {
+            m_BsWithPrimeFactorIndex = std::move(source.m_BsWithPrimeFactorIndex);
+            m_BsPrimeIndexIterators = std::move(source.m_BsPrimeIndexIterators);
+#ifndef NDEBUG
+            m_dbgB = std::move(source.m_dbgB);
+#endif
         }
         vector<int> asWithPrimeFactor(int primeFactorIndex, int power)
         {
@@ -275,7 +289,6 @@ class AAndBWithGCD
             return m_primeIndicesThatDivideAAndB;
         }
     private:
-        int maxValue;
         set<int> m_primeIndicesThatDivideAAndB;
         map<int, list<int>> m_AsWithPrimeFactorIndex;
         map<int, list<int>> m_BsWithPrimeFactorIndex;
