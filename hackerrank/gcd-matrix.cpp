@@ -60,7 +60,7 @@ int findResultBruteForce(int r1, int c1, int r2, int c2)
 class AAndBWithGCD
 {
     public:
-        AAndBWithGCD(int maxValue)
+        AAndBWithGCD()
         {
         }
         void setAAndB(const vector<int>& A, const vector<int>& B)
@@ -458,8 +458,33 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     }
     // Recurse - this will find some of the gcds that are not divisible by this prime.
     findResult(aAndBWithGCD, productSoFar, nextMinPrimeIndex, generatedGcds);
+
+    {
+        // Construct a AAndBWithGCD where all a's are divisible by prime, but none of 
+        // the B's are.
+        AAndBWithGCD aDivisibleByPrimeBNotDivisibleByPrime;
+        // Construction of aDivisibleByPrime - with all B's information intact - is O(1).
+        aDivisibleByPrimeBNotDivisibleByPrime.moveBsFrom(aAndBWithGCD);
+        for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
+        {
+            aDivisibleByPrimeBNotDivisibleByPrime.addToA(asWithPrimePower[primePower]);
+        }
+        for (int primePower = 1; primePower < bsWithPrimePower.size(); primePower++)
+        {
+            aDivisibleByPrimeBNotDivisibleByPrime.removeFromB(bsWithPrimePower[primePower]);
+        }
+        // Recurse - this finds the remaining gcds not divisible by this prime.
+        findResult(aDivisibleByPrimeBNotDivisibleByPrime, productSoFar, nextMinPrimeIndex, generatedGcds);
+        
+        // Restore aAndBWithGCD (constant-time).
+        aAndBWithGCD.moveBsFrom(aDivisibleByPrimeBNotDivisibleByPrime);
+    }
+
+    // TODO  - arrange for a and b divisible by prime, but 1) power of a fixed; power of b at least power of a and
+    // 2) power of b fixed; power of a strictly larger than power of b.
     for (int primePower = 1; primePower < min(asWithPrimePower.size(), bsWithPrimePower.size()); primePower++)
     {
+        AAndBWithGCD aAndBDivisibleByPrime;
         assert(!asWithPrimePower[primePower].empty() && !bsWithPrimePower[primePower].empty());
         if (primePower > 1)
         {
@@ -580,7 +605,7 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
 #endif
 
     vector<bool> generatedGcds(maxValue + 1);
-    AAndBWithGCD aAndBWithGCD(maxValue);
+    AAndBWithGCD aAndBWithGCD;
     aAndBWithGCD.setAAndB(aSubset, bSubset);
     const int maxPrimeIndex = primesUpToMaxValue.size() - 1;
     findResult(aAndBWithGCD, 1, 0, generatedGcds);
