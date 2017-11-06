@@ -61,9 +61,7 @@ class AAndBWithGCD
 {
     public:
         AAndBWithGCD(int maxValue)
-            : maxValue{maxValue},
-              m_AsPrimeIndexIterators(maxValue + 1),
-              m_BsPrimeIndexIterators(maxValue + 1)
+            : maxValue{maxValue}
         {
             cout << "maxValue: " << maxValue << endl;
         }
@@ -159,7 +157,6 @@ class AAndBWithGCD
         {
             cout << "addToA " << a << " m_AsPrimeIndexIterators.size(): " << m_AsPrimeIndexIterators.size() << endl;
             assert(find(m_dbgA.begin(), m_dbgA.end(), a) == m_dbgA.end());
-            assert(a < m_AsPrimeIndexIterators.size());
             for (const auto primeFactorIndex : primeFactorIndices[a])
             {
                 const bool needToAddThing = (m_AsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_BsWithPrimeFactorIndex[primeFactorIndex].empty());
@@ -198,7 +195,6 @@ class AAndBWithGCD
         void removeFromA(int a)
         {
             cout << "removeFromA: " << a << endl;
-            assert(a < m_AsPrimeIndexIterators.size());
             assert(find(m_dbgA.begin(), m_dbgA.end(), a) != m_dbgA.end());
             int i = 0;
             for (const auto primeFactorIndex : primeFactorIndices[a])
@@ -283,8 +279,8 @@ class AAndBWithGCD
         set<int> m_primeIndicesThatDivideAAndB;
         map<int, list<int>> m_AsWithPrimeFactorIndex;
         map<int, list<int>> m_BsWithPrimeFactorIndex;
-        vector<vector<list<int>::iterator>> m_AsPrimeIndexIterators;
-        vector<vector<list<int>::iterator>> m_BsPrimeIndexIterators;
+        map<int, vector<list<int>::iterator>> m_AsPrimeIndexIterators;
+        map<int, vector<list<int>::iterator>> m_BsPrimeIndexIterators;
 #ifndef NDEBUG
         vector<int> m_dbgA;
         vector<int> m_dbgB;
