@@ -6,6 +6,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <list>
 #include <set>
 #include <map>
 #include <string>
@@ -59,6 +60,12 @@ int findResultBruteForce(int r1, int c1, int r2, int c2)
 class AAndBWithGCD
 {
     public:
+        AAndBWithGCD(int maxValue)
+            : maxValue{maxValue},
+              m_AsPrimeIndexIterators(maxValue + 1),
+              m_BsPrimeIndexIterators(maxValue + 1)
+        {
+        }
         void setAAndB(const vector<int>& A, const vector<int>& B)
         {
             //cout << "setAAndB" << endl;
@@ -69,6 +76,7 @@ class AAndBWithGCD
             m_A = A;
             m_B = B;
             static int addedToMaps = 0;
+#if 0
             for (const auto a : A)
             {
                 //cout << " a: " << a << endl;
@@ -112,7 +120,60 @@ class AAndBWithGCD
 
             //m_AsWithPrimeFactorIndex.clear();
             //m_BsWithPrimeFactorIndex.clear();
+#endif
+            for (const auto a : A)
+                addToA(a);
+            for (const auto b : B)
+                addToB(b);
         }
+        vector<int> asWithPrimeFactor(int prime, int power)
+        {
+            int primeToPower = 1;
+            for (int i = 0; i < power; i++)
+                primeToPower *= prime;
+            vector<int> result;
+            for (const auto a : m_A)
+            {
+                if ((a % primeToPower) == 0 && !((a % (primeToPower * prime)) == 0))
+                {
+                    result.push_back(a);
+                } 
+            }
+            return result;
+        }
+        vector<int> bsWithPrimeFactor(int prime, int power)
+        {
+            int primeToPower = 1;
+            for (int i = 0; i < power; i++)
+                primeToPower *= prime;
+            vector<int> result;
+            for (const auto b : m_B)
+            {
+                if ((b % primeToPower) == 0 && !((b % (primeToPower * prime)) == 0))
+                {
+                    result.push_back(b);
+                } 
+            }
+            return result;
+        }
+        void addToA(int a)
+        {
+            for (const auto primeFactorIndex : primeFactorIndices[a])
+            {
+                const bool needToAddThing = (m_AsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_BsWithPrimeFactorIndex[primeFactorIndex].empty());
+                const auto addedPrimeFactorIterIter = m_AsWithPrimeFactorIndex[primeFactorIndex].insert(m_AsWithPrimeFactorIndex[primeFactorIndex].end(), a);
+                m_AsPrimeIndexIterators[a].push_back(addedPrimeFactorIterIter);
+                if (needToAddThing)
+                {
+                    assert(m_primeIndicesThatDivideAAndB.find(primeFactorIndex) == m_primeIndicesThatDivideAAndB.end());
+                    m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
+                }
+            }
+        }
+        void addToB(int b)
+        {
+        }
+#if 0
         vector<int> asWithPrimeFactorIndex(int primeFactorIndex) const
         {
             const auto asIter = m_AsWithPrimeFactorIndex.find(primeFactorIndex);
@@ -125,6 +186,7 @@ class AAndBWithGCD
             assert(bsIter != m_BsWithPrimeFactorIndex.end());
             return bsIter->second;
         }
+#endif
         vector<int> as() const
         {
             return m_A;
@@ -138,9 +200,12 @@ class AAndBWithGCD
             return m_primeIndicesThatDivideAAndB;
         }
     private:
+        int maxValue;
         set<int> m_primeIndicesThatDivideAAndB;
-        map<int, vector<int>> m_AsWithPrimeFactorIndex;
-        map<int, vector<int>> m_BsWithPrimeFactorIndex;
+        map<int, list<int>> m_AsWithPrimeFactorIndex;
+        map<int, list<int>> m_BsWithPrimeFactorIndex;
+        vector<vector<list<int>::iterator>> m_AsPrimeIndexIterators;
+        vector<vector<list<int>::iterator>> m_BsPrimeIndexIterators;
         vector<int> m_A;
         vector<int> m_B;
 
@@ -278,6 +343,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrime
         primeToPower *= prime;
     }
 
+#if 0
     auto eraseDivisibleBy = [](vector<int>& array, int divisor)
     {
         array.erase(remove_if(array.begin(), array.end(), [divisor](const int value) { return (value % divisor) == 0;}), array.end());
@@ -363,6 +429,7 @@ void findResult(const AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrime
 
         primeToPower *= prime;
     }
+#endif
 }
 
 int findResult(int r1, int c1, int r2, int c2, int maxValue)
@@ -388,7 +455,7 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
 #endif
 
     vector<bool> generatedGcds(maxValue + 1);
-    AAndBWithGCD aAndBWithGCD;
+    AAndBWithGCD aAndBWithGCD(maxValue);
     aAndBWithGCD.setAAndB(aSubset, bSubset);
     const int maxPrimeIndex = primesUpToMaxValue.size() - 1;
     findResult(aAndBWithGCD, 1, 0, generatedGcds);
