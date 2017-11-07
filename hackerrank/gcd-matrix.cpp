@@ -223,7 +223,7 @@ class AAndBWithGCD
         }
         void removeFromB(const vector<int>& bs)
         {
-            for (const auto a : bs)
+            for (const auto b : bs)
                 removeFromB(b);
         }
         void removeFromA(int a)
@@ -246,7 +246,7 @@ class AAndBWithGCD
             }
             m_AsPrimeIndexIterators[a].clear();
 #ifndef NDEBUG
-            m_dbgA.erase(find(m_dbgA.begin(), m_dbgA.end(), a), m_dbgA.end());
+            m_dbgA.erase(remove(m_dbgA.begin(), m_dbgA.end(), a), m_dbgA.end());
 #endif
         }
         void removeFromB(int b)
@@ -265,7 +265,7 @@ class AAndBWithGCD
             }
             m_AsPrimeIndexIterators[b].clear();
 #ifndef NDEBUG
-            m_dbgB.erase(find(m_dbgB.begin(), m_dbgB.end(), b), m_dbgB.end());
+            m_dbgB.erase(remove(m_dbgB.begin(), m_dbgB.end(), b), m_dbgB.end());
 #endif
         }
         void assertHasIterator(list<int>& l, list<int>::iterator it)
@@ -327,23 +327,22 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(minPrimeIndex);
 
     //if (primeIndexIter == primeIndicesThatDivideAAndB.end() && primeIndexIter != primeIndicesThatDivideAAndB.begin())
-        //primeIndexIter--;
+    //primeIndexIter--;
     //while (primeIndexIter != primeIndicesThatDivideAAndB.end() && *primeIndexIter > maxPrimeIndex)
     //{
-        //cout << "Need to walk back: " << *primeIndexIter << endl;
-        //if (primeIndexIter != primeIndicesThatDivideAAndB.begin())
-            //primeIndexIter--;
-        //else
-        //{
-            //primeIndexIter = primeIndicesThatDivideAAndB.end();
-            //break;
-        //}
-        //else
-        //primeIndexIter = primeIndicesThatDivideAAndB.end();
+    //cout << "Need to walk back: " << *primeIndexIter << endl;
+    //if (primeIndexIter != primeIndicesThatDivideAAndB.begin())
+    //primeIndexIter--;
+    //else
+    //{
+    //primeIndexIter = primeIndicesThatDivideAAndB.end();
+    //break;
+    //}
+    //else
+    //primeIndexIter = primeIndicesThatDivideAAndB.end();
     //}
 
 #if 0
-    cout << " productSoFar: " << productSoFar << " maxPrimeIndex: " << maxPrimeIndex << " primeIndicesThatDivideAAndB: " << endl;
     cout << "  ";
     for (const auto primeIndex : primeIndicesThatDivideAAndB)
     {
@@ -365,6 +364,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     const int primeFactorIndex = *primeIndexIter;
     const auto prime = primesUpToMaxValue[primeFactorIndex];
     const int nextMinPrimeIndex = *primeIndexIter + 1;
+    cout << "entering findResult; productSoFar: " << productSoFar << " prime: " << prime << endl;
     //findResult(aAndBWithGCD, prime * productSoFar, nextMaxPrimeIndex, generatedGcds);
 
     //int primePower = 1;
@@ -460,36 +460,152 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     findResult(aAndBWithGCD, productSoFar, nextMinPrimeIndex, generatedGcds);
 
     {
+        cout << "About to move: b's in source: " << endl;
+        for (const auto b : aAndBWithGCD.bs())
+        {
+            cout << b << " ";
+        }
+        cout << endl;
         // Construct a AAndBWithGCD where all a's are divisible by prime, but none of 
         // the B's are.
         AAndBWithGCD aDivisibleByPrimeBNotDivisibleByPrime;
         // Construction of aDivisibleByPrime - with all B's information intact - is O(1).
         aDivisibleByPrimeBNotDivisibleByPrime.moveBsFrom(aAndBWithGCD);
+        cout << "Done move: b's in dest: " << endl;
+        for (const auto b : aDivisibleByPrimeBNotDivisibleByPrime.bs())
+        {
+            cout << b << " ";
+        }
+        cout << endl;
         for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
         {
             aDivisibleByPrimeBNotDivisibleByPrime.addToA(asWithPrimePower[primePower]);
         }
         for (int primePower = 1; primePower < bsWithPrimePower.size(); primePower++)
         {
+            cout << "Trying to remove bsWithPrimePower " << primePower << endl;
+            for (const auto b : bsWithPrimePower[primePower])
+            {
+                cout << b << " ";
+            }
+            cout << endl;
             aDivisibleByPrimeBNotDivisibleByPrime.removeFromB(bsWithPrimePower[primePower]);
+            cout << ".. done; remaining" << endl;
+            for (const auto b : aDivisibleByPrimeBNotDivisibleByPrime.bs())
+            {
+                cout << b << " ";
+            }
+            cout << endl;
         }
         // Recurse - this finds the remaining gcds not divisible by this prime.
         findResult(aDivisibleByPrimeBNotDivisibleByPrime, productSoFar, nextMinPrimeIndex, generatedGcds);
-        
+
         // Restore aAndBWithGCD (constant-time).
         aAndBWithGCD.moveBsFrom(aDivisibleByPrimeBNotDivisibleByPrime);
+        for (int primePower = 1; primePower < bsWithPrimePower.size(); primePower++)
+        {
+            aAndBWithGCD.addToB(bsWithPrimePower[primePower]);
+        }
+        cout << "restored aAndBWithGCD - bs: " << endl;
+        for (const auto b : aAndBWithGCD.bs())
+        {
+            cout << b << " ";
+        }
+        cout << endl;
     }
 
-    // TODO  - arrange for a and b divisible by prime, but 1) power of a fixed; power of b at least power of a and
-    // 2) power of b fixed; power of a strictly larger than power of b.
-    for (int primePower = 1; primePower < min(asWithPrimePower.size(), bsWithPrimePower.size()); primePower++)
     {
-        AAndBWithGCD aAndBDivisibleByPrime;
-        assert(!asWithPrimePower[primePower].empty() && !bsWithPrimePower[primePower].empty());
-        if (primePower > 1)
+        if (asWithPrimePower.size() > 1 && bsWithPrimePower.size() > 1)
         {
-                aAndBWithGCD.removeFromA(asWithPrimePower[primePower - 1]);
+            // TODO  - arrange for a and b divisible by prime, but 1) power of a fixed; power of b at least power of a and
+            // 2) power of b fixed; power of a strictly larger than power of b.
+            {
+                // Do 1).
+                AAndBWithGCD aAndBDivisibleByPrime;
+                //aAndBDivisibleByPrime.addToA(asWithPrimePower[1]);
+                for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
+                {
+                    cout << "adding b's to aAndBDivisibleByPrime:" << endl;
+                    for (const auto b : bsWithPrimePower[bPrimePower])
+                    {
+                        cout << b << " ";
+                    }
+                    cout << endl;
+                    aAndBDivisibleByPrime.addToB(bsWithPrimePower[bPrimePower]);
+                }
+                int primeToPower = prime;
+                for (int primePower = 1; primePower < maxPowerOfPrime; primePower++)
+                {
+                    if (primePower > 1)
+                    {
+                        aAndBDivisibleByPrime.removeFromA(asWithPrimePower[primePower - 1]);
+                    }
+                    if (primePower < asWithPrimePower.size())
+                        aAndBDivisibleByPrime.addToA(asWithPrimePower[primePower]);
+                    else
+                        break;
+                    if (primePower >= bsWithPrimePower.size())
+                        break;
+                    cout << "Before recurse: bs's in aAndBDivisibleByPrime: " << endl;
+                    for (const auto b : aAndBDivisibleByPrime.bs())
+                    {
+                        cout << b << " " << endl;
+                    }
+                    cout << endl;
+                    // Recurse.
+                    findResult(aAndBDivisibleByPrime, productSoFar * primeToPower, nextMinPrimeIndex, generatedGcds);
+                    cout << "After recurse: bs's in aAndBDivisibleByPrime: " << endl;
+                    for (const auto b : aAndBDivisibleByPrime.bs())
+                    {
+                        cout << b << " " << endl;
+                    }
+                    cout << endl;
+
+                    if (primePower < bsWithPrimePower.size())
+                        aAndBDivisibleByPrime.removeFromB(bsWithPrimePower[primePower]);
+                    else
+                        break;
+
+                    primeToPower *= prime;
+                }
+            }
+            {
+                // Do 2).
+                AAndBWithGCD aAndBDivisibleByPrime;
+                for (int aPrimePower = 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
+                {
+                    aAndBDivisibleByPrime.addToA(asWithPrimePower[aPrimePower]);
+                }
+                int primeToPower = prime;
+                for (int primePower = 1; primePower < maxPowerOfPrime; primePower++)
+                {
+                    if (primePower > 1)
+                    {
+                        if (primePower - 1 < bsWithPrimePower.size())
+                            aAndBDivisibleByPrime.removeFromB(bsWithPrimePower[primePower - 1]);
+                        else
+                            break;
+                    }
+                    if (primePower < bsWithPrimePower.size())
+                        aAndBDivisibleByPrime.addToB(bsWithPrimePower[primePower]);
+                    else 
+                        break;
+                    if (primePower < asWithPrimePower.size())
+                        aAndBDivisibleByPrime.removeFromA(asWithPrimePower[primePower]);
+                    else
+                        break;
+                    // Recurse.
+                    findResult(aAndBDivisibleByPrime, productSoFar * primeToPower, nextMinPrimeIndex, generatedGcds);
+
+                    primeToPower *= prime;
+                }
+            }
         }
+    }
+
+    // Restore aAndBWithGCD back to its original state.
+    for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
+    {
         aAndBWithGCD.addToA(asWithPrimePower[primePower]);
     }
 
@@ -580,6 +696,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         primeToPower *= prime;
     }
 #endif
+    cout << "Exiting findResult" << endl;
 }
 
 int findResult(int r1, int c1, int r2, int c2, int maxValue)
