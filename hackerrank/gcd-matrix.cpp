@@ -37,6 +37,13 @@ bool isPrime(int n)
     return true;
 }
 
+vector<int> sorted(const vector<int>& orig)
+{
+    auto result = orig;
+    sort(result.begin(), result.end());
+    return result;
+}
+
 vector<int> a;
 vector<int> b;
 vector<vector<int>> primeFactorIndices;
@@ -257,8 +264,8 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(minPrimeIndex);
 
 #ifndef NDEBUG
-    const auto dbgOriginalAs = aAndBWithGCD.as();
-    const auto dbgOriginalBs = aAndBWithGCD.bs();
+    const auto dbgOriginalAs = sorted(aAndBWithGCD.as());
+    const auto dbgOriginalBs = sorted(aAndBWithGCD.bs());
 #endif
 
     if (primeIndexIter == primeIndicesThatDivideAAndB.end())
@@ -352,8 +359,8 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
             //}
             //cout << endl;
         }
-        const auto dbgAs = aAndBWithGCD.as();
-        const auto dbgBs = aAndBWithGCD.bs();
+        const auto dbgAs = sorted(aAndBWithGCD.as());
+        const auto dbgBs = sorted(aAndBWithGCD.bs());
         AAndBWithGCD aDivisibleByPrimeBNotDivisibleByPrime;
         // Construction of aDivisibleByPrime - with all B's information intact - is O(1).
         aDivisibleByPrimeBNotDivisibleByPrime.moveBsFrom(aAndBWithGCD);
@@ -372,8 +379,8 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
 
         // Restore aAndBWithGCD (constant-time).
         aAndBWithGCD.moveBsFrom(aDivisibleByPrimeBNotDivisibleByPrime);
-        assert(aAndBWithGCD.as() == dbgAs);
-        assert(aAndBWithGCD.bs() == dbgBs);
+        assert(sorted(aAndBWithGCD.as()) == dbgAs);
+        assert(sorted(aAndBWithGCD.bs()) == dbgBs);
         for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
         {
             cout << "bPrimePower: " << bPrimePower << " / " << bsWithPrimePower.size() - 1 <<  endl;
@@ -494,10 +501,39 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         aAndBWithGCD.addToA(asWithPrimePower[primePower]);
     }
 
-    cout << "Exiting findResult" << endl;
 
-    assert(dbgOriginalAs == aAndBWithGCD.as());
-    assert(dbgOriginalBs == aAndBWithGCD.bs());
+#ifndef NDEBUG
+    const auto dbgVerifyAs = sorted(aAndBWithGCD.as());
+    const auto dbgVerifyBs = sorted(aAndBWithGCD.bs());
+    cout << "dbgOriginalAs: " << endl;
+    for (const auto x : dbgOriginalAs)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    cout << "dbgOriginalBs: " << endl;
+    for (const auto x : dbgOriginalBs)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    cout << "as: " << endl;
+    for (const auto x : dbgVerifyAs)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    cout << "bs: " << endl;
+    for (const auto x : dbgVerifyBs)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    assert(dbgOriginalAs == dbgVerifyAs);
+    assert(dbgOriginalBs == dbgVerifyBs);
+#endif
+
+    cout << "Exiting findResult" << endl;
 }
 
 int findResult(int r1, int c1, int r2, int c2, int maxValue)
