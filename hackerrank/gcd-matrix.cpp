@@ -814,9 +814,9 @@ int main(int argc, char** argv)
     {
         srand(time(0));
         const int maxGenValue = 100000;
-        const int n = rand() % 5000 + 1;
-        const int m = rand() % 5000 + 1;
-        const int q = rand() % 100 + 1;
+        const int n = rand() % 10 + 1;
+        const int m = rand() % 10 + 1;
+        const int q = rand() % 1 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
         {
