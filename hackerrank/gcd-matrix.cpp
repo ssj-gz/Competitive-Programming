@@ -328,6 +328,7 @@ class AAndBWithGCD
         }
         void verifyBIters()
         {
+#if 0
             cout << "Performing verifyBIters" << endl;
             for (const auto b : m_dbgB)
             {
@@ -341,6 +342,7 @@ class AAndBWithGCD
                 }
             }
             cout << "Done Performing verifyBIters" << endl;
+#endif
         }
     private:
         set<int> m_primeIndicesThatDivideAAndB;
@@ -387,7 +389,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
 
     if (primeIndexIter == primeIndicesThatDivideAAndB.end())
     {
-        //cout << "end - productSoFar: " << productSoFar << endl;
+        cout << "end - productSoFar: " << productSoFar << endl;
         //if (productSoFar == 1 && aAndBWithGCD
         assert(productSoFar < generatedGcds.size());
         generatedGcds[productSoFar] = true;
@@ -560,12 +562,15 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     }
 
     {
+        cout << "prime: " << prime << " About to do 1) and 2), perhaps" << endl;
         if (asWithPrimePower.size() > 1 && bsWithPrimePower.size() > 1)
         {
+            cout << " ... yep, doing 1) and 2)" << endl;
             // TODO  - arrange for a and b divisible by prime, but 1) power of a fixed; power of b at least power of a and
             // 2) power of b fixed; power of a strictly larger than power of b.
             {
                 // Do 1).
+                cout << " doing 1) maxPowerOfPrime: " << maxPowerOfPrime << endl;
                 AAndBWithGCD aAndBDivisibleByPrime;
                 //aAndBDivisibleByPrime.addToA(asWithPrimePower[1]);
                 for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
@@ -579,8 +584,9 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
                     aAndBDivisibleByPrime.addToB(bsWithPrimePower[bPrimePower]);
                 }
                 int primeToPower = prime;
-                for (int primePower = 1; primePower < maxPowerOfPrime; primePower++)
+                for (int primePower = 1; primePower <= maxPowerOfPrime; primePower++)
                 {
+                    cout << "1) prime: " << prime << " primePower: " << primePower << " primeToPower: " << primeToPower << " asWithPrimePower.size() " << asWithPrimePower.size() << " bsWithPrimePower.size(): " << bsWithPrimePower.size() << endl;
                     if (primePower > 1)
                     {
                         aAndBDivisibleByPrime.removeFromA(asWithPrimePower[primePower - 1]);
@@ -591,13 +597,20 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
                         break;
                     if (primePower >= bsWithPrimePower.size())
                         break;
-                    cout << "Before recurse: bs's in aAndBDivisibleByPrime: " << endl;
+                    cout << " 1) Before recurse: as's in aAndBDivisibleByPrime: " << endl;
+                    for (const auto a : aAndBDivisibleByPrime.as())
+                    {
+                        cout << a << " " << endl;
+                    }
+                    cout << endl;
+                    cout << " 1) Before recurse: bs's in aAndBDivisibleByPrime: " << endl;
                     for (const auto b : aAndBDivisibleByPrime.bs())
                     {
                         cout << b << " " << endl;
                     }
                     cout << endl;
                     // Recurse.
+                    cout << " recursing 1) " << endl;
                     findResult(aAndBDivisibleByPrime, productSoFar * primeToPower, nextMinPrimeIndex, generatedGcds);
                     cout << "After recurse: bs's in aAndBDivisibleByPrime: " << endl;
                     for (const auto b : aAndBDivisibleByPrime.bs())
@@ -616,13 +629,14 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
             }
             {
                 // Do 2).
+                cout << " doing 2)" << endl;
                 AAndBWithGCD aAndBDivisibleByPrime;
                 for (int aPrimePower = 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
                 {
                     aAndBDivisibleByPrime.addToA(asWithPrimePower[aPrimePower]);
                 }
                 int primeToPower = prime;
-                for (int primePower = 1; primePower < maxPowerOfPrime; primePower++)
+                for (int primePower = 1; primePower <= maxPowerOfPrime; primePower++)
                 {
                     if (primePower > 1)
                     {
