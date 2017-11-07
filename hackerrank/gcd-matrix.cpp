@@ -86,17 +86,17 @@ class AAndBWithGCD
             m_dbgB = std::move(source.m_dbgB);
 #endif
         }
-        vector<int> asWithPrimeFactor(int primeFactorIndex, int power)
+        vector<int> asWithPrimeFactor(int primeFactorIndex, int power, bool& anyWithThisOrHigherPower)
         {
-            cout << "in asWithPrimeFactor; primeFactorIndex: " << primeFactorIndex << " power: " << power << endl;
-            return elementsWithPrimeFactor(primeFactorIndex, power, m_AsWithPrimeFactorIndex[primeFactorIndex]);
+            //cout << "in asWithPrimeFactor; primeFactorIndex: " << primeFactorIndex << " power: " << power << endl;
+            return elementsWithPrimeFactor(primeFactorIndex, power, m_AsWithPrimeFactorIndex[primeFactorIndex], anyWithThisOrHigherPower);
         }
-        vector<int> bsWithPrimeFactor(int primeFactorIndex, int power)
+        vector<int> bsWithPrimeFactor(int primeFactorIndex, int power, bool& anyWithThisOrHigherPower)
         {
-            cout << "in bsWithPrimeFactor; primeFactorIndex: " << primeFactorIndex << " power: " << power << endl;
-            return elementsWithPrimeFactor(primeFactorIndex, power, m_BsWithPrimeFactorIndex[primeFactorIndex]);
+            //cout << "in bsWithPrimeFactor; primeFactorIndex: " << primeFactorIndex << " power: " << power << endl;
+            return elementsWithPrimeFactor(primeFactorIndex, power, m_BsWithPrimeFactorIndex[primeFactorIndex], anyWithThisOrHigherPower);
         }
-        vector<int> elementsWithPrimeFactor(int primeFactorIndex, int power, const list<int>& elementsWithPrimeFactorIndex)
+        vector<int> elementsWithPrimeFactor(int primeFactorIndex, int power, const list<int>& elementsWithPrimeFactorIndex, bool& anyWithThisOrHigherPower)
         {
             const int prime = primesUpToMaxValue[primeFactorIndex];
             int primeToPower = 1;
@@ -106,10 +106,14 @@ class AAndBWithGCD
             for (const auto x : elementsWithPrimeFactorIndex)
             {
                 cout << " x: " << x << " primeToPower: " << primeToPower << endl;
-                if ((x % primeToPower) == 0 && !((x % (primeToPower * prime)) == 0))
+                if ((x % primeToPower) == 0)
                 {
-                    cout << " adding x" << endl;
-                    result.push_back(x);
+                    anyWithThisOrHigherPower = true;
+                    if (!((x % (primeToPower * prime)) == 0))
+                    {
+                        cout << " adding x" << endl;
+                        result.push_back(x);
+                    }
                 } 
             }
             return result;
@@ -123,6 +127,14 @@ class AAndBWithGCD
         {
             for (const auto b : bs)
                 addToB(b);
+        }
+        int numAs() const
+        {
+            return m_numAs;
+        }
+        int numBs() const
+        {
+            return m_numBs;
         }
         void addToA(int a)
         {
@@ -138,6 +150,7 @@ class AAndBWithGCD
                     m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
                 }
             }
+            m_numAs++;
 #ifndef NDEBUG
             m_dbgA.push_back(a);
 #endif
@@ -158,6 +171,7 @@ class AAndBWithGCD
                     m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
                 }
             }
+            m_numBs++;
 #ifndef NDEBUG
             m_dbgB.push_back(b);
 #endif
@@ -191,6 +205,8 @@ class AAndBWithGCD
                 i++;
             }
             m_AsPrimeIndexIterators[a].clear();
+            m_numAs--;
+            assert(m_numAs >= 0);
 #ifndef NDEBUG
             m_dbgA.erase(remove(m_dbgA.begin(), m_dbgA.end(), a), m_dbgA.end());
 #endif
@@ -214,6 +230,8 @@ class AAndBWithGCD
                 i++;
             }
             m_BsPrimeIndexIterators[b].clear();
+            m_numBs--;
+            assert(m_numBs >= 0);
 #ifndef NDEBUG
             m_dbgB.erase(remove(m_dbgB.begin(), m_dbgB.end(), b), m_dbgB.end());
 #endif
@@ -251,6 +269,8 @@ class AAndBWithGCD
         map<int, list<int>> m_BsWithPrimeFactorIndex;
         map<int, vector<list<int>::iterator>> m_AsPrimeIndexIterators;
         map<int, vector<list<int>::iterator>> m_BsPrimeIndexIterators;
+        int m_numAs = 0;
+        int m_numBs = 0;
 #ifndef NDEBUG
         vector<int> m_dbgA;
         vector<int> m_dbgB;
@@ -260,9 +280,12 @@ class AAndBWithGCD
 
 void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex, vector<bool>& generatedGcds)
 {
+    if (aAndBWithGCD.numAs() == 0 || aAndBWithGCD.numBs() == 0)
+        return;
     const auto& primeIndicesThatDivideAAndB = aAndBWithGCD.primeIndicesThatDivideAAndB();
     auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(minPrimeIndex);
 
+    cout << "entering findResult; productSoFar: " << productSoFar << " minPrimeIndex: " << minPrimeIndex << endl;
 #ifndef NDEBUG
     const auto dbgOriginalAs = sorted(aAndBWithGCD.as());
     const auto dbgOriginalBs = sorted(aAndBWithGCD.bs());
@@ -274,6 +297,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         //if (productSoFar == 1 && aAndBWithGCD
         assert(productSoFar < generatedGcds.size());
         generatedGcds[productSoFar] = true;
+        cout << "Exiting findResult (terminal)" << endl;
         return;
     }
 
@@ -281,7 +305,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     const int primeFactorIndex = *primeIndexIter;
     const auto prime = primesUpToMaxValue[primeFactorIndex];
     const int nextMinPrimeIndex = *primeIndexIter + 1;
-    cout << "entering findResult; productSoFar: " << productSoFar << " prime: " << prime << endl;
+    cout << " entered findResult; productSoFar: " << productSoFar << " prime: " << prime << endl;
 
     vector<vector<int>> asWithPrimePower;
     vector<vector<int>> bsWithPrimePower;
@@ -294,8 +318,10 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     int maxPowerOfPrime = primePower;
     while (true)
     {
-        const vector<int> asWithCurrentPrimePower = aAndBWithGCD.asWithPrimeFactor(primeFactorIndex, primePower);
-        const vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bsWithPrimeFactor(primeFactorIndex, primePower);
+        bool anyAWithThisOrHigherPower = false;
+        bool anyBWithThisOrHigherPower = false;
+        const vector<int> asWithCurrentPrimePower = aAndBWithGCD.asWithPrimeFactor(primeFactorIndex, primePower, anyAWithThisOrHigherPower);
+        const vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bsWithPrimeFactor(primeFactorIndex, primePower, anyBWithThisOrHigherPower);
 
         cout << "prime: " << prime << " primePower: " << primePower << " asWithCurrentPrimePower: " << endl;
         for (const auto a : asWithCurrentPrimePower)
@@ -313,7 +339,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         if (!bsWithCurrentPrimePower.empty())
             bsWithPrimePower.push_back(bsWithCurrentPrimePower);
 
-        if (!asWithCurrentPrimePower.empty() || !bsWithCurrentPrimePower.empty())
+        if (anyAWithThisOrHigherPower || anyBWithThisOrHigherPower)
             maxPowerOfPrime = primePower;
         else
         {
