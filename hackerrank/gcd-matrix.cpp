@@ -256,6 +256,11 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     const auto& primeIndicesThatDivideAAndB = aAndBWithGCD.primeIndicesThatDivideAAndB();
     auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(minPrimeIndex);
 
+#ifndef NDEBUG
+    const auto dbgOriginalAs = aAndBWithGCD.as();
+    const auto dbgOriginalBs = aAndBWithGCD.bs();
+#endif
+
     if (primeIndexIter == primeIndicesThatDivideAAndB.end())
     {
         cout << "end - productSoFar: " << productSoFar << endl;
@@ -347,6 +352,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
             //}
             //cout << endl;
         }
+        const auto dbgAs = aAndBWithGCD.as();
         const auto dbgBs = aAndBWithGCD.bs();
         AAndBWithGCD aDivisibleByPrimeBNotDivisibleByPrime;
         // Construction of aDivisibleByPrime - with all B's information intact - is O(1).
@@ -366,6 +372,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
 
         // Restore aAndBWithGCD (constant-time).
         aAndBWithGCD.moveBsFrom(aDivisibleByPrimeBNotDivisibleByPrime);
+        assert(aAndBWithGCD.as() == dbgAs);
         assert(aAndBWithGCD.bs() == dbgBs);
         for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
         {
@@ -488,6 +495,9 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     }
 
     cout << "Exiting findResult" << endl;
+
+    assert(dbgOriginalAs == aAndBWithGCD.as());
+    assert(dbgOriginalBs == aAndBWithGCD.bs());
 }
 
 int findResult(int r1, int c1, int r2, int c2, int maxValue)
@@ -614,7 +624,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < primesUpToMaxValue.size(); i++)
     {
-        cout << "i: " << i << " primesUpToMaxValue: " << primesUpToMaxValue[i] << endl;
+        //cout << "i: " << i << " primesUpToMaxValue: " << primesUpToMaxValue[i] << endl;
     }
 
     for (int i = 0; i < q; i++)
