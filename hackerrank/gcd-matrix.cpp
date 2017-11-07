@@ -143,6 +143,7 @@ class AAndBWithGCD
             {
                 const bool needToAddThing = (m_AsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_BsWithPrimeFactorIndex[primeFactorIndex].empty());
                 const auto addedPrimeFactorIterIter = m_AsWithPrimeFactorIndex[primeFactorIndex].insert(m_AsWithPrimeFactorIndex[primeFactorIndex].end(), a);
+                cout << "adding a: " << a << " prime: " << primesUpToMaxValue[primeFactorIndex] << endl;
                 m_AsPrimeIndexIterators[a].push_back(addedPrimeFactorIterIter);
                 if (needToAddThing)
                 {
@@ -157,6 +158,7 @@ class AAndBWithGCD
         }
         void addToB(int b)
         {
+            cout << "addToB: " << b << endl;
             assert(find(m_dbgB.begin(), m_dbgB.end(), b) == m_dbgB.end());
             assert(m_BsPrimeIndexIterators[b].empty());
             for (const auto primeFactorIndex : primeFactorIndices[b])
@@ -338,10 +340,10 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
 
         //cout << "primeToPower: " << primeToPower << endl;
 
-        if (!asWithCurrentPrimePower.empty())
-            asWithPrimePower.push_back(asWithCurrentPrimePower);
-        if (!bsWithCurrentPrimePower.empty())
-            bsWithPrimePower.push_back(bsWithCurrentPrimePower);
+        //if (!asWithCurrentPrimePower.empty())
+        asWithPrimePower.push_back(asWithCurrentPrimePower);
+        //if (!bsWithCurrentPrimePower.empty())
+        bsWithPrimePower.push_back(bsWithCurrentPrimePower);
 
         if (anyAWithThisOrHigherPower || anyBWithThisOrHigherPower)
             maxPowerOfPrime = primePower;
@@ -468,7 +470,11 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
                         aAndBDivisibleByPrime.removeFromA(asWithPrimePower[primePower - 1]);
                     }
                     if (primePower < asWithPrimePower.size())
+                    {
+                        cout << "adding as prime: " << prime << " primePower: " << primePower << endl;
                         aAndBDivisibleByPrime.addToA(asWithPrimePower[primePower]);
+                        cout << "done adding as prime: " << prime << " primePower: " << primePower << endl;
+                    }
                     else
                         break;
                     if (primePower >= bsWithPrimePower.size())
