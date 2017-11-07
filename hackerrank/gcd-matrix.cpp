@@ -1,5 +1,5 @@
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -191,12 +191,12 @@ class AAndBWithGCD
         }
         void removeFromA(int a)
         {
-            cout << "removeFromA: " << a << endl;
+            //cout << "removeFromA: " << a << endl;
             assert(find(m_dbgA.begin(), m_dbgA.end(), a) != m_dbgA.end());
             int i = 0;
             for (const auto primeFactorIndex : primeFactorIndices[a])
             {
-                cout << "removeFromA: " << a << " i: " << i << " primeFactorIndex: " << primeFactorIndex << " prime: " << primesUpToMaxValue[primeFactorIndex] << " m_AsPrimeIndexIterators[a].size(): " << m_AsPrimeIndexIterators[a].size() << endl;
+                //cout << "removeFromA: " << a << " i: " << i << " primeFactorIndex: " << primeFactorIndex << " prime: " << primesUpToMaxValue[primeFactorIndex] << " m_AsPrimeIndexIterators[a].size(): " << m_AsPrimeIndexIterators[a].size() << endl;
                 assert(i < m_AsPrimeIndexIterators[a].size());
                 assertHasIterator(m_AsWithPrimeFactorIndex[primeFactorIndex], m_AsPrimeIndexIterators[a][i]);
                 m_AsWithPrimeFactorIndex[primeFactorIndex].erase(m_AsPrimeIndexIterators[a][i]);
@@ -216,12 +216,12 @@ class AAndBWithGCD
         }
         void removeFromB(int b)
         {
-            cout << "removeFromB: " << b << endl;
+            //cout << "removeFromB: " << b << endl;
             assert(find(m_dbgB.begin(), m_dbgB.end(), b) != m_dbgB.end());
             int i = 0;
             for (const auto primeFactorIndex : primeFactorIndices[b])
             {
-                cout << "b: " << b << " i: " << i << " primeFactorIndex: " << primeFactorIndex <<  endl;
+                //cout << "b: " << b << " i: " << i << " primeFactorIndex: " << primeFactorIndex <<  endl;
                 assert(i < m_BsPrimeIndexIterators[b].size());
                 assertHasIterator(m_BsWithPrimeFactorIndex[primeFactorIndex], m_BsPrimeIndexIterators[b][i]);
                 m_BsWithPrimeFactorIndex[primeFactorIndex].erase(m_BsPrimeIndexIterators[b][i]);
@@ -329,6 +329,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         const vector<int> asWithCurrentPrimePower = aAndBWithGCD.asWithPrimeFactor(primeFactorIndex, primePower, anyAWithThisOrHigherPower);
         const vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bsWithPrimeFactor(primeFactorIndex, primePower, anyBWithThisOrHigherPower);
 
+#ifndef  NDEBUG
         cout << "prime: " << prime << " primePower: " << primePower << " asWithCurrentPrimePower: " << endl;
         for (const auto a : asWithCurrentPrimePower)
             cout << a << " ";
@@ -337,6 +338,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         for (const auto b : bsWithCurrentPrimePower)
             cout << b << " ";
         cout << endl;
+#endif
 
         //cout << "primeToPower: " << primeToPower << endl;
 
@@ -366,7 +368,10 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     // Recurse - this will find some of the gcds that are not divisible by this prime.
     findResult(aAndBWithGCD, productSoFar, nextMinPrimeIndex, generatedGcds);
 
+    if (asWithPrimePower.size() > 1)
     {
+        // Construct a AAndBWithGCD where all a's are divisible by prime, but none of 
+        // the B's are.
 #ifndef NDEBUG
         cout << "About to move: b's in source: " << endl;
         for (const auto b : aAndBWithGCD.bs())
@@ -375,21 +380,19 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         }
         cout << endl;
 #endif
-        // Construct a AAndBWithGCD where all a's are divisible by prime, but none of 
-        // the B's are.
         for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
         {
             //cout << "Trying to remove bsWithPrimePower " << bPrimePower << endl;
             //for (const auto b : bsWithPrimePower[bPrimePower])
             //{
-                //cout << b << " ";
+            //cout << b << " ";
             //}
             //cout << endl;
             aAndBWithGCD.removeFromB(bsWithPrimePower[bPrimePower]);
             //cout << ".. done; remaining" << endl;
             //for (const auto b : aDivisibleByPrimeBNotDivisibleByPrime.bs())
             //{
-                //cout << b << " ";
+            //cout << b << " ";
             //}
             //cout << endl;
         }
@@ -408,27 +411,27 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         }
         cout << endl;
 #endif
-        for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
-        {
-            aDivisibleByPrimeBNotDivisibleByPrime.addToA(asWithPrimePower[primePower]);
-        }
-        // Recurse - this finds the remaining gcds not divisible by this prime.
-        cout << "prime: " << prime << " productSoFar: " << productSoFar << " recursing to find B not divisible by prime; a is" << endl;
+            for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
+            {
+                aDivisibleByPrimeBNotDivisibleByPrime.addToA(asWithPrimePower[primePower]);
+            }
+            // Recurse - this finds the remaining gcds not divisible by this prime.
+            cout << "prime: " << prime << " productSoFar: " << productSoFar << " recursing to find B not divisible by prime; a is" << endl;
 #ifndef NDEBUG
-        cout << "as: " <<  endl;
-        for (const auto x : aDivisibleByPrimeBNotDivisibleByPrime.as())
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-        cout << "bs: " <<  endl;
-        for (const auto x : aDivisibleByPrimeBNotDivisibleByPrime.bs())
-        {
-            cout << x << " ";
-        }
-        cout << endl;
+            cout << "as: " <<  endl;
+            for (const auto x : aDivisibleByPrimeBNotDivisibleByPrime.as())
+            {
+                cout << x << " ";
+            }
+            cout << endl;
+            cout << "bs: " <<  endl;
+            for (const auto x : aDivisibleByPrimeBNotDivisibleByPrime.bs())
+            {
+                cout << x << " ";
+            }
+            cout << endl;
 #endif
-        findResult(aDivisibleByPrimeBNotDivisibleByPrime, productSoFar, nextMinPrimeIndex, generatedGcds);
+            findResult(aDivisibleByPrimeBNotDivisibleByPrime, productSoFar, nextMinPrimeIndex, generatedGcds);
 
         // Restore aAndBWithGCD (constant-time).
         aAndBWithGCD.moveBsFrom(aDivisibleByPrimeBNotDivisibleByPrime);
@@ -450,40 +453,42 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     }
 
     {
-        cout << "prime: " << prime << " About to do 1) and 2), perhaps" << endl;
+        //cout << "prime: " << prime << " About to do 1) and 2), perhaps" << endl;
         if (asWithPrimePower.size() > 1 && bsWithPrimePower.size() > 1)
         {
-            cout << " ... yep, doing 1) and 2)" << endl;
+            //cout << " ... yep, doing 1) and 2)" << endl;
             // TODO  - arrange for a and b divisible by prime, but 1) power of a fixed; power of b at least power of a and
             // 2) power of b fixed; power of a strictly larger than power of b.
             {
                 // Do 1).
-                cout << " doing 1) maxPowerOfPrime: " << maxPowerOfPrime << endl;
+                //cout << " doing 1) maxPowerOfPrime: " << maxPowerOfPrime << endl;
                 AAndBWithGCD aAndBDivisibleByPrime;
                 //aAndBDivisibleByPrime.addToA(asWithPrimePower[1]);
                 for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
                 {
+#ifndef NDEBUG
                     cout << "adding b's to aAndBDivisibleByPrime:" << endl;
                     for (const auto b : bsWithPrimePower[bPrimePower])
                     {
                         cout << b << " ";
                     }
                     cout << endl;
+#endif
                     aAndBDivisibleByPrime.addToB(bsWithPrimePower[bPrimePower]);
                 }
                 int primeToPower = prime;
                 for (int primePower = 1; primePower <= maxPowerOfPrime; primePower++)
                 {
-                    cout << "1) prime: " << prime << " primePower: " << primePower << " primeToPower: " << primeToPower << " asWithPrimePower.size() " << asWithPrimePower.size() << " bsWithPrimePower.size(): " << bsWithPrimePower.size() << endl;
+                    //cout << "1) prime: " << prime << " primePower: " << primePower << " primeToPower: " << primeToPower << " asWithPrimePower.size() " << asWithPrimePower.size() << " bsWithPrimePower.size(): " << bsWithPrimePower.size() << endl;
                     if (primePower > 1)
                     {
                         aAndBDivisibleByPrime.removeFromA(asWithPrimePower[primePower - 1]);
                     }
                     if (primePower < asWithPrimePower.size())
                     {
-                        cout << "adding as prime: " << prime << " primePower: " << primePower << endl;
+                        //cout << "adding as prime: " << prime << " primePower: " << primePower << endl;
                         aAndBDivisibleByPrime.addToA(asWithPrimePower[primePower]);
-                        cout << "done adding as prime: " << prime << " primePower: " << primePower << endl;
+                        //cout << "done adding as prime: " << prime << " primePower: " << primePower << endl;
                     }
                     else
                         break;
@@ -655,24 +660,26 @@ int main(int argc, char** argv)
 {
     if (argc == 2)
     {
-        cout << 100000 << " " << 100000 << " " << 10 << endl;
+#if 0
+        const int n = 30000;
+        cout << n << " " << n << " " << 1 << endl;
         for (int j = 1; j <= 2; j++)
         {
-        for (int i = 0; i < 100000; i++)
+        for (int i = 0; i < n; i++)
         {
             cout << (i + 1) << " ";
         }
         cout << endl;
         }
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 1; i++)
         {
-            cout << "0 0 99999 99999" << endl;
+            cout << "0 0 " << (n - 1) << " " << (n - 1) << endl;
         }
-#if 0
+#else
         srand(time(0));
         const int maxGenValue = 100000;
-        const int n = rand() % 20 + 1;
-        const int m = rand() % 20 + 1;
+        const int n = rand() % 100 + 1;
+        const int m = rand() % 100 + 1;
         const int q = rand() % 100 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
