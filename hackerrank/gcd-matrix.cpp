@@ -65,63 +65,9 @@ class AAndBWithGCD
         }
         void setAAndB(const vector<int>& A, const vector<int>& B)
         {
-            //cout << "setAAndB" << endl;
-            //static int addedToSet = 0;
-            //const auto justAddedToSet = A.size() + B.size();
-            //addedToSet += justAddedToSet;
-            //cout << "addedToSet: " << addedToSet << endl;
-            //m_dbgA = A;
-            //m_dbgB = B;
-            //static int addedToMaps = 0;
-#if 0
-            for (const auto a : A)
-            {
-                //cout << " a: " << a << endl;
-                for (const auto primeFactorOfAIndex : primeFactorIndices[a])
-                {
-                    //cout << "  primeFactorOfAIndex: " << primeFactorOfAIndex << endl;
-                    m_AsWithPrimeFactorIndex[primeFactorOfAIndex].push_back(a);
-                    m_primeIndicesThatDivideAAndB.insert(primeFactorOfAIndex);
-                    addedToMaps += 2;
-                }
-            }
-            for (const auto b : B)
-            {
-                //cout << " b: " << b << endl;
-                for (const auto primeFactorOfBIndex : primeFactorIndices[b])
-                {
-                    //cout << "  primeFactorOfBIndex: " << primeFactorOfBIndex << endl;
-                    m_BsWithPrimeFactorIndex[primeFactorOfBIndex].push_back(b);
-                    m_primeIndicesThatDivideAAndB.insert(primeFactorOfBIndex);
-                    addedToMaps += 2;
-                }
-            }
-
-            //cout << "addedToMaps: " << addedToMaps << endl;
-
-            auto primeIndexIter = m_primeIndicesThatDivideAAndB.begin();
-            while (primeIndexIter != m_primeIndicesThatDivideAAndB.end())
-            {
-                if (m_AsWithPrimeFactorIndex[*primeIndexIter].empty() || m_BsWithPrimeFactorIndex[*primeIndexIter].empty())
-                {
-                    //cout << "  erasing prime index: " << *primeIndexIter << endl;
-                    primeIndexIter = m_primeIndicesThatDivideAAndB.erase(primeIndexIter);
-                }
-                else
-                {
-                    //cout << "  not erasing prime index: " << *primeIndexIter << endl;
-                    primeIndexIter++;
-                }
-            }
-
-
-            //m_AsWithPrimeFactorIndex.clear();
-            //m_BsWithPrimeFactorIndex.clear();
-#endif
             addToA(A);
             addToB(B);
 
-            verifyBIters();
         }
         void moveBsFrom(AAndBWithGCD& source)
         {
@@ -132,8 +78,6 @@ class AAndBWithGCD
 #ifndef NDEBUG
             m_dbgB = std::move(source.m_dbgB);
 #endif
-            verifyBIters();
-            source.verifyBIters();
         }
         vector<int> asWithPrimeFactor(int primeFactorIndex, int power)
         {
@@ -167,18 +111,14 @@ class AAndBWithGCD
         {
             for (const auto a : as)
                 addToA(a);
-            verifyBIters();
         }
         void addToB(const vector<int>& bs)
         {
             for (const auto b : bs)
                 addToB(b);
-            verifyBIters();
         }
         void addToA(int a)
         {
-            verifyBIters();
-            cout << "addToA " << a << " m_AsPrimeIndexIterators.size(): " << m_AsPrimeIndexIterators.size() << endl;
             assert(find(m_dbgA.begin(), m_dbgA.end(), a) == m_dbgA.end());
             for (const auto primeFactorIndex : primeFactorIndices[a])
             {
@@ -187,7 +127,6 @@ class AAndBWithGCD
                 m_AsPrimeIndexIterators[a].push_back(addedPrimeFactorIterIter);
                 if (needToAddThing)
                 {
-                    cout << "adding a's primeFactorIndex " << primeFactorIndex << " to m_primeIndicesThatDivideAAndB" << endl;
                     assert(m_primeIndicesThatDivideAAndB.find(primeFactorIndex) == m_primeIndicesThatDivideAAndB.end());
                     m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
                 }
@@ -195,33 +134,23 @@ class AAndBWithGCD
 #ifndef NDEBUG
             m_dbgA.push_back(a);
 #endif
-            verifyBIters();
         }
         void addToB(int b)
         {
-            verifyBIters();
-            cout << "addToB: " << b << endl;
             assert(find(m_dbgB.begin(), m_dbgB.end(), b) == m_dbgB.end());
             assert(m_BsPrimeIndexIterators[b].empty());
             for (const auto primeFactorIndex : primeFactorIndices[b])
             {
                 const bool needToAddThing = (m_BsWithPrimeFactorIndex[primeFactorIndex].empty() && !m_AsWithPrimeFactorIndex[primeFactorIndex].empty());
-                cout << "Bleep: " << b << " primeFactorIndex: " << primeFactorIndex << " blah: " << m_BsWithPrimeFactorIndex[primeFactorIndex].size() << endl;
                 auto& glomp = m_BsWithPrimeFactorIndex[primeFactorIndex];
                 const auto addedPrimeFactorIterIter = glomp.insert(glomp.end(), b);
-                cout << "Adding iterator for m_BsWithPrimeFactorIndex[" << primeFactorIndex << "] at index " << m_BsPrimeIndexIterators[b].size() << " in m_BsPrimeIndexIterators[b] b = " << b << endl;
                 m_BsPrimeIndexIterators[b].push_back(addedPrimeFactorIterIter);
                 if (needToAddThing)
                 {
-                    cout << "adding b's primeFactorIndex " << primeFactorIndex << " to m_primeIndicesThatDivideAAndB" << endl;
                     assert(m_primeIndicesThatDivideAAndB.find(primeFactorIndex) == m_primeIndicesThatDivideAAndB.end());
                     m_primeIndicesThatDivideAAndB.insert(primeFactorIndex);
                 }
-                cout << "directly verify iter for b: " << b << endl;
-                assertHasIterator(glomp, addedPrimeFactorIterIter);
-                cout << "done directly verify iter for b: " << b << endl;
             }
-            verifyBIters();
 #ifndef NDEBUG
             m_dbgB.push_back(b);
 #endif
@@ -239,7 +168,6 @@ class AAndBWithGCD
         void removeFromA(int a)
         {
             cout << "removeFromA: " << a << endl;
-            verifyBIters();
             assert(find(m_dbgA.begin(), m_dbgA.end(), a) != m_dbgA.end());
             int i = 0;
             for (const auto primeFactorIndex : primeFactorIndices[a])
@@ -259,7 +187,6 @@ class AAndBWithGCD
 #ifndef NDEBUG
             m_dbgA.erase(remove(m_dbgA.begin(), m_dbgA.end(), a), m_dbgA.end());
 #endif
-            verifyBIters();
         }
         void removeFromB(int b)
         {
@@ -283,7 +210,6 @@ class AAndBWithGCD
 #ifndef NDEBUG
             m_dbgB.erase(remove(m_dbgB.begin(), m_dbgB.end(), b), m_dbgB.end());
 #endif
-            verifyBIters();
         }
         void assertHasIterator(list<int>& l, list<int>::iterator it)
         {
@@ -298,20 +224,6 @@ class AAndBWithGCD
             assert(false && "Could not find iterator!");
 #endif
         }
-#if 0
-        vector<int> asWithPrimeFactorIndex(int primeFactorIndex) const
-        {
-            const auto asIter = m_AsWithPrimeFactorIndex.find(primeFactorIndex);
-            assert(asIter != m_AsWithPrimeFactorIndex.end());
-            return asIter->second;
-        }
-        vector<int> bsWithPrimeFactorIndex(int primeFactorIndex) const
-        {
-            const auto bsIter = m_BsWithPrimeFactorIndex.find(primeFactorIndex);
-            assert(bsIter != m_BsWithPrimeFactorIndex.end());
-            return bsIter->second;
-        }
-#endif
 #ifndef NDEBUG
         vector<int> as() const
         {
@@ -325,24 +237,6 @@ class AAndBWithGCD
         const set<int>& primeIndicesThatDivideAAndB() const
         {
             return m_primeIndicesThatDivideAAndB;
-        }
-        void verifyBIters()
-        {
-#if 0
-            cout << "Performing verifyBIters" << endl;
-            for (const auto b : m_dbgB)
-            {
-                int i = 0;
-                for (const auto primeFactorIndex : primeFactorIndices[b])
-                {
-                    cout << " verifyBIters b: " << b << " i: " << i << " primeFactorIndex: " << primeFactorIndex <<  endl;
-                    assert(i < m_BsPrimeIndexIterators[b].size());
-                    assertHasIterator(m_BsWithPrimeFactorIndex[primeFactorIndex], m_BsPrimeIndexIterators[b][i]);
-                    i++;
-                }
-            }
-            cout << "Done Performing verifyBIters" << endl;
-#endif
         }
     private:
         set<int> m_primeIndicesThatDivideAAndB;
@@ -362,31 +256,6 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     const auto& primeIndicesThatDivideAAndB = aAndBWithGCD.primeIndicesThatDivideAAndB();
     auto primeIndexIter = primeIndicesThatDivideAAndB.lower_bound(minPrimeIndex);
 
-    //if (primeIndexIter == primeIndicesThatDivideAAndB.end() && primeIndexIter != primeIndicesThatDivideAAndB.begin())
-    //primeIndexIter--;
-    //while (primeIndexIter != primeIndicesThatDivideAAndB.end() && *primeIndexIter > maxPrimeIndex)
-    //{
-    //cout << "Need to walk back: " << *primeIndexIter << endl;
-    //if (primeIndexIter != primeIndicesThatDivideAAndB.begin())
-    //primeIndexIter--;
-    //else
-    //{
-    //primeIndexIter = primeIndicesThatDivideAAndB.end();
-    //break;
-    //}
-    //else
-    //primeIndexIter = primeIndicesThatDivideAAndB.end();
-    //}
-
-#if 0
-    cout << "  ";
-    for (const auto primeIndex : primeIndicesThatDivideAAndB)
-    {
-        cout << primeIndex << " ";
-    }
-    cout << endl;
-#endif
-
     if (primeIndexIter == primeIndicesThatDivideAAndB.end())
     {
         cout << "end - productSoFar: " << productSoFar << endl;
@@ -401,49 +270,6 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
     const auto prime = primesUpToMaxValue[primeFactorIndex];
     const int nextMinPrimeIndex = *primeIndexIter + 1;
     cout << "entering findResult; productSoFar: " << productSoFar << " prime: " << prime << endl;
-    aAndBWithGCD.verifyBIters();
-    //findResult(aAndBWithGCD, prime * productSoFar, nextMaxPrimeIndex, generatedGcds);
-
-    //int primePower = 1;
-    //int primeToPower = prime;
-    //vector<int> asWithCurrentPrimePower = aAndBWithGCD.asWithPrimeFactorIndex(*primeIndexIter);
-    //vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bsWithPrimeFactorIndex(*primeIndexIter);
-    //vector<int> asWithCurrentPrimePower = aAndBWithGCD.as();
-    //vector<int> bsWithCurrentPrimePower = aAndBWithGCD.bs();
-#if 0
-    for (const auto a : asWithCurrentPrimePower)
-    {
-        if ((a % prime) == 0)
-            cout << a << " is in a and divisible by " << prime << " productSoFar: " << productSoFar << endl;
-    }
-    for (const auto b : bsWithCurrentPrimePower)
-    {
-        if ((b % prime) == 0)
-            cout << b << " is in b and divisible by " << prime << " productSoFar: " << productSoFar << endl;
-    }
-#endif
-    //const int numCopied = asWithCurrentPrimePower.size() + bsWithCurrentPrimePower.size();
-    //static int totalCopied = 0;
-    //totalCopied += numCopied;
-    ////cout << "totalCopied: " << totalCopied << endl;
-    //assert(!asWithCurrentPrimePower.empty() && !bsWithCurrentPrimePower.empty());
-    //int maxPowerOfPrime = primePower;
-
-#if 0
-    cout << "prime: " << prime << " productSoFar: " << productSoFar << " as: " << endl;
-    for (const auto aElement : asWithCurrentPrimePower)
-    {
-        cout << aElement << " ";
-    }
-    cout << endl;
-    cout << " bs" << endl;
-    for (const auto bElement : bsWithCurrentPrimePower)
-    {
-        cout << bElement << " ";
-    }
-    cout << endl;
-#endif
-
 
     vector<vector<int>> asWithPrimePower;
     vector<vector<int>> bsWithPrimePower;
@@ -494,9 +320,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         aAndBWithGCD.removeFromA(asWithPrimePower[primePower]);
     }
     // Recurse - this will find some of the gcds that are not divisible by this prime.
-    aAndBWithGCD.verifyBIters();
     findResult(aAndBWithGCD, productSoFar, nextMinPrimeIndex, generatedGcds);
-    aAndBWithGCD.verifyBIters();
 
     {
         cout << "About to move: b's in source: " << endl;
@@ -524,7 +348,6 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
             //cout << endl;
         }
         const auto dbgBs = aAndBWithGCD.bs();
-        aAndBWithGCD.verifyBIters();
         AAndBWithGCD aDivisibleByPrimeBNotDivisibleByPrime;
         // Construction of aDivisibleByPrime - with all B's information intact - is O(1).
         aDivisibleByPrimeBNotDivisibleByPrime.moveBsFrom(aAndBWithGCD);
@@ -534,19 +357,15 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
             cout << b << " ";
         }
         cout << endl;
-        aDivisibleByPrimeBNotDivisibleByPrime.verifyBIters();
         for (int primePower = 1; primePower < asWithPrimePower.size(); primePower++)
         {
             aDivisibleByPrimeBNotDivisibleByPrime.addToA(asWithPrimePower[primePower]);
         }
-        aDivisibleByPrimeBNotDivisibleByPrime.verifyBIters();
         // Recurse - this finds the remaining gcds not divisible by this prime.
         findResult(aDivisibleByPrimeBNotDivisibleByPrime, productSoFar, nextMinPrimeIndex, generatedGcds);
 
         // Restore aAndBWithGCD (constant-time).
-        aDivisibleByPrimeBNotDivisibleByPrime.verifyBIters();
         aAndBWithGCD.moveBsFrom(aDivisibleByPrimeBNotDivisibleByPrime);
-        aAndBWithGCD.verifyBIters();
         assert(aAndBWithGCD.bs() == dbgBs);
         for (int bPrimePower = 1; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
         {
@@ -668,93 +487,6 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
         aAndBWithGCD.addToA(asWithPrimePower[primePower]);
     }
 
-#if 0
-    auto eraseDivisibleBy = [](vector<int>& array, int divisor)
-    {
-        array.erase(remove_if(array.begin(), array.end(), [divisor](const int value) { return (value % divisor) == 0;}), array.end());
-    };
-
-    primeToPower = 1;
-    for (int primePower = 0; primePower <= maxPowerOfPrime; primePower++)
-    {
-        //cout << "prime: " << prime << " primePower: " << primePower << endl;
-        if (primePower < asWithPrimePower.size())
-        {
-            eraseDivisibleBy(asWithPrimePower[primePower], primeToPower * prime);
-#if 0
-            cout << "asWithPrimePower: " << endl;
-            for (const auto aElement : asWithPrimePower[primePower])
-            {
-                cout << aElement << " ";
-            }
-            cout << endl;
-#endif
-        }
-        if (primePower < bsWithPrimePower.size())
-        {
-            eraseDivisibleBy(bsWithPrimePower[primePower], primeToPower * prime);
-#if 0
-            cout << "bsWithPrimePower: " << endl;
-            for (const auto bElement : bsWithPrimePower[primePower])
-            {
-                cout << bElement << " ";
-            }
-            cout << endl;
-#endif
-        }
-
-        primeToPower *= prime;
-    }
-
-    primeToPower = 1;
-    //cout << " computing permutations; prime: " << prime << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
-    for (int primePower = 0; primePower <= maxPowerOfPrime; primePower++)
-    {
-        //cout << "prime: " << prime << "  primePower: " << primePower << " maxPowerOfPrime: " << maxPowerOfPrime << " productSoFar: " << productSoFar << endl;
-        const int nextProductSoFar = productSoFar * primeToPower;
-        //cout << "nextProductSoFar: " << nextProductSoFar << endl;
-        if (primePower < asWithPrimePower.size())
-        {
-            // As with primePower; Bs with >= primePower.
-            //cout << "  Power of prime for a: " << primePower << endl;
-            const auto asWithCurrentPrimePower = asWithPrimePower[primePower];
-            vector<int> bsWithGreaterOrEqualPrimerPower;
-            for (int bPrimePower = primePower; bPrimePower < bsWithPrimePower.size(); bPrimePower++)
-            {
-                //cout << "   Power of prime for b: " << bPrimePower << endl; 
-                //const auto bsWithCurrentPrimePower = bsWithPrimePower[bPrimePower];
-                bsWithGreaterOrEqualPrimerPower.insert(bsWithGreaterOrEqualPrimerPower.end(), bsWithPrimePower[bPrimePower].begin(), bsWithPrimePower[bPrimePower].end());
-            }
-            if (!asWithCurrentPrimePower.empty() && !bsWithGreaterOrEqualPrimerPower.empty())
-            {
-                AAndBWithGCD nextAAndBWithGCD;
-                nextAAndBWithGCD.setAAndB(asWithCurrentPrimePower, bsWithGreaterOrEqualPrimerPower);
-                findResult(nextAAndBWithGCD, nextProductSoFar, nextMinPrimeIndex, generatedGcds);
-            }
-        }
-        if (primePower < bsWithPrimePower.size())
-        {
-            // Bs with primePower; As with > primePower.
-            //cout << "  Power of prime for b: " << primePower << endl;
-            const auto bsWithCurrentPrimePower = bsWithPrimePower[primePower];
-            vector<int> asWithGreaterPrimePower;
-            for (int aPrimePower = primePower + 1; aPrimePower < asWithPrimePower.size(); aPrimePower++)
-            {
-                //cout << "   Power of prime for a: " << aPrimePower << endl;
-                asWithGreaterPrimePower.insert(asWithGreaterPrimePower.end(), asWithPrimePower[aPrimePower].begin(), asWithPrimePower[aPrimePower].end());
-                //const auto asWithCurrentPrimePower = asWithPrimePower[aPrimePower];
-            }
-            if (!asWithGreaterPrimePower.empty() && !bsWithCurrentPrimePower.empty())
-            {
-                AAndBWithGCD nextAAndBWithGCD;
-                nextAAndBWithGCD.setAAndB(asWithGreaterPrimePower, bsWithCurrentPrimePower);
-                findResult(nextAAndBWithGCD, nextProductSoFar, nextMinPrimeIndex, generatedGcds);
-            }
-        }
-
-        primeToPower *= prime;
-    }
-#endif
     cout << "Exiting findResult" << endl;
 }
 
