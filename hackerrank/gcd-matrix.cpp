@@ -767,6 +767,11 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
     for (int j = c1; j <= c2; j++)
         bSubset.push_back(b[j]);
 
+    sort(aSubset.begin(), aSubset.end());
+    aSubset.erase(unique(aSubset.begin(), aSubset.end()), aSubset.end());
+
+    sort(bSubset.begin(), bSubset.end());
+    bSubset.erase(unique(bSubset.begin(), bSubset.end()), bSubset.end());
 
     cout << "findResult:" << endl;
 #if 1
