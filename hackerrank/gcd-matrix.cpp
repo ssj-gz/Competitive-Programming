@@ -654,28 +654,32 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
 struct PrimeFactor
 {
     PrimeFactor(int primeFactorIndex, int primePower)
-        : primeFactorIndex{primeFactorIndex}
+        : primeFactorIndex{primeFactorIndex}, primePower{primePower}
     {
         assert(primeFactorIndex >=0 && primeFactorIndex < primesUpToMaxValue.size());
         prime = primesUpToMaxValue[primeFactorIndex];
-        setPrimePower(primePower);
-    }
-    void setPrimePower(int primePower)
-    {
-        value = 1;
-        for (int i = 0; i < primePower; i++)
-            value *= prime;
-        this->primePower = primePower;
     }
     int primeFactorIndex = 0;
     int prime = 0;
     int primePower = 0;
-    int value = 0;
 };
 
 struct PrimeFactorisation
 {
     vector<PrimeFactor> primeFactors;
+    void updateValue()
+    {
+        value = 1;
+        for (const auto primeFactor : primeFactors)
+        {
+            int primeFactorValue = 1;
+            for (int i = 0; i < primeFactor.primePower; i++)
+                primeFactorValue *= primeFactor.prime;
+
+            value *= primeFactorValue;
+        }
+    }
+    int value = -1;
 };
 
 ostream& operator<<(ostream& os, const PrimeFactor& primeFactor)
@@ -716,11 +720,12 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
         {
             //cout << "productSoFar: " << productSoFar << " minPrimeIndex: " << minPrimeIndex << " primeIndex: " << primeIndex << " nextProductSoFar: " << nextProductSoFar << endl;
             PrimeFactor& primeFactor = primeFactorisationSoFar.primeFactors.back();
-            primeFactor.setPrimePower(primeFactor.primePower + 1);
+            primeFactor.primePower++;;
             nextProductSoFar *= prime;
 
-            cout << "Storing " << primeFactorisationSoFar << " as " << nextProductSoFar << endl;
             assert(nextProductSoFar >= 0 && nextProductSoFar < lookup.size());
+            primeFactorisationSoFar.updateValue();
+            assert(primeFactorisationSoFar.value == nextProductSoFar);
             lookup[nextProductSoFar] = primeFactorisationSoFar;
 
             generatePrimeFactorLookups(nextProductSoFar, maxValue, primeIndex + 1, primeFactorisationSoFar, lookup);
