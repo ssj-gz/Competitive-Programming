@@ -760,6 +760,7 @@ PrimeFactorisation basis(const PrimeFactorisation& primeFactorisation)
     {
         basis.primeFactors.push_back({primeFactor.primeFactorIndex, 1});
     }
+    basis.updateValue();
     return basis;
 }
 
@@ -864,6 +865,19 @@ int main(int argc, char** argv)
     }
     cout << "basis of " << testValue << endl;
     cout << basis(testValue) << endl;
+
+    vector<vector<int>> numbersWithBasis(maxValue + 1);
+    for (int number = 1; number <= maxValue; number++)
+    {
+        const auto valueOfNumbersBasis = basis(primeFactorisationOf[number]).value;
+        //cout << "number: " << number << " valueOfNumbersBasis: " << valueOfNumbersBasis << endl;
+        numbersWithBasis[valueOfNumbersBasis].push_back(number);
+    }
+    for (int i = 1; i <= maxValue; i++)
+    {
+        //cout << "Num numbers with basis " << primeFactorisationOf[i] << " = " << numbersWithBasis[i].size() << endl;
+    }
+
     return 0;
 
     for (int i = 0; i < primesUpToMaxValue.size(); i++)
