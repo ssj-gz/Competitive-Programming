@@ -747,9 +747,20 @@ vector<PrimeFactorisation> findAllCombinationsOfPrimeFactors(const PrimeFactoris
             if ((primeFactorInclusionMask & (1 << i)) != 0)
                 primeFactorsCombination.primeFactors.push_back(primeFactorisation.primeFactors[i]);
         }
+        primeFactorsCombination.updateValue();
         result.push_back(primeFactorsCombination);
     }
     return result;
+}
+
+PrimeFactorisation basis(const PrimeFactorisation& primeFactorisation)
+{
+    PrimeFactorisation basis;
+    for (const auto& primeFactor : primeFactorisation.primeFactors)
+    {
+        basis.primeFactors.push_back({primeFactor.primeFactorIndex, 1});
+    }
+    return basis;
 }
 
 int main(int argc, char** argv)
@@ -845,10 +856,13 @@ int main(int argc, char** argv)
     PrimeFactorisation primeFactorisationSoFar;
     generatePrimeFactorLookups(1, maxValue, 0, primeFactorisationSoFar, primeFactorisationOf);
     cout << "Finished generatePrimeFactorLookups" << endl;
-    for (const auto combination : findAllCombinationsOfPrimeFactors(primeFactorisationOf[2 * 7 * 11 * 11 * 23]))
+    const auto testValue = primeFactorisationOf[2 * 7 * 11 * 11 * 23];
+    for (const auto combination : findAllCombinationsOfPrimeFactors(testValue))
     {
         cout << "combination: " << combination << endl;
     }
+    cout << "basis of " << testValue << endl;
+    cout << basis(testValue) << endl;
     return 0;
 
     for (int i = 0; i < primesUpToMaxValue.size(); i++)
