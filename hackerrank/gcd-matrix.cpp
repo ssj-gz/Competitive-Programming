@@ -772,16 +772,17 @@ int main(int argc, char** argv)
         cout << n << " " << n << " " << 1 << endl;
         for (int j = 1; j <= 2; j++)
         {
-        for (int i = 0; i < n; i++)
-        {
-            cout << (i + 1) << " ";
-        }
-        cout << endl;
+            for (int i = 0; i < n; i++)
+            {
+                cout << (i + 1) << " ";
+            }
+            cout << endl;
         }
         for (int i = 0; i < 1; i++)
         {
             cout << "0 0 " << (n - 1) << " " << (n - 1) << endl;
         }
+        return 0;
 #else
         srand(time(0));
         const int maxGenValue = 100000;
