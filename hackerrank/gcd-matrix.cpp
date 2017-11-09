@@ -735,6 +735,23 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
     }
 }
 
+vector<PrimeFactorisation> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFactorisation)
+{
+    vector<PrimeFactorisation> result;
+    const int numDistinctPrimes = primeFactorisation.primeFactors.size();
+    for (unsigned int primeFactorInclusionMask = 1; primeFactorInclusionMask < (1 << numDistinctPrimes); primeFactorInclusionMask++)
+    {
+        PrimeFactorisation primeFactorsCombination;
+        for (unsigned int i = 0; i < numDistinctPrimes; i++)
+        {
+            if ((primeFactorInclusionMask & (1 << i)) != 0)
+                primeFactorsCombination.primeFactors.push_back(primeFactorisation.primeFactors[i]);
+        }
+        result.push_back(primeFactorsCombination);
+    }
+    return result;
+}
+
 int main(int argc, char** argv)
 {
     if (argc == 2)
@@ -828,6 +845,10 @@ int main(int argc, char** argv)
     PrimeFactorisation primeFactorisationSoFar;
     generatePrimeFactorLookups(1, maxValue, 0, primeFactorisationSoFar, primeFactorisationOf);
     cout << "Finished generatePrimeFactorLookups" << endl;
+    for (const auto combination : findAllCombinationsOfPrimeFactors(primeFactorisationOf[2 * 7 * 11 * 11 * 23]))
+    {
+        cout << "combination: " << combination << endl;
+    }
     return 0;
 
     for (int i = 0; i < primesUpToMaxValue.size(); i++)
