@@ -1,5 +1,5 @@
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -603,6 +603,7 @@ void findResult(AAndBWithGCD& aAndBWithGCD, int productSoFar, int minPrimeIndex,
 
 int findResult(int r1, int c1, int r2, int c2, int maxValue)
 {
+    return 0;
     vector<int> aSubset;
     for (int i = r1; i <= r2; i++)
         aSubset.push_back(a[i]);
@@ -650,13 +651,91 @@ int findResult(int r1, int c1, int r2, int c2, int maxValue)
     return numDistinctGCDS;
 }
 
+struct PrimeFactor
+{
+    PrimeFactor(int primeFactorIndex, int primePower)
+        : primeFactorIndex{primeFactorIndex}
+    {
+        assert(primeFactorIndex >=0 && primeFactorIndex < primesUpToMaxValue.size());
+        prime = primesUpToMaxValue[primeFactorIndex];
+        setPrimePower(primePower);
+    }
+    void setPrimePower(int primePower)
+    {
+        value = 1;
+        for (int i = 0; i < primePower; i++)
+            value *= prime;
+        this->primePower = primePower;
+    }
+    int primeFactorIndex = 0;
+    int prime = 0;
+    int primePower = 0;
+    int value = 0;
+};
+
+struct PrimeFactorisation
+{
+    vector<PrimeFactor> primeFactors;
+};
+
+ostream& operator<<(ostream& os, const PrimeFactor& primeFactor)
+{
+    os << primeFactor.prime;
+    if (primeFactor.primePower != 1)
+        os << "^" << primeFactor.primePower;
+    return os;
+}
+
+ostream& operator<<(ostream& os, const PrimeFactorisation& primeFactorisation)
+{
+    for (auto iter = primeFactorisation.primeFactors.begin(); iter != primeFactorisation.primeFactors.end(); iter++)
+    {
+        os << *iter;
+        if (iter + 1 != primeFactorisation.primeFactors.end())
+            os << "*";
+    }
+    return os;
+}
+
+void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrimeIndex, PrimeFactorisation& primeFactorisationSoFar, vector<PrimeFactorisation>& lookup)
+{
+    //cout << "generatePrimeFactorLookups: productSoFar:" << productSoFar << " minPrimeIndex: " << minPrimeIndex << " primesUpToMaxValue.size(): " << primesUpToMaxValue.size() << endl;
+    if (minPrimeIndex >= primesUpToMaxValue.size())
+        return;
+    assert(productSoFar <= maxValue);
+    //if (productSoFar <= maxValue)
+
+    for (int primeIndex = minPrimeIndex; primeIndex < primesUpToMaxValue.size(); primeIndex++)
+    {
+        const int64_t prime = primesUpToMaxValue[primeIndex];
+        if (productSoFar * prime > maxValue)
+            return;
+        int64_t nextProductSoFar = productSoFar;
+        primeFactorisationSoFar.primeFactors.push_back(PrimeFactor(primeIndex, 0));
+        while (nextProductSoFar * prime <= maxValue)
+        {
+            //cout << "productSoFar: " << productSoFar << " minPrimeIndex: " << minPrimeIndex << " primeIndex: " << primeIndex << " nextProductSoFar: " << nextProductSoFar << endl;
+            PrimeFactor& primeFactor = primeFactorisationSoFar.primeFactors.back();
+            primeFactor.setPrimePower(primeFactor.primePower + 1);
+            nextProductSoFar *= prime;
+
+            cout << "Storing " << primeFactorisationSoFar << " as " << nextProductSoFar << endl;
+            assert(nextProductSoFar >= 0 && nextProductSoFar < lookup.size());
+            lookup[nextProductSoFar] = primeFactorisationSoFar;
+
+            generatePrimeFactorLookups(nextProductSoFar, maxValue, primeIndex + 1, primeFactorisationSoFar, lookup);
+
+        }
+        primeFactorisationSoFar.primeFactors.pop_back();
+    }
+}
 
 int main(int argc, char** argv)
 {
     if (argc == 2)
     {
 #if 1
-        const int n = 40000;
+        const int n = 100000;
         cout << n << " " << n << " " << 1 << endl;
         for (int j = 1; j <= 2; j++)
         {
@@ -739,6 +818,12 @@ int main(int argc, char** argv)
             }
         }
     }
+
+    vector<PrimeFactorisation> primeFactorisationOf(maxValue + 1);
+    PrimeFactorisation primeFactorisationSoFar;
+    generatePrimeFactorLookups(1, maxValue, 0, primeFactorisationSoFar, primeFactorisationOf);
+    cout << "Finished generatePrimeFactorLookups" << endl;
+    return 0;
 
     for (int i = 0; i < primesUpToMaxValue.size(); i++)
     {
