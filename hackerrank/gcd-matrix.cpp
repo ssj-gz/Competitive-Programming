@@ -875,7 +875,23 @@ int main(int argc, char** argv)
     }
     for (int i = 1; i <= maxValue; i++)
     {
-        //cout << "Num numbers with basis " << primeFactorisationOf[i] << " = " << numbersWithBasis[i].size() << endl;
+        cout << "Num numbers with basis " << primeFactorisationOf[i] << " = " << numbersWithBasis[i].size() << endl;
+    }
+
+    vector<int> numNumbersWith(maxValue + 1);
+    for (const auto& primeFactorisation : primeFactorisationOf)
+    {
+        const auto allCombinationsOfPrimeFactorisation = findAllCombinationsOfPrimeFactors(primeFactorisation);
+        for (const auto& combination : allCombinationsOfPrimeFactorisation)
+        {
+            numNumbersWith[combination.value]++;
+        }
+
+    }
+
+    for (int i = 1; i <= maxValue; i++)
+    {
+        cout << "Num numbers with " << primeFactorisationOf[i] << " = " << numNumbersWith[i] << endl;
     }
 
     return 0;
