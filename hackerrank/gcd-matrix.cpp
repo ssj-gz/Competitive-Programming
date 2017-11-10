@@ -56,6 +56,7 @@ struct PrimeFactorisation
 
 vector<PrimeFactorisation> primeFactorisationOf;
 
+// Populate the primeFactorisationOf lookup - for each value i in 1 ... maxValue + 1, set primeFactorisationOf[i] to i's prime factorisation1
 void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrimeIndex, PrimeFactorisation& primeFactorisationSoFar, vector<PrimeFactorisation>& lookup)
 {
     if (minPrimeIndex >= primesUpToMaxValue.size())
@@ -87,6 +88,7 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
     }
 }
 
+// If there are k prime factors in primeFactors, then compute all 2^k values we can get by using all subsets of its prime factors.
 vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFactorisation)
 {
     vector<int> result;
@@ -107,6 +109,7 @@ vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFac
     return result;
 }
 
+// The "basis" of a prime factorisation is just the value obtained by multiplying each distinct prime in primeFactorisation together.
 PrimeFactorisation basis(const PrimeFactorisation& primeFactorisation)
 {
     PrimeFactorisation basis;
@@ -149,25 +152,26 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
         isInBSubset[b[j]] = true;
     }
 
-    vector<int64_t> numPairsWithGCD(maxValue + 1);
     vector<int64_t> numNumbersInAContaining(maxValue + 1);
     vector<int64_t> numNumbersInBContaining(maxValue + 1);
-    for (int i = 1; i <= maxValue; i++)
+    for (int value = 1; value <= maxValue; value++)
     {
-        for (const auto& numberWith : numbersContaining[i])
+        for (const auto& numberContainingValue : numbersContaining[value])
         {
-            if (isInASubset[numberWith])
-                numNumbersInAContaining[i]++;
-            if (isInBSubset[numberWith])
-                numNumbersInBContaining[i]++;
+            if (isInASubset[numberContainingValue])
+                numNumbersInAContaining[value]++;
+            if (isInBSubset[numberContainingValue])
+                numNumbersInBContaining[value]++;
         }
     }
 
+    vector<int64_t> numPairsWithGCD(maxValue + 1);
     for (int basis = 1; basis <= maxValue; basis++)
     {
         if (numbersWithBasis[basis].empty())
             continue;
 
+        // Iterate over all pairs of numbers each of which has basis "basis".
         for (const auto& withBasisInA : numbersWithBasis[basis])
         {
             if (numNumbersInAContaining[withBasisInA] == 0)
@@ -176,9 +180,9 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
             {
                 if (numNumbersInBContaining[withBasisInB] == 0)
                     continue;
+                const auto gcd = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasisInA], primeFactorisationOf[withBasisInB]);
                 const int64_t numPairsWithThisGCD = numNumbersInAContaining[withBasisInA] * numNumbersInBContaining[withBasisInB];
                 assert(numPairsWithThisGCD > 0);
-                const auto gcd = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasisInA], primeFactorisationOf[withBasisInB]);
                 const auto& gcdPrimeFactorisation = primeFactorisationOf[gcd];
                 const auto numPrimeFactorsInGcd = gcdPrimeFactorisation.primeFactors.size();
                 for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcdPrimeFactorisation))
