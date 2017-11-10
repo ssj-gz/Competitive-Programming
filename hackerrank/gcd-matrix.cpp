@@ -1,9 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-10 12:09
-#define BRUTE_FORCE
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
-#undef BRUTE_FORCE
 #endif
 #include <iostream>
 #include <vector>
@@ -17,30 +15,9 @@
 
 using namespace std;
 
-int gcd(int a, int b)
-{
-    while (b != 0)
-    {
-        int t = b; 
-        b = a % b; 
-        a = t; 
-    }
-    return a;
-}
-
-bool isPrime(int n)
-{
-    for (int i = 2; i <= sqrt(n) + 1; i++)
-    {
-        if (i < n && (n % i) == 0)
-            return false;
-    }
-    return true;
-}
-
 vector<int> primesUpToMaxValue;
 vector<vector<int>> numbersWithBasis;
-vector<vector<int>> numbersWith;
+vector<vector<int>> numbersContaining;
 
 struct PrimeFactor
 {
@@ -179,37 +156,29 @@ int gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFactorisation1, con
 
 int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, int r1, int c1, int r2, int c2, int maxValue)
 {
-    vector<int> aSubset;
+    // Create the isInASubset and isInBSubsets.
+    vector<bool> isInASubset(maxValue + 1, false);
     for (int i = r1; i <= r2; i++)
-        aSubset.push_back(a[i]);
-    vector<int> bSubset;
+    {
+        isInASubset[a[i]] = true;
+    }
+    vector<bool> isInBSubset(maxValue + 1, false);
     for (int j = c1; j <= c2; j++)
-        bSubset.push_back(b[j]);
-
-    sort(aSubset.begin(), aSubset.end());
-    aSubset.erase(unique(aSubset.begin(), aSubset.end()), aSubset.end());
-
-    sort(bSubset.begin(), bSubset.end());
-    bSubset.erase(unique(bSubset.begin(), bSubset.end()), bSubset.end());
-
-    vector<bool> isInASubset(maxValue + 1);
-    for (const auto aElement : aSubset)
-        isInASubset[aElement] = true;
-    vector<bool> isInBSubset(maxValue + 1);
-    for (const auto bElement : bSubset)
-        isInBSubset[bElement] = true;
+    {
+        isInBSubset[b[j]] = true;
+    }
 
     vector<int64_t> numPairsWithGCD(maxValue + 1);
-    vector<int64_t> numNumbersInAWith(maxValue + 1);
-    vector<int64_t> numNumbersInBWith(maxValue + 1);
+    vector<int64_t> numNumbersInAContaining(maxValue + 1);
+    vector<int64_t> numNumbersInBContaining(maxValue + 1);
     for (int i = 1; i <= maxValue; i++)
     {
-        for (const auto& numberWith : numbersWith[i])
+        for (const auto& numberWith : numbersContaining[i])
         {
             if (isInASubset[numberWith])
-                numNumbersInAWith[i]++;
+                numNumbersInAContaining[i]++;
             if (isInBSubset[numberWith])
-                numNumbersInBWith[i]++;
+                numNumbersInBContaining[i]++;
         }
     }
 
@@ -220,13 +189,13 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
 
         for (const auto& withBasisInA : numbersWithBasis[basis])
         {
-            if (numNumbersInAWith[withBasisInA] == 0)
+            if (numNumbersInAContaining[withBasisInA] == 0)
                 continue;
             for (const auto& withBasisInB : numbersWithBasis[basis])
             {
-                if (numNumbersInBWith[withBasisInB] == 0)
+                if (numNumbersInBContaining[withBasisInB] == 0)
                     continue;
-                const int64_t numPairsWithThisGCD = numNumbersInAWith[withBasisInA] * numNumbersInBWith[withBasisInB];
+                const int64_t numPairsWithThisGCD = numNumbersInAContaining[withBasisInA] * numNumbersInBContaining[withBasisInB];
                 assert(numPairsWithThisGCD > 0);
                 const auto gcd = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasisInA], primeFactorisationOf[withBasisInB]);
                 const auto& gcdPrimeFactorisation = primeFactorisationOf[gcd];
@@ -235,6 +204,8 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
                 {
                     assert(subsetGcd >= 0 && subsetGcd <= maxValue);
                     const int numPrimeFactorsInSubsetGcd = primeFactorisationOf[subsetGcd].primeFactors.size();
+                    // If gcd has an odd number more primes in its factorisation than subsetGcd, then exclude it - else include it
+                    // (Inclusion-Exclusion principle).
                     const bool include = (((numPrimeFactorsInGcd - numPrimeFactorsInSubsetGcd) % 2) == 0);
                     numPairsWithGCD[subsetGcd] += (include ? 1 : -1) * numPairsWithThisGCD;
                 }
@@ -243,6 +214,7 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
 
     }
 
+    // Finally compute the numDistinctGcds!
     int numDistinctGcds = 0;
     for (int gcd = 1; gcd <= maxValue; gcd++)
     {
@@ -325,13 +297,13 @@ int main(int argc, char** argv)
         cin >> b[i];
     }
 
+    // Compute list of primesUpToMaxValue, using Sieve of Erastophenes.
     const auto maxValue = max(*max_element(a.begin(), a.end()), *max_element(b.begin(), b.end()));
     vector<bool> primeSieve(maxValue + 1, true);
     for (int factor = 2; factor <= maxValue; factor++)
     {
         if (primeSieve[factor])
         {
-            assert(isPrime(factor));
             const int primeIndex = primesUpToMaxValue.size();
             primesUpToMaxValue.push_back(factor);
             auto multiple = 2 * factor;
@@ -356,13 +328,13 @@ int main(int argc, char** argv)
         numbersWithBasis[valueOfNumbersBasis].push_back(number);
     }
 
-    numbersWith.resize(maxValue + 1);
+    numbersContaining.resize(maxValue + 1);
     for (const auto& primeFactorisation : primeFactorisationOf)
     {
         const auto allCombinationsOfPrimeFactorisation = findAllCombinationsOfPrimeFactors(primeFactorisation);
         for (const auto& combination : allCombinationsOfPrimeFactorisation)
         {
-            numbersWith[combination].push_back(primeFactorisation.value);
+            numbersContaining[combination].push_back(primeFactorisation.value);
         }
 
     }
@@ -373,16 +345,8 @@ int main(int argc, char** argv)
 
         cin >> r1 >> c1 >> r2 >> c2;
 
-        //cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << " c2: " << c2 << " submatrix size: " << (c2 - c1 + 1) * (r2 - r1 + 1) << endl;
-
         const auto result = findNumDistinctGCDsInSubmatrix(a, b, r1, c1, r2, c2, maxValue);
         cout << result << endl;
-#ifdef BRUTE_FORCE
-        const auto resultBruteForce = findResultBruteForce(a, b, r1, c1, r2, c2);
-        cout << "result: " << result << endl;
-        cout << "resultBruteForce: " << resultBruteForce << endl;
-        assert(result == resultBruteForce);
-#endif
     }
 }
 
