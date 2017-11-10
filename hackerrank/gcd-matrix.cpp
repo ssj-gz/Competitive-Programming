@@ -54,25 +54,6 @@ struct PrimeFactorisation
     int value = -1;
 };
 
-ostream& operator<<(ostream& os, const PrimeFactor& primeFactor)
-{
-    os << primeFactor.prime;
-    if (primeFactor.primePower != 1)
-        os << "^" << primeFactor.primePower;
-    return os;
-}
-
-ostream& operator<<(ostream& os, const PrimeFactorisation& primeFactorisation)
-{
-    for (auto iter = primeFactorisation.primeFactors.begin(); iter != primeFactorisation.primeFactors.end(); iter++)
-    {
-        os << *iter;
-        if (iter + 1 != primeFactorisation.primeFactors.end())
-            os << "*";
-    }
-    return os;
-}
-
 vector<PrimeFactorisation> primeFactorisationOf;
 
 void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrimeIndex, PrimeFactorisation& primeFactorisationSoFar, vector<PrimeFactorisation>& lookup)
