@@ -777,6 +777,71 @@ PrimeFactorisation gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFact
     return gcd;
 }
 
+vector<PrimeFactorisation> primeFactorisationOf;
+vector<vector<int>> numbersWithBasis;
+vector<vector<int>> numbersWith;
+
+int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int r2, int c2, int maxValue)
+{
+    vector<int> aSubset;
+    for (int i = r1; i <= r2; i++)
+        aSubset.push_back(a[i]);
+    vector<int> bSubset;
+    for (int j = c1; j <= c2; j++)
+        bSubset.push_back(b[j]);
+
+    sort(aSubset.begin(), aSubset.end());
+    aSubset.erase(unique(aSubset.begin(), aSubset.end()), aSubset.end());
+
+    sort(bSubset.begin(), bSubset.end());
+    bSubset.erase(unique(bSubset.begin(), bSubset.end()), bSubset.end());
+
+    vector<bool> isInASubset(maxValue + 1);
+    for (const auto aElement : aSubset)
+        isInASubset[aElement] = true;
+    vector<bool> isInBSubset(maxValue + 1);
+    for (const auto bElement : bSubset)
+        isInBSubset[bElement] = true;
+
+    vector<int> numPairsWithGCD(maxValue + 1);
+    vector<int> numNumbersInAWith(maxValue + 1);
+    vector<int> numNumbersInBWith(maxValue + 1);
+    for (int i = 1; i <= maxValue; i++)
+    {
+        for (const auto& numberWith : numbersWith[i])
+        {
+            if (true) // TODO - if numberWith in A.
+                numNumbersInAWith[i]++;
+            if (true) // TODO - if numberWith in B.
+                numNumbersInBWith[i]++;
+        }
+    }
+
+    for (int i = 1; i <= maxValue; i++)
+    {
+        if (numbersWithBasis[i].empty())
+            continue;
+
+        for (const auto& withBasis1 : numbersWithBasis[i])
+        {
+            for (const auto& withBasis2 : numbersWithBasis[i])
+            {
+                const auto gcdPrimeFactorisation = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasis1], primeFactorisationOf[withBasis2]);
+                const auto gcd = gcdPrimeFactorisation.value;
+                for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcdPrimeFactorisation))
+                {
+                    const bool include = (((gcdPrimeFactorisation.primeFactors.size() - subsetGcd.primeFactors.size()) % 2) == 0);
+                    const auto numPairsWithSubsetGcd = numNumbersInAWith[withBasis1] * numNumbersInBWith[withBasis2];
+                    numPairsWithGCD[subsetGcd.value] += (include ? 1 : -1) * numPairsWithSubsetGcd;
+                }
+            }
+        }
+
+    }
+
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     if (argc == 2)
@@ -867,7 +932,7 @@ int main(int argc, char** argv)
         }
     }
 
-    vector<PrimeFactorisation> primeFactorisationOf(maxValue + 1);
+    primeFactorisationOf.resize(maxValue + 1);
     PrimeFactorisation primeFactorisationSoFar;
     generatePrimeFactorLookups(1, maxValue, 0, primeFactorisationSoFar, primeFactorisationOf);
     cout << "Finished generatePrimeFactorLookups" << endl;
@@ -879,7 +944,7 @@ int main(int argc, char** argv)
     cout << "basis of " << testValue << endl;
     cout << basis(testValue) << endl;
 
-    vector<vector<int>> numbersWithBasis(maxValue + 1);
+    numbersWithBasis.resize(maxValue + 1);
     for (int number = 1; number <= maxValue; number++)
     {
         const auto valueOfNumbersBasis = basis(primeFactorisationOf[number]).value;
@@ -888,10 +953,10 @@ int main(int argc, char** argv)
     }
     for (int i = 1; i <= maxValue; i++)
     {
-        cout << "Num numbers with basis " << primeFactorisationOf[i] << " = " << numbersWithBasis[i].size() << endl;
+        //cout << "Num numbers with basis " << primeFactorisationOf[i] << " = " << numbersWithBasis[i].size() << endl;
     }
 
-    vector<vector<int>> numbersWith(maxValue + 1);
+    numbersWith.resize(maxValue + 1);
     for (const auto& primeFactorisation : primeFactorisationOf)
     {
         const auto allCombinationsOfPrimeFactorisation = findAllCombinationsOfPrimeFactors(primeFactorisation);
@@ -904,7 +969,7 @@ int main(int argc, char** argv)
 
     for (int i = 1; i <= maxValue; i++)
     {
-        cout << "Num numbers with " << primeFactorisationOf[i] << " = " << numbersWith[i].size() << endl;
+        //cout << "Num numbers with " << primeFactorisationOf[i] << " = " << numbersWith[i].size() << endl;
     }
 
 
@@ -913,45 +978,8 @@ int main(int argc, char** argv)
         //cout << "i: " << i << " primesUpToMaxValue: " << primesUpToMaxValue[i] << endl;
     }
 
-    vector<int> numPairsWithGCD(maxValue + 1);
 
-    vector<int> numNumbersInAWith(maxValue + 1);
-    vector<int> numNumbersInBWith(maxValue + 1);
-    for (int i = 1; i <= maxValue; i++)
-    {
-        for (const auto& numberWith : numbersWith[i])
-        {
-            if (true) // TODO - if numberWith in A.
-                numNumbersInAWith[i]++;
-            if (true) // TODO - if numberWith in B.
-                numNumbersInBWith[i]++;
-        }
-    }
-
-
-    for (int i = 1; i <= maxValue; i++)
-    {
-        if (numbersWithBasis[i].empty())
-            continue;
-
-        for (const auto& withBasis1 : numbersWithBasis[i])
-        {
-            for (const auto& withBasis2 : numbersWithBasis[i])
-            {
-                const auto gcdPrimeFactorisation = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasis1], primeFactorisationOf[withBasis2]);
-                const auto gcd = gcdPrimeFactorisation.value;
-                for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcdPrimeFactorisation))
-                {
-                    const bool include = (((gcdPrimeFactorisation.primeFactors.size() - subsetGcd.primeFactors.size()) % 2) == 0);
-                    const auto numPairsWithSubsetGcd = numNumbersInAWith[withBasis1] * numNumbersInBWith[withBasis2];
-                    numPairsWithGCD[subsetGcd.value] += (include ? 1 : -1) * numPairsWithSubsetGcd;
-                }
-            }
-        }
-
-    }
-
-    //return 0;
+    return 0;
 
     for (int i = 0; i < q; i++)
     {
@@ -961,7 +989,7 @@ int main(int argc, char** argv)
 
         cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << " c2: " << c2 << endl;
 
-        const auto result = findResult(r1, c1, r2, c2, maxValue);
+        const auto result = findResult2(a, b, r1, c1, r2, c2, maxValue);
         cout << "result: " << result << endl;
 #ifdef BRUTE_FORCE
         const auto resultBruteForce = findResultBruteForce(r1, c1, r2, c2);
