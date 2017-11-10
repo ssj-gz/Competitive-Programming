@@ -290,7 +290,6 @@ int main(int argc, char** argv)
     {
         if (primeSieve[factor])
         {
-            const int primeIndex = primesUpToMaxValue.size();
             primesUpToMaxValue.push_back(factor);
             auto multiple = 2 * factor;
             while (multiple <= maxValue)
