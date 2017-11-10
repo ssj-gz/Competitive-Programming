@@ -30,7 +30,7 @@ struct PrimeFactor
     void updateValue()
     {
         value = 1;
-        for (int i = 0; i < primePower; i++)
+        for (auto i = 0; i < primePower; i++)
             value *= prime;
     }
     int primeFactorIndex = 0;
@@ -63,12 +63,12 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
         return;
     assert(productSoFar <= maxValue);
 
-    for (int primeIndex = minPrimeIndex; primeIndex < primesUpToMaxValue.size(); primeIndex++)
+    for (auto primeIndex = minPrimeIndex; primeIndex < primesUpToMaxValue.size(); primeIndex++)
     {
-        const int64_t prime = primesUpToMaxValue[primeIndex];
+        const auto prime = primesUpToMaxValue[primeIndex];
         if (productSoFar * prime > maxValue)
             return;
-        int64_t nextProductSoFar = productSoFar;
+        auto nextProductSoFar = productSoFar;
         primeFactorisationSoFar.primeFactors.push_back(PrimeFactor(primeIndex, 0));
         while (nextProductSoFar * prime <= maxValue)
         {
@@ -79,6 +79,7 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
             assert(nextProductSoFar >= 0 && nextProductSoFar < lookup.size());
             primeFactorisationSoFar.updateValue();
             assert(primeFactorisationSoFar.value == nextProductSoFar);
+
             lookup[nextProductSoFar] = primeFactorisationSoFar;
 
             generatePrimeFactorLookups(nextProductSoFar, maxValue, primeIndex + 1, primeFactorisationSoFar, lookup);
@@ -92,11 +93,11 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
 vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFactorisation)
 {
     vector<int> result;
-    const int numDistinctPrimes = primeFactorisation.primeFactors.size();
-    for (unsigned int primeFactorInclusionMask = 0; primeFactorInclusionMask < (1 << numDistinctPrimes); primeFactorInclusionMask++)
+    const auto numDistinctPrimes = primeFactorisation.primeFactors.size();
+    for (uint32_t primeFactorInclusionMask = 0; primeFactorInclusionMask < (1 << numDistinctPrimes); primeFactorInclusionMask++)
     {
         int value = 1;
-        for (unsigned int i = 0; i < numDistinctPrimes; i++)
+        for (uint32_t i = 0; i < numDistinctPrimes; i++)
         {
             if ((primeFactorInclusionMask & (1 << i)) != 0)
             {
@@ -125,14 +126,14 @@ int gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFactorisation1, con
 {
     assert(primeFactorisation1.primeFactors.size() == primeFactorisation2.primeFactors.size());
     const auto numPrimeFactors = primeFactorisation1.primeFactors.size();
-    int gcd = 1;
-    for (int i = 0; i < numPrimeFactors; i++)
+    auto gcd = 1;
+    for (auto i = 0; i < numPrimeFactors; i++)
     {
         assert(primeFactorisation1.primeFactors[i].primeFactorIndex == primeFactorisation2.primeFactors[i].primeFactorIndex);
         const int prime = primesUpToMaxValue[primeFactorisation1.primeFactors[i].primeFactorIndex];
         const int primePower = min(primeFactorisation1.primeFactors[i].primePower, primeFactorisation2.primeFactors[i].primePower);
         assert(primePower > 0);
-        for (int j = 0; j < primePower; j++)
+        for (auto j = 0; j < primePower; j++)
             gcd *= prime;
     }
     return gcd;
@@ -142,19 +143,19 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
 {
     // Create the isInASubset and isInBSubsets.
     vector<bool> isInASubset(maxValue + 1, false);
-    for (int i = r1; i <= r2; i++)
+    for (auto i = r1; i <= r2; i++)
     {
         isInASubset[a[i]] = true;
     }
     vector<bool> isInBSubset(maxValue + 1, false);
-    for (int j = c1; j <= c2; j++)
+    for (auto j = c1; j <= c2; j++)
     {
         isInBSubset[b[j]] = true;
     }
 
     vector<int64_t> numNumbersInAContaining(maxValue + 1);
     vector<int64_t> numNumbersInBContaining(maxValue + 1);
-    for (int value = 1; value <= maxValue; value++)
+    for (auto value = 1; value <= maxValue; value++)
     {
         for (const auto& numberContainingValue : numbersContaining[value])
         {
@@ -166,7 +167,7 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
     }
 
     vector<int64_t> numPairsWithGCD(maxValue + 1);
-    for (int basis = 1; basis <= maxValue; basis++)
+    for (auto basis = 1; basis <= maxValue; basis++)
     {
         if (numbersWithBasis[basis].empty())
             continue;
@@ -181,7 +182,7 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
                 if (numNumbersInBContaining[withBasisInB] == 0)
                     continue;
                 const auto gcd = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasisInA], primeFactorisationOf[withBasisInB]);
-                const int64_t numPairsWithThisGCD = numNumbersInAContaining[withBasisInA] * numNumbersInBContaining[withBasisInB];
+                const auto numPairsWithThisGCD = numNumbersInAContaining[withBasisInA] * numNumbersInBContaining[withBasisInB];
                 assert(numPairsWithThisGCD > 0);
                 const auto& gcdPrimeFactorisation = primeFactorisationOf[gcd];
                 const auto numPrimeFactorsInGcd = gcdPrimeFactorisation.primeFactors.size();
