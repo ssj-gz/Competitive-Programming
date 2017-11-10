@@ -1,5 +1,5 @@
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -770,19 +770,20 @@ PrimeFactorisation basis(const PrimeFactorisation& primeFactorisation)
     return basis;
 }
 
-PrimeFactorisation gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFactorisation1, const PrimeFactorisation& primeFactorisation2)
+int gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFactorisation1, const PrimeFactorisation& primeFactorisation2)
 {
     assert(primeFactorisation1.primeFactors.size() == primeFactorisation2.primeFactors.size());
     const auto numPrimeFactors = primeFactorisation1.primeFactors.size();
-    PrimeFactorisation gcd;
-    gcd.primeFactors.reserve(numPrimeFactors);
+    int gcd = 1;
     for (int i = 0; i < numPrimeFactors; i++)
     {
         assert(primeFactorisation1.primeFactors[i].primeFactorIndex == primeFactorisation2.primeFactors[i].primeFactorIndex);
-        gcd.primeFactors.push_back({primeFactorisation1.primeFactors[i].primeFactorIndex, min(primeFactorisation1.primeFactors[i].primePower, primeFactorisation2.primeFactors[i].primePower)});
-        assert(gcd.primeFactors.back().primePower > 0);
+        const int prime = primesUpToMaxValue[primeFactorisation1.primeFactors[i].primeFactorIndex];
+        const int primePower = min(primeFactorisation1.primeFactors[i].primePower, primeFactorisation2.primeFactors[i].primePower);
+        assert(primePower > 0);
+        for (int j = 0; j < primePower; j++)
+            gcd *= prime;
     }
-    gcd.updateValue();
     return gcd;
 }
 
@@ -839,8 +840,8 @@ int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int 
                 const auto numPairsWithThisGCD = numNumbersInAWith[withBasis1] * numNumbersInBWith[withBasis2];
                 if (numPairsWithThisGCD == 0)
                     continue;
-                const auto gcdPrimeFactorisation = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasis1], primeFactorisationOf[withBasis2]);
-                const auto gcd = gcdPrimeFactorisation.value;
+                const auto gcd = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasis1], primeFactorisationOf[withBasis2]);
+                const auto& gcdPrimeFactorisation = primeFactorisationOf[gcd];
                 const auto numPrimeFactorsInGcd = gcdPrimeFactorisation.primeFactors.size();
                 for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcdPrimeFactorisation))
                 {
@@ -869,7 +870,7 @@ int main(int argc, char** argv)
 {
     if (argc == 2)
     {
-#if 1
+#if 0
         const int n = 100000;
         cout << n << " " << n << " " << 1 << endl;
         for (int j = 1; j <= 2; j++)
@@ -1010,7 +1011,7 @@ int main(int argc, char** argv)
 
         cin >> r1 >> c1 >> r2 >> c2;
 
-        cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << " c2: " << c2 << endl;
+        cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << " c2: " << c2 << " submatrix size: " << (c2 - c1 + 1) * (r2 - r1 + 1) << endl;
 
         const auto result = findResult2(a, b, r1, c1, r2, c2, maxValue);
         cout << "result: " << result << endl;
