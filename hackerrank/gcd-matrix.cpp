@@ -1,5 +1,6 @@
+// Simon St James (ssjgz) - 2017-11-10 12:09
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -39,17 +40,30 @@ bool isPrime(int n)
 
 int findResultBruteForce(const vector<int>& a, const vector<int>& b, int r1, int c1, int r2, int c2)
 {
-    set<int> gcds;
+    vector<bool> gcds(100001);
+    ///set<int> gcds;
+    int numDistinctGcds = 0;
     for (int i = r1; i <= r2; i++)
     {
+        //if ((i % 100) == 0)
+            //cout << "i: " << i << " r2: " << r2 << endl;
         for (int j = c1; j <= c2; j++)
         {
             const auto gcdEntry = gcd(a[i], b[j]);
             //cout << "i: " << i << " j: " << j <<  " a: " << a[i] << " b: " << b[j] << " gcdEntry: " << gcdEntry << endl;
-            gcds.insert(gcdEntry);
+            //gcds.insert(gcdEntry);
+            if (!gcds[gcdEntry])
+            {
+                numDistinctGcds++;
+                gcds[gcdEntry] = true;
+            }
         }
     }
-    return gcds.size();
+    for (int i = 1; i <= 100000; i++)
+    {
+        //cout << "Brute force has gcd " << i << " ? " << gcds[i] << endl;
+    }
+    return numDistinctGcds;
 }
 
 vector<int> primesUpToMaxValue;
@@ -191,7 +205,7 @@ int gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFactorisation1, con
     return gcd;
 }
 
-int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int r2, int c2, int maxValue)
+int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, int r1, int c1, int r2, int c2, int maxValue)
 {
     vector<int> aSubset;
     for (int i = r1; i <= r2; i++)
@@ -213,9 +227,9 @@ int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int 
     for (const auto bElement : bSubset)
         isInBSubset[bElement] = true;
 
-    vector<int> numPairsWithGCD(maxValue + 1);
-    vector<int> numNumbersInAWith(maxValue + 1);
-    vector<int> numNumbersInBWith(maxValue + 1);
+    vector<int64_t> numPairsWithGCD(maxValue + 1);
+    vector<int64_t> numNumbersInAWith(maxValue + 1);
+    vector<int64_t> numNumbersInBWith(maxValue + 1);
     for (int i = 1; i <= maxValue; i++)
     {
         for (const auto& numberWith : numbersWith[i])
@@ -236,7 +250,8 @@ int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int 
         {
             for (const auto& withBasis2 : numbersWithBasis[i])
             {
-                const auto numPairsWithThisGCD = numNumbersInAWith[withBasis1] * numNumbersInBWith[withBasis2];
+                const int64_t numPairsWithThisGCD = numNumbersInAWith[withBasis1] * numNumbersInBWith[withBasis2];
+                assert(numPairsWithThisGCD >= 0);
                 if (numPairsWithThisGCD == 0)
                     continue;
                 const auto gcd = gcdOfNumbersWithSameBasis(primeFactorisationOf[withBasis1], primeFactorisationOf[withBasis2]);
@@ -247,7 +262,7 @@ int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int 
                     assert(subsetGcd >= 0 && subsetGcd <= maxValue);
                     const int numPrimeFactorsInSubsetGcd = primeFactorisationOf[subsetGcd].primeFactors.size();
                     const bool include = (((numPrimeFactorsInGcd - numPrimeFactorsInSubsetGcd) % 2) == 0);
-                    numPairsWithGCD[subsetGcd] += (include ? 1 : -1) * numPairsWithThisGCD;
+                    numPairsWithGCD[subsetGcd] += (include ? static_cast<int64_t>(1) : static_cast<int64_t>(-1)) * numPairsWithThisGCD;
                 }
             }
         }
@@ -257,8 +272,11 @@ int findResult2(const vector<int>& a, const vector<int>& b, int r1, int c1, int 
     int numDistinctGcds = 0;
     for (int i = 1; i <= maxValue; i++)
     {
+        //cout << "optimised numPairsWithGCD[" << i << "]: " << numPairsWithGCD[i] << endl;
         if (numPairsWithGCD[i] > 0)
+        {
             numDistinctGcds++;
+        }
     }
 
     return numDistinctGcds;
@@ -287,9 +305,9 @@ int main(int argc, char** argv)
         return 0;
 #else
         srand(time(0));
-        const int maxGenValue = 100000;
-        const int n = rand() % 1000 + 1;
-        const int m = rand() % 1000 + 1;
+        const int maxGenValue = 30000;
+        const int n = rand() % 100 + 1;
+        const int m = rand() % 100 + 1;
         const int q = rand() % 1000 + 1;
         cout << n << " " << m << " " << q << " " << endl;
         for (int i = 0; i < n; i++)
@@ -357,7 +375,6 @@ int main(int argc, char** argv)
     primeFactorisationOf[1].updateValue();
     PrimeFactorisation primeFactorisationSoFar;
     generatePrimeFactorLookups(1, maxValue, 0, primeFactorisationSoFar, primeFactorisationOf);
-    //cout << "Finished generatePrimeFactorLookups" << endl;
 
     numbersWithBasis.resize(maxValue + 1);
     for (int number = 1; number <= maxValue; number++)
@@ -385,7 +402,7 @@ int main(int argc, char** argv)
 
         //cout << "r1: " << r1 << " c1: " << c1 << " r2: " << r2 << " c2: " << c2 << " submatrix size: " << (c2 - c1 + 1) * (r2 - r1 + 1) << endl;
 
-        const auto result = findResult2(a, b, r1, c1, r2, c2, maxValue);
+        const auto result = findNumDistinctGCDsInSubmatrix(a, b, r1, c1, r2, c2, maxValue);
         cout << result << endl;
 #ifdef BRUTE_FORCE
         const auto resultBruteForce = findResultBruteForce(a, b, r1, c1, r2, c2);
