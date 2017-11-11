@@ -93,6 +93,7 @@ struct PrimeFactorisation
 };
 
 vector<PrimeFactorisation> primeFactorisationOf;
+vector<vector<int>> allCombinationsOfPrimeFactors;
 
 // Populate the primeFactorisationOf lookup - for each value i in 1 ... maxValue + 1, set primeFactorisationOf[i] to i's prime factorisation1
 void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrimeIndex, PrimeFactorisation& primeFactorisationSoFar, vector<PrimeFactorisation>& lookup)
@@ -127,9 +128,14 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
     }
 }
 
-// If there are k prime factors in primeFactors, then compute all 2^k values we can get by using all subsets of its prime factors.
-vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFactorisation)
+// If there are k prime factors in prime factorisation of number, then compute all 2^k values we can get by using all subsets of its prime factors.
+vector<int> findAllCombinationsOfPrimeFactors(int number)
 {
+    if (!allCombinationsOfPrimeFactors[number].empty())
+        return allCombinationsOfPrimeFactors[number];
+
+    const PrimeFactorisation& primeFactorisation = primeFactorisationOf[number];
+    //cout << "findAllCombinationsOfPrimeFactors: " << primeFactorisation << endl;
     vector<int> result;
     const auto numDistinctPrimes = primeFactorisation.numFactors();
     result.reserve((1 << numDistinctPrimes));
@@ -146,6 +152,8 @@ vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFac
         }
         result.push_back(value);
     }
+    // Cache result.
+    allCombinationsOfPrimeFactors[number] = result;
     return result;
 }
 
@@ -225,7 +233,7 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
                 assert(numPairsWithThisGCD > 0);
                 const auto& gcdPrimeFactorisation = primeFactorisationOf[gcd];
                 const auto numPrimeFactorsInGcd = gcdPrimeFactorisation.numFactors();
-                for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcdPrimeFactorisation))
+                for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcd))
                 {
                     assert(subsetGcd >= 0 && subsetGcd <= maxValue);
                     const int numPrimeFactorsInSubsetGcd = primeFactorisationOf[subsetGcd].numFactors();
@@ -345,6 +353,8 @@ int main(int argc, char** argv)
     PrimeFactorisation primeFactorisationSoFar;
     generatePrimeFactorLookups(1, maxValue, 0, primeFactorisationSoFar, primeFactorisationOf);
 
+    allCombinationsOfPrimeFactors.resize(maxValue + 1);
+
     numbersWithBasis.resize(maxValue + 1);
     for (int number = 1; number <= maxValue; number++)
     {
@@ -355,7 +365,7 @@ int main(int argc, char** argv)
     numbersContaining.resize(maxValue + 1);
     for (const auto& primeFactorisation : primeFactorisationOf)
     {
-        const auto allCombinationsOfPrimeFactorisation = findAllCombinationsOfPrimeFactors(primeFactorisation);
+        const auto allCombinationsOfPrimeFactorisation = findAllCombinationsOfPrimeFactors(primeFactorisation.value);
         for (const auto& combination : allCombinationsOfPrimeFactorisation)
         {
             numbersContaining[combination].push_back(primeFactorisation.value);
