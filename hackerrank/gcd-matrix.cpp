@@ -1,10 +1,11 @@
 // Simon St James (ssjgz) - 2017-11-10 12:09
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
+#include <array>
 #include <list>
 #include <set>
 #include <map>
@@ -21,6 +22,10 @@ vector<vector<int>> numbersContaining;
 
 struct PrimeFactor
 {
+    PrimeFactor()
+        : primeFactorIndex{-1}, primePower{-1}
+    {
+    }
     PrimeFactor(int primeFactorIndex, int primePower)
         : primeFactorIndex{primeFactorIndex}, primePower{primePower}
     {
@@ -29,6 +34,7 @@ struct PrimeFactor
     }
     void updateValue()
     {
+        assert(primeFactorIndex != -1 && primePower != -1);
         value = 1;
         for (auto i = 0; i < primePower; i++)
             value *= prime;
@@ -39,19 +45,51 @@ struct PrimeFactor
     int value = -1;
 };
 
+constexpr auto maxPrimeFactors = 6;
+
 struct PrimeFactorisation
 {
-    vector<PrimeFactor> primeFactors;
     void updateValue()
     {
         value = 1;
-        for (auto& primeFactor : primeFactors)
+        for (int i = 0; i < numPrimeFactors; i++)
         {
+            PrimeFactor& primeFactor = primeFactors[i];
             primeFactor.updateValue();
             value *= primeFactor.value;
         }
     }
     int value = -1;
+    void push_back(const PrimeFactor& primeFactor)
+    {
+        primeFactors[numPrimeFactors] = primeFactor;
+        numPrimeFactors++;
+
+    }
+    void pop_back()
+    {
+        assert(numPrimeFactors > 0);
+        numPrimeFactors--;
+    }
+    PrimeFactor& back()
+    {
+        return primeFactors[numPrimeFactors - 1];
+    }
+    int numFactors() const
+    {
+        return numPrimeFactors;
+    }
+    const PrimeFactor& operator[](int i) const
+    {
+        return primeFactors[i];
+    };
+    PrimeFactor& operator[](int i)
+    {
+        return primeFactors[i];
+    };
+    private:
+        array<PrimeFactor, maxPrimeFactors> primeFactors;
+        int numPrimeFactors = 0;
 };
 
 vector<PrimeFactorisation> primeFactorisationOf;
@@ -69,10 +107,10 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
         if (productSoFar * prime > maxValue)
             return;
         auto nextProductSoFar = productSoFar;
-        primeFactorisationSoFar.primeFactors.push_back(PrimeFactor(primeIndex, 0));
+        primeFactorisationSoFar.push_back(PrimeFactor(primeIndex, 0));
         while (nextProductSoFar * prime <= maxValue)
         {
-            PrimeFactor& primeFactor = primeFactorisationSoFar.primeFactors.back();
+            PrimeFactor& primeFactor = primeFactorisationSoFar.back();
             primeFactor.primePower++;;
             nextProductSoFar *= prime;
 
@@ -85,7 +123,7 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
             generatePrimeFactorLookups(nextProductSoFar, maxValue, primeIndex + 1, primeFactorisationSoFar, lookup);
 
         }
-        primeFactorisationSoFar.primeFactors.pop_back();
+        primeFactorisationSoFar.pop_back();
     }
 }
 
@@ -93,7 +131,7 @@ void generatePrimeFactorLookups(int64_t productSoFar, int maxValue, int minPrime
 vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFactorisation)
 {
     vector<int> result;
-    const auto numDistinctPrimes = primeFactorisation.primeFactors.size();
+    const auto numDistinctPrimes = primeFactorisation.numFactors();
     for (uint32_t primeFactorInclusionMask = 0; primeFactorInclusionMask < (1 << numDistinctPrimes); primeFactorInclusionMask++)
     {
         int value = 1;
@@ -101,8 +139,8 @@ vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFac
         {
             if ((primeFactorInclusionMask & (1 << i)) != 0)
             {
-                assert(primeFactorisation.primeFactors[i].value != -1);
-                value *= primeFactorisation.primeFactors[i].value;
+                assert(primeFactorisation[i].value != -1);
+                value *= primeFactorisation[i].value;
             }
         }
         result.push_back(value);
@@ -114,9 +152,9 @@ vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFac
 PrimeFactorisation basis(const PrimeFactorisation& primeFactorisation)
 {
     PrimeFactorisation basis;
-    for (const auto& primeFactor : primeFactorisation.primeFactors)
+    for (int i = 0; i < primeFactorisation.numFactors(); i++)
     {
-        basis.primeFactors.push_back({primeFactor.primeFactorIndex, 1});
+        basis.push_back({primeFactorisation[i].primeFactorIndex, 1});
     }
     basis.updateValue();
     return basis;
@@ -124,14 +162,14 @@ PrimeFactorisation basis(const PrimeFactorisation& primeFactorisation)
 
 int gcdOfNumbersWithSameBasis(const PrimeFactorisation& primeFactorisation1, const PrimeFactorisation& primeFactorisation2)
 {
-    assert(primeFactorisation1.primeFactors.size() == primeFactorisation2.primeFactors.size());
-    const auto numPrimeFactors = primeFactorisation1.primeFactors.size();
+    assert(primeFactorisation1.numFactors() == primeFactorisation2.numFactors());
+    const auto numPrimeFactors = primeFactorisation1.numFactors();
     auto gcd = 1;
     for (auto i = 0; i < numPrimeFactors; i++)
     {
-        assert(primeFactorisation1.primeFactors[i].primeFactorIndex == primeFactorisation2.primeFactors[i].primeFactorIndex);
-        const int prime = primesUpToMaxValue[primeFactorisation1.primeFactors[i].primeFactorIndex];
-        const int primePower = min(primeFactorisation1.primeFactors[i].primePower, primeFactorisation2.primeFactors[i].primePower);
+        assert(primeFactorisation1[i].primeFactorIndex == primeFactorisation2[i].primeFactorIndex);
+        const int prime = primesUpToMaxValue[primeFactorisation1[i].primeFactorIndex];
+        const int primePower = min(primeFactorisation1[i].primePower, primeFactorisation2[i].primePower);
         assert(primePower > 0);
         for (auto j = 0; j < primePower; j++)
             gcd *= prime;
@@ -185,11 +223,11 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
                 const auto numPairsWithThisGCD = numNumbersInAContaining[withBasisInA] * numNumbersInBContaining[withBasisInB];
                 assert(numPairsWithThisGCD > 0);
                 const auto& gcdPrimeFactorisation = primeFactorisationOf[gcd];
-                const auto numPrimeFactorsInGcd = gcdPrimeFactorisation.primeFactors.size();
+                const auto numPrimeFactorsInGcd = gcdPrimeFactorisation.numFactors();
                 for (const auto& subsetGcd : findAllCombinationsOfPrimeFactors(gcdPrimeFactorisation))
                 {
                     assert(subsetGcd >= 0 && subsetGcd <= maxValue);
-                    const int numPrimeFactorsInSubsetGcd = primeFactorisationOf[subsetGcd].primeFactors.size();
+                    const int numPrimeFactorsInSubsetGcd = primeFactorisationOf[subsetGcd].numFactors();
                     // If gcd has an odd number more primes in its factorisation than subsetGcd, then exclude it - else include it
                     // (Inclusion-Exclusion principle).
                     const bool include = (((numPrimeFactorsInGcd - numPrimeFactorsInSubsetGcd) % 2) == 0);
