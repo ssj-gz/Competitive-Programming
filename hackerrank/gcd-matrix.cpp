@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-11-10 12:09
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -132,6 +132,7 @@ vector<int> findAllCombinationsOfPrimeFactors(const PrimeFactorisation& primeFac
 {
     vector<int> result;
     const auto numDistinctPrimes = primeFactorisation.numFactors();
+    result.reserve((1 << numDistinctPrimes));
     for (uint32_t primeFactorInclusionMask = 0; primeFactorInclusionMask < (1 << numDistinctPrimes); primeFactorInclusionMask++)
     {
         int value = 1;
