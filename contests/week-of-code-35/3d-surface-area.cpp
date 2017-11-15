@@ -43,7 +43,7 @@ int main()
             const auto stackBehindHeight = (row > 0 ? A[row - 1][col] : 0);
             if (stackHeight > stackBehindHeight)
                 exposedSideFaces += stackHeight - stackBehindHeight;
-            // Front front.
+            // Front faces.
             const auto stackInFrontHeight = (row < H - 1 ? A[row + 1][col] : 0);
             if (stackHeight > stackInFrontHeight)
                 exposedSideFaces += stackHeight - stackInFrontHeight;
