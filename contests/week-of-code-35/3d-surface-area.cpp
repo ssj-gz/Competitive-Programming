@@ -10,41 +10,41 @@ int main()
     int H, W;
     cin >> H >> W;
 
-    vector<vector<int>> A(W, vector<int>(H, -1));
+    vector<vector<int>> A(H, vector<int>(W, -1));
 
-    for (int y = 0; y < H; y++)
+    for (int row = 0; row < H; row++)
     {
-        for (int x = 0; x < W; x++)
+        for (int col = 0; col < W; col++)
         {
-            cin >> A[x][y];
-            assert(A[x][y] >= 1);
+            cin >> A[row][col];
+            assert(A[row][col] >= 1);
         }
     }
 
     int64_t totalCost = 0;
-    for (int y = 0; y < H; y++)
+    for (int row = 0; row < H; row++)
     {
-        for (int x = 0; x < W; x++)
+        for (int col = 0; col < W; col++)
         {
             totalCost += 2; // Top and bottom surface of this cell.
 
             // The "sides" of each square that is stacked on this cell.
-            for (int depth = 1; depth <= A[x][y]; depth++)
+            for (int depth = 1; depth <= A[row][col]; depth++)
             {
                 int exposedSides = 4;
-                if (x > 0 && A[x - 1][y] >= depth)
+                if (col > 0 && A[row][col - 1] >= depth)
                 {
                     exposedSides--;
                 }
-                if (x < W - 1 && A[x + 1][y] >= depth)
+                if (col < W - 1 && A[row][col + 1] >= depth)
                 {
                     exposedSides--;
                 }
-                if (y > 0 && A[x][y - 1] >= depth)
+                if (row > 0 && A[row - 1][col] >= depth)
                 {
                     exposedSides--;
                 }
-                if (y < H - 1 && A[x][y + 1] >= depth)
+                if (row < H - 1 && A[row + 1][col] >= depth)
                 {
                     exposedSides--;
                 }
