@@ -29,7 +29,7 @@ int main()
             totalCost += 2; // Top and bottom surface of this cell.
 
             // The "sides" of each square that is stacked on this cell.
-            auto exposedSideFaces = 0;
+            int64_t exposedSideFaces = 0;
             const auto stackHeight = A[row][col];
             // Num exposed left faces of this stack.
             const auto stackToLeftHeight = (col > 0 ? A[row][col - 1] : 0);
