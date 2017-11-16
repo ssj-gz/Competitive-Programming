@@ -92,8 +92,8 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
             int64_t sumFromRight = 0;
             for (int startCol = numCols - 1; startCol >= 0; startCol--)
             {
-                sumFromRight += A[row][startCol];
-                bestFromRightCumulative.push_back(sumFromRight + lookup[row + 1][startCol]);
+                //sumFromRight += A[row][startCol];
+                bestFromRightCumulative.push_back(A[row][startCol] + lookup[row + 1][startCol]);
 
             }
             for (const auto& blah : findMaxSubarraySumEndingAtReversed(bestFromRightCumulative))
@@ -161,8 +161,79 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int>>& 
 
 }
 
+void blah(const vector<int64_t>& a, const vector<int64_t>& b)
+{
+    assert(a.size() == b.size());
+    cout << "blah: a: " << endl;
+    for (const auto x : a)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    cout << "b: " << endl;
+    for (const auto x : b)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    int64_t bestSum = std::numeric_limits<int64_t>::min();
+    int64_t bestB = b.front();
+    int64_t cumulativeSum = 0;
+    //cout << "blah" << endl;
+    for (int endPoint = 0; endPoint < a.size(); endPoint++)
+    {
+        //cout << " endPoint: " << endPoint << endl;
+        if (a[endPoint] + b[endPoint] > bestSum + a[endPoint])
+        {
+            //cout << " found better, apparently" << endl;
+            bestSum = a[endPoint] + b[endPoint];
+            bestB = b[endPoint];
+            cumulativeSum = a[endPoint];
+        }
+        else
+        {
+            cumulativeSum += a[endPoint];
+            bestSum = cumulativeSum + bestB;
+        }
+        //cout << " bestSum: " << bestSum << " cumulativeSum: " << cumulativeSum << " bestB: " << bestB << endl;
+        {
+            // Verify.
+            int64_t bestSumDebug = std::numeric_limits<int64_t>::min();
+            int cumulativeSum = 0;
+            for (int startPoint = endPoint; startPoint >= 0; startPoint--)
+            {
+                cumulativeSum += a[startPoint];
+                if (cumulativeSum + b[startPoint] > bestSumDebug)
+                {
+                    bestSumDebug = cumulativeSum + b[startPoint];
+                }
+            }
+            //cout << " bestSumDebug: " << bestSumDebug << endl;
+            assert(bestSum == bestSumDebug);
+        }
+    }
+}
+
 int main()
 {
+
+    srand(time(0));
+    while (true)
+    {
+        const int n = (rand() % 20) + 1;
+        const int range = 200;
+        vector<int64_t> a;
+        vector<int64_t> b;
+        for (int i = 0; i < n; i++)
+        {
+            a.push_back(rand() % (2 * range + 1) - range);
+            b.push_back(rand() % (2 * range + 1) - range);
+        }
+        blah(a, b);
+    }
+    //blah(vector<int64_t>{0, 5, -3, 7, -8}, vector<int64_t>{-2, -3, 3, 5, -6});
+
+
     int n, m;
     cin >> n >> m;
 
