@@ -90,6 +90,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
         result[endPoint] = {bestSum, startPoint};
         cout << " End of loop: endPoint: " << endPoint << " bestSum: " << bestSum << " cumulativeSum: " << cumulativeSum << " bestB: " << bestB << endl;
 #endif
+        cout << "iteration - endPoint: " << endPoint << endl;
         const auto oldBestB = bestB;
         //bestB = max(bestB, bonusIfStartAt[endPoint]);
         things[bonusIfStartAt[endPoint]]++;
@@ -97,7 +98,9 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
         {
             if (startPoint == endPoint)
                 break;
-            if (A[startPoint] >= 0)
+            //if (A[startPoint] >= 0)
+                //break;
+            if (cumulativeSum >= 0)
                 break;
             bool eraseStartPoint = false;
             // Best sum if start point removed?
@@ -112,12 +115,15 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             }
             if (newBest < oldBest)
             {
-                if (oldBest - newBest < -A[startPoint])
+                if (oldBest - newBest > -A[startPoint])
                     eraseStartPoint = true;
             }
             else
                 eraseStartPoint = true;
-            cout << "Ditching start point";
+            cout << "newBest if ditched startPoint: " << startPoint << " = " << newBest << endl;
+            cout << "increase due to best if ditched startPoint: " << newBest - oldBest << endl;
+            cout << "increase due to startCol if ditched startPoint: " << -A[startPoint] << endl;
+            cout << "Ditching start point: " << startPoint << endl;
             if (!eraseStartPoint)
             {
                 things[bonusIfStartAt[startPoint]]++;
@@ -127,6 +133,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             {
                 cumulativeSum -= A[startPoint];
                 bestB = newBest;
+                bestSum = cumulativeSum + bestB;
                 startPoint++;
             }
         }
@@ -171,6 +178,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                 {
                     bestSumDebug = cumulativeSum + bestBDebug;
                     startPointDebug = startPoint;
+                    cout << "  endPoint: " << endPoint << " startPoint: " << startPoint << " bestSumDebug: " << bestSumDebug << endl;
                 }
                 else if (cumulativeSum + bestBDebug == bestSumDebug)
                 {
@@ -181,7 +189,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                     //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
                 }
             }
-            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << endl;
+            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
             assert(bestSum == bestSumDebug);
             //assert(startPointDebug == startPoint);
         }
@@ -387,7 +395,7 @@ int main()
 #if 1
     while (true)
     {
-        const int n = rand() % 4 + 1;
+        const int n = rand() % 3 + 1;
         const int range = 10;
         vector<int64_t> bloo;
         vector<int64_t> bloo2;
