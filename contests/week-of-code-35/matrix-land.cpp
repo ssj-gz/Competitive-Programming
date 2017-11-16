@@ -12,12 +12,24 @@
 
 using namespace std;
 
-vector<int64_t> findMaxSubarraySumEndingAt(const vector<int>& A)
+struct BestSubarraySum
+{
+    BestSubarraySum() = default;
+    BestSubarraySum(int64_t sum, int subArrayStartIndex)
+        : sum{sum}, subArrayStartIndex{subArrayStartIndex}
+    {
+    }
+    int64_t sum = 0;
+    int subArrayStartIndex = 0;
+};
+
+vector<BestSubarraySum> findMaxSubarraySumEndingAt(const vector<int>& A)
 {
     const auto N = A.size();
-    vector<int64_t> result(N);
+    vector<BestSubarraySum> result(N);
     int64_t maxContiguousSubarraySum = 0;
     int64_t sumOfLargestSubarrayEndingHere = 0;
+    int subarrayStartPos = 0;
     for (int i = 0; i < N; i++)
     {
         if (sumOfLargestSubarrayEndingHere + A[i] >= 0)
@@ -27,9 +39,10 @@ vector<int64_t> findMaxSubarraySumEndingAt(const vector<int>& A)
         else
         {
             sumOfLargestSubarrayEndingHere = 0;
+            subarrayStartPos = i;
         }
         maxContiguousSubarraySum = max(maxContiguousSubarraySum, sumOfLargestSubarrayEndingHere);
-        result.push_back(sumOfLargestSubarrayEndingHere);
+        result.push_back({sumOfLargestSubarrayEndingHere, subarrayStartPos});
     }
     return result;
 
@@ -45,6 +58,7 @@ int64_t maxSum(int startRow, int startCol, const vector<vector<int>>& A, vector<
 
     if (lookup[startRow][startCol] != -1)
         return lookup[startRow][startCol];
+
 
     int64_t best = 0;
     for (int clearToLeftCol = 0; clearToLeftCol <= startCol; clearToLeftCol++)
