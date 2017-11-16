@@ -220,7 +220,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
     if (lookup[startRow][startCol] != -1)
         return lookup[startRow][startCol];
 
-    int64_t best = 0;
+    int64_t best = std::numeric_limits<int64_t>::min();
     for (int clearToLeftCol = 0; clearToLeftCol <= startCol; clearToLeftCol++)
     {
         for (int clearToRightCol = startCol; clearToRightCol < numCols; clearToRightCol++)
@@ -233,6 +233,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
             for (int descendCol = clearToLeftCol; descendCol <= clearToRightCol; descendCol++)
             {
                 const auto bestIfClearAndDescendHere = scoreAfterClearing + maxSumBruteForce(startRow + 1, descendCol, A, lookup);
+                cout << "startRow: " << startRow << " bestIfClearAndDescendHere(" << descendCol << ") : " << bestIfClearAndDescendHere << endl;
                 best = max(best, bestIfClearAndDescendHere); 
             }
         }
@@ -252,6 +253,8 @@ int64_t maxSumBruteForce(const vector<vector<int64_t>>& A)
     const int numCols = A[0].size();
 
     vector<vector<int64_t>> bruteForceLookup(numRows, vector<int64_t>(numCols, -1));
+    //const vector<int64_t> rowOfZeros(numCols, 0);
+    //bruteForceLookup.push_back(rowOfZeros);
     int64_t bestBruteForce = std::numeric_limits<int64_t>::min();
     for (int startCol = 0; startCol < numCols; startCol++)
     {
@@ -269,8 +272,8 @@ int main()
     srand(time(0));
     while (true)
     {
-        const int numRows = (rand() % 20) + 1;
-        const int numCols = (rand() % 20) + 1;
+        const int numRows = (rand() % 3) + 1;
+        const int numCols = (rand() % 3) + 1;
         const int range = 250;
         vector<vector<int64_t>> A(numRows, vector<int64_t>(numCols, -1));
         for (int i = 0; i < numRows; i++)
@@ -283,6 +286,18 @@ int main()
         const auto best = maxSum(A);
         const auto bestBruteForce = maxSumBruteForce(A);
         cout << "best: " << best << " bestBruteForce: " << bestBruteForce << endl;
+        if (best != bestBruteForce)
+        {
+            cout << "Whoops: A: " << endl;
+            for (int i = 0; i < numRows; i++)
+            {
+                for (int j = 0; j < numCols; j++)
+                {
+                    cout << A[i][j] << " ";
+                }
+                cout << endl;
+            }
+        }
         assert(best == bestBruteForce);
         //blah(a, b);
     }
