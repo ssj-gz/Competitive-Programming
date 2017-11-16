@@ -34,49 +34,77 @@ struct BestSubarraySum
     int subArrayEndIndex = 0;
 };
 
-vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& scoreIfDescendAt)
+vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
-    const auto N = A.size();
-    vector<BestSubarraySumUpTo> result(N);
-    int64_t maxContiguousSubarraySum = 0;
-    int64_t sumOfLargestSubarrayEndingHere = 0;
-    int subarrayStartPos = 0;
-    for (int i = 0; i < N; i++)
+    vector<BestSubarraySumUpTo> result(A.size());
+    int64_t bestSum = std::numeric_limits<int64_t>::min();
+    int64_t bestB = bonusIfStartAt.front();
+    int64_t cumulativeSum = 0;
+    int startPoint = 0;
+    //cout << "blah" << endl;
+    for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
-        if (sumOfLargestSubarrayEndingHere + A[i] >= 0)
+        //cout << " endPoint: " << endPoint << endl;
+        if (bonusIfStartAt[endPoint] > bestSum )
         {
-            sumOfLargestSubarrayEndingHere += A[i];
+            //cout << " found better, apparently" << endl;
+            bestSum = A[endPoint] + bonusIfStartAt[endPoint];
+            bestB = bonusIfStartAt[endPoint];
+            cumulativeSum = A[endPoint];
+            startPoint = endPoint;
         }
         else
         {
-            sumOfLargestSubarrayEndingHere = 0;
-            subarrayStartPos = i;
+            cumulativeSum += A[endPoint];
+            bestSum = cumulativeSum + bestB;
         }
-        maxContiguousSubarraySum = max(maxContiguousSubarraySum, sumOfLargestSubarrayEndingHere);
-        result[i] = BestSubarraySumUpTo{sumOfLargestSubarrayEndingHere, subarrayStartPos};
+        result[endPoint] = {bestSum, startPoint};
+        //cout << " bestSum: " << bestSum << " cumulativeSum: " << cumulativeSum << " bestB: " << bestB << endl;
 #ifdef BRUTE_FORCE
-
+        {
+            // Verify.
+            int64_t bestSumDebug = std::numeric_limits<int64_t>::min();
+            int cumulativeSum = 0;
+            int startPointDebug = 0;
+            for (int startPoint = endPoint; startPoint >= 0; startPoint--)
+            {
+                cumulativeSum += A[startPoint];
+                if (cumulativeSum + bonusIfStartAt[startPoint] > bestSumDebug)
+                {
+                    bestSumDebug = cumulativeSum + bonusIfStartAt[startPoint];
+                    startPointDebug = startPoint;
+                }
+                else if (cumulativeSum + bonusIfStartAt[startPoint] == bestSumDebug)
+                {
+                    startPointDebug = startPoint;
+                }
+            }
+            //cout << " bestSumDebug: " << bestSumDebug << endl;
+            assert(bestSum == bestSumDebug);
+            assert(startPointDebug == startPoint);
+        }
 #endif
     }
     return result;
 }
 
-vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int64_t>& A, const vector<int64_t>& scoreIfDescendAt)
+vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
     const vector<int64_t> aReversed(A.rbegin(), A.rend());
-    const vector<int64_t> scoreIfDescendAtReversed(scoreIfDescendAt.rbegin(), scoreIfDescendAt.rend());
+    const vector<int64_t> bonusIfStartAtReversed(bonusIfStartAt.rbegin(), bonusIfStartAt.rend());
     const auto N = A.size();
-    auto result = findMaxSubarraySumEndingAt(aReversed, scoreIfDescendAtReversed);
+    auto result = findMaxSubarraySumEndingAt(aReversed, bonusIfStartAtReversed);
     // Need to invert indices.
     for (auto& sumEndingAt : result)
     {
         sumEndingAt.subArrayStartIndex = (N - 1) - sumEndingAt.subArrayStartIndex;
     }
+    reverse(result.begin(), result.end());
     assert(result.size() == A.size());
     return result;
 }
 
-int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
+int64_t maxSum(const vector<vector<int64_t>>& A, vector<vector<int64_t>>& lookup)
 {
     const int numRows = A.size();
     const int numCols = A[0].size();
@@ -93,6 +121,7 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
         cout << "row!" << row << endl;
         vector<int64_t> bestIfMovedRightFromAndDescended;
         {
+#if 0
             vector<int64_t> bestFromRightCumulative;
             int64_t sumFromRight = 0;
             for (int startCol = numCols - 1; startCol >= 0; startCol--)
@@ -101,13 +130,15 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
                 bestFromRightCumulative.push_back(A[row][startCol] + lookup[row + 1][startCol]);
 
             }
-            for (const auto& blah : findMaxSubarraySumEndingAtReversed(bestFromRightCumulative, rowOfZeros))
+#endif
+            for (const auto& blah : findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]))
             {
                 cout << " floop " << blah.sum << endl;
                 bestIfMovedRightFromAndDescended.push_back(blah.sum);
             }
 #ifdef BRUTE_FORCE
             {
+                // Verify.
                 for (int startCol = 0; startCol < numCols; startCol++)
                 {
                     int64_t sum = 0;
@@ -115,7 +146,8 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
                     for (int descendCol = startCol; descendCol < numCols; descendCol++)
                     {
                         sum += A[row][descendCol];
-                        best = sum + lookup[row + 1][descendCol];
+                        const auto score = sum + lookup[row + 1][descendCol];
+                        best = max(best, score);
                     }
                     cout << "row: " << row << " startCol: " << startCol << " bestIfMovedRightFromAndDescended[startCol]: " << bestIfMovedRightFromAndDescended[startCol] << " best: " << best << endl;
                     assert(best == bestIfMovedRightFromAndDescended[startCol]);
@@ -129,7 +161,7 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
     return best;
 }
 
-int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
+int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t>>& A, vector<vector<int64_t>>& lookup)
 {
     const int numRows = A.size();
     const int numCols = A[0].size();
@@ -230,6 +262,7 @@ void blah(const vector<int64_t>& a, const vector<int64_t>& b)
 
 int main()
 {
+#if 0
 
     srand(time(0));
     while (true)
@@ -245,13 +278,12 @@ int main()
         }
         blah(a, b);
     }
-    //blah(vector<int64_t>{0, 5, -3, 7, -8}, vector<int64_t>{-2, -3, 3, 5, -6});
-
+#endif
 
     int n, m;
     cin >> n >> m;
 
-    vector<vector<int>> A(n, vector<int>(m, -1));
+    vector<vector<int64_t>> A(n, vector<int64_t>(m, -1));
 
     for (int row = 0; row < n; row++)
     {
