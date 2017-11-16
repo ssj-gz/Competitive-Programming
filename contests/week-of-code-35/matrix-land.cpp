@@ -121,16 +121,6 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         cout << "row!" << row << endl;
         vector<int64_t> bestIfMovedRightFromAndDescended;
         {
-#if 0
-            vector<int64_t> bestFromRightCumulative;
-            int64_t sumFromRight = 0;
-            for (int startCol = numCols - 1; startCol >= 0; startCol--)
-            {
-                //sumFromRight += A[row][startCol];
-                bestFromRightCumulative.push_back(A[row][startCol] + lookup[row + 1][startCol]);
-
-            }
-#endif
             for (const auto& blah : findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]))
             {
                 cout << " floop " << blah.sum << endl;
@@ -155,6 +145,30 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             }
 #endif
         }
+        vector<int64_t> bestIfMovedLeftFromAndDescended;
+        for (const auto& blah : findMaxSubarraySumEndingAt(A[row], lookup[row + 1]))
+        {
+            cout << " floop " << blah.sum << endl;
+            bestIfMovedLeftFromAndDescended.push_back(blah.sum);
+        }
+#ifdef BRUTE_FORCE
+        {
+            // Verify.
+            for (int startCol = 0; startCol < numCols; startCol++)
+            {
+                int64_t sum = 0;
+                int64_t best = std::numeric_limits<int64_t>::min();
+                for (int descendCol = startCol; descendCol >= 0; descendCol--)
+                {
+                    sum += A[row][descendCol];
+                    const auto score = sum + lookup[row + 1][descendCol];
+                    best = max(best, score);
+                }
+                cout << "row: " << row << " startCol: " << startCol << " bestIfMovedRightFromAndDescended[startCol]: " << bestIfMovedRightFromAndDescended[startCol] << " best: " << best << endl;
+                assert(best == bestIfMovedLeftFromAndDescended[startCol]);
+            }
+        }
+#endif
     }
 
 
