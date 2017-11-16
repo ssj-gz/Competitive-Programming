@@ -12,10 +12,10 @@
 
 using namespace std;
 
-struct BestSubarraySum
+struct BestSubarraySumUpTo
 {
-    BestSubarraySum() = default;
-    BestSubarraySum(int64_t sum, int subArrayStartIndex)
+    BestSubarraySumUpTo() = default;
+    BestSubarraySumUpTo(int64_t sum, int subArrayStartIndex)
         : sum{sum}, subArrayStartIndex{subArrayStartIndex}
     {
     }
@@ -23,10 +23,21 @@ struct BestSubarraySum
     int subArrayStartIndex = 0;
 };
 
-vector<BestSubarraySum> findMaxSubarraySumEndingAt(const vector<int>& A)
+struct BestSubarraySum
+{
+    BestSubarraySum(int64_t sum, int subArrayStartIndex, int subArrayEndIndex)
+        : sum{sum}, subArrayStartIndex{subArrayStartIndex}, subArrayEndIndex{subArrayEndIndex}
+    {
+    }
+    int64_t sum = 0;
+    int subArrayStartIndex = 0;
+    int subArrayEndIndex = 0;
+};
+
+vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int>& A)
 {
     const auto N = A.size();
-    vector<BestSubarraySum> result(N);
+    vector<BestSubarraySumUpTo> result(N);
     int64_t maxContiguousSubarraySum = 0;
     int64_t sumOfLargestSubarrayEndingHere = 0;
     int subarrayStartPos = 0;
@@ -45,41 +56,18 @@ vector<BestSubarraySum> findMaxSubarraySumEndingAt(const vector<int>& A)
         result.push_back({sumOfLargestSubarrayEndingHere, subarrayStartPos});
     }
     return result;
-
 }
 
-int64_t maxSum(int startRow, int startCol, const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
+int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
 {
     const int numRows = A.size();
     const int numCols = A[0].size();
-    
-    if (startRow == numRows)
-        return 0;
 
-    if (lookup[startRow][startCol] != -1)
-        return lookup[startRow][startCol];
-
+    lookup.resize(numRows, vector<int64_t>(numCols, -1));
+    lookup.push_back(vector<int64_t>(numCols, 0)); // "Sentinel" row.
 
     int64_t best = 0;
-    for (int clearToLeftCol = 0; clearToLeftCol <= startCol; clearToLeftCol++)
-    {
-        for (int clearToRightCol = startCol; clearToRightCol < numCols; clearToRightCol++)
-        {
-            int64_t scoreAfterClearing = 0;
-            for (int i = clearToLeftCol; i <= clearToRightCol; i++)
-            {
-                scoreAfterClearing += A[startRow][i];
-            }
-            for (int descendCol = clearToLeftCol; descendCol <= clearToRightCol; descendCol++)
-            {
-                const auto bestIfClearAndDescendHere = scoreAfterClearing + maxSum(startRow + 1, descendCol, A, lookup);
-                best = max(best, bestIfClearAndDescendHere); 
-            }
-        }
-    }
 
-    assert(lookup[startRow][startCol] == -1);
-    lookup[startRow][startCol] = best;
     return best;
 }
 
@@ -87,7 +75,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int>>& 
 {
     const int numRows = A.size();
     const int numCols = A[0].size();
-    
+
     if (startRow == numRows)
         return 0;
 
@@ -106,7 +94,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int>>& 
             }
             for (int descendCol = clearToLeftCol; descendCol <= clearToRightCol; descendCol++)
             {
-                const auto bestIfClearAndDescendHere = scoreAfterClearing + maxSum(startRow + 1, descendCol, A, lookup);
+                const auto bestIfClearAndDescendHere = scoreAfterClearing + maxSumBruteForce(startRow + 1, descendCol, A, lookup);
                 best = max(best, bestIfClearAndDescendHere); 
             }
         }
@@ -114,7 +102,9 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int>>& 
 
     assert(lookup[startRow][startCol] == -1);
     lookup[startRow][startCol] = best;
+
     return best;
+
 
 }
 
@@ -133,14 +123,17 @@ int main()
         }
     }
 
-    vector<vector<int64_t>> lookup(n, vector<int64_t>(m, -1));
+    vector<vector<int64_t>> lookup;
+#ifdef BRUTE_FORCE
+    vector<vector<int64_t>> bruteForceLookup(n, vector<int64_t>(m, -1));
+#endif
     int64_t best = 0;
     for (int startCol = 0; startCol < m; startCol++)
     {
-        const auto bestStartingHere = maxSum(0, startCol, A, lookup);
+        const auto bestStartingHere = maxSum(A, lookup);
         best = max(best, bestStartingHere);
 #ifdef BRUTE_FORCE
-        const auto bestStartingHereBruteForce = maxSumBruteForce(0, startCol, A, lookup);
+        const auto bestStartingHereBruteForce = maxSumBruteForce(0, startCol, A, bruteForceLookup);
         cout << "startCol: " << startCol << " bestStartingHere: " << bestStartingHere << " bestStartingHereBruteForce: " << bestStartingHereBruteForce << endl;
         assert(bestStartingHere == bestStartingHereBruteForce);
 #endif
