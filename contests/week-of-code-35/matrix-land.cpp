@@ -320,19 +320,18 @@ int main()
         }
     }
 
+    int64_t best = maxSum(A);
 #ifdef BRUTE_FORCE
     vector<vector<int64_t>> bruteForceLookup(n, vector<int64_t>(m, -1));
-#endif
-    int64_t best = 0;
+    int64_t bestBruteForce = std::numeric_limits<int64_t>::min();
     for (int startCol = 0; startCol < m; startCol++)
     {
-        const auto bestStartingHere = maxSum(A);
-        best = max(best, bestStartingHere);
-#ifdef BRUTE_FORCE
         const auto bestStartingHereBruteForce = maxSumBruteForce(0, startCol, A, bruteForceLookup);
-        cout << "startCol: " << startCol << " bestStartingHere: " << bestStartingHere << " bestStartingHereBruteForce: " << bestStartingHereBruteForce << endl;
-        assert(bestStartingHere == bestStartingHereBruteForce);
-#endif
+        bestBruteForce = max(bestBruteForce, bestStartingHereBruteForce);
+        cout << "startCol: " << startCol << " bestStartingHereBruteForce: " << bestStartingHereBruteForce << endl;
     }
+    cout << "best: " << best << " best brute force: " << bestBruteForce << endl;
+    assert(best == bestBruteForce);
+#endif
     cout << best << endl;
 }
