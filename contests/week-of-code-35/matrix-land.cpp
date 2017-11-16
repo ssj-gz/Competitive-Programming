@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-16 
 // This is a test submission - the algorithm is too slow to pass, but I want to check correctness, at least!
 #define BRUTE_FORCE
-//#define RANDOM
+#define RANDOM
 //#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <map>
 #include <cassert>
 
 using namespace std;
@@ -38,52 +39,151 @@ struct BestSubarraySum
 
 vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
+    cout << "findMaxSubarraySumEndingAt: A:" << endl;
+    for (const auto x : A)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    cout << "bonusIfStartAt:" << endl;
+    for (const auto x : bonusIfStartAt)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
     vector<BestSubarraySumUpTo> result(A.size());
+    map<int64_t, int64_t> things;
+    int startPoint = 0;
     int64_t bestSum = std::numeric_limits<int64_t>::min();
-    int64_t bestB = bonusIfStartAt.front();
+    int64_t bestB = std::numeric_limits<int64_t>::min(); //bonusIfStartAt.front();
+    int64_t cumulativeSum = 0;
+    for (int endPoint = 0; endPoint < A.size(); endPoint++)
+    {
+#if 0
+    int64_t bestSum = std::numeric_limits<int64_t>::min();
+    int64_t bestB = std::numeric_limits<int64_t>::min(); //bonusIfStartAt.front();
     int64_t cumulativeSum = 0;
     int startPoint = 0;
     //cout << "blah" << endl;
-    for (int endPoint = 0; endPoint < A.size(); endPoint++)
-    {
-        //cout << " endPoint: " << endPoint << endl;
-        if (bonusIfStartAt[endPoint] > bestSum )
+        cout << " endPoint: " << endPoint << endl;
+        if (A[endPoint] + bonusIfStartAt[endPoint] >= cumulativeSum + A[endPoint] + max(bestB, bonusIfStartAt[endPoint]))
+        //if (A[endPoint] + bonusIfStartAt[endPoint] > bestSum + A[endPoint])
         {
-            //cout << " found better, apparently" << endl;
             bestSum = A[endPoint] + bonusIfStartAt[endPoint];
             bestB = bonusIfStartAt[endPoint];
             cumulativeSum = A[endPoint];
             startPoint = endPoint;
+            cout << " found better, apparently: set bestB: " << bestB << " cumulativeSum: " << cumulativeSum << " bestSum: " << bestSum << endl;
+
+        
+        else
+        {
+            if (bonusIfStartAt[endPoint] > bestB)
+            {
+                bestB = bonusIfStartAt[endPoint];
+                cout << " updated bestB: " << bestB << endl;
+            }
+            cumulativeSum += A[endPoint];
+            bestSum = cumulativeSum + bestB;
+            cout << " updated cumulativeSum: " << cumulativeSum << " bestB: " << bestB << " bestB " << " bestSum: " << bestSum << endl;
+        }
+        result[endPoint] = {bestSum, startPoint};
+        cout << " End of loop: endPoint: " << endPoint << " bestSum: " << bestSum << " cumulativeSum: " << cumulativeSum << " bestB: " << bestB << endl;
+#endif
+        const auto oldBestB = bestB;
+        //bestB = max(bestB, bonusIfStartAt[endPoint]);
+        things[bonusIfStartAt[endPoint]]++;
+        while (true)
+        {
+            if (startPoint == endPoint)
+                break;
+            if (A[startPoint] >= 0)
+                break;
+            bool eraseStartPoint = false;
+            // Best sum if start point removed?
+            int64_t oldBest = things.rbegin()->first;
+            int64_t newBest = oldBest;
+            things[bonusIfStartAt[startPoint]]--;
+            assert(things[bonusIfStartAt[startPoint]] >= 0);
+            if (things[bonusIfStartAt[startPoint]] == 0)
+            {
+                things.erase(things.find(bonusIfStartAt[startPoint]));
+                newBest = things.rbegin()->first;
+            }
+            if (newBest < oldBest)
+            {
+                if (oldBest - newBest < -A[startPoint])
+                    eraseStartPoint = true;
+            }
+            else
+                eraseStartPoint = true;
+            cout << "Ditching start point";
+            if (!eraseStartPoint)
+            {
+                things[bonusIfStartAt[startPoint]]++;
+                break;
+            }
+            else
+            {
+                cumulativeSum -= A[startPoint];
+                bestB = newBest;
+                startPoint++;
+            }
+        }
+
+        if (A[endPoint] + bonusIfStartAt[endPoint] >= cumulativeSum + A[endPoint] + max(bestB, bonusIfStartAt[endPoint]))
+        {
+            bestSum = A[endPoint] + bonusIfStartAt[endPoint];
+            bestB = bonusIfStartAt[endPoint];
+            cumulativeSum = A[endPoint];
+            startPoint = endPoint;
+            things.clear();
+            things[bonusIfStartAt[startPoint]]++;
+            cout << " found better, apparently: set bestB: " << bestB << " cumulativeSum: " << cumulativeSum << " bestSum: " << bestSum << endl;
+
         }
         else
         {
+            if (bonusIfStartAt[endPoint] > bestB)
+            {
+                bestB = bonusIfStartAt[endPoint];
+                cout << " updated bestB: " << bestB << endl;
+            }
             cumulativeSum += A[endPoint];
             bestSum = cumulativeSum + bestB;
+            cout << " updated cumulativeSum: " << cumulativeSum << " bestB: " << bestB << " bestB " << " bestSum: " << bestSum << endl;
         }
         result[endPoint] = {bestSum, startPoint};
-        //cout << " bestSum: " << bestSum << " cumulativeSum: " << cumulativeSum << " bestB: " << bestB << endl;
+
 #ifdef BRUTE_FORCE
         {
             // Verify.
             int64_t bestSumDebug = std::numeric_limits<int64_t>::min();
             int cumulativeSum = 0;
             int startPointDebug = 0;
+            auto bestBDebug = std::numeric_limits<int64_t>::min();
             for (int startPoint = endPoint; startPoint >= 0; startPoint--)
             {
                 cumulativeSum += A[startPoint];
-                if (cumulativeSum + bonusIfStartAt[startPoint] > bestSumDebug)
+                if (bonusIfStartAt[startPoint] > bestBDebug)
+                    bestBDebug = bonusIfStartAt[startPoint];
+                if (cumulativeSum + bestBDebug > bestSumDebug)
                 {
-                    bestSumDebug = cumulativeSum + bonusIfStartAt[startPoint];
+                    bestSumDebug = cumulativeSum + bestBDebug;
                     startPointDebug = startPoint;
                 }
-                else if (cumulativeSum + bonusIfStartAt[startPoint] == bestSumDebug)
+                else if (cumulativeSum + bestBDebug == bestSumDebug)
                 {
                     startPointDebug = startPoint;
+                }
+                if (endPoint == 2)
+                {
+                    //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
                 }
             }
-            //cout << " bestSumDebug: " << bestSumDebug << endl;
+            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << endl;
             assert(bestSum == bestSumDebug);
-            assert(startPointDebug == startPoint);
+            //assert(startPointDebug == startPoint);
         }
 #endif
     }
@@ -225,6 +325,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
     int bestLeft = -1;
     int bestRight = -1;
     int bestDescend = -1;
+    int bestScoreAfterClearing = 0;
     for (int clearToLeftCol = 0; clearToLeftCol <= startCol; clearToLeftCol++)
     {
         for (int clearToRightCol = startCol; clearToRightCol < numCols; clearToRightCol++)
@@ -237,13 +338,14 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
             for (int descendCol = clearToLeftCol; descendCol <= clearToRightCol; descendCol++)
             {
                 const auto bestIfClearAndDescendHere = scoreAfterClearing + maxSumBruteForce(startRow + 1, descendCol, A, lookup);
-                //cout << "startRow: " << startRow << " bestIfClearAndDescendHere(" << descendCol << ") : " << bestIfClearAndDescendHere << endl;
+                cout << "startRow: " << startRow << " bestIfClearAndDescendHere(" << descendCol << ") : " << bestIfClearAndDescendHere << endl;
                 if (bestIfClearAndDescendHere > best)
                 {
                     best = max(best, bestIfClearAndDescendHere); 
                     bestLeft = clearToLeftCol;
                     bestRight = clearToRightCol;
                     bestDescend = descendCol;
+                    bestScoreAfterClearing = scoreAfterClearing;
                 }
             }
         }
@@ -252,7 +354,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
     assert(lookup[startRow][startCol] == -1);
     lookup[startRow][startCol] = best;
 
-    cout << "brute force startRow: " << startRow << " startCol: " << startCol << " best: " << best << " bestLeft: " << bestLeft << " bestRight: " << bestRight << " bestDescend: " << bestDescend << endl;
+    cout << "brute force startRow: " << startRow << " startCol: " << startCol << " best: " << best << " bestLeft: " << bestLeft << " bestRight: " << bestRight << " bestDescend: " << bestDescend << " bestScoreAfterClearing: " << bestScoreAfterClearing << endl;
 
     return best;
 
@@ -282,10 +384,28 @@ int main()
 #ifdef RANDOM
 
     srand(time(0));
+#if 1
     while (true)
     {
-        const int numRows = (rand() % 3) + 1;
-        const int numCols = (rand() % 3) + 1;
+        const int n = rand() % 4 + 1;
+        const int range = 10;
+        vector<int64_t> bloo;
+        vector<int64_t> bloo2;
+        for (int i = 0; i < n; i++)
+        {
+            bloo.push_back(rand() % (2 * range + 1) - range);
+            bloo2.push_back(rand() % (2 * range + 1) - range);
+        }
+        findMaxSubarraySumEndingAt(bloo, vector<int64_t>(n, 0));
+        findMaxSubarraySumEndingAt(bloo, bloo2);
+        //findMaxSubarraySumEndingAt(vector<int64_t>{56, -93, 225}, vector<int64_t>(3, 0));
+        cout << "n: " << n << endl;
+    }
+#endif
+    while (true)
+    {
+        const int numRows = (rand() % 6) + 1;
+        const int numCols = (rand() % 6) + 1;
         const int range = 250;
         vector<vector<int64_t>> A(numRows, vector<int64_t>(numCols, -1));
         for (int i = 0; i < numRows; i++)
