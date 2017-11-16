@@ -168,7 +168,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
              for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
             {
-                const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][startCol];
+                const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][i];
                 bestForStartCol = max(bestForStartCol, scoreIfDescendHere);
             }
 
@@ -274,7 +274,7 @@ int main()
     while (true)
     {
         const int numRows = (rand() % 3) + 1;
-        const int numCols = (rand() % 3) + 1;
+        const int numCols = (rand() % 2) + 1;
         const int range = 250;
         vector<vector<int64_t>> A(numRows, vector<int64_t>(numCols, -1));
         for (int i = 0; i < numRows; i++)
