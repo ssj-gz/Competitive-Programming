@@ -1,9 +1,11 @@
 // Simon St James (ssjgz) - 2017-11-16 
 // This is a test submission - the algorithm is too slow to pass, but I want to check correctness, at least!
 #define BRUTE_FORCE
+#define RANDOM
 //#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
+#undef RANDOM
 #define NDEBUG
 #endif
 #include <iostream>
@@ -267,17 +269,22 @@ int main()
     srand(time(0));
     while (true)
     {
-        const int n = (rand() % 20) + 1;
-        const int m = (rand() % 20) + 1;
+        const int numRows = (rand() % 20) + 1;
+        const int numCols = (rand() % 20) + 1;
         const int range = 250;
-        vector<int64_t> a;
-        vector<int64_t> b;
-        for (int i = 0; i < n; i++)
+        vector<vector<int64_t>> A(numRows, vector<int64_t>(numCols, -1));
+        for (int i = 0; i < numRows; i++)
         {
-            a.push_back(rand() % (2 * range + 1) - range);
-            b.push_back(rand() % (2 * range + 1) - range);
+            for (int j = 0; j < numCols; j++)
+            {
+                A[i][j] = rand() % (2 * range + 1) - range;
+            }
         }
-        blah(a, b);
+        const auto best = maxSum(A);
+        const auto bestBruteForce = maxSumBruteForce(A);
+        cout << "best: " << best << " bestBruteForce: " << bestBruteForce << endl;
+        assert(best == bestBruteForce);
+        //blah(a, b);
     }
 #else
 
