@@ -34,7 +34,7 @@ struct BestSubarraySum
     int subArrayEndIndex = 0;
 };
 
-vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A)
+vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& scoreIfDescendAt)
 {
     const auto N = A.size();
     vector<BestSubarraySumUpTo> result(N);
@@ -54,15 +54,19 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A)
         }
         maxContiguousSubarraySum = max(maxContiguousSubarraySum, sumOfLargestSubarrayEndingHere);
         result[i] = BestSubarraySumUpTo{sumOfLargestSubarrayEndingHere, subarrayStartPos};
+#ifdef BRUTE_FORCE
+
+#endif
     }
     return result;
 }
 
-vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int64_t>& A)
+vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int64_t>& A, const vector<int64_t>& scoreIfDescendAt)
 {
     const vector<int64_t> aReversed(A.rbegin(), A.rend());
+    const vector<int64_t> scoreIfDescendAtReversed(scoreIfDescendAt.rbegin(), scoreIfDescendAt.rend());
     const auto N = A.size();
-    auto result = findMaxSubarraySumEndingAt(aReversed);
+    auto result = findMaxSubarraySumEndingAt(aReversed, scoreIfDescendAtReversed);
     // Need to invert indices.
     for (auto& sumEndingAt : result)
     {
@@ -77,9 +81,10 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
     const int numRows = A.size();
     const int numCols = A[0].size();
     cout << "numRows: " << numRows << " numCols: " << numCols << endl;
+    const vector<int64_t> rowOfZeros(numCols, 0);
 
     lookup.resize(numRows, vector<int64_t>(numCols, -1));
-    lookup.push_back(vector<int64_t>(numCols, 0)); // "Sentinel" row.
+    lookup.push_back(rowOfZeros); // "Sentinel" row.
 
     int64_t best = 0;
 
@@ -96,7 +101,7 @@ int64_t maxSum(const vector<vector<int>>& A, vector<vector<int64_t>>& lookup)
                 bestFromRightCumulative.push_back(A[row][startCol] + lookup[row + 1][startCol]);
 
             }
-            for (const auto& blah : findMaxSubarraySumEndingAtReversed(bestFromRightCumulative))
+            for (const auto& blah : findMaxSubarraySumEndingAtReversed(bestFromRightCumulative, rowOfZeros))
             {
                 cout << " floop " << blah.sum << endl;
                 bestIfMovedRightFromAndDescended.push_back(blah.sum);
@@ -179,16 +184,18 @@ void blah(const vector<int64_t>& a, const vector<int64_t>& b)
     int64_t bestSum = std::numeric_limits<int64_t>::min();
     int64_t bestB = b.front();
     int64_t cumulativeSum = 0;
+    int startPoint = 0;
     //cout << "blah" << endl;
     for (int endPoint = 0; endPoint < a.size(); endPoint++)
     {
         //cout << " endPoint: " << endPoint << endl;
-        if (a[endPoint] + b[endPoint] > bestSum + a[endPoint])
+        if (b[endPoint] > bestSum )
         {
             //cout << " found better, apparently" << endl;
             bestSum = a[endPoint] + b[endPoint];
             bestB = b[endPoint];
             cumulativeSum = a[endPoint];
+            startPoint = endPoint;
         }
         else
         {
@@ -200,16 +207,23 @@ void blah(const vector<int64_t>& a, const vector<int64_t>& b)
             // Verify.
             int64_t bestSumDebug = std::numeric_limits<int64_t>::min();
             int cumulativeSum = 0;
+            int startPointDebug = 0;
             for (int startPoint = endPoint; startPoint >= 0; startPoint--)
             {
                 cumulativeSum += a[startPoint];
                 if (cumulativeSum + b[startPoint] > bestSumDebug)
                 {
                     bestSumDebug = cumulativeSum + b[startPoint];
+                    startPointDebug = startPoint;
+                }
+                else if (cumulativeSum + b[startPoint] == bestSumDebug)
+                {
+                    startPointDebug = startPoint;
                 }
             }
             //cout << " bestSumDebug: " << bestSumDebug << endl;
             assert(bestSum == bestSumDebug);
+            assert(startPointDebug == startPoint);
         }
     }
 }
