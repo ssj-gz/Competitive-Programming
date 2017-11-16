@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-16 
 // This is a test submission - the algorithm is too slow to pass, but I want to check correctness, at least!
 #define BRUTE_FORCE
-#define RANDOM
+//#define RANDOM
 //#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -123,10 +123,10 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     cout << "numRows: " << numRows << " numCols: " << numCols << endl;
     const vector<int64_t> rowOfZeros(numCols, 0);
 
-    vector<vector<int64_t>> lookup(numRows, vector<int64_t>(numCols, -1));
+    vector<vector<int64_t>> lookup(numRows, vector<int64_t>(numCols, std::numeric_limits<int64_t>::min()));
     lookup.push_back(rowOfZeros); // "Sentinel" row.
 
-    int64_t best = 0;
+    int64_t best = std::numeric_limits<int64_t>::min();
 
     for (int row = numRows - 1; row >= 0; row--)
     {
@@ -178,14 +178,15 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             // Descend to the left of gobble-range.
             if (bestGobbleStartIndex > 0)
             {
-                const int64_t score = bestIfMovedLeftFromAndDescended[bestGobbleStartIndex - 1];
+                const int64_t score = bestGobbleSum + bestIfMovedLeftFromAndDescended[bestGobbleStartIndex - 1];
                 bestForStartCol = max(bestForStartCol, score);
             }
             cout << "  bestForStartCol after descend to left of gobble-range: " << bestForStartCol << endl;
             // Descend to the right of gobble-range.
             if (bestGobbleEndIndex < numCols - 1)
             {
-                const int64_t score = bestIfMovedRightFromAndDescended[bestGobbleEndIndex + 1];
+                const int64_t score = bestGobbleSum + bestIfMovedRightFromAndDescended[bestGobbleEndIndex + 1];
+                cout << "bestIfMovedRightFromAndDescended from " << (bestGobbleEndIndex + 1) << " : " << score << endl;
                 bestForStartCol = max(bestForStartCol, score);
             }
             cout << "  bestForStartCol: " << bestForStartCol << endl;
@@ -233,7 +234,7 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
             for (int descendCol = clearToLeftCol; descendCol <= clearToRightCol; descendCol++)
             {
                 const auto bestIfClearAndDescendHere = scoreAfterClearing + maxSumBruteForce(startRow + 1, descendCol, A, lookup);
-                cout << "startRow: " << startRow << " bestIfClearAndDescendHere(" << descendCol << ") : " << bestIfClearAndDescendHere << endl;
+                //cout << "startRow: " << startRow << " bestIfClearAndDescendHere(" << descendCol << ") : " << bestIfClearAndDescendHere << endl;
                 best = max(best, bestIfClearAndDescendHere); 
             }
         }
@@ -308,12 +309,15 @@ int main()
 
     vector<vector<int64_t>> A(n, vector<int64_t>(m, -1));
 
+    cout << "A:" << endl;
     for (int row = 0; row < n; row++)
     {
         for (int col = 0; col < m; col++)
         {
             cin >> A[row][col];
+            cout << A[row][col] << " ";
         }
+        cout << endl;
     }
 
     const int64_t best = maxSum(A);
