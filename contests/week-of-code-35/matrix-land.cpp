@@ -1,5 +1,8 @@
+// Simon St James (ssjgz) - 2017-11-16 
+// This is a test submission - the algorithm is too slow to pass, but I want to check correctness, at least!
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
