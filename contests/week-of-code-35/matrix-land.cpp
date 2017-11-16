@@ -170,12 +170,13 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
                 bestForStartCol = max(bestForStartCol, score);
             }
             cout << "  bestForStartCol: " << bestForStartCol << endl;
-            // All columns in the gobble range have the same max attainable score if we start there.
+            // All columns in the gobble range have the same max attainable score if we start there TODO - no, this is wrong!
             for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
             {
-                lookup[row][i] = bestForStartCol;
+                lookup[row][i] = max(lookup[row][i], bestForStartCol);
             }
-            startCol = bestGobbleEndIndex + 1;
+            //startCol = bestGobbleEndIndex + 1;
+            startCol++;
         }
     }
 
