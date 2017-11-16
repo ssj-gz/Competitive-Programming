@@ -37,6 +37,42 @@ struct BestSubarraySum
     int subArrayEndIndex = 0;
 };
 
+class MaxTracker
+{
+    public:
+        void add(int64_t value)
+        {
+            numOfValue[value]++;
+        }
+        void remove(int64_t value)
+        {
+            assert(numOfValue.find(value) != numOfValue.end());
+            numOfValue[value]--;
+            if (numOfValue[value] == 0)
+            {
+                numOfValue.erase(numOfValue.find(value));
+            }
+        }
+        int64_t max() const
+        {
+            assert(size() > 0);
+            return numOfValue.rbegin()->first;
+        }
+        int size() const
+        {
+            return numOfValue.size();
+        }
+        int64_t secondToMax() const
+        {
+            assert(size() > 1);
+            auto blah = numOfValue.rbegin();
+            blah++;
+            return blah->first;
+        };
+    private:
+        map<int64_t, int64_t> numOfValue;
+};
+
 vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
     cout << "findMaxSubarraySumEndingAt: A:" << endl;
