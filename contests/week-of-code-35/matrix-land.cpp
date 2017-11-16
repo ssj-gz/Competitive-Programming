@@ -129,48 +129,55 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     for (int row = numRows - 1; row >= 0; row--)
     {
         cout << "row!" << row << endl;
-        const vector<int64_t> bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
+        const auto bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
+        const auto bestIfMovedLeftFromAndDescended = extractSums(findMaxSubarraySumEndingAt(A[row], lookup[row + 1]));
+        const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
+        const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
+
+        int startCol = 0;
+        while (startCol < numCols)
         {
-#ifdef BRUTE_FORCE
+            int64_t bestGobbleSum = 0;
+            const int bestGobbleStartIndex = bestGobbleToLeftFrom[startCol].subArrayStartIndex;
+            bestGobbleSum += bestGobbleToLeftFrom[startCol].sum;
+            int bestGobbleEndIndex = startCol;
+            if (startCol < numCols - 1)
             {
-                // Verify.
-                for (int startCol = 0; startCol < numCols; startCol++)
-                {
-                    int64_t sum = 0;
-                    int64_t best = std::numeric_limits<int64_t>::min();
-                    for (int descendCol = startCol; descendCol < numCols; descendCol++)
-                    {
-                        sum += A[row][descendCol];
-                        const auto score = sum + lookup[row + 1][descendCol];
-                        best = max(best, score);
-                    }
-                    cout << "row: " << row << " startCol: " << startCol << " bestIfMovedRightFromAndDescended[startCol]: " << bestIfMovedRightFromAndDescended[startCol] << " best: " << best << endl;
-                    assert(best == bestIfMovedRightFromAndDescended[startCol]);
-                }
+                bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
+                bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
             }
-#endif
-        }
-        const vector<int64_t> bestIfMovedLeftFromAndDescended = extractSums(findMaxSubarraySumEndingAt(A[row], lookup[row + 1]));
-#ifdef BRUTE_FORCE
-        {
-            // Verify.
-            for (int startCol = 0; startCol < numCols; startCol++)
+            // Descend in the middle of gobble-range.
+            int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
+            for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
             {
-                int64_t sum = 0;
-                int64_t best = std::numeric_limits<int64_t>::min();
-                for (int descendCol = startCol; descendCol >= 0; descendCol--)
-                {
-                    sum += A[row][descendCol];
-                    const auto score = sum + lookup[row + 1][descendCol];
-                    best = max(best, score);
-                }
-                cout << "row: " << row << " startCol: " << startCol << " bestIfMovedRightFromAndDescended[startCol]: " << bestIfMovedRightFromAndDescended[startCol] << " best: " << best << endl;
-                assert(best == bestIfMovedLeftFromAndDescended[startCol]);
+                const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][startCol];
+                bestForStartCol = max(bestForStartCol, scoreIfDescendHere);
             }
+            // Descend to the left of gobble-range.
+            if (bestGobbleStartIndex > 0)
+            {
+                const int64_t score = bestIfMovedLeftFromAndDescended[bestGobbleStartIndex - 1];
+                bestForStartCol = max(bestForStartCol, score);
+            }
+            // Descend to the right of gobble-range.
+            if (bestGobbleEndIndex < numCols - 1)
+            {
+                const int64_t score = bestIfMovedRightFromAndDescended[bestGobbleEndIndex + 1];
+                bestForStartCol = max(bestForStartCol, score);
+            }
+            // All columns in the gobble range have the same max attainable score if we start there.
+            for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
+            {
+                lookup[row][i] = bestForStartCol;
+            }
+            startCol = bestGobbleEndIndex + 1;
         }
-#endif
     }
 
+    for (const auto bestForStartCol : lookup[0])
+    {
+        best = max(best, bestForStartCol);
+    }
 
     return best;
 }
