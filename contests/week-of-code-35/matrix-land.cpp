@@ -147,6 +147,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
 #endif
 
         int startCol = 0;
+        int previousGobbleLeftIndex = -1;
         while (startCol < numCols)
         {
             cout << " startCol: " << startCol << endl;
@@ -159,6 +160,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
                 bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
                 bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
             }
+            assert(previousGobbleLeftIndex == -1 || bestGobbleStartIndex >= previousGobbleLeftIndex);
             cout << "  bestGobbleSum: " << bestGobbleSum << " bestGobbleStartIndex: " << bestGobbleStartIndex << " bestGobbleEndIndex: " << bestGobbleEndIndex << endl;
             // Descend in the middle of gobble-range.
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
@@ -193,6 +195,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             //}
             //startCol = bestGobbleEndIndex + 1;
             startCol++;
+            previousGobbleLeftIndex = bestGobbleStartIndex;
         }
     }
 
@@ -241,15 +244,32 @@ int64_t maxSumBruteForce(int startRow, int startCol, const vector<vector<int64_t
 
 }
 
+int64_t maxSumBruteForce(const vector<vector<int64_t>>& A)
+{
+    const int numRows = A.size();
+    const int numCols = A[0].size();
+
+    vector<vector<int64_t>> bruteForceLookup(numRows, vector<int64_t>(numCols, -1));
+    int64_t bestBruteForce = std::numeric_limits<int64_t>::min();
+    for (int startCol = 0; startCol < numCols; startCol++)
+    {
+        const auto bestStartingHereBruteForce = maxSumBruteForce(0, startCol, A, bruteForceLookup);
+        bestBruteForce = max(bestBruteForce, bestStartingHereBruteForce);
+        cout << "startCol: " << startCol << " bestStartingHereBruteForce: " << bestStartingHereBruteForce << endl;
+    }
+    return bestBruteForce;
+}
+
 int main()
 {
-#if 0
+#ifdef RANDOM
 
     srand(time(0));
     while (true)
     {
         const int n = (rand() % 20) + 1;
-        const int range = 200;
+        const int m = (rand() % 20) + 1;
+        const int range = 250;
         vector<int64_t> a;
         vector<int64_t> b;
         for (int i = 0; i < n; i++)
@@ -259,7 +279,7 @@ int main()
         }
         blah(a, b);
     }
-#endif
+#else
 
     int n, m;
     cin >> n >> m;
@@ -274,18 +294,12 @@ int main()
         }
     }
 
-    int64_t best = maxSum(A);
+    const int64_t best = maxSum(A);
 #ifdef BRUTE_FORCE
-    vector<vector<int64_t>> bruteForceLookup(n, vector<int64_t>(m, -1));
-    int64_t bestBruteForce = std::numeric_limits<int64_t>::min();
-    for (int startCol = 0; startCol < m; startCol++)
-    {
-        const auto bestStartingHereBruteForce = maxSumBruteForce(0, startCol, A, bruteForceLookup);
-        bestBruteForce = max(bestBruteForce, bestStartingHereBruteForce);
-        cout << "startCol: " << startCol << " bestStartingHereBruteForce: " << bestStartingHereBruteForce << endl;
-    }
+    const auto bestBruteForce = maxSumBruteForce(A);
     cout << "best: " << best << " best brute force: " << bestBruteForce << endl;
     assert(best == bestBruteForce);
 #endif
     cout << best << endl;
+#endif
 }
