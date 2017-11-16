@@ -115,47 +115,6 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
         {
             cout << " iterating negative point checks" << endl;
             bool negativePointChanged = false;
-            for (int i = negativePointsLastCheckedUntil + 1; i <= endPoint; i++)
-            {
-                if (negativePoint == -1 || (!encounteredPositiveAfterNegativePoint && A[endPoint] < 0))
-                {
-                    upToNegativePointCumulative += A[endPoint];
-                    beforeNegativePointBs.add(bonusIfStartAt[endPoint]);
-                    if (upToNegativePointCumulative < 0)
-                    {
-                        if (negativePoint == -1)
-                        {
-                            unprocessedNegativePointIndex = startPoint;
-                            encounteredPositiveAfterNegativePoint = false;
-                        }
-                        negativePoint = endPoint;
-                        cout << "Negative point found: " << negativePoint << endl;
-                        //needToRemoveFromAfter = true;
-                        negativePointChanged = true;
-                        cout << "Removing afterNegativePointBs to reflect new negative point; unprocessedNegativePointIndex: " << unprocessedNegativePointIndex << endl;
-                        //if (negativePointsLastCheckedUntil == -1)
-                            //negativePointsLastCheckedUntil = 0;
-                        //for (int j = negativePointsLastCheckedUntil + 1; j <= negativePoint; j++)
-                        for (int j = unprocessedNegativePointIndex; j <= negativePoint; j++)
-                        {
-                            cout << " removing bonusIfStartAt[" << j << "] = " << bonusIfStartAt[j] << " from afterNegativePointBs" << endl;
-                            afterNegativePointBs.remove(bonusIfStartAt[j]);
-                        }
-                        unprocessedNegativePointIndex = negativePoint + 1;
-                        break;
-                    }
-                    else
-                    {
-                    }
-                }
-                else
-                {
-                    break;
-                }
-                if (negativePoint != -1 && A[endPoint] >= 0)
-                    encounteredPositiveAfterNegativePoint = true;
-            }
-            negativePointsLastCheckedUntil = endPoint;
 
             //if (negativePoint == -1)
             //afterNegativePointBs.add(bonusIfStartAt[endPoint]);
@@ -233,6 +192,47 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
 #endif
                 }
             }
+            for (int i = negativePointsLastCheckedUntil + 1; i <= endPoint; i++)
+            {
+                if (negativePoint == -1 || (!encounteredPositiveAfterNegativePoint && A[endPoint] < 0))
+                {
+                    upToNegativePointCumulative += A[endPoint];
+                    beforeNegativePointBs.add(bonusIfStartAt[endPoint]);
+                    if (upToNegativePointCumulative < 0)
+                    {
+                        if (negativePoint == -1)
+                        {
+                            unprocessedNegativePointIndex = startPoint;
+                            encounteredPositiveAfterNegativePoint = false;
+                        }
+                        negativePoint = endPoint;
+                        cout << "Negative point found: " << negativePoint << endl;
+                        //needToRemoveFromAfter = true;
+                        negativePointChanged = true;
+                        cout << "Removing afterNegativePointBs to reflect new negative point; unprocessedNegativePointIndex: " << unprocessedNegativePointIndex << endl;
+                        //if (negativePointsLastCheckedUntil == -1)
+                            //negativePointsLastCheckedUntil = 0;
+                        //for (int j = negativePointsLastCheckedUntil + 1; j <= negativePoint; j++)
+                        for (int j = unprocessedNegativePointIndex; j <= negativePoint; j++)
+                        {
+                            cout << " removing bonusIfStartAt[" << j << "] = " << bonusIfStartAt[j] << " from afterNegativePointBs" << endl;
+                            afterNegativePointBs.remove(bonusIfStartAt[j]);
+                        }
+                        unprocessedNegativePointIndex = negativePoint + 1;
+                        break;
+                    }
+                    else
+                    {
+                    }
+                }
+                else
+                {
+                    break;
+                }
+                if (negativePoint != -1 && A[endPoint] >= 0)
+                    encounteredPositiveAfterNegativePoint = true;
+            }
+            negativePointsLastCheckedUntil = endPoint;
             if (!negativePointChanged)
                 break;
         }
