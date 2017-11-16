@@ -126,7 +126,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             if (negativePoint != -1 && negativePoint < endPoint)
             {
                 cout << "There is a negative point: " << negativePoint << " upToNegativePointCumulative: " << upToNegativePointCumulative << " beforeNegativePointBs.max(): " << (beforeNegativePointBs.size() > 0 ? beforeNegativePointBs.max() : -999) << " afterNegativePointBs.max(): " << (afterNegativePointBs.size() > 0 ? afterNegativePointBs.max() : -999) << " - testing if we can remove" << endl;
-                assert(upToNegativePointCumulative < 0);
+                //assert(upToNegativePointCumulative < 0);
                 const int64_t gainFromStrippingUpToNegativePoint = -upToNegativePointCumulative;
                 int64_t lossFromStrippingUpToNegativePoint = 0;
                 cout << "gainFromStrippingUpToNegativePoint: " << gainFromStrippingUpToNegativePoint << endl;
@@ -198,7 +198,8 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             for (int i = negativePointsLastCheckedUntil + 1; i <= endPoint; i++)
             {
                 cout << "Checking for additional negative points i: " << i << " negativePoint: " << negativePoint << " encounteredPositiveAfterNegativePoint: " << encounteredPositiveAfterNegativePoint << " A[i]:  " << A[i] << endl;
-                if (negativePoint == -1 || (!encounteredPositiveAfterNegativePoint && A[i] < 0))
+                //if (negativePoint == -1/* || (!encounteredPositiveAfterNegativePoint && A[i] < 0)*/)
+                if (true)
                 {
                     upToNegativePointCumulative += A[i];
                     cout << " updating upToNegativePointCumulative: now " << upToNegativePointCumulative << endl;
@@ -236,7 +237,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                 }
                 if (negativePoint != -1 && A[i] >= 0)
                 {
-                    encounteredPositiveAfterNegativePoint = true;
+                    //encounteredPositiveAfterNegativePoint = true;
                     cout << "Setting encounteredPositiveAfterNegativePoint to true; negativePoint: " << negativePoint << "  due to i: " << i << endl;
                 }
                 if (negativePoint != -1) // See if we can remove this one immediately; if not, hopefully we can loop round and get it.
