@@ -104,14 +104,14 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int6
     return result;
 }
 
-int64_t maxSum(const vector<vector<int64_t>>& A, vector<vector<int64_t>>& lookup)
+int64_t maxSum(const vector<vector<int64_t>>& A)
 {
     const int numRows = A.size();
     const int numCols = A[0].size();
     cout << "numRows: " << numRows << " numCols: " << numCols << endl;
     const vector<int64_t> rowOfZeros(numCols, 0);
 
-    lookup.resize(numRows, vector<int64_t>(numCols, -1));
+    vector<vector<int64_t>> lookup(numRows, vector<int64_t>(numCols, -1));
     lookup.push_back(rowOfZeros); // "Sentinel" row.
 
     int64_t best = 0;
@@ -293,14 +293,13 @@ int main()
         }
     }
 
-    vector<vector<int64_t>> lookup;
 #ifdef BRUTE_FORCE
     vector<vector<int64_t>> bruteForceLookup(n, vector<int64_t>(m, -1));
 #endif
     int64_t best = 0;
     for (int startCol = 0; startCol < m; startCol++)
     {
-        const auto bestStartingHere = maxSum(A, lookup);
+        const auto bestStartingHere = maxSum(A);
         best = max(best, bestStartingHere);
 #ifdef BRUTE_FORCE
         const auto bestStartingHereBruteForce = maxSumBruteForce(0, startCol, A, bruteForceLookup);
