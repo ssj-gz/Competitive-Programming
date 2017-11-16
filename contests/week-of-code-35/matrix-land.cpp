@@ -104,6 +104,16 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int6
     return result;
 }
 
+vector<int64_t> extractSums(const vector<BestSubarraySumUpTo>& sumsAndStartIndices)
+{
+    vector<int64_t> result;
+    for (const auto sumAndStartIndex : sumsAndStartIndices)
+    {
+        result.push_back(sumAndStartIndex.sum);
+    }
+    return result;
+}
+
 int64_t maxSum(const vector<vector<int64_t>>& A)
 {
     const int numRows = A.size();
@@ -119,13 +129,8 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     for (int row = numRows - 1; row >= 0; row--)
     {
         cout << "row!" << row << endl;
-        vector<int64_t> bestIfMovedRightFromAndDescended;
+        const vector<int64_t> bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
         {
-            for (const auto& blah : findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]))
-            {
-                cout << " floop " << blah.sum << endl;
-                bestIfMovedRightFromAndDescended.push_back(blah.sum);
-            }
 #ifdef BRUTE_FORCE
             {
                 // Verify.
@@ -145,12 +150,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             }
 #endif
         }
-        vector<int64_t> bestIfMovedLeftFromAndDescended;
-        for (const auto& blah : findMaxSubarraySumEndingAt(A[row], lookup[row + 1]))
-        {
-            cout << " floop " << blah.sum << endl;
-            bestIfMovedLeftFromAndDescended.push_back(blah.sum);
-        }
+        const vector<int64_t> bestIfMovedLeftFromAndDescended = extractSums(findMaxSubarraySumEndingAt(A[row], lookup[row + 1]));
 #ifdef BRUTE_FORCE
         {
             // Verify.
