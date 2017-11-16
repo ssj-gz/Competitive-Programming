@@ -137,15 +137,17 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         int startCol = 0;
         while (startCol < numCols)
         {
+            cout << " startCol: " << startCol << endl;
             int64_t bestGobbleSum = 0;
             const int bestGobbleStartIndex = bestGobbleToLeftFrom[startCol].subArrayStartIndex;
             bestGobbleSum += bestGobbleToLeftFrom[startCol].sum;
             int bestGobbleEndIndex = startCol;
-            if (startCol < numCols - 1)
+            if (startCol < numCols - 1 && bestGobbleToRightFrom[startCol + 1].sum >= 0)
             {
                 bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
                 bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
             }
+            cout << "  bestGobbleSum: " << bestGobbleSum << " bestGobbleStartIndex: " << bestGobbleStartIndex << " bestGobbleEndIndex: " << bestGobbleEndIndex << endl;
             // Descend in the middle of gobble-range.
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
             for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
@@ -153,18 +155,21 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
                 const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][startCol];
                 bestForStartCol = max(bestForStartCol, scoreIfDescendHere);
             }
+            cout << "  bestForStartCol after descend in gobble-range: " << bestForStartCol << endl;
             // Descend to the left of gobble-range.
             if (bestGobbleStartIndex > 0)
             {
                 const int64_t score = bestIfMovedLeftFromAndDescended[bestGobbleStartIndex - 1];
                 bestForStartCol = max(bestForStartCol, score);
             }
+            cout << "  bestForStartCol after descend to left of gobble-range: " << bestForStartCol << endl;
             // Descend to the right of gobble-range.
             if (bestGobbleEndIndex < numCols - 1)
             {
                 const int64_t score = bestIfMovedRightFromAndDescended[bestGobbleEndIndex + 1];
                 bestForStartCol = max(bestForStartCol, score);
             }
+            cout << "  bestForStartCol: " << bestForStartCol << endl;
             // All columns in the gobble range have the same max attainable score if we start there.
             for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
             {
