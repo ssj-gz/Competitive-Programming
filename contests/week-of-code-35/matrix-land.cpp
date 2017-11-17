@@ -154,8 +154,10 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
                 maxInGobbleRange = max(maxInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxDescendValue);
             }
             maxInGobbleRange += bestGobbleSum;
-            // Descend in the middle of gobble-range.
+
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
+
+            // Descend in the middle of gobble-range.
             bestForStartCol = max(bestForStartCol, maxInGobbleRange);
 
             // Descend to the left of gobble-range.
