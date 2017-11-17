@@ -1,5 +1,4 @@
 // Simon St James (ssjgz) - 2017-11-17
-// This is just a "correctness" submission - it's too slow to pass all testcase!
 #define BRUTE_FORCE
 #define SUBMISSION
 #ifdef SUBMISSION
@@ -41,7 +40,6 @@ vector<int64_t> factorialLookup;
 vector<int64_t> factorialInverseLookup;
 vector<int64_t> inverseLookup;
 
-
 void buildFactorialLookups(int maxN)
 {
     factorialLookup.resize(maxN + 1);
@@ -63,56 +61,35 @@ int64_t nCr(int64_t n, int64_t r, int64_t modulus)
 {
     int64_t result = (factorialLookup[n] * factorialInverseLookup[r]) % modulus;
     result = (result * factorialInverseLookup[n - r]) % modulus;
-    //cout << "nCr: n: " << n << " r: " << r << " result: " << result << endl;
     return result;
 }
 
 int64_t computePowerSum(int64_t n, int64_t k)
 {
-    if (n == 0)
-        return 0;
-    vector<int64_t> answersForEarlierK(maxK + 1);
+    // Recursive formula to compute; taken from https://math.stackexchange.com/a/2040334.
+    vector<int64_t> answerForK(maxK + 1);
 
-    answersForEarlierK[0] = n;
+    answerForK[0] = n;
 
     for (int i = 1; i <= k; i++)
     {
         int64_t answer = (quickPower(n + 1, i + 1, ::modulus) + ::modulus - 1) % ::modulus;
-        //cout << "answer quickPower: " << answer << endl;
         for (int j = 0; j <= i - 1; j++)
         {
             const int64_t multiplier = nCr(i + 1, j, ::modulus);
-            //cout << "multiplier: " << multiplier << endl;
-            const int64_t term = (multiplier * answersForEarlierK[j]) % :: modulus;
-            //cout << "term: " << term << endl;
+            const int64_t term = (multiplier * answerForK[j]) % :: modulus;
             answer = (::modulus + answer - term) % ::modulus;
         }
-        //assert((answer % (i + 1)) == 0);
-        //answer /= (i + 1);
         answer = (answer * inverseLookup[i + 1]) % ::modulus;
-        answersForEarlierK[i] = answer;
-        //cout << "answer for power = " << i << " : " << answer << endl;;
+        answerForK[i] = answer;
     }
-    return answersForEarlierK[k];
+    return answerForK[k];
 }
 
 int main()
 {
-#if 0
-    Rational r1{3, 4};
-    Rational r2{5, 4};
-    Rational r3{7, 6};
-
-    cout << r1 << " + " << r2 << " = " << (r1 + r2) << endl;
-    cout << r1 << " * " << r2 << " = " << (r1 * r2) << endl;
-    cout << r1 << " / " << r2 << " = " << (r1 / r2) << endl;
-    cout << r1 << " / " << r3 << " = " << (r1 / r3) << endl;
-    cout << r2 << " + " << r3 << " = " << (r2 + r3) << endl;
-#endif
-    //vector<vector<Rational>> coefficientsForK;
-    //coefficientsForK.push_back(
+    // Build lookup tables.
     buildFactorialLookups(maxnCr);
-
     inverseLookup.resize(maxnCr + 1);
     for (int64_t i = 1; i <= maxnCr; i++)
     {
@@ -129,10 +106,9 @@ int main()
         int64_t n, k;
         cin >> n >> k;
 
+        // We need to compute the power sum 2^k + .... + (n-1)^k.
+        // This is just 1^k + ... + n^k with the n^k and 1^k terms dropped.
         int64_t nMinusOne = (n + ::modulus - 1) % ::modulus; 
-
-
-
         const int64_t total = (n != 1 ? computePowerSum(nMinusOne, k) - 1 : 0);
         cout << total << endl;
 #ifdef BRUTE_FORCE
@@ -140,19 +116,11 @@ int main()
 
         for (int i = 2; i <= n - 1; i++)
         {
-            //cout << "i : " << i << " i ^^ k: " << quickPower(i, k, ::modulus) << endl;
-            //dbgTotal = (dbgTotal + (n - 1 - i) * quickPower(i, k, ::modulus)) % ::modulus;
             dbgTotal = (dbgTotal + quickPower(i, k, ::modulus)) % ::modulus;
-            //cout << "i: " << i << " dbgTotal: " << dbgTotal << endl;
 
         }
         cout << "total: " << total << " dbgTotal: " << dbgTotal << endl;
         assert(dbgTotal == total);
 #endif
     }
-
-    //const auto blah = quickPower(5, 8, ::modulus);
-    //const auto blah2 = quickPower(::modulus - 5, 8, ::modulus);
-    //cout << "blah: " << blah << " blah2: " << blah2 << " sum: " << (blah + blah2) << " sum mod: " << (blah + blah2) % ::modulus << endl;
-
 }
