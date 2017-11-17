@@ -127,17 +127,21 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     const int numCols = A[0].size();
     const vector<int64_t> rowOfZeros(numCols, 0);
 
-    vector<vector<int64_t>> lookup(numRows, vector<int64_t>(numCols, std::numeric_limits<int64_t>::min()));
-    lookup.push_back(rowOfZeros); // "Sentinel" row.
+    vector<int64_t> maxScores(numCols);
+    vector<int64_t> rowUnderneathMaxScores(numCols); // The previous row we processed (i.e. the one below the current one!).
+    rowUnderneathMaxScores = rowOfZeros;
 
     int64_t best = std::numeric_limits<int64_t>::min();
 
     for (int row = numRows - 1; row >= 0; row--)
     {
-        const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]);
-        const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], lookup[row + 1]);
-        const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], lookup[row + 1]);
-        const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]);
+        maxScores.clear();
+        maxScores.resize(numCols);
+
+        const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], rowUnderneathMaxScores);
+        const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], rowUnderneathMaxScores);
+        const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowUnderneathMaxScores);
+        const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowUnderneathMaxScores);
 
         int startCol = 0;
         while (startCol < numCols)
@@ -172,13 +176,19 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
                 const int64_t score = bestGobbleSum + bestIfMovedRightFromAndDescended[bestGobbleEndIndex + 1];
                 bestForStartCol = max(bestForStartCol, score);
             }
-            lookup[row][startCol] = max(lookup[row][startCol], bestForStartCol);
+            maxScores[startCol] = max(maxScores[startCol], bestForStartCol);
 
             startCol++;
         }
+
+        if (row != 0)
+        {
+            // Faster than copying!
+            swap(rowUnderneathMaxScores, maxScores);
+        }
     }
 
-    for (const auto bestForStartCol : lookup[0])
+    for (const auto bestForStartCol : maxScores)
     {
         best = max(best, bestForStartCol);
     }
