@@ -5,6 +5,9 @@
 
 using namespace std;
 
+constexpr auto modulus = 1'000'000'009ULL;
+constexpr auto maxK = 1000;
+
 int64_t quickPower(int64_t n, uint64_t k, int64_t m)
 {
     int64_t result = 1;
@@ -26,8 +29,27 @@ int64_t quickPower(int64_t n, uint64_t k, int64_t m)
     return result;
 }
 
+vector<int64_t> factorialLookup;
+vector<int64_t> factorialInverseLookup;
+vector<int64_t> inverseLookup;
 
-constexpr auto modulus = 1'000'000'009ULL;
+
+void buildFactorialLookups(int maxN)
+{
+    factorialLookup.resize(maxN + 1);
+    factorialLookup[0] = 1;
+    factorialInverseLookup.resize(maxN + 1);
+    factorialInverseLookup[0] = 1;
+    int64_t factorial = 1;
+    for (auto i = 1; i <= maxN; i++)
+    {
+        factorial = (factorial * i) % ::modulus;
+        factorialLookup[i] = factorial;
+        const auto factorialInverse = quickPower(factorial, ::modulus - 2, ::modulus);
+        assert((factorial * factorialInverse) % ::modulus == 1);
+        factorialInverseLookup[i] = factorialInverse;
+    }
+}
 
 class Rational
 {
@@ -114,16 +136,16 @@ int64_t factorial(int64_t n)
     return result;
 }
 
-int64_t nCr(int64_t n, int64_t r)
+int64_t nCr(int64_t n, int64_t r, int64_t modulus)
 {
-    auto result = factorial(n) / factorial(r) / factorial(n - r);
+    auto result = (factorialLookup[n] * factorialInverseLookup[r]) % modulus;
+    result = (result * factorialInverseLookup[n - r]) % modulus;
     cout << "nCr: n: " << n << " r: " << r << " result: " << result << endl;
     return result;
 }
 
 int64_t computePowerSum(int64_t n, int64_t k)
 {
-    const int maxK = 1000;
     vector<int64_t> answersForEarlierK(maxK + 1);
 
     answersForEarlierK.clear();
@@ -131,14 +153,19 @@ int64_t computePowerSum(int64_t n, int64_t k)
 
     for (int i = 1; i <= k; i++)
     {
-        int64_t answer = quickPower(n + 1, i + 1, ::modulus) - 1;
+        int64_t answer = (quickPower(n + 1, i + 1, ::modulus) + ::modulus - 1) % ::modulus;
+        cout << "answer quickPower: " << answer << endl;
         for (int j = 0; j <= i - 1; j++)
         {
-            const auto multiplier = nCr(i + 1, j);
-            answer -= multiplier * answersForEarlierK[j];
+            const auto multiplier = nCr(i + 1, j, ::modulus);
+            cout << "multiplier: " << multiplier << endl;
+            const auto term = (multiplier * answersForEarlierK[j]) % :: modulus;
+            cout << "term: " << term << endl;
+            answer = (answer - term) % ::modulus;
         }
-        assert((answer % (i + 1)) == 0);
-        answer /= (i + 1);
+        //assert((answer % (i + 1)) == 0);
+        //answer /= (i + 1);
+        answer = (answer * inverseLookup[i + 1]) % ::modulus;
         answersForEarlierK[i] = answer;
         cout << "answer for power = " << i << " : " << answer << endl;;
     }
@@ -160,6 +187,15 @@ int main()
 #endif
     //vector<vector<Rational>> coefficientsForK;
     //coefficientsForK.push_back(
+    buildFactorialLookups(maxK);
+
+    inverseLookup.resize(maxK + 1);
+    for (int64_t i = 1; i <= maxK; i++)
+    {
+        const auto inverse = quickPower(i, ::modulus - 2, ::modulus);
+        assert(((inverse * i) % ::modulus) == 1);
+        inverseLookup[i] = inverse;
+    }
 
     int q;
     cin >> q;
@@ -180,7 +216,7 @@ int main()
             //dbgTotal = (dbgTotal + (n - 1 - i) * quickPower(i, k, ::modulus)) % ::modulus;
             dbgTotal = (dbgTotal + quickPower(i, k, ::modulus)) % ::modulus;
             //cout << "i: " << i << " dbgTotal: " << dbgTotal << endl;
-            
+
         }
         const int64_t total = computePowerSum(n - 1, k) - 1;
         cout << "total: " << total << " dbgTotal: " << dbgTotal << endl;
