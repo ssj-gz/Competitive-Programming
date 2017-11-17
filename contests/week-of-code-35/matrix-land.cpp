@@ -251,8 +251,8 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         cout << endl;
         const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]);
         const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], lookup[row + 1]);
-        const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
-        const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
+        const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], lookup[row + 1]);
+        const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]);
 
         int startCol = 0;
         int previousGobbleLeftIndex = -1;
@@ -263,21 +263,30 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             const int bestGobbleStartIndex = bestGobbleToLeftFrom[startCol].subArrayStartIndex;
             bestGobbleSum += bestGobbleToLeftFrom[startCol].sum;
             int bestGobbleEndIndex = startCol;
+            int64_t maxInGobbleRange = bestGobbleToLeftFrom[startCol].maxValue;
+            cout << "bestGobbleToLeftFrom maxValue: " << bestGobbleToLeftFrom[startCol].maxValue << endl;
             if (startCol < numCols - 1 && bestGobbleToRightFrom[startCol + 1].sum >= 0)
             {
                 bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
                 bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
+                maxInGobbleRange = max(maxInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxValue);
+                cout << "bestGobbleToRightFrom maxValue: " << bestGobbleToRightFrom[startCol].maxValue << endl;
             }
+            maxInGobbleRange += bestGobbleSum;
             assert(previousGobbleLeftIndex == -1 || bestGobbleStartIndex >= previousGobbleLeftIndex);
             cout << "  bestGobbleSum: " << bestGobbleSum << " bestGobbleStartIndex: " << bestGobbleStartIndex << " bestGobbleEndIndex: " << bestGobbleEndIndex << endl;
             // Descend in the middle of gobble-range.
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
-            int64_t maxInGobbleRange = std::numeric_limits<int64_t>::min();
+#ifdef BestSubarraySumUpTo
+            int64_t maxInGobbleRangeDebug = std::numeric_limits<int64_t>::min();
             for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
             {
                 const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][i];
-                maxInGobbleRange = max(maxInGobbleRange, scoreIfDescendHere);
+                maxInGobbleRangeDebug = max(maxInGobbleRangeDebug, scoreIfDescendHere);
             }
+            cout << "maxInGobbleRangeDebug: " << maxInGobbleRangeDebug << " maxInGobbleRange: " << maxInGobbleRange << endl;
+            assert(maxInGobbleRangeDebug == maxInGobbleRange);
+#endif
             bestForStartCol = max(bestForStartCol, maxInGobbleRange);
 
             //const auto bestScoreIfDescendInGobbleRange = bestGobbleSum +  cumulativeDescendAtScore[bestGobbleEndIndex] - (bestGobbleStartIndex > 0 ? cumulativeDescendAtScore[bestGobbleStartIndex - 1] : 0);
