@@ -80,191 +80,66 @@ class MaxTracker
 
 vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
-    vector<BestSubarraySumUpTo> result(A.size());
-    for (int endPoint = 0; endPoint < A.size(); endPoint++)
-    {
-#if 0
-    cout << "findMaxSubarraySumEndingAt: A:" << endl;
+    cout << "findMaxSubarraySumEndingAt: A: " << endl;
     for (const auto x : A)
     {
         cout << x << " ";
     }
     cout << endl;
-    cout << "bonusIfStartAt:" << endl;
+    cout << "bonusIfStartAt: " << endl;
     for (const auto x : bonusIfStartAt)
     {
         cout << x << " ";
     }
     cout << endl;
     vector<BestSubarraySumUpTo> result(A.size());
-    map<int64_t, int64_t> things;
+    int64_t bestSum = numeric_limits<int64_t>::min();
+    int64_t cumulative = numeric_limits<int64_t>::min();
+    int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
+    int64_t startIndexIfBeatBestSum = -1;
+    int64_t bestSumIfBeat = -1;
+    int64_t highestBonus = numeric_limits<int64_t>::min();
     int startPoint = 0;
-    int64_t bestSum = std::numeric_limits<int64_t>::min();
-    int64_t cumulative = 0;
-    int negativePoint = -1;
-    int negativePointsLastCheckedUntil = -1;
-    int negativePointsStartIndex = -1;
-    int upToNegativePointCumulative = 0;
-    int unprocessedNegativePointIndex = 0;
-    bool encounteredPositiveAfterNegativePoint = false;
-    MaxTracker afterNegativePointBs;
-    MaxTracker beforeNegativePointBs;
     for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
-        cout << "iteration - endPoint: " << endPoint << endl;
-        afterNegativePointBs.add(bonusIfStartAt[endPoint]);
-        cumulative += A[endPoint];
-
-        while (true)
+        if (bestSum == numeric_limits<int64_t>::min())
         {
-            cout << " iterating negative point checks" << endl;
-            bool negativePointChanged = false;
-
-            //if (negativePoint == -1)
-            //afterNegativePointBs.add(bonusIfStartAt[endPoint]);
-
-
-            cout << "upToNegativePointCumulative: " << upToNegativePointCumulative << " negativePoint: " << negativePoint << endl;
-
-
-            if (negativePoint != -1 && negativePoint < endPoint)
-            {
-                cout << "There is a negative point: " << negativePoint << " upToNegativePointCumulative: " << upToNegativePointCumulative << " beforeNegativePointBs.max(): " << (beforeNegativePointBs.size() > 0 ? beforeNegativePointBs.max() : -999) << " afterNegativePointBs.max(): " << (afterNegativePointBs.size() > 0 ? afterNegativePointBs.max() : -999) << " - testing if we can remove" << endl;
-                //assert(upToNegativePointCumulative < 0);
-                const int64_t gainFromStrippingUpToNegativePoint = -upToNegativePointCumulative;
-                int64_t lossFromStrippingUpToNegativePoint = 0;
-                cout << "gainFromStrippingUpToNegativePoint: " << gainFromStrippingUpToNegativePoint << endl;
-                //if (needToRemoveFromAfter)
-                //{
-                //afterNegativePointBs.remove(bonusIfStartAt[endPoint]);
-                //needToRemoveFromAfter = false;
-                //}
-                const auto maxBonus = (afterNegativePointBs.size() > 0 ? afterNegativePointBs.max() : bonusIfStartAt[endPoint]);
-                assert(beforeNegativePointBs.size() > 0);
-                if (maxBonus < beforeNegativePointBs.max())
-                {
-                    //assert(afterNegativePointBs.max() < beforeNegativePointBs.max());
-                    lossFromStrippingUpToNegativePoint += (beforeNegativePointBs.max() - maxBonus);
-                }
-                cout << "lossFromStrippingUpToNegativePoint: " << lossFromStrippingUpToNegativePoint << endl;
-                if (gainFromStrippingUpToNegativePoint >= lossFromStrippingUpToNegativePoint)
-                {
-                    //for (int i = startPoint; i <= negativePoint; i++)
-                    //{
-                    //upToNegativePointCumulative -= A[i];
-                    //beforeNegativePointBs.remove(bonusIfStartAt[i]);
-                    //}
-                    cout << " stripping" << endl;
-                    cumulative -= upToNegativePointCumulative;
-                    cout << " cumulative now: " << cumulative << endl;
-                    upToNegativePointCumulative = 0;
-                    //upToNegativePointCumulative -= upToNegativePointCumulative;
-                    cout << " upToNegativePointCumulative now: " << upToNegativePointCumulative << endl;
-                    beforeNegativePointBs.clear();
-                    startPoint = negativePoint + 1;
-                    negativePoint = -1;
-                    negativePointChanged = true;
-                    encounteredPositiveAfterNegativePoint = false;
-                    negativePointsLastCheckedUntil = startPoint - 1;
-#if 0
-                    cout << "advanced start point to : " << startPoint << endl;
-                    for (int i = startPoint; i <= endPoint; i++)
-                    {
-                        cout << " i: " << i << endl;
-                        if (negativePoint == -1)
-                        {
-                            beforeNegativePointBs.add(bonusIfStartAt[i]);
-                            upToNegativePointCumulative += A[i];
-                            cout << "advancing - added A[" << i << "] = " << A[i] << " to upToNegativePointCumulative; now: " << upToNegativePointCumulative << endl;
-                            if (upToNegativePointCumulative < 0)
-                            {
-                                negativePoint = i;
-                                cout << " new negativePoint found!" << negativePoint << " with upToNegativePointCumulative: " << upToNegativePointCumulative << endl;
-                                //cout << "removing " < 
-                                for (int j = startPoint; j <= negativePoint; j++)
-                                {
-                                    cout << " removing bonusIfStartAt[" << j << "] = " << bonusIfStartAt[j] << " from afterNegativePointBs" << endl;
-                                    afterNegativePointBs.remove(bonusIfStartAt[j]);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-
-                    }
-                    cout << " afterNegativePointBs now: " << (afterNegativePointBs.size() > 0 ? afterNegativePointBs.max() : -999) << endl;
-                    //needToRemoveFromAfter = false;
-#endif
-                }
-            }
-            for (int i = negativePointsLastCheckedUntil + 1; i <= endPoint; i++)
-            {
-                cout << "Checking for additional negative points i: " << i << " negativePoint: " << negativePoint << " encounteredPositiveAfterNegativePoint: " << encounteredPositiveAfterNegativePoint << " A[i]:  " << A[i] << endl;
-                //if (negativePoint == -1/* || (!encounteredPositiveAfterNegativePoint && A[i] < 0)*/)
-                if (true)
-                {
-                    upToNegativePointCumulative += A[i];
-                    cout << " updating upToNegativePointCumulative: now " << upToNegativePointCumulative << endl;
-                    beforeNegativePointBs.add(bonusIfStartAt[i]);
-                    if (upToNegativePointCumulative < 0)
-                    {
-                        if (negativePoint == -1)
-                        {
-                            unprocessedNegativePointIndex = startPoint;
-                            encounteredPositiveAfterNegativePoint = false;
-                        }
-                        cout << "Negative point found: " << i << " encounteredPositiveAfterNegativePoint: " << encounteredPositiveAfterNegativePoint << " previous negativePoint: " << negativePoint << endl;
-                        negativePoint = i;
-                        //needToRemoveFromAfter = true;
-                        negativePointChanged = true;
-                        cout << "Removing afterNegativePointBs to reflect new negative point; unprocessedNegativePointIndex: " << unprocessedNegativePointIndex << endl;
-                        //if (negativePointsLastCheckedUntil == -1)
-                            //negativePointsLastCheckedUntil = 0;
-                        //for (int j = negativePointsLastCheckedUntil + 1; j <= negativePoint; j++)
-                        for (int j = unprocessedNegativePointIndex; j <= negativePoint; j++)
-                        {
-                            cout << " removing bonusIfStartAt[" << j << "] = " << bonusIfStartAt[j] << " from afterNegativePointBs" << endl;
-                            afterNegativePointBs.remove(bonusIfStartAt[j]);
-                        }
-                        unprocessedNegativePointIndex = negativePoint + 1;
-                        //break;
-                    }
-                    else
-                    {
-                    }
-                }
-                else
-                {
-                    //break;
-                }
-                if (negativePoint != -1 && A[i] >= 0)
-                {
-                    //encounteredPositiveAfterNegativePoint = true;
-                    cout << "Setting encounteredPositiveAfterNegativePoint to true; negativePoint: " << negativePoint << "  due to i: " << i << endl;
-                }
-                if (negativePoint != -1) // See if we can remove this one immediately; if not, hopefully we can loop round and get it.
-                    break;
-            }
-            negativePointsLastCheckedUntil = endPoint;
-            if (!negativePointChanged)
-                break;
+            bestSum = A[endPoint] + bonusIfStartAt[endPoint];
         }
-
-
-        int64_t maxBonus = (afterNegativePointBs.size() > 0 ? afterNegativePointBs.max() : bonusIfStartAt[endPoint]);
-        cout << " max bonus - beforeNegativePointBs.max() " << (beforeNegativePointBs.size() > 0 ? beforeNegativePointBs.max() : -999) << endl;
-        if (beforeNegativePointBs.size() > 0)
-            maxBonus = max(maxBonus, beforeNegativePointBs.max());
-
-        cout << " maxBonus: " << maxBonus << endl;
-        cout << " cumulative: " << cumulative << endl;
-        bestSum = cumulative + maxBonus;
-
-        //if (needToRemoveFromAfter)
-            //afterNegativePointBs.remove(bonusIfStartAt[endPoint]);
-#endif
+        else
+        {
+            bestSum += A[endPoint];
+        }
+        cout << "endpoint: " << endPoint << endl;
+        if (A[endPoint] > cumulative + A[endPoint])
+        {
+            cout << "New best cumulative: " << A[endPoint] << endl;
+            cumulative = A[endPoint];
+            const int64_t deficit = bestSum - (cumulative + bonusIfStartAt[endPoint]);
+            cout << "deficit" << deficit << endl;
+            lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, bonusIfStartAt[endPoint] + deficit);
+            startIndexIfBeatBestSum = endPoint;
+            bestSumIfBeat = cumulative;
+            cout << "cumulative: " << cumulative << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << endl;
+        }
+        else
+        {
+            cumulative += A[endPoint];
+            cout << "updated cumulative; now: " << cumulative << endl;
+        }
+        if (cumulative + bonusIfStartAt[endPoint] > bestSum)
+        {
+            bestSum = cumulative + bonusIfStartAt[endPoint];
+            lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
+            startIndexIfBeatBestSum = endPoint;
+        }
+        if (bonusIfStartAt[endPoint] >= lowestDescentToBeatBestSum)
+        {
+            cout << "Got a new favourite, I think!" << endl;
+            startPoint = startIndexIfBeatBestSum;
+            bestSum = bestSumIfBeat + bonusIfStartAt[endPoint];
+            lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
+        }
 
 #ifdef BRUTE_FORCE
         {
@@ -293,10 +168,10 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                     //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
                 }
             }
-            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
-            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
+            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
+            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
             result[endPoint] = {bestSumDebug, startPointDebug};
-            //assert(bestSum == bestSumDebug);
+            assert(bestSum == bestSumDebug);
             //assert(startPointDebug == startPoint);
         }
 #endif
@@ -361,6 +236,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
         const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
 
+#if 0
         vector<int64_t> bleep(numCols);
         for (int i = 0; i < numCols; i++)
         {
@@ -394,6 +270,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             }
         }
         assert(bleep == bestIfMovedRightFromAndDescended);
+#endif
 
 
 #if 0
@@ -555,10 +432,10 @@ int main()
     cout << "Sorted " << k.size() << endl;
     return 0;
 #endif
-#if 0
+#if 1
     while (true)
     {
-        const int n = rand() % 4 + 1;
+        const int n = rand() % 3 + 1;
         const int range = 10;
         vector<int64_t> bloo;
         vector<int64_t> bloo2;
@@ -576,7 +453,7 @@ int main()
     while (true)
     {
         const int numRows = (rand() % 2) + 1;
-        const int numCols = (rand() % 4) + 1;
+        const int numCols = (rand() % 2) + 1;
         const int range = 10;
         vector<vector<int64_t>> A(numRows, vector<int64_t>(numCols, -1));
         for (int i = 0; i < numRows; i++)
