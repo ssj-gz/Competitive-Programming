@@ -142,7 +142,7 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
     return result;
 }
 
-vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
+vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& scoreIfDescendAt)
 {
     vector<BestSubarraySumUpTo> result(A.size());
     int64_t bestSum = std::numeric_limits<int64_t>::min();
@@ -150,12 +150,12 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
     int64_t maxValue = numeric_limits<int64_t>::min();
     for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
-        maxValue = max(maxValue, A[endPoint]);
+        maxValue = max(maxValue, scoreIfDescendAt[endPoint]);
         if (bestSum < 0)
         {
             bestSum = A[endPoint];
             startIndex = endPoint;
-            maxValue = A[endPoint];
+            maxValue = scoreIfDescendAt[endPoint];
         }
         else
         {
@@ -169,18 +169,15 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             int64_t bestSumDebug = std::numeric_limits<int64_t>::min();
             int cumulativeSum = 0;
             int startPointDebug = 0;
-            auto bestBDebug = std::numeric_limits<int64_t>::min();
             for (int startPoint = endPoint; startPoint >= 0; startPoint--)
             {
                 cumulativeSum += A[startPoint];
-                if (bonusIfStartAt[startPoint] > bestBDebug)
-                    bestBDebug = bonusIfStartAt[startPoint];
-                if (cumulativeSum + bestBDebug > bestSumDebug)
+                if (cumulativeSum > bestSumDebug)
                 {
-                    bestSumDebug = cumulativeSum + bestBDebug;
+                    bestSumDebug = cumulativeSum;
                     startPointDebug = startPoint;
                 }
-                else if (cumulativeSum + bestBDebug == bestSumDebug)
+                else if (cumulativeSum == bestSumDebug)
                 {
                     startPointDebug = startPoint;
                 }
@@ -188,7 +185,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             int64_t maxValueDebug = std::numeric_limits<int64_t>::min();
             for (int i = startPointDebug; i <= endPoint; i++)
             {
-                maxValueDebug = max(maxValueDebug, A[i]);
+                maxValueDebug = max(maxValueDebug, scoreIfDescendAt[i]);
             }
             assert(bestSum == bestSumDebug);
             assert(startPointDebug == startIndex);
@@ -275,11 +272,13 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             cout << "  bestGobbleSum: " << bestGobbleSum << " bestGobbleStartIndex: " << bestGobbleStartIndex << " bestGobbleEndIndex: " << bestGobbleEndIndex << endl;
             // Descend in the middle of gobble-range.
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
-             for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
+            int64_t maxInGobbleRange = std::numeric_limits<int64_t>::min();
+            for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
             {
                 const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][i];
-                bestForStartCol = max(bestForStartCol, scoreIfDescendHere);
+                maxInGobbleRange = max(maxInGobbleRange, scoreIfDescendHere);
             }
+            bestForStartCol = max(bestForStartCol, maxInGobbleRange);
 
             //const auto bestScoreIfDescendInGobbleRange = bestGobbleSum +  cumulativeDescendAtScore[bestGobbleEndIndex] - (bestGobbleStartIndex > 0 ? cumulativeDescendAtScore[bestGobbleStartIndex - 1] : 0);
             //bestForStartCol = max(bestForStartCol, bestScoreIfDescendInGobbleRange);
