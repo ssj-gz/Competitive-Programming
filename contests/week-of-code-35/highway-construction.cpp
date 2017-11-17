@@ -138,7 +138,7 @@ int64_t factorial(int64_t n)
 
 int64_t nCr(int64_t n, int64_t r, int64_t modulus)
 {
-    auto result = (factorialLookup[n] * factorialInverseLookup[r]) % modulus;
+    int64_t result = (factorialLookup[n] * factorialInverseLookup[r]) % modulus;
     result = (result * factorialInverseLookup[n - r]) % modulus;
     cout << "nCr: n: " << n << " r: " << r << " result: " << result << endl;
     return result;
@@ -157,11 +157,11 @@ int64_t computePowerSum(int64_t n, int64_t k)
         cout << "answer quickPower: " << answer << endl;
         for (int j = 0; j <= i - 1; j++)
         {
-            const auto multiplier = nCr(i + 1, j, ::modulus);
+            const int64_t multiplier = nCr(i + 1, j, ::modulus);
             cout << "multiplier: " << multiplier << endl;
-            const auto term = (multiplier * answersForEarlierK[j]) % :: modulus;
+            const int64_t term = (multiplier * answersForEarlierK[j]) % :: modulus;
             cout << "term: " << term << endl;
-            answer = (answer - term) % ::modulus;
+            answer = (::modulus + answer - term) % ::modulus;
         }
         //assert((answer % (i + 1)) == 0);
         //answer /= (i + 1);
