@@ -147,18 +147,21 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
     vector<BestSubarraySumUpTo> result(A.size());
     int64_t bestSum = std::numeric_limits<int64_t>::min();
     int startIndex = 0;
+    int64_t maxValue = numeric_limits<int64_t>::min();
     for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
+        maxValue = max(maxValue, A[endPoint]);
         if (bestSum < 0)
         {
             bestSum = A[endPoint];
             startIndex = endPoint;
+            maxValue = A[endPoint];
         }
         else
         {
             bestSum += A[endPoint];
         }
-        result[endPoint] = {bestSum, startIndex, 0};
+        result[endPoint] = {bestSum, startIndex, maxValue};
 
 #ifdef BRUTE_FORCE
         {
@@ -182,8 +185,16 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                     startPointDebug = startPoint;
                 }
             }
+            int64_t maxValueDebug = std::numeric_limits<int64_t>::min();
+            for (int i = startPointDebug; i <= endPoint; i++)
+            {
+                maxValueDebug = max(maxValueDebug, A[i]);
+            }
             assert(bestSum == bestSumDebug);
             assert(startPointDebug == startIndex);
+            cout << "endPoint: " << endPoint << " startPointDebug: " << startPointDebug << " maxValueDebug: " << maxValueDebug << " maxValue: " << maxValue << endl;
+            //cout << "maxValue: " << maxValue << " maxValueDebug: " << maxValueDebug << endl;
+            assert(maxValueDebug == maxValue);
         }
 #endif
     }
