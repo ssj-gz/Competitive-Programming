@@ -13,6 +13,7 @@ using namespace std;
 
 constexpr auto modulus = 1'000'000'009ULL;
 constexpr auto maxK = 1000;
+constexpr auto maxnCr = maxK + 1;
 
 int64_t quickPower(int64_t n, uint64_t k, int64_t m)
 {
@@ -57,16 +58,6 @@ void buildFactorialLookups(int maxN)
     }
 }
 
-int64_t factorial(int64_t n)
-{
-    int64_t result = 1;
-    for (int i = 1; i <= n; i++)
-    {
-        result *= i;
-    }
-    return result;
-}
-
 int64_t nCr(int64_t n, int64_t r, int64_t modulus)
 {
     int64_t result = (factorialLookup[n] * factorialInverseLookup[r]) % modulus;
@@ -79,7 +70,7 @@ int64_t computePowerSum(int64_t n, int64_t k)
 {
     vector<int64_t> answersForEarlierK(maxK + 1);
 
-    answersForEarlierK.push_back(n);
+    answersForEarlierK[0] = n;
 
     for (int i = 1; i <= k; i++)
     {
@@ -117,10 +108,10 @@ int main()
 #endif
     //vector<vector<Rational>> coefficientsForK;
     //coefficientsForK.push_back(
-    buildFactorialLookups(maxK);
+    buildFactorialLookups(maxnCr);
 
-    inverseLookup.resize(maxK + 1);
-    for (int64_t i = 1; i <= maxK; i++)
+    inverseLookup.resize(maxnCr + 1);
+    for (int64_t i = 1; i <= maxnCr; i++)
     {
         const auto inverse = quickPower(i, ::modulus - 2, ::modulus);
         assert(((inverse * i) % ::modulus) == 1);
