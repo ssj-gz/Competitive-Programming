@@ -34,10 +34,8 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
     int64_t cumulative = numeric_limits<int64_t>::min();
     int64_t bestCumulative = numeric_limits<int64_t>::min();
     int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
-    int64_t startIndexIfBeatBestSum = -1;
     int64_t bestSumIfBeat = -1;
     int64_t highestBonus = numeric_limits<int64_t>::min();
-    int startPoint = 0;
     for (int endPoint = 0; endPoint < row.size(); endPoint++)
     {
         bestSum += row[endPoint];
@@ -55,18 +53,15 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
             bestCumulative = cumulative;
             const int64_t deficit = bestSum - (cumulative + scoreIfDescendAt[endPoint]);
             lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[endPoint] + deficit);
-            startIndexIfBeatBestSum = endPoint;
             bestSumIfBeat = cumulative;
         }
         if (cumulative + scoreIfDescendAt[endPoint] > bestSum)
         {
             bestSum = cumulative + scoreIfDescendAt[endPoint];
             lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
-            startIndexIfBeatBestSum = endPoint;
         }
         if (scoreIfDescendAt[endPoint] >= lowestDescentToBeatBestSum)
         {
-            startPoint = startIndexIfBeatBestSum;
             bestSum = bestSumIfBeat + scoreIfDescendAt[endPoint];
         }
 
