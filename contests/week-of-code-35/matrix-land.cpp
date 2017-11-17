@@ -202,11 +202,13 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
         if (bestSum < 0)
         {
             bestSum = A[endPoint];
+            startIndex = endPoint;
         }
         else
         {
             bestSum += A[endPoint];
         }
+        result[endPoint] = {bestSum, startIndex};
 
 #ifdef BRUTE_FORCE
         {
@@ -237,9 +239,9 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             }
             //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
             //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
-            result[endPoint] = {bestSumDebug, startPointDebug};
-            //assert(bestSum == bestSumDebug);
-            //assert(startPointDebug == startPoint);
+            //result[endPoint] = {bestSumDebug, startPointDebug};
+            assert(bestSum == bestSumDebug);
+            assert(startPointDebug == startIndex);
         }
 #endif
     }
