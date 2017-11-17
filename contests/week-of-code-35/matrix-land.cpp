@@ -17,13 +17,13 @@ using namespace std;
 struct SubArrayInfo
 {
     SubArrayInfo() = default;
-    SubArrayInfo(int64_t sum, int subArrayStartIndex, int64_t maxValue)
-        : sum{sum}, subArrayStartIndex{subArrayStartIndex}, maxValue{maxValue}
+    SubArrayInfo(int64_t sum, int subArrayStartIndex, int64_t maxDescendValue)
+        : sum{sum}, subArrayStartIndex{subArrayStartIndex}, maxDescendValue{maxDescendValue}
     {
     }
     int64_t sum = 0;
     int subArrayStartIndex = 0;
-    int64_t maxValue = 0;
+    int64_t maxDescendValue = 0;
 };
 
 
@@ -85,21 +85,21 @@ vector<SubArrayInfo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const 
     vector<SubArrayInfo> result(A.size());
     int64_t bestSum = std::numeric_limits<int64_t>::min();
     int startIndex = 0;
-    int64_t maxValue = numeric_limits<int64_t>::min();
+    int64_t maxDescendValue = numeric_limits<int64_t>::min();
     for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
-        maxValue = max(maxValue, scoreIfDescendAt[endPoint]);
+        maxDescendValue = max(maxDescendValue, scoreIfDescendAt[endPoint]);
         if (bestSum < 0)
         {
             bestSum = A[endPoint];
             startIndex = endPoint;
-            maxValue = scoreIfDescendAt[endPoint];
+            maxDescendValue = scoreIfDescendAt[endPoint];
         }
         else
         {
             bestSum += A[endPoint];
         }
-        result[endPoint] = {bestSum, startIndex, maxValue};
+        result[endPoint] = {bestSum, startIndex, maxDescendValue};
 
     }
     return result;
@@ -146,12 +146,12 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             const int bestGobbleStartIndex = bestGobbleToLeftFrom[startCol].subArrayStartIndex;
             bestGobbleSum += bestGobbleToLeftFrom[startCol].sum;
             int bestGobbleEndIndex = startCol;
-            int64_t maxInGobbleRange = bestGobbleToLeftFrom[startCol].maxValue;
+            int64_t maxInGobbleRange = bestGobbleToLeftFrom[startCol].maxDescendValue;
             if (startCol < numCols - 1 && bestGobbleToRightFrom[startCol + 1].sum >= 0)
             {
                 bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
                 bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
-                maxInGobbleRange = max(maxInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxValue);
+                maxInGobbleRange = max(maxInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxDescendValue);
             }
             maxInGobbleRange += bestGobbleSum;
             // Descend in the middle of gobble-range.
