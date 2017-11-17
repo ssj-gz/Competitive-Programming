@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-17
 // This is just a "correctness" submission - it's too slow to pass all testcase!
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
@@ -69,6 +69,8 @@ int64_t nCr(int64_t n, int64_t r, int64_t modulus)
 
 int64_t computePowerSum(int64_t n, int64_t k)
 {
+    if (n == 0)
+        return 0;
     vector<int64_t> answersForEarlierK(maxK + 1);
 
     answersForEarlierK[0] = n;
@@ -130,9 +132,8 @@ int main()
         int64_t nMinusOne = (n + ::modulus - 1) % ::modulus; 
 
 
-        //cout << "n: " << n << " k: " << k << endl;
 
-        const int64_t total = computePowerSum(nMinusOne, k) - 1;
+        const int64_t total = (n != 1 ? computePowerSum(nMinusOne, k) - 1 : 0);
         cout << total << endl;
 #ifdef BRUTE_FORCE
         int64_t dbgTotal = 0;
