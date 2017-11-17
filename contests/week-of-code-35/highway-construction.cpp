@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-17
 // This is just a "correctness" submission - it's too slow to pass all testcase!
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
@@ -126,7 +126,7 @@ int main()
 
     for (int t = 0; t < q; t++)
     {
-        int n, k;
+        int64_t n, k;
         cin >> n >> k;
 
         int64_t nMinusOne = (n + ::modulus - 1) % ::modulus; 
