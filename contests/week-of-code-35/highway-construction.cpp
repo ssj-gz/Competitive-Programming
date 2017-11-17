@@ -1,6 +1,7 @@
 // Simon St James (ssjgz) - 2017-11-17
 // This is just a "correctness" submission - it's too slow to pass all testcase!
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -103,8 +104,24 @@ ostream& operator<<(ostream& os, const Rational& rational)
     return os;
 }
 
+int64_t factorial(int64_t n)
+{
+    int64_t result = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        result *= n;
+    }
+    return result;
+}
+
+int64_t nCr(int64_t n, int64_t r)
+{
+    return factorial(n) / factorial(r) / factorial(n - r);
+}
+
 int main()
 {
+#if 0
     Rational r1{3, 4};
     Rational r2{5, 4};
     Rational r3{7, 6};
@@ -114,6 +131,12 @@ int main()
     cout << r1 << " / " << r2 << " = " << (r1 / r2) << endl;
     cout << r1 << " / " << r3 << " = " << (r1 / r3) << endl;
     cout << r2 << " + " << r3 << " = " << (r2 + r3) << endl;
+#endif
+    //vector<vector<Rational>> coefficientsForK;
+    //coefficientsForK.push_back(
+
+    const int maxK = 1000;
+    vector<int64_t> answersForEarlierK(maxK + 1);
 
     int q;
     cin >> q;
@@ -123,20 +146,37 @@ int main()
         int n, k;
         cin >> n >> k;
 
+        answersForEarlierK.clear();
+        answersForEarlierK.push_back(n - 1);
+
+        for (int i = 1; i <= k; i++)
+        {
+            int64_t answer = quickPower(n, i + 1, ::modulus) - 1;
+            for (int j = 0; j <= i - 1; j++)
+            {
+                const auto multiplier = nCr(i + 1, j);
+                answer -= multiplier * answersForEarlierK[j];
+            }
+            assert((answer % (i + 1)) == 0);
+            answer /= (i + 1);
+            answersForEarlierK[i] = answer;
+            cout << "answer for power = " << i << " : " << answer << endl;;
+        }
+
         //cout << "n: " << n << " k: " << k << endl;
 
-        int64_t total = 0;
+        int64_t dbgTotal = 0;
 
         for (int i = 2; i <= n - 1; i++)
         {
-            //cout << "i : " << i << " i ^^ k: " << quickPower(i, k, ::modulus) << endl;
-            //total = (total + (n - 1 - i) * quickPower(i, k, ::modulus)) % ::modulus;
-            total = (total + quickPower(i, k, ::modulus)) % ::modulus;
-            //cout << "i: " << i << " total: " << total << endl;
-            cout << "i: " << i << " total: " << total << endl;
+            cout << "i : " << i << " i ^^ k: " << quickPower(i, k, ::modulus) << endl;
+            //dbgTotal = (dbgTotal + (n - 1 - i) * quickPower(i, k, ::modulus)) % ::modulus;
+            dbgTotal = (dbgTotal + quickPower(i, k, ::modulus)) % ::modulus;
+            //cout << "i: " << i << " dbgTotal: " << dbgTotal << endl;
             
         }
-        cout << total << endl;
+        const int64_t total = answersForEarlierK[k] - 1;
+        cout << "total: " << total << " dbgTotal: " << dbgTotal << endl;
     }
 
     const auto blah = quickPower(5, 8, ::modulus);

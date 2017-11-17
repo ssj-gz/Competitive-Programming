@@ -361,40 +361,40 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
         const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
 
-        struct Thing
-        {
-            int pos = -1;
-            int sum = -1;
-        };
-        vector<Thing> blah;
-        int64_t cumulative = 0;
+        vector<int64_t> bleep(numCols);
         for (int i = 0; i < numCols; i++)
         {
-            cumulative += A[row][i];
-            Thing thing;
-            thing.pos = i;
-            thing.sum = cumulative + lookup[row + 1][i];
-            cout << "i: " << i << " thing.sum: " << thing.sum << " lookup: " << lookup[row + 1][i] << endl;
-            blah.push_back(thing);
+            cout << "i: " << i << " bestIfMovedRightFromAndDescended: " << bestIfMovedRightFromAndDescended[i] << endl;
         }
-        sort(blah.begin(), blah.end(), [](const auto& lhs, const auto& rhs) { return rhs.sum < lhs.sum; });
-        int blee = 0;
-        cumulative = 0;
-        vector<int> floop;
-        for (int i = 0; i < numCols; i++)
         {
-            while (i > blah[blee].pos)
+            int64_t maxDescent = lookup[row + 1].back();
+            //int64_t cumulative = A[row].back();
+            int64_t cumulative = 0;
+            int64_t bestScore = cumulative + maxDescent;
+            int64_t descentUsedWithBest = maxDescent;
+            cout << " Initial bestScore: " << bestScore << " maxDescent: " << maxDescent << " cumulative: " << cumulative << endl;
+            for (int i = numCols - 1; i >= 0; i--)
             {
-                cout << "incrementing blee" << endl;
-                blee++;
-            }
+                cumulative += A[row][i];
+                maxDescent = max(maxDescent, lookup[row + 1][i]);
+                //bestScore = cumulative + (i == numCols - 1 ? maxDescent : (maxDescent - lastMaxDescent));
+                bestScore = cumulative + maxDescent;
+                cout << "i: " << i << " Preliminary bestScore: " << bestScore << " maxDescent: " << maxDescent << " cumulative: " << cumulative << endl;
+                if (A[row][i] + lookup[row + 1][i] > bestScore)
+                {
+                    bestScore = A[row][i] + lookup[row + 1][i];
+                    cumulative = A[row][i];
+                    maxDescent = lookup[row + 1][i];
+                    descentUsedWithBest = maxDescent;
+                    cout << "i: " << i << " adjusted bestScore: " << bestScore << " maxDescent: " << maxDescent << " cumulative: " << cumulative << endl;
 
-            floop.push_back(blah[blee].sum - cumulative);
-            cout << "floop i: " << i << " = " << floop.back() << " bestIfMovedRightFromAndDescended[i]: " << bestIfMovedRightFromAndDescended[i] << endl;
-            cout << "blah i: " << i << " sum: " << blah[blee].sum << " pos: " << blah[blee].pos << endl;
-            assert(floop.back() == bestIfMovedRightFromAndDescended[i]);
-            cumulative += A[row][i];
+                }
+                cout << "i: " << i << " bestScore: " << bestScore << endl;
+                bleep[i] = bestScore;
+            }
         }
+        assert(bleep == bestIfMovedRightFromAndDescended);
+
 
 #if 0
         vector<int64_t> cumulativeDescendAtScore;
