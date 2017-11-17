@@ -30,7 +30,7 @@ struct SubArrayInfo
 vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, const vector<int64_t>& scoreIfDescendAt)
 {
     vector<int64_t> result(row.size());
-    int64_t bestSum = numeric_limits<int64_t>::min();
+    int64_t bestSum = scoreIfDescendAt.front();
     int64_t cumulative = numeric_limits<int64_t>::min();
     int64_t bestCumulative = numeric_limits<int64_t>::min();
     int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
@@ -40,15 +40,8 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
     int startPoint = 0;
     for (int endPoint = 0; endPoint < row.size(); endPoint++)
     {
-        if (bestSum == numeric_limits<int64_t>::min())
-        {
-            bestSum = row[endPoint] + scoreIfDescendAt[endPoint];
-        }
-        else
-        {
-            bestSum += row[endPoint];
-            bestSumIfBeat += row[endPoint];
-        }
+        bestSum += row[endPoint];
+        bestSumIfBeat += row[endPoint];
         if (cumulative < 0)
         {
             cumulative = row[endPoint];
