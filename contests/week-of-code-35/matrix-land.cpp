@@ -195,78 +195,18 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
 vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
     vector<BestSubarraySumUpTo> result(A.size());
-#if 0
-    cout << "findMaxSubarraySumEndingAt: A: " << endl;
-    for (const auto x : A)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
-    cout << "bonusIfStartAt: " << endl;
-    for (const auto x : bonusIfStartAt)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
-    int64_t bestSum = numeric_limits<int64_t>::min();
-    int64_t cumulative = numeric_limits<int64_t>::min();
-    int64_t bestCumulative = numeric_limits<int64_t>::min();
-    int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
-    int64_t startIndexIfBeatBestSum = -1;
-    int64_t bestSumIfBeat = -1;
-    int64_t highestBonus = numeric_limits<int64_t>::min();
-    int startPoint = 0;
-#endif
+    int64_t bestSum = std::numeric_limits<int64_t>::min();
+    int startIndex = 0;
     for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
-#if 0
-        if (bestSum == numeric_limits<int64_t>::min())
+        if (bestSum < 0)
         {
-            bestSum = A[endPoint] + bonusIfStartAt[endPoint];
+            bestSum = A[endPoint];
         }
         else
         {
             bestSum += A[endPoint];
-            bestSumIfBeat += A[endPoint];
         }
-        cout << "endpoint: " << endPoint << endl;
-        if (A[endPoint] > cumulative + A[endPoint])
-        {
-            cumulative = A[endPoint];
-            cout << "New cumulative: " << cumulative << endl;
-        }
-        else
-        {
-            cumulative += A[endPoint];
-            cout << "updated cumulative; now: " << cumulative << endl;
-        }
-        if (cumulative > bestCumulative)
-        {
-            bestCumulative = cumulative;
-            cout << " new bestCumulative " << bestCumulative << endl;
-            const int64_t deficit = bestSum - (cumulative + bonusIfStartAt[endPoint]);
-            cout << "deficit: " << deficit << " bestSum:" << bestSum << endl;
-            lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, bonusIfStartAt[endPoint] + deficit);
-            startIndexIfBeatBestSum = endPoint;
-            bestSumIfBeat = cumulative;
-            cout << "cumulative: " << cumulative << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << endl;
-        }
-        if (cumulative + bonusIfStartAt[endPoint] > bestSum)
-        {
-            bestSum = cumulative + bonusIfStartAt[endPoint];
-            lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
-            startIndexIfBeatBestSum = endPoint;
-        }
-        if (bonusIfStartAt[endPoint] >= lowestDescentToBeatBestSum)
-        {
-            startPoint = startIndexIfBeatBestSum;
-            bestSum = bestSumIfBeat + bonusIfStartAt[endPoint];
-            cout << "Got a new favourite, I think due to bonusIfStartAt: " << bonusIfStartAt[endPoint] << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << " bestSumIfBeat: " << bestSumIfBeat << " new bestSum: " << bestSum << endl;
-            lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
-        }
-
-        //result[endPoint] = {bestSum, -1};
-#endif
 
 #ifdef BRUTE_FORCE
         {
@@ -367,9 +307,10 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             cout << x << " ";
         }
         cout << endl;
-        const auto bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
-        assert(bestIfMovedRightFromAndDescended == findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]));
-        const auto bestIfMovedLeftFromAndDescended = extractSums(findMaxSubarraySumEndingAt(A[row], lookup[row + 1]));
+        //const auto bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
+        //assert(bestIfMovedRightFromAndDescended == findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]));
+        const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]);
+        const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], lookup[row + 1]);
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
         const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
 
