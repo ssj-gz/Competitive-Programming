@@ -2,7 +2,7 @@
 // This is a test submission - the algorithm is too slow to pass, but I want to check correctness, at least!
 #define BRUTE_FORCE
 #define RANDOM
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #undef RANDOM
@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <limits>
+#include <algorithm>
 #include <cassert>
 
 using namespace std;
@@ -30,6 +32,7 @@ struct BestSubarraySumUpTo
 
 vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, const vector<int64_t>& scoreIfDescendAt)
 {
+#if 0
     cout << "findBestIfMovedFromAndDescended row: " << endl;
     for (const auto x : row)
     {
@@ -42,11 +45,10 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
         cout << x << " ";
     }
     cout << endl;
+#endif
     vector<int64_t> result(row.size());
     int64_t bestSum = numeric_limits<int64_t>::min();
     int64_t cumulative = numeric_limits<int64_t>::min();
-    cout << "original cumulative: " << cumulative << endl;
-    cout << "cumulative < 0? " << (cumulative < 0) << endl;
     int64_t bestCumulative = numeric_limits<int64_t>::min();
     int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
     int64_t startIndexIfBeatBestSum = -1;
@@ -55,7 +57,7 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
     int startPoint = 0;
     for (int endPoint = 0; endPoint < row.size(); endPoint++)
     {
-        cout << "row[endPoint]: " << row[endPoint] << endl;
+        //cout << "row[endPoint]: " << row[endPoint] << endl;
         if (bestSum == numeric_limits<int64_t>::min())
         {
             bestSum = row[endPoint] + scoreIfDescendAt[endPoint];
@@ -65,28 +67,28 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
             bestSum += row[endPoint];
             bestSumIfBeat += row[endPoint];
         }
-        cout << "endpoint: " << endPoint << endl;
+        //cout << "endpoint: " << endPoint << endl;
         //if (row[endPoint] > cumulative + row[endPoint])
         if (cumulative < 0)
         {
             cumulative = row[endPoint];
-            cout << "New cumulative: " << cumulative << endl;
+            //cout << "New cumulative: " << cumulative << endl;
         }
         else
         {
             cumulative += row[endPoint];
-            cout << "updated cumulative; now: " << cumulative << endl;
+            //cout << "updated cumulative; now: " << cumulative << endl;
         }
         if (cumulative > bestCumulative)
         {
             bestCumulative = cumulative;
-            cout << " new bestCumulative " << bestCumulative << endl;
+            //cout << " new bestCumulative " << bestCumulative << endl;
             const int64_t deficit = bestSum - (cumulative + scoreIfDescendAt[endPoint]);
-            cout << "deficit: " << deficit << " bestSum:" << bestSum << endl;
+            //cout << "deficit: " << deficit << " bestSum:" << bestSum << endl;
             lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[endPoint] + deficit);
             startIndexIfBeatBestSum = endPoint;
             bestSumIfBeat = cumulative;
-            cout << "cumulative: " << cumulative << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << endl;
+            //cout << "cumulative: " << cumulative << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << endl;
         }
         if (cumulative + scoreIfDescendAt[endPoint] > bestSum)
         {
@@ -98,7 +100,7 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
         {
             startPoint = startIndexIfBeatBestSum;
             bestSum = bestSumIfBeat + scoreIfDescendAt[endPoint];
-            cout << "Got a new favourite, I think due to scoreIfDescendAt: " << scoreIfDescendAt[endPoint] << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << " bestSumIfBeat: " << bestSumIfBeat << " new bestSum: " << bestSum << endl;
+            //cout << "Got a new favourite, I think due to scoreIfDescendAt: " << scoreIfDescendAt[endPoint] << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << " bestSumIfBeat: " << bestSumIfBeat << " new bestSum: " << bestSum << endl;
             lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
         }
 
@@ -189,7 +191,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             }
             assert(bestSum == bestSumDebug);
             assert(startPointDebug == startIndex);
-            cout << "endPoint: " << endPoint << " startPointDebug: " << startPointDebug << " maxValueDebug: " << maxValueDebug << " maxValue: " << maxValue << endl;
+            //cout << "endPoint: " << endPoint << " startPointDebug: " << startPointDebug << " maxValueDebug: " << maxValueDebug << " maxValue: " << maxValue << endl;
             //cout << "maxValue: " << maxValue << " maxValueDebug: " << maxValueDebug << endl;
             assert(maxValueDebug == maxValue);
         }
@@ -227,7 +229,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
 {
     const int numRows = A.size();
     const int numCols = A[0].size();
-    cout << "numRows: " << numRows << " numCols: " << numCols << endl;
+    //cout << "numRows: " << numRows << " numCols: " << numCols << endl;
     const vector<int64_t> rowOfZeros(numCols, 0);
 
     vector<vector<int64_t>> lookup(numRows, vector<int64_t>(numCols, std::numeric_limits<int64_t>::min()));
@@ -237,6 +239,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
 
     for (int row = numRows - 1; row >= 0; row--)
     {
+#if 0
         cout << "row!" << row << endl;
         for (const auto x : A[row])
         {
@@ -249,6 +252,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             cout << x << " ";
         }
         cout << endl;
+#endif
         const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]);
         const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], lookup[row + 1]);
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], lookup[row + 1]);
@@ -258,23 +262,23 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         int previousGobbleLeftIndex = -1;
         while (startCol < numCols)
         {
-            cout << " startCol: " << startCol << endl;
+            //cout << " startCol: " << startCol << endl;
             int64_t bestGobbleSum = 0;
             const int bestGobbleStartIndex = bestGobbleToLeftFrom[startCol].subArrayStartIndex;
             bestGobbleSum += bestGobbleToLeftFrom[startCol].sum;
             int bestGobbleEndIndex = startCol;
             int64_t maxInGobbleRange = bestGobbleToLeftFrom[startCol].maxValue;
-            cout << "bestGobbleToLeftFrom maxValue: " << bestGobbleToLeftFrom[startCol].maxValue << endl;
+            //cout << "bestGobbleToLeftFrom maxValue: " << bestGobbleToLeftFrom[startCol].maxValue << endl;
             if (startCol < numCols - 1 && bestGobbleToRightFrom[startCol + 1].sum >= 0)
             {
                 bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
                 bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
                 maxInGobbleRange = max(maxInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxValue);
-                cout << "bestGobbleToRightFrom maxValue: " << bestGobbleToRightFrom[startCol].maxValue << endl;
+                //cout << "bestGobbleToRightFrom maxValue: " << bestGobbleToRightFrom[startCol].maxValue << endl;
             }
             maxInGobbleRange += bestGobbleSum;
             assert(previousGobbleLeftIndex == -1 || bestGobbleStartIndex >= previousGobbleLeftIndex);
-            cout << "  bestGobbleSum: " << bestGobbleSum << " bestGobbleStartIndex: " << bestGobbleStartIndex << " bestGobbleEndIndex: " << bestGobbleEndIndex << endl;
+            //cout << "  bestGobbleSum: " << bestGobbleSum << " bestGobbleStartIndex: " << bestGobbleStartIndex << " bestGobbleEndIndex: " << bestGobbleEndIndex << endl;
             // Descend in the middle of gobble-range.
             int64_t bestForStartCol = std::numeric_limits<int64_t>::min();
 #ifdef BestSubarraySumUpTo
@@ -284,29 +288,29 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
                 const int64_t scoreIfDescendHere = bestGobbleSum + lookup[row + 1][i];
                 maxInGobbleRangeDebug = max(maxInGobbleRangeDebug, scoreIfDescendHere);
             }
-            cout << "maxInGobbleRangeDebug: " << maxInGobbleRangeDebug << " maxInGobbleRange: " << maxInGobbleRange << endl;
+            //cout << "maxInGobbleRangeDebug: " << maxInGobbleRangeDebug << " maxInGobbleRange: " << maxInGobbleRange << endl;
             assert(maxInGobbleRangeDebug == maxInGobbleRange);
 #endif
             bestForStartCol = max(bestForStartCol, maxInGobbleRange);
 
             //const auto bestScoreIfDescendInGobbleRange = bestGobbleSum +  cumulativeDescendAtScore[bestGobbleEndIndex] - (bestGobbleStartIndex > 0 ? cumulativeDescendAtScore[bestGobbleStartIndex - 1] : 0);
             //bestForStartCol = max(bestForStartCol, bestScoreIfDescendInGobbleRange);
-            cout << "  bestForStartCol after descend in gobble-range: " << bestForStartCol << endl;
+            //cout << "  bestForStartCol after descend in gobble-range: " << bestForStartCol << endl;
             // Descend to the left of gobble-range.
             if (bestGobbleStartIndex > 0)
             {
                 const int64_t score = bestGobbleSum + bestIfMovedLeftFromAndDescended[bestGobbleStartIndex - 1];
                 bestForStartCol = max(bestForStartCol, score);
             }
-            cout << "  bestForStartCol after descend to left of gobble-range: " << bestForStartCol << endl;
+            //cout << "  bestForStartCol after descend to left of gobble-range: " << bestForStartCol << endl;
             // Descend to the right of gobble-range.
             if (bestGobbleEndIndex < numCols - 1)
             {
                 const int64_t score = bestGobbleSum + bestIfMovedRightFromAndDescended[bestGobbleEndIndex + 1];
-                cout << "bestIfMovedRightFromAndDescended from " << (bestGobbleEndIndex + 1) << " : " << score << endl;
+                //cout << "bestIfMovedRightFromAndDescended from " << (bestGobbleEndIndex + 1) << " : " << score << endl;
                 bestForStartCol = max(bestForStartCol, score);
             }
-            cout << "  bestForStartCol: " << bestForStartCol << endl;
+            //cout << "  bestForStartCol: " << bestForStartCol << endl;
             // All columns in the gobble range have the same max attainable score if we start there TODO - no, this is wrong!
             lookup[row][startCol] = max(lookup[row][startCol], bestForStartCol);
             //for (int i = bestGobbleStartIndex; i <= bestGobbleEndIndex; i++)
@@ -398,20 +402,18 @@ int64_t maxSumBruteForce(const vector<vector<int64_t>>& A)
 
 int main(int argc, char** argv)
 {
-#ifdef RANDOM
-
-    srand(time(0));
-#endif
+     ios::sync_with_stdio(false);
 
     if (argc == 2)
     {
-        const int maxCells = 4'000'000;
+        srand(time(0));
+        const int maxCells = 4000000;
         //const int maxCells = 100000;
-        const int64_t n = rand() % maxCells;
-        int64_t m = 0;
+        const int64_t m = rand() % maxCells + 1;
+        int64_t n = 0;
         while (true)
         {
-            m = rand() % maxCells;
+            n = rand() % maxCells + 1;
             if (n * m <= maxCells)
                 break;
         }
@@ -500,15 +502,15 @@ int main(int argc, char** argv)
 
     vector<vector<int64_t>> A(n, vector<int64_t>(m, -1));
 
-    cout << "A:" << endl;
+    //cout << "A:" << endl;
     for (int row = 0; row < n; row++)
     {
         for (int col = 0; col < m; col++)
         {
             cin >> A[row][col];
-            cout << A[row][col] << " ";
+            //cout << A[row][col] << " ";
         }
-        cout << endl;
+        //cout << endl;
     }
 
     const int64_t best = maxSum(A);
