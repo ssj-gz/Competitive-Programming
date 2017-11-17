@@ -35,40 +35,40 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
     int64_t bestCumulative = numeric_limits<int64_t>::min();
     int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
     int64_t bestSumBaseIfLowestDescentFound = -1;
-    for (int endPoint = 0; endPoint < row.size(); endPoint++)
+    for (int startPoint = 0; startPoint < row.size(); startPoint++)
     {
-        bestSum += row[endPoint];
-        bestSumBaseIfLowestDescentFound += row[endPoint];
+        bestSum += row[startPoint];
+        bestSumBaseIfLowestDescentFound += row[startPoint];
 
         if (cumulative < 0)
         {
             // Just as in Kadane's algorithm, if breaking with the existing
             // cumulative give a better result, then do so.
-            cumulative = row[endPoint];
+            cumulative = row[startPoint];
         }
         else
-            cumulative += row[endPoint];
+            cumulative += row[startPoint];
 
         if (cumulative > bestCumulative)
         {
             // This would be the best if only it could use a descent of lowestDescentToBeatBestSum
             // size.
             bestCumulative = cumulative;
-            const int64_t deficit = bestSum - (cumulative + scoreIfDescendAt[endPoint]);
-            lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[endPoint] + deficit);
+            const int64_t deficit = bestSum - (cumulative + scoreIfDescendAt[startPoint]);
+            lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[startPoint] + deficit);
             bestSumBaseIfLowestDescentFound = bestCumulative;
         }
-        if (cumulative + scoreIfDescendAt[endPoint] > bestSum)
+        if (cumulative + scoreIfDescendAt[startPoint] > bestSum)
         {
-            bestSum = cumulative + scoreIfDescendAt[endPoint];
+            bestSum = cumulative + scoreIfDescendAt[startPoint];
             lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
         }
-        if (scoreIfDescendAt[endPoint] >= lowestDescentToBeatBestSum)
+        if (scoreIfDescendAt[startPoint] >= lowestDescentToBeatBestSum)
         {
-            bestSum = bestSumBaseIfLowestDescentFound + scoreIfDescendAt[endPoint];
+            bestSum = bestSumBaseIfLowestDescentFound + scoreIfDescendAt[startPoint];
         }
 
-        result[endPoint] = bestSum;
+        result[startPoint] = bestSum;
 
     }
     return result;
