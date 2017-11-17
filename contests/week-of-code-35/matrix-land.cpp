@@ -18,65 +18,15 @@ using namespace std;
 struct BestSubarraySumUpTo
 {
     BestSubarraySumUpTo() = default;
-    BestSubarraySumUpTo(int64_t sum, int subArrayStartIndex)
-        : sum{sum}, subArrayStartIndex{subArrayStartIndex}
+    BestSubarraySumUpTo(int64_t sum, int subArrayStartIndex, int64_t maxValue)
+        : sum{sum}, subArrayStartIndex{subArrayStartIndex}, maxValue{maxValue}
     {
     }
     int64_t sum = 0;
     int subArrayStartIndex = 0;
+    int64_t maxValue = 0;
 };
 
-struct BestSubarraySum
-{
-    BestSubarraySum(int64_t sum, int subArrayStartIndex, int subArrayEndIndex)
-        : sum{sum}, subArrayStartIndex{subArrayStartIndex}, subArrayEndIndex{subArrayEndIndex}
-    {
-    }
-    int64_t sum = 0;
-    int subArrayStartIndex = 0;
-    int subArrayEndIndex = 0;
-};
-
-class MaxTracker
-{
-    public:
-        void add(int64_t value)
-        {
-            numOfValue[value]++;
-            assert(size() > 0);
-        }
-        void remove(int64_t value)
-        {
-            assert(numOfValue.find(value) != numOfValue.end());
-            numOfValue[value]--;
-            if (numOfValue[value] == 0)
-            {
-                numOfValue.erase(numOfValue.find(value));
-            }
-        }
-        void clear()
-        {
-            numOfValue.clear();
-        }
-        int64_t max() const
-        {
-            assert(size() > 0);
-            return numOfValue.rbegin()->first;
-        }
-        int size() const
-        {
-            return numOfValue.size();
-        }
-        int64_t secondToMax() const
-        {
-            assert(size() > 1);
-            auto blah = numOfValue.rbegin();
-            blah++;
-            return blah->first;
-        };
-    private:
-        map<int64_t, int64_t> numOfValue;
-};
 
 vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, const vector<int64_t>& scoreIfDescendAt)
 {
@@ -208,7 +158,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
         {
             bestSum += A[endPoint];
         }
-        result[endPoint] = {bestSum, startIndex};
+        result[endPoint] = {bestSum, startIndex, 0};
 
 #ifdef BRUTE_FORCE
         {
@@ -226,20 +176,12 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                 {
                     bestSumDebug = cumulativeSum + bestBDebug;
                     startPointDebug = startPoint;
-                    //cout << "  endPoint: " << endPoint << " startPoint: " << startPoint << " bestSumDebug: " << bestSumDebug << endl;
                 }
                 else if (cumulativeSum + bestBDebug == bestSumDebug)
                 {
                     startPointDebug = startPoint;
                 }
-                if (endPoint == 2)
-                {
-                    //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
-                }
             }
-            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
-            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
-            //result[endPoint] = {bestSumDebug, startPointDebug};
             assert(bestSum == bestSumDebug);
             assert(startPointDebug == startIndex);
         }
@@ -273,16 +215,6 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAtReversed(const vector<int6
     return result;
 }
 
-vector<int64_t> extractSums(const vector<BestSubarraySumUpTo>& sumsAndStartIndices)
-{
-    vector<int64_t> result;
-    for (const auto sumAndStartIndex : sumsAndStartIndices)
-    {
-        result.push_back(sumAndStartIndex.sum);
-    }
-    return result;
-}
-
 int64_t maxSum(const vector<vector<int64_t>>& A)
 {
     const int numRows = A.size();
@@ -309,61 +241,10 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
             cout << x << " ";
         }
         cout << endl;
-        //const auto bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
-        //assert(bestIfMovedRightFromAndDescended == findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]));
         const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]);
         const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], lookup[row + 1]);
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
         const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
-
-#if 0
-        vector<int64_t> bleep(numCols);
-        for (int i = 0; i < numCols; i++)
-        {
-            cout << "i: " << i << " bestIfMovedRightFromAndDescended: " << bestIfMovedRightFromAndDescended[i] << endl;
-        }
-        {
-            int64_t maxDescent = lookup[row + 1].back();
-            //int64_t cumulative = A[row].back();
-            int64_t cumulative = 0;
-            int64_t bestScore = cumulative + maxDescent;
-            int64_t descentUsedWithBest = maxDescent;
-            cout << " Initial bestScore: " << bestScore << " maxDescent: " << maxDescent << " cumulative: " << cumulative << endl;
-            for (int i = numCols - 1; i >= 0; i--)
-            {
-                cumulative += A[row][i];
-                maxDescent = max(maxDescent, lookup[row + 1][i]);
-                //bestScore = cumulative + (i == numCols - 1 ? maxDescent : (maxDescent - lastMaxDescent));
-                bestScore = cumulative + maxDescent;
-                cout << "i: " << i << " Preliminary bestScore: " << bestScore << " maxDescent: " << maxDescent << " cumulative: " << cumulative << endl;
-                if (A[row][i] + lookup[row + 1][i] > bestScore)
-                {
-                    bestScore = A[row][i] + lookup[row + 1][i];
-                    cumulative = A[row][i];
-                    maxDescent = lookup[row + 1][i];
-                    descentUsedWithBest = maxDescent;
-                    cout << "i: " << i << " adjusted bestScore: " << bestScore << " maxDescent: " << maxDescent << " cumulative: " << cumulative << endl;
-
-                }
-                cout << "i: " << i << " bestScore: " << bestScore << endl;
-                bleep[i] = bestScore;
-            }
-        }
-        assert(bleep == bestIfMovedRightFromAndDescended);
-#endif
-
-
-#if 0
-        vector<int64_t> cumulativeDescendAtScore;
-        {
-            int64_t cumulativeScore = 0;
-            for (int col = 0; col < numCols; col++)
-            {
-                cumulativeScore += lookup[row + 1][col];
-                cumulativeDescendAtScore.push_back(cumulativeScore);
-            }
-        }
-#endif
 
         int startCol = 0;
         int previousGobbleLeftIndex = -1;
