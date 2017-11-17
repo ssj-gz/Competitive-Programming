@@ -396,8 +396,40 @@ int64_t maxSumBruteForce(const vector<vector<int64_t>>& A)
     return bestBruteForce;
 }
 
-int main()
+int main(int argc, char** argv)
 {
+#ifdef RANDOM
+
+    srand(time(0));
+#endif
+
+    if (argc == 2)
+    {
+        const int maxCells = 4'000'000;
+        //const int maxCells = 100000;
+        const int64_t n = rand() % maxCells;
+        int64_t m = 0;
+        while (true)
+        {
+            m = rand() % maxCells;
+            if (n * m <= maxCells)
+                break;
+        }
+
+        cout << n << " " << m << endl;
+        const int range = 250;
+        for (int row = 0; row < n; row++)
+        {
+            for (int col = 0; col < m; col++)
+            {
+                cout << rand() % (2 * range + 1) - range << " ";
+            }
+            cout << endl;
+        }
+
+        return 0;
+    }
+
 #ifdef RANDOM
 
     srand(time(0));
