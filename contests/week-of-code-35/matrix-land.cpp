@@ -34,25 +34,29 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
     int64_t cumulative = numeric_limits<int64_t>::min();
     int64_t bestCumulative = numeric_limits<int64_t>::min();
     int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
-    int64_t bestSumIfBeat = -1;
+    int64_t bestSumBaseIfLowestDescentFound = -1;
     for (int endPoint = 0; endPoint < row.size(); endPoint++)
     {
         bestSum += row[endPoint];
-        bestSumIfBeat += row[endPoint];
+        bestSumBaseIfLowestDescentFound += row[endPoint];
+
         if (cumulative < 0)
         {
+            // Just as in Kadane's algorithm, if breaking with the existing
+            // cumulative give a better result, then do so.
             cumulative = row[endPoint];
         }
         else
-        {
             cumulative += row[endPoint];
-        }
+
         if (cumulative > bestCumulative)
         {
+            // This would be the best if only it could use a descent of lowestDescentToBeatBestSum
+            // size.
             bestCumulative = cumulative;
             const int64_t deficit = bestSum - (cumulative + scoreIfDescendAt[endPoint]);
             lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[endPoint] + deficit);
-            bestSumIfBeat = cumulative;
+            bestSumBaseIfLowestDescentFound = bestCumulative;
         }
         if (cumulative + scoreIfDescendAt[endPoint] > bestSum)
         {
@@ -61,7 +65,7 @@ vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, cons
         }
         if (scoreIfDescendAt[endPoint] >= lowestDescentToBeatBestSum)
         {
-            bestSum = bestSumIfBeat + scoreIfDescendAt[endPoint];
+            bestSum = bestSumBaseIfLowestDescentFound + scoreIfDescendAt[endPoint];
         }
 
         result[endPoint] = bestSum;
