@@ -109,14 +109,40 @@ int64_t factorial(int64_t n)
     int64_t result = 1;
     for (int i = 1; i <= n; i++)
     {
-        result *= n;
+        result *= i;
     }
     return result;
 }
 
 int64_t nCr(int64_t n, int64_t r)
 {
-    return factorial(n) / factorial(r) / factorial(n - r);
+    auto result = factorial(n) / factorial(r) / factorial(n - r);
+    cout << "nCr: n: " << n << " r: " << r << " result: " << result << endl;
+    return result;
+}
+
+int64_t computePowerSum(int64_t n, int64_t k)
+{
+    const int maxK = 1000;
+    vector<int64_t> answersForEarlierK(maxK + 1);
+
+    answersForEarlierK.clear();
+    answersForEarlierK.push_back(n);
+
+    for (int i = 1; i <= k; i++)
+    {
+        int64_t answer = quickPower(n + 1, i + 1, ::modulus) - 1;
+        for (int j = 0; j <= i - 1; j++)
+        {
+            const auto multiplier = nCr(i + 1, j);
+            answer -= multiplier * answersForEarlierK[j];
+        }
+        assert((answer % (i + 1)) == 0);
+        answer /= (i + 1);
+        answersForEarlierK[i] = answer;
+        cout << "answer for power = " << i << " : " << answer << endl;;
+    }
+    return answersForEarlierK[k];
 }
 
 int main()
@@ -135,9 +161,6 @@ int main()
     //vector<vector<Rational>> coefficientsForK;
     //coefficientsForK.push_back(
 
-    const int maxK = 1000;
-    vector<int64_t> answersForEarlierK(maxK + 1);
-
     int q;
     cin >> q;
 
@@ -146,22 +169,6 @@ int main()
         int n, k;
         cin >> n >> k;
 
-        answersForEarlierK.clear();
-        answersForEarlierK.push_back(n - 1);
-
-        for (int i = 1; i <= k; i++)
-        {
-            int64_t answer = quickPower(n, i + 1, ::modulus) - 1;
-            for (int j = 0; j <= i - 1; j++)
-            {
-                const auto multiplier = nCr(i + 1, j);
-                answer -= multiplier * answersForEarlierK[j];
-            }
-            assert((answer % (i + 1)) == 0);
-            answer /= (i + 1);
-            answersForEarlierK[i] = answer;
-            cout << "answer for power = " << i << " : " << answer << endl;;
-        }
 
         //cout << "n: " << n << " k: " << k << endl;
 
@@ -175,7 +182,7 @@ int main()
             //cout << "i: " << i << " dbgTotal: " << dbgTotal << endl;
             
         }
-        const int64_t total = answersForEarlierK[k] - 1;
+        const int64_t total = computePowerSum(n - 1, k) - 1;
         cout << "total: " << total << " dbgTotal: " << dbgTotal << endl;
     }
 
