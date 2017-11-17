@@ -1,13 +1,14 @@
 // Simon St James (ssjgz) - 2017-11-17
 // This is just a "correctness" submission - it's too slow to pass all testcase!
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
