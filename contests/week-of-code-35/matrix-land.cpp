@@ -80,6 +80,10 @@ class MaxTracker
 
 vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
+    vector<BestSubarraySumUpTo> result(A.size());
+    for (int endPoint = 0; endPoint < A.size(); endPoint++)
+    {
+#if 0
     cout << "findMaxSubarraySumEndingAt: A:" << endl;
     for (const auto x : A)
     {
@@ -260,6 +264,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
 
         //if (needToRemoveFromAfter)
             //afterNegativePointBs.remove(bonusIfStartAt[endPoint]);
+#endif
 
 #ifdef BRUTE_FORCE
         {
@@ -277,7 +282,7 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                 {
                     bestSumDebug = cumulativeSum + bestBDebug;
                     startPointDebug = startPoint;
-                    cout << "  endPoint: " << endPoint << " startPoint: " << startPoint << " bestSumDebug: " << bestSumDebug << endl;
+                    //cout << "  endPoint: " << endPoint << " startPoint: " << startPoint << " bestSumDebug: " << bestSumDebug << endl;
                 }
                 else if (cumulativeSum + bestBDebug == bestSumDebug)
                 {
@@ -288,8 +293,10 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                     //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
                 }
             }
-            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
-            assert(bestSum == bestSumDebug);
+            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
+            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
+            result[endPoint] = {bestSumDebug, startPointDebug};
+            //assert(bestSum == bestSumDebug);
             //assert(startPointDebug == startPoint);
         }
 #endif
@@ -338,10 +345,56 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     for (int row = numRows - 1; row >= 0; row--)
     {
         cout << "row!" << row << endl;
+        for (const auto x : A[row])
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        cout << "lookup!" << endl;
+        for (const auto x : lookup[row + 1])
+        {
+            cout << x << " ";
+        }
+        cout << endl;
         const auto bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
         const auto bestIfMovedLeftFromAndDescended = extractSums(findMaxSubarraySumEndingAt(A[row], lookup[row + 1]));
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
         const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
+
+        struct Thing
+        {
+            int pos = -1;
+            int sum = -1;
+        };
+        vector<Thing> blah;
+        int64_t cumulative = 0;
+        for (int i = 0; i < numCols; i++)
+        {
+            cumulative += A[row][i];
+            Thing thing;
+            thing.pos = i;
+            thing.sum = cumulative + lookup[row + 1][i];
+            cout << "i: " << i << " thing.sum: " << thing.sum << " lookup: " << lookup[row + 1][i] << endl;
+            blah.push_back(thing);
+        }
+        sort(blah.begin(), blah.end(), [](const auto& lhs, const auto& rhs) { return rhs.sum < lhs.sum; });
+        int blee = 0;
+        cumulative = 0;
+        vector<int> floop;
+        for (int i = 0; i < numCols; i++)
+        {
+            while (i > blah[blee].pos)
+            {
+                cout << "incrementing blee" << endl;
+                blee++;
+            }
+
+            floop.push_back(blah[blee].sum - cumulative);
+            cout << "floop i: " << i << " = " << floop.back() << " bestIfMovedRightFromAndDescended[i]: " << bestIfMovedRightFromAndDescended[i] << endl;
+            cout << "blah i: " << i << " sum: " << blah[blee].sum << " pos: " << blah[blee].pos << endl;
+            assert(floop.back() == bestIfMovedRightFromAndDescended[i]);
+            cumulative += A[row][i];
+        }
 
 #if 0
         vector<int64_t> cumulativeDescendAtScore;
@@ -491,7 +544,18 @@ int main()
 #ifdef RANDOM
 
     srand(time(0));
-#if 1
+#if 0
+    vector<int64_t> k(4'000'000);
+    const int range = 4'000'000 * 250;
+    for (int i = 0; i < k.size(); i++)
+    {
+        k[i] = rand() % (2 * range + 1) - range;
+    }
+    sort(k.begin(), k.end());
+    cout << "Sorted " << k.size() << endl;
+    return 0;
+#endif
+#if 0
     while (true)
     {
         const int n = rand() % 4 + 1;
@@ -511,9 +575,9 @@ int main()
 #endif
     while (true)
     {
-        const int numRows = (rand() % 6) + 1;
-        const int numCols = (rand() % 6) + 1;
-        const int range = 250;
+        const int numRows = (rand() % 2) + 1;
+        const int numCols = (rand() % 4) + 1;
+        const int range = 10;
         vector<vector<int64_t>> A(numRows, vector<int64_t>(numCols, -1));
         for (int i = 0; i < numRows; i++)
         {
