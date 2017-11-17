@@ -1,5 +1,11 @@
 // Simon St James (ssjgz) - 2017-11-17
 // This is just a "correctness" submission - it's too slow to pass all testcase!
+#define BRUTE_FORCE
+//#define SUBMISSION
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 
@@ -51,81 +57,6 @@ void buildFactorialLookups(int maxN)
     }
 }
 
-class Rational
-{
-    public:
-        Rational(int64_t numerator, int64_t denominator = 1)
-            : m_numerator{numerator}, m_denominator{denominator}
-        {
-        };
-        int64_t numerator() const
-        {
-            return m_numerator;
-        }
-        int64_t denominator() const
-        {
-            return m_denominator;
-        }
-        Rational& operator+=(const Rational& other)
-        {
-            if (other.m_denominator == m_denominator)
-            {
-                m_numerator += other.m_numerator;
-            }
-            else
-            {
-                const int64_t newNumerator = m_numerator * other.m_denominator + other.m_numerator * m_denominator;
-                const int64_t newDenominator = m_denominator * other.m_denominator;
-                m_numerator = newNumerator;
-                m_denominator = newDenominator;
-            }
-            return *this;
-        }
-        Rational& operator*=(const Rational& other)
-        {
-            m_numerator *= other.m_numerator;
-            m_denominator *= other.m_denominator;
-            return *this;
-        }
-        Rational& operator/=(const Rational& other)
-        {
-            m_numerator *= other.m_denominator;
-            m_denominator *= other.m_numerator;
-            return *this;
-        }
-    private:
-        int64_t m_numerator;
-        int64_t m_denominator;
-
-};
-
-Rational operator+(const Rational& lhs, const Rational& rhs)
-{
-    Rational result = lhs;
-    result += rhs;
-    return result;
-}
-
-Rational operator*(const Rational& lhs, const Rational& rhs)
-{
-    Rational result = lhs;
-    result *= rhs;
-    return result;
-}
-
-Rational operator/(const Rational& lhs, const Rational& rhs)
-{
-    Rational result = lhs;
-    result /= rhs;
-    return result;
-}
-
-ostream& operator<<(ostream& os, const Rational& rational)
-{
-    os << rational.numerator() << "/" << rational.denominator();
-    return os;
-}
-
 int64_t factorial(int64_t n)
 {
     int64_t result = 1;
@@ -140,7 +71,7 @@ int64_t nCr(int64_t n, int64_t r, int64_t modulus)
 {
     int64_t result = (factorialLookup[n] * factorialInverseLookup[r]) % modulus;
     result = (result * factorialInverseLookup[n - r]) % modulus;
-    cout << "nCr: n: " << n << " r: " << r << " result: " << result << endl;
+    //cout << "nCr: n: " << n << " r: " << r << " result: " << result << endl;
     return result;
 }
 
@@ -148,26 +79,25 @@ int64_t computePowerSum(int64_t n, int64_t k)
 {
     vector<int64_t> answersForEarlierK(maxK + 1);
 
-    answersForEarlierK.clear();
     answersForEarlierK.push_back(n);
 
     for (int i = 1; i <= k; i++)
     {
         int64_t answer = (quickPower(n + 1, i + 1, ::modulus) + ::modulus - 1) % ::modulus;
-        cout << "answer quickPower: " << answer << endl;
+        //cout << "answer quickPower: " << answer << endl;
         for (int j = 0; j <= i - 1; j++)
         {
             const int64_t multiplier = nCr(i + 1, j, ::modulus);
-            cout << "multiplier: " << multiplier << endl;
+            //cout << "multiplier: " << multiplier << endl;
             const int64_t term = (multiplier * answersForEarlierK[j]) % :: modulus;
-            cout << "term: " << term << endl;
+            //cout << "term: " << term << endl;
             answer = (::modulus + answer - term) % ::modulus;
         }
         //assert((answer % (i + 1)) == 0);
         //answer /= (i + 1);
         answer = (answer * inverseLookup[i + 1]) % ::modulus;
         answersForEarlierK[i] = answer;
-        cout << "answer for power = " << i << " : " << answer << endl;;
+        //cout << "answer for power = " << i << " : " << answer << endl;;
     }
     return answersForEarlierK[k];
 }
@@ -205,25 +135,31 @@ int main()
         int n, k;
         cin >> n >> k;
 
+        int64_t nMinusOne = (n + ::modulus - 1) % ::modulus; 
+
 
         //cout << "n: " << n << " k: " << k << endl;
 
+        const int64_t total = computePowerSum(nMinusOne, k) - 1;
+        cout << total << endl;
+#ifdef BRUTE_FORCE
         int64_t dbgTotal = 0;
 
         for (int i = 2; i <= n - 1; i++)
         {
-            cout << "i : " << i << " i ^^ k: " << quickPower(i, k, ::modulus) << endl;
+            //cout << "i : " << i << " i ^^ k: " << quickPower(i, k, ::modulus) << endl;
             //dbgTotal = (dbgTotal + (n - 1 - i) * quickPower(i, k, ::modulus)) % ::modulus;
             dbgTotal = (dbgTotal + quickPower(i, k, ::modulus)) % ::modulus;
             //cout << "i: " << i << " dbgTotal: " << dbgTotal << endl;
 
         }
-        const int64_t total = computePowerSum(n - 1, k) - 1;
         cout << "total: " << total << " dbgTotal: " << dbgTotal << endl;
+        assert(dbgTotal == total);
+#endif
     }
 
-    const auto blah = quickPower(5, 8, ::modulus);
-    const auto blah2 = quickPower(::modulus - 5, 8, ::modulus);
-    cout << "blah: " << blah << " blah2: " << blah2 << " sum: " << (blah + blah2) << " sum mod: " << (blah + blah2) % ::modulus << endl;
+    //const auto blah = quickPower(5, 8, ::modulus);
+    //const auto blah2 = quickPower(::modulus - 5, 8, ::modulus);
+    //cout << "blah: " << blah << " blah2: " << blah2 << " sum: " << (blah + blah2) << " sum mod: " << (blah + blah2) % ::modulus << endl;
 
 }
