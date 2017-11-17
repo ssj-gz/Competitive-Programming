@@ -78,8 +78,124 @@ class MaxTracker
         map<int64_t, int64_t> numOfValue;
 };
 
+vector<int64_t> findBestIfMovedFromAndDescended(const vector<int64_t>& row, const vector<int64_t>& scoreIfDescendAt)
+{
+    cout << "findBestIfMovedFromAndDescended row: " << endl;
+    for (const auto x : row)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    cout << "scoreIfDescendAt: " << endl;
+    for (const auto x : scoreIfDescendAt)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    vector<int64_t> result(row.size());
+    int64_t bestSum = numeric_limits<int64_t>::min();
+    int64_t cumulative = numeric_limits<int64_t>::min();
+    cout << "original cumulative: " << cumulative << endl;
+    cout << "cumulative < 0? " << (cumulative < 0) << endl;
+    int64_t bestCumulative = numeric_limits<int64_t>::min();
+    int64_t lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
+    int64_t startIndexIfBeatBestSum = -1;
+    int64_t bestSumIfBeat = -1;
+    int64_t highestBonus = numeric_limits<int64_t>::min();
+    int startPoint = 0;
+    for (int endPoint = 0; endPoint < row.size(); endPoint++)
+    {
+        cout << "row[endPoint]: " << row[endPoint] << endl;
+        if (bestSum == numeric_limits<int64_t>::min())
+        {
+            bestSum = row[endPoint] + scoreIfDescendAt[endPoint];
+        }
+        else
+        {
+            bestSum += row[endPoint];
+            bestSumIfBeat += row[endPoint];
+        }
+        cout << "endpoint: " << endPoint << endl;
+        //if (row[endPoint] > cumulative + row[endPoint])
+        if (cumulative < 0)
+        {
+            cumulative = row[endPoint];
+            cout << "New cumulative: " << cumulative << endl;
+        }
+        else
+        {
+            cumulative += row[endPoint];
+            cout << "updated cumulative; now: " << cumulative << endl;
+        }
+        if (cumulative > bestCumulative)
+        {
+            bestCumulative = cumulative;
+            cout << " new bestCumulative " << bestCumulative << endl;
+            const int64_t deficit = bestSum - (cumulative + scoreIfDescendAt[endPoint]);
+            cout << "deficit: " << deficit << " bestSum:" << bestSum << endl;
+            lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[endPoint] + deficit);
+            startIndexIfBeatBestSum = endPoint;
+            bestSumIfBeat = cumulative;
+            cout << "cumulative: " << cumulative << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << endl;
+        }
+        if (cumulative + scoreIfDescendAt[endPoint] > bestSum)
+        {
+            bestSum = cumulative + scoreIfDescendAt[endPoint];
+            lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
+            startIndexIfBeatBestSum = endPoint;
+        }
+        if (scoreIfDescendAt[endPoint] >= lowestDescentToBeatBestSum)
+        {
+            startPoint = startIndexIfBeatBestSum;
+            bestSum = bestSumIfBeat + scoreIfDescendAt[endPoint];
+            cout << "Got a new favourite, I think due to scoreIfDescendAt: " << scoreIfDescendAt[endPoint] << " lowestDescentToBeatBestSum: " << lowestDescentToBeatBestSum << " bestSumIfBeat: " << bestSumIfBeat << " new bestSum: " << bestSum << endl;
+            lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
+        }
+
+        result[endPoint] = bestSum;
+
+#ifdef BRUTE_FORCE
+        {
+            // Verify.
+            int64_t bestSumDebug = std::numeric_limits<int64_t>::min();
+            int cumulativeSum = 0;
+            int startPointDebug = 0;
+            auto bestBDebug = std::numeric_limits<int64_t>::min();
+            for (int startPoint = endPoint; startPoint >= 0; startPoint--)
+            {
+                cumulativeSum += row[startPoint];
+                if (scoreIfDescendAt[startPoint] > bestBDebug)
+                    bestBDebug = scoreIfDescendAt[startPoint];
+                if (cumulativeSum + bestBDebug > bestSumDebug)
+                {
+                    bestSumDebug = cumulativeSum + bestBDebug;
+                    startPointDebug = startPoint;
+                    //cout << "  endPoint: " << endPoint << " startPoint: " << startPoint << " bestSumDebug: " << bestSumDebug << endl;
+                }
+                else if (cumulativeSum + bestBDebug == bestSumDebug)
+                {
+                    startPointDebug = startPoint;
+                }
+                if (endPoint == 2)
+                {
+                    //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
+                }
+            }
+            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
+            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
+            //result[endPoint] = {bestSumDebug, startPointDebug};
+            assert(bestSum == bestSumDebug);
+            //assert(startPointDebug == startPoint);
+        }
+#endif
+    }
+    return result;
+}
+
 vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A, const vector<int64_t>& bonusIfStartAt)
 {
+    vector<BestSubarraySumUpTo> result(A.size());
+#if 0
     cout << "findMaxSubarraySumEndingAt: A: " << endl;
     for (const auto x : A)
     {
@@ -92,7 +208,6 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
         cout << x << " ";
     }
     cout << endl;
-    vector<BestSubarraySumUpTo> result(A.size());
     int64_t bestSum = numeric_limits<int64_t>::min();
     int64_t cumulative = numeric_limits<int64_t>::min();
     int64_t bestCumulative = numeric_limits<int64_t>::min();
@@ -101,8 +216,10 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
     int64_t bestSumIfBeat = -1;
     int64_t highestBonus = numeric_limits<int64_t>::min();
     int startPoint = 0;
+#endif
     for (int endPoint = 0; endPoint < A.size(); endPoint++)
     {
+#if 0
         if (bestSum == numeric_limits<int64_t>::min())
         {
             bestSum = A[endPoint] + bonusIfStartAt[endPoint];
@@ -148,6 +265,9 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
             lowestDescentToBeatBestSum = numeric_limits<int64_t>::max();
         }
 
+        //result[endPoint] = {bestSum, -1};
+#endif
+
 #ifdef BRUTE_FORCE
         {
             // Verify.
@@ -175,14 +295,23 @@ vector<BestSubarraySumUpTo> findMaxSubarraySumEndingAt(const vector<int64_t>& A,
                     //cout << "endPoint: " << endPoint << " startPoint: " << startPoint << " cumulativeSum: " << cumulativeSum << " bestSumDebug: " << bestSumDebug << endl;
                 }
             }
-            cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
+            //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " bestSum: " << bestSum << " startPointDebug: " << startPointDebug << " startPoint:" << startPoint << endl;
             //cout << " endPoint: " << endPoint << " bestSumDebug: " << bestSumDebug << " startPointDebug: " << startPointDebug << endl;
             result[endPoint] = {bestSumDebug, startPointDebug};
-            assert(bestSum == bestSumDebug);
+            //assert(bestSum == bestSumDebug);
             //assert(startPointDebug == startPoint);
         }
 #endif
     }
+    return result;
+}
+vector<int64_t> findBestIfMovedFromAndDescendedReversed(const vector<int64_t>& A, const vector<int64_t>& scoreIfDescendAt)
+{
+    const vector<int64_t> aReversed(A.rbegin(), A.rend());
+    const vector<int64_t> scoreIfDescendAtReversed(scoreIfDescendAt.rbegin(), scoreIfDescendAt.rend());
+    auto result = findBestIfMovedFromAndDescended(aReversed, scoreIfDescendAtReversed);
+    reverse(result.begin(), result.end());
+    assert(result.size() == A.size());
     return result;
 }
 
@@ -239,6 +368,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
         }
         cout << endl;
         const auto bestIfMovedRightFromAndDescended = extractSums(findMaxSubarraySumEndingAtReversed(A[row], lookup[row + 1]));
+        assert(bestIfMovedRightFromAndDescended == findBestIfMovedFromAndDescendedReversed(A[row], lookup[row + 1]));
         const auto bestIfMovedLeftFromAndDescended = extractSums(findMaxSubarraySumEndingAt(A[row], lookup[row + 1]));
         const auto bestGobbleToLeftFrom = findMaxSubarraySumEndingAt(A[row], rowOfZeros);
         const auto bestGobbleToRightFrom = findMaxSubarraySumEndingAtReversed(A[row], rowOfZeros);
@@ -439,11 +569,11 @@ int main()
     cout << "Sorted " << k.size() << endl;
     return 0;
 #endif
-#if 1
+#if 0
     while (true)
     {
-        const int n = rand() % 5 + 1;
-        const int range = 10;
+        const int n = rand() % 8 + 1;
+        const int range = 50;
         vector<int64_t> bloo;
         vector<int64_t> bloo2;
         for (int i = 0; i < n; i++)
