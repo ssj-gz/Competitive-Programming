@@ -140,7 +140,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
         }
         cout << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << endl;
-        const int midpoint = (rightEndpoint - leftEndpoint) / 2;
+        const int midpoint = (rightEndpoint + leftEndpoint) / 2;
         const bool oddMidpoint = (((rightEndpoint - leftEndpoint) % 2) == 0);
         
         bool hasAirportNotReachableByEndPoints = false;
