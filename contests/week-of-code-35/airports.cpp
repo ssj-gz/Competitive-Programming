@@ -246,7 +246,9 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     cout << "removing: " << *airportsNotCovered.begin() << " due to change right end point" << endl;
                     if (hasNext(airportsNotCovered, airportsNotCovered.begin()))
                     {
-                        minDiffOfSuccessiveUncoveredPairs.remove(next(airportsNotCovered, airportsNotCovered.begin()) -  *airportsNotCovered.begin());
+                        const int diffToRemove = next(airportsNotCovered, airportsNotCovered.begin()) -  *airportsNotCovered.begin();
+                        cout << " removing diff: " << diffToRemove << " due to change right end point";
+                        minDiffOfSuccessiveUncoveredPairs.remove(diffToRemove);
                     }
                     airportsNotCovered.erase(airportsNotCovered.begin());
                 }
@@ -279,7 +281,9 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                             cout << "removing: " << *highestIter << " due to change left end point" << endl;
                             if (hasPrevious(airportsNotCovered, highestIter))
                             {
-                                minDiffOfSuccessiveUncoveredPairs.remove(*highestIter - previous(airportsNotCovered, highestIter));
+                                const int diffToRemove = *highestIter - previous(airportsNotCovered, highestIter);
+                                cout << " removing diff: " << diffToRemove << " due to change left end point";
+                                minDiffOfSuccessiveUncoveredPairs.remove(diffToRemove);
                             }
 
                             highestIter = airportsNotCovered.erase(highestIter);
@@ -332,6 +336,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     cout << "** new uncoveredAirportPos: " << uncoveredAirportPos << " left: " << (hasLeft ? to_string(left) : "none") << " right: " << (hasRight ? to_string(right) : "none") << endl;
                     if (hasLeft && hasRight)
                     {
+                        cout << " removing diff  " << (right - left) << " because of breaking stuff up!" << endl;
                         minDiffOfSuccessiveUncoveredPairs.remove(right - left);
                     } 
                     if (hasLeft)
@@ -473,8 +478,9 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         {
             airportsNotCovered = set<int>(unreachableAirports.begin(), unreachableAirports.end());
         }
-        //unreachableAirports.erase(unique(unreachableAirports.begin(), unreachableAirports.end()), unreachableAirports.end());
+        unreachableAirports.erase(unique(unreachableAirports.begin(), unreachableAirports.end()), unreachableAirports.end());
         int numCostAdjustments = 0;
+        int minDiffOfThings = numeric_limits<int>::max();
         for (int j = 0; j < unreachableAirports.size(); j++)
         {
             const int unreachableAirPort = unreachableAirports[j];
@@ -494,6 +500,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     assert(bestCost <= adjustLeftBy + adjustRightBy);
                 }
                 assert(adjustLeftBy + adjustRightBy == leftEndpoint - rightEndpoint + 2 * minDistance - (unreachableAirPort - previousUnreachable));
+                minDiffOfThings = min(minDiffOfThings, unreachableAirPort - previousUnreachable);
             }
             if (adjustLeftBy + adjustRightBy <= bestCost)
             {
@@ -505,6 +512,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
             assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
         }
+        cout << "minDiffOfThings: " << minDiffOfThings << " minDiffOfSuccessiveUncoveredPairs: " << (minDiffOfSuccessiveUncoveredPairs.empty() ? "none" : to_string(minDiffOfSuccessiveUncoveredPairs.min())) << endl;
+        assert((minDiffOfThings == numeric_limits<int>::max() && minDiffOfSuccessiveUncoveredPairs.empty()) || (minDiffOfThings == minDiffOfSuccessiveUncoveredPairs.min()));
         if (!unreachableAirports.empty())
         {
             int adjustRightBy = unreachableAirports.back() - (rightEndpoint - minDistance);
