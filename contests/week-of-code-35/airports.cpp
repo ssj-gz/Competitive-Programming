@@ -43,7 +43,7 @@ bool areAirportsArranged(const vector<int>& airports, int minDistance)
 
 bool canArrangeAirportsWithCost(vector<int>& airports, int nextAirportIndex, int cost, int minDistance)
 {
-    if (cost <= 0)
+    if (cost < 0)
     {
         return false;
     }
