@@ -171,38 +171,38 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             {
                 if (maxAirportNotReachable < midpoint)
                 {
-                    adjustRightBy += maxAirportNotReachable - (rightEndpoint - minDistance);
+                    adjustRightBy = max(adjustRightBy, maxAirportNotReachable - (rightEndpoint - minDistance));
                 }
                 else if (minAirportNotReachable >= midpoint)
                 {
-                    adjustLeftBy += (leftEndpoint + minDistance) - minAirportNotReachable;
+                    adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - minAirportNotReachable);
                 }
                 else
                 {
-                    adjustLeftBy += ((leftEndpoint + minDistance) - maxAirportNotReachable);
-                    adjustRightBy += (minAirportNotReachable - (rightEndpoint - minDistance));
+                    adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - maxAirportNotReachable);
+                    adjustRightBy = max(adjustRightBy, minAirportNotReachable - (rightEndpoint - minDistance));
                 }
             }
             else
             {
                 if (minAirportNotReachable == maxAirportNotReachable)
                 {
-                    adjustRightBy += minAirportNotReachable - (rightEndpoint - minDistance);
+                    adjustRightBy = max(adjustRightBy, minAirportNotReachable - (rightEndpoint - minDistance));
                 }
                 else
                 {
                     if (maxAirportNotReachable <= midpoint)
                     {
-                        adjustRightBy += maxAirportNotReachable - (rightEndpoint - minDistance);
+                        adjustRightBy = max(adjustRightBy, maxAirportNotReachable - (rightEndpoint - minDistance));
                     }
                     else if (minAirportNotReachable > midpoint)
                     {
-                        adjustLeftBy += (leftEndpoint + minDistance) - minAirportNotReachable;
+                        adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - minAirportNotReachable);
                     }
                     else
                     {
-                        adjustLeftBy += ((leftEndpoint + minDistance) - maxAirportNotReachable);
-                        adjustRightBy += (minAirportNotReachable - (rightEndpoint - minDistance));
+                        adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - maxAirportNotReachable);
+                        adjustRightBy = max(adjustRightBy, minAirportNotReachable - (rightEndpoint - minDistance));
                     }
                 }
             }
