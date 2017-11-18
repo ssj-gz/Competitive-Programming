@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <map>
 #include <cassert>
 
 using namespace std;
@@ -101,6 +102,31 @@ vector<int> findAirportArrangementWithCost(const vector<int>& airports, int cost
     return findAirportArrangementWithCost(airportsCopy, 0, cost, minDistance, moveOnlyFirstAndLast);
 }
 
+class MinTracker
+{
+    public:
+        void add(int n)
+        {
+            m_countOf[n]++;
+        }
+        void remove(int n)
+        {
+            assert(m_countOf.find(n) != m_countOf.end());
+            m_countOf[n]--;
+            if (m_countOf[n] == 0)
+            {
+                m_countOf.erase(m_countOf.find(n));
+            }
+        }
+        int min() const
+        {
+            return m_countOf.begin()->first;
+        }
+    private:
+        map<int, int> m_countOf;
+
+};
+
 vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
 {
     //cout << "findResult - minDistance: " << minDistance << endl;
@@ -115,9 +141,39 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
 
     int bestCostForInner = 0;
 
+    MinTracker minDiffOfSuccessiveUncoveredPairs;
+
     auto isUncovered = [&leftEndpoint, &rightEndpoint, minDistance](const int airportPos)
     {
         return airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance;
+    };
+    auto hasNext = [](const set<int>& collection, auto setIter)
+    {
+        if (setIter == collection.end())
+            return false;
+        setIter++;
+        if (setIter == collection.end())
+            return false;
+    };
+    auto hasPrevious = [](const set<int>& collection, auto setIter)
+    {
+        if (setIter == collection.end())
+            return false;
+        setIter--;
+        if (setIter == collection.end())
+            return false;
+    };
+    auto next = [&hasNext](const set<int>& collection, auto setIter)
+    {
+        assert(hasNext(collection, setIter));
+        setIter++;
+        return *setIter;
+    };
+    auto previous = [&hasPrevious](const set<int>& collection, auto setIter)
+    {
+        assert(hasPrevious(collection, setIter));
+        setIter--;
+        return *setIter;
     };
     set<int> airportsNotCovered;
     for (int i = 0; i < airportAddedOnDay.size(); i++)
