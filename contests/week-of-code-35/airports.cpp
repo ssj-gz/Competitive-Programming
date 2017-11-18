@@ -1,8 +1,6 @@
 // Simon St James (ssjgz) 2017-11-18
 #define SUBMISSION
 #ifdef SUBMISSION
-#undef RANDOM
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -46,7 +44,7 @@ class MaxTracker
 
 };
 
-vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
+vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay, int minDistance)
 {
     vector<int> results;
     vector<int> airports;
@@ -280,7 +278,7 @@ int main(int argc, char** argv)
             cin >> airportAddedOnDay[i];
         }
 
-        const auto result = findResult(airportAddedOnDay, minDistance);
+        const auto result = findMinCostOfArrangementForDays(airportAddedOnDay, minDistance);
         for (const auto costForDay : result)
         {
             cout << costForDay << " ";
