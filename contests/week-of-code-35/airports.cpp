@@ -1,5 +1,13 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
+#define RANDOM
+#define BRUTE_FORCE
+//#define SUBMISSION
+#ifdef SUBMISSION
+#undef RANDOM
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -116,6 +124,22 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
 
 int main()
 {
+#ifdef RANDOM
+    while (true)
+    {
+        srand(time(0));
+        const int maxAirports = 10;
+        const int airportRange = 30;
+        const int numAirports = (rand() % (maxAirports - 3)) + 3;
+        const int minDistance = rand() % 10;
+        vector<int> airportAddedOnDay;
+        for (int i = 0; i < numAirports; i++)
+        {
+            airportAddedOnDay.push_back(rand() % (2 * airportRange + 1) - airportRange);
+        }
+        findResultBruteForce(airportAddedOnDay, minDistance);
+    }
+#endif
     int Q;
     cin >> Q;
     for (int q = 0; q < Q; q++)
