@@ -120,6 +120,13 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         airports.push_back(airportPos);
         sort(airports.begin(), airports.end());
 
+        cout << "airports: " << endl;
+        for (const auto x : airports)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+
         if (airportPos == leftEndpoint)
             leftEndPointDuplicated = true;
         if (airportPos == rightEndpoint)
@@ -127,6 +134,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
 
         const auto oldLeftEndPoint = leftEndpoint;
         const auto oldRightEndPoint = rightEndpoint;
+        const auto oldLeftEndPointDuplicated = leftEndPointDuplicated;
+        const auto oldRightEndPointDuplicated = rightEndPointDuplicated;
         bool endpointChanged = false;
         if (airportPos < leftEndpoint)
         {
@@ -143,38 +152,66 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             endpointChanged = true;
         }
 
-        if (!endpointChanged)
+        cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
+        //if (!endpointChanged)
         {
             if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
                 (airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance)
                     )
             {
-                cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
+                cout << "adding " << airportPos << " to airportsNotCovered" << endl;
                 airportsNotCovered.insert(airportPos);
             }
         }
-        else
+        //else
         {
-            if (oldLeftEndPoint != leftEndpoint)
-            {
-                //assert(rightEndpoint == oldRightEndPoint);
-                while (!airportsNotCovered.empty() && *airportsNotCovered.begin() > rightEndpoint - minDistance)
-                {
-                    airportsNotCovered.erase(airportsNotCovered.begin());
-                }
-            }
+            cout << "end points changed - removing stuff from set!" << endl;
             if (oldRightEndPoint != rightEndpoint)
             {
-                while (true)
+                cout << "right end point changed" << endl;
+                //assert(rightEndpoint == oldRightEndPoint);
+                while (!airportsNotCovered.empty() && *airportsNotCovered.begin() <= rightEndpoint - minDistance)
                 {
-                    if (airportsNotCovered.empty())
-                        break;
+                    cout << "removing: " << *airportsNotCovered.begin() << " due to change right end point" << endl;
+                    airportsNotCovered.erase(airportsNotCovered.begin());
+                }
+                if ((i != 0) && (/*oldRightEndPointDuplicated && */oldRightEndPoint < leftEndpoint + minDistance && oldRightEndPoint > rightEndpoint - minDistance && oldRightEndPoint != leftEndpoint))
+                {
+                    cout << "adding oldRightEndPoint: " << oldRightEndPoint << " to airportsNotCovered oldRightEndPointDuplicated: " << oldRightEndPointDuplicated<< endl;
+                    airportsNotCovered.insert(oldRightEndPoint);
+                }
+            }
+            if (oldLeftEndPoint != leftEndpoint)
+            {
+                cout << "left end point changed" << endl;
+                if (!airportsNotCovered.empty())
+                {
                     auto highestIter = airportsNotCovered.end();
                     highestIter--;
-                    if (*highestIter < leftEndpoint + minDistance)
-                        airportsNotCovered.erase(highestIter);
+                    while (true)
+                    {
+                        if (airportsNotCovered.empty())
+                            break;
+                        if (*highestIter >= leftEndpoint + minDistance)
+                        {
+                            cout << "removing: " << *highestIter << " due to change left end point" << endl;
+                            highestIter = airportsNotCovered.erase(highestIter);
+                            if (!airportsNotCovered.empty())
+                                highestIter--;
+                        }
+                        else
+                        {
+                            cout << "Not removing " << *highestIter << " due to left end point change" << endl;
+                            break;
+                        }
+                    }
                 }
                 //assert(leftEndpoint == oldLeftEndPoint);
+                if ((i != 0) && (/*oldLeftEndPointDuplicated &&*/ oldLeftEndPoint > rightEndpoint - minDistance && oldLeftEndPoint < leftEndpoint + minDistance && (oldLeftEndPoint != rightEndpoint)))
+                {
+                    cout << "adding oldLeftEndPoint: " << oldLeftEndPoint << " to airportsNotCovered oldLeftEndPointDuplicated: " << oldLeftEndPointDuplicated  << endl;
+                    airportsNotCovered.insert(oldLeftEndPoint);
+                }
             }
 
         }
@@ -241,10 +278,10 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 unreachableAirports.push_back(unreachableAirPort);
             }
         }
-        if (!endpointChanged)
+        if (true || !endpointChanged)
         {
             set<int> dbgUnreachableAirports(unreachableAirports.begin(), unreachableAirports.end());
-#if 0
+#if 1
             cout << "airportsNotCovered: " << endl;
             for (const auto x : airportsNotCovered)
             {
