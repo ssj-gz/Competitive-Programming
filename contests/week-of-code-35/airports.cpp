@@ -127,7 +127,7 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
             const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCost(airportsSorted, cost, minDistance, true);
             const auto arrangedAirportsMovingAny = findAirportArrangementWithCost(airportsSorted, cost, minDistance, false);
             assert(arrangedAirportsMovingOnlyEnds.size() == arrangedAirportsMovingAny.size());
-            cout << "same cost" << endl;
+            //cout << "same cost" << endl;
             const auto arrangedAirports = arrangedAirportsMovingOnlyEnds;
             if (!arrangedAirports.empty())
             {
@@ -179,13 +179,14 @@ int main()
         const int minAirports = 5;
         const int airportRange = 45;
         const int numAirports = (rand() % (maxAirports - minAirports)) + minAirports;
-        const int minDistance = rand() % 10 + 3;
+        const int minDistance = rand() % 25;
         vector<int> airportAddedOnDay;
         for (int i = 0; i < numAirports; i++)
         {
             airportAddedOnDay.push_back(rand() % (2 * airportRange + 1) - airportRange);
         }
         const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
+        cout << "testcaes with " << numAirports << " airports" << endl;
     }
 #endif
     int Q;
