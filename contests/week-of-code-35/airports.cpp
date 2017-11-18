@@ -10,12 +10,12 @@ using namespace std;
 
 bool areAirportsArranged(const vector<int>& airports, int minDistance)
 {
-    cout << "areAirportsArranged; minDistance: " << minDistance << " airports:" << endl;
-    for (const auto x : airports)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
+    //cout << "areAirportsArranged; minDistance: " << minDistance << " airports:" << endl;
+    //for (const auto x : airports)
+    //{
+        //cout << x << " ";
+    //}
+    //cout << endl;
     set<int> reachedAirportIndices;
     vector<int> airportIndicesToExplore;
     airportIndicesToExplore.push_back(0);
@@ -43,7 +43,7 @@ bool areAirportsArranged(const vector<int>& airports, int minDistance)
     }
 
     const auto areArranged = reachedAirportIndices.size() == airports.size();
-    cout << "areArranged? " << areArranged << endl;
+    //cout << "areArranged? " << areArranged << endl;
 
     return areArranged;
 }
@@ -92,19 +92,19 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
     {
         airportsSorted.push_back(airportAddedOnDay[day]);
         sort(airportsSorted.begin(), airportsSorted.end());
-        cout << "day: " << day << " airports: " <<  endl;
-        for (const auto x : airportsSorted)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
+        //cout << "day: " << day << " airports: " <<  endl;
+        //for (const auto x : airportsSorted)
+        //{
+            //cout << x << " ";
+        //}
+        //cout << endl;
 
         int cost = 0;
         while (true)
         {
             if (canArrangeAirportsWithCost(airportsSorted, cost, minDistance))
             {
-                cout << "day: " << day << " can arrange with cost: " << cost << endl;
+                //cout << "day: " << day << " can arrange with cost: " << cost << endl;
                 results.push_back(cost);
                 break;
             }
