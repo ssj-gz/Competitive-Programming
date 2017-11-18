@@ -113,6 +113,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     bool leftEndPointDuplicated = false;
     bool rightEndPointDuplicated = false;
 
+    int bestCostForInner = 0;
+
     auto isUncovered = [&leftEndpoint, &rightEndpoint, minDistance](const int airportPos)
     {
         return airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance;
@@ -187,6 +189,11 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     cout << "adding oldRightEndPoint: " << oldRightEndPoint << " to airportsNotCovered oldRightEndPointDuplicated: " << oldRightEndPointDuplicated<< endl;
                     newlyUncoveredAirportPositions.push_back(oldRightEndPoint);
                 }
+                if (oldRightEndPoint != rightEndpoint && !airportsNotCovered.empty())
+                {
+                    bestCostForInner -= rightEndpoint - oldRightEndPoint;
+                    //assert(bestCostForInner >= 0);
+                }
             }
             if (oldLeftEndPoint != leftEndpoint)
             {
@@ -219,11 +226,23 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     cout << "adding oldLeftEndPoint: " << oldLeftEndPoint << " to airportsNotCovered oldLeftEndPointDuplicated: " << oldLeftEndPointDuplicated  << endl;
                     newlyUncoveredAirportPositions.push_back(oldLeftEndPoint);
                 }
+                if (oldLeftEndPoint != leftEndpoint && !airportsNotCovered.empty())
+                {
+                    bestCostForInner -= oldLeftEndPoint - leftEndpoint;
+                    //assert(bestCostForInner >= 0);
+                }
             }
 
             for (const auto uncoveredAirportPos : newlyUncoveredAirportPositions)
             {
-                airportsNotCovered.insert(uncoveredAirportPos);
+                if (airportsNotCovered.find(uncoveredAirportPos) == airportsNotCovered.end())
+                {
+                    airportsNotCovered.insert(uncoveredAirportPos);
+                    auto newUncoveredIter = airportsNotCovered.find(uncoveredAirportPos);
+                    const bool hasLeft = newUncoveredIter != airportsNotCovered.begin();
+                    newUncoveredIter++;
+                    const bool hasRight = newUncoveredIter != airportsNotCovered.end();
+                }
             }
 
         }
