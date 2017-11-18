@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-#define RANDOM
+//#define RANDOM
 #define BRUTE_FORCE
 //#define SUBMISSION
 #ifdef SUBMISSION
@@ -142,18 +142,20 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         cout << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << endl;
         const int midpoint = (rightEndpoint + leftEndpoint) / 2;
         const bool oddMidpoint = (((rightEndpoint - leftEndpoint) % 2) == 0);
-        
+
         bool hasAirportNotReachableByEndPoints = false;
 
         //int minAirportNotReachable = numeric_limits<int>::max();
         //int maxAirportNotReachable = numeric_limits<int>::min();
 
-        int adjustLeftBy = 0;
-        int adjustRightBy = 0;
-        
-        int bestAdjustedLeftBy = numeric_limits<int>::max();
-        int bestAdjustedRightBy = numeric_limits<int>::max();
+        //int adjustLeftBy = 0;
+        //int adjustRightBy = 0;
 
+        int bestAdjustedLeftBy = 0;
+        int bestAdjustedRightBy = 0;
+        int bestCost = numeric_limits<int>::max();
+
+        vector<int> unreachableAirports;
         for (int j = 0; j < airports.size(); j++)
         {
             const int unreachableAirPort = airports[j];
@@ -161,37 +163,70 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 continue;
             if (unreachableAirPort < leftEndpoint + minDistance && unreachableAirPort > rightEndpoint - minDistance)
             {
-                cout << " airport: " << unreachableAirPort << " is not reachable from or equal to either endpoint; midpoint " << midpoint << " oddMidpoint? " << oddMidpoint << endl;
-                hasAirportNotReachableByEndPoints = true;
-                //minAirportNotReachable = min(minAirportNotReachable, unreachableAirPort);
-                //maxAirportNotReachable = max(maxAirportNotReachable, unreachableAirPort);
-
-#if 0
-                if (!oddMidpoint)
-                {
-                    if (unreachableAirPort < midpoint)
-                    {
-                        adjustRightBy = max(adjustRightBy, unreachableAirPort - (rightEndpoint - minDistance));
-                    }
-                    else
-                    {
-                        adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - unreachableAirPort);
-                    }
-                }
-                else
-                {
-                    if (unreachableAirPort <= midpoint)
-                    {
-                        adjustRightBy = max(adjustRightBy, unreachableAirPort - (rightEndpoint - minDistance));
-                    }
-                    else 
-                    {
-                        adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - unreachableAirPort);
-                    }
-                }
-#endif
+                unreachableAirports.push_back(unreachableAirPort);
             }
         }
+        for (int j = 0; j < unreachableAirports.size(); j++)
+        {
+            const int unreachableAirPort = unreachableAirports[j];
+            cout << " airport: " << unreachableAirPort << " is not reachable from or equal to either endpoint; midpoint " << midpoint << " oddMidpoint? " << oddMidpoint << endl;
+            hasAirportNotReachableByEndPoints = true;
+            //minAirportNotReachable = min(minAirportNotReachable, unreachableAirPort);
+            //maxAirportNotReachable = max(maxAirportNotReachable, unreachableAirPort);
+            int adjustLeftBy = (leftEndpoint + minDistance) - unreachableAirPort;
+            int adjustRightBy = 0;
+            if (j != 0)
+            {
+                const int previousUnreachable = unreachableAirports[j - 1];
+                adjustRightBy = previousUnreachable - (rightEndpoint - minDistance);
+            }
+            cout << " adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << " cost: " << (adjustLeftBy + adjustRightBy) << endl;
+            if (adjustLeftBy + adjustRightBy <= bestCost)
+            {
+                bestCost = adjustLeftBy + adjustRightBy;
+                bestAdjustedLeftBy = adjustLeftBy;
+                bestAdjustedRightBy = adjustRightBy;
+                cout << "Updated best cost: " << bestCost << endl;
+            }
+            assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
+        }
+        if (!unreachableAirports.empty())
+        {
+            int adjustRightBy = unreachableAirports.back() - (rightEndpoint - minDistance);
+            int adjustLeftBy = 0;
+            if (adjustLeftBy + adjustRightBy <= bestCost)
+            {
+                bestCost = adjustLeftBy + adjustRightBy;
+                bestAdjustedLeftBy = adjustLeftBy;
+                bestAdjustedRightBy = adjustRightBy;
+                cout << "Updated best cost: " << bestCost << endl;
+            }
+        }
+
+#if 0
+        if (!oddMidpoint)
+        {
+            if (unreachableAirPort < midpoint)
+            {
+                adjustRightBy = max(adjustRightBy, unreachableAirPort - (rightEndpoint - minDistance));
+            }
+            else
+            {
+                adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - unreachableAirPort);
+            }
+        }
+        else
+        {
+            if (unreachableAirPort <= midpoint)
+            {
+                adjustRightBy = max(adjustRightBy, unreachableAirPort - (rightEndpoint - minDistance));
+            }
+            else 
+            {
+                adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - unreachableAirPort);
+            }
+        }
+#endif
 #if 0
         cout << " minAirportNotReachable: " << minAirportNotReachable << " maxAirportNotReachable: " << maxAirportNotReachable << endl;
         cout << "midpoint: " << midpoint << " oddMidpoint: " << oddMidpoint << endl;
@@ -238,19 +273,20 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
         }
 #endif
-        cout << " adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
-        const int newLeftEndpoint = leftEndpoint - adjustLeftBy;
-        const int newRightEndpoint = rightEndpoint + adjustRightBy;
+        cout << " bestAdjustedLeftBy: " << bestAdjustedLeftBy << " bestAdjustedRightBy: " << bestAdjustedRightBy << endl;
+        const int newLeftEndpoint = leftEndpoint - bestAdjustedLeftBy;
+        const int newRightEndpoint = rightEndpoint + bestAdjustedRightBy;
+        assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
         if (newRightEndpoint - newLeftEndpoint < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
-            adjustRightBy += leftEndpoint - (rightEndpoint - minDistance);
-            cout << " further adjustment needed adjustRightBy now: " << adjustRightBy << endl;
+            bestAdjustedRightBy += leftEndpoint - (rightEndpoint - minDistance);
+            cout << " further adjustment needed bestAdjustedRightBy now: " << bestAdjustedRightBy << endl;
         } 
         else
         {
             cout << " no further adjustRightBy needed" << endl;
         }
-        const int cost = adjustRightBy + adjustLeftBy;
+        const int cost = bestAdjustedLeftBy + bestAdjustedRightBy;
         cout << cost << endl;
         results.push_back(cost);
     }
