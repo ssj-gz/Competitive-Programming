@@ -240,8 +240,45 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     airportsNotCovered.insert(uncoveredAirportPos);
                     auto newUncoveredIter = airportsNotCovered.find(uncoveredAirportPos);
                     const bool hasLeft = newUncoveredIter != airportsNotCovered.begin();
+                    int left = -1;
+                    if (hasLeft)
+                    {
+                        newUncoveredIter--;
+                        left = *newUncoveredIter;
+                        newUncoveredIter++;
+                    }
                     newUncoveredIter++;
                     const bool hasRight = newUncoveredIter != airportsNotCovered.end();
+                    int right = -1;
+                    if (hasRight)
+                    {
+                        right = *newUncoveredIter;
+                    }
+                    int newBestCostForInner = numeric_limits<int>::max();
+                    if (hasLeft)
+                    {
+                        const int adjustRightBy = left - (rightEndpoint - minDistance);
+                        const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
+                        newBestCostForInner = min(newBestCostForInner, (adjustLeftBy + adjustRightBy));
+                    }
+                    else
+                    {
+                        // uncoveredAirportPos is min.
+                        const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
+                        newBestCostForInner = min(newBestCostForInner, adjustRightBy);
+                    }
+                    if (hasRight)
+                    {
+                        const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
+                        const int adjustLeftBy = (leftEndpoint + minDistance) - right;
+                        newBestCostForInner = min(newBestCostForInner, (adjustLeftBy + adjustRightBy));
+                    }
+                    else
+                    {
+                        // uncoveredAirportPos is largest.
+                        const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
+                        newBestCostForInner = min(newBestCostForInner, adjustLeftBy);
+                    }
                 }
             }
 
