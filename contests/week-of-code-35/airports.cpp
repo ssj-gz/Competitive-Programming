@@ -118,8 +118,13 @@ class MinTracker
                 m_countOf.erase(m_countOf.find(n));
             }
         }
+        bool empty() const
+        {
+            return m_countOf.empty();
+        }
         int min() const
         {
+            assert(!empty());
             return m_countOf.begin()->first;
         }
     private:
@@ -239,6 +244,10 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 while (!airportsNotCovered.empty() && *airportsNotCovered.begin() <= rightEndpoint - minDistance)
                 {
                     cout << "removing: " << *airportsNotCovered.begin() << " due to change right end point" << endl;
+                    if (hasNext(airportsNotCovered, airportsNotCovered.begin()))
+                    {
+                        minDiffOfSuccessiveUncoveredPairs.remove(next(airportsNotCovered, airportsNotCovered.begin()) -  *airportsNotCovered.begin());
+                    }
                     airportsNotCovered.erase(airportsNotCovered.begin());
                 }
                 if ((i != 0) && (/*oldRightEndPointDuplicated && */ isUncovered(oldRightEndPoint) && oldRightEndPoint != leftEndpoint))
@@ -268,6 +277,11 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                         if (*highestIter >= leftEndpoint + minDistance)
                         {
                             cout << "removing: " << *highestIter << " due to change left end point" << endl;
+                            if (hasPrevious(airportsNotCovered, highestIter))
+                            {
+                                minDiffOfSuccessiveUncoveredPairs.remove(*highestIter - previous(airportsNotCovered, highestIter));
+                            }
+
                             highestIter = airportsNotCovered.erase(highestIter);
                             if (!airportsNotCovered.empty())
                                 highestIter--;
@@ -359,13 +373,16 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     //cout << "newBestCostForInner: " << newBestCostForInner << endl;
                     //bestCostForInner = min(bestCostForInner, newBestCostForInner);
                     //bestCostForInner = newBestCostForInner;
-                    bestCostForInner = leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min();
                     const int minThing = *airportsNotCovered.begin();
                     auto blee = airportsNotCovered.end();
                     blee--;
                     const int maxThing = *blee;
                     bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
                     bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
+                    if (!minDiffOfSuccessiveUncoveredPairs.empty())
+                    {
+                        bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min());
+                    }
                 }
             }
 
