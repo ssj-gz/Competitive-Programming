@@ -125,6 +125,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         if (airportPos == rightEndpoint)
             rightEndPointDuplicated = true;
 
+        const auto oldLeftEndPoint = leftEndpoint;
+        const auto oldRightEndPoint = rightEndpoint;
         bool endpointChanged = false;
         if (airportPos < leftEndpoint)
         {
@@ -141,7 +143,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             endpointChanged = true;
         }
 
-        //if (!endpointChanged)
+        if (!endpointChanged)
         {
             if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
                 (airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance)
@@ -150,6 +152,31 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
                 airportsNotCovered.insert(airportPos);
             }
+        }
+        else
+        {
+            if (oldLeftEndPoint != leftEndpoint)
+            {
+                //assert(rightEndpoint == oldRightEndPoint);
+                while (!airportsNotCovered.empty() && *airportsNotCovered.begin() > rightEndpoint - minDistance)
+                {
+                    airportsNotCovered.erase(airportsNotCovered.begin());
+                }
+            }
+            if (oldRightEndPoint != rightEndpoint)
+            {
+                while (true)
+                {
+                    if (airportsNotCovered.empty())
+                        break;
+                    auto highestIter = airportsNotCovered.end();
+                    highestIter--;
+                    if (*highestIter < leftEndpoint + minDistance)
+                        airportsNotCovered.erase(highestIter);
+                }
+                //assert(leftEndpoint == oldLeftEndPoint);
+            }
+
         }
 
 #if 0
@@ -217,6 +244,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         if (!endpointChanged)
         {
             set<int> dbgUnreachableAirports(unreachableAirports.begin(), unreachableAirports.end());
+#if 0
             cout << "airportsNotCovered: " << endl;
             for (const auto x : airportsNotCovered)
             {
@@ -229,6 +257,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 cout << x << " ";
             }
             cout << endl;
+#endif
             assert(airportsNotCovered == dbgUnreachableAirports);
         }
         else
