@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-//#define RANDOM
+#define RANDOM
 #define BRUTE_FORCE
 //#define SUBMISSION
 #ifdef SUBMISSION
@@ -317,8 +317,8 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
         while (true)
         {
             const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCost(airportsSorted, cost, minDistance, true);
-            const auto arrangedAirportsMovingAny = findAirportArrangementWithCost(airportsSorted, cost, minDistance, false);
-            assert(arrangedAirportsMovingOnlyEnds.size() == arrangedAirportsMovingAny.size());
+            //const auto arrangedAirportsMovingAny = findAirportArrangementWithCost(airportsSorted, cost, minDistance, false);
+            //assert(arrangedAirportsMovingOnlyEnds.size() == arrangedAirportsMovingAny.size());
             //cout << "same cost" << endl;
             const auto arrangedAirports = arrangedAirportsMovingOnlyEnds;
             if (!arrangedAirports.empty())
