@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-//#define RANDOM
+#define RANDOM
 #define BRUTE_FORCE
 //#define SUBMISSION
 #ifdef SUBMISSION
@@ -280,6 +280,22 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
     return results;
 }
 
+void compareBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
+{
+    const auto result = findResult(airportAddedOnDay, minDistance);
+    const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
+    const int numDays = airportAddedOnDay.size();
+    if (resultsBruteForce != result)
+    {
+        cout << "whoops:" << endl;
+        for (int i = 0; i < numDays; i++)
+        {
+            cout << "i: " << i << " result[i]: " << result[i] << " resultsBruteForce[i]: " << resultsBruteForce[i] << endl;
+        }
+    }
+    assert(result == resultsBruteForce);
+}
+
 int main()
 {
 #ifdef RANDOM
@@ -296,8 +312,9 @@ int main()
         {
             airportAddedOnDay.push_back(rand() % (2 * airportRange + 1) - airportRange);
         }
-        const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
-        cout << "testcaes with " << numAirports << " airports" << endl;
+        compareBruteForce(airportAddedOnDay, minDistance);
+        //const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
+        //cout << "testcaes with " << numAirports << " airports" << endl;
     }
 #endif
     int Q;
@@ -315,24 +332,12 @@ int main()
             cin >> airportAddedOnDay[i];
         }
 
-        const auto result = findResult(airportAddedOnDay, minDistance);
 
 #ifdef BRUTE_FORCE
-        const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
-        if (resultsBruteForce != result)
-        {
-            cout << "whoops:" << endl;
-            for (int i = 0; i < numDays; i++)
-            {
-                cout << "i: " << i << " result[i]: " << result[i] << " resultsBruteForce[i]: " << resultsBruteForce[i] << endl;
-            }
-        }
-        assert(result == resultsBruteForce);
-        //for (const auto x : resultsBruteForce)
-        //{
-            //cout << x << " ";
-        //}
-        //cout << endl;
+        compareBruteForce(airportAddedOnDay, minDistance);
+#else
+        const auto result = findResult(airportAddedOnDay, minDistance);
+        cout << result << endl;
 #endif
     }
 }
