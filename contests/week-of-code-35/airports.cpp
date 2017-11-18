@@ -190,21 +190,18 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             if (airportsNotCovered.find(uncoveredAirportPos) == airportsNotCovered.end())
             {
                 airportsNotCovered.insert(uncoveredAirportPos);
-                auto newUncoveredIter = airportsNotCovered.find(uncoveredAirportPos);
-                const bool hasLeft = newUncoveredIter != airportsNotCovered.begin();
+                const auto newUncoveredIter = airportsNotCovered.find(uncoveredAirportPos);
+                const bool hasLeft = hasPrevious(airportsNotCovered, newUncoveredIter);
                 int left = -1;
                 if (hasLeft)
                 {
-                    newUncoveredIter--;
-                    left = *newUncoveredIter;
-                    newUncoveredIter++;
+                    left = previous(airportsNotCovered, newUncoveredIter);
                 }
-                newUncoveredIter++;
-                const bool hasRight = newUncoveredIter != airportsNotCovered.end();
+                const bool hasRight = hasNext(airportsNotCovered, newUncoveredIter);
                 int right = -1;
                 if (hasRight)
                 {
-                    right = *newUncoveredIter;
+                    right = next(airportsNotCovered, newUncoveredIter);
                 }
                 if (hasLeft && hasRight)
                 {
