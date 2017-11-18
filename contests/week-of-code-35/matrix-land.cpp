@@ -130,7 +130,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     const int numRows = A.size();
     const int numCols = A[0].size();
 
-    vector<int64_t> maxScores(numCols);
+    vector<int64_t> maxScores;
     vector<int64_t> rowUnderneathMaxScores(numCols, 0); // The previous row we processed (i.e. the one below the current one!).
 
     int64_t best = std::numeric_limits<int64_t>::min();
@@ -138,7 +138,7 @@ int64_t maxSum(const vector<vector<int64_t>>& A)
     for (int row = numRows - 1; row >= 0; row--)
     {
         maxScores.clear();
-        maxScores.resize(numCols);
+        maxScores.resize(numCols, numeric_limits<int64_t>::min());
 
         const auto bestIfMovedRightFromAndDescended = findBestIfMovedFromAndDescendedReversed(A[row], rowUnderneathMaxScores);
         const auto bestIfMovedLeftFromAndDescended = findBestIfMovedFromAndDescended(A[row], rowUnderneathMaxScores);
