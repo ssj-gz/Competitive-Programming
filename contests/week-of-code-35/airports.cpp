@@ -382,21 +382,6 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
 
         }
-        bestCostForInner = 0;
-        if (!airportsNotCovered.empty())
-        {
-            bestCostForInner = numeric_limits<int>::max();
-            const int minThing = *airportsNotCovered.begin();
-            auto blee = airportsNotCovered.end();
-            blee--;
-            const int maxThing = *blee;
-            bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
-            bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
-            if (!minDiffOfSuccessiveUncoveredPairs.empty())
-            {
-                bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min());
-            }
-        }
 
 #if 0
         cout << "day " << i << " airports: " << endl;
@@ -406,6 +391,31 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         }
         cout << endl;
 #endif
+        cout << "airportsNotCovered: " << endl;
+        for (const auto x : airportsNotCovered)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        cout << "About to calculate bestCostForInner" << endl;
+        bestCostForInner = 0;
+        if (!airportsNotCovered.empty())
+        {
+            bestCostForInner = numeric_limits<int>::max();
+            const int minThing = *airportsNotCovered.begin();
+            auto blee = airportsNotCovered.end();
+            blee--;
+            const int maxThing = *blee;
+            // If left endpoint extended to cover everything.
+            bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
+            // If right end point extended to cover everything.
+            bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
+            cout << " minThing: " << minThing << " maxThing: " << maxThing << endl;
+            if (!minDiffOfSuccessiveUncoveredPairs.empty())
+            {
+                bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min());
+            }
+        }
 
         int dbgLeftEndpoint = numeric_limits<int>::max();
         int dbgRightEndpoint = numeric_limits<int>::min();
@@ -463,7 +473,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         if (true || !endpointChanged)
         {
             set<int> dbgUnreachableAirports(unreachableAirports.begin(), unreachableAirports.end());
-#if 1
+#if 0
             cout << "airportsNotCovered: " << endl;
             for (const auto x : airportsNotCovered)
             {
@@ -506,6 +516,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 }
                 assert(adjustLeftBy + adjustRightBy == leftEndpoint - rightEndpoint + 2 * minDistance - (unreachableAirPort - previousUnreachable));
                 minDiffOfThings = min(minDiffOfThings, unreachableAirPort - previousUnreachable);
+                cout << "cost of this: " << (adjustLeftBy + adjustRightBy) << endl;
             }
             if (adjustLeftBy + adjustRightBy <= bestCost)
             {
