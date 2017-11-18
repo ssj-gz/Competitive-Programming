@@ -361,147 +361,9 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     return results;
 }
 
-vector<int> findAirportArrangementWithCostEndpointsOnly(const vector<int>& airports, int cost, int minDistance)
-{
-    vector<int> airportsCopy(airports);
-    int leftEndpoint = airportsCopy.front();
-    int rightEndpoint = airportsCopy.back();
-
-    for (int adjustLeftBy = 0; adjustLeftBy <= cost; adjustLeftBy++)
-    {
-        airportsCopy[0] = airports[0] - adjustLeftBy;
-        for (int adjustRightBy = 0; adjustLeftBy + adjustRightBy <= cost; adjustRightBy++)
-        {
-            const int totalCost = adjustLeftBy + adjustRightBy;
-            assert(totalCost <= cost);
-            airportsCopy.back() = airports.back() + adjustRightBy;
-            if (areAirportsArranged(airportsCopy, minDistance))
-            {
-                return airportsCopy;
-            }
-        }
-    }
-    return vector<int>();
-}
-
-vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
-{
-    const int numDays = airportAddedOnDay.size();
-
-    vector<int> results;
-
-    vector<int> airportsSorted;
-    for (int day = 0; day < numDays; day++)
-    {
-        airportsSorted.push_back(airportAddedOnDay[day]);
-        sort(airportsSorted.begin(), airportsSorted.end());
-        //cout << "brute force day: " << day << " of " << numDays << endl;
-#if 0
-        cout << "day: " << day << " airports: " <<  endl;
-        for (const auto x : airportsSorted)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-#endif
-
-        int cost = 0;
-        while (true)
-        {
-            //const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCost(airportsSorted, cost, minDistance, true);
-            //assert(findAirportArrangementWithCostEndpointsOnly(airportsSorted, cost, minDistance).size() == arrangedAirportsMovingOnlyEnds.size());
-            const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCostEndpointsOnly(airportsSorted, cost, minDistance);
-            //const auto arrangedAirportsMovingAny = findAirportArrangementWithCost(airportsSorted, cost, minDistance, false);
-            //assert(arrangedAirportsMovingOnlyEnds.size() == arrangedAirportsMovingAny.size());
-            //cout << "same cost" << endl;
-            const auto arrangedAirports = arrangedAirportsMovingOnlyEnds;
-            if (!arrangedAirports.empty())
-            {
-#if 0
-                cout << "day: " << day << " minDistance: " << minDistance << " can arrange with cost: " << cost << endl;
-                cout << "Arrangement: " << endl;
-                for (const auto x : arrangedAirports)
-                {
-                    cout << x << " ";
-                }
-                cout << endl;
-                cout << "original: "<< endl;
-                for (const auto x : airportsSorted)
-                {
-                    cout << x << " ";
-                }
-                cout << endl;
-#endif
-                results.push_back(cost);
-                break;
-            }
-            cost++;
-        }
-    }
-    return results;
-}
-
-void compareBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
-{
-    const auto result = findResult(airportAddedOnDay, minDistance);
-    const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
-    const int numDays = airportAddedOnDay.size();
-    if (resultsBruteForce != result)
-    {
-        cout << "whoops:" << endl;
-        for (int i = 0; i < numDays; i++)
-        {
-            cout << "i: " << i << " result[i]: " << result[i] << " resultsBruteForce[i]: " << resultsBruteForce[i] << endl;
-        }
-        assert(result == resultsBruteForce);
-    }
-    else
-    {
-        cout << "Success with " << airportAddedOnDay.size() << " days and minDistance: " << minDistance << endl;
-    }
-}
 
 int main(int argc, char** argv)
 {
-    if (argc == 2)
-    {
-        srand(time(0));
-        const int numQueries = rand() % 100;
-        cout << numQueries << endl;
-        for (int q = 0; q < numQueries; q++)
-        {
-            const int numAirports = rand() % 100000 + 3;
-            const int minDistance = rand() % 100000000;
-            const int airportRange = 10000000;
-
-            vector<int> airportAddedOnDay;
-            cout << numAirports << " " << minDistance << endl;
-            for (int i = 0; i < numAirports; i++)
-            {
-                cout << (rand() % (2 * airportRange + 1) - airportRange) << " ";
-            }
-        }
-        return 0;
-    }
-#ifdef RANDOM
-    srand(time(0));
-    while (true)
-    {
-        const int maxAirports = 20;
-        const int minAirports = 5;
-        const int airportRange = 20;
-        const int numAirports = (rand() % (maxAirports - minAirports)) + minAirports;
-        const int minDistance = rand() % 25;
-        vector<int> airportAddedOnDay;
-        for (int i = 0; i < numAirports; i++)
-        {
-            airportAddedOnDay.push_back(rand() % (2 * airportRange + 1) - airportRange);
-        }
-        compareBruteForce(airportAddedOnDay, minDistance);
-        //const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
-        //cout << "testcaes with " << numAirports << " airports" << endl;
-    }
-#endif
     int Q;
     cin >> Q;
     for (int q = 0; q < Q; q++)
@@ -518,15 +380,11 @@ int main(int argc, char** argv)
         }
 
 
-#ifdef BRUTE_FORCE
-        compareBruteForce(airportAddedOnDay, minDistance);
-#else
         const auto result = findResult(airportAddedOnDay, minDistance);
         for (const auto costForDay : result)
         {
             cout << costForDay << " ";
         }
         cout << endl;
-#endif
     }
 }
