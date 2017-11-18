@@ -180,7 +180,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     cout << "removing: " << *airportsNotCovered.begin() << " due to change right end point" << endl;
                     airportsNotCovered.erase(airportsNotCovered.begin());
                 }
-                if ((i != 0) && (/*oldRightEndPointDuplicated && */oldRightEndPoint < leftEndpoint + minDistance && oldRightEndPoint > rightEndpoint - minDistance && oldRightEndPoint != leftEndpoint))
+                if ((i != 0) && (/*oldRightEndPointDuplicated && */ isUncovered(oldRightEndPoint) && oldRightEndPoint != leftEndpoint))
                 {
                     cout << "adding oldRightEndPoint: " << oldRightEndPoint << " to airportsNotCovered oldRightEndPointDuplicated: " << oldRightEndPointDuplicated<< endl;
                     airportsNotCovered.insert(oldRightEndPoint);
@@ -212,7 +212,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     }
                 }
                 //assert(leftEndpoint == oldLeftEndPoint);
-                if ((i != 0) && (/*oldLeftEndPointDuplicated &&*/ oldLeftEndPoint > rightEndpoint - minDistance && oldLeftEndPoint < leftEndpoint + minDistance && (oldLeftEndPoint != rightEndpoint)))
+                if ((i != 0) && (/*oldLeftEndPointDuplicated &&*/ isUncovered(oldLeftEndPoint) && (oldLeftEndPoint != rightEndpoint)))
                 {
                     cout << "adding oldLeftEndPoint: " << oldLeftEndPoint << " to airportsNotCovered oldLeftEndPointDuplicated: " << oldLeftEndPointDuplicated  << endl;
                     airportsNotCovered.insert(oldLeftEndPoint);
