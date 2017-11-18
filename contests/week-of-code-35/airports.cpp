@@ -105,8 +105,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
         const auto oldLeftEndPoint = leftEndpoint;
         const auto oldRightEndPoint = rightEndpoint;
-        const auto oldLeftEndPointDuplicated = leftEndPointDuplicated;
-        const auto oldRightEndPointDuplicated = rightEndPointDuplicated;
         bool endpointChanged = false;
         if (airportPos < leftEndpoint)
         {
