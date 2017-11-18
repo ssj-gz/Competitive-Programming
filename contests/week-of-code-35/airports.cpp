@@ -56,15 +56,19 @@ bool areAirportsArranged(const vector<int>& airports, int minDistance)
     return areArranged;
 }
 
-bool canArrangeAirportsWithCost(vector<int>& airports, int nextAirportIndex, int cost, int minDistance)
+vector<int> findAirportArrangementWithCost(vector<int>& airports, int nextAirportIndex, int cost, int minDistance)
 {
     if (cost < 0)
     {
-        return false;
+        return vector<int>();
     }
-    if (nextAirportIndex == airports.size() || cost == 0)
+    if (nextAirportIndex == airports.size())
     {
-        return areAirportsArranged(airports, minDistance);
+        if (areAirportsArranged(airports, minDistance))
+        {
+            return airports;
+        }
+        return vector<int>();
     }
     const int originalPos = airports[nextAirportIndex];
     for (int newAirportPos = originalPos - cost; newAirportPos <= originalPos + cost; newAirportPos++)
@@ -72,21 +76,22 @@ bool canArrangeAirportsWithCost(vector<int>& airports, int nextAirportIndex, int
         const int costOfThisMove = abs(newAirportPos - originalPos);
         airports[nextAirportIndex] = newAirportPos;
 
-        if (canArrangeAirportsWithCost(airports, nextAirportIndex + 1, cost - costOfThisMove, minDistance))
+        const auto arrangedAirports = (findAirportArrangementWithCost(airports, nextAirportIndex + 1, cost - costOfThisMove, minDistance));
+        if ((!arrangedAirports.empty()))
         {
             //cout << "Can arrange airports with cost: " << cost << endl;
-            return true;
+            return arrangedAirports;
         }
     }
     airports[nextAirportIndex] = originalPos;
 
-    return false;
+    return vector<int>();
 }
 
-bool canArrangeAirportsWithCost(const vector<int>& airports, int cost, int minDistance)
+vector<int> findAirportArrangementWithCost(const vector<int>& airports, int cost, int minDistance)
 {
     vector<int> airportsCopy(airports);
-    return canArrangeAirportsWithCost(airportsCopy, 0, cost, minDistance);
+    return findAirportArrangementWithCost(airportsCopy, 0, cost, minDistance);
 }
 
 vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
@@ -100,19 +105,50 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
     {
         airportsSorted.push_back(airportAddedOnDay[day]);
         sort(airportsSorted.begin(), airportsSorted.end());
-        //cout << "day: " << day << " airports: " <<  endl;
-        //for (const auto x : airportsSorted)
-        //{
-            //cout << x << " ";
-        //}
-        //cout << endl;
+#if 0
+        cout << "day: " << day << " airports: " <<  endl;
+        for (const auto x : airportsSorted)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+#endif
 
         int cost = 0;
         while (true)
         {
-            if (canArrangeAirportsWithCost(airportsSorted, cost, minDistance))
+            const auto arrangedAirports = findAirportArrangementWithCost(airportsSorted, cost, minDistance);
+            if (!arrangedAirports.empty())
             {
-                //cout << "day: " << day << " can arrange with cost: " << cost << endl;
+                if (arrangedAirports.size() > 5 && cost > 0)
+                {
+                    int derangements = 0;
+                    for (int i = 1; i < airportsSorted.size() - 1; i++)
+                    {
+                        if (arrangedAirports[i] != airportsSorted[i])
+                        {
+                            derangements++;
+                            break;
+                        }
+                    }
+                    if (derangements > 0)
+                    {
+                        cout << "day: " << day << " minDistance: " << minDistance << " can arrange with cost: " << cost << " derangements: " << derangements << endl;
+                        cout << "Arrangement: " << endl;
+                        for (const auto x : arrangedAirports)
+                        {
+                            cout << x << " ";
+                        }
+                        cout << endl;
+                        cout << "original: "<< endl;
+                        for (const auto x : airportsSorted)
+                        {
+                            cout << x << " ";
+                        }
+                        cout << endl;
+                        assert(derangements <= 1);
+                    }
+                }
                 results.push_back(cost);
                 break;
             }
@@ -125,19 +161,20 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
 int main()
 {
 #ifdef RANDOM
+    srand(time(0));
     while (true)
     {
-        srand(time(0));
-        const int maxAirports = 10;
-        const int airportRange = 30;
-        const int numAirports = (rand() % (maxAirports - 3)) + 3;
-        const int minDistance = rand() % 10;
+        const int maxAirports = 20;
+        const int minAirports = 5;
+        const int airportRange = 45;
+        const int numAirports = (rand() % (maxAirports - minAirports)) + minAirports;
+        const int minDistance = rand() % 10 + 3;
         vector<int> airportAddedOnDay;
         for (int i = 0; i < numAirports; i++)
         {
             airportAddedOnDay.push_back(rand() % (2 * airportRange + 1) - airportRange);
         }
-        findResultBruteForce(airportAddedOnDay, minDistance);
+        const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
     }
 #endif
     int Q;
