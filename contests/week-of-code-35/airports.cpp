@@ -194,7 +194,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     const int reduceBy = rightEndpoint - oldRightEndPoint;
                     bestCostForInner -= reduceBy;
                     cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in right endpoint" << endl;
-                    assert(bestCostForInner >= 0);
+                    //assert(bestCostForInner >= 0);
                 }
             }
             if (oldLeftEndPoint != leftEndpoint)
@@ -233,7 +233,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     const int reduceBy = oldLeftEndPoint - leftEndpoint;
                     bestCostForInner -= reduceBy;
                     cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in left endpoint" << endl;
-                    assert(bestCostForInner >= 0);
+                    //assert(bestCostForInner >= 0);
                 }
             }
 
@@ -369,7 +369,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
             cout << endl;
             cout << "dbgUnreachableAirports: " << endl;
-            for (const auto x : dbgUnreachableAirports)
+            for (const auto x : unreachableAirports)
             {
                 cout << x << " ";
             }
@@ -381,6 +381,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         {
             airportsNotCovered = set<int>(unreachableAirports.begin(), unreachableAirports.end());
         }
+        //unreachableAirports.erase(unique(unreachableAirports.begin(), unreachableAirports.end()), unreachableAirports.end());
+        int numCostAdjustments = 0;
         for (int j = 0; j < unreachableAirports.size(); j++)
         {
             const int unreachableAirPort = unreachableAirports[j];
@@ -394,14 +396,19 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             {
                 const int previousUnreachable = unreachableAirports[j - 1];
                 adjustRightBy = previousUnreachable - (rightEndpoint - minDistance);
+                cout << "weee adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << " cost: " << (adjustLeftBy + adjustRightBy) << " previousUnreachable: " << previousUnreachable << " unreachable: " << unreachableAirPort << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " minDistance: " << minDistance << " thing: " << (adjustRightBy + adjustLeftBy + (unreachableAirPort - previousUnreachable)) <<  endl;
+                if (previousUnreachable == unreachableAirPort)
+                {
+                    assert(bestCost <= adjustLeftBy + adjustRightBy);
+                }
             }
-            //cout << " adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << " cost: " << (adjustLeftBy + adjustRightBy) << endl;
             if (adjustLeftBy + adjustRightBy <= bestCost)
             {
                 bestCost = adjustLeftBy + adjustRightBy;
                 bestAdjustedLeftBy = adjustLeftBy;
                 bestAdjustedRightBy = adjustRightBy;
-                //cout << "Updated best cost: " << bestCost << endl;
+                numCostAdjustments++;
+                cout << "Updated best cost: " << bestCost << " numCostAdjustments: " << numCostAdjustments << endl;
             }
             assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
         }
@@ -493,7 +500,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         const int newRightEndpoint = rightEndpoint + bestAdjustedRightBy;
         const int dbgInnerCost = bestAdjustedRightBy + bestAdjustedLeftBy;
         cout << "dbgInnerCost: " << dbgInnerCost << " bestCostForInner: " << bestCostForInner << endl;
-        assert(dbgInnerCost ==  bestCostForInner);
+        //assert(dbgInnerCost ==  bestCostForInner);
         assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
         if (newRightEndpoint - newLeftEndpoint < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
@@ -639,7 +646,7 @@ int main(int argc, char** argv)
     {
         const int maxAirports = 20;
         const int minAirports = 5;
-        const int airportRange = 10;
+        const int airportRange = 20;
         const int numAirports = (rand() % (maxAirports - minAirports)) + minAirports;
         const int minDistance = rand() % 25;
         vector<int> airportAddedOnDay;
