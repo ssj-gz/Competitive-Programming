@@ -359,8 +359,12 @@ void compareBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
         {
             cout << "i: " << i << " result[i]: " << result[i] << " resultsBruteForce[i]: " << resultsBruteForce[i] << endl;
         }
+        assert(result == resultsBruteForce);
     }
-    assert(result == resultsBruteForce);
+    else
+    {
+        cout << "Success with " << airportAddedOnDay.size() << " days and minDistance: " << minDistance << endl;
+    }
 }
 
 int main()
