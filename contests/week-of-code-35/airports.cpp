@@ -2,7 +2,7 @@
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
 #define RANDOM
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #undef RANDOM
 #undef BRUTE_FORCE
@@ -154,7 +154,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     {
         return airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance;
     };
-    auto hasNext = [](const set<int>& collection, auto setIter)
+    auto hasNext = [](const set<int>& collection, set<int>::iterator setIter)
     {
         if (setIter == collection.end())
             return false;
@@ -163,7 +163,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             return false;
         return true;
     };
-    auto hasPrevious = [](const set<int>& collection, auto setIter)
+    auto hasPrevious = [](const set<int>& collection, set<int>::iterator setIter)
     {
         if (collection.empty())
             return false;
@@ -171,13 +171,13 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             return false;
         return true;
     };
-    auto next = [&hasNext](const set<int>& collection, auto setIter)
+    auto next = [&hasNext](const set<int>& collection, set<int>::iterator setIter)
     {
         assert(hasNext(collection, setIter));
         setIter++;
         return *setIter;
     };
-    auto previous = [&hasPrevious](const set<int>& collection, auto setIter)
+    auto previous = [&hasPrevious](const set<int>& collection, set<int>::iterator setIter)
     {
         assert(hasPrevious(collection, setIter));
         setIter--;
@@ -227,38 +227,38 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
 
         vector<int> newlyUncoveredAirportPositions;
 
-        cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
+        //cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
         //if (!endpointChanged)
         {
             if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
                 (isUncovered(airportPos))
                     )
             {
-                cout << "adding " << airportPos << " to airportsNotCovered" << endl;
+                //cout << "adding " << airportPos << " to airportsNotCovered" << endl;
                 newlyUncoveredAirportPositions.push_back(airportPos);
             }
         }
         //else
         {
-            cout << "end points changed - removing stuff from set!" << endl;
+            //cout << "end points changed - removing stuff from set!" << endl;
             if (oldRightEndPoint != rightEndpoint)
             {
-                cout << "right end point changed" << endl;
+                //cout << "right end point changed" << endl;
                 //assert(rightEndpoint == oldRightEndPoint);
                 while (!airportsNotCovered.empty() && *airportsNotCovered.begin() <= rightEndpoint - minDistance)
                 {
-                    cout << "removing: " << *airportsNotCovered.begin() << " due to change right end point" << endl;
+                    //cout << "removing: " << *airportsNotCovered.begin() << " due to change right end point" << endl;
                     if (hasNext(airportsNotCovered, airportsNotCovered.begin()))
                     {
                         const int diffToRemove = next(airportsNotCovered, airportsNotCovered.begin()) -  *airportsNotCovered.begin();
-                        cout << " removing diff: " << diffToRemove << " due to change right end point";
+                        //cout << " removing diff: " << diffToRemove << " due to change right end point";
                         maxDiffOfSuccessiveUncoveredPairs.remove(diffToRemove);
                     }
                     airportsNotCovered.erase(airportsNotCovered.begin());
                 }
                 if ((i != 0) && (/*oldRightEndPointDuplicated && */ isUncovered(oldRightEndPoint) && oldRightEndPoint != leftEndpoint))
                 {
-                    cout << "adding oldRightEndPoint: " << oldRightEndPoint << " to airportsNotCovered oldRightEndPointDuplicated: " << oldRightEndPointDuplicated<< endl;
+                    //cout << "adding oldRightEndPoint: " << oldRightEndPoint << " to airportsNotCovered oldRightEndPointDuplicated: " << oldRightEndPointDuplicated<< endl;
                     newlyUncoveredAirportPositions.push_back(oldRightEndPoint);
                 }
                 if (oldRightEndPoint != rightEndpoint && !airportsNotCovered.empty())
@@ -271,7 +271,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
             if (oldLeftEndPoint != leftEndpoint)
             {
-                cout << "left end point changed" << endl;
+                //cout << "left end point changed" << endl;
                 if (!airportsNotCovered.empty())
                 {
                     auto highestIter = airportsNotCovered.end();
@@ -282,11 +282,11 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                             break;
                         if (*highestIter >= leftEndpoint + minDistance)
                         {
-                            cout << "removing: " << *highestIter << " due to change left end point" << endl;
+                            //cout << "removing: " << *highestIter << " due to change left end point" << endl;
                             if (hasPrevious(airportsNotCovered, highestIter))
                             {
                                 const int diffToRemove = *highestIter - previous(airportsNotCovered, highestIter);
-                                cout << " removing diff: " << diffToRemove << " due to change left end point";
+                                //cout << " removing diff: " << diffToRemove << " due to change left end point";
                                 maxDiffOfSuccessiveUncoveredPairs.remove(diffToRemove);
                             }
 
@@ -296,7 +296,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                         }
                         else
                         {
-                            cout << "Not removing " << *highestIter << " due to left end point change" << endl;
+                            //cout << "Not removing " << *highestIter << " due to left end point change" << endl;
                             break;
                         }
                     }
@@ -304,7 +304,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 //assert(leftEndpoint == oldLeftEndPoint);
                 if ((i != 0) && (/*oldLeftEndPointDuplicated &&*/ isUncovered(oldLeftEndPoint) && (oldLeftEndPoint != rightEndpoint)))
                 {
-                    cout << "adding oldLeftEndPoint: " << oldLeftEndPoint << " to airportsNotCovered oldLeftEndPointDuplicated: " << oldLeftEndPointDuplicated  << endl;
+                    //cout << "adding oldLeftEndPoint: " << oldLeftEndPoint << " to airportsNotCovered oldLeftEndPointDuplicated: " << oldLeftEndPointDuplicated  << endl;
                     newlyUncoveredAirportPositions.push_back(oldLeftEndPoint);
                 }
                 if (oldLeftEndPoint != leftEndpoint && !airportsNotCovered.empty())
@@ -337,10 +337,10 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     {
                         right = *newUncoveredIter;
                     }
-                    cout << "** new uncoveredAirportPos: " << uncoveredAirportPos << " left: " << (hasLeft ? to_string(left) : "none") << " right: " << (hasRight ? to_string(right) : "none") << endl;
+                    //cout << "** new uncoveredAirportPos: " << uncoveredAirportPos << " left: " << (hasLeft ? to_string(left) : "none") << " right: " << (hasRight ? to_string(right) : "none") << endl;
                     if (hasLeft && hasRight)
                     {
-                        cout << " removing diff  " << (right - left) << " because of breaking stuff up!" << endl;
+                        //cout << " removing diff  " << (right - left) << " because of breaking stuff up!" << endl;
                         maxDiffOfSuccessiveUncoveredPairs.remove(right - left);
                     } 
                     if (hasLeft)
@@ -395,13 +395,15 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         }
         cout << endl;
 #endif
+#if 0
         cout << "airportsNotCovered: " << endl;
         for (const auto x : airportsNotCovered)
         {
             cout << x << " ";
         }
         cout << endl;
-        cout << "About to calculate bestCostForInner" << endl;
+#endif
+        //cout << "About to calculate bestCostForInner" << endl;
         bestCostForInner = 0;
         if (!airportsNotCovered.empty())
         {
@@ -414,7 +416,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
             // If right end point extended to cover everything.
             bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
-            cout << " minThing: " << minThing << " maxThing: " << maxThing << endl;
+            //cout << " minThing: " << minThing << " maxThing: " << maxThing << endl;
             if (!maxDiffOfSuccessiveUncoveredPairs.empty())
             {
                 bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - maxDiffOfSuccessiveUncoveredPairs.max());
