@@ -249,8 +249,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 if (oldRightEndPoint != rightEndpoint && !airportsNotCovered.empty())
                 {
                     const int reduceBy = rightEndpoint - oldRightEndPoint;
-                    bestCostForInner -= reduceBy;
-                    cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in right endpoint" << endl;
+                    //bestCostForInner -= reduceBy;
+                    //cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in right endpoint" << endl;
                     //assert(bestCostForInner >= 0);
                 }
             }
@@ -288,8 +288,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 if (oldLeftEndPoint != leftEndpoint && !airportsNotCovered.empty())
                 {
                     const int reduceBy = oldLeftEndPoint - leftEndpoint;
-                    bestCostForInner -= reduceBy;
-                    cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in left endpoint" << endl;
+                    //bestCostForInner -= reduceBy;
+                    //cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in left endpoint" << endl;
                     //assert(bestCostForInner >= 0);
                 }
             }
@@ -359,7 +359,13 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     //cout << "newBestCostForInner: " << newBestCostForInner << endl;
                     //bestCostForInner = min(bestCostForInner, newBestCostForInner);
                     //bestCostForInner = newBestCostForInner;
-                    bestCostForInner = leftEndpoint - rightEndpoint + 2 * minDistance + minDiffOfSuccessiveUncoveredPairs.min();
+                    bestCostForInner = leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min();
+                    const int minThing = *airportsNotCovered.begin();
+                    auto blee = airportsNotCovered.end();
+                    blee--;
+                    const int maxThing = *blee;
+                    bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
+                    bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
                 }
             }
 
