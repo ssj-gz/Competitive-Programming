@@ -106,12 +106,28 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     //cout << "findResult - minDistance: " << minDistance << endl;
     vector<int> results;
     vector<int> airports;
+    int leftEndpoint = numeric_limits<int>::max();
+    int rightEndpoint = numeric_limits<int>::min();
+    int leftEndPointIndex = -1;
+    int rightEndPointIndex = -1;
     for (int i = 0; i < airportAddedOnDay.size(); i++)
     {
 
         const int airportPos = airportAddedOnDay[i];
         airports.push_back(airportPos);
         sort(airports.begin(), airports.end());
+
+        if (airportPos < leftEndpoint)
+        {
+            leftEndpoint = airportPos;
+            leftEndPointIndex = i;
+        }
+        if (airportPos > rightEndpoint)
+        {
+            rightEndpoint = airportPos;
+            rightEndPointIndex = i;
+        }
+
 
 #if 0
         cout << "day " << i << " airports: " << endl;
@@ -141,10 +157,11 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 dbgRightEndPointIndex = j;
             }
         }
-        const int leftEndpoint = dbgLeftEndpoint;
-        const int rightEndpoint = dbgRightEndpoint;
-        const int leftEndPointIndex = dbgLeftEndPointIndex;
-        const int rightEndPointIndex = dbgRightEndPointIndex;
+         const int leftEndpoint = dbgLeftEndpoint;
+         const int rightEndpoint = dbgRightEndpoint;
+         const int leftEndPointIndex = dbgLeftEndPointIndex;
+         const int rightEndPointIndex = dbgRightEndPointIndex;
+
         assert(leftEndpoint == dbgLeftEndpoint && rightEndpoint == dbgRightEndpoint);
         assert((leftEndPointIndex == rightEndPointIndex) ==  (dbgLeftEndPointIndex == dbgRightEndPointIndex));
         //cout << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << endl;
@@ -167,7 +184,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         for (int j = 0; j < airports.size(); j++)
         {
             const int unreachableAirPort = airports[j];
-            if (j == leftEndPointIndex || j == rightEndPointIndex)
+            if (j == dbgLeftEndPointIndex || j == dbgRightEndPointIndex)
                 continue;
             if (unreachableAirPort < leftEndpoint + minDistance && unreachableAirPort > rightEndpoint - minDistance)
             {
