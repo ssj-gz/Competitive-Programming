@@ -378,19 +378,24 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     //cout << "newBestCostForInner: " << newBestCostForInner << endl;
                     //bestCostForInner = min(bestCostForInner, newBestCostForInner);
                     //bestCostForInner = newBestCostForInner;
-                    const int minThing = *airportsNotCovered.begin();
-                    auto blee = airportsNotCovered.end();
-                    blee--;
-                    const int maxThing = *blee;
-                    bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
-                    bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
-                    if (!minDiffOfSuccessiveUncoveredPairs.empty())
-                    {
-                        bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min());
-                    }
                 }
             }
 
+        }
+        bestCostForInner = 0;
+        if (!airportsNotCovered.empty())
+        {
+            bestCostForInner = numeric_limits<int>::max();
+            const int minThing = *airportsNotCovered.begin();
+            auto blee = airportsNotCovered.end();
+            blee--;
+            const int maxThing = *blee;
+            bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
+            bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
+            if (!minDiffOfSuccessiveUncoveredPairs.empty())
+            {
+                bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - minDiffOfSuccessiveUncoveredPairs.min());
+            }
         }
 
 #if 0
@@ -531,7 +536,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         const int newRightEndpoint = rightEndpoint + bestAdjustedRightBy;
         const int dbgInnerCost = bestAdjustedRightBy + bestAdjustedLeftBy;
         cout << "dbgInnerCost: " << dbgInnerCost << " bestCostForInner: " << bestCostForInner << endl;
-        //assert(dbgInnerCost ==  bestCostForInner);
+        assert(dbgInnerCost ==  bestCostForInner);
         assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
         if (newRightEndpoint - newLeftEndpoint < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
