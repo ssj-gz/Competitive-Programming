@@ -190,6 +190,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
         }
 
+        // Add the new uncovered airport positions to airportsNotCovered if they are not there already,
+        // and keep maxDiffOfSuccessiveUncoveredPairs up-to-date.
         for (const auto uncoveredAirportPos : newlyUncoveredAirportPositions)
         {
             if (airportsNotCovered.find(uncoveredAirportPos) == airportsNotCovered.end())
@@ -228,6 +230,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         }
 
 
+        // Compute the bestCostForInner i.e. the cost required to arrange everything so that it is reachable, but *ignoring*
+        // (for now) any adjustment necessary to make the gap between the endpoints large enough.
         bestCostForInner = 0;
         if (!airportsNotCovered.empty())
         {
@@ -246,9 +250,11 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             }
         }
 
+        // We've reduced the gap between the endpoints by bestCostForInner - is it enough?
         int cost = bestCostForInner;
         if (rightEndpoint - leftEndpoint + bestCostForInner < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
+            // No, they're too close together - make the gap bigger!
             cost += leftEndpoint - (rightEndpoint - minDistance);
         }
         results.push_back(cost);
@@ -273,7 +279,6 @@ int main(int argc, char** argv)
         {
             cin >> airportAddedOnDay[i];
         }
-
 
         const auto result = findResult(airportAddedOnDay, minDistance);
         for (const auto costForDay : result)
