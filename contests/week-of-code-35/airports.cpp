@@ -112,6 +112,11 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     int rightEndPointIndex = -1;
     bool leftEndPointDuplicated = false;
     bool rightEndPointDuplicated = false;
+
+    auto isUncovered = [&leftEndpoint, &rightEndpoint, minDistance](const int airportPos)
+    {
+        return airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance;
+    };
     set<int> airportsNotCovered;
     for (int i = 0; i < airportAddedOnDay.size(); i++)
     {
@@ -156,7 +161,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         //if (!endpointChanged)
         {
             if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
-                (airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance)
+                (isUncovered(airportPos))
                     )
             {
                 cout << "adding " << airportPos << " to airportsNotCovered" << endl;
