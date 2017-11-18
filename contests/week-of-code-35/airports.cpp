@@ -1,8 +1,8 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-#define RANDOM
+//#define RANDOM
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #undef RANDOM
 #undef BRUTE_FORCE
@@ -295,6 +295,29 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     return results;
 }
 
+vector<int> findAirportArrangementWithCostEndpointsOnly(const vector<int>& airports, int cost, int minDistance)
+{
+    vector<int> airportsCopy(airports);
+    int leftEndpoint = airportsCopy.front();
+    int rightEndpoint = airportsCopy.back();
+
+    for (int adjustLeftBy = 0; adjustLeftBy <= cost; adjustLeftBy++)
+    {
+        airportsCopy[0] = airports[0] - adjustLeftBy;
+        for (int adjustRightBy = 0; adjustLeftBy + adjustRightBy <= cost; adjustRightBy++)
+        {
+            const int totalCost = adjustLeftBy + adjustRightBy;
+            assert(totalCost <= cost);
+            airportsCopy.back() = airports.back() + adjustRightBy;
+            if (areAirportsArranged(airportsCopy, minDistance))
+            {
+                return airportsCopy;
+            }
+        }
+    }
+    return vector<int>();
+}
+
 vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
 {
     const int numDays = airportAddedOnDay.size();
@@ -306,6 +329,7 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
     {
         airportsSorted.push_back(airportAddedOnDay[day]);
         sort(airportsSorted.begin(), airportsSorted.end());
+        cout << "brute force day: " << day << " of " << numDays << endl;
 #if 0
         cout << "day: " << day << " airports: " <<  endl;
         for (const auto x : airportsSorted)
@@ -318,7 +342,9 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
         int cost = 0;
         while (true)
         {
-            const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCost(airportsSorted, cost, minDistance, true);
+            //const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCost(airportsSorted, cost, minDistance, true);
+            //assert(findAirportArrangementWithCostEndpointsOnly(airportsSorted, cost, minDistance).size() == arrangedAirportsMovingOnlyEnds.size());
+            const auto arrangedAirportsMovingOnlyEnds = findAirportArrangementWithCostEndpointsOnly(airportsSorted, cost, minDistance);
             //const auto arrangedAirportsMovingAny = findAirportArrangementWithCost(airportsSorted, cost, minDistance, false);
             //assert(arrangedAirportsMovingOnlyEnds.size() == arrangedAirportsMovingAny.size());
             //cout << "same cost" << endl;
@@ -369,8 +395,23 @@ void compareBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
     }
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc == 2)
+    {
+        srand(time(0));
+        const int numAirports = rand() % 1000 + 3;
+        const int minDistance = rand() % 100;
+        const int airportRange = 1000;
+        
+        vector<int> airportAddedOnDay;
+        cout << "1 " << numAirports << " " << minDistance << endl;
+        for (int i = 0; i < numAirports; i++)
+        {
+            cout << (rand() % (2 * airportRange + 1) - airportRange) << " ";
+        }
+        return 0;
+    }
 #ifdef RANDOM
     srand(time(0));
     while (true)
