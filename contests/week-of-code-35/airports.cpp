@@ -1,7 +1,4 @@
 // Simon St James (ssjgz) 2017-11-18
-// This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-#define RANDOM
-#define BRUTE_FORCE
 #define SUBMISSION
 #ifdef SUBMISSION
 #undef RANDOM
@@ -188,17 +185,6 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     {
 
         const int airportPos = airportAddedOnDay[i];
-#ifdef BRUTE_FORCE
-        airports.push_back(airportPos);
-        sort(airports.begin(), airports.end());
-
-        cout << "airports: " << endl;
-        for (const auto x : airports)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-#endif
 
         if (airportPos == leftEndpoint)
             leftEndPointDuplicated = true;
@@ -227,19 +213,12 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
 
         vector<int> newlyUncoveredAirportPositions;
 
-        //cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
-        //if (!endpointChanged)
+        if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
+            (isUncovered(airportPos))
+                )
         {
-            if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
-                (isUncovered(airportPos))
-                    )
-            {
-                //cout << "adding " << airportPos << " to airportsNotCovered" << endl;
-                newlyUncoveredAirportPositions.push_back(airportPos);
-            }
+            newlyUncoveredAirportPositions.push_back(airportPos);
         }
-        //else
-        {
             //cout << "end points changed - removing stuff from set!" << endl;
             if (oldRightEndPoint != rightEndpoint)
             {
@@ -337,73 +316,23 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     {
                         right = *newUncoveredIter;
                     }
-                    //cout << "** new uncoveredAirportPos: " << uncoveredAirportPos << " left: " << (hasLeft ? to_string(left) : "none") << " right: " << (hasRight ? to_string(right) : "none") << endl;
                     if (hasLeft && hasRight)
                     {
-                        //cout << " removing diff  " << (right - left) << " because of breaking stuff up!" << endl;
+                        // Broken up a previously successive pair; remove their contribution.
                         maxDiffOfSuccessiveUncoveredPairs.remove(right - left);
                     } 
                     if (hasLeft)
                     {
-#if 0
-                        const int adjustRightBy = left - (rightEndpoint - minDistance);
-                        const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
-                        cout << "has left - adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
-                        newBestCostForInner = min(newBestCostForInner, (adjustLeftBy + adjustRightBy));
-#endif
                         maxDiffOfSuccessiveUncoveredPairs.add(uncoveredAirportPos - left);
                     }
-#if 0
-                    else
-                    {
-                        // uncoveredAirportPos is min.
-                        const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
-                        newBestCostForInner = min(newBestCostForInner, adjustLeftBy);
-                        cout << "is min - adjustLeftBy: " << adjustLeftBy << endl;
-                    }
-#endif
                     if (hasRight)
                     {
-                        //const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
-                        //const int adjustLeftBy = (leftEndpoint + minDistance) - right;
-                        //cout << "has right - adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
-                        //newBestCostForInner = min(newBestCostForInner, (adjustLeftBy + adjustRightBy));
                         maxDiffOfSuccessiveUncoveredPairs.add(right - uncoveredAirportPos);
                     }
-#if 0
-                    else
-                    {
-                        // uncoveredAirportPos is largest.
-                        const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
-                        newBestCostForInner = min(newBestCostForInner, adjustRightBy);
-                        cout << "is max - adjustRightBy: " << adjustRightBy << endl;
-                    }
-#endif
-                    //cout << "newBestCostForInner: " << newBestCostForInner << endl;
-                    //bestCostForInner = min(bestCostForInner, newBestCostForInner);
-                    //bestCostForInner = newBestCostForInner;
                 }
             }
 
-        }
 
-#if 0
-        cout << "day " << i << " airports: " << endl;
-        for (const auto x : airports)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-#endif
-#if 0
-        cout << "airportsNotCovered: " << endl;
-        for (const auto x : airportsNotCovered)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-#endif
-        //cout << "About to calculate bestCostForInner" << endl;
         bestCostForInner = 0;
         if (!airportsNotCovered.empty())
         {
@@ -416,171 +345,17 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
             // If right end point extended to cover everything.
             bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
-            //cout << " minThing: " << minThing << " maxThing: " << maxThing << endl;
             if (!maxDiffOfSuccessiveUncoveredPairs.empty())
             {
                 bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - maxDiffOfSuccessiveUncoveredPairs.max());
             }
         }
 
-#ifdef BRUTE_FORCE
-        int dbgLeftEndpoint = numeric_limits<int>::max();
-        int dbgRightEndpoint = numeric_limits<int>::min();
-        int dbgLeftEndPointIndex = -1;
-        int dbgRightEndPointIndex = -1;
-        for (int j = 0; j < airports.size(); j++)
-        {
-            const int airportPos = airports[j];
-
-            if (airportPos < dbgLeftEndpoint)
-            {
-                dbgLeftEndpoint = airportPos;
-                dbgLeftEndPointIndex = j;
-            }
-            if (airportPos > dbgRightEndpoint)
-            {
-                dbgRightEndpoint = airportPos;
-                dbgRightEndPointIndex = j;
-            }
-        }
-         const int leftEndpoint = dbgLeftEndpoint;
-         const int rightEndpoint = dbgRightEndpoint;
-         const int leftEndPointIndex = dbgLeftEndPointIndex;
-         const int rightEndPointIndex = dbgRightEndPointIndex;
-
-        assert(leftEndpoint == dbgLeftEndpoint && rightEndpoint == dbgRightEndpoint);
-        assert((leftEndPointIndex == rightEndPointIndex) ==  (dbgLeftEndPointIndex == dbgRightEndPointIndex));
-#endif
-        //cout << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << endl;
-        const int midpoint = (rightEndpoint + leftEndpoint) / 2;
-        const bool oddMidpoint = (((rightEndpoint - leftEndpoint) % 2) == 0);
-
-        bool hasAirportNotReachableByEndPoints = false;
-
-        //int minAirportNotReachable = numeric_limits<int>::max();
-        //int maxAirportNotReachable = numeric_limits<int>::min();
-
-        //int adjustLeftBy = 0;
-        //int adjustRightBy = 0;
-
-        int bestAdjustedLeftBy = 0;
-        int bestAdjustedRightBy = 0;
-        int bestCost = numeric_limits<int>::max();
-
-#ifdef BRUTE_FORCE
-        vector<int> unreachableAirports;
-        for (int j = 0; j < airports.size(); j++)
-        {
-            const int unreachableAirPort = airports[j];
-            if (j == dbgLeftEndPointIndex || j == dbgRightEndPointIndex)
-                continue;
-            if (unreachableAirPort < leftEndpoint + minDistance && unreachableAirPort > rightEndpoint - minDistance)
-            {
-                unreachableAirports.push_back(unreachableAirPort);
-            }
-        }
-        if (true || !endpointChanged)
-        {
-            set<int> dbgUnreachableAirports(unreachableAirports.begin(), unreachableAirports.end());
-#if 0
-            cout << "airportsNotCovered: " << endl;
-            for (const auto x : airportsNotCovered)
-            {
-                cout << x << " ";
-            }
-            cout << endl;
-            cout << "dbgUnreachableAirports: " << endl;
-            for (const auto x : unreachableAirports)
-            {
-                cout << x << " ";
-            }
-            cout << endl;
-#endif
-            assert(airportsNotCovered == dbgUnreachableAirports);
-        }
-        else
-        {
-            airportsNotCovered = set<int>(unreachableAirports.begin(), unreachableAirports.end());
-        }
-        unreachableAirports.erase(unique(unreachableAirports.begin(), unreachableAirports.end()), unreachableAirports.end());
-#endif
-#ifdef BRUTE_FORCE
-        int numCostAdjustments = 0;
-        int maxDiffOfThings = numeric_limits<int>::min();
-        for (int j = 0; j < unreachableAirports.size(); j++)
-        {
-            const int unreachableAirPort = unreachableAirports[j];
-            //cout << " airport: " << unreachableAirPort << " is not reachable from or equal to either endpoint; midpoint " << midpoint << " oddMidpoint? " << oddMidpoint << endl;
-            hasAirportNotReachableByEndPoints = true;
-            //minAirportNotReachable = min(minAirportNotReachable, unreachableAirPort);
-            //maxAirportNotReachable = max(maxAirportNotReachable, unreachableAirPort);
-            int adjustLeftBy = (leftEndpoint + minDistance) - unreachableAirPort;
-            int adjustRightBy = 0;
-            if (j != 0)
-            {
-                const int previousUnreachable = unreachableAirports[j - 1];
-                adjustRightBy = previousUnreachable - (rightEndpoint - minDistance);
-                cout << "weee adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << " cost: " << (adjustLeftBy + adjustRightBy) << " previousUnreachable: " << previousUnreachable << " unreachable: " << unreachableAirPort << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " minDistance: " << minDistance << " thing: " << (adjustRightBy + adjustLeftBy + (unreachableAirPort - previousUnreachable)) <<  endl;
-                if (previousUnreachable == unreachableAirPort)
-                {
-                    assert(bestCost <= adjustLeftBy + adjustRightBy);
-                }
-                assert(adjustLeftBy + adjustRightBy == leftEndpoint - rightEndpoint + 2 * minDistance - (unreachableAirPort - previousUnreachable));
-                maxDiffOfThings = max(maxDiffOfThings, unreachableAirPort - previousUnreachable);
-                cout << "cost of this: " << (adjustLeftBy + adjustRightBy) << endl;
-            }
-            if (adjustLeftBy + adjustRightBy <= bestCost)
-            {
-                bestCost = adjustLeftBy + adjustRightBy;
-                bestAdjustedLeftBy = adjustLeftBy;
-                bestAdjustedRightBy = adjustRightBy;
-                numCostAdjustments++;
-                cout << "Updated best cost: " << bestCost << " numCostAdjustments: " << numCostAdjustments << endl;
-            }
-            assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
-        }
-        cout << "maxDiffOfThings: " << maxDiffOfThings << " maxDiffOfSuccessiveUncoveredPairs: " << (maxDiffOfSuccessiveUncoveredPairs.empty() ? "none" : to_string(maxDiffOfSuccessiveUncoveredPairs.max())) << endl;
-        assert((maxDiffOfThings == numeric_limits<int>::min() && maxDiffOfSuccessiveUncoveredPairs.empty()) || (maxDiffOfThings == maxDiffOfSuccessiveUncoveredPairs.max()));
-        if (!unreachableAirports.empty())
-        {
-            int adjustRightBy = unreachableAirports.back() - (rightEndpoint - minDistance);
-            int adjustLeftBy = 0;
-            if (adjustLeftBy + adjustRightBy <= bestCost)
-            {
-                bestCost = adjustLeftBy + adjustRightBy;
-                bestAdjustedLeftBy = adjustLeftBy;
-                bestAdjustedRightBy = adjustRightBy;
-                //cout << "Updated best cost: " << bestCost << endl;
-            }
-        }
-#endif
-        //cout << " bestAdjustedLeftBy: " << bestAdjustedLeftBy << " bestAdjustedRightBy: " << bestAdjustedRightBy << endl;
-#ifdef BRUTE_FORCE
-        const int newLeftEndpoint = leftEndpoint - bestAdjustedLeftBy;
-        const int newRightEndpoint = rightEndpoint + bestAdjustedRightBy;
-        const int dbgInnerCost = bestAdjustedRightBy + bestAdjustedLeftBy;
-        cout << "dbgInnerCost: " << dbgInnerCost << " bestCostForInner: " << bestCostForInner << endl;
-        assert(dbgInnerCost ==  bestCostForInner);
-        assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
-#endif
-#if 0
-        if (newRightEndpoint - newLeftEndpoint < minDistance && (leftEndPointIndex != rightEndPointIndex))
-        {
-            bestAdjustedRightBy += leftEndpoint - (rightEndpoint - minDistance);
-            //cout << " further adjustment needed bestAdjustedRightBy now: " << bestAdjustedRightBy << endl;
-        } 
-        else
-        {
-            //cout << " no further adjustRightBy needed" << endl;
-        }
-#endif
         int cost = bestCostForInner;
         if (rightEndpoint - leftEndpoint + bestCostForInner < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
             cost += leftEndpoint - (rightEndpoint - minDistance);
         }
-        //const int cost = bestAdjustedLeftBy + bestAdjustedRightBy;
-        //cout << cost << endl;
         results.push_back(cost);
     }
     return results;
