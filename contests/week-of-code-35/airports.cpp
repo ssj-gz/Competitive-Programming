@@ -247,6 +247,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
 int main(int argc, char** argv)
 {
+    ios::sync_with_stdio(false);
     int Q;
     cin >> Q;
     for (int q = 0; q < Q; q++)
