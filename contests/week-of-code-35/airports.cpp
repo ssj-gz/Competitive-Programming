@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-//#define RANDOM
+#define RANDOM
 #define BRUTE_FORCE
 //#define SUBMISSION
 #ifdef SUBMISSION
@@ -108,10 +108,6 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
     vector<int> airports;
     for (int i = 0; i < airportAddedOnDay.size(); i++)
     {
-        int leftEndpoint = numeric_limits<int>::max();
-        int rightEndpoint = numeric_limits<int>::min();
-        int leftEndPointIndex = -1;
-        int rightEndPointIndex = -1;
 
         const int airportPos = airportAddedOnDay[i];
         airports.push_back(airportPos);
@@ -126,21 +122,31 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         cout << endl;
 #endif
 
+        int dbgLeftEndpoint = numeric_limits<int>::max();
+        int dbgRightEndpoint = numeric_limits<int>::min();
+        int dbgLeftEndPointIndex = -1;
+        int dbgRightEndPointIndex = -1;
         for (int j = 0; j < airports.size(); j++)
         {
             const int airportPos = airports[j];
 
-            if (airportPos < leftEndpoint)
+            if (airportPos < dbgLeftEndpoint)
             {
-                leftEndpoint = airportPos;
-                leftEndPointIndex = j;
+                dbgLeftEndpoint = airportPos;
+                dbgLeftEndPointIndex = j;
             }
-            if (airportPos > rightEndpoint)
+            if (airportPos > dbgRightEndpoint)
             {
-                rightEndpoint = airportPos;
-                rightEndPointIndex = j;
+                dbgRightEndpoint = airportPos;
+                dbgRightEndPointIndex = j;
             }
         }
+        const int leftEndpoint = dbgLeftEndpoint;
+        const int rightEndpoint = dbgRightEndpoint;
+        const int leftEndPointIndex = dbgLeftEndPointIndex;
+        const int rightEndPointIndex = dbgRightEndPointIndex;
+        assert(leftEndpoint == dbgLeftEndpoint && rightEndpoint == dbgRightEndpoint);
+        assert((leftEndPointIndex == rightEndPointIndex) ==  (dbgLeftEndPointIndex == dbgRightEndPointIndex));
         //cout << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << endl;
         const int midpoint = (rightEndpoint + leftEndpoint) / 2;
         const bool oddMidpoint = (((rightEndpoint - leftEndpoint) % 2) == 0);
