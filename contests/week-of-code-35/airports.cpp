@@ -329,7 +329,7 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
     {
         airportsSorted.push_back(airportAddedOnDay[day]);
         sort(airportsSorted.begin(), airportsSorted.end());
-        cout << "brute force day: " << day << " of " << numDays << endl;
+        //cout << "brute force day: " << day << " of " << numDays << endl;
 #if 0
         cout << "day: " << day << " airports: " <<  endl;
         for (const auto x : airportsSorted)
@@ -400,15 +400,20 @@ int main(int argc, char** argv)
     if (argc == 2)
     {
         srand(time(0));
-        const int numAirports = rand() % 1000 + 3;
-        const int minDistance = rand() % 100;
-        const int airportRange = 1000;
-        
-        vector<int> airportAddedOnDay;
-        cout << "1 " << numAirports << " " << minDistance << endl;
-        for (int i = 0; i < numAirports; i++)
+        const int numQueries = rand() % 100;
+        cout << numQueries << endl;
+        for (int q = 0; q < numQueries; q++)
         {
-            cout << (rand() % (2 * airportRange + 1) - airportRange) << " ";
+            const int numAirports = rand() % 1000 + 3;
+            const int minDistance = rand() % 100;
+            const int airportRange = 1000;
+
+            vector<int> airportAddedOnDay;
+            cout << numAirports << " " << minDistance << endl;
+            for (int i = 0; i < numAirports; i++)
+            {
+                cout << (rand() % (2 * airportRange + 1) - airportRange) << " ";
+            }
         }
         return 0;
     }
