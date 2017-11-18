@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 2017-11-18
 // This is just a slow, brute-force approach to test correctness - it's much too slow to pass!
-#define RANDOM
+//#define RANDOM
 #define BRUTE_FORCE
 //#define SUBMISSION
 #ifdef SUBMISSION
@@ -101,6 +101,131 @@ vector<int> findAirportArrangementWithCost(const vector<int>& airports, int cost
     return findAirportArrangementWithCost(airportsCopy, 0, cost, minDistance, moveOnlyFirstAndLast);
 }
 
+vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
+{
+    cout << "findResult - minDistance: " << minDistance << endl;
+    vector<int> results;
+    vector<int> airports;
+    for (int i = 0; i < airportAddedOnDay.size(); i++)
+    {
+        int leftEndpoint = numeric_limits<int>::max();
+        int rightEndpoint = numeric_limits<int>::min();
+        int leftEndPointIndex = -1;
+        int rightEndPointIndex = -1;
+
+        const int airportPos = airportAddedOnDay[i];
+        airports.push_back(airportPos);
+        sort(airports.begin(), airports.end());
+
+        cout << "day " << i << " airports: " << endl;
+        for (const auto x : airports)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+
+        for (int j = 0; j < airports.size(); j++)
+        {
+            const int airportPos = airports[j];
+
+            if (airportPos < leftEndpoint)
+            {
+                leftEndpoint = airportPos;
+                leftEndPointIndex = j;
+            }
+            if (airportPos > rightEndpoint)
+            {
+                rightEndpoint = airportPos;
+                rightEndPointIndex = j;
+            }
+        }
+        cout << " leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << endl;
+        const int midpoint = (rightEndpoint - leftEndpoint) / 2;
+        const bool oddMidpoint = (((rightEndpoint - leftEndpoint) % 2) == 0);
+        
+        bool hasAirportNotReachableByEndPoints = false;
+
+        int minAirportNotReachable = numeric_limits<int>::max();
+        int maxAirportNotReachable = numeric_limits<int>::min();
+
+        for (int j = 0; j < airports.size(); j++)
+        {
+            const int unreachableAirPort = airports[j];
+            if (j == leftEndPointIndex || j == rightEndPointIndex)
+                continue;
+            if (unreachableAirPort < leftEndpoint + minDistance && unreachableAirPort > rightEndpoint - minDistance)
+            {
+                cout << " airport: " << unreachableAirPort << " is not reachable from or equal to either endpoint" << endl;
+                hasAirportNotReachableByEndPoints = true;
+                minAirportNotReachable = min(minAirportNotReachable, unreachableAirPort);
+                maxAirportNotReachable = max(maxAirportNotReachable, unreachableAirPort);
+            }
+        }
+        int adjustLeftBy = 0;
+        int adjustRightBy = 0;
+        cout << " minAirportNotReachable: " << minAirportNotReachable << " maxAirportNotReachable: " << maxAirportNotReachable << endl;
+        cout << "midpoint: " << midpoint << " oddMidpoint: " << oddMidpoint << endl;
+        if (hasAirportNotReachableByEndPoints)
+        {
+            if (!oddMidpoint)
+            {
+                if (maxAirportNotReachable < midpoint)
+                {
+                    adjustRightBy += maxAirportNotReachable - (rightEndpoint - minDistance);
+                }
+                else if (minAirportNotReachable >= midpoint)
+                {
+                    adjustLeftBy += (leftEndpoint + minDistance) - minAirportNotReachable;
+                }
+                else
+                {
+                    adjustLeftBy += ((leftEndpoint + minDistance) - maxAirportNotReachable);
+                    adjustRightBy += (minAirportNotReachable - (rightEndpoint - minDistance));
+                }
+            }
+            else
+            {
+                if (minAirportNotReachable == maxAirportNotReachable)
+                {
+                    adjustRightBy += minAirportNotReachable - (rightEndpoint - minDistance);
+                }
+                else
+                {
+                    if (maxAirportNotReachable <= midpoint)
+                    {
+                        adjustRightBy += maxAirportNotReachable - (rightEndpoint - minDistance);
+                    }
+                    else if (minAirportNotReachable > midpoint)
+                    {
+                        adjustLeftBy += (leftEndpoint + minDistance) - minAirportNotReachable;
+                    }
+                    else
+                    {
+                        adjustLeftBy += ((leftEndpoint + minDistance) - maxAirportNotReachable);
+                        adjustRightBy += (minAirportNotReachable - (rightEndpoint - minDistance));
+                    }
+                }
+            }
+        }
+        cout << " adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
+        const int newLeftEndpoint = leftEndpoint - adjustLeftBy;
+        const int newRightEndpoint = rightEndpoint + adjustRightBy;
+        if (newRightEndpoint - newLeftEndpoint < minDistance && (leftEndPointIndex != rightEndPointIndex))
+        {
+            adjustRightBy += leftEndpoint - (rightEndpoint - minDistance);
+            cout << " further adjustment needed adjustRightBy now: " << adjustRightBy << endl;
+        } 
+        else
+        {
+            cout << " no further adjustRightBy needed" << endl;
+        }
+        const int cost = adjustRightBy + adjustLeftBy;
+        cout << cost << endl;
+        results.push_back(cost);
+    }
+    return results;
+}
+
 vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDistance)
 {
     const int numDays = airportAddedOnDay.size();
@@ -131,35 +256,21 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
             const auto arrangedAirports = arrangedAirportsMovingOnlyEnds;
             if (!arrangedAirports.empty())
             {
-                if (arrangedAirports.size() > 5 && cost > 0)
+#if 0
+                cout << "day: " << day << " minDistance: " << minDistance << " can arrange with cost: " << cost << endl;
+                cout << "Arrangement: " << endl;
+                for (const auto x : arrangedAirports)
                 {
-                    int derangements = 0;
-                    for (int i = 1; i < airportsSorted.size() - 1; i++)
-                    {
-                        if (arrangedAirports[i] != airportsSorted[i])
-                        {
-                            derangements++;
-                            break;
-                        }
-                    }
-                    if (derangements > 0)
-                    {
-                        cout << "day: " << day << " minDistance: " << minDistance << " can arrange with cost: " << cost << " derangements: " << derangements << endl;
-                        cout << "Arrangement: " << endl;
-                        for (const auto x : arrangedAirports)
-                        {
-                            cout << x << " ";
-                        }
-                        cout << endl;
-                        cout << "original: "<< endl;
-                        for (const auto x : airportsSorted)
-                        {
-                            cout << x << " ";
-                        }
-                        cout << endl;
-                        assert(derangements <= 1);
-                    }
+                    cout << x << " ";
                 }
+                cout << endl;
+                cout << "original: "<< endl;
+                for (const auto x : airportsSorted)
+                {
+                    cout << x << " ";
+                }
+                cout << endl;
+#endif
                 results.push_back(cost);
                 break;
             }
@@ -204,11 +315,24 @@ int main()
             cin >> airportAddedOnDay[i];
         }
 
+        const auto result = findResult(airportAddedOnDay, minDistance);
+
+#ifdef BRUTE_FORCE
         const auto resultsBruteForce = findResultBruteForce(airportAddedOnDay, minDistance);
-        for (const auto x : resultsBruteForce)
+        if (resultsBruteForce != result)
         {
-            cout << x << " ";
+            cout << "whoops:" << endl;
+            for (int i = 0; i < numDays; i++)
+            {
+                cout << "i: " << i << " result[i]: " << result[i] << " resultsBruteForce[i]: " << resultsBruteForce[i] << endl;
+            }
         }
-        cout << endl;
+        assert(result == resultsBruteForce);
+        //for (const auto x : resultsBruteForce)
+        //{
+            //cout << x << " ";
+        //}
+        //cout << endl;
+#endif
     }
 }
