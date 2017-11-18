@@ -10,6 +10,12 @@ using namespace std;
 
 bool areAirportsArranged(const vector<int>& airports, int minDistance)
 {
+    cout << "areAirportsArranged; minDistance: " << minDistance << " airports:" << endl;
+    for (const auto x : airports)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
     set<int> reachedAirportIndices;
     vector<int> airportIndicesToExplore;
     airportIndicesToExplore.push_back(0);
@@ -37,6 +43,7 @@ bool areAirportsArranged(const vector<int>& airports, int minDistance)
     }
 
     const auto areArranged = reachedAirportIndices.size() == airports.size();
+    cout << "areArranged? " << areArranged << endl;
 
     return areArranged;
 }
@@ -47,7 +54,7 @@ bool canArrangeAirportsWithCost(vector<int>& airports, int nextAirportIndex, int
     {
         return false;
     }
-    if (nextAirportIndex == airports.size())
+    if (nextAirportIndex == airports.size() || cost == 0)
     {
         return areAirportsArranged(airports, minDistance);
     }
@@ -59,9 +66,11 @@ bool canArrangeAirportsWithCost(vector<int>& airports, int nextAirportIndex, int
 
         if (canArrangeAirportsWithCost(airports, nextAirportIndex + 1, cost - costOfThisMove, minDistance))
         {
+            //cout << "Can arrange airports with cost: " << cost << endl;
             return true;
         }
     }
+    airports[nextAirportIndex] = originalPos;
 
     return false;
 }
@@ -83,12 +92,19 @@ vector<int> findResultBruteForce(const vector<int>& airportAddedOnDay, int minDi
     {
         airportsSorted.push_back(airportAddedOnDay[day]);
         sort(airportsSorted.begin(), airportsSorted.end());
+        cout << "day: " << day << " airports: " <<  endl;
+        for (const auto x : airportsSorted)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
 
         int cost = 0;
         while (true)
         {
             if (canArrangeAirportsWithCost(airportsSorted, cost, minDistance))
             {
+                cout << "day: " << day << " can arrange with cost: " << cost << endl;
                 results.push_back(cost);
                 break;
             }
