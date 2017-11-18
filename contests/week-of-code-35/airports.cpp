@@ -145,8 +145,14 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         
         bool hasAirportNotReachableByEndPoints = false;
 
-        int minAirportNotReachable = numeric_limits<int>::max();
-        int maxAirportNotReachable = numeric_limits<int>::min();
+        //int minAirportNotReachable = numeric_limits<int>::max();
+        //int maxAirportNotReachable = numeric_limits<int>::min();
+
+        int adjustLeftBy = 0;
+        int adjustRightBy = 0;
+        
+        int bestAdjustedLeftBy = numeric_limits<int>::max();
+        int bestAdjustedRightBy = numeric_limits<int>::max();
 
         for (int j = 0; j < airports.size(); j++)
         {
@@ -155,14 +161,38 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 continue;
             if (unreachableAirPort < leftEndpoint + minDistance && unreachableAirPort > rightEndpoint - minDistance)
             {
-                cout << " airport: " << unreachableAirPort << " is not reachable from or equal to either endpoint" << endl;
+                cout << " airport: " << unreachableAirPort << " is not reachable from or equal to either endpoint; midpoint " << midpoint << " oddMidpoint? " << oddMidpoint << endl;
                 hasAirportNotReachableByEndPoints = true;
-                minAirportNotReachable = min(minAirportNotReachable, unreachableAirPort);
-                maxAirportNotReachable = max(maxAirportNotReachable, unreachableAirPort);
+                //minAirportNotReachable = min(minAirportNotReachable, unreachableAirPort);
+                //maxAirportNotReachable = max(maxAirportNotReachable, unreachableAirPort);
+
+#if 0
+                if (!oddMidpoint)
+                {
+                    if (unreachableAirPort < midpoint)
+                    {
+                        adjustRightBy = max(adjustRightBy, unreachableAirPort - (rightEndpoint - minDistance));
+                    }
+                    else
+                    {
+                        adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - unreachableAirPort);
+                    }
+                }
+                else
+                {
+                    if (unreachableAirPort <= midpoint)
+                    {
+                        adjustRightBy = max(adjustRightBy, unreachableAirPort - (rightEndpoint - minDistance));
+                    }
+                    else 
+                    {
+                        adjustLeftBy = max(adjustLeftBy, (leftEndpoint + minDistance) - unreachableAirPort);
+                    }
+                }
+#endif
             }
         }
-        int adjustLeftBy = 0;
-        int adjustRightBy = 0;
+#if 0
         cout << " minAirportNotReachable: " << minAirportNotReachable << " maxAirportNotReachable: " << maxAirportNotReachable << endl;
         cout << "midpoint: " << midpoint << " oddMidpoint: " << oddMidpoint << endl;
         if (hasAirportNotReachableByEndPoints)
@@ -207,6 +237,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 }
             }
         }
+#endif
         cout << " adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
         const int newLeftEndpoint = leftEndpoint - adjustLeftBy;
         const int newRightEndpoint = rightEndpoint + adjustRightBy;
@@ -304,7 +335,7 @@ int main()
     {
         const int maxAirports = 20;
         const int minAirports = 5;
-        const int airportRange = 45;
+        const int airportRange = 10;
         const int numAirports = (rand() % (maxAirports - minAirports)) + minAirports;
         const int minDistance = rand() % 25;
         vector<int> airportAddedOnDay;
