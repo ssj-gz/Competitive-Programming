@@ -191,8 +191,10 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 }
                 if (oldRightEndPoint != rightEndpoint && !airportsNotCovered.empty())
                 {
-                    bestCostForInner -= rightEndpoint - oldRightEndPoint;
-                    //assert(bestCostForInner >= 0);
+                    const int reduceBy = rightEndpoint - oldRightEndPoint;
+                    bestCostForInner -= reduceBy;
+                    cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in right endpoint" << endl;
+                    assert(bestCostForInner >= 0);
                 }
             }
             if (oldLeftEndPoint != leftEndpoint)
@@ -228,8 +230,10 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 }
                 if (oldLeftEndPoint != leftEndpoint && !airportsNotCovered.empty())
                 {
-                    bestCostForInner -= oldLeftEndPoint - leftEndpoint;
-                    //assert(bestCostForInner >= 0);
+                    const int reduceBy = oldLeftEndPoint - leftEndpoint;
+                    bestCostForInner -= reduceBy;
+                    cout << " bestCostForInner reduced by " << reduceBy << " to " << bestCostForInner << " due to change in left endpoint" << endl;
+                    assert(bestCostForInner >= 0);
                 }
             }
 
@@ -254,31 +258,39 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     {
                         right = *newUncoveredIter;
                     }
+                    cout << "** new uncoveredAirportPos: " << uncoveredAirportPos << " left: " << (hasLeft ? to_string(left) : "none") << " right: " << (hasRight ? to_string(right) : "none") << endl;
                     int newBestCostForInner = numeric_limits<int>::max();
                     if (hasLeft)
                     {
                         const int adjustRightBy = left - (rightEndpoint - minDistance);
                         const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
+                        cout << "has left - adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
                         newBestCostForInner = min(newBestCostForInner, (adjustLeftBy + adjustRightBy));
                     }
                     else
                     {
                         // uncoveredAirportPos is min.
-                        const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
-                        newBestCostForInner = min(newBestCostForInner, adjustRightBy);
+                        const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
+                        newBestCostForInner = min(newBestCostForInner, adjustLeftBy);
+                        cout << "is min - adjustLeftBy: " << adjustLeftBy << endl;
                     }
                     if (hasRight)
                     {
                         const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
                         const int adjustLeftBy = (leftEndpoint + minDistance) - right;
+                        cout << "has right - adjustLeftBy: " << adjustLeftBy << " adjustRightBy: " << adjustRightBy << endl;
                         newBestCostForInner = min(newBestCostForInner, (adjustLeftBy + adjustRightBy));
                     }
                     else
                     {
                         // uncoveredAirportPos is largest.
-                        const int adjustLeftBy = (leftEndpoint + minDistance) - uncoveredAirportPos;
-                        newBestCostForInner = min(newBestCostForInner, adjustLeftBy);
+                        const int adjustRightBy = uncoveredAirportPos - (rightEndpoint - minDistance);
+                        newBestCostForInner = min(newBestCostForInner, adjustRightBy);
+                        cout << "is max - adjustRightBy: " << adjustRightBy << endl;
                     }
+                    cout << "newBestCostForInner: " << newBestCostForInner << endl;
+                    //bestCostForInner = min(bestCostForInner, newBestCostForInner);
+                    bestCostForInner = newBestCostForInner;
                 }
             }
 
@@ -479,6 +491,9 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
         //cout << " bestAdjustedLeftBy: " << bestAdjustedLeftBy << " bestAdjustedRightBy: " << bestAdjustedRightBy << endl;
         const int newLeftEndpoint = leftEndpoint - bestAdjustedLeftBy;
         const int newRightEndpoint = rightEndpoint + bestAdjustedRightBy;
+        const int dbgInnerCost = bestAdjustedRightBy + bestAdjustedLeftBy;
+        cout << "dbgInnerCost: " << dbgInnerCost << " bestCostForInner: " << bestCostForInner << endl;
+        assert(dbgInnerCost ==  bestCostForInner);
         assert(bestAdjustedLeftBy >= 0 && bestAdjustedRightBy >= 0);
         if (newRightEndpoint - newLeftEndpoint < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
