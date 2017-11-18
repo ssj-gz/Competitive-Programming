@@ -157,6 +157,8 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
             endpointChanged = true;
         }
 
+        vector<int> newlyUncoveredAirportPositions;
+
         cout << "leftEndpoint: " << leftEndpoint << " rightEndpoint: " << rightEndpoint << " airportPos: " << airportPos << " leftEndPointDuplicated: " << leftEndPointDuplicated << " rightEndPointDuplicated: " <<rightEndPointDuplicated << " minDistance: " << minDistance << endl;
         //if (!endpointChanged)
         {
@@ -165,7 +167,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                     )
             {
                 cout << "adding " << airportPos << " to airportsNotCovered" << endl;
-                airportsNotCovered.insert(airportPos);
+                newlyUncoveredAirportPositions.push_back(airportPos);
             }
         }
         //else
@@ -183,7 +185,7 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 if ((i != 0) && (/*oldRightEndPointDuplicated && */ isUncovered(oldRightEndPoint) && oldRightEndPoint != leftEndpoint))
                 {
                     cout << "adding oldRightEndPoint: " << oldRightEndPoint << " to airportsNotCovered oldRightEndPointDuplicated: " << oldRightEndPointDuplicated<< endl;
-                    airportsNotCovered.insert(oldRightEndPoint);
+                    newlyUncoveredAirportPositions.push_back(oldRightEndPoint);
                 }
             }
             if (oldLeftEndPoint != leftEndpoint)
@@ -215,8 +217,13 @@ vector<int> findResult(const vector<int>& airportAddedOnDay, int minDistance)
                 if ((i != 0) && (/*oldLeftEndPointDuplicated &&*/ isUncovered(oldLeftEndPoint) && (oldLeftEndPoint != rightEndpoint)))
                 {
                     cout << "adding oldLeftEndPoint: " << oldLeftEndPoint << " to airportsNotCovered oldLeftEndPointDuplicated: " << oldLeftEndPointDuplicated  << endl;
-                    airportsNotCovered.insert(oldLeftEndPoint);
+                    newlyUncoveredAirportPositions.push_back(oldLeftEndPoint);
                 }
+            }
+
+            for (const auto uncoveredAirportPos : newlyUncoveredAirportPositions)
+            {
+                airportsNotCovered.insert(uncoveredAirportPos);
             }
 
         }
