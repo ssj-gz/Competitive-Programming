@@ -218,28 +218,31 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         if (!airportsNotCovered.empty())
         {
             bestCostForInner = numeric_limits<int>::max();
-            const int minThing = *airportsNotCovered.begin();
-            auto blee = airportsNotCovered.end();
-            blee--;
-            const int maxThing = *blee;
+            const int minUncoveredAirport = *airportsNotCovered.begin();
+            auto maxUncoveredAirportIter = airportsNotCovered.end();
+            maxUncoveredAirportIter--;
+            const int maxUncoveredAirport = *maxUncoveredAirportIter;
             // If left endpoint extended to cover everything.
-            bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minThing);
+            bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minUncoveredAirport);
             // If right end point extended to cover everything.
-            bestCostForInner = min(bestCostForInner,  maxThing - (rightEndpoint - minDistance));
+            bestCostForInner = min(bestCostForInner,  maxUncoveredAirport - (rightEndpoint - minDistance));
+            // The other case: left endpoint and right endpoint both extended to cover a successive pair
+            // of uncovered airports so that all airports become covered.
             if (!maxDiffOfSuccessiveUncoveredPairs.empty())
             {
                 bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - maxDiffOfSuccessiveUncoveredPairs.max());
             }
         }
 
-        // We've reduced the gap between the endpoints by bestCostForInner - is it enough?
-        int cost = bestCostForInner;
+        int bestCost = bestCostForInner;
+        // We've reduced the gap between the endpoints by bestCostForInner (bestCostForInner represents the sum of the amount we
+        // adjusted the left endpoint leftwards plus the right endpoint rightwards) - is it enough?
         if (rightEndpoint - leftEndpoint + bestCostForInner < minDistance && (leftEndPointIndex != rightEndPointIndex))
         {
             // No, they're too close together - make the gap bigger!
-            cost += leftEndpoint - (rightEndpoint - minDistance);
+            bestCost += leftEndpoint - (rightEndpoint - minDistance);
         }
-        results.push_back(cost);
+        results.push_back(bestCost);
     }
     return results;
 }
