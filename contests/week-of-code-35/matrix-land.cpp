@@ -130,6 +130,16 @@ int maxSum(const vector<vector<int>>& A)
     const int numRows = A.size();
     const int numCols = A[0].size();
 
+    if (numCols == 1)
+    {
+        int sum = 0;
+        for (const auto row : A)
+        {
+            sum += row[0];
+        }
+        return sum;
+    }
+
     vector<int> maxScores;
     vector<int> rowUnderneathMaxScores(numCols, 0); // The previous row we processed (i.e. the one below the current one!).
 
