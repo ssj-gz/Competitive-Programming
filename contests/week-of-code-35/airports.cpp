@@ -163,8 +163,8 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
         // Should we add this as an "uncovered" airport? There's a bit of finickiness with whether it's an endpoint: 
         // we should add it to uncovered if it is and there is a duplicate of it already in the set of airports.
-        if ((airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated) &&
-                (isUncovered(airportPos))
+        if (isUncovered(airportPos) &&
+            (airportPos != leftEndpoint || leftEndPointDuplicated) && (airportPos != rightEndpoint || rightEndPointDuplicated)
            )
         {
             newlyUncoveredAirportPositions.push_back(airportPos);
