@@ -12,38 +12,6 @@
 
 using namespace std;
 
-class MaxTracker
-{
-    public:
-        void add(int n)
-        {
-            m_countOf[n]++;
-        }
-        void remove(int n)
-        {
-            assert(m_countOf.find(n) != m_countOf.end());
-            m_countOf[n]--;
-            if (m_countOf[n] == 0)
-            {
-                m_countOf.erase(m_countOf.find(n));
-            }
-        }
-        bool empty() const
-        {
-            return m_countOf.empty();
-        }
-        int max() const
-        {
-            assert(!empty());
-            auto highestIter = m_countOf.end();
-            highestIter--;
-            return highestIter->first;
-        }
-    private:
-        map<int, int> m_countOf;
-
-};
-
 template <typename T>
 class MinMaxTracker
 {
@@ -177,7 +145,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
     int bestCostForInner = 0;
 
-    MaxTracker maxDiffOfSuccessiveUncoveredPairs;
+    MinMaxTracker<int> maxDiffOfSuccessiveUncoveredPairs;
 
     auto isUncovered = [&leftEndpoint, &rightEndpoint, minDistance](const int airportPos)
     {
