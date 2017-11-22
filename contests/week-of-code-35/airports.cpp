@@ -12,6 +12,8 @@
 
 using namespace std;
 
+// Wrapper around std::map that gets rid of some of the ugliness of finding its min, max,
+// next in sequence, previous in sequence, etc.
 template <typename T>
 class MinMaxTracker
 {
