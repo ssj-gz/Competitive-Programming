@@ -29,7 +29,6 @@ class MinMaxTracker
                 m_minValue = value;
                 m_hasMinValue = true;
             }
-            validate();
         }
         void remove(const T& value)
         {
@@ -63,7 +62,6 @@ class MinMaxTracker
                     }
                 }
             }
-            validate();
         }
         bool contains(const T& value) const
         {
@@ -106,23 +104,6 @@ class MinMaxTracker
             assert(hasPrevious(valueIter));
             valueIter--;
             return valueIter->first;
-        }
-        void validate()
-        {
-#if 0
-            return;
-            vector<T> v(m_countOf.begin(), m_countOf.end());
-            assert(v.empty() == m_countOf.empty());
-            if (v.empty())
-                return;
-            sort(v.begin(), v.end());
-            assert(m_hasMinValue);
-            assert(v.front() == m_minValue);
-            assert(m_hasMaxValue);
-            assert(v.back() == m_maxValue);
-            assert(!hasNext(find(m_maxValue)));
-            assert(!hasPrevious(find(m_minValue)));
-#endif
         }
     private:
         map<T, int> m_countOf;
