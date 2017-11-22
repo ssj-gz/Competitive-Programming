@@ -180,7 +180,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
                 if (!uncoveredAirportPositions.empty())
                 {
                     const int diffToRemove = uncoveredAirportPositions.min() - oldMin;
-
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
 
