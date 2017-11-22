@@ -45,12 +45,12 @@ class MaxTracker
 };
 
 template <typename T>
-class Set
+class MinMaxTracker
 {
     public:
         void add(const T& value)
         {
-            m_set[value]++;
+            m_countOf[value]++;
             if (!m_hasMaxValue || value > m_maxValue)
             {
                 m_maxValue = value;
@@ -65,20 +65,20 @@ class Set
         }
         void remove(const T& value)
         {
-            auto valueIter = m_set.find(value);
-            assert(valueIter != m_set.end());
-            m_set[value]--;
-            if (m_set[value] == 0)
+            auto valueIter = m_countOf.find(value);
+            assert(valueIter != m_countOf.end());
+            m_countOf[value]--;
+            if (m_countOf[value] == 0)
             {
-                valueIter = m_set.erase(valueIter);
-                if (m_set.empty())
+                valueIter = m_countOf.erase(valueIter);
+                if (m_countOf.empty())
                 {
                     m_hasMinValue = false;
                     m_hasMaxValue = false;
                 }
                 else
                 {
-                    if (valueIter == m_set.end())
+                    if (valueIter == m_countOf.end())
                     {
                         assert(value == m_maxValue);
                         assert(value != m_minValue);
@@ -99,29 +99,29 @@ class Set
         }
         bool contains(const T& value) const
         {
-            return (m_set.find(value) != m_set.end());
+            return (m_countOf.find(value) != m_countOf.end());
         }
         typename map<T, int>::iterator find(const T& value)
         {
-            return m_set.find(value);
+            return m_countOf.find(value);
         }
         bool empty() const
         {
-            return m_set.empty();
+            return m_countOf.empty();
         }
         T min() const
         {
-            assert(!m_set.empty());
+            assert(!m_countOf.empty());
             return m_minValue;
         }
         T max() const
         {
-            assert(!m_set.empty());
+            assert(!m_countOf.empty());
             return m_maxValue;
         };
         bool hasNext(typename map<T, int>::const_iterator valueIter) const
         {
-            return !m_set.empty() && valueIter != m_set.end() && valueIter->first != m_maxValue;
+            return !m_countOf.empty() && valueIter != m_countOf.end() && valueIter->first != m_maxValue;
         }
         T next(typename map<T, int>::const_iterator valueIter) const
         {
@@ -131,7 +131,7 @@ class Set
         }
         bool hasPrevious(typename map<T, int>::const_iterator valueIter) const
         {
-            return !m_set.empty() && valueIter != m_set.begin();
+            return !m_countOf.empty() && valueIter != m_countOf.begin();
         }
         T previous(typename map<T, int>::const_iterator valueIter) const
         {
@@ -143,8 +143,8 @@ class Set
         {
 #if 0
             return;
-            vector<T> v(m_set.begin(), m_set.end());
-            assert(v.empty() == m_set.empty());
+            vector<T> v(m_countOf.begin(), m_countOf.end());
+            assert(v.empty() == m_countOf.empty());
             if (v.empty())
                 return;
             sort(v.begin(), v.end());
@@ -157,7 +157,7 @@ class Set
 #endif
         }
     private:
-        map<T, int> m_set;
+        map<T, int> m_countOf;
         T m_maxValue;
         bool m_hasMaxValue = false;
         T m_minValue;
@@ -183,7 +183,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
     {
         return airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance;
     };
-    Set<int> airportsNotCovered;
+    MinMaxTracker<int> airportsNotCovered;
     for (int i = 0; i < airportAddedOnDay.size(); i++)
     {
         const int airportPos = airportAddedOnDay[i];
