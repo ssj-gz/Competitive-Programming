@@ -118,7 +118,7 @@ class MinMaxTracker
 vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay, int minDistance)
 {
     vector<int> results;
-    vector<int> airports;
+
     int leftEndpoint = numeric_limits<int>::max();
     int rightEndpoint = numeric_limits<int>::min();
     int leftEndPointIndex = -1;
@@ -278,7 +278,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
     }
     return results;
 }
-
 
 int main(int argc, char** argv)
 {
