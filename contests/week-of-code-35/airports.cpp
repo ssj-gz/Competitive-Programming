@@ -280,46 +280,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
 int main(int argc, char** argv)
 {
-#if 0
-    Set<int> s;
-    s.add(3);
-    cout << "Added 3" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.add(6);
-    cout << "Added 6" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.add(4);
-    cout << "Added 4" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.add(5);
-    cout << "Added 5" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    cout << "has next 5? " << s.hasNext(s.find(5)) << endl;
-    cout << "next 5: " << s.next(s.find(5)) << endl;
-    cout << "has next 6? " << s.hasNext(s.find(6)) << endl;
-    cout << "has previous 5? " << s.hasPrevious(s.find(5)) << endl;
-    cout << "previous 5: " << s.previous(s.find(5)) << endl;
-    cout << "has previous 3? " << s.hasPrevious(s.find(3)) << endl;
-    s.remove(4);
-    cout << "removed 4" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.remove(3);
-    cout << "removed 3" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.remove(6);
-    cout << "removed 6" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.add(7);
-    cout << "added 7" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.remove(7);
-    cout << "removed 7" << endl;
-    cout << "s max: " << s.max() << " s min: " << s.min() << endl;
-    s.remove(5);
-    cout << "removed 5" << endl;
-    cout << "empty? " << s.empty() << endl;
-#endif
-
     ios::sync_with_stdio(false);
     int Q;
     cin >> Q;
