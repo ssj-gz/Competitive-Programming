@@ -126,7 +126,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
     int bestCostForInner = 0;
 
-    MinMaxTracker<int> maxDiffOfSuccessiveUncoveredPairs;
+    MinMaxTracker<int> diffsOfSuccessiveUncoveredPairs;
 
     auto isUncovered = [&leftEndpoint, &rightEndpoint, minDistance](const int airportPos)
     {
@@ -170,7 +170,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         if (oldRightEndPoint != rightEndpoint)
         {
             // The right endpoint has been moved rightwards; erase the now-covered airports from the beginning of
-            // airportsNotCovered (updating maxDiffOfSuccessiveUncoveredPairs as we go) ...
+            // airportsNotCovered (updating diffsOfSuccessiveUncoveredPairs as we go) ...
             while (!airportsNotCovered.empty() && airportsNotCovered.min() <= rightEndpoint - minDistance)
             {
                 const auto oldMin = airportsNotCovered.min();
@@ -182,7 +182,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
                     //cout << "removing from left diffToRemove: " << diffToRemove << endl;
 
                     assert(diffToRemove > 0);
-                    maxDiffOfSuccessiveUncoveredPairs.remove(diffToRemove);
+                    diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
 
                 }
             }
@@ -206,7 +206,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
                 {
                     const int diffToRemove = oldMax - airportsNotCovered.max();
                     assert(diffToRemove > 0);
-                    maxDiffOfSuccessiveUncoveredPairs.remove(diffToRemove);
+                    diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
                     //cout << "removing from right diffToRemove: " << diffToRemove << endl;
 
                 }
@@ -218,7 +218,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         }
 
         // Add the new uncovered airport positions to airportsNotCovered if they are not there already,
-        // and keep maxDiffOfSuccessiveUncoveredPairs up-to-date.
+        // and keep diffsOfSuccessiveUncoveredPairs up-to-date.
         for (const auto uncoveredAirportPos : newlyUncoveredAirportPositions)
         {
             if (!airportsNotCovered.contains(uncoveredAirportPos))
@@ -234,15 +234,15 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
                 if (hasLeft && hasRight)
                 {
                     // Broken up a previously successive pair; remove their contribution.
-                    maxDiffOfSuccessiveUncoveredPairs.remove(right - left);
+                    diffsOfSuccessiveUncoveredPairs.remove(right - left);
                 } 
                 if (hasLeft)
                 {
-                    maxDiffOfSuccessiveUncoveredPairs.add(uncoveredAirportPos - left);
+                    diffsOfSuccessiveUncoveredPairs.add(uncoveredAirportPos - left);
                 }
                 if (hasRight)
                 {
-                    maxDiffOfSuccessiveUncoveredPairs.add(right - uncoveredAirportPos);
+                    diffsOfSuccessiveUncoveredPairs.add(right - uncoveredAirportPos);
                 }
             }
         }
@@ -264,9 +264,9 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             bestCostForInner = min(bestCostForInner,  maxUncoveredAirport - (rightEndpoint - minDistance));
             // The other case: left endpoint and right endpoint both extended to cover a successive pair
             // of uncovered airports so that all airports become covered.
-            if (!maxDiffOfSuccessiveUncoveredPairs.empty())
+            if (!diffsOfSuccessiveUncoveredPairs.empty())
             {
-                bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - maxDiffOfSuccessiveUncoveredPairs.max());
+                bestCostForInner = min(bestCostForInner,  leftEndpoint - rightEndpoint + 2 * minDistance - diffsOfSuccessiveUncoveredPairs.max());
             }
         }
 
