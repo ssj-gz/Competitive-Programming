@@ -177,12 +177,12 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             {
                 const auto oldMin = uncoveredAirportPositions.min();
                 uncoveredAirportPositions.remove(oldMin);
+
                 if (!uncoveredAirportPositions.empty())
                 {
                     const int diffToRemove = uncoveredAirportPositions.min() - oldMin;
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
-
                 }
             }
             // ... and maybe add the previous endpoint as an uncovered airport.
@@ -194,18 +194,17 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         if (oldLeftEndPoint != leftEndpoint)
         {
             // Left endpoint has been moved leftwards; erase the now-covered airports from the end of uncoveredAirportPositions, etc.
-            // Same as the right endpoint case, really, except dealing with iterators is more ugly!
+            // Same as the right endpoint case, really!
             while (!uncoveredAirportPositions.empty() && uncoveredAirportPositions.max() >= leftEndpoint + minDistance)
             {
                 const auto oldMax = uncoveredAirportPositions.max();
-
                 uncoveredAirportPositions.remove(oldMax);
+
                 if (!uncoveredAirportPositions.empty())
                 {
                     const int diffToRemove = oldMax - uncoveredAirportPositions.max();
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
-
                 }
             }
             if ((i != 0) && (isUncovered(oldLeftEndPoint) && (oldLeftEndPoint != rightEndpoint)))
