@@ -174,12 +174,10 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             while (!airportsNotCovered.empty() && airportsNotCovered.min() <= rightEndpoint - minDistance)
             {
                 const auto oldMin = airportsNotCovered.min();
-                //cout << "Erasing from left: " <<  oldMin << endl;
                 airportsNotCovered.remove(oldMin);
                 if (!airportsNotCovered.empty())
                 {
                     const int diffToRemove = airportsNotCovered.min() - oldMin;
-                    //cout << "removing from left diffToRemove: " << diffToRemove << endl;
 
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
@@ -199,7 +197,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             while (!airportsNotCovered.empty() && airportsNotCovered.max() >= leftEndpoint + minDistance)
             {
                 const auto oldMax = airportsNotCovered.max();
-                //cout << "Erasing from right: " <<  oldMax << endl;
 
                 airportsNotCovered.remove(oldMax);
                 if (!airportsNotCovered.empty())
@@ -207,7 +204,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
                     const int diffToRemove = oldMax - airportsNotCovered.max();
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
-                    //cout << "removing from right diffToRemove: " << diffToRemove << endl;
 
                 }
             }
@@ -229,7 +225,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
                 const int left = (hasLeft ? airportsNotCovered.previous(newUncoveredIter) : -1);
                 const bool hasRight = airportsNotCovered.hasNext(newUncoveredIter);
                 const int right = (hasRight ? airportsNotCovered.next(newUncoveredIter) : -1);
-                //cout << "uncoveredAirportPos: " << uncoveredAirportPos << " hasLeft? " << hasLeft << " left: " << left << " hasRight: " << hasRight << " right: " << right << endl;
 
                 if (hasLeft && hasRight)
                 {
@@ -256,7 +251,6 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             bestCostForInner = numeric_limits<int>::max();
             const int minUncoveredAirport = airportsNotCovered.min();
             const int maxUncoveredAirport = airportsNotCovered.max();
-            //cout << "minUncoveredAirport: " << minUncoveredAirport << " maxUncoveredAirport: " << maxUncoveredAirport << endl;
 
             // If left endpoint extended to cover everything.
             bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minUncoveredAirport);
