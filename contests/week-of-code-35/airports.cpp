@@ -50,7 +50,7 @@ class Set
     public:
         void add(const T& value)
         {
-            m_set.insert(value);
+            m_set[value]++;
             if (!m_hasMaxValue || value > m_maxValue)
             {
                 m_maxValue = value;
@@ -67,27 +67,31 @@ class Set
         {
             auto valueIter = m_set.find(value);
             assert(valueIter != m_set.end());
-            valueIter = m_set.erase(valueIter);
-            if (m_set.empty())
+            m_set[value]--;
+            if (m_set[value] == 0)
             {
-                m_hasMinValue = false;
-                m_hasMaxValue = false;
-            }
-            else
-            {
-                if (valueIter == m_set.end())
+                valueIter = m_set.erase(valueIter);
+                if (m_set.empty())
                 {
-                    assert(value == m_maxValue);
-                    assert(value != m_minValue);
-                    valueIter--;
-                    m_maxValue = *valueIter;
+                    m_hasMinValue = false;
+                    m_hasMaxValue = false;
                 }
                 else
                 {
-                    assert(value != m_maxValue);
-                    if (value == m_minValue)
+                    if (valueIter == m_set.end())
                     {
-                        m_minValue = *valueIter;
+                        assert(value == m_maxValue);
+                        assert(value != m_minValue);
+                        valueIter--;
+                        m_maxValue = valueIter->first;
+                    }
+                    else
+                    {
+                        assert(value != m_maxValue);
+                        if (value == m_minValue)
+                        {
+                            m_minValue = valueIter->first;
+                        }
                     }
                 }
             }
@@ -97,7 +101,7 @@ class Set
         {
             return (m_set.find(value) != m_set.end());
         }
-        typename set<T>::iterator find(const T& value)
+        typename map<T, int>::iterator find(const T& value)
         {
             return m_set.find(value);
         }
@@ -115,28 +119,29 @@ class Set
             assert(!m_set.empty());
             return m_maxValue;
         };
-        bool hasNext(typename set<T>::const_iterator valueIter) const
+        bool hasNext(typename map<T, int>::const_iterator valueIter) const
         {
-            return !m_set.empty() && valueIter != m_set.end() && *valueIter != m_maxValue;
+            return !m_set.empty() && valueIter != m_set.end() && valueIter->first != m_maxValue;
         }
-        T next(typename set<T>::const_iterator valueIter) const
+        T next(typename map<T, int>::const_iterator valueIter) const
         {
             assert(hasNext(valueIter));
             valueIter++;
-            return *valueIter;
+            return valueIter->first;
         }
-        bool hasPrevious(typename set<T>::const_iterator valueIter) const
+        bool hasPrevious(typename map<T, int>::const_iterator valueIter) const
         {
             return !m_set.empty() && valueIter != m_set.begin();
         }
-        T previous(typename set<T>::const_iterator valueIter) const
+        T previous(typename map<T, int>::const_iterator valueIter) const
         {
             assert(hasPrevious(valueIter));
             valueIter--;
-            return *valueIter;
+            return valueIter->first;
         }
         void validate()
         {
+#if 0
             return;
             vector<T> v(m_set.begin(), m_set.end());
             assert(v.empty() == m_set.empty());
@@ -149,9 +154,10 @@ class Set
             assert(v.back() == m_maxValue);
             assert(!hasNext(find(m_maxValue)));
             assert(!hasPrevious(find(m_minValue)));
+#endif
         }
     private:
-        set<T> m_set;
+        map<T, int> m_set;
         T m_maxValue;
         bool m_hasMaxValue = false;
         T m_minValue;
