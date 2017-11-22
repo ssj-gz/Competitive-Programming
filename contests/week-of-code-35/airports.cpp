@@ -134,7 +134,7 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
     {
         return airportPos < leftEndpoint + minDistance && airportPos > rightEndpoint - minDistance;
     };
-    MinMaxTracker<int> airportsNotCovered;
+    MinMaxTracker<int> uncoveredAirportPositions;
     for (int i = 0; i < airportAddedOnDay.size(); i++)
     {
         const int airportPos = airportAddedOnDay[i];
@@ -172,14 +172,14 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         if (oldRightEndPoint != rightEndpoint)
         {
             // The right endpoint has been moved rightwards; erase the now-covered airports from the beginning of
-            // airportsNotCovered (updating diffsOfSuccessiveUncoveredPairs as we go) ...
-            while (!airportsNotCovered.empty() && airportsNotCovered.min() <= rightEndpoint - minDistance)
+            // uncoveredAirportPositions (updating diffsOfSuccessiveUncoveredPairs as we go) ...
+            while (!uncoveredAirportPositions.empty() && uncoveredAirportPositions.min() <= rightEndpoint - minDistance)
             {
-                const auto oldMin = airportsNotCovered.min();
-                airportsNotCovered.remove(oldMin);
-                if (!airportsNotCovered.empty())
+                const auto oldMin = uncoveredAirportPositions.min();
+                uncoveredAirportPositions.remove(oldMin);
+                if (!uncoveredAirportPositions.empty())
                 {
-                    const int diffToRemove = airportsNotCovered.min() - oldMin;
+                    const int diffToRemove = uncoveredAirportPositions.min() - oldMin;
 
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
@@ -194,16 +194,16 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         }
         if (oldLeftEndPoint != leftEndpoint)
         {
-            // Left endpoint has been moved leftwards; erase the now-covered airports from the end of airportsNotCovered, etc.
+            // Left endpoint has been moved leftwards; erase the now-covered airports from the end of uncoveredAirportPositions, etc.
             // Same as the right endpoint case, really, except dealing with iterators is more ugly!
-            while (!airportsNotCovered.empty() && airportsNotCovered.max() >= leftEndpoint + minDistance)
+            while (!uncoveredAirportPositions.empty() && uncoveredAirportPositions.max() >= leftEndpoint + minDistance)
             {
-                const auto oldMax = airportsNotCovered.max();
+                const auto oldMax = uncoveredAirportPositions.max();
 
-                airportsNotCovered.remove(oldMax);
-                if (!airportsNotCovered.empty())
+                uncoveredAirportPositions.remove(oldMax);
+                if (!uncoveredAirportPositions.empty())
                 {
-                    const int diffToRemove = oldMax - airportsNotCovered.max();
+                    const int diffToRemove = oldMax - uncoveredAirportPositions.max();
                     assert(diffToRemove > 0);
                     diffsOfSuccessiveUncoveredPairs.remove(diffToRemove);
 
@@ -215,18 +215,18 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
             }
         }
 
-        // Add the new uncovered airport positions to airportsNotCovered if they are not there already,
+        // Add the new uncovered airport positions to uncoveredAirportPositions if they are not there already,
         // and keep diffsOfSuccessiveUncoveredPairs up-to-date.
         for (const auto uncoveredAirportPos : newlyUncoveredAirportPositions)
         {
-            if (!airportsNotCovered.contains(uncoveredAirportPos))
+            if (!uncoveredAirportPositions.contains(uncoveredAirportPos))
             {
-                airportsNotCovered.add(uncoveredAirportPos);
-                const auto newUncoveredIter = airportsNotCovered.find(uncoveredAirportPos);
-                const bool hasLeft = airportsNotCovered.hasPrevious(newUncoveredIter);
-                const int left = (hasLeft ? airportsNotCovered.previous(newUncoveredIter) : -1);
-                const bool hasRight = airportsNotCovered.hasNext(newUncoveredIter);
-                const int right = (hasRight ? airportsNotCovered.next(newUncoveredIter) : -1);
+                uncoveredAirportPositions.add(uncoveredAirportPos);
+                const auto newUncoveredIter = uncoveredAirportPositions.find(uncoveredAirportPos);
+                const bool hasLeft = uncoveredAirportPositions.hasPrevious(newUncoveredIter);
+                const int left = (hasLeft ? uncoveredAirportPositions.previous(newUncoveredIter) : -1);
+                const bool hasRight = uncoveredAirportPositions.hasNext(newUncoveredIter);
+                const int right = (hasRight ? uncoveredAirportPositions.next(newUncoveredIter) : -1);
 
                 if (hasLeft && hasRight)
                 {
@@ -248,11 +248,11 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
         // Compute the bestCostForInner i.e. the cost required to arrange everything so that it is reachable, but *ignoring*
         // (for now) any adjustment necessary to make the gap between the endpoints large enough.
         bestCostForInner = 0;
-        if (!airportsNotCovered.empty())
+        if (!uncoveredAirportPositions.empty())
         {
             bestCostForInner = numeric_limits<int>::max();
-            const int minUncoveredAirport = airportsNotCovered.min();
-            const int maxUncoveredAirport = airportsNotCovered.max();
+            const int minUncoveredAirport = uncoveredAirportPositions.min();
+            const int maxUncoveredAirport = uncoveredAirportPositions.max();
 
             // If left endpoint extended to cover everything.
             bestCostForInner = min(bestCostForInner,  (leftEndpoint + minDistance) - minUncoveredAirport);
