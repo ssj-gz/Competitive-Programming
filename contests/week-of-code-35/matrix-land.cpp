@@ -33,18 +33,20 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     int bestSum = scoreIfDescendAt.front();
     int cumulative = numeric_limits<int>::min();
     int bestCumulative = numeric_limits<int>::min();
-    int lowestDescentToBeatBestSum = numeric_limits<int>::max();
-    int bestSumBaseIfLowestDescentFound = -1;
+    //int lowestDescentToBeatBestSum = numeric_limits<int>::max();
+    //int bestSumBaseIfLowestDescentFound = -1;
     for (int startPoint = 0; startPoint < row.size(); startPoint++)
     {
         bestSum += row[startPoint];
-        bestSumBaseIfLowestDescentFound += row[startPoint];
+        //bestSumBaseIfLowestDescentFound += row[startPoint];
 
+        bool resetCumulative = false;
         if (cumulative < 0)
         {
             // Just as in Kadane's algorithm, if breaking with the existing
             // cumulative give a better result, then do so.
             cumulative = row[startPoint];
+            resetCumulative = true;
         }
         else
             cumulative += row[startPoint];
@@ -54,19 +56,23 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
             // This would be the best if only it could use a descent of lowestDescentToBeatBestSum
             // size.
             bestCumulative = cumulative;
-            const int deficit = bestSum - (cumulative + scoreIfDescendAt[startPoint]);
-            lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[startPoint] + deficit);
-            bestSumBaseIfLowestDescentFound = bestCumulative;
+            //const int deficit = bestSum - (cumulative + scoreIfDescendAt[startPoint]);
+            //lowestDescentToBeatBestSum = min(lowestDescentToBeatBestSum, scoreIfDescendAt[startPoint] + deficit);
+            //bestSumBaseIfLowestDescentFound = bestCumulative;
         }
         if (cumulative + scoreIfDescendAt[startPoint] > bestSum)
         {
             bestSum = cumulative + scoreIfDescendAt[startPoint];
-            lowestDescentToBeatBestSum = numeric_limits<int>::max();
+            //lowestDescentToBeatBestSum = numeric_limits<int>::max();
+            assert(resetCumulative);
         }
+#if 0
         if (scoreIfDescendAt[startPoint] >= lowestDescentToBeatBestSum)
         {
+            assert(bestSum == bestSumBaseIfLowestDescentFound + scoreIfDescendAt[startPoint]);
             bestSum = bestSumBaseIfLowestDescentFound + scoreIfDescendAt[startPoint];
         }
+#endif
 
         result[startPoint] = bestSum;
 
