@@ -30,24 +30,24 @@ struct SubArrayInfo
 vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector<int>& scoreIfDescendAt)
 {
     vector<int> result(row.size());
-    int bestSum = scoreIfDescendAt.front();
-    int cumulative = numeric_limits<int>::min();
+    int bestSum = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
+    int bestCumulative = numeric_limits<int>::min();
     for (int startPoint = 0; startPoint < row.size(); startPoint++)
     {
         bestSum += row[startPoint];
 
-        if (cumulative < 0)
+        if (bestCumulative < 0)
         {
             // Just as in Kadane's algorithm, if breaking with the existing
-            // cumulative give a better result, then do so.
-            cumulative = row[startPoint];
+            // bestCumulative give a better result, then do so.
+            bestCumulative = row[startPoint];
         }
         else
-            cumulative += row[startPoint];
+            bestCumulative += row[startPoint];
 
-        if (cumulative + scoreIfDescendAt[startPoint] > bestSum)
+        if (bestCumulative + scoreIfDescendAt[startPoint] > bestSum)
         {
-            bestSum = cumulative + scoreIfDescendAt[startPoint];
+            bestSum = bestCumulative + scoreIfDescendAt[startPoint];
         }
 
         result[startPoint] = bestSum;
