@@ -263,60 +263,9 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
 
 int main(int argc, char** argv)
 {
-    if (argc == 2)
-    {
-#if 0
-        const int n = 100000;
-        cout << n << " " << n << " " << 1 << endl;
-        for (int j = 1; j <= 2; j++)
-        {
-            for (int i = 0; i < n; i++)
-            {
-                cout << (i + 1) << " ";
-            }
-            cout << endl;
-        }
-        for (int i = 0; i < 1; i++)
-        {
-            cout << "0 0 " << (n - 1) << " " << (n - 1) << endl;
-        }
-        return 0;
-#else
-        srand(time(0));
-        const int maxGenValue = 30000;
-        const int n = rand() % 100 + 1;
-        const int m = rand() % 100 + 1;
-        const int q = rand() % 1000 + 1;
-        cout << n << " " << m << " " << q << " " << endl;
-        for (int i = 0; i < n; i++)
-        {
-            cout  << (rand() % maxGenValue) + 1 << " ";
-        }
-        cout << endl;
-        for (int i = 0; i < m; i++)
-        {
-            cout  << (rand() % maxGenValue) + 1 << " ";
-        }
-        cout << endl;
-        for (int i = 0; i < q; i++)
-        {
-            int r1 = rand() % n;
-            int r2 = rand() % n;
-            if (r2 < r1)
-                swap(r1, r2);
-            int c1 = rand() % m;
-            int c2 = rand() % m;
-            if (c2 < c1)
-                swap(c1, c2);
-            cout << r1 << " " << c1 << " " << r2 << " " << c2 << endl;
-        }
-        return 0;
-#endif
-    }
     int n, m, q;
 
     cin >> n >> m >> q;
-    //cout << "n: " << n << " m: " << m << " q: " << q << endl;
 
     vector<int> a(n);
     for (int i = 0; i < n; i++)
