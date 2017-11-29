@@ -263,6 +263,96 @@ int findNumDistinctGCDsInSubmatrix(const vector<int>& a, const vector<int>& b, i
 
 int main(int argc, char** argv)
 {
+    // *Ouch* - this was a really tough one, and I spent *10s of hours* pursuing dead ends before I finally figured out
+    // the correct approach.  The 20% completion rate gave me some solace, but after successfully completing it I looked
+    // at the Editorial briefly (I didn't examine it in detail, but it looked far simpler than what I have here)
+    // and it turns out that this challenge was part of an *Hourrank* challenge - i.e. those 20% of people have solved this,
+    // plus about 4 other challenges, *within an hour*.  Felt very, very stupid after that!
+    //
+    // Anyway, the basic problem is, given too lists of numbers A and B, of size ~100000 and where each number in the list
+    // is less than 100000, to find the number of distinct values of gcd(a, b) (a in A, b in B) that can be produced.
+    // The basic strategy is, for each possible gcd (since the numbers in A and B are bounded by 100000, so are the possible
+    // gcds), to see if we can generate that gcd using a pair from A and B.  More specifically, we use a concept that I'm
+    // calling the "basis" of a number to home-in on subsets of A and B in which pairs from these subsets are not co-prime and whose
+    // gcd can be predicted to a degree, and then count the number of ways of picking from A and B to generate this gcd using
+    // a counting argument that takes into account over and under counting using the Inclusion-Exclusion Principle.  All
+    // clear as mud, so let's describe this all more fully!
+    //
+    // Let maxValue be the maximum value of an element on A or B, and find all the primes up to maxValue.  Let's say there are
+    // NP such primes, and number them p_1, p_2, ... p_NP.  Then any number x in A or B can be expressed as an NP-vector
+    // (k_1, k_2, ... , k_NP) where x = p_1^k_1 + p_2^k_2 + ... + p_NP^k_NP, where each k_i >= 0.  Let pvec(x) be this (unique) NP-vector
+    // representing x.  Sometimes I'll be using x and pvec(x) interchangeably; it's hopefully clear when I'm doing this from context.
+    //
+    // Given a y in A or B, we say that y *contains* x if and only if for each non-zero entry in pvec(x), the corresponding entry in
+    // pvec(y) is equal to that entry in pvec(x) i.e. y contains x if and only if, for all i such that pvec(x)[i] != 0, pvec(y)[i] = pvec(x)[i].
+    // Thus, if x = 3^2*5*7^3, then 2*3^2*5*7^3*11 contains x, but 2*3*7^3 and 3^2*5*7^4 do not.
+    //
+    // The *basis* of x is the set of p_i's such that the ith entry in pvec(x) is non-zero (essentially corresponding to the set of indices of primes
+    // that make up x).  Thus .e.g the basis of 3^2 * 11 is {3, 11} since x is divisible by (and only by) the primes 3 and 11.
+    //
+    // Given x and y, it is easily seen that the NP-vector v representing gcd(x, y) satisfies v[i] = min(pvec(x)[i], pvec(y)[i]) for all i = 1 ... NP,
+    // so is easily computed if we know pvec(x) and pvec(y).
+    //
+    // For each x in 1 ... maxValue, we'd like to know whether or not there is a pair a in A, b in B such that gcd(a,b) = x.  Imagine x = 3^3*5*11^2;
+    // then restricting our attention to pairs a, b such that a and b *contain* the basis of x i.e. a and b that contain {5, 7, 11}.  We can narrow it 
+    // down further: using the formula for gcd above, we want to consider the pairs satisfying the following:
+    //
+    //  i) a contains 3^3 * 5 * 11^2, as does b.
+    //  ii) a contains 3^4 * 5 * 11^2, b contains 3^3 * 5 * 11^2 (and vice-versa).
+    //  iii) a contains 3^3 * 5^2 * 11^2, b contains 3^3 * 5 * 11^2 (and vice-versa)
+    //
+    // and that's all - since a and b must be less than maxValue = 100'000, there's not much wiggle-room for changing powers of the 3, 5 and 11 without
+    // exceeding maxValue.  If we pick a and b satisfying any of these five (condition i) or condition ii) or condition iii) or reverse of condition ii),
+    // or reverse of condition iii)) conditions, then in their gcd the power of 3 will be 3, the power of 5, 1, and the power of 11, 2 i.e. the gcd of 
+    // a, b will *contain* the required x.  So it seems that perhaps counting the number of pairs of a and b which satisfy any of the five conditions
+    // will give us the number of pairs with gcd(a, b) = x.
+    //
+    // Unfortunately, of course, just because a gcd contains x, does not mean that the gcd equals x!
+    //
+    // Imagine A = 3^3*5*11^2, 2*3^4*5*11^2, 3^4*5*7*11^2, 2*3^3*5*7*11^2 and
+    //         B = 2*3^3*5*11^2, 3^4*5*11^2, 3^3*5*7*11^2, 2*3^3*5*7*11^2.
+    //
+    // (not a very realistic example, since some of the elements in A and B exceed maxValue, but it will do to illustrate the point!).
+    //
+    // If we choose all a, b satisfying i), we get
+    //
+    //   A' = 3^3*5*11^2, 2*3^3*5*7*11^2
+    //   B' = 2*3^3*5*11^2, 3^3*5*7*11^2, 2*3^3*5*7*11^2.
+    //
+    // and we see that if we pick a = 2*3^3*5*7*11^2 and b = 2*3^3*5*11^2, we get gcd(a, b) = 2*3^3*5*11^2, which is not the desired x = 3^3*5*11^2.
+    // Picking a = 2*3^3*5*7*11^2 and b = 2*3^3*5*7*11^2 gives gcd(a, b) = 2*3^3*5*7*11^2, which again is not the desired x.
+    //
+    // Likewise, if we choose all a,b satisfying ii), then we get
+    //
+    //   A' = 2*3^4*5*11^2, 3^4*5*7*11^2
+    //   B = 2*3^3*5*11^2, 3^3*5*7*11^2, 2*3^3*5*7*11^2
+    //
+    // and picking a = 3^4*5*7*11^2 and b = 3^3*5*7*11^2 gives gcd(a, b) = 3^3*5*7*11^2.
+    //
+    // I actually picked A, B especially so that most pairs satisfy one of the conditions; let's make a table of those that do!
+    //
+    //        a              b             gcd(a, b)        condition satisfied
+    //  3^3*5*11^2      2*3^3*5*11^2       3^3*5*11^2             i)
+    //  3^3*5*11^2      3^4*5*11^2         3^3*5*11^2             ii)-reversed
+    //  3^3*5*11^2      3^3*5*7*11^2       3^3*5*11^2             i)
+    //  3^3*5*11^2      3^3*5*7*11^2       3^3*5*11^2             i)
+    //  2*3^4*5*11^2    2*3^3*5*11^2       2*3^3*5*11^2           ii)
+    //  2*3^4*5*11^2    3^3*5*7*11^2       3^3*5*11^2             ii)
+    //  2*3^4*5*11^2    2*3^3*5*7*11^2     2*3^3*5*11^2           ii)
+    //  3^4*5*7*11^2    2*3^3*5*11^2       3^3*5*11^2             ii)
+    //  3^4*5*7*11^2    3^3*5*7*11^2       3^3*5*7*11^2           ii)
+    //  3^4*5*7*11^2    2*3^3*5*7*11^2     3^3*5*7*11^2           ii)
+    //  2*3^3*5*7*11^2  2*3^3*5*11^2       2*3^3*5*11^2           i)
+    //  2*3^3*5*7*11^2  3^4*5*11^2         3^3*5*11^2             ii)-reversed
+    //  2*3^3*5*7*11^2  3^3*5*7*11^2       3^3*5*7*11^2           i)
+    //  2*3^3*5*7*11^2  2*3^3*5*7*11^2     2*3^3*5*7*11^2         i)
+    //
+    // The number of pairs of a and b that satisfy any of the conditions is 14, and naively, we might have expected that
+    // the number of pairs that generated x = 3^3*5*11^2 was 14.  But instead, it is 7 - the other pairs make
+    // 2*3^3*5*11^2 (3 pairs), 3^3*5*7*11^2 (3 pairs) and 2*3^3*5*7*11^2 (1 pair).
+
+
+
     int n, m, q;
 
     cin >> n >> m >> q;
