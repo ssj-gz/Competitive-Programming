@@ -8,10 +8,10 @@ constexpr auto boardWidth = 15;
 constexpr auto boardHeight = 15;
 enum CellState { Win, Lose, Unknown };
 
-CellState findCellState(int x, int y, vector<vector<CellState>>& board)
+CellState findCellState(int x, int y, vector<vector<CellState>>& boardCellStates)
 {
-    if (board[x][y] != Unknown)
-        return board[x][y];
+    if (boardCellStates[x][y] != Unknown)
+        return boardCellStates[x][y];
 
     bool canMakeMove = false;
     bool canReachLoseCell = false;
@@ -39,19 +39,21 @@ CellState findCellState(int x, int y, vector<vector<CellState>>& board)
             continue;
 
         canMakeMove = true;
-        if (findCellState(newX, newY, board) == Lose)
+        if (findCellState(newX, newY, boardCellStates) == Lose)
             canReachLoseCell = true;
     }
 
     const CellState cellState = canReachLoseCell ? Win : Lose;
-    board[x][y] = cellState;
+    boardCellStates[x][y] = cellState;
 
     return cellState;
 }
 
 int main()
 {
-    vector<vector<CellState>> board(boardWidth, vector<CellState>(boardHeight, Unknown));
+    // Easy one - just use retrograde analysis and a bit of Dynamic Programming to mark
+    // cells of the board as either Win or Lose for the player who starts there.
+    vector<vector<CellState>> boardCellStates(boardWidth, vector<CellState>(boardHeight, Unknown));
 
     int T;
     cin >> T;
@@ -60,11 +62,11 @@ int main()
     {
         int x, y;
         cin >> x >> y;
-        // Make 0-relative.
+        // Make x and y 0-relative.
         x--;
         y--;
 
-        const auto player1Wins = (findCellState(x, y, board) == Win);
+        const auto player1Wins = (findCellState(x, y, boardCellStates) == Win);
         if (player1Wins)
             cout << "First";
         else
