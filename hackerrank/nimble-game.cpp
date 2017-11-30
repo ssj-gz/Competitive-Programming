@@ -42,9 +42,11 @@ int main()
             int numCoinsInSquare;
             cin >> numCoinsInSquare;
 
-            if ((numCoinsInSquare % 2) == 1)
+            const auto pileSize = i;
+            const auto numPilesWithThisPileSize = numCoinsInSquare;
+
+            if ((numPilesWithThisPileSize % 2) == 1)
             {
-                const auto pileSize = i;
                 stonePileXorSum ^= pileSize;
             }
         }
