@@ -13,7 +13,6 @@ CellState findCellState(int x, int y, vector<vector<CellState>>& boardCellStates
     if (boardCellStates[x][y] != Unknown)
         return boardCellStates[x][y];
 
-    bool canMakeMove = false;
     bool canReachLoseCell = false;
 
     struct Diff
@@ -38,7 +37,6 @@ CellState findCellState(int x, int y, vector<vector<CellState>>& boardCellStates
         if (newX < 0 || newX >= boardWidth || newY < 0 || newY >= boardHeight)
             continue;
 
-        canMakeMove = true;
         if (findCellState(newX, newY, boardCellStates) == Lose)
             canReachLoseCell = true;
     }
