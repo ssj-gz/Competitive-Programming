@@ -24,9 +24,9 @@ CellState findCellState(int x, int y, vector<vector<CellState>>& boardCellStates
 
     const Diff moveDirections[] = 
     {
-        {-2, 1},
+        {-2, +1},
         {-2, -1},
-        {1, -2},
+        {+1, -2},
         {-1, -2}
     };
 
