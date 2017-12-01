@@ -18,9 +18,9 @@ int main()
     //
     //  b) after each move, the number of blocks always reduces by exactly 1 (easily verified); and
     //
-    //  c) the person who can make the last move always wins.
+    //  c) the person who can make the final move always wins.
     //
-    // To see c), let's look at all the states the penultimate move can be in i.e. all the contents of the 3 piles when there are exactly two blocks remaining.
+    // To see c), let's look at all the states the final move can be made in i.e. all the possible distributions of the final two blocks over the three piles.
     //
     //  i) 2 0 0 ii) 0 2 0 iii) 0 0 2 iv) 1 1 0 v) 1 0 1 vi) 0 1 1
     //     A B C     A B C      A B C     A B C    A B C     A B C
@@ -32,11 +32,11 @@ int main()
     // taking the one from B then the one from A means we add to pile B (1 - 0 is 1, mod 3) - thus if the current player is Kitty, she makes the move that adds to B;
     // if current player is Katty, she makes the move that adds to C.  Either way, the player who makes the final move wins.
     //
-    // v) and vi) are basically identical to iv) - we have two orders for picking the last two blocks, and the current player can ensure that the last
+    // The remaining cases v) and vi) are basically identical to iv) - we have two orders for picking the final two blocks, and the current player can ensure that the final
     // block is added to B or C and so should choose the one that makes them win.
     //
     // So in all cases, the current player i.e. the one who makes the final move is the winner.  Coupled with a), we see that, if n >= 2,
-    // then Kitty makes the last move if and only if n is even i.e. for n >= 2, Kitty wins if and only if n is even.  She also wins if n == 1.
+    // then Kitty makes the final move if and only if n is even i.e. for n >= 2, Kitty wins if and only if n is even.  She also wins if n == 1.
     
     int T;
     cin >> T;
