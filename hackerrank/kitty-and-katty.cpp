@@ -16,7 +16,7 @@ int main()
     //  we can model the problem as three piles of blocks, where pile A has the blocks whose values mod 3 are 0; B has those whose value is 1; and C has 
     //  those whose value is 2; 
     //
-    //  b) after each move, the number of blocks always blocks reduces by exactly 1 (easily verified); and
+    //  b) after each move, the number of blocks always reduces by exactly 1 (easily verified); and
     //
     //  c) the person who can make the last move always wins.
     //
