@@ -13,8 +13,8 @@ int main()
     // The trick is to notice that :
     //
     //  a) the numbers on the blocks are more-or-less irrelevant; only their value mod 3 is important; thus
-    //  we can model the problem as three piles of blocks, where pile A has the blocks whose values mod 3 are 0; B has those whose value is 2; and C has 
-    //  those whose value is 3; 
+    //  we can model the problem as three piles of blocks, where pile A has the blocks whose values mod 3 are 0; B has those whose value is 1; and C has 
+    //  those whose value is 2; 
     //
     //  b) after each move, the number of blocks always blocks reduces by exactly 1 (easily verified); and
     //
