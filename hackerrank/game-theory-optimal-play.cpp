@@ -5,7 +5,10 @@
 
 using namespace std;
 
+#define VERBOSE
+
 #define MOVE_COINS_EXAMPLE
+//#define MOVE_COINS_EXAMPLE_RANDOM
 #ifdef MOVE_COINS_EXAMPLE
 struct Node
 {
@@ -209,16 +212,20 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState)
         const auto result = findWinner(otherPlayer(currentPlayer), newGameState);
         if (result == winForPlayer(currentPlayer))
         {
+#ifdef VERBOSE
             if (playState != winForPlayer(currentPlayer))
             {
                 // Print out the winning move, but only once.
                 cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
             }
+#endif
             playState = winForPlayer(currentPlayer);
         }
     }
 
+#ifdef VERBOSE
     cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : "Loses") << endl;
+#endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
     return playState;
@@ -256,6 +263,7 @@ int main()
 
     printTree(nodes);
 
+#ifdef MOVE_COINS_EXAMPLE_RANDOM
     while (true)
     {
         GameState initialState;
@@ -273,6 +281,16 @@ int main()
         cout << result << "  oddHeightXor: " << oddHeightXor << endl;
         assert((result == Player1Win) == (oddHeightXor != 0));
     }
+#else
+    GameState initialState;
+    initialState.coins.resize(n);
+    for (const auto node : nodes)
+    {
+        initialState.coins[node.nodeId] = node.numCoins;
+    }
+    const auto result = (findWinner(Player1, initialState));
+    cout << result << endl;
+#endif
 #endif
 }
 
