@@ -221,8 +221,8 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
 PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, PlayerType player1Type, PlayerType player2Type, bool isBruteForceMoveSearch)
 {
     const auto playThisMoveAsType = (currentPlayer == Player1 ? player1Type : player2Type);
-    const bool playThisMoveInteractively = (playThisMoveAsType == Human);
-    const bool playThisMoveRandomly = (playThisMoveAsType == Random);
+    const bool playThisMoveInteractively = !isBruteForceMoveSearch && (playThisMoveAsType == Human);
+    const bool playThisMoveRandomly = !isBruteForceMoveSearch && (playThisMoveAsType == Random);
     if (isBruteForceMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
         // Don't use the cache if we're interactive/ random: it will know all losing states from earlier dry-runs,
@@ -431,7 +431,7 @@ int main(int argc, char** argv)
     {
         initialState.coins[node.nodeId] = node.numCoins;
     }
-    const auto result = (findWinner(Player1, initialState, CPU, Human));
+    const auto result = (findWinner(Player1, initialState, CPU, Random));
     cout << result << endl;
 #endif
 #endif
