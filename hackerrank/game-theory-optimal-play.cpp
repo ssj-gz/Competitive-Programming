@@ -225,12 +225,13 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
     auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, interactivePlayer](const Move& move, bool isInteractive)
     {
         const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-        const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, interactivePlayer);
+        const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, isInteractive, interactivePlayer);
         if (result == winForPlayer(currentPlayer))
         {
             playState = winForPlayer(currentPlayer);
         }
     };
+
     if (gameState.hasWinningPlayerOverride(currentPlayer))
     {
         playState = winForPlayer(gameState.winningPlayerOverride(currentPlayer));
@@ -251,6 +252,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
                 int moveIndex = -1;
                 cin >> moveIndex;
                 assert(cin);
+                assert(moveIndex >= 0 && moveIndex < availableMoves.size());
                 const auto chosenMove = availableMoves[moveIndex];
                 cout << "You chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
                 updatePlayStateFromMove(chosenMove, true);
@@ -265,25 +267,21 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
             Move chosenMove;
             for (const auto& move : availableMoves)
             {
-                const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-                const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, false, Player1);
-                if (result == winForPlayer(currentPlayer))
-                {
-                    if (playState != winForPlayer(currentPlayer))
-                    {
-                        chosenMove = move;
-                        // Print out the winning move, but only once.
-#ifdef VERBOSE
-                        cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
-#endif
-                    }
-                    playState = winForPlayer(currentPlayer);
-                }
+                const auto oldPlayState = playState;
+                updatePlayStateFromMove(move, false);
 
                 if (playState != winForPlayer(currentPlayer))
                 {
                     // If we can't win, just play an arbitrary move; the last one, say.
                     chosenMove = move;
+                }
+                else if (oldPlayState != playState)
+                {
+                    // This is the first winning move we've discovered; store it and print it out (but not subsequent ones).
+                    chosenMove = move;
+#ifdef VERBOSE
+                    cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
+#endif
                 }
             }
             if (isInteractive && !availableMoves.empty())
