@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <sstream>
 #include <cassert>
 
 using namespace std;
@@ -232,6 +233,25 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
         }
     };
 
+    auto readInt = [](const string& message)
+    {
+        while (true)
+        {
+            cout << message << endl;
+            int value;
+            cin >> value;
+
+            if (!cin)
+            {
+                cout << "Invalid input; please try again" << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            else
+                return value;
+        }
+    };
+
     if (gameState.hasWinningPlayerOverride(currentPlayer))
     {
         playState = winForPlayer(gameState.winningPlayerOverride(currentPlayer));
@@ -244,15 +264,23 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
         {
             if (!availableMoves.empty())
             {
-                cout << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
+                stringstream messagePromptStream;
+                messagePromptStream << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
                 for (int i = 0; i < availableMoves.size(); i++)
                 {
-                    cout << i << ":  " << availableMoves[i] << endl;
+                    messagePromptStream << i << ":  " << availableMoves[i] << endl;
                 }
                 int moveIndex = -1;
-                cin >> moveIndex;
-                assert(cin);
-                assert(moveIndex >= 0 && moveIndex < availableMoves.size());
+                while (true)
+                {
+                    moveIndex = readInt(messagePromptStream.str());
+                    if (moveIndex < 0 || moveIndex >= availableMoves.size())
+                    {
+                        cout << "Invalid input" << endl;
+                    }
+                    else
+                        break;
+                }
                 const auto chosenMove = availableMoves[moveIndex];
                 cout << "You chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
                 updatePlayStateFromMove(chosenMove, true);
