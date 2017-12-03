@@ -208,7 +208,7 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
     return nextGameState;
 }
 
-PlayState findWinner(Player currentPlayer, const GameState& gameState)
+PlayState findWinnerAux(Player currentPlayer, const GameState& gameState)
 {
     if (playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
@@ -227,7 +227,7 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState)
         for (const auto& move : availableMoves)
         {
             const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-            const auto result = findWinner(otherPlayer(currentPlayer), newGameState);
+            const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState);
             if (result == winForPlayer(currentPlayer))
             {
 #ifdef VERBOSE
@@ -248,6 +248,11 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState)
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
     return playState;
+}
+
+PlayState findWinner(Player currentPlayer, const GameState& gameState)
+{
+    return findWinnerAux(currentPlayer, gameState);
 }
 
 int main()
