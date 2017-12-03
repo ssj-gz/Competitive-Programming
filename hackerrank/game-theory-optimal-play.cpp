@@ -287,7 +287,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
             }
             else
             {
-                cout << "Player " << currentPlayer << " - you have no moves available.  You lose, sir; good-day!" << endl;
+                cout << "Player " << currentPlayer << " - you have no moves available.  You lose; good-day, Sir!" << endl;
             }
         }
         else
