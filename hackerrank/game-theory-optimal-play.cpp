@@ -209,10 +209,16 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState)
         const auto result = findWinner(otherPlayer(currentPlayer), newGameState);
         if (result == winForPlayer(currentPlayer))
         {
+            if (playState != winForPlayer(currentPlayer))
+            {
+                // Print out the winning move, but only once.
+                cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
+            }
             playState = winForPlayer(currentPlayer);
         }
     }
 
+    cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : "Loses") << endl;
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
     return playState;
