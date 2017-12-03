@@ -218,14 +218,13 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
     return nextGameState;
 }
 
-PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, PlayerType player1Type, PlayerType player2Type)
+PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, PlayerType player1Type, PlayerType player2Type, bool isBruteForceMoveSearch)
 {
     const auto playThisMoveAsType = (currentPlayer == Player1 ? player1Type : player2Type);
     const auto otherPlayerType = (currentPlayer == Player1 ? player2Type : player1Type);
     const bool playThisMoveInteractively = (playThisMoveAsType == Human);
     const bool playThisMoveRandomly = (playThisMoveAsType == Random);
-    const bool isWinningMoveSearch = (playThisMoveAsType == CPU && otherPlayerType == CPU);
-    if (isWinningMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
+    if (isBruteForceMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
         // Don't use the cache if we're interactive/ random: it will know all losing states from earlier dry-runs,
         // and if the human player is in a losing state, won't give them a chance to make a move!
@@ -235,10 +234,10 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
     // Assume a loss by default.
     PlayState playState = loseForPlayer(currentPlayer);
 
-    auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer](const Move& move, PlayerType player1Type, PlayerType player2Type)
+    auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, player1Type, player2Type](const Move& move, bool isBruteForceMoveSearch)
     {
         const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-        const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, player1Type, player2Type);
+        const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, player1Type, player2Type, isBruteForceMoveSearch);
         if (result == winForPlayer(currentPlayer))
         {
             playState = winForPlayer(currentPlayer);
@@ -295,7 +294,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
                 }
                 const auto chosenMove = availableMoves[moveIndex];
                 cout << "You chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
-                updatePlayStateFromMove(chosenMove, player1Type, player2Type);
+                updatePlayStateFromMove(chosenMove, false);
             }
             else
             {
@@ -309,7 +308,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
                 const int moveIndex = rand() % availableMoves.size();
                 const auto chosenMove = availableMoves[moveIndex];
                 cout << "Randomly chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
-                updatePlayStateFromMove(chosenMove, player1Type, player2Type);
+                updatePlayStateFromMove(chosenMove, false);
             }
         }
         else
@@ -318,7 +317,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
             for (const auto& move : availableMoves)
             {
                 const auto oldPlayState = playState;
-                updatePlayStateFromMove(move, CPU, CPU);
+                updatePlayStateFromMove(move, true);
 
                 if (playState != winForPlayer(currentPlayer))
                 {
@@ -334,10 +333,10 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 #endif
                 }
             }
-            if (otherPlayerType != CPU && !availableMoves.empty())
+            if (!isBruteForceMoveSearch && !availableMoves.empty())
             {
-                cout << "Computer played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : "Lose") << endl;
-                updatePlayStateFromMove(chosenMove, player1Type, player2Type);
+                cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : "Lose") << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
+                updatePlayStateFromMove(chosenMove, false);
             }
         }
     }
@@ -353,7 +352,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 PlayState findWinner(Player currentPlayer, const GameState& gameState, PlayerType player1Type = CPU, PlayerType player2Type = CPU)
 {
     playStateForLookup.clear();
-    const auto result = findWinnerAux(currentPlayer, gameState, player1Type, player2Type);
+    const auto result = findWinnerAux(currentPlayer, gameState, player1Type, player2Type, false);
 
     if (player1Type == Human || player2Type == Human)
     {
@@ -363,6 +362,7 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState, PlayerTyp
 
     return result;
 }
+
 
 int main(int argc, char** argv)
 {
