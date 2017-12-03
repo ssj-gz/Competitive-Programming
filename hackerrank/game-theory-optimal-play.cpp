@@ -214,6 +214,8 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
     const bool playThisMoveInteractively = (isInteractive && (currentPlayer == interactivePlayer));
     if (!isInteractive && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
+        // Don't use the cache if we're interactive: it will know all losing states from earlier dry-runs,
+        // and if the human player is in a losing state, won't give them a chance to make a move!
         return playStateForLookup[{gameState, currentPlayer}];
     }
 
@@ -231,22 +233,22 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
             if (!availableMoves.empty())
             {
 
-            cout << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
-            for (int i = 0; i < availableMoves.size(); i++)
-            {
-                cout << i << ":  " << availableMoves[i] << endl;
-            }
-            int moveIndex = -1;
-            cin >> moveIndex;
-            assert(cin);
-            const auto chosenMove = availableMoves[moveIndex];
-            cout << "You chose move " << chosenMove << endl;
-            const auto newGameState = gameStateAfterMove(gameState, currentPlayer, chosenMove);
-            const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, currentPlayer);
-            if (result == winForPlayer(currentPlayer))
-            {
-                playState = winForPlayer(currentPlayer);
-            }
+                cout << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
+                for (int i = 0; i < availableMoves.size(); i++)
+                {
+                    cout << i << ":  " << availableMoves[i] << endl;
+                }
+                int moveIndex = -1;
+                cin >> moveIndex;
+                assert(cin);
+                const auto chosenMove = availableMoves[moveIndex];
+                cout << "You chose move " << chosenMove << endl;
+                const auto newGameState = gameStateAfterMove(gameState, currentPlayer, chosenMove);
+                const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, currentPlayer);
+                if (result == winForPlayer(currentPlayer))
+                {
+                    playState = winForPlayer(currentPlayer);
+                }
             }
             else
             {
