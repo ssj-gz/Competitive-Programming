@@ -219,7 +219,18 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
         return playStateForLookup[{gameState, currentPlayer}];
     }
 
+
     PlayState playState = loseForPlayer(currentPlayer);
+
+    auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, interactivePlayer](const Move& move, bool isInteractive)
+    {
+        const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
+        const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, interactivePlayer);
+        if (result == winForPlayer(currentPlayer))
+        {
+            playState = winForPlayer(currentPlayer);
+        }
+    };
     if (gameState.hasWinningPlayerOverride(currentPlayer))
     {
         playState = winForPlayer(gameState.winningPlayerOverride(currentPlayer));
@@ -242,12 +253,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
                 assert(cin);
                 const auto chosenMove = availableMoves[moveIndex];
                 cout << "You chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
-                const auto newGameState = gameStateAfterMove(gameState, currentPlayer, chosenMove);
-                const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, currentPlayer);
-                if (result == winForPlayer(currentPlayer))
-                {
-                    playState = winForPlayer(currentPlayer);
-                }
+                updatePlayStateFromMove(chosenMove, true);
             }
             else
             {
