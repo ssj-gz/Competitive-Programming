@@ -337,7 +337,14 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
 PlayState findWinner(Player currentPlayer, const GameState& gameState, bool interactive = false, Player interactivePlayer = Player1)
 {
     playStateForLookup.clear();
-    return findWinnerAux(currentPlayer, gameState, interactive, interactivePlayer);
+    const auto result = findWinnerAux(currentPlayer, gameState, interactive, interactivePlayer);
+
+    if (interactive)
+    {
+        cout << "Result of interactive game: you played as " << interactivePlayer << "; " << currentPlayer << " took the first turn; " << result << endl;
+    }
+
+    return result;
 }
 
 int main(int argc, char** argv)
