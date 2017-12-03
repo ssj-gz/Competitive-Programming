@@ -336,6 +336,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
 
 PlayState findWinner(Player currentPlayer, const GameState& gameState, bool interactive = false, Player interactivePlayer = Player1)
 {
+    playStateForLookup.clear();
     return findWinnerAux(currentPlayer, gameState, interactive, interactivePlayer);
 }
 
