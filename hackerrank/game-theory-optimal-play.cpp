@@ -232,7 +232,6 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
         {
             if (!availableMoves.empty())
             {
-
                 cout << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
                 for (int i = 0; i < availableMoves.size(); i++)
                 {
@@ -242,7 +241,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
                 cin >> moveIndex;
                 assert(cin);
                 const auto chosenMove = availableMoves[moveIndex];
-                cout << "You chose move " << chosenMove << endl;
+                cout << "You chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
                 const auto newGameState = gameStateAfterMove(gameState, currentPlayer, chosenMove);
                 const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, currentPlayer);
                 if (result == winForPlayer(currentPlayer))
