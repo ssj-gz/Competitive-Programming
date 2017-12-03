@@ -10,7 +10,8 @@
 
 using namespace std;
 
-//#define VERBOSE
+//#define VERY_VERBOSE
+#define PRINT_COMPUTER_MOVES
 
 #define MOVE_COINS_EXAMPLE
 //#define MOVE_COINS_EXAMPLE_RANDOM
@@ -329,20 +330,22 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
                 {
                     // This is the first winning move we've discovered; store it and print it out (but not subsequent ones).
                     chosenMove = move;
-#ifdef VERBOSE
+#ifdef VERY_VERBOSE
                     cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
 #endif
                 }
             }
             if (!isBruteForceMoveSearch && !availableMoves.empty())
             {
+#ifdef PRINT_COMPUTER_MOVES
                 cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : "Lose") << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
+#endif
                 updatePlayStateFromMove(chosenMove, false);
             }
         }
     }
 
-#ifdef VERBOSE
+#ifdef VERY_VERBOSE
     cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : "Loses") << endl;
 #endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
