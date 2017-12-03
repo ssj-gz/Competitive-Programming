@@ -221,7 +221,6 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
 PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, PlayerType player1Type, PlayerType player2Type, bool isBruteForceMoveSearch)
 {
     const auto playThisMoveAsType = (currentPlayer == Player1 ? player1Type : player2Type);
-    const auto otherPlayerType = (currentPlayer == Player1 ? player2Type : player1Type);
     const bool playThisMoveInteractively = (playThisMoveAsType == Human);
     const bool playThisMoveRandomly = (playThisMoveAsType == Random);
     if (isBruteForceMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
