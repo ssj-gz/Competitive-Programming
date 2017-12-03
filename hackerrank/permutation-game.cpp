@@ -346,36 +346,25 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
 
 int main(int argc, char** argv)
 {
-    // Very easy one - just a brute force exploration with memo-isation using a kind of retrograde analysis with memo-isation.
+    // Very easy one - just a brute force exploration with memo-isation using the classic "Can I Make A Move That Guarantees The Other Player Loses" algorithm.
     // Any state of the array can be represented by an n-bit number representing
-    // the array indices that have not yet been removed.
+    // the (original) indices of that array elements that have not yet been removed.
     // The clutter above is part of a framework I've written for easy exploration of turn-based zero-sum games.
-    srand(time(0));
-    ifstream testCaseFileIn;
-    bool isTestcaseFromFile = false;
-    if (argc == 2)
-    {
-        const auto testCaseFilename = argv[1];
-        testCaseFileIn.open(testCaseFilename);
-        assert(testCaseFileIn.is_open());
-        isTestcaseFromFile = true;
-    }
-    istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
     
     int T;
-    testCaseIn >> T;
+    cin >> T;
 
     for (int t = 0; t < T; t++)
     {
         int n;
-        testCaseIn >> n;
+        cin >> n;
 
         vector<int> a(n);
 
         vector<char> currentPlayerWinsForRemainingBitsetLookup(1 << n, -1);
         for (int i = 0; i < n; i++)
         {
-            testCaseIn >> a[i];
+            cin >> a[i];
         }
 
         const int allRemainingBitset = (1 << n) - 1;
