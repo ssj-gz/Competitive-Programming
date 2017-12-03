@@ -112,7 +112,7 @@ ostream& operator<<(ostream& os, const GameState& gameState)
 #ifdef MOVE_COINS_EXAMPLE
     for (const auto x : gameState.coins)
     {
-        cout << x << " ";
+        os << x << " ";
     }
 #endif
     return os;
@@ -121,8 +121,30 @@ ostream& operator<<(ostream& os, const GameState& gameState)
 ostream& operator<<(ostream& os, const Move& move)
 {
 #ifdef MOVE_COINS_EXAMPLE
-    cout << "Take " << move.numCoins << " from node: " << (move.nodeIdToTakeFrom + 1) << " and place in " << (move.nodeIdToAddTo + 1);
+    os << "Take " << move.numCoins << " from node: " << (move.nodeIdToTakeFrom + 1) << " and place in " << (move.nodeIdToAddTo + 1);
 #endif
+    return os;
+}
+
+ostream& operator<<(ostream& os, Player player)
+{
+    if (player == Player1)
+        os << player1Name;
+    else
+        os << player2Name;
+
+    return os;
+}
+
+ostream& operator<<(ostream& os, PlayState playState)
+{
+    if (playState == Player1Win)
+        os << Player1;
+    else
+        os << Player2;
+
+    os << " wins";
+
     return os;
 }
 
@@ -240,9 +262,10 @@ int main()
                 oddHeightXor ^= initialState.coins.back();
             }
         }
-        const auto firstPlayerWins = (findWinner(Player1, initialState) == Player1Win);
-        cout << "Win for first player: " << (firstPlayerWins ? "Yes" : "No") << " oddHeightXor: " << oddHeightXor << endl;
-        assert(firstPlayerWins == (oddHeightXor != 0));
+        const auto result = findWinner(Player1, initialState);
+        //cout << "Win for first player: " << (firstPlayerWins ? "Yes" : "No") << " oddHeightXor: " << oddHeightXor << endl;
+        cout << result << "  oddHeightXor: " << oddHeightXor << endl;
+        assert((result == Player1Win) == (oddHeightXor != 0));
     }
 #endif
 }
