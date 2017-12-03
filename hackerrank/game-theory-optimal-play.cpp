@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <fstream>
 #include <cassert>
 
 using namespace std;
@@ -333,17 +334,27 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState, bool inte
     return findWinnerAux(currentPlayer, gameState, interactive, interactivePlayer);
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    ifstream testCaseFileIn;
+    bool isTestcaseFromFile = false;
+    if (argc == 2)
+    {
+        const auto testCaseFilename = argv[1];
+        testCaseFileIn.open(testCaseFilename);
+        assert(testCaseFileIn.is_open());
+        isTestcaseFromFile = true;
+    }
+    istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
 #ifdef MOVE_COINS_EXAMPLE
     int n;
-    cin >> n;
+    testCaseIn >> n;
 
     nodes.resize(n);
     for (int i = 0; i < n; i++)
     {
         int numCoinsOnNode = 0;
-        cin >> numCoinsOnNode;
+        testCaseIn >> numCoinsOnNode;
 
         nodes[i].numCoins = numCoinsOnNode;
         nodes[i].nodeId = i;
@@ -352,7 +363,7 @@ int main()
     for (int i = 0; i < n - 1; i++)
     {
         int u, v;
-        cin >> u >> v;
+        testCaseIn >> u >> v;
         u--;
         v--;
 
@@ -390,7 +401,6 @@ int main()
     {
         initialState.coins[node.nodeId] = node.numCoins;
     }
-    //const auto result = (findWinner(Player1, initialState));
     const auto result = (findWinner(Player1, initialState, true, Player1));
     cout << result << endl;
 #endif
