@@ -224,8 +224,8 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
     const auto otherPlayerType = (currentPlayer == Player1 ? player2Type : player1Type);
     const bool playThisMoveInteractively = (playThisMoveAsType == Human);
     const bool playThisMoveRandomly = (playThisMoveAsType == Random);
-    const bool playThisMoveAsAI = (playThisMoveAsType == CPU);
-    if ((playThisMoveAsType == CPU && otherPlayerType == CPU) && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
+    const bool isWinningMoveSearch = (playThisMoveAsType == CPU && otherPlayerType == CPU);
+    if (isWinningMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
         // Don't use the cache if we're interactive/ random: it will know all losing states from earlier dry-runs,
         // and if the human player is in a losing state, won't give them a chance to make a move!
@@ -366,6 +366,7 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState, PlayerTyp
 
 int main(int argc, char** argv)
 {
+    srand(time(0));
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
     if (argc == 2)
