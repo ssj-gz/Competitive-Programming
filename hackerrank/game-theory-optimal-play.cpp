@@ -89,6 +89,17 @@ class GameState
 #ifdef MOVE_COINS_EXAMPLE
         vector<int> coins;
 #endif
+        bool hasWinningPlayerOverride(Player currentPlayer) const
+        {
+            // Assume that a GameState that has no moves that lead to a Lose for the
+            // other player is a losing state (and vice-versa).
+            return false;
+        }
+        Player winningPlayerOverride(Player currentPlayer) const
+        {
+            assert(false);
+            return Player1;
+        }
 };
 
 bool operator<(const GameState& lhs, const GameState& rhs)
@@ -203,23 +214,31 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState)
     {
         return playStateForLookup[{gameState, currentPlayer}];
     }
-    const vector<Move> availableMoves = movesFor(currentPlayer, gameState);
-    PlayState playState = loseForPlayer(currentPlayer);
 
-    for (const auto& move : availableMoves)
+    PlayState playState = loseForPlayer(currentPlayer);
+    if (gameState.hasWinningPlayerOverride(currentPlayer))
     {
-        const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-        const auto result = findWinner(otherPlayer(currentPlayer), newGameState);
-        if (result == winForPlayer(currentPlayer))
+        playState = winForPlayer(gameState.winningPlayerOverride(currentPlayer));
+    }
+    else
+    {
+        const vector<Move> availableMoves = movesFor(currentPlayer, gameState);
+
+        for (const auto& move : availableMoves)
         {
-#ifdef VERBOSE
-            if (playState != winForPlayer(currentPlayer))
+            const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
+            const auto result = findWinner(otherPlayer(currentPlayer), newGameState);
+            if (result == winForPlayer(currentPlayer))
             {
-                // Print out the winning move, but only once.
-                cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
-            }
+#ifdef VERBOSE
+                if (playState != winForPlayer(currentPlayer))
+                {
+                    // Print out the winning move, but only once.
+                    cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
+                }
 #endif
-            playState = winForPlayer(currentPlayer);
+                playState = winForPlayer(currentPlayer);
+            }
         }
     }
 
