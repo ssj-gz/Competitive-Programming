@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#define VERBOSE
+//#define VERBOSE
 
 #define MOVE_COINS_EXAMPLE
 //#define MOVE_COINS_EXAMPLE_RANDOM
@@ -208,9 +208,11 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
     return nextGameState;
 }
 
-PlayState findWinnerAux(Player currentPlayer, const GameState& gameState)
+PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool isInteractive, Player interactivePlayer)
 {
-    if (playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
+    //cout << "findWinnerAux: isInteractive " << isInteractive << " currentPlayer: " << currentPlayer << " interactivePlayer: " << interactivePlayer << endl;
+    const bool playThisMoveInteractively = (isInteractive && (currentPlayer == interactivePlayer));
+    if (!isInteractive && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
         return playStateForLookup[{gameState, currentPlayer}];
     }
@@ -224,20 +226,63 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState)
     {
         const vector<Move> availableMoves = movesFor(currentPlayer, gameState);
 
-        for (const auto& move : availableMoves)
+        if (playThisMoveInteractively)
         {
-            const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-            const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState);
+            if (!availableMoves.empty())
+            {
+
+            cout << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
+            for (int i = 0; i < availableMoves.size(); i++)
+            {
+                cout << i << ":  " << availableMoves[i] << endl;
+            }
+            int moveIndex = -1;
+            cin >> moveIndex;
+            assert(cin);
+            const auto chosenMove = availableMoves[moveIndex];
+            cout << "You chose move " << chosenMove << endl;
+            const auto newGameState = gameStateAfterMove(gameState, currentPlayer, chosenMove);
+            const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, true, currentPlayer);
             if (result == winForPlayer(currentPlayer))
             {
+                playState = winForPlayer(currentPlayer);
+            }
+            }
+            else
+            {
+                cout << "Player " << currentPlayer << " - you have no moves available.  You lose, sir; good-day!" << endl;
+            }
+        }
+        else
+        {
+            Move chosenMove;
+            for (const auto& move : availableMoves)
+            {
+                const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
+                const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, false, Player1);
+                if (result == winForPlayer(currentPlayer))
+                {
+                    if (playState != winForPlayer(currentPlayer))
+                    {
+                        chosenMove = move;
+                        // Print out the winning move, but only once.
 #ifdef VERBOSE
+                        cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
+#endif
+                    }
+                    playState = winForPlayer(currentPlayer);
+                }
+
                 if (playState != winForPlayer(currentPlayer))
                 {
-                    // Print out the winning move, but only once.
-                    cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
+                    // If we can't win, just play an arbitrary move; the last one, say.
+                    chosenMove = move;
                 }
-#endif
-                playState = winForPlayer(currentPlayer);
+            }
+            if (isInteractive && !availableMoves.empty())
+            {
+                cout << "Computer played move: " << chosenMove << endl;
+                findWinnerAux(otherPlayer(currentPlayer), gameStateAfterMove(gameState, currentPlayer, chosenMove), true, interactivePlayer);
             }
         }
     }
@@ -250,9 +295,9 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState)
     return playState;
 }
 
-PlayState findWinner(Player currentPlayer, const GameState& gameState)
+PlayState findWinner(Player currentPlayer, const GameState& gameState, bool interactive = false, Player interactivePlayer = Player1)
 {
-    return findWinnerAux(currentPlayer, gameState);
+    return findWinnerAux(currentPlayer, gameState, interactive, interactivePlayer);
 }
 
 int main()
@@ -312,7 +357,8 @@ int main()
     {
         initialState.coins[node.nodeId] = node.numCoins;
     }
-    const auto result = (findWinner(Player1, initialState));
+    //const auto result = (findWinner(Player1, initialState));
+    const auto result = (findWinner(Player1, initialState, true, Player2));
     cout << result << endl;
 #endif
 #endif
