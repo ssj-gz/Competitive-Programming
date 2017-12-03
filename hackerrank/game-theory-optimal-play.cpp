@@ -86,6 +86,11 @@ PlayState loseForPlayer(Player player)
         return Player1Win;
 }
 
+class GameState;
+class Move;
+
+vector<Move> movesFor(Player currentPlayer, const GameState& gameState);
+
 class GameState
 {
     public:
