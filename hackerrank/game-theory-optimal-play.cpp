@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
 #include <iostream>
 #include <vector>
 #include <map>
@@ -210,7 +211,6 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
 
 PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool isInteractive, Player interactivePlayer)
 {
-    //cout << "findWinnerAux: isInteractive " << isInteractive << " currentPlayer: " << currentPlayer << " interactivePlayer: " << interactivePlayer << endl;
     const bool playThisMoveInteractively = (isInteractive && (currentPlayer == interactivePlayer));
     if (!isInteractive && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
@@ -219,7 +219,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
         return playStateForLookup[{gameState, currentPlayer}];
     }
 
-
+    // Assume a loss by default.
     PlayState playState = loseForPlayer(currentPlayer);
 
     auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, interactivePlayer](const Move& move, bool isInteractive)
