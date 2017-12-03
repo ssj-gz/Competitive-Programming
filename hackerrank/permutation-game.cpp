@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) - 2017-12-03
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
@@ -309,7 +309,7 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
     {
         if ((remainingNumberBitset & powerOf2) != 0)
         {
-            if (previousRemainingArrayElement != -1 && a[i] < last)
+            if (previousRemainingArrayElement != -1 && a[i] < previousRemainingArrayElement)
             {
                 inOrder = false;
                 break;
