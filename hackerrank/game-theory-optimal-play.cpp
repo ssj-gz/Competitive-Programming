@@ -287,11 +287,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, bool i
             if (isInteractive && !availableMoves.empty())
             {
                 cout << "Computer played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : "Lose") << endl;
-                const auto result = findWinnerAux(otherPlayer(currentPlayer), gameStateAfterMove(gameState, currentPlayer, chosenMove), true, interactivePlayer);
-                if (result == winForPlayer(currentPlayer))
-                {
-                    playState = winForPlayer(currentPlayer);
-                }
+                updatePlayStateFromMove(chosenMove, true);
             }
         }
     }
