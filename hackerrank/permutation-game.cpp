@@ -343,30 +343,6 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
 
 int main(int argc, char** argv)
 {
-#if 0
-    {
-        cout << 100 << endl;
-        for (int i = 1; i <= 100; i++)
-        {
-            const int n = 15;
-            cout << n << endl;
-            vector<int> a;
-            for (int j = 1; j <= n; j++)
-            {
-                a.push_back(j);
-            }
-            random_shuffle(a.begin(), a.end());
-
-            for (const auto x : a)
-            {
-                cout << x << " ";
-            }
-            cout << endl;
-
-        }
-        return 0;
-    }
-#endif
     srand(time(0));
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
