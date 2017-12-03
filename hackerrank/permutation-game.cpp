@@ -278,7 +278,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 
 PlayState findWinner(Player currentPlayer, const GameState& gameState, PlayerType player1Type = CPU, PlayerType player2Type = CPU)
 {
-    //playStateForLookup.clear();
+    playStateForLookup.clear();
     const auto result = findWinnerAux(currentPlayer, gameState, player1Type, player2Type, false);
 
     if (player1Type == Human || player2Type == Human)
@@ -300,20 +300,21 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
 
     const int n = a.size();
 
-    const int maxPowerOf2 = (1 << (n - 1));
-    int last = -1;
+    // Check if inOrder.
+    const int maxPowerOf2ForN = (1 << (n - 1));
+    int previousRemainingArrayElement = -1;
     bool inOrder = true;
-    auto powerOf2 = maxPowerOf2;
+    auto powerOf2 = maxPowerOf2ForN;
     for (int i = 0; i < n; i++)
     {
         if ((remainingNumberBitset & powerOf2) != 0)
         {
-            if (last != -1 && a[i] < last)
+            if (previousRemainingArrayElement != -1 && a[i] < last)
             {
                 inOrder = false;
                 break;
             }
-            last = a[i];
+            previousRemainingArrayElement = a[i];
 
         }
         powerOf2 >>= 1;
@@ -321,7 +322,8 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
 
     if (!inOrder)
     {
-        powerOf2 = maxPowerOf2;
+        // Perform each "move", where a move is removing an array element that still remains.
+        powerOf2 = maxPowerOf2ForN;
         for (int i = 0; i < n; i++)
         {
             if ((remainingNumberBitset & powerOf2) != 0)
@@ -329,6 +331,7 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
                 const int nextRemainingNumberBitset = remainingNumberBitset - (remainingNumberBitset & powerOf2);
                 if (!isWinnerWithRemainingBitset(nextRemainingNumberBitset, a, currentPlayerWinsForRemainingBitsetLookup))
                 {
+                    // This move forces the other player to lose - a Win for us!
                     isWin =  true;
                 }
             }
@@ -343,6 +346,9 @@ bool isWinnerWithRemainingBitset(int remainingNumberBitset, const vector<int>& a
 
 int main(int argc, char** argv)
 {
+    // Very easy one - just a brute force exploration with memo-isation using a kind of retrograde analysis with memo-isation.
+    // Any state of the array can be represented by an n-bit number representing
+    // the array indices that have not yet been removed.
     srand(time(0));
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
