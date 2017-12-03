@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) - 2017-12-03
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
@@ -349,6 +349,7 @@ int main(int argc, char** argv)
     // Very easy one - just a brute force exploration with memo-isation using a kind of retrograde analysis with memo-isation.
     // Any state of the array can be represented by an n-bit number representing
     // the array indices that have not yet been removed.
+    // The clutter above is part of a framework I've written for easy exploration of turn-based zero-sum games.
     srand(time(0));
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
