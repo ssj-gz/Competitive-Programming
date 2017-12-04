@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 {
     // Very easy one - just a brute force exploration with memo-isation using the classic "Can I Make A Move That Guarantees The Other Player Loses" algorithm.
     // Any state of the array can be represented by an n-bit number representing
-    // the (original) indices of that array elements that have not yet been removed.
+    // the (original) indices of the array elements that have not yet been removed.
     int T;
     cin >> T;
 
