@@ -46,6 +46,17 @@ int findGrundy(int i)
 
 int main()
 {
+    // Easy one if you just experiment, but pretty hard if you try to Logic your way into a solution :)
+    // So we basically just consider one pile for the time being, and try to find the Grundy number
+    // for a single pile of n elements; this is easily done via the #if 0'd code below and the "findGrundy"
+    // function above.  We see that the grundy numbers for n = 0, 1, ... etc are just the cycle:
+    //
+    //   0, 0, 1, 1, 2, 2, 3, 3, 4 
+    //
+    // repeated over and over again (which I wouldn't have Logic'd), so the grundy number for a single pile of size n is easily computed.
+    //
+    // Once we know the Grundy number for a pile of size n, then the final answer, by Sprague-Grundy, is 
+    // just the Grundy numbers of all the pile sizes xor'd together.
 #if 0
     for (int i = 0; i <= n; i++)
     {
@@ -53,7 +64,7 @@ int main()
     }
 #endif
     const int grundyCycle[] = { 0, 0, 1, 1, 2, 2, 3, 3, 4 };
-    const int grundyCycleSize = sizeof(grundyCycle) / sizeof(grundyCycle[0]);
+    const int grundyCycleLength = sizeof(grundyCycle) / sizeof(grundyCycle[0]);
 
     int T;
     cin >> T;
@@ -69,7 +80,7 @@ int main()
             int64_t x;
             cin >> x;
 
-            xorSum ^= grundyCycle[x % grundyCycleSize];
+            xorSum ^= grundyCycle[x % grundyCycleLength];
         }
 
         if (xorSum != 0)
