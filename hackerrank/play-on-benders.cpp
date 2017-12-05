@@ -18,14 +18,17 @@ int mex(const vector<int>& numbers)
         return 0;
     auto numbersSorted = numbers;
     sort(numbersSorted.begin(), numbersSorted.end());
-    numbersSorted.erase(unique(numbersSorted.begin(), numbersSorted.end()), numbersSorted.end());
 
     int mex = 0;
     auto numberIter = numbersSorted.begin();
     while (numberIter != numbersSorted.end() && mex == *numberIter)
     {
+        // Skip over duplicated in numberIter.
+        while (numberIter != numbersSorted.end() && *numberIter == mex)
+        {
+            numberIter++;
+        }
         mex++;
-        numberIter++;
     }
 
     return mex;
