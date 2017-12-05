@@ -1,5 +1,4 @@
 // Simon St James (ssjgz) - 2017-12-05
-// Computation of Mex is not optimal, so may time out!
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -42,15 +41,17 @@ int findGrundyNumber(int pileSize)
 
     const auto factors = findFactors(pileSize);
     vector<int> grundyNumbersForMoves;
-    for (const auto factor : factors)
+    for (const auto moveFactor : factors)
     {
-        const auto numNewPiles = factor;
-        const auto newPileSize = pileSize / factor;
+        const auto numPilesAfterMove = moveFactor;
+        const auto sizeOfEachPileAfterMove = pileSize / moveFactor;
 
-        if (numNewPiles == 1)
+        if (numPilesAfterMove == 1)
             continue;
+
+        const int grundyNumberForStateArisingFromMove = xorPower(findGrundyNumber(sizeOfEachPileAfterMove), numPilesAfterMove);
         
-        grundyNumbersForMoves.push_back(xorPower(findGrundyNumber(newPileSize), numNewPiles));
+        grundyNumbersForMoves.push_back(grundyNumberForStateArisingFromMove);
     }
 
     // This is not very efficient, but seems to be efficient enough in practise!
