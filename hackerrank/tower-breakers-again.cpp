@@ -18,23 +18,14 @@ vector<int> findFactors(const int x)
     {
         if ((x % factor) == 0)
         {
-            //cout << "x: " << x << " adding factor " << factor << endl;
             factors.push_back(factor);
+            // For square numbers, don't add the same factor twice!
             if (factor * factor != x)
             {
-                //cout << "x: " << x << " adding factor " << x / factor << endl;
                 factors.push_back(x / factor);
             }
         }
     }
-#if 0
-    cout << "x: " << x << " factors: ";
-    for (const auto factor : factors)
-    {
-        cout << factor << " ";
-    }
-    cout << " -- " << endl;
-#endif
     return factors;
 }
 
@@ -49,9 +40,9 @@ int findGrundyNumber(int pileSize)
     if (grundyForPileSizeLookup[pileSize] != -1)
         return grundyForPileSizeLookup[pileSize];
 
-    const auto properFactors = findFactors(pileSize);
+    const auto factors = findFactors(pileSize);
     vector<int> grundyNumbersForMoves;
-    for (const auto factor : properFactors)
+    for (const auto factor : factors)
     {
         const auto numNewPiles = factor;
         const auto newPileSize = pileSize / factor;
@@ -59,10 +50,10 @@ int findGrundyNumber(int pileSize)
         if (numNewPiles == 1)
             continue;
         
-        //cout << "pileSize: " << pileSize << " move factor: " << factor << " newPileSize: " << newPileSize << " numNewPiles: " << numNewPiles << endl;
         grundyNumbersForMoves.push_back(xorPower(findGrundyNumber(newPileSize), numNewPiles));
     }
 
+    // This is not very efficient, but seems to be efficient enough in practise!
     int mexGrundyNumbersForMoves = 0;
     while (find(grundyNumbersForMoves.begin(), grundyNumbersForMoves.end(), mexGrundyNumbersForMoves) != grundyNumbersForMoves.end())
     {
@@ -71,13 +62,23 @@ int findGrundyNumber(int pileSize)
 
     grundyForPileSizeLookup[pileSize] = mexGrundyNumbersForMoves;
 
-    //cout << "Grundy number for pileSize: " << pileSize << " : " << mexGrundyNumbersForMoves << endl;
-
     return mexGrundyNumbersForMoves;
 }
 
 int main()
 {
+    // Fundamentally easy - just find the Grundy numbers for each Pile Size.
+    // For a given pile of size pileSize, the "moves" we can make correspond to
+    // the factors of pileSize, with the trivial factor "1" removed.
+    //
+    // For a factor f of pileSize, the state we reach has f piles, each of size pileSize/f.
+    // The grundy number for such a state is grundy(pileSize) ^ grundy(pileSize) ^ ... ^ grundy(pileSize), where
+    // "grundy(pileSize)" appears "f" times i.e. xorPower(grundy(pileSize), f) - this is just grundy(pileSize)
+    // if f is odd, and 0 otherwise.
+    //
+    // The grundy number for pileSize is then just the mex of the grundy numbers for the states arising from each move.
+    // Recursion + memo-isation is sufficient to handle everything from then on.  The final answer is just the xor
+    // sum of the grundy numbers of each pileSize in the list of piles.
     int T;
     cin >> T;
 
