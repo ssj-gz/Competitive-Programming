@@ -23,7 +23,7 @@ int mex(const vector<int>& numbers)
     auto numberIter = numbersSorted.begin();
     while (numberIter != numbersSorted.end() && mex == *numberIter)
     {
-        // Skip over duplicated in numberIter.
+        // Skip over duplicates in numberIter.
         while (numberIter != numbersSorted.end() && *numberIter == mex)
         {
             numberIter++;
