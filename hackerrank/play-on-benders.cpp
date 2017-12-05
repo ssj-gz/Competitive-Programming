@@ -70,6 +70,9 @@ int main()
     //
     // It's then a simple matter to use Sprague Grundy to find the overall winner of the game by xor'ing the
     // grundy numbers of each soldier's starting location.
+
+    ios::sync_with_stdio(false);
+
     int numLocations, numPaths;
     cin >> numLocations >> numPaths;
 
