@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cassert>
 
-
 using namespace std;
 
 struct Location
@@ -23,7 +22,7 @@ int mex(const vector<int>& numbers)
 
     int mex = 0;
     auto numberIter = numbersSorted.begin();
-    while (numberIter != numbers.end() && mex == *numberIter)
+    while (numberIter != numbersSorted.end() && mex == *numberIter)
     {
         mex++;
         numberIter++;
