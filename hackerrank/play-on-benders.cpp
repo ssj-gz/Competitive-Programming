@@ -29,7 +29,6 @@ int mex(const vector<int>& numbers)
     }
 
     return mex;
-
 }
 
 int findGrundyNumber(Location* location)
@@ -52,6 +51,22 @@ int findGrundyNumber(Location* location)
 
 int main()
 {
+    // Easy 70 points :) This is just a bunch of Nim-style games played on a graph - one 
+    // game for each soldier.  We need to find the grundy number for each Soldier, which depends
+    // solely on its start location in the graph i.e. we need to find the grundy number for 
+    // each Location in the graph.  This is easy: it is defined recursively (via Sprague-Grundy) by:
+    //
+    //  If location is a leaf:
+    //
+    //   grundy(location) = 0
+    //
+    // else if location has l neighbours neighbour1, neighbour2, ... , neighbour_l (locations that can be 
+    // reached directly by following one road):
+    //
+    //   grundy(location) = mex(grundy(neighbour1), grundy(neighbour2), .... , grundy(neighbour_l))
+    //
+    // It's then a simple matter to use Sprague Grundy to find the overall winner of the game by xor'ing the
+    // grundy numbers of each soldier's starting location.
     int numLocations, numPaths;
     cin >> numLocations >> numPaths;
 
@@ -71,6 +86,7 @@ int main()
 
     for (auto& location : locations)
     {
+        // Update the memo'ised Grundy numbers for each location.
         findGrundyNumber(&location);
     }
 
@@ -94,6 +110,7 @@ int main()
             nimSum ^= findGrundyNumber(&(locations[soldierLocation]));
         }
 
+        // Bumi is the first player.
         if (nimSum != 0)
             cout << "Bumi";
         else
@@ -101,5 +118,4 @@ int main()
         cout << endl;
     }
     assert(cin);
-
 }
