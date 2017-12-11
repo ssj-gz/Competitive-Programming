@@ -20,15 +20,12 @@ int mex(const vector<int>& numbers)
     sort(numbersSorted.begin(), numbersSorted.end());
 
     int mex = 0;
-    auto numberIter = numbersSorted.begin();
-    while (numberIter != numbersSorted.end() && mex == *numberIter)
+    for (const auto number : numbersSorted)
     {
-        // Skip over duplicates in numberIter.
-        while (numberIter != numbersSorted.end() && *numberIter == mex)
-        {
-            numberIter++;
-        }
-        mex++;
+        if (number == mex)
+            mex++;
+        else if (number > mex)
+            break;
     }
 
     return mex;
