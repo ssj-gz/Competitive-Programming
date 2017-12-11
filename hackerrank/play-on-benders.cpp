@@ -90,12 +90,6 @@ int main()
         locations[startLocation].neighbours.push_back(&(locations[endLocation]));
     }
 
-    for (auto& location : locations)
-    {
-        // Update the memo'ised Grundy numbers for each location.
-        findGrundyNumber(&location);
-    }
-
     int numQueries;
     cin >> numQueries;
 
