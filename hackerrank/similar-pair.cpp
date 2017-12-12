@@ -99,8 +99,7 @@ class NumberTracker
             if ((start % powerOf2) == 0)
             {
                 // Advance start by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
-                // Generally, we'll advance 0 or 1 places - I don't think 2 is a possibility.
-                while (start <= end - powerOf2)
+                if (start <= end - powerOf2)
                 {
                     const int cellContents = m_cellMatrix[cellRow][start/powerOf2].numNumbersInRange;
                     numberInRange += cellContents;
@@ -111,8 +110,7 @@ class NumberTracker
             if (((end + 1) % powerOf2) == 0)
             {
                 // Unadvance end by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
-                // Again, I don't think it's possible to iterate two or more times.
-                while (start <= end - powerOf2)
+                if (start <= end - powerOf2)
                 {
                     const int cellContents = m_cellMatrix[cellRow][end/powerOf2].numNumbersInRange;
                     numberInRange += cellContents;
