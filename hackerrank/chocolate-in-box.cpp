@@ -1,6 +1,7 @@
 // Simon St James (ssjgz) - 2017-12-06
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
@@ -30,6 +31,8 @@ int main()
     {
         const int nimSumWithoutContainer = originalNimSum ^ numChocsInContainer[containerIndex];
         const int numInThisContainerToMakeNimSumZero = nimSumWithoutContainer;
+        assert((nimSumWithoutContainer ^ numInThisContainerToMakeNimSumZero) == 0);
+
         if (numInThisContainerToMakeNimSumZero < numChocsInContainer[containerIndex])
         {
             numWinningFirstMoves++;
