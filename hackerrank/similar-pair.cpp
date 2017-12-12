@@ -118,12 +118,13 @@ class NumberTracker
                 }
                 return numberInRange + countNumbersInRange(start, end, cellRow + 1, powerOf2 >> 1);
             }
-            // Neither start nor end is a multiple of powerOf2: sum up the complete cells in between (if any) ...
+            // Neither start nor end is a multiple of powerOf2 ... sum up the complete cells in between (if any) ...
             const int powerOf2AfterStart = (start / powerOf2 + 1) * powerOf2;
             const int powerOf2BeforeEnd =  (end / powerOf2) * powerOf2;
-            for (int cellIndex = powerOf2AfterStart / powerOf2; cellIndex < powerOf2BeforeEnd / powerOf2; cellIndex++)
+            // ... add the complete cell in between (if there is one) ...
+            if (powerOf2AfterStart < powerOf2BeforeEnd)
             {
-                numberInRange += m_cellMatrix[cellRow][cellIndex].numNumbersInRange;
+                numberInRange += m_cellMatrix[cellRow][powerOf2AfterStart / powerOf2].numNumbersInRange;
             }
             // ... and then split into two, and recurse: for each of two split regions, at least one of the start or end will be a multiple of powerOf2, so they
             // will not split further.
