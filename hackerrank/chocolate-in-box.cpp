@@ -17,20 +17,20 @@ int main()
     int numContainers;
     cin >> numContainers;
 
-    int nimSum = 0;
+    auto nimSum = 0;
     vector<int> numChocsInContainer(numContainers);
-    for (int containerIndex = 0; containerIndex < numContainers; containerIndex++)
+    for (auto containerIndex = 0; containerIndex < numContainers; containerIndex++)
     {
         cin >> numChocsInContainer[containerIndex];
         nimSum ^= numChocsInContainer[containerIndex];
     }
 
-    const int originalNimSum = nimSum;
-    int numWinningFirstMoves = 0;
-    for (int containerIndex = 0; containerIndex < numContainers; containerIndex++)
+    const auto originalNimSum = nimSum;
+    auto numWinningFirstMoves = 0;
+    for (auto containerIndex = 0; containerIndex < numContainers; containerIndex++)
     {
-        const int nimSumWithoutContainer = originalNimSum ^ numChocsInContainer[containerIndex];
-        const int numInThisContainerToMakeNimSumZero = nimSumWithoutContainer;
+        const auto nimSumWithoutContainer = originalNimSum ^ numChocsInContainer[containerIndex];
+        const auto numInThisContainerToMakeNimSumZero = nimSumWithoutContainer;
         assert((nimSumWithoutContainer ^ numInThisContainerToMakeNimSumZero) == 0);
 
         if (numInThisContainerToMakeNimSumZero < numChocsInContainer[containerIndex])
