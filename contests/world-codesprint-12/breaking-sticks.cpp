@@ -21,8 +21,8 @@ int64_t findMaxMoves(const int64_t stickSize, map<int64_t, int64_t>& maxMovesLoo
         if ((stickSize % factor) == 0)
         {
             {
-                const int numParts = factor;
-                const int newStickSize = stickSize / factor;
+                const int64_t numParts = factor;
+                const int64_t newStickSize = stickSize / factor;
                 if (numParts != 1)
                 {
                     const int64_t maxMovesFromHere = numParts * findMaxMoves(newStickSize, maxMovesLookup);
@@ -31,8 +31,8 @@ int64_t findMaxMoves(const int64_t stickSize, map<int64_t, int64_t>& maxMovesLoo
                 }
             }
             {
-                const int numParts = stickSize / factor;
-                const int newStickSize = factor;
+                const int64_t numParts = stickSize / factor;
+                const int64_t newStickSize = factor;
                 if (numParts != 1)
                 {
                     const int64_t maxMovesFromHere = numParts * findMaxMoves(newStickSize, maxMovesLookup);
