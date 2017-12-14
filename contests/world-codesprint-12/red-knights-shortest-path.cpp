@@ -1,0 +1,113 @@
+#include <iostream>
+#include <vector>
+#include <cassert>
+
+using namespace std;
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<vector<int>> distToDestination(n, vector<int>(n, -1));
+
+    struct Move
+    {
+        int dx;
+        int dy;
+        const char* printable;
+    };
+
+    const Move movesInPreferredOrder[] = { 
+        {-1, -2, "UL"},
+        {1, -2, "UR"},
+        {2, 0, "R"},
+        {1, 2, "LR"},
+        {-1, 2, "LL"},
+        {-2, 0, "L"}
+    };
+
+    int startX, startY;
+    cin >> startY >> startX;
+
+    int destX,  destY;
+    cin >> destY >> destX;
+
+    //cout << "startX: " << startX << " startY: " << startY << endl;
+    //cout << "destX: " << destX << " destY: " << destY << endl;
+
+    struct Position
+    {
+        Position(int x, int y)
+            : x{x}, y{y}
+        {
+        }
+        int x;
+        int y;
+        bool operator==(const Position& other)
+        {
+            return x == other.x && y == other.y;
+        }
+
+    };
+
+    int distanceFromDest = 0;
+
+    vector<Position> positionsToExplore = {{destX, destY}};
+    while (!positionsToExplore.empty())
+    {
+        vector<Position> nextPositionsToExplore;
+        for (const Position& pos : positionsToExplore)
+        {
+            if (distToDestination[pos.x][pos.y] != -1)
+                continue;
+
+            distToDestination[pos.x][pos.y] = distanceFromDest;
+
+            for (const auto& move : movesInPreferredOrder)
+            {
+                const Position newPos = { pos.x + move.dx, pos.y + move.dy };
+                if (newPos.x >= 0 && newPos.x < n && newPos.y >= 0 && newPos.y < n)
+                    nextPositionsToExplore.push_back(newPos);
+            }
+
+        }
+
+        positionsToExplore = nextPositionsToExplore;
+        distanceFromDest++;
+    }
+
+    if (distToDestination[startX][startY] == -1)
+        cout << "Impossible" << endl;
+    else
+    {
+        const int distFromStartToDest = distToDestination[startX][startY];
+        cout << distFromStartToDest << endl;
+        int distTravelled = 0;
+
+        const Position destination = { destX, destY };
+        Position position = { startX, startY };
+        while (!(position == destination))
+        {
+            //cout << "Position: " << position.x << "," << position.y << " distTravelled: " << distTravelled << endl;
+            bool moveMade = false;
+            for (const auto move : movesInPreferredOrder)
+            {
+                const Position newPos = { position.x + move.dx, position.y + move.dy };
+                if (newPos.x < 0 || newPos.x >= n || newPos.y < 0 || newPos.y >= n)
+                    continue;
+                //cout << "New Position: " << newPos.x << "," << newPos.y << " distToDestination[newPos.x][newPos.y]: " << distToDestination[newPos.x][newPos.y]  << endl;
+                if (distToDestination[newPos.x][newPos.y] == distFromStartToDest - 1 - distTravelled)
+                {
+                    moveMade = true;
+                    position = newPos;
+                    cout << move.printable << " ";
+                    break;
+                }
+            }
+            assert(moveMade);
+            distTravelled++;
+        }
+    }
+
+}
