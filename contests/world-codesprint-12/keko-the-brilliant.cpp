@@ -9,6 +9,7 @@ struct Node
     Node* parent = nullptr;
     vector<Node*> children;
     int r = -1;
+    int id = -1;
 
     vector<Node*> neighbours;
 };
@@ -50,15 +51,36 @@ void correctDFS(Node* node, Node* parent)
     node->neighbours.clear();
 }
 
+bool canMakeRight(Node* node, Node* parent, int maxRInParents, const vector<bool>& nodeIdsThatCanChange)
+{
+    if (parent && parent->r > node->r && !nodeIdsThatCanChange[node->id])
+        return false;
+
+    if (nodeIdsThatCanChange[node->id])
+    {
+        //cout << "Made a change - node " << (node->id + 1) << " from " << node->r << " to " << maxRInParents << endl;
+        node->r = maxRInParents;
+    }
+
+    bool canMakeThisSubtreeRight = true;
+    for (const auto child : node->children)
+    {
+        canMakeThisSubtreeRight = (canMakeThisSubtreeRight && canMakeRight(child, node, max(maxRInParents, node->r), nodeIdsThatCanChange));
+    }
+    return canMakeThisSubtreeRight;
+}
+
 int main()
 {
     int n;
     cin >> n;
 
     vector<Node> nodes(n);
+    vector<int> r(n);
     for (int i = 0; i < n; i++)
     {
-        cin >> nodes[i].r;
+        cin >> r[i];
+        nodes[i].id = i;
     }
 
     for (int i = 0; i < n - 1; i++)
@@ -83,16 +105,28 @@ int main()
         vector<vector<bool>> allChoices;
         generateChoices(emptyChoices, 0, numChanges, allChoices);
 
-        cout << "numChanges: " << numChanges << " choices:" << allChoices.size() << endl;
-        for (const auto& blah : allChoices)
+        //cout << "numChanges: " << numChanges << " choices:" << allChoices.size() << endl;
+        for (const auto& choice : allChoices)
         {
-            for (const auto x : blah)
+            for (int i = 0; i < n; i++)
             {
-                cout << x << " ";
+                nodes[i].r = r[i];
             }
-            cout << endl;
+
+            //cout << "Checking if can make right" << endl;
+            if (canMakeRight(rootNode, nullptr, 0, choice))
+            {
+                //cout << "Wee" << endl;
+                for (int i = 0; i < n; i++)
+                {
+                    //cout << "Node: " << (i + 1) << " parent: " << (nodes[i].parent ? nodes[i].parent->id + 1 : -1) << " r: " << nodes[i].r << endl;
+                }
+                cout << numChanges << endl;
+                return 0;
+            }
+
         }
-        cout << endl;
+        //cout << endl;
 
         numChanges++;
 
