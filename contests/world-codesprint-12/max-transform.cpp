@@ -26,7 +26,11 @@ vector<int> maxTransform(const vector<int>& A)
                 }
             }
             result.push_back(maxInRange);
-            cout << maxInRange << "[" << indexOfMaxInRange << "]" << " ";
+            cout << maxInRange << 
+#if 0
+                "[" << indexOfMaxInRange << "]"  <<
+#endif
+                 " ";
         }
 
     }
