@@ -30,6 +30,13 @@ class FactorialTracker
             while (powerOf2 > 0)
             {
                 m_cellMatrix.push_back(vector<Cell>(numCellsInThisRow));
+                int rangeBegin = 0;
+                for (int cellCol = 0; cellCol < numCellsInThisRow; cellCol++)
+                {
+                    m_cellMatrix.back()[cellCol].rangeBegin = rangeBegin;
+                    m_cellMatrix.back()[cellCol].rangeEnd = rangeBegin + powerOf2 - 1;
+                    rangeBegin += powerOf2;
+                }
                 numCellsInThisRow *= 2;
                 powerOf2 /= 2;
             }
@@ -44,8 +51,21 @@ class FactorialTracker
                     childCellIndex++;
                     m_cellMatrix[cellRow][cellCol].rightChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
                     m_cellMatrix[cellRow + 1][childCellIndex].parent = &(m_cellMatrix[cellRow][cellCol]);
+                    childCellIndex++;
                 }
             }
+
+            // Debug
+            for (int cellRow = 0; cellRow < m_cellMatrix.size() - 1; cellRow++)
+            {
+                cout << "row: " << cellRow << endl;
+                for (int cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
+                {
+                    Cell* cell = &(m_cellMatrix[cellRow][cellCol]);
+                    cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << endl;
+                }
+            }
+
         }
     private:
         int m_powerOf2BiggerThanMaxNumber;
@@ -53,9 +73,14 @@ class FactorialTracker
         int m_maxNumber;
         struct Cell
         {
+            int rangeBegin = -1;
+            int rangeEnd = -1;
             Cell* parent = nullptr;
             Cell* leftChild = nullptr;
             Cell* rightChild = nullptr;
+
+            int pendingOperatorInfo = 0;
+            bool hasPendingOperator = false;
         };
         vector<vector<Cell>> m_cellMatrix;
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
@@ -118,5 +143,6 @@ class FactorialTracker
 
 int main()
 {
+    FactorialTracker factorialTracker(10);
 }
 
