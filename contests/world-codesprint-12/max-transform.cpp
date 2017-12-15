@@ -131,7 +131,7 @@ int main()
             //const auto blee = min(k, rightC[i] - leftC[i]) - min(leftC[i] - 1, k);
             //const auto blee = min(k, rightC[i]) - max(-k, -leftC[i]);
             //const auto blee = min(k, rightC[i] - k) + min(k, leftC[i]);
-            const auto blee = min(0, rightC[i] - k) + min(k, leftC[i]) + 1;
+            const auto blee = max(0, min(0, rightC[i] - k) + min(k, leftC[i]) + 1);
             cout << " i: " << i << " A[i]: " << A[i] << " leftC[i]: " << leftC[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << endl;
         }
     }
