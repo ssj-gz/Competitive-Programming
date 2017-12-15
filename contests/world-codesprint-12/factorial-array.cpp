@@ -1,5 +1,5 @@
 #define VERIFY
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY
@@ -73,13 +73,15 @@ class FactorialTracker
         }
         void addToRange(int number, int start, int end)
         {
+            cout << "addToRange " << number << " " << start << "-" << end << endl;
             vector<Cell*> cells;
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
             for (auto cell : cells)
             {
                 cell->addPendingOperation(number);
                 cell->servicePendingOperations();
-                cell->setNeedsUpdateFromChildren();
+                if (cell->parent)
+                    cell->parent->setNeedsUpdateFromChildren();
             }
             m_cellMatrix.front().front().updateFromChildren();
 #ifdef VERIFY
@@ -106,6 +108,7 @@ class FactorialTracker
                 {
                     dbgNumInRange += m_numbers[i];
                 }
+                cout << "countInRange " << start << "-" << end << " result: " << numberInRange << " debug result: " << dbgNumInRange << endl;
                 assert(dbgNumInRange == numberInRange);
             }
 #endif
@@ -115,10 +118,11 @@ class FactorialTracker
         int m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
         int m_maxNumber;
+    public:
         void printMatrix()
         {
             // Debug
-            for (int cellRow = 0; cellRow < m_cellMatrix.size() - 1; cellRow++)
+            for (int cellRow = 0; cellRow < m_cellMatrix.size(); cellRow++)
             {
                 cout << "row: " << cellRow << endl;
                 for (int cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
@@ -128,6 +132,7 @@ class FactorialTracker
                 }
             }
         }
+    private:
         struct Cell
         {
             int numInRange = 0; // TODO - remove.
@@ -160,7 +165,7 @@ class FactorialTracker
             {
                 if (hasPendingOperator)
                 {
-                    numInRange += pendingOperatorInfo;
+                    numInRange += (rangeEnd - rangeBegin + 1) * pendingOperatorInfo;
                     if (leftChild && rightChild)
                     {
                         leftChild->addPendingOperation(pendingOperatorInfo);
@@ -173,6 +178,8 @@ class FactorialTracker
             void setNeedsUpdateFromChildren()
             {
                 if (needsUpdateFromChildren)
+                    return;
+                if (!(leftChild && rightChild))
                     return;
 
                 needsUpdateFromChildren = true;
@@ -187,13 +194,17 @@ class FactorialTracker
                 if (!(leftChild && rightChild))
                     return;
 
+                cout << "updating " << this << " from children" << endl;
+                leftChild->updateFromChildren();
+                rightChild->updateFromChildren();
                 numInRange = leftChild->numInRange + rightChild->numInRange;
+                needsUpdateFromChildren = false;
             }
 
         };
         void printCell(Cell* cell)
         {
-            cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << endl;
+            cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " numInRange: " << cell->numInRange << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << " needsUpdateFromChildren: " << cell->needsUpdateFromChildren << endl;
         }
         vector<vector<Cell>> m_cellMatrix;
 #ifdef VERIFY
@@ -201,6 +212,8 @@ class FactorialTracker
 #endif
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
+            if (cellRow == m_cellMatrix.size())
+                return;
             if (cellRow != 0)
             {
                 const int parentCellStartIndex = start / (powerOf2 * 2);
@@ -220,8 +233,6 @@ class FactorialTracker
                 return;
                 //return m_cellMatrix.back()[start].numNumbersInRange;
             }
-            if (cellRow == m_cellMatrix.size())
-                return;
             if (end + 1 - start < powerOf2)
             {
                 // Gap between start and end is too small; recurse with next row.
@@ -278,8 +289,12 @@ int main()
     factorialTracker.blah(3,11);
     }
     {
-        FactorialTracker factorialTracker(1000);
-        factorialTracker.blah(30, 530);
+        FactorialTracker factorialTracker(20);
+        factorialTracker.addToRange(1, 5, 11);
+        factorialTracker.printMatrix();
+        factorialTracker.countInRange(5, 11);
+        factorialTracker.countInRange(7, 10);
     }
+
 }
 
