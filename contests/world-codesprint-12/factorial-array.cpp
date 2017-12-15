@@ -75,7 +75,7 @@ class FactorialTracker
         {
             cout << "addToRange " << number << " " << start << "-" << end << endl;
             vector<Cell*> cells;
-            collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
+            collectMinCellsForRange(start, end, cells);
             for (auto cell : cells)
             {
                 cell->addPendingOperation(number);
@@ -95,7 +95,7 @@ class FactorialTracker
         {
             cout << " countInRange " << start << "-" << end << endl;
             vector<Cell*> cells;
-            collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
+            collectMinCellsForRange(start, end, cells);
             int numberInRange = 0;
             for (auto cell : cells)
             {
@@ -213,9 +213,25 @@ class FactorialTracker
 #ifdef VERIFY
         vector<int> m_numbers;
 #endif
+
+        void collectMinCellsForRange(int start, int end, vector<Cell*>& destCells)
+        {
+            collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
+            sort(destCells.begin(), destCells.end(), [](const auto& lhs, const auto& rhs)
+                    {
+                        return lhs->rangeBegin < rhs->rangeEnd;
+                    });
+
+            for (int i = 1; i < destCells.size(); i++)
+            {
+                assert(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1);
+            }
+            assert(destCells.front()->rangeBegin == start);
+            assert(destCells.back()->rangeEnd == end);
+        }
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
-            cout << "collectMinCellsForRange start: " << start << " end: " << end << " cellRow: " << cellRow << " powerOf2: " << powerOf2 << endl;
+            //cout << "collectMinCellsForRange start: " << start << " end: " << end << " cellRow: " << cellRow << " powerOf2: " << powerOf2 << endl;
             if (cellRow == m_cellMatrix.size())
                 return;
             if (cellRow != 0)
@@ -295,12 +311,14 @@ int main()
     }
     {
         FactorialTracker factorialTracker(20);
+#if 0
         factorialTracker.addToRange(1, 5, 11);
         factorialTracker.printMatrix();
         factorialTracker.countInRange(5, 11);
         factorialTracker.countInRange(7, 10);
         factorialTracker.countInRange(8, 9);
         factorialTracker.countInRange(8, 8);
+#endif
 
         while (true)
         {
@@ -310,6 +328,7 @@ int main()
             if (addRangeEnd < addRangeBegin)
                 swap(addRangeBegin, addRangeEnd);
             factorialTracker.addToRange(numberToAdd, addRangeBegin, addRangeEnd);
+            factorialTracker.printMatrix();
             int countRangeBegin = rand() % 20;
             int countRangeEnd = rand() % 20;
             if (countRangeEnd < countRangeBegin)
