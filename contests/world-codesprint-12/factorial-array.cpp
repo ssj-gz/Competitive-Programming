@@ -329,10 +329,10 @@ struct Query
     int64_t n2;
 };
 
-vector<int64_t> bruteForce(const vector<int>& originalA, const vector<Query>& queries)
+vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>& queries)
 {
     vector<int64_t> results;
-    vector<int> A(originalA);
+    vector<int64_t> A(originalA);
 
     for (const auto& query : queries)
     {
@@ -355,7 +355,8 @@ vector<int64_t> bruteForce(const vector<int>& originalA, const vector<Query>& qu
                     int64_t factorialSum = 0;
                     for (int i = l; i <= r; i++)
                     {
-                        factorialSum += factorialTable[A[i]];
+                        if (A[i] <= maxNonZeroFactorial)
+                            factorialSum += factorialTable[A[i]];
                     }
                     results.push_back(factorialSum);
                     break;
@@ -373,9 +374,9 @@ vector<int64_t> bruteForce(const vector<int>& originalA, const vector<Query>& qu
 int main()
 {
 
-    factorialTable.push_back(1); // What's 0 factorial?
+    factorialTable.push_back(0); // What's 0 factorial?
     int64_t factorial = 1;
-    for (int i = 1; i <= maxNonZeroFactorial; i++)
+    for (int64_t i = 1; i <= maxNonZeroFactorial; i++)
     {
         factorial = (factorial * i) % mod;
         factorialTable.push_back(factorial);
@@ -385,7 +386,7 @@ int main()
     int n, m;
     cin >> n >> m;
 
-    vector<int> A(n);
+    vector<int64_t> A(n);
     for (int i = 0; i < n; i++)
     {
         cin >> A[i];
