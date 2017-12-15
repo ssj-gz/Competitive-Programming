@@ -12,7 +12,7 @@
 
 using namespace std;
 
-constexpr int64_t mod = 1'000'000'000;
+constexpr int64_t mod = 1'000'000'000UL;
 constexpr int maxNonZeroFactorial = 39;
 
 vector<int64_t> factorialTable;
@@ -356,7 +356,7 @@ vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>
                     for (int i = l; i <= r; i++)
                     {
                         if (A[i] <= maxNonZeroFactorial)
-                            factorialSum += factorialTable[A[i]];
+                            factorialSum = (factorialSum + factorialTable[A[i]]) % mod;
                     }
                     results.push_back(factorialSum);
                     break;
@@ -381,6 +381,10 @@ int main()
         factorial = (factorial * i) % mod;
         factorialTable.push_back(factorial);
     }
+    //for (int i = 0; i <= maxNonZeroFactorial; i++)
+    //{
+        //cout << "i: " << i << " factorialTable[i]: " << factorialTable[i] << endl;
+    //}
     ios::sync_with_stdio(false);
 
     int n, m;
