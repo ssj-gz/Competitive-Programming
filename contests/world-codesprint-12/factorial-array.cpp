@@ -93,13 +93,15 @@ class FactorialTracker
         }
         int countInRange(int start, int end)
         {
+            cout << " countInRange " << start << "-" << end << endl;
             vector<Cell*> cells;
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
             int numberInRange = 0;
             for (auto cell : cells)
             {
-                assert(!cell->hasPendingOperator);
+                cell->servicePendingOperations();
                 numberInRange += cell->numInRange;
+                printCell(cell);
             }
 #ifdef VERIFY
             {
@@ -172,6 +174,7 @@ class FactorialTracker
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
                     hasPendingOperator = false;
+                    cout << "cell " << this << " updated to numInRange: " << numInRange << " by servicePendingOperations" << endl;
                 }
             }
 
@@ -212,6 +215,7 @@ class FactorialTracker
 #endif
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
+            cout << "collectMinCellsForRange start: " << start << " end: " << end << " cellRow: " << cellRow << " powerOf2: " << powerOf2 << endl;
             if (cellRow == m_cellMatrix.size())
                 return;
             if (cellRow != 0)
@@ -243,8 +247,9 @@ class FactorialTracker
             if ((start % powerOf2) == 0)
             {
                 // Advance start by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
-                if (start <= end - powerOf2)
+                while (start <= end - powerOf2 + 1)
                 {
+                    cout << "collected cell: powerOf2: " << powerOf2 << " start: " << start << " end: " << end << endl;
                     destCells.push_back(&(m_cellMatrix[cellRow][start/powerOf2]));
                     start += powerOf2;
                 }
@@ -254,7 +259,7 @@ class FactorialTracker
             if (((end + 1) % powerOf2) == 0)
             {
                 // Unadvance end by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
-                if (start <= end - powerOf2)
+                while (start <= end - powerOf2 + 1)
                 {
                     destCells.push_back(&(m_cellMatrix[cellRow][end/powerOf2]));
                     end -= powerOf2;
@@ -294,6 +299,23 @@ int main()
         factorialTracker.printMatrix();
         factorialTracker.countInRange(5, 11);
         factorialTracker.countInRange(7, 10);
+        factorialTracker.countInRange(8, 9);
+        factorialTracker.countInRange(8, 8);
+
+        while (true)
+        {
+            const int numberToAdd = rand() % 5;
+            int addRangeBegin = rand() % 20;
+            int addRangeEnd = rand() % 20;
+            if (addRangeEnd < addRangeBegin)
+                swap(addRangeBegin, addRangeEnd);
+            factorialTracker.addToRange(numberToAdd, addRangeBegin, addRangeEnd);
+            int countRangeBegin = rand() % 20;
+            int countRangeEnd = rand() % 20;
+            if (countRangeEnd < countRangeBegin)
+                swap(countRangeBegin, countRangeEnd);
+            factorialTracker.countInRange(countRangeBegin, countRangeEnd);
+        }
     }
 
 }
