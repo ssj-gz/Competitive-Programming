@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include <cassert>
 
 using namespace std;
@@ -15,12 +16,17 @@ vector<int> maxTransform(const vector<int>& A)
         {
             const int j = i + k;
             int maxInRange = 0;
+            int indexOfMaxInRange = -1;
             for (int l = i; l <= j; l++)
             {
-                maxInRange = max(maxInRange, A[l]);
+                if (A[l] > maxInRange)
+                {
+                    maxInRange = A[l];
+                    indexOfMaxInRange = l;
+                }
             }
             result.push_back(maxInRange);
-            cout << maxInRange << " ";
+            cout << maxInRange << "[" << indexOfMaxInRange << "]" << " ";
         }
 
     }
@@ -122,17 +128,44 @@ int main()
 
     cout << sum << endl;
 
+    int indexOf2 = -1;
+    for (int i = 0; i < A.size(); i++)
+    {
+        if (A[i] == 2)
+        {
+            indexOf2 = i;
+            break;
+        }
+    }
 
     for (int k = 0; k < A.size(); k++)
     {
         cout << "k: " << k << endl;
-        for (int i = 0; i < A.size(); i++)
+        //for (int i = 0; i < A.size(); i++)
+        const int i = indexOf2;
         {
             //const auto blee = min(k, rightC[i] - leftC[i]) - min(leftC[i] - 1, k);
             //const auto blee = min(k, rightC[i]) - max(-k, -leftC[i]);
             //const auto blee = min(k, rightC[i] - k) + min(k, leftC[i]);
             const auto blee = max(0, min(0, rightC[i] - k) + min(k, leftC[i]) + 1);
-            cout << " i: " << i << " A[i]: " << A[i] << " leftC[i]: " << leftC[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << endl;
+            //const auto bloo = min(leftC[i], rightC[i]) + min(k, abs(leftC[i] - rightC[i]));
+            int bloo = 0;
+            int l = leftC[i];
+            int r = rightC[i];
+            if (r < l)
+                swap(l, r);
+            if (k <= l)
+                bloo = k + 1;
+            else if (k >= l && k <= r)
+                bloo = l + 1;
+            else if (k > r && k <= l + 1 + r)
+                bloo = l + 1 - (k - r);
+            else if (k > l + 1 + r)
+                bloo = 0;
+            //if (bloo < 0)
+                //bloo = 0;
+            assert(bloo == blee);
+            cout << " i: " << i << " A[i]: " << A[i] << " leftC[i]: " << leftC[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << " bloo: " << bloo << endl;
         }
     }
 
