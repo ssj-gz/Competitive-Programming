@@ -1,15 +1,21 @@
-#define VERIFY
-//#define SUBMISSION
+#define VERIFY_FACTORIAL_TRACKER
+#define BRUTE_FORCE
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
-#undef VERIFY
+#undef VERIFY_FACTORIAL_TRACKER
 #endif
 #include <iostream>
 #include <vector>
-#include <stack>
+#include <algorithm>
 #include <cassert>
 
 using namespace std;
+
+constexpr int64_t mod = 1'000'000'000;
+constexpr int maxNonZeroFactorial = 39;
+
+vector<int64_t> factorialTable;
 
 class FactorialTracker
 {
@@ -38,6 +44,7 @@ class FactorialTracker
                     m_cellMatrix.back()[cellCol].rangeBegin = rangeBegin;
                     m_cellMatrix.back()[cellCol].rangeEnd = rangeBegin + powerOf2 - 1;
                     rangeBegin += powerOf2;
+                    //cout << "rangeBegin: " << rangeBegin << endl;
                 }
                 numCellsInThisRow *= 2;
                 powerOf2 /= 2;
@@ -56,8 +63,8 @@ class FactorialTracker
                     childCellIndex++;
                 }
             }
-            printMatrix();
-#ifdef VERIFY
+            //printMatrix();
+#ifdef VERIFY_FACTORIAL_TRACKER
             m_numbers.resize(maxNumber + 1);
 #endif
         }
@@ -65,21 +72,21 @@ class FactorialTracker
         {
             vector<Cell*> cells;
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
-            cout << "collected cells in range " << start << "-" << end << endl;
+            //cout << "collected cells in range " << start << "-" << end << endl;
             for (const auto cell : cells)
             {
-                printCell(cell);
+                //printCell(cell);
             }
         }
         void addToRange(int number, int start, int end)
         {
-            cout << "addToRange " << number << " " << start << "-" << end << endl;
+            //cout << "addToRange " << number << " " << start << "-" << end << endl;
             vector<Cell*> cells;
             collectMinCellsForRange(start, end, cells);
-            cout << "cells collected by addToRange " << start << "-" << end << endl;
+            //cout << "cells collected by addToRange " << start << "-" << end << endl;
             for (const auto cell : cells)
             {
-                printCell(cell);
+                //printCell(cell);
             }
             for (auto cell : cells)
             {
@@ -88,13 +95,13 @@ class FactorialTracker
                 if (cell->parent)
                     cell->parent->setNeedsUpdateFromChildren();
             }
-            cout << "cells collected by addToRange after performing operation: " << start << "-" << end << endl;
+            //cout << "cells collected by addToRange after performing operation: " << start << "-" << end << endl;
             for (const auto cell : cells)
             {
-                printCell(cell);
+                //printCell(cell);
             }
             m_cellMatrix.front().front().updateFromChildren();
-#ifdef VERIFY
+#ifdef VERIFY_FACTORIAL_TRACKER
             for (int i = start; i <= end; i++)
             {
                 m_numbers[i] += number;
@@ -103,7 +110,7 @@ class FactorialTracker
         }
         int countInRange(int start, int end)
         {
-            cout << " countInRange " << start << "-" << end << endl;
+            //cout << " countInRange " << start << "-" << end << endl;
             vector<Cell*> cells;
             collectMinCellsForRange(start, end, cells);
             int numberInRange = 0;
@@ -111,9 +118,9 @@ class FactorialTracker
             {
                 cell->servicePendingOperations();
                 numberInRange += cell->numInRange;
-                printCell(cell);
+                //printCell(cell);
             }
-#ifdef VERIFY
+#ifdef VERIFY_FACTORIAL_TRACKER
             {
                 int dbgNumInRange = 0;
                 for (int i = start; i <= end; i++)
@@ -136,7 +143,7 @@ class FactorialTracker
             // Debug
             for (int cellRow = 0; cellRow < m_cellMatrix.size(); cellRow++)
             {
-                cout << "row: " << cellRow << endl;
+                //cout << "row: " << cellRow << endl;
                 for (int cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
                 {
                     Cell* cell = &(m_cellMatrix[cellRow][cellCol]);
@@ -184,7 +191,7 @@ class FactorialTracker
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
                     hasPendingOperator = false;
-                    cout << "cell " << this << " updated to numInRange: " << numInRange << " by servicePendingOperations; pendingOperatorInfo: " << pendingOperatorInfo << endl;
+                    //cout << "cell " << this << " updated to numInRange: " << numInRange << " by servicePendingOperations; pendingOperatorInfo: " << pendingOperatorInfo << endl;
                 }
             }
 
@@ -213,7 +220,7 @@ class FactorialTracker
                 leftChild->updateFromChildren();
                 rightChild->updateFromChildren();
                 numInRange = leftChild->numInRange + rightChild->numInRange;
-                cout << "updating " << this << " from children; was: " << oldValue << " now: " << numInRange << endl;
+                //cout << "updating " << this << " from children; was: " << oldValue << " now: " << numInRange << endl;
                 needsUpdateFromChildren = false;
             }
 
@@ -223,14 +230,14 @@ class FactorialTracker
             cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " numInRange: " << cell->numInRange << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << " needsUpdateFromChildren: " << cell->needsUpdateFromChildren << endl;
         }
         vector<vector<Cell>> m_cellMatrix;
-#ifdef VERIFY
+#ifdef VERIFY_FACTORIAL_TRACKER
         vector<int> m_numbers;
 #endif
 
         void collectMinCellsForRange(int start, int end, vector<Cell*>& destCells)
         {
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
-            sort(destCells.begin(), destCells.end(), [](const auto& lhs, const auto& rhs)
+            sort(destCells.begin(), destCells.end(), [](const Cell* lhs, const Cell* rhs)
                     {
                         return lhs->rangeBegin < rhs->rangeEnd;
                     });
@@ -244,7 +251,7 @@ class FactorialTracker
         }
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
-            cout << "collectMinCellsForRange start: " << start << " end: " << end << " cellRow: " << cellRow << " powerOf2: " << powerOf2 << endl;
+            //cout << "collectMinCellsForRange start: " << start << " end: " << end << " cellRow: " << cellRow << " powerOf2: " << powerOf2 << endl;
             if (cellRow == m_cellMatrix.size())
                 return;
             if (cellRow != 0)
@@ -252,11 +259,10 @@ class FactorialTracker
                 const int parentCellStartIndex = start / (powerOf2 * 2);
                 const int parentCellEndIndex = end / (powerOf2 * 2);
                 const int parentCellRow = cellRow - 1;
-                cout << "collectMinCellsForRange " << start << "-" << end << " cellRow: " << cellRow << " parentCellStartIndex: " << parentCellStartIndex << " parentCellEndIndex: " << parentCellEndIndex << " parentCells " << endl;
+                //cout << "collectMinCellsForRange " << start << "-" << end << " cellRow: " << cellRow << " parentCellStartIndex: " << parentCellStartIndex << " parentCellEndIndex: " << parentCellEndIndex << " parentCells " << endl;
                 for (int parentCellCol = parentCellStartIndex; parentCellCol <= parentCellEndIndex; parentCellCol++)
                 {
                     Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellCol]);
-                    printCell(parentCell);
                     parentCell->servicePendingOperations();
                 }
             }
@@ -281,9 +287,8 @@ class FactorialTracker
             if ((start % powerOf2) == 0)
             {
                 // Advance start by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
-                while (start <= end - powerOf2 + 1)
+                if (start <= end - powerOf2 + 1)
                 {
-                    cout << "collected cell: powerOf2: " << powerOf2 << " start: " << start << " end: " << end << endl;
                     destCells.push_back(&(m_cellMatrix[cellRow][start/powerOf2]));
                     start += powerOf2;
                 }
@@ -293,7 +298,7 @@ class FactorialTracker
             if (((end + 1) % powerOf2) == 0)
             {
                 // Unadvance end by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
-                while (start <= end - powerOf2 + 1)
+                if (start <= end - powerOf2 + 1)
                 {
                     destCells.push_back(&(m_cellMatrix[cellRow][end/powerOf2]));
                     end -= powerOf2;
@@ -317,49 +322,133 @@ class FactorialTracker
         }
 };
 
+struct Query
+{
+    int type;
+    int64_t n1;
+    int64_t n2;
+};
+
+vector<int64_t> bruteForce(const vector<int>& originalA, const vector<Query>& queries)
+{
+    vector<int64_t> results;
+    vector<int> A(originalA);
+
+    for (const auto& query : queries)
+    {
+        switch (query.type)
+        {
+            case 1:
+                {
+                    const auto l = query.n1 - 1;
+                    const auto r = query.n2 - 1;
+                    for (int i = l; i <= r; i++)
+                    {
+                        A[i]++;
+                    }
+                    break;
+                }
+            case 2:
+                {
+                    const auto l = query.n1 - 1;
+                    const auto r = query.n2 - 1;
+                    int64_t factorialSum = 0;
+                    for (int i = l; i <= r; i++)
+                    {
+                        factorialSum += factorialTable[A[i]];
+                    }
+                    results.push_back(factorialSum);
+                    break;
+                }
+            case 3:
+                A[query.n1 - 1] = query.n2;
+                break;
+        }
+    }
+
+    return results;
+}
+
 
 int main()
 {
+
+    factorialTable.push_back(1); // What's 0 factorial?
+    int64_t factorial = 1;
+    for (int i = 1; i <= maxNonZeroFactorial; i++)
     {
-    FactorialTracker factorialTracker(10);
-    factorialTracker.blah(1,1);
-    factorialTracker.blah(0,15);
-    factorialTracker.blah(0,7);
-    factorialTracker.blah(3,11);
+        factorial = (factorial * i) % mod;
+        factorialTable.push_back(factorial);
+    }
+    ios::sync_with_stdio(false);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<int> A(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> A[i];
+    }
+
+    vector<Query> queries(m);
+    for (int i = 0; i < m; i++)
+    {
+        cin >> queries[i].type;
+        cin >> queries[i].n1;
+        cin >> queries[i].n2;
+    }
+    assert(cin);
+#ifdef BRUTE_FORCE
+    const auto resultsBruteForce = bruteForce(A, queries);
+    for (const auto result : resultsBruteForce)
+    {
+        cout << result << endl;
+    }
+#endif
+
+#if 0
+    {
+        FactorialTracker factorialTracker(10);
+        factorialTracker.blah(1,1);
+        factorialTracker.blah(0,15);
+        factorialTracker.blah(0,7);
+        factorialTracker.blah(3,11);
     }
     {
+#if 0
         FactorialTracker factorialTracker(5);
-#if 1
         factorialTracker.addToRange(1, 3, 4);
         factorialTracker.printMatrix();
         factorialTracker.addToRange(4, 0, 3);
         factorialTracker.printMatrix();
         factorialTracker.countInRange(3, 3);
 #endif
-
-#if 1
-        {
-            srand(time(0));
-            const int maxNum = 20;
-            FactorialTracker factorialTracker(maxNum);
-            while (true)
-            {
-                const int numberToAdd = rand() % 5;
-                int addRangeBegin = rand() % maxNum;
-                int addRangeEnd = rand() % maxNum;
-                if (addRangeEnd < addRangeBegin)
-                    swap(addRangeBegin, addRangeEnd);
-                factorialTracker.addToRange(numberToAdd, addRangeBegin, addRangeEnd);
-                factorialTracker.printMatrix();
-                int countRangeBegin = rand() % maxNum;
-                int countRangeEnd = rand() % maxNum;
-                if (countRangeEnd < countRangeBegin)
-                    swap(countRangeBegin, countRangeEnd);
-                factorialTracker.countInRange(countRangeBegin, countRangeEnd);
-            }
-        }
-#endif
     }
 
+#if 1
+    {
+        srand(time(0));
+        const int maxNum = 100000;
+        FactorialTracker factorialTracker(maxNum);
+        for (int i = 0; i < 100000; i++)
+        {
+            const int numberToAdd = rand() % 4;
+            int addRangeBegin = rand() % maxNum;
+            int addRangeEnd = rand() % maxNum;
+            if (addRangeEnd < addRangeBegin)
+                swap(addRangeBegin, addRangeEnd);
+            factorialTracker.addToRange(numberToAdd, addRangeBegin, addRangeEnd);
+            //factorialTracker.printMatrix();
+            int countRangeBegin = rand() % maxNum;
+            int countRangeEnd = rand() % maxNum;
+            if (countRangeEnd < countRangeBegin)
+                swap(countRangeBegin, countRangeEnd);
+            //cout << factorialTracker.countInRange(countRangeBegin, countRangeEnd) << endl;
+        }
+    }
+#endif
+
+#endif
 }
 
