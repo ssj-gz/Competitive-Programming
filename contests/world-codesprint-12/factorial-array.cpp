@@ -182,10 +182,14 @@ class FactorialTracker
                         leftChild->addPendingOperation(pendingOperatorInfo);
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
+                    // Add "pendingOperatorInfo" to each "value" in the array - this has the effect of shifting the histogram
+                    // pendingOperatorInfo elements to the right (i.e. if there were x elements with value y,
+                    // and pendingOperatorInfo was 2, then there are now x elements with value y + 2 instead).
                     for (int i = maxNonZeroFactorial; i >= pendingOperatorInfo; i--)
                     {
                         factorialHistogram.numWithFactorial[i] = factorialHistogram.numWithFactorial[i - pendingOperatorInfo];
                     }
+                    // The shift to the right should, obviously, zero out the "new" elements to the left :)
                     for (int i = 0; i < min(pendingOperatorInfo, maxNonZeroFactorial + 1) ; i++)
                     {
                         factorialHistogram.numWithFactorial[i] = 0;
@@ -234,29 +238,6 @@ class FactorialTracker
         void collectMinCellsForRange(int start, int end, vector<Cell*>& destCells)
         {
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
-#if 0
-            // Verification.
-            sort(destCells.begin(), destCells.end(), [](const Cell* lhs, const Cell* rhs)
-                    {
-                        return lhs->rangeBegin < rhs->rangeBegin;
-                    });
-
-            for (int i = 1; i < destCells.size(); i++)
-            {
-
-                if (!(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1))
-                {
-                    cout << "Cell error" << endl;
-                    for (const auto cell : destCells)
-                    {
-                        printCell(cell);
-                    }
-                }
-                assert(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1);
-            }
-            assert(destCells.front()->rangeBegin == start);
-            assert(destCells.back()->rangeEnd == end);
-#endif
         }
 
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
@@ -265,6 +246,7 @@ class FactorialTracker
                 return;
             if (cellRow != 0)
             {
+                // Ensure all parents have serviced their pending operations.
                 const int parentCellStartIndex = start / (powerOf2 * 2);
                 const int parentCellEndIndex = end / (powerOf2 * 2);
                 const int parentCellRow = cellRow - 1;
@@ -276,12 +258,11 @@ class FactorialTracker
             }
             if (end < start)
                 return;
+
             if (end == start)
             {
                 if (cellRow == m_cellMatrix.size() - 1)
-                {
                     destCells.push_back(&(m_cellMatrix.back()[start]));
-                }
                 else
                     collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
                 return;
@@ -324,8 +305,8 @@ class FactorialTracker
             }
             // ... and then split into two, and recurse: for each of two split regions, at least one of the start or end will be a multiple of powerOf2, so they
             // will not split further.
-            collectMinCellsForRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 >> 1, destCells);
-            collectMinCellsForRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1, destCells);
+            collectMinCellsForRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 >> 1, destCells); // Left region.
+            collectMinCellsForRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1, destCells); // Right region.
             return;
         }
 };
@@ -337,17 +318,14 @@ struct Query
     int64_t n2;
 };
 
-vector<int64_t> results(const vector<int64_t>& A, const vector<Query>& queries)
+vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queries)
 {
     FactorialTracker factorialTracker(A.size());
     factorialTracker.setInitialValues(A);
     vector<int64_t> results;
 
-    int queryIndex = 0;
     for (const auto& query : queries)
     {
-        //cout << "Matrix before query index " << queryIndex << endl;
-        //factorialTracker.printMatrix();
         switch (query.type)
         {
             case 1:
@@ -369,13 +347,9 @@ vector<int64_t> results(const vector<int64_t>& A, const vector<Query>& queries)
                 factorialTracker.setValue(query.n1 - 1, query.n2);
                 break;
         }
-        //cout << "Matrix after query index " << queryIndex << endl;
-        //factorialTracker.printMatrix();
-        queryIndex++;
     }
     return results;
 }
-
 
 int main(int argc, char** argv)
 {
@@ -405,8 +379,8 @@ int main(int argc, char** argv)
         cin >> queries[i].n2;
     }
     assert(cin);
-    const auto resultsOptimised = results(A, queries);
-    for (const auto result : resultsOptimised)
+    const auto results = findResults(A, queries);
+    for (const auto result : results)
     {
         cout << result << endl;
     }
