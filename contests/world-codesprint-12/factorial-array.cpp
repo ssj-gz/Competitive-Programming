@@ -147,7 +147,8 @@ class FactorialTracker
                 {
                     auto& cell = m_cellMatrix.back()[i];
                     cell.factorialHistogram.numWithFactorial[factorialIndex] = 1;
-                    cell.parent->setNeedsUpdateFromChildren();
+                    if (cell.parent)
+                        cell.parent->setNeedsUpdateFromChildren();
                 }
             }
             m_cellMatrix.front().front().updateFromChildren();
@@ -510,8 +511,41 @@ vector<int64_t> results(const vector<int64_t>& A, const vector<Query>& queries)
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc == 2)
+    {
+        srand(time(0));
+        const int n = rand() % 200 + 1;
+        const int m = rand() % 20 + 1;
+        cout << n << " " << m << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout << rand() % 50 + 1 << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < m; i++)
+        {
+            const int type = rand() % 3 + 1;
+            cout << type << " ";
+            if (type == 1 || type == 2)
+            {
+                int l = rand() % n + 1;
+                int r = rand() % n + 1;
+                if (l > r)
+                    swap(l, r);
+                cout << l << " " << r;
+            }
+            else
+            {
+                const int pos = rand() % n + 1;
+                const int value = rand() % 50 + 1;
+                cout << pos << " " << value;
+            }
+            cout << endl;
+        }
+        return 0;
+    }
 
     factorialTable.push_back(0); // What's 0 factorial?
     int64_t factorial = 1;
@@ -556,6 +590,7 @@ int main()
     {
         cout << result << endl;
     }
+    assert(resultsOptimised == resultsBruteForce);
 #endif
 
 #if 0
