@@ -8,6 +8,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <cassert>
 
@@ -20,7 +21,7 @@ vector<int64_t> factorialTable;
 
 struct FactorialHistogram
 {
-    int64_t numWithFactorial[maxNonZeroFactorial + 1] = {};
+    std::array<int64_t, maxNonZeroFactorial + 1> numWithFactorial = {};
 };
 
 class FactorialTracker
@@ -30,7 +31,7 @@ class FactorialTracker
             : m_maxNumber{maxNumber}
         {
             int exponentOfPowerOf2 = 0;
-            int powerOf2 = 1;
+            int64_t powerOf2 = 1;
             while (maxNumber > powerOf2)
             {
                 exponentOfPowerOf2++;
@@ -44,11 +45,12 @@ class FactorialTracker
             while (powerOf2 > 0)
             {
                 m_cellMatrix.push_back(vector<Cell>(numCellsInThisRow));
-                int rangeBegin = 0;
+                int64_t rangeBegin = 0;
                 for (int cellCol = 0; cellCol < numCellsInThisRow; cellCol++)
                 {
                     m_cellMatrix.back()[cellCol].rangeBegin = rangeBegin;
                     m_cellMatrix.back()[cellCol].rangeEnd = rangeBegin + powerOf2 - 1;
+                    assert(m_cellMatrix.back()[cellCol].rangeEnd >= m_cellMatrix.back()[cellCol].rangeBegin);
                     rangeBegin += powerOf2;
                     //cout << "rangeBegin: " << rangeBegin << endl;
                 }
@@ -123,7 +125,7 @@ class FactorialTracker
             for (auto cell : cells)
             {
                 cell->servicePendingOperations();
-                numberInRange += cell->numInRange;
+                //numberInRange += cell->numInRange;
                 //printCell(cell);
             }
 #ifdef VERIFY_FACTORIAL_TRACKER
@@ -236,10 +238,11 @@ class FactorialTracker
                     factorialSum = (factorialSum + (cell->factorialHistogram.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
                 }
             }
+            assert(factorialSum >= 0 && factorialSum < mod);
             return factorialSum;
         }
     private:
-        int m_powerOf2BiggerThanMaxNumber;
+        int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
         int m_maxNumber;
     public:
@@ -259,11 +262,10 @@ class FactorialTracker
     private:
         struct Cell
         {
-            int numInRange = 0; // TODO - remove.
             FactorialHistogram factorialHistogram;
 
-            int rangeBegin = -1;
-            int rangeEnd = -1;
+            int64_t rangeBegin = -1;
+            int64_t rangeEnd = -1;
             Cell* parent = nullptr;
             Cell* leftChild = nullptr;
             Cell* rightChild = nullptr;
@@ -307,7 +309,7 @@ class FactorialTracker
                     {
                         factorialHistogram.numWithFactorial[i] = factorialHistogram.numWithFactorial[i - pendingOperatorInfo];
                     }
-                    for (int i = 0; i < pendingOperatorInfo; i++)
+                    for (int i = 0; i < min(pendingOperatorInfo, maxNonZeroFactorial + 1) ; i++)
                     {
                         factorialHistogram.numWithFactorial[i] = 0;
                     }
@@ -361,7 +363,7 @@ class FactorialTracker
         };
         void printCell(Cell* cell)
         {
-            cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " numInRange: " << cell->numInRange << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << " needsUpdateFromChildren: " << cell->needsUpdateFromChildren << endl;
+            cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << " needsUpdateFromChildren: " << cell->needsUpdateFromChildren << endl;
             for (int i = 1; i <= maxNonZeroFactorial; i++)
             {
                 if (cell->factorialHistogram.numWithFactorial[i] != 0)
@@ -378,11 +380,21 @@ class FactorialTracker
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
             sort(destCells.begin(), destCells.end(), [](const Cell* lhs, const Cell* rhs)
                     {
-                        return lhs->rangeBegin < rhs->rangeEnd;
+                        return lhs->rangeBegin < rhs->rangeBegin;
                     });
 
             for (int i = 1; i < destCells.size(); i++)
             {
+
+                if (!(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1))
+                {
+                    //cout << "destCells[i]->rangeBegin: " << destCells[i]->rangeBegin << " destCells[i - 1]->rangeEnd + 1: " << (destCells[i - 1]->rangeEnd + 1) << endl;
+                    cout << "Cell error" << endl;
+                    for (const auto cell : destCells)
+                    {
+                        printCell(cell);
+                    }
+                }
                 assert(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1);
             }
             assert(destCells.front()->rangeBegin == start);
@@ -410,7 +422,10 @@ class FactorialTracker
             if (end == start)
             {
                 if (cellRow == m_cellMatrix.size() - 1)
+                {
                     destCells.push_back(&(m_cellMatrix.back()[start]));
+                //cout << "Added cell 1: " << destCells.back() << endl;
+                }
                 else
                     collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
                 return;
@@ -429,6 +444,7 @@ class FactorialTracker
                 if (start <= end - powerOf2 + 1)
                 {
                     destCells.push_back(&(m_cellMatrix[cellRow][start/powerOf2]));
+                //cout << "Added cell 2: " << destCells.back() << " row: " << cellRow << " index: " << (start/ powerOf2) << " cells in row: " << m_cellMatrix[cellRow].size() << endl;
                     start += powerOf2;
                 }
                 collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
@@ -440,6 +456,7 @@ class FactorialTracker
                 if (start <= end - powerOf2 + 1)
                 {
                     destCells.push_back(&(m_cellMatrix[cellRow][end/powerOf2]));
+                //cout << "Added cell 3: " << destCells.back() << endl;
                     end -= powerOf2;
                 }
                 collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
@@ -452,6 +469,7 @@ class FactorialTracker
             if (powerOf2AfterStart < powerOf2BeforeEnd)
             {
                 destCells.push_back(&(m_cellMatrix[cellRow][powerOf2AfterStart / powerOf2]));
+                //cout << "Added cell 4: " << destCells.back() << endl;
             }
             // ... and then split into two, and recurse: for each of two split regions, at least one of the start or end will be a multiple of powerOf2, so they
             // will not split further.
@@ -515,12 +533,14 @@ vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>
                 cout << " type - setvalue " << query.n1 - 1 << "-" << query.n2 << endl;
                 break;
         }
+#if 0
         cout << "After query " << queryIndex << endl;
         for (const auto x : A)
         {
             cout << x << " ";
         }
         cout << endl;
+#endif
         queryIndex++;
     }
 
@@ -572,8 +592,10 @@ int main(int argc, char** argv)
     if (argc == 2)
     {
         srand(time(0));
-        const int n = rand() % 100'000 + 1;
-        const int m = rand() % 100'000 + 1;
+        //const int n = rand() % 100'000 + 1;
+        //const int m = rand() % 100'000 + 1;
+        const int n = 100'000;
+        const int m = 100'000;
         cout << n << " " << m << endl;
         for (int i = 0; i < n; i++)
         {
@@ -616,7 +638,7 @@ int main(int argc, char** argv)
     //}
     ios::sync_with_stdio(false);
 
-    int n, m;
+    int64_t n, m;
     cin >> n >> m;
 
     vector<int64_t> A(n);
@@ -626,7 +648,7 @@ int main(int argc, char** argv)
     }
 
     vector<Query> queries(m);
-    for (int i = 0; i < m; i++)
+    for (int64_t i = 0; i < m; i++)
     {
         cin >> queries[i].type;
         cin >> queries[i].n1;
