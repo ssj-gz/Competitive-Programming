@@ -70,7 +70,7 @@ class FactorialTracker
             }
             //printMatrix();
 #ifdef VERIFY_FACTORIAL_TRACKER
-            m_numbers.resize(maxNumber + 1);
+            m_dbgFactorialHistogram.resize(maxNumber + 1);
 #endif
         }
         void blah(int start, int end)
@@ -107,10 +107,10 @@ class FactorialTracker
             }
             m_cellMatrix.front().front().updateFromChildren();
 #ifdef VERIFY_FACTORIAL_TRACKER
-            for (int i = start; i <= end; i++)
-            {
-                m_numbers[i] += number;
-            }
+            //for (int i = start; i <= end; i++)
+            //{
+                //m_numbers[i] += number;
+            //}
 #endif
         }
         int countInRange(int start, int end)
@@ -127,13 +127,13 @@ class FactorialTracker
             }
 #ifdef VERIFY_FACTORIAL_TRACKER
             {
-                int dbgNumInRange = 0;
-                for (int i = start; i <= end; i++)
-                {
-                    dbgNumInRange += m_numbers[i];
-                }
-                cout << "countInRange " << start << "-" << end << " result: " << numberInRange << " debug result: " << dbgNumInRange << endl;
-                assert(dbgNumInRange == numberInRange);
+                //int dbgNumInRange = 0;
+                //for (int i = start; i <= end; i++)
+                //{
+                    //dbgNumInRange += m_numbers[i];
+                //}
+                //cout << "countInRange " << start << "-" << end << " result: " << numberInRange << " debug result: " << dbgNumInRange << endl;
+                //assert(dbgNumInRange == numberInRange);
             }
 #endif
             return numberInRange;
@@ -152,6 +152,16 @@ class FactorialTracker
                 }
             }
             m_cellMatrix.front().front().updateFromChildren();
+#ifdef VERIFY_FACTORIAL_TRACKER
+            for (int i = 0; i < A.size(); i++)
+            {
+                const int factorialIndex = (A[i] <= maxNonZeroFactorial ? A[i] : -1);
+                if (factorialIndex != -1)
+                {
+                    m_dbgFactorialHistogram[i].numWithFactorial[factorialIndex] = 1;
+                }
+            }
+#endif
         }
         void addOneToAllInRange(int left, int right)
         {
@@ -168,23 +178,28 @@ class FactorialTracker
         }
         void setValue(int pos, int64_t value)
         {
+            cout << "setValue: " << pos << " to " << value << endl;
+            cout << "original matrix:" << endl;
+            printMatrix();
             vector<Cell*> cells;
             collectMinCellsForRange(pos, pos, cells);
             assert(cells.size() == 1);
             auto cell = cells.front();
             cell->servicePendingOperations();
-            cout << "setValue: " << pos << " to " << value << endl;
             printCell(cell);
             const int valueFactorialIndex = (value <= maxNonZeroFactorial ? value : -1);
+            bool foundNonZero = false;
             for (int i = 1; i <= maxNonZeroFactorial; i++)
             {
                 cout << "i: " << i << " numWithFactorial[i]: " << cell->factorialHistogram.numWithFactorial[i] << endl;
                 if (cell->factorialHistogram.numWithFactorial[i] != 0)
                 {
+                    assert(!foundNonZero);
                     assert(cell->factorialHistogram.numWithFactorial[i] == 1);
                     cell->factorialHistogram.numWithFactorial[i] = 0;
                     cout << "Found non-zero: " << i << endl;
-                    break;
+                    foundNonZero = true;
+                    //break;
                 }
             }
             cout << " valueFactorialIndex: " << valueFactorialIndex << endl;
@@ -203,6 +218,9 @@ class FactorialTracker
                 cell->parent->setNeedsUpdateFromChildren();
             m_cellMatrix.front().front().updateFromChildren();
 
+            cout << "matrix after setValue " << pos << " to " << value << endl;
+            printMatrix();
+
         }
         int64_t factorialSum(int left, int right)
         {
@@ -212,7 +230,7 @@ class FactorialTracker
             for (auto cell : cells)
             {
                 cell->servicePendingOperations();
-                for (int i = 0; i <= maxNonZeroFactorial; i++)
+                for (int i = 1; i <= maxNonZeroFactorial; i++)
                 {
                     factorialSum = (factorialSum + (cell->factorialHistogram.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
                 }
@@ -229,7 +247,7 @@ class FactorialTracker
             // Debug
             for (int cellRow = 0; cellRow < m_cellMatrix.size(); cellRow++)
             {
-                //cout << "row: " << cellRow << endl;
+                cout << "row: " << cellRow << endl;
                 for (int cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
                 {
                     Cell* cell = &(m_cellMatrix[cellRow][cellCol]);
@@ -280,7 +298,7 @@ class FactorialTracker
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
                     cout << "Cell: " << this << " " << rangeBegin << "-" << rangeEnd << " original factorial histogram:" << endl;
-                    for (int i = 1; i <= maxNonZeroFactorial; i++)
+                    for (int i = 0; i <= maxNonZeroFactorial; i++)
                     {
                         cout << "i: " << i << " numWithFactorial[i]: " << factorialHistogram.numWithFactorial[i] << endl;
                     }
@@ -288,12 +306,20 @@ class FactorialTracker
                     {
                         factorialHistogram.numWithFactorial[i] = factorialHistogram.numWithFactorial[i - pendingOperatorInfo];
                     }
+                    for (int i = 0; i < pendingOperatorInfo; i++)
+                    {
+                        factorialHistogram.numWithFactorial[i] = 0;
+                    }
                     cout << "Cell: " << this << " after updating with " << pendingOperatorInfo << " factorial histogram:" << endl;
-                    for (int i = 1; i <= maxNonZeroFactorial; i++)
+                    for (int i = 0; i <= maxNonZeroFactorial; i++)
                     {
                         cout << "i: " << i << " numWithFactorial[i]: " << factorialHistogram.numWithFactorial[i] << endl;
                     }
                     hasPendingOperator = false;
+                    if (pendingOperatorInfo != 1)
+                    {
+                        cout << "Merged multiple factorials" << endl;
+                    }
                     //cout << "cell " << this << " updated to numInRange: " << numInRange << " by servicePendingOperations; pendingOperatorInfo: " << pendingOperatorInfo << endl;
                 }
             }
@@ -335,10 +361,15 @@ class FactorialTracker
         void printCell(Cell* cell)
         {
             cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " numInRange: " << cell->numInRange << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << " needsUpdateFromChildren: " << cell->needsUpdateFromChildren << endl;
+            for (int i = 1; i <= maxNonZeroFactorial; i++)
+            {
+                if (cell->factorialHistogram.numWithFactorial[i] != 0)
+                    cout << "  i: " << i << " numWithFactorial[i]: " << cell->factorialHistogram.numWithFactorial[i] << endl;
+            }
         }
         vector<vector<Cell>> m_cellMatrix;
 #ifdef VERIFY_FACTORIAL_TRACKER
-        vector<int> m_numbers;
+        vector<FactorialHistogram> m_dbgFactorialHistogram;
 #endif
 
         void collectMinCellsForRange(int start, int end, vector<Cell*>& destCells)
@@ -436,19 +467,22 @@ struct Query
     int64_t n2;
 };
 
-vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>& queries)
+vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>& queries, const vector<int64_t>& resultsOptimised)
 {
     vector<int64_t> results;
     vector<int64_t> A(originalA);
 
+    int queryIndex = 0;
     for (const auto& query : queries)
     {
+        cout << "queryIndex: " << queryIndex;
         switch (query.type)
         {
             case 1:
                 {
                     const auto l = query.n1 - 1;
                     const auto r = query.n2 - 1;
+                    cout << " type - add " << l << "-" << r << endl;
                     for (int i = l; i <= r; i++)
                     {
                         A[i]++;
@@ -460,18 +494,33 @@ vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>
                     const auto l = query.n1 - 1;
                     const auto r = query.n2 - 1;
                     int64_t factorialSum = 0;
+                    cout << " type - sum " << l << "-" << r << endl;
                     for (int i = l; i <= r; i++)
                     {
                         if (A[i] <= maxNonZeroFactorial)
                             factorialSum = (factorialSum + factorialTable[A[i]]) % mod;
+                    }
+                    if (resultsOptimised[results.size()] != factorialSum)
+                    {
+                        cout << "Error at query: " << queryIndex << " sum over range: " << l << "-" << r << " optimised: " << resultsOptimised[results.size()] << " brute force: " << factorialSum << endl;
+                        if (queryIndex != 0)
+                            cout << "Previous query type: " << queries[queryIndex - 1].type << " n1: " << queries[queryIndex - 1].n1 << " n2: " << queries[queryIndex - 1].n2 << endl;
                     }
                     results.push_back(factorialSum);
                     break;
                 }
             case 3:
                 A[query.n1 - 1] = query.n2;
+                cout << " type - setvalue " << query.n1 - 1 << "-" << query.n2 << endl;
                 break;
         }
+        cout << "After query " << queryIndex << endl;
+        for (const auto x : A)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        queryIndex++;
     }
 
     return results;
@@ -483,8 +532,11 @@ vector<int64_t> results(const vector<int64_t>& A, const vector<Query>& queries)
     factorialTracker.setInitialValues(A);
     vector<int64_t> results;
 
+    int queryIndex = 0;
     for (const auto& query : queries)
     {
+        cout << "Matrix before query index " << queryIndex << endl;
+        factorialTracker.printMatrix();
         switch (query.type)
         {
             case 1:
@@ -506,6 +558,9 @@ vector<int64_t> results(const vector<int64_t>& A, const vector<Query>& queries)
                 factorialTracker.setValue(query.n1 - 1, query.n2);
                 break;
         }
+        cout << "Matrix after query index " << queryIndex << endl;
+        factorialTracker.printMatrix();
+        queryIndex++;
     }
     return results;
 }
@@ -516,8 +571,8 @@ int main(int argc, char** argv)
     if (argc == 2)
     {
         srand(time(0));
-        const int n = rand() % 200 + 1;
-        const int m = rand() % 20 + 1;
+        const int n = rand() % 20 + 1;
+        const int m = rand() % 2000 + 1;
         cout << n << " " << m << endl;
         for (int i = 0; i < n; i++)
         {
@@ -585,7 +640,7 @@ int main(int argc, char** argv)
     }
 #ifdef BRUTE_FORCE
     cout << "results brute force:" << endl;
-    const auto resultsBruteForce = bruteForce(A, queries);
+    const auto resultsBruteForce = bruteForce(A, queries, resultsOptimised);
     for (const auto result : resultsBruteForce)
     {
         cout << result << endl;
