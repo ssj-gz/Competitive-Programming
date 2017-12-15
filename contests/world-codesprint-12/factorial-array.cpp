@@ -19,7 +19,7 @@ vector<int64_t> factorialTable;
 
 struct FactorialHistogram
 {
-    int64_t numWithFactorial[maxNonZeroFactorial] = {};
+    int64_t numWithFactorial[maxNonZeroFactorial + 1] = {};
 };
 
 class FactorialTracker
@@ -152,6 +152,34 @@ class FactorialTracker
             }
             m_cellMatrix.front().front().updateFromChildren();
         }
+        void addOneToAllInRange(int left, int right)
+        {
+            vector<Cell*> cells;
+            collectMinCellsForRange(left, right, cells);
+            for (auto cell : cells)
+            {
+                cell->addPendingOperation(1);
+                cell->servicePendingOperations();
+                if (cell->parent)
+                    cell->parent->setNeedsUpdateFromChildren();
+            }
+            m_cellMatrix.front().front().updateFromChildren();
+        }
+        int64_t factorialSum(int left, int right)
+        {
+            vector<Cell*> cells;
+            collectMinCellsForRange(left, right, cells);
+            int64_t factorialSum = 0;
+            for (auto cell : cells)
+            {
+                cell->servicePendingOperations();
+                for (int i = 0; i <= maxNonZeroFactorial; i++)
+                {
+                    factorialSum = (factorialSum + (cell->factorialHistogram.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
+                }
+            }
+            return factorialSum;
+        }
     private:
         int m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
@@ -203,11 +231,18 @@ class FactorialTracker
             {
                 if (hasPendingOperator)
                 {
+#if 0
+                    const int numInRange = (rangeEnd - rangeBegin + 1);
                     numInRange += (rangeEnd - rangeBegin + 1) * pendingOperatorInfo;
+#endif
                     if (leftChild && rightChild)
                     {
                         leftChild->addPendingOperation(pendingOperatorInfo);
                         rightChild->addPendingOperation(pendingOperatorInfo);
+                    }
+                    for (int i = pendingOperatorInfo; i <= maxNonZeroFactorial; i++)
+                    {
+                        factorialHistogram.numWithFactorial[i] = factorialHistogram.numWithFactorial[i - pendingOperatorInfo];
                     }
                     hasPendingOperator = false;
                     //cout << "cell " << this << " updated to numInRange: " << numInRange << " by servicePendingOperations; pendingOperatorInfo: " << pendingOperatorInfo << endl;
@@ -235,11 +270,15 @@ class FactorialTracker
 
                 leftChild->servicePendingOperations();
                 rightChild->servicePendingOperations();
-                const int oldValue = numInRange;
+                //const int oldValue = numInRange;
                 leftChild->updateFromChildren();
                 rightChild->updateFromChildren();
-                numInRange = leftChild->numInRange + rightChild->numInRange;
+                //numInRange = leftChild->numInRange + rightChild->numInRange;
                 //cout << "updating " << this << " from children; was: " << oldValue << " now: " << numInRange << endl;
+                for (int i = 0; i <= maxNonZeroFactorial; i++)
+                {
+                    factorialHistogram.numWithFactorial[i] = leftChild->factorialHistogram.numWithFactorial[i] + rightChild->factorialHistogram.numWithFactorial[i];
+                }
                 needsUpdateFromChildren = false;
             }
 
@@ -389,10 +428,43 @@ vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>
     return results;
 }
 
+vector<int64_t> results(const vector<int64_t>& A, const vector<Query>& queries)
+{
+    FactorialTracker factorialTracker(A.size());
+    factorialTracker.setInitialValues(A);
+    vector<int64_t> results;
+
+    for (const auto& query : queries)
+    {
+        switch (query.type)
+        {
+            case 1:
+                {
+                    const auto l = query.n1 - 1;
+                    const auto r = query.n2 - 1;
+                    factorialTracker.addOneToAllInRange(l, r);
+                    break;
+                }
+            case 2:
+                {
+                    const auto l = query.n1 - 1;
+                    const auto r = query.n2 - 1;
+                    const auto factorialSum = factorialTracker.factorialSum(l, r);
+                    results.push_back(factorialSum);
+                    break;
+                }
+            case 3:
+                //A[query.n1 - 1] = query.n2;
+                assert(false);
+                break;
+        }
+    }
+    return results;
+}
+
 
 int main()
 {
-    FactorialTracker factorialTracker(100'000);
 
     factorialTable.push_back(0); // What's 0 factorial?
     int64_t factorial = 1;
@@ -415,7 +487,6 @@ int main()
     {
         cin >> A[i];
     }
-    factorialTracker.setInitialValues(A);
 
     vector<Query> queries(m);
     for (int i = 0; i < m; i++)
@@ -425,7 +496,14 @@ int main()
         cin >> queries[i].n2;
     }
     assert(cin);
+    const auto resultsOptimised = results(A, queries);
+    cout << "results: " << endl;
+    for (const auto result : resultsOptimised)
+    {
+        cout << result << endl;
+    }
 #ifdef BRUTE_FORCE
+    cout << "results brute force:" << endl;
     const auto resultsBruteForce = bruteForce(A, queries);
     for (const auto result : resultsBruteForce)
     {
