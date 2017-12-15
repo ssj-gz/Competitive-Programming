@@ -1,6 +1,8 @@
+#define VERIFY
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
+#undef VERIFY
 #endif
 #include <iostream>
 #include <vector>
@@ -55,6 +57,9 @@ class FactorialTracker
                 }
             }
             printMatrix();
+#ifdef VERIFY
+            m_numbers.resize(maxNumber + 1);
+#endif
         }
         void blah(int start, int end)
         {
@@ -65,6 +70,46 @@ class FactorialTracker
             {
                 printCell(cell);
             }
+        }
+        void addToRange(int number, int start, int end)
+        {
+            vector<Cell*> cells;
+            collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
+            for (auto cell : cells)
+            {
+                cell->addPendingOperation(number);
+                cell->servicePendingOperations();
+                cell->setNeedsUpdateFromChildren();
+            }
+            m_cellMatrix.front().front().updateFromChildren();
+#ifdef VERIFY
+            for (int i = start; i <= end; i++)
+            {
+                m_numbers[i] += number;
+            }
+#endif
+        }
+        int countInRange(int start, int end)
+        {
+            vector<Cell*> cells;
+            collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, cells);
+            int numberInRange = 0;
+            for (auto cell : cells)
+            {
+                assert(!cell->hasPendingOperator);
+                numberInRange += cell->numInRange;
+            }
+#ifdef VERIFY
+            {
+                int dbgNumInRange = 0;
+                for (int i = start; i <= end; i++)
+                {
+                    dbgNumInRange += m_numbers[i];
+                }
+                assert(dbgNumInRange == numberInRange);
+            }
+#endif
+            return numberInRange;
         }
     private:
         int m_powerOf2BiggerThanMaxNumber;
@@ -85,6 +130,9 @@ class FactorialTracker
         }
         struct Cell
         {
+            int numInRange = 0; // TODO - remove.
+
+
             int rangeBegin = -1;
             int rangeEnd = -1;
             Cell* parent = nullptr;
@@ -93,14 +141,77 @@ class FactorialTracker
 
             int pendingOperatorInfo = 0;
             bool hasPendingOperator = false;
+            bool needsUpdateFromChildren = false;
+
+            void addPendingOperation(int operatorInfo)
+            {
+                if (!hasPendingOperator)
+                {
+                    hasPendingOperator = true;
+                    pendingOperatorInfo = operatorInfo;
+                }
+                else
+                {
+                    pendingOperatorInfo += operatorInfo;
+                }
+            }
+
+            void servicePendingOperations()
+            {
+                if (hasPendingOperator)
+                {
+                    numInRange += pendingOperatorInfo;
+                    if (leftChild && rightChild)
+                    {
+                        leftChild->addPendingOperation(pendingOperatorInfo);
+                        rightChild->addPendingOperation(pendingOperatorInfo);
+                    }
+                    hasPendingOperator = false;
+                }
+            }
+
+            void setNeedsUpdateFromChildren()
+            {
+                if (needsUpdateFromChildren)
+                    return;
+
+                needsUpdateFromChildren = true;
+                if (parent)
+                    parent->setNeedsUpdateFromChildren();
+            }
+
+            void updateFromChildren()
+            {
+                if (!needsUpdateFromChildren)
+                    return;
+                if (!(leftChild && rightChild))
+                    return;
+
+                numInRange = leftChild->numInRange + rightChild->numInRange;
+            }
+
         };
         void printCell(Cell* cell)
         {
             cout << " cell: " << cell << " begin: " << cell->rangeBegin << " end:" << cell->rangeEnd << " parent: " << cell->parent << " leftChild: " << cell->leftChild << " rightChild: " << cell->rightChild << " hasPendingOperator: " << cell->hasPendingOperator << " pendingOperatorInfo: " << cell->pendingOperatorInfo << endl;
         }
         vector<vector<Cell>> m_cellMatrix;
+#ifdef VERIFY
+        vector<int> m_numbers;
+#endif
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
+            if (cellRow != 0)
+            {
+                const int parentCellStartIndex = start / (powerOf2 * 2);
+                const int parentCellEndIndex = end / (powerOf2 * 2);
+                const int parentCellRow = cellRow - 1;
+                for (int parentCellCol = parentCellStartIndex; parentCellCol <= parentCellEndIndex; parentCellCol++)
+                {
+                    Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellCol]);
+                    parentCell->servicePendingOperations();
+                }
+            }
             if (end < start)
                 return;
             if (end == start)
