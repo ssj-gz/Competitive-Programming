@@ -17,6 +17,11 @@ constexpr int maxNonZeroFactorial = 39;
 
 vector<int64_t> factorialTable;
 
+struct FactorialHistogram
+{
+    int64_t numWithFactorial[maxNonZeroFactorial] = {};
+};
+
 class FactorialTracker
 {
     public:
@@ -133,6 +138,20 @@ class FactorialTracker
 #endif
             return numberInRange;
         }
+        void setInitialValues(const vector<int64_t>& A)
+        {
+            for (int i = 0; i < A.size(); i++)
+            {
+                const int factorialIndex = (A[i] <= maxNonZeroFactorial ? A[i] : -1);
+                if (factorialIndex != -1)
+                {
+                    auto& cell = m_cellMatrix.back()[i];
+                    cell.factorialHistogram.numWithFactorial[factorialIndex] = 1;
+                    cell.parent->setNeedsUpdateFromChildren();
+                }
+            }
+            m_cellMatrix.front().front().updateFromChildren();
+        }
     private:
         int m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
@@ -155,7 +174,7 @@ class FactorialTracker
         struct Cell
         {
             int numInRange = 0; // TODO - remove.
-
+            FactorialHistogram factorialHistogram;
 
             int rangeBegin = -1;
             int rangeEnd = -1;
@@ -373,6 +392,7 @@ vector<int64_t> bruteForce(const vector<int64_t>& originalA, const vector<Query>
 
 int main()
 {
+    FactorialTracker factorialTracker(100'000);
 
     factorialTable.push_back(0); // What's 0 factorial?
     int64_t factorial = 1;
@@ -395,6 +415,7 @@ int main()
     {
         cin >> A[i];
     }
+    factorialTracker.setInitialValues(A);
 
     vector<Query> queries(m);
     for (int i = 0; i < m; i++)
