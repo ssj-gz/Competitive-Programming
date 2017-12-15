@@ -10,6 +10,7 @@ vector<int> maxTransform(const vector<int>& A)
 
     for (int k = 0; k < A.size(); k++)
     {
+        cout << " |(" << k << ") ";
         for (int i = 0; i < A.size() - k; i++)
         {
             const int j = i + k;
@@ -19,6 +20,7 @@ vector<int> maxTransform(const vector<int>& A)
                 maxInRange = max(maxInRange, A[l]);
             }
             result.push_back(maxInRange);
+            cout << maxInRange << " ";
         }
 
     }
@@ -119,6 +121,21 @@ int main()
 
 
     cout << sum << endl;
+
+
+    for (int k = 0; k < A.size(); k++)
+    {
+        cout << "k: " << k << endl;
+        for (int i = 0; i < A.size(); i++)
+        {
+            //const auto blee = min(k, rightC[i] - leftC[i]) - min(leftC[i] - 1, k);
+            //const auto blee = min(k, rightC[i]) - max(-k, -leftC[i]);
+            //const auto blee = min(k, rightC[i] - k) + min(k, leftC[i]);
+            const auto blee = min(0, rightC[i] - k) + min(k, leftC[i]) + 1;
+            cout << " i: " << i << " A[i]: " << A[i] << " leftC[i]: " << leftC[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << endl;
+        }
+    }
+
 
 }
 
