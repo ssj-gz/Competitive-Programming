@@ -368,7 +368,43 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
     }
     else if (leftCLT[index] != -1 && rightCLE[index] == -1)
     {
-        assert(false && "Unhandled");
+        int l = leftCLT[index];
+        int r = A.size() - index - 1;
+        if (r < l)
+            swap(l, r);
+        // k == 0 case.
+        //numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
+        //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
+        for (int64_t k = 0; k < A.size(); k++)
+        {
+            //const int clearToRightThisK = index - k;
+            const int clearToRightThisK = max(int64_t(0), int64_t(A.size()) -  index - 1 - k);
+            //const int leftmostToBeginNextK = max(int64_t(0), int64_t(A.size()) - rightMostCLTPos[index] - (k));
+            const int leftmostToBeginNextK = (k < A.size() - 1 ? leftMostCGTPos[index] - (k + 1) : 0);
+            //const int left = (clearToRightThisK >= 0 ? clearToRightThisK + leftmostToBeginNextK : 0);
+            const int left = clearToRightThisK + leftmostToBeginNextK;
+            int numInA = -1;
+            if (k <= l)
+                numInA = k + 1;
+            else if (k >= l && k <= r)
+                numInA = l + 1;
+            else if (k > r && k <= l + 1 + r)
+                numInA = l + 1 - (k - r);
+            else if (k > l + 1 + r)
+                numInA = 0;
+
+            int leftTransformA = max(leftCLT[index] - k, int64_t(0));
+            int rightTransformA = max(clearToRightThisK + max(leftmostToBeginNextK, 0), 0);
+            cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
+            if (rightTransformA < leftTransformA)
+                swap(leftTransformA, rightTransformA);
+            const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
+            cout << " k: " << k << " index: " << index << " left: " << left << " clearToRightThisK: " << clearToRightThisK << " leftmostToBeginNextK: " << leftmostToBeginNextK << " numInA: " << numInA << " lesser side transform: " << leftTransformA << " greater side transform: " << rightTransformA  << endl;
+
+            numOccurrences += blee;
+            cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
+        }
+        //assert(false && "Unhandled");
     }
     else if (leftCLT[index] == -1 && rightCLE[index] == -1)
     {
