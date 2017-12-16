@@ -43,16 +43,37 @@ vector<int> computeLeftCBruteForce(const vector<int>& A)
     vector<int> results(A.size());
     for (int i = 0; i < A.size(); i++)
     {
-        int leftCPos = -1;
+        int leftCLTPos = -1;
         for (int j = 0; j < i; j++)
         {
             if (A[j] > A[i])
             {
-                leftCPos = j + 1;
+                leftCLTPos = j + 1;
             }
         }
-        if (leftCPos != -1)
-            results[i] = i - leftCPos;
+        if (leftCLTPos != -1)
+            results[i] = i - leftCLTPos;
+        else
+            results[i] = -1;
+    }
+    return results;
+}
+
+vector<int> computeLeftCLTBruteForce(const vector<int>& A)
+{
+    vector<int> results(A.size());
+    for (int i = 0; i < A.size(); i++)
+    {
+        int leftCLTPos = -1;
+        for (int j = 0; j < i; j++)
+        {
+            if (A[j] >= A[i])
+            {
+                leftCLTPos = j + 1;
+            }
+        }
+        if (leftCLTPos != -1)
+            results[i] = i - leftCLTPos;
         else
             results[i] = -1;
     }
@@ -107,10 +128,10 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     return numOccurrences;
 }
 
-int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftC, const vector<int>& rightC)
+int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightC)
 {
     cout << "numOccurrences for index: " << index << endl;
-    int l = leftC[index];
+    int l = leftCLT[index];
     int r = rightC[index];
     bool swappedLR = false;
     if (r < l)
@@ -185,10 +206,10 @@ int main()
     cout << endl;
 #endif
 
-    const auto leftC = computeLeftCBruteForce(A);
+    const auto leftCLT = computeLeftCLTBruteForce(A);
     for (int i = 0; i < A.size(); i++)
     {
-        cout << "i: " << i << " A[i]: " << A[i] << " leftC[i]: " << leftC[i] << endl;
+        cout << "i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << endl;
     }
     const auto rightC = computeRightCBruteForce(A);
     for (int i = 0; i < A.size(); i++)
@@ -202,12 +223,12 @@ int main()
     const int trackNumber = 2;
 
     int indexOf2 = -1;
+    int64_t occurrencesOpt = 0;
     for (int i = 0; i < A.size(); i++)
     {
         if (A[i] == trackNumber)
         {
-            findNumOccurrencesBruteForce(i, A, leftC, rightC);
-            break;
+            occurrencesOpt += findNumOccurrencesBruteForce(i, A, leftCLT, rightC);
         }
     }
     int realOccurrences = 0;
@@ -216,7 +237,7 @@ int main()
         if (x == trackNumber)
             realOccurrences++;
     }
-    cout << "real occurrences of " << trackNumber << " in maxTransformMaxTransformA: " << realOccurrences << endl;
+    cout << "real occurrences of " << trackNumber << " in maxTransformMaxTransformA: " << realOccurrences << " occurrencesOpt: " << occurrencesOpt << endl;
 
     for (int k = 0; k < A.size(); k++)
     {
@@ -224,13 +245,13 @@ int main()
         //for (int i = 0; i < A.size(); i++)
         const int i = indexOf2;
         {
-            //const auto blee = min(k, rightC[i] - leftC[i]) - min(leftC[i] - 1, k);
-            //const auto blee = min(k, rightC[i]) - max(-k, -leftC[i]);
-            //const auto blee = min(k, rightC[i] - k) + min(k, leftC[i]);
-            const auto blee = max(0, min(0, rightC[i] - k) + min(k, leftC[i]) + 1);
-            //const auto bloo = min(leftC[i], rightC[i]) + min(k, abs(leftC[i] - rightC[i]));
+            //const auto blee = min(k, rightC[i] - leftCLT[i]) - min(leftCLT[i] - 1, k);
+            //const auto blee = min(k, rightC[i]) - max(-k, -leftCLT[i]);
+            //const auto blee = min(k, rightC[i] - k) + min(k, leftCLT[i]);
+            const auto blee = max(0, min(0, rightC[i] - k) + min(k, leftCLT[i]) + 1);
+            //const auto bloo = min(leftCLT[i], rightC[i]) + min(k, abs(leftCLT[i] - rightC[i]));
             int bloo = 0;
-            int l = leftC[i];
+            int l = leftCLT[i];
             int r = rightC[i];
             if (r < l)
                 swap(l, r);
@@ -245,7 +266,7 @@ int main()
             //if (bloo < 0)
                 //bloo = 0;
             assert(bloo == blee);
-            cout << " i: " << i << " A[i]: " << A[i] << " leftC[i]: " << leftC[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << " bloo: " << bloo << endl;
+            cout << " i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << " bloo: " << bloo << endl;
         }
     }
 
