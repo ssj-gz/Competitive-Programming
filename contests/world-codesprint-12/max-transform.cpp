@@ -38,12 +38,66 @@ vector<int> maxTransform(const vector<int>& A)
 #if 0
                 "[" << indexOfMaxInRange << "]"  <<
 #endif
-                 " ";
+                " ";
         }
 
     }
 
     return result;
+}
+
+class ModNum
+{
+    public:
+        ModNum(int64_t n)
+            : m_n{n}
+        {
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % ::mod;
+            return *this;
+        }
+        ModNum& operator-=(const ModNum& other)
+        {
+            m_n = (::mod + m_n - other.m_n) % ::mod;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % ::mod;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
 }
 
 int64_t quickPower(int64_t n, int64_t k, int64_t mod)
@@ -146,17 +200,34 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
 {
     if (r < l)
         swap(l, r);
-    int64_t numOccurrences = 0;
+    l %= mod;
+    r %= mod;
+    ModNum numOccurrences = 0;
+    numOccurrences += ModNum(l + 1) * m + sumUpTo(l, mod);
+    cout << "Sloorp: " << numOccurrences << endl;
+    numOccurrences += ModNum(r - l) * (l + m);
+    cout << "Sloorp1: " << numOccurrences << endl;
+    numOccurrences += ModNum(l + m) * (ModNum(l + m + r));
+    numOccurrences -= ModNum(sumUpTo(l + m + r, mod)) - ModNum(sumUpTo(r, mod));
 #ifdef VERIFY
     {
+        int64_t dbgBlee1 = 0;
+        int64_t dbgBlee2 = 0;
         int64_t dbgNumOccurrences = 0;
         for (int k = 0; k < 1000; k++)
         {
             int64_t blee = 0;
             if (k <= l)
+            {
                 blee = k + m;
+                dbgBlee1 += blee;
+            }
             else if (k >= l && k <= r)
+            {
                 blee = l + m;
+                dbgBlee2 += blee;
+                cout << "blee2" << endl;
+            }
             else if (k > r && k <= l + m + r)
                 blee = l + m - (k - r);
             else if (k > l + m + r)
@@ -169,10 +240,13 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
             if (blee == 0)
                 break;
         }
-        assert(dbgNumOccurrences == numOccurrences);
+        cout << " findNumOccurrencesBruteForce2 l : " << l << " m: " << m << " r: " << r << " numOccurrences: " << numOccurrences << " dbgNumOccurrences: " << dbgNumOccurrences << endl;
+        cout << "dbgBlee1: " << dbgBlee1 << endl;
+        cout << "dbgBlee2: " << dbgBlee2 << endl;
+        assert(dbgNumOccurrences == numOccurrences.value());
     }
 #endif
-    return numOccurrences;
+    return numOccurrences.value();
 }
 
 int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE)
@@ -312,7 +386,7 @@ int main()
             else if (k > l + 1 + r)
                 bloo = 0;
             //if (bloo < 0)
-                //bloo = 0;
+            //bloo = 0;
             assert(bloo == blee);
             cout << " i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << " rightCLE[i]: " << rightCLE[i] << " blee: " << blee << " bloo: " << bloo << endl;
         }
