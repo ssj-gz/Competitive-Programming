@@ -80,6 +80,61 @@ vector<int> computeRightCBruteForce(const vector<int>& A)
     return results;
 }
 
+int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
+{
+    if (r < l)
+        swap(l, r);
+    int64_t numOccurrences = 0;
+    for (int k = 0; k < 1000; k++)
+    {
+        if (k <= l)
+            numOccurrences += k + m;
+        else if (k >= l && k <= r)
+            numOccurrences += l + m;
+        else if (k > r && k <= l + 1 + r)
+            numOccurrences += l + m - (k - r);
+        else if (k > l + 1 + r)
+            numOccurrences += 0;
+    }
+    return numOccurrences;
+}
+
+int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftC, const vector<int>& rightC)
+{
+    cout << "numOccurrences for index: " << index << endl;
+    int l = leftC[index];
+    int r = rightC[index];
+    bool swappedLR = false;
+    if (r < l)
+    {
+        swappedLR = true;
+        swap(l, r);
+    }
+    int64_t numOccurrences = 0;
+    for (int k = 0; k < A.size(); k++)
+    {
+        int leftTransformA = -1;
+        int rightTransformA = -1;
+        int numInA = -1;
+        if (k <= l)
+            numInA = k + 1;
+        else if (k >= l && k <= r)
+            numInA = l + 1;
+        else if (k > r && k <= l + 1 + r)
+            numInA = l + 1 - (k - r);
+        else if (k > l + 1 + r)
+            numInA = 0;
+
+        leftTransformA = max(l - k, 0);
+        rightTransformA = max(r - k, 0);
+        cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << " numInA: " << numInA << " swappedLR: " << swappedLR << endl;
+
+        numOccurrences += findNumOccurrencesBruteForce2(l, numInA, r);
+
+    }
+    return numOccurrences;
+}
+
 
 int main()
 {
@@ -137,7 +192,7 @@ int main()
     {
         if (A[i] == 2)
         {
-            indexOf2 = i;
+            findNumOccurrencesBruteForce(i, A, leftC, rightC);
             break;
         }
     }
