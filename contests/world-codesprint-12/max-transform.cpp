@@ -85,16 +85,16 @@ vector<int> computeRightCBruteForce(const vector<int>& A)
     vector<int> results(A.size());
     for (int i = 0; i < A.size(); i++)
     {
-        int rightCPos = -1;
+        int rightCLEPos = -1;
         for (int j = A.size() - 1; j > i; j--)
         {
             if (A[j] > A[i])
             {
-                rightCPos = j - 1;
+                rightCLEPos = j - 1;
             }
         }
-        if (rightCPos != -1)
-            results[i] = rightCPos - i;
+        if (rightCLEPos != -1)
+            results[i] = rightCLEPos - i;
         else
             results[i] = -1;
     }
@@ -128,11 +128,11 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     return numOccurrences;
 }
 
-int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightC)
+int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE)
 {
     cout << "numOccurrences for index: " << index << endl;
     int l = leftCLT[index];
-    int r = rightC[index];
+    int r = rightCLE[index];
     bool swappedLR = false;
     if (r < l)
     {
@@ -211,10 +211,10 @@ int main()
     {
         cout << "i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << endl;
     }
-    const auto rightC = computeRightCBruteForce(A);
+    const auto rightCLE = computeRightCBruteForce(A);
     for (int i = 0; i < A.size(); i++)
     {
-        cout << "i: " << i << " A[i]: " << A[i] << " rightC[i]: " << rightC[i] << endl;
+        cout << "i: " << i << " A[i]: " << A[i] << " rightCLE[i]: " << rightCLE[i] << endl;
     }
 
 
@@ -228,7 +228,7 @@ int main()
     {
         if (A[i] == trackNumber)
         {
-            occurrencesOpt += findNumOccurrencesBruteForce(i, A, leftCLT, rightC);
+            occurrencesOpt += findNumOccurrencesBruteForce(i, A, leftCLT, rightCLE);
         }
     }
     int realOccurrences = 0;
@@ -245,14 +245,14 @@ int main()
         //for (int i = 0; i < A.size(); i++)
         const int i = indexOf2;
         {
-            //const auto blee = min(k, rightC[i] - leftCLT[i]) - min(leftCLT[i] - 1, k);
-            //const auto blee = min(k, rightC[i]) - max(-k, -leftCLT[i]);
-            //const auto blee = min(k, rightC[i] - k) + min(k, leftCLT[i]);
-            const auto blee = max(0, min(0, rightC[i] - k) + min(k, leftCLT[i]) + 1);
-            //const auto bloo = min(leftCLT[i], rightC[i]) + min(k, abs(leftCLT[i] - rightC[i]));
+            //const auto blee = min(k, rightCLE[i] - leftCLT[i]) - min(leftCLT[i] - 1, k);
+            //const auto blee = min(k, rightCLE[i]) - max(-k, -leftCLT[i]);
+            //const auto blee = min(k, rightCLE[i] - k) + min(k, leftCLT[i]);
+            const auto blee = max(0, min(0, rightCLE[i] - k) + min(k, leftCLT[i]) + 1);
+            //const auto bloo = min(leftCLT[i], rightCLE[i]) + min(k, abs(leftCLT[i] - rightCLE[i]));
             int bloo = 0;
             int l = leftCLT[i];
-            int r = rightC[i];
+            int r = rightCLE[i];
             if (r < l)
                 swap(l, r);
             if (k <= l)
@@ -266,7 +266,7 @@ int main()
             //if (bloo < 0)
                 //bloo = 0;
             assert(bloo == blee);
-            cout << " i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << " rightC[i]: " << rightC[i] << " blee: " << blee << " bloo: " << bloo << endl;
+            cout << " i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << " rightCLE[i]: " << rightCLE[i] << " blee: " << blee << " bloo: " << bloo << endl;
         }
     }
 
