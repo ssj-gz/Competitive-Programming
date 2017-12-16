@@ -1,9 +1,17 @@
+#define VERIFY
+//#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#undef VERIFY
+#endif
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <cassert>
 
 using namespace std;
+
+constexpr int64_t mod = 1'000'000'007UL;
 
 vector<int> maxTransform(const vector<int>& A)
 {
@@ -35,6 +43,39 @@ vector<int> maxTransform(const vector<int>& A)
 
     }
 
+    return result;
+}
+
+int64_t quickPower(int64_t n, int64_t k, int64_t mod)
+{
+    int64_t result = 1;
+    int64_t power = 0;
+    while (k > 0)
+    {
+        if (k & 1)
+        {
+            int64_t subResult = n;
+            for (int64_t i = 0; i < power; i++)
+            {
+                subResult = (subResult * subResult) % mod;
+            }
+            result = (result * subResult) % mod;
+        }
+        k >>= 1;
+        power++;
+    }
+    return result;
+}
+
+
+int64_t sumUpTo(int64_t n, int64_t mod)
+{
+    const int64_t oneHalfModMod = quickPower(2, mod - 2, mod);
+    assert((oneHalfModMod * 2) % mod == 1);
+    int64_t result = n + 1;
+    result %= mod;
+    result = (result * (n)) % mod;
+    result = (result * oneHalfModMod) % mod;
     return result;
 }
 
@@ -106,25 +147,31 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     if (r < l)
         swap(l, r);
     int64_t numOccurrences = 0;
-    for (int k = 0; k < 1000; k++)
+#ifdef VERIFY
     {
-        int64_t blee = 0;
-        if (k <= l)
-            blee = k + m;
-        else if (k >= l && k <= r)
-            blee = l + m;
-        else if (k > r && k <= l + m + r)
-            blee = l + m - (k - r);
-        else if (k > l + m + r)
-            blee = 0;
+        int64_t dbgNumOccurrences = 0;
+        for (int k = 0; k < 1000; k++)
+        {
+            int64_t blee = 0;
+            if (k <= l)
+                blee = k + m;
+            else if (k >= l && k <= r)
+                blee = l + m;
+            else if (k > r && k <= l + m + r)
+                blee = l + m - (k - r);
+            else if (k > l + m + r)
+                blee = 0;
 
-        cout << "  findNumOccurrencesBruteForce2 l: " << l << " m: " << m << " r: " << r << " k: " << k << " = " << blee << endl;
+            cout << "  findNumOccurrencesBruteForce2 l: " << l << " m: " << m << " r: " << r << " k: " << k << " = " << blee << endl;
 
-        numOccurrences += blee;
+            dbgNumOccurrences += blee;
 
-        if (blee == 0)
-            break;
+            if (blee == 0)
+                break;
+        }
+        assert(dbgNumOccurrences == numOccurrences);
     }
+#endif
     return numOccurrences;
 }
 
@@ -170,6 +217,7 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
 
 int main()
 {
+    cout << "sumUpTo 5: " << sumUpTo(5, mod) << endl;
     int n;
     cin >> n;
 
