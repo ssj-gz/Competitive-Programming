@@ -6,6 +6,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <map>
 #include <cmath>
 #include <cassert>
 
@@ -540,25 +541,28 @@ int main()
 
     cout << sum << endl;
 
-    const int trackNumber = 2;
+    map<int, int64_t> resultsOpt;
 
-    int indexOf2 = -1;
+
     int64_t occurrencesOpt = 0;
+    ModNum sumOpt = 0;
     for (int i = 0; i < A.size(); i++)
     {
-        if (A[i] == trackNumber)
-        {
-            occurrencesOpt += findNumOccurrencesBruteForce(i, A, leftCLT, rightCLE, rightMostCLEPos, leftMostCGTPos);
-        }
+        resultsOpt[A[i]] = (resultsOpt[A[i]] + findNumOccurrencesBruteForce(i, A, leftCLT, rightCLE, rightMostCLEPos, leftMostCGTPos)) % mod;
+        sumOpt += ModNum(A[i]) * findNumOccurrencesBruteForce(i, A, leftCLT, rightCLE, rightMostCLEPos, leftMostCGTPos);
     }
     int realOccurrences = 0;
+    ModNum realSum = 0;
     for (const auto x : maxTransformMaxTransformA)
     {
-        if (x == trackNumber)
-            realOccurrences++;
+        //if (x == trackNumber)
+            //realOccurrences++;
+        realSum += x;
     }
-    cout << "real occurrences of " << trackNumber << " in maxTransformMaxTransformA: " << realOccurrences << " occurrencesOpt: " << occurrencesOpt << endl;
+    //cout << "real occurrences of " << trackNumber << " in maxTransformMaxTransformA: " << realOccurrences << " occurrencesOpt: " << occurrencesOpt << endl;
+    cout << "real sum: " << realSum << " sumOpt: " << sumOpt << endl;
 
+#if 0
     for (int k = 0; k < A.size(); k++)
     {
         cout << "k: " << k << endl;
@@ -589,6 +593,7 @@ int main()
             cout << " i: " << i << " A[i]: " << A[i] << " leftCLT[i]: " << leftCLT[i] << " rightCLE[i]: " << rightCLE[i] << " blee: " << blee << " bloo: " << bloo << endl;
         }
     }
+#endif
 
 
 }
