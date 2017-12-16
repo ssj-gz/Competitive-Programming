@@ -249,37 +249,56 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
 int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE)
 {
     cout << "numOccurrences for index: " << index << endl;
-    int l = leftCLT[index];
-    int r = rightCLE[index];
-    bool swappedLR = false;
-    if (r < l)
-    {
-        swappedLR = true;
-        swap(l, r);
-    }
     int64_t numOccurrences = 0;
-    for (int k = 0; k < A.size(); k++)
+    if (leftCLT[index] != -1 && rightCLE[index] != -1)
     {
-        int leftTransformA = -1;
-        int rightTransformA = -1;
-        int numInA = -1;
-        if (k <= l)
-            numInA = k + 1;
-        else if (k >= l && k <= r)
-            numInA = l + 1;
-        else if (k > r && k <= l + 1 + r)
-            numInA = l + 1 - (k - r);
-        else if (k > l + 1 + r)
-            numInA = 0;
+        int l = leftCLT[index];
+        int r = rightCLE[index];
+        bool swappedLR = false;
+        if (r < l)
+        {
+            swappedLR = true;
+            swap(l, r);
+        }
+        for (int k = 0; k < A.size(); k++)
+        {
+            int leftTransformA = -1;
+            int rightTransformA = -1;
+            int numInA = -1;
+            if (k <= l)
+                numInA = k + 1;
+            else if (k >= l && k <= r)
+                numInA = l + 1;
+            else if (k > r && k <= l + 1 + r)
+                numInA = l + 1 - (k - r);
+            else if (k > l + 1 + r)
+                numInA = 0;
 
-        leftTransformA = max(l - k, 0);
-        rightTransformA = max(r - k, 0);
-        cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << " numInA: " << numInA << " swappedLR: " << swappedLR << endl;
-        const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
+            leftTransformA = max(l - k, 0);
+            rightTransformA = max(r - k, 0);
+            cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << " numInA: " << numInA << " swappedLR: " << swappedLR << endl;
+            const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
 
-        numOccurrences += blee;
-        cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
+            numOccurrences += blee;
+            cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
 
+        }
+    }
+    else if (leftCLT[index] != -1 && rightCLE[index] != -1)
+    {
+        assert(false && "Unhandled");
+    }
+    else if (leftCLT[index] != -1 && rightCLE[index] != -1)
+    {
+        assert(false && "Unhandled");
+    }
+    else if (leftCLT[index] != -1 && rightCLE[index] != -1)
+    {
+        assert(false && "Unhandled");
+    }
+    else
+    {
+        assert(false);
     }
     cout << "Total occurrences for index " << index << " = " << numOccurrences << endl;
     return numOccurrences;
