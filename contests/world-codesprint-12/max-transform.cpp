@@ -307,7 +307,40 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
     }
     else if (leftCLT[index] == -1 && rightCLE[index] != -1)
     {
-        assert(false && "Unhandled");
+        // TODO - k == 0
+        for (int64_t k = 1; k < A.size(); k++)
+        {
+            //const int clearToLeftThisK = index - k;
+            const int clearToLeftThisK = max(int64_t(0), index - k);
+            //const int rightmostToEndLastK = max(int64_t(0), int64_t(A.size()) - rightMostCLTPos[index] - (k));
+            const int rightmostToEndLastK = A.size() - rightMostCLTPos[index] - k;
+            //const int left = (clearToLeftThisK >= 0 ? clearToLeftThisK + rightmostToEndLastK : 0);
+            const int left = clearToLeftThisK + rightmostToEndLastK;
+            int numInA = -1;
+            int l = max(0, index) ;
+            int r = rightCLE[index];
+            if (r < l)
+                swap(l, r);
+            if (k <= l)
+                numInA = k + 1;
+            else if (k >= l && k <= r)
+                numInA = l + 1;
+            else if (k > r && k <= l + 1 + r)
+                numInA = l + 1 - (k - r);
+            else if (k > l + 1 + r)
+                numInA = 0;
+
+            int leftTransformA = max(l - k + max(rightmostToEndLastK, 0), int64_t(0));
+            int rightTransformA = max(r - k, int64_t(0));
+            if (rightTransformA < leftTransformA)
+                swap(leftTransformA, rightTransformA);
+            const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
+            cout << " k: " << k << " index: " << index << " left: " << left << " clearToLeftThisK: " << clearToLeftThisK << " rightmostToEndLastK: " << rightmostToEndLastK << " numInA: " << numInA << endl;
+
+            numOccurrences += blee;
+            cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
+        }
+        //assert(false && "Unhandled");
     }
     else if (leftCLT[index] != -1 && rightCLE[index] == -1)
     {
