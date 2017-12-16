@@ -291,7 +291,7 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
 int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE, const vector<int>& rightMostCLTPos, const vector<int>& leftMostCGTPos)
 {
     cout << "numOccurrences for index: " << index << endl;
-    int64_t numOccurrences = 0;
+    ModNum numOccurrences = 0;
     if (leftCLT[index] != -1 && rightCLE[index] != -1)
     {
         int l = leftCLT[index];
@@ -465,7 +465,7 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         assert(false);
     }
     cout << "Total occurrences for index " << index << " = " << numOccurrences << endl;
-    return numOccurrences;
+    return numOccurrences.value();
 }
 
 
