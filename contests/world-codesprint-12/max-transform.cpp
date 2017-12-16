@@ -297,7 +297,6 @@ int64_t sizeOfTransformA = -1;
 
 int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE, const vector<int>& rightMostCLEPos, const vector<int>& leftMostCGTPos)
 {
-    //cout << "numOccurrences for index: " << index << endl;
     ModNum numOccurrences = 0;
     if (leftCLT[index] != -1 && rightCLE[index] != -1)
     {
@@ -325,12 +324,9 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
 
             leftTransformA = max(l - k, 0);
             rightTransformA = max(r - k, 0);
-            //cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << " numInA: " << numInA << " swappedLR: " << swappedLR << endl;
             const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
 
             numOccurrences += blee;
-            //cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
-
         }
     }
     else if (leftCLT[index] == -1 && rightCLE[index] != -1)
@@ -339,16 +335,10 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         int r = rightCLE[index];
         if (r < l)
             swap(l, r);
-        // k == 0 case.
-        numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
-        //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
-        for (int64_t k = 1; k < A.size(); k++)
+        for (int64_t k = 0; k < A.size(); k++)
         {
-            //const int clearToLeftThisK = index - k;
             const int clearToLeftThisK = max(int64_t(0), index - k);
-            //const int rightmostToEndLastK = max(int64_t(0), int64_t(A.size()) - rightMostCLEPos[index] - (k));
-            const int rightmostToEndLastK = A.size() - rightMostCLEPos[index] - k;
-            //const int left = (clearToLeftThisK >= 0 ? clearToLeftThisK + rightmostToEndLastK : 0);
+            const int rightmostToEndLastK = (k > 0 ? A.size() - rightMostCLEPos[index] - k : 0);
             const int left = clearToLeftThisK + rightmostToEndLastK;
             int numInA = -1;
             if (k <= l)
@@ -362,16 +352,12 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
 
             int leftTransformA = max(max(index - k, int64_t(0)) + max(rightmostToEndLastK, 0), int64_t(0));
             int rightTransformA = max(rightCLE[index] - k, int64_t(0));
-            //cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
             if (rightTransformA < leftTransformA)
                 swap(leftTransformA, rightTransformA);
             const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
-            //cout << " k: " << k << " index: " << index << " left: " << left << " clearToLeftThisK: " << clearToLeftThisK << " rightmostToEndLastK: " << rightmostToEndLastK << " numInA: " << numInA << " lesser side transform: " << leftTransformA << " greater side transform: " << rightTransformA  << endl;
 
             numOccurrences += blee;
-            //cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
         }
-        //assert(false && "Unhandled");
     }
     else if (leftCLT[index] != -1 && rightCLE[index] == -1)
     {
@@ -379,9 +365,6 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         int r = A.size() - index - 1;
         if (r < l)
             swap(l, r);
-        // k == 0 case.
-        //numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
-        //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
         if (sizeOfTransformA == -1)
         {
             sizeOfTransformA = 0;
@@ -390,18 +373,13 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
                 sizeOfTransformA += k;
             }
         }
-        //cout << "sizeOfTransformA: " << sizeOfTransformA << endl;
         auto remainingAfterK = sizeOfTransformA;
         for (int64_t k = 0; k < A.size(); k++)
         {
             const int kBlockSize = A.size() - k;
             remainingAfterK -= kBlockSize;
             assert(remainingAfterK >= 0);
-            //const int clearToRightThisK = index - k;
             const int clearToRightThisK = max(int64_t(0), int64_t(A.size()) -  index - 1 - k);
-            //const int leftmostToBeginNextK = max(int64_t(0), int64_t(A.size()) - rightMostCLEPos[index] - (k));
-            //assert(leftMostCGTPos[index] != -1);
-            //const int left = (clearToRightThisK >= 0 ? clearToRightThisK + leftmostToBeginNextK : 0);
             int numInA = -1;
             if (k <= l)
                 numInA = k + 1;
@@ -415,27 +393,6 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
             int spaceToRight = 0;
             if (leftMostCGTPos[index] == -1)
             {
-#if 0
-                const int clearToLeftThisK = max(int64_t(0), leftCLT[index] - k);
-                //const int indexInKBlock = max(index - leftCLT[index] - k, int64_t(0));
-                int requiredBeginOfThing = 0;
-                if (k < leftCLT[index])
-                {
-                    requiredBeginOfThing = index - k;
-                }
-                else
-                {
-                    requiredBeginOfThing = index - leftCLT[index];
-                }
-                assert(requiredBeginOfThing >= 0);
-                const int indexInKBlock = (numInA != 0 ? requiredBeginOfThing : 0);
-
-                cout << " k: " << k << " clearToLeftThisK: " << clearToLeftThisK << " indexInKBlock: " << indexInKBlock << endl;
-                spaceToRight = max(remainingAfterK + (kBlockSize - numInA - indexInKBlock), int64_t(0));
-                if (numInA == 0)
-                    spaceToRight = 0;
-#endif
-                //spaceToRight =  max(remainingAfterK + (kBlockSize - numInA - indexInKBlock), int64_t(0));
                 spaceToRight =  remainingAfterK;
             }
             else
@@ -444,18 +401,12 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
             }
 
             int leftTransformA = max(leftCLT[index] - k, int64_t(0));
-            //int rightTransformA = max(clearToRightThisK + max(spaceToRight, 0), 0);
             int rightTransformA = max(clearToRightThisK + max(spaceToRight, 0), 0);
-            //cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
             if (rightTransformA < leftTransformA)
                 swap(leftTransformA, rightTransformA);
             const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
-            //cout << " k: " << k << " index: " << index << " left: " << left << " clearToRightThisK: " << clearToRightThisK << " numInA: " << numInA << " spaceToRight: " << spaceToRight << " lesser side transform: " << leftTransformA << " greater side transform: " << rightTransformA  << endl;
-
             numOccurrences += blee;
-            //cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
         }
-        //assert(false && "Unhandled");
     }
     else if (leftCLT[index] == -1 && rightCLE[index] == -1)
     {
@@ -463,9 +414,6 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         int r = A.size() - index - 1;
         if (r < l)
             swap(l, r);
-        // k == 0 case.
-        //numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
-        //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
         if (sizeOfTransformA == -1)
         {
             sizeOfTransformA = 0;
@@ -475,20 +423,16 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
             }
         }
 
-        //cout << "sizeOfTransformA: " << sizeOfTransformA << endl;
         auto remainingAfterK = sizeOfTransformA;
         for (int64_t k = 0; k < A.size(); k++)
         {
             const int kBlockSize = A.size() - k;
             remainingAfterK -= kBlockSize;
             assert(remainingAfterK >= 0);
-            //const int clearToRightThisK = index - k;
             const int clearToRightThisK = max(int64_t(0), int64_t(A.size()) -  index - 1 - k);
             const int clearToLeftThisK = max(int64_t(0), index - k);
-            //const int leftmostToBeginNextK = max(int64_t(0), int64_t(A.size()) - rightMostCLEPos[index] - (k));
             const int leftmostToBeginNextK = (k < A.size() - 1 ? leftMostCGTPos[index] - (k + 1) : 0);
             const int rightmostToEndLastK = (k != 0 ? A.size() - rightMostCLEPos[index] - k : 0);
-            //const int left = (clearToRightThisK >= 0 ? clearToRightThisK + leftmostToBeginNextK : 0);
             int numInA = -1;
             if (k <= l)
                 numInA = k + 1;
@@ -500,27 +444,18 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
                 numInA = 0;
 
             int64_t leftTransformA = max(clearToLeftThisK + max(rightmostToEndLastK, 0), 0);
-            //int rightTransformA = max(clearToRightThisK + max(leftmostToBeginNextK, 0), 0);
-            //cout << " k: " << k << " blee: " << int64_t(A.size()) - numInA - clearToLeftThisK << endl;
-            //int64_t rightTransformA = max(remainingAfterK + (kBlockSize - numInA - clearToLeftThisK), int64_t(0));
             int64_t rightTransformA = clearToRightThisK + remainingAfterK;
 
-            //cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
             if (rightTransformA < leftTransformA)
                 swap(leftTransformA, rightTransformA);
             const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
-            //cout << " k: " << k << " index: " << index << " left: " << left << " clearToRightThisK: " << clearToRightThisK << " clearToLeftThisK: " << clearToLeftThisK << " leftmostToBeginNextK: " << leftmostToBeginNextK << " rightmostToEndLastK: " << rightmostToEndLastK << " numInA: " << numInA << " lesser side transform: " << leftTransformA << " greater side transform: " << rightTransformA << " remainingAfterK: " << remainingAfterK << endl;
-
             numOccurrences += blee;
-            //cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
         }
-        //assert(false && "Unhandled");
     }
     else
     {
         assert(false);
     }
-    //cout << "Total occurrences for index " << index << " = " << numOccurrences << endl;
     return numOccurrences.value();
 }
 
