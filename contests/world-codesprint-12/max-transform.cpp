@@ -1,6 +1,6 @@
 #define VERIFY
 #define BRUTE_FORCE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY
@@ -22,7 +22,7 @@ vector<int> maxTransform(const vector<int>& A)
 
     for (int k = 0; k < A.size(); k++)
     {
-        cout << " |(" << k << ") ";
+        //cout << " |(" << k << ") ";
         for (int i = 0; i < A.size() - k; i++)
         {
             const int j = i + k;
@@ -37,11 +37,11 @@ vector<int> maxTransform(const vector<int>& A)
                 }
             }
             result.push_back(maxInRange);
+#if 0
             cout << maxInRange << 
-#if 1
                 "[" << indexOfMaxInRange << "]"  <<
-#endif
                 " ";
+#endif
         }
 
     }
@@ -502,7 +502,8 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
             int64_t leftTransformA = max(clearToLeftThisK + max(rightmostToEndLastK, 0), 0);
             //int rightTransformA = max(clearToRightThisK + max(leftmostToBeginNextK, 0), 0);
             //cout << " k: " << k << " blee: " << int64_t(A.size()) - numInA - clearToLeftThisK << endl;
-            int64_t rightTransformA = max(remainingAfterK + (kBlockSize - numInA - clearToLeftThisK), int64_t(0));
+            //int64_t rightTransformA = max(remainingAfterK + (kBlockSize - numInA - clearToLeftThisK), int64_t(0));
+            int64_t rightTransformA = clearToRightThisK + remainingAfterK;
 
             //cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
             if (rightTransformA < leftTransformA)
@@ -535,8 +536,7 @@ int main(int argc, char** argv)
         // Assuming you did not need quite that accuracy
         // Also do not assume the system clock has that accuracy.
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        //const int N = rand() % 4000 + 1;
-        const int N = 4000;
+        const int N = rand() % 50 + 1;
         cout << N << endl;
         for (int i = 0; i < N; i++)
         {
