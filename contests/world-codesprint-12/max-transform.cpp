@@ -127,6 +127,9 @@ int64_t quickPower(int64_t n, int64_t k, int64_t mod)
 
 int64_t sumUpTo(int64_t n, int64_t mod)
 {
+    if (n == 0)
+        return 0;
+    //cout << " sumUpTo: " << n << endl;
     const static int64_t oneHalfModMod = quickPower(2, mod - 2, mod);
     assert((oneHalfModMod * 2) % mod == 1);
     int64_t result = n + 1;
@@ -290,6 +293,8 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     return numOccurrences.value();
 }
 
+int64_t sizeOfTransformA = -1;
+
 int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE, const vector<int>& rightMostCLEPos, const vector<int>& leftMostCGTPos)
 {
     //cout << "numOccurrences for index: " << index << endl;
@@ -377,10 +382,13 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         // k == 0 case.
         //numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
         //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
-        int64_t sizeOfTransformA = 0;
-        for (int k = 0; k <= A.size(); k++)
+        if (sizeOfTransformA == -1)
         {
-            sizeOfTransformA += k;
+            sizeOfTransformA = 0;
+            for (int k = 0; k <= A.size(); k++)
+            {
+                sizeOfTransformA += k;
+            }
         }
         //cout << "sizeOfTransformA: " << sizeOfTransformA << endl;
         auto remainingAfterK = sizeOfTransformA;
@@ -458,11 +466,15 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         // k == 0 case.
         //numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
         //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
-        int64_t sizeOfTransformA = 0;
-        for (int k = 0; k <= A.size(); k++)
+        if (sizeOfTransformA == -1)
         {
-            sizeOfTransformA += k;
+            sizeOfTransformA = 0;
+            for (int k = 0; k <= A.size(); k++)
+            {
+                sizeOfTransformA += k;
+            }
         }
+
         //cout << "sizeOfTransformA: " << sizeOfTransformA << endl;
         auto remainingAfterK = sizeOfTransformA;
         for (int64_t k = 0; k < A.size(); k++)
@@ -491,7 +503,7 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
             //int rightTransformA = max(clearToRightThisK + max(leftmostToBeginNextK, 0), 0);
             //cout << " k: " << k << " blee: " << int64_t(A.size()) - numInA - clearToLeftThisK << endl;
             int64_t rightTransformA = max(remainingAfterK + (kBlockSize - numInA - clearToLeftThisK), int64_t(0));
-            
+
             //cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
             if (rightTransformA < leftTransformA)
                 swap(leftTransformA, rightTransformA);
@@ -523,7 +535,8 @@ int main(int argc, char** argv)
         // Assuming you did not need quite that accuracy
         // Also do not assume the system clock has that accuracy.
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int N = rand() % 5 + 1;
+        //const int N = rand() % 4000 + 1;
+        const int N = 4000;
         cout << N << endl;
         for (int i = 0; i < N; i++)
         {
