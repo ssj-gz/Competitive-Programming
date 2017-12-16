@@ -196,6 +196,27 @@ vector<int> computeRightMostCLEBruteForce(const vector<int>& A)
     return results;
 }
 
+vector<int> computeLeftMostCGTBruteForce(const vector<int>& A)
+{
+    vector<int> results(A.size());
+    for (int i = 0; i < A.size(); i++)
+    {
+        int leftMostCGTPos = -1;
+        for (int j = 0; j < A.size(); j++)
+        {
+            if (A[j] > A[i])
+            {
+                leftMostCGTPos = j;
+                break;
+            }
+        }
+        //assert(leftMostCGTPos != -1);
+        results[i] = leftMostCGTPos;
+        cout << "leftMostCGTPos for i: " << i << " = " << leftMostCGTPos << endl;
+    }
+    return results;
+}
+
 vector<int> computeRightCBruteForce(const vector<int>& A)
 {
     vector<int> results(A.size());
@@ -267,7 +288,7 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     return numOccurrences.value();
 }
 
-int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE, const vector<int>& rightMostCLTPos)
+int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vector<int>& leftCLT, const vector<int>& rightCLE, const vector<int>& rightMostCLTPos, const vector<int>& leftMostCGTPos)
 {
     cout << "numOccurrences for index: " << index << endl;
     int64_t numOccurrences = 0;
@@ -427,6 +448,7 @@ int main()
         cout << "i: " << i << " A[i]: " << A[i] << " rightCLE[i]: " << rightCLE[i] << endl;
     }
     const auto rightMostCLEPos = computeRightMostCLEBruteForce(A);
+    const auto leftMostCGTPos = computeLeftMostCGTBruteForce(A);
 
 
     cout << sum << endl;
@@ -439,7 +461,7 @@ int main()
     {
         if (A[i] == trackNumber)
         {
-            occurrencesOpt += findNumOccurrencesBruteForce(i, A, leftCLT, rightCLE, rightMostCLEPos);
+            occurrencesOpt += findNumOccurrencesBruteForce(i, A, leftCLT, rightCLE, rightMostCLEPos, leftMostCGTPos);
         }
     }
     int realOccurrences = 0;
