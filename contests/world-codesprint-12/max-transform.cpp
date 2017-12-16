@@ -276,12 +276,12 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
 
             //cout << "  findNumOccurrencesBruteForce2 l: " << l << " m: " << m << " r: " << r << " k: " << k << " = " << blee << endl;
 
-            dbgNumOccurrences += blee;
+            dbgNumOccurrences = (dbgNumOccurrences + blee) % mod;
 
             if (blee == 0)
                 break;
         }
-        //cout << " findNumOccurrencesBruteForce2 l : " << l << " m: " << m << " r: " << r << " numOccurrences: " << numOccurrences << " dbgNumOccurrences: " << dbgNumOccurrences << endl;
+        cout << " findNumOccurrencesBruteForce2 l : " << l << " m: " << m << " r: " << r << " numOccurrences: " << numOccurrences << " dbgNumOccurrences: " << dbgNumOccurrences << endl;
         assert(dbgNumOccurrences == numOccurrences.value());
     }
 #endif
@@ -408,7 +408,57 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
     }
     else if (leftCLT[index] == -1 && rightCLE[index] == -1)
     {
-        assert(false && "Unhandled");
+        int l = index;
+        int r = A.size() - index - 1;
+        if (r < l)
+            swap(l, r);
+        // k == 0 case.
+        //numOccurrences += findNumOccurrencesBruteForce2(l, 1, r);
+        //cout << " after k = 0, numOccurrences: " << numOccurrences << endl;
+        int64_t sizeOfTransformA = 0;
+        for (int k = 0; k <= A.size(); k++)
+        {
+            sizeOfTransformA += k;
+        }
+        cout << "sizeOfTransformA: " << sizeOfTransformA << endl;
+        auto remainingAfterK = sizeOfTransformA;
+        for (int64_t k = 0; k < A.size(); k++)
+        {
+            const int kBlockSize = A.size() - k;
+            remainingAfterK -= kBlockSize;
+            assert(remainingAfterK >= 0);
+            //const int clearToRightThisK = index - k;
+            const int clearToRightThisK = max(int64_t(0), int64_t(A.size()) -  index - 1 - k);
+            const int clearToLeftThisK = max(int64_t(0), index - k);
+            //const int leftmostToBeginNextK = max(int64_t(0), int64_t(A.size()) - rightMostCLTPos[index] - (k));
+            const int leftmostToBeginNextK = (k < A.size() - 1 ? leftMostCGTPos[index] - (k + 1) : 0);
+            const int rightmostToEndLastK = (k != 0 ? A.size() - rightMostCLTPos[index] - k : 0);
+            //const int left = (clearToRightThisK >= 0 ? clearToRightThisK + leftmostToBeginNextK : 0);
+            int numInA = -1;
+            if (k <= l)
+                numInA = k + 1;
+            else if (k >= l && k <= r)
+                numInA = l + 1;
+            else if (k > r && k <= l + 1 + r)
+                numInA = l + 1 - (k - r);
+            else if (k > l + 1 + r)
+                numInA = 0;
+
+            int64_t leftTransformA = max(clearToLeftThisK + max(rightmostToEndLastK, 0), 0);
+            //int rightTransformA = max(clearToRightThisK + max(leftmostToBeginNextK, 0), 0);
+            cout << " k: " << k << " blee: " << int64_t(A.size()) - numInA - clearToLeftThisK << endl;
+            int64_t rightTransformA = max(remainingAfterK + (kBlockSize - numInA - clearToLeftThisK), int64_t(0));
+            
+            cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << endl;
+            if (rightTransformA < leftTransformA)
+                swap(leftTransformA, rightTransformA);
+            const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
+            cout << " k: " << k << " index: " << index << " left: " << left << " clearToRightThisK: " << clearToRightThisK << " clearToLeftThisK: " << clearToLeftThisK << " leftmostToBeginNextK: " << leftmostToBeginNextK << " rightmostToEndLastK: " << rightmostToEndLastK << " numInA: " << numInA << " lesser side transform: " << leftTransformA << " greater side transform: " << rightTransformA << " remainingAfterK: " << remainingAfterK << endl;
+
+            numOccurrences += blee;
+            cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
+        }
+        //assert(false && "Unhandled");
     }
     else
     {
@@ -455,6 +505,7 @@ int main()
         cout << x << " ";
     }
     cout << endl;
+    cout << "size: " << maxTransformA.size() << endl;
 #endif
 
     const auto maxTransformMaxTransformA = maxTransform(maxTransformA);
