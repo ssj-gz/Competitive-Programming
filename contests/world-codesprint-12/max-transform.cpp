@@ -198,8 +198,14 @@ vector<int> computeRightCBruteForce(const vector<int>& A)
 
 int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
 {
+    assert(l <= r);
+#if 0
     if (r < l)
+    {
+        assert(false);
         swap(l, r);
+    }
+#endif
     l %= mod;
     r %= mod;
     ModNum numOccurrences = 0;
@@ -282,6 +288,21 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
 
 int main()
 {
+#if 0
+    {
+        while (true)
+        {
+            const int m = rand() % 20 + 1;
+            int l = rand() % 20;
+            int r = rand() % 20;
+            if (r < l)
+                swap(r, l);
+            findNumOccurrencesBruteForce2(l, m, r);
+        }
+
+
+    }
+#endif
     cout << "sumUpTo 5: " << sumUpTo(5, mod) << endl;
     int n;
     cin >> n;
