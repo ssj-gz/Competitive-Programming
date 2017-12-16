@@ -204,15 +204,11 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     r %= mod;
     ModNum numOccurrences = 0;
     numOccurrences += ModNum(l + 1) * m + sumUpTo(l, mod);
-    cout << "Sloorp: " << numOccurrences << endl;
     numOccurrences += ModNum(r - l) * (l + m);
-    cout << "Sloorp1: " << numOccurrences << endl;
     numOccurrences += ModNum(l + m) * (ModNum(l + m + r));
     numOccurrences -= ModNum(sumUpTo(l + m + r, mod)) - ModNum(sumUpTo(r, mod));
 #ifdef VERIFY
     {
-        int64_t dbgBlee1 = 0;
-        int64_t dbgBlee2 = 0;
         int64_t dbgNumOccurrences = 0;
         for (int k = 0; k < 1000; k++)
         {
@@ -220,13 +216,10 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
             if (k <= l)
             {
                 blee = k + m;
-                dbgBlee1 += blee;
             }
             else if (k >= l && k <= r)
             {
                 blee = l + m;
-                dbgBlee2 += blee;
-                cout << "blee2" << endl;
             }
             else if (k > r && k <= l + m + r)
                 blee = l + m - (k - r);
@@ -241,8 +234,6 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
                 break;
         }
         cout << " findNumOccurrencesBruteForce2 l : " << l << " m: " << m << " r: " << r << " numOccurrences: " << numOccurrences << " dbgNumOccurrences: " << dbgNumOccurrences << endl;
-        cout << "dbgBlee1: " << dbgBlee1 << endl;
-        cout << "dbgBlee2: " << dbgBlee2 << endl;
         assert(dbgNumOccurrences == numOccurrences.value());
     }
 #endif
