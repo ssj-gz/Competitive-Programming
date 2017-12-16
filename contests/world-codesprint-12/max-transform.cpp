@@ -87,14 +87,22 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
     int64_t numOccurrences = 0;
     for (int k = 0; k < 1000; k++)
     {
+        int64_t blee = 0;
         if (k <= l)
-            numOccurrences += k + m;
+            blee = k + m;
         else if (k >= l && k <= r)
-            numOccurrences += l + m;
+            blee = l + m;
         else if (k > r && k <= l + 1 + r)
-            numOccurrences += l + m - (k - r);
+            blee = l + m - (k - r);
         else if (k > l + 1 + r)
-            numOccurrences += 0;
+            blee = 0;
+
+        cout << "  findNumOccurrencesBruteForce2 l: " << l << " m: " << m << " r: " << r << " k: " << k << " = " << blee << endl;
+
+        numOccurrences += blee;
+
+        if (blee == 0)
+            break;
     }
     return numOccurrences;
 }
@@ -128,10 +136,13 @@ int64_t findNumOccurrencesBruteForce(int index, const vector<int>& A, const vect
         leftTransformA = max(l - k, 0);
         rightTransformA = max(r - k, 0);
         cout << " k: " << k << " leftTransformA: " << leftTransformA << " rightTransformA: " << rightTransformA << " numInA: " << numInA << " swappedLR: " << swappedLR << endl;
+        const auto blee = findNumOccurrencesBruteForce2(leftTransformA, numInA, rightTransformA);
 
-        numOccurrences += findNumOccurrencesBruteForce2(l, numInA, r);
+        numOccurrences += blee;
+        cout << " numOccurrences in maxTransformMaxTransformA for index " << index << " k: " << k << " = " << blee << endl;
 
     }
+    cout << "Total occurrences for index " << index << " = " << numOccurrences << endl;
     return numOccurrences;
 }
 
@@ -164,6 +175,7 @@ int main()
     {
         sum += x;
     }
+    cout << endl;
 #if 1
     cout << "maxTransformMaxTransformA: " << endl;
     for (const auto x : maxTransformMaxTransformA)
@@ -187,15 +199,24 @@ int main()
 
     cout << sum << endl;
 
+    const int trackNumber = 2;
+
     int indexOf2 = -1;
     for (int i = 0; i < A.size(); i++)
     {
-        if (A[i] == 2)
+        if (A[i] == trackNumber)
         {
             findNumOccurrencesBruteForce(i, A, leftC, rightC);
             break;
         }
     }
+    int realOccurrences = 0;
+    for (const auto x : maxTransformMaxTransformA)
+    {
+        if (x == trackNumber)
+            realOccurrences++;
+    }
+    cout << "real occurrences of " << trackNumber << " in maxTransformMaxTransformA: " << realOccurrences << endl;
 
     for (int k = 0; k < A.size(); k++)
     {
