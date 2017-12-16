@@ -92,9 +92,9 @@ int64_t findNumOccurrencesBruteForce2(int64_t l, int64_t m, int64_t r)
             blee = k + m;
         else if (k >= l && k <= r)
             blee = l + m;
-        else if (k > r && k <= l + 1 + r)
+        else if (k > r && k <= l + m + r)
             blee = l + m - (k - r);
-        else if (k > l + 1 + r)
+        else if (k > l + m + r)
             blee = 0;
 
         cout << "  findNumOccurrencesBruteForce2 l: " << l << " m: " << m << " r: " << r << " k: " << k << " = " << blee << endl;
