@@ -522,7 +522,7 @@ class PseudoIsomorphicSuffixTree
         {
             State* oldr = m_root;
             assert(m_numSuffixLinksTraversed < m_isoNormalisedSuffixPermutations.size());
-            const int letterIndex = m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]) - 'a' + 1;
+            const int letterIndex = toLetterIndex(m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]));
             assert(m_numSuffixLinksTraversed < m_isoNormalisedSuffixPermutations.size());
             const auto testAndSplitResult = testAndSplit(s, k, i - 1, letterIndex, &(m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed]));
             auto isEndPoint = testAndSplitResult.first;
@@ -556,7 +556,7 @@ class PseudoIsomorphicSuffixTree
                 assert(emptySuffix || isoNormaliseString(m_currentString.substr(m_numSuffixLinksTraversed)).find(isoNormalisedStringToState(s)) == 0);
 
                 assert(m_numSuffixLinksTraversed < m_isoNormalisedSuffixPermutations.size() || emptySuffix);
-                const int letterIndex = emptySuffix ? 1 : m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]) - 'a' + 1;
+                const int letterIndex = emptySuffix ? 1 : toLetterIndex(m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed].permutedLetter(m_currentString[i - 1]));
                 const auto testAndSplitResult = testAndSplit(s, k, i - 1, letterIndex, emptySuffix ? &allLettersToA : &(m_isoNormalisedSuffixPermutations[m_numSuffixLinksTraversed]));
                 isEndPoint = testAndSplitResult.first;
                 r = testAndSplitResult.second;
@@ -683,7 +683,7 @@ class PseudoIsomorphicSuffixTree
                     const auto kCanonized = canonizeResult.second;
                     // The suffix link may not be explicit; (ab?)use testAndSplitResult to ensure it is.
                     const char unusedChar = 'a' + alphabetSize - 1;
-                    const auto testAndSplitResult = testAndSplit(suffixLinkCanonized, kCanonized, p, unusedChar - 'a' + 1, &compoundPermutation);
+                    const auto testAndSplitResult = testAndSplit(suffixLinkCanonized, kCanonized, p, toLetterIndex(unusedChar), &compoundPermutation);
                     s->suffixLink = testAndSplitResult.second;
                     break;
                 }
@@ -697,12 +697,12 @@ class PseudoIsomorphicSuffixTree
             if (k <= p)
             {
                 const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
-                const auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
+                const auto tkTransitionIter = findTransitionIter(s, toLetterIndex(letterToFollowFromState));
                 auto sPrime = tkTransitionIter->nextState;
                 auto kPrime = tkTransitionIter->substringFollowed.startIndex;
                 auto pPrime = tkTransitionIter->substringFollowed.endIndex;
                 assert(tkTransitionIter->letterPermutation);
-                if (letterIndex == tkTransitionIter->letterPermutation->permutedLetter(m_currentString[kPrime + p - k]) - 'a' + 1)
+                if (letterIndex == toLetterIndex(tkTransitionIter->letterPermutation->permutedLetter(m_currentString[kPrime + p - k])))
                     return {true, s};
                 else
                 {
@@ -735,7 +735,7 @@ class PseudoIsomorphicSuffixTree
             {
                 const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
                 assert(letterToFollowFromState >= 'a' && letterToFollowFromState <= 'z');
-                auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
+                auto tkTransitionIter = findTransitionIter(s, toLetterIndex(letterToFollowFromState));
                 auto sPrime = tkTransitionIter->nextState;
                 auto kPrime = tkTransitionIter->substringFollowed.startIndex;
                 auto pPrime = tkTransitionIter->substringFollowed.endIndex;
@@ -747,7 +747,7 @@ class PseudoIsomorphicSuffixTree
                     {
                         assert(s != m_auxiliaryState);
                         const char letterToFollowFromState = letterPermutation->permutedLetter(m_currentString[k - 1]);
-                        auto tkTransitionIter = findTransitionIter(s, letterToFollowFromState - 'a' + 1);
+                        auto tkTransitionIter = findTransitionIter(s, toLetterIndex(letterToFollowFromState));
                         sPrime = tkTransitionIter->nextState;
                         kPrime = tkTransitionIter->substringFollowed.startIndex;
                         pPrime = tkTransitionIter->substringFollowed.endIndex;
@@ -788,7 +788,7 @@ class PseudoIsomorphicSuffixTree
                 {
                     assert(transitionIter->substringFollowed.startIndex != 0);
                     const char transitionLetter = transitionIter->letterPermutation->permutedLetter(m_currentString[transitionIter->substringFollowed.startIndex - 1]);
-                    if (transitionLetter - 'a' + 1 == letterIndex)
+                    if (toLetterIndex(transitionLetter) == letterIndex)
                     {
                         return transitionIter;
                     }
@@ -801,6 +801,12 @@ class PseudoIsomorphicSuffixTree
                 assert(false);
             return state->transitions.end();
         };
+
+        int toLetterIndex(char letter)
+        {
+            // In Ukkonnen's Algorithm, letter indices are 1-relative.
+            return letter - 'a' + 1;
+        }
 
 };
 
