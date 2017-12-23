@@ -57,6 +57,7 @@ class SegmentTree
                 int64_t rangeBegin = 0;
                 for (int cellCol = 0; cellCol < numCellsInThisRow; cellCol++)
                 {
+                    m_cellMatrix.back()[cellCol].container = this;
                     m_cellMatrix.back()[cellCol].rangeBegin = rangeBegin;
                     m_cellMatrix.back()[cellCol].rangeEnd = rangeBegin + powerOf2 - 1;
                     assert(m_cellMatrix.back()[cellCol].rangeEnd >= m_cellMatrix.back()[cellCol].rangeBegin);
@@ -141,6 +142,7 @@ class SegmentTree
 
         struct Cell
         {
+            SegmentTree* container = nullptr;
             ValueType value;
 
             int64_t rangeBegin = -1;
