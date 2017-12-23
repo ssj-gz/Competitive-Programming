@@ -320,9 +320,9 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
 
         return combinedFactorialHistogram;
     };
-    auto addValueToHistogram = [](int numToAdd, FactorialHistogram& value)
+    auto addToAllValues = [](int numToAdd, FactorialHistogram& value)
     {
-        // Add numToAdd to value - this has the effect of shifting the histogram
+        // Add numToAdd to all values represented by the histogram - this has the effect of shifting the histogram
         // numToAdd elements to the right (i.e. if there were x elements with value y,
         // and numToAdd was 2, then there are now x elements with value y  2 instead).
         for (int i = maxNonZeroFactorial; i >= numToAdd; i--)
@@ -340,7 +340,7 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
         return numToAdd1 + numToAdd2;
     };
 
-    FactorialTracker factorialTracker(A.size(), combineFactorialHistograms, addValueToHistogram, combineAdditions);
+    FactorialTracker factorialTracker(A.size(), combineFactorialHistograms, addToAllValues, combineAdditions);
 
     vector<FactorialHistogram> initialValues(A.size());
     for (int i = 0; i < A.size(); i++)
