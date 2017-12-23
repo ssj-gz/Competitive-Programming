@@ -18,6 +18,14 @@ vector<int64_t> factorialTable;
 struct FactorialHistogram
 {
     std::array<int64_t, maxNonZeroFactorial + 1> numWithFactorial = {};
+    static FactorialHistogram fromValue(int value)
+    {
+        FactorialHistogram factorialHistogram;
+        if (value <= maxNonZeroFactorial)
+            factorialHistogram.numWithFactorial[value] = 1;
+        
+        return factorialHistogram;
+    }
 };
 
 template <typename ValueType>
@@ -68,18 +76,14 @@ class SegmentTree
                 }
             }
         }
-        void setInitialValues(const vector<int64_t>& A)
+        void setInitialValues(const vector<ValueType>& initialValues)
         {
-            for (int i = 0; i < A.size(); i++)
+            for (int i = 0; i < initialValues.size(); i++)
             {
-                const int factorialIndex = (A[i] <= maxNonZeroFactorial ? A[i] : -1);
-                if (factorialIndex != -1)
-                {
-                    auto& cell = m_cellMatrix.back()[i];
-                    cell.value.numWithFactorial[factorialIndex] = 1;
-                    if (cell.parent)
-                        cell.parent->setNeedsUpdateFromChildren();
-                }
+                auto& cell = m_cellMatrix.back()[i];
+                cell.value = initialValues[i];
+                if (cell.parent)
+                    cell.parent->setNeedsUpdateFromChildren();
             }
             m_cellMatrix.front().front().updateFromChildren();
         }
@@ -323,7 +327,13 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
 {
     using FactorialTracker = SegmentTree<FactorialHistogram>;
     FactorialTracker factorialTracker(A.size());
-    factorialTracker.setInitialValues(A);
+
+    vector<FactorialHistogram> initialValues(A.size());
+    for (int i = 0; i < A.size(); i++)
+    {
+        initialValues[i] = FactorialHistogram::fromValue(A[i]);
+    }
+    factorialTracker.setInitialValues(initialValues);
     vector<int64_t> results;
 
     for (const auto& query : queries)
