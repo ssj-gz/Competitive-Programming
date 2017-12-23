@@ -181,18 +181,8 @@ class SegmentTree
                         leftChild->addPendingOperation(pendingOperatorInfo);
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
-                    // Add "pendingOperatorInfo" to each "value" in the array - this has the effect of shifting the histogram
-                    // pendingOperatorInfo elements to the right (i.e. if there were x elements with value y,
-                    // and pendingOperatorInfo was 2, then there are now x elements with value y + 2 instead).
-                    for (int i = maxNonZeroFactorial; i >= pendingOperatorInfo; i--)
-                    {
-                        value.numWithFactorial[i] = value.numWithFactorial[i - pendingOperatorInfo];
-                    }
-                    // The shift to the right should, obviously, zero out the "new" elements to the left :)
-                    for (int i = 0; i < min(pendingOperatorInfo, maxNonZeroFactorial + 1) ; i++)
-                    {
-                        value.numWithFactorial[i] = 0;
-                    }
+
+                    container->m_applyOperator(pendingOperatorInfo, value);
 
                     hasPendingOperator = false;
                 }
