@@ -100,31 +100,14 @@ class SegmentTree
             }
             m_cellMatrix.front().front().updateFromChildren();
         }
-        void setValue(int pos, int64_t value)
+        void setValue(int pos, const ValueType& newValue)
         {
             vector<Cell*> cells;
             collectMinCellsForRange(pos, pos, cells);
             assert(cells.size() == 1);
             auto cell = cells.front();
             cell->servicePendingOperations();
-            const int valueFactorialIndex = (value <= maxNonZeroFactorial ? value : -1);
-
-            // Erase old value from histogram.
-            for (int i = 1; i <= maxNonZeroFactorial; i++)
-            {
-                if (cell->value.numWithFactorial[i] != 0)
-                {
-                    assert(!foundNonZero);
-                    assert(cell->value.numWithFactorial[i] == 1);
-                    cell->value.numWithFactorial[i] = 0;
-                    break;
-                }
-            }
-            // Add new value, if it is valid (i.e. - non-zero).
-            if (valueFactorialIndex != -1)
-            {
-                cell->value.numWithFactorial[valueFactorialIndex] = 1;
-            }
+            cell->value = newValue;
 
             if (cell->parent)
                 cell->parent->setNeedsUpdateFromChildren();
@@ -356,7 +339,9 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
                     break;
                 }
             case 3:
-                factorialTracker.setValue(query.n1 - 1, query.n2);
+                const int valuePos = query.n1 - 1; // Make 0-relative.
+                const int newValue = query.n2;
+                factorialTracker.setValue( valuePos, FactorialHistogram::fromValue(newValue));
                 break;
         }
     }
