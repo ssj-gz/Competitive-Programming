@@ -75,10 +75,10 @@ class SegmentTree
                 {
                     auto& cell = m_cellMatrix[cellRow][cellCol];
                     cell.leftChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
-                    m_cellMatrix[cellRow + 1][childCellIndex].parent = &cell;
+                    cell.leftChild->parent = &cell;
                     childCellIndex++;
                     cell.rightChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
-                    m_cellMatrix[cellRow + 1][childCellIndex].parent = &cell;
+                    cell.rightChild->parent = &cell;
                     childCellIndex++;
                 }
             }
