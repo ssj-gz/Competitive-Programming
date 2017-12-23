@@ -96,13 +96,13 @@ class SegmentTree
             }
             m_cellMatrix.front().front().updateFromChildren();
         }
-        void addOneToAllInRange(int left, int right)
+        void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
             vector<Cell*> cells;
             collectMinCellsForRange(left, right, cells);
             for (auto cell : cells)
             {
-                cell->addPendingOperation(1);
+                cell->addPendingOperation(operatorInfo);
                 cell->servicePendingOperations();
                 if (cell->parent)
                     cell->parent->setNeedsUpdateFromChildren();
@@ -358,7 +358,7 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
                 {
                     const auto l = query.n1 - 1;
                     const auto r = query.n2 - 1;
-                    factorialTracker.addOneToAllInRange(l, r);
+                    factorialTracker.applyOperatorToAllInRange(l, r, 1); // Add 1 to all in range.
                     break;
                 }
             case 2:
