@@ -32,8 +32,12 @@ template <typename ValueType, typename OperatorInfo>
 class SegmentTree
 {
     public:
-        SegmentTree(int maxNumber)
-            : m_maxNumber{maxNumber}
+
+        using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
+
+
+        SegmentTree(int maxNumber, ApplyOperator applyOperator)
+            : m_maxNumber{maxNumber}, m_applyOperator{applyOperator}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -130,6 +134,7 @@ class SegmentTree
             return factorialSum;
         }
     private:
+        ApplyOperator m_applyOperator;
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
         int m_maxNumber;
@@ -309,7 +314,23 @@ struct Query
 vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queries)
 {
     using FactorialTracker = SegmentTree<FactorialHistogram, int>;
-    FactorialTracker factorialTracker(A.size());
+    auto applyOperator = [](int numToAdd, FactorialHistogram& value)
+    {
+        // Add numToAdd to value - this has the effect of shifting the histogram
+        // numToAdd elements to the right (i.e. if there were x elements with value y,
+        // and numToAdd was 2, then there are now x elements with value y  2 instead).
+        for (int i = maxNonZeroFactorial; i >= numToAdd; i--)
+        {
+            value.numWithFactorial[i] = value.numWithFactorial[i - numToAdd];
+        }
+        // The shift to the right should, obviously, zero out the "new" elements to the left :)
+        for (int i = 0; i < min(numToAdd, maxNonZeroFactorial + 1) ; i++)
+        {
+            value.numWithFactorial[i] = 0;
+        }
+    };
+
+    FactorialTracker factorialTracker(A.size(), applyOperator);
 
     vector<FactorialHistogram> initialValues(A.size());
     for (int i = 0; i < A.size(); i++)
