@@ -37,7 +37,6 @@ class SegmentTree
         using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
         using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
-
         SegmentTree(int maxNumber, CombineValues combineValues, ApplyOperator applyOperator, CombineOperators combineOperators)
             : m_maxNumber{maxNumber}, m_combineValues{combineValues}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
         {
@@ -94,7 +93,7 @@ class SegmentTree
                 if (cell.parent)
                     cell.parent->setNeedsUpdateFromChildren();
             }
-            m_cellMatrix.front().front().updateFromChildren();
+            updateAllFromChildren();
         }
         void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
@@ -107,7 +106,7 @@ class SegmentTree
                 if (cell->parent)
                     cell->parent->setNeedsUpdateFromChildren();
             }
-            m_cellMatrix.front().front().updateFromChildren();
+            updateAllFromChildren();
         }
         void setValue(int pos, const ValueType& newValue)
         {
@@ -120,7 +119,7 @@ class SegmentTree
 
             if (cell->parent)
                 cell->parent->setNeedsUpdateFromChildren();
-            m_cellMatrix.front().front().updateFromChildren();
+            updateAllFromChildren();
         }
         ValueType combinedValuesInRange(int left, int right)
         {
@@ -293,6 +292,11 @@ class SegmentTree
             collectMinCellsForRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 >> 1, destCells); // Left region.
             collectMinCellsForRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1, destCells); // Right region.
             return;
+        }
+
+        void updateAllFromChildren()
+        {
+            m_cellMatrix.front().front().updateFromChildren();
         }
 };
 
