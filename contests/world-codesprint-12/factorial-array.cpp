@@ -73,11 +73,12 @@ class SegmentTree
                 int childCellIndex = 0;
                 for (int cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
                 {
-                    m_cellMatrix[cellRow][cellCol].leftChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
-                    m_cellMatrix[cellRow + 1][childCellIndex].parent = &(m_cellMatrix[cellRow][cellCol]);
+                    auto& cell = m_cellMatrix[cellRow][cellCol];
+                    cell.leftChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
+                    m_cellMatrix[cellRow + 1][childCellIndex].parent = &cell;
                     childCellIndex++;
-                    m_cellMatrix[cellRow][cellCol].rightChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
-                    m_cellMatrix[cellRow + 1][childCellIndex].parent = &(m_cellMatrix[cellRow][cellCol]);
+                    cell.rightChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
+                    m_cellMatrix[cellRow + 1][childCellIndex].parent = &cell;
                     childCellIndex++;
                 }
             }
