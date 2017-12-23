@@ -316,7 +316,7 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
 
         return combinedFactorialHistogram;
     };
-    auto applyOperator = [](int numToAdd, FactorialHistogram& value)
+    auto addValueToHistogram = [](int numToAdd, FactorialHistogram& value)
     {
         // Add numToAdd to value - this has the effect of shifting the histogram
         // numToAdd elements to the right (i.e. if there were x elements with value y,
@@ -331,12 +331,12 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
             value.numWithFactorial[i] = 0;
         }
     };
-    auto combineOperators = [](int numToAdd1, int numToAdd2)
+    auto combineAdditions = [](int numToAdd1, int numToAdd2)
     {
         return numToAdd1 + numToAdd2;
     };
 
-    FactorialTracker factorialTracker(A.size(), combineFactorialHistograms, applyOperator, combineOperators);
+    FactorialTracker factorialTracker(A.size(), combineFactorialHistograms, addValueToHistogram, combineAdditions);
 
     vector<FactorialHistogram> initialValues(A.size());
     for (int i = 0; i < A.size(); i++)
