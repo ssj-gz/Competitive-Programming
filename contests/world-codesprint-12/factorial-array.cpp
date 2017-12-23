@@ -57,10 +57,11 @@ class SegmentTree
                 int64_t rangeBegin = 0;
                 for (int cellCol = 0; cellCol < numCellsInThisRow; cellCol++)
                 {
-                    m_cellMatrix.back()[cellCol].container = this;
-                    m_cellMatrix.back()[cellCol].rangeBegin = rangeBegin;
-                    m_cellMatrix.back()[cellCol].rangeEnd = rangeBegin + powerOf2 - 1;
-                    assert(m_cellMatrix.back()[cellCol].rangeEnd >= m_cellMatrix.back()[cellCol].rangeBegin);
+                    auto& cell = m_cellMatrix.back()[cellCol];
+                    cell.container = this;
+                    cell.rangeBegin = rangeBegin;
+                    cell.rangeEnd = rangeBegin + powerOf2 - 1;
+                    assert(cell.rangeEnd >= cell.rangeBegin);
                     rangeBegin += powerOf2;
                 }
                 numCellsInThisRow *= 2;
