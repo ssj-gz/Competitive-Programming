@@ -20,6 +20,7 @@ struct FactorialHistogram
     std::array<int64_t, maxNonZeroFactorial + 1> numWithFactorial = {};
 };
 
+template <typename ValueType>
 class SegmentTree
 {
     public:
@@ -75,7 +76,7 @@ class SegmentTree
                 if (factorialIndex != -1)
                 {
                     auto& cell = m_cellMatrix.back()[i];
-                    cell.factorialHistogram.numWithFactorial[factorialIndex] = 1;
+                    cell.value.numWithFactorial[factorialIndex] = 1;
                     if (cell.parent)
                         cell.parent->setNeedsUpdateFromChildren();
                 }
@@ -107,18 +108,18 @@ class SegmentTree
             // Erase old value from histogram.
             for (int i = 1; i <= maxNonZeroFactorial; i++)
             {
-                if (cell->factorialHistogram.numWithFactorial[i] != 0)
+                if (cell->value.numWithFactorial[i] != 0)
                 {
                     assert(!foundNonZero);
-                    assert(cell->factorialHistogram.numWithFactorial[i] == 1);
-                    cell->factorialHistogram.numWithFactorial[i] = 0;
+                    assert(cell->value.numWithFactorial[i] == 1);
+                    cell->value.numWithFactorial[i] = 0;
                     break;
                 }
             }
             // Add new value, if it is valid (i.e. - non-zero).
             if (valueFactorialIndex != -1)
             {
-                cell->factorialHistogram.numWithFactorial[valueFactorialIndex] = 1;
+                cell->value.numWithFactorial[valueFactorialIndex] = 1;
             }
 
             if (cell->parent)
@@ -135,7 +136,7 @@ class SegmentTree
                 cell->servicePendingOperations();
                 for (int i = 1; i <= maxNonZeroFactorial; i++)
                 {
-                    factorialSum = (factorialSum + (cell->factorialHistogram.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
+                    factorialSum = (factorialSum + (cell->value.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
                 }
             }
             assert(factorialSum >= 0 && factorialSum < mod);
@@ -148,7 +149,7 @@ class SegmentTree
 
         struct Cell
         {
-            FactorialHistogram factorialHistogram;
+            ValueType value;
 
             int64_t rangeBegin = -1;
             int64_t rangeEnd = -1;
@@ -187,12 +188,12 @@ class SegmentTree
                     // and pendingOperatorInfo was 2, then there are now x elements with value y + 2 instead).
                     for (int i = maxNonZeroFactorial; i >= pendingOperatorInfo; i--)
                     {
-                        factorialHistogram.numWithFactorial[i] = factorialHistogram.numWithFactorial[i - pendingOperatorInfo];
+                        value.numWithFactorial[i] = value.numWithFactorial[i - pendingOperatorInfo];
                     }
                     // The shift to the right should, obviously, zero out the "new" elements to the left :)
                     for (int i = 0; i < min(pendingOperatorInfo, maxNonZeroFactorial + 1) ; i++)
                     {
-                        factorialHistogram.numWithFactorial[i] = 0;
+                        value.numWithFactorial[i] = 0;
                     }
 
                     hasPendingOperator = false;
@@ -226,7 +227,7 @@ class SegmentTree
 
                 for (int i = 0; i <= maxNonZeroFactorial; i++)
                 {
-                    factorialHistogram.numWithFactorial[i] = leftChild->factorialHistogram.numWithFactorial[i] + rightChild->factorialHistogram.numWithFactorial[i];
+                    value.numWithFactorial[i] = leftChild->value.numWithFactorial[i] + rightChild->value.numWithFactorial[i];
                 }
                 needsUpdateFromChildren = false;
             }
@@ -320,7 +321,7 @@ struct Query
 
 vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queries)
 {
-    using FactorialTracker = SegmentTree;
+    using FactorialTracker = SegmentTree<FactorialHistogram>;
     FactorialTracker factorialTracker(A.size());
     factorialTracker.setInitialValues(A);
     vector<int64_t> results;
