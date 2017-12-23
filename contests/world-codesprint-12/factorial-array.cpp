@@ -34,10 +34,11 @@ class SegmentTree
     public:
 
         using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
+        using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
 
-        SegmentTree(int maxNumber, ApplyOperator applyOperator)
-            : m_maxNumber{maxNumber}, m_applyOperator{applyOperator}
+        SegmentTree(int maxNumber, ApplyOperator applyOperator, CombineOperators combineOperators)
+            : m_maxNumber{maxNumber}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -138,6 +139,7 @@ class SegmentTree
         }
     private:
         ApplyOperator m_applyOperator;
+        CombineOperators m_combineOperators;
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
         int m_maxNumber;
@@ -166,7 +168,7 @@ class SegmentTree
                 }
                 else
                 {
-                    pendingOperatorInfo += operatorInfo;
+                    pendingOperatorInfo = container->m_combineOperators(operatorInfo, pendingOperatorInfo);
                 }
             }
 
@@ -333,8 +335,12 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
             value.numWithFactorial[i] = 0;
         }
     };
+    auto combineOperators = [](int numToAdd1, int numToAdd2)
+    {
+        return numToAdd1 + numToAdd2;
+    };
 
-    FactorialTracker factorialTracker(A.size(), applyOperator);
+    FactorialTracker factorialTracker(A.size(), applyOperator, combineOperators);
 
     vector<FactorialHistogram> initialValues(A.size());
     for (int i = 0; i < A.size(); i++)
