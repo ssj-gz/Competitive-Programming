@@ -33,12 +33,13 @@ class SegmentTree
 {
     public:
 
+        using CombineValues = std::function<ValueType(const ValueType& lhs, const ValueType& rhs)>;
         using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
         using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
 
-        SegmentTree(int maxNumber, ApplyOperator applyOperator, CombineOperators combineOperators)
-            : m_maxNumber{maxNumber}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
+        SegmentTree(int maxNumber, CombineValues combineValues, ApplyOperator applyOperator, CombineOperators combineOperators)
+            : m_maxNumber{maxNumber}, m_combineValues{combineValues}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -138,6 +139,7 @@ class SegmentTree
             return factorialSum;
         }
     private:
+        CombineValues m_combineValues;
         ApplyOperator m_applyOperator;
         CombineOperators m_combineOperators;
         int64_t m_powerOf2BiggerThanMaxNumber;
@@ -213,10 +215,8 @@ class SegmentTree
                 leftChild->updateFromChildren();
                 rightChild->updateFromChildren();
 
-                for (int i = 0; i <= maxNonZeroFactorial; i++)
-                {
-                    value.numWithFactorial[i] = leftChild->value.numWithFactorial[i] + rightChild->value.numWithFactorial[i];
-                }
+                value = container->m_combineValues(leftChild->value, rightChild->value);
+
                 needsUpdateFromChildren = false;
             }
 
@@ -310,6 +310,16 @@ struct Query
 vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queries)
 {
     using FactorialTracker = SegmentTree<FactorialHistogram, int>;
+    auto combineFactorialHistograms = [](const FactorialHistogram& lhs, const FactorialHistogram& rhs)
+    {
+        FactorialHistogram combinedFactorialHistogram;
+        for (int i = 0; i <= maxNonZeroFactorial; i++)
+        {
+            combinedFactorialHistogram.numWithFactorial[i] = lhs.numWithFactorial[i] + rhs.numWithFactorial[i];
+        }
+
+        return combinedFactorialHistogram;
+    };
     auto applyOperator = [](int numToAdd, FactorialHistogram& value)
     {
         // Add numToAdd to value - this has the effect of shifting the histogram
@@ -330,7 +340,7 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
         return numToAdd1 + numToAdd2;
     };
 
-    FactorialTracker factorialTracker(A.size(), applyOperator, combineOperators);
+    FactorialTracker factorialTracker(A.size(), combineFactorialHistograms, applyOperator, combineOperators);
 
     vector<FactorialHistogram> initialValues(A.size());
     for (int i = 0; i < A.size(); i++)
