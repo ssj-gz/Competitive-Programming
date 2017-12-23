@@ -20,10 +20,10 @@ struct FactorialHistogram
     std::array<int64_t, maxNonZeroFactorial + 1> numWithFactorial = {};
 };
 
-class FactorialTracker
+class SegmentTree
 {
     public:
-        FactorialTracker(int maxNumber)
+        SegmentTree(int maxNumber)
             : m_maxNumber{maxNumber}
         {
             int exponentOfPowerOf2 = 0;
@@ -320,6 +320,7 @@ struct Query
 
 vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queries)
 {
+    using FactorialTracker = SegmentTree;
     FactorialTracker factorialTracker(A.size());
     factorialTracker.setInitialValues(A);
     vector<int64_t> results;
