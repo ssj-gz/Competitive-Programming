@@ -122,21 +122,17 @@ class SegmentTree
                 cell->parent->setNeedsUpdateFromChildren();
             m_cellMatrix.front().front().updateFromChildren();
         }
-        int64_t factorialSum(int left, int right)
+        ValueType combinedValuesInRange(int left, int right)
         {
             vector<Cell*> cells;
             collectMinCellsForRange(left, right, cells);
-            int64_t factorialSum = 0;
+            ValueType combinedValuesInRange;
             for (auto cell : cells)
             {
                 cell->servicePendingOperations();
-                for (int i = 1; i <= maxNonZeroFactorial; i++)
-                {
-                    factorialSum = (factorialSum + (cell->value.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
-                }
+                combinedValuesInRange = m_combineValues(combinedValuesInRange, cell->value);
             }
-            assert(factorialSum >= 0 && factorialSum < mod);
-            return factorialSum;
+            return combinedValuesInRange;
         }
     private:
         CombineValues m_combineValues;
@@ -365,7 +361,14 @@ vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queri
                 {
                     const auto l = query.n1 - 1;
                     const auto r = query.n2 - 1;
-                    const auto factorialSum = factorialTracker.factorialSum(l, r);
+                    int64_t factorialSum = 0;
+                    const auto combinedFactorialSumsInRange = factorialTracker.combinedValuesInRange(l, r);
+                    for (int i = 1; i <= maxNonZeroFactorial; i++)
+                    {
+                        factorialSum = (factorialSum + (combinedFactorialSumsInRange.numWithFactorial[i] * factorialTable[i]) % mod) % mod;
+                    }
+                    assert(factorialSum >= 0 && factorialSum < mod);
+
                     results.push_back(factorialSum);
                     break;
                 }
