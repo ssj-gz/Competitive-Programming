@@ -28,7 +28,7 @@ struct FactorialHistogram
     }
 };
 
-template <typename ValueType>
+template <typename ValueType, typename OperatorInfo>
 class SegmentTree
 {
     public:
@@ -144,11 +144,11 @@ class SegmentTree
             Cell* leftChild = nullptr;
             Cell* rightChild = nullptr;
 
-            int pendingOperatorInfo = 0;
+            OperatorInfo pendingOperatorInfo = 0;
             bool hasPendingOperator = false;
             bool needsUpdateFromChildren = false;
 
-            void addPendingOperation(int operatorInfo)
+            void addPendingOperation(OperatorInfo operatorInfo)
             {
                 if (!hasPendingOperator)
                 {
@@ -308,7 +308,7 @@ struct Query
 
 vector<int64_t> findResults(const vector<int64_t>& A, const vector<Query>& queries)
 {
-    using FactorialTracker = SegmentTree<FactorialHistogram>;
+    using FactorialTracker = SegmentTree<FactorialHistogram, int>;
     FactorialTracker factorialTracker(A.size());
 
     vector<FactorialHistogram> initialValues(A.size());
