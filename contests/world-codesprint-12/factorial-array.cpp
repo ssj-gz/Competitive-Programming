@@ -264,6 +264,14 @@ class SegmentTree
         void collectMinCellsForRange(int start, int end, vector<Cell*>& destCells)
         {
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
+#ifdef VERIFY_SEGMENT_TREE
+            assert(destCells.front()->rangeBegin == start);
+            assert(destCells.back()->rangeEnd == end);
+            for (int i = 1; i < destCells.size(); i++)
+            {
+                assert(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1);
+            }
+#endif
         }
 
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
@@ -313,25 +321,31 @@ class SegmentTree
             if (((end + 1) % powerOf2) == 0)
             {
                 // Unadvance end by one complete cell at a time, summing the contents of that cell, then recurse on the rest.
+                Cell* cellToAdd = nullptr;
                 if (start <= end - powerOf2 + 1)
                 {
-                    destCells.push_back(&(m_cellMatrix[cellRow][end/powerOf2]));
+                    cellToAdd = &(m_cellMatrix[cellRow][end/powerOf2]);
                     end -= powerOf2;
                 }
                 collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
+                if (cellToAdd)
+                    destCells.push_back(cellToAdd);
                 return;
             }
             // Neither start nor end is a multiple of powerOf2 ... sum up the complete cells in between (if any) ...
             const int powerOf2AfterStart = (start / powerOf2 + 1) * powerOf2;
             const int powerOf2BeforeEnd =  (end / powerOf2) * powerOf2;
-            // ... add the complete cell in between (if there is one) ...
+            Cell* middleCellToAdd = nullptr;
+            // ... make a note to add the complete cell in between (if there is one) ...
             if (powerOf2AfterStart < powerOf2BeforeEnd)
             {
-                destCells.push_back(&(m_cellMatrix[cellRow][powerOf2AfterStart / powerOf2]));
+                middleCellToAdd = &(m_cellMatrix[cellRow][powerOf2AfterStart / powerOf2]);
             }
             // ... and then split into two, and recurse: for each of two split regions, at least one of the start or end will be a multiple of powerOf2, so they
             // will not split further.
             collectMinCellsForRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 >> 1, destCells); // Left region.
+            if (middleCellToAdd)
+                destCells.push_back(middleCellToAdd);
             collectMinCellsForRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1, destCells); // Right region.
             return;
         }
