@@ -1,5 +1,7 @@
+#define VERIFY_SEGMENT_TREE
 #define SUBMISSION
 #ifdef SUBMISSION
+#undef VERIFY_SEGMENT_TREE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -25,6 +27,15 @@ struct FactorialHistogram
             factorialHistogram.numWithFactorial[value] = 1;
         
         return factorialHistogram;
+    }
+    bool operator==(const FactorialHistogram& other)
+    {
+        for (int i = 0; i < numWithFactorial.size(); i++)
+        {
+            if (numWithFactorial[i] != other.numWithFactorial[i])
+                return false;
+        }
+        return true;
     }
 };
 
@@ -83,6 +94,9 @@ class SegmentTree
                     childCellIndex++;
                 }
             }
+#ifdef VERIFY_SEGMENT_TREE
+            m_dbgValues.resize(maxNumber);
+#endif
         }
         void setInitialValues(const vector<ValueType>& initialValues)
         {
@@ -94,6 +108,9 @@ class SegmentTree
                     cell.parent->setNeedsUpdateFromChildren();
             }
             updateAllFromChildren();
+#ifdef VERIFY_SEGMENT_TREE
+            m_dbgValues = initialValues;
+#endif
         }
         void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
@@ -107,6 +124,12 @@ class SegmentTree
                     cell->parent->setNeedsUpdateFromChildren();
             }
             updateAllFromChildren();
+#ifdef VERIFY_SEGMENT_TREE
+            for (int i = left; i <= right; i++)
+            {
+                m_applyOperator(operatorInfo, m_dbgValues[i]);
+            }
+#endif
         }
         void setValue(int pos, const ValueType& newValue)
         {
@@ -120,6 +143,9 @@ class SegmentTree
             if (cell->parent)
                 cell->parent->setNeedsUpdateFromChildren();
             updateAllFromChildren();
+#ifdef VERIFY_SEGMENT_TREE
+            m_dbgValues[pos] = newValue;
+#endif
         }
         ValueType combinedValuesInRange(int left, int right)
         {
@@ -131,6 +157,18 @@ class SegmentTree
                 cell->servicePendingOperations();
                 combinedValuesInRange = m_combineValues(combinedValuesInRange, cell->value);
             }
+#ifdef VERIFY_SEGMENT_TREE
+            {
+                ValueType dbgCombinedValuesInRange;
+
+                for (int i = left; i <= right; i++)
+                {
+                    dbgCombinedValuesInRange = m_combineValues(dbgCombinedValuesInRange, m_dbgValues[i]);
+                }
+
+                assert(dbgCombinedValuesInRange == combinedValuesInRange);
+            }
+#endif
             return combinedValuesInRange;
         }
     private:
@@ -140,6 +178,10 @@ class SegmentTree
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
         int m_maxNumber;
+
+#ifdef VERIFY_SEGMENT_TREE
+        vector<ValueType> m_dbgValues;
+#endif
 
         struct Cell
         {
