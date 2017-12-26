@@ -261,7 +261,8 @@ class SegmentTree
 
         vector<vector<Cell>> m_cellMatrix;
 
-        void collectMinCellsForRange(int start, int end, vector<Cell*>& destCells)
+        // Collect O(log2(end - start + 1)) cells in range-order that span the interval start-end (inclusive).
+        void collectMinCellsForRange(const int start, const int end, vector<Cell*>& destCells)
         {
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
 #ifdef VERIFY_SEGMENT_TREE
