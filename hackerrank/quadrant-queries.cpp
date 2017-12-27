@@ -386,18 +386,23 @@ class SegmentTree {
         }
 };
 
-struct Query
-{
-    int type;
-    int64_t n1;
-    int64_t n2;
-};
-
-Transform transformTable[numTransforms][numTransforms];
-
 int main(int argc, char** argv)
 {
-    // Build transform table.
+    // Very easy one: we don't care too much about the "full" values of each x and y; we only care which quadrant this point is in.
+    // Imagine we maintained, for each point, a QuadrantHistogram: this is simply the number of points in each quadrant for this point
+    // i.e. all but one quadrants in the histogram would have 0 points in them; the other would have 1, representing the quadrant that the point
+    // is in.  Applying a transform to this histogram permutes the values in an obvious way (see applyTransform()).
+    //
+    // It might seem odd to represent each point by a histogram of points, but this makes sense once we transplant the problem - as we must with most
+    // range-query problems - into a SegmentTree problem; then, each QuadrantHistogram represents the number of points in each quadrant for a *range* of points.
+    // With our lazy-evaluation SegmentTree, we need to be able to combine Transforms together into a new transform: while the original transforms
+    // consist only of FlipAlongVertical and FlipAlongHorizontal, we see that combining these can create new transforms: for example, FlipAlongHorizontal followed
+    // by FlipAlongVertical actually creates a *rotation* by 180 degrees (Rotate180); similarly, two consecutive flips along the same axis is the same as doing no
+    // flips at all i.e. the Identity transform.  These combinations are stored in combinedTransformsTable.  
+    // And that's about it - given all this, the conversion to a SegmentTree problem is hopefully obvious!
+
+    // Build transform table - if we apply transform T1 followed by transform T2 to some QuadrantHistogram, then the result will be combinedTransforms[T2][T1].
+    Transform combinedTransformsTable[numTransforms][numTransforms];
     for (int firstTransform = 0; firstTransform < numTransforms; firstTransform++)
     {
         for (int secondTransform = 0; secondTransform < numTransforms; secondTransform++)
@@ -424,7 +429,7 @@ int main(int argc, char** argv)
                 if (otherQuadrantHistogram == quadrantHistogram)
                 {
                     found = true;
-                    transformTable[secondTransform][firstTransform] = static_cast<Transform>(i);
+                    combinedTransformsTable[secondTransform][firstTransform] = static_cast<Transform>(i);
                     break;
                 }
             }
@@ -443,17 +448,18 @@ int main(int argc, char** argv)
         return combined;
     };
 
-    auto combineTransforms = [](const Transform& secondTransform, const Transform& firstTransform)
+    auto combineTransforms = [&combinedTransformsTable](const Transform& secondTransform, const Transform& firstTransform)
     {
-        return transformTable[secondTransform][firstTransform];
+        return combinedTransformsTable[secondTransform][firstTransform];
     };
 
 
     int n;
     cin >> n;
 
+    // Compute the initial values for the points: each "point" is represented by a histogram where all quadrants but the one
+    // the point belongs to are empty, and the remaining quadrant has a single point (i.e. this point!).
     vector<QuadrantHistogram> initialValues(n);
-
     for (int i = 0; i < n; i++)
     {
         int x, y;
@@ -511,6 +517,5 @@ int main(int argc, char** argv)
                 assert(false);
         }
     }
-
 }
 
