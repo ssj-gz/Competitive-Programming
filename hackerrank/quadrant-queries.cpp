@@ -32,8 +32,8 @@ struct QuadrantHistogram
 enum Transform
 {
     Identity,
-    FlipAlongHorizontal,
-    FlipAlongVertical,
+    ReflectAlongHorizontal,
+    ReflectAlongVertical,
     Rotate180,
 };
 constexpr int numTransforms = 4;
@@ -45,11 +45,11 @@ void applyTransform(Transform transform, QuadrantHistogram& quadrantHistogram)
     {
         case Identity:
             break;
-        case FlipAlongHorizontal:
+        case ReflectAlongHorizontal:
             swap(numInQuadrant[QuadrantHistogram::TopLeft], numInQuadrant[QuadrantHistogram::BottomLeft]);
             swap(numInQuadrant[QuadrantHistogram::TopRight], numInQuadrant[QuadrantHistogram::BottomRight]);
             break;
-        case FlipAlongVertical:
+        case ReflectAlongVertical:
             swap(numInQuadrant[QuadrantHistogram::TopLeft], numInQuadrant[QuadrantHistogram::TopRight]);
             swap(numInQuadrant[QuadrantHistogram::BottomLeft], numInQuadrant[QuadrantHistogram::BottomRight]);
             break;
@@ -396,8 +396,8 @@ int main(int argc, char** argv)
     // It might seem odd to represent each point by a histogram of points, but this makes sense once we transplant the problem - as we must with most
     // range-query problems - into a SegmentTree problem; then, each QuadrantHistogram represents the number of points in each quadrant for a *range* of points.
     // With our lazy-evaluation SegmentTree, we need to be able to combine Transforms together into a new transform: while the original transforms
-    // consist only of FlipAlongVertical and FlipAlongHorizontal, we see that combining these can create new transforms: for example, FlipAlongHorizontal followed
-    // by FlipAlongVertical actually creates a *rotation* by 180 degrees (Rotate180); similarly, two consecutive flips along the same axis is the same as doing no
+    // consist only of ReflectAlongVertical and ReflectAlongHorizontal, we see that combining these can create new transforms: for example, ReflectAlongHorizontal followed
+    // by ReflectAlongVertical actually creates a *rotation* by 180 degrees (Rotate180); similarly, two consecutive flips along the same axis is the same as doing no
     // flips at all i.e. the Identity transform.  These combinations are stored in combinedTransformsTable.  
     // And that's about it - given all this, the conversion to a SegmentTree problem is hopefully obvious!
 
@@ -499,10 +499,10 @@ int main(int argc, char** argv)
         switch (operationType)
         {
             case 'X':
-                quadrantTracker.applyOperatorToAllInRange(start, end, FlipAlongHorizontal); 
+                quadrantTracker.applyOperatorToAllInRange(start, end, ReflectAlongHorizontal); 
                 break;
             case 'Y':
-                quadrantTracker.applyOperatorToAllInRange(start, end, FlipAlongVertical); 
+                quadrantTracker.applyOperatorToAllInRange(start, end, ReflectAlongVertical); 
                 break;
             case 'C':
                 {
