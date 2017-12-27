@@ -19,6 +19,16 @@ struct QuadrantHistogram
     enum Quadrant { TopRight, TopLeft, BottomLeft, BottomRight }; // In the order specified in the problem i.e. "first quadrant" is Top-Right; "second quadrant" Top-Left, etc.
     static constexpr int numQuadrants = 4;
 
+    QuadrantHistogram(int numInFirstQuadrant, int numInSecondQuadrant, int numInThirdQuadrant, int numInFourthQuadrant)
+    {   
+        numInQuadrant[0] = numInFirstQuadrant;
+        numInQuadrant[1] = numInSecondQuadrant;
+        numInQuadrant[2] = numInThirdQuadrant;
+        numInQuadrant[3] = numInFourthQuadrant;
+    }       
+
+    QuadrantHistogram() = default;
+
     array<int, numQuadrants> numInQuadrant = {};
     bool operator==(const QuadrantHistogram& other)
     {
@@ -407,11 +417,7 @@ int main(int argc, char** argv)
     {
         for (int secondTransform = 0; secondTransform < numTransforms; secondTransform++)
         {
-            QuadrantHistogram quadrantHistogram;
-            quadrantHistogram.numInQuadrant[QuadrantHistogram::TopLeft] = 1;
-            quadrantHistogram.numInQuadrant[QuadrantHistogram::TopRight] = 2;
-            quadrantHistogram.numInQuadrant[QuadrantHistogram::BottomLeft] = 3;
-            quadrantHistogram.numInQuadrant[QuadrantHistogram::BottomRight] = 4;
+            QuadrantHistogram quadrantHistogram(1, 2, 3 ,4);
 
             applyTransform(static_cast<Transform>(firstTransform), quadrantHistogram);
             applyTransform(static_cast<Transform>(secondTransform), quadrantHistogram);
@@ -419,14 +425,10 @@ int main(int argc, char** argv)
             bool found = false;
             for (int i = 0; i < numTransforms; i++)
             {
-                QuadrantHistogram otherQuadrantHistogram;
-                otherQuadrantHistogram.numInQuadrant[QuadrantHistogram::TopLeft] = 1;
-                otherQuadrantHistogram.numInQuadrant[QuadrantHistogram::TopRight] = 2;
-                otherQuadrantHistogram.numInQuadrant[QuadrantHistogram::BottomLeft] = 3;
-                otherQuadrantHistogram.numInQuadrant[QuadrantHistogram::BottomRight] = 4;
+                QuadrantHistogram quadrantHistogramToMatchWithOriginal(1, 2, 3 ,4);
 
-                applyTransform(static_cast<Transform>(i), otherQuadrantHistogram);
-                if (otherQuadrantHistogram == quadrantHistogram)
+                applyTransform(static_cast<Transform>(i), quadrantHistogramToMatchWithOriginal);
+                if (quadrantHistogramToMatchWithOriginal == quadrantHistogram)
                 {
                     found = true;
                     combinedTransformsTable[secondTransform][firstTransform] = static_cast<Transform>(i);
