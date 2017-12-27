@@ -425,7 +425,6 @@ int main(int argc, char** argv)
                 {
                     found = true;
                     transformTable[secondTransform][firstTransform] = static_cast<Transform>(i);
-                    cout << "Found " << firstTransform << " + " << secondTransform << " = " << i << endl;
                     break;
                 }
             }
@@ -512,8 +511,6 @@ int main(int argc, char** argv)
                 assert(false);
         }
     }
-
-
 
 }
 
