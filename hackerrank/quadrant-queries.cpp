@@ -411,7 +411,8 @@ int main(int argc, char** argv)
     // flips at all i.e. the Identity transform.  These combinations are stored in combinedTransformsTable.  
     // And that's about it - given all this, the conversion to a SegmentTree problem is hopefully obvious!
 
-    // Build transform table - if we apply transform T1 followed by transform T2 to some QuadrantHistogram, then the result will be combinedTransforms[T2][T1].
+    // Build transform table - if we apply transform T1 followed by transform T2 to some QuadrantHistogram q, then the result will be the same as if we had just
+    // applied combinedTransforms[T2][T1] to q instead.
     Transform combinedTransformsTable[numTransforms][numTransforms];
     for (int firstTransform = 0; firstTransform < numTransforms; firstTransform++)
     {
