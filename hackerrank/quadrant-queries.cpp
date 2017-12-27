@@ -459,6 +459,9 @@ int main(int argc, char** argv)
     int n;
     cin >> n;
 
+    using QuadrantTracker = SegmentTree<QuadrantHistogram, Transform>;
+    QuadrantTracker quadrantTracker(n,  combineQuadrantHistograms, applyTransform, combineTransforms);
+
     // Compute the initial values for the points: each "point" is represented by a histogram where all quadrants but the one
     // the point belongs to are empty, and the remaining quadrant has a single point (i.e. this point!).
     vector<QuadrantHistogram> initialValues(n);
@@ -480,12 +483,10 @@ int main(int argc, char** argv)
             initialValues[i].numInQuadrant[QuadrantHistogram::TopRight] = 1;
     }
 
+    quadrantTracker.setInitialValues(initialValues);
+
     int Q;
     cin >> Q;
-
-    using QuadrantTracker = SegmentTree<QuadrantHistogram, Transform>;
-    QuadrantTracker quadrantTracker(n,  combineQuadrantHistograms, applyTransform, combineTransforms);
-    quadrantTracker.setInitialValues(initialValues);
 
     for (int q = 0; q < Q; q++)
     {
