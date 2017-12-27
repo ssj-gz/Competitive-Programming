@@ -16,7 +16,7 @@ using namespace std;
 
 struct QuadrantHistogram
 {
-    enum Quadrant { TopLeft, TopRight, BottomLeft, BottomRight };
+    enum Quadrant { TopRight, TopLeft, BottomLeft, BottomRight }; // In the order specified in the problem i.e. "first quadrant" is Top-Right; "second quadrant" Top-Left, etc.
     static constexpr int numQuadrants = 4;
 
     array<int, numQuadrants> numInQuadrant = {};
@@ -508,10 +508,10 @@ int main(int argc, char** argv)
                 {
                     const auto combinedQuadrantHistogramsInRange = quadrantTracker.combinedValuesInRange(start, end);
                     const auto& numInQuadrant = combinedQuadrantHistogramsInRange.numInQuadrant;
-                    cout << numInQuadrant[QuadrantHistogram::TopRight] << " " <<
-                        numInQuadrant[QuadrantHistogram::TopLeft] << " " <<
-                        numInQuadrant[QuadrantHistogram::BottomLeft] << " " <<
-                        numInQuadrant[QuadrantHistogram::BottomRight] << endl;
+                    cout << numInQuadrant[0] << " " <<
+                        numInQuadrant[1] << " " <<
+                        numInQuadrant[2] << " " <<
+                        numInQuadrant[3] << endl;
                     break;
                 }
             default:
