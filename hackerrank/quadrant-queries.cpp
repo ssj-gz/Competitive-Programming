@@ -507,10 +507,11 @@ int main(int argc, char** argv)
             case 'C':
                 {
                     const auto combinedQuadrantHistogramsInRange = quadrantTracker.combinedValuesInRange(start, end);
-                    cout << combinedQuadrantHistogramsInRange.numInQuadrant[QuadrantHistogram::TopRight] << " " <<
-                        combinedQuadrantHistogramsInRange.numInQuadrant[QuadrantHistogram::TopLeft] << " " <<
-                        combinedQuadrantHistogramsInRange.numInQuadrant[QuadrantHistogram::BottomLeft] << " " <<
-                        combinedQuadrantHistogramsInRange.numInQuadrant[QuadrantHistogram::BottomRight] << endl;
+                    const auto& numInQuadrant = combinedQuadrantHistogramsInRange.numInQuadrant;
+                    cout << numInQuadrant[QuadrantHistogram::TopRight] << " " <<
+                        numInQuadrant[QuadrantHistogram::TopLeft] << " " <<
+                        numInQuadrant[QuadrantHistogram::BottomLeft] << " " <<
+                        numInQuadrant[QuadrantHistogram::BottomRight] << endl;
                     break;
                 }
             default:
