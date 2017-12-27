@@ -1,5 +1,4 @@
 GCD Matrix (60) [60]
-Quadrant Queries (100) [395]
 Clues on a Binary Path (60) [120]
 Beautiful Strings (80) [200]
 Favorite Sequence (95) [295]
