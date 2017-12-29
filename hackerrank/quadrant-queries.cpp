@@ -418,18 +418,18 @@ int main(int argc, char** argv)
     {
         for (int secondTransform = 0; secondTransform < numTransforms; secondTransform++)
         {
-            QuadrantHistogram quadrantHistogram(1, 2, 3 ,4);
+            QuadrantHistogram quadrantHistogramWithTwoTransforms(1, 2, 3 ,4);
 
-            applyTransform(static_cast<Transform>(firstTransform), quadrantHistogram);
-            applyTransform(static_cast<Transform>(secondTransform), quadrantHistogram);
+            applyTransform(static_cast<Transform>(firstTransform), quadrantHistogramWithTwoTransforms);
+            applyTransform(static_cast<Transform>(secondTransform), quadrantHistogramWithTwoTransforms);
 
             bool found = false;
             for (int i = 0; i < numTransforms; i++)
             {
-                QuadrantHistogram quadrantHistogramToMatchWithOriginal(1, 2, 3 ,4);
+                QuadrantHistogram quadrantHistogramSingleTransform(1, 2, 3 ,4);
 
-                applyTransform(static_cast<Transform>(i), quadrantHistogramToMatchWithOriginal);
-                if (quadrantHistogramToMatchWithOriginal == quadrantHistogram)
+                applyTransform(static_cast<Transform>(i), quadrantHistogramSingleTransform);
+                if (quadrantHistogramSingleTransform == quadrantHistogramWithTwoTransforms)
                 {
                     found = true;
                     combinedTransformsTable[secondTransform][firstTransform] = static_cast<Transform>(i);
