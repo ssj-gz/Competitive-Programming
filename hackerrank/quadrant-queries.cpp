@@ -427,12 +427,13 @@ int main(int argc, char** argv)
             for (int i = 0; i < numTransforms; i++)
             {
                 QuadrantHistogram quadrantHistogramSingleTransform(1, 2, 3 ,4);
+                const auto singleTransform = static_cast<Transform>(i);
 
-                applyTransform(static_cast<Transform>(i), quadrantHistogramSingleTransform);
+                applyTransform(singleTransform, quadrantHistogramSingleTransform);
                 if (quadrantHistogramSingleTransform == quadrantHistogramWithTwoTransforms)
                 {
                     found = true;
-                    combinedTransformsTable[secondTransform][firstTransform] = static_cast<Transform>(i);
+                    combinedTransformsTable[secondTransform][firstTransform] = singleTransform;
                     break;
                 }
             }
