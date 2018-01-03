@@ -43,7 +43,7 @@ vector<Node*> getDescendants(Node* node, Node* parentNode)
     return descendants;
 }
 
-Node* findMedian(Node* startNode)
+Node* findCentroid(Node* startNode)
 {
     int numInGraph = 1;
     vector<Node*> allNodes = getDescendants(startNode, nullptr);
@@ -87,7 +87,7 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
     };
     const string indent(indentLevel, ' ');
     cout << indent << "Decomposing graph containing " << startNode->index << endl;
-    Node* centroid = findMedian(startNode);
+    Node* centroid = findCentroid(startNode);
     const auto numNodes = getDescendants(centroid, nullptr).size();
     cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
     cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
@@ -154,7 +154,7 @@ int main()
         cout << endl;
     }
 
-    const auto median = findMedian(&(nodes.front()));
+    const auto median = findCentroid(&(nodes.front()));
     cout << "median: " << median->index << endl;
 
     vector<vector<int>> blee(numNodes, vector<int>(numNodes, 0));
