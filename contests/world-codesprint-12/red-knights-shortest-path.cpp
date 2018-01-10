@@ -89,19 +89,18 @@ int main()
         Position position = { startX, startY };
         while (!(position == destination))
         {
-            //cout << "Position: " << position.x << "," << position.y << " distTravelled: " << distTravelled << endl;
             bool moveMade = false;
-            for (const auto move : movesInPreferredOrder)
+            for (const auto nextMove : movesInPreferredOrder)
             {
-                const Position newPos = { position.x + move.dx, position.y + move.dy };
+                const Position newPos = { position.x + nextMove.dx, position.y + nextMove.dy };
                 if (newPos.x < 0 || newPos.x >= n || newPos.y < 0 || newPos.y >= n)
                     continue;
-                //cout << "New Position: " << newPos.x << "," << newPos.y << " distToDestination[newPos.x][newPos.y]: " << distToDestination[newPos.x][newPos.y]  << endl;
-                if (distToDestination[newPos.x][newPos.y] == distFromStartToDest - 1 - distTravelled)
+
+                if (distToDestination[newPos.x][newPos.y] == distFromStartToDest - (distTravelled + 1))
                 {
                     moveMade = true;
                     position = newPos;
-                    cout << move.printable << " ";
+                    cout << nextMove.printable << " ";
                     break;
                 }
             }
