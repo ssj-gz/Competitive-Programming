@@ -8,7 +8,6 @@
 #include <iostream>
 #include <vector>
 #include <array>
-#include <algorithm>
 #include <functional>
 #include <cassert>
 
@@ -444,11 +443,11 @@ int main(int argc, char** argv)
     auto combineQuadrantHistograms = [](const QuadrantHistogram& lhs, const QuadrantHistogram& rhs)
     {
         QuadrantHistogram combined;
-        combined.numInQuadrant[QuadrantHistogram::TopLeft] = lhs.numInQuadrant[QuadrantHistogram::TopLeft] + rhs.numInQuadrant[QuadrantHistogram::TopLeft];
-        combined.numInQuadrant[QuadrantHistogram::TopRight] = lhs.numInQuadrant[QuadrantHistogram::TopRight] + rhs.numInQuadrant[QuadrantHistogram::TopRight];
-        combined.numInQuadrant[QuadrantHistogram::BottomLeft] = lhs.numInQuadrant[QuadrantHistogram::BottomLeft] + rhs.numInQuadrant[QuadrantHistogram::BottomLeft];
-        combined.numInQuadrant[QuadrantHistogram::BottomRight] = lhs.numInQuadrant[QuadrantHistogram::BottomRight] + rhs.numInQuadrant[QuadrantHistogram::BottomRight];
+        for (int i = 0; i < QuadrantHistogram::numQuadrants; i++)
+        {
+            combined.numInQuadrant[i] = lhs.numInQuadrant[i] + rhs.numInQuadrant[i];
 
+        }
         return combined;
     };
 
