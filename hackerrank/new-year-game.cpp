@@ -10,336 +10,79 @@
 
 using namespace std;
 
-//#define VERY_VERBOSE
-#define PRINT_COMPUTER_MOVES
-enum PlayState { Player1Win, Player1Lose };
-enum Player { Player1, Player2 };
-
-enum PlayerType { CPU, Random, Human };
-
-const string player1Name = "Balsa";
-const string player2Name = "Koca";
-
-Player otherPlayer(Player player)
-{
-    if (player == Player1)
-        return Player2;
-    else
-        return Player1;
-}
-
-PlayState winForPlayer(Player player)
-{
-    if (player == Player1)
-        return Player1Win;
-    else
-        return Player1Lose;
-}
-
-PlayState loseForPlayer(Player player)
-{
-    if (player == Player1)
-        return Player1Lose;
-    else
-        return Player1Win;
-}
-
-class GameState;
-class Move;
-
-vector<Move> movesFor(Player currentPlayer, const GameState& gameState);
-
-class GameState
-{
-    public:
-        array<int, 3> numWithMod3 = {};
-        int balsaScore = 0;
-        int kocaScore = 0;
-        bool hasWinningPlayerOverride(Player currentPlayer) const
-        {
-            return movesFor(currentPlayer, *this).empty();
-        }
-        Player winningPlayerOverride(Player currentPlayer) const
-        {
-            //cout << "state override: balsaScore: " << balsaScore << " kocaScore: " << kocaScore << endl;
-            const int balsaScoreMod3 = balsaScore % 3;
-            const int kocaScoreMod3 = kocaScore % 3;
-            const int balsaMinusKocaMod3 = (3 + balsaScoreMod3 - kocaScoreMod3) % 3;
-            //cout << "balsaMinusKocaMod3: " << balsaMinusKocaMod3 << endl;
-            return (balsaMinusKocaMod3 == 0 ? Player2 : Player1);
-        }
-};
-
-bool operator<(const GameState& lhs, const GameState& rhs)
-{
-    if (lhs.balsaScore != rhs.balsaScore)
-        return lhs.balsaScore < rhs.balsaScore;
-    if (lhs.kocaScore != rhs.kocaScore)
-        return lhs.kocaScore < rhs.kocaScore;
-    return lhs.numWithMod3 < rhs.numWithMod3;
-}
-
-class Move
-{
-    public:
-        int takeFromWithMod3 = -1;
-};
-
-ostream& operator<<(ostream& os, const GameState& gameState)
-{
-    os << "piles: " << gameState.numWithMod3[0] << " "<< gameState.numWithMod3[1] << " " << gameState.numWithMod3[2] << " balsa score: " << gameState.balsaScore << " kocaScore: " << gameState.kocaScore << endl;
-    return os;
-}
-
-ostream& operator<<(ostream& os, const Move& move)
-{
-    os << "Take from pile " << move.takeFromWithMod3;
-    return os;
-}
-
-ostream& operator<<(ostream& os, Player player)
-{
-    if (player == Player1)
-        os << player1Name;
-    else
-        os << player2Name;
-
-    return os;
-}
-
-ostream& operator<<(ostream& os, PlayState playState)
-{
-    if (playState == Player1Win)
-        os << Player1;
-    else
-        os << Player2;
-
-    os << " wins";
-
-    return os;
-}
-
-map<pair<GameState, Player>, PlayState> playStateForLookup;
-
-vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
-{
-    vector<Move> moves;
-    for (int i = 0; i < 3; i++)
-    {
-        if (gameState.numWithMod3[i] > 0)
-        {
-            Move move;
-            move.takeFromWithMod3 = i;
-            moves.push_back(move);
-        }
-    }
-
-    //cout << "num moves for " << gameState << " : " << moves.size() << endl;
-
-    return moves;
-}
-
-GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, const Move& move)
-{
-    GameState nextGameState(gameState);
-    nextGameState.numWithMod3[move.takeFromWithMod3]--;
-    if (currentPlayer == Player1)
-    {
-        nextGameState.balsaScore += move.takeFromWithMod3;
-    }
-    else
-    {
-        nextGameState.kocaScore += move.takeFromWithMod3;
-    }
-
-    return nextGameState;
-}
-
-PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, PlayerType player1Type, PlayerType player2Type, bool isBruteForceMoveSearch)
-{
-    const auto playThisMoveAsType = (currentPlayer == Player1 ? player1Type : player2Type);
-    const bool playThisMoveInteractively = !isBruteForceMoveSearch && (playThisMoveAsType == Human);
-    const bool playThisMoveRandomly = !isBruteForceMoveSearch && (playThisMoveAsType == Random);
-    if (isBruteForceMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
-    {
-        // Don't use the cache if we're interactive/ random: it will know all losing states from earlier dry-runs,
-        // and if the human player is in a losing state, won't give them a chance to make a move!
-        return playStateForLookup[{gameState, currentPlayer}];
-    }
-
-    // Assume a loss by default.
-    PlayState playState = loseForPlayer(currentPlayer);
-
-    auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, player1Type, player2Type](const Move& move, bool isBruteForceMoveSearch)
-    {
-        const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
-        const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, player1Type, player2Type, isBruteForceMoveSearch);
-        if (result == winForPlayer(currentPlayer))
-        {
-            playState = winForPlayer(currentPlayer);
-        }
-    };
-
-    auto readInt = [](const string& message)
-    {
-        while (true)
-        {
-            cout << message << endl;
-            int value;
-            cin >> value;
-
-            if (!cin)
-            {
-                cout << "Invalid input; please try again" << endl;
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            }
-            else
-                return value;
-        }
-    };
-
-    if (gameState.hasWinningPlayerOverride(currentPlayer))
-    {
-        playState = winForPlayer(gameState.winningPlayerOverride(currentPlayer));
-    }
-    else
-    {
-        const vector<Move> availableMoves = movesFor(currentPlayer, gameState);
-
-        if (playThisMoveInteractively)
-        {
-            if (!availableMoves.empty())
-            {
-                stringstream messagePromptStream;
-                messagePromptStream << "Player " << currentPlayer << ", it is your move; game state is " << gameState << endl;
-                for (int i = 0; i < availableMoves.size(); i++)
-                {
-                    messagePromptStream << i << ":  " << availableMoves[i] << endl;
-                }
-                int moveIndex = -1;
-                while (true)
-                {
-                    moveIndex = readInt(messagePromptStream.str());
-                    if (moveIndex < 0 || moveIndex >= availableMoves.size())
-                    {
-                        cout << "Invalid input" << endl;
-                    }
-                    else
-                        break;
-                }
-                const auto chosenMove = availableMoves[moveIndex];
-                cout << "You chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
-                updatePlayStateFromMove(chosenMove, false);
-            }
-            else
-            {
-                cout << "Player " << currentPlayer << " - you have no moves available.  You lose; good-day, Sir!" << endl;
-            }
-        }
-        else if (playThisMoveRandomly)
-        {
-            if (!availableMoves.empty())
-            {
-                const int moveIndex = rand() % availableMoves.size();
-                const auto chosenMove = availableMoves[moveIndex];
-                cout << "Randomly chose move " << chosenMove << " game state is now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
-                updatePlayStateFromMove(chosenMove, false);
-            }
-        }
-        else
-        {
-            Move chosenMove;
-            for (const auto& move : availableMoves)
-            {
-                const auto oldPlayState = playState;
-                updatePlayStateFromMove(move, true);
-
-                if (playState != winForPlayer(currentPlayer))
-                {
-                    // If we can't win, just play an arbitrary move; the last one, say.
-                    chosenMove = move;
-                }
-                else if (oldPlayState != playState)
-                {
-                    // This is the first winning move we've discovered; store it and print it out (but not subsequent ones).
-                    chosenMove = move;
-#ifdef VERY_VERBOSE
-                    cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
-#endif
-                }
-            }
-            if (!isBruteForceMoveSearch && !availableMoves.empty())
-            {
-#ifdef PRINT_COMPUTER_MOVES
-                cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : "Lose") << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
-#endif
-                updatePlayStateFromMove(chosenMove, false);
-            }
-        }
-    }
-
-#ifdef VERY_VERBOSE
-    cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : "Loses") << endl;
-#endif
-    playStateForLookup[{gameState, currentPlayer}] = playState;
-
-    return playState;
-}
-
-PlayState findWinner(Player currentPlayer, const GameState& gameState, PlayerType player1Type = CPU, PlayerType player2Type = CPU)
-{
-    playStateForLookup.clear();
-    const auto result = findWinnerAux(currentPlayer, gameState, player1Type, player2Type, false);
-
-    if (player1Type == Human || player2Type == Human)
-    {
-        const auto interactivePlayer = (player1Type == Human ? Player1 : Player2);
-        cout << "Result of interactive game: you played as " << interactivePlayer << "; " << currentPlayer << " took the first turn; " << result << endl;
-    }
-
-    return result;
-}
-
-
-
-
-
 int main(int argc, char** argv)
 {
-    ifstream testCaseFileIn;
-    bool isTestcaseFromFile = false;
-    if (argc == 2)
-    {
-        const auto testCaseFilename = argv[1];
-        testCaseFileIn.open(testCaseFilename);
-        assert(testCaseFileIn.is_open());
-        isTestcaseFromFile = true;
-    }
-    istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
-
+    // Fairly easy one.  We're interested only in the difference of scores mod 3, which suggests that we don't
+    // really care about the full values in the array, merely their value mod 3.  Thus, we can boil down the
+    // array at any state in the game to just the number of values that are 0 mod 3, 1 mod 3, and 2 mod 3.  Let N(x) be the number
+    // of values in the array that have value x mod 3 for x = 0, 1, 2.
+    //
+    // If scoreDiff is Balsa's score minus Koca's score, mod 3, then Balsa taking a value v from the array increases scoreDiff by 
+    // v (mod 3), and Koca taking a value v' from the array *decreases* scoreDiff by v' (again, all mod 3).  Note that if Balsa takes 
+    // a value which is x mod 3 from the array and Koca then takes a value which has the same value x mod 3, then scoreDiff is unchanged;
+    // this hints that mirroring might form part of the optimal strategy and, further, that the winner might depend only on the parity of 
+    // each N(x) for each x = 0, 1, 2.  In fact, as we'll see, this is indeed the case.
+    //
+    // Let's switch to looking at a near-end stage of the game - where each N(x) is either 0 or 1 (parity!)
+    //
+    // There are eight possibilities: each triple below represents (N(0), N(1), N(2)).
+    //
+    //  1) (0, 0, 0)
+    //     No player can move, so scoreDiff remains at 0; Koca wins.
+    //  2) (0, 0, 1)
+    //     Balsa must take the sole value which is 2 mod 3, making the scoreDiff 2 mod 3.  Koca cannot make any moves, so the final scoreDiff is 2: Balsa wins.
+    //  3) (0, 1, 0)
+    //     Using identical reasoning to 2), the final scoreDiff is 1, so Balsa wins.
+    //  4) (0, 1, 1) 
+    //     Two sub-possibilities:
+    //      
+    //     a) Balsa takes the value which is 2 mod 3 (making scoreDiff 2); Koca then must take the sole remaining value which decreases scoreDiff to 1.  No
+    //        further moves are possible -> Balsa wins.
+    //     b) Similar to a) - final scoreDiff is 2, so Balsa wins.
+    //  5) (1, 0, 0)
+    //     Balsa must take the sole value which is 0 mod 3, leaving scoreDiff as 0.  No further moves are possible, so final scoreDiff is 0 -> Koca wins.
+    //  6 - 8): (1, 0, 1), (1, 1, 0), (1, 1, 1) - exercise for the reader ;) Balsa wins each of these.
+    //
+    // So we see that in this simple game, Koca wins if and only if N(1) == N(2) == 0 (the value of N(0) makes no difference).
+    //
+    // It's now fairly easy to see that Balsa has a winning strategy for (N(0), N(1), N(2)) if and only if it Balsa has a winning strategy for (N(0) % 2, N(1) % 2, N(2) % 2).
+    // Let N'(x) be N(x) % 2.  Assume that Balsa has a winning strategy for (N'(0), N'(1), N'(2)).  Note that N(x) is odd if and only if N'(x) is 1.  Let Balsa use the following
+    // strategy:
+    //
+    //  i) Pick the x such that x would be the winning first move for (N'(0), N'(1), N'(2)) (we know this exists, by assumption) - then we must have had N'(x) = 1.  Set N'(x) to 0.
+    //  ii) Let Koca make his move, and call it x'. 
+    //  iii) There are two situations that Balsa must respond to:
+    //   a) N'(x') was equal to 1.  In this case, play whatever move we would respond to if we had played x then x' in the original (N'(0), N'(1), N'(2)) game and set N'(x') to 0.
+    //   b) N'(x') was equal to 0, in which case N(x) was even when Koca made the move, and is now odd; have Balsa play the same move, x, essentially undoing Koca's change to scoreDiff.
+    //   Since N(x) is odd when it is Balsa's turn, it is always possible for Balsa to play this move x.
+    //  
+    // It's easy to see that repeated application of this strategy (i), then repeat ii) and iii) until the game ends) will be a win for Balsa - we are essentially playing the 
+    // reduced (N(0) % 2, N(1) % 2, N(2) % 2) game (which we know Balsa can win), except that when Koca plays a move x which is not possible in (N'(0), N'(1), N'(2)), we immediately
+    // nullify it by playing the same move x (mirroring). So if there is a winning strategy for Balsa with (N(0) % 2, N(1) % 2, N(2) % 2), then there is a winning strategy for (N(0), N(1), N(2)).  
+    // We can apply the same reasoning to form a winning strategy for Koca for (N(0), N(1), N(2)) if there is a winning strategy for Koca for (N(0) % 2, N(1) % 2, N(2) % 2).  Since if Balsa does not have a winning
+    // strategy then Koca does, we see that both sides of the implication hold i.e. if  there is no winning strategy for Balsa for (N(0), N(1), N(2)), then there is no winning strategy
+    // for Balsa with (N(0) % 2, N(1) % 2, N(2) % 2) i.e. the winner is completely determined by (N(0) % 2, N(1) % 2, N(2) % 2), in which only two configurations (1) and 5)) are wins 
+    // for Koca.
     int T;
-    testCaseIn >> T;
-
+    cin >> T;
     for (int t = 0; t < T; t++)
     {
-        GameState initialState;
-#if 1
         int n;
-        testCaseIn >> n;
+        cin >> n;
 
         vector<int> a(n);
         for (int i = 0; i < n; i++)
         {
-            testCaseIn >> a[i];
+            cin >> a[i];
         }
 
+        int numWithMod3[3] = {};
         for (const auto x : a)
         {
-            //cout << "x: " << x << endl;
-            initialState.numWithMod3[x % 3]++;
+            numWithMod3[x % 3]++;
         }
-        if (initialState.numWithMod3[1] % 2 == 0 && initialState.numWithMod3[2] % 2 == 0)
+        
+        if (numWithMod3[1] % 2 == 0 && numWithMod3[2] % 2 == 0)
         {
             cout << "Koca";
         }
@@ -348,27 +91,6 @@ int main(int argc, char** argv)
             cout << "Balsa";
         }
         cout << endl;
-#else
-        int x, y, z;
-        testCaseIn >> x >> y >> z;
-        initialState.numWithMod3[0] = x;
-        initialState.numWithMod3[1] = y;
-        initialState.numWithMod3[2] = z;
-        cout << "0: " << initialState.numWithMod3[0] << " 1: " << initialState.numWithMod3[1] << " 2: " << initialState.numWithMod3[2] << endl;
-#endif
-#if 0
-        //const auto result = findWinner(Player1, initialState);
-        const auto result = findWinner(Player1, initialState, CPU, Human);
-        if (result == Player1Win)
-        {
-            cout << "Balsa";
-        }
-        else
-        {
-            cout << "Koca";
-        }
-        cout << endl;
-#endif
     }
 }
 
