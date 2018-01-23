@@ -56,6 +56,8 @@ int main()
     // for i != 0) which has the same e_reduce as the original height array.
     //
     // Then, we just set e_start to h[0] / 2, and add the 1 if this isn't big enough i.e. if any of the remaining h's are non-zero.  Ta-da!
+    //
+    // UPDATE: Ooooh - the Editorial is much simpler.  Clever!
     int N;
     cin >> N;
 
