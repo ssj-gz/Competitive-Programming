@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) 2018-01-23
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -6,7 +7,7 @@ using namespace std;
 
 int main()
 {
-#if 0
+#if 1
     int N;
     cin >> N;
 
@@ -16,15 +17,18 @@ int main()
         cin >> heights[i];
     }
 #endif
-    while (true)
+    //while (true)
     {
+#if 0
         const int N = rand() % 10 + 1;
         vector<int> heights;
         for (int i = 0; i < N; i++)
         {
             heights.push_back(rand() % 10000 + 1);
         }
+#endif
 
+#if 0
         int64_t startEnergy = 0;
         while (true)
         {
@@ -111,6 +115,7 @@ int main()
             heights[0] += blee;
         }
 #endif
+#endif
         int flipple = 0;
         for (int i = N - 1; i >= 0; i--)
         {
@@ -133,21 +138,24 @@ int main()
             }
         }
 
+#if 0
         cout << "Final heights: " << endl;
         for (const auto h : heights)
         {
             cout << h << " ";
         }
         cout << endl;
+#endif
 
-        const int pickle = fleep();
-        cout << "sausage: " << sausage << " pickle: " << pickle << endl;
+        //const int pickle = fleep();
+        //cout << "sausage: " << sausage << " pickle: " << pickle << endl;
         //assert(sausage == pickle);
 
-        const int blah = (startEnergy * (1 << N)) - sausage;
-        cout << "blah: " << blah << endl;
+        //const int blah = (startEnergy * (1 << N)) - sausage;
+        //cout << "blah: " << blah << endl;
 
-        cout << "startEnergy: " << startEnergy << " flipple: " << flipple << endl;
-        assert(startEnergy == flipple);
+        //cout << "startEnergy: " << startEnergy << " flipple: " << flipple << endl;
+        //assert(startEnergy == flipple);
+        cout << flipple << endl;
     }
 }
