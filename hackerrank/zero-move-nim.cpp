@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 int mex(const vector<int>& numbers)
 {
     if (numbers.empty())
@@ -36,8 +35,7 @@ int findGrundyNumber(const int numInPile, bool haveZeroMove, vector<vector<int>>
 
     if (haveZeroMove && numInPile > 0)
     {
-        // Blow zero-move; the result is a "normal" game of Nim with numInPile in the pile, 
-        // which has grundy number numInPile.
+        // Use up the zero-move for this pile.
         moveGrundies.push_back(findGrundyNumber(numInPile, false, grundyLookup));
     }
 
@@ -57,10 +55,22 @@ int findGrundyNumber(const int numInPile, bool haveZeroMove, vector<vector<int>>
 
 int main()
 {
+    // Interesting one :) It clearly reduces to finding the grundy number of a pile
+    // with a given number of stones, which is very easy (see findGrundyNumber(...),
+    // above), though note that this won't work as a full solution due to the large pile-sizes involved.  
+    // From there, after generating the grundy numbers for the first 100
+    // possible pile sizes, it's easy to pattern-match our way to the solution - we 
+    // see that the rightmost digit cycles through the values in "cycle", below, while
+    // the other digits are roughly the same as the number of stones in the pile, with a 
+    // few tweaks.
+    //
+    // Not very satisfying, and hard to Logic our way to, but oh well :)
+    //
+    // UPDATE: The Editorial is simpler (doh), but still gives no logic behind it - I guess the
+    // submitter pattern-matched his way to a solution, too :)
     int T;
     cin >> T;
 
-    //const vector<int> cycle = { 1, 0, 3, 2, 5, 4, 7, 6, 9, 8 };
     const vector<int> cycle = { 2, 1, 4, 3, 6, 5, 8, 7, 0, 9 };
 
     for (int t = 0; t < T; t++)
@@ -77,8 +87,6 @@ int main()
             maxInPile = max(maxInPile, numInPile[i]);
         }
 
-        //vector<vector<int>> grundyLookup(2, vector<int>(maxInPile + 1, -1));
-
         int xorSum = 0;
         for (int i = 0; i < n; i++)
         {
@@ -87,12 +95,8 @@ int main()
             {
                 grundyNumber += 10;
             }
-            //const auto grundyNumberDebug = findGrundyNumber(numInPile[i], true, grundyLookup);
-            //assert(grundyNumber == findGrundyNumber(numInPile[i], true, grundyLookup));
             xorSum ^= grundyNumber;
         }
-
-        //cout << "t: " << t << " n: " << n << " xorSum: " << xorSum << endl;
 
         if (xorSum == 0)
             cout << "L";
@@ -103,6 +107,7 @@ int main()
 
 
 #if 0
+    // Used for exploring the patterns in the grundy numbers.
     vector<vector<int>> grundyLookup(2, vector<int>(10000, -1));
     for (int i = 1; i < grundyLookup[0].size(); i++)
     {
@@ -114,7 +119,6 @@ int main()
         }
         cout << "i: " << i << " grundyNumber: " << grundyNumber << " floop: " << floop << endl;
         assert(grundyNumber == floop);
-        //cout << " grundyNumber: " << grundyNumber << endl;
     }
 #endif
 }
