@@ -26,24 +26,24 @@ int mex(const vector<int>& numbers)
 
 int findGrundyNumber(const int pileSize, vector<int>& grundyNumberForPileSizeLookup);
 
-void findGrundyNumbersForMoves(int minPileSize, int numStonesRemaining, vector<int>& pileSizesSoFar, vector<int>& grundyNumberForPileSizeLookup, vector<int>& grundyNumbersForMoves)
+void findGrundyNumbersForMoves(int minPileSize, int numStonesRemaining, vector<int>& pileSizesSoFar, vector<int>& grundyNumberForPileSizeLookup, vector<int>& grundyNumbersForAllMoves)
 {
     if (numStonesRemaining == 0 && pileSizesSoFar.size() > 1)
     {
-        // We have a partition of the original pile into several piles of different sizes i.e. a "Move" in the Game.
-        // The Grundy number for this move is the xor of the Grundy numbers for each pile.
+        // We have a partition of the original pile into at least two piles of different sizes i.e. a "Move" in the Game.
+        // The Grundy number for this move is the xor of the Grundy numbers for each pile in the partition.
         vector<int> grundyNumberForEachPile;
-        for (const auto pileSize : pileSizesSoFar)
+        for (const auto partitionPileSize : pileSizesSoFar)
         {
-            grundyNumberForEachPile.push_back(findGrundyNumber(pileSize, grundyNumberForPileSizeLookup));
+            grundyNumberForEachPile.push_back(findGrundyNumber(partitionPileSize, grundyNumberForPileSizeLookup));
         }
         int grundyNumberForMove = 0;
-        for (const auto grundyNumber : grundyNumberForEachPile)
+        for (const auto grundyNumberForPile : grundyNumberForEachPile)
         {
-            grundyNumberForMove ^= grundyNumber;
+            grundyNumberForMove ^= grundyNumberForPile;
         }
 
-        grundyNumbersForMoves.push_back(grundyNumberForMove);
+        grundyNumbersForAllMoves.push_back(grundyNumberForMove);
 
         return;
     }
@@ -53,7 +53,7 @@ void findGrundyNumbersForMoves(int minPileSize, int numStonesRemaining, vector<i
 
         // Recurse, splitting the remaining stones use a minimum pile size strictly greater than the one we just chose: this ensures
         // we don't end up with piles of the same size.
-        findGrundyNumbersForMoves(pileSize + 1, numStonesRemaining - pileSize, pileSizesSoFar, grundyNumberForPileSizeLookup, grundyNumbersForMoves);
+        findGrundyNumbersForMoves(pileSize + 1, numStonesRemaining - pileSize, pileSizesSoFar, grundyNumberForPileSizeLookup, grundyNumbersForAllMoves);
 
         pileSizesSoFar.pop_back();
     }
@@ -63,19 +63,30 @@ int findGrundyNumber(const int pileSize, vector<int>& grundyNumberForPileSizeLoo
 {
     if (grundyNumberForPileSizeLookup[pileSize] != -1)
         return grundyNumberForPileSizeLookup[pileSize];
-    vector<int> grundyNumbersForMoves;
+    vector<int> grundyNumbersForAllMoves;
     vector<int> pileSizesSoFar;
-    findGrundyNumbersForMoves(1, pileSize, pileSizesSoFar, grundyNumberForPileSizeLookup, grundyNumbersForMoves);
+    findGrundyNumbersForMoves(1, pileSize, pileSizesSoFar, grundyNumberForPileSizeLookup, grundyNumbersForAllMoves);
 
-    const auto grundyNumber = mex(grundyNumbersForMoves);
+    const auto grundyNumberForPileSize = mex(grundyNumbersForAllMoves);
 
-    grundyNumberForPileSizeLookup[pileSize] = grundyNumber;
+    grundyNumberForPileSizeLookup[pileSize] = grundyNumberForPileSize;
     
-    return grundyNumber;
+    return grundyNumberForPileSize;
 }
 
 int main()
 {
+    // Easy one: as always, the Grundy sum for the game is just the xor of the Grundy sums of the list of pile sizes, so
+    // the solution reduces to finding the Grundy sum for a given pile size (which cannot exceed 50).
+    //
+    // It's easy to enumerate all moves for a given pile size: just recursively find all ways of partitioning that pile size
+    // into distinct pile sizes (each such partitioning corresponds to a "move") - for uniqueness, we assume that the partitioned
+    // pile sizes are in strictly increasing order.  The Grundy number for the result of such a move
+    // is - again - just the xor of the Grundy sums of each pile in the resulting partition, so a bit of dynamic programming
+    // gets the job done!
+    //
+    // Once we have the Grundy numbers for each possible move for a given pile size, the Grundy number for that pile size is just
+    // the mex of these.
     const int maxN = 50;
     vector<int> grundyNumberForPileSizeLookup(maxN + 1, -1);
 
