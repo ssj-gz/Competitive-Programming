@@ -31,13 +31,17 @@ int findGrundyNumber(const int numInPile, vector<int>& grundyNumberForPileSizeLo
         return grundyNumberForPileSizeLookup[numInPile];
 
     vector<int> grundyNumbersForMoves;
-    for (int numStonesToTake = 1; numStonesToTake <= 2; numStonesToTake++)
+    for (auto numStonesToTake = 1; numStonesToTake <= 2; numStonesToTake++)
     {
-        for (int positionToTakeFrom = 0; positionToTakeFrom + numStonesToTake <= numInPile; positionToTakeFrom++)
+        for (auto positionToTakeFrom = 0; positionToTakeFrom + numStonesToTake <= numInPile; positionToTakeFrom++)
         {
-            const int numInSplitPile1 = positionToTakeFrom;
-            const int numInSplitPile2 = numInPile - numInSplitPile1 - numStonesToTake;
-            grundyNumbersForMoves.push_back(findGrundyNumber(numInSplitPile1, grundyNumberForPileSizeLookup) ^ findGrundyNumber(numInSplitPile2, grundyNumberForPileSizeLookup));
+            const auto numInSplitPile1 = positionToTakeFrom;
+            const auto numInSplitPile2 = numInPile - numInSplitPile1 - numStonesToTake;
+            const auto splitPile1GrundyNumber = findGrundyNumber(numInSplitPile1, grundyNumberForPileSizeLookup);
+            const auto splitPile2GrundyNumber = findGrundyNumber(numInSplitPile2, grundyNumberForPileSizeLookup);
+            // NB: this is still correct even if one or both of the piles is empty, as an empty pile has Grundy number 0,
+            // and x xor 0 == x for all x.
+            grundyNumbersForMoves.push_back(splitPile1GrundyNumber ^ splitPile2GrundyNumber);
         }
     }
 
@@ -50,6 +54,20 @@ int findGrundyNumber(const int numInPile, vector<int>& grundyNumberForPileSizeLo
 
 int main()
 {
+    // A fairly easy one.  Firstly, let's translate this into a problem involving piles of stones:
+    // a run of s standing bowling pins represents a pile of s stones e.g.
+    //
+    //  XXIIIXXXXIXXXXIIII
+    //
+    // corresponds to 3 piles of size 3, 1 and 4 stones respectively.
+    //
+    // The bowler may hit one pin or two adjacent pins (he gets to choice which) - thus, hitting x pins
+    // corresponds to taking x stones from some location in some pile P, which will split the pile
+    // into two piles (at least one of which can be empty) whose combined number of stones is equal to
+    // the number of stones in the original P, minus x.  The x stones can be removed from any location in
+    // the pile.  Thus, it's easy to enumerate all possible moves we can make on a pile of stones and then,
+    // use the Sprague-Grundy Theorem to (recursively) find the Grundy number for any pile size.  It 
+    // is then a simple matter, again by Sprague-Grundy, to find out who the winner is.
     int T;
     cin >> T;
 
@@ -68,6 +86,8 @@ int main()
 
         vector<int> numInEachPile;
         int numInCurrentPile = 0;
+        // NB: note throughout here that adding a pile with 0 stones in it to numInEachPile makes
+        // no difference to the result, as x xor 0 == x for any x.
         for (const auto letter : s)
         {
             if (letter == 'I')
@@ -80,8 +100,7 @@ int main()
             else
                 assert(false);
         }
-        if (numInCurrentPile != 0)
-            numInEachPile.push_back(numInCurrentPile);
+        numInEachPile.push_back(numInCurrentPile);
 
         int xorSum = 0;
         for (const auto numInPile : numInEachPile)
@@ -95,5 +114,4 @@ int main()
             cout << "LOSE";
         cout << endl;
     }
-
 }
