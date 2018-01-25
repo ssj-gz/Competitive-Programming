@@ -34,7 +34,7 @@ int findGrundyNumber(const int numInPile, bool haveZeroMove, vector<vector<int>>
 
     vector<int> moveGrundies;
 
-    if (haveZeroMove)
+    if (haveZeroMove && numInPile > 0)
     {
         // Blow zero-move; the result is a "normal" game of Nim with numInPile in the pile, 
         // which has grundy number numInPile.
@@ -57,11 +57,11 @@ int findGrundyNumber(const int numInPile, bool haveZeroMove, vector<vector<int>>
 
 int main()
 {
-    cout << ((51 ^ 14) ^ 35) << endl;
     int T;
     cin >> T;
 
-    const vector<int> cycle = { 1, 0, 3, 2, 5, 4, 7, 6, 9, 8 };
+    //const vector<int> cycle = { 1, 0, 3, 2, 5, 4, 7, 6, 9, 8 };
+    const vector<int> cycle = { 2, 1, 4, 3, 6, 5, 8, 7, 0, 9 };
 
     for (int t = 0; t < T; t++)
     {
@@ -77,19 +77,22 @@ int main()
             maxInPile = max(maxInPile, numInPile[i]);
         }
 
-        vector<vector<int>> grundyLookup(2, vector<int>(maxInPile + 1, -1));
+        //vector<vector<int>> grundyLookup(2, vector<int>(maxInPile + 1, -1));
 
         int xorSum = 0;
         for (int i = 0; i < n; i++)
         {
-            const auto grundyNumber = (numInPile[i] / 10) * 10 + cycle[numInPile[i] % 10];
-            const auto grundyNumberDebug = findGrundyNumber(numInPile[i], true, grundyLookup);
-            cout << " numInPile: " << numInPile[i] << " grundyNumber: " << grundyNumber << " grundyNumberDebug: " << grundyNumberDebug << endl;
-            //assert(grundyNumber == findGrundyNumber(numInPile[i], false, grundyLookup));
-            xorSum ^= grundyNumberDebug;
+            int grundyNumber = ((numInPile[i] - 1) / 10) * 10 + (cycle[(numInPile[i] - 1) % 10]);
+            if (numInPile[i] % 10 == 9)
+            {
+                grundyNumber += 10;
+            }
+            //const auto grundyNumberDebug = findGrundyNumber(numInPile[i], true, grundyLookup);
+            //assert(grundyNumber == findGrundyNumber(numInPile[i], true, grundyLookup));
+            xorSum ^= grundyNumber;
         }
 
-        cout << "t: " << t << " n: " << n << " xorSum: " << xorSum << endl;
+        //cout << "t: " << t << " n: " << n << " xorSum: " << xorSum << endl;
 
         if (xorSum == 0)
             cout << "L";
@@ -100,11 +103,15 @@ int main()
 
 
 #if 0
-    vector<int> grundyLookup(100000, -1);
-    for (int i = 0; i < grundyLookup.size(); i++)
+    vector<vector<int>> grundyLookup(2, vector<int>(10000, -1));
+    for (int i = 1; i < grundyLookup[0].size(); i++)
     {
-        const auto grundyNumber = findGrundyNumber(i, grundyLookup);
-        const auto floop = (i / 10) * 10 + cycle[i % 10];
+        const auto grundyNumber = findGrundyNumber(i, true, grundyLookup);
+        int floop = ((i - 1) / 10) * 10 + (cycle[(i - 1) % 10]);
+        if (i % 10 == 9)
+        {
+            floop += 10;
+        }
         cout << "i: " << i << " grundyNumber: " << grundyNumber << " floop: " << floop << endl;
         assert(grundyNumber == floop);
         //cout << " grundyNumber: " << grundyNumber << endl;
