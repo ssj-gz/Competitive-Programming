@@ -11,7 +11,7 @@
 using namespace std;
 
 //#define VERY_VERBOSE
-#define PRINT_COMPUTER_MOVES
+//#define PRINT_COMPUTER_MOVES
 
 struct Node
 {
@@ -379,6 +379,7 @@ PlayState findWinner(Player currentPlayer, const GameState& gameState, PlayerTyp
 
 int main(int argc, char** argv)
 {
+#if 0
     srand(time(0));
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
@@ -390,6 +391,25 @@ int main(int argc, char** argv)
         isTestcaseFromFile = true;
     }
     istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
+#else
+
+    srand(time(0));
+    if (argc == 2)
+    {
+        const int n = rand() % 10 + 1;
+        cout << 1 << " " << n << endl;
+        for (int row = 0; row < 2; row++)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                cout << (rand() % 20 + 1) << " ";
+            }
+            cout << endl;
+        }
+        return 0;
+    }
+#endif
+    istream& testCaseIn = cin;
 
     int T;
     testCaseIn >> T;
