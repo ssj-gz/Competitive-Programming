@@ -36,38 +36,30 @@ int main(int argc, char** argv)
         for (int i = 0; i < n; i++)
             cin >> B[i];
 
-        struct AAndBSum
-        {
-            int sum = 0;
-            int originalIndex = -1;
-        };
-        vector<AAndBSum> aAndBSumsInIncreasingOrder;
+        vector<int> indicesInIncreasingOrderOfSum;
         for (int i = 0; i < n; i++)
         {
-            AAndBSum sum;
-            sum.sum = A[i] + B[i];
-            sum.originalIndex = i;
-            aAndBSumsInIncreasingOrder.push_back(sum);
+            indicesInIncreasingOrderOfSum.push_back(i);
         }
-        sort(aAndBSumsInIncreasingOrder.begin(), aAndBSumsInIncreasingOrder.end(), [](const auto& lhs, const auto& rhs) { return lhs.sum < rhs.sum;});
+        sort(indicesInIncreasingOrderOfSum.begin(), indicesInIncreasingOrderOfSum.end(), [&A, &B](const auto& lhsIndex, const auto& rhsIndex) { return A[lhsIndex] + B[lhsIndex] < A[rhsIndex] + B[rhsIndex];});
 
         // Simulate perfect play using the Greedy strategy.
         bool isPlayer1 = true;
         int player1Score = 0;
         int player2Score = 0;
-        while (!aAndBSumsInIncreasingOrder.empty())
+        while (!indicesInIncreasingOrderOfSum.empty())
         {
-            const int originalIndexOfHighestSum = aAndBSumsInIncreasingOrder.back().originalIndex;
+            const int indexOfHighestRemainingSum = indicesInIncreasingOrderOfSum.back();
             if (isPlayer1)
             {
-                player1Score += A[originalIndexOfHighestSum];
+                player1Score += A[indexOfHighestRemainingSum];
             }
             else
             {
-                player2Score += B[originalIndexOfHighestSum];
+                player2Score += B[indexOfHighestRemainingSum];
             }
 
-            aAndBSumsInIncreasingOrder.pop_back();
+            indicesInIncreasingOrderOfSum.pop_back();
             isPlayer1 = !isPlayer1;
         }
 
