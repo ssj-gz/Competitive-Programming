@@ -6,6 +6,7 @@
 #include <fstream>
 #include <limits>
 #include <algorithm>
+#include <sys/time.h>
 #include <cassert>
 
 using namespace std;
@@ -393,7 +394,10 @@ int main(int argc, char** argv)
     istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
 #else
 
-    srand(time(0));
+    struct timeval time; 
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
     if (argc == 2)
     {
         const int n = rand() % 10 + 1;
@@ -416,7 +420,7 @@ int main(int argc, char** argv)
 
     for (int t = 0; t < T; t++)
     {
-        cout << "** t: " << t << endl;
+        //cout << "** t: " << t << endl;
         int n;
         testCaseIn >> n;
 
@@ -430,7 +434,9 @@ int main(int argc, char** argv)
         for (int i = 0; i < n; i++)
             testCaseIn >> initialGameState.B[i];
 
+#if 0
         const auto result = findWinner(Player1, initialGameState, CPU, CPU);
+#endif
 
         struct Sum
         {
@@ -463,8 +469,8 @@ int main(int argc, char** argv)
             sums.pop_back();
             isPlayer1 = !isPlayer1;
         }
-        cout << "Estimate: player1Score: " << player1Score << " player2Score: " << player2Score << endl;
 
+#if 0
         if (result == Draw)
             assert(player1Score == player2Score);
         else if (result == Player1Win)
@@ -473,7 +479,15 @@ int main(int argc, char** argv)
             assert(player1Score < player2Score);
 
 
-        cout << "Result: " << result << endl;
+        cout << "Result: " << result << " Estimate: player1Score: " << player1Score << " player2Score: " << player2Score << endl;
+#endif
+        if (player1Score < player2Score)
+            cout << "Second";
+        else if (player1Score > player2Score)
+            cout << "First";
+        else if (player1Score == player2Score)
+            cout << "Tie";
+        cout << endl;
     }
 }
 
