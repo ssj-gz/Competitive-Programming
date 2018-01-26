@@ -6,6 +6,7 @@
 #include <fstream>
 #include <limits>
 #include <algorithm>
+#include <sys/time.h>
 #include <cassert>
 
 using namespace std;
@@ -380,7 +381,10 @@ PlayState findWinner(Player currentPlayer, const GameState& initialGameState, Pl
 
 int main(int argc, char** argv)
 {
-    srand(time(0));
+    struct timeval time; 
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
     if (argc == 2)
