@@ -63,15 +63,14 @@ int findGrundyNumberForCell(int x, int y, vector<vector<int>>& grundyNumberForCe
     const auto grundyNumberForCell = mex(grundyNumbersForMoves);
     grundyNumberForCellLookup[x][y] = grundyNumberForCell;
 
-    //cout << "grundyNumberForCell " << x << "," << y << " = " << grundyNumberForCell << endl;
-
     return grundyNumberForCell;
 }
 
 int main()
 {
     // Easy one - pretty much identical to "A Chessboard Game" but we need to find Grundy numbers for each cell
-    // instead of a Win/ Lose value.
+    // instead of a Win/ Lose value.  We can then use Sprague-Grundy to find the winner - it is the xor sum
+    // of the grundy numbers of each coin's starting cell.
     vector<vector<int>> grundyNumberForCellLookup(boardWidth, vector<int>(boardHeight, -1));
 
     int T;
@@ -79,7 +78,6 @@ int main()
 
     for (int t = 0; t < T; t++)
     {
-        //cout << "t: " << t << endl;
         int k;
         cin >> k;
 
@@ -92,12 +90,8 @@ int main()
             coinX--;
             coinY--;
 
-            //cout << "coinX: " << coinX << " coinY: " << coinY << endl;
-
             xorSum ^= findGrundyNumberForCell(coinX, coinY, grundyNumberForCellLookup);
         }
-
-        //cout << "xorSum: " << xorSum << endl;
 
         const auto player1Wins = (xorSum != 0);
         if (player1Wins)
