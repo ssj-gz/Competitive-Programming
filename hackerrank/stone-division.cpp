@@ -58,6 +58,9 @@ int64_t findGrundyNumber(const int64_t pileSize, const vector<int64_t>& s, map<i
 
 int main()
 {
+    // Very basic Sprague-Grundy example: the only complication is the potentially very large a) number of stones in any pile
+    // and b) number of piles - using a map for the former and the fact that x ^ x == 0 (see xorPower) for the latter
+    // deals with this very easily.
     int64_t n, m;
     cin >> n >> m;
 
