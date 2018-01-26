@@ -59,7 +59,7 @@ void printTree(const vector<Node>& nodes)
 vector<Node> nodes;
 #endif
 
-enum PlayState { Player1Win, Player1Lose };
+enum PlayState { Player1Win, Player1Lose, Draw };
 enum Player { Player1, Player2 };
 
 const string player1Name = "Player 1";
@@ -108,10 +108,10 @@ class GameState
             // other player is a losing state (and vice-versa).
             return false;
         }
-        Player winningPlayerOverride(Player currentPlayer) const
+        PlayState winningPlayerOverride(Player currentPlayer) const
         {
             assert(false);
-            return Player1;
+            return Player1Win;
         }
 };
 
@@ -166,14 +166,15 @@ ostream& operator<<(ostream& os, Player player)
 ostream& operator<<(ostream& os, PlayState playState)
 {
     if (playState == Player1Win)
-        os << Player1;
+        os << Player1 << " wins";
+    else if (playState == Player1Lose)
+        os << Player2 << " wins";
     else
-        os << Player2;
-
-    os << " wins";
+        os << "Draw";
 
     return os;
 }
+
 
 map<pair<GameState, Player>, PlayState> playStateForLookup;
 
@@ -244,6 +245,11 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
         {
             playState = winForPlayer(currentPlayer);
         }
+        else if (playState != winForPlayer(currentPlayer) && result == Draw)
+        {
+            playState = Draw;
+        }
+
     };
 
     auto readInt = [](const string& message)
@@ -267,7 +273,8 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 
     if (gameState.hasWinningPlayerOverride(currentPlayer))
     {
-        playState = winForPlayer(gameState.winningPlayerOverride(currentPlayer));
+        playState = gameState.winningPlayerOverride(currentPlayer);
+                
     }
     else
     {
@@ -321,12 +328,12 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
                 const auto oldPlayState = playState;
                 updatePlayStateFromMove(move, true);
 
-                if (playState != winForPlayer(currentPlayer))
+                if (playState != winForPlayer(currentPlayer) && playState != Draw)
                 {
                     // If we can't win, just play an arbitrary move; the last one, say.
                     chosenMove = move;
                 }
-                else if (oldPlayState != playState)
+                else if ((playState == winForPlayer(currentPlayer) && oldPlayState != playState) || (playState == Draw && oldPlayState != playState) )
                 {
                     // This is the first winning move we've discovered; store it and print it out (but not subsequent ones).
                     chosenMove = move;
@@ -334,11 +341,12 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
                     cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
 #endif
                 }
+                                                  
             }
             if (!isBruteForceMoveSearch && !availableMoves.empty())
             {
 #ifdef PRINT_COMPUTER_MOVES
-                cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : "Lose") << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
+                cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : (playState == Draw ? "Draw" : "Lose")) << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
 #endif
                 updatePlayStateFromMove(chosenMove, false);
             }
@@ -346,7 +354,8 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
     }
 
 #ifdef VERY_VERBOSE
-    cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : "Loses") << endl;
+    cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : playState == winForPlayer(otherPlayer(currentPlayer)) ? "Loses" : "Draws") << endl;
+
 #endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
