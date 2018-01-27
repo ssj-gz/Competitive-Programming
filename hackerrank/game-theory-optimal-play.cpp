@@ -399,16 +399,16 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
     return playState;
 }
 
-PlayState findWinner(Player currentPlayer, const GameState& initialGameState, PlayerType player1Type = CPU, PlayerType player2Type = CPU)
+PlayState findWinner(Player firstPlayer, const GameState& initialGameState, PlayerType player1Type = CPU, PlayerType player2Type = CPU)
 {
     cout << "Initial game state: " << initialGameState << endl;
     playStateForLookup.clear();
-    const auto result = findWinnerAux(currentPlayer, initialGameState, player1Type, player2Type, false);
+    const auto result = findWinnerAux(firstPlayer, initialGameState, player1Type, player2Type, false);
 
     if (player1Type == Human || player2Type == Human)
     {
         const auto interactivePlayer = (player1Type == Human ? Player1 : Player2);
-        cout << "Result of interactive game: you played as " << interactivePlayer << "; " << currentPlayer << " took the first turn; " << result << endl;
+        cout << "Result of interactive game: you played as " << interactivePlayer << "; " << firstPlayer << " took the first turn; " << result << endl;
     }
 
     return result;
