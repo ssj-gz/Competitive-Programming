@@ -192,35 +192,35 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
     const auto numRows = gameState.numRows;
     for (int column = 0; column < numColumns; column++)
     {
-        int minRow = -1;
-        int maxRow = -1;
+        int minRowToMoveTo = -1;
+        int maxRowToMoveTo = -1;
         if (currentPlayer == Player1)
         {
             if (gameState.player1RowForColumn[column] < gameState.player2RowForColumn[column])
             {
-                minRow = 1;
-                maxRow = gameState.player2RowForColumn[column] - 1;
+                minRowToMoveTo = 1;
+                maxRowToMoveTo = gameState.player2RowForColumn[column] - 1;
             }
             else
             {
-                minRow = gameState.player2RowForColumn[column] + 1;
-                maxRow = numRows;
+                minRowToMoveTo = gameState.player2RowForColumn[column] + 1;
+                maxRowToMoveTo = numRows;
             }
         }
         else
         {
             if (gameState.player2RowForColumn[column] < gameState.player1RowForColumn[column])
             {
-                minRow = 1;
-                maxRow = gameState.player1RowForColumn[column] - 1;
+                minRowToMoveTo = 1;
+                maxRowToMoveTo = gameState.player1RowForColumn[column] - 1;
             }
             else
             {
-                minRow = gameState.player1RowForColumn[column] + 1;
-                maxRow = numRows;
+                minRowToMoveTo = gameState.player1RowForColumn[column] + 1;
+                maxRowToMoveTo = numRows;
             }
         }
-        for (int row = minRow; row <= maxRow; row++)
+        for (int rowToMoveTo = minRowToMoveTo; rowToMoveTo <= maxRowToMoveTo; rowToMoveTo++)
         {
             GameState stateAfterMove = gameState;
             const int originalRookDistance = abs(gameState.player1RowForColumn[column] - gameState.player2RowForColumn[column]);
@@ -228,12 +228,12 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
             if (currentPlayer == Player1)
             {
                 originalRow = gameState.player1RowForColumn[column];
-                stateAfterMove.player1RowForColumn[column] = row;
+                stateAfterMove.player1RowForColumn[column] = rowToMoveTo;
             }
             else
             {
                 originalRow = gameState.player2RowForColumn[column];
-                stateAfterMove.player2RowForColumn[column] = row;
+                stateAfterMove.player2RowForColumn[column] = rowToMoveTo;
             }
             const int rookDistanceAfterMove = abs(stateAfterMove.player1RowForColumn[column] - stateAfterMove.player2RowForColumn[column]);
             const bool isBackmove = (rookDistanceAfterMove > originalRookDistance);
@@ -244,7 +244,7 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
 
             Move move;
             move.column = column;
-            move.dy = row - originalRow;
+            move.dy = rowToMoveTo - originalRow;
             move.isBackmove = isBackmove;
 
             moves.push_back(move);
