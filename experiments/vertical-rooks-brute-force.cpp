@@ -56,6 +56,7 @@ class GameState
         vector<int> player1RowForColumn;
         vector<int> player2RowForColumn;
         int numBackMovesAllowed = 0;
+        static int64_t numGameStatesOverEstimate;
         void validate()
         {
             assert(numColumns > 0 && numRows > 0);
@@ -79,6 +80,7 @@ class GameState
             return Player1Win;
         }
 };
+int64_t GameState::numGameStatesOverEstimate = -1;
 
 bool operator<(const GameState& lhs, const GameState& rhs)
 {
@@ -438,6 +440,11 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 #endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
+    if (playStateForLookup.size() % 10'000 == 0)
+    {
+        cout << "Processed " << playStateForLookup.size() << " out of at most " << GameState::numGameStatesOverEstimate << endl;
+    }
+
     return playState;
 }
 
@@ -474,6 +481,12 @@ int main(int argc, char** argv)
     // makes no difference as to whether you win or lose.
     initialGameState.numBackMovesAllowed = 15; 
     initialGameState.validate();
+    GameState::numGameStatesOverEstimate = initialGameState.numBackMovesAllowed;
+    const auto numArrangementsOfRooksInAColumn = (initialGameState.numRows * (initialGameState.numRows + 1)) / 2;
+    for (int i = 0; i < initialGameState.numColumns; i++)
+    {
+        GameState::numGameStatesOverEstimate *= numArrangementsOfRooksInAColumn;
+    }
 
     const auto result = findWinner(Player1, initialGameState, CPU, Human);
 
