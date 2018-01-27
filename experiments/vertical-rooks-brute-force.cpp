@@ -362,6 +362,13 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
         }
         else
         {
+#ifdef PRINT_COMPUTER_MOVES
+            if (!isBruteForceMoveSearch)
+            {
+                cout << "Computer's turn; thinking ..." << endl;
+            }
+#endif
+
             for (const auto& move : availableMoves)
             {
                 const auto oldPlayState = playState;
@@ -427,9 +434,6 @@ PlayState findWinner(Player currentPlayer, const GameState& initialGameState, Pl
 
 int main(int argc, char** argv)
 {
-    const vector<int> player1Positions = { 1, 1, 1, 1};
-    const vector<int> player2Positions = { 4, 3, 2, 2};
-
     GameState initialGameState;
     // A 4x4 grid - unfortunately, any larger than this takes ages to compute :/ Although 4 columns x 5 rows works and is a bit more interesting.
     // With this particular arrangement of Rooks, Player 1 is guaranteed to Win; you, poor human,
