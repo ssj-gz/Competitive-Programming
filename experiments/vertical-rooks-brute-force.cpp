@@ -98,15 +98,41 @@ class Move
         bool isBackmove = false;
         static Move preferredMove(const vector<Move>& moves, PlayState moveOutcome, Player currentPlayer, const GameState& gameState)
         {
+
+            // ** SPOILER SPOILER SPOILER **
+            // ** SPOILER SPOILER SPOILER **
+            // ** SPOILER SPOILER SPOILER **
+
+            // There is a winning strategy for a Winning player that does not require backmoves, so prefer not to use them; 
+            // if you want to incorporate them, uncomment the ALLOW_COMPUTER_BACKMOVES define below  - it's still quite rare that a computer will decide to use one, though! :)
+            // If ALLOW_COMPUTER_BACKMOVES is set, we still restrict how often it will use them in order to avoid situations where Player 2 loses purely because he ran
+            // out of backmoves.
+//#define ALLOW_COMPUTER_BACKMOVES 
             if (moveOutcome == winForPlayer(currentPlayer))
             {
+#ifdef ALLOW_COMPUTER_BACKMOVES
                 // Pick a move where we don't backmove, for illustration purposes :)
-                for (const auto& move : moves)
+                if (gameState.numBackMovesAllowed < 10)
                 {
-                    if (!move.isBackmove)
-                        return move;
+#endif
+                    for (const auto& move : moves)
+                    {
+                        if (!move.isBackmove)
+                            return move;
+                    }
+                    assert(false);
+#ifdef ALLOW_COMPUTER_BACKMOVES
                 }
-                assert(false);
+                else
+                {
+                    // Let's make a Backmove - just to show that's it's possible!
+                    for (const auto& move : moves)
+                    {
+                        if (move.isBackmove)
+                            return move;
+                    }
+                }
+#endif
             }
             // Pick the first one, arbitrarily - feel free to add your own preferences here :)
             return moves.front();
