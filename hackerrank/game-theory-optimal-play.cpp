@@ -133,6 +133,12 @@ class Move
         int nodeIdToTakeFrom = -1;
         int nodeIdToAddTo = -1;
 #endif
+        static Move preferredMove(const vector<Move>& moves, PlayState moveOutcome, Player currentPlayer, const GameState& gameState)
+        {
+            assert(!moves.empty());
+            // Pick the first one, arbitrarily - feel free to add your own preferences here :)
+            return moves.front();
+        }
 };
 
 ostream& operator<<(ostream& os, const GameState& gameState)
@@ -238,10 +244,28 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
     // Assume a loss by default.
     PlayState playState = loseForPlayer(currentPlayer);
 
-    auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, player1Type, player2Type](const Move& move, bool isBruteForceMoveSearch)
+    vector<Move> winningMovesForCurrentPlayer;
+    vector<Move> losingMovesForCurrentPlayer;
+    vector<Move> drawingMovesForCurrentPlayer;
+
+
+    auto updatePlayStateFromMove = [&playState, &gameState, currentPlayer, player1Type, player2Type, &winningMovesForCurrentPlayer, &drawingMovesForCurrentPlayer, &losingMovesForCurrentPlayer]
+        (const Move& move, bool isBruteForceMoveSearch)
     {
         const auto newGameState = gameStateAfterMove(gameState, currentPlayer, move);
         const auto result = findWinnerAux(otherPlayer(currentPlayer), newGameState, player1Type, player2Type, isBruteForceMoveSearch);
+        if (result == winForPlayer(currentPlayer))
+        {
+            winningMovesForCurrentPlayer.push_back(move);
+        }
+        else if (result == Draw)
+        {
+            drawingMovesForCurrentPlayer.push_back(move);
+        }
+        else
+        {
+            losingMovesForCurrentPlayer.push_back(move);
+        }
         if (result == winForPlayer(currentPlayer))
         {
             playState = winForPlayer(currentPlayer);
@@ -323,29 +347,35 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
         }
         else
         {
-            Move chosenMove;
             for (const auto& move : availableMoves)
             {
                 const auto oldPlayState = playState;
                 updatePlayStateFromMove(move, true);
 
-                if (playState != winForPlayer(currentPlayer) && playState != Draw)
-                {
-                    // If we can't win, just play an arbitrary move; the last one, say.
-                    chosenMove = move;
-                }
-                else if ((playState == winForPlayer(currentPlayer) && oldPlayState != playState) || (playState == Draw && oldPlayState != playState) )
-                {
-                    // This is the first winning move we've discovered; store it and print it out (but not subsequent ones).
-                    chosenMove = move;
 #ifdef VERY_VERBOSE
-                    cout << "The move " << move << " from state: " << gameState << " is a win for player " << currentPlayer << endl;
+                    cout << "The move " << move << " from state: " << gameState << " is a " << (playState == winForPlayer(currentPlayer) ? "Win" : (playState == Draw ? "Draw" : "Lose")) << " for player " << currentPlayer << endl;
 #endif
-                }
                                                   
             }
+
             if (!isBruteForceMoveSearch && !availableMoves.empty())
             {
+                Move chosenMove;
+                if (playState == winForPlayer(currentPlayer))
+                {
+                    assert(!winningMovesForCurrentPlayer.empty());
+                    chosenMove = Move::preferredMove(winningMovesForCurrentPlayer, playState, currentPlayer, gameState);
+                }
+                else if (playState == Draw)
+                {
+                    assert(!drawingMovesForCurrentPlayer.empty());
+                    chosenMove = Move::preferredMove(drawingMovesForCurrentPlayer, playState, currentPlayer, gameState);
+                }
+                else
+                {
+                    assert(!losingMovesForCurrentPlayer.empty());
+                    chosenMove = Move::preferredMove(losingMovesForCurrentPlayer, playState, currentPlayer, gameState);
+                }
 #ifdef PRINT_COMPUTER_MOVES
                 cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : (playState == Draw ? "Draw" : "Lose")) << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
 #endif
