@@ -55,8 +55,17 @@ class GameState
         int numRows = -1;
         vector<int> player1RowForColumn;
         vector<int> player2RowForColumn;
-        int numBackMovesAllowed = 0;
         static int64_t numGameStatesOverEstimate;
+        bool isWinForCurrentPlayer() const
+        {
+            int xorSum = 0;
+            for (int column = 0; column < numColumns; column++)
+            {
+                const auto rookDistance = abs(player1RowForColumn[column] - player2RowForColumn[column]) - 1;
+                xorSum ^= rookDistance;
+            }
+            return (xorSum != 0);
+        }
         void validate()
         {
             assert(numColumns > 0 && numRows > 0);
@@ -84,8 +93,6 @@ int64_t GameState::numGameStatesOverEstimate = -1;
 
 bool operator<(const GameState& lhs, const GameState& rhs)
 {
-    if (lhs.numBackMovesAllowed != rhs.numBackMovesAllowed)
-        return lhs.numBackMovesAllowed < rhs.numBackMovesAllowed;
     if (lhs.player1RowForColumn != rhs.player1RowForColumn)
         return lhs.player1RowForColumn < rhs.player1RowForColumn;
 
@@ -100,7 +107,6 @@ class Move
         bool isBackmove = false;
         static Move preferredMove(const vector<Move>& moves, PlayState moveOutcome, Player currentPlayer, const GameState& gameState)
         {
-
             // ** SPOILER SPOILER SPOILER **
             // ** SPOILER SPOILER SPOILER **
             // ** SPOILER SPOILER SPOILER **
@@ -109,31 +115,24 @@ class Move
             // if you want to incorporate them, uncomment the ALLOW_COMPUTER_BACKMOVES define below  - it's still quite rare that a computer will decide to use one, though! :)
             // If ALLOW_COMPUTER_BACKMOVES is set, we still restrict how often it will use them in order to avoid situations where Player 2 loses purely because he ran
             // out of backmoves.
-//#define ALLOW_COMPUTER_BACKMOVES 
+            //#define ALLOW_COMPUTER_BACKMOVES 
             if (moveOutcome == winForPlayer(currentPlayer))
             {
 #ifdef ALLOW_COMPUTER_BACKMOVES
+                // Let's make a Backmove - just to show that's it's possible!
+                for (const auto& move : moves)
+                {
+                    if (move.isBackmove)
+                        return move;
+                }
+#else
                 // Pick a move where we don't backmove, for illustration purposes :)
-                if (gameState.numBackMovesAllowed < 10)
+                for (const auto& move : moves)
                 {
-#endif
-                    for (const auto& move : moves)
-                    {
-                        if (!move.isBackmove)
-                            return move;
-                    }
-                    assert(false);
-#ifdef ALLOW_COMPUTER_BACKMOVES
+                    if (!move.isBackmove)
+                        return move;
                 }
-                else
-                {
-                    // Let's make a Backmove - just to show that's it's possible!
-                    for (const auto& move : moves)
-                    {
-                        if (move.isBackmove)
-                            return move;
-                    }
-                }
+                assert(false);
 #endif
             }
             // Pick the first one, arbitrarily - feel free to add your own preferences here :)
@@ -152,7 +151,6 @@ ostream& operator<<(ostream& os, const GameState& gameState)
     for (const auto pos : gameState.player2RowForColumn)
         os << " " << pos;
     os << endl;
-    os << "Backmoves allowed: " << gameState.numBackMovesAllowed << endl;
     return os;
 }
 
@@ -239,8 +237,6 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
             }
             const int rookDistanceAfterMove = abs(stateAfterMove.player1RowForColumn[column] - stateAfterMove.player2RowForColumn[column]);
             const bool isBackmove = (rookDistanceAfterMove > originalRookDistance);
-            if (isBackmove && gameState.numBackMovesAllowed == 0)
-                continue;
             if (stateAfterMove.player1RowForColumn == gameState.player1RowForColumn && stateAfterMove.player2RowForColumn == gameState.player2RowForColumn)
                 continue;
 
@@ -265,9 +261,6 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
     else
         nextGameState.player2RowForColumn[move.column] += move.dy;
 
-    if (move.isBackmove)
-        nextGameState.numBackMovesAllowed--;
-    assert(nextGameState.numBackMovesAllowed >= 0);
 
     return nextGameState;
 }
@@ -399,13 +392,14 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 
             for (const auto& move : availableMoves)
             {
-                const auto oldPlayState = playState;
-                updatePlayStateFromMove(move, true);
-
-#ifdef VERY_VERBOSE
-                cout << "The move " << move << " from state: " << gameState << " is a " << (playState == winForPlayer(currentPlayer) ? "Win" : (playState == Draw ? "Draw" : "Lose")) << " for player " << currentPlayer << endl;
-#endif
-
+                const bool moveIsWinForCurrentPlayer = !gameStateAfterMove(gameState, currentPlayer, move).isWinForCurrentPlayer();
+                if (moveIsWinForCurrentPlayer)
+                {
+                    winningMovesForCurrentPlayer.push_back(move);
+                    playState = winForPlayer(currentPlayer);
+                }
+                else
+                    losingMovesForCurrentPlayer.push_back(move);
             }
 
             if (!isBruteForceMoveSearch && !availableMoves.empty())
@@ -470,26 +464,22 @@ int main(int argc, char** argv)
     srand(time(0));
 
     GameState initialGameState;
-    // A 4x4 grid - unfortunately, any larger than this takes ages to compute :/ Although 4 columns x 5 rows works and is a bit more interesting.
     // With this particular arrangement of Rooks, Player 1 is guaranteed to Win; you, poor human,
     // will be playing as Player 2 :)
-    initialGameState.player1RowForColumn = { 1, 1, 1, 1};
-    initialGameState.player2RowForColumn = { 4, 3, 2, 2};
-    initialGameState.numRows = 4;
-    initialGameState.numColumns = 4;
-    // Stop the brute-force calculation from continuing forever - you won't be able to use up all these backmoves, though, so the limit
-    // makes no difference as to whether you win or lose.
-    initialGameState.numBackMovesAllowed = 15; 
+    // Try to either make Player 1 lose or to prolong your defeat indefinitely, and see how the computer player
+    // counters your strategy :)
+    initialGameState.player1RowForColumn = { 1, 1, 1, 1, 1, 1};
+    initialGameState.player2RowForColumn = { 6, 6, 2, 2, 2, 2};
+    initialGameState.numRows = 6;
+    initialGameState.numColumns = 6;
     initialGameState.validate();
-    GameState::numGameStatesOverEstimate = initialGameState.numBackMovesAllowed;
-    const auto numArrangementsOfRooksInAColumn = (initialGameState.numRows * (initialGameState.numRows + 1)) / 2;
-    for (int i = 0; i < initialGameState.numColumns; i++)
-    {
-        GameState::numGameStatesOverEstimate *= numArrangementsOfRooksInAColumn;
-    }
+    cout << "Bloop: " << initialGameState.isWinForCurrentPlayer() << endl;
+    cout << "^^^" << endl;
 
-    const auto result = findWinner(Player1, initialGameState, CPU, Human);
+    // Player 2 goes first!
+    const auto result = findWinner(Player2, initialGameState, CPU, Human);
 
     cout << "Result: " << result << endl;
+    assert(result == Player1Win);
 }
 
