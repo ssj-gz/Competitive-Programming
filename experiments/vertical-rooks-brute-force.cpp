@@ -53,18 +53,18 @@ class GameState
     public:
         int numColumns = -1;
         int numRows = -1;
-        vector<int> player1Positions;
-        vector<int> player2Positions;
+        vector<int> player1RowForColumn;
+        vector<int> player2RowForColumn;
         int numBackMovesAllowed = 0;
         void validate()
         {
             assert(numColumns > 0 && numRows > 0);
-            assert(player1Positions.size() == numColumns && player2Positions.size() == numColumns);
+            assert(player1RowForColumn.size() == numColumns && player2RowForColumn.size() == numColumns);
             for (int column = 0; column < numColumns; column++)
             {
-                assert(player1Positions[column] >= 1 && player1Positions[column] <= numRows);
-                assert(player2Positions[column] >= 1 && player2Positions[column] <= numRows);
-                assert(player1Positions[column] != player2Positions[column]);
+                assert(player1RowForColumn[column] >= 1 && player1RowForColumn[column] <= numRows);
+                assert(player2RowForColumn[column] >= 1 && player2RowForColumn[column] <= numRows);
+                assert(player1RowForColumn[column] != player2RowForColumn[column]);
             }
         }
         bool hasWinningPlayerOverride(Player currentPlayer) const
@@ -84,10 +84,10 @@ bool operator<(const GameState& lhs, const GameState& rhs)
 {
     if (lhs.numBackMovesAllowed != rhs.numBackMovesAllowed)
         return lhs.numBackMovesAllowed < rhs.numBackMovesAllowed;
-    if (lhs.player1Positions != rhs.player1Positions)
-        return lhs.player1Positions < rhs.player1Positions;
+    if (lhs.player1RowForColumn != rhs.player1RowForColumn)
+        return lhs.player1RowForColumn < rhs.player1RowForColumn;
 
-    return lhs.player2Positions < rhs.player2Positions;
+    return lhs.player2RowForColumn < rhs.player2RowForColumn;
 }
 
 class Move
@@ -142,12 +142,12 @@ class Move
 ostream& operator<<(ostream& os, const GameState& gameState)
 {
     os << endl;
-    os << "Player 1 Positions: " << endl;
-    for (const auto pos : gameState.player1Positions)
+    os << "Player 1 RowForColumn: " << endl;
+    for (const auto pos : gameState.player1RowForColumn)
         os << " " << pos;
     os << endl;
-    os << "Player 2 Positions: " << endl;
-    for (const auto pos : gameState.player2Positions)
+    os << "Player 2 RowForColumn: " << endl;
+    for (const auto pos : gameState.player2RowForColumn)
         os << " " << pos;
     os << endl;
     os << "Backmoves allowed: " << gameState.numBackMovesAllowed << endl;
@@ -196,50 +196,50 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
         int maxRow = -1;
         if (currentPlayer == Player1)
         {
-            if (gameState.player1Positions[column] < gameState.player2Positions[column])
+            if (gameState.player1RowForColumn[column] < gameState.player2RowForColumn[column])
             {
                 minRow = 1;
-                maxRow = gameState.player2Positions[column] - 1;
+                maxRow = gameState.player2RowForColumn[column] - 1;
             }
             else
             {
-                minRow = gameState.player2Positions[column] + 1;
+                minRow = gameState.player2RowForColumn[column] + 1;
                 maxRow = numRows;
             }
         }
         else
         {
-            if (gameState.player2Positions[column] < gameState.player1Positions[column])
+            if (gameState.player2RowForColumn[column] < gameState.player1RowForColumn[column])
             {
                 minRow = 1;
-                maxRow = gameState.player1Positions[column] - 1;
+                maxRow = gameState.player1RowForColumn[column] - 1;
             }
             else
             {
-                minRow = gameState.player1Positions[column] + 1;
+                minRow = gameState.player1RowForColumn[column] + 1;
                 maxRow = numRows;
             }
         }
         for (int row = minRow; row <= maxRow; row++)
         {
             GameState stateAfterMove = gameState;
-            const int originalRookDistance = abs(gameState.player1Positions[column] - gameState.player2Positions[column]);
+            const int originalRookDistance = abs(gameState.player1RowForColumn[column] - gameState.player2RowForColumn[column]);
             int originalRow = -1;
             if (currentPlayer == Player1)
             {
-                originalRow = gameState.player1Positions[column];
-                stateAfterMove.player1Positions[column] = row;
+                originalRow = gameState.player1RowForColumn[column];
+                stateAfterMove.player1RowForColumn[column] = row;
             }
             else
             {
-                originalRow = gameState.player2Positions[column];
-                stateAfterMove.player2Positions[column] = row;
+                originalRow = gameState.player2RowForColumn[column];
+                stateAfterMove.player2RowForColumn[column] = row;
             }
-            const int rookDistanceAfterMove = abs(stateAfterMove.player1Positions[column] - stateAfterMove.player2Positions[column]);
+            const int rookDistanceAfterMove = abs(stateAfterMove.player1RowForColumn[column] - stateAfterMove.player2RowForColumn[column]);
             const bool isBackmove = (rookDistanceAfterMove > originalRookDistance);
             if (isBackmove && gameState.numBackMovesAllowed == 0)
                 continue;
-            if (stateAfterMove.player1Positions == gameState.player1Positions && stateAfterMove.player2Positions == gameState.player2Positions)
+            if (stateAfterMove.player1RowForColumn == gameState.player1RowForColumn && stateAfterMove.player2RowForColumn == gameState.player2RowForColumn)
                 continue;
 
             Move move;
@@ -259,9 +259,9 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
 {
     GameState nextGameState(gameState);
     if (currentPlayer == Player1)
-        nextGameState.player1Positions[move.column] += move.dy;
+        nextGameState.player1RowForColumn[move.column] += move.dy;
     else
-        nextGameState.player2Positions[move.column] += move.dy;
+        nextGameState.player2RowForColumn[move.column] += move.dy;
 
     if (move.isBackmove)
         nextGameState.numBackMovesAllowed--;
@@ -466,8 +466,8 @@ int main(int argc, char** argv)
     // A 4x4 grid - unfortunately, any larger than this takes ages to compute :/ Although 4 columns x 5 rows works and is a bit more interesting.
     // With this particular arrangement of Rooks, Player 1 is guaranteed to Win; you, poor human,
     // will be playing as Player 2 :)
-    initialGameState.player1Positions = { 1, 1, 1, 1};
-    initialGameState.player2Positions = { 4, 3, 2, 2};
+    initialGameState.player1RowForColumn = { 1, 1, 1, 1};
+    initialGameState.player2RowForColumn = { 4, 3, 2, 2};
     initialGameState.numRows = 4;
     initialGameState.numColumns = 4;
     // Stop the brute-force calculation from continuing forever - you won't be able to use up all these backmoves, though, so the limit
