@@ -460,6 +460,8 @@ PlayState findWinner(Player currentPlayer, const GameState& initialGameState, Pl
 
 int main(int argc, char** argv)
 {
+    srand(time(0));
+
     GameState initialGameState;
     // A 4x4 grid - unfortunately, any larger than this takes ages to compute :/ Although 4 columns x 5 rows works and is a bit more interesting.
     // With this particular arrangement of Rooks, Player 1 is guaranteed to Win; you, poor human,
