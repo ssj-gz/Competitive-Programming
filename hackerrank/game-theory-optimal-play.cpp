@@ -347,6 +347,12 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
         }
         else
         {
+            if (!isBruteForceMoveSearch)
+            {
+#ifdef PRINT_COMPUTER_MOVES
+                cout << "Computer's turn; thinking ..." << endl;
+#endif
+            }
             for (const auto& move : availableMoves)
             {
                 const auto oldPlayState = playState;
