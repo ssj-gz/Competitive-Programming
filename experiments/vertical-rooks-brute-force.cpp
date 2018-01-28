@@ -55,7 +55,6 @@ class GameState
         int numRows = -1;
         vector<int> player1RowForColumn;
         vector<int> player2RowForColumn;
-        static int64_t numGameStatesOverEstimate;
         bool isWinForCurrentPlayer() const
         {
             int xorSum = 0;
@@ -89,7 +88,6 @@ class GameState
             return Player1Win;
         }
 };
-int64_t GameState::numGameStatesOverEstimate = -1;
 
 bool operator<(const GameState& lhs, const GameState& rhs)
 {
@@ -111,29 +109,15 @@ class Move
             // ** SPOILER SPOILER SPOILER **
             // ** SPOILER SPOILER SPOILER **
 
-            // There is a winning strategy for a Winning player that does not require backmoves, so prefer not to use them; 
-            // if you want to incorporate them, uncomment the ALLOW_COMPUTER_BACKMOVES define below  - it's still quite rare that a computer will decide to use one, though! :)
-            // If ALLOW_COMPUTER_BACKMOVES is set, we still restrict how often it will use them in order to avoid situations where Player 2 loses purely because he ran
-            // out of backmoves.
-            //#define ALLOW_COMPUTER_BACKMOVES 
+            // If there is a Winning strategy for currentPlayer, then there is a winning strategy that does not use backmoves; use that.
             if (moveOutcome == winForPlayer(currentPlayer))
             {
-#ifdef ALLOW_COMPUTER_BACKMOVES
-                // Let's make a Backmove - just to show that's it's possible!
-                for (const auto& move : moves)
-                {
-                    if (move.isBackmove)
-                        return move;
-                }
-#else
-                // Pick a move where we don't backmove, for illustration purposes :)
                 for (const auto& move : moves)
                 {
                     if (!move.isBackmove)
                         return move;
                 }
                 assert(false);
-#endif
             }
             // Pick the first one, arbitrarily - feel free to add your own preferences here :)
             return moves.front();
@@ -392,6 +376,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 
             for (const auto& move : availableMoves)
             {
+                // I've Cut out the chunk that works by mini-maxing as Vertical Rooks has a more efficiently computable Win condition.
                 const bool moveIsWinForCurrentPlayer = !gameStateAfterMove(gameState, currentPlayer, move).isWinForCurrentPlayer();
                 if (moveIsWinForCurrentPlayer)
                 {
@@ -434,11 +419,6 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 #endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
-    if (playStateForLookup.size() % 10'000 == 0)
-    {
-        cout << "Processed " << playStateForLookup.size() << " out of at most " << GameState::numGameStatesOverEstimate << endl;
-    }
-
     return playState;
 }
 
@@ -473,11 +453,11 @@ int main(int argc, char** argv)
     initialGameState.numRows = 6;
     initialGameState.numColumns = 6;
     initialGameState.validate();
-    cout << "Bloop: " << initialGameState.isWinForCurrentPlayer() << endl;
-    cout << "^^^" << endl;
-
     // Player 2 goes first!
-    const auto result = findWinner(Player2, initialGameState, CPU, Human);
+    const Player firstPlayer = Player2;
+    cout << "There is a Winning Strategy for Player " << (initialGameState.isWinForCurrentPlayer() ? firstPlayer : otherPlayer(firstPlayer)) << endl;
+
+    const auto result = findWinner(firstPlayer, initialGameState, CPU, Human);
 
     cout << "Result: " << result << endl;
     assert(result == Player1Win);
