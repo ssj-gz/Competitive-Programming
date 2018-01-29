@@ -74,23 +74,21 @@ int main()
         int n;
         cin >> n;
 
-        string topRow;
-        cin >> topRow;
-
-        vector<bool> isTopCellBlackened;
-        for (const auto letter : topRow)
+        auto readBooleanStringAsVector = []()
         {
-            isTopCellBlackened.push_back(letter == '1');
-        }
+            string booleanString;
+            cin >> booleanString;
 
-        string bottomRow;
-        cin >> bottomRow;
+            vector<bool> booleanVector;
+            for (const auto digit : booleanString)
+            {
+                booleanVector.push_back(digit == '1');
+            }
+            return booleanVector;
+        };
 
-        vector<bool> isBottomCellBlackened;
-        for (const auto letter : bottomRow)
-        {
-            isBottomCellBlackened.push_back(letter == '1');
-        }
+        const auto isTopCellBlackened = readBooleanStringAsVector();
+        const auto isBottomCellBlackened = readBooleanStringAsVector();
 
         vector<vector<int>> canTileGridLookup(n + 1, vector<int>(n + 1, -1));
         // Yes, we can certainly tile in such a way that no tiles are added!
