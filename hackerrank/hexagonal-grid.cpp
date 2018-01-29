@@ -13,46 +13,19 @@ bool canTileGrid(const int topRowNumTiled, const int bottomRowNumTiled, const ve
 
     bool canTile = false;
 
-#if 0
-    int lastTopUnblackened = -1;
-    for (int i = topRowNumTiled - 1; i >= 0; i--)
-    {
-        if (!isTopCellBlackened[i])
-        {
-            lastTopUnblackened = i;
-            break;
-        }
-    }
-    int lastBottomUnblackened = -1;
-    for (int i = bottomRowNumTiled - 1; i >= 0; i--)
-    {
-        if (!isBottomCellBlackened[i])
-        {
-            lastBottomUnblackened = i;
-            break;
-        }
-    }
-    cout << "topRowNumTiled: " << topRowNumTiled << " bottomRowNumTiled: " << bottomRowNumTiled << " lastTopUnblackened: " << lastTopUnblackened << " lastBottomUnblackened: " << lastBottomUnblackened << endl;
-    if (lastTopUnblackened != topRowNumTiled - 1 || lastBottomUnblackened != bottomRowNumTiled - 1)
-    {
-        // One of the last top/ bottom cells is blackened.
-        cout << "Doing thing" << endl;
-        canTile |= canTileGrid(lastTopUnblackened + 1, lastBottomUnblackened + 1, isTopCellBlackened, isBottomCellBlackened, canTileGridLookup);
-    }
-#endif
     if (topRowNumTiled > 0 && isTopCellBlackened[topRowNumTiled - 1])
     {
+        // The last of the topRowNumTiled to tile is blackened, so can tile this if and only if we can
+        // tile topRowNumTiled - 1 on the top, and bottomRowNumTiled on the bottom.
         canTile |= canTileGrid(topRowNumTiled - 1, bottomRowNumTiled, isTopCellBlackened, isBottomCellBlackened, canTileGridLookup);
-        if (canTile)
-        {
-            //cout << "topRowNumTiled: " << topRowNumTiled << " bottomRowNumTiled: " << bottomRowNumTiled << " can tile due to thing" << isTopCellBlackened[topRowNumTiled - 1] << endl;
-        }
     }
     if (bottomRowNumTiled > 0 && isBottomCellBlackened[bottomRowNumTiled - 1])
     {
+        // As above, the last of the bottomRowNumTiled is blackened.
         canTile |= canTileGrid(topRowNumTiled, bottomRowNumTiled - 1, isTopCellBlackened, isBottomCellBlackened, canTileGridLookup);
     }
     
+    // Can we complete the tiling by adding one last piece?
     // Piece a)
     if (topRowNumTiled >= 1 && bottomRowNumTiled == topRowNumTiled)
     {
@@ -78,7 +51,6 @@ bool canTileGrid(const int topRowNumTiled, const int bottomRowNumTiled, const ve
             canTile = canTile || canTileGrid(topRowNumTiled, bottomRowNumTiled - 2, isTopCellBlackened, isBottomCellBlackened, canTileGridLookup);
     }
 
-    //cout << "topRowNumTiled: " << topRowNumTiled << " bottomRowNumTiled: " << bottomRowNumTiled << " can tile: " << canTile << endl;
     canTileGridLookup[topRowNumTiled][bottomRowNumTiled] = canTile;
 
     return canTile;
@@ -86,6 +58,14 @@ bool canTileGrid(const int topRowNumTiled, const int bottomRowNumTiled, const ve
 
 int main()
 {
+    // Fairly easy one, though again, lots of dumb mistakes on the way XD
+    // Let canTileGridLookup[t][b] be true if and only if we can
+    // add some tiles (including 0 tiles!) so that the first t tiles on the top
+    // are all either tiled or blackened (and the rest untiled), and the first b tiles on the bottom
+    // are all either tiled or blackened (and the rest untuiled).  There's an easy recurrence relation for this;
+    // details are given inside canTileGrid, which is hopefully self-explanatory
+    // (pieces a), b) and c) are the three tile pieces presented in the problem
+    // description, in order).
     int T;
     cin >> T;
 
@@ -112,12 +92,8 @@ int main()
             isBottomCellBlackened.push_back(letter == '1');
         }
 
-        for (int i = 0; i < n; i++)
-        {
-            //cout << "isTopCellBlackened[" << i << "] = " << isTopCellBlackened[i] << endl;
-        }
-
         vector<vector<int>> canTileGridLookup(n + 1, vector<int>(n + 1, -1));
+        // Yes, we can certainly tile in such a way that no tiles are added!
         canTileGridLookup[0][0] = 1;
 
         const bool result = canTileGrid(n, n, isTopCellBlackened, isBottomCellBlackened, canTileGridLookup);
