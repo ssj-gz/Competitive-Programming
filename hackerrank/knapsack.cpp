@@ -21,8 +21,9 @@ int main()
             cin >> a[i];
         }
         const auto maxSum = n * *max_element(a.begin(), a.end());
+        const auto maxRelevantSum = min(maxSum, k); // We don't care about sums that exceed k.
 
-        vector<bool> canFormSumFromFirstM(maxSum + 1);
+        vector<bool> canFormSumFromFirstM(maxRelevantSum + 1);
         // Can always form 0 from the first m ai's by just picking none of the ai's :)
         canFormSumFromFirstM[0] = true;
 
@@ -30,8 +31,10 @@ int main()
         {
             // After each iteration, canFormSumFromFirstM[s] will be true if and only if
             // we can form s using just a[0], a[1], ... , a[m].
+            if (a[m] > maxRelevantSum)
+                continue;
             canFormSumFromFirstM[a[m]] = true;
-            for (int sum = 0; sum <= maxSum; sum++)
+            for (int sum = 0; sum <= maxRelevantSum; sum++)
             {
                 if (sum - a[m] >= 0 && canFormSumFromFirstM[sum - a[m]])
                 {
@@ -41,11 +44,11 @@ int main()
         }
 
         int nearestSumToK = 0;
-        for (int i = 0; i <= k; i++)
+        for (int sum = 0; sum <= k; sum++)
         {
-            if (canFormSumFromFirstM[i])
+            if (canFormSumFromFirstM[sum])
             {
-                nearestSumToK = i;
+                nearestSumToK = sum;
             }
         }
 
