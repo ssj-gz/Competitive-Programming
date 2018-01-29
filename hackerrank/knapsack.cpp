@@ -20,14 +20,13 @@ int main()
         {
             cin >> a[i];
         }
-        const auto maxSum = n * *max_element(a.begin(), a.end());
-        const auto maxRelevantSum = min(maxSum, k); // We don't care about sums that exceed k.
+        const auto maxRelevantSum = k; // We don't care about sums that exceed k.
 
         vector<bool> canFormSumFromFirstM(maxRelevantSum + 1);
         // Can always form 0 from the first m ai's by just picking none of the ai's :)
         canFormSumFromFirstM[0] = true;
 
-        for (int m = 0; m <= n; m++)
+        for (int m = 0; m < n; m++)
         {
             // After each iteration, canFormSumFromFirstM[s] will be true if and only if
             // we can form s using just a[0], a[1], ... , a[m].
