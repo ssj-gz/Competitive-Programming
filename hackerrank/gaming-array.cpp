@@ -6,9 +6,9 @@ using namespace std;
 
 int main()
 {
-    // Very easy one; just do an initial sweep through the array, making note, for each value,
-    // of the highest value seen so far (excluding current value) and the index of that
-    // value, and store in highestElementToLeft.
+    // Very easy one (though made immensely stupid mistakes XD); just do an initial sweep through the array, making note, for each value,
+    // of the highest value seen so far (including current value) and the index of that
+    // value, and store in highestElementHereOrToLeft.
     // Then it's trivial to find the maximum value remaining in the array and its index,
     // and trivial to use this to simulate the game, all in O(N).
     int T;
@@ -31,16 +31,16 @@ int main()
             int index = -1;
         };
 
-        vector<HighestElement> highestElementToLeft(n);
+        vector<HighestElement> highestElementHereOrToLeft(n);
         HighestElement currentHighestElement = {-1, -1};
         for (int i = 0; i < n; i++)
         {
-            highestElementToLeft[i] = currentHighestElement;
             if (A[i] > currentHighestElement.value)
             {
                 currentHighestElement.value = A[i];
                 currentHighestElement.index = i;
             }
+            highestElementHereOrToLeft[i] = currentHighestElement;
         }
 
         // Simulate the game.
@@ -49,7 +49,7 @@ int main()
         while (lastRemainingIndex >= 0)
         {
             currentPlayerIsBob = !currentPlayerIsBob;
-            const int indexToRemove = highestElementToLeft[lastRemainingIndex].index;
+            const int indexToRemove = highestElementHereOrToLeft[lastRemainingIndex].index;
             lastRemainingIndex = indexToRemove - 1;
         }
 
