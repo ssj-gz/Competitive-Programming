@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2018-02-06 07:19
+#define BRUTE_FORCE
+#define SUBMISSION
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -84,7 +90,7 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int n = rand() % 10 + 1;
+        const int n = rand() % 15 + 1;
         cout << n << endl;
         for (int i = 0; i < n; i++)
         {
@@ -108,7 +114,6 @@ int main(int argc, char** argv)
     const auto maxUnlocks = numUnlocks(isLocked, false);
 
     cout << minUnlocks << " " << maxUnlocks << endl;
-#define BRUTE_FORCE
 #ifdef BRUTE_FORCE
     const auto minUnlocksBruteForce = numUnlocksBruteForce(isLocked, true);
     const auto maxUnlocksBruteForce = numUnlocksBruteForce(isLocked, false);
