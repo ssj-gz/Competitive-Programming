@@ -25,7 +25,7 @@ int main()
             int row = -1;
             int col = -1;
         }; 
-        Position promotablePawnPos;
+        vector<Position> promotablePawnPositions;
         Position enemyKingPos;
         for (int row = 0; row < numRows; row++)
         {
@@ -33,8 +33,7 @@ int main()
             {
                 if (board[row][col] == 'P' && row == 1)
                 {
-                    assert(promotablePawnPos.row == -1);
-                    promotablePawnPos = {row, col};
+                    promotablePawnPositions.push_back({row, col});
                 }
                 if (board[row][col] == 'k')
                 {
@@ -43,75 +42,87 @@ int main()
                 }
             }
         }
-        assert(promotablePawnPos.row != -1 && enemyKingPos.row != -1);
+        assert(!promotablePawnPositions.empty());
         //cout << "t: " << t << " promotablePawnPos: " << promotablePawnPos.row << "," << promotablePawnPos.col << " enemyKingPos: " << enemyKingPos.row << "," << enemyKingPos.col << endl;
 
-        const Position promotedPawnPos = {promotablePawnPos.row - 1, promotablePawnPos.col};
-
-        auto moveReachesKing = [&board, promotedPawnPos](int dRow, int dCol, int limit = 1000)
-        {
-            int row = promotedPawnPos.row;
-            int col = promotedPawnPos.col;
-
-            bool reachedKing = false;
-            for (int i = 0; i < limit; i++)
-            {
-                row += dRow;
-                col += dCol;
-
-                if (row < 0 || row >= 8)
-                    break;
-                if (col < 0 || col >= 8)
-                    break;
-
-                if (board[row][col] == 'k')
-                {
-                    reachedKing = true;
-                    break;
-                }
-                if (board[row][col] != '#')
-                    break;
-            }
-
-            return reachedKing;
-        };
-
         int numWaysToCheck = 0;
+        for (const auto& promotablePawnPos : promotablePawnPositions)
+        {
+            const Position promotedPawnPos = {promotablePawnPos.row - 1, promotablePawnPos.col};
+            if (board[promotedPawnPos.row][promotedPawnPos.col] != '#')
+                continue;
 
-        // Queen.
-        bool promotingToQueenChecks = false;
-        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(0, -1); // Left
-        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(0, 1);  // Right
-        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, 0);  // Down
-        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, -1);  // Down + Left
-        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, 1);  // Down + Right
-        if (promotingToQueenChecks)
-            numWaysToCheck++;
+            auto moveReachesKing = [&board, promotedPawnPos](int dRow, int dCol, int limit = 1000)
+            {
+                int row = promotedPawnPos.row;
+                int col = promotedPawnPos.col;
 
-        // Rook.
-        bool promotingToRookChecks = false;
-        promotingToRookChecks = promotingToRookChecks || moveReachesKing(0, -1); // Left
-        promotingToRookChecks = promotingToRookChecks || moveReachesKing(0, 1); // Right
-        promotingToRookChecks = promotingToRookChecks || moveReachesKing(1, 0); // Down
-        if (promotingToRookChecks)
-            numWaysToCheck++;
+                bool reachedKing = false;
+                for (int i = 0; i < limit; i++)
+                {
+                    row += dRow;
+                    col += dCol;
 
-        // Bishop.
-        bool promotingToBishopChecks = false;
-        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(1, -1); // Down + Left.
-        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(1, 1); // Down + Left.
-        if (promotingToBishopChecks)
-            numWaysToCheck++;
+                    if (row < 0 || row >= 8)
+                        break;
+                    if (col < 0 || col >= 8)
+                        break;
 
-        // Knight.
-        bool promotingToKnightChecks = false;
-        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(1, -2, 1);
-        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(1, 2, 1);
-        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(2, -1, 1);
-        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(2, 1, 1);
-        if (promotingToKnightChecks)
-            numWaysToCheck++;
+                    if (board[row][col] == 'k')
+                    {
+                        reachedKing = true;
+                        break;
+                    }
+                    if (board[row][col] != '#')
+                        break;
+                }
 
+                return reachedKing;
+            };
+
+            int numWaysToCheckWithThisPawn = 0;
+
+            // Queen.
+            bool promotingToQueenChecks = false;
+            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(0, -1); // Left
+            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(0, 1);  // Right
+            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, 0);  // Down
+            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, -1);  // Down + Left
+            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, 1);  // Down + Right
+            if (promotingToQueenChecks)
+                numWaysToCheckWithThisPawn++;
+
+            // Rook.
+            bool promotingToRookChecks = false;
+            promotingToRookChecks = promotingToRookChecks || moveReachesKing(0, -1); // Left
+            promotingToRookChecks = promotingToRookChecks || moveReachesKing(0, 1); // Right
+            promotingToRookChecks = promotingToRookChecks || moveReachesKing(1, 0); // Down
+            if (promotingToRookChecks)
+                numWaysToCheckWithThisPawn++;
+
+            // Bishop.
+            bool promotingToBishopChecks = false;
+            promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(1, -1); // Down + Left.
+            promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(1, 1); // Down + Right.
+            if (promotingToBishopChecks)
+                numWaysToCheckWithThisPawn++;
+
+            // Knight.
+            bool promotingToKnightChecks = false;
+            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(1, -2, 1);
+            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(1, 2, 1);
+            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(2, -1, 1);
+            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(2, 1, 1);
+            if (promotingToKnightChecks)
+                numWaysToCheckWithThisPawn++;
+
+            //cout << "promotingToQueenChecks: " << promotingToQueenChecks << endl;
+            //cout << "promotingToRookChecks: " << promotingToRookChecks << endl;
+            //cout << "promotingToBishopChecks: " << promotingToBishopChecks << endl;
+            //cout << "promotingToKnightChecks: " << promotingToKnightChecks << endl;
+
+            numWaysToCheck += numWaysToCheckWithThisPawn;
+        }
         cout << numWaysToCheck << endl;
     }
 
