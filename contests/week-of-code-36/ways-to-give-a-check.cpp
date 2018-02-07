@@ -11,7 +11,8 @@ const auto numCols = 8;
 bool isKingInCheck(const vector<string>& board, bool isBlackKing)
 {
     const char kingToTestChar = (isBlackKing ? 'k' : 'K');
-    auto moveReachesKing = [&board, kingToTestChar](int startRow, int startCol, int dRow, int dCol, int limit = 1000)
+    bool isInCheck = false;
+    auto updateResultFromMove = [&isInCheck, &board, kingToTestChar](int startRow, int startCol, int dRow, int dCol, int limit = 1000)
     {
         int row = startRow;
         int col = startCol;
@@ -28,12 +29,13 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                 break;
 
             if (board[row][col] == kingToTestChar)
-                return true;
+            {
+                isInCheck = true;
+                break;
+            }
             if (board[row][col] != '#')
                 break;
         }
-
-        return false;
     };
 
     const auto attackingPiecesAreWhite = isBlackKing;
@@ -50,65 +52,52 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
             {
                 case 'Q':
                     {
-                        bool promotingToQueenChecks = false;
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 0, -1); // Left
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 0, 1);  // Right
+                        // Queen.
+                        updateResultFromMove(row, col, 0, -1); // Left
+                        updateResultFromMove(row, col, 0, 1);  // Right
 
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 1, 0);  // Down
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 1, -1);  // Down + Left
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 1, 1);  // Down + Right
+                        updateResultFromMove(row, col, 1, 0);  // Down
+                        updateResultFromMove(row, col, 1, -1);  // Down + Left
+                        updateResultFromMove(row, col, 1, 1);  // Down + Right
 
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, -1, 0);  // Up
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, -1, -1);  // Up + Left
-                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, -1, 1);  // Up + Right
-
-                        if (promotingToQueenChecks)
-                            return true;
+                        updateResultFromMove(row, col, -1, 0);  // Up
+                        updateResultFromMove(row, col, -1, -1);  // Up + Left
+                        updateResultFromMove(row, col, -1, 1);  // Up + Right
                     }
                     break;
                 case 'R':
                     {
                         // Rook.
-                        bool promotingToRookChecks = false;
-                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, -1); // Left
-                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, 1); // Right
+                        updateResultFromMove(row, col, 0, -1); // Left
+                        updateResultFromMove(row, col, 0, 1); // Right
 
-                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 1, 0); // Down
-                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, -1, 0); // Up
-                        if (promotingToRookChecks)
-                            return true;
+                        updateResultFromMove(row, col, 1, 0); // Down
+                        updateResultFromMove(row, col, -1, 0); // Up
                     };
                     break;
 
                 case 'N':
                     {
                         // Knight.
-                        bool promotingToKnightChecks = false;
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 1, -2, 1); // Down + 2 Left.
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 1, 2, 1);  // Down + 2 Right
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 2, -1, 1); // 2 Down + Left
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 2, 1, 1);  // 2 Down + Right
+                        updateResultFromMove(row, col, 1, -2, 1); // Down + 2 Left.
+                        updateResultFromMove(row, col, 1, 2, 1);  // Down + 2 Right
+                        updateResultFromMove(row, col, 2, -1, 1); // 2 Down + Left
+                        updateResultFromMove(row, col, 2, 1, 1);  // 2 Down + Right
 
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -1, -2, 1); // Up + 2 Left.
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -1, 2, 1);  // Up + 2 Right
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -2, -1, 1); // 2 Up + Left
-                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -2, 1, 1);  // 2 Up + Right
-                        if (promotingToKnightChecks)
-                            return true;
+                        updateResultFromMove(row, col, -1, -2, 1); // Up + 2 Left.
+                        updateResultFromMove(row, col, -1, 2, 1);  // Up + 2 Right
+                        updateResultFromMove(row, col, -2, -1, 1); // 2 Up + Left
+                        updateResultFromMove(row, col, -2, 1, 1);  // 2 Up + Right
                     };
                     break;
 
                 case 'B':
                     {
                         // Bishop.
-                        bool promotingToBishopChecks = false;
-                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, 1, -1); // Down + Left.
-                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, 1, 1); // Down + Right.
-                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, -1, -1); // Up + Left.
-                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, -1, 1); // Up + Right.
-                        //cout << "promotingToBishopChecks: " << promotingToBishopChecks << " - " << piece << endl;
-                        if (promotingToBishopChecks)
-                            return true;
+                        updateResultFromMove(row, col, 1, -1); // Down + Left.
+                        updateResultFromMove(row, col, 1, 1); // Down + Right.
+                        updateResultFromMove(row, col, -1, -1); // Up + Left.
+                        updateResultFromMove(row, col, -1, 1); // Up + Right.
                     }
                     break;
 
@@ -116,7 +105,7 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
         }
     }
 
-    return false;
+    return isInCheck;
 }
 
 int main()
