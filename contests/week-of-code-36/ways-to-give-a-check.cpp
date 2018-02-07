@@ -117,8 +117,6 @@ int main()
     int T;
     cin >> T;
 
-    const auto numRows = 8;
-    const auto numCols = 8;
     for (int t = 0; t < T; t++)
     {
         vector<string> boardOriginal(numRows);
