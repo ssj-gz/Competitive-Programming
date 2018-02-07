@@ -10,8 +10,8 @@ const auto numCols = 8;
 
 bool isKingInCheck(const vector<string>& board, bool isBlackKing)
 {
-    const char kingToCheck = (isBlackKing ? 'k' : 'K');
-    auto moveReachesKing = [&board, kingToCheck](int startRow, int startCol, int dRow, int dCol, int limit = 1000)
+    const char kingToTestChar = (isBlackKing ? 'k' : 'K');
+    auto moveReachesKing = [&board, kingToTestChar](int startRow, int startCol, int dRow, int dCol, int limit = 1000)
     {
         int row = startRow;
         int col = startCol;
@@ -27,29 +27,26 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
             if (col < 0 || col >= 8)
                 break;
 
-            if (board[row][col] == kingToCheck)
-            {
-                reachedKing = true;
-                break;
-            }
+            if (board[row][col] == kingToTestChar)
+                return true;
             if (board[row][col] != '#')
                 break;
         }
 
-        return reachedKing;
+        return false;
     };
 
-    const bool playerPiecesToTestAreWhite = isBlackKing;
-    for (int row = 0; row < numRows; row++)
+    const auto attackingPiecesAreWhite = isBlackKing;
+    for (auto row = 0; row < numRows; row++)
     {
-        for (int col = 0; col < numCols; col++)
+        for (auto col = 0; col < numCols; col++)
         {
-            const char piece = board[row][col];
-            const char pieceUpperCase = toupper(piece);
-            const bool isWhitePiece = (pieceUpperCase == piece);
-            if (playerPiecesToTestAreWhite != isWhitePiece)
+            const auto pieceChar = board[row][col];
+            const auto pieceCharUpperCase = toupper(pieceChar);
+            const auto isWhitePiece = (pieceCharUpperCase == pieceChar);
+            if (attackingPiecesAreWhite != isWhitePiece)
                 continue;
-            switch(pieceUpperCase)
+            switch(pieceCharUpperCase)
             {
                 case 'Q':
                     {
@@ -75,9 +72,9 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                         bool promotingToRookChecks = false;
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, -1); // Left
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, 1); // Right
+
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 1, 0); // Down
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, -1, 0); // Up
-                        //cout << "promotingToRookChecks: " << promotingToRookChecks << " - " << piece << endl;
                         if (promotingToRookChecks)
                             return true;
                     };
@@ -96,7 +93,6 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                         promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -1, 2, 1);  // Up + 2 Right
                         promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -2, -1, 1); // 2 Up + Left
                         promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -2, 1, 1);  // 2 Up + Right
-                        //cout << "promotingToKnightChecks? " << promotingToKnightChecks << endl;
                         if (promotingToKnightChecks)
                             return true;
                     };
