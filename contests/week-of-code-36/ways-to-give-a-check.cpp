@@ -12,7 +12,6 @@ bool isKingInCheck(const vector<string>& board)
 {
     auto moveReachesKing = [&board](int startRow, int startCol, int dRow, int dCol, int limit = 1000)
     {
-        //cout << "dRow: " << dRow << " dCol: " << dCol << endl;
         int row = startRow;
         int col = startCol;
 
@@ -21,8 +20,6 @@ bool isKingInCheck(const vector<string>& board)
         {
             row += dRow;
             col += dCol;
-
-            //cout << "i: " << i << " row: " << row << " col: " << col << endl;
 
             if (row < 0 || row >= 8)
                 break;
@@ -153,11 +150,8 @@ int main()
                 }
             }
         }
-        //assert(!promotablePawnPositions.empty());
-        //assert(promotablePawnPositions.size() == 1);
         assert(promotablePawnPos.row != -1 && promotablePawnPos.col != -1);
-        //cout << "t: " << t << " promotablePawnPos: " << promotablePawnPos.row << "," << promotablePawnPos.col << " enemyKingPos: " << enemyKingPos.row << "," << enemyKingPos.col << endl;
-        //cout << "t: " << t << endl;
+        assert(enemyKingPos.row != -1 && enemyKingPos.col != -1);
 
         int numWaysToCheck = 0;
         const char piecesToPromoteTo[] = { 'Q', 'R', 'B', 'N' };
@@ -167,7 +161,6 @@ int main()
             const Position promotedPawnPos = {promotablePawnPos.row - 1, promotablePawnPos.col};
             board[promotablePawnPos.row][promotablePawnPos.col] = '#';
             board[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
-            //cout << "Pawn promoted to row: " << promotedPawnPos.row << " col: " << promotedPawnPos.col << endl;
 
             if (isKingInCheck(board))
             {
@@ -176,5 +169,6 @@ int main()
         }
         cout << numWaysToCheck << endl;
     }
+    assert(cin);
 
 }
