@@ -71,11 +71,13 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                     break;
                 case 'R':
                     {
+                        // Rook.
                         bool promotingToRookChecks = false;
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, -1); // Left
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, 1); // Right
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 1, 0); // Down
                         promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, -1, 0); // Up
+                        //cout << "promotingToRookChecks: " << promotingToRookChecks << " - " << piece << endl;
                         if (promotingToRookChecks)
                             return true;
                     };
@@ -83,6 +85,7 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
 
                 case 'N':
                     {
+                        // Knight.
                         bool promotingToKnightChecks = false;
                         promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 1, -2, 1); // Down + 2 Left.
                         promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 1, 2, 1);  // Down + 2 Right
@@ -107,6 +110,7 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                         promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, 1, 1); // Down + Right.
                         promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, -1, -1); // Up + Left.
                         promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, -1, 1); // Up + Right.
+                        //cout << "promotingToBishopChecks: " << promotingToBishopChecks << " - " << piece << endl;
                         if (promotingToBishopChecks)
                             return true;
                     }
@@ -126,7 +130,6 @@ int main()
 
     for (int t = 0; t < T; t++)
     {
-        //cout << "t: " << t << endl;
         vector<string> boardOriginal(numRows);
         for (int row = 0; row < numRows; row++)
         {
@@ -138,73 +141,41 @@ int main()
             int row = -1;
             int col = -1;
         }; 
-        //Position promotablePawnPos;
-        //Position enemyKingPos;
-        for (int row = 0; row < numRows; row++)
-        {
-            for (int col = 0; col < numCols; col++)
-            {
-#if 0
-                if (boardOriginal[row][col] == 'P' && row == 1 && boardOriginal[row - 1][col] == '#')
-                {
-                    assert(promotablePawnPos.row == -1);
-                    promotablePawnPos = {row, col};
-                }
-                if (boardOriginal[row][col] == 'k')
-                {
-                    assert(enemyKingPos.row == -1);
-                    enemyKingPos = {row, col};
-                }
-#endif
-            }
-        }
-
-#if 0
-        assert(promotablePawnPos.row != -1 && promotablePawnPos.col != -1);
-        assert(enemyKingPos.row != -1 && enemyKingPos.col != -1);
-#endif
 
         int numWaysToCheck = 0;
         const char piecesToPromoteTo[] = { 'Q', 'R', 'B', 'N' };
-        bool foundPromotablePawn = false;
+        int numPromotablePawns = 0;
         for (int pawnCol = 0; pawnCol < numCols; pawnCol++)
         {
             const int rowFor7thRank = 1;
             const int rowFor8thRank = 0;
             const Position candidatePawnPos = {rowFor7thRank, pawnCol};
+            bool isPawnPromotable = false;
             if (boardOriginal[candidatePawnPos.row][candidatePawnPos.col] != 'P')
-            {
-
-                //cout << "Can't promote pawn at " << candidatePawnPos.row << "," << candidatePawnPos.col << " as not a pawn!" << endl;
-                continue;
-            }
+                continue; // Not a Pawn!
             const Position promotedPawnPos = {rowFor8thRank, pawnCol};
             if (boardOriginal[promotedPawnPos.row][promotedPawnPos.col] != '#')
-            {
-                //cout << "Can't promote pawn at " << candidatePawnPos.row << "," << candidatePawnPos.col << " as it is blocked" << endl;
-                continue;
-            }
+                continue; // Can't move Pawn forwards!
             for (const auto pieceToPromoteTo : piecesToPromoteTo)
             {
                 vector<string> board{boardOriginal};
                 board[candidatePawnPos.row][candidatePawnPos.col] = '#';
                 board[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
                 if (isKingInCheck(board, false))
-                {
-                    // Promoting this pawn would put us in check.
-                    //cout << "Can't promote pawn at " << candidatePawnPos.row << "," << candidatePawnPos.col << " as it puts our own King in check" << endl;
-                    continue;
-                }
+                    continue; // Promoting this pawn would put us in check.
 
-                foundPromotablePawn = true;
+                isPawnPromotable = true;
 
                 if (isKingInCheck(board, true))
                 {
                     numWaysToCheck++;
                 }
             }
+
+            if (isPawnPromotable)
+                numPromotablePawns++;
         }
-        assert(foundPromotablePawn);
+        assert(numPromotablePawns == 1);
         cout << numWaysToCheck << endl;
     }
     assert(cin);
