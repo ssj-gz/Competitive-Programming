@@ -14,11 +14,11 @@ int main()
     const auto numCols = 8;
     for (int t = 0; t < T; t++)
     {
-        vector<string> board(numRows);
+        vector<string> boardOriginal(numRows);
         for (int row = 0; row < numRows; row++)
         {
-            cin >> board[row];
-            assert(board[row].size() == numCols);
+            cin >> boardOriginal[row];
+            assert(boardOriginal[row].size() == numCols);
         }
         struct Position
         {
@@ -31,11 +31,11 @@ int main()
         {
             for (int col = 0; col < numCols; col++)
             {
-                if (board[row][col] == 'P' && row == 1)
+                if (boardOriginal[row][col] == 'P' && row == 1 && boardOriginal[row - 1][col] == '#')
                 {
                     promotablePawnPositions.push_back({row, col});
                 }
-                if (board[row][col] == 'k')
+                if (boardOriginal[row][col] == 'k')
                 {
                     assert(enemyKingPos.row == -1);
                     enemyKingPos = {row, col};
@@ -44,16 +44,19 @@ int main()
         }
         assert(!promotablePawnPositions.empty());
         //cout << "t: " << t << " promotablePawnPos: " << promotablePawnPos.row << "," << promotablePawnPos.col << " enemyKingPos: " << enemyKingPos.row << "," << enemyKingPos.col << endl;
+        //cout << "t: " << t << endl;
 
         int numWaysToCheck = 0;
         for (const auto& promotablePawnPos : promotablePawnPositions)
         {
+            vector<string> board(boardOriginal);
             const Position promotedPawnPos = {promotablePawnPos.row - 1, promotablePawnPos.col};
-            if (board[promotedPawnPos.row][promotedPawnPos.col] != '#')
-                continue;
+            board[promotablePawnPos.row][promotablePawnPos.col] = '#';
+            //cout << "Pawn promoted to row: " << promotedPawnPos.row << " col: " << promotedPawnPos.col << endl;
 
             auto moveReachesKing = [&board, promotedPawnPos](int dRow, int dCol, int limit = 1000)
             {
+                //cout << "dRow: " << dRow << " dCol: " << dCol << endl;
                 int row = promotedPawnPos.row;
                 int col = promotedPawnPos.col;
 
@@ -62,6 +65,8 @@ int main()
                 {
                     row += dRow;
                     col += dCol;
+
+                    //cout << "i: " << i << " row: " << row << " col: " << col << endl;
 
                     if (row < 0 || row >= 8)
                         break;
