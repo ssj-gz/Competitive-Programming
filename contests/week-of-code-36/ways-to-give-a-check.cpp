@@ -5,6 +5,116 @@
 
 using namespace std;
 
+const auto numRows = 8;
+const auto numCols = 8;
+
+bool isKingInCheck(const vector<string>& board)
+{
+    auto moveReachesKing = [&board](int startRow, int startCol, int dRow, int dCol, int limit = 1000)
+    {
+        //cout << "dRow: " << dRow << " dCol: " << dCol << endl;
+        int row = startRow;
+        int col = startCol;
+
+        bool reachedKing = false;
+        for (int i = 0; i < limit; i++)
+        {
+            row += dRow;
+            col += dCol;
+
+            //cout << "i: " << i << " row: " << row << " col: " << col << endl;
+
+            if (row < 0 || row >= 8)
+                break;
+            if (col < 0 || col >= 8)
+                break;
+
+            if (board[row][col] == 'k')
+            {
+                reachedKing = true;
+                break;
+            }
+            if (board[row][col] != '#')
+                break;
+        }
+
+        return reachedKing;
+    };
+
+    for (int row = 0; row < numRows; row++)
+    {
+        for (int col = 0; col < numCols; col++)
+        {
+            const char piece = board[row][col];
+            switch(piece)
+            {
+                case 'Q':
+                    {
+                        bool promotingToQueenChecks = false;
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 0, -1); // Left
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 0, 1);  // Right
+
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 1, 0);  // Down
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 1, -1);  // Down + Left
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, 1, 1);  // Down + Right
+
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, -1, 0);  // Up
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, -1, -1);  // Up + Left
+                        promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(row, col, -1, 1);  // Up + Right
+
+                        if (promotingToQueenChecks)
+                            return true;
+                    }
+                    break;
+                case 'R':
+                    {
+                        bool promotingToRookChecks = false;
+                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, -1); // Left
+                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 0, 1); // Right
+                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, 1, 0); // Down
+                        promotingToRookChecks = promotingToRookChecks || moveReachesKing(row, col, -1, 0); // Up
+                        if (promotingToRookChecks)
+                            return true;
+                    };
+                    break;
+
+                case 'N':
+                    {
+                        bool promotingToKnightChecks = false;
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 1, -2, 1); // Down + 2 Left.
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 1, 2, 1);  // Down + 2 Right
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 2, -1, 1); // 2 Down + Left
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, 2, 1, 1);  // 2 Down + Right
+
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -1, -2, 1); // Up + 2 Left.
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -1, 2, 1);  // Up + 2 Right
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -2, -1, 1); // 2 Up + Left
+                        promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(row, col, -2, 1, 1);  // 2 Up + Right
+                        if (promotingToKnightChecks)
+                            return true;
+                    };
+                    break;
+
+                case 'B':
+                    {
+                        // Bishop.
+                        bool promotingToBishopChecks = false;
+                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, 1, -1); // Down + Left.
+                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, 1, 1); // Down + Right.
+                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, -1, -1); // Up + Left.
+                        promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(row, col, -1, 1); // Up + Right.
+                        if (promotingToBishopChecks)
+                            return true;
+                    }
+                    break;
+
+            }
+        }
+    }
+
+    return false;
+}
+
 int main()
 {
     int T;
@@ -25,7 +135,7 @@ int main()
             int row = -1;
             int col = -1;
         }; 
-        vector<Position> promotablePawnPositions;
+        Position promotablePawnPos;
         Position enemyKingPos;
         for (int row = 0; row < numRows; row++)
         {
@@ -33,7 +143,8 @@ int main()
             {
                 if (boardOriginal[row][col] == 'P' && row == 1 && boardOriginal[row - 1][col] == '#')
                 {
-                    promotablePawnPositions.push_back({row, col});
+                    assert(promotablePawnPos.row == -1);
+                    promotablePawnPos = {row, col};
                 }
                 if (boardOriginal[row][col] == 'k')
                 {
@@ -42,91 +153,26 @@ int main()
                 }
             }
         }
-        assert(!promotablePawnPositions.empty());
+        //assert(!promotablePawnPositions.empty());
+        //assert(promotablePawnPositions.size() == 1);
+        assert(promotablePawnPos.row != -1 && promotablePawnPos.col != -1);
         //cout << "t: " << t << " promotablePawnPos: " << promotablePawnPos.row << "," << promotablePawnPos.col << " enemyKingPos: " << enemyKingPos.row << "," << enemyKingPos.col << endl;
         //cout << "t: " << t << endl;
 
         int numWaysToCheck = 0;
-        for (const auto& promotablePawnPos : promotablePawnPositions)
+        const char piecesToPromoteTo[] = { 'Q', 'R', 'B', 'N' };
+        for (const auto pieceToPromoteTo : piecesToPromoteTo)
         {
-            vector<string> board(boardOriginal);
+            vector<string> board{boardOriginal};
             const Position promotedPawnPos = {promotablePawnPos.row - 1, promotablePawnPos.col};
             board[promotablePawnPos.row][promotablePawnPos.col] = '#';
+            board[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
             //cout << "Pawn promoted to row: " << promotedPawnPos.row << " col: " << promotedPawnPos.col << endl;
 
-            auto moveReachesKing = [&board, promotedPawnPos](int dRow, int dCol, int limit = 1000)
+            if (isKingInCheck(board))
             {
-                //cout << "dRow: " << dRow << " dCol: " << dCol << endl;
-                int row = promotedPawnPos.row;
-                int col = promotedPawnPos.col;
-
-                bool reachedKing = false;
-                for (int i = 0; i < limit; i++)
-                {
-                    row += dRow;
-                    col += dCol;
-
-                    //cout << "i: " << i << " row: " << row << " col: " << col << endl;
-
-                    if (row < 0 || row >= 8)
-                        break;
-                    if (col < 0 || col >= 8)
-                        break;
-
-                    if (board[row][col] == 'k')
-                    {
-                        reachedKing = true;
-                        break;
-                    }
-                    if (board[row][col] != '#')
-                        break;
-                }
-
-                return reachedKing;
-            };
-
-            int numWaysToCheckWithThisPawn = 0;
-
-            // Queen.
-            bool promotingToQueenChecks = false;
-            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(0, -1); // Left
-            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(0, 1);  // Right
-            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, 0);  // Down
-            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, -1);  // Down + Left
-            promotingToQueenChecks = promotingToQueenChecks || moveReachesKing(1, 1);  // Down + Right
-            if (promotingToQueenChecks)
-                numWaysToCheckWithThisPawn++;
-
-            // Rook.
-            bool promotingToRookChecks = false;
-            promotingToRookChecks = promotingToRookChecks || moveReachesKing(0, -1); // Left
-            promotingToRookChecks = promotingToRookChecks || moveReachesKing(0, 1); // Right
-            promotingToRookChecks = promotingToRookChecks || moveReachesKing(1, 0); // Down
-            if (promotingToRookChecks)
-                numWaysToCheckWithThisPawn++;
-
-            // Bishop.
-            bool promotingToBishopChecks = false;
-            promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(1, -1); // Down + Left.
-            promotingToBishopChecks = promotingToBishopChecks || moveReachesKing(1, 1); // Down + Right.
-            if (promotingToBishopChecks)
-                numWaysToCheckWithThisPawn++;
-
-            // Knight.
-            bool promotingToKnightChecks = false;
-            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(1, -2, 1);
-            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(1, 2, 1);
-            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(2, -1, 1);
-            promotingToKnightChecks = promotingToKnightChecks || moveReachesKing(2, 1, 1);
-            if (promotingToKnightChecks)
-                numWaysToCheckWithThisPawn++;
-
-            //cout << "promotingToQueenChecks: " << promotingToQueenChecks << endl;
-            //cout << "promotingToRookChecks: " << promotingToRookChecks << endl;
-            //cout << "promotingToBishopChecks: " << promotingToBishopChecks << endl;
-            //cout << "promotingToKnightChecks: " << promotingToKnightChecks << endl;
-
-            numWaysToCheck += numWaysToCheckWithThisPawn;
+                numWaysToCheck++;
+            }
         }
         cout << numWaysToCheck << endl;
     }
