@@ -493,6 +493,8 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     //cout << "prices.back(): " << prices.back() << endl;
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
     d.back() = minCostStartingWithStudent.back() + prices.back();
+    map<int64_t, int> nextIndexOfDWithValue;
+    nextIndexOfDWithValue[d[n - 1]] = n - 1;
     //cout << "d[" << (n  - 1) << "] = " << d[n - 1] << endl;
 
     auto combineValues = [](const auto& x, const auto& y)
@@ -595,6 +597,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
 #endif
 
     int64_t heightDifferential = 0;
+
     for (int i = n - 2; i >= 0; i--)
     {
         auto costIfPassedToStudent = [i, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
@@ -619,14 +622,19 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         assert(tallerStudentIndex == indexOfNextTallerStudent[i]);
 
         //cout << "tallerStudentIndex: " << tallerStudentIndex << endl;
-        int64_t minD = numeric_limits<int64_t>::max();
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
         const auto rangeMin = i + 1;
         const auto rangeMax = tallerStudentIndex == -1 ? n - 1 : tallerStudentIndex - 1;
         //cout << "i: " << i << " rangeMin: " << rangeMin << " rangeMax: " << rangeMax << endl;
         if (rangeMax >= rangeMin)
         {
-            minD = minTree.combinedValuesInRange(rangeMin, rangeMax, std::numeric_limits<int64_t>::max());
+            const auto minD = minTree.combinedValuesInRange(rangeMin, rangeMax, numeric_limits<int64_t>::max());
+            const int bestUnforcedPassStudent = nextIndexOfDWithValue[minD];
+            cout << "bestUnforcedPassStudent: " << bestUnforcedPassStudent << " minD: " << minD << endl;
+            assert(bestUnforcedPassStudent >= i + 1);
+            minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestUnforcedPassStudent));
+
+#if 0
             int bestStudentIndex = -1;
             for (int j = rangeMin; j <= rangeMax; j++)
             {
@@ -637,7 +645,8 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 }
             }
             assert(bestStudentIndex != -1);
-            minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestStudentIndex));
+#endif
+
         }
 
 
@@ -659,6 +668,11 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
             - (n - 1 - i) + 
             heightDifferential;
         minTree.setValue(i, d[i]);
+
+        nextIndexOfDWithValue[d[i]] = i;
+
+        cout << "i: " << i << " d: " << d[i] << endl;
+
 
     }
 
