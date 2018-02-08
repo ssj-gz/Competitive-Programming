@@ -94,7 +94,7 @@ int64_t minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>&
         for (int nextStudent = i + 1; nextStudent <= lastStudentIndex; nextStudent++)
         {
             assert(heights[nextStudent] <= heights[i]);
-            if (d[nextStudent] < minD)
+            if (d[nextStudent] <= minD)
             {
                 minD = d[nextStudent];
                 minDIndex = nextStudent;
@@ -481,8 +481,8 @@ int main(int argc, char** argv)
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         const int N = rand() % 20 + 1;
-        const int maxHeight = 30;
-        const int maxPrice = 2000;
+        const int maxHeight = 5;
+        const int maxPrice = 5;
         const int minPrice = -maxPrice;
         cout << N << endl;
         for (int i = 0; i < N; i++)
