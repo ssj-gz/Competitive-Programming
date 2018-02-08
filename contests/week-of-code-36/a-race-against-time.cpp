@@ -388,6 +388,12 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
 
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
 
+    // The d array is a rather abstract thing intended to make choosing the 
+    // best student to hand to easier to find: it can be shown that
+    //
+    //   d[i] < d[j] if and only if cost of handing to student i < cost of handing to student j
+    //
+    // (and the same for ==, >, etc).
     vector<int64_t> d(n);
     d.back() = minCostStartingWithStudent.back() + prices.back();
     map<int64_t, int> nextIndexOfDWithValue;
