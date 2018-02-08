@@ -23,29 +23,34 @@ int64_t minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>&
     vector<int64_t> d(n);
     cout << "prices.back(): " << prices.back() << endl;
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
-    d.back() = 0 + prices.back();
+    d.back() = 1 + prices.back();
+    cout << "d[" << (n  - 1) << "] = " << d[n - 1] << endl;
 
+    int64_t heightDifferential = 0;
     for (int i = n - 2; i >= 0; i--)
     {
-        cout << "i: " << i << endl;
-        int64_t minCostStartingHere = numeric_limits<int64_t>::max();
-        bool forcedExchange = false;
-        int nextStudentChosen = -1;
-        int minDIndex = -1;
-        int64_t minD = numeric_limits<int64_t>::max();
-        int64_t dbgMinCost = minCostStartingHere;
-        for (int nextStudent = i + 1; nextStudent < n; nextStudent++)
+        auto costIfPassedToStudent = [i, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
         {
             const int64_t costIfPassedToNextStudent = (nextStudent - i) // Cost of running to student.
                 + prices[nextStudent] // Student charge
                 + abs(heights[nextStudent] - heights[i]) // Height difference (time taken to exchange).
                 + minCostStartingWithStudent[nextStudent]; 
+            return costIfPassedToNextStudent;
+        };
+        cout << "i: " << i << endl;
+        int64_t minCostStartingHere = numeric_limits<int64_t>::max();
+        int nextStudentChosen = -1;
+        int indexOfTaller = -1;
+        for (int nextStudent = i + 1; nextStudent < n; nextStudent++)
+        {
+            const auto costIfPassedToNextStudent = costIfPassedToStudent(nextStudent);
             if (costIfPassedToNextStudent < minCostStartingHere)
             {
                 minCostStartingHere = costIfPassedToNextStudent;
                 nextStudentChosen = nextStudent;
                 cout << " chosen nextStudent = " << nextStudent << " for cost " << costIfPassedToNextStudent << endl;
             }
+#if 0
             if (d[nextStudent] < minD 
                     && (heights[nextStudent] <= heights[i])
                )
@@ -63,19 +68,43 @@ int64_t minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>&
                     minDIndex = nextStudent;
                 }
             }
+#endif
             //cout << " nextStudent: " << nextStudent << " minCostStartingHere becomes " << minCostStartingHere << endl;
             if (heights[nextStudent] > heights[i])
             {
                 cout << "  Forced exchange!" << endl;
-                forcedExchange = true;
+                //forcedExchange = true;
+                indexOfTaller = nextStudent;
                 //cout << " chosen (forced) nextStudent = " << nextStudent << " for cost " << costIfPassedToNextStudent << endl;
+#if 0
                 if (costIfPassedToNextStudent < dbgMinCost)
                 {
                     minDIndex = nextStudent;
                     dbgMinCost = min(dbgMinCost, costIfPassedToNextStudent);
                 }
+#endif
                 break;
             }
+        }
+        const bool forcedExchange = (indexOfTaller != -1);
+        int minDIndex = -1;
+        int64_t minD = numeric_limits<int64_t>::max();
+        int64_t dbgMinCost = numeric_limits<int64_t>::max();
+        const int lastStudentIndex =  (indexOfTaller == -1 ? n - 1 : indexOfTaller - 1);
+        for (int nextStudent = i + 1; nextStudent <= lastStudentIndex; nextStudent++)
+        {
+            assert(heights[nextStudent] <= heights[i]);
+            if (d[nextStudent] < minD)
+            {
+                minD = d[nextStudent];
+                minDIndex = nextStudent;
+                dbgMinCost = min(dbgMinCost, costIfPassedToStudent(nextStudent));
+                cout << "Bleep: " << nextStudent << " minD: " << minD << endl;
+            }
+        }
+        if (indexOfTaller != -1)
+        {
+            dbgMinCost = min(dbgMinCost, costIfPassedToStudent(indexOfTaller));
         }
         if (!forcedExchange)
         {
@@ -84,9 +113,13 @@ int64_t minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>&
             dbgMinCost = min(dbgMinCost, static_cast<int64_t>(n - i));
             //cout << " Run straight to finish line" << endl;
         }
-        //cout << " minCostStartingHere: " << minCostStartingHere << endl;
         minCostStartingWithStudent[i] = minCostStartingHere;
-        d[i] = minCostStartingWithStudent[i] + prices[i] - (n - i) + heights[i + 1] - heights[i];
+        heightDifferential += heights[i + 1] - heights[i];
+        d[i] = minCostStartingWithStudent[i] + 
+            (prices[i]) 
+            - (n - i) + 
+            heightDifferential;
+        cout << " minCostStartingHere: " << minCostStartingHere << " d[" << i<< "] = " << d[i] << endl;
         for (int j = i + 1; j < n; j++)
         {
 #if 0
@@ -101,7 +134,7 @@ int64_t minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>&
         }
         cout << "forcedExchange: " << forcedExchange << " nextStudentChosen: " << nextStudentChosen << " minDIndex: " << minDIndex << " minCostStartingHere: " << minCostStartingHere << " dbgMinCost: " << dbgMinCost << endl;
         assert(dbgMinCost == minCostStartingHere);
-        
+
 
 
     }
@@ -447,9 +480,9 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 4 + 1;
-        const int maxHeight = 10;
-        const int maxPrice = 10;
+        const int N = rand() % 20 + 1;
+        const int maxHeight = 30;
+        const int maxPrice = 2000;
         const int minPrice = -maxPrice;
         cout << N << endl;
         for (int i = 0; i < N; i++)
@@ -495,8 +528,8 @@ int main(int argc, char** argv)
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = minCostBruteForce(heights, prices);
-    //cout << "resultBruteForce: " << resultBruteForce << endl;
-    cout << resultBruteForce << endl;
+    cout << "resultBruteForce: " << resultBruteForce << endl;
+    //cout << resultBruteForce << endl;
 #endif
 
 }
