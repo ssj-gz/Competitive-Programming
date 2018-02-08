@@ -108,13 +108,6 @@ class SegmentTree
             {
                 m_applyOperator(operatorInfo, m_dbgValues[i]);
             }
-#if 0
-            cout << "applyOperatorToAllInRange left: " << left << " right: " << right << " operatorInfo: " << operatorInfo << endl;
-            for (int i = 0; i < m_maxNumber; i++)
-            {
-                cout << " i: " << i << " segment tree value: " << m_dbgValues[i] << endl;
-            }
-#endif
 #endif
         }
         void setValue(int pos, const ValueType& newValue)
