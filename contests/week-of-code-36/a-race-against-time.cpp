@@ -1,4 +1,5 @@
 // Simon St James (ssjgz) - 2018-02-08
+// This is a Brute Force solution for testing only - not expected to pass, yet!
 #define BRUTE_FORCE
 //#define SUBMISSION
 #ifdef SUBMISSION
@@ -20,16 +21,17 @@ int64_t minCostBruteForce(const vector<int>& heights, const vector<int64_t>& pri
 
     for (int i = n - 2; i >= 0; i--)
     {
-        cout << "i: " << i << endl;
+        //cout << "i: " << i << endl;
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
         bool forcedExchange = false;
         for (int nextStudent = i + 1; nextStudent < n; nextStudent++)
         {
-            minCostStartingHere = (nextStudent - i) + prices[nextStudent] + abs(heights[nextStudent] - heights[i]) + minCostStartingWithStudent[nextStudent];
-            cout << " nextStudent: " << nextStudent << " minCostStartingHere becomes " << minCostStartingHere << endl;
+            const auto costIfPassedToNextStudent = (nextStudent - i) + prices[nextStudent] + abs(heights[nextStudent] - heights[i]) + minCostStartingWithStudent[nextStudent];
+            minCostStartingHere = min(minCostStartingHere, costIfPassedToNextStudent);
+            //cout << " nextStudent: " << nextStudent << " minCostStartingHere becomes " << minCostStartingHere << endl;
             if (heights[nextStudent] > heights[i])
             {
-                cout << "  Forced exchange!" << endl;
+                //cout << "  Forced exchange!" << endl;
                 forcedExchange = true;
                 break;
             }
@@ -38,9 +40,9 @@ int64_t minCostBruteForce(const vector<int>& heights, const vector<int64_t>& pri
         {
             // Run to finish line.
             minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - i));
-            cout << " Run straight to finish line" << endl;
+            //cout << " Run straight to finish line" << endl;
         }
-        cout << " minCostStartingHere: " << minCostStartingHere << endl;
+        //cout << " minCostStartingHere: " << minCostStartingHere << endl;
         minCostStartingWithStudent[i] = minCostStartingHere;
 
 
@@ -48,7 +50,7 @@ int64_t minCostBruteForce(const vector<int>& heights, const vector<int64_t>& pri
 
     for (int i = 0; i < n; i++)
     {
-        cout << "minCostStartingWithStudent[" << i << "] = " << minCostStartingWithStudent[i] << endl;
+        //cout << "minCostStartingWithStudent[" << i << "] = " << minCostStartingWithStudent[i] << endl;
     }
 
     return minCostStartingWithStudent[0];
@@ -77,7 +79,8 @@ int main()
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = minCostBruteForce(heights, prices);
-    cout << "resultBruteForce: " << resultBruteForce << endl;
+    //cout << "resultBruteForce: " << resultBruteForce << endl;
+    cout << resultBruteForce << endl;
 #endif
 
 }
