@@ -401,49 +401,33 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
 vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& prices)
 {
     const int n = heights.size();
-    //cout << "n: " << n << endl;
     vector<int64_t> minCostStartingWithStudent(n);
-    vector<int64_t> d(n);
-    //cout << "prices.back(): " << prices.back() << endl;
+
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
+
+    vector<int64_t> d(n);
     d.back() = minCostStartingWithStudent.back() + prices.back();
     map<int64_t, int> nextIndexOfDWithValue;
     nextIndexOfDWithValue[d[n - 1]] = n - 1;
-    //cout << "d[" << (n  - 1) << "] = " << d[n - 1] << endl;
 
-    auto combineValues = [](const auto& x, const auto& y)
+    auto minimumOfValues = [](const auto& x, const auto& y)
     {
         return min(x, y);
     };
-    auto applyOperator = [](auto blah, const auto& blee)
+    auto minDApplyOperatorUnused = [](auto, const auto&)
     {
         assert(false);
     };
-    auto combineOperators = [](const auto& blah, const auto& blee)
+    auto minDCombineOperatorsUnused = [](const auto&, const auto&)
     {
         assert(false);
         return 0;
     };
     using MinTree = SegmentTree<int64_t, int>;
-    MinTree minTree(n + 1, combineValues, applyOperator, combineOperators);
-    //cout << "fleep: " << d[n - 1] << endl;
-    minTree.setValue(n - 1, d[n - 1]);
-#if 0
+    // Allow us to find the minimum value of d for a given range of students.
+    MinTree minDTree(n + 1, minimumOfValues, minDApplyOperatorUnused, minDCombineOperatorsUnused);
+    minDTree.setValue(n - 1, d[n - 1]);
 
-    minTree.setValue(0, 5);
-    minTree.setValue(1, 5);
-    minTree.setValue(2, -1);
-    minTree.setValue(3, -3);
-    minTree.setValue(4, -4);
-
-    cout << "min 0-1 " << minTree.combinedValuesInRange(0, 1, std::numeric_limits<int64_t>::max()) << endl;
-    cout << "min 0-2 " << minTree.combinedValuesInRange(0, 2, std::numeric_limits<int64_t>::max()) << endl;
-    cout << "min 0-3 " << minTree.combinedValuesInRange(0, 3, std::numeric_limits<int64_t>::max()) << endl;
-    cout << "min 1-3 " << minTree.combinedValuesInRange(1, 3, std::numeric_limits<int64_t>::max()) << endl;
-    cout << "min 2-3 " << minTree.combinedValuesInRange(2, 3, std::numeric_limits<int64_t>::max()) << endl;
-    cout << "min 2-2 " << minTree.combinedValuesInRange(2, 2, std::numeric_limits<int64_t>::max()) << endl;
-    cout << "min 3-4 " << minTree.combinedValuesInRange(3, 4, std::numeric_limits<int64_t>::max()) << endl;
-#endif
     vector<int> indexOfNextTallerStudent(n, -1);
     {
         // Build up indexOfNextTallerStudent in O(nlogn).
@@ -521,7 +505,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         const auto rangeMax = tallerStudentIndex == -1 ? n - 1 : tallerStudentIndex - 1;
         if (rangeMax >= rangeMin)
         {
-            const auto minD = minTree.combinedValuesInRange(rangeMin, rangeMax, numeric_limits<int64_t>::max());
+            const auto minD = minDTree.combinedValuesInRange(rangeMin, rangeMax, numeric_limits<int64_t>::max());
             const int bestUnforcedPassStudent = nextIndexOfDWithValue[minD];
             assert(bestUnforcedPassStudent >= i + 1);
             minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestUnforcedPassStudent));
@@ -539,12 +523,13 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         }
         minCostStartingWithStudent[i] = minCostStartingHere;
 
+        // Update d.
         heightDifferential += heights[i + 1] - heights[i];
         d[i] = minCostStartingWithStudent[i] + 
             (prices[i]) 
             - (n - 1 - i) + 
             heightDifferential;
-        minTree.setValue(i, d[i]);
+        minDTree.setValue(i, d[i]);
         nextIndexOfDWithValue[d[i]] = i;
     }
 
