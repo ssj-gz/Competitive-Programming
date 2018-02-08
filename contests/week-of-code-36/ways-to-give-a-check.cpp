@@ -143,7 +143,6 @@ int main()
                 continue; // Can't move Pawn forwards!
             for (const auto pieceToPromoteTo : piecesToPromoteTo)
             {
-                //cout << "Promoting to " << pieceToPromoteTo << endl;
                 vector<string> board{boardOriginal};
                 board[candidatePawnPos.row][candidatePawnPos.col] = '#';
                 board[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
@@ -155,67 +154,7 @@ int main()
                 if (isKingInCheck(board, true))
                 {
                     numWaysToCheck++;
-                    continue;
                 }
-                // King is not in check - is it the only Black piece, and can it move next turn?
-                bool isKingOnlyBlackPiece = true;
-                int blackKingRow = -1;
-                int blackKingCol = -1;
-                for (int row = 0; row < numRows; row++)
-                {
-                    for (int col = 0; col < numCols; col++)
-                    {
-                        if (board[row][col] == 'k')
-                        {
-                            blackKingRow = row;
-                            blackKingCol = col;
-                        }
-                        else if (board[row][col]  == tolower(board[row][col]) && board[row][col] != '#')
-                        {
-                            isKingOnlyBlackPiece = false;
-                            //cout << "Found non-King: " << board[row][col] << endl;
-                        }
-                    }
-                }
-                assert(blackKingRow != -1 && blackKingCol != -1);
-
-
-                //cout << "isKingOnlyBlackPiece: " << isKingOnlyBlackPiece << endl;
-                if (isKingOnlyBlackPiece)
-                {
-                    bool kingCanMoveNextTurn = false;
-                    for (int nextKingRow = blackKingRow - 1; nextKingRow <= blackKingRow + 1; nextKingRow++)
-                    {
-                        for (int nextKingCol = blackKingCol - 1; nextKingCol <= blackKingCol + 1; nextKingCol++)
-                        {
-                            if (nextKingRow == blackKingRow && nextKingCol == blackKingCol)
-                                continue;
-                            if (nextKingRow < 0 || nextKingRow >= numRows)
-                                continue; 
-                            if (nextKingCol < 0 || nextKingCol >= numCols)
-                                continue; 
-                            if (board[nextKingRow][nextKingCol] != '#')
-                                continue;
-                            board[nextKingRow][nextKingCol] = 'k';
-                            board[blackKingRow][blackKingCol] = '#';
-
-                            if (!isKingInCheck(board, true))
-                            {
-                                kingCanMoveNextTurn = true;
-                            }
-
-                            board[nextKingRow][nextKingCol] = '#';
-                            board[blackKingRow][blackKingCol] = 'k';
-                        }
-                    }
-
-                    if (!kingCanMoveNextTurn)
-                    {
-                        //cout << "King is only piece and cannot move" << endl;
-                        numWaysToCheck++;
-                    }
-                }
-
             }
 
             if (isPawnPromotable)
