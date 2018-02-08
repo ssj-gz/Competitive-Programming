@@ -354,7 +354,7 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
     vector<int64_t> d(n);
     //cout << "prices.back(): " << prices.back() << endl;
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
-    d.back() = 1 + prices.back();
+    d.back() = minCostStartingWithStudent.back() + prices.back();
     //cout << "d[" << (n  - 1) << "] = " << d[n - 1] << endl;
 
     int64_t heightDifferential = 0;
@@ -425,7 +425,7 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
         for (int nextStudent = i + 1; nextStudent <= lastStudentIndex; nextStudent++)
         {
             assert(heights[nextStudent] <= heights[i]);
-            if (d[nextStudent] <= minD)
+            if (d[nextStudent] < minD)
             {
                 minD = d[nextStudent];
                 minDIndex = nextStudent;
@@ -448,7 +448,7 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
         heightDifferential += heights[i + 1] - heights[i];
         d[i] = minCostStartingWithStudent[i] + 
             (prices[i]) 
-            - (n - i) + 
+            - (n - i + -1) + 
             heightDifferential;
         //cout << " minCostStartingHere: " << minCostStartingHere << " d[" << i<< "] = " << d[i] << endl;
         for (int j = i + 1; j < n; j++)
@@ -492,7 +492,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     vector<int64_t> d(n);
     //cout << "prices.back(): " << prices.back() << endl;
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
-    d.back() = 1 + prices.back();
+    d.back() = minCostStartingWithStudent.back() + prices.back();
     //cout << "d[" << (n  - 1) << "] = " << d[n - 1] << endl;
 
     auto combineValues = [](const auto& x, const auto& y)
@@ -633,6 +633,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 if (d[j] == minD)
                 {
                     bestStudentIndex = j;
+                    break;
                 }
             }
             assert(bestStudentIndex != -1);
@@ -655,7 +656,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         heightDifferential += heights[i + 1] - heights[i];
         d[i] = minCostStartingWithStudent[i] + 
             (prices[i]) 
-            - (n - i) + 
+            - (n - 1 - i) + 
             heightDifferential;
         minTree.setValue(i, d[i]);
 
