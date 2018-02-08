@@ -340,13 +340,11 @@ class SegmentTree
 
 vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>& prices)
 {
+    // An O(N^2) algorithm provided as a reference implementation.
     const int n = heights.size();
     vector<int64_t> minCostStartingWithStudent(n);
-    vector<int64_t> d(n);
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
-    d.back() = minCostStartingWithStudent.back() + prices.back();
 
-    int64_t heightDifferential = 0;
     for (int i = n - 2; i >= 0; i--)
     {
         auto costIfPassedToStudent = [i, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
@@ -358,34 +356,26 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
             return costIfPassedToNextStudent;
         };
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
-        int nextStudentChosen = -1;
-        int indexOfTaller = -1;
+        bool forcedExchange = false;
         for (int nextStudent = i + 1; nextStudent < n; nextStudent++)
         {
             const auto costIfPassedToNextStudent = costIfPassedToStudent(nextStudent);
             if (costIfPassedToNextStudent < minCostStartingHere)
             {
                 minCostStartingHere = costIfPassedToNextStudent;
-                nextStudentChosen = nextStudent;
             }
             if (heights[nextStudent] > heights[i])
             {
-                indexOfTaller = nextStudent;
+                forcedExchange = true;
                 break;
             }
         }
-        const bool forcedExchange = (indexOfTaller != -1);
         if (!forcedExchange)
         {
             // Run to finish line.
             minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - i));
         }
         minCostStartingWithStudent[i] = minCostStartingHere;
-        heightDifferential += heights[i + 1] - heights[i];
-        d[i] = minCostStartingWithStudent[i] + 
-            (prices[i]) 
-            - (n - i + -1) + 
-            heightDifferential;
     }
 
     return minCostStartingWithStudent;
@@ -539,8 +529,8 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxMaxHeight = 100;
-        const int maxMaxPrice = 100;
+        const int maxMaxHeight = 10;
+        const int maxMaxPrice = 10;
 
         const int N = rand() % 200 + 1;
         const int maxHeight = rand() % maxMaxHeight + 1;
