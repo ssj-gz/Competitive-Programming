@@ -2,7 +2,7 @@
 // This is a Brute Force solution for testing only - not expected to pass, yet!
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -13,6 +13,7 @@
 #include <limits>
 #include <functional>
 #include <map>
+#include <algorithm>
 #include <sys/time.h>
 #include <cassert>
 
@@ -108,6 +109,13 @@ class SegmentTree
             {
                 m_applyOperator(operatorInfo, m_dbgValues[i]);
             }
+#if 0
+            cout << "applyOperatorToAllInRange left: " << left << " right: " << right << " operatorInfo: " << operatorInfo << endl;
+            for (int i = 0; i < m_maxNumber; i++)
+            {
+                cout << " i: " << i << " segment tree value: " << m_dbgValues[i] << endl;
+            }
+#endif
 #endif
         }
         void setValue(int pos, const ValueType& newValue)
@@ -520,9 +528,58 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     cout << "min 2-2 " << minTree.combinedValuesInRange(2, 2, std::numeric_limits<int64_t>::max()) << endl;
     cout << "min 3-4 " << minTree.combinedValuesInRange(3, 4, std::numeric_limits<int64_t>::max()) << endl;
 #endif
-    map<int64_t, int> indexOfNextStudentWithHeight;
     vector<int> indexOfNextTallerStudent(n, -1);
+    {
+        vector<int> compressedHeights(n);
+        map<int64_t, int> heightToCompressedIndex;
+        vector<int64_t> heightsSorted(heights);
+        sort(heightsSorted.begin(), heightsSorted.end());
+        int compressedHeightIndex = 0;
+        for (const auto height : heightsSorted)
+        {
+            auto iter = heightToCompressedIndex.find(height);
+            if (iter == heightToCompressedIndex.end())
+            {
+                heightToCompressedIndex[height] = compressedHeightIndex;
+                compressedHeightIndex++;
+            }
+        }
+        auto combineValues = [](const auto& x, const auto& y)
+        {
+            return min(x, y);
+        };
+        auto applyOperator = [](auto toSetTo, auto& dest)
+        {
+            dest = toSetTo;
+        };
+        auto combineOperators = [](const auto& newestOperator, const auto& olderOperator)
+        {
+            return newestOperator;
+        };
+        using MinTree = SegmentTree<int, int>;
+        MinTree minIndexTree(n + 1, combineValues, applyOperator, combineOperators);
+        minIndexTree.setInitialValues(vector<int>(n + 1, numeric_limits<int>::max()));
+        for (int i = n - 1; i >= 0; i--)
+        {
+            const int compressedHeightIndex = heightToCompressedIndex[heights[i]];
+            const auto indexOfNextTallest = minIndexTree.combinedValuesInRange(compressedHeightIndex + 1, n, numeric_limits<int>::max());
+            //cout << "i: " << i << " height: " << heights[i] << " compressedHeightIndex: " << compressedHeightIndex << " indexOfNextTallest: " << indexOfNextTallest << endl;
+
+            if (indexOfNextTallest == numeric_limits<int>::max())
+            {
+                indexOfNextTallerStudent[i] = -1;
+            }
+            else
+            {
+                indexOfNextTallerStudent[i] = indexOfNextTallest;
+            }
+
+            minIndexTree.applyOperatorToAllInRange(0, compressedHeightIndex, i);
+        }
+    }
     
+#if 0
+    map<int64_t, int> indexOfNextStudentWithHeight;
     for (int i = n - 1; i >= 0; i--)
     {
         auto tallerIndexIter = indexOfNextStudentWithHeight.upper_bound(heights[i]);
@@ -530,9 +587,12 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         {
             indexOfNextTallerStudent[i] = tallerIndexIter->second;
         }
+        cout << "i: indexOfNextTallerStudent: " << indexOfNextTallerStudent[i] << endl;
 
         indexOfNextStudentWithHeight[heights[i]] = i;
+        cout << "Stored " << heights[i] << " -> " << i << endl;
     }
+#endif
 
     int64_t heightDifferential = 0;
     for (int i = n - 2; i >= 0; i--)
@@ -555,6 +615,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 break;
             }
         }
+        //cout << "i: " << i << " tallerStudentIndex:" << tallerStudentIndex << " indexOfNextTallerStudent: " << indexOfNextTallerStudent[i] << endl;
         assert(tallerStudentIndex == indexOfNextTallerStudent[i]);
 
         //cout << "tallerStudentIndex: " << tallerStudentIndex << endl;
@@ -650,7 +711,7 @@ int main(int argc, char** argv)
         cin >> prices[i];
     }
 
-#if 0
+#ifndef SUBMISSION
     cout << "heights: " << endl;
     for (const auto x : heights)
         cout << x << " ";
