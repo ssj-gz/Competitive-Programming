@@ -348,13 +348,10 @@ class SegmentTree
 vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<int64_t>& prices)
 {
     const int n = heights.size();
-    //cout << "n: " << n << endl;
     vector<int64_t> minCostStartingWithStudent(n);
     vector<int64_t> d(n);
-    //cout << "prices.back(): " << prices.back() << endl;
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
     d.back() = minCostStartingWithStudent.back() + prices.back();
-    //cout << "d[" << (n  - 1) << "] = " << d[n - 1] << endl;
 
     int64_t heightDifferential = 0;
     for (int i = n - 2; i >= 0; i--)
@@ -367,7 +364,6 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
                 + minCostStartingWithStudent[nextStudent]; 
             return costIfPassedToNextStudent;
         };
-        //cout << "i: " << i << endl;
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
         int nextStudentChosen = -1;
         int indexOfTaller = -1;
@@ -378,70 +374,18 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
             {
                 minCostStartingHere = costIfPassedToNextStudent;
                 nextStudentChosen = nextStudent;
-                //cout << " chosen nextStudent = " << nextStudent << " for cost " << costIfPassedToNextStudent << endl;
             }
-#if 0
-            if (d[nextStudent] < minD 
-                    && (heights[nextStudent] <= heights[i])
-               )
-            {
-                minDIndex = nextStudent;
-                minD = d[nextStudent];
-                cout << "Bleep: " << nextStudent << " minD: " << minD << endl;
-                dbgMinCost = costIfPassedToNextStudent;
-            }
-            if (nextStudent == n - 1 && (heights[nextStudent] <= heights[i]))
-            {
-                if (costIfPassedToNextStudent < dbgMinCost)
-                {
-                    dbgMinCost = costIfPassedToNextStudent;
-                    minDIndex = nextStudent;
-                }
-            }
-#endif
-            //cout << " nextStudent: " << nextStudent << " minCostStartingHere becomes " << minCostStartingHere << endl;
             if (heights[nextStudent] > heights[i])
             {
-                //cout << "  Forced exchange!" << endl;
-                //forcedExchange = true;
                 indexOfTaller = nextStudent;
-                //cout << " chosen (forced) nextStudent = " << nextStudent << " for cost " << costIfPassedToNextStudent << endl;
-#if 0
-                if (costIfPassedToNextStudent < dbgMinCost)
-                {
-                    minDIndex = nextStudent;
-                    dbgMinCost = min(dbgMinCost, costIfPassedToNextStudent);
-                }
-#endif
                 break;
             }
         }
         const bool forcedExchange = (indexOfTaller != -1);
-        int minDIndex = -1;
-        int64_t minD = numeric_limits<int64_t>::max();
-        int64_t dbgMinCost = numeric_limits<int64_t>::max();
-        const int lastStudentIndex =  (indexOfTaller == -1 ? n - 1 : indexOfTaller - 1);
-        for (int nextStudent = i + 1; nextStudent <= lastStudentIndex; nextStudent++)
-        {
-            assert(heights[nextStudent] <= heights[i]);
-            if (d[nextStudent] < minD)
-            {
-                minD = d[nextStudent];
-                minDIndex = nextStudent;
-                dbgMinCost = min(dbgMinCost, costIfPassedToStudent(nextStudent));
-                //cout << "Bleep: " << nextStudent << " minD: " << minD << endl;
-            }
-        }
-        if (indexOfTaller != -1)
-        {
-            dbgMinCost = min(dbgMinCost, costIfPassedToStudent(indexOfTaller));
-        }
         if (!forcedExchange)
         {
             // Run to finish line.
             minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - i));
-            dbgMinCost = min(dbgMinCost, static_cast<int64_t>(n - i));
-            //cout << " Run straight to finish line" << endl;
         }
         minCostStartingWithStudent[i] = minCostStartingHere;
         heightDifferential += heights[i + 1] - heights[i];
@@ -449,35 +393,6 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
             (prices[i]) 
             - (n - i + -1) + 
             heightDifferential;
-        //cout << " minCostStartingHere: " << minCostStartingHere << " d[" << i<< "] = " << d[i] << endl;
-        for (int j = i + 1; j < n; j++)
-        {
-#if 0
-            if (d[j] < minD)
-            {
-                minDIndex = j;
-                minD = d[j];
-            }
-            if (heights[j] > heights[i])
-                break;
-#endif
-        }
-        //cout << "forcedExchange: " << forcedExchange << " nextStudentChosen: " << nextStudentChosen << " minDIndex: " << minDIndex << " minCostStartingHere: " << minCostStartingHere << " dbgMinCost: " << dbgMinCost << endl;
-        assert(dbgMinCost == minCostStartingHere);
-
-
-
-    }
-
-    for (int i = 0; i < n; i++)
-    {
-        //cout << "minCostStartingWithStudent[" << i << "] = " << minCostStartingWithStudent[i] << endl;
-    }
-
-    for (int i = 0; i < n; i++)
-    {
-        //cout << "minCostStartingWithStudent[" << i << "] = " << minCostStartingWithStudent[i] << endl;
-        //cout << "d[" << i << "] = " << d[i] << endl;
     }
 
     return minCostStartingWithStudent;
@@ -564,7 +479,6 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         {
             const int compressedHeightIndex = heightToCompressedIndex[heights[i]];
             const auto indexOfNextTallest = minIndexTree.combinedValuesInRange(compressedHeightIndex + 1, n, numeric_limits<int>::max());
-            //cout << "i: " << i << " height: " << heights[i] << " compressedHeightIndex: " << compressedHeightIndex << " indexOfNextTallest: " << indexOfNextTallest << endl;
 
             if (indexOfNextTallest == numeric_limits<int>::max())
             {
@@ -579,22 +493,6 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         }
     }
     
-#if 0
-    map<int64_t, int> indexOfNextStudentWithHeight;
-    for (int i = n - 1; i >= 0; i--)
-    {
-        auto tallerIndexIter = indexOfNextStudentWithHeight.upper_bound(heights[i]);
-        if (tallerIndexIter != indexOfNextStudentWithHeight.end())
-        {
-            indexOfNextTallerStudent[i] = tallerIndexIter->second;
-        }
-        cout << "i: indexOfNextTallerStudent: " << indexOfNextTallerStudent[i] << endl;
-
-        indexOfNextStudentWithHeight[heights[i]] = i;
-        cout << "Stored " << heights[i] << " -> " << i << endl;
-    }
-#endif
-
     int64_t heightDifferential = 0;
 
     for (int i = n - 2; i >= 0; i--)
@@ -607,48 +505,17 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 + minCostStartingWithStudent[nextStudent]; 
             return costIfPassedToNextStudent;
         };
-#if 0
-        //cout << "i: " << i << endl;
-        int tallerStudentIndex = -1;
-        for (int j = i + 1; j < n; j++)
-        {
-            if (heights[j] > heights[i])
-            {
-                tallerStudentIndex = j;
-                break;
-            }
-        }
-        //cout << "i: " << i << " tallerStudentIndex:" << tallerStudentIndex << " indexOfNextTallerStudent: " << indexOfNextTallerStudent[i] << endl;
-        assert(tallerStudentIndex == indexOfNextTallerStudent[i]);
-#endif
         const int tallerStudentIndex = indexOfNextTallerStudent[i];
 
-        //cout << "tallerStudentIndex: " << tallerStudentIndex << endl;
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
         const auto rangeMin = i + 1;
         const auto rangeMax = tallerStudentIndex == -1 ? n - 1 : tallerStudentIndex - 1;
-        //cout << "i: " << i << " rangeMin: " << rangeMin << " rangeMax: " << rangeMax << endl;
         if (rangeMax >= rangeMin)
         {
             const auto minD = minTree.combinedValuesInRange(rangeMin, rangeMax, numeric_limits<int64_t>::max());
             const int bestUnforcedPassStudent = nextIndexOfDWithValue[minD];
-            //cout << "bestUnforcedPassStudent: " << bestUnforcedPassStudent << " minD: " << minD << endl;
             assert(bestUnforcedPassStudent >= i + 1);
             minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestUnforcedPassStudent));
-
-#if 0
-            int bestStudentIndex = -1;
-            for (int j = rangeMin; j <= rangeMax; j++)
-            {
-                if (d[j] == minD)
-                {
-                    bestStudentIndex = j;
-                    break;
-                }
-            }
-            assert(bestStudentIndex != -1);
-#endif
-
         }
 
 
