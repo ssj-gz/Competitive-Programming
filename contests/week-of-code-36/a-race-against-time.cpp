@@ -12,6 +12,7 @@
 #include <vector>
 #include <limits>
 #include <functional>
+#include <map>
 #include <sys/time.h>
 #include <cassert>
 
@@ -519,6 +520,19 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     cout << "min 2-2 " << minTree.combinedValuesInRange(2, 2, std::numeric_limits<int64_t>::max()) << endl;
     cout << "min 3-4 " << minTree.combinedValuesInRange(3, 4, std::numeric_limits<int64_t>::max()) << endl;
 #endif
+    map<int64_t, int> indexOfNextStudentWithHeight;
+    vector<int> indexOfNextTallerStudent(n, -1);
+    
+    for (int i = n - 1; i >= 0; i--)
+    {
+        auto tallerIndexIter = indexOfNextStudentWithHeight.upper_bound(heights[i]);
+        if (tallerIndexIter != indexOfNextStudentWithHeight.end())
+        {
+            indexOfNextTallerStudent[i] = tallerIndexIter->second;
+        }
+
+        indexOfNextStudentWithHeight[heights[i]] = i;
+    }
 
     int64_t heightDifferential = 0;
     for (int i = n - 2; i >= 0; i--)
@@ -541,6 +555,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 break;
             }
         }
+        assert(tallerStudentIndex == indexOfNextTallerStudent[i]);
 
         //cout << "tallerStudentIndex: " << tallerStudentIndex << endl;
         int64_t minD = numeric_limits<int64_t>::max();
