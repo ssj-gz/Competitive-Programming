@@ -446,6 +446,12 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
 #endif
     vector<int> indexOfNextTallerStudent(n, -1);
     {
+        // Build up indexOfNextTallerStudent in O(nlogn).
+        // We do this by compressing heights so that they are in the range 0 ... n (rather than 0 - 10^9)
+        // so that the given heights H1 and H2 with corresponding compressed height indicies hi1 and hi2,
+        // H1 < H2 if and only if hi1 < hi2 (and same for =, >, etc).
+        // We can then use a segment tree, indexed by compressed height indices, to find the index of
+        // the next student whose height exceeds a given value.
         vector<int> compressedHeights(n);
         map<int64_t, int> heightToCompressedIndex;
         vector<int64_t> heightsSorted(heights);
@@ -460,25 +466,27 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 compressedHeightIndex++;
             }
         }
-        auto combineValues = [](const auto& x, const auto& y)
+        auto minimumOfValues = [](const auto& x, const auto& y)
         {
             return min(x, y);
         };
-        auto applyOperator = [](auto toSetTo, auto& dest)
+        auto setValue = [](auto toSetTo, auto& dest)
         {
             dest = toSetTo;
         };
-        auto combineOperators = [](const auto& newestOperator, const auto& olderOperator)
+        auto combineSetValues = [](const auto& newestValueToSet, const auto& olderValueToSet)
         {
-            return newestOperator;
+            return newestValueToSet;
         };
         using MinTree = SegmentTree<int, int>;
-        MinTree minIndexTree(n + 1, combineValues, applyOperator, combineOperators);
-        minIndexTree.setInitialValues(vector<int>(n + 1, numeric_limits<int>::max()));
+        // Given the compressed height indices hi and hj, hi <= hj, tracks the next index of the student
+        // whose compressed height index is between hi and hj.
+        MinTree minIndexForCompressedHeightTree(n + 1, minimumOfValues, setValue, combineSetValues);
+        minIndexForCompressedHeightTree.setInitialValues(vector<int>(n + 1, numeric_limits<int>::max()));
         for (int i = n - 1; i >= 0; i--)
         {
             const int compressedHeightIndex = heightToCompressedIndex[heights[i]];
-            const auto indexOfNextTallest = minIndexTree.combinedValuesInRange(compressedHeightIndex + 1, n, numeric_limits<int>::max());
+            const auto indexOfNextTallest = minIndexForCompressedHeightTree.combinedValuesInRange(compressedHeightIndex + 1, n, numeric_limits<int>::max());
 
             if (indexOfNextTallest == numeric_limits<int>::max())
             {
@@ -489,12 +497,13 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 indexOfNextTallerStudent[i] = indexOfNextTallest;
             }
 
-            minIndexTree.applyOperatorToAllInRange(0, compressedHeightIndex, i);
+            // The student with index i's height exceeds all those whose indices are in the range
+            // 0 ... compressedHeightIndex.
+            minIndexForCompressedHeightTree.applyOperatorToAllInRange(0, compressedHeightIndex, i);
         }
     }
     
     int64_t heightDifferential = 0;
-
     for (int i = n - 2; i >= 0; i--)
     {
         auto costIfPassedToStudent = [i, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
@@ -518,7 +527,6 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
             minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestUnforcedPassStudent));
         }
 
-
         const bool forcedExchange = (tallerStudentIndex != -1);
         if (!forcedExchange)
         {
@@ -537,12 +545,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
             - (n - 1 - i) + 
             heightDifferential;
         minTree.setValue(i, d[i]);
-
         nextIndexOfDWithValue[d[i]] = i;
-
-        //cout << "i: " << i << " d: " << d[i] << endl;
-
-
     }
 
     return minCostStartingWithStudent;
@@ -598,23 +601,11 @@ int main(int argc, char** argv)
     {
         cin >> prices[i];
     }
-
-#ifndef SUBMISSION
-    cout << "heights: " << endl;
-    for (const auto x : heights)
-        cout << x << " ";
-    cout << endl;
-    cout << "prices: " << endl;
-    for (const auto x : prices)
-        cout << x << " ";
-    cout << endl;
-#endif
     const auto result = minCost(heights, prices);
     cout << result[0] << endl;
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = minCostBruteForce(heights, prices);
-    //cout << "resultBruteForce: " << resultBruteForce << endl;
     cout << "resultBruteForce: " << resultBruteForce[0] << " result: " << result[0] << endl;
     assert(resultBruteForce == result);
 #endif
