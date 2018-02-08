@@ -2,7 +2,7 @@
 // This is a Brute Force solution for testing only - not expected to pass, yet!
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -242,6 +242,8 @@ class SegmentTree
         // Collect O(log2(end - start + 1)) cells in range-order that span the interval start-end (inclusive).
         void collectMinCellsForRange(const int start, const int end, vector<Cell*>& destCells)
         {
+            if (end < start)
+                return;
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
 #ifdef VERIFY_SEGMENT_TREE
             assert(destCells.front()->rangeBegin == start);
@@ -498,7 +500,10 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         return 0;
     };
     using MinTree = SegmentTree<int64_t, int>;
-    MinTree minTree(5, combineValues, applyOperator, combineOperators);
+    MinTree minTree(n + 1, combineValues, applyOperator, combineOperators);
+    //cout << "fleep: " << d[n - 1] << endl;
+    minTree.setValue(n - 1, d[n - 1]);
+#if 0
 
     minTree.setValue(0, 5);
     minTree.setValue(1, 5);
@@ -513,6 +518,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     cout << "min 2-3 " << minTree.combinedValuesInRange(2, 3, std::numeric_limits<int64_t>::max()) << endl;
     cout << "min 2-2 " << minTree.combinedValuesInRange(2, 2, std::numeric_limits<int64_t>::max()) << endl;
     cout << "min 3-4 " << minTree.combinedValuesInRange(3, 4, std::numeric_limits<int64_t>::max()) << endl;
+#endif
 
     int64_t heightDifferential = 0;
     for (int i = n - 2; i >= 0; i--)
@@ -525,6 +531,58 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 + minCostStartingWithStudent[nextStudent]; 
             return costIfPassedToNextStudent;
         };
+        //cout << "i: " << i << endl;
+        int tallerStudentIndex = -1;
+        for (int j = i + 1; j < n; j++)
+        {
+            if (heights[j] > heights[i])
+            {
+                tallerStudentIndex = j;
+                break;
+            }
+        }
+
+        //cout << "tallerStudentIndex: " << tallerStudentIndex << endl;
+        int64_t minD = numeric_limits<int64_t>::max();
+        int64_t minCostStartingHere = numeric_limits<int64_t>::max();
+        const auto rangeMin = i + 1;
+        const auto rangeMax = tallerStudentIndex == -1 ? n - 1 : tallerStudentIndex - 1;
+        //cout << "i: " << i << " rangeMin: " << rangeMin << " rangeMax: " << rangeMax << endl;
+        if (rangeMax >= rangeMin)
+        {
+            minD = minTree.combinedValuesInRange(rangeMin, rangeMax, std::numeric_limits<int64_t>::max());
+            int bestStudentIndex = -1;
+            for (int j = rangeMin; j <= rangeMax; j++)
+            {
+                if (d[j] == minD)
+                {
+                    bestStudentIndex = j;
+                }
+            }
+            assert(bestStudentIndex != -1);
+            minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestStudentIndex));
+        }
+
+
+        const bool forcedExchange = (tallerStudentIndex != -1);
+        if (!forcedExchange)
+        {
+            // Run to finish line.
+            minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - i));
+        }
+        else
+        {
+            minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(tallerStudentIndex));
+        }
+        minCostStartingWithStudent[i] = minCostStartingHere;
+
+        heightDifferential += heights[i + 1] - heights[i];
+        d[i] = minCostStartingWithStudent[i] + 
+            (prices[i]) 
+            - (n - i) + 
+            heightDifferential;
+        minTree.setValue(i, d[i]);
+
     }
 
     return minCostStartingWithStudent;
