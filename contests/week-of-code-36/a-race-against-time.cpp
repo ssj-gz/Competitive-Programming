@@ -425,7 +425,6 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         // H1 < H2 if and only if hi1 < hi2 (and same for =, >, etc).
         // We can then use a segment tree, indexed by compressed height indices, to find the index of
         // the next student whose height exceeds a given value.
-        vector<int> compressedHeights(n);
         map<int64_t, int> heightToCompressedIndex;
         vector<int64_t> heightsSorted(heights);
         sort(heightsSorted.begin(), heightsSorted.end());
