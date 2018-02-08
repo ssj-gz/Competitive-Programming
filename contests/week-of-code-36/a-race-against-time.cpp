@@ -1,8 +1,7 @@
-// Simon St James (ssjgz) - 2018-02-08
-// This is a Brute Force solution for testing only - not expected to pass, yet!
+// Simon St James (ssjgz) - 2018-02-08 14:36
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -608,6 +607,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 + minCostStartingWithStudent[nextStudent]; 
             return costIfPassedToNextStudent;
         };
+#if 0
         //cout << "i: " << i << endl;
         int tallerStudentIndex = -1;
         for (int j = i + 1; j < n; j++)
@@ -620,6 +620,8 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         }
         //cout << "i: " << i << " tallerStudentIndex:" << tallerStudentIndex << " indexOfNextTallerStudent: " << indexOfNextTallerStudent[i] << endl;
         assert(tallerStudentIndex == indexOfNextTallerStudent[i]);
+#endif
+        const int tallerStudentIndex = indexOfNextTallerStudent[i];
 
         //cout << "tallerStudentIndex: " << tallerStudentIndex << endl;
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
@@ -630,7 +632,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         {
             const auto minD = minTree.combinedValuesInRange(rangeMin, rangeMax, numeric_limits<int64_t>::max());
             const int bestUnforcedPassStudent = nextIndexOfDWithValue[minD];
-            cout << "bestUnforcedPassStudent: " << bestUnforcedPassStudent << " minD: " << minD << endl;
+            //cout << "bestUnforcedPassStudent: " << bestUnforcedPassStudent << " minD: " << minD << endl;
             assert(bestUnforcedPassStudent >= i + 1);
             minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestUnforcedPassStudent));
 
@@ -671,7 +673,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
 
         nextIndexOfDWithValue[d[i]] = i;
 
-        cout << "i: " << i << " d: " << d[i] << endl;
+        //cout << "i: " << i << " d: " << d[i] << endl;
 
 
     }
@@ -689,9 +691,10 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 20 + 1;
-        const int maxHeight = 5;
-        const int maxPrice = 5;
+        //const int N = rand() % 20 + 1;
+        const int N = 10000;
+        const int maxHeight = 50;
+        const int maxPrice = 50;
         const int minPrice = -maxPrice;
         cout << N << endl;
         for (int i = 0; i < N; i++)
