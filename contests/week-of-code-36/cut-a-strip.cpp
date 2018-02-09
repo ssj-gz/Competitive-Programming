@@ -17,6 +17,7 @@ using namespace std;
 constexpr int maxN = 380;
 // The minSubrangeForRow[row][l][r] lookup table returns the sum of the smallest subrange x1-x2 in row, where
 // l <= x1 <= x2 <= r, and the length of the subrange x1-x2 is at most k.
+// I use a C-style array as vectors were too slow (by a factor of approx 2!).
 int minSubrangeForRow[maxN][maxN][maxN];
 
 int findMaxSubMatrix(const vector<vector<int>>& matrix, bool ignoreFullMatrix)
@@ -238,8 +239,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 }
                 largestSubMatrixSum += rowSums[row];
 
-                const bool isFullWidth = (l == 0 && r == numCols - 1);
-                const bool isProper = (row != numRows - 1 || largestSubMatrixTop != 0 || !isFullWidth);
+                const bool isProper = !(row == numRows - 1 && largestSubMatrixTop == 0 && l == 0 && r == numCols - 1);
                 if (isProper)
                 {
                     largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum);
