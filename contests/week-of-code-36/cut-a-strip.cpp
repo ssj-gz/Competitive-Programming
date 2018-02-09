@@ -46,7 +46,7 @@ int findResultBruteForce(const vector<vector<int>>& originalMatrix, int k)
     const int numRows = originalMatrix.size();
     const int numCols = originalMatrix[0].size();
 
-    int result = 0;
+    int result = numeric_limits<int>::min();
 
     for (int row = 0; row < numRows; row++)
     {
@@ -84,6 +84,25 @@ int findResultBruteForce(const vector<vector<int>>& originalMatrix, int k)
     return result;
 }
 
+int findMinSubRangeBruteForce(const vector<int>& row, int left, int right, int k)
+{
+    int result = numeric_limits<int>::max();
+
+    for (int x1 = left; x1 <= right; x1++)
+    {
+        int sum = 0;
+        for (int x2 = x1; x2 <= right; x2++)
+        {
+            if (x2 - x1 + 1 > k)
+                break;
+            sum += row[x2];
+            result = min(result, sum);
+        }
+    }
+
+    return result;
+}
+
 int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
 {
     const int numRows = originalMatrix.size();
@@ -95,7 +114,8 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     {
         for (int r = l; r < numCols; r++)
         {
-            int currentBestSubMatrix = 0;
+            int currentBestSubMatrix = numeric_limits<int>::min();
+            int currentMinSubMatrixStrip = numeric_limits<int>::max();
             for (int row = 0; row < numRows; row++)
             {
                 int rowSum = 0;
@@ -103,14 +123,24 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 {
                     rowSum += originalMatrix[row][col];
                 }
-                if (currentBestSubMatrix + rowSum < rowSum)
+                const int bestStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
+                if (currentBestSubMatrix < 0)
                 {
-                    currentBestSubMatrix = 0;
+                    // Kadane's algorithm - complete reset.
+                    currentBestSubMatrix = rowSum;
+                    currentMinSubMatrixStrip = bestStripForRow;
                 }
-                currentBestSubMatrix += rowSum;
-                cout << "l: " << l << " r: " << r << " row: " << row << " rowSum: " << rowSum << " currentBestSubMatrix: " << currentBestSubMatrix << endl;
+                else
+                {
+                    currentBestSubMatrix += rowSum;
+                    currentMinSubMatrixStrip = min(currentMinSubMatrixStrip, bestStripForRow);
+                }
+                //currentBestSubMatrix += rowSum;
+                const int currentBestStrippedSubMatrix = currentBestSubMatrix - currentMinSubMatrixStrip;
+                cout << "l: " << l << " r: " << r << " row: " << row << " rowSum: " << rowSum << " currentBestSubMatrix: " << currentBestSubMatrix << " currentMinSubMatrixStrip: " << currentMinSubMatrixStrip << " currentBestStrippedSubMatrix: " << currentBestStrippedSubMatrix << endl;
 
                 maxSubMatrixSize = max(maxSubMatrixSize, currentBestSubMatrix);
+                result = max(result, currentBestStrippedSubMatrix);
             }
         }
     }
@@ -192,6 +222,7 @@ int main(int argc, char** argv)
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = findResultBruteForce(matrix, k);
     cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl;
+    assert(resultBruteForce == result);
 #endif
 }
 
