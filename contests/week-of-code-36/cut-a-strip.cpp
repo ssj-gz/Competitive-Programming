@@ -228,7 +228,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
             for (int row = 0; row < numRows; row++)
             {
                 vector<int>& prefixSumsForRow = prefixSumUpToCol[row];
-                const int rowSum = prefixSumsForRow[r] - prefixSumsForRow[leftForPrefixSum];
+                const int rowSum = (l > 0 ? prefixSumsForRow[r] - prefixSumsForRow[l - 1] : prefixSumsForRow[r]);
                 *rowsSumsPointer = rowSum;
                 rowsSumsPointer++;
                 const int minStripForRow = minSubrangeForRow[row][l][r];
