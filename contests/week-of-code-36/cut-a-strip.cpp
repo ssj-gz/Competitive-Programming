@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <cassert>
 #include <sys/time.h>
 
 using namespace std;
@@ -85,7 +86,36 @@ int findResultBruteForce(const vector<vector<int>>& originalMatrix, int k)
 
 int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
 {
+    const int numRows = originalMatrix.size();
+    const int numCols = originalMatrix[0].size();
+
     int result = numeric_limits<int>::min();
+    int maxSubMatrixSize = numeric_limits<int>::min();
+    for (int l = 0; l < numCols; l++)
+    {
+        for (int r = l; r < numCols; r++)
+        {
+            int currentBestSubMatrix = 0;
+            for (int row = 0; row < numRows; row++)
+            {
+                int rowSum = 0;
+                for (int col = l; col <= r; col++)
+                {
+                    rowSum += originalMatrix[row][col];
+                }
+                if (currentBestSubMatrix + rowSum < rowSum)
+                {
+                    currentBestSubMatrix = 0;
+                }
+                currentBestSubMatrix += rowSum;
+                cout << "l: " << l << " r: " << r << " row: " << row << " rowSum: " << rowSum << " currentBestSubMatrix: " << currentBestSubMatrix << endl;
+
+                maxSubMatrixSize = max(maxSubMatrixSize, currentBestSubMatrix);
+            }
+        }
+    }
+    cout << "maxSubMatrixSize " << maxSubMatrixSize << " weeble: " << findMaxSubMatrix(originalMatrix) << endl;
+    assert(maxSubMatrixSize == findMaxSubMatrix(originalMatrix));
     return result;
 }
 
@@ -121,12 +151,17 @@ int main(int argc, char** argv)
 
         const int numRows = rand() % 10 + 1;
         const int numCols = rand() % 10 + 1;
+        //const int numRows = 380;
+        //const int numCols = 380;
         const int k = rand() % 15;
+        //const int k = rand() % 500;
 
         cout << numRows << " " << numCols << " " << k << endl;
 
-        const int maxValue = 10;
-        const int minValue = -10;
+        //const int maxValue = 10;
+        //const int minValue = -10;
+        const int maxValue = 5000;
+        const int minValue = -5000;
 
         for (int row = 0; row < numRows; row++)
         {
