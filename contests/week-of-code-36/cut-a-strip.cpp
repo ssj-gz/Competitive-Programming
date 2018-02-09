@@ -1,6 +1,10 @@
 // Simon St James (ssjgz) - 2018-02-09
-// This is just a brute force solution to check correctness - it's too slow to pass!
 #define BRUTE_FORCE
+#define SUBMISSION
+#ifndef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -206,6 +210,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
         minSubrangeForRow[row] = computeMinSubrangeLookup(originalMatrix[row], k);
     }
 
+    int largestProperSubMatrixSum = numeric_limits<int>::min();
     for (int l = 0; l < numCols; l++)
     {
         for (int r = l; r < numCols; r++)
@@ -222,13 +227,46 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 }
 #endif
                 rowSums[row] = rowSum;
-                const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
-                assert(minStripForRow == minSubrangeForRow[row][l][r]);
+                const int minStripForRow = minSubrangeForRow[row][l][r];
+                assert(minStripForRow == findMinSubRangeBruteForce(originalMatrix[row], l, r, k));
                 cout << "minStripForRow: " << minStripForRow << " minSubrangeForRow: " << minSubrangeForRow[row][l][r] << endl;
                 negativeMinStripForRows[row] = -minStripForRow;
             }
             result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
             //assert(blah(rowSums, negativeMinStripForRows) == findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
+
+            cout << "l: " << l << " r: " << r << endl;
+            int largestSubMatrixSum = numeric_limits<int>::min();
+            int largestSubMatrixTop = -1;
+            for (int row = 0; row < numRows; row++)
+            {
+                if (largestSubMatrixSum < 0)
+                {
+                    largestSubMatrixSum = 0;
+                    largestSubMatrixTop = row;
+                }
+                largestSubMatrixSum += rowSums[row];
+
+                const bool isProper = (row != numRows - 1 || largestSubMatrixTop != 0 || l != 0 || r != numCols - 1);
+                cout << "largestSubMatrixSum: " << largestSubMatrixSum << " isProper: " << isProper << endl;
+                if (isProper)
+                {
+                    largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum);
+                    cout << "Now largestProperSubMatrixSum: " << largestProperSubMatrixSum << endl;
+                }
+#if 0
+                else if (row > largestSubMatrixTop)
+                {
+                    largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum - rowSums[largestSubMatrixTop]);
+                }
+#endif
+            }
+            int sumFromBottom = 0;
+            for (int row = numRows - 1; row >= 1; row--)
+            {
+                sumFromBottom += rowSums[row];
+                largestProperSubMatrixSum = max(largestProperSubMatrixSum, sumFromBottom);
+            }
         }
     }
 #if 0
@@ -281,8 +319,9 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
 #endif
 
     const int largestSubMatrixLeavingRoomForStrip = findMaxSubMatrix(originalMatrix, true);
-    cout << "largestSubMatrixLeavingRoomForStrip: " << largestSubMatrixLeavingRoomForStrip << endl;
-    result = max(result, findMaxSubMatrix(originalMatrix, true));
+    cout << "largestSubMatrixLeavingRoomForStrip: " << largestSubMatrixLeavingRoomForStrip << " largestProperSubMatrixSum: " << largestProperSubMatrixSum << endl;
+    assert(largestProperSubMatrixSum == largestSubMatrixLeavingRoomForStrip);
+    result = max(result, largestProperSubMatrixSum);
     return result;
 }
 
