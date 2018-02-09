@@ -294,23 +294,19 @@ int main(int argc, char** argv)
     ios::sync_with_stdio(false);
     if (argc == 2)
     {
+        // Dump random testcase to stdout and exit.
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         const int numRows = rand() % 5 + 1;
         const int numCols = rand() % 5 + 1;
-        //const int numRows = 380;
-        //const int numCols = 380;
         const int k = rand() % 15 + 1;
-        //const int k = rand() % 500 + 1;
 
         cout << numRows << " " << numCols << " " << k << endl;
 
         const int maxValue = 100;
         const int minValue = -100;
-        //const int maxValue = 5000;
-        //const int minValue = -5000;
 
         for (int row = 0; row < numRows; row++)
         {
