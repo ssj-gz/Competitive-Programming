@@ -159,6 +159,18 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     const int numCols = originalMatrix[0].size();
     int result = numeric_limits<int>::min();
 
+    vector<vector<int>> prefixSumUpToCol(numRows);
+    for (int row = 0; row < numRows; row++)
+    {
+        prefixSumUpToCol[row].resize(numCols);
+        int sum = 0;
+        for (int col = 0; col < numCols; col++)
+        {
+            sum += originalMatrix[row][col];
+            prefixSumUpToCol[row][col] = sum;
+        }
+    }
+
     for (int l = 0; l < numCols; l++)
     {
         for (int r = l; r < numCols; r++)
@@ -167,11 +179,13 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
             vector<int> negativeMinStripForRows(numRows);
             for (int row = 0; row < numRows; row++)
             {
-                int rowSum = 0;
+                const int rowSum = (l > 0 ? prefixSumUpToCol[row][r] - prefixSumUpToCol[row][l - 1] : prefixSumUpToCol[row][r]);
+#if 0
                 for (int col = l; col <= r; col++)
                 {
                     rowSum += originalMatrix[row][col];
                 }
+#endif
                 rowSums[row] = rowSum;
                 const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
                 negativeMinStripForRows[row] = -minStripForRow;
