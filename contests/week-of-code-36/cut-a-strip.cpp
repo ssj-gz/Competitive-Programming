@@ -146,25 +146,6 @@ int findBestStrippedSubMatrixForThisRange(const vector<int>& rowSums, const vect
     return result;
 }
 
-
-int blah(const vector<int>& A, const vector<int>& B)
-{
-    int result = numeric_limits<int>::min();
-    for (int i = 0; i < A.size(); i++)
-    {
-        int maxB = numeric_limits<int>::min();
-        int sum = 0;
-        for (int j = i; j >= 0; j--)
-        {
-            maxB = max(maxB, B[j]);
-            sum += A[j];
-            result = max(result, sum + maxB);
-        }
-    }
-    return result;
-
-}
-
 // Build minSubrangeForRow lookup table.
 void computeMinSubrangeLookup(const vector<vector<int>>& originalMatrix, int k)
 {
