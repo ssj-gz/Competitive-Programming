@@ -219,17 +219,22 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     vector<int> negativeMinStripForRows(numRows);
     for (int l = 0; l < numCols; l++)
     {
+        const int leftForPrefixSum = (l > 0 ? l - 1 : 0);
         for (int r = l; r < numCols; r++)
         {
             const bool isFullWidth = (l == 0 && r == numCols - 1);
+            int* rowsSumsPointer = rowSums.data();
+            int* negativeMinStripForRowsPointer = negativeMinStripForRows.data();
             for (int row = 0; row < numRows; row++)
             {
                 vector<int>& prefixSumsForRow = prefixSumUpToCol[row];
-                const int rowSum = (l > 0 ? prefixSumsForRow[r] - prefixSumsForRow[l - 1] : prefixSumsForRow[r]);
-                rowSums[row] = rowSum;
+                const int rowSum = prefixSumsForRow[r] - prefixSumsForRow[leftForPrefixSum];
+                *rowsSumsPointer = rowSum;
+                rowsSumsPointer++;
                 const int minStripForRow = minSubrangeForRow[row][l][r];
                 assert(minStripForRow == findMinSubRangeBruteForce(originalMatrix[row], l, r, k));
-                negativeMinStripForRows[row] = -minStripForRow;
+                *negativeMinStripForRowsPointer = -minStripForRow;
+                negativeMinStripForRowsPointer++;
             }
             result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
 
