@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2018-02-08 14:36
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -534,10 +534,10 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxMaxHeight = 10;
-        const int maxMaxPrice = 10;
+        const int maxMaxHeight = 10000;
+        const int maxMaxPrice = 10000;
 
-        const int N = rand() % 200 + 1;
+        const int N = rand() % 2000 + 1;
         const int maxHeight = rand() % maxMaxHeight + 1;
         const int maxPrice = rand() % maxMaxPrice + 1;
         const int minPrice = -maxPrice;
