@@ -172,7 +172,7 @@ void computeMinSubrangeLookup(const vector<vector<int>>& originalMatrix, int k)
             }
         }
 
-        // Now use this result to find, for each l and r, the largest subrange of length at most k that lies in the range l-r.
+        // Now use this result to find, for each l and r, the  subrange of length at most k that lies in the range l-r and gives the smallest sum.
         for (int l = 0; l < numCols; l++)
         {
             int minStartingFromAtLeastL = numeric_limits<int>::max();
