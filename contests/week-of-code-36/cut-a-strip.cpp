@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -82,8 +83,63 @@ int findResultBruteForce(const vector<vector<int>>& originalMatrix, int k)
     return result;
 }
 
+int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
+{
+    int result = numeric_limits<int>::min();
+    return result;
+}
+
+
+int findResult(const vector<vector<int>>& originalMatrix, int k)
+{
+    int result = numeric_limits<int>::min();
+    result = max(result, findResultWithHorizontalStrip(originalMatrix, k));
+
+    const int numRows = originalMatrix.size();
+    const int numCols = originalMatrix[0].size();
+
+    vector<vector<int>> rotatedMatrix(numCols);
+    for (int col = 0; col < numCols; col++)
+    {
+        rotatedMatrix[col].resize(numRows);
+        for (int row = 0; row < numRows; row++)
+        {
+            rotatedMatrix[col][row] = originalMatrix[row][col];
+        }
+    }
+    result = max(result, findResultWithHorizontalStrip(rotatedMatrix, k));
+    return result;
+}
+
 int main(int argc, char** argv)
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int numRows = rand() % 10 + 1;
+        const int numCols = rand() % 10 + 1;
+        const int k = rand() % 15;
+
+        cout << numRows << " " << numCols << " " << k << endl;
+
+        const int maxValue = 10;
+        const int minValue = -10;
+
+        for (int row = 0; row < numRows; row++)
+        {
+            for (int col = 0; col < numCols; col++)
+            {
+                cout << (rand() % (maxValue - minValue + 1) + minValue) << " ";
+            }
+            cout << endl;
+        }
+
+        return 0;
+    }
+
     int numRows, numCols, k;
     cin >> numRows >> numCols >> k;
 
@@ -96,11 +152,11 @@ int main(int argc, char** argv)
             cin >> matrix[row][col];
         }
     }
+    const auto result = findResult(matrix, k);
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = findResultBruteForce(matrix, k);
-    cout << resultBruteForce << endl;
-    //cout << "resultBruteForce: " << resultBruteForce << endl;
+    cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl;
 #endif
 }
 
