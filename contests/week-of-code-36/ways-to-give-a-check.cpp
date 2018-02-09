@@ -17,7 +17,6 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
         int row = startRow;
         int col = startCol;
 
-        bool reachedKing = false;
         for (int i = 0; i < limit; i++)
         {
             row += dRow;
