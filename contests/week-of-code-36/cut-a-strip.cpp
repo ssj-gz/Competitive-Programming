@@ -112,9 +112,10 @@ int findMinSubRangeBruteForce(const vector<int>& row, int left, int right, int k
 // Taken from Matrix Land, which is very similar - will do some renaming on it later XD
 int findBestIfMovedFromAndDescended(const vector<int>& row, const vector<int>& scoreIfDescendAt)
 {
-    vector<int> result(row.size());
+    //vector<int> result(row.size());
     int bestSum = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
     int bestCumulative = numeric_limits<int>::min();
+    int result = numeric_limits<int>::min();
     for (int startPoint = 0; startPoint < row.size(); startPoint++)
     {
         bestSum += row[startPoint];
@@ -133,10 +134,10 @@ int findBestIfMovedFromAndDescended(const vector<int>& row, const vector<int>& s
             bestSum = bestCumulative + scoreIfDescendAt[startPoint];
         }
 
-        result[startPoint] = bestSum;
+        result = max(result, bestSum);
 
     }
-    return *max_element(result.begin(), result.end());
+    return result;
 }
 
 
@@ -192,7 +193,6 @@ vector<vector<int>> computeMinSubrangeLookup(const vector<int>& row, int k)
 
 int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
 {
-    //cout << "findResultWithHorizontalStrip" << endl;
     const int numRows = originalMatrix.size();
     const int numCols = originalMatrix[0].size();
     int result = numeric_limits<int>::min();
@@ -211,35 +211,24 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
 
         minSubrangeForRow[row] = computeMinSubrangeLookup(originalMatrix[row], k);
     }
-    //cout << "computed lookups" << endl;
 
     int largestProperSubMatrixSum = numeric_limits<int>::min();
     for (int l = 0; l < numCols; l++)
     {
         for (int r = l; r < numCols; r++)
         {
-            //cout << "l: " << l << " r: " << r << endl;
             vector<int> rowSums(numRows);
             vector<int> negativeMinStripForRows(numRows);
             for (int row = 0; row < numRows; row++)
             {
                 const int rowSum = (l > 0 ? prefixSumUpToCol[row][r] - prefixSumUpToCol[row][l - 1] : prefixSumUpToCol[row][r]);
-#if 0
-                for (int col = l; col <= r; col++)
-                {
-                    rowSum += originalMatrix[row][col];
-                }
-#endif
                 rowSums[row] = rowSum;
                 const int minStripForRow = minSubrangeForRow[row][l][r];
                 assert(minStripForRow == findMinSubRangeBruteForce(originalMatrix[row], l, r, k));
-                //cout << "minStripForRow: " << minStripForRow << " minSubrangeForRow: " << minSubrangeForRow[row][l][r] << endl;
                 negativeMinStripForRows[row] = -minStripForRow;
             }
             result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
-            //assert(blah(rowSums, negativeMinStripForRows) == findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
 
-            //cout << "l: " << l << " r: " << r << endl;
             int largestSubMatrixSum = numeric_limits<int>::min();
             int largestSubMatrixTop = -1;
             for (int row = 0; row < numRows; row++)
@@ -252,18 +241,10 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 largestSubMatrixSum += rowSums[row];
 
                 const bool isProper = (row != numRows - 1 || largestSubMatrixTop != 0 || l != 0 || r != numCols - 1);
-                //cout << "largestSubMatrixSum: " << largestSubMatrixSum << " isProper: " << isProper << endl;
                 if (isProper)
                 {
                     largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum);
-                    //cout << "Now largestProperSubMatrixSum: " << largestProperSubMatrixSum << endl;
                 }
-#if 0
-                else if (row > largestSubMatrixTop)
-                {
-                    largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum - rowSums[largestSubMatrixTop]);
-                }
-#endif
             }
             int sumFromBottom = 0;
             for (int row = numRows - 1; row >= 1; row--)
@@ -273,56 +254,6 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
             }
         }
     }
-#if 0
-    int maxSubMatrixSize = numeric_limits<int>::min();
-    for (int l = 0; l < numCols; l++)
-    {
-        for (int r = l; r < numCols; r++)
-        {
-            int currentBestSubMatrix = 0;
-            int currentMinSubMatrixStrip = 0;
-            for (int row = 0; row < numRows; row++)
-            {
-                int rowSum = 0;
-                for (int col = l; col <= r; col++)
-                {
-                    rowSum += originalMatrix[row][col];
-                }
-                const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
-                if (row == 0)
-                {
-                    currentBestSubMatrix = rowSum;
-                    currentMinSubMatrixStrip = minStripForRow;
-                }
-                if (currentBestSubMatrix + rowSum - min(currentMinSubMatrixStrip, minStripForRow) < rowSum - minStripForRow)
-                {
-                    cout << "Reset!" << endl;
-                    // Kadane's algorithm - complete reset.
-                    currentBestSubMatrix = rowSum;
-                    currentMinSubMatrixStrip = minStripForRow;
-                }
-                else
-                {
-                    if (row != 0)
-                    {
-                    currentBestSubMatrix += rowSum;
-                    currentMinSubMatrixStrip = min(currentMinSubMatrixStrip, minStripForRow);
-                    }
-                }
-                //currentBestSubMatrix += rowSum;
-                const int currentBestStrippedSubMatrix = currentBestSubMatrix - currentMinSubMatrixStrip;
-                cout << "l: " << l << " r: " << r << " row: " << row << " rowSum: " << rowSum << " currentBestSubMatrix: " << currentBestSubMatrix << " currentMinSubMatrixStrip: " << currentMinSubMatrixStrip << " currentBestStrippedSubMatrix: " << currentBestStrippedSubMatrix << " minStripForRow: " << minStripForRow << endl;
-
-                maxSubMatrixSize = max(maxSubMatrixSize, currentBestSubMatrix);
-                result = max(result, currentBestStrippedSubMatrix);
-            }
-        }
-    }
-    //cout << "maxSubMatrixSize " << maxSubMatrixSize << " weeble: " << findMaxSubMatrix(originalMatrix) << endl;
-    //assert(maxSubMatrixSize == findMaxSubMatrix(originalMatrix));
-#endif
-
-    //cout << "largestSubMatrixLeavingRoomForStrip: " << largestSubMatrixLeavingRoomForStrip << " largestProperSubMatrixSum: " << largestProperSubMatrixSum << endl;
     assert(largestProperSubMatrixSum == findMaxSubMatrix(originalMatrix, true));
     result = max(result, largestProperSubMatrixSum);
     return result;
@@ -346,7 +277,6 @@ int findResult(const vector<vector<int>>& originalMatrix, int k)
             rotatedMatrix[col][row] = originalMatrix[row][col];
         }
     }
-    //cout << "Rotated!" << endl;
     result = max(result, findResultWithHorizontalStrip(rotatedMatrix, k));
     return result;
 }
