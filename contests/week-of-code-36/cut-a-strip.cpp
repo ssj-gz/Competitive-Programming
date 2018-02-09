@@ -221,6 +221,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     {
         for (int r = l; r < numCols; r++)
         {
+            const bool isFullWidth = (l == 0 && r == numCols - 1);
             for (int row = 0; row < numRows; row++)
             {
                 vector<int>& prefixSumsForRow = prefixSumUpToCol[row];
@@ -243,7 +244,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 }
                 largestSubMatrixSum += rowSums[row];
 
-                const bool isProper = (row != numRows - 1 || largestSubMatrixTop != 0 || l != 0 || r != numCols - 1);
+                const bool isProper = (row != numRows - 1 || largestSubMatrixTop != 0 || !isFullWidth);
                 if (isProper)
                 {
                     largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum);
