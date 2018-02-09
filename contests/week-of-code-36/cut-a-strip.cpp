@@ -123,17 +123,17 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 {
                     rowSum += originalMatrix[row][col];
                 }
-                const int bestStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
+                const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
                 if (currentBestSubMatrix < 0)
                 {
                     // Kadane's algorithm - complete reset.
                     currentBestSubMatrix = rowSum;
-                    currentMinSubMatrixStrip = bestStripForRow;
+                    currentMinSubMatrixStrip = minStripForRow;
                 }
                 else
                 {
                     currentBestSubMatrix += rowSum;
-                    currentMinSubMatrixStrip = min(currentMinSubMatrixStrip, bestStripForRow);
+                    currentMinSubMatrixStrip = min(currentMinSubMatrixStrip, minStripForRow);
                 }
                 //currentBestSubMatrix += rowSum;
                 const int currentBestStrippedSubMatrix = currentBestSubMatrix - currentMinSubMatrixStrip;
@@ -179,19 +179,19 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numRows = rand() % 10 + 1;
-        const int numCols = rand() % 10 + 1;
+        const int numRows = rand() % 3 + 1;
+        const int numCols = rand() % 3 + 1;
         //const int numRows = 380;
         //const int numCols = 380;
-        const int k = rand() % 15;
-        //const int k = rand() % 500;
+        const int k = rand() % 15 + 1;
+        //const int k = rand() % 500 + 1;
 
         cout << numRows << " " << numCols << " " << k << endl;
 
-        //const int maxValue = 10;
-        //const int minValue = -10;
-        const int maxValue = 5000;
-        const int minValue = -5000;
+        const int maxValue = 10;
+        const int minValue = -10;
+        //const int maxValue = 5000;
+        //const int minValue = -5000;
 
         for (int row = 0; row < numRows; row++)
         {
