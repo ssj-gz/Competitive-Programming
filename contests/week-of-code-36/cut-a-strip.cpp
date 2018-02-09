@@ -153,6 +153,38 @@ int blah(const vector<int>& A, const vector<int>& B)
 
 }
 
+vector<vector<int>> computeMinSubrangeLookup(const vector<int>& row, int k)
+{
+    vector<vector<int>> minSubrangeEndingAtRightIgnoringKLookup(row.size(), vector<int>(row.size(), numeric_limits<int>::max()));
+    for (int l = 0; l < row.size(); l++)
+    {
+        int minEndingAtRIgnoringK = numeric_limits<int>::max();
+        for (int r = l; r < row.size(); r++)
+        {
+            if (minEndingAtRIgnoringK > 0)
+            {
+                minEndingAtRIgnoringK = 0;
+            }
+            minEndingAtRIgnoringK += row[r];
+            minSubrangeEndingAtRightIgnoringKLookup[l][r] = minEndingAtRIgnoringK;
+        }
+    }
+
+    vector<vector<int>> minSubrangeLookup(row.size(), vector<int>(row.size(), numeric_limits<int>::max()));
+    for (int l = 0; l < row.size(); l++)
+    {
+        int minStartingFromL = numeric_limits<int>::max();
+        for (int r = l; r < row.size(); r++)
+        {
+            const int leftBoundForEndingAtR = (r - l + 1 <= k ? l : r - k + 1);
+            minStartingFromL = min(minStartingFromL, minSubrangeEndingAtRightIgnoringKLookup[leftBoundForEndingAtR][r]);
+            minSubrangeLookup[l][r] = minStartingFromL;
+        }
+    }
+
+    return minSubrangeLookup;
+}
+
 int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
 {
     const int numRows = originalMatrix.size();
@@ -160,6 +192,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     int result = numeric_limits<int>::min();
 
     vector<vector<int>> prefixSumUpToCol(numRows);
+    vector<vector<vector<int>>> minSubrangeForRow(numRows);
     for (int row = 0; row < numRows; row++)
     {
         prefixSumUpToCol[row].resize(numCols);
@@ -169,6 +202,8 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
             sum += originalMatrix[row][col];
             prefixSumUpToCol[row][col] = sum;
         }
+
+        minSubrangeForRow[row] = computeMinSubrangeLookup(originalMatrix[row], k);
     }
 
     for (int l = 0; l < numCols; l++)
@@ -188,6 +223,8 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
 #endif
                 rowSums[row] = rowSum;
                 const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
+                assert(minStripForRow == minSubrangeForRow[row][l][r]);
+                cout << "minStripForRow: " << minStripForRow << " minSubrangeForRow: " << minSubrangeForRow[row][l][r] << endl;
                 negativeMinStripForRows[row] = -minStripForRow;
             }
             result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
@@ -280,8 +317,8 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numRows = rand() % 6 + 1;
-        const int numCols = rand() % 6 + 1;
+        const int numRows = rand() % 10 + 1;
+        const int numCols = rand() % 10 + 1;
         //const int numRows = 380;
         //const int numCols = 380;
         const int k = rand() % 15 + 1;
@@ -289,8 +326,8 @@ int main(int argc, char** argv)
 
         cout << numRows << " " << numCols << " " << k << endl;
 
-        const int maxValue = 10;
-        const int minValue = -10;
+        const int maxValue = 100;
+        const int minValue = -100;
         //const int maxValue = 5000;
         //const int minValue = -5000;
 
