@@ -121,24 +121,24 @@ int findBestStrippedSubMatrixForThisRange(const vector<int>& rowSums, const vect
 {
     // Taken from Matrix Land, which is very similar.
     int bestSum = negativeMinStripForRows.front(); // Should be negativeMinStripForRows.front() + rowSums[0], but the body of the loop adds the rowSums[0] on the first iteration.
-    int bestCumulative = numeric_limits<int>::min();
+    int largestEndingAtRow = numeric_limits<int>::min();
     int result = numeric_limits<int>::min();
-    for (int startRow = 0; startRow < rowSums.size(); startRow++)
+    for (int row = 0; row < rowSums.size(); row++)
     {
-        bestSum += rowSums[startRow];
+        bestSum += rowSums[row];
 
-        if (bestCumulative < 0)
+        if (largestEndingAtRow < 0)
         {
             // Just as in Kadane's algorithm, if breaking with the existing
-            // bestCumulative give a better result, then do so.
-            bestCumulative = rowSums[startRow];
+            // largestEndingAtRow give a better result, then do so.
+            largestEndingAtRow = rowSums[row];
         }
         else
-            bestCumulative += rowSums[startRow];
+            largestEndingAtRow += rowSums[row];
 
-        if (bestCumulative + negativeMinStripForRows[startRow] > bestSum)
+        if (largestEndingAtRow + negativeMinStripForRows[row] > bestSum)
         {
-            bestSum = bestCumulative + negativeMinStripForRows[startRow];
+            bestSum = largestEndingAtRow + negativeMinStripForRows[row];
         }
 
         result = max(result, bestSum);
