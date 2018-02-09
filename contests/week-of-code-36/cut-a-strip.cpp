@@ -206,20 +206,18 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     const int numCols = originalMatrix[0].size();
     int result = numeric_limits<int>::min();
 
+    // Lookup table for quickly finding the sum of all elements in a range in a row.
     int  prefixSumUpToCol[maxN][maxN];
-    //vector<vector<vector<int>>> minSubrangeForRow(numRows);
     for (int row = 0; row < numRows; row++)
     {
-        //prefixSumUpToCol[row].resize(numCols);
         int sum = 0;
         for (int col = 0; col < numCols; col++)
         {
             sum += originalMatrix[row][col];
             prefixSumUpToCol[row][col] = sum;
         }
-
-        //minSubrangeForRow[row] = computeMinSubrangeLookup(originalMatrix[row], k);
     }
+    // Compute lookup table for quickly finding the subrange with the least sum in a range in a row.
     computeMinSubrangeLookup(originalMatrix, k);
 
     int largestProperSubMatrixSum = numeric_limits<int>::min();
@@ -231,18 +229,14 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
         for (int r = l; r < numCols; r++)
         {
             const bool isFullWidth = (l == 0 && r == numCols - 1);
-            int* rowsSumsPointer = rowSums.data();
-            int* negativeMinStripForRowsPointer = negativeMinStripForRows.data();
             for (int row = 0; row < numRows; row++)
             {
                 auto prefixSumsForRow = prefixSumUpToCol[row];
                 const int rowSum = (l > 0 ? prefixSumsForRow[r] - prefixSumsForRow[l - 1] : prefixSumsForRow[r]);
-                *rowsSumsPointer = rowSum;
-                rowsSumsPointer++;
+                rowSums[row] = rowSum;
                 const int minStripForRow = minSubrangeForRow[row][l][r];
                 assert(minStripForRow == findMinSubRangeBruteForce(originalMatrix[row], l, r, k));
-                *negativeMinStripForRowsPointer = -minStripForRow;
-                negativeMinStripForRowsPointer++;
+                negativeMinStripForRows[row] = -minStripForRow;
             }
             result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
 
@@ -263,6 +257,9 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                     largestProperSubMatrixSum = max(largestProperSubMatrixSum, largestSubMatrixSum);
                 }
             }
+            // Add an edge case for the largestProperSubMatrixSum - knocking off the topmost row (and possibly
+            // some subsequent rows) will give us a proper submatrix with a lower sum than the "full" matrix, 
+            // and it's possible for this new submatrix to still be the best proper one.
             int sumFromBottom = 0;
             for (int row = numRows - 1; row >= 1; row--)
             {
@@ -272,6 +269,9 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
         }
     }
     assert(largestProperSubMatrixSum == findMaxSubMatrix(originalMatrix, true));
+    // The best result might just make some trivial 1x1 strip somewhere and take a matrix that doesn't 
+    // contain the strip - in this case, the result will be the largest *proper* submatrix (so we have
+    // some space for our 1x1 strip!).
     result = max(result, largestProperSubMatrixSum);
     return result;
 }
