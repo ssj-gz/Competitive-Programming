@@ -234,6 +234,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
             {
                 if (largestSubMatrixSum < 0)
                 {
+                    // Kadane's algorithm.
                     largestSubMatrixSum = 0;
                     largestSubMatrixTop = row;
                 }
