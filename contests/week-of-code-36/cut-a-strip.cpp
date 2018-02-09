@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int findMaxSubMatrix(const vector<vector<int>>& matrix)
+int findMaxSubMatrix(const vector<vector<int>>& matrix, bool ignoreFullMatrix)
 {
     const int numRows = matrix.size();
     const int numCols = matrix[0].size();
@@ -32,7 +32,8 @@ int findMaxSubMatrix(const vector<vector<int>>& matrix)
                             sum += matrix[row][col];
                         }
                     }
-                    maxSum = max(maxSum, sum);
+                    if (!ignoreFullMatrix || ((r - l + 1) * (bottom - top + 1) != numRows * numCols))
+                        maxSum = max(maxSum, sum);
                 }
             }
         }
@@ -62,7 +63,7 @@ int findResultBruteForce(const vector<vector<int>>& originalMatrix, int k)
                         break;
                     matrix[row][colToZero] = 0;
 
-                    result = max(result, findMaxSubMatrix(matrix));
+                    result = max(result, findMaxSubMatrix(matrix, false));
                 }
             }
             {
@@ -75,7 +76,7 @@ int findResultBruteForce(const vector<vector<int>>& originalMatrix, int k)
                         break;
                     matrix[rowToZero][col] = 0;
 
-                    result = max(result, findMaxSubMatrix(matrix));
+                    result = max(result, findMaxSubMatrix(matrix, false));
                 }
             }
         }
@@ -155,6 +156,8 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     }
     //cout << "maxSubMatrixSize " << maxSubMatrixSize << " weeble: " << findMaxSubMatrix(originalMatrix) << endl;
     //assert(maxSubMatrixSize == findMaxSubMatrix(originalMatrix));
+
+    result = max(result, findMaxSubMatrix(originalMatrix, true));
     return result;
 }
 
@@ -189,8 +192,8 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numRows = rand() % 3 + 1;
-        const int numCols = rand() % 3 + 1;
+        const int numRows = rand() % 4 + 1;
+        const int numCols = rand() % 4 + 1;
         //const int numRows = 380;
         //const int numCols = 380;
         const int k = rand() % 15 + 1;
