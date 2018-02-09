@@ -114,8 +114,8 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     {
         for (int r = l; r < numCols; r++)
         {
-            int currentBestSubMatrix = numeric_limits<int>::min();
-            int currentMinSubMatrixStrip = numeric_limits<int>::max();
+            int currentBestSubMatrix = 0;
+            int currentMinSubMatrixStrip = 0;
             for (int row = 0; row < numRows; row++)
             {
                 int rowSum = 0;
@@ -124,28 +124,37 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                     rowSum += originalMatrix[row][col];
                 }
                 const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
-                if (currentBestSubMatrix < 0)
+                if (row == 0)
                 {
+                    currentBestSubMatrix = rowSum;
+                    currentMinSubMatrixStrip = minStripForRow;
+                }
+                if (currentBestSubMatrix + rowSum - min(currentMinSubMatrixStrip, minStripForRow) < rowSum - minStripForRow)
+                {
+                    cout << "Reset!" << endl;
                     // Kadane's algorithm - complete reset.
                     currentBestSubMatrix = rowSum;
                     currentMinSubMatrixStrip = minStripForRow;
                 }
                 else
                 {
+                    if (row != 0)
+                    {
                     currentBestSubMatrix += rowSum;
                     currentMinSubMatrixStrip = min(currentMinSubMatrixStrip, minStripForRow);
+                    }
                 }
                 //currentBestSubMatrix += rowSum;
                 const int currentBestStrippedSubMatrix = currentBestSubMatrix - currentMinSubMatrixStrip;
-                cout << "l: " << l << " r: " << r << " row: " << row << " rowSum: " << rowSum << " currentBestSubMatrix: " << currentBestSubMatrix << " currentMinSubMatrixStrip: " << currentMinSubMatrixStrip << " currentBestStrippedSubMatrix: " << currentBestStrippedSubMatrix << endl;
+                cout << "l: " << l << " r: " << r << " row: " << row << " rowSum: " << rowSum << " currentBestSubMatrix: " << currentBestSubMatrix << " currentMinSubMatrixStrip: " << currentMinSubMatrixStrip << " currentBestStrippedSubMatrix: " << currentBestStrippedSubMatrix << " minStripForRow: " << minStripForRow << endl;
 
                 maxSubMatrixSize = max(maxSubMatrixSize, currentBestSubMatrix);
                 result = max(result, currentBestStrippedSubMatrix);
             }
         }
     }
-    cout << "maxSubMatrixSize " << maxSubMatrixSize << " weeble: " << findMaxSubMatrix(originalMatrix) << endl;
-    assert(maxSubMatrixSize == findMaxSubMatrix(originalMatrix));
+    //cout << "maxSubMatrixSize " << maxSubMatrixSize << " weeble: " << findMaxSubMatrix(originalMatrix) << endl;
+    //assert(maxSubMatrixSize == findMaxSubMatrix(originalMatrix));
     return result;
 }
 
@@ -167,6 +176,7 @@ int findResult(const vector<vector<int>>& originalMatrix, int k)
             rotatedMatrix[col][row] = originalMatrix[row][col];
         }
     }
+    cout << "Rotated!" << endl;
     result = max(result, findResultWithHorizontalStrip(rotatedMatrix, k));
     return result;
 }
