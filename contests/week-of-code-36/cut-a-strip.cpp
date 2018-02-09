@@ -161,11 +161,12 @@ int blah(const vector<int>& A, const vector<int>& B)
 
 vector<vector<int>> computeMinSubrangeLookup(const vector<int>& row, int k)
 {
-    vector<vector<int>> minSubrangeEndingAtRightIgnoringKLookup(row.size(), vector<int>(row.size(), numeric_limits<int>::max()));
-    for (int l = 0; l < row.size(); l++)
+    const int rowSize = row.size();
+    vector<vector<int>> minSubrangeEndingAtRightIgnoringKLookup(rowSize, vector<int>(row.size(), numeric_limits<int>::max()));
+    for (int l = 0; l < rowSize; l++)
     {
         int minEndingAtRIgnoringK = numeric_limits<int>::max();
-        for (int r = l; r < row.size(); r++)
+        for (int r = l; r < rowSize; r++)
         {
             if (minEndingAtRIgnoringK > 0)
             {
@@ -176,15 +177,16 @@ vector<vector<int>> computeMinSubrangeLookup(const vector<int>& row, int k)
         }
     }
 
-    vector<vector<int>> minSubrangeLookup(row.size(), vector<int>(row.size(), numeric_limits<int>::max()));
-    for (int l = 0; l < row.size(); l++)
+    vector<vector<int>> minSubrangeLookup(rowSize, vector<int>(rowSize, numeric_limits<int>::max()));
+    for (int l = 0; l < rowSize; l++)
     {
         int minStartingFromL = numeric_limits<int>::max();
-        for (int r = l; r < row.size(); r++)
+        auto& minSubrangeLookupForL = minSubrangeLookup[l];
+        for (int r = l; r < rowSize; r++)
         {
             const int leftBoundForEndingAtR = (r - l + 1 <= k ? l : r - k + 1);
             minStartingFromL = min(minStartingFromL, minSubrangeEndingAtRightIgnoringKLookup[leftBoundForEndingAtR][r]);
-            minSubrangeLookup[l][r] = minStartingFromL;
+            minSubrangeLookupForL[r] = minStartingFromL;
         }
     }
 
@@ -213,15 +215,16 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     }
 
     int largestProperSubMatrixSum = numeric_limits<int>::min();
+    vector<int> rowSums(numRows);
+    vector<int> negativeMinStripForRows(numRows);
     for (int l = 0; l < numCols; l++)
     {
         for (int r = l; r < numCols; r++)
         {
-            vector<int> rowSums(numRows);
-            vector<int> negativeMinStripForRows(numRows);
             for (int row = 0; row < numRows; row++)
             {
-                const int rowSum = (l > 0 ? prefixSumUpToCol[row][r] - prefixSumUpToCol[row][l - 1] : prefixSumUpToCol[row][r]);
+                vector<int>& prefixSumsForRow = prefixSumUpToCol[row];
+                const int rowSum = (l > 0 ? prefixSumsForRow[r] - prefixSumsForRow[l - 1] : prefixSumsForRow[r]);
                 rowSums[row] = rowSum;
                 const int minStripForRow = minSubrangeForRow[row][l][r];
                 assert(minStripForRow == findMinSubRangeBruteForce(originalMatrix[row], l, r, k));
