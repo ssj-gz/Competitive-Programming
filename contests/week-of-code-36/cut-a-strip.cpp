@@ -104,6 +104,37 @@ int findMinSubRangeBruteForce(const vector<int>& row, int left, int right, int k
     return result;
 }
 
+// Taken from Matrix Land, which is very similar - will do some renaming on it later XD
+int findBestIfMovedFromAndDescended(const vector<int>& row, const vector<int>& scoreIfDescendAt)
+{
+    vector<int> result(row.size());
+    int bestSum = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
+    int bestCumulative = numeric_limits<int>::min();
+    for (int startPoint = 0; startPoint < row.size(); startPoint++)
+    {
+        bestSum += row[startPoint];
+
+        if (bestCumulative < 0)
+        {
+            // Just as in Kadane's algorithm, if breaking with the existing
+            // bestCumulative give a better result, then do so.
+            bestCumulative = row[startPoint];
+        }
+        else
+            bestCumulative += row[startPoint];
+
+        if (bestCumulative + scoreIfDescendAt[startPoint] > bestSum)
+        {
+            bestSum = bestCumulative + scoreIfDescendAt[startPoint];
+        }
+
+        result[startPoint] = bestSum;
+
+    }
+    return *max_element(result.begin(), result.end());
+}
+
+
 int blah(const vector<int>& A, const vector<int>& B)
 {
     int result = numeric_limits<int>::min();
@@ -145,7 +176,8 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
                 negativeMinStripForRows[row] = -minStripForRow;
             }
-            result = max(result, blah(rowSums, negativeMinStripForRows));
+            result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
+            //assert(blah(rowSums, negativeMinStripForRows) == findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
         }
     }
 #if 0
