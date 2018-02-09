@@ -104,12 +104,51 @@ int findMinSubRangeBruteForce(const vector<int>& row, int left, int right, int k
     return result;
 }
 
+int blah(const vector<int>& A, const vector<int>& B)
+{
+    int result = numeric_limits<int>::min();
+    for (int i = 0; i < A.size(); i++)
+    {
+        int maxB = numeric_limits<int>::min();
+        int sum = 0;
+        for (int j = i; j >= 0; j--)
+        {
+            maxB = max(maxB, B[j]);
+            sum += A[j];
+            result = max(result, sum + maxB);
+        }
+    }
+    return result;
+
+}
+
 int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
 {
     const int numRows = originalMatrix.size();
     const int numCols = originalMatrix[0].size();
-
     int result = numeric_limits<int>::min();
+
+    for (int l = 0; l < numCols; l++)
+    {
+        for (int r = l; r < numCols; r++)
+        {
+            vector<int> rowSums(numRows);
+            vector<int> negativeMinStripForRows(numRows);
+            for (int row = 0; row < numRows; row++)
+            {
+                int rowSum = 0;
+                for (int col = l; col <= r; col++)
+                {
+                    rowSum += originalMatrix[row][col];
+                }
+                rowSums[row] = rowSum;
+                const int minStripForRow = findMinSubRangeBruteForce(originalMatrix[row], l, r, k);
+                negativeMinStripForRows[row] = -minStripForRow;
+            }
+            result = max(result, blah(rowSums, negativeMinStripForRows));
+        }
+    }
+#if 0
     int maxSubMatrixSize = numeric_limits<int>::min();
     for (int l = 0; l < numCols; l++)
     {
@@ -156,7 +195,10 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
     }
     //cout << "maxSubMatrixSize " << maxSubMatrixSize << " weeble: " << findMaxSubMatrix(originalMatrix) << endl;
     //assert(maxSubMatrixSize == findMaxSubMatrix(originalMatrix));
+#endif
 
+    const int largestSubMatrixLeavingRoomForStrip = findMaxSubMatrix(originalMatrix, true);
+    cout << "largestSubMatrixLeavingRoomForStrip: " << largestSubMatrixLeavingRoomForStrip << endl;
     result = max(result, findMaxSubMatrix(originalMatrix, true));
     return result;
 }
@@ -192,8 +234,8 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numRows = rand() % 4 + 1;
-        const int numCols = rand() % 4 + 1;
+        const int numRows = rand() % 6 + 1;
+        const int numCols = rand() % 6 + 1;
         //const int numRows = 380;
         //const int numCols = 380;
         const int k = rand() % 15 + 1;
