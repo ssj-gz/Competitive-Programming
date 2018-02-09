@@ -15,6 +15,8 @@
 using namespace std;
 
 constexpr int maxN = 380;
+// The minSubrangeForRow[row][l][r] lookup table returns the sum of the smallest subrange x1-x2 in row, where
+// l <= x1 <= x2 <= r, and the length of the subrange x1-x2 is at most k.
 int minSubrangeForRow[maxN][maxN][maxN];
 
 int findMaxSubMatrix(const vector<vector<int>>& matrix, bool ignoreFullMatrix)
@@ -112,29 +114,30 @@ int findMinSubRangeBruteForce(const vector<int>& row, int left, int right, int k
     return result;
 }
 
-// Taken from Matrix Land, which is very similar - will do some renaming on it later XD
-int findBestIfMovedFromAndDescended(const vector<int>& row, const vector<int>& scoreIfDescendAt)
+// Finds the s, t, b such that sum [ t <= r <= b ] { rowSums[r] } + negativeMinStripForRows[s] is maximised
+// over all 0 <= t <= s <= b.  Just returns this sum, not s, t and b themselves.
+int findBestStrippedSubMatrixForThisRange(const vector<int>& rowSums, const vector<int>& negativeMinStripForRows)
 {
-    //vector<int> result(row.size());
-    int bestSum = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
+    // Taken from Matrix Land, which is very similar.
+    int bestSum = negativeMinStripForRows.front(); // Should be negativeMinStripForRows.front() + rowSums[0], but the body of the loop adds the rowSums[0] on the first iteration.
     int bestCumulative = numeric_limits<int>::min();
     int result = numeric_limits<int>::min();
-    for (int startPoint = 0; startPoint < row.size(); startPoint++)
+    for (int startRow = 0; startRow < rowSums.size(); startRow++)
     {
-        bestSum += row[startPoint];
+        bestSum += rowSums[startRow];
 
         if (bestCumulative < 0)
         {
             // Just as in Kadane's algorithm, if breaking with the existing
             // bestCumulative give a better result, then do so.
-            bestCumulative = row[startPoint];
+            bestCumulative = rowSums[startRow];
         }
         else
-            bestCumulative += row[startPoint];
+            bestCumulative += rowSums[startRow];
 
-        if (bestCumulative + scoreIfDescendAt[startPoint] > bestSum)
+        if (bestCumulative + negativeMinStripForRows[startRow] > bestSum)
         {
-            bestSum = bestCumulative + scoreIfDescendAt[startPoint];
+            bestSum = bestCumulative + negativeMinStripForRows[startRow];
         }
 
         result = max(result, bestSum);
@@ -162,6 +165,7 @@ int blah(const vector<int>& A, const vector<int>& B)
 
 }
 
+// Build minSubrangeForRow lookup table.
 void computeMinSubrangeLookup(const vector<vector<int>>& originalMatrix, int k)
 {
     const int numRows = originalMatrix.size();
@@ -170,6 +174,8 @@ void computeMinSubrangeLookup(const vector<vector<int>>& originalMatrix, int k)
     {
         const auto& row = originalMatrix[rowIndex];
         vector<vector<int>> minSubrangeEndingAtRightIgnoringKLookup(numCols, vector<int>(row.size(), numeric_limits<int>::max()));
+        // In the first pass, find, for each l and r, the subrange (of any length) that ends precisely at r and whose
+        // start is at least l that gives the smallest sum.
         for (int l = 0; l < numCols; l++)
         {
             int minEndingAtRIgnoringK = numeric_limits<int>::max();
@@ -184,20 +190,18 @@ void computeMinSubrangeLookup(const vector<vector<int>>& originalMatrix, int k)
             }
         }
 
-        //vector<vector<int>> minSubrangeLookup(numCols, vector<int>(numCols, numeric_limits<int>::max()));
+        // Now use this result to find, for each l and r, the largest subrange of length at most k that lies in the range l-r.
         for (int l = 0; l < numCols; l++)
         {
-            int minStartingFromL = numeric_limits<int>::max();
+            int minStartingFromAtLeastL = numeric_limits<int>::max();
             for (int r = l; r < numCols; r++)
             {
-                const int leftBoundForEndingAtR = (r - l + 1 <= k ? l : r - k + 1);
-                minStartingFromL = min(minStartingFromL, minSubrangeEndingAtRightIgnoringKLookup[leftBoundForEndingAtR][r]);
-                minSubrangeForRow[rowIndex][l][r] = minStartingFromL;
+                const int leftBoundForEndingAtR = (r - l + 1 <= k ? l : r - k + 1); // This part enforces the "maximum of length k" part.
+                minStartingFromAtLeastL = min(minStartingFromAtLeastL, minSubrangeEndingAtRightIgnoringKLookup[leftBoundForEndingAtR][r]);
+                minSubrangeForRow[rowIndex][l][r] = minStartingFromAtLeastL;
             }
         }
     }
-
-    //return minSubrangeLookup;
 }
 
 int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int k)
@@ -228,7 +232,6 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
         const int leftForPrefixSum = (l > 0 ? l - 1 : 0);
         for (int r = l; r < numCols; r++)
         {
-            const bool isFullWidth = (l == 0 && r == numCols - 1);
             for (int row = 0; row < numRows; row++)
             {
                 auto prefixSumsForRow = prefixSumUpToCol[row];
@@ -238,8 +241,11 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 assert(minStripForRow == findMinSubRangeBruteForce(originalMatrix[row], l, r, k));
                 negativeMinStripForRows[row] = -minStripForRow;
             }
-            result = max(result, findBestIfMovedFromAndDescended(rowSums, negativeMinStripForRows));
+            // For this range l, r, find the best stripped submatrix whose left and right edges are l and r, respectively.
+            result = max(result, findBestStrippedSubMatrixForThisRange(rowSums, negativeMinStripForRows));
 
+            // Also, while we're at it, find the proper submatrix whose left and right edges are l and r that gives
+            // the largest sum.
             int largestSubMatrixSum = numeric_limits<int>::min();
             int largestSubMatrixTop = -1;
             for (int row = 0; row < numRows; row++)
@@ -251,6 +257,7 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
                 }
                 largestSubMatrixSum += rowSums[row];
 
+                const bool isFullWidth = (l == 0 && r == numCols - 1);
                 const bool isProper = (row != numRows - 1 || largestSubMatrixTop != 0 || !isFullWidth);
                 if (isProper)
                 {
@@ -280,11 +287,14 @@ int findResultWithHorizontalStrip(const vector<vector<int>>& originalMatrix, int
 int findResult(const vector<vector<int>>& originalMatrix, int k)
 {
     int result = numeric_limits<int>::min();
+    // Best result using horizontal strips.
     result = max(result, findResultWithHorizontalStrip(originalMatrix, k));
 
     const int numRows = originalMatrix.size();
     const int numCols = originalMatrix[0].size();
 
+    // Best result using vertical strips - just rotate the matrix 90 (or maybe 270??)
+    // degrees!
     vector<vector<int>> rotatedMatrix(numCols);
     for (int col = 0; col < numCols; col++)
     {
