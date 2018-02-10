@@ -38,13 +38,24 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     {
         assert(c[maxJ] <= c[jLimit]);
         cout << "woo fleep!" << endl;
+        assert(c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit]));
+        //assert(h[i] * c[maxJ] + c[i] * h[maxJ] == c[i] * h[jLimit] + h[i] * c[jLimit]);
     }
     else
     {
         cout << "wee fleep!" << endl;
+        assert(c[i] * (h[jLimit] - h[maxJ]) <= h[i] * (c[maxJ] - c[jLimit]));
     }
-    assert(c[i] * (h[jLimit] - h[maxJ]) == h[i] * (c[maxJ] - c[jLimit]));
-    assert(h[i] * c[maxJ] + c[i] * h[maxJ] == c[i] * h[jLimit] + h[i] * c[jLimit]);
+
+#if 0
+    for (int j = 1; j <= jLimit; j++)
+    {
+        if (h[i] * c[j] + c[i] * h[j] == c[i] * h[jLimit] + h[i] * c[jLimit])
+        {
+            assert(h[j] * c[i] - c[j] * h[i] == maxInRange);
+        }
+    }
+#endif
 
     return maxInRange;
 }
@@ -303,7 +314,8 @@ bool generateTestcaseAux(int n)
 void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
-    const int n = 1000;
+    //const int n = rand() % 1000 + 1;
+    const int n = 10;
     while (true)
     {
         if (generateTestcaseAux(n))
