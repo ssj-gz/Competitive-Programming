@@ -50,7 +50,7 @@ int main()
     //vector<int64_t> maxHCCH(n);
     //maxHCCH[0] = h[0] 
 
-    const auto M = 1000000007UL;
+    const int64_t M = 1000000007UL;
     //cout << "M: " << M << endl;
 
     {
@@ -64,8 +64,11 @@ int main()
         l[i] = z[i] ^ G[i - 1];
 
         F[i] = calcF(i, h, c, l);
-        while (F[i] < 0)
-            F[i] += M;
+        if (F[i] < 0)
+        {
+            const auto blee = (F[i] / -M) + 1;
+            F[i] += blee * M;
+        }
 
         G[i] = (G[i - 1] + F[i]) % M;
 
