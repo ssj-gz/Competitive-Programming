@@ -79,6 +79,8 @@ bool generateTestcaseAux(int n)
     vector<int64_t> G(n + 1);
     G[1] = F[1];
 
+    const int maxThing = 10;
+
     vector<int> randomNumbers(maxRandomNumber + 1);
     for (int i = 0; i < maxRandomNumber; i++)
     {
@@ -87,6 +89,7 @@ bool generateTestcaseAux(int n)
 
     for (int i = 2; i <= n; i++)
     {
+#if 0
         bool valid = false;
         random_shuffle(randomNumbers.begin(), randomNumbers.end());
         for (int j = 0; j < maxRandomNumber; j++)
@@ -135,6 +138,18 @@ bool generateTestcaseAux(int n)
         }
         if (!valid)
             return false;
+#endif
+        if (maxThing == h[i - 1])
+            return false;
+        const int nextH = h[i - 1] + rand() % (maxThing - h[i - 1]) + 1;
+        x[i] = G[i - 1] ^ nextH;
+        const int nextC = rand() % maxThing + 1;
+        y[i] = G[i - 1] ^ nextC;
+        const int nextL = rand() % i;
+        z[i] = G[i - 1] ^ nextL;
+        
+
+
         h[i] = x[i] ^ G[i - 1];
         c[i] = y[i] ^ G[i - 1];
         l[i] = z[i] ^ G[i - 1];
