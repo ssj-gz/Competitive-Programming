@@ -39,7 +39,7 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
             assert(c[i] * (h[j] - h[maxJ]) <=  h[i] * (c[j] - c[maxJ]));
         }
         if (!quiet)
-            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << endl;
+            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << " h[j]: " << h[j] << " c[j]: " << c[j] << endl;
     }
 
     if (maxJ != jLimit)
@@ -54,6 +54,24 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
         cout << "wee fleep!" << endl;
         assert(c[i] * (h[jLimit] - h[maxJ]) == h[i] * (c[maxJ] - c[jLimit]));
     }
+
+    int64_t currentC = numeric_limits<int64_t>::max();
+    int64_t dbgMaxInRange = numeric_limits<int64_t>::min();
+    for (int j = jLimit; j >= 1; j--)
+    {
+        if (c[j] >= currentC)
+            continue;
+        currentC = c[j];
+        const int64_t blah = h[j] * c[i] - c[j] * h[i];
+        cout << " Checking at j: " << j << endl;
+        if (blah > dbgMaxInRange)
+        {
+            dbgMaxInRange = blah;
+        }
+    }
+    cout << "dbgMaxInRange: " << dbgMaxInRange << " maxInRange: " << maxInRange << endl;
+    assert(dbgMaxInRange == maxInRange);
+
 
 #if 0
     for (int j = 1; j <= jLimit; j++)
@@ -137,7 +155,7 @@ bool generateTestcaseAux(int n)
     vector<int64_t> c(n + 1);
     vector<int64_t> l(n + 1);
 
-    const int maxThing = 1000;
+    const int maxThing = 10000;
 #ifdef SUBPROBLEM
 
     {
@@ -322,8 +340,8 @@ bool generateTestcaseAux(int n)
 void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
-    const int n = rand() % 1000 + 1;
-    //const int n = 10;
+    //const int n = rand() % 100 + 1;
+    const int n = 1000;
     while (true)
     {
         if (generateTestcaseAux(n))
