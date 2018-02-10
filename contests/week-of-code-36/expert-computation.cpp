@@ -38,12 +38,13 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     {
         assert(c[maxJ] <= c[jLimit]);
         cout << "woo fleep!" << endl;
-        assert(c[i] * (h[jLimit] - h[maxJ]) == h[i] * (c[maxJ] - c[jLimit]));
     }
     else
     {
         cout << "wee fleep!" << endl;
     }
+    assert(c[i] * (h[jLimit] - h[maxJ]) == h[i] * (c[maxJ] - c[jLimit]));
+    assert(h[i] * c[maxJ] + c[i] * h[maxJ] == c[i] * h[jLimit] + h[i] * c[jLimit]);
 
     return maxInRange;
 }
