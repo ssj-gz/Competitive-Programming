@@ -11,29 +11,32 @@ int main()
     int n;
     cin >> n;
 
-    vector<int> x(n);
+    vector<int64_t> x(n);
     for (int i= 0; i < n; i++)
         cin >> x[i];
-    vector<int> y(n);
+    vector<int64_t> y(n);
     for (int i= 0; i < n; i++)
         cin >> y[i];
-    vector<int> z(n);
+    vector<int64_t> z(n);
     for (int i= 0; i < n; i++)
         cin >> z[i];
 
-    vector<int> h(n);
-    vector<int> c(n);
-    vector<int> l(n);
+    vector<int64_t> h(n);
+    vector<int64_t> c(n);
+    vector<int64_t> l(n);
 
-    vector<int> G(n);
+    vector<int64_t> G(n);
     G[0] = 0;
 
     h[0] = x[0];
     c[0] = y[0];
     l[0] = z[0];
 
-    vector<int> F(n);
+    vector<int64_t> F(n);
     F[0] = 0;
+
+    vector<int64_t> maxHCCH(n);
+    //maxHCCH[0] = h[0] 
 
     for (int i = 1; i < n; i++)
     {
