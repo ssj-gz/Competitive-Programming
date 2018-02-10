@@ -1,4 +1,5 @@
 // Simon St James (ssjgz) - 2018-02-10
+#define SUBPROBLEM
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -15,18 +16,41 @@ int derangementsFound = 0;
 int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, bool quiet = false)
 {
     if (!quiet)
-        cout << "calcF - i: " << i << endl;
+        cout << "calcF : i: " << i << endl;
     int64_t maxInRange = numeric_limits<int64_t>::min();
-    for (int j = 1; j <= i - l[i]; j++)
+    int maxJ = -1;
+    const int jLimit = i - l[i];
+    cout << "i: " << i << " jLimit: " << jLimit << " l[i]: " << l[i] << endl;
+    assert(jLimit >= 1);
+    for (int j = 1; j <= jLimit; j++)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
-        maxInRange = max(maxInRange, blah);
+        if (blah > maxInRange)
+        {
+            maxInRange = blah;
+            maxJ = j;
+        }
         if (!quiet)
-            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << endl;
+            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << endl;
+    }
+
+    if (maxJ != jLimit)
+    {
+        assert(c[maxJ] < c[jLimit]);
     }
 
     return maxInRange;
 }
+
+void solveSubproblem(int n, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l)
+{
+    for (int i = 1; i <= n; i++)
+    {
+        const auto f = calcF(i, h, c, l);
+        cout << " solveSubproblem i: " << i << " i - l[i]: " << (i - l[i]) << " f: " << f << endl;
+    }
+}
+
 
 vector<int> makeRandomChoices(int n, int maxValue)
 {
@@ -83,6 +107,40 @@ void blibble(const int i, const vector<int64_t>& h, const vector<int64_t>& c, co
 
 bool generateTestcaseAux(int n)
 {
+    vector<int64_t> h(n + 1);
+    vector<int64_t> c(n + 1);
+    vector<int64_t> l(n + 1);
+
+    const int maxThing = 1000;
+#ifdef SUBPROBLEM
+
+    {
+        cout << n << endl;
+        auto choicesForH = makeRandomChoices(n + 1, maxThing);
+        sort(choicesForH.begin(), choicesForH.end());
+
+        for (int i = 1; i <= n; i++)
+        {
+            cout << choicesForH[i] << " ";
+        }
+        cout << endl;
+
+        for (int i = 1; i <= n; i++)
+        {
+            cout << rand() % maxThing + 1 << " ";
+        }
+        cout << endl;
+
+        for (int i = 1; i <= n; i++)
+        {
+            cout << rand() % i << " ";
+        }
+        cout << endl;
+
+    }
+
+    return true;
+#endif
     //cout << "Trying to generate a testcase of length " << n << endl;
     vector<int64_t> x(n + 1);
     vector<int64_t> y(n + 1);
@@ -92,10 +150,6 @@ bool generateTestcaseAux(int n)
     y[1] = rand() % maxRandomNumber + 1;
     z[1] = 0;
 
-    vector<int64_t> h(n + 1);
-    vector<int64_t> c(n + 1);
-    vector<int64_t> l(n + 1);
-
     c[1] = y[1];
     l[1] = z[1];
 
@@ -104,7 +158,6 @@ bool generateTestcaseAux(int n)
     vector<int64_t> G(n + 1);
     G[1] = F[1];
 
-    const int maxThing = 1000;
 
     auto choicesForH = makeRandomChoices(n + 1, maxThing);
     sort(choicesForH.begin(), choicesForH.end());
@@ -202,6 +255,7 @@ bool generateTestcaseAux(int n)
         assert(h[i] > h[i - 1]);
     }
 
+#if 0
     int numNonZeroZs = 0;
     for (const auto a : z)
     {
@@ -210,8 +264,10 @@ bool generateTestcaseAux(int n)
     }
     if (numNonZeroZs < 2)
         return false;
+#endif
 
     cout << n << endl;
+#ifndef SUBPROBLEM
     for (int i = 1; i <= n; i++)
         cout << x[i] << " ";
     cout << endl;
@@ -221,6 +277,18 @@ bool generateTestcaseAux(int n)
     for (int i = 1; i <= n; i++)
         cout << z[i] << " ";
     cout << endl;
+#else
+    for (int i = 1; i <= n; i++)
+        cout << h[i] << " ";
+    cout << endl;
+    for (int i = 1; i <= n; i++)
+        cout << c[i] << " ";
+    cout << endl;
+    for (int i = 1; i <= n; i++)
+        cout << l[i] << " ";
+    cout << endl;
+
+#endif
 
     return true;
 }
@@ -235,6 +303,7 @@ void generateTestcase()
             return;
     }
 }
+
 
 int main(int argc, char** argv)
 {
@@ -251,23 +320,56 @@ int main(int argc, char** argv)
     int n;
     cin >> n;
 
-    vector<int64_t> x(n + 1);
-    for (int i = 1; i <= n; i++)
-        cin >> x[i];
-    vector<int64_t> y(n + 1);
-    for (int i= 1; i <= n; i++)
-        cin >> y[i];
-    vector<int64_t> z(n + 1);
-    for (int i = 1; i <= n; i++)
-        cin >> z[i];
-
     vector<int64_t> h(n + 1);
     vector<int64_t> c(n + 1);
     vector<int64_t> l(n + 1);
 
+    vector<int64_t> x(n + 1);
+    vector<int64_t> y(n + 1);
+    vector<int64_t> z(n + 1);
+
+#ifndef SUBPROBLEM
+    for (int i = 1; i <= n; i++)
+        cin >> x[i];
+    for (int i= 1; i <= n; i++)
+        cin >> y[i];
+    for (int i = 1; i <= n; i++)
+        cin >> z[i];
+
     h[1] = x[1];
     c[1] = y[1];
     l[1] = z[1];
+#endif
+
+#ifdef SUBPROBLEM
+    for (int i = 1; i <= n; i++)
+        cin >> h[i];
+    for (int i= 1; i <= n; i++)
+        cin >> c[i];
+    for (int i = 1; i <= n; i++)
+        cin >> l[i];
+
+    cout << "h: " << endl;
+    for (int i = 1; i <= n; i++)
+        cout << h[i] << " ";
+    cout << endl;
+    cout << "c: " << endl;
+    for (int i = 1; i <= n; i++)
+        cout << c[i] << " ";
+    cout << endl;
+    cout << "l: " << endl;
+    for (int i = 1; i <= n; i++)
+    {
+        cout << l[i] << " ";
+        assert(l[i] <= i - 1);
+    }
+    cout << endl;
+
+
+    solveSubproblem(n, h, c ,l);
+    return 0;
+#endif
+
 
     vector<int64_t> F(n + 1);
     F[1] = calcF(1, h, c, l);
