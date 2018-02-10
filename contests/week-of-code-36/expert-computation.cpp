@@ -8,12 +8,13 @@ using namespace std;
 
 int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l)
 {
+    cout << "calcF - i: " << i << endl;
     int64_t maxInRange = numeric_limits<int64_t>::min();
     for (int j = 1; j <= i - l[i]; j++)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
         maxInRange = max(maxInRange, blah);
-        //cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << endl;
+        cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << endl;
     }
 
     return maxInRange;
@@ -72,9 +73,12 @@ int main()
 
         G[i] = (G[i - 1] + F[i]) % M;
 
-        //cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
-        //assert(l[i] <= i - 1);
+        cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
+        assert(l[i] <= i - 1);
         assert(F[i] >= 0);
+        assert(1 <= c[i] && c[i] <= 10'000'000);
+        assert(1 <= h[i] && h[i] <= 10'000'000);
+        assert(h[i] > h[i - 1]);
     }
 
     cout << G[n] << endl;
