@@ -36,7 +36,12 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
 
     if (maxJ != jLimit)
     {
-        assert(c[maxJ] < c[jLimit]);
+        assert(c[maxJ] <= c[jLimit]);
+        cout << "woo fleep!" << endl;
+    }
+    else
+    {
+        cout << "wee fleep!" << endl;
     }
 
     return maxInRange;
