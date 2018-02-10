@@ -16,7 +16,7 @@ int derangementsFound = 0;
 int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, bool quiet = false)
 {
     if (!quiet)
-        cout << "calcF : i: " << i << endl;
+        cout << "calcF : i: " << i << " c[i]: " << c[i] << " h[i]: " << h[i] << endl;
     int64_t maxInRange = numeric_limits<int64_t>::min();
     int maxJ = -1;
     const int jLimit = i - l[i];
@@ -25,8 +25,46 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     for (int j = jLimit; j >= 1; j--)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
+        if (maxJ != -1)
+        {
+            if (c[j] < c[maxJ] && c[i] * (h[maxJ] - h[j]) < h[i] * (c[j] - c[maxJ]))
+            //if (c[j] < c[jLimit] && c[i] * (h[jLimit] - h[j]) >= h[i] * (c[j] - c[jLimit]))
+            {
+                cout << "Floop" << endl;
+                assert(h[maxJ] - h[j] >= 0);
+                cout << "blah: " << blah << " maxInRange: " << maxInRange << endl;
+                assert(blah >= maxInRange);
+            }
+
+            if (c[j] < c[maxJ])
+            {
+                cout << "Bleep: " << (c[i] * (h[maxJ] - h[j]) + h[i] * (c[j] - c[maxJ])) << endl;
+                cout << "Bleep2: " << (h[maxJ] * c[i] - c[maxJ] * h[i]) - (h[j] * c[i] - c[j] * h[i]) << endl;
+                cout << "Bleep3: " << h[maxJ] * c[i] - c[maxJ] * h[i] - h[j] * c[i] + c[j] * h[i] << endl;
+                cout << "Bleep3: " << c[i] * (h[maxJ] - h[j]) - c[maxJ] * h[i]  + c[j] * h[i] << endl;
+                cout << "Bleep3: " << c[i] * (h[maxJ] - h[j]) - h[i] * (c[maxJ]  - c[j]) << endl;
+                const auto bleep = c[i] * (h[maxJ] - h[j]) - h[i] * (c[maxJ]  - c[j]);
+                const auto lhs = c[i] * (h[maxJ] - h[j]);
+                const auto rhs = h[i] * (c[maxJ]  - c[j]);
+                if (lhs < rhs)
+                {
+                    cout << "lhs: " << lhs << " rhs: " << rhs << endl;
+                    assert(blah > maxInRange);
+                }
+            }
+        }
         if (blah > maxInRange)
         {
+            if (maxJ != -1)
+            {
+                assert(c[j] < c[maxJ]);
+                //assert(c[i] * (h[maxJ] - h[j]) >= h[i] * (c[j] - c[maxJ]));
+                assert(h[maxJ] - h[j] > 0);
+                assert(c[i] * (h[maxJ] - h[j]) >= h[i] * (c[j] - c[maxJ]));
+                const auto lhs = c[i] * (h[maxJ] - h[j]);
+                const auto rhs = h[i] * (c[maxJ]  - c[j]);
+                assert(lhs < rhs);
+            }
             maxInRange = blah;
             maxJ = j;
             assert((maxJ == jLimit) ||  (c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit])));
@@ -63,10 +101,11 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
             continue;
         currentC = c[j];
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
-        cout << " Checking at j: " << j << endl;
+        //cout << " Checking at j: " << j << endl;
         if (blah > dbgMaxInRange)
         {
             dbgMaxInRange = blah;
+            cout << "dbgMaxInRange changed to " << dbgMaxInRange << " at index: " << j << endl;
         }
     }
     cout << "dbgMaxInRange: " << dbgMaxInRange << " maxInRange: " << maxInRange << endl;
@@ -89,6 +128,7 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
 void solveSubproblem(int n, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l)
 {
     for (int i = 1; i <= n; i++)
+    //const int i = 10000;
     {
         const auto f = calcF(i, h, c, l);
         cout << " solveSubproblem i: " << i << " i - l[i]: " << (i - l[i]) << " f: " << f << endl;
@@ -155,7 +195,8 @@ bool generateTestcaseAux(int n)
     vector<int64_t> c(n + 1);
     vector<int64_t> l(n + 1);
 
-    const int maxThing = 10000;
+    const int maxThing = 1000000;
+    //const int maxThing = 2000;
 #ifdef SUBPROBLEM
 
     {
@@ -163,15 +204,30 @@ bool generateTestcaseAux(int n)
         auto choicesForH = makeRandomChoices(n + 1, maxThing);
         sort(choicesForH.begin(), choicesForH.end());
 
+        //int currentH = rand() % 10;
         for (int i = 1; i <= n; i++)
         {
             cout << choicesForH[i] << " ";
+            //cout << i << " ";
         }
         cout << endl;
 
+        int currentC = rand() % 10;
         for (int i = 1; i <= n; i++)
         {
             cout << rand() % maxThing + 1 << " ";
+            //currentC += rand() % 500;
+            //if (i <= 1000)
+            //{
+                //cout << currentC << " ";
+                //cout << (i + 1) << " ";
+            //}
+            //else
+            //{
+                //cout << rand() % maxThing + 1 + 500'000 << " ";
+                //cout << 500'000 + i << " ";
+            //}
+
         }
         cout << endl;
 
@@ -341,7 +397,7 @@ void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
     //const int n = rand() % 100 + 1;
-    const int n = 1000;
+    const int n = 100000;
     while (true)
     {
         if (generateTestcaseAux(n))
