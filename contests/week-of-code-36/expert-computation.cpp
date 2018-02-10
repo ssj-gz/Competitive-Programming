@@ -6,14 +6,14 @@
 
 using namespace std;
 
-int64_t calcF(int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l)
+int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l)
 {
     int64_t maxInRange = numeric_limits<int64_t>::min();
     for (int j = 1; j <= i - l[i]; j++)
     {
-        const auto blah = h[j] * c[i] - c[j] * h[i];
-        //cout << " j: " << j << " blah: " << blah << endl;
+        const int64_t blah = h[j] * c[i] - c[j] * h[i];
         maxInRange = max(maxInRange, blah);
+        //cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << endl;
     }
 
     return maxInRange;
@@ -38,7 +38,6 @@ int main()
     vector<int64_t> c(n + 1);
     vector<int64_t> l(n + 1);
 
-
     h[1] = x[1];
     c[1] = y[1];
     l[1] = z[1];
@@ -51,9 +50,13 @@ int main()
     //vector<int64_t> maxHCCH(n);
     //maxHCCH[0] = h[0] 
 
-    const auto M = 1'000'000'007UL;
+    const auto M = 1000000007UL;
     //cout << "M: " << M << endl;
 
+    {
+        int i = 1;
+        //cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
+    }
     for (int i = 2; i <= n; i++)
     {
         h[i] = x[i] ^ G[i - 1];
@@ -61,11 +64,14 @@ int main()
         l[i] = z[i] ^ G[i - 1];
 
         F[i] = calcF(i, h, c, l);
+        while (F[i] < 0)
+            F[i] += M;
 
         G[i] = (G[i - 1] + F[i]) % M;
 
         //cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
-        assert(l[i] <= i - 1);
+        //assert(l[i] <= i - 1);
+        assert(F[i] >= 0);
     }
 
     cout << G[n] << endl;
