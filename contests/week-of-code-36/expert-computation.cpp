@@ -22,13 +22,21 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     const int jLimit = i - l[i];
     cout << "i: " << i << " jLimit: " << jLimit << " l[i]: " << l[i] << endl;
     assert(jLimit >= 1);
-    for (int j = 1; j <= jLimit; j++)
+    for (int j = jLimit; j >= 1; j--)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
         if (blah > maxInRange)
         {
             maxInRange = blah;
             maxJ = j;
+            assert((maxJ == jLimit) ||  (c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit])));
+        }
+        else
+        {
+            assert(j != maxJ);
+            assert(maxJ != -1);
+            //assert(c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit]));
+            assert(c[i] * (h[j] - h[maxJ]) <=  h[i] * (c[j] - c[maxJ]));
         }
         if (!quiet)
             cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << endl;
@@ -38,13 +46,13 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     {
         assert(c[maxJ] <= c[jLimit]);
         cout << "woo fleep!" << endl;
-        assert(c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit]));
+        //assert(c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit]));
         //assert(h[i] * c[maxJ] + c[i] * h[maxJ] == c[i] * h[jLimit] + h[i] * c[jLimit]);
     }
     else
     {
         cout << "wee fleep!" << endl;
-        assert(c[i] * (h[jLimit] - h[maxJ]) <= h[i] * (c[maxJ] - c[jLimit]));
+        assert(c[i] * (h[jLimit] - h[maxJ]) == h[i] * (c[maxJ] - c[jLimit]));
     }
 
 #if 0
@@ -314,8 +322,8 @@ bool generateTestcaseAux(int n)
 void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
-    //const int n = rand() % 1000 + 1;
-    const int n = 10;
+    const int n = rand() % 1000 + 1;
+    //const int n = 10;
     while (true)
     {
         if (generateTestcaseAux(n))
