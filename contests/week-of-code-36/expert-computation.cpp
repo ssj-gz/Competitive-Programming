@@ -10,7 +10,7 @@ using namespace std;
 
 const int64_t M = 1000000007UL;
 
-bool assertOnExit = false;
+int derangementsFound = 0;
 
 int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, bool quiet = false)
 {
@@ -27,6 +27,33 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
 
     return maxInRange;
 }
+
+vector<int> makeRandomChoices(int n, int maxValue)
+{
+    vector<int> toChooseFrom;
+    for (int i = 1; i <= maxValue; i++)
+    {
+        toChooseFrom.push_back(i);
+    }
+
+    vector<int> choices;
+    int numRemainingChoices = maxValue;
+    for (int i = 1; i <=n; i++)
+    {
+        int choiceIndex = rand() % numRemainingChoices;
+        //cout << " blee: " << (maxValue - numRemainingChoices + choiceIndex) << " toChooseFrom.size(): " << toChooseFrom.size() << endl;
+        const int choice = toChooseFrom[maxValue - numRemainingChoices + choiceIndex];
+        swap(toChooseFrom[maxValue - numRemainingChoices], toChooseFrom[maxValue - numRemainingChoices + choiceIndex]);
+        
+        choices.push_back(choice);
+        
+
+        numRemainingChoices--;
+    }
+
+    return choices;
+}
+
 void blibble(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, bool quiet = false)
 {
     int64_t maxInRange = numeric_limits<int64_t>::min();
@@ -42,14 +69,14 @@ void blibble(const int i, const vector<int64_t>& h, const vector<int64_t>& c, co
         }
 
         if (!quiet)
-            cout << "blibble j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << endl;
+            cout << "blibble j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << endl;
     }
 
     cout << "i: " << i << " maxJ: " << maxJ << endl;
     if (maxJ < oldMaxJ)
     {
-        cout << "******** oldMaxJ: " << oldMaxJ << endl;
-        assertOnExit = true;
+        cout << "******** oldMaxJ: " << oldMaxJ << " maxJ: " << maxJ << " i: " << i << endl;
+        derangementsFound++;
     }
     oldMaxJ = maxJ;
 }
@@ -62,7 +89,6 @@ bool generateTestcaseAux(int n)
     vector<int64_t> z(n + 1);
 
     const int maxRandomNumber = 100;
-    x[1] = rand() % maxRandomNumber + 1;
     y[1] = rand() % maxRandomNumber + 1;
     z[1] = 0;
 
@@ -70,7 +96,6 @@ bool generateTestcaseAux(int n)
     vector<int64_t> c(n + 1);
     vector<int64_t> l(n + 1);
 
-    h[1] = x[1];
     c[1] = y[1];
     l[1] = z[1];
 
@@ -79,7 +104,12 @@ bool generateTestcaseAux(int n)
     vector<int64_t> G(n + 1);
     G[1] = F[1];
 
-    const int maxThing = 10;
+    const int maxThing = 1000;
+
+    auto choicesForH = makeRandomChoices(n + 1, maxThing);
+    sort(choicesForH.begin(), choicesForH.end());
+    x[1] = choicesForH[1];
+    h[1] = x[1];
 
     vector<int> randomNumbers(maxRandomNumber + 1);
     for (int i = 0; i < maxRandomNumber; i++)
@@ -139,9 +169,8 @@ bool generateTestcaseAux(int n)
         if (!valid)
             return false;
 #endif
-        if (maxThing == h[i - 1])
-            return false;
-        const int nextH = h[i - 1] + rand() % (maxThing - h[i - 1]) + 1;
+        const int nextH = choicesForH[i];
+        //cout << "lastH: " << h[i - 1] << " nextH: " << nextH << endl;
         x[i] = G[i - 1] ^ nextH;
         const int nextC = rand() % maxThing + 1;
         y[i] = G[i - 1] ^ nextC;
@@ -199,7 +228,7 @@ bool generateTestcaseAux(int n)
 void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
-    const int n = 8;
+    const int n = 100;
     while (true)
     {
         if (generateTestcaseAux(n))
@@ -281,6 +310,7 @@ int main(int argc, char** argv)
 
     cout << G[n] << endl;
 
-    assert(!assertOnExit);
+    //assert(!assertOnExit);
+    assert(derangementsFound < 4);
 
 }
