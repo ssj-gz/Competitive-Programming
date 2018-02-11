@@ -142,15 +142,15 @@ int main()
                 continue; // Can't move Pawn forwards!
             for (const auto pieceToPromoteTo : piecesToPromoteTo)
             {
-                vector<string> board{boardOriginal};
-                board[candidatePawnPos.row][candidatePawnPos.col] = '#';
-                board[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
-                if (isKingInCheck(board, false))
+                vector<string> boardAfterPromotion{boardOriginal};
+                boardAfterPromotion[candidatePawnPos.row][candidatePawnPos.col] = '#';
+                boardAfterPromotion[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
+                if (isKingInCheck(boardAfterPromotion, false))
                     continue; // Promoting this pawn would put us in check.
 
                 isPawnPromotable = true;
 
-                if (isKingInCheck(board, true))
+                if (isKingInCheck(boardAfterPromotion, true))
                 {
                     numWaysToCheck++;
                 }
