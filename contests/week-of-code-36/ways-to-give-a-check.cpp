@@ -37,6 +37,21 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
         }
     };
 
+    auto updateResultFromDiagonalMoves = [&updateResultFromMove](int startRow, int startCol)
+    {
+        updateResultFromMove(startRow, startCol, 1, -1); // Down + Left.
+        updateResultFromMove(startRow, startCol, 1, 1); // Down + Right.
+        updateResultFromMove(startRow, startCol, -1, -1); // Up + Left.
+        updateResultFromMove(startRow, startCol, -1, 1); // Up + Right.
+    };
+    auto updateResultFromHorizontalAndVerticalMoves = [&updateResultFromMove](int startRow, int startCol)
+    {
+        updateResultFromMove(startRow, startCol, 0, -1); // Left
+        updateResultFromMove(startRow, startCol, 0, 1);  // Right
+        updateResultFromMove(startRow, startCol, 1, 0);  // Down
+        updateResultFromMove(startRow, startCol, -1, 0);  // Up
+    };
+
     const auto attackingPiecesAreWhite = isBlackKing;
     for (auto row = 0; row < numRows; row++)
     {
@@ -52,26 +67,14 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                 case 'Q':
                     {
                         // Queen.
-                        updateResultFromMove(row, col, 0, -1); // Left
-                        updateResultFromMove(row, col, 0, 1);  // Right
-
-                        updateResultFromMove(row, col, 1, 0);  // Down
-                        updateResultFromMove(row, col, 1, -1);  // Down + Left
-                        updateResultFromMove(row, col, 1, 1);  // Down + Right
-
-                        updateResultFromMove(row, col, -1, 0);  // Up
-                        updateResultFromMove(row, col, -1, -1);  // Up + Left
-                        updateResultFromMove(row, col, -1, 1);  // Up + Right
+                        updateResultFromHorizontalAndVerticalMoves(row, col);
+                        updateResultFromDiagonalMoves(row, col);
                     }
                     break;
                 case 'R':
                     {
                         // Rook.
-                        updateResultFromMove(row, col, 0, -1); // Left
-                        updateResultFromMove(row, col, 0, 1); // Right
-
-                        updateResultFromMove(row, col, 1, 0); // Down
-                        updateResultFromMove(row, col, -1, 0); // Up
+                        updateResultFromHorizontalAndVerticalMoves(row, col);
                     };
                     break;
 
@@ -93,10 +96,7 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
                 case 'B':
                     {
                         // Bishop.
-                        updateResultFromMove(row, col, 1, -1); // Down + Left.
-                        updateResultFromMove(row, col, 1, 1); // Down + Right.
-                        updateResultFromMove(row, col, -1, -1); // Up + Left.
-                        updateResultFromMove(row, col, -1, 1); // Up + Right.
+                        updateResultFromDiagonalMoves(row, col);
                     }
                     break;
 
@@ -163,5 +163,4 @@ int main()
         cout << numWaysToCheck << endl;
     }
     assert(cin);
-
 }
