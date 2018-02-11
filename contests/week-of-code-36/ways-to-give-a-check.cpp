@@ -22,9 +22,9 @@ bool isKingInCheck(const vector<string>& board, bool isBlackKing)
             row += dRow;
             col += dCol;
 
-            if (row < 0 || row >= 8)
+            if (row < 0 || row >= numRows)
                 break;
-            if (col < 0 || col >= 8)
+            if (col < 0 || col >= numCols)
                 break;
 
             if (board[row][col] == kingToTestChar)
