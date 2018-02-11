@@ -29,6 +29,9 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
         if (maxJ != -1)
         {
+            const auto lhs = c[i] * (h[maxJ] - h[j]);
+            const auto rhs = h[i] * (c[maxJ]  - c[j]);
+            //if (c[j] < c[maxJ] && c[i] * (h[maxJ] - h[j]) < h[i] * (c[j] - c[maxJ]))
             if (c[j] < c[maxJ] && c[i] * (h[maxJ] - h[j]) < h[i] * (c[j] - c[maxJ]))
             //if (c[j] < c[jLimit] && c[i] * (h[jLimit] - h[j]) >= h[i] * (c[j] - c[jLimit]))
             {
@@ -141,21 +144,55 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     return maxInRange;
 }
 
-int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, const vector<int>& lastIndexOfCValueLessThan, bool quiet = false)
+int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, const vector<int>& lastIndexOfCValueLessThan, const vector<int64_t>& maxCSoFar, bool quiet = false)
 {
     int64_t maxInRange = numeric_limits<int64_t>::min();
     int maxJ = -1;
     const int jLimit = i - l[i];
     assert(jLimit >= 1);
     int j = jLimit;
+    int64_t testMaxInRange = numeric_limits<int64_t>::min();
     while (j >= 1)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
+        if (maxJ != -1)
+        {
+            assert(c[j] < c[maxJ]);
+            const auto lhs = c[i] * (h[maxJ] - h[j]);
+            const auto rhs = h[i] * (c[maxJ]  - c[j]);
+            if (lhs < rhs)
+                assert(blah > maxInRange);
+        }
         if (blah > maxInRange)
+        {
+            if (maxJ != -1)
+                assert(c[i] * (h[maxJ] - h[j]) >= h[i] * (c[j] - c[maxJ]));
+            maxJ = j;
             maxInRange = blah;
+            //if (j > 1 && (c[i] * h[j] <= h[i] * (c[j] - maxCSoFar[j - 1])) && (testMaxInRange == numeric_limits<int64_t>::min() ))
+            if (j > 1 && c[i] >= h[i] * (abs(c[maxJ] - maxCSoFar[j - 1])) && (testMaxInRange == numeric_limits<int64_t>::min() ))
+            {
+                //cout << "Can't get better than " << maxInRange << endl;
+                testMaxInRange = maxInRange;
+                //break; // TODO - this is not correct, apparently!
+            }
+        }
+        else
+        {
+            if (maxJ != -1)
+            {
+                assert(c[j] < c[maxJ]);
+                const auto lhs = c[i] * (h[maxJ] - h[j]);
+                const auto rhs = h[i] * (c[maxJ]  - c[j]);
+                assert(lhs >= rhs);
+            }
+        }
 
+        //if (j > 1 && (c[j] - maxCSoFar[j - 1]) * h[i] > c[i] * (h[j]) && (testMaxInRange == numeric_limits<int64_t>::min() ))
         j = lastIndexOfCValueLessThan[j];
     }
+    //cout << "maxInRange: " << maxInRange << " testMaxInRange: " << testMaxInRange << endl;
+    assert(testMaxInRange == numeric_limits<int64_t>::min() || testMaxInRange == maxInRange);
 
 
     return maxInRange;
@@ -522,9 +559,11 @@ int main(int argc, char** argv)
 #endif
 
 
+    vector<int64_t> maxCSoFar(n + 1);
+    maxCSoFar[1] = c[1];
     vector<int> lastIndexOfCValueLessThan(n, -1);
     vector<int64_t> F(n + 1);
-    F[1] = calcF2(1, h, c, l, lastIndexOfCValueLessThan);
+    F[1] = calcF2(1, h, c, l, lastIndexOfCValueLessThan, maxCSoFar);
     vector<int64_t> G(n + 1);
     G[1] = F[1];
 
@@ -572,6 +611,7 @@ int main(int argc, char** argv)
                 //cout << "None less than " << c[i] << " apparently" << endl;
             }
         }
+        maxCSoFar[i] = max(c[i], maxCSoFar[i - 1]);
         //cout << "lastIndexOfCValue: " << endl;
         //for (const auto& blah : lastIndexOfCValue)
         //{
@@ -593,7 +633,7 @@ int main(int argc, char** argv)
 #endif
 
 
-        F[i] = calcF2(i, h, c, l, lastIndexOfCValueLessThan);
+        F[i] = calcF2(i, h, c, l, lastIndexOfCValueLessThan, maxCSoFar);
         //blibble(i, h, c, l);
         if (F[i] < 0)
         {
