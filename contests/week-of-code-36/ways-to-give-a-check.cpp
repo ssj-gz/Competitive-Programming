@@ -145,6 +145,7 @@ int main()
                 vector<string> boardAfterPromotion{boardOriginal};
                 boardAfterPromotion[candidatePawnPos.row][candidatePawnPos.col] = '#';
                 boardAfterPromotion[promotedPawnPos.row][promotedPawnPos.col] = pieceToPromoteTo;
+
                 if (isKingInCheck(boardAfterPromotion, false))
                     continue; // Promoting this pawn would put us in check.
 
