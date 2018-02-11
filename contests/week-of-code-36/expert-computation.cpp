@@ -1,7 +1,8 @@
 // Simon St James (ssjgz) - 2018-02-10
-#define SUBPROBLEM
+//#define SUBPROBLEM
 #include <iostream>
 #include <vector>
+#include <map>
 #include <limits>
 #include <algorithm>
 #include <sys/time.h>
@@ -20,9 +21,9 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     int64_t maxInRange = numeric_limits<int64_t>::min();
     int maxJ = -1;
     const int jLimit = i - l[i];
-    cout << "i: " << i << " jLimit: " << jLimit << " l[i]: " << l[i] << endl;
+    //cout << "i: " << i << " jLimit: " << jLimit << " l[i]: " << l[i] << endl;
     assert(jLimit >= 1);
-    cout << "c[i]/h[i]: " << static_cast<double>(c[i]) / h[i] << endl;
+    //cout << "c[i]/h[i]: " << static_cast<double>(c[i]) / h[i] << endl;
     for (int j = jLimit; j >= 1; j--)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
@@ -31,9 +32,9 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
             if (c[j] < c[maxJ] && c[i] * (h[maxJ] - h[j]) < h[i] * (c[j] - c[maxJ]))
             //if (c[j] < c[jLimit] && c[i] * (h[jLimit] - h[j]) >= h[i] * (c[j] - c[jLimit]))
             {
-                cout << "Floop" << endl;
+                //cout << "Floop" << endl;
                 assert(h[maxJ] - h[j] >= 0);
-                cout << "blah: " << blah << " maxInRange: " << maxInRange << endl;
+                //cout << "blah: " << blah << " maxInRange: " << maxInRange << endl;
                 assert(blah >= maxInRange);
             }
 
@@ -52,7 +53,7 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
                 const auto rhs = h[i] * (c[maxJ]  - c[j]);
                 if (lhs < rhs)
                 {
-                    cout << "lhs: " << lhs << " rhs: " << rhs << endl;
+                    //cout << "lhs: " << lhs << " rhs: " << rhs << endl;
                     assert(blah > maxInRange);
                 }
 #endif
@@ -91,20 +92,20 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
         if (!quiet)
         {
             const double glomp = static_cast<double>(c[jLimit] - c[j]) / (h[jLimit] - h[j]);
-            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << " h[j]: " << h[j] << " c[j]: " << c[j] << " glomp: " << glomp << endl;
+            //cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << " h[j]: " << h[j] << " c[j]: " << c[j] << " glomp: " << glomp << endl;
         }
     }
 
     if (maxJ != jLimit)
     {
         assert(c[maxJ] <= c[jLimit]);
-        cout << "woo fleep!" << endl;
+        //cout << "woo fleep!" << endl;
         //assert(c[i] * (h[jLimit] - h[maxJ]) > h[i] * (c[maxJ] - c[jLimit]));
         //assert(h[i] * c[maxJ] + c[i] * h[maxJ] == c[i] * h[jLimit] + h[i] * c[jLimit]);
     }
     else
     {
-        cout << "wee fleep!" << endl;
+        //cout << "wee fleep!" << endl;
         assert(c[i] * (h[jLimit] - h[maxJ]) == h[i] * (c[maxJ] - c[jLimit]));
     }
 
@@ -120,10 +121,10 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
         if (blah > dbgMaxInRange)
         {
             dbgMaxInRange = blah;
-            cout << "dbgMaxInRange changed to " << dbgMaxInRange << " at index: " << j << endl;
+            //cout << "dbgMaxInRange changed to " << dbgMaxInRange << " at index: " << j << endl;
         }
     }
-    cout << "dbgMaxInRange: " << dbgMaxInRange << " maxInRange: " << maxInRange << endl;
+    //cout << "dbgMaxInRange: " << dbgMaxInRange << " maxInRange: " << maxInRange << endl;
     assert(dbgMaxInRange == maxInRange);
 
 
@@ -139,6 +140,27 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
 
     return maxInRange;
 }
+
+int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, const vector<int>& lastIndexOfCValueLessThan, bool quiet = false)
+{
+    int64_t maxInRange = numeric_limits<int64_t>::min();
+    int maxJ = -1;
+    const int jLimit = i - l[i];
+    assert(jLimit >= 1);
+    int j = jLimit;
+    while (j >= 1)
+    {
+        const int64_t blah = h[j] * c[i] - c[j] * h[i];
+        if (blah > maxInRange)
+            maxInRange = blah;
+
+        j = lastIndexOfCValueLessThan[j];
+    }
+
+
+    return maxInRange;
+}
+
 
 void solveSubproblem(int n, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l)
 {
@@ -358,7 +380,6 @@ bool generateTestcaseAux(int n)
         y[i] = G[i - 1] ^ nextC;
         const int nextL = rand() % i;
         z[i] = G[i - 1] ^ nextL;
-        
 
 
         h[i] = x[i] ^ G[i - 1];
@@ -501,8 +522,9 @@ int main(int argc, char** argv)
 #endif
 
 
+    vector<int> lastIndexOfCValueLessThan(n, -1);
     vector<int64_t> F(n + 1);
-    F[1] = calcF(1, h, c, l);
+    F[1] = calcF2(1, h, c, l, lastIndexOfCValueLessThan);
     vector<int64_t> G(n + 1);
     G[1] = F[1];
 
@@ -515,24 +537,74 @@ int main(int argc, char** argv)
         int i = 1;
         //cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
     }
+    map<int64_t, int> lastIndexOfCValue;
+    lastIndexOfCValue[c[1]] = 1;
+    //cout << "c[1]: " << c[1] << endl;
+
+
     for (int i = 2; i <= n; i++)
     {
         h[i] = x[i] ^ G[i - 1];
         c[i] = y[i] ^ G[i - 1];
         l[i] = z[i] ^ G[i - 1];
 
-        F[i] = calcF(i, h, c, l);
-        blibble(i, h, c, l);
+        //cout << "Computing thing for i: " << i << " c[i]: "<< c[i] << endl;
+        if (!lastIndexOfCValue.empty())
+        {
+            auto iter = lastIndexOfCValue.end();
+            iter--;
+
+            while (iter != lastIndexOfCValue.end() && iter->first >= c[i])
+            {
+                //cout << " erasing "  << iter->first << endl;
+                iter = lastIndexOfCValue.erase(iter);
+                if (iter == lastIndexOfCValue.end() && !lastIndexOfCValue.empty())
+                    iter--;
+            }
+
+            if (iter != lastIndexOfCValue.end())
+            {
+                //cout << "Setting last index less than " << c[i] << " to index " << iter->second << endl;
+                lastIndexOfCValueLessThan[i] = iter->second;
+            }
+            else
+            {
+                //cout << "None less than " << c[i] << " apparently" << endl;
+            }
+        }
+        //cout << "lastIndexOfCValue: " << endl;
+        //for (const auto& blah : lastIndexOfCValue)
+        //{
+            //cout << blah.first << " " << blah.second << endl;
+        //}
+        lastIndexOfCValue[c[i]] = i;
+
+#if 0
+        int dbgLastIndex = -1;
+        for (int j = i; j >= 1; j--)
+        {
+            if (c[j] < c[i])
+            {
+                dbgLastIndex = j;
+                break;
+            }
+        }
+        assert(dbgLastIndex == lastIndexOfCValueLessThan[i]);
+#endif
+
+
+        F[i] = calcF2(i, h, c, l, lastIndexOfCValueLessThan);
+        //blibble(i, h, c, l);
         if (F[i] < 0)
         {
-            cout << "F was -ve" << endl;
+            //cout << "F was -ve" << endl;
             const auto blee = (F[i] / -M) + 1;
             F[i] += blee * M;
         }
 
         G[i] = (G[i - 1] + F[i]) % M;
 
-        cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
+        //cout << "i: " << i << " h: " << h[i] << " c: " << c[i] << " l: " << l[i] <<  " F: " << F[i] << " G: " << G[i] << endl;
         assert(l[i] <= i - 1);
         assert(F[i] >= 0);
         assert(1 <= c[i] && c[i] <= 10'000'000);
