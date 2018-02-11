@@ -144,7 +144,7 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     return maxInRange;
 }
 
-int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, const vector<int>& lastIndexOfCValueLessThan, const vector<int64_t>& maxCSoFar, bool quiet = false)
+int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, const vector<int64_t>& l, const vector<int>& lastIndexOfCValueLessThan, const vector<int64_t>& maxHSoFar, bool quiet = false)
 {
     int64_t maxInRange = numeric_limits<int64_t>::min();
     int maxJ = -1;
@@ -169,12 +169,13 @@ int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, 
                 assert(c[i] * (h[maxJ] - h[j]) >= h[i] * (c[j] - c[maxJ]));
             maxJ = j;
             maxInRange = blah;
-            //if (j > 1 && (c[i] * h[j] <= h[i] * (c[j] - maxCSoFar[j - 1])) && (testMaxInRange == numeric_limits<int64_t>::min() ))
-            if (j > 1 && c[i] >= h[i] * (abs(c[maxJ] - maxCSoFar[j - 1])) && (testMaxInRange == numeric_limits<int64_t>::min() ))
+            //if (j > 1 && (c[i] * h[j] <= h[i] * (c[j] - maxHSoFar[j - 1])) && (testMaxInRange == numeric_limits<int64_t>::min() ))
+            if (j > 1 && lastIndexOfCValueLessThan[maxJ] != -1 && c[i] * (h[maxJ] - maxHSoFar[j - 1]) >= h[i] * (c[maxJ]) && (testMaxInRange == numeric_limits<int64_t>::min() ))
             {
+                assert(c[lastIndexOfCValueLessThan[maxJ]] < c[maxJ]);
                 //cout << "Can't get better than " << maxInRange << endl;
                 testMaxInRange = maxInRange;
-                //break; // TODO - this is not correct, apparently!
+                break; // TODO - this is not correct, apparently!
             }
         }
         else
@@ -185,10 +186,17 @@ int64_t calcF2(const int i, const vector<int64_t>& h, const vector<int64_t>& c, 
                 const auto lhs = c[i] * (h[maxJ] - h[j]);
                 const auto rhs = h[i] * (c[maxJ]  - c[j]);
                 assert(lhs >= rhs);
+                if (lastIndexOfCValueLessThan[maxJ] != -1)
+                {
+                    //assert(c[j] >= c[lastIndexOfCValueLessThan[maxJ]]);
+                    //cout << "maxJ: " << maxJ << " c[maxJ]: " << c[maxJ] << " c[j]: " << c[j] << " c[lastIndexOfCValueLessThan[maxJ]]: " << c[lastIndexOfCValueLessThan[maxJ]] << endl;
+                    //assert(c[maxJ] - c[lastIndexOfCValueLessThan[maxJ]] >= c[maxJ] - c[j]);
+                    assert(h[i] * (c[maxJ]) >= rhs);
+                }
             }
         }
 
-        //if (j > 1 && (c[j] - maxCSoFar[j - 1]) * h[i] > c[i] * (h[j]) && (testMaxInRange == numeric_limits<int64_t>::min() ))
+        //if (j > 1 && (c[j] - maxHSoFar[j - 1]) * h[i] > c[i] * (h[j]) && (testMaxInRange == numeric_limits<int64_t>::min() ))
         j = lastIndexOfCValueLessThan[j];
     }
     //cout << "maxInRange: " << maxInRange << " testMaxInRange: " << testMaxInRange << endl;
@@ -484,7 +492,7 @@ void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
     //const int n = rand() % 100 + 1;
-    const int n = 1000;
+    const int n = 10000;
     while (true)
     {
         if (generateTestcaseAux(n))
@@ -495,6 +503,7 @@ void generateTestcase()
 
 int main(int argc, char** argv)
 {
+    ios::sync_with_stdio(false);
     if (argc == 2)
     {
         struct timeval time;
@@ -559,11 +568,11 @@ int main(int argc, char** argv)
 #endif
 
 
-    vector<int64_t> maxCSoFar(n + 1);
-    maxCSoFar[1] = c[1];
+    vector<int64_t> maxHSoFar(n + 1);
+    maxHSoFar[1] = h[1];
     vector<int> lastIndexOfCValueLessThan(n, -1);
     vector<int64_t> F(n + 1);
-    F[1] = calcF2(1, h, c, l, lastIndexOfCValueLessThan, maxCSoFar);
+    F[1] = calcF2(1, h, c, l, lastIndexOfCValueLessThan, maxHSoFar);
     vector<int64_t> G(n + 1);
     G[1] = F[1];
 
@@ -611,7 +620,7 @@ int main(int argc, char** argv)
                 //cout << "None less than " << c[i] << " apparently" << endl;
             }
         }
-        maxCSoFar[i] = max(c[i], maxCSoFar[i - 1]);
+        maxHSoFar[i] = max(h[i], maxHSoFar[i - 1]);
         //cout << "lastIndexOfCValue: " << endl;
         //for (const auto& blah : lastIndexOfCValue)
         //{
@@ -633,7 +642,7 @@ int main(int argc, char** argv)
 #endif
 
 
-        F[i] = calcF2(i, h, c, l, lastIndexOfCValueLessThan, maxCSoFar);
+        F[i] = calcF2(i, h, c, l, lastIndexOfCValueLessThan, maxHSoFar);
         //blibble(i, h, c, l);
         if (F[i] < 0)
         {
