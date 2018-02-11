@@ -22,6 +22,7 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
     const int jLimit = i - l[i];
     cout << "i: " << i << " jLimit: " << jLimit << " l[i]: " << l[i] << endl;
     assert(jLimit >= 1);
+    cout << "c[i]/h[i]: " << static_cast<double>(c[i]) / h[i] << endl;
     for (int j = jLimit; j >= 1; j--)
     {
         const int64_t blah = h[j] * c[i] - c[j] * h[i];
@@ -38,12 +39,15 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
 
             if (c[j] < c[maxJ])
             {
+#if 0
                 cout << "Bleep: " << (c[i] * (h[maxJ] - h[j]) + h[i] * (c[j] - c[maxJ])) << endl;
                 cout << "Bleep2: " << (h[maxJ] * c[i] - c[maxJ] * h[i]) - (h[j] * c[i] - c[j] * h[i]) << endl;
                 cout << "Bleep3: " << h[maxJ] * c[i] - c[maxJ] * h[i] - h[j] * c[i] + c[j] * h[i] << endl;
                 cout << "Bleep3: " << c[i] * (h[maxJ] - h[j]) - c[maxJ] * h[i]  + c[j] * h[i] << endl;
                 cout << "Bleep3: " << c[i] * (h[maxJ] - h[j]) - h[i] * (c[maxJ]  - c[j]) << endl;
+#endif
                 const auto bleep = c[i] * (h[maxJ] - h[j]) - h[i] * (c[maxJ]  - c[j]);
+#if 1
                 const auto lhs = c[i] * (h[maxJ] - h[j]);
                 const auto rhs = h[i] * (c[maxJ]  - c[j]);
                 if (lhs < rhs)
@@ -51,6 +55,14 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
                     cout << "lhs: " << lhs << " rhs: " << rhs << endl;
                     assert(blah > maxInRange);
                 }
+#endif
+                //const auto lhs = c[i] * (h[jLimit] - h[j]);
+                //const auto rhs = h[i] * (c[jLimit]  - c[j]);
+                //if (lhs < rhs)
+                //{
+                    //cout << "lhs: " << lhs << " rhs: " << rhs << endl;
+                    //assert(blah > maxInRange);
+                //}
             }
         }
         if (blah > maxInRange)
@@ -77,7 +89,10 @@ int64_t calcF(const int i, const vector<int64_t>& h, const vector<int64_t>& c, c
             assert(c[i] * (h[j] - h[maxJ]) <=  h[i] * (c[j] - c[maxJ]));
         }
         if (!quiet)
-            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << " h[j]: " << h[j] << " c[j]: " << c[j] << endl;
+        {
+            const double glomp = static_cast<double>(c[jLimit] - c[j]) / (h[jLimit] - h[j]);
+            cout << " j: " << j << " blah: " << blah << " maxInRange: " << maxInRange << " maxJ: " << maxJ << " h[j]: " << h[j] << " c[j]: " << c[j] << " glomp: " << glomp << endl;
+        }
     }
 
     if (maxJ != jLimit)
@@ -204,19 +219,29 @@ bool generateTestcaseAux(int n)
         auto choicesForH = makeRandomChoices(n + 1, maxThing);
         sort(choicesForH.begin(), choicesForH.end());
 
-        //int currentH = rand() % 10;
+        int currentH = rand() % 10;
         for (int i = 1; i <= n; i++)
         {
-            cout << choicesForH[i] << " ";
+            //cout << choicesForH[i] << " ";
             //cout << i << " ";
+            currentH += rand() % 50;
+            cout << currentH << " " << endl;
+            
         }
         cout << endl;
 
-        int currentC = rand() % 10;
+        int currentC = 50000;
         for (int i = 1; i <= n; i++)
         {
-            cout << rand() % maxThing + 1 << " ";
-            //currentC += rand() % 500;
+            //cout << rand() % maxThing + 1 << " ";
+            if (i <= 20)
+            {
+                //cout << 50'000 + i << " ";
+                cout << currentC << " ";
+            }
+            else
+                cout << rand() % 500 << " ";
+            currentC += rand() % 50;
             //if (i <= 1000)
             //{
                 //cout << currentC << " ";
@@ -233,7 +258,11 @@ bool generateTestcaseAux(int n)
 
         for (int i = 1; i <= n; i++)
         {
-            cout << rand() % i << " ";
+            if (i - 20 >= 0)
+                cout << i - 20;
+            else
+                cout << i - 1;
+            cout << " ";
         }
         cout << endl;
 
@@ -397,7 +426,7 @@ void generateTestcase()
 {
     //const int n = rand() % 7 + 2;
     //const int n = rand() % 100 + 1;
-    const int n = 100000;
+    const int n = 1000;
     while (true)
     {
         if (generateTestcaseAux(n))
