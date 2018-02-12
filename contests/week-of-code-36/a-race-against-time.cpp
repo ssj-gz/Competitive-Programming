@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2018-02-08 14:36
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -425,7 +425,6 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         // H1 < H2 if and only if hi1 < hi2 (and same for =, >, etc).
         // We can then use a segment tree, indexed by compressed height indices, to find the index of
         // the next student whose height exceeds a given value.
-        // TODO - a SegmentTree is complete overkill for this!
         map<int64_t, int> heightToCompressedIndex;
         vector<int64_t> heightsSorted(heights);
         sort(heightsSorted.begin(), heightsSorted.end());
@@ -439,40 +438,25 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
                 compressedHeightIndex++;
             }
         }
-        auto minimumOfValues = [](const auto& x, const auto& y)
-        {
-            return min(x, y);
-        };
-        auto setValue = [](auto toSetTo, auto& dest)
-        {
-            dest = toSetTo;
-        };
-        auto combineSetValues = [](const auto& newestValueToSet, const auto& olderValueToSet)
-        {
-            return newestValueToSet;
-        };
-        using MinTree = SegmentTree<int, int>;
-        // Given the compressed height indices hi and hj, hi <= hj, tracks the next index of the student
-        // whose compressed height index is between hi and hj.
-        MinTree minIndexForCompressedHeightTree(n + 1, minimumOfValues, setValue, combineSetValues);
-        minIndexForCompressedHeightTree.setInitialValues(vector<int>(n + 1, numeric_limits<int>::max()));
+
+        map<int64_t, int> nextIndexOfStudentWithCompressedHeightIndex;
         for (int i = n - 1; i >= 0; i--)
         {
-            const int compressedHeightIndex = heightToCompressedIndex[heights[i]];
-            const auto indexOfNextTallest = minIndexForCompressedHeightTree.combinedValuesInRange(compressedHeightIndex + 1, n, numeric_limits<int>::max());
-
-            if (indexOfNextTallest == numeric_limits<int>::max())
+            const auto thisCompressedHeightIndex = heightToCompressedIndex[heights[i]];
+            if (!nextIndexOfStudentWithCompressedHeightIndex.empty())
             {
-                indexOfNextTallerStudent[i] = -1;
-            }
-            else
-            {
-                indexOfNextTallerStudent[i] = indexOfNextTallest;
-            }
+                auto iter = nextIndexOfStudentWithCompressedHeightIndex.begin();
+                while (iter != nextIndexOfStudentWithCompressedHeightIndex.end() && iter->first <= thisCompressedHeightIndex)
+                {
+                    iter = nextIndexOfStudentWithCompressedHeightIndex.erase(iter);
+                }
 
-            // The student with index i's height exceeds all those whose indices are in the range
-            // 0 ... compressedHeightIndex.
-            minIndexForCompressedHeightTree.applyOperatorToAllInRange(0, compressedHeightIndex, i);
+                if (iter != nextIndexOfStudentWithCompressedHeightIndex.end())
+                {
+                    indexOfNextTallerStudent[i] = iter->second;
+                }
+            }
+            nextIndexOfStudentWithCompressedHeightIndex[thisCompressedHeightIndex] = i;
         }
     }
     
