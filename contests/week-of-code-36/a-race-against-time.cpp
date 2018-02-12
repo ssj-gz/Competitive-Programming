@@ -501,7 +501,7 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         d[i] = minCostStartingWithStudent[i] + 
             (prices[i])      // Equalise price comparison.
             - (n - 1 - i) +  // Equalise "cost to run to".
-            heightDifferential; // Equalise height-difference cost comparison.
+            heightDifferential; // Equalise height-difference (time to exchange) cost comparison.
         minDTree.setValue(i, d[i]);
         nextIndexOfDWithValue[d[i]] = i;
     }
