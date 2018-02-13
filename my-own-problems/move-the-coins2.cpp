@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
@@ -332,6 +333,52 @@ class SegmentTree
         }
 };
 
+struct Node
+{
+    vector<Node*> children;
+    bool containsCoin = false;
+    Node* parent = nullptr;
+    int nodeId = -1;
+    bool usable = true;
+};
+
+void grundyNumberForTree(Node* node, const int depth, int& grundyNumber)
+{
+    grundyNumber ^= (depth);
+    for (Node* child : node->children)
+    {
+        grundyNumberForTree(child, depth + 1, grundyNumber);
+    }
+}
+
+int grundyNumberForTree(Node* node)
+{
+    int grundyNumber = 0;
+    grundyNumberForTree(node, 0, grundyNumber);
+    return grundyNumber;
+}
+
+void markDescendentsAsUsable(Node* node,  bool usable)
+{
+    node->usable = usable;
+
+    for (Node* child : node->children)
+    {
+        markDescendentsAsUsable(child, usable);
+    }
+}
+
+void reparentNode(Node* nodeToMove, Node* newParent)
+{
+    auto oldParent = nodeToMove->parent;
+    assert(find(oldParent->children.begin(), oldParent->children.end(), nodeToMove) != oldParent->children.end());
+    oldParent->children.erase(remove(oldParent->children.begin(), oldParent->children.end(), nodeToMove), oldParent->children.end());
+    assert(find(oldParent->children.begin(), oldParent->children.end(), nodeToMove) == oldParent->children.end());
+    nodeToMove->parent = newParent;
+    assert(find(newParent->children.begin(), newParent->children.end(), nodeToMove) == newParent->children.end());
+    newParent->children.push_back(nodeToMove);
+}
+
 
 int main()
 {
@@ -359,22 +406,45 @@ int main()
 
     while (true)
     {
-        vector<int> blee;
-        for (int i = 1; i < 10000; i++)
+        const int numNodes = rand() % 100'000 + 1;
+        cout << "Random tree with nodes: " << numNodes << endl;
+        vector<Node> nodes(numNodes);
+        for (int i = 0; i < numNodes; i++)
         {
-            blee.push_back(rand() % i + 10000);
-        }
-        for (int m = 1; m <= 100000; m++)
-        {
-            int xorSum = 0;
-            for (const auto x : blee)
+            if (i > 0)
             {
-                xorSum ^= (x + m);
+                const int parentNodeIndex = rand() % i;
+                nodes[parentNodeIndex].children.push_back(&nodes[i]);
+                nodes[i].parent = &(nodes[parentNodeIndex]);
             }
-            if (xorSum == 0)
-                cout << m << endl;
+            nodes[i].containsCoin = rand() % 2;
+            nodes[i].nodeId = i;
+        }
 
+        for (Node& node : nodes)
+        {
+            if (!node.parent)
+                continue;
+
+            auto oldParent = node.parent;
+            markDescendentsAsUsable(&node, false);
+
+            for (Node& newParent : nodes)
+            {
+                if (node.parent == &newParent)
+                    continue;
+                if (!newParent.usable)
+                    continue;
+
+                reparentNode(&node, &newParent);
+                if (grundyNumberForTree(&(nodes.front())) == 0)
+                {
+                    cout << " woo!" << node.nodeId << "," << newParent.nodeId << endl;
+                }
+                reparentNode(&node, oldParent);
+
+            }
+            markDescendentsAsUsable(&node, true);
         }
     }
-
 }
