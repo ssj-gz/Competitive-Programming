@@ -382,6 +382,47 @@ void reparentNode(Node* nodeToMove, Node* newParent)
 
 int main()
 {
+    // Draft solution:
+    //  - Store all queries that re-parent Node n in node n, so we know which newParent n will be re-parented to on each query.
+    //  - For node n, calculate grundy sum Gn of subtree rooted at n, though where heights of each descendant is measured
+    //    relative to original root, not to n (easy).
+    //  - The xor sum for whole tree after removing n is then Groot (lol) ^ Gn.
+    //  - For each q at n, what is grundy sum of new tree where n is re-parented to newParent?
+    //  - For each power of 2 up to n, maintain a segment tree, numModuloPowerOf2 of length (you guessed it!) powerOf2.
+    //  - Each query will essentially add (or subtract) some number m from the height of each descendent of n.
+    //  - If we can find out, for each binary digit/ power of 2, how many descendents of n have a height which, when
+    //    m is added to/ subtracted from it, will leave that binary digit 1 (or 0), we're in business.
+    //  - Whether a height will have digit B switched on after adding m depends, in a fairly simple way, of height % powerOf2 and m; see
+    //    list of binary numbers below:
+    //
+    //     0000
+    //     0001
+    //     0010
+    //     0011
+    //     0100
+    //     0101
+    //     0110
+    //     0111
+    //     1000
+    //     1001
+    //     1010
+    //     1011
+    //     1100
+    //     1101
+    //     1110
+    //     1111
+    //
+    //  - The number of descendents with bit B set when we add m to their heights will presumably a range (possibly) split
+    //    of moduli modulo the power of 2; for example, the bit corresponding to power of 2 == 4 is on for height h
+    //    after adding 3 for h = 1, 2, 3, 4 mod 8 and 0 otherwise i.e. for 5, 6, 7, 0.
+    //  - When we visit a node with height h:
+    //     - For each power of 2, for each m from each query, count the number of heights we've seen so far in the given 
+    //       "h modulo power of 2 + m will give binary digit 1" range. (A)
+    //     - Add the height h for this node modulo power of 2 to the segment tree corresponding to each power of 2.
+    //     - Explore descendants.
+    //     - Recalculate A for each query m, and subtract original from it - we now know how many descendants of h will have a given bit B set to on
+    //       for m.
+    //     - We can then use this to calculate Grundy number for re-parented tree.  I hope :)
     const int maxN = 100'000;
     auto add = [](const auto& x, int& destValue)
     {
