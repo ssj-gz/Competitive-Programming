@@ -340,6 +340,7 @@ struct Node
     Node* parent = nullptr;
     int nodeId = -1;
     bool usable = true;
+    int originalHeight = -1;
 };
 
 void grundyNumberForTree(Node* node, const int depth, int& grundyNumber)
@@ -441,15 +442,13 @@ int main()
     numInRangeTracker.applyOperatorToAllInRange(1, 1, 1);
     numInRangeTracker.applyOperatorToAllInRange(1, 2, 1);
     numInRangeTracker.applyOperatorToAllInRange(3, 3, 1);
-    cout << numInRangeTracker.combinedValuesInRange(1, 1) << endl;
-    cout << numInRangeTracker.combinedValuesInRange(1, 2) << endl;
-    cout << numInRangeTracker.combinedValuesInRange(1, 3) << endl;
-
+    cout << numInRangeTracker.combinedValuesInRange(1, 1) << endl; cout << numInRangeTracker.combinedValuesInRange(1, 2) << endl; cout << numInRangeTracker.combinedValuesInRange(1, 3) << endl; 
     while (true)
     {
         const int numNodes = rand() % 100'000 + 1;
         cout << "Random tree with nodes: " << numNodes << endl;
         vector<Node> nodes(numNodes);
+        nodes.front().originalHeight = 0;
         for (int i = 0; i < numNodes; i++)
         {
             if (i > 0)
@@ -457,6 +456,7 @@ int main()
                 const int parentNodeIndex = rand() % i;
                 nodes[parentNodeIndex].children.push_back(&nodes[i]);
                 nodes[i].parent = &(nodes[parentNodeIndex]);
+                nodes[i].originalHeight = nodes[i].parent->originalHeight + 1;
             }
             nodes[i].containsCoin = rand() % 2;
             nodes[i].nodeId = i;
