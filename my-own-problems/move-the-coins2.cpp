@@ -475,7 +475,7 @@ int originalTreeGrundyNumber;
 
 using NumberTracker = SegmentTree<int, int>;
 
-NumberTracker numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+vector<int> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 
 
 
@@ -493,9 +493,34 @@ void solve(Node* node)
             {
                 if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
                 {
+                    cout << " added " << numNodesWithHeight[height] << " to originalNodesThatMakeDigitOne[" << binaryDigitNum << "]" << " height: " << height  << endl;
                     reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum] += numNodesWithHeight[height];
                 }
             }
+            const int powerOf2 = (1 << (binaryDigitNum + 1));
+            const int oneThreshold = (1 << (binaryDigitNum));
+            int blee[log2MaxN + 1] = {};
+            cout << "binaryDigitNum: " << binaryDigitNum << " powerOf2: " << powerOf2 << endl;
+            for (int height = 0; height < min(static_cast<int>(numNodesWithHeight.size()), powerOf2); height++)
+            {
+                assert(height < powerOf2);
+                int heightPlusChangeModPowerOf2 = height + heightChange;
+                if (heightPlusChangeModPowerOf2 < 0)
+                {
+                    const auto blee = (heightPlusChangeModPowerOf2 / -powerOf2) + 1;
+                    heightPlusChangeModPowerOf2 += blee * powerOf2;
+                }
+                assert(heightPlusChangeModPowerOf2 >= 0);
+                heightPlusChangeModPowerOf2 %= powerOf2;
+                cout << " heightPlusChangeModPowerOf2: " << heightPlusChangeModPowerOf2 << " oneThreshold: " << oneThreshold << " height: " << height << endl;
+                if (heightPlusChangeModPowerOf2 >= oneThreshold)
+                {
+                    cout << " added " << numNodesWithHeightModuloPowerOf2[binaryDigitNum][height] << " to blee[" << binaryDigitNum << "]" << endl;
+                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                }
+            }
+            cout << "binaryDigitNum: " << binaryDigitNum << " blee: " << blee[binaryDigitNum] << " originalNodesThatMakeDigitOne: " << reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum] << endl;
+            assert(blee[binaryDigitNum] == reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum]);
 
         } 
     }
@@ -504,8 +529,13 @@ void solve(Node* node)
         numNodesWithHeight[node->height]++;
     for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
-        const int heightModuloPowerOf2 = (1 << (binaryDigitNum + 1));
-        numNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
+        if ((node->numCoins % 2) == 1)
+        {
+            const int powerOf2 = (1 << (binaryDigitNum + 1));
+            const int heightModuloPowerOf2 = node->height % powerOf2;
+            //numNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
+            numNodesWithHeightModuloPowerOf2[binaryDigitNum][heightModuloPowerOf2]++;
+        }
     }
     for (auto child : node->children)
     {
@@ -586,7 +616,8 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         {
             return x1 + x2;
         };
-        numNodesWithHeightModuloPowerOf2[binaryDigitNum] = NumberTracker((1 << (binaryDigitNum + 1)) + 1, combineValues, add, combineAdditions);
+        //numNodesWithHeightModuloPowerOf2[binaryDigitNum] = NumberTracker((1 << (binaryDigitNum + 1)) + 1, combineValues, add, combineAdditions);
+        numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
     }
     numNodesWithHeight.resize(nodes.size() + 1);
     auto rootNode = &(nodes.front());
