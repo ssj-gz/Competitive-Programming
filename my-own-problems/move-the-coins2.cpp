@@ -31,6 +31,8 @@ class SegmentTree
         using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
         using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
+        SegmentTree() = default;
+
         SegmentTree(int maxNumber, CombineValues combineValues, ApplyOperator applyOperator, CombineOperators combineOperators)
             : m_maxNumber{maxNumber}, m_combineValues{combineValues}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
         {
@@ -470,6 +472,14 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
 vector<int> numNodesWithHeight;
 vector<int> queryResults;
 int originalTreeGrundyNumber;
+
+using NumberTracker = SegmentTree<int, int>;
+
+NumberTracker numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+
+
+
+
 void solve(Node* node)
 {
     for (auto& reorderedQuery : node->queriesForNode)
@@ -492,6 +502,11 @@ void solve(Node* node)
     const auto originalNumNodesWithHeight = numNodesWithHeight;
     if ((node->numCoins) % 2 == 1)
         numNodesWithHeight[node->height]++;
+    for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    {
+        const int heightModuloPowerOf2 = (1 << (binaryDigitNum + 1));
+        numNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
+    }
     for (auto child : node->children)
     {
         solve(child);
@@ -557,6 +572,22 @@ void solve(Node* node)
 
 vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
 {
+    for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    {
+        auto add = [](const auto& x, int& destValue)
+        {
+            destValue += x;
+        };
+        auto combineValues = [](const int lhs, const int rhs)
+        {
+            return lhs + rhs;
+        };
+        auto combineAdditions = [](const int x1, int x2)
+        {
+            return x1 + x2;
+        };
+        numNodesWithHeightModuloPowerOf2[binaryDigitNum] = NumberTracker((1 << (binaryDigitNum + 1)) + 1, combineValues, add, combineAdditions);
+    }
     numNodesWithHeight.resize(nodes.size() + 1);
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
