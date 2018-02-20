@@ -353,6 +353,7 @@ struct ReorderedQuery
 {
     int originalQueryIndex = -1;
     Query originalQuery;
+    int originalNodesThatMakeDigitOne[log2MaxN + 1];
 };
 
 
@@ -471,6 +472,23 @@ vector<int> queryResults;
 int originalTreeGrundyNumber;
 void solve(Node* node)
 {
+    for (auto& reorderedQuery : node->queriesForNode)
+    {
+        auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
+        auto newParent = reorderedQuery.originalQuery.newParent;
+        const int heightChange = newParent->height - nodeToMove->parent->height;
+        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        {
+            for (int height = 0; height < numNodesWithHeight.size(); height++)
+            {
+                if (((numNodesWithHeight[height] % 2) == 1) && ((height + heightChange) & (1 << binaryDigitNum)) == 1)
+                {
+                    reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum]++;
+                }
+            }
+
+        } 
+    }
     const auto originalNumNodesWithHeight = numNodesWithHeight;
     if ((node->numCoins) % 2 == 1)
         numNodesWithHeight[node->height]++;
@@ -489,18 +507,19 @@ void solve(Node* node)
         auto newParent = reorderedQuery.originalQuery.newParent;
         const int heightChange = newParent->height - nodeToMove->parent->height;
 
-        //const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ nodeToMove->grundyNumber;
+        const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ nodeToMove->grundyNumber;
         //int newGrundyNumber = grundyNumberMinusSubtree;
         //cout << "originalTreeGrundyNumber: " << originalTreeGrundyNumber << endl;
-        int newGrundyNumber = originalTreeGrundyNumber;
+        int newGrundyNumber = grundyNumberMinusSubtree;
+        int relocatedSubtreeGrundyNumber = 0;
         for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
         {
             if ((numDescendendantNodesWithHeight[height] % 2) == 1)
             {
-                newGrundyNumber ^= height;
-                newGrundyNumber ^= (height + heightChange);
+                relocatedSubtreeGrundyNumber ^= (height + heightChange);
             }
         }
+        newGrundyNumber ^= relocatedSubtreeGrundyNumber;
         queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
     }
 
