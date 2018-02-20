@@ -511,22 +511,10 @@ void solve(Node* node)
         const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ nodeToMove->grundyNumber;
         //int newGrundyNumber = grundyNumberMinusSubtree;
         //cout << "originalTreeGrundyNumber: " << originalTreeGrundyNumber << endl;
-        int newGrundyNumber = grundyNumberMinusSubtree;
-        int relocatedSubtreeGrundyNumber = 0;
-        for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
-        {
-            if ((numDescendendantNodesWithHeight[height] % 2) == 1)
-            {
-                relocatedSubtreeGrundyNumber ^= (height + heightChange);
-                cout << " height: " << height << " contributes " << (height + heightChange) << " to relocatedSubtreeGrundyNumber!" << endl;
-            }
-        }
-        newGrundyNumber ^= relocatedSubtreeGrundyNumber;
-        queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
 
         int relocatedSubtreeGrundyDigits[log2MaxN + 1] = {};
 
-        int blee = 0;
+        int relocatedSubtreeGrundyNumber = 0;
         for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
             cout << "binaryDigitNum: " << binaryDigitNum << endl;
@@ -537,18 +525,32 @@ void solve(Node* node)
                 if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
                 {
                     //cout << "gloop!" << endl;
-                        cout << " gleep!" << endl;
-                        relocatedSubtreeGrundyDigits[binaryDigitNum] += numNodesWithHeight[height];
+                    cout << " gleep!" << endl;
+                    relocatedSubtreeGrundyDigits[binaryDigitNum] += numNodesWithHeight[height];
                 }
             }
             assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
             relocatedSubtreeGrundyDigits[binaryDigitNum] %= 2;
-            blee = blee + (1 << binaryDigitNum) * relocatedSubtreeGrundyDigits[binaryDigitNum];
+            relocatedSubtreeGrundyNumber = relocatedSubtreeGrundyNumber + (1 << binaryDigitNum) * relocatedSubtreeGrundyDigits[binaryDigitNum];
             cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
         } 
+        int newGrundyNumber = grundyNumberMinusSubtree;
+        newGrundyNumber ^= relocatedSubtreeGrundyNumber;
+        queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
         cout << " relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << endl;
-        cout << " blee: " << blee << endl;
-        assert(blee == relocatedSubtreeGrundyNumber);
+        //cout << " relocatedSubtreeGrundyNumber: " << blee << endl;
+        {
+            int verifyRelocatedSubtreeGrundyNumber = 0;
+            for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
+            {
+                if ((numDescendendantNodesWithHeight[height] % 2) == 1)
+                {
+                    verifyRelocatedSubtreeGrundyNumber ^= (height + heightChange);
+                    cout << " height: " << height << " contributes " << (height + heightChange) << " to relocatedSubtreeGrundyNumber!" << endl;
+                }
+            }
+            assert(relocatedSubtreeGrundyNumber == verifyRelocatedSubtreeGrundyNumber);
+        }
     }
 
 }
