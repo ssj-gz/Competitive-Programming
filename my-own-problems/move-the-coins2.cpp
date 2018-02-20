@@ -2,7 +2,7 @@
 #define VERIFY_SEGMENT_TREE
 #define VERIFY_SUBSTEPS
 #define FIND_ZERO_GRUNDYS
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -14,8 +14,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <sys/time.h>
+#include <functional>
 #include <cassert>
+#include <sys/time.h>
 
 constexpr auto maxN = 100'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
