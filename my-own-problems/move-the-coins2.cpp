@@ -478,6 +478,16 @@ using NumberTracker = SegmentTree<int, int>;
 vector<int> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 
 
+int modPosOrNeg(int x, int modulus)
+{
+    if (x < 0)
+    {
+        const auto numOfModulusToAddToMakeNonNegative = (x / -modulus) + 1;
+        x += numOfModulusToAddToMakeNonNegative * modulus;
+    }
+    assert(x >= 0);
+    return x % modulus;
+}
 
 
 void solve(Node* node)
@@ -504,14 +514,8 @@ void solve(Node* node)
             for (int height = 0; height < min(static_cast<int>(numNodesWithHeight.size()), powerOf2); height++)
             {
                 assert(height < powerOf2);
-                int heightPlusChangeModPowerOf2 = height + heightChange;
-                if (heightPlusChangeModPowerOf2 < 0)
-                {
-                    const auto blee = (heightPlusChangeModPowerOf2 / -powerOf2) + 1;
-                    heightPlusChangeModPowerOf2 += blee * powerOf2;
-                }
+                const int heightPlusChangeModPowerOf2 = modPosOrNeg(height + heightChange, powerOf2);
                 assert(heightPlusChangeModPowerOf2 >= 0);
-                heightPlusChangeModPowerOf2 %= powerOf2;
                 cout << " heightPlusChangeModPowerOf2: " << heightPlusChangeModPowerOf2 << " oneThreshold: " << oneThreshold << " height: " << height << endl;
                 if (heightPlusChangeModPowerOf2 >= oneThreshold)
                 {
