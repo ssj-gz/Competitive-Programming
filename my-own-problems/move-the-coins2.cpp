@@ -1,6 +1,6 @@
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-#define VERIFY_SUBSTEPS
+//#define VERIFY_SUBSTEPS
 //#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -400,7 +400,7 @@ int grundyNumberForTreeBruteForce(Node* node)
 {
     int grundyNumber = 0;
     grundyNumberForTreeBruteForce(node, 0, grundyNumber);
-    cout << "grundyNumberForTreeBruteForce node: " << node->nodeId << " = " << grundyNumber << endl;
+    //cout << "grundyNumberForTreeBruteForce node: " << node->nodeId << " = " << grundyNumber << endl;
     return grundyNumber;
 }
 
@@ -467,14 +467,19 @@ int findGrundyNumberForNodes(Node* node)
 
 vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<Query>& queries)
 {
+    cout << "grundyNumbersForQueriesBruteForce" << endl;
     auto rootNode = &(nodes.front());
     vector<int> grundyNumbersForQueries;
+    int queryNum = 0;
     for (const auto& query : queries)
     {
         auto originalParent = query.nodeToMove->parent;
         reparentNode(query.nodeToMove, query.newParent);
         grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
         reparentNode(query.nodeToMove, originalParent);
+        queryNum++;
+        if (queryNum % 100 == 0)
+            cerr << "Brute force queryNum: " << queryNum << " out of " << queries.size() << endl;
     }
 
     return grundyNumbersForQueries;
@@ -935,6 +940,11 @@ int main(int argc, char** argv)
     cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
 
     const auto result = grundyNumbersForQueries(nodes, queries);
+    for (const auto queryResult : result)
+    {
+        cout << queryResult << " ";
+    }
+    cout << endl;
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = grundyNumbersForQueriesBruteForce(nodes, queries);
