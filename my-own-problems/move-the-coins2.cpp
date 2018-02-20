@@ -1,16 +1,19 @@
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-//#define VERIFY_SUBSTEPS
-//#define SUBMISSION
+#define VERIFY_SUBSTEPS
+#define FIND_ZERO_GRUNDYS
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
 #undef VERIFY_SEGMENT_TREE
 #undef VERIFY_SUBSTEPS
+#undef FIND_ZERO_GRUNDYS
 #endif
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <sys/time.h>
 #include <cassert>
 
@@ -490,6 +493,7 @@ vector<int> numNodesWithHeight;
 #endif
 vector<int> queryResults;
 int originalTreeGrundyNumber;
+int largestHeight = -1;
 int log2LargestHeight = -1;
 
 using NumberTracker = SegmentTree<int, int>;
@@ -508,9 +512,37 @@ int modPosOrNeg(int x, int modulus)
     return x % modulus;
 }
 
+int grundyNumberWithHeightChange(Node* node, const int heightChange)
+{
+    int grundyNumber = 0;
+    if ((node->numCoins % 2) == 1)
+    {
+        const int newHeight = node->height + heightChange;
+        assert(newHeight >= 0);
+        grundyNumber ^= newHeight;
+    }
+    for (auto child : node->children)
+    {
+        grundyNumber ^= grundyNumberWithHeightChange(child, heightChange);
+    }
+    return grundyNumber;
+}
+
+void buildHeightHistogram(Node* node, vector<int>& numWithHeight)
+{
+    if ((node->numCoins % 2) == 1)
+        numWithHeight[node->height]++;
+
+    for (auto child : node->children)
+    {
+        buildHeightHistogram(child, numWithHeight);
+    }
+}
+
 
 void solve(Node* node)
 {
+    static int numZeroGrundys = 0;
     auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
     {
         for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
@@ -618,11 +650,18 @@ void solve(Node* node)
                 verifyRelocatedSubtreeGrundyNumber = verifyRelocatedSubtreeGrundyNumber + (1 << binaryDigitNum) * digit;
                 //cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
             } 
+
+            assert(verifyRelocatedSubtreeGrundyNumber == grundyNumberWithHeightChange(nodeToMove, heightChange));
         }
 #endif
         int newGrundyNumber = grundyNumberMinusSubtree;
         newGrundyNumber ^= relocatedSubtreeGrundyNumber;
         queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
+        if (newGrundyNumber == 0)
+        {
+            numZeroGrundys++;
+            cout << "numZeroGrundys: " << numZeroGrundys << " node original height: " << nodeToMove->height << " node new height: " << newParent->height << endl;
+        }
         //cout << " relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << endl;
         //cout << " relocatedSubtreeGrundyNumber: " << blee << endl;
 #ifdef VERIFY_SUBSTEPS
@@ -706,42 +745,72 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
 
 int main(int argc, char** argv)
 {
+    ios::sync_with_stdio(false);
     if (argc == 2)
     {
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxNumNodes = 20;
-        const int maxNumQueries = 20;
+        const int maxNumNodes = 100'000;
+        const int maxNumQueries = 100'000;
+        //const int maxNumNodes = 100;
+        //const int maxNumQueries = 100;
+
+        const int forceHeight = 30000;
+        //const int forceHeight = -1;
 
         int numNodes = rand() % maxNumNodes + 1;
         int numQueries = rand() % maxNumQueries + 1;
+        
+        cerr << "numNodes: " << numNodes << " numQueries: " << numQueries << endl;
 
         int numMetaAttempts = 0;
 
+        int largestHeight = -1;
         while (true)
         {
             //cout << "Random tree with nodes: " << numNodes << endl;
             vector<Node> nodes(numNodes);
+            nodes[0].height = 0;
             vector<pair<int, int>> edges;
             for (int i = 0; i < numNodes; i++)
             {
+                int parentNodeIndex = -1;
                 if (i > 0)
                 {
-                    const int parentNodeIndex = rand() % i;
+                    if (forceHeight == -1 || i > 2 * forceHeight)
+                    {
+                        parentNodeIndex = rand() % i;
+                    }
+                    else
+                    {
+                        if (i != forceHeight)
+                        {
+                            parentNodeIndex = i - 1;
+                        }
+                        else if (i == forceHeight)
+                        {
+                            parentNodeIndex = 0;
+                        }
+                    }
                     nodes[parentNodeIndex].children.push_back(&nodes[i]);
                     nodes[i].parent = &(nodes[parentNodeIndex]);
+                    nodes[i].height = nodes[i].parent->height + 1;
                     edges.push_back({i, parentNodeIndex});
                 }
                 nodes[i].numCoins = rand() % 20;
                 nodes[i].nodeId = i;
+                largestHeight = max(largestHeight, nodes[i].height);
             }
+            cerr << "largestHeight:" << largestHeight << endl;
 
             int numQueriesToGenerate = numQueries;
             int numAttempts = 0;
             vector<pair<int, int>> potentialQueries;
             int64_t numPotentialQueries = 0;
+            int64_t numZeroGrundies = 0;
+            auto rootNode = &(nodes.front());
             for (int nodeIndexToMove = 0; nodeIndexToMove < numNodes; nodeIndexToMove++)
             {
                 if (nodeIndexToMove % 100 == 0)
@@ -751,15 +820,29 @@ int main(int argc, char** argv)
                 markDescendentsAsUsable(&nodeToMove, false);
                 for (int newParentNodeIndex = 0; newParentNodeIndex < numNodes; newParentNodeIndex++)
                 {
-                    if (nodes[newParentNodeIndex].usable)
+                    auto newParent = &(nodes[newParentNodeIndex]);
+                    if (newParent->usable)
                     {
                         //potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
                         numPotentialQueries++;
                         //cout << "numPotentialQueries: " << numPotentialQueries << endl;
+#if 0
+                        auto originalParent = nodeToMove.parent;
+                        reparentNode(&nodeToMove, newParent);
+                        const auto grundyNumber = grundyNumberForTreeBruteForce(rootNode);
+                        //const auto grundyNumber = 1;
+                        reparentNode(&nodeToMove, originalParent);
+                        if (grundyNumber == 0)
+                        {
+                            numZeroGrundies++;
+                            cout << "numZeroGrundies: " << numZeroGrundies << " newParent height: " << newParent->height << endl;
+                        }
+#endif
                     }
                 }
                 markDescendentsAsUsable(&nodeToMove, true);
             }
+            cerr << "numZeroGrundies: " << numZeroGrundies << " numPotentialQueries: " << numPotentialQueries << endl;
             //assert(RAND_MAX >= numPotentialQueries);
             const bool successful = (numPotentialQueries >= numQueries);
             if (successful)
@@ -916,6 +999,8 @@ int main(int argc, char** argv)
     int numQueries;
     cin >> numQueries;
 
+    cout << "numQueries: " << numQueries << endl;
+
     vector<Query> queries(numQueries);
 
     for (int i = 0; i < numQueries; i++)
@@ -932,12 +1017,61 @@ int main(int argc, char** argv)
 
     auto rootNode = &(nodes.front());
     fixParentChildAndHeights(rootNode);
-    int largestHeight = -1;
     for (const auto& node : nodes)
         largestHeight = max(largestHeight, node.height);
 
     log2LargestHeight = log2(largestHeight) + 1;
     cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
+
+#ifdef FIND_ZERO_GRUNDYS
+    originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
+    assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
+    int numZeroGrundies = 0;
+    vector<int> nodeIds;
+    for (int i = 0; i < numNodes; i++)
+    {
+        nodeIds.push_back(i);
+    }
+    random_shuffle(nodeIds.begin(), nodeIds.end());
+    int numNodesProcessed = 0;
+    for (auto nodeId : nodeIds)
+    {
+        auto node = &(nodes[nodeId]);
+        vector<int> numWithHeight(numNodes + 1);
+        buildHeightHistogram(node, numWithHeight);
+        vector<int> descendentHeights;
+        for (int height = 0; height < numWithHeight.size(); height++)
+        {
+            if ((numWithHeight[height] % 2) == 1)
+                descendentHeights.push_back(height);
+        }
+        cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " << (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height) << endl;
+        for (int heightChange = -node->height; node->height + heightChange <= largestHeight; heightChange++)
+        {
+            //cout << "heightChange: " << heightChange << endl;
+            const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
+            //const int newGrundyNumber = grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange);
+            int adjustedXor = 0;
+            for (const auto height : descendentHeights)
+            {
+                const int adjustedHeight = (height + heightChange);
+                assert(adjustedHeight >= 0);
+                adjustedXor ^= adjustedHeight;
+            }
+            //const int newGrundyNumber = grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange);
+            const int newGrundyNumber = grundyNumberMinusSubtree ^ adjustedXor;
+            if (newGrundyNumber == 0)
+            {
+                numZeroGrundies++;
+                cout << "Forced a grundy number: nodeId: " << nodeId << " node height: " << node->height << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
+#define NDEBUG
+                assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
+            }
+        }
+        numNodesProcessed++;
+        cout << "Processed " << numNodesProcessed << " out of " << numNodes << endl;
+    }
+#endif
 
     const auto result = grundyNumbersForQueries(nodes, queries);
     for (const auto queryResult : result)
@@ -945,6 +1079,7 @@ int main(int argc, char** argv)
         cout << queryResult << " ";
     }
     cout << endl;
+
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = grundyNumbersForQueriesBruteForce(nodes, queries);
