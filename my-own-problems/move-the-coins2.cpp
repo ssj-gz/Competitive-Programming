@@ -1,11 +1,12 @@
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
 #define VERIFY_SUBSTEPS
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
 #undef VERIFY_SEGMENT_TREE
+#undef VERIFY_SUBSTEPS
 #endif
 
 #include <iostream>
@@ -479,7 +480,9 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
     return grundyNumbersForQueries;
 }
 
+#ifdef VERIFY_SUBSTEPS
 vector<int> numNodesWithHeight;
+#endif
 vector<int> queryResults;
 int originalTreeGrundyNumber;
 int log2LargestHeight = -1;
@@ -542,16 +545,18 @@ void solve(Node* node)
         const int heightChange = newParent->height - nodeToMove->parent->height;
         countCoinsThatMakeDigitOneAfterHeightChange(heightChange, reorderedQuery.originalNodesThatMakeDigitOne);
     }
+#ifdef VERIFY_SUBSTEPS
     const auto originalNumNodesWithHeight = numNodesWithHeight;
     if ((node->numCoins) % 2 == 1)
         numNodesWithHeight[node->height]++;
+#endif
     for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
     {
         if ((node->numCoins % 2) == 1)
         {
             const int powerOf2 = (1 << (binaryDigitNum + 1));
             const int heightModuloPowerOf2 = node->height % powerOf2;
-            cout << "About to applyOperatorToAllInRange - binaryDigitNum: " << binaryDigitNum << " heightModuloPowerOf2: " << heightModuloPowerOf2 << endl;
+            //cout << "About to applyOperatorToAllInRange - binaryDigitNum: " << binaryDigitNum << " heightModuloPowerOf2: " << heightModuloPowerOf2 << endl;
             numNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
             //numNodesWithHeightModuloPowerOf2[binaryDigitNum][heightModuloPowerOf2]++;
         }
@@ -560,14 +565,16 @@ void solve(Node* node)
     {
         solve(child);
     }
+#ifdef VERIFY_SUBSTEPS
     vector<int> numDescendendantNodesWithHeight(numNodesWithHeight.size());
     for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
     {
         numDescendendantNodesWithHeight[height] = numNodesWithHeight[height] - originalNumNodesWithHeight[height];
     }
+#endif
     for (auto& reorderedQuery : node->queriesForNode)
     {
-        cout << "reorderedQuery" << endl;
+        //cout << "reorderedQuery" << endl;
         auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
         auto newParent = reorderedQuery.originalQuery.newParent;
         const int heightChange = newParent->height - nodeToMove->parent->height;
@@ -581,27 +588,27 @@ void solve(Node* node)
         int relocatedSubtreeGrundyNumber = 0;
         for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
         {
-            cout << "binaryDigitNum: " << binaryDigitNum << endl;
+            //cout << "binaryDigitNum: " << binaryDigitNum << endl;
             relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
             for (int height = 0; height < numNodesWithHeight.size(); height++)
             {
-                cout << " height: " << height << endl;
+                //cout << " height: " << height << endl;
                 if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
                 {
                     //cout << "gloop!" << endl;
-                    cout << " gleep!" << endl;
+                    //cout << " gleep!" << endl;
                     relocatedSubtreeGrundyDigits[binaryDigitNum] += numNodesWithHeight[height];
                 }
             }
             assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
             relocatedSubtreeGrundyDigits[binaryDigitNum] %= 2;
             relocatedSubtreeGrundyNumber = relocatedSubtreeGrundyNumber + (1 << binaryDigitNum) * relocatedSubtreeGrundyDigits[binaryDigitNum];
-            cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
+            //cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
         } 
         int newGrundyNumber = grundyNumberMinusSubtree;
         newGrundyNumber ^= relocatedSubtreeGrundyNumber;
         queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
-        cout << " relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << endl;
+        //cout << " relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << endl;
         //cout << " relocatedSubtreeGrundyNumber: " << blee << endl;
 #ifdef VERIFY_SUBSTEPS
         {
@@ -645,6 +652,12 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
     assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
+    for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
+    {
+        const auto query = queries[queryIndex];
+        query.nodeToMove->queriesForNode.push_back({queryIndex, query});
+    }
+#ifdef VERIFY_SUBSTEPS
     // TODO - optimise this - don't use Brute Force XD
     vector<int> grundyNumbersForQueries;
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
@@ -658,18 +671,20 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         reparentNode(query.nodeToMove, query.newParent);
         grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
         reparentNode(query.nodeToMove, originalParent);
-
-        query.nodeToMove->queriesForNode.push_back({queryIndex, query});
     }
+#endif
     queryResults.resize(queries.size());
+    cout << "Calling solve" << endl;
     solve(rootNode);
+#ifdef VERIFY_SUBSTEPS
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
         cout << " queryIndex: " << queryIndex << " queryResults: " << queryResults[queryIndex] << " grundyNumbersForQueries: " << grundyNumbersForQueries[queryIndex] << endl;
     }
     assert(queryResults == grundyNumbersForQueries);
+#endif
 
-    return grundyNumbersForQueries;
+    return queryResults;
 }
 
 int main(int argc, char** argv)
