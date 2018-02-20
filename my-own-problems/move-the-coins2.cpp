@@ -358,19 +358,22 @@ struct Query
     Node* newParent = nullptr;
 };
 
-void grundyNumberForTree(Node* node, const int depth, int& grundyNumber)
+void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber)
 {
-    grundyNumber ^= (depth);
+    for (int i = 0; i < node->numCoins; i++)
+    {
+        grundyNumber ^= (depth);
+    }
     for (Node* child : node->children)
     {
-        grundyNumberForTree(child, depth + 1, grundyNumber);
+        grundyNumberForTreeBruteForce(child, depth + 1, grundyNumber);
     }
 }
 
-int grundyNumberForTree(Node* node)
+int grundyNumberForTreeBruteForce(Node* node)
 {
     int grundyNumber = 0;
-    grundyNumberForTree(node, 0, grundyNumber);
+    grundyNumberForTreeBruteForce(node, 0, grundyNumber);
     return grundyNumber;
 }
 
@@ -415,7 +418,7 @@ vector<int> grundyNumbersForQueriesBruteForce(Node* rootNode, const vector<Query
     {
         auto originalParent = query.nodeToMove->parent;
         reparentNode(query.nodeToMove, query.newParent);
-        grundyNumbersForQueries.push_back(grundyNumberForTree(rootNode));
+        grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
         reparentNode(query.nodeToMove, originalParent);
     }
 
@@ -430,7 +433,7 @@ vector<int> grundyNumbersForQueries(Node* rootNode, const vector<Query>& queries
     {
         auto originalParent = query.nodeToMove->parent;
         reparentNode(query.nodeToMove, query.newParent);
-        grundyNumbersForQueries.push_back(grundyNumberForTree(rootNode));
+        grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
         reparentNode(query.nodeToMove, originalParent);
     }
 
