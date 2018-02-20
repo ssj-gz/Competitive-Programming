@@ -492,15 +492,8 @@ int modPosOrNeg(int x, int modulus)
 
 void solve(Node* node)
 {
-    auto countCoinsThatMakeDigitOneAfterheightChange = [](const int binaryDigitNum, const int heightChange, int* destination)
+    auto countCoinsThatMakeDigitOneAfterheightChange = [](const int heightChange, int* destination)
     {
-    };
-    for (auto& reorderedQuery : node->queriesForNode)
-    {
-        auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
-        auto newParent = reorderedQuery.originalQuery.newParent;
-        const int heightChange = newParent->height - nodeToMove->parent->height;
-        int blee[log2MaxN + 1] = {};
         for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
             const int powerOf2 = (1 << (binaryDigitNum + 1));
@@ -513,7 +506,7 @@ void solve(Node* node)
                 {
                     assert(height < powerOf2);
                     assert(modPosOrNeg(height + heightChange, powerOf2) >= oneThreshold);
-                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                    destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
                 }
             }
             else
@@ -521,12 +514,12 @@ void solve(Node* node)
                 for (int height = begin; height <= powerOf2 - 1; height++)
                 {
                     assert(modPosOrNeg(height + heightChange, powerOf2) >= oneThreshold);
-                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                    destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
                 }
                 for (int height = 0; height <= end; height++)
                 {
                     assert(modPosOrNeg(height + heightChange, powerOf2) >= oneThreshold);
-                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                    destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
                 }
             }
             {
@@ -539,9 +532,8 @@ void solve(Node* node)
                         verify += numNodesWithHeight[height];
                     }
                 }
-                assert(blee[binaryDigitNum] == verify);
+                assert(destination[binaryDigitNum] == verify);
             }
-            reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum] = blee[binaryDigitNum];
 #if 0
             cout << "binaryDigitNum: " << binaryDigitNum << " powerOf2: " << powerOf2 << endl;
             for (int height = 0; height < min(static_cast<int>(numNodesWithHeight.size()), powerOf2); height++)
@@ -562,6 +554,13 @@ void solve(Node* node)
 
 
         } 
+    };
+    for (auto& reorderedQuery : node->queriesForNode)
+    {
+        auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
+        auto newParent = reorderedQuery.originalQuery.newParent;
+        const int heightChange = newParent->height - nodeToMove->parent->height;
+        countCoinsThatMakeDigitOneAfterheightChange(heightChange, reorderedQuery.originalNodesThatMakeDigitOne);
     }
     const auto originalNumNodesWithHeight = numNodesWithHeight;
     if ((node->numCoins) % 2 == 1)
