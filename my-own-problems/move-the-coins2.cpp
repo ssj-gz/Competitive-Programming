@@ -680,8 +680,8 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxNumNodes = 20;
-        const int maxNumQueries = 20;
+        const int maxNumNodes = 100'000;
+        const int maxNumQueries = 100'000;
 
         int numNodes = rand() % maxNumNodes + 1;
         int numQueries = rand() % maxNumQueries + 1;
@@ -709,8 +709,11 @@ int main(int argc, char** argv)
             int numQueriesToGenerate = numQueries;
             int numAttempts = 0;
             vector<pair<int, int>> potentialQueries;
+            int64_t numPotentialQueries = 0;
             for (int nodeIndexToMove = 0; nodeIndexToMove < numNodes; nodeIndexToMove++)
             {
+                if (nodeIndexToMove % 100 == 0)
+                    cerr << "nodeIndexToMove: " << nodeIndexToMove << " / " << numNodes << endl;
                 auto& nodeToMove = nodes[nodeIndexToMove];
                 auto oldParent = nodeToMove.parent;
                 markDescendentsAsUsable(&nodeToMove, false);
@@ -718,18 +721,62 @@ int main(int argc, char** argv)
                 {
                     if (nodes[newParentNodeIndex].usable)
                     {
-                        potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
+                        //potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
+                        numPotentialQueries++;
+                        //cout << "numPotentialQueries: " << numPotentialQueries << endl;
                     }
                 }
                 markDescendentsAsUsable(&nodeToMove, true);
             }
-            const bool successful = (potentialQueries.size() >= numQueries);
+            //assert(RAND_MAX >= numPotentialQueries);
+            const bool successful = (numPotentialQueries >= numQueries);
             if (successful)
             {
-                random_shuffle(potentialQueries.begin(), potentialQueries.end());
-                potentialQueries.erase(potentialQueries.begin() + numQueries, potentialQueries.end());
-                assert(potentialQueries.size() == numQueries);
+                vector<int64_t> queriesChosen;
+                while (queriesChosen.size() < numQueries)
+                {
+                    int64_t queryIndex = ((uint64_t(rand()) << 32) | rand()) % numPotentialQueries;
+                    if (find(queriesChosen.begin(), queriesChosen.end(), queryIndex) == queriesChosen.end())
+                    {
+                        queriesChosen.push_back(queryIndex);
+                        if (queriesChosen.size() % 100 == 0)
+                        {
+                            cerr << "chosen " << queriesChosen.size() << " out of " << numQueries << " queries" << endl;
+                        }
+                    }
+                }
+                sort(queriesChosen.begin(), queriesChosen.end());
 
+                int64_t queryIndex = 0;
+                vector<pair<int, int>> queries;
+                queries.reserve(numQueries);
+                auto queryIndexIter = queriesChosen.begin();
+                for (int nodeIndexToMove = 0; nodeIndexToMove < numNodes; nodeIndexToMove++)
+                {
+                    if (nodeIndexToMove % 100 == 0)
+                        cerr << "nodeIndexToMove: " << nodeIndexToMove << " / " << numNodes << endl;
+                    auto& nodeToMove = nodes[nodeIndexToMove];
+                    auto oldParent = nodeToMove.parent;
+                    markDescendentsAsUsable(&nodeToMove, false);
+                    for (int newParentNodeIndex = 0; newParentNodeIndex < numNodes; newParentNodeIndex++)
+                    {
+                        if (nodes[newParentNodeIndex].usable)
+                        {
+                            //potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
+                            if (queryIndexIter != queriesChosen.end() && *queryIndexIter == queryIndex)
+                            {
+                                queries.push_back({nodeIndexToMove, newParentNodeIndex});
+                                queryIndexIter++;
+                                if (queries.size() % 100 == 0)
+                                    cerr << "Fulfilled " << queries.size() << " out of " << numQueries << " queries" << endl;
+                            }
+                            queryIndex++;
+                            //cout << "numPotentialQueries: " << numPotentialQueries << endl;
+                        }
+                    }
+                    markDescendentsAsUsable(&nodeToMove, true);
+                }
+                random_shuffle(queries.begin(), queries.end());
                 cout << numNodes << endl;
                 for (const auto& node : nodes)
                 {
@@ -748,11 +795,15 @@ int main(int argc, char** argv)
                     cout << (edge.first + 1) << " " << (edge.second + 1) << endl;
                 }
                 cout << numQueries << endl;
-                for (const auto& query : potentialQueries)
+                for (const auto& query : queries)
                 {
                     cout << (query.first + 1) << " " << (query.second + 1) << endl;
                 }
                 break;
+            }
+            else
+            {
+                cerr << "Unsuccessful; numPotentialQueries: " << numPotentialQueries << " needed " << numQueries << endl;
             }
 
             numMetaAttempts++;
