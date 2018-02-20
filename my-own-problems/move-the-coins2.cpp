@@ -349,7 +349,13 @@ struct Node
     Node* parent = nullptr;
     int nodeId = -1;
     bool usable = true;
-    int originalHeight = -1;
+    int height = -1;
+};
+
+struct Query
+{
+    Node* nodeToMove = nullptr;
+    Node* newParent = nullptr;
 };
 
 void grundyNumberForTree(Node* node, const int depth, int& grundyNumber)
@@ -389,6 +395,32 @@ void reparentNode(Node* nodeToMove, Node* newParent)
     newParent->children.push_back(nodeToMove);
 }
 
+void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
+{
+    node->height = height;
+    node->parent = parent;
+
+    node->children.erase(remove(node->children.begin(), node->children.end(), parent), node->children.end());
+
+    for (auto child : node->children)
+    {
+        fixParentChildAndHeights(child, node, height + 1);
+    }
+}
+
+vector<int> grundyNumbersForQueriesBruteForce(Node* rootNode, const vector<Query>& queries)
+{
+    vector<int> grundyNumbersForQueries;
+    for (const auto& query : queries)
+    {
+        auto originalParent = query.nodeToMove->parent;
+        reparentNode(query.nodeToMove, query.newParent);
+        grundyNumbersForQueries.push_back(grundyNumberForTree(rootNode));
+        reparentNode(query.nodeToMove, originalParent);
+    }
+
+    return grundyNumbersForQueries;
+}
 
 int main(int argc, char** argv)
 {
@@ -410,7 +442,6 @@ int main(int argc, char** argv)
         {
             //cout << "Random tree with nodes: " << numNodes << endl;
             vector<Node> nodes(numNodes);
-            nodes.front().originalHeight = 0;
             vector<pair<int, int>> edges;
             for (int i = 0; i < numNodes; i++)
             {
@@ -419,7 +450,6 @@ int main(int argc, char** argv)
                     const int parentNodeIndex = rand() % i;
                     nodes[parentNodeIndex].children.push_back(&nodes[i]);
                     nodes[i].parent = &(nodes[parentNodeIndex]);
-                    nodes[i].originalHeight = nodes[i].parent->originalHeight + 1;
                     edges.push_back({i, parentNodeIndex});
                 }
                 nodes[i].numCoins = rand() % 20;
@@ -464,16 +494,17 @@ int main(int argc, char** argv)
                 random_shuffle(edges.begin(), edges.end());
                 for (const auto& edge : edges)
                 {
-                    cout << edge.first << " " << edge.second << endl;
+                    cout << (edge.first + 1) << " " << (edge.second + 1) << endl;
                 }
                 cout << numQueries << endl;
                 for (const auto& query : potentialQueries)
                 {
-                    cout << query.first << " " << query.second << endl;
+                    cout << (query.first + 1) << " " << (query.second + 1) << endl;
                 }
                 break;
             }
 
+            numMetaAttempts++;
             if (numMetaAttempts > 1000)
             {
                 numNodes = rand() % maxNumNodes + 1;
@@ -525,6 +556,60 @@ int main(int argc, char** argv)
     //     - Recalculate A for each query m, and subtract original from it - we now know how many descendants of h will have a given bit B set to on
     //       for m.
     //     - We can then use this to calculate Grundy number for re-parented tree.  I hope :)
+
+    int numNodes;
+    cin >> numNodes;
+
+    vector<Node> nodes(numNodes);
+    for (int i = 0; i < numNodes; i++)
+    {
+        nodes[i].nodeId = i;
+        cin >> nodes[i].numCoins;
+    }
+    for (int i = 0; i < numNodes - 1; i++)
+    {
+        int a, b;
+        cin >> a >> b;
+        a--;
+        b--;
+
+        nodes[a].children.push_back(&nodes[b]);
+        nodes[b].children.push_back(&nodes[a]);
+    }
+
+    int numQueries;
+    cin >> numQueries;
+
+    vector<Query> queries(numQueries);
+
+    for (int i = 0; i < numQueries; i++)
+    {
+        int u, v;
+        cin >> u >> v;
+        u--;
+        v--;
+
+
+        queries[i].nodeToMove = &(nodes[u]);
+        queries[i].newParent = &(nodes[v]);
+    }
+
+    auto rootNode = &(nodes.front());
+    fixParentChildAndHeights(rootNode);
+
+
+#ifdef BRUTE_FORCE
+    const auto resultBruteForce = grundyNumbersForQueriesBruteForce(rootNode, queries);
+    cout << "resultBruteForce: " << endl;
+    for (const auto queryResult : resultBruteForce)
+    {
+        cout << queryResult << " ";
+    }
+    cout << endl;
+#endif
+
+
+#if 0
     auto add = [](const auto& x, int& destValue)
     {
         destValue += x;
@@ -543,6 +628,8 @@ int main(int argc, char** argv)
     numInRangeTracker.applyOperatorToAllInRange(1, 2, 1);
     numInRangeTracker.applyOperatorToAllInRange(3, 3, 1);
     cout << numInRangeTracker.combinedValuesInRange(1, 1) << endl; cout << numInRangeTracker.combinedValuesInRange(1, 2) << endl; cout << numInRangeTracker.combinedValuesInRange(1, 3) << endl; 
+#endif
+#if 0
     while (true)
     {
         const int numNodes = rand() % 100'000 + 1;
@@ -588,4 +675,5 @@ int main(int argc, char** argv)
             markDescendentsAsUsable(&node, true);
         }
     }
+#endif
 }
