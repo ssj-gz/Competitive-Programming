@@ -1,7 +1,7 @@
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
 #define VERIFY_SUBSTEPS
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -584,27 +584,37 @@ void solve(Node* node)
         //cout << "originalTreeGrundyNumber: " << originalTreeGrundyNumber << endl;
 
         int relocatedSubtreeGrundyDigits[log2MaxN + 1] = {};
-
+        countCoinsThatMakeDigitOneAfterHeightChange(heightChange, relocatedSubtreeGrundyDigits);
         int relocatedSubtreeGrundyNumber = 0;
         for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
         {
-            //cout << "binaryDigitNum: " << binaryDigitNum << endl;
             relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
-            for (int height = 0; height < numNodesWithHeight.size(); height++)
-            {
-                //cout << " height: " << height << endl;
-                if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
-                {
-                    //cout << "gloop!" << endl;
-                    //cout << " gleep!" << endl;
-                    relocatedSubtreeGrundyDigits[binaryDigitNum] += numNodesWithHeight[height];
-                }
-            }
             assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
-            relocatedSubtreeGrundyDigits[binaryDigitNum] %= 2;
-            relocatedSubtreeGrundyNumber = relocatedSubtreeGrundyNumber + (1 << binaryDigitNum) * relocatedSubtreeGrundyDigits[binaryDigitNum];
-            //cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
-        } 
+            relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (relocatedSubtreeGrundyDigits[binaryDigitNum] % 2);
+        }
+
+#ifdef VERIFY_SUBSTEPS
+        {
+            int verifyRelocatedSubtreeGrundyNumber = 0;
+            for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
+            {
+                //cout << "binaryDigitNum: " << binaryDigitNum << endl;
+                int digit = -reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
+                relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
+                for (int height = 0; height < numNodesWithHeight.size(); height++)
+                {
+                    if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
+                    {
+                        digit += numNodesWithHeight[height];
+                    }
+                }
+                assert(digit >= 0);
+                digit %= 2;
+                verifyRelocatedSubtreeGrundyNumber = verifyRelocatedSubtreeGrundyNumber + (1 << binaryDigitNum) * digit;
+                //cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
+            } 
+        }
+#endif
         int newGrundyNumber = grundyNumberMinusSubtree;
         newGrundyNumber ^= relocatedSubtreeGrundyNumber;
         queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
@@ -648,7 +658,9 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         numNodesWithHeightModuloPowerOf2[binaryDigitNum].init((1 << (binaryDigitNum + 1)) + 1, combineValues, add, combineAdditions);
         //numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
     }
+#ifdef VERIFY_SUBSTEPS
     numNodesWithHeight.resize(nodes.size() + 1);
+#endif
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
     assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
@@ -695,8 +707,8 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxNumNodes = 100'000;
-        const int maxNumQueries = 100'000;
+        const int maxNumNodes = 20;
+        const int maxNumQueries = 20;
 
         int numNodes = rand() % maxNumNodes + 1;
         int numQueries = rand() % maxNumQueries + 1;
