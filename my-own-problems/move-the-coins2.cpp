@@ -9,7 +9,16 @@
 
 #include <iostream>
 #include <vector>
+#include <sys/time.h>
 #include <cassert>
+
+constexpr auto maxN = 100'000;
+constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
+{
+            return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
+}
+constexpr int log2MaxN = log2(maxN);
+
 
 using namespace std;
 
@@ -336,7 +345,7 @@ class SegmentTree
 struct Node
 {
     vector<Node*> children;
-    bool containsCoin = false;
+    int numCoins = -1;
     Node* parent = nullptr;
     int nodeId = -1;
     bool usable = true;
@@ -381,8 +390,100 @@ void reparentNode(Node* nodeToMove, Node* newParent)
 }
 
 
-int main()
+int main(int argc, char** argv)
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int maxNumNodes = 20;
+        const int maxNumQueries = 20;
+
+        int numNodes = rand() % maxNumNodes + 1;
+        int numQueries = rand() % maxNumQueries + 1;
+
+        int numMetaAttempts = 0;
+
+        while (true)
+        {
+            //cout << "Random tree with nodes: " << numNodes << endl;
+            vector<Node> nodes(numNodes);
+            nodes.front().originalHeight = 0;
+            vector<pair<int, int>> edges;
+            for (int i = 0; i < numNodes; i++)
+            {
+                if (i > 0)
+                {
+                    const int parentNodeIndex = rand() % i;
+                    nodes[parentNodeIndex].children.push_back(&nodes[i]);
+                    nodes[i].parent = &(nodes[parentNodeIndex]);
+                    nodes[i].originalHeight = nodes[i].parent->originalHeight + 1;
+                    edges.push_back({i, parentNodeIndex});
+                }
+                nodes[i].numCoins = rand() % 20;
+                nodes[i].nodeId = i;
+            }
+
+            int numQueriesToGenerate = numQueries;
+            int numAttempts = 0;
+            vector<pair<int, int>> potentialQueries;
+            for (int nodeIndexToMove = 0; nodeIndexToMove < numNodes; nodeIndexToMove++)
+            {
+                auto& nodeToMove = nodes[nodeIndexToMove];
+                auto oldParent = nodeToMove.parent;
+                markDescendentsAsUsable(&nodeToMove, false);
+                for (int newParentNodeIndex = 0; newParentNodeIndex < numNodes; newParentNodeIndex++)
+                {
+                    if (nodes[newParentNodeIndex].usable)
+                    {
+                        potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
+                    }
+                }
+                markDescendentsAsUsable(&nodeToMove, true);
+            }
+            const bool successful = (potentialQueries.size() >= numQueries);
+            random_shuffle(potentialQueries.begin(), potentialQueries.end());
+            potentialQueries.erase(potentialQueries.begin() + numQueries, potentialQueries.end());
+            assert(potentialQueries.size() == numQueries);
+            if (successful)
+            {
+                cout << numNodes << endl;
+                for (const auto& node : nodes)
+                {
+                    cout << node.numCoins << " ";
+                }
+                cout << endl;
+                assert(edges.size() == numNodes - 1);
+                for (auto& edge : edges)
+                {
+                    if (rand() % 2 == 0)
+                        swap(edge.first, edge.second);
+                }
+                random_shuffle(edges.begin(), edges.end());
+                for (const auto& edge : edges)
+                {
+                    cout << edge.first << " " << edge.second << endl;
+                }
+                cout << numQueries << endl;
+                for (const auto& query : potentialQueries)
+                {
+                    cout << query.first << " " << query.second << endl;
+                }
+                break;
+            }
+
+            if (numMetaAttempts > 1000)
+            {
+                numNodes = rand() % maxNumNodes + 1;
+                numQueries = rand() % maxNumQueries + 1;
+                numMetaAttempts = 0;
+            }
+        }
+        return 0;
+    }
+
     // Draft solution:
     //  - Store all queries that re-parent Node n in node n, so we know which newParent n will be re-parented to on each query.
     //  - For node n, calculate grundy sum Gn of subtree rooted at n, though where heights of each descendant is measured
@@ -424,7 +525,6 @@ int main()
     //     - Recalculate A for each query m, and subtract original from it - we now know how many descendants of h will have a given bit B set to on
     //       for m.
     //     - We can then use this to calculate Grundy number for re-parented tree.  I hope :)
-    const int maxN = 100'000;
     auto add = [](const auto& x, int& destValue)
     {
         destValue += x;
@@ -458,7 +558,7 @@ int main()
                 nodes[i].parent = &(nodes[parentNodeIndex]);
                 nodes[i].originalHeight = nodes[i].parent->originalHeight + 1;
             }
-            nodes[i].containsCoin = rand() % 2;
+            nodes[i].numCoins = rand() % 20;
             nodes[i].nodeId = i;
         }
 
