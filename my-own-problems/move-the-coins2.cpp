@@ -466,10 +466,51 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
     return grundyNumbersForQueries;
 }
 
+vector<int> numNodesWithHeight;
+vector<int> queryResults;
+int originalTreeGrundyNumber;
+void solve(Node* node)
+{
+    const auto originalNumNodesWithHeight = numNodesWithHeight;
+    if ((node->numCoins) % 2 == 1)
+        numNodesWithHeight[node->height]++;
+    for (auto child : node->children)
+    {
+        solve(child);
+    }
+    vector<int> numDescendendantNodesWithHeight(numNodesWithHeight.size());
+    for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
+    {
+        numDescendendantNodesWithHeight[height] = numNodesWithHeight[height] - originalNumNodesWithHeight[height];
+    }
+    for (auto& reorderedQuery : node->queriesForNode)
+    {
+        auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
+        auto newParent = reorderedQuery.originalQuery.newParent;
+        const int heightChange = newParent->height - nodeToMove->parent->height;
+
+        //const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ nodeToMove->grundyNumber;
+        //int newGrundyNumber = grundyNumberMinusSubtree;
+        //cout << "originalTreeGrundyNumber: " << originalTreeGrundyNumber << endl;
+        int newGrundyNumber = originalTreeGrundyNumber;
+        for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
+        {
+            if ((numDescendendantNodesWithHeight[height] % 2) == 1)
+            {
+                newGrundyNumber ^= height;
+                newGrundyNumber ^= (height + heightChange);
+            }
+        }
+        queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
+    }
+
+}
+
 vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
 {
+    numNodesWithHeight.resize(nodes.size() + 1);
     auto rootNode = &(nodes.front());
-    const auto originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
+    originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
     assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
     // TODO - optimise this - don't use Brute Force XD
     vector<int> grundyNumbersForQueries;
@@ -487,6 +528,13 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
 
         query.nodeToMove->queriesForNode.push_back({queryIndex, query});
     }
+    queryResults.resize(queries.size());
+    solve(rootNode);
+    for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
+    {
+        cout << " queryIndex: " << queryIndex << " queryResults: " << queryResults[queryIndex] << " grundyNumbersForQueries: " << grundyNumbersForQueries[queryIndex] << endl;
+    }
+    assert(queryResults == grundyNumbersForQueries);
 
     return grundyNumbersForQueries;
 }
@@ -543,11 +591,12 @@ int main(int argc, char** argv)
                 markDescendentsAsUsable(&nodeToMove, true);
             }
             const bool successful = (potentialQueries.size() >= numQueries);
-            random_shuffle(potentialQueries.begin(), potentialQueries.end());
-            potentialQueries.erase(potentialQueries.begin() + numQueries, potentialQueries.end());
-            assert(potentialQueries.size() == numQueries);
             if (successful)
             {
+                random_shuffle(potentialQueries.begin(), potentialQueries.end());
+                potentialQueries.erase(potentialQueries.begin() + numQueries, potentialQueries.end());
+                assert(potentialQueries.size() == numQueries);
+
                 cout << numNodes << endl;
                 for (const auto& node : nodes)
                 {
@@ -574,8 +623,10 @@ int main(int argc, char** argv)
             }
 
             numMetaAttempts++;
+            //cout << "numMetaAttempts: " << numMetaAttempts << endl;
             if (numMetaAttempts > 1000)
             {
+                //cout << "Whoops" << endl;
                 numNodes = rand() % maxNumNodes + 1;
                 numQueries = rand() % maxNumQueries + 1;
                 numMetaAttempts = 0;
