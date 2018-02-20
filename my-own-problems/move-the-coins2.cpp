@@ -393,12 +393,18 @@ void markDescendentsAsUsable(Node* node,  bool usable)
 void reparentNode(Node* nodeToMove, Node* newParent)
 {
     auto oldParent = nodeToMove->parent;
-    assert(find(oldParent->children.begin(), oldParent->children.end(), nodeToMove) != oldParent->children.end());
-    oldParent->children.erase(remove(oldParent->children.begin(), oldParent->children.end(), nodeToMove), oldParent->children.end());
-    assert(find(oldParent->children.begin(), oldParent->children.end(), nodeToMove) == oldParent->children.end());
+    if (oldParent)
+    {
+        assert(find(oldParent->children.begin(), oldParent->children.end(), nodeToMove) != oldParent->children.end());
+        oldParent->children.erase(remove(oldParent->children.begin(), oldParent->children.end(), nodeToMove), oldParent->children.end());
+        assert(find(oldParent->children.begin(), oldParent->children.end(), nodeToMove) == oldParent->children.end());
+    }
     nodeToMove->parent = newParent;
-    assert(find(newParent->children.begin(), newParent->children.end(), nodeToMove) == newParent->children.end());
-    newParent->children.push_back(nodeToMove);
+    if (newParent)
+    {
+        assert(find(newParent->children.begin(), newParent->children.end(), nodeToMove) == newParent->children.end());
+        newParent->children.push_back(nodeToMove);
+    }
 }
 
 void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
@@ -453,13 +459,17 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
 vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
 {
     auto rootNode = &(nodes.front());
-    findGrundyNumberForNodes(rootNode);
+    const auto originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
     assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
     // TODO - optimise this - don't use Brute Force XD
     vector<int> grundyNumbersForQueries;
     for (const auto& query : queries)
     {
         auto originalParent = query.nodeToMove->parent;
+        {
+            reparentNode(query.nodeToMove, nullptr);
+            assert(grundyNumberForTreeBruteForce(rootNode) == (originalTreeGrundyNumber ^ query.nodeToMove->grundyNumber));
+        }
         reparentNode(query.nodeToMove, query.newParent);
         grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
         reparentNode(query.nodeToMove, originalParent);
