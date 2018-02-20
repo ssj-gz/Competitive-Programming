@@ -1,5 +1,6 @@
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
+#define VERIFY_SUBSTEPS
 //#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -481,6 +482,7 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
 vector<int> numNodesWithHeight;
 vector<int> queryResults;
 int originalTreeGrundyNumber;
+int log2LargestHeight = -1;
 
 using NumberTracker = SegmentTree<int, int>;
 
@@ -503,7 +505,7 @@ void solve(Node* node)
 {
     auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
     {
-        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
         {
             const int powerOf2 = (1 << (binaryDigitNum + 1));
             const int oneThreshold = (1 << (binaryDigitNum));
@@ -518,6 +520,7 @@ void solve(Node* node)
                 destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1);
                 destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end);
             }
+#ifdef VERIFY_SUBSTEPS
             {
                 int verify = 0;
                 for (int height = 0; height < numNodesWithHeight.size(); height++)
@@ -529,6 +532,7 @@ void solve(Node* node)
                 }
                 assert(destination[binaryDigitNum] == verify);
             }
+#endif
         } 
     };
     for (auto& reorderedQuery : node->queriesForNode)
@@ -541,7 +545,7 @@ void solve(Node* node)
     const auto originalNumNodesWithHeight = numNodesWithHeight;
     if ((node->numCoins) % 2 == 1)
         numNodesWithHeight[node->height]++;
-    for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
     {
         if ((node->numCoins % 2) == 1)
         {
@@ -575,7 +579,7 @@ void solve(Node* node)
         int relocatedSubtreeGrundyDigits[log2MaxN + 1] = {};
 
         int relocatedSubtreeGrundyNumber = 0;
-        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
         {
             cout << "binaryDigitNum: " << binaryDigitNum << endl;
             relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
@@ -599,6 +603,7 @@ void solve(Node* node)
         queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
         cout << " relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << endl;
         //cout << " relocatedSubtreeGrundyNumber: " << blee << endl;
+#ifdef VERIFY_SUBSTEPS
         {
             int verifyRelocatedSubtreeGrundyNumber = 0;
             for (int height = 0; height < numDescendendantNodesWithHeight.size(); height++)
@@ -611,13 +616,14 @@ void solve(Node* node)
             }
             assert(relocatedSubtreeGrundyNumber == verifyRelocatedSubtreeGrundyNumber);
         }
+#endif
     }
 
 }
 
 vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
 {
-    for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
     {
         auto add = [](const auto& x, int& destValue)
         {
@@ -843,6 +849,12 @@ int main(int argc, char** argv)
 
     auto rootNode = &(nodes.front());
     fixParentChildAndHeights(rootNode);
+    int largestHeight = -1;
+    for (const auto& node : nodes)
+        largestHeight = max(largestHeight, node.height);
+
+    log2LargestHeight = log2(largestHeight) + 1;
+    cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
 
     const auto result = grundyNumbersForQueries(nodes, queries);
 
