@@ -509,7 +509,32 @@ void solve(Node* node)
             }
             const int powerOf2 = (1 << (binaryDigitNum + 1));
             const int oneThreshold = (1 << (binaryDigitNum));
+            const int begin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
+            const int end = modPosOrNeg(-heightChange - 1, powerOf2);
             int blee[log2MaxN + 1] = {};
+            if (begin <= end)
+            {
+                for (int height = begin; height <= end; height++)
+                {
+                    assert(height < powerOf2);
+                    assert(modPosOrNeg(height + heightChange, powerOf2) >= oneThreshold);
+                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                }
+            }
+            else
+            {
+                for (int height = begin; height <= powerOf2 - 1; height++)
+                {
+                    assert(modPosOrNeg(height + heightChange, powerOf2) >= oneThreshold);
+                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                }
+                for (int height = 0; height <= end; height++)
+                {
+                    assert(modPosOrNeg(height + heightChange, powerOf2) >= oneThreshold);
+                    blee[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum][height];
+                }
+            }
+#if 0
             cout << "binaryDigitNum: " << binaryDigitNum << " powerOf2: " << powerOf2 << endl;
             for (int height = 0; height < min(static_cast<int>(numNodesWithHeight.size()), powerOf2); height++)
             {
@@ -524,7 +549,9 @@ void solve(Node* node)
                 }
             }
             cout << "binaryDigitNum: " << binaryDigitNum << " blee: " << blee[binaryDigitNum] << " originalNodesThatMakeDigitOne: " << reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum] << endl;
+#endif
             assert(blee[binaryDigitNum] == reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum]);
+
 
         } 
     }
