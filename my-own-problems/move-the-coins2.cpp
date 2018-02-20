@@ -350,6 +350,8 @@ struct Node
     int nodeId = -1;
     bool usable = true;
     int height = -1;
+
+    int grundyNumber = -1;
 };
 
 struct Query
@@ -362,7 +364,7 @@ void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumbe
 {
     for (int i = 0; i < node->numCoins; i++)
     {
-        grundyNumber ^= (depth);
+        grundyNumber ^= depth;
     }
     for (Node* child : node->children)
     {
@@ -374,6 +376,7 @@ int grundyNumberForTreeBruteForce(Node* node)
 {
     int grundyNumber = 0;
     grundyNumberForTreeBruteForce(node, 0, grundyNumber);
+    cout << "grundyNumberForTreeBruteForce node: " << node->nodeId << " = " << grundyNumber << endl;
     return grundyNumber;
 }
 
@@ -411,8 +414,30 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
-vector<int> grundyNumbersForQueriesBruteForce(Node* rootNode, const vector<Query>& queries)
+int findGrundyNumberForNodes(Node* node, const int depth)
 {
+    int grundyNumber = 0;
+    if ((node->numCoins % 2) == 1)
+        grundyNumber ^= depth;
+
+    for (auto child : node->children)
+    {
+        grundyNumber ^= findGrundyNumberForNodes(child, depth + 1);
+    }
+
+    node->grundyNumber = grundyNumber;
+
+
+    return grundyNumber;
+}
+int findGrundyNumberForNodes(Node* node)
+{
+    return findGrundyNumberForNodes(node, 0);
+}
+
+vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<Query>& queries)
+{
+    auto rootNode = &(nodes.front());
     vector<int> grundyNumbersForQueries;
     for (const auto& query : queries)
     {
@@ -425,8 +450,11 @@ vector<int> grundyNumbersForQueriesBruteForce(Node* rootNode, const vector<Query
     return grundyNumbersForQueries;
 }
 
-vector<int> grundyNumbersForQueries(Node* rootNode, const vector<Query>& queries)
+vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
 {
+    auto rootNode = &(nodes.front());
+    findGrundyNumberForNodes(rootNode);
+    assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
     // TODO - optimise this - don't use Brute Force XD
     vector<int> grundyNumbersForQueries;
     for (const auto& query : queries)
@@ -615,10 +643,10 @@ int main(int argc, char** argv)
     auto rootNode = &(nodes.front());
     fixParentChildAndHeights(rootNode);
 
-    const auto result = grundyNumbersForQueries(rootNode, queries);
+    const auto result = grundyNumbersForQueries(nodes, queries);
 
 #ifdef BRUTE_FORCE
-    const auto resultBruteForce = grundyNumbersForQueriesBruteForce(rootNode, queries);
+    const auto resultBruteForce = grundyNumbersForQueriesBruteForce(nodes, queries);
     cout << "resultBruteForce: " << endl;
     for (const auto queryResult : resultBruteForce)
     {
