@@ -422,6 +422,21 @@ vector<int> grundyNumbersForQueriesBruteForce(Node* rootNode, const vector<Query
     return grundyNumbersForQueries;
 }
 
+vector<int> grundyNumbersForQueries(Node* rootNode, const vector<Query>& queries)
+{
+    // TODO - optimise this - don't use Brute Force XD
+    vector<int> grundyNumbersForQueries;
+    for (const auto& query : queries)
+    {
+        auto originalParent = query.nodeToMove->parent;
+        reparentNode(query.nodeToMove, query.newParent);
+        grundyNumbersForQueries.push_back(grundyNumberForTree(rootNode));
+        reparentNode(query.nodeToMove, originalParent);
+    }
+
+    return grundyNumbersForQueries;
+}
+
 int main(int argc, char** argv)
 {
     if (argc == 2)
@@ -597,6 +612,7 @@ int main(int argc, char** argv)
     auto rootNode = &(nodes.front());
     fixParentChildAndHeights(rootNode);
 
+    const auto result = grundyNumbersForQueries(rootNode, queries);
 
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = grundyNumbersForQueriesBruteForce(rootNode, queries);
@@ -606,6 +622,13 @@ int main(int argc, char** argv)
         cout << queryResult << " ";
     }
     cout << endl;
+    cout << "result: " << endl;
+    for (const auto queryResult : result)
+    {
+        cout << queryResult << " ";
+    }
+    cout << endl;
+    assert(result == resultBruteForce);
 #endif
 
 
