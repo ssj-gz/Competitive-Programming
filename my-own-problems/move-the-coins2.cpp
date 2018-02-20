@@ -481,9 +481,9 @@ void solve(Node* node)
         {
             for (int height = 0; height < numNodesWithHeight.size(); height++)
             {
-                if (((numNodesWithHeight[height] % 2) == 1) && ((height + heightChange) & (1 << binaryDigitNum)) == 1)
+                if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
                 {
-                    reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum]++;
+                    reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum] += numNodesWithHeight[height];
                 }
             }
 
@@ -530,20 +530,19 @@ void solve(Node* node)
         for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
             cout << "binaryDigitNum: " << binaryDigitNum << endl;
+            relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
             for (int height = 0; height < numNodesWithHeight.size(); height++)
             {
                 cout << " height: " << height << endl;
                 if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
                 {
                     //cout << "gloop!" << endl;
-                    if ((numDescendendantNodesWithHeight[height] % 2) == 1)
-                    {
                         cout << " gleep!" << endl;
-                        relocatedSubtreeGrundyDigits[binaryDigitNum]++;
-                        relocatedSubtreeGrundyDigits[binaryDigitNum] %= 2;
-                    }
+                        relocatedSubtreeGrundyDigits[binaryDigitNum] += numNodesWithHeight[height];
                 }
             }
+            assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
+            relocatedSubtreeGrundyDigits[binaryDigitNum] %= 2;
             blee = blee + (1 << binaryDigitNum) * relocatedSubtreeGrundyDigits[binaryDigitNum];
             cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
         } 
