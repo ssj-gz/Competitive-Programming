@@ -342,6 +342,20 @@ class SegmentTree
         }
 };
 
+struct Node;
+struct Query
+{
+    Node* nodeToMove = nullptr;
+    Node* newParent = nullptr;
+};
+
+struct ReorderedQuery
+{
+    int originalQueryIndex = -1;
+    Query originalQuery;
+};
+
+
 struct Node
 {
     vector<Node*> children;
@@ -352,13 +366,9 @@ struct Node
     int height = -1;
 
     int grundyNumber = -1;
+    vector<ReorderedQuery> queriesForNode;
 };
 
-struct Query
-{
-    Node* nodeToMove = nullptr;
-    Node* newParent = nullptr;
-};
 
 void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber)
 {
@@ -463,8 +473,9 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
     // TODO - optimise this - don't use Brute Force XD
     vector<int> grundyNumbersForQueries;
-    for (const auto& query : queries)
+    for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
+        const auto query = queries[queryIndex];
         auto originalParent = query.nodeToMove->parent;
         {
             reparentNode(query.nodeToMove, nullptr);
@@ -473,6 +484,8 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         reparentNode(query.nodeToMove, query.newParent);
         grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
         reparentNode(query.nodeToMove, originalParent);
+
+        query.nodeToMove->queriesForNode.push_back({queryIndex, query});
     }
 
     return grundyNumbersForQueries;
