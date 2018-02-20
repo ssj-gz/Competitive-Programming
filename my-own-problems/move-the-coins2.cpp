@@ -2,7 +2,7 @@
 #define VERIFY_SEGMENT_TREE
 #define VERIFY_SUBSTEPS
 #define FIND_ZERO_GRUNDYS
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -23,7 +23,6 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
             return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
 constexpr int log2MaxN = log2(maxN);
-
 
 using namespace std;
 
@@ -714,7 +713,6 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         query.nodeToMove->queriesForNode.push_back({queryIndex, query});
     }
 #ifdef VERIFY_SUBSTEPS
-    // TODO - optimise this - don't use Brute Force XD
     vector<int> grundyNumbersForQueries;
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
@@ -752,13 +750,13 @@ int main(int argc, char** argv)
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxNumNodes = 100'000;
-        const int maxNumQueries = 100'000;
-        //const int maxNumNodes = 100;
-        //const int maxNumQueries = 100;
+        //const int maxNumNodes = 100'000;
+        //const int maxNumQueries = 100'000;
+        const int maxNumNodes = 100;
+        const int maxNumQueries = 100;
 
-        const int forceHeight = 30000;
-        //const int forceHeight = -1;
+        //const int forceHeight = 30000;
+        const int forceHeight = -1;
 
         int numNodes = rand() % maxNumNodes + 1;
         int numQueries = rand() % maxNumQueries + 1;
@@ -1064,7 +1062,6 @@ int main(int argc, char** argv)
             {
                 numZeroGrundies++;
                 cout << "Forced a grundy number: nodeId: " << nodeId << " node height: " << node->height << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
-#define NDEBUG
                 assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
             }
         }
@@ -1096,74 +1093,5 @@ int main(int argc, char** argv)
     }
     cout << endl;
     assert(result == resultBruteForce);
-#endif
-
-
-#if 0
-    auto add = [](const auto& x, int& destValue)
-    {
-        destValue += x;
-    };
-    auto combineValues = [](const int lhs, const int rhs)
-    {
-        return lhs + rhs;
-    };
-    auto combineAdditions = [](const int x1, int x2)
-    {
-        return x1 + x2;
-    };
-    SegmentTree<int, int> numInRangeTracker(maxN + 1, combineValues, add, combineAdditions);
-
-    numInRangeTracker.applyOperatorToAllInRange(1, 1, 1);
-    numInRangeTracker.applyOperatorToAllInRange(1, 2, 1);
-    numInRangeTracker.applyOperatorToAllInRange(3, 3, 1);
-    cout << numInRangeTracker.combinedValuesInRange(1, 1) << endl; cout << numInRangeTracker.combinedValuesInRange(1, 2) << endl; cout << numInRangeTracker.combinedValuesInRange(1, 3) << endl; 
-#endif
-#if 0
-    while (true)
-    {
-        const int numNodes = rand() % 100'000 + 1;
-        cout << "Random tree with nodes: " << numNodes << endl;
-        vector<Node> nodes(numNodes);
-        nodes.front().originalHeight = 0;
-        for (int i = 0; i < numNodes; i++)
-        {
-            if (i > 0)
-            {
-                const int parentNodeIndex = rand() % i;
-                nodes[parentNodeIndex].children.push_back(&nodes[i]);
-                nodes[i].parent = &(nodes[parentNodeIndex]);
-                nodes[i].originalHeight = nodes[i].parent->originalHeight + 1;
-            }
-            nodes[i].numCoins = rand() % 20;
-            nodes[i].nodeId = i;
-        }
-
-        for (Node& node : nodes)
-        {
-            if (!node.parent)
-                continue;
-
-            auto oldParent = node.parent;
-            markDescendentsAsUsable(&node, false);
-
-            for (Node& newParent : nodes)
-            {
-                if (node.parent == &newParent)
-                    continue;
-                if (!newParent.usable)
-                    continue;
-
-                reparentNode(&node, &newParent);
-                if (grundyNumberForTree(&(nodes.front())) == 0)
-                {
-                    cout << " woo!" << node.nodeId << "," << newParent.nodeId << endl;
-                }
-                reparentNode(&node, oldParent);
-
-            }
-            markDescendentsAsUsable(&node, true);
-        }
-    }
 #endif
 }
