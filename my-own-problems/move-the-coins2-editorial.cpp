@@ -77,11 +77,11 @@ int findGrundyNumbersForNodes(Node* node)
 
 // bt : bit array
 // i and j are starting and ending index INCLUSIVE
-long long bit_q(long long * bt,int i,int j)
+int bit_q(int * bt,int i,int j)
 {
     i++;
     j++;
-    long long sum=0ll;
+    int sum=0;
     while(j>0)
     {
         sum+=bt[j];
@@ -100,7 +100,7 @@ long long bit_q(long long * bt,int i,int j)
 // n : size of bit array
 // i is the index to be updated
 // diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
-void bit_up(long long * bt,int n,int i,long long diff)
+void bit_up(int * bt,int n,int i,int diff)
 {
     i++;
     while(i<=n)
@@ -113,7 +113,7 @@ void bit_up(long long * bt,int n,int i,long long diff)
 vector<int> queryResults;
 int originalTreeGrundyNumber;
 
-vector<long long> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+vector<int> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 
 int modPosOrNeg(int x, int modulus)
 {
