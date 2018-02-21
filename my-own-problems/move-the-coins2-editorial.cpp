@@ -1,3 +1,5 @@
+// Editorial solution for "Move the Coins 2".
+// Simon St James (ssjgz) 2018-02-21.
 //#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -126,7 +128,7 @@ int modPosOrNeg(int x, int modulus)
     return x % modulus;
 }
 
-void solve(Node* node)
+void answerQueries(Node* node)
 {
     auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
     {
@@ -162,7 +164,7 @@ void solve(Node* node)
     }
     for (auto child : node->children)
     {
-        solve(child);
+        answerQueries(child);
     }
     for (auto& queryForNode : node->queriesForNode)
     {
@@ -199,7 +201,7 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         query.nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, query.newParent->originalHeight - query.nodeToMove->parent->originalHeight});
     }
     queryResults.resize(queries.size());
-    solve(rootNode);
+    answerQueries(rootNode);
 
     return queryResults;
 }
