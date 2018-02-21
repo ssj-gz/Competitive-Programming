@@ -492,6 +492,8 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
 //i and j are starting and ending index INCLUSIVE
 long long bit_q(long long * bt,int i,int j)
 {
+    i++;
+    j++;
     long long sum=0ll;
     while(j>0)
     {
@@ -512,6 +514,7 @@ long long bit_q(long long * bt,int i,int j)
 //diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
 void bit_up(long long * bt,int n,int i,long long diff)
 {
+    i++;
     while(i<=n)
     {
         bt[i] += diff;
@@ -587,14 +590,14 @@ void solve(Node* node)
             if (begin <= end)
             {
                 destination[binaryDigitNum] += dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, end);
-                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, end) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin + 1, end + 1));
+                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, end) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end));
             }
             else
             {
                 destination[binaryDigitNum] += dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1);
-                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin + 1, powerOf2));
+                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1));
                 destination[binaryDigitNum] += dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end);
-                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 1, end + 1));
+                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end));
             }
 #ifdef VERIFY_SUBSTEPS
             {
@@ -631,7 +634,7 @@ void solve(Node* node)
             const int heightModuloPowerOf2 = node->height % powerOf2;
             //cout << "About to applyOperatorToAllInRange - binaryDigitNum: " << binaryDigitNum << " heightModuloPowerOf2: " << heightModuloPowerOf2 << endl;
             dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
-            bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2 + 1, 1);
+            bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, 1);
         }
     }
     for (auto child : node->children)
