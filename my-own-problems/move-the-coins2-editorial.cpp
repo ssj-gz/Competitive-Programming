@@ -218,12 +218,6 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     }
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
-    // Re-order queries so that all queries that move a given node are accessible from that node.
-    for (auto queryIndex = 0; queryIndex < queries.size(); queryIndex++)
-    {
-        const auto query = queries[queryIndex];
-        query.nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, query.newParent->originalHeight - query.nodeToMove->parent->originalHeight});
-    }
     queryResults.resize(queries.size());
     answerQueries(rootNode);
 
@@ -255,24 +249,26 @@ int main(int argc, char** argv)
         nodes[b].children.push_back(&nodes[a]);
     }
 
+    auto rootNode = &(nodes.front());
+    fixParentChildAndHeights(rootNode);
+
     int numQueries;
     cin >> numQueries;
 
     vector<Query> queries(numQueries);
 
-    for (auto i = 0; i < numQueries; i++)
+    for (auto queryIndex = 0; queryIndex < numQueries; queryIndex++)
     {
         int u, v;
         cin >> u >> v;
         u--;
         v--;
 
-        queries[i].nodeToMove = &(nodes[u]);
-        queries[i].newParent = &(nodes[v]);
+        // Re-order queries so that all queries that move a given node u are accessible from u.
+        auto nodeToMove = &(nodes[u]);
+        auto newParent = &(nodes[v]);
+        nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, newParent->originalHeight - nodeToMove->parent->originalHeight});
     }
-
-    auto rootNode = &(nodes.front());
-    fixParentChildAndHeights(rootNode);
 
     const auto result = grundyNumbersForQueries(nodes, queries);
     for (const auto queryResult : result)
