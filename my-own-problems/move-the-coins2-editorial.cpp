@@ -18,13 +18,6 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 }
 constexpr int log2MaxN = log2(maxN);
 
-struct Node;
-struct Query
-{
-    Node* nodeToMove = nullptr;
-    Node* newParent = nullptr;
-};
-
 struct QueryForNode
 {
     QueryForNode(int originalQueryIndex, int heightChange)
@@ -210,7 +203,7 @@ void answerQueries(Node* node)
 
 }
 
-vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
+vector<int> grundyNumbersForQueries(vector<Node>& nodes, const int numQueries)
 {
     for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
@@ -218,7 +211,7 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     }
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
-    queryResults.resize(queries.size());
+    queryResults.resize(numQueries);
     answerQueries(rootNode);
 
     return queryResults;
@@ -255,8 +248,6 @@ int main(int argc, char** argv)
     int numQueries;
     cin >> numQueries;
 
-    vector<Query> queries(numQueries);
-
     for (auto queryIndex = 0; queryIndex < numQueries; queryIndex++)
     {
         int u, v;
@@ -270,7 +261,7 @@ int main(int argc, char** argv)
         nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, newParent->originalHeight - nodeToMove->parent->originalHeight});
     }
 
-    const auto result = grundyNumbersForQueries(nodes, queries);
+    const auto result = grundyNumbersForQueries(nodes, numQueries);
     for (const auto queryResult : result)
     {
         cout << queryResult << " ";
