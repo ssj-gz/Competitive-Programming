@@ -37,7 +37,7 @@ struct QueryForNode
 struct Node
 {
     vector<Node*> children;
-    int numCoins = -1;
+    bool hasCoin = false;
     Node* parent = nullptr;
     int originalHeight = -1;
 
@@ -62,7 +62,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 int findGrundyNumbersForNodes(Node* node, const int depth)
 {
     int grundyNumber = 0;
-    if ((node->numCoins % 2) == 1)
+    if (node->hasCoin)
         grundyNumber ^= depth;
 
     for (auto child : node->children)
@@ -157,7 +157,7 @@ void solve(Node* node)
     }
     for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
-        if ((node->numCoins % 2) == 1)
+        if (node->hasCoin)
         {
             const int powerOf2 = (1 << (binaryDigitNum + 1));
             const int heightModuloPowerOf2 = node->originalHeight % powerOf2;
@@ -218,7 +218,9 @@ int main(int argc, char** argv)
     vector<Node> nodes(numNodes);
     for (int i = 0; i < numNodes; i++)
     {
-        cin >> nodes[i].numCoins;
+        int numCoins;
+        cin >> numCoins;
+        nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins.
     }
     for (int i = 0; i < numNodes - 1; i++)
     {
