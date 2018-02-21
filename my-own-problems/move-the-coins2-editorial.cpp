@@ -24,13 +24,12 @@ struct Query
     Node* newParent = nullptr;
 };
 
-struct ReorderedQuery
+struct QueryForNode
 {
     int originalQueryIndex = -1;
-    Query originalQuery;
+    int heightChange;
     int originalNodesThatMakeDigitOne[log2MaxN + 1];
 };
-
 
 struct Node
 {
@@ -40,7 +39,7 @@ struct Node
     int originalHeight = -1;
 
     int grundyNumber = -1;
-    vector<ReorderedQuery> queriesForNode;
+    vector<QueryForNode> queriesForNode;
 };
 
 
@@ -149,12 +148,9 @@ void solve(Node* node)
             }
         } 
     };
-    for (auto& reorderedQuery : node->queriesForNode)
+    for (auto& queryForNode : node->queriesForNode)
     {
-        auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
-        auto newParent = reorderedQuery.originalQuery.newParent;
-        const int heightChange = newParent->originalHeight - nodeToMove->parent->originalHeight;
-        countCoinsThatMakeDigitOneAfterHeightChange(heightChange, reorderedQuery.originalNodesThatMakeDigitOne);
+        countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalNodesThatMakeDigitOne);
     }
     for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
@@ -169,26 +165,22 @@ void solve(Node* node)
     {
         solve(child);
     }
-    for (auto& reorderedQuery : node->queriesForNode)
+    for (auto& queryForNode : node->queriesForNode)
     {
-        auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
-        auto newParent = reorderedQuery.originalQuery.newParent;
-        const int heightChange = newParent->originalHeight - nodeToMove->parent->originalHeight;
-
-        const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ nodeToMove->grundyNumber;
+        const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
 
         int relocatedSubtreeGrundyDigits[log2MaxN + 1] = {};
-        countCoinsThatMakeDigitOneAfterHeightChange(heightChange, relocatedSubtreeGrundyDigits);
+        countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, relocatedSubtreeGrundyDigits);
         int relocatedSubtreeGrundyNumber = 0;
         for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
-            relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
+            relocatedSubtreeGrundyDigits[binaryDigitNum] -= queryForNode.originalNodesThatMakeDigitOne[binaryDigitNum];
             assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
             relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (relocatedSubtreeGrundyDigits[binaryDigitNum] % 2);
         }
 
         const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
-        queryResults[reorderedQuery.originalQueryIndex] = newGrundyNumber;
+        queryResults[queryForNode.originalQueryIndex] = newGrundyNumber;
     }
 
 }
@@ -204,7 +196,7 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
         const auto query = queries[queryIndex];
-        query.nodeToMove->queriesForNode.push_back({queryIndex, query});
+        query.nodeToMove->queriesForNode.push_back({queryIndex, query.newParent->originalHeight - query.nodeToMove->parent->originalHeight});
     }
     queryResults.resize(queries.size());
     solve(rootNode);
