@@ -76,7 +76,7 @@ class SegmentTree
         SegmentTree() = default;
         SegmentTree(int numElements)
             : m_numElements{numElements},
-        m_elements(numElements)
+              m_elements(numElements)
         {
         }
         int total() const
@@ -203,13 +203,13 @@ void answerQueries(Node* node)
 
 }
 
-vector<int> grundyNumbersForQueries(vector<Node>& nodes, const int numQueries)
+vector<int> grundyNumbersForQueries(Node* rootNode, const int numQueries)
 {
+    // Initialise the SegmentTrees.
     for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
-    auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
     queryResults.resize(numQueries);
     answerQueries(rootNode);
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
         nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, newParent->originalHeight - nodeToMove->parent->originalHeight});
     }
 
-    const auto result = grundyNumbersForQueries(nodes, numQueries);
+    const auto result = grundyNumbersForQueries(rootNode, numQueries);
     for (const auto queryResult : result)
     {
         cout << queryResult << " ";
