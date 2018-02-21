@@ -83,9 +83,13 @@ class SegmentTree
         SegmentTree() = default;
         SegmentTree(int numElements)
             : m_numElements{numElements},
-            m_elements(numElements)
-            {
-            }
+        m_elements(numElements)
+        {
+        }
+        int total() const
+        {
+            return m_total;
+        }
         int numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
@@ -114,10 +118,13 @@ class SegmentTree
                 m_elements[pos]++;
                 pos += (pos & (pos * -1));
             }
+
+            m_total++;
         }
 
     private:
         int m_numElements;
+        int m_total = 0;
         vector<int> m_elements;
 };
 
@@ -153,9 +160,9 @@ void answerQueries(Node* node)
             }
             else
             {
-                // Range is split in two.
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(begin, powerOf2 - 1);
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(0, end);
+                // Range is split in two - count the number that make digit 0 instead, and subtract from the total over the whole range.
+                const auto numThatMakeDigitZero = numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(end + 1, begin - 1);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].total() - numThatMakeDigitZero;
             }
         } 
     };
