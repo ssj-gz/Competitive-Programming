@@ -77,6 +77,54 @@ int findGrundyNumbersForNodes(Node* node)
     return grundyNumber;
 }
 
+class SegmentTree
+{
+    public:
+        SegmentTree() = default;
+        SegmentTree(int numElements)
+            : m_numElements{numElements},
+            m_elements(numElements)
+            {
+            }
+        int bit_q(int i, int j)
+        {
+            i++;
+            j++;
+            auto sum = 0;
+            while(j > 0)
+            {
+                sum += m_elements[j];
+                j -= (j & (j*-1));
+            }
+            i--;
+            while(i > 0)
+            {
+                sum -= m_elements[i];
+                i -= (i & (i*-1));
+            }
+            return sum;
+        }
+
+        // bt : bit array
+        // n : size of bit array
+        // i is the index to be updated
+        // diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
+        void bit_up(int i, int diff)
+        {
+            const int n = m_numElements;
+            i++;
+            while(i<=n)
+            {
+                m_elements[i] += diff;
+                i += (i & (i*-1));
+            }
+        }
+
+    private:
+        int m_numElements;
+        vector<int> m_elements;
+};
+
 // bt : bit array
 // i and j are starting and ending index INCLUSIVE
 int bit_q(int* bt, int i, int j)
@@ -115,7 +163,8 @@ void bit_up(int* bt, int n, int i, int diff)
 vector<int> queryResults;
 int originalTreeGrundyNumber;
 
-vector<int> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+//vector<int> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+SegmentTree numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 
 int modPosOrNeg(int x, int modulus)
 {
@@ -140,13 +189,16 @@ void answerQueries(Node* node)
             const auto end = modPosOrNeg(-heightChange - 1, powerOf2);
             if (begin <= end)
             {
-                destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end);
+                //destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_q(begin, end);
             }
             else
             {
                 // Range is split in two.
-                destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1);
-                destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end);
+                //destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1);
+                //destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_q(begin, powerOf2 - 1);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_q(0, end);
             }
         } 
     };
@@ -162,7 +214,8 @@ void answerQueries(Node* node)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto heightModuloPowerOf2 = node->originalHeight % powerOf2;
-            bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, 1);
+            //bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, 1);
+            numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_up(heightModuloPowerOf2, 1);
         }
     }
     // Recurse.
@@ -198,7 +251,8 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
 {
     for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
-        numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
+        //numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
+        numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
