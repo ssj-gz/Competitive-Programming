@@ -59,24 +59,20 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
-int findGrundyNumbersForNodes(Node* node, const int depth)
+int findGrundyNumbersForNodes(Node* node)
 {
     int grundyNumber = 0;
     if (node->hasCoin)
-        grundyNumber ^= depth;
+        grundyNumber ^= node->originalHeight;
 
     for (auto child : node->children)
     {
-        grundyNumber ^= findGrundyNumbersForNodes(child, depth + 1);
+        grundyNumber ^= findGrundyNumbersForNodes(child);
     }
 
     node->grundyNumber = grundyNumber;
 
     return grundyNumber;
-}
-int findGrundyNumbersForNodes(Node* node)
-{
-    return findGrundyNumbersForNodes(node, 0);
 }
 
 // bt : bit array
