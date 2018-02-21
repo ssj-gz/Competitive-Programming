@@ -2,7 +2,7 @@
 #define VERIFY_SEGMENT_TREE
 #define VERIFY_SUBSTEPS
 #define FIND_ZERO_GRUNDYS
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -488,6 +488,38 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
     return grundyNumbersForQueries;
 }
 
+//bt : bit array
+//i and j are starting and ending index INCLUSIVE
+long long bit_q(long long * bt,int i,int j)
+{
+    long long sum=0ll;
+    while(j>0)
+    {
+        sum+=bt[j];
+        j -= (j & (j*-1));
+    }
+    i--;
+    while(i>0)
+    {
+        sum-=bt[i];
+        i -= (i & (i*-1));
+    }
+    return sum;
+}
+//bt : bit array
+//n : size of bit array
+//i is the index to be updated
+//diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
+void bit_up(long long * bt,int n,int i,long long diff)
+{
+    while(i<=n)
+    {
+        bt[i] += diff;
+        i += (i & (i*-1));
+        cout << "i: " << i << " n: " << n << endl;
+    }
+}
+
 #ifdef VERIFY_SUBSTEPS
 vector<int> numNodesWithHeight;
 #endif
@@ -498,7 +530,8 @@ int log2LargestHeight = -1;
 
 using NumberTracker = SegmentTree<int, int>;
 
-NumberTracker numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+NumberTracker dbgnumNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+vector<long long> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 
 
 int modPosOrNeg(int x, int modulus)
@@ -553,12 +586,15 @@ void solve(Node* node)
             const int end = modPosOrNeg(-heightChange - 1, powerOf2);
             if (begin <= end)
             {
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, end);
+                destination[binaryDigitNum] += dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, end);
+                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, end) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin + 1, end + 1));
             }
             else
             {
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1);
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end);
+                destination[binaryDigitNum] += dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1);
+                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(begin, powerOf2 - 1) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin + 1, powerOf2));
+                destination[binaryDigitNum] += dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end);
+                assert(dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].combinedValuesInRange(0, end) == bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 1, end + 1));
             }
 #ifdef VERIFY_SUBSTEPS
             {
@@ -594,8 +630,8 @@ void solve(Node* node)
             const int powerOf2 = (1 << (binaryDigitNum + 1));
             const int heightModuloPowerOf2 = node->height % powerOf2;
             //cout << "About to applyOperatorToAllInRange - binaryDigitNum: " << binaryDigitNum << " heightModuloPowerOf2: " << heightModuloPowerOf2 << endl;
-            numNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
-            //numNodesWithHeightModuloPowerOf2[binaryDigitNum][heightModuloPowerOf2]++;
+            dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].applyOperatorToAllInRange(heightModuloPowerOf2, heightModuloPowerOf2, 1);
+            bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2 + 1, 1);
         }
     }
     for (auto child : node->children)
@@ -699,8 +735,8 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
             return x1 + x2;
         };
 
-        numNodesWithHeightModuloPowerOf2[binaryDigitNum].init((1 << (binaryDigitNum + 1)) + 1, combineValues, add, combineAdditions);
-        //numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
+        dbgnumNodesWithHeightModuloPowerOf2[binaryDigitNum].init((1 << (binaryDigitNum + 1)) + 1, combineValues, add, combineAdditions);
+        numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
     }
 #ifdef VERIFY_SUBSTEPS
     numNodesWithHeight.resize(nodes.size() + 1);
