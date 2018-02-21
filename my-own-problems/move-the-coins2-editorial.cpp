@@ -86,37 +86,33 @@ class SegmentTree
             m_elements(numElements)
             {
             }
-        int bit_q(int i, int j)
+        int numInRange(int start, int end) const
         {
-            i++;
-            j++;
+            start++; // Make 1-relative.  start and end are inclusive.
+            end++;
             auto sum = 0;
-            while(j > 0)
+            while(end > 0)
             {
-                sum += m_elements[j];
-                j -= (j & (j*-1));
+                sum += m_elements[end];
+                end -= (end & (end*-1));
             }
-            i--;
-            while(i > 0)
+            start--;
+            while(start > 0)
             {
-                sum -= m_elements[i];
-                i -= (i & (i*-1));
+                sum -= m_elements[start];
+                start -= (start & (start*-1));
             }
             return sum;
         }
 
-        // bt : bit array
-        // n : size of bit array
-        // i is the index to be updated
-        // diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
-        void bit_up(int i, int diff)
+        void addOne(int pos)
         {
             const int n = m_numElements;
-            i++;
-            while(i<=n)
+            pos++; // Make 1-relative.
+            while(pos <= n)
             {
-                m_elements[i] += diff;
-                i += (i & (i*-1));
+                m_elements[pos]++;
+                pos += (pos & (pos * -1));
             }
         }
 
@@ -125,45 +121,9 @@ class SegmentTree
         vector<int> m_elements;
 };
 
-// bt : bit array
-// i and j are starting and ending index INCLUSIVE
-int bit_q(int* bt, int i, int j)
-{
-    i++;
-    j++;
-    auto sum = 0;
-    while(j > 0)
-    {
-        sum += bt[j];
-        j -= (j & (j*-1));
-    }
-    i--;
-    while(i > 0)
-    {
-        sum -= bt[i];
-        i -= (i & (i*-1));
-    }
-    return sum;
-}
-
-// bt : bit array
-// n : size of bit array
-// i is the index to be updated
-// diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
-void bit_up(int* bt, int n, int i, int diff)
-{
-    i++;
-    while(i<=n)
-    {
-        bt[i] += diff;
-        i += (i & (i*-1));
-    }
-}
-
 vector<int> queryResults;
 int originalTreeGrundyNumber;
 
-//vector<int> numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 SegmentTree numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
 
 int modPosOrNeg(int x, int modulus)
@@ -189,16 +149,13 @@ void answerQueries(Node* node)
             const auto end = modPosOrNeg(-heightChange - 1, powerOf2);
             if (begin <= end)
             {
-                //destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end);
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_q(begin, end);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(begin, end);
             }
             else
             {
                 // Range is split in two.
-                //destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1);
-                //destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end);
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_q(begin, powerOf2 - 1);
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_q(0, end);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(begin, powerOf2 - 1);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(0, end);
             }
         } 
     };
@@ -214,8 +171,7 @@ void answerQueries(Node* node)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto heightModuloPowerOf2 = node->originalHeight % powerOf2;
-            //bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, 1);
-            numNodesWithHeightModuloPowerOf2[binaryDigitNum].bit_up(heightModuloPowerOf2, 1);
+            numNodesWithHeightModuloPowerOf2[binaryDigitNum].addOne(heightModuloPowerOf2);
         }
     }
     // Recurse.
@@ -251,7 +207,6 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
 {
     for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
-        //numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
     auto rootNode = &(nodes.front());
