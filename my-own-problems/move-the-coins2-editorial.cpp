@@ -63,7 +63,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 
 int findGrundyNumbersForNodes(Node* node)
 {
-    int grundyNumber = 0;
+    auto grundyNumber = 0;
     if (node->hasCoin)
         grundyNumber ^= node->originalHeight;
 
@@ -79,20 +79,20 @@ int findGrundyNumbersForNodes(Node* node)
 
 // bt : bit array
 // i and j are starting and ending index INCLUSIVE
-int bit_q(int * bt,int i,int j)
+int bit_q(int* bt, int i, int j)
 {
     i++;
     j++;
-    int sum=0;
-    while(j>0)
+    auto sum = 0;
+    while(j > 0)
     {
-        sum+=bt[j];
+        sum += bt[j];
         j -= (j & (j*-1));
     }
     i--;
-    while(i>0)
+    while(i > 0)
     {
-        sum-=bt[i];
+        sum -= bt[i];
         i -= (i & (i*-1));
     }
     return sum;
@@ -102,7 +102,7 @@ int bit_q(int * bt,int i,int j)
 // n : size of bit array
 // i is the index to be updated
 // diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
-void bit_up(int * bt,int n,int i,int diff)
+void bit_up(int* bt, int n, int i, int diff)
 {
     i++;
     while(i<=n)
@@ -132,18 +132,19 @@ void answerQueries(Node* node)
 {
     auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
     {
-        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
-            const int powerOf2 = (1 << (binaryDigitNum + 1));
-            const int oneThreshold = (1 << (binaryDigitNum));
-            const int begin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
-            const int end = modPosOrNeg(-heightChange - 1, powerOf2);
+            const auto powerOf2 = (1 << (binaryDigitNum + 1));
+            const auto oneThreshold = (1 << (binaryDigitNum));
+            const auto begin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
+            const auto end = modPosOrNeg(-heightChange - 1, powerOf2);
             if (begin <= end)
             {
                 destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end);
             }
             else
             {
+                // Range is split in two.
                 destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1);
                 destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end);
             }
@@ -159,8 +160,8 @@ void answerQueries(Node* node)
     {
         if (node->hasCoin)
         {
-            const int powerOf2 = (1 << (binaryDigitNum + 1));
-            const int heightModuloPowerOf2 = node->originalHeight % powerOf2;
+            const auto powerOf2 = (1 << (binaryDigitNum + 1));
+            const auto heightModuloPowerOf2 = node->originalHeight % powerOf2;
             bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, 1);
         }
     }
@@ -173,11 +174,11 @@ void answerQueries(Node* node)
     // to work out relocatedSubtreeGrundyNumber for each query.
     for (auto& queryForNode : node->queriesForNode)
     {
-        const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
+        const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
 
         int descendantCoinsThatMakeDigitOne[log2MaxN + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOne);
-        int relocatedSubtreeGrundyNumber = 0;
+        auto relocatedSubtreeGrundyNumber = 0;
         for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
             descendantCoinsThatMakeDigitOne[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOne[binaryDigitNum];
@@ -185,7 +186,7 @@ void answerQueries(Node* node)
             relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (descendantCoinsThatMakeDigitOne[binaryDigitNum] % 2);
         }
 
-        const int grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
+        const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
         assert(queryForNode.originalQueryIndex >= 0);
 
         queryResults[queryForNode.originalQueryIndex] = grundyNumberAfterRelocatingNode;
@@ -195,14 +196,14 @@ void answerQueries(Node* node)
 
 vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& queries)
 {
-    for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
     }
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
     // Re-order queries so that all queries that move a given node are accessible from that node.
-    for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
+    for (auto queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
         const auto query = queries[queryIndex];
         query.nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, query.newParent->originalHeight - query.nodeToMove->parent->originalHeight});
@@ -221,13 +222,13 @@ int main(int argc, char** argv)
     cin >> numNodes;
 
     vector<Node> nodes(numNodes);
-    for (int i = 0; i < numNodes; i++)
+    for (auto i = 0; i < numNodes; i++)
     {
         int numCoins;
         cin >> numCoins;
         nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins.
     }
-    for (int i = 0; i < numNodes - 1; i++)
+    for (auto i = 0; i < numNodes - 1; i++)
     {
         int a, b;
         cin >> a >> b;
@@ -243,7 +244,7 @@ int main(int argc, char** argv)
 
     vector<Query> queries(numQueries);
 
-    for (int i = 0; i < numQueries; i++)
+    for (auto i = 0; i < numQueries; i++)
     {
         int u, v;
         cin >> u >> v;
