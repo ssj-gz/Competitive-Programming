@@ -359,7 +359,7 @@ void solve(Node* node)
         if (newGrundyNumber == 0)
         {
             numZeroGrundys++;
-            cout << "numZeroGrundys: " << numZeroGrundys << " node original height: " << nodeToMove->height << " node new height: " << newParent->height << endl;
+            //cout << "numZeroGrundys: " << numZeroGrundys << " node original height: " << nodeToMove->height << " node new height: " << newParent->height << endl;
         }
         //cout << " relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << endl;
         //cout << " relocatedSubtreeGrundyNumber: " << blee << endl;
@@ -414,7 +414,7 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     }
 #endif
     queryResults.resize(queries.size());
-    cout << "Calling solve" << endl;
+    //cout << "Calling solve" << endl;
     solve(rootNode);
 #ifdef VERIFY_SUBSTEPS
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
@@ -683,7 +683,7 @@ int main(int argc, char** argv)
     int numQueries;
     cin >> numQueries;
 
-    cout << "numQueries: " << numQueries << endl;
+    //cout << "numQueries: " << numQueries << endl;
 
     vector<Query> queries(numQueries);
 
@@ -705,7 +705,7 @@ int main(int argc, char** argv)
         largestHeight = max(largestHeight, node.height);
 
     log2LargestHeight = log2(largestHeight) + 1;
-    cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
+    //cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
 
 #ifdef FIND_ZERO_GRUNDYS
     originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
