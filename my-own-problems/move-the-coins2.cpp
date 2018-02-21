@@ -2,7 +2,7 @@
 #define VERIFY_SEGMENT_TREE
 #define VERIFY_SUBSTEPS
 #define FIND_ZERO_GRUNDYS
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef BRUTE_FORCE
@@ -239,42 +239,44 @@ void buildHeightHistogram(Node* node, vector<int>& numWithHeight)
     }
 }
 
+auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
+{
+    for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
+    {
+        const int powerOf2 = (1 << (binaryDigitNum + 1));
+        const int oneThreshold = (1 << (binaryDigitNum));
+        const int begin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
+        const int end = modPosOrNeg(-heightChange - 1, powerOf2);
+        if (begin <= end)
+        {
+            destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end);
+        }
+        else
+        {
+            destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1);
+            destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end);
+        }
+#ifdef VERIFY_SUBSTEPS
+#if 0
+        {
+            int verify = 0;
+            for (int height = 0; height < numNodesWithHeight.size(); height++)
+            {
+                if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
+                {
+                    verify += numNodesWithHeight[height];
+                }
+            }
+            assert(destination[binaryDigitNum] == verify);
+        }
+#endif
+#endif
+    } 
+};
 
 void solve(Node* node)
 {
     static int numZeroGrundys = 0;
-    auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
-    {
-        for (int binaryDigitNum = 0; binaryDigitNum <= log2LargestHeight; binaryDigitNum++)
-        {
-            const int powerOf2 = (1 << (binaryDigitNum + 1));
-            const int oneThreshold = (1 << (binaryDigitNum));
-            const int begin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
-            const int end = modPosOrNeg(-heightChange - 1, powerOf2);
-            if (begin <= end)
-            {
-                destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, end);
-            }
-            else
-            {
-                destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), begin, powerOf2 - 1);
-                destination[binaryDigitNum] += bit_q(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), 0, end);
-            }
-#ifdef VERIFY_SUBSTEPS
-            {
-                int verify = 0;
-                for (int height = 0; height < numNodesWithHeight.size(); height++)
-                {
-                    if (((height + heightChange) & (1 << binaryDigitNum)) != 0)
-                    {
-                        verify += numNodesWithHeight[height];
-                    }
-                }
-                assert(destination[binaryDigitNum] == verify);
-            }
-#endif
-        } 
-    };
     for (auto& reorderedQuery : node->queriesForNode)
     {
         auto nodeToMove = reorderedQuery.originalQuery.nodeToMove;
@@ -446,7 +448,7 @@ int main(int argc, char** argv)
 
         int numNodes = rand() % maxNumNodes + 1;
         int numQueries = rand() % maxNumQueries + 1;
-        
+
         cerr << "numNodes: " << numNodes << " numQueries: " << numQueries << endl;
 
         int numMetaAttempts = 0;
@@ -729,12 +731,25 @@ int main(int argc, char** argv)
             if ((numWithHeight[height] % 2) == 1)
                 descendentHeights.push_back(height);
         }
+        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        {
+            const int powerOf2 = (1 << (binaryDigitNum + 1));
+            numNodesWithHeightModuloPowerOf2[binaryDigitNum].clear();
+            numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize(powerOf2 + 1);
+            for (int height = 0; height < numWithHeight.size(); height++)
+            {
+                const int heightModuloPowerOf2 = height % powerOf2;
+                //cout << "About to applyOperatorToAllInRange - binaryDigitNum: " << binaryDigitNum << " heightModuloPowerOf2: " << heightModuloPowerOf2 << endl;
+                bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, numWithHeight[height]);
+            }
+        }
         cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " << (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height) << endl;
         for (int heightChange = -node->height; node->height + heightChange <= largestHeight; heightChange++)
         {
             //cout << "heightChange: " << heightChange << endl;
             const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
             //const int newGrundyNumber = grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange);
+#if 0
             int adjustedXor = 0;
             for (const auto height : descendentHeights)
             {
@@ -742,8 +757,21 @@ int main(int argc, char** argv)
                 assert(adjustedHeight >= 0);
                 adjustedXor ^= adjustedHeight;
             }
+#endif
+            int relocatedSubtreeGrundyDigits[log2MaxN + 1] = {};
+            countCoinsThatMakeDigitOneAfterHeightChange(heightChange, relocatedSubtreeGrundyDigits);
+            int relocatedSubtreeGrundyNumber = 0;
+            for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+            {
+                //relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
+                assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
+                relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (relocatedSubtreeGrundyDigits[binaryDigitNum] % 2);
+            }
+            //cout << "relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << " adjustedXor: " << adjustedXor << endl;
+            //assert(relocatedSubtreeGrundyNumber == adjustedXor);
             //const int newGrundyNumber = grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange);
-            const int newGrundyNumber = grundyNumberMinusSubtree ^ adjustedXor;
+            //const int newGrundyNumber = grundyNumberMinusSubtree ^ adjustedXor;
+            const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
             if (newGrundyNumber == 0)
             {
                 numZeroGrundies++;
