@@ -149,10 +149,12 @@ void answerQueries(Node* node)
             }
         } 
     };
+    // Store the originalNodesThatMakeDigitOne for each query, before exploring any further.
     for (auto& queryForNode : node->queriesForNode)
     {
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalNodesThatMakeDigitOne);
     }
+    // Update numNodesWithHeightModuloPowerOf2 with information fron this node.
     for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
     {
         if (node->hasCoin)
@@ -162,10 +164,13 @@ void answerQueries(Node* node)
             bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, 1);
         }
     }
+    // Recurse.
     for (auto child : node->children)
     {
         answerQueries(child);
     }
+    // Now we've explored all descendants, use the stored originalNodesThatMakeDigitOne and the newly-updated numNodesWithHeightModuloPowerOf2
+    // to work out relocatedSubtreeGrundyNumber for each query.
     for (auto& queryForNode : node->queriesForNode)
     {
         const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
@@ -180,9 +185,10 @@ void answerQueries(Node* node)
             relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (relocatedSubtreeGrundyDigits[binaryDigitNum] % 2);
         }
 
-        const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
+        const int grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
         assert(queryForNode.originalQueryIndex >= 0);
-        queryResults[queryForNode.originalQueryIndex] = newGrundyNumber;
+
+        queryResults[queryForNode.originalQueryIndex] = grundyNumberAfterRelocatingNode;
     }
 
 }
