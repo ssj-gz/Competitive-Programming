@@ -56,7 +56,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
-int findGrundyNumberForNodes(Node* node, const int depth)
+int findGrundyNumbersForNodes(Node* node, const int depth)
 {
     int grundyNumber = 0;
     if ((node->numCoins % 2) == 1)
@@ -64,17 +64,16 @@ int findGrundyNumberForNodes(Node* node, const int depth)
 
     for (auto child : node->children)
     {
-        grundyNumber ^= findGrundyNumberForNodes(child, depth + 1);
+        grundyNumber ^= findGrundyNumbersForNodes(child, depth + 1);
     }
 
     node->grundyNumber = grundyNumber;
 
-
     return grundyNumber;
 }
-int findGrundyNumberForNodes(Node* node)
+int findGrundyNumbersForNodes(Node* node)
 {
-    return findGrundyNumberForNodes(node, 0);
+    return findGrundyNumbersForNodes(node, 0);
 }
 
 //bt : bit array
@@ -192,7 +191,7 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize((1 << (binaryDigitNum + 1)) + 1);
     }
     auto rootNode = &(nodes.front());
-    originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
+    originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
         const auto query = queries[queryIndex];
