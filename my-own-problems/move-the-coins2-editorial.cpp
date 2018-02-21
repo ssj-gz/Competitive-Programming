@@ -2,11 +2,12 @@
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
-
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cassert>
+
+using namespace std;
 
 constexpr auto maxN = 100'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
@@ -14,8 +15,6 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
     return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
 constexpr int log2MaxN = log2(maxN);
-
-using namespace std;
 
 struct Node;
 struct Query
@@ -76,8 +75,8 @@ int findGrundyNumbersForNodes(Node* node)
     return findGrundyNumbersForNodes(node, 0);
 }
 
-//bt : bit array
-//i and j are starting and ending index INCLUSIVE
+// bt : bit array
+// i and j are starting and ending index INCLUSIVE
 long long bit_q(long long * bt,int i,int j)
 {
     i++;
@@ -96,10 +95,11 @@ long long bit_q(long long * bt,int i,int j)
     }
     return sum;
 }
-//bt : bit array
-//n : size of bit array
-//i is the index to be updated
-//diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
+
+// bt : bit array
+// n : size of bit array
+// i is the index to be updated
+// diff is (new_val - old_val) i.e. if want to increase diff is +ive and if want to decrease -ive
 void bit_up(long long * bt,int n,int i,long long diff)
 {
     i++;
