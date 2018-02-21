@@ -88,15 +88,16 @@ class SegmentTree
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
             auto sum = 0;
+            auto elements = m_elements.data();
             while(end > 0)
             {
-                sum += m_elements[end];
+                sum += elements[end];
                 end -= (end & (end*-1));
             }
             start--;
             while(start > 0)
             {
-                sum -= m_elements[start];
+                sum -= elements[start];
                 start -= (start & (start*-1));
             }
             return sum;
@@ -105,10 +106,11 @@ class SegmentTree
         void addOne(int pos)
         {
             const int n = m_numElements;
+            auto elements = m_elements.data();
             pos++; // Make 1-relative.
             while(pos <= n)
             {
-                m_elements[pos]++;
+                elements[pos]++;
                 pos += (pos & (pos * -1));
             }
 
