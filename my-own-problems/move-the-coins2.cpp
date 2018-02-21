@@ -352,7 +352,7 @@ void solve(Node* node)
                 //cout << " relocatedSubtreeGrundyDigits[" << binaryDigitNum << "] = " << relocatedSubtreeGrundyDigits[binaryDigitNum] << endl;
             } 
 
-            assert(verifyRelocatedSubtreeGrundyNumber == grundyNumberWithHeightChange(nodeToMove, heightChange));
+            //assert(verifyRelocatedSubtreeGrundyNumber == grundyNumberWithHeightChange(nodeToMove, heightChange));
         }
 #endif
         int newGrundyNumber = grundyNumberMinusSubtree;
@@ -743,7 +743,8 @@ int main(int argc, char** argv)
                 bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, numWithHeight[height]);
             }
         }
-        cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " << (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height) << endl;
+        //cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " <<  << endl;
+        const int depthUnderneath = (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height);
         for (int heightChange = -node->height; node->height + heightChange <= largestHeight; heightChange++)
         {
             //cout << "heightChange: " << heightChange << endl;
@@ -775,12 +776,14 @@ int main(int argc, char** argv)
             if (newGrundyNumber == 0)
             {
                 numZeroGrundies++;
-                cout << "Forced a grundy number: nodeId: " << nodeId << " node height: " << node->height << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
-                assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
+                cout << "Forced a grundy number: nodeId: " << nodeId << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
+                //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
             }
         }
         numNodesProcessed++;
-        cout << "Processed " << numNodesProcessed << " out of " << numNodes << endl;
+        //cout << "Processed " << numNodesProcessed << " out of " << numNodes << endl;
+        //if (numNodesProcessed == 100)
+            //return 0;
     }
 #endif
 
