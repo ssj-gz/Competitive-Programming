@@ -1,4 +1,4 @@
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-constexpr auto maxN = 100'000;
+constexpr auto maxN = 100000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
     return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
@@ -25,9 +25,13 @@ struct Query
 
 struct QueryForNode
 {
+    QueryForNode(int originalQueryIndex, int heightChange)
+        : originalQueryIndex{originalQueryIndex}, heightChange{heightChange}
+    {
+    }
     int originalQueryIndex = -1;
     int heightChange;
-    int originalNodesThatMakeDigitOne[log2MaxN + 1];
+    int originalNodesThatMakeDigitOne[log2MaxN + 1] = {};
 };
 
 struct Node
@@ -179,6 +183,7 @@ void solve(Node* node)
         }
 
         const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
+        assert(queryForNode.originalQueryIndex >= 0);
         queryResults[queryForNode.originalQueryIndex] = newGrundyNumber;
     }
 
@@ -195,7 +200,7 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
         const auto query = queries[queryIndex];
-        query.nodeToMove->queriesForNode.push_back({queryIndex, query.newParent->originalHeight - query.nodeToMove->parent->originalHeight});
+        query.nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, query.newParent->originalHeight - query.nodeToMove->parent->originalHeight});
     }
     queryResults.resize(queries.size());
     solve(rootNode);
