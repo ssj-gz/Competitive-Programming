@@ -188,7 +188,7 @@ void answerQueries(Node* node)
         int descendantCoinsThatMakeDigitOne[log2MaxN + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOne);
         auto relocatedSubtreeGrundyNumber = 0;
-        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
             descendantCoinsThatMakeDigitOne[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOne[binaryDigitNum];
             assert(descendantCoinsThatMakeDigitOne[binaryDigitNum] >= 0);
