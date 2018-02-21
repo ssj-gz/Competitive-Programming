@@ -231,7 +231,7 @@ int main(int argc, char** argv)
     {
         int numCoins;
         cin >> numCoins;
-        nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins.
+        nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins at each height.
     }
     for (auto i = 0; i < numNodes - 1; i++)
     {
