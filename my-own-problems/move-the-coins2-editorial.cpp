@@ -194,7 +194,9 @@ void answerQueries(Node* node)
         {
             descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum];
             assert(descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] >= 0);
-            relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] % 2);
+            const auto isRelocatedSubtreeGrundyDigitOne = (descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] % 2);
+            if (isRelocatedSubtreeGrundyDigitOne)
+                relocatedSubtreeGrundyNumber += (1 << binaryDigitNum);
         }
 
         const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
