@@ -36,7 +36,7 @@ struct Node
     Node* parent = nullptr;
     int originalHeight = -1;
 
-    int grundyNumber = -1;
+    int grundyContribForSubtree = -1;
     vector<QueryForNode> queriesForNode;
 };
 
@@ -56,18 +56,18 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 
 int findGrundyNumbersForNodes(Node* node)
 {
-    auto grundyNumber = 0;
+    auto grundyContribForSubtree = 0;
     if (node->hasCoin)
-        grundyNumber ^= node->originalHeight;
+        grundyContribForSubtree ^= node->originalHeight;
 
     for (auto child : node->children)
     {
-        grundyNumber ^= findGrundyNumbersForNodes(child);
+        grundyContribForSubtree ^= findGrundyNumbersForNodes(child);
     }
 
-    node->grundyNumber = grundyNumber;
+    node->grundyContribForSubtree = grundyContribForSubtree;
 
-    return grundyNumber;
+    return grundyContribForSubtree;
 }
 
 class SegmentTree
@@ -185,7 +185,7 @@ void answerQueries(Node* node)
     // to work out relocatedSubtreeGrundyNumber for each query.
     for (const auto& queryForNode : node->queriesForNode)
     {
-        const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
+        const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyContribForSubtree;
 
         int descendantCoinsThatMakeDigitOneAfterHeightChange[log2MaxN + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOneAfterHeightChange);
