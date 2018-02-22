@@ -26,7 +26,7 @@ struct QueryForNode
     }
     int originalQueryIndex = -1;
     int heightChange;
-    int originalCoinsThatMakeDigitOne[log2MaxN + 1] = {};
+    int originalCoinsThatMakeDigitOneAfterHeightChange[log2MaxN + 1] = {};
 };
 
 struct Node
@@ -161,10 +161,10 @@ void answerQueries(Node* node)
             }
         } 
     };
-    // Store the originalCoinsThatMakeDigitOne for each query, before exploring any further.
+    // Store the originalCoinsThatMakeDigitOneAfterHeightChange for each query, before exploring any further.
     for (auto& queryForNode : node->queriesForNode)
     {
-        countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOne);
+        countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange);
     }
     // Update numNodesWithHeightModuloPowerOf2 with information from this node.
     for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
@@ -181,20 +181,20 @@ void answerQueries(Node* node)
     {
         answerQueries(child);
     }
-    // Now we've explored all descendants, use the stored originalCoinsThatMakeDigitOne and the newly-updated numNodesWithHeightModuloPowerOf2
+    // Now we've explored all descendants, use the stored originalCoinsThatMakeDigitOneAfterHeightChange and the newly-updated numNodesWithHeightModuloPowerOf2
     // to work out relocatedSubtreeGrundyNumber for each query.
     for (const auto& queryForNode : node->queriesForNode)
     {
         const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
 
-        int descendantCoinsThatMakeDigitOne[log2MaxN + 1] = {};
-        countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOne);
+        int descendantCoinsThatMakeDigitOneAfterHeightChange[log2MaxN + 1] = {};
+        countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOneAfterHeightChange);
         auto relocatedSubtreeGrundyNumber = 0;
         for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
         {
-            descendantCoinsThatMakeDigitOne[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOne[binaryDigitNum];
-            assert(descendantCoinsThatMakeDigitOne[binaryDigitNum] >= 0);
-            relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (descendantCoinsThatMakeDigitOne[binaryDigitNum] % 2);
+            descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum];
+            assert(descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] >= 0);
+            relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] % 2);
         }
 
         const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
