@@ -183,7 +183,7 @@ void answerQueries(Node* node)
     }
     // Now we've explored all descendants, use the stored originalCoinsThatMakeDigitOne and the newly-updated numNodesWithHeightModuloPowerOf2
     // to work out relocatedSubtreeGrundyNumber for each query.
-    for (auto& queryForNode : node->queriesForNode)
+    for (const auto& queryForNode : node->queriesForNode)
     {
         const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
 
