@@ -1,7 +1,7 @@
 #define BRUTE_FORCE
 #define VERIFY_SEGMENT_TREE
-#define VERIFY_SUBSTEPS
-#define FIND_ZERO_GRUNDYS
+//#define VERIFY_SUBSTEPS
+//#define FIND_ZERO_GRUNDYS
 //#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -139,7 +139,7 @@ int findGrundyNumberForNodes(Node* node)
 
 vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<Query>& queries)
 {
-    cout << "grundyNumbersForQueriesBruteForce" << endl;
+    //cout << "grundyNumbersForQueriesBruteForce" << endl;
     auto rootNode = &(nodes.front());
     vector<int> grundyNumbersForQueries;
     int queryNum = 0;
@@ -310,6 +310,7 @@ void solve(Node* node)
         numDescendendantNodesWithHeight[height] = numNodesWithHeight[height] - originalNumNodesWithHeight[height];
     }
 #endif
+    int queryNum = 0;
     for (auto& reorderedQuery : node->queriesForNode)
     {
         //cout << "reorderedQuery" << endl;
@@ -379,6 +380,9 @@ void solve(Node* node)
             assert(relocatedSubtreeGrundyNumber == verifyRelocatedSubtreeGrundyNumber);
         }
 #endif
+        queryNum++;
+        if (queryNum % 100 == 0)
+            cerr << "queryNum: " << queryNum << " out of " << queryResults.size() << endl;
     }
 
 }
