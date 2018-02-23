@@ -46,6 +46,8 @@ int main()
             }
         }
     }
+    // Pairs of tickets that each have full digit digests.
+    numWinningPairs += numTicketsWithDigitDigest[fullDigitsDigest] * (numTicketsWithDigitDigest[fullDigitsDigest] - 1) / 2;
 
     cout << numWinningPairs << endl; 
 }
