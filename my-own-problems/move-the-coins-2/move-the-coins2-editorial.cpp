@@ -16,7 +16,7 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
     return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
-constexpr int log2MaxN = log2(maxN);
+constexpr int maxBinaryDigits = log2(maxN);
 
 struct QueryForNode
 {
@@ -26,7 +26,7 @@ struct QueryForNode
     }
     int originalQueryIndex = -1;
     int heightChange;
-    int originalCoinsThatMakeDigitOneAfterHeightChange[log2MaxN + 1] = {};
+    int originalCoinsThatMakeDigitOneAfterHeightChange[maxBinaryDigits + 1] = {};
 };
 
 struct Node
@@ -126,7 +126,7 @@ class SegmentTree
 vector<int> queryResults;
 int originalTreeGrundyNumber;
 
-SegmentTree numNodesWithHeightModuloPowerOf2[log2MaxN + 1];
+SegmentTree numNodesWithHeightModuloPowerOf2[maxBinaryDigits + 1];
 
 int modPosOrNeg(int x, int modulus)
 {
@@ -143,7 +143,7 @@ void answerQueries(Node* node)
 {
     auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
     {
-        for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto oneThreshold = (1 << (binaryDigitNum));
@@ -167,7 +167,7 @@ void answerQueries(Node* node)
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange);
     }
     // Update numNodesWithHeightModuloPowerOf2 with information from this node.
-    for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
     {
         if (node->hasCoin)
         {
@@ -187,10 +187,10 @@ void answerQueries(Node* node)
     {
         const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyContribForSubtree;
 
-        int descendantCoinsThatMakeDigitOneAfterHeightChange[log2MaxN + 1] = {};
+        int descendantCoinsThatMakeDigitOneAfterHeightChange[maxBinaryDigits + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOneAfterHeightChange);
         auto relocatedSubtreeGrundyNumber = 0;
-        for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+        for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
         {
             descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum];
             assert(descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] >= 0);
@@ -210,7 +210,7 @@ void answerQueries(Node* node)
 vector<int> grundyNumbersForQueries(Node* rootNode, const int numQueries)
 {
     // Initialise the SegmentTrees.
-    for (auto binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
+    for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
