@@ -46,7 +46,9 @@ int main()
                     break;
                 }
             }
-            if (firstUncoveredCity < numCities && (nextCityWithTower == -1 || nextCityWithTower - towerRange > firstUncoveredCity))
+            const bool haveUncoveredCityToLeft = (firstUncoveredCity < numCities);
+            const bool nextCityWithTowerCoversAllCitiesToLeft = (nextCityWithTower != -1 && nextCityWithTower - towerRange <= firstUncoveredCity);
+            if (haveUncoveredCityToLeft && !nextCityWithTowerCoversAllCitiesToLeft)
             {
                 // Need a tower here - the next city with a tower (and so, all cities with towers after that one) 
                 // would leave firstUncoveredCity uncovered.
