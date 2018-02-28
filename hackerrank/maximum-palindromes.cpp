@@ -7,7 +7,7 @@ using namespace std;
 
 const int maxN = 100'000;
 
-const int64_t modulus = 1'000'000'009ULL;
+const int64_t modulus = 1'000'000'007ULL;
 
 
 vector<int64_t> factorialLookup;
