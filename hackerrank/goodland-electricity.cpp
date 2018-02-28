@@ -27,14 +27,32 @@ int main()
 
     for (int cityPos = 0; cityPos < numCities; cityPos++)
     {
-        if (firstUncoveredCity < numCities && (cityPos == numCities || (cityPos + 1) - towerRange > firstUncoveredCity))
+        if (cityHasTower[cityPos])
         {
-            // Need a tower here.
-            numTowersSwitchedOn++;
-            firstUncoveredCity = cityPos + towerRange + 1;
-            //cout << "Switched on " << cityPos << " firstUncoveredCity is now: " << firstUncoveredCity << endl;
+            int nextCityWithTower = -1;
+            // Finding the next city with a tower looks O(numCities) (which would make the whole algorithm O(numCities^2)),
+            // but it gets amortised to O(1) when taken over all cityPos that have a tower.
+            for (int i = cityPos + 1; i < numCities; i++)
+            {
+                if (cityHasTower[i])
+                {
+                    nextCityWithTower = i;
+                    break;
+                }
+            }
+            if (firstUncoveredCity < numCities && (nextCityWithTower == -1 || nextCityWithTower - towerRange > firstUncoveredCity))
+            {
+                // Need a tower here.
+                numTowersSwitchedOn++;
+                firstUncoveredCity = cityPos + towerRange + 1;
+                //cout << "Switched on " << cityPos << " firstUncoveredCity is now: " << firstUncoveredCity << endl;
+            }
         }
     }
 
-    cout << numTowersSwitchedOn << endl;
+    const auto coveredAllCities = (firstUncoveredCity >= numCities);
+    if (coveredAllCities)
+        cout << numTowersSwitchedOn << endl;
+    else
+        cout << -1 << endl;
 }
