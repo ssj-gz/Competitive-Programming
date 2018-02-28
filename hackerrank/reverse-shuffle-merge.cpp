@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     // decompose sReversed into two subsequences: one will be A; the other will be some shuffling of A (shuffleA)
     // i.e. we need to decompose sReversed into two subsequences that are anagrams of each other and,
     // over the set of all such decompositions, give the one with the smallest A.  Recall that two
-    // strings are anagrams of each other if they have the same letter histogram.
+    // strings are anagrams of each other if and only if they have the same letter histogram.
     //
     // Now, we want the first letter of A to be as small as possible so, intuitively, if the first letter
     // of sReversed is "big" (e.g. 'z') then we don't want that to be part of the A-subsequence of sReversed,
