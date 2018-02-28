@@ -1,16 +1,12 @@
 // Simon St James (ssjgz) - 2018-02-28
-#define BRUTE_FORCE
 #define SUBMISSION
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cassert>
-#include <sys/time.h>
-
 
 using namespace std;
 
@@ -152,30 +148,33 @@ int main(int argc, char* argv[])
         }
 
         // Find the next best character for A.
-        char bestNextLetterIndex = numLetters;
+        int bestNextLetterIndex = -1;
+        bool haveCandidateBestNextLetter = false;
         for (const auto letter : sReversed)
         {
             const int letterIndex = letter - 'a';
-            if (numOfLetterCanAddToReverseA[letterIndex] > 0 && letterIndex < bestNextLetterIndex)
-            {
-                if (bestNextLetterIndex == numLetters || numOfLetterCanAddToShuffle[bestNextLetterIndex] > 0)
-                {
-                    if (bestNextLetterIndex != numLetters)
-                        numOfLetterCanAddToShuffle[bestNextLetterIndex]--;
+            const bool isBetterCandidate = ((!haveCandidateBestNextLetter || letterIndex < bestNextLetterIndex) && numOfLetterCanAddToReverseA[letterIndex] > 0);
+            const bool canAddPreviousBestToShuffleA = (!haveCandidateBestNextLetter || numOfLetterCanAddToShuffle[bestNextLetterIndex] > 0);
+            if (isBetterCandidate && canAddPreviousBestToShuffleA)
+            {                                          
+                if (haveCandidateBestNextLetter)
+                    numOfLetterCanAddToShuffle[bestNextLetterIndex]--;
 
-                    bestNextLetterIndex = letterIndex;
-                }
-            }
+                bestNextLetterIndex = letterIndex;
+                haveCandidateBestNextLetter = true;
+            }  
             else
-            {
+            {  
+                // Add to shuffleA.
                 numOfLetterCanAddToShuffle[letterIndex]--;
                 const bool hitInvalidState = (numOfLetterCanAddToShuffle[letterIndex] < 0);
-                if (hitInvalidState)
-                    break;
+                if (hitInvalidState)         
+                    break;                   
             }
         }
 
-        assert(bestNextLetterIndex != numLetters);
+        assert(haveCandidateBestNextLetter);
+
         const char bestNextLetter = 'a' + bestNextLetterIndex;
         A.push_back(bestNextLetter);
         // Remove the prefix up to and including the letter we just added (the first occurrence of bestNextLetter).
@@ -186,9 +185,4 @@ int main(int argc, char* argv[])
 
     const auto result = A;
     cout << result << endl;
-#ifdef BRUTE_FORCE
-    const auto resultBruteForce = bruteForce(s);
-    cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl;
-    assert(result == resultBruteForce);
-#endif
 }
