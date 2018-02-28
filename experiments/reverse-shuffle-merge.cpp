@@ -112,7 +112,6 @@ int main(int argc, char* argv[])
     assert(s.size() % 2 == 0);
     const int numLettersInA = s.size() / 2;
 
-    string A;
 
     int numOfLetterCanAddToReverseA[numLetters] = {};
     for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
@@ -124,63 +123,55 @@ int main(int argc, char* argv[])
     string sReversed = reversed(s);
     const string originalSReversed(sReversed);
 
+    string A;
     while (A.size() < numLettersInA)
     {
-        //cout << "iteration " << A.size() << " sReversed: " << sReversed << " A:" << A << endl;
-        const int numLettersRemoved = originalSReversed.size() - sReversed.size();
+        // Update numOfLetterCanAddToShuffle: every letter in the prefix we've removed so far
+        // must be treated as "added to shuffle", *except* for those that have been added to A.
         int numOfLetterCanAddToShuffle[numLetters] = {};
+        const int sizeOfRemovedPrefix = originalSReversed.size() - sReversed.size();
         for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
         {
-            numOfLetterCanAddToShuffle[letterIndex] = (letterHistogram[letterIndex] - numOfLetterCanAddToReverseA[letterIndex]);
+            const int numOfLetterInPrefixNotAddedToShuffle = (letterHistogram[letterIndex] - numOfLetterCanAddToReverseA[letterIndex]);
+            numOfLetterCanAddToShuffle[letterIndex] = numOfLetterInPrefixNotAddedToShuffle;
         }
-        for (int i = 0; i < numLettersRemoved; i++)
+        for (int i = 0; i < sizeOfRemovedPrefix; i++)
         {
             const int letterIndex = originalSReversed[i] - 'a';
             numOfLetterCanAddToShuffle[letterIndex]--;
         }
-        for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
-        {
-            //cout << " letter: " << static_cast<char>('a' + letterIndex) << " numOfLetterCanAddToShuffle: " << numOfLetterCanAddToShuffle[letterIndex] << " numOfLetterCanAddToReverseA: " << numOfLetterCanAddToReverseA[letterIndex] << endl;
-        }
 
-
-        char bestNextChar = 'z' + 1;
+        // Find the next best character for A.
+        char bestNextLetterIndex = numLetters;
         for (const auto letter : sReversed)
         {
             const int letterIndex = letter - 'a';
-            //cout << " letter: " << letter << " bestNextChar: " << bestNextChar << endl;
-            if (numOfLetterCanAddToReverseA[letterIndex] > 0 && letter < bestNextChar)
+            if (numOfLetterCanAddToReverseA[letterIndex] > 0 && letterIndex < bestNextLetterIndex)
             {
-                //cout << " letter " << letter << " is a possible candidate" << endl;
-                if (bestNextChar == 'z' + 1 || numOfLetterCanAddToShuffle[bestNextChar - 'a'] > 0)
+                if (bestNextLetterIndex == numLetters || numOfLetterCanAddToShuffle[bestNextLetterIndex] > 0)
                 {
-                    if (bestNextChar != 'z' + 1)
-                        numOfLetterCanAddToShuffle[bestNextChar - 'a']--;
+                    if (bestNextLetterIndex != numLetters)
+                        numOfLetterCanAddToShuffle[bestNextLetterIndex]--;
 
-                    bestNextChar = letter;
-                    //cout << "  bestNextChar: " << bestNextChar << endl;
+                    bestNextLetterIndex = letterIndex;
                 }
             }
             else
             {
                 numOfLetterCanAddToShuffle[letterIndex]--;
-                if (numOfLetterCanAddToShuffle[letterIndex] < 0)
+                const bool hitInvalidState = (numOfLetterCanAddToShuffle[letterIndex] < 0);
+                if (hitInvalidState)
                     break;
             }
         }
 
-        assert(bestNextChar != 'z' + 1);
-        //cout << " added " << bestNextChar << endl;
-        A.push_back(bestNextChar);
-        sReversed.erase(sReversed.begin(),  sReversed.begin() + sReversed.find(bestNextChar) + 1);
-        numOfLetterCanAddToReverseA[bestNextChar - 'a']--;
-#if 0
-        for (const auto letter : sReversed)
-        {
-            const int letterIndex = letter - 'a';
-            numOfLetterCanAddToShuffle[letterIndex]++;
-        }
-#endif
+        assert(bestNextLetterIndex != numLetters);
+        const char bestNextLetter = 'a' + bestNextLetterIndex;
+        A.push_back(bestNextLetter);
+        // Remove the prefix up to and including the letter we just added (the first occurrence of bestNextLetter).
+        sReversed.erase(sReversed.begin(),  sReversed.begin() + sReversed.find(bestNextLetter) + 1);
+
+        numOfLetterCanAddToReverseA[bestNextLetterIndex]--;
     }
 
     const auto result = A;
