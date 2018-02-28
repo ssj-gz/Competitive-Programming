@@ -175,7 +175,7 @@ int main()
                 const int numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
                 if ((numOccurencesOfLetterInRange % 2) == 1)
                 {
-                    const int numInHalfPalindrome = numLettersInRange / 2 - numLettersWithOddOccurrencesInRange + 1;
+                    const int numInHalfPalindrome = (numLettersInRange - numLettersWithOddOccurrencesInRange) / 2;
                     ModNum palindromeContribToNumerator = ModNum(factorialLookup[numInHalfPalindrome]) * factorialInverseLookup[numOccurencesOfLetterInRange / 2];
 
                     numerator += palindromeContribToNumerator;
