@@ -9,6 +9,50 @@ const int maxN = 100'000;
 
 const int64_t modulus = 1'000'000'007ULL;
 
+class ModNum
+{
+    public:
+        ModNum(int64_t n)
+            : m_n{n}
+        {
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % ::modulus;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % ::modulus;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
+
+
 
 vector<int64_t> factorialLookup;
 vector<int64_t> factorialInverseLookup;
@@ -107,47 +151,41 @@ int main()
 
         LetterHistogram letterHistogramForRange = letterHistogramForPrefixSize[r + 1] - letterHistogramForPrefixSize[l];
         int numLettersWithOddOccurrencesInRange = 0;
-        int64_t denominator = 1;
+        ModNum denominator = 1;
         for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
         {
             const int numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
             if ((numOccurencesOfLetterInRange % 2) == 1)
                 numLettersWithOddOccurrencesInRange++;
 
-            denominator = (denominator * factorialInverseLookup[numOccurencesOfLetterInRange / 2]) % ::modulus;
+            denominator *= factorialInverseLookup[numOccurencesOfLetterInRange / 2];
         }
-        int64_t numWithMaxPalindrome = 0;
+        ModNum numWithMaxPalindrome = 0;
         const int numLettersInRange = r - l + 1;
         if (numLettersWithOddOccurrencesInRange == 0)
         {
             assert((numLettersInRange % 2) == 0);
-            numWithMaxPalindrome = factorialLookup[numLettersInRange / 2];
-            numWithMaxPalindrome = (numWithMaxPalindrome * denominator) % ::modulus;
+            numWithMaxPalindrome = factorialLookup[numLettersInRange / 2] * denominator;
         }
         else
         {
-            int64_t numerator = 0;
+            ModNum numerator = 0;
             for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
             {
                 const int numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
                 if ((numOccurencesOfLetterInRange % 2) == 1)
                 {
                     const int numInHalfPalindrome = numLettersInRange / 2 - numLettersWithOddOccurrencesInRange + 1;
-                    //cout << "numInHalfPalindrome: " << numInHalfPalindrome << endl;
-                    int64_t palindromeContribToNumerator = factorialLookup[numInHalfPalindrome];
-                    palindromeContribToNumerator = (palindromeContribToNumerator * factorialInverseLookup[numOccurencesOfLetterInRange / 2]) % ::modulus;
+                    ModNum palindromeContribToNumerator = ModNum(factorialLookup[numInHalfPalindrome]) * factorialInverseLookup[numOccurencesOfLetterInRange / 2];
 
-                    numerator = (numerator + palindromeContribToNumerator) % ::modulus;
+                    numerator += palindromeContribToNumerator;
                 }
             }
-            numWithMaxPalindrome = (numerator * denominator) % ::modulus;
+            numWithMaxPalindrome = numerator * denominator;
 
         }
 
-        cout << numWithMaxPalindrome << endl;
-
-
-
+        cout << numWithMaxPalindrome.value() << endl;
     }
 
 
