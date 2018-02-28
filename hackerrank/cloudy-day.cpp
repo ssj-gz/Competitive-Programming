@@ -61,7 +61,10 @@ int main()
     vector<Cloud> cloudsByStartPoint(clouds);
     sort(cloudsByStartPoint.begin(), cloudsByStartPoint.end(), [](const Cloud& lhs, const Cloud& rhs)
             {
-                return lhs.startPoint < rhs.startPoint;
+                if (lhs.startPoint != rhs.startPoint)
+                    return lhs.startPoint < rhs.startPoint;
+                // Allow multiple clouds with the same startpoint!
+                return lhs.cloudIndex < rhs.cloudIndex;
             });
 
     auto compareEndpoints = [](const Cloud& lhs, const Cloud& rhs)
@@ -85,8 +88,8 @@ int main()
                 return lhs.townIndex < rhs.townIndex;
             });
 
-    int populationOriginallySunny = 0;
-    vector<int> populationCoveredJustByThisCloud(numClouds, 0);
+    int64_t populationOriginallySunny = 0;
+    vector<int64_t> populationCoveredJustByThisCloud(numClouds, 0);
     for (const auto& town : townsByLocation)
     {
         while (nextCloudIter != cloudsByStartPoint.end() && nextCloudIter->startPoint <= town.location)
@@ -109,8 +112,8 @@ int main()
             populationOriginallySunny += town.population;
         }
     }
-    const int maxNewSunnyByRemovingCloud = *max_element(populationCoveredJustByThisCloud.begin(), populationCoveredJustByThisCloud.end());
-    const int maxSunnyAfterRemovingOneCloud = populationOriginallySunny + maxNewSunnyByRemovingCloud;
+    const auto maxNewSunnyByRemovingCloud = *max_element(populationCoveredJustByThisCloud.begin(), populationCoveredJustByThisCloud.end());
+    const auto maxSunnyAfterRemovingOneCloud = populationOriginallySunny + maxNewSunnyByRemovingCloud;
 
     cout << maxSunnyAfterRemovingOneCloud << endl;
 }
