@@ -105,8 +105,10 @@ int main(int argc, char* argv[])
     //  originalSReversed = zyzybbbbaa
     //  sReversed =              bbbaa
     //
-    // and so on; eventually (in O(|s|^2)), we'll have filled out all letters in A.
-
+    // and so on; eventually (in O(|s|^2)), we'll have filled out all letters in A.  And that's about it: there's a few minor differences between
+    // the code and the description above: the code, instead of checking whether the number of a given letter we've added to A/ shuffleA exceeds
+    // the quota, instead uses countdowns (numOfLetterCanAddToA/ numOfLetterCanAddToShuffleA, respectively), and rather than setting the initial 
+    // bestNextLetter to some value that is higher than all letters, I introduce haveCandidateBestNextLetter instead.
     string s;
     cin >> s;
 
@@ -119,11 +121,11 @@ int main(int argc, char* argv[])
     assert(s.size() % 2 == 0);
     const int numLettersInA = s.size() / 2;
 
-    int numOfLetterCanAddToReverseA[numLetters] = {};
+    int numOfLetterCanAddToA[numLetters] = {};
     for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
     {
         assert(letterHistogram[letterIndex] % 2 == 0);
-        numOfLetterCanAddToReverseA[letterIndex] = letterHistogram[letterIndex] / 2;
+        numOfLetterCanAddToA[letterIndex] = letterHistogram[letterIndex] / 2;
     }
 
     string sReversed = reversed(s);
@@ -132,19 +134,19 @@ int main(int argc, char* argv[])
     string A;
     while (A.size() < numLettersInA)
     {
-        // Update numOfLetterCanAddToShuffle, according to the logic in (*): every letter in the prefix we've removed so far
+        // Update numOfLetterCanAddToShuffleA, according to the logic in (*): every letter in the prefix we've removed so far
         // must be treated as "added to shuffle", *except* for those that have been added to A.
-        int numOfLetterCanAddToShuffle[numLetters] = {};
-        const int sizeOfRemovedPrefix = originalSReversed.size() - sReversed.size();
+        int numOfLetterCanAddToShuffleA[numLetters] = {};
         for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
         {
-            const int numOfLetterInPrefixNotAddedToShuffle = (letterHistogram[letterIndex] - numOfLetterCanAddToReverseA[letterIndex]);
-            numOfLetterCanAddToShuffle[letterIndex] = numOfLetterInPrefixNotAddedToShuffle;
+            const int numOfLetterInPrefixAddedToA = (letterHistogram[letterIndex] - numOfLetterCanAddToA[letterIndex]);
+            numOfLetterCanAddToShuffleA[letterIndex] = numOfLetterInPrefixAddedToA;
         }
+        const int sizeOfRemovedPrefix = originalSReversed.size() - sReversed.size();
         for (int i = 0; i < sizeOfRemovedPrefix; i++)
         {
             const int letterIndex = originalSReversed[i] - 'a';
-            numOfLetterCanAddToShuffle[letterIndex]--;
+            numOfLetterCanAddToShuffleA[letterIndex]--;
         }
 
         // Find the next best character for A.
@@ -153,12 +155,12 @@ int main(int argc, char* argv[])
         for (const auto letter : sReversed)
         {
             const int letterIndex = letter - 'a';
-            const bool isBetterCandidate = ((!haveCandidateBestNextLetter || letterIndex < bestNextLetterIndex) && numOfLetterCanAddToReverseA[letterIndex] > 0);
-            const bool canAddPreviousBestToShuffleA = (!haveCandidateBestNextLetter || numOfLetterCanAddToShuffle[bestNextLetterIndex] > 0);
+            const bool isBetterCandidate = ((!haveCandidateBestNextLetter || letterIndex < bestNextLetterIndex) && numOfLetterCanAddToA[letterIndex] > 0);
+            const bool canAddPreviousBestToShuffleA = (!haveCandidateBestNextLetter || numOfLetterCanAddToShuffleA[bestNextLetterIndex] > 0);
             if (isBetterCandidate && canAddPreviousBestToShuffleA)
             {                                          
                 if (haveCandidateBestNextLetter)
-                    numOfLetterCanAddToShuffle[bestNextLetterIndex]--;
+                    numOfLetterCanAddToShuffleA[bestNextLetterIndex]--;
 
                 bestNextLetterIndex = letterIndex;
                 haveCandidateBestNextLetter = true;
@@ -166,8 +168,8 @@ int main(int argc, char* argv[])
             else
             {  
                 // Add to shuffleA.
-                numOfLetterCanAddToShuffle[letterIndex]--;
-                const bool hitInvalidState = (numOfLetterCanAddToShuffle[letterIndex] < 0);
+                numOfLetterCanAddToShuffleA[letterIndex]--;
+                const bool hitInvalidState = (numOfLetterCanAddToShuffleA[letterIndex] < 0);
                 if (hitInvalidState)         
                     break;                   
             }
@@ -180,7 +182,7 @@ int main(int argc, char* argv[])
         // Remove the prefix up to and including the letter we just added (the first occurrence of bestNextLetter).
         sReversed.erase(sReversed.begin(),  sReversed.begin() + sReversed.find(bestNextLetter) + 1);
 
-        numOfLetterCanAddToReverseA[bestNextLetterIndex]--;
+        numOfLetterCanAddToA[bestNextLetterIndex]--;
     }
 
     const auto result = A;
