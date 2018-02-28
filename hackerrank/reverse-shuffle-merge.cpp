@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) - 2018-02-28
 #define BRUTE_FORCE
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numLettersInA = rand() % 10 + 1;
+        const int numLettersInA = rand() % 10'000 + 1;
         const int maxLetter = rand() % numLetters + 1;
         string A;
         for (int i = 0; i < numLettersInA; i++)
