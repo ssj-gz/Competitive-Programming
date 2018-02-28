@@ -6,6 +6,12 @@ using namespace std;
 
 int main()
 {
+    // Easy one - basically identical to Hackerland Radio Transmitters.
+    // We adopt a Greedy strategy: The first tower we pick is the *rightmost*
+    // city with a tower which, when switched on, will cover all cities up to and
+    // including that city (in particular, city 0).  We then compute firstUncoveredCity in light of the fact
+    // that this city's tower is switched on, and again find the *rightmost* city with
+    // a tower that causes firstUncoveredCity to be covered, and repeat.
     int numCities;
     cin >> numCities;
 
@@ -42,10 +48,10 @@ int main()
             }
             if (firstUncoveredCity < numCities && (nextCityWithTower == -1 || nextCityWithTower - towerRange > firstUncoveredCity))
             {
-                // Need a tower here.
+                // Need a tower here - the next city with a tower (and so, all cities with towers after that one) 
+                // would leave firstUncoveredCity uncovered.
                 numTowersSwitchedOn++;
                 firstUncoveredCity = cityPos + towerRange + 1;
-                //cout << "Switched on " << cityPos << " firstUncoveredCity is now: " << firstUncoveredCity << endl;
             }
         }
     }
