@@ -117,20 +117,20 @@ int main()
     //
     // In the case where we have duplicated letters, we will overcount - if s = aaaa, there is one palindrome, not (|s| / 2)! == 2! = 4
     // palindromes! Dealing with this is easy: if the letter x occurs n(x) times in the half-palindrome, then it will  contribute a factor
-    // of n(x)! to the overcount, so we must divide by this at the end; "denominatorInverse" represents the productive of these divisions
+    // of n(x)! to the overcount, so we must divide by this at the end; "denominatorInverse" represents the product of these divisions
     // over all letters.
     //
-    // So, anyway - if the range contains an even number of each letters, then the can form a palindrome with the same size as the size
+    // So, anyway - if the range contains an even number of each letter, then we can form a palindrome with the same size as the size
     // of the range, and work out the number of ways of doing so using the above.
     //
-    // If the range contains some letters that occur and odd number of times, then the situation is more complex: for each such letter
+    // If the range contains some letters that occur an odd number of times, then the situation is more complex: for each such letter
     // x we can form a palindrome of odd length around x by removing precisely one of each other letter y that occurs an odd number
     // of times, leading to a case ii) situation.  The length of such a palindrome is numLettersInRange - numLettersWithOddOccurrencesInRange + 1.
     // We can work out, for each x, the number of distinct palindromes of this max length centred around x fairly easily by again 
     // considering "half-palindromes", where here a half-palindrome is all letters to the left of the central x (the letters to the right of 
     // this x must then be a mirror of this half-palindrome).  As it happens, the overcount is exactly the same as in the case
     // where all letters occur an even number of times and so we must again simply multiply our result by denominatorInverse.
-    // So we can easily find the number of palindromes of max length centred around x for each x that occurs and odd number of times,
+    // So we can easily find the number of palindromes of max length centred around x for each x that occurs an odd number of times,
     // and we just need to sum these.  And that's about it!
     string s;
     cin >> s;
