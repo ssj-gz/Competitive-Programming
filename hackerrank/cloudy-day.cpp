@@ -16,7 +16,7 @@ int main()
     // of their startPoint to find all that have their startPoint occur before the town's location (these may cover the town), and add them to
     // cloudsCoveringCurrentPosByEndpoint.
     // After doing this, find all clouds in cloudsCoveringCurrentPosByEndpoint whose endpoint ends before the current town location - easy as they
-    // are sorted by their endpoints!
+    // are sorted by their endpoints! - and remove them.
     // After this, cloudsCoveringCurrentPosByEndpoint is precisely the set of clouds that covers the current town.
     // If there is exactly one cloud c covering the current town, then make a note that removing c will make the population of the current town
     // sunny (i.e. add the population to populationCoveredJustByThisCloud).  
