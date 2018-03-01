@@ -5,8 +5,6 @@
 
 using namespace std;
 
-const int maxN = 100'000;
-
 const int64_t modulus = 1'000'000'007ULL;
 
 class ModNum
@@ -162,7 +160,7 @@ int main()
         letterHistogramForPrefixSize.push_back(letterHistogram);
     }
 
-    buildFactorialLookups(maxN);
+    buildFactorialLookups(s.size());
 
     for (int q = 0; q < numQueries; q++)
     {
