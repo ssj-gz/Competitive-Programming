@@ -136,14 +136,14 @@ int main()
     int numQueries;
     cin >> numQueries;
 
-    const int numLetters = 26;
+    const auto numLetters = 26;
     struct LetterHistogram
     {
         int letterCount[numLetters] = {};
         LetterHistogram operator-(const LetterHistogram& other)
         {
             LetterHistogram result(*this);
-            for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
+            for (auto letterIndex = 0; letterIndex < numLetters; letterIndex++)
             {
                 result.letterCount[letterIndex] -= other.letterCount[letterIndex];
             }
@@ -154,7 +154,7 @@ int main()
     vector<LetterHistogram> letterHistogramForPrefixSize;
     LetterHistogram letterHistogram;
     letterHistogramForPrefixSize.push_back(letterHistogram);
-    for (int i = 0; i < s.size(); i++)
+    for (auto i = 0; i < s.size(); i++)
     {
         letterHistogram.letterCount[s[i] - 'a']++;
         letterHistogramForPrefixSize.push_back(letterHistogram);
@@ -162,7 +162,7 @@ int main()
 
     buildFactorialLookups(s.size());
 
-    for (int q = 0; q < numQueries; q++)
+    for (auto q = 0; q < numQueries; q++)
     {
         int l, r;
         cin >> l >> r;
@@ -171,11 +171,11 @@ int main()
         r--;
 
         LetterHistogram letterHistogramForRange = letterHistogramForPrefixSize[r + 1] - letterHistogramForPrefixSize[l];
-        int numLettersWithOddOccurrencesInRange = 0;
+        auto numLettersWithOddOccurrencesInRange = 0;
         ModNum denominatorInverse = 1;
-        for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
+        for (auto letterIndex = 0; letterIndex < numLetters; letterIndex++)
         {
-            const int numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
+            const auto numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
             if ((numOccurencesOfLetterInRange % 2) == 1)
                 numLettersWithOddOccurrencesInRange++;
 
@@ -184,26 +184,26 @@ int main()
             denominatorInverse *= factorialInverseLookup[numOccurencesOfLetterInRange / 2];
         }
         ModNum numWithMaxPalindrome = 0;
-        const int numLettersInRange = r - l + 1;
+        const auto numLettersInRange = r - l + 1;
         if (numLettersWithOddOccurrencesInRange == 0)
         {
             // Every letter occurs an even number of times; the max length of the palindrome is numLettersInRange.
             assert((numLettersInRange % 2) == 0);
-            const int numInHalfPalindrome = numLettersInRange / 2;
+            const auto numInHalfPalindrome = numLettersInRange / 2;
             numWithMaxPalindrome = factorialLookup[numInHalfPalindrome] * denominatorInverse;
         }
         else
         {
             // At least one letter occurs an odd number of times; the max length of the palindrome is numLettersInRange - numLettersWithOddOccurrencesInRange + 1.
             ModNum numerator = 0;
-            for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
+            for (auto letterIndex = 0; letterIndex < numLetters; letterIndex++)
             {
-                const int numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
+                const auto numOccurencesOfLetterInRange = letterHistogramForRange.letterCount[letterIndex];
                 if ((numOccurencesOfLetterInRange % 2) == 1)
                 {
                     // Form an odd-length palindrome around this letter, "removing" all occurrences of the other letters that have
                     // an odd number of occurrences in this range.
-                    const int numInHalfPalindrome = (numLettersInRange - numLettersWithOddOccurrencesInRange) / 2;
+                    const auto numInHalfPalindrome = (numLettersInRange - numLettersWithOddOccurrencesInRange) / 2;
                     numWithMaxPalindrome += factorialLookup[numInHalfPalindrome] * denominatorInverse;
                 }
             }
