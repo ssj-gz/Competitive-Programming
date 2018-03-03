@@ -8,7 +8,6 @@
 #include <limits>
 #include <cassert>
 #include <algorithm>
-#include <sys/time.h>
 
 using namespace std;
 
@@ -291,33 +290,6 @@ int findResult(const vector<vector<int>>& originalMatrix, int k)
 int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
-    if (argc == 2)
-    {
-        // Dump random testcase to stdout and exit.
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int numRows = rand() % 5 + 1;
-        const int numCols = rand() % 5 + 1;
-        const int k = rand() % 15 + 1;
-
-        cout << numRows << " " << numCols << " " << k << endl;
-
-        const int maxValue = 100;
-        const int minValue = -100;
-
-        for (int row = 0; row < numRows; row++)
-        {
-            for (int col = 0; col < numCols; col++)
-            {
-                cout << (rand() % (maxValue - minValue + 1) + minValue) << " ";
-            }
-            cout << endl;
-        }
-
-        return 0;
-    }
 
     int numRows, numCols, k;
     cin >> numRows >> numCols >> k;
