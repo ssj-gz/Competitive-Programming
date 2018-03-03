@@ -209,6 +209,6 @@ int main()
             }
         }
 
-        cout << numWithMaxPalindrome.value() << endl;
+        cout << numWithMaxPalindrome << endl;
     }
 }
