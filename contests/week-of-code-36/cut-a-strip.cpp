@@ -1,8 +1,6 @@
 // Simon St James (ssjgz) - 2018-02-09 12:57
-#define BRUTE_FORCE
 #define SUBMISSION
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -335,12 +333,6 @@ int main(int argc, char** argv)
     }
     const auto result = findResult(matrix, k);
     cout << result << endl;
-
-#ifdef BRUTE_FORCE
-    const auto resultBruteForce = findResultBruteForce(matrix, k);
-    cout << "result: " << result << " resultBruteForce: " << resultBruteForce << endl;
-    assert(resultBruteForce == result);
-#endif
 }
 
 
