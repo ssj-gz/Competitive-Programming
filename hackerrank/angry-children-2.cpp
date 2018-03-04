@@ -59,7 +59,7 @@ int main()
     // 
     // Theorem
     //
-    // If D = {p1, p2, ... , pk}, then there is a distribution D' = {p'1, p'2, ... p'k} with p'1 >= p1, p'k <= pk, and p'i+1 = pi + 1 for i = 1...k-1 and Unf(D') <= Unf(D).
+    // If D = {p1, p2, ... , pk}, then there is a distribution D' = {p'1, p'2, ... p'k} with p'1 >= p1, p'k <= pk, and p'i+1 = p'i + 1 for i = 1...k-1 and Unf(D') <= Unf(D).
     //
     // Proof.
     //
