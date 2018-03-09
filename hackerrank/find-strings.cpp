@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #define NO_VERIFY_UKKONEN
@@ -40,13 +40,6 @@ class SuffixTreeBuilder
                 : startIndex(startIndex), endIndex(endIndex)
             {
             }
-            int length(int fullStringLength) const
-            {
-                const auto endIndexAdjusted = (endIndex == openTransitionEnd ? fullStringLength - 1: endIndex - 1);
-                const auto length = endIndexAdjusted - startIndex;
-                assert(length != -1);
-                return length;
-            }
             int startIndex = -1;
             int endIndex = -1;
         };
@@ -58,7 +51,9 @@ class SuffixTreeBuilder
             }
             int substringLength(int fullStringLength) const
             {
-                return substringFollowed.length(fullStringLength);
+                const auto startIndex = substringFollowed.startIndex - 1;
+                const auto endIndex = (substringFollowed.endIndex == openTransitionEnd ? fullStringLength - 1: substringFollowed.endIndex - 1);
+                return endIndex - startIndex + 1;
             }
 
             State *nextState = nullptr;
@@ -690,11 +685,16 @@ class SuffixTreeBuilder
                         }
                         else
                         {
+                            // Truncate transition and to just before the occurence of the marker (#) and 
+                            // change the state reached to a new, dead-end state (essentially orphaning the 
+                            // original nextState).
                             transition.substringFollowed.endIndex = candidateMarkerPos;
+                            transition.nextState = createNewState(state);
                         }
                     }
                 }
             } while (transitionRemoved);
+            // Recurse.
             for (auto& transition : state->transitions)
             {
                 truncateStringsContainingMarkerAux(transition.nextState, orderedMarkerPositions);
@@ -752,23 +752,25 @@ string findString(const int k, const SuffixTreeBuilder::Cursor cursor, const vec
     {
         const long numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursor.stateId()];
         const long overshotBy = numSubstringsGeneratedAtState - k;
-        // This state has generated a number of substrings in excess of k (or maybe equal to).  The desired result is
+        // This state has generated a number of substrings in excess of k (or maybe equal to k).  The desired result is
         // the current substring pointed to by cursor, with the last "overshotBy" characters
-        // removed (each such character would have been responsible for generated one substring).
+        // removed (each such character would have been responsible for generating one substring).
         const auto stringFollowed = cursor.stringFollowed();
         return stringFollowed.substr(0, stringFollowed.size() - overshotBy);
     }
     char nextLetterToFollow = '\0';
-    long minStringsGeneratorByChildGreaterThanK = numeric_limits<long>::max();
+    long minNumStringsAtLeastKGeneratedByChild = numeric_limits<long>::max();
     // Find the letter that leads to a state with has numSubstringsGeneratedAtState at least k,
-    // and which has minimal numSubstringsGeneratedAtState among all such states.
+    // and which has minimal numSubstringsGeneratedAtState among all such states; following
+    // such a path of letters all the way to a terminal state gives us the terminal state such that the kth
+    // substring is generated on the path to it.
     for (const auto nextLetter : nextLetters)
     {
         const auto cursorAfterTransition = cursorAfterFollowingLetterToNextState(cursor, nextLetter);
         const long numSubstringsGeneratedAtState = numSubstringsGeneratedAtStateId[cursorAfterTransition.stateId()];
-        if (numSubstringsGeneratedAtState >= k && numSubstringsGeneratedAtState <= minStringsGeneratorByChildGreaterThanK)
+        if (numSubstringsGeneratedAtState >= k && numSubstringsGeneratedAtState <= minNumStringsAtLeastKGeneratedByChild)
         {
-            minStringsGeneratorByChildGreaterThanK = numSubstringsGeneratedAtState;
+            minNumStringsAtLeastKGeneratedByChild = numSubstringsGeneratedAtState;
             nextLetterToFollow = nextLetter;
         }
     }
@@ -808,40 +810,46 @@ void printResults(const vector<string>& w, const vector<long>& ks)
 }
 
 int main() {
-    // Fairly easy one.  Firstly, we have the issue of forming a suffix tree that represents the
-    // union of all substrings of all of the w's.  This can be formed quite easily: nominate a 
+    // Fairly easy one.  First of all, we need to build the suffix tree representing the
+    // union of all substrings of all of the w's.  This can be done quite easily: first, nominate a 
     // markerChar - a character that won't appear in any of the w's; '#' is chosen here - 
     // and concatenate all the w's together into one string s, separated by markerChars 
     // ie if w = { 'aa', 'abc', 'def' } (n = 3), then the string s formed would be aa#abc#def#
     // (the trailing # can be removed if you want; I didn't bother).
-    // Then add s to a suffix tree, and perform an operation that does a DFS on the suffix 
-    // tree, stopping whenever we encounter a markerChar and truncating the transition
-    // that leads to it to one character before the markerChar; this will give us
-    // the desired unionOfWSuffixTree.  A naive implementation of this DFS will take O(|s|^2), 
-    // but a bit of cunning allows us to determine the first location of a markerChar in a transition 
+    // Then, put s into a suffix tree.  This will represent the union of all substrings of all the w's,
+    // but will also contain substrings of s that cross "markerChar boundaries" e.g. c#d or aa#ab, which we
+    // obviously don't want!  We can get rid of these unwanted substrings by performing a 
+    // DFS on the suffix tree, stopping whenever we encounter a markerChar and truncating the transition
+    // that leads to it to one character before the markerChar and changing its nextState to a 
+    // new, dead-end state (orphaning all child states originally reachable via the original transition); this 
+    // will give us the desired unionOfWSuffixTree.  A naive implementation of this DFS will take O(|s|^2), 
+    // but a bit of cunning allows us to determine the first location of a markerChar (if any) in a transition 
     // in the suffix tree in O(log(n)) (n = number of strings, remember), so the whole process
-    // is O(|S|xlog(n)).  This is all handled via truncateStringsContainingMarker().
-    // So: we have a suffix tree representing precisely all substrings of all n w's.  Imagine performing a 
+    // is O(number of transitions xlog(n)) = O(|s| x log(n)).  This is all handled via truncateStringsContainingMarker().
+    // So: we now have a suffix tree representing precisely all substrings of all n w's.  Imagine performing a 
     // DFS on this tree where, whenever we encounter a choice of which letter to follow next,
-    // we choose them in alphabetical order: this DFS would sketch out all substrings in 
-    // lexicographical order.  We can count the number of substrings generated as we go (each char we follow
-    // would generate one extra substring), and  we can also speed up from O(|s|^2) to O(|s|) by not following 
-    // transitions character by character/ but instead adding the number of characters in each transition to 
-    // the count of the number of substrings.  For each *explicit* state, we associate a count of the number
-    // of substrings that would have been generated in the DFS when all children of that state have been explored.
-    // This is handled by buildSubstringsGeneratedAfterStateTable(), and the results for each state 
-    // stored in numSubstringsGeneratedAtStateId.
+    // we follow them in alphabetical order: this DFS would sketch out all substrings in 
+    // lexicographical order.  We can count the number of substrings generated as we go  - each char we follow
+    // would generate one extra substring. Performing DFS, as usual, will be O(|s|^2), but (as usual!) we can 
+    // speed up to O(|s|) by not following transitions character by character, but instead adding the number of 
+    // characters in each transition to the count of the number of substrings generated.  For each *explicit* state, we 
+    // associate a count of the number of substrings that would have been generated in the DFS when all 
+    // children of that state have been explored. This is handled by buildSubstringsGeneratedAfterStateTable(), 
+    // and the results for each state stored in numSubstringsGeneratedAtStateId.
 
     // Finally, we can use this numSubstringsGeneratedAtStateId to find the kth string by performing 
     // (yet another!) DFS of the suffix tree: this time, when given a choice of the next letter to pick, we choose
     // the one that leads to the state *whose numSubstringsGeneratedAtStateId is at least k, and whose 
-    // numSubstringsGeneratedAtStateId is minimal among such states*.  Transitions are simply skipped; we 
-    // care only about explicit states.  If there is no such letter i.e. all child states have 
-    // numSubstringsGeneratedAtStateId strictly less than k, there we can stop: there is no kth word.
-    // When we reach a terminal state, the kth element will be some prefix of the current substring that we've 
+    // numSubstringsGeneratedAtStateId is minimal among such states*; this will have the effect of navigating
+    // our way down the tree until we reach the state which, when followed in our DFS, would generate the 
+    // kth substring in lexicographic order or, if we could find no such next state, proving that there is no
+    // kth word (although as an implementation detail we actually keep on going all the way down to terminal states).  
+    // During this DFS, transitions are simply skipped; we care only about explicit states, so this is 
+    // O(|s|). 
+    // When we finally reach a terminal state, the kth element will be some prefix of the current substring that we've 
     // followed so far. Noting that each successive character in this substring adds one extra substring to the list 
     // of those found, we simply truncate the current substring by the value of 
-    // numSubstringsGeneratedAtStateId - k for this terminal state, and that is the answer!
+    // (numSubstringsGeneratedAtStateId - k) for this terminal state, and that is the answer!
 
     long n;
     cin >> n;
