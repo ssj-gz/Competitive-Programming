@@ -219,31 +219,6 @@ int main()
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
     HeightTracker heightTracker;
-    heightTracker.adjustAllHeights(-1);
-    heightTracker.insertHeight(15);
-    //cout << "blah: " << heightTracker.grundyNumber() << endl;
-#if 0
-    heightTracker.insertHeight(4);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.insertHeight(6);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.insertHeight(7);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-    heightTracker.adjustAllHeights(1);
-    cout << "blah: " << heightTracker.grundyNumber() << endl;
-#endif
 
     int numInsertions = 0;
     int numAdjustments = 0;
