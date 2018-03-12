@@ -1,4 +1,5 @@
 #define VERIFY_HEIGHT_TRACKER
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY_HEIGHT_TRACKER
@@ -37,6 +38,8 @@ class HeightTracker
         void insertHeight(const int newHeight)
         {
             cout << "insertHeight: " << newHeight << " m_cumulativeHeightAdjustment: " << m_cumulativeHeightAdjustment << endl;
+            if (newHeight < m_smallestHeight)
+                m_smallestHeight = newHeight;
             int powerOf2 = 2;
             m_grundyNumber = 0;
             int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
@@ -82,12 +85,10 @@ class HeightTracker
         };
         bool canDecreaseHeights() const
         {
-            // This is just for debugging - situation won't occurr in real-life.
-            for (const auto height : m_dbgHeights)
-            {
-                if (height <= 0)
-                    return false;
-            }
+            // This is just  for testing - won't be needed in real-life.
+            // TODO - remove this!
+            if (m_smallestHeight == 0)
+                return false;
             return true;
         }
         void adjustAllHeights(int heightDiff)
@@ -97,6 +98,7 @@ class HeightTracker
             assert(heightDiff == 1 || heightDiff == -1);
             cout << "adjustAllHeights: " << heightDiff << endl;
             m_cumulativeHeightAdjustment += heightDiff;
+            m_smallestHeight += heightDiff;
             if (heightDiff == 1)
             {
                 int powerOf2 = 2;
@@ -199,6 +201,7 @@ class HeightTracker
         int m_grundyNumber = 0;
 
         int m_versionNumber = 0;
+        int m_smallestHeight = 0;
 };
 
 
@@ -243,6 +246,8 @@ int main()
         {
             cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << endl;
             heightTracker.clear();
+            numInsertions = 0;
+            numAdjustments = 0;
         }
         if (rand() % 2 == 0)
         {
