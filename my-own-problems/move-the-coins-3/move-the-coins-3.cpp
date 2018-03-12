@@ -42,8 +42,7 @@ class HeightTracker
             int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
             if (newHeightAdjusted < 0)
             {
-                //cout << "Gloop" << endl;
-                newHeightAdjusted += 65536 * 8;
+                newHeightAdjusted += (1 << (log2MaxHeight + 1));
             }
             assert(newHeightAdjusted >= 0);
             //cout << "newHeightAdjusted: " << newHeightAdjusted << endl;
@@ -51,7 +50,6 @@ class HeightTracker
             {
                 const int heightModPowerOf2 = newHeightAdjusted % powerOf2;
                 m_heightsModPowerOf2[i][heightModPowerOf2]++;
-                //cout << "i: " << i << " powerOf2: " << powerOf2 << " heightModPowerOf2: " << heightModPowerOf2 << " m_makesDigitOneBegin: " << m_makesDigitOneBegin[i] << " m_makesDigitOneEnd: " << m_makesDigitOneEnd[i] << endl;
                 if (m_makesDigitOneBegin[i] <= m_makesDigitOneEnd[i])
                 {
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[i] && heightModPowerOf2 <= m_makesDigitOneEnd[i])
@@ -63,7 +61,6 @@ class HeightTracker
                 {
                     const int makeDigitZeroBegin = m_makesDigitOneEnd[i] + 1;
                     const int makeDigitZeroEnd = m_makesDigitOneBegin[i] - 1;
-                    //cout << "i: " << i << " makeDigitZeroBegin: " << makeDigitZeroBegin << " makeDigitZeroEnd: " << makeDigitZeroEnd << endl;
                     assert(makeDigitZeroBegin <= makeDigitZeroEnd);
                     assert(0 <= makeDigitZeroEnd < powerOf2);
                     assert(0 <= makeDigitZeroBegin < powerOf2);
@@ -73,33 +70,10 @@ class HeightTracker
                     }
                 }
 
-                //cout << "i: " << i << " m_numHeightsThatMakeDigitOne[i]: " << m_numHeightsThatMakeDigitOne[i] << endl;
 
                 m_grundyNumber ^= ((powerOf2 >> 1) * (m_numHeightsThatMakeDigitOne[i] % 2));
 
                 powerOf2 <<= 1;
-            }
-            {
-                int powerOf2 = 2;
-                for (int i = 0; i <= log2MaxHeight; i++)
-                {
-                    int blee = 0;
-                    int blah = m_makesDigitOneBegin[i];
-                    while (true)
-                    {
-                        //cout << "Blah: " << blah << " m_heightsModPowerOf2[i][blah]: " << m_heightsModPowerOf2[i][blah] << endl;
-                        blee += m_heightsModPowerOf2[i][blah];
-                        if (blah == m_makesDigitOneEnd[i])
-                            break;
-                        blah = (blah + 1) % powerOf2;
-
-                    }
-                    //cout << "i: " << i<< " m_makesDigitOneBegin[i]: " << m_makesDigitOneBegin[i] << " m_makesDigitOneEnd[i]: " << m_makesDigitOneEnd[i] << endl;
-                    //cout << "blee: " << blee << " m_numHeightsThatMakeDigitOne[i]: " << m_numHeightsThatMakeDigitOne[i] << endl;
-                    assert(blee == m_numHeightsThatMakeDigitOne[i]);
-
-                    powerOf2 <<= 1;
-                }
             }
 #ifdef VERIFY_HEIGHT_TRACKER
             m_dbgHeights.push_back(newHeight);
@@ -120,7 +94,6 @@ class HeightTracker
             if (heightDiff == 0)
                 return;
             assert(heightDiff == 1 || heightDiff == -1);
-            m_grundyNumber = 0;
             cout << "adjustAllHeights: " << heightDiff << endl;
             m_cumulativeHeightAdjustment += heightDiff;
             if (heightDiff == 1)
@@ -150,25 +123,6 @@ class HeightTracker
 
                     powerOf2 <<= 1;
                 } 
-            }
-            {
-                int powerOf2 = 2;
-                for (int i = 0; i <= log2MaxHeight; i++)
-                {
-                    int blee = 0;
-                    int blah = m_makesDigitOneBegin[i];
-                    while (true)
-                    {
-                        blee += m_heightsModPowerOf2[i][blah];
-                        if (blah == m_makesDigitOneEnd[i])
-                            break;
-
-                        blah = (blah + 1) % powerOf2;
-                    }
-                    assert(blee == m_numHeightsThatMakeDigitOne[i]);
-
-                    powerOf2 <<= 1;
-                }
             }
             int powerOf2 = 2;
             m_grundyNumber = 0;
@@ -262,7 +216,7 @@ int main()
     {
         if (rand() % 2 == 0)
         {
-            const int newHeight = rand() % 100;
+            const int newHeight = rand() % maxHeight;
             heightTracker.insertHeight(newHeight);
         }
         else
