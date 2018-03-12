@@ -1,5 +1,5 @@
 #define VERIFY_HEIGHT_TRACKER
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY_HEIGHT_TRACKER
@@ -24,16 +24,17 @@ class HeightTracker
     public:
         HeightTracker()
         {
+            m_makesDigitOneBegin.resize(maxBinaryDigits + 1);
+            m_makesDigitOneEnd.resize(maxBinaryDigits + 1);
+            m_numHeightsThatMakeDigitOne.resize(maxBinaryDigits + 1);
+
             int powerOf2 = 2;
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
                 m_heightsModPowerOf2.push_back(vector<VersionedValue>(powerOf2));
-                m_makesDigitOneBegin.push_back(powerOf2 >> 1);
-                m_makesDigitOneEnd.push_back(powerOf2 - 1);
-                m_numHeightsThatMakeDigitOne.push_back(0);
-
                 powerOf2 <<= 1;
             }
+            clear();
         }
         void insertHeight(const int newHeight)
         {
@@ -265,8 +266,8 @@ int main()
                 }
             }
         }
-        //cout << "blah: " << heightTracker.grundyNumber() << endl;
-        blah += heightTracker.grundyNumber();
+        cout << "blah: " << heightTracker.grundyNumber() << endl;
+        //blah += heightTracker.grundyNumber();
 
         if (totalNumInsertions + totalNumAdjustments >= 10'000'000)
             break;
