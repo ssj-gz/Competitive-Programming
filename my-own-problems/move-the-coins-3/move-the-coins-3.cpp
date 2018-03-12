@@ -1,5 +1,5 @@
 #define VERIFY_HEIGHT_TRACKER
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY_HEIGHT_TRACKER
@@ -38,11 +38,11 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
-            cout << "insertHeight: " << newHeight << " m_cumulativeHeightAdjustment: " << m_cumulativeHeightAdjustment << endl;
+            //cout << "insertHeight: " << newHeight << " m_cumulativeHeightAdjustment: " << m_cumulativeHeightAdjustment << endl;
             if (newHeight < m_smallestHeight)
                 m_smallestHeight = newHeight;
             int powerOf2 = 2;
-            m_grundyNumber = 0;
+            //m_grundyNumber = 0;
             int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
             if (newHeightAdjusted < 0)
             {
@@ -60,6 +60,7 @@ class HeightTracker
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
                     {
                         m_numHeightsThatMakeDigitOne[binaryDigitNum]++;
+                        m_grundyNumber ^= (powerOf2 >> 1);
                     }
                 }
                 else
@@ -72,11 +73,12 @@ class HeightTracker
                     if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
                     {
                         m_numHeightsThatMakeDigitOne[binaryDigitNum]++;
+                        m_grundyNumber ^= (powerOf2 >> 1);
                     }
                 }
 
 
-                m_grundyNumber ^= ((powerOf2 >> 1) * (m_numHeightsThatMakeDigitOne[binaryDigitNum] % 2));
+                //m_grundyNumber ^= ((powerOf2 >> 1) * (m_numHeightsThatMakeDigitOne[binaryDigitNum] % 2));
 
                 powerOf2 <<= 1;
             }
@@ -103,7 +105,7 @@ class HeightTracker
             if (heightDiff == 0)
                 return;
             assert(heightDiff == 1 || heightDiff == -1);
-            cout << "adjustAllHeights: " << heightDiff << endl;
+            //cout << "adjustAllHeights: " << heightDiff << endl;
             m_cumulativeHeightAdjustment += heightDiff;
             m_smallestHeight += heightDiff;
             if (heightDiff == 1)
@@ -111,11 +113,15 @@ class HeightTracker
                 int powerOf2 = 2;
                 for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
+                    const int oldNumHeightsThatMakeDigitOne =  m_numHeightsThatMakeDigitOne[binaryDigitNum];
                     m_numHeightsThatMakeDigitOne[binaryDigitNum] -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
                     m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) % powerOf2;
 
                     m_makesDigitOneBegin[binaryDigitNum] = (powerOf2 + m_makesDigitOneBegin[binaryDigitNum] - 1) % powerOf2;
                     m_numHeightsThatMakeDigitOne[binaryDigitNum] += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
+
+                    if (abs(m_numHeightsThatMakeDigitOne[binaryDigitNum] - oldNumHeightsThatMakeDigitOne) % 2 == 1)
+                        m_grundyNumber ^= (powerOf2 >> 1);
 
                     powerOf2 <<= 1;
                 } 
@@ -125,15 +131,21 @@ class HeightTracker
                 int powerOf2 = 2;
                 for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
+                    const int oldNumHeightsThatMakeDigitOne =  m_numHeightsThatMakeDigitOne[binaryDigitNum];
                     m_numHeightsThatMakeDigitOne[binaryDigitNum] -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
                     m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) % powerOf2;
 
                     m_makesDigitOneEnd[binaryDigitNum] = (m_makesDigitOneEnd[binaryDigitNum] + 1) % powerOf2;
                     m_numHeightsThatMakeDigitOne[binaryDigitNum] += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
 
+                    if (abs(m_numHeightsThatMakeDigitOne[binaryDigitNum] - oldNumHeightsThatMakeDigitOne) % 2 == 1)
+                        m_grundyNumber ^= (powerOf2 >> 1);
+
                     powerOf2 <<= 1;
                 } 
             }
+
+#if 0
             int powerOf2 = 2;
             m_grundyNumber = 0;
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
@@ -141,6 +153,7 @@ class HeightTracker
                 m_grundyNumber ^= ((powerOf2 >> 1) * (m_numHeightsThatMakeDigitOne[binaryDigitNum] % 2));
                 powerOf2 <<= 1;
             }
+#endif
 #ifdef VERIFY_HEIGHT_TRACKER
             for (auto& height : m_dbgHeights)
             {
@@ -174,7 +187,7 @@ class HeightTracker
         }
         void clear()
         {
-            cout << "Clear!" << endl;
+            //cout << "Clear!" << endl;
             m_versionNumber++;
             int powerOf2 = 2;
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
@@ -215,9 +228,11 @@ class HeightTracker
 
 int main()
 {
+#if 0
     struct timeval time;
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+#endif
 
     HeightTracker heightTracker;
 
@@ -232,7 +247,7 @@ int main()
     {
         if (rand() % 100'000 == 0)
         {
-            cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << " (up: " << numAdjustmentsUp << " down: " << numAdjustmentsDown << ")" << " totalNumInsertions: " << totalNumInsertions << " totalNumAdjustments: " << totalNumAdjustments << endl;
+            //cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << " (up: " << numAdjustmentsUp << " down: " << numAdjustmentsDown << ")" << " totalNumInsertions: " << totalNumInsertions << " totalNumAdjustments: " << totalNumAdjustments << endl;
             heightTracker.clear();
             numInsertions = 0;
             numAdjustments = 0;
@@ -266,8 +281,8 @@ int main()
                 }
             }
         }
-        cout << "blah: " << heightTracker.grundyNumber() << endl;
-        //blah += heightTracker.grundyNumber();
+        //cout << "blah: " << heightTracker.grundyNumber() << endl;
+        blah += heightTracker.grundyNumber();
 
         if (totalNumInsertions + totalNumAdjustments >= 10'000'000)
             break;
