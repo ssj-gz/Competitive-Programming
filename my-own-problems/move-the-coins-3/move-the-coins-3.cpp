@@ -32,13 +32,14 @@ class HeightTracker
                 powerOf2 <<= 1;
             }
         }
-        void insertHeight(int newHeight)
+        void insertHeight(const int newHeight)
         {
             int powerOf2 = 2;
             m_grundyNumber = 0;
+            const int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
             for (int i = 0; i <= log2MaxHeight; i++)
             {
-                const int heightModPowerOf2 = newHeight % powerOf2;
+                const int heightModPowerOf2 = newHeightAdjusted % powerOf2;
                 m_heightsModPowerOf2[i][heightModPowerOf2]++;
                 cout << "i: " << i << " powerOf2: " << powerOf2 << " heightModPowerOf2: " << heightModPowerOf2 << " m_makesDigitOneBegin: " << m_makesDigitOneBegin[i] << " m_makesDigitOneEnd: " << m_makesDigitOneEnd[i] << endl;
                 if (m_makesDigitOneBegin[i] <= m_makesDigitOneEnd[i])
@@ -76,6 +77,7 @@ class HeightTracker
             assert(heightDiff == 1 || heightDiff == -1);
             m_grundyNumber = 0;
             cout << "adjustAllHeights: " << heightDiff << endl;
+            m_cumulativeHeightAdjustment += heightDiff;
             if (heightDiff == 1)
             {
                 int powerOf2 = 2;
@@ -153,6 +155,7 @@ class HeightTracker
         vector<int> m_makesDigitOneEnd;
 
         vector<int> m_numHeightsThatMakeDigitOne;
+        int m_cumulativeHeightAdjustment = 0;
         int m_grundyNumber = 0;
 };
 
@@ -180,4 +183,27 @@ int main()
     cout << "blah: " << heightTracker.grundyNumber() << endl;
     heightTracker.adjustAllHeights(1);
     cout << "blah: " << heightTracker.grundyNumber() << endl;
+
+    while (true)
+    {
+        if (rand() % 2 == 0)
+        {
+            const int newHeight = rand() % maxHeight;
+            heightTracker.insertHeight(newHeight);
+        }
+        else
+        {
+            if (rand() % 2 == 0)
+            {
+                heightTracker.adjustAllHeights(1);
+            }
+            else
+            {
+                heightTracker.adjustAllHeights(-1);
+            }
+        }
+        cout << "blah: " << heightTracker.grundyNumber() << endl;
+
+    }
+
 }
