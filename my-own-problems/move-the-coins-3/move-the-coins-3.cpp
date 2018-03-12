@@ -1,5 +1,5 @@
 #define VERIFY_HEIGHT_TRACKER
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY_HEIGHT_TRACKER
@@ -91,6 +91,12 @@ class HeightTracker
                 return false;
             return true;
         }
+        bool canIncreaseHeights() const
+        {
+            // This is just  for testing - won't be needed in real-life.
+            // TODO - remove this!
+            return m_cumulativeHeightAdjustment <= maxHeight;
+        }
         void adjustAllHeights(int heightDiff)
         {
             if (heightDiff == 0)
@@ -173,13 +179,14 @@ class HeightTracker
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
                 //m_heightsModPowerOf2.push_back(vector<int>(powerOf2, 0));
-                m_makesDigitOneBegin.push_back(powerOf2 >> 1);
-                m_makesDigitOneEnd.push_back(powerOf2 - 1);
+                m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
+                m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
                 m_numHeightsThatMakeDigitOne[binaryDigitNum] = 0;
 
                 powerOf2 <<= 1;
             }
             m_grundyNumber = 0;
+            m_cumulativeHeightAdjustment = 0;
 #ifdef VERIFY_HEIGHT_TRACKER
             m_dbgHeights.clear();
 #endif
@@ -240,39 +247,56 @@ int main()
 
     int numInsertions = 0;
     int numAdjustments = 0;
+    int numAdjustmentsUp = 0;
+    int numAdjustmentsDown = 0;
+    int totalNumInsertions = 0;
+    int totalNumAdjustments = 0;
+    int64_t blah = 0;
     while (true)
     {
-        if (rand() % 10000 == 0)
+        if (rand() % 100'000 == 0)
         {
-            cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << endl;
+            cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << " (up: " << numAdjustmentsUp << " down: " << numAdjustmentsDown << ")" << " totalNumInsertions: " << totalNumInsertions << " totalNumAdjustments: " << totalNumAdjustments << endl;
             heightTracker.clear();
             numInsertions = 0;
             numAdjustments = 0;
+            numAdjustmentsUp = 0;
+            numAdjustmentsDown = 0;
         }
         if (rand() % 2 == 0)
         {
             const int newHeight = rand() % maxHeight;
             heightTracker.insertHeight(newHeight);
             numInsertions++;
+            totalNumInsertions++;
         }
         else
         {
-            if (rand() % 2 == 0)
+            if (rand() % 3 == 0 && heightTracker.canDecreaseHeights())
             {
-                if (heightTracker.canDecreaseHeights())
-                {
-                    heightTracker.adjustAllHeights(-1);
-                    numAdjustments++;
-                }
+                heightTracker.adjustAllHeights(-1);
+                numAdjustments++;
+                numAdjustmentsDown++;
+                totalNumAdjustments++;
             }
             else
             {
-                heightTracker.adjustAllHeights(1);
-                numAdjustments++;
+                if (heightTracker.canIncreaseHeights())
+                {
+                    heightTracker.adjustAllHeights(1);
+                    numAdjustments++;
+                    numAdjustmentsUp++;
+                    totalNumAdjustments++;
+                }
             }
         }
-        cout << "blah: " << heightTracker.grundyNumber() << endl;
+        //cout << "blah: " << heightTracker.grundyNumber() << endl;
+        blah += heightTracker.grundyNumber();
+
+        if (totalNumInsertions + totalNumAdjustments >= 10'000'000)
+            break;
 
     }
+    cout << blah << endl;
 
 }
