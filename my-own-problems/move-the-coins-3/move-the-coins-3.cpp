@@ -26,7 +26,7 @@ class HeightTracker
             int powerOf2 = 2;
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2.push_back(vector<int>(powerOf2, 0));
+                m_heightsModPowerOf2.push_back(vector<VersionedValue>(powerOf2));
                 m_makesDigitOneBegin.push_back(powerOf2 >> 1);
                 m_makesDigitOneEnd.push_back(powerOf2 - 1);
                 m_numHeightsThatMakeDigitOne.push_back(0);
@@ -49,7 +49,8 @@ class HeightTracker
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
                 const int heightModPowerOf2 = newHeightAdjusted % powerOf2;
-                m_heightsModPowerOf2[binaryDigitNum][heightModPowerOf2]++;
+                //m_heightsModPowerOf2[binaryDigitNum][heightModPowerOf2]++;
+                numHeightsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
@@ -101,11 +102,11 @@ class HeightTracker
                 int powerOf2 = 2;
                 for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
-                    m_numHeightsThatMakeDigitOne[binaryDigitNum] -= m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
+                    m_numHeightsThatMakeDigitOne[binaryDigitNum] -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
                     m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) % powerOf2;
 
                     m_makesDigitOneBegin[binaryDigitNum] = (powerOf2 + m_makesDigitOneBegin[binaryDigitNum] - 1) % powerOf2;
-                    m_numHeightsThatMakeDigitOne[binaryDigitNum] += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
+                    m_numHeightsThatMakeDigitOne[binaryDigitNum] += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
 
                     powerOf2 <<= 1;
                 } 
@@ -115,11 +116,11 @@ class HeightTracker
                 int powerOf2 = 2;
                 for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
-                    m_numHeightsThatMakeDigitOne[binaryDigitNum] -= m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
+                    m_numHeightsThatMakeDigitOne[binaryDigitNum] -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
                     m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) % powerOf2;
 
                     m_makesDigitOneEnd[binaryDigitNum] = (m_makesDigitOneEnd[binaryDigitNum] + 1) % powerOf2;
-                    m_numHeightsThatMakeDigitOne[binaryDigitNum] += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
+                    m_numHeightsThatMakeDigitOne[binaryDigitNum] += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
 
                     powerOf2 <<= 1;
                 } 
@@ -139,6 +140,16 @@ class HeightTracker
             }
 #endif
         }
+        int& numHeightsModPowerOf2(int binaryDigitNum, int modPowerOf2)
+        {
+            auto& numHeights = m_heightsModPowerOf2[binaryDigitNum][modPowerOf2];
+            if (numHeights.versionNumber != m_versionNumber)
+            {
+                numHeights.value = 0;
+                numHeights.versionNumber = m_versionNumber;
+            }
+            return numHeights.value;
+        }
         int grundyNumber() const
         {
 #ifdef VERIFY_HEIGHT_TRACKER
@@ -154,11 +165,12 @@ class HeightTracker
         }
         void clear()
         {
-            // TODO - use a versionNumber to make this O(logN).
+            cout << "Clear!" << endl;
+            m_versionNumber++;
             int powerOf2 = 2;
             for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2.push_back(vector<int>(powerOf2, 0));
+                //m_heightsModPowerOf2.push_back(vector<int>(powerOf2, 0));
                 m_makesDigitOneBegin.push_back(powerOf2 >> 1);
                 m_makesDigitOneEnd.push_back(powerOf2 - 1);
                 m_numHeightsThatMakeDigitOne[binaryDigitNum] = 0;
@@ -166,17 +178,27 @@ class HeightTracker
                 powerOf2 <<= 1;
             }
             m_grundyNumber = 0;
+#ifdef VERIFY_HEIGHT_TRACKER
+            m_dbgHeights.clear();
+#endif
         }
 #ifdef VERIFY_HEIGHT_TRACKER
         vector<int> m_dbgHeights;
 #endif
-        vector<vector<int>> m_heightsModPowerOf2;
+        struct VersionedValue
+        {
+            int value = 0;
+            int versionNumber = -1;
+        };
+        vector<vector<VersionedValue>> m_heightsModPowerOf2;
         vector<int> m_makesDigitOneBegin;
         vector<int> m_makesDigitOneEnd;
 
         vector<int> m_numHeightsThatMakeDigitOne;
         int m_cumulativeHeightAdjustment = 0;
         int m_grundyNumber = 0;
+
+        int m_versionNumber = 0;
 };
 
 
@@ -213,26 +235,36 @@ int main()
     cout << "blah: " << heightTracker.grundyNumber() << endl;
 #endif
 
+    int numInsertions = 0;
+    int numAdjustments = 0;
     while (true)
     {
+        if (rand() % 10000 == 0)
+        {
+            cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << endl;
+            heightTracker.clear();
+        }
         if (rand() % 2 == 0)
         {
             const int newHeight = rand() % maxHeight;
             heightTracker.insertHeight(newHeight);
+            numInsertions++;
         }
         else
         {
             if (rand() % 2 == 0)
             {
                 if (heightTracker.canDecreaseHeights())
+                {
                     heightTracker.adjustAllHeights(-1);
+                    numAdjustments++;
+                }
             }
-#if 1
             else
             {
                 heightTracker.adjustAllHeights(1);
+                numAdjustments++;
             }
-#endif
         }
         cout << "blah: " << heightTracker.grundyNumber() << endl;
 
