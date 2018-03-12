@@ -154,7 +154,7 @@ class HeightTracker
         }
         void clear()
         {
-            // TODO - use a versionNumber to make this O(1).
+            // TODO - use a versionNumber to make this O(logN).
             int powerOf2 = 2;
             for (int i = 0; i <= log2MaxHeight; i++)
             {
