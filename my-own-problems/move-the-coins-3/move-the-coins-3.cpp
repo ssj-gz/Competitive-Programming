@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <sys/time.h>
+
 
 using namespace std;
 
@@ -34,14 +36,22 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
+            cout << "insertHeight: " << newHeight << " m_cumulativeHeightAdjustment: " << m_cumulativeHeightAdjustment << endl;
             int powerOf2 = 2;
             m_grundyNumber = 0;
-            const int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
+            int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
+            if (newHeightAdjusted < 0)
+            {
+                //cout << "Gloop" << endl;
+                newHeightAdjusted += 65536 * 8;
+            }
+            assert(newHeightAdjusted >= 0);
+            //cout << "newHeightAdjusted: " << newHeightAdjusted << endl;
             for (int i = 0; i <= log2MaxHeight; i++)
             {
                 const int heightModPowerOf2 = newHeightAdjusted % powerOf2;
                 m_heightsModPowerOf2[i][heightModPowerOf2]++;
-                cout << "i: " << i << " powerOf2: " << powerOf2 << " heightModPowerOf2: " << heightModPowerOf2 << " m_makesDigitOneBegin: " << m_makesDigitOneBegin[i] << " m_makesDigitOneEnd: " << m_makesDigitOneEnd[i] << endl;
+                //cout << "i: " << i << " powerOf2: " << powerOf2 << " heightModPowerOf2: " << heightModPowerOf2 << " m_makesDigitOneBegin: " << m_makesDigitOneBegin[i] << " m_makesDigitOneEnd: " << m_makesDigitOneEnd[i] << endl;
                 if (m_makesDigitOneBegin[i] <= m_makesDigitOneEnd[i])
                 {
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[i] && heightModPowerOf2 <= m_makesDigitOneEnd[i])
@@ -51,25 +61,60 @@ class HeightTracker
                 }
                 else
                 {
-                    const int makeDigitZeroBegin = heightModPowerOf2 >= m_makesDigitOneEnd[i] + 1;
+                    const int makeDigitZeroBegin = m_makesDigitOneEnd[i] + 1;
                     const int makeDigitZeroEnd = m_makesDigitOneBegin[i] - 1;
+                    //cout << "i: " << i << " makeDigitZeroBegin: " << makeDigitZeroBegin << " makeDigitZeroEnd: " << makeDigitZeroEnd << endl;
                     assert(makeDigitZeroBegin <= makeDigitZeroEnd);
+                    assert(0 <= makeDigitZeroEnd < powerOf2);
+                    assert(0 <= makeDigitZeroBegin < powerOf2);
                     if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
                     {
                         m_numHeightsThatMakeDigitOne[i]++;
                     }
                 }
 
-                cout << "i: " << i << " m_numHeightsThatMakeDigitOne[i]: " << m_numHeightsThatMakeDigitOne[i] << endl;
+                //cout << "i: " << i << " m_numHeightsThatMakeDigitOne[i]: " << m_numHeightsThatMakeDigitOne[i] << endl;
 
                 m_grundyNumber ^= ((powerOf2 >> 1) * (m_numHeightsThatMakeDigitOne[i] % 2));
 
                 powerOf2 <<= 1;
             }
+            {
+                int powerOf2 = 2;
+                for (int i = 0; i <= log2MaxHeight; i++)
+                {
+                    int blee = 0;
+                    int blah = m_makesDigitOneBegin[i];
+                    while (true)
+                    {
+                        //cout << "Blah: " << blah << " m_heightsModPowerOf2[i][blah]: " << m_heightsModPowerOf2[i][blah] << endl;
+                        blee += m_heightsModPowerOf2[i][blah];
+                        if (blah == m_makesDigitOneEnd[i])
+                            break;
+                        blah = (blah + 1) % powerOf2;
+
+                    }
+                    //cout << "i: " << i<< " m_makesDigitOneBegin[i]: " << m_makesDigitOneBegin[i] << " m_makesDigitOneEnd[i]: " << m_makesDigitOneEnd[i] << endl;
+                    //cout << "blee: " << blee << " m_numHeightsThatMakeDigitOne[i]: " << m_numHeightsThatMakeDigitOne[i] << endl;
+                    assert(blee == m_numHeightsThatMakeDigitOne[i]);
+
+                    powerOf2 <<= 1;
+                }
+            }
 #ifdef VERIFY_HEIGHT_TRACKER
             m_dbgHeights.push_back(newHeight);
 #endif
         };
+        bool canDecreaseHeights() const
+        {
+            // This is just for debugging - situation won't occurr in real-life.
+            for (const auto height : m_dbgHeights)
+            {
+                if (height <= 0)
+                    return false;
+            }
+            return true;
+        }
         void adjustAllHeights(int heightDiff)
         {
             if (heightDiff == 0)
@@ -106,6 +151,25 @@ class HeightTracker
                     powerOf2 <<= 1;
                 } 
             }
+            {
+                int powerOf2 = 2;
+                for (int i = 0; i <= log2MaxHeight; i++)
+                {
+                    int blee = 0;
+                    int blah = m_makesDigitOneBegin[i];
+                    while (true)
+                    {
+                        blee += m_heightsModPowerOf2[i][blah];
+                        if (blah == m_makesDigitOneEnd[i])
+                            break;
+
+                        blah = (blah + 1) % powerOf2;
+                    }
+                    assert(blee == m_numHeightsThatMakeDigitOne[i]);
+
+                    powerOf2 <<= 1;
+                }
+            }
             int powerOf2 = 2;
             m_grundyNumber = 0;
             for (int i = 0; i <= log2MaxHeight; i++)
@@ -117,6 +181,7 @@ class HeightTracker
             for (auto& height : m_dbgHeights)
             {
                 height += heightDiff;
+                assert(height >= 0);
             }
 #endif
         }
@@ -162,7 +227,15 @@ class HeightTracker
 
 int main()
 {
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
     HeightTracker heightTracker;
+    heightTracker.adjustAllHeights(-1);
+    heightTracker.insertHeight(15);
+    //cout << "blah: " << heightTracker.grundyNumber() << endl;
+#if 0
     heightTracker.insertHeight(4);
     cout << "blah: " << heightTracker.grundyNumber() << endl;
     heightTracker.insertHeight(6);
@@ -183,24 +256,28 @@ int main()
     cout << "blah: " << heightTracker.grundyNumber() << endl;
     heightTracker.adjustAllHeights(1);
     cout << "blah: " << heightTracker.grundyNumber() << endl;
+#endif
 
     while (true)
     {
         if (rand() % 2 == 0)
         {
-            const int newHeight = rand() % maxHeight;
+            const int newHeight = rand() % 100;
             heightTracker.insertHeight(newHeight);
         }
         else
         {
             if (rand() % 2 == 0)
             {
-                heightTracker.adjustAllHeights(1);
+                if (heightTracker.canDecreaseHeights())
+                    heightTracker.adjustAllHeights(-1);
             }
+#if 1
             else
             {
-                heightTracker.adjustAllHeights(-1);
+                heightTracker.adjustAllHeights(1);
             }
+#endif
         }
         cout << "blah: " << heightTracker.grundyNumber() << endl;
 
