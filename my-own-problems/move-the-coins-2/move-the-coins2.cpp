@@ -933,55 +933,13 @@ int main(int argc, char** argv)
                 heightTracker.insertHeight(height - node->height);
             }
         }
-#if 0
-        for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
-        {
-            const int powerOf2 = (1 << (binaryDigitNum + 1));
-            numNodesWithHeightModuloPowerOf2[binaryDigitNum].clear();
-            numNodesWithHeightModuloPowerOf2[binaryDigitNum].resize(powerOf2 + 1);
-            for (int height = 0; height < numWithHeight.size(); height++)
-            {
-                const int heightModuloPowerOf2 = height % powerOf2;
-                //cout << "About to applyOperatorToAllInRange - binaryDigitNum: " << binaryDigitNum << " heightModuloPowerOf2: " << heightModuloPowerOf2 << endl;
-                bit_up(numNodesWithHeightModuloPowerOf2[binaryDigitNum].data(), numNodesWithHeightModuloPowerOf2[binaryDigitNum].size(), heightModuloPowerOf2, numWithHeight[height]);
-            }
-        }
-#endif
         //cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " <<  << endl;
         const int depthUnderneath = (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height);
         for (int heightChange = -node->height; node->height + heightChange <= largestHeight; heightChange++)
         {
-            //cout << "heightChange: " << heightChange << endl;
             const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
-            //const int newGrundyNumber = grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange);
-#if 0
-            int adjustedXor = 0;
-            for (const auto height : descendentHeights)
-            {
-                const int adjustedHeight = (height + heightChange);
-                assert(adjustedHeight >= 0);
-                adjustedXor ^= adjustedHeight;
-            }
-#endif
-#if 0
-            int relocatedSubtreeGrundyDigits[log2MaxN + 1] = {};
-            countCoinsThatMakeDigitOneAfterHeightChange(heightChange, relocatedSubtreeGrundyDigits);
-            int relocatedSubtreeGrundyNumber = 0;
-            for (int binaryDigitNum = 0; binaryDigitNum <= log2MaxN; binaryDigitNum++)
-            {
-                //relocatedSubtreeGrundyDigits[binaryDigitNum] -= reorderedQuery.originalNodesThatMakeDigitOne[binaryDigitNum];
-                assert(relocatedSubtreeGrundyDigits[binaryDigitNum] >= 0);
-                relocatedSubtreeGrundyNumber += (1 << binaryDigitNum) * (relocatedSubtreeGrundyDigits[binaryDigitNum] % 2);
-            }
-#endif
             int relocatedSubtreeGrundyNumber = heightTracker.grundyNumber();
-            //assert(relocatedSubtreeGrundyNumber == heightTracker.grundyNumber());
-            //cout << "relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << " heightTracker.grundyNumber(): " << heightTracker.grundyNumber() << endl;
             heightTracker.adjustAllHeights(1);
-            //cout << "relocatedSubtreeGrundyNumber: " << relocatedSubtreeGrundyNumber << " adjustedXor: " << adjustedXor << endl;
-            //assert(relocatedSubtreeGrundyNumber == adjustedXor);
-            //const int newGrundyNumber = grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange);
-            //const int newGrundyNumber = grundyNumberMinusSubtree ^ adjustedXor;
             const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
             if (newGrundyNumber == 0)
             {
@@ -991,11 +949,9 @@ int main(int argc, char** argv)
             }
         }
         numNodesProcessed++;
-        //if ((numNodesProcessed % 100) == 0)
-            //cerr << "Processed " << numNodesProcessed << " out of " << numNodes << endl;
     }
     return 0;
-#endif
+#endif // FIND_ZERO_GRUNDYS
 
     const auto result = grundyNumbersForQueries(nodes, queries);
     for (const auto queryResult : result)
