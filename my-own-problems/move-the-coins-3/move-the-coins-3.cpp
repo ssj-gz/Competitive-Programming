@@ -27,6 +27,8 @@ struct Node
     vector<Node*> children;
     int numDescendents = 0;
     bool isParentEdgeHeavy = false;
+
+    int dbgNumVisits = 0;
 };
 
 vector<vector<Node*>> heavyChains;
@@ -36,14 +38,11 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
     node->parent = parentNode;
     if (parentNode)
     {
-        assert(find(node->children.begin(), node->children.end(), parentNode) != node->children.end());
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
     }
 
     for (auto child : node->children)
     {
-        assert(child);
-        assert(child != parentNode);
         node->numDescendents += fixParentChildAndCountDescendants(child, node);
     }
 
@@ -52,13 +51,6 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 
 void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
 {
-    cout << "doHeavyLightDecomposition node:" << node->id << " followedHeavyEdge:" << followedHeavyEdge << endl;
-    cout << "children: ";
-    for (auto child : node->children)
-    {
-        cout << child->id << " ";
-    }
-    cout << endl;
     if (followedHeavyEdge)
     {
         node->isParentEdgeHeavy = true;
@@ -66,8 +58,6 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     }
     else
     {
-        // Start new chain, consisting of just this node for now.
-        cout << "Starting new chain at node: " << node->id << endl;
         heavyChains.push_back({node});
     }
     if (!node->children.empty())
@@ -78,15 +68,32 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
                 });
         iter_swap(node->children.begin(), heaviestChildIter);
         auto heavyChild = node->children.front();
-        assert(heavyChild != node->parent);
-        cout << "heavyChild: " << heavyChild->id << " node: " << node->id << endl;
         doHeavyLightDecomposition(heavyChild, true);
 
         for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
         {
-            assert(*lightChildIter != node->parent);
-            cout << "light child of node: " << node->id <<  " id: " << (*lightChildIter)->id << endl;
             doHeavyLightDecomposition(*lightChildIter, false);
+        }
+    }
+}
+
+void doDfs(Node* node)
+{
+    node->dbgNumVisits++;
+    for (auto child : node->children)
+    {
+        doDfs(child);
+    }
+}
+
+void doLightFirstDFS(Node* node)
+{
+    node->dbgNumVisits++;
+    if (node->children.size() > 0)
+    {
+        for (auto lightChildIter = node->children.begin() + 0; lightChildIter != node->children.end(); lightChildIter++)
+        {
+            doDfs(*lightChildIter);
         }
     }
 }
@@ -280,13 +287,26 @@ class HeightTracker
 };
 
 
-int main()
+int main(int argc, char* argv[])
 {
 #if 1
     struct timeval time;
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 #endif
+    if (argc == 2)
+    {
+        //const int numNodes = rand() % 100'000;
+        const int numNodes = 100'000;
+        const int numEdges = numNodes - 1;
+        cout << numNodes << endl;
+        for (int i = 0; i < numEdges; i++)
+        {
+            const int parentNodeIndex = (rand() % (i + 1)) + 1;
+            cout << (i + 2) << " " << parentNodeIndex << endl;
+        }
+        return 0;
+    }
 
 #if 0
     HeightTracker heightTracker;
@@ -376,7 +396,9 @@ int main()
 
     auto rootNode = &(nodes.front());
     cout << "rootNode: " << rootNode->id << endl;
+    cout << "about to fixParentChildAndCountDescendants" << endl;
     fixParentChildAndCountDescendants(rootNode, nullptr);
+    cout << "done fixParentChildAndCountDescendants" << endl;
     doHeavyLightDecomposition(rootNode, false);
 
     for (const auto& chain : heavyChains)
@@ -387,5 +409,14 @@ int main()
             cout << node->id << " ";
         }
         cout << endl;
+    }
+
+    for (auto& node : nodes)
+    {
+        doLightFirstDFS(&node);
+    }
+    for (auto& node : nodes)
+    {
+        cout << "Node: " << node.id << " visited " << node.dbgNumVisits << " times in doLightFirstDFS" << endl; 
     }
 }
