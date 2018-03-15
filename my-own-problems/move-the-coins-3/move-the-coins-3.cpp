@@ -6,6 +6,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <cassert>
 #include <sys/time.h>
 
@@ -18,6 +19,77 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
         return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
 constexpr auto maxBinaryDigits = log2(maxHeight);
+
+struct Node
+{
+    int id = -1;
+    Node* parent = nullptr;
+    vector<Node*> children;
+    int numDescendents = 0;
+    bool isParentEdgeHeavy = false;
+};
+
+vector<vector<Node*>> heavyChains;
+
+int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
+{
+    node->parent = parentNode;
+    if (parentNode)
+    {
+        assert(find(node->children.begin(), node->children.end(), parentNode) != node->children.end());
+        node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
+    }
+
+    for (auto child : node->children)
+    {
+        assert(child);
+        assert(child != parentNode);
+        node->numDescendents += fixParentChildAndCountDescendants(child, node);
+    }
+
+    return node->numDescendents;
+}
+
+void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
+{
+    cout << "doHeavyLightDecomposition node:" << node->id << " followedHeavyEdge:" << followedHeavyEdge << endl;
+    cout << "children: ";
+    for (auto child : node->children)
+    {
+        cout << child->id << " ";
+    }
+    cout << endl;
+    if (followedHeavyEdge)
+    {
+        node->isParentEdgeHeavy = true;
+        heavyChains.back().push_back(node);
+    }
+    else
+    {
+        // Start new chain, consisting of just this node for now.
+        cout << "Starting new chain at node: " << node->id << endl;
+        heavyChains.push_back({node});
+    }
+    if (!node->children.empty())
+    {
+        auto heaviestChildIter = max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
+                {
+                return lhs->numDescendents < rhs->numDescendents;
+                });
+        iter_swap(node->children.begin(), heaviestChildIter);
+        auto heavyChild = node->children.front();
+        assert(heavyChild != node->parent);
+        cout << "heavyChild: " << heavyChild->id << " node: " << node->id << endl;
+        doHeavyLightDecomposition(heavyChild, true);
+
+        for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
+        {
+            assert(*lightChildIter != node->parent);
+            cout << "light child of node: " << node->id <<  " id: " << (*lightChildIter)->id << endl;
+            doHeavyLightDecomposition(*lightChildIter, false);
+        }
+    }
+}
 
 class HeightTracker
 {
@@ -216,6 +288,7 @@ int main()
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 #endif
 
+#if 0
     HeightTracker heightTracker;
 
     int numInsertions = 0;
@@ -271,5 +344,48 @@ int main()
 
     }
     cout << blah << endl;
+#endif
+    int numNodes;
+    cin >> numNodes;
 
+    cout << "numNodes: " << numNodes << endl;
+
+    vector<Node> nodes(numNodes);
+    for (int nodeIndex = 0; nodeIndex < numNodes; nodeIndex++)
+    {
+        nodes[nodeIndex].id = nodeIndex + 1;
+    }
+
+    for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
+    {
+        int node1;
+        cin >> node1;
+        int node2;
+        cin >> node2;
+        cout << "node1 : " << node1 << " node2: " << node2 << endl;
+        // Make 0-relative.
+        node1--;
+        node2--;
+        assert(cin);
+
+        cout << "edge: " << nodes[node1].id << " - " << nodes[node2].id << endl;
+
+        nodes[node1].children.push_back(&(nodes[node2]));
+        nodes[node2].children.push_back(&(nodes[node1]));
+    }
+
+    auto rootNode = &(nodes.front());
+    cout << "rootNode: " << rootNode->id << endl;
+    fixParentChildAndCountDescendants(rootNode, nullptr);
+    doHeavyLightDecomposition(rootNode, false);
+
+    for (const auto& chain : heavyChains)
+    {
+        cout << "chain: ";
+        for (const auto node : chain)
+        {
+            cout << node->id << " ";
+        }
+        cout << endl;
+    }
 }
