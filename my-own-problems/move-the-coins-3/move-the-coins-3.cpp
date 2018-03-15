@@ -89,9 +89,9 @@ void doDfs(Node* node)
 void doLightFirstDFS(Node* node)
 {
     node->dbgNumVisits++;
-    if (node->children.size() > 0)
+    if (node->children.size() > 1)
     {
-        for (auto lightChildIter = node->children.begin() + 0; lightChildIter != node->children.end(); lightChildIter++)
+        for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
         {
             doDfs(*lightChildIter);
         }
