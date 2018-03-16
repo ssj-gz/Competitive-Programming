@@ -356,8 +356,24 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
             reverse(chain.begin(), chain.end());
         }
     }
+    for (auto& node : nodes)
+    {
+        cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
+        heightTracker.clear();
+        // Collect.
+        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
+                {
+                cout << "Collect for single; node: " << node->id << " depth: " << depth << " has coin: " << node->hasCoin << endl;
+                if (node->hasCoin)
+                {
+                    heightTracker.insertHeight(depth);
+                    }
+                });
+        //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
+        node.grundyNumber ^= heightTracker.grundyNumber();
+    }
 
-#if 1
+#if 0
     for (auto& node : nodes)
     {
         cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
@@ -547,7 +563,7 @@ int main(int argc, char* argv[])
     computeGrundyNumberForAllNodes(nodes);
     for (auto& node : nodes)
     {
-        cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << endl; 
+        cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << " " << (grundyNumberBruteForce(&node) == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
     }
 
 }
