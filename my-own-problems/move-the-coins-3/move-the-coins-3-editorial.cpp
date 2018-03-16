@@ -85,16 +85,14 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
-            auto powerOf2 = 2;
-            auto newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
-            if (newHeightAdjusted < 0)
-            {
-                newHeightAdjusted += (1 << (maxBinaryDigits + 1));
-            }
+            const auto newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment
+                // Add a number guarantees makes newHeightAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
+                + (1 << (maxBinaryDigits + 1)); 
             assert(newHeightAdjusted >= 0);
-            for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            auto powerOf2 = 2;
+            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                const int heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1);
+                const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1);
                 numHeightsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
@@ -105,8 +103,8 @@ class HeightTracker
                 }
                 else
                 {
-                    const int makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
-                    const int makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
+                    const auto makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
+                    const auto makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
                     assert(makeDigitZeroBegin <= makeDigitZeroEnd);
                     assert(0 <= makeDigitZeroEnd < powerOf2);
                     assert(0 <= makeDigitZeroBegin < powerOf2);
