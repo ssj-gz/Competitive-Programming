@@ -1,5 +1,5 @@
 #define VERIFY_HEIGHT_TRACKER
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY_HEIGHT_TRACKER
@@ -23,8 +23,10 @@ constexpr auto maxBinaryDigits = log2(maxHeight);
 struct Node
 {
     int id = -1;
+    bool hasCoin = false;
     Node* parent = nullptr;
     vector<Node*> children;
+    vector<Node*> neighbours;
     int numDescendents = 0;
     bool isParentEdgeHeavy = false;
 
@@ -77,23 +79,25 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     }
 }
 
-void doDfs(Node* node)
+template <typename NodeProcessor>
+void doDfs(Node* node, int depth, NodeProcessor& nodeProcessor)
 {
-    node->dbgNumVisits++;
+    nodeProcessor(node, depth);
     for (auto child : node->children)
     {
-        doDfs(child);
+        doDfs(child, depth + 1, nodeProcessor);
     }
 }
 
-void doLightFirstDFS(Node* node)
+template <typename NodeProcessor>
+void doLightFirstDFS(Node* node, NodeProcessor nodeProcessor)
 {
-    node->dbgNumVisits++;
+    nodeProcessor(node, 0);
     if (node->children.size() > 1)
     {
         for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
         {
-            doDfs(*lightChildIter);
+            doDfs(*lightChildIter, 1, nodeProcessor);
         }
     }
 }
@@ -286,6 +290,19 @@ class HeightTracker
         int m_smallestHeight = 0;
 };
 
+int grundyNumberBruteForce(Node* node, Node* parent = nullptr, int depth = 0)
+{
+    int grundyNumber = (node->hasCoin ? depth : 0);
+    for (const auto child : node->neighbours)
+    {
+        if (child == parent)
+            continue;
+
+        grundyNumber ^= grundyNumberBruteForce(child, node, depth + 1);
+    }
+    return grundyNumber;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -392,7 +409,20 @@ int main(int argc, char* argv[])
 
         nodes[node1].children.push_back(&(nodes[node2]));
         nodes[node2].children.push_back(&(nodes[node1]));
+
+        nodes[node1].neighbours.push_back(&(nodes[node2]));
+        nodes[node2].neighbours.push_back(&(nodes[node1]));
     }
+
+    for (int i = 0; i < numNodes; i++)
+    {
+        int numCoins;
+        cin >> numCoins;
+        cout << "numCoins: " << numCoins << endl;
+
+        nodes[i].hasCoin = ((numCoins % 2) == 1);
+    }
+    assert(cin);
 
     auto rootNode = &(nodes.front());
     cout << "rootNode: " << rootNode->id << endl;
@@ -413,10 +443,18 @@ int main(int argc, char* argv[])
 
     for (auto& node : nodes)
     {
-        doLightFirstDFS(&node);
+        doLightFirstDFS(&node, [](Node* node, int depth)
+                {
+                    node->dbgNumVisits++;
+                });
     }
     for (auto& node : nodes)
     {
         cout << "Node: " << node.id << " visited " << node.dbgNumVisits << " times in doLightFirstDFS" << endl; 
+    }
+
+    for (auto& node : nodes)
+    {
+        cout << "Node: " << node.id << " grundy number: " << grundyNumberBruteForce(&node) << endl; 
     }
 }
