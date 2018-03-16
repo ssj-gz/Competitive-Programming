@@ -311,7 +311,6 @@ void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdju
     }
 }
 
-
 int grundyNumberBruteForce(Node* node, Node* parent = nullptr, int depth = 0)
 {
     int grundyNumber = (node->hasCoin ? depth : 0);
@@ -344,12 +343,9 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
         for (int i = 0; i < 2; i++)
         {
             heightTracker.clear();
-            cout << "New chain" <<  endl;
             for (auto node : chain)
             {
-                cout << " node in chain: " << node->id << endl;
                 heightTracker.adjustAllHeights(1);
-                //node->grundyNumber ^= heightTracker.grundyNumber();
                 // Broadcast.
                 doLightFirstDFS(node, heightTracker, AdjustUpWithDepth, broadcast);
                 // Collect.
@@ -358,90 +354,38 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
             reverse(chain.begin(), chain.end());
         }
     }
-#if 1
     for (auto& node : nodes)
     {
-        cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
         heightTracker.clear();
         if (node.children.empty())
             continue;
-        // Collect.
-        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
-                {
-                cout << "Collect for single; node: " << node->id << " depth: " << depth << " has coin: " << node->hasCoin << endl;
-                if (node->hasCoin)
-                {
-                    heightTracker.insertHeight(depth);
-                    }
-                });
-        //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
+        // Collect and update node from all its light-first descendents.
+        doLightFirstDFS(&node, heightTracker, DoNotAdjust, collect);
         node.grundyNumber ^= heightTracker.grundyNumber();
-        vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
-        for (int i = 0; i < 2; i++)
+        // Broadcast this nodes coin info to descendents.
+        if (node.hasCoin)
         {
             heightTracker.clear();
-            if (node.hasCoin && i == 0)
-            {
-                cout << "node " << node.id << " has coin" << endl;
-                heightTracker.insertHeight(0);
-            }
-            for (auto child : lightChildren)
-            {
-                cout << " doing dfs from child: " << child->id << endl;
-                doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
-                doDfs(child, 1, heightTracker, DoNotAdjust, collect);
-            }
-            reverse(lightChildren.begin(), lightChildren.end());
+            heightTracker.insertHeight(0);
+            doLightFirstDFS(&node, heightTracker, AdjustUpWithDepth, broadcast);
+        }
+        // Broadcast light-first descendent info to other light-first descendents.
+        vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
+        heightTracker.clear();
+        for (auto child : lightChildren)
+        {
+            doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
+            doDfs(child, 1, heightTracker, DoNotAdjust, collect);
+        }
+        reverse(lightChildren.begin(), lightChildren.end());
+        // ... and again, using reversed order of children.
+        heightTracker.clear();
+        for (auto child : lightChildren)
+        {
+            doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
+            doDfs(child, 1, heightTracker, DoNotAdjust, collect);
         }
     }
-#endif
-#if 0
-        // Collect.
-        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
-                {
-                cout << "Collect for single; node: " << node->id << " depth: " << depth << " has coin: " << node->hasCoin << endl;
-                if (node->hasCoin)
-                {
-                    heightTracker.insertHeight(depth);
-                    }
-                });
-        //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
-        node.grundyNumber ^= heightTracker.grundyNumber();
-#endif
-
-
-#if 0
-    for (auto& node : nodes)
-    {
-        cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
-        heightTracker.clear();
-        // Collect.
-        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
-                {
-                cout << "Collect for single; node: " << node->id << " depth: " << depth << " has coin: " << node->hasCoin << endl;
-                if (node->hasCoin)
-                {
-                    heightTracker.insertHeight(depth);
-                    }
-                });
-        //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
-        //node.grundyNumber ^= heightTracker.grundyNumber();
-        cout << " collected grundy number: " << heightTracker.grundyNumber() << endl;
-        heightTracker.printHeights();
-        // Broadcast, with adjustments.
-        doLightFirstDFS(&node, heightTracker, AdjustDownWithDepth, [&heightTracker](Node* node, int depth)
-                {
-                node->grundyNumber ^= heightTracker.grundyNumber();
-                if (node->hasCoin)
-                {
-                //node->grundyNumber ^= (2 * depth);
-                //cout << "Set node " << node->id << " to " << node->grundyNumber << " during reflection adjustment" << endl;
-                }
-                });
-    }
-#endif
-
-
 
     return grundyNumbers;
 }
@@ -471,63 +415,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-#if 0
-    HeightTracker heightTracker;
-
-    int numInsertions = 0;
-    int numAdjustments = 0;
-    int numAdjustmentsUp = 0;
-    int numAdjustmentsDown = 0;
-    int totalNumInsertions = 0;
-    int totalNumAdjustments = 0;
-    int64_t blah = 0;
-    while (true)
-    {
-        if (rand() % 100'000 == 0)
-        {
-            //cout << "numInsertions: " << numInsertions << " numAdjustments: " << numAdjustments << " (up: " << numAdjustmentsUp << " down: " << numAdjustmentsDown << ")" << " totalNumInsertions: " << totalNumInsertions << " totalNumAdjustments: " << totalNumAdjustments << endl;
-            heightTracker.clear();
-            numInsertions = 0;
-            numAdjustments = 0;
-            numAdjustmentsUp = 0;
-            numAdjustmentsDown = 0;
-        }
-        if (rand() % 2 == 0)
-        {
-            const int newHeight = rand() % maxHeight;
-            heightTracker.insertHeight(newHeight);
-            numInsertions++;
-            totalNumInsertions++;
-        }
-        else
-        {
-            if (rand() % 3 == 0 && heightTracker.canDecreaseHeights())
-            {
-                heightTracker.adjustAllHeights(-1);
-                numAdjustments++;
-                numAdjustmentsDown++;
-                totalNumAdjustments++;
-            }
-            else
-            {
-                if (heightTracker.canIncreaseHeights())
-                {
-                    heightTracker.adjustAllHeights(1);
-                    numAdjustments++;
-                    numAdjustmentsUp++;
-                    totalNumAdjustments++;
-                }
-            }
-        }
-        //cout << "blah: " << heightTracker.grundyNumber() << endl;
-        blah += heightTracker.grundyNumber();
-
-        if (totalNumInsertions + totalNumAdjustments >= 10'000'000)
-            break;
-
-    }
-    cout << blah << endl;
-#endif
     int numNodes;
     cin >> numNodes;
 
@@ -567,40 +454,13 @@ int main(int argc, char* argv[])
         cout << "numCoins: " << numCoins << endl;
 
         nodes[i].hasCoin = ((numCoins % 2) == 1);
-        nodes[i].hasCoin = rand() % 2;
+        //nodes[i].hasCoin = rand() % 2;
     }
     assert(cin);
 
     auto rootNode = &(nodes.front());
-    cout << "rootNode: " << rootNode->id << endl;
-    cout << "about to fixParentChildAndCountDescendants" << endl;
     fixParentChildAndCountDescendants(rootNode, nullptr);
-    cout << "done fixParentChildAndCountDescendants" << endl;
     doHeavyLightDecomposition(rootNode, false);
-
-    for (const auto& chain : heavyChains)
-    {
-        cout << "chain: ";
-        for (const auto node : chain)
-        {
-            cout << node->id << " ";
-        }
-        cout << endl;
-    }
-
-#if 0
-    for (auto& node : nodes)
-    {
-        doLightFirstDFS(&node, [](Node* node, int depth)
-                {
-                    node->dbgNumVisits++;
-                });
-    }
-    for (auto& node : nodes)
-    {
-        cout << "Node: " << node.id << " visited " << node.dbgNumVisits << " times in doLightFirstDFS" << endl; 
-    }
-#endif
 
     computeGrundyNumberForAllNodes(nodes);
     for (auto& node : nodes)
