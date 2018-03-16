@@ -309,7 +309,7 @@ int grundyNumberBruteForce(Node* node, Node* parent = nullptr, int depth = 0)
 }
 
 
-vector<int> computeGrundyNumberForAllNodes()
+vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
 {
     vector<int> grundyNumbers;
     HeightTracker heightTracker;
@@ -327,18 +327,44 @@ vector<int> computeGrundyNumberForAllNodes()
                 // Broadcast.
                 doLightFirstDFS(node, heightTracker, true, [&heightTracker](Node* node, int depth)
                         {
-                        node->grundyNumber ^= heightTracker.grundyNumber();
+                            node->grundyNumber ^= heightTracker.grundyNumber();
                         });
                 // Collect.
                 doLightFirstDFS(node, heightTracker, false, [&heightTracker](Node* node, int depth)
                         {
-                        if (node->hasCoin)
-                        heightTracker.insertHeight(depth);
+                            if (node->hasCoin)
+                                heightTracker.insertHeight(depth);
                         });
             }
             reverse(chain.begin(), chain.end());
         }
     }
+
+#if 1
+    for (auto& node : nodes)
+    {
+        cout << "Handling single nodes; node: " << node.id << endl;
+        heightTracker.clear();
+        // Collect.
+        doLightFirstDFS(&node, heightTracker, false, [&heightTracker](Node* node, int depth)
+                {
+                    if (node->hasCoin)
+                        heightTracker.insertHeight(depth);
+                });
+        cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
+        //node.grundyNumber ^= heightTracker.grundyNumber();
+        // Broadcast, with adjustments.
+        doLightFirstDFS(&node, heightTracker, true, [&heightTracker](Node* node, int depth)
+                {
+                    node->grundyNumber ^= heightTracker.grundyNumber();
+                    if (node->hasCoin)
+                        node->grundyNumber ^= (2 * depth);
+                });
+    }
+#endif
+
+
+
     return grundyNumbers;
 }
 
@@ -493,7 +519,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    computeGrundyNumberForAllNodes();
+    computeGrundyNumberForAllNodes(nodes);
     for (auto& node : nodes)
     {
         cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << endl; 
