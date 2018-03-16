@@ -39,6 +39,7 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
     return node->numDescendants;
 }
 
+// Build up heavyChains; move the heavy child of each node to the front of that node's children.
 void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
 {
     if (followedHeavyEdge)
@@ -268,7 +269,8 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
     }
     for (auto& node : nodes)
     {
-        if (node.children.empty())
+        const bool hasLightChildren = (node.children.size() > 1);
+        if (!hasLightChildren)
             continue;
         // Collect and update node with height info from all its light-first descendants.
         heightTracker.clear();
