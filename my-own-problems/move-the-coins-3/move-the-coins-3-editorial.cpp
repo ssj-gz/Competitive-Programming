@@ -308,7 +308,7 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
     int numBlah = 0;
     for (auto& node : nodes)
     {
-        cout << node.grundyNumber << endl;
+        cout << node.grundyNumber << '\n';
         if (node.grundyNumber == 0)
             numBlah++;
     }
