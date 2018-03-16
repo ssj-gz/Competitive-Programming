@@ -31,14 +31,10 @@ vector<vector<Node*>> heavyChains;
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 {
     if (parentNode)
-    {
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
-    }
 
     for (auto child : node->children)
-    {
         node->numDescendents += fixParentChildAndCountDescendants(child, node);
-    }
 
     return node->numDescendents;
 }
@@ -47,10 +43,12 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
 {
     if (followedHeavyEdge)
     {
+        // Continue this chain.
         heavyChains.back().push_back(node);
     }
     else
     {
+        // Start a new chain.
         heavyChains.push_back({node});
     }
     if (!node->children.empty())
@@ -64,9 +62,7 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
         doHeavyLightDecomposition(heavyChild, true);
 
         for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
-        {
             doHeavyLightDecomposition(*lightChildIter, false);
-        }
     }
 }
 
@@ -132,9 +128,10 @@ class HeightTracker
             assert(heightDiff == 1 || heightDiff == -1);
             m_cumulativeHeightAdjustment += heightDiff;
             m_smallestHeight += heightDiff;
+
+            int powerOf2 = 2;
             if (heightDiff == 1)
             {
-                int powerOf2 = 2;
                 for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
@@ -154,7 +151,6 @@ class HeightTracker
             }
             else
             {
-                int powerOf2 = 2;
                 for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
@@ -216,21 +212,19 @@ class HeightTracker
         int m_smallestHeight = 0;
 };
 
-enum HeightTrackerAdjustment {DoNotAdjust, AdjustUpWithDepth};
+enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 template <typename NodeProcessor>
 void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& nodeProcessor)
 {
-    if (heightTrackerAdjustment == AdjustUpWithDepth)
+    if (heightTrackerAdjustment == AdjustWithDepth)
         heightTracker.adjustAllHeights(1);
 
     nodeProcessor(node, depth);
 
     for (auto child : node->children)
-    {
         doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, nodeProcessor);
-    }
 
-    if (heightTrackerAdjustment == AdjustUpWithDepth)
+    if (heightTrackerAdjustment == AdjustWithDepth)
         heightTracker.adjustAllHeights(-1);
 }
 
@@ -251,12 +245,12 @@ void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdju
 void computeGrundyNumberForAllNodes(vector<Node>& nodes)
 {
     HeightTracker heightTracker;
-    auto collect = [&heightTracker](Node* node, int depth)
+    auto collectHeights = [&heightTracker](Node* node, int depth)
                         {
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
-    auto broadcast = [&heightTracker](Node* node, int depth)
+    auto broadcastHeights = [&heightTracker](Node* node, int depth)
                         {
                             node->grundyNumber ^= heightTracker.grundyNumber();
                         };
@@ -269,8 +263,8 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
             for (auto node : chain)
             {
                 heightTracker.adjustAllHeights(1);
-                doLightFirstDFS(node, heightTracker, AdjustUpWithDepth, broadcast);
-                doLightFirstDFS(node, heightTracker, DoNotAdjust, collect);
+                doLightFirstDFS(node, heightTracker, AdjustWithDepth, broadcastHeights);
+                doLightFirstDFS(node, heightTracker, DoNotAdjust, collectHeights);
             }
             // Now do it backwards.
             reverse(chain.begin(), chain.end());
@@ -282,30 +276,30 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
             continue;
         // Collect and update node from all its light-first descendents.
         heightTracker.clear();
-        doLightFirstDFS(&node, heightTracker, DoNotAdjust, collect);
+        doLightFirstDFS(&node, heightTracker, DoNotAdjust, collectHeights);
         node.grundyNumber ^= heightTracker.grundyNumber();
         // Broadcast this nodes' coin info to descendents.
         if (node.hasCoin)
         {
             heightTracker.clear();
             heightTracker.insertHeight(0);
-            doLightFirstDFS(&node, heightTracker, AdjustUpWithDepth, broadcast);
+            doLightFirstDFS(&node, heightTracker, AdjustWithDepth, broadcastHeights);
         }
         // Broadcast light-first descendent info to other light-first descendents.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
         for (auto lightChild : lightChildren)
         {
-            doDfs(lightChild, 1, heightTracker, AdjustUpWithDepth, broadcast);
-            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collect);
+            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, broadcastHeights);
+            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
         }
         reverse(lightChildren.begin(), lightChildren.end());
         // ... and again, using reversed order of children.
         heightTracker.clear();
         for (auto lightChild : lightChildren)
         {
-            doDfs(lightChild, 1, heightTracker, AdjustUpWithDepth, broadcast);
-            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collect);
+            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, broadcastHeights);
+            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
         }
     }
 
@@ -337,10 +331,8 @@ int main(int argc, char* argv[])
         node1--;
         node2--;
 
-
         nodes[node1].children.push_back(&(nodes[node2]));
         nodes[node2].children.push_back(&(nodes[node1]));
-
     }
 
     for (int i = 0; i < numNodes; i++)
@@ -356,5 +348,4 @@ int main(int argc, char* argv[])
     doHeavyLightDecomposition(rootNode, false);
 
     computeGrundyNumberForAllNodes(nodes);
-
 }
