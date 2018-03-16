@@ -250,6 +250,15 @@ class HeightTracker
 #endif
         }
 #ifdef VERIFY_HEIGHT_TRACKER
+        void printHeights() const
+        {
+            cout << "Heights in height tracker: ";
+            for (const auto height : m_dbgHeights)
+            {
+                cout << height << " ";
+            }
+            cout << endl;
+        }
         vector<int> m_dbgHeights;
 #endif
         struct VersionedValue
@@ -267,29 +276,37 @@ class HeightTracker
         int m_versionNumber = 0;
         int m_smallestHeight = 0;
 };
+enum HeightTrackerAdjustment {DoNotAdjust, AdjustUpWithDepth, AdjustDownWithDepth};
 template <typename NodeProcessor>
-void doDfs(Node* node, int depth, HeightTracker& heightTracker, bool adjustHeightTracker, NodeProcessor& nodeProcessor)
+void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& nodeProcessor)
 {
-    if (adjustHeightTracker)
+    if (heightTrackerAdjustment == AdjustUpWithDepth)
         heightTracker.adjustAllHeights(1);
+    if (heightTrackerAdjustment == AdjustDownWithDepth)
+        heightTracker.adjustAllHeights(-1);
+
     nodeProcessor(node, depth);
+
     for (auto child : node->children)
     {
-        doDfs(child, depth + 1, heightTracker, adjustHeightTracker, nodeProcessor);
+        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, nodeProcessor);
     }
-    if (adjustHeightTracker)
+
+    if (heightTrackerAdjustment == AdjustUpWithDepth)
         heightTracker.adjustAllHeights(-1);
+    if (heightTrackerAdjustment == AdjustDownWithDepth)
+        heightTracker.adjustAllHeights(1);
 }
 
 template <typename NodeProcessor>
-void doLightFirstDFS(Node* node, HeightTracker& heightTracker, bool adjustHeightTracker, NodeProcessor nodeProcessor)
+void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor nodeProcessor)
 {
     nodeProcessor(node, 0);
     if (node->children.size() > 1)
     {
         for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
         {
-            doDfs(*lightChildIter, 1, heightTracker, adjustHeightTracker, nodeProcessor);
+            doDfs(*lightChildIter, 1, heightTracker, heightTrackerAdjustment, nodeProcessor);
         }
     }
 }
@@ -325,15 +342,15 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
                 heightTracker.adjustAllHeights(1);
                 //node->grundyNumber ^= heightTracker.grundyNumber();
                 // Broadcast.
-                doLightFirstDFS(node, heightTracker, true, [&heightTracker](Node* node, int depth)
+                doLightFirstDFS(node, heightTracker, AdjustUpWithDepth, [&heightTracker](Node* node, int depth)
                         {
-                            node->grundyNumber ^= heightTracker.grundyNumber();
+                        node->grundyNumber ^= heightTracker.grundyNumber();
                         });
                 // Collect.
-                doLightFirstDFS(node, heightTracker, false, [&heightTracker](Node* node, int depth)
+                doLightFirstDFS(node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
                         {
-                            if (node->hasCoin)
-                                heightTracker.insertHeight(depth);
+                        if (node->hasCoin)
+                        heightTracker.insertHeight(depth);
                         });
             }
             reverse(chain.begin(), chain.end());
@@ -343,22 +360,30 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
 #if 1
     for (auto& node : nodes)
     {
-        cout << "Handling single nodes; node: " << node.id << endl;
+        cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
         heightTracker.clear();
         // Collect.
-        doLightFirstDFS(&node, heightTracker, false, [&heightTracker](Node* node, int depth)
+        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
                 {
-                    if (node->hasCoin)
-                        heightTracker.insertHeight(depth);
+                cout << "Collect for single; node: " << node->id << " depth: " << depth << " has coin: " << node->hasCoin << endl;
+                if (node->hasCoin)
+                {
+                    heightTracker.insertHeight(depth);
+                    }
                 });
-        cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
+        //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
         //node.grundyNumber ^= heightTracker.grundyNumber();
+        cout << " collected grundy number: " << heightTracker.grundyNumber() << endl;
+        heightTracker.printHeights();
         // Broadcast, with adjustments.
-        doLightFirstDFS(&node, heightTracker, true, [&heightTracker](Node* node, int depth)
+        doLightFirstDFS(&node, heightTracker, AdjustDownWithDepth, [&heightTracker](Node* node, int depth)
                 {
-                    node->grundyNumber ^= heightTracker.grundyNumber();
-                    if (node->hasCoin)
-                        node->grundyNumber ^= (2 * depth);
+                node->grundyNumber ^= heightTracker.grundyNumber();
+                if (node->hasCoin)
+                {
+                //node->grundyNumber ^= (2 * depth);
+                //cout << "Set node " << node->id << " to " << node->grundyNumber << " during reflection adjustment" << endl;
+                }
                 });
     }
 #endif
