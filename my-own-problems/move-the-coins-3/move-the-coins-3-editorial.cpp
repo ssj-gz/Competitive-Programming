@@ -276,16 +276,18 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         const bool hasLightChildren = (node.children.size() > 1);
         if (!hasLightChildren)
             continue;
-        // Collect and update node with height info from all its light-first descendants.
-        heightTracker.clear();
-        doLightFirstDFS(&node, heightTracker, DoNotAdjust, collectHeights);
-        node.grundyNumber ^= heightTracker.grundyNumber();
+        // Update node with height info from all its light-first descendants.
+        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&node](Node* descendantNode, int depth) 
+                { 
+                    if (descendantNode->hasCoin) node.grundyNumber ^= depth; 
+                });
         if (node.hasCoin)
         {
             // Broadcast this nodes' coin info to descendants.
-            heightTracker.clear();
-            heightTracker.insertHeight(0);
-            doLightFirstDFS(&node, heightTracker, AdjustWithDepth, broadcastHeights);
+            doLightFirstDFS(&node, heightTracker, DoNotAdjust, [](Node* node, int depth) 
+                    { 
+                        node->grundyNumber ^= depth; 
+                    });
         }
         // Broadcast light-first descendant info to other light-first descendants.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
