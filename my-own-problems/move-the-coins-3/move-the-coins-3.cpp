@@ -276,14 +276,12 @@ class HeightTracker
         int m_versionNumber = 0;
         int m_smallestHeight = 0;
 };
-enum HeightTrackerAdjustment {DoNotAdjust, AdjustUpWithDepth, AdjustDownWithDepth};
+enum HeightTrackerAdjustment {DoNotAdjust, AdjustUpWithDepth};
 template <typename NodeProcessor>
 void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& nodeProcessor)
 {
     if (heightTrackerAdjustment == AdjustUpWithDepth)
         heightTracker.adjustAllHeights(1);
-    if (heightTrackerAdjustment == AdjustDownWithDepth)
-        heightTracker.adjustAllHeights(-1);
 
     nodeProcessor(node, depth);
 
@@ -294,8 +292,6 @@ void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdj
 
     if (heightTrackerAdjustment == AdjustUpWithDepth)
         heightTracker.adjustAllHeights(-1);
-    if (heightTrackerAdjustment == AdjustDownWithDepth)
-        heightTracker.adjustAllHeights(1);
 }
 
 template <typename NodeProcessor>
@@ -331,38 +327,38 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
     HeightTracker heightTracker;
     auto collect = [&heightTracker](Node* node, int depth)
                         {
-                        if (node->hasCoin)
-                        heightTracker.insertHeight(depth);
+                            if (node->hasCoin)
+                                heightTracker.insertHeight(depth);
                         };
     auto broadcast = [&heightTracker](Node* node, int depth)
                         {
-                        node->grundyNumber ^= heightTracker.grundyNumber();
+                            node->grundyNumber ^= heightTracker.grundyNumber();
                         };
     for (auto& chain : heavyChains)
     {
         for (int i = 0; i < 2; i++)
         {
             heightTracker.clear();
+            // Crawl along chain, collecting from one node and broadcasting to the next.
             for (auto node : chain)
             {
                 heightTracker.adjustAllHeights(1);
-                // Broadcast.
                 doLightFirstDFS(node, heightTracker, AdjustUpWithDepth, broadcast);
-                // Collect.
                 doLightFirstDFS(node, heightTracker, DoNotAdjust, collect);
             }
+            // Now do it backwards.
             reverse(chain.begin(), chain.end());
         }
     }
     for (auto& node : nodes)
     {
-        heightTracker.clear();
         if (node.children.empty())
             continue;
         // Collect and update node from all its light-first descendents.
+        heightTracker.clear();
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, collect);
         node.grundyNumber ^= heightTracker.grundyNumber();
-        // Broadcast this nodes coin info to descendents.
+        // Broadcast this nodes' coin info to descendents.
         if (node.hasCoin)
         {
             heightTracker.clear();
@@ -399,7 +395,7 @@ int main(int argc, char* argv[])
 #endif
     if (argc == 2)
     {
-        const int numNodes = rand() % 20 + 1;
+        const int numNodes = rand() % 100 + 1;
         //const int numNodes = 100'000;
         const int numEdges = numNodes - 1;
         cout << numNodes << endl;
