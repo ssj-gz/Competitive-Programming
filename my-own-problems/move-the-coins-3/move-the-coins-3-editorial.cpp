@@ -247,7 +247,7 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
-    auto broadcastHeights = [&heightTracker](Node* node, int depth)
+    auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
                             node->grundyNumber ^= heightTracker.grundyNumber();
                         };
@@ -256,13 +256,13 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         for (int i = 0; i < 2; i++)
         {
             heightTracker.clear();
-            // Crawl along chain, collecting from one node and broadcasting to the next.
+            // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
-                // Adjust the heights we collected from previous node in the chain, and broadcast it to
+                // Adjust the heights we collected from previous node in the chain, and propagate it to
                 // light-first descendants of this node.
                 heightTracker.adjustAllHeights(1);
-                doLightFirstDFS(node, heightTracker, AdjustWithDepth, broadcastHeights);
+                doLightFirstDFS(node, heightTracker, AdjustWithDepth, propagateHeights);
                 
                 // Collect heights from light-first descendants.
                 doLightFirstDFS(node, heightTracker, DoNotAdjust, collectHeights);
@@ -284,18 +284,18 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
                 });
         if (node.hasCoin)
         {
-            // Broadcast this nodes' coin info to descendants.
+            // Propagate this nodes' coin info to descendants.
             doLightFirstDFS(&node, heightTracker, DoNotAdjust, [](Node* node, int depth) 
                     { 
                         node->grundyNumber ^= depth; 
                     });
         }
-        // Broadcast light-first descendant info to other light-first descendants.
+        // Propagate light-first descendant info to other light-first descendants.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
         for (auto lightChild : lightChildren)
         {
-            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, broadcastHeights);
+            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
             doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
         }
         reverse(lightChildren.begin(), lightChildren.end());
@@ -303,7 +303,7 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         heightTracker.clear();
         for (auto lightChild : lightChildren)
         {
-            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, broadcastHeights);
+            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
             doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
         }
     }
