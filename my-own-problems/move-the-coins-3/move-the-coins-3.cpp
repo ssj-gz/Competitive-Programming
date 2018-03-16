@@ -330,6 +330,15 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
 {
     vector<int> grundyNumbers;
     HeightTracker heightTracker;
+    auto collect = [&heightTracker](Node* node, int depth)
+                        {
+                        if (node->hasCoin)
+                        heightTracker.insertHeight(depth);
+                        };
+    auto broadcast = [&heightTracker](Node* node, int depth)
+                        {
+                        node->grundyNumber ^= heightTracker.grundyNumber();
+                        };
     for (auto& chain : heavyChains)
     {
         for (int i = 0; i < 2; i++)
@@ -342,16 +351,9 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
                 heightTracker.adjustAllHeights(1);
                 //node->grundyNumber ^= heightTracker.grundyNumber();
                 // Broadcast.
-                doLightFirstDFS(node, heightTracker, AdjustUpWithDepth, [&heightTracker](Node* node, int depth)
-                        {
-                        node->grundyNumber ^= heightTracker.grundyNumber();
-                        });
+                doLightFirstDFS(node, heightTracker, AdjustUpWithDepth, broadcast);
                 // Collect.
-                doLightFirstDFS(node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
-                        {
-                        if (node->hasCoin)
-                        heightTracker.insertHeight(depth);
-                        });
+                doLightFirstDFS(node, heightTracker, DoNotAdjust, collect);
             }
             reverse(chain.begin(), chain.end());
         }
@@ -360,6 +362,8 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
     {
         cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
         heightTracker.clear();
+        if (node.children.empty())
+            continue;
         // Collect.
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
                 {
@@ -371,7 +375,32 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
                 });
         //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
         node.grundyNumber ^= heightTracker.grundyNumber();
+        vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
+        for (int i = 0; i < 2; i++)
+        {
+            heightTracker.clear();
+            for (auto child : lightChildren)
+            {
+                doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
+                doDfs(child, 1, heightTracker, DoNotAdjust, collect);
+            }
+            reverse(lightChildren.begin(), lightChildren.end());
+        }
     }
+#if 0
+        // Collect.
+        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
+                {
+                cout << "Collect for single; node: " << node->id << " depth: " << depth << " has coin: " << node->hasCoin << endl;
+                if (node->hasCoin)
+                {
+                    heightTracker.insertHeight(depth);
+                    }
+                });
+        //cout << "Updating node " << node.id << " with grundy number: " << heightTracker.grundyNumber() << endl;
+        node.grundyNumber ^= heightTracker.grundyNumber();
+#endif
+
 
 #if 0
     for (auto& node : nodes)
