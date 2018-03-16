@@ -31,6 +31,7 @@ struct Node
     bool isParentEdgeHeavy = false;
 
     int dbgNumVisits = 0;
+    int grundyNumber = 0;
 };
 
 vector<vector<Node*>> heavyChains;
@@ -304,6 +305,28 @@ int grundyNumberBruteForce(Node* node, Node* parent = nullptr, int depth = 0)
 }
 
 
+vector<int> computeGrundyNumberForAllNodes()
+{
+    vector<int> grundyNumbers;
+    HeightTracker heightTracker;
+    for (const auto& chain : heavyChains)
+    {
+        heightTracker.clear();
+        cout << "New chain" <<  endl;
+        for (auto node : chain)
+        {
+            heightTracker.adjustAllHeights(1);
+            node->grundyNumber ^= heightTracker.grundyNumber();
+            doLightFirstDFS(node, [&heightTracker](Node* node, int depth)
+                    {
+                        if (node->hasCoin)
+                            heightTracker.insertHeight(depth);
+                    });
+        }
+    }
+    return grundyNumbers;
+}
+
 int main(int argc, char* argv[])
 {
 #if 1
@@ -453,8 +476,10 @@ int main(int argc, char* argv[])
         cout << "Node: " << node.id << " visited " << node.dbgNumVisits << " times in doLightFirstDFS" << endl; 
     }
 
+    computeGrundyNumberForAllNodes();
     for (auto& node : nodes)
     {
-        cout << "Node: " << node.id << " grundy number: " << grundyNumberBruteForce(&node) << endl; 
+        cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << endl; 
     }
+
 }
