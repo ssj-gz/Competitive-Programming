@@ -358,6 +358,7 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
             reverse(chain.begin(), chain.end());
         }
     }
+#if 1
     for (auto& node : nodes)
     {
         cout << "Handling single nodes; node: " << node.id << " grundyNumber: " << node.grundyNumber << endl;
@@ -379,14 +380,21 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
         for (int i = 0; i < 2; i++)
         {
             heightTracker.clear();
+            if (node.hasCoin && i == 0)
+            {
+                cout << "node " << node.id << " has coin" << endl;
+                heightTracker.insertHeight(0);
+            }
             for (auto child : lightChildren)
             {
+                cout << " doing dfs from child: " << child->id << endl;
                 doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
                 doDfs(child, 1, heightTracker, DoNotAdjust, collect);
             }
             reverse(lightChildren.begin(), lightChildren.end());
         }
     }
+#endif
 #if 0
         // Collect.
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&heightTracker](Node* node, int depth)
@@ -555,6 +563,7 @@ int main(int argc, char* argv[])
         cout << "numCoins: " << numCoins << endl;
 
         nodes[i].hasCoin = ((numCoins % 2) == 1);
+        nodes[i].hasCoin = rand() % 2;
     }
     assert(cin);
 
