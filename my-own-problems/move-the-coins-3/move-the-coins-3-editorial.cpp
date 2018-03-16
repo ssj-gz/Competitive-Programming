@@ -75,8 +75,8 @@ class HeightTracker
             m_makesDigitOneBegin.resize(maxBinaryDigits + 1);
             m_makesDigitOneEnd.resize(maxBinaryDigits + 1);
 
-            int powerOf2 = 2;
-            for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            auto powerOf2 = 2;
+            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
                 m_heightsModPowerOf2.push_back(vector<VersionedValue>(powerOf2));
                 powerOf2 <<= 1;
@@ -85,8 +85,8 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
-            int powerOf2 = 2;
-            int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
+            auto powerOf2 = 2;
+            auto newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
             if (newHeightAdjusted < 0)
             {
                 newHeightAdjusted += (1 << (maxBinaryDigits + 1));
@@ -127,14 +127,14 @@ class HeightTracker
             assert(heightDiff == 1 || heightDiff == -1);
             m_cumulativeHeightAdjustment += heightDiff;
 
-            int powerOf2 = 2;
+            auto powerOf2 = 2;
             if (heightDiff == 1)
             {
-                for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+                for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
-                    int changeToNumberOfHeightsThatMakeDigitsOne = 0;
+                    auto changeToNumberOfHeightsThatMakeDigitsOne = 0;
                     changeToNumberOfHeightsThatMakeDigitsOne -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
                     m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) % powerOf2;
 
@@ -149,10 +149,10 @@ class HeightTracker
             }
             else
             {
-                for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+                for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
-                    int changeToNumberOfHeightsThatMakeDigitsOne = 0;
+                    auto changeToNumberOfHeightsThatMakeDigitsOne = 0;
                     changeToNumberOfHeightsThatMakeDigitsOne -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
                     m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) % powerOf2;
 
@@ -183,8 +183,8 @@ class HeightTracker
         void clear()
         {
             m_versionNumber++;
-            int powerOf2 = 2;
-            for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            auto powerOf2 = 2;
+            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
                 m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
                 m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
@@ -259,8 +259,12 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
             // Crawl along chain, collecting from one node and broadcasting to the next.
             for (auto node : chain)
             {
+                // Adjust the heights we collected from previous node in the chain, and broadcast it to
+                // light-first descendants of this node.
                 heightTracker.adjustAllHeights(1);
                 doLightFirstDFS(node, heightTracker, AdjustWithDepth, broadcastHeights);
+                
+                // Collect heights from light-first descendants.
                 doLightFirstDFS(node, heightTracker, DoNotAdjust, collectHeights);
             }
             // Now do it backwards.
@@ -276,14 +280,14 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         heightTracker.clear();
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, collectHeights);
         node.grundyNumber ^= heightTracker.grundyNumber();
-        // Broadcast this nodes' coin info to descendants.
         if (node.hasCoin)
         {
+            // Broadcast this nodes' coin info to descendants.
             heightTracker.clear();
             heightTracker.insertHeight(0);
             doLightFirstDFS(&node, heightTracker, AdjustWithDepth, broadcastHeights);
         }
-        // Broadcast light-first descendent info to other light-first descendants.
+        // Broadcast light-first descendant info to other light-first descendants.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
         for (auto lightChild : lightChildren)
@@ -314,25 +318,23 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    int numNodes;
-    cin >> numNodes;
-
-    vector<Node> nodes(numNodes);
-
     auto readInt = [](){ int x; cin >> x; return x; };
 
-    for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
+    const auto numNodes = readInt();
+    vector<Node> nodes(numNodes);
+
+    for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
     {
-        const int node1Index = readInt() - 1;
-        const int node2Index = readInt() - 1;
+        const auto node1Index = readInt() - 1;
+        const auto node2Index = readInt() - 1;
 
         nodes[node1Index].children.push_back(&(nodes[node2Index]));
         nodes[node2Index].children.push_back(&(nodes[node1Index]));
     }
 
-    for (int i = 0; i < numNodes; i++)
+    for (auto i = 0; i < numNodes; i++)
     {
-        const int numCoins = readInt();
+        const auto numCoins = readInt();
 
         nodes[i].hasCoin = ((numCoins % 2) == 1);
     }
