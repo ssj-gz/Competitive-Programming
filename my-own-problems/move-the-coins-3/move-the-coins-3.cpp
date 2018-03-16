@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <set>
 #include <cassert>
 #include <sys/time.h>
 
@@ -309,6 +310,12 @@ void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdju
 
 int grundyNumberBruteForce(Node* node, Node* parent = nullptr, int depth = 0)
 {
+    static int maxDepth = 0;
+    if (depth > maxDepth)
+    {
+        maxDepth = depth;
+        cout << " new max depth: " << maxDepth << endl; 
+    }
     int grundyNumber = (node->hasCoin ? depth : 0);
     for (const auto child : node->neighbours)
     {
@@ -396,13 +403,49 @@ int main(int argc, char* argv[])
 #endif
     if (argc == 2)
     {
-        //const int numNodes = rand() % 100 + 1;
+        //const int numNodes = rand() % 10 + 1;
         const int numNodes = 100'000;
         const int numEdges = numNodes - 1;
+        const int leafNodePercentage = 98;
+        set<int> leafNodes;
+        leafNodes.insert(1);
+        set<int> nonLeafNodes;
         cout << numNodes << endl;
         for (int i = 0; i < numEdges; i++)
         {
-            const int parentNodeIndex = (rand() % (i + 1)) + 1;
+            int parentNodeIndex = -1;
+            if (nonLeafNodes.empty())
+            {
+                parentNodeIndex = (rand() % (i + 1)) + 1;
+            }
+            else
+            {
+                if ((rand() % 100) + 1 <= leafNodePercentage)
+                {
+                    //cerr << "Chose leaf node" << endl;
+                    const int leafNodeIndex = rand() % leafNodes.size();
+                    auto leafNodeIter = leafNodes.begin();
+                    for (int i = 0; i < leafNodeIndex; i++)
+                    {
+                        leafNodeIter++;
+                    }
+                    parentNodeIndex = *leafNodeIter;
+                }
+                else
+                {
+                    //cerr << "Chose non-leaf node" << endl;
+                    const int nonLeafNodeIndex = rand() % nonLeafNodes.size();
+                    auto nonLeafNodeIter = nonLeafNodes.begin();
+                    for (int i = 0; i < nonLeafNodeIndex; i++)
+                    {
+                        nonLeafNodeIter++;
+                    }
+                    parentNodeIndex = *nonLeafNodeIter;
+                }
+            }
+            leafNodes.erase(parentNodeIndex);
+            nonLeafNodes.insert(parentNodeIndex);
+            leafNodes.insert(i + 2);
             cout << (i + 2) << " " << parentNodeIndex << endl;
         }
         for (int i = 0; i < numNodes; i++)
@@ -464,8 +507,8 @@ int main(int argc, char* argv[])
     for (auto& node : nodes)
     {
         const auto resultBruteForce = grundyNumberBruteForce(&node);
-        //cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
-        cout << "Node: " << node.id << " grundy:" << resultBruteForce << endl;
+        cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+        //cout << "Node: " << node.id << " grundy:" << resultBruteForce << endl;
         assert(resultBruteForce == node.grundyNumber);
         if (node.grundyNumber == 0)
         {
