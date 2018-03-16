@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) 16/3/18.
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif

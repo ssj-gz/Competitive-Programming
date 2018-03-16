@@ -1,4 +1,4 @@
-#define VERIFY_HEIGHT_TRACKER
+//#define VERIFY_HEIGHT_TRACKER
 //#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -463,8 +463,9 @@ int main(int argc, char* argv[])
     int numBlah = 0;
     for (auto& node : nodes)
     {
-        cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << " " << (grundyNumberBruteForce(&node) == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
-        assert(grundyNumberBruteForce(&node) == node.grundyNumber);
+        const auto resultBruteForce = grundyNumberBruteForce(&node);
+        cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+        assert(resultBruteForce == node.grundyNumber);
         if (node.grundyNumber == 0)
         {
             numBlah++;
