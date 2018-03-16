@@ -284,7 +284,7 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
                 });
         if (node.hasCoin)
         {
-            // Propagate this nodes' coin info to descendants.
+            // Propagate this node's coin info to descendants.
             doLightFirstDFS(&node, heightTracker, DoNotAdjust, [](Node* node, int depth) 
                     { 
                         node->grundyNumber ^= depth; 
