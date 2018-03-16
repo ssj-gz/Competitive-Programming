@@ -279,7 +279,8 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         // Update node with height info from all its light-first descendants.
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&node](Node* descendantNode, int depth) 
                 { 
-                    if (descendantNode->hasCoin) node.grundyNumber ^= depth; 
+                    if (descendantNode->hasCoin) 
+                        node.grundyNumber ^= depth; 
                 });
         if (node.hasCoin)
         {
