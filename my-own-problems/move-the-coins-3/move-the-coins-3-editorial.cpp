@@ -20,7 +20,6 @@ constexpr auto maxBinaryDigits = log2(maxHeight);
 struct Node
 {
     bool hasCoin = false;
-    Node* parent = nullptr;
     vector<Node*> children;
     int numDescendents = 0;
 
@@ -31,7 +30,6 @@ vector<vector<Node*>> heavyChains;
 
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 {
-    node->parent = parentNode;
     if (parentNode)
     {
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
@@ -296,18 +294,18 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         // Broadcast light-first descendent info to other light-first descendents.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
-        for (auto child : lightChildren)
+        for (auto lightChild : lightChildren)
         {
-            doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
-            doDfs(child, 1, heightTracker, DoNotAdjust, collect);
+            doDfs(lightChild, 1, heightTracker, AdjustUpWithDepth, broadcast);
+            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collect);
         }
         reverse(lightChildren.begin(), lightChildren.end());
         // ... and again, using reversed order of children.
         heightTracker.clear();
-        for (auto child : lightChildren)
+        for (auto lightChild : lightChildren)
         {
-            doDfs(child, 1, heightTracker, AdjustUpWithDepth, broadcast);
-            doDfs(child, 1, heightTracker, DoNotAdjust, collect);
+            doDfs(lightChild, 1, heightTracker, AdjustUpWithDepth, broadcast);
+            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collect);
         }
     }
 
