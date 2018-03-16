@@ -313,26 +313,30 @@ vector<int> computeGrundyNumberForAllNodes()
 {
     vector<int> grundyNumbers;
     HeightTracker heightTracker;
-    for (const auto& chain : heavyChains)
+    for (auto& chain : heavyChains)
     {
-        heightTracker.clear();
-        cout << "New chain" <<  endl;
-        for (auto node : chain)
+        for (int i = 0; i < 2; i++)
         {
-            cout << " node in chain: " << node->id << endl;
-            heightTracker.adjustAllHeights(1);
-            //node->grundyNumber ^= heightTracker.grundyNumber();
-            // Broadcast.
-            doLightFirstDFS(node, heightTracker, true, [&heightTracker](Node* node, int depth)
-                    {
+            heightTracker.clear();
+            cout << "New chain" <<  endl;
+            for (auto node : chain)
+            {
+                cout << " node in chain: " << node->id << endl;
+                heightTracker.adjustAllHeights(1);
+                //node->grundyNumber ^= heightTracker.grundyNumber();
+                // Broadcast.
+                doLightFirstDFS(node, heightTracker, true, [&heightTracker](Node* node, int depth)
+                        {
                         node->grundyNumber ^= heightTracker.grundyNumber();
-                    });
-            // Collect.
-            doLightFirstDFS(node, heightTracker, false, [&heightTracker](Node* node, int depth)
-                    {
+                        });
+                // Collect.
+                doLightFirstDFS(node, heightTracker, false, [&heightTracker](Node* node, int depth)
+                        {
                         if (node->hasCoin)
-                            heightTracker.insertHeight(depth);
-                    });
+                        heightTracker.insertHeight(depth);
+                        });
+            }
+            reverse(chain.begin(), chain.end());
         }
     }
     return grundyNumbers;
