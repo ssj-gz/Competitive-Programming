@@ -1,15 +1,12 @@
-#define VERIFY_HEIGHT_TRACKER
+// Simon St James (ssjgz) 16/3/18.
 //#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
-#undef VERIFY_HEIGHT_TRACKER
 #endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cassert>
-#include <sys/time.h>
-
 
 using namespace std;
 
@@ -22,7 +19,6 @@ constexpr auto maxBinaryDigits = log2(maxHeight);
 
 struct Node
 {
-    int id = -1;
     bool hasCoin = false;
     Node* parent = nullptr;
     vector<Node*> children;
@@ -63,7 +59,7 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     {
         auto heaviestChildIter = max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
                 {
-                return lhs->numDescendents < rhs->numDescendents;
+                    return lhs->numDescendents < rhs->numDescendents;
                 });
         iter_swap(node->children.begin(), heaviestChildIter);
         auto heavyChild = node->children.front();
@@ -315,22 +311,23 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         }
     }
 
+    int numBlah = 0;
     for (auto& node : nodes)
     {
         cout << node.grundyNumber << endl;
+        if (node.grundyNumber == 0)
+            numBlah++;
     }
+    cout << "numBlah (editorial):" << numBlah << endl;
 }
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
     int numNodes;
     cin >> numNodes;
 
     vector<Node> nodes(numNodes);
-    for (int nodeIndex = 0; nodeIndex < numNodes; nodeIndex++)
-    {
-        nodes[nodeIndex].id = nodeIndex + 1;
-    }
 
     for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
     {

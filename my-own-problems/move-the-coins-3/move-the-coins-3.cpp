@@ -388,6 +388,7 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
 #if 1
     struct timeval time;
     gettimeofday(&time,NULL);
@@ -395,8 +396,8 @@ int main(int argc, char* argv[])
 #endif
     if (argc == 2)
     {
-        const int numNodes = rand() % 100 + 1;
-        //const int numNodes = 100'000;
+        //const int numNodes = rand() % 100 + 1;
+        const int numNodes = 100'000;
         const int numEdges = numNodes - 1;
         cout << numNodes << endl;
         for (int i = 0; i < numEdges; i++)
@@ -428,13 +429,13 @@ int main(int argc, char* argv[])
         cin >> node1;
         int node2;
         cin >> node2;
-        cout << "node1 : " << node1 << " node2: " << node2 << endl;
+        //cout << "node1 : " << node1 << " node2: " << node2 << endl;
         // Make 0-relative.
         node1--;
         node2--;
         assert(cin);
 
-        cout << "edge: " << nodes[node1].id << " - " << nodes[node2].id << endl;
+        //cout << "edge: " << nodes[node1].id << " - " << nodes[node2].id << endl;
 
         nodes[node1].children.push_back(&(nodes[node2]));
         nodes[node2].children.push_back(&(nodes[node1]));
@@ -447,7 +448,7 @@ int main(int argc, char* argv[])
     {
         int numCoins;
         cin >> numCoins;
-        cout << "numCoins: " << numCoins << endl;
+        //cout << "numCoins: " << numCoins << endl;
 
         nodes[i].hasCoin = ((numCoins % 2) == 1);
         //nodes[i].hasCoin = rand() % 2;
@@ -459,10 +460,16 @@ int main(int argc, char* argv[])
     doHeavyLightDecomposition(rootNode, false);
 
     computeGrundyNumberForAllNodes(nodes);
+    int numBlah = 0;
     for (auto& node : nodes)
     {
         cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << " " << (grundyNumberBruteForce(&node) == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
         assert(grundyNumberBruteForce(&node) == node.grundyNumber);
+        if (node.grundyNumber == 0)
+        {
+            numBlah++;
+        }
     }
 
+    cout << "numBlah: " << numBlah << " numNodes: " << numNodes << endl;
 }
