@@ -455,14 +455,18 @@ int main(int argc, char* argv[])
 #endif
     if (argc == 2)
     {
-        //const int numNodes = rand() % 100'000;
-        const int numNodes = 100'000;
+        const int numNodes = rand() % 20 + 1;
+        //const int numNodes = 100'000;
         const int numEdges = numNodes - 1;
         cout << numNodes << endl;
         for (int i = 0; i < numEdges; i++)
         {
             const int parentNodeIndex = (rand() % (i + 1)) + 1;
             cout << (i + 2) << " " << parentNodeIndex << endl;
+        }
+        for (int i = 0; i < numNodes; i++)
+        {
+            cout << rand() % 20 << endl;
         }
         return 0;
     }
@@ -602,6 +606,7 @@ int main(int argc, char* argv[])
     for (auto& node : nodes)
     {
         cout << "Node: " << node.id << " real grundy number: " << grundyNumberBruteForce(&node) << " optimised grundy number: " << node.grundyNumber << " " << (grundyNumberBruteForce(&node) == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+        assert(grundyNumberBruteForce(&node) == node.grundyNumber);
     }
 
 }
