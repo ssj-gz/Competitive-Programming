@@ -464,7 +464,8 @@ int main(int argc, char* argv[])
     for (auto& node : nodes)
     {
         const auto resultBruteForce = grundyNumberBruteForce(&node);
-        cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+        //cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+        cout << "Node: " << node.id << " grundy:" << resultBruteForce << endl;
         assert(resultBruteForce == node.grundyNumber);
         if (node.grundyNumber == 0)
         {

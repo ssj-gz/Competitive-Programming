@@ -21,7 +21,7 @@ struct Node
 {
     bool hasCoin = false;
     vector<Node*> children;
-    int numDescendents = 0;
+    int numDescendants = 0;
 
     int grundyNumber = 0;
 };
@@ -34,9 +34,9 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
 
     for (auto child : node->children)
-        node->numDescendents += fixParentChildAndCountDescendants(child, node);
+        node->numDescendants += fixParentChildAndCountDescendants(child, node);
 
-    return node->numDescendents;
+    return node->numDescendants;
 }
 
 void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
@@ -55,7 +55,7 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     {
         auto heaviestChildIter = max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
                 {
-                    return lhs->numDescendents < rhs->numDescendents;
+                    return lhs->numDescendants < rhs->numDescendants;
                 });
         iter_swap(node->children.begin(), heaviestChildIter);
         auto heavyChild = node->children.front();
@@ -84,8 +84,6 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
-            if (newHeight < m_smallestHeight)
-                m_smallestHeight = newHeight;
             int powerOf2 = 2;
             int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
             if (newHeightAdjusted < 0)
@@ -127,7 +125,6 @@ class HeightTracker
                 return;
             assert(heightDiff == 1 || heightDiff == -1);
             m_cumulativeHeightAdjustment += heightDiff;
-            m_smallestHeight += heightDiff;
 
             int powerOf2 = 2;
             if (heightDiff == 1)
@@ -196,6 +193,7 @@ class HeightTracker
             m_grundyNumber = 0;
             m_cumulativeHeightAdjustment = 0;
         }
+    private:
         struct VersionedValue
         {
             int value = 0;
@@ -209,7 +207,6 @@ class HeightTracker
         int m_grundyNumber = 0;
 
         int m_versionNumber = 0;
-        int m_smallestHeight = 0;
 };
 
 enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
@@ -240,7 +237,6 @@ void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdju
         }
     }
 }
-
 
 void computeGrundyNumberForAllNodes(vector<Node>& nodes)
 {
@@ -274,18 +270,18 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
     {
         if (node.children.empty())
             continue;
-        // Collect and update node from all its light-first descendents.
+        // Collect and update node with height info from all its light-first descendants.
         heightTracker.clear();
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, collectHeights);
         node.grundyNumber ^= heightTracker.grundyNumber();
-        // Broadcast this nodes' coin info to descendents.
+        // Broadcast this nodes' coin info to descendants.
         if (node.hasCoin)
         {
             heightTracker.clear();
             heightTracker.insertHeight(0);
             doLightFirstDFS(&node, heightTracker, AdjustWithDepth, broadcastHeights);
         }
-        // Broadcast light-first descendent info to other light-first descendents.
+        // Broadcast light-first descendent info to other light-first descendants.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
         for (auto lightChild : lightChildren)
@@ -321,24 +317,20 @@ int main(int argc, char* argv[])
 
     vector<Node> nodes(numNodes);
 
+    auto readInt = [](){ int x; cin >> x; return x; };
+
     for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
     {
-        int node1;
-        cin >> node1;
-        int node2;
-        cin >> node2;
-        // Make 0-relative.
-        node1--;
-        node2--;
+        const int node1Index = readInt() - 1;
+        const int node2Index = readInt() - 1;
 
-        nodes[node1].children.push_back(&(nodes[node2]));
-        nodes[node2].children.push_back(&(nodes[node1]));
+        nodes[node1Index].children.push_back(&(nodes[node2Index]));
+        nodes[node2Index].children.push_back(&(nodes[node1Index]));
     }
 
     for (int i = 0; i < numNodes; i++)
     {
-        int numCoins;
-        cin >> numCoins;
+        const int numCoins = readInt();
 
         nodes[i].hasCoin = ((numCoins % 2) == 1);
     }
