@@ -10,6 +10,7 @@
 #include <set>
 #include <cassert>
 #include <memory>
+#include <functional>
 #include <sys/time.h>
 
 
@@ -444,15 +445,31 @@ class TreeGenerator
         }
         vector<TestNode*> createNodesWithRandomParentPreferringLeafNodes(int numNewNodes, double leafNodePreferencePercent)
         {
-            vector<TestNode*> newNodes;
             set<TestNode*> leaves;
-            set<TestNode*> nonLeaves;
             for (auto& node : m_nodes)
             {
                 if (node->neighbours.size() <= 1)
                     leaves.insert(node.get());
-                else
-                    nonLeaves.insert(node.get());
+            }
+
+            return createNodesWithRandomParentPreferringFromSet(leaves, numNewNodes, leafNodePreferencePercent, [](TestNode* newNode, TestNode* newNodeParent, bool& addNewNodeToSet, bool& removeParentFromSet)
+                    {
+                        addNewNodeToSet = true;
+                        removeParentFromSet = true;
+                    });
+        }
+
+        vector<TestNode*> createNodesWithRandomParentPreferringFromSet(const set<TestNode*>& preferredSet, int numNewNodes, double preferencePercent, std::function<void(TestNode* newNode, TestNode* parent, bool& addNewNodeToSet, bool& removeParentFromSet)> onCreateNode)
+        {
+            vector<TestNode*> newNodes;
+            set<TestNode*> preferredSetCopy(preferredSet);
+            set<TestNode*> nonPreferredSet;
+            for (auto& node : m_nodes)
+            {
+                if (preferredSetCopy.find(node.get()) == preferredSetCopy.end())
+                {
+                    nonPreferredSet.insert(node.get());
+                }
             }
 
             auto chooseRandomNodeFromSet = [](set<TestNode*>& nodeSet)
@@ -469,27 +486,33 @@ class TreeGenerator
             for (int i = 0; i < numNewNodes; i++)
             {
                 const double random = static_cast<double>(rand()) / RAND_MAX;
-                TestNode* newNode = nullptr;
-                if (random <= leafNodePreferencePercent)
+                TestNode* newNodeParent = nullptr;
+                if (random <= preferencePercent)
                 {
-                    // Choose a random leaf as a parent.
-                    auto parent = chooseRandomNodeFromSet(leaves); 
-                    newNode = createNode(parent);
-                    leaves.erase(parent);
+                    // Choose a random element from preferredSetCopy as a parent.
+                    newNodeParent = chooseRandomNodeFromSet(preferredSetCopy); 
                 }
                 else
                 {
-                    // Choose a random non-leaf as a parent.
-                    auto parent = chooseRandomNodeFromSet(nonLeaves); 
-                    newNode = createNode(parent);
+                    // Choose a random element from nonPreferredSet as a parent.
+                    newNodeParent = chooseRandomNodeFromSet(nonPreferredSet); 
                 }
+                auto newNode = createNode(newNodeParent);
                 newNodes.push_back(newNode);
-                leaves.insert(newNode);
-
+                bool addNewNodeToSet = false;
+                bool removeParentFromSet = false;
+                onCreateNode(newNode, newNodeParent, addNewNodeToSet, removeParentFromSet);
+                if (addNewNodeToSet)
+                    preferredSetCopy.insert(newNode);
+                else
+                    nonPreferredSet.insert(newNode);
+                if (removeParentFromSet)
+                    nonPreferredSet.erase(newNodeParent);
             }
 
             return newNodes;
         }
+
         int numNodes() const
         {
             return m_nodes.size();
