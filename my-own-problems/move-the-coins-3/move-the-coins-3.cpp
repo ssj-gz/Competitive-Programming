@@ -442,6 +442,54 @@ class TreeGenerator
 
             return newNodes;
         }
+        vector<TestNode*> createNodesWithRandomParentPreferringLeafNodes(int numNewNodes, double leafNodePreferencePercent)
+        {
+            vector<TestNode*> newNodes;
+            set<TestNode*> leaves;
+            set<TestNode*> nonLeaves;
+            for (auto& node : m_nodes)
+            {
+                if (node->neighbours.size() <= 1)
+                    leaves.insert(node.get());
+                else
+                    nonLeaves.insert(node.get());
+            }
+
+            auto chooseRandomNodeFromSet = [](set<TestNode*>& nodeSet)
+            {
+                const int randomIndex = rand() % nodeSet.size();
+                auto nodeIter = nodeSet.begin();
+                for (int i = 0; i < randomIndex; i++)
+                {
+                    nodeIter++;
+                }
+                return *nodeIter;
+            };
+
+            for (int i = 0; i < numNewNodes; i++)
+            {
+                const double random = static_cast<double>(rand()) / RAND_MAX;
+                TestNode* newNode = nullptr;
+                if (random <= leafNodePreferencePercent)
+                {
+                    // Choose a random leaf as a parent.
+                    auto parent = chooseRandomNodeFromSet(leaves); 
+                    newNode = createNode(parent);
+                    leaves.erase(parent);
+                }
+                else
+                {
+                    // Choose a random non-leaf as a parent.
+                    auto parent = chooseRandomNodeFromSet(nonLeaves); 
+                    newNode = createNode(parent);
+                }
+                newNodes.push_back(newNode);
+                leaves.insert(newNode);
+
+            }
+
+            return newNodes;
+        }
         int numNodes() const
         {
             return m_nodes.size();
@@ -488,6 +536,8 @@ class TreeGenerator
                     swap(edge->nodeA, edge->nodeB);
             }
         }
+        // Scrambles the order of the nodes, then re-ids them, in new order, with the first
+        // node in the new order having scrambledId 1, then next 2, etc.
         void scrambleNodeIdsAndReorder()
         {
             scrambleNodeOrder();
