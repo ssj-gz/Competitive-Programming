@@ -72,13 +72,10 @@ class HeightTracker
     public:
         HeightTracker()
         {
-            m_makesDigitOneBegin.resize(maxBinaryDigits + 1);
-            m_makesDigitOneEnd.resize(maxBinaryDigits + 1);
-
             auto powerOf2 = 2;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2.push_back(vector<VersionedValue>(powerOf2));
+                m_heightsModPowerOf2[binaryDigitNum] = vector<VersionedValue>(powerOf2);
                 powerOf2 <<= 1;
             }
             clear();
@@ -198,9 +195,9 @@ class HeightTracker
             int value = 0;
             int versionNumber = -1;
         };
-        vector<vector<VersionedValue>> m_heightsModPowerOf2;
-        vector<int> m_makesDigitOneBegin;
-        vector<int> m_makesDigitOneEnd;
+        vector<VersionedValue> m_heightsModPowerOf2[maxBinaryDigits + 1];
+        int m_makesDigitOneBegin[maxBinaryDigits + 1];
+        int m_makesDigitOneEnd[maxBinaryDigits + 1];
 
         int m_cumulativeHeightAdjustment = 0;
         int m_grundyNumber = 0;
