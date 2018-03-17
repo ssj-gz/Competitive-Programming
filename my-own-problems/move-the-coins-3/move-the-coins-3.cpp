@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <set>
 #include <cassert>
+#include <memory>
 #include <sys/time.h>
 
 
@@ -392,6 +393,138 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
 
     return grundyNumbers;
 }
+
+struct TestEdge;
+struct TestNode
+{
+    vector<TestEdge*> neighbours;
+    int originalId = -1;
+    int scrambledId = -1;
+    int id() const
+    {
+        return (scrambledId == -1) ? originalId : scrambledId;
+    }
+};
+struct TestEdge
+{
+    TestNode* nodeA = nullptr;
+    TestNode* nodeB = nullptr;
+};
+class TreeGenerator
+{
+    public:
+        TestNode* createNode()
+        {
+            m_nodes.emplace_back(new TestNode);
+            auto newNode = m_nodes.back().get();
+            newNode->originalId = m_nodes.size();
+            return newNode;
+        }
+        TestNode* createNode(TestNode* attachedTo)
+        {
+            auto newNode = createNode();
+            addEdge(newNode, attachedTo);
+            return newNode;
+        }
+        TestNode* createNodeWithRandomParent()
+        {
+            const int parentIndex = rand() % m_nodes.size();
+            auto randomParent = m_nodes[parentIndex].get();
+            return createNode(randomParent);
+        }
+        vector<TestNode*> createNodesWithRandomParent(int numNewNodes)
+        {
+            vector<TestNode*> newNodes;
+            for (int i = 0; i < numNewNodes; i++)
+            {
+                newNodes.push_back(createNodeWithRandomParent());
+            }
+
+            return newNodes;
+        }
+        int numNodes() const
+        {
+            return m_nodes.size();
+        };
+        TestNode* firstNode() const
+        {
+            assert(!m_nodes.empty());
+            return m_nodes.front().get();
+        }
+        TestEdge* addEdge(TestNode* nodeA, TestNode* nodeB)
+        {
+            m_edges.emplace_back(new TestEdge);
+            auto newEdge = m_edges.back().get();
+            newEdge->nodeA = nodeA;
+            newEdge->nodeB = nodeB;
+            nodeA->neighbours.push_back(newEdge);
+            nodeB->neighbours.push_back(newEdge);
+
+            return newEdge;
+        }
+        vector<TestNode*> addNodeChain(TestNode* chainStart, int numInChain)
+        {
+            vector<TestNode*> nodeChain;
+
+            auto lastNodeInChain = chainStart;
+            for (int i = 0; i < numInChain; i++)
+            {
+                lastNodeInChain = createNode(lastNodeInChain);
+                nodeChain.push_back(lastNodeInChain);
+            }
+
+            return nodeChain;
+        }
+        void scrambleNodeOrder()
+        {
+            random_shuffle(m_nodes.begin(), m_nodes.end());
+        }
+        void scrambleEdgeOrder()
+        {
+            random_shuffle(m_edges.begin(), m_edges.end());
+            for (auto& edge : m_edges)
+            {
+                if (rand() % 2 == 1)
+                    swap(edge->nodeA, edge->nodeB);
+            }
+        }
+        void scrambleNodeIdsAndReorder()
+        {
+            scrambleNodeOrder();
+            for (int i = 0; i < m_nodes.size(); i++)
+            {
+                m_nodes[i]->scrambledId = (i + 1);
+            }
+        }
+        vector<TestNode*> nodes() const
+        {
+            vector<TestNode*> nodes;
+            for (auto& node : m_nodes)
+            {
+                nodes.push_back(node.get());
+            }
+            return nodes;
+        }
+        vector<TestEdge*> edges() const
+        {
+            vector<TestEdge*> edges;
+            for (auto& edge : m_edges)
+            {
+                edges.push_back(edge.get());
+            }
+            return edges;
+        }
+        void printEdges() const
+        {
+            for (const auto& edge : m_edges)
+            {
+                cout << edge->nodeA->id() << " " << edge->nodeB->id() << endl;
+            }
+        }
+    private:
+        vector<unique_ptr<TestNode>> m_nodes;
+        vector<unique_ptr<TestEdge>> m_edges;
+};
 
 int main(int argc, char* argv[])
 {
