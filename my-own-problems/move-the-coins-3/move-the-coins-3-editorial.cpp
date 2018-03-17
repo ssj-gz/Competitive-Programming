@@ -94,9 +94,7 @@ class HeightTracker
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
-                    {
                         m_grundyNumber ^= (powerOf2 >> 1);
-                    }
                 }
                 else
                 {
@@ -106,9 +104,7 @@ class HeightTracker
                     assert(0 <= makeDigitZeroEnd < powerOf2);
                     assert(0 <= makeDigitZeroBegin < powerOf2);
                     if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
-                    {
                         m_grundyNumber ^= (powerOf2 >> 1);
-                    }
                 }
 
                 powerOf2 <<= 1;
