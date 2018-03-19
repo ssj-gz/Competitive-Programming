@@ -78,9 +78,11 @@ int main()
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
     
-    const int maxNumNeighbours = 100;
-    const int maxMaxValue = 1000;
-    const int maxPathValues = 100;
+    const int maxNumNeighbours = 20;
+    const int maxMaxValue = 100;
+    const int maxPathValues = 20;
+
+    int numTests = 0;
 
     while (true)
     {
@@ -183,8 +185,9 @@ int main()
                 pathValuesByVal.insert(blee);
             }
         }
-        cout << "maxPathValueProduct: " << maxPathValueProduct << " dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << " " << (maxPathValueProduct == dbgMaxPathValueProduct ? "MATCH" : "NOMATCH") <<  endl;
+        cout << "maxPathValueProduct: " << maxPathValueProduct << " dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << " " << (maxPathValueProduct == dbgMaxPathValueProduct ? "MATCH" : "NOMATCH") <<  " numTests: " << numTests << endl;
         assert(maxPathValueProduct == dbgMaxPathValueProduct);
+        numTests++;
     }
 
 }
