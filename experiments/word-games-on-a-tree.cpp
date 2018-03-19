@@ -15,11 +15,11 @@ struct Node
 struct BestTracker
 {
     static constexpr int maxToStore = 3;
-    void add(int value, Edge* otherEdge);
+    void add(int64_t value, Edge* otherEdge);
     int num = 0;
     struct Blah
     {
-        int value = -1;
+        int64_t value = -1;
         Edge* otherEdge = nullptr;
     };
     Blah stored[maxToStore];
@@ -31,7 +31,7 @@ struct Edge
     int edgeId = -1;
     BestTracker bestTracker;
 };
-void BestTracker::add(int value, Edge* otherEdge)
+void BestTracker::add(int64_t value, Edge* otherEdge)
 {
     //cout << "add: " << value << " otherEdge: " << otherEdge->edgeId << endl;
     assert(num <= maxToStore);
@@ -56,13 +56,13 @@ void BestTracker::add(int value, Edge* otherEdge)
 struct PathValue
 {
     PathValue() = default;
-    PathValue(Edge* edgeA, Edge* edgeB, int value)
+    PathValue(Edge* edgeA, Edge* edgeB, int64_t value)
         : edgeA{edgeA}, edgeB{edgeB}, value{value}
     {
     }
     Edge* edgeA = nullptr;
     Edge* edgeB = nullptr;
-    int value = 0;
+    int64_t value = 0;
 };
 
 
@@ -81,7 +81,7 @@ int main()
     while (true)
     {
         Node rootNode;
-        const int numNeighbours = 4;
+        const int numNeighbours = 5;
         vector<Edge> edges(numNeighbours);
         int edgeId = 0;
         for (auto& edge : edges)
@@ -91,8 +91,8 @@ int main()
             edgeId++;
         }
 
-        const int numPathValues = 20;
-        const int maxValue = 5000;
+        const int numPathValues = 2000;
+        const int64_t maxValue = 5000;
         vector<PathValue> pathValues;
         for (int i = 0; i < numPathValues; i++)
         {
@@ -125,7 +125,7 @@ int main()
                     pathValue1.edgeB != pathValue2.edgeA && pathValue1.edgeB != pathValue2.edgeB);
         };
 
-        int dbgMaxPathValueProduct = -1;
+        int64_t dbgMaxPathValueProduct = -1;
         for (const auto& pathValue1 : pathValues)
         {
             for (const auto& pathValue2 : pathValues)
@@ -154,10 +154,10 @@ int main()
         };
         set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
 
-        int maxPathValueProduct = -1;
+        int64_t maxPathValueProduct = -1;
         for (auto& edge : edges)
         {
-            int maxFromThis = -1;
+            int64_t maxFromThis = -1;
             for (auto blahIter = begin(edge.bestTracker.stored); blahIter != begin(edge.bestTracker.stored) + edge.bestTracker.num; blahIter++)
             {
                 PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
