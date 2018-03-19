@@ -77,11 +77,15 @@ int main()
     struct timeval time;
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    
+    const int maxNumNeighbours = 100;
+    const int maxMaxValue = 1000;
+    const int maxPathValues = 100;
 
     while (true)
     {
         Node rootNode;
-        const int numNeighbours = 5;
+        const int numNeighbours = (rand() % (maxNumNeighbours - 1)) + 2;
         vector<Edge> edges(numNeighbours);
         int edgeId = 0;
         for (auto& edge : edges)
@@ -91,8 +95,8 @@ int main()
             edgeId++;
         }
 
-        const int numPathValues = 2000;
-        const int64_t maxValue = 5000;
+        const int numPathValues = (rand() % maxPathValues) + 1;
+        const int64_t maxValue = (rand() % maxMaxValue) + 1;
         vector<PathValue> pathValues;
         for (int i = 0; i < numPathValues; i++)
         {
