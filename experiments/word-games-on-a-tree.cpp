@@ -1,0 +1,186 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <cassert>
+#include <sys/time.h>
+
+using namespace std;
+
+struct Edge;
+struct Node
+{
+    vector<Edge*> neighbours;
+};
+struct BestTracker
+{
+    static constexpr int maxToStore = 3;
+    void add(int value, Edge* otherEdge);
+    int num = 0;
+    struct Blah
+    {
+        int value = -1;
+        Edge* otherEdge = nullptr;
+    };
+    Blah stored[maxToStore];
+};
+struct Edge
+{
+    Node* nodeA = nullptr;
+    Node* nodeB = nullptr;
+    int edgeId = -1;
+    BestTracker bestTracker;
+};
+void BestTracker::add(int value, Edge* otherEdge)
+{
+    //cout << "add: " << value << " otherEdge: " << otherEdge->edgeId << endl;
+    assert(num <= maxToStore);
+    for (int i = 0; i < num; i++)
+    {
+        if (stored[i].otherEdge == otherEdge)
+        {
+            stored[i].value = max(stored[i].value, value);
+            return;
+        }
+    }
+    vector<Blah> blee(begin(stored), begin(stored) + num);
+    Blah newBlah;
+    newBlah.value = value;
+    newBlah.otherEdge = otherEdge;
+    blee.push_back(newBlah);
+    sort(blee.begin(), blee.end(), [](const auto& lhs,  const auto& rhs) { return lhs.value > rhs.value; });
+    const int newNum = min(static_cast<int>(blee.size()), maxToStore);
+    copy(blee.begin(), blee.begin() + newNum, stored);
+    num = newNum;
+};
+struct PathValue
+{
+    PathValue() = default;
+    PathValue(Edge* edgeA, Edge* edgeB, int value)
+        : edgeA{edgeA}, edgeB{edgeB}, value{value}
+    {
+    }
+    Edge* edgeA = nullptr;
+    Edge* edgeB = nullptr;
+    int value = 0;
+};
+
+
+ostream& operator<<(ostream& os, const PathValue& pathValue)
+{
+    os << "pathValue - value: " << pathValue.value << " edgeA: " << (pathValue.edgeA ? pathValue.edgeA->edgeId : -1) << " edgeB: " << (pathValue.edgeB ? pathValue.edgeB->edgeId : -1);
+    return os;
+}
+
+int main()
+{
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+    while (true)
+    {
+        Node rootNode;
+        const int numNeighbours = 4;
+        vector<Edge> edges(numNeighbours);
+        int edgeId = 0;
+        for (auto& edge : edges)
+        {
+            edge.nodeA = &rootNode;
+            edge.edgeId = edgeId;
+            edgeId++;
+        }
+
+        const int numPathValues = 20;
+        const int maxValue = 5000;
+        vector<PathValue> pathValues;
+        for (int i = 0; i < numPathValues; i++)
+        {
+            while (true)
+            {
+                auto edge1 = &(edges[rand() % numNeighbours]);
+                auto edge2 = &(edges[rand() % numNeighbours]);
+                if (edge1 == edge2)
+                    continue;
+
+
+                pathValues.push_back({edge1, edge2, (rand() % maxValue) + 1});
+                break;
+            }
+        }
+
+        for (const auto& pathValue : pathValues)
+        {
+            //cout << pathValue << endl;
+        }
+        for (const auto& pathValue : pathValues)
+        {
+            pathValue.edgeA->bestTracker.add(pathValue.value, pathValue.edgeB); 
+            pathValue.edgeB->bestTracker.add(pathValue.value, pathValue.edgeA); 
+        }
+
+        auto shareAnEdge = [](const PathValue& pathValue1, const PathValue& pathValue2)
+        {
+            return !( pathValue1.edgeA != pathValue2.edgeA && pathValue1.edgeA != pathValue2.edgeB &&
+                    pathValue1.edgeB != pathValue2.edgeA && pathValue1.edgeB != pathValue2.edgeB);
+        };
+
+        int dbgMaxPathValueProduct = -1;
+        for (const auto& pathValue1 : pathValues)
+        {
+            for (const auto& pathValue2 : pathValues)
+            {
+                if (!shareAnEdge(pathValue1, pathValue2))
+                {
+                    const auto pathValueProduct = pathValue1.value * pathValue2.value;
+                    if (pathValueProduct > dbgMaxPathValueProduct)
+                    {
+                        dbgMaxPathValueProduct = pathValueProduct;
+                        //cout << "New best: " << pathValueProduct << " from " << pathValue1 << " and " << pathValue2 << endl;
+                    }
+                }
+            }
+        }
+
+        //cout << "dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << endl;
+
+        auto comparePathValues = [](const PathValue& lhs, const PathValue& rhs) 
+        {
+            if (lhs.value != rhs.value)
+                return lhs.value > rhs.value;
+            if (lhs.edgeA != rhs.edgeA)
+                return lhs.edgeA < rhs.edgeA;
+            return lhs.edgeB < rhs.edgeB;
+        };
+        set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
+
+        int maxPathValueProduct = -1;
+        for (auto& edge : edges)
+        {
+            int maxFromThis = -1;
+            for (auto blahIter = begin(edge.bestTracker.stored); blahIter != begin(edge.bestTracker.stored) + edge.bestTracker.num; blahIter++)
+            {
+                PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
+                //cout << " Blee: " << blee << endl;
+                for (const auto& otherPathValue : pathValuesByVal)
+                {
+                    //cout << " otherPathValue: " << otherPathValue << endl;
+                    if (!shareAnEdge(blee, otherPathValue))
+                    {
+                        maxFromThis = max(maxFromThis, blee.value * otherPathValue.value);
+                        break;
+                    }
+                }
+                maxPathValueProduct = max(maxPathValueProduct, maxFromThis);
+            }
+            for (auto blahIter = begin(edge.bestTracker.stored); blahIter != begin(edge.bestTracker.stored) + edge.bestTracker.num; blahIter++)
+            {
+                PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
+                pathValuesByVal.insert(blee);
+            }
+        }
+        cout << "maxPathValueProduct: " << maxPathValueProduct << " dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << " " << (maxPathValueProduct == dbgMaxPathValueProduct ? "MATCH" : "NOMATCH") <<  endl;
+        assert(maxPathValueProduct == dbgMaxPathValueProduct);
+    }
+
+}
