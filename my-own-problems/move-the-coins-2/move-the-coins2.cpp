@@ -632,10 +632,7 @@ struct TestNode;
 struct NodeData
 {
     int numCoins = -1;
-    TestNode* parent = nullptr;
     bool usable = true;
-    int visitNum = -1;
-    int endVisitNum = -1;
 };
 struct TestEdge;
 struct TestNode
@@ -648,6 +645,12 @@ struct TestNode
         return (scrambledId == -1) ? originalId : scrambledId;
     }
     NodeData data;
+
+    // Filled in my doGenericInfoDFS.
+    TestNode* parent = nullptr;
+    int visitNum = -1;
+    int endVisitNum = -1;
+    int height = -1;
 };
 struct TestEdge
 {
@@ -884,33 +887,54 @@ void doDFS(TestNode* node, TestNode* parent, int depth, std::function<void(TestN
         onEndVisitNode(node, depth);
 }
 
+void doGenericInfoDFS(TestNode* rootNode)
+{
+    int visitNum = 0;
+    vector<TestNode*> ancestors = {nullptr};
+    doDFS(rootNode, nullptr, 0, [&ancestors, &visitNum](TestNode* node, int depth) 
+            { 
+                node->parent = ancestors.back(); 
+                node->height = depth; 
+                node->visitNum = visitNum;
+                visitNum++;
+                ancestors.push_back(node);
+            },
+            [&ancestors, &visitNum](TestNode* node, int depth)
+            { 
+                ancestors.pop_back();
+                node->endVisitNum = visitNum;
+                visitNum++;
+            });
+
+}
+
 void markDescendentsAsUsable(TestNode* node, bool usable)
 {
-    doDFS(node, node->data.parent, 0, [usable](TestNode* node, int depth) { node->data.usable = usable; });
+    doDFS(node, node->parent, 0, [usable](TestNode* node, int depth) { node->data.usable = usable; });
 }
 
 TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendantsOf, const vector<vector<TestNode*>>& nodesWithHeight)
 {
 #if 0
-    cout << "pickNodeAtHeightNotDescendantOf: " << height << " forbidDescendantsOf: " << forbidDescendantsOf->id() << " visitNum:" << forbidDescendantsOf->data.visitNum << " endVisitNum: " << forbidDescendantsOf->data.endVisitNum << endl;
+    cout << "pickNodeAtHeightNotDescendantOf: " << height << " forbidDescendantsOf: " << forbidDescendantsOf->id() << " visitNum:" << forbidDescendantsOf->visitNum << " endVisitNum: " << forbidDescendantsOf->endVisitNum << endl;
     cout << "nodesWithHeight: " << endl;
 #endif
     const vector<TestNode*>& nodesAtGivenHeight = nodesWithHeight[height];
 #if 0
     for (auto node : nodesAtGivenHeight)
     {
-        cout << "id: " << node->id() << " visitNum: " << node->data.visitNum << " ";
+        cout << "id: " << node->id() << " visitNum: " << node->visitNum << " ";
     }
     cout << endl;
 #endif
-    const int descendantVisitNumBegin = forbidDescendantsOf->data.visitNum;
-    const int descendantVisitNumEnd = forbidDescendantsOf->data.endVisitNum;
-    auto compareNodesByVisitNum = [](const TestNode* lhs, const TestNode* rhs) { return lhs->data.visitNum < rhs->data.visitNum;};
+    const int descendantVisitNumBegin = forbidDescendantsOf->visitNum;
+    const int descendantVisitNumEnd = forbidDescendantsOf->endVisitNum;
+    auto compareNodesByVisitNum = [](const TestNode* lhs, const TestNode* rhs) { return lhs->visitNum < rhs->visitNum;};
     TestNode dummyNode; 
-    dummyNode.data.visitNum = descendantVisitNumBegin;
+    dummyNode.visitNum = descendantVisitNumBegin;
     auto endOfBeforeNodeIter = lower_bound(nodesAtGivenHeight.begin(), nodesAtGivenHeight.end(), &dummyNode, compareNodesByVisitNum);
     //assert(endOfBeforeNodeIter != nodesAtGivenHeight.end());
-    //cout << "Blarp: " << (*endOfBeforeNodeIter)->data.visitNum << endl;
+    //cout << "Blarp: " << (*endOfBeforeNodeIter)->visitNum << endl;
     if (endOfBeforeNodeIter != nodesAtGivenHeight.begin())
     {
         //cout << "decrementing" << endl;
@@ -923,11 +947,11 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
     }
     else
     {
-        //cout << "Blee: " << (*endOfBeforeNodeIter)->data.visitNum << " bloo: " << descendantVisitNumBegin << endl;
-        if((*endOfBeforeNodeIter)->data.visitNum >= descendantVisitNumBegin)
+        //cout << "Blee: " << (*endOfBeforeNodeIter)->visitNum << " bloo: " << descendantVisitNumBegin << endl;
+        if((*endOfBeforeNodeIter)->visitNum >= descendantVisitNumBegin)
             endOfBeforeNodeIter = nodesAtGivenHeight.end();
     }
-    dummyNode.data.visitNum = descendantVisitNumEnd;
+    dummyNode.visitNum = descendantVisitNumEnd;
     auto beginOfAfterNodeIter = upper_bound(nodesAtGivenHeight.cbegin(), nodesAtGivenHeight.cend(), &dummyNode, compareNodesByVisitNum);
     const int numBefore = (endOfBeforeNodeIter == nodesAtGivenHeight.end() ? 0 : endOfBeforeNodeIter - nodesAtGivenHeight.begin() + 1);
     const int numAfter = nodesAtGivenHeight.end() - beginOfAfterNodeIter;
@@ -948,13 +972,13 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
     int dbgNumAfter = 0;
     for (const auto& node : nodesAtGivenHeight)
     {
-        if (node->data.visitNum < forbidDescendantsOf->data.visitNum)
+        if (node->visitNum < forbidDescendantsOf->visitNum)
         {
             dbgValidNodes.push_back(node);
             dbgNumBefore++;
         }
 
-        if (node->data.visitNum > forbidDescendantsOf->data.endVisitNum)
+        if (node->visitNum > forbidDescendantsOf->endVisitNum)
         {
             dbgValidNodes.push_back(node);
             dbgNumAfter++;
@@ -1000,25 +1024,16 @@ int main(int argc, char** argv)
         {
             testNode->data.numCoins = rand() % 20;
         }
-        int visitNum = 0;
-        vector<TestNode*> ancestors = {nullptr};
-        doDFS(rootNode, nullptr, 0, [&ancestors](TestNode* node, int depth) { node->data.parent = ancestors.back(); ancestors.push_back(node);},
-                                    [&ancestors](TestNode* node, int depth) { ancestors.pop_back();});
+        doGenericInfoDFS(rootNode);
 
         vector<vector<TestNode*>> nodesWithHeight(treeGenerator.numNodes());
-        doDFS(rootNode, nullptr, 0, 
-                [&visitNum, &nodesWithHeight](TestNode* node, int depth) { 
-                    cout << "Visited node: " << node->id() << endl; 
-                    node->data.visitNum = visitNum; 
-                    visitNum++; 
-                    assert(depth >= 0);
-                    assert(depth < nodesWithHeight.size());
-                    nodesWithHeight[depth].push_back(node);
-                    },
-                [&visitNum](TestNode* node, int depth) { node->data.endVisitNum = visitNum; visitNum++;});
+        for (auto& node : treeGenerator.nodes())
+        {
+            nodesWithHeight[node->height].push_back(node);
+        }
         for (auto& nodes : nodesWithHeight)
         {
-            sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->data.visitNum < rhs->data.visitNum; });
+            sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->visitNum < rhs->visitNum; });
         }
                                      
 #if 0
@@ -1029,10 +1044,10 @@ int main(int argc, char** argv)
 
             for (auto otherNode : treeGenerator.nodes())
             {
-                bool isDescendant = otherNode->data.visitNum >= node->data.visitNum && otherNode->data.visitNum <= node->data.endVisitNum;
+                bool isDescendant = otherNode->visitNum >= node->visitNum && otherNode->visitNum <= node->endVisitNum;
                 if (isDescendant != !otherNode->data.usable)
                 {
-                    cout << "node: " << node->id() << " visitNum: " << node->data.visitNum << " endVisitNum: " << node->data.endVisitNum << " otherNode: " << otherNode->id() << " visitNum: " << otherNode->data.visitNum << endl;
+                    cout << "node: " << node->id() << " visitNum: " << node->visitNum << " endVisitNum: " << node->endVisitNum << " otherNode: " << otherNode->id() << " visitNum: " << otherNode->visitNum << endl;
                 }
                 assert(isDescendant == !otherNode->data.usable);
             }
