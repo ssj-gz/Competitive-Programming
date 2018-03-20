@@ -903,7 +903,6 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
     }
     cout << endl;
 #endif
-    TestNode* retVal = nullptr;
     const int descendantVisitNumBegin = forbidDescendantsOf->data.visitNum;
     const int descendantVisitNumEnd = forbidDescendantsOf->data.endVisitNum;
     auto compareNodesByVisitNum = [](const TestNode* lhs, const TestNode* rhs) { return lhs->data.visitNum < rhs->data.visitNum;};
@@ -932,21 +931,45 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
     auto beginOfAfterNodeIter = upper_bound(nodesAtGivenHeight.cbegin(), nodesAtGivenHeight.cend(), &dummyNode, compareNodesByVisitNum);
     const int numBefore = (endOfBeforeNodeIter == nodesAtGivenHeight.end() ? 0 : endOfBeforeNodeIter - nodesAtGivenHeight.begin() + 1);
     const int numAfter = nodesAtGivenHeight.end() - beginOfAfterNodeIter;
+    const int total = numBefore + numAfter;
+    TestNode* retval = nullptr;
+    const int randomIndex = (total == 0 ? -1 : rand() % total);
+    if (total > 0)
+    {
+    if (randomIndex < numBefore)
+        retval =  *(nodesAtGivenHeight.begin() + randomIndex);
+    else
+        retval =  *(beginOfAfterNodeIter + (randomIndex - numBefore));
+    }
 
+#if 1
+    vector<TestNode*> dbgValidNodes;
     int dbgNumBefore = 0;
     int dbgNumAfter = 0;
     for (const auto& node : nodesAtGivenHeight)
     {
         if (node->data.visitNum < forbidDescendantsOf->data.visitNum)
+        {
+            dbgValidNodes.push_back(node);
             dbgNumBefore++;
+        }
 
         if (node->data.visitNum > forbidDescendantsOf->data.endVisitNum)
+        {
+            dbgValidNodes.push_back(node);
             dbgNumAfter++;
+        }
     }
     //cout << "numBefore: " << numBefore << " dbgNumBefore: " << dbgNumBefore << " numAfter: " << numAfter << " dbgNumAfter: " << dbgNumAfter << " blah: " << forbidDescendantsOf->id() << endl;
     assert(dbgNumAfter == numAfter);
     assert(dbgNumBefore == numBefore);
-    return retVal;
+    assert((total == 0 && dbgValidNodes.empty()) || (total != 0 && !dbgValidNodes.empty()));
+    if (total != 0)
+    {
+        assert(dbgValidNodes[randomIndex] == retval);
+    }
+#endif
+    return retval;
 }
 
 int main(int argc, char** argv)
@@ -1023,7 +1046,8 @@ int main(int argc, char** argv)
             cout << "testing node: " << node->id() << endl;
             for (int height = 0; height < treeGenerator.numNodes(); height++)
             {
-                pickNodeAtHeightNotDescendantOf(height, node, nodesWithHeight);
+                auto pick = pickNodeAtHeightNotDescendantOf(height, node, nodesWithHeight);
+                //cout << " picked " << (pick ? pick->id() : -1) << endl;
             }
         }
 
