@@ -834,12 +834,23 @@ class TreeGenerator
         }
         // Scrambles the order of the nodes, then re-ids them, in new order, with the first
         // node in the new order having scrambledId 1, then next 2, etc.
-        void scrambleNodeIdsAndReorder()
+        void scrambleNodeIdsAndReorder(TestNode* forceAsRootNode)
         {
             scrambleNodeOrder();
             for (int i = 0; i < m_nodes.size(); i++)
             {
                 m_nodes[i]->scrambledId = (i + 1);
+            }
+            if (forceAsRootNode)
+            {
+                auto forcedRootNodeIter = find_if(m_nodes.begin(), m_nodes.end(), [forceAsRootNode](const auto& nodePtr) { return nodePtr.get() == forceAsRootNode; });
+                assert(forcedRootNodeIter != m_nodes.end());
+                if (forcedRootNodeIter != m_nodes.begin())
+                {
+                    swap((*m_nodes.begin())->scrambledId, forceAsRootNode->scrambledId);
+                    iter_swap(m_nodes.begin(), forcedRootNodeIter);
+                } 
+                assert(forceAsRootNode->scrambledId == 1);
             }
         }
         vector<TestNode*> nodes() const
