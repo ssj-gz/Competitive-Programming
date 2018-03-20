@@ -878,7 +878,7 @@ void doDFS(TestNode* node, TestNode* parent, int depth, std::function<void(TestN
         if (child == parent)
             continue;
 
-        doDFS(child, node, depth + 1, onVisitNode);
+        doDFS(child, node, depth + 1, onVisitNode, onEndVisitNode);
     }
     if (onEndVisitNode)
         onEndVisitNode(node, depth);
@@ -918,10 +918,40 @@ int main(int argc, char** argv)
             testNode->data.numCoins = rand() % 20;
         }
         int visitNum = 0;
-        vector<vector<TestNode*>> nodesWithHeight(numNodes + 1);
-        doDFS(rootNode, nullptr, 0, [&visitNum, &nodesWithHeight](TestNode* node, int depth) { node->data.visitNum = visitNum; visitNum++; nodesWithHeight[depth].push_back(node);},
-                                    [&visitNum](TestNode* node, int depth) { node->data.endVisitNum = visitNum; visitNum++;});
+        vector<TestNode*> ancestors = {nullptr};
+        doDFS(rootNode, nullptr, 0, [&ancestors](TestNode* node, int depth) { node->data.parent = ancestors.back(); ancestors.push_back(node);},
+                                    [&ancestors](TestNode* node, int depth) { ancestors.pop_back();});
+
+        vector<vector<TestNode*>> nodesWithHeight(treeGenerator.numNodes());
+        doDFS(rootNode, nullptr, 0, 
+                [&visitNum, &nodesWithHeight](TestNode* node, int depth) { 
+                    cout << "Visited node: " << node->id() << endl; 
+                    node->data.visitNum = visitNum; 
+                    visitNum++; 
+                    assert(depth >= 0);
+                    assert(depth < nodesWithHeight.size());
+                    nodesWithHeight[depth].push_back(node);
+                    },
+                [&visitNum](TestNode* node, int depth) { node->data.endVisitNum = visitNum; visitNum++;});
                                      
+        for (auto node : treeGenerator.nodes())
+        {
+            cout << "testing node: " << node->id() << endl;
+            markDescendentsAsUsable(node, false);
+
+            for (auto otherNode : treeGenerator.nodes())
+            {
+                bool isDescendant = otherNode->data.visitNum >= node->data.visitNum && otherNode->data.visitNum <= node->data.endVisitNum;
+                if (isDescendant != !otherNode->data.usable)
+                {
+                    cout << "node: " << node->id() << " visitNum: " << node->data.visitNum << " endVisitNum: " << node->data.endVisitNum << " otherNode: " << otherNode->id() << " visitNum: " << otherNode->data.visitNum << endl;
+                }
+                assert(isDescendant == !otherNode->data.usable);
+            }
+
+
+            markDescendentsAsUsable(node, true);
+        }
 
 
         return 0;
