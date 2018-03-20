@@ -889,6 +889,66 @@ void markDescendentsAsUsable(TestNode* node, bool usable)
     doDFS(node, node->data.parent, 0, [usable](TestNode* node, int depth) { node->data.usable = usable; });
 }
 
+TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendantsOf, const vector<vector<TestNode*>>& nodesWithHeight)
+{
+#if 0
+    cout << "pickNodeAtHeightNotDescendantOf: " << height << " forbidDescendantsOf: " << forbidDescendantsOf->id() << " visitNum:" << forbidDescendantsOf->data.visitNum << " endVisitNum: " << forbidDescendantsOf->data.endVisitNum << endl;
+    cout << "nodesWithHeight: " << endl;
+#endif
+    const vector<TestNode*>& nodesAtGivenHeight = nodesWithHeight[height];
+#if 0
+    for (auto node : nodesAtGivenHeight)
+    {
+        cout << "id: " << node->id() << " visitNum: " << node->data.visitNum << " ";
+    }
+    cout << endl;
+#endif
+    TestNode* retVal = nullptr;
+    const int descendantVisitNumBegin = forbidDescendantsOf->data.visitNum;
+    const int descendantVisitNumEnd = forbidDescendantsOf->data.endVisitNum;
+    auto compareNodesByVisitNum = [](const TestNode* lhs, const TestNode* rhs) { return lhs->data.visitNum < rhs->data.visitNum;};
+    TestNode dummyNode; 
+    dummyNode.data.visitNum = descendantVisitNumBegin;
+    auto endOfBeforeNodeIter = lower_bound(nodesAtGivenHeight.begin(), nodesAtGivenHeight.end(), &dummyNode, compareNodesByVisitNum);
+    //assert(endOfBeforeNodeIter != nodesAtGivenHeight.end());
+    //cout << "Blarp: " << (*endOfBeforeNodeIter)->data.visitNum << endl;
+    if (endOfBeforeNodeIter != nodesAtGivenHeight.begin())
+    {
+        //cout << "decrementing" << endl;
+        endOfBeforeNodeIter--;
+    }
+    if(endOfBeforeNodeIter == nodesAtGivenHeight.end())
+    {
+        //endOfBeforeNodeIter = nodesAtGivenHeight.begin();
+        //cout << "is end!" << endl;
+    }
+    else
+    {
+        //cout << "Blee: " << (*endOfBeforeNodeIter)->data.visitNum << " bloo: " << descendantVisitNumBegin << endl;
+        if((*endOfBeforeNodeIter)->data.visitNum >= descendantVisitNumBegin)
+            endOfBeforeNodeIter = nodesAtGivenHeight.end();
+    }
+    dummyNode.data.visitNum = descendantVisitNumEnd;
+    auto beginOfAfterNodeIter = upper_bound(nodesAtGivenHeight.cbegin(), nodesAtGivenHeight.cend(), &dummyNode, compareNodesByVisitNum);
+    const int numBefore = (endOfBeforeNodeIter == nodesAtGivenHeight.end() ? 0 : endOfBeforeNodeIter - nodesAtGivenHeight.begin() + 1);
+    const int numAfter = nodesAtGivenHeight.end() - beginOfAfterNodeIter;
+
+    int dbgNumBefore = 0;
+    int dbgNumAfter = 0;
+    for (const auto& node : nodesAtGivenHeight)
+    {
+        if (node->data.visitNum < forbidDescendantsOf->data.visitNum)
+            dbgNumBefore++;
+
+        if (node->data.visitNum > forbidDescendantsOf->data.endVisitNum)
+            dbgNumAfter++;
+    }
+    //cout << "numBefore: " << numBefore << " dbgNumBefore: " << dbgNumBefore << " numAfter: " << numAfter << " dbgNumAfter: " << dbgNumAfter << " blah: " << forbidDescendantsOf->id() << endl;
+    assert(dbgNumAfter == numAfter);
+    assert(dbgNumBefore == numBefore);
+    return retVal;
+}
+
 int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
@@ -933,7 +993,12 @@ int main(int argc, char** argv)
                     nodesWithHeight[depth].push_back(node);
                     },
                 [&visitNum](TestNode* node, int depth) { node->data.endVisitNum = visitNum; visitNum++;});
+        for (auto& nodes : nodesWithHeight)
+        {
+            sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->data.visitNum < rhs->data.visitNum; });
+        }
                                      
+#if 0
         for (auto node : treeGenerator.nodes())
         {
             cout << "testing node: " << node->id() << endl;
@@ -951,6 +1016,15 @@ int main(int argc, char** argv)
 
 
             markDescendentsAsUsable(node, true);
+        }
+#endif
+        for (auto node : treeGenerator.nodes())
+        {
+            cout << "testing node: " << node->id() << endl;
+            for (int height = 0; height < treeGenerator.numNodes(); height++)
+            {
+                pickNodeAtHeightNotDescendantOf(height, node, nodesWithHeight);
+            }
         }
 
 
