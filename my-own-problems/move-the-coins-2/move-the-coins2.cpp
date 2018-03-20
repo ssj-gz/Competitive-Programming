@@ -628,6 +628,15 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
 
 #include <set> 
 #include <memory> 
+struct TestNode;
+struct NodeData
+{
+    int numCoins = -1;
+    TestNode* parent = nullptr;
+    bool usable = true;
+    int visitNum = -1;
+    int endVisitNum = -1;
+};
 struct TestEdge;
 struct TestNode
 {
@@ -638,11 +647,21 @@ struct TestNode
     {
         return (scrambledId == -1) ? originalId : scrambledId;
     }
+    NodeData data;
 };
 struct TestEdge
 {
     TestNode* nodeA = nullptr;
     TestNode* nodeB = nullptr;
+    TestNode* otherNode(TestNode* node)
+    {
+        if (node == nodeA)
+            return nodeB;
+        if (node == nodeB)
+            return nodeA;
+        assert(false);
+        return nullptr;
+    }
 };
 class TreeGenerator
 {
@@ -850,6 +869,25 @@ class TreeGenerator
         vector<unique_ptr<TestEdge>> m_edges;
 };
 
+void doDFS(TestNode* node, TestNode* parent, int depth, std::function<void(TestNode* node, int depth)> onVisitNode, std::function<void(TestNode*, int depth)> onEndVisitNode = std::function<void(TestNode*, int depth)>())
+{
+    onVisitNode(node, depth);
+    for (auto edge : node->neighbours)
+    {
+        auto child = edge->otherNode(node);
+        if (child == parent)
+            continue;
+
+        doDFS(child, node, depth + 1, onVisitNode);
+    }
+    if (onEndVisitNode)
+        onEndVisitNode(node, depth);
+}
+
+void markDescendentsAsUsable(TestNode* node, bool usable)
+{
+    doDFS(node, node->data.parent, 0, [usable](TestNode* node, int depth) { node->data.usable = usable; });
+}
 
 int main(int argc, char** argv)
 {
@@ -865,180 +903,27 @@ int main(int argc, char** argv)
         const int maxNumNodes = 100;
         const int maxNumQueries = 100;
 
-        //const int forceHeight = 30000;
-        const int forceHeight = -1;
-
         int numNodes = rand() % maxNumNodes + 1;
         int numQueries = rand() % maxNumQueries + 1;
 
-        cerr << "numNodes: " << numNodes << " numQueries: " << numQueries << endl;
 
-        int numMetaAttempts = 0;
-
-        int largestHeight = -1;
-        while (true)
+        TreeGenerator treeGenerator;
+        auto rootNode = treeGenerator.createNode();
+        auto chain1 = treeGenerator.addNodeChain(rootNode, 40'000);
+        auto chain2 = treeGenerator.addNodeChain(rootNode, 40'000);
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(5'000, 1.0);
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15'000, 98.0);
+        for (auto testNode : treeGenerator.nodes())
         {
-            //cout << "Random tree with nodes: " << numNodes << endl;
-            vector<Node> nodes(numNodes);
-            nodes[0].height = 0;
-            vector<pair<int, int>> edges;
-            for (int i = 0; i < numNodes; i++)
-            {
-                int parentNodeIndex = -1;
-                if (i > 0)
-                {
-                    if (forceHeight == -1 || i > 2 * forceHeight)
-                    {
-                        parentNodeIndex = rand() % i;
-                    }
-                    else
-                    {
-                        if (i != forceHeight)
-                        {
-                            parentNodeIndex = i - 1;
-                        }
-                        else if (i == forceHeight)
-                        {
-                            parentNodeIndex = 0;
-                        }
-                    }
-                    nodes[parentNodeIndex].children.push_back(&nodes[i]);
-                    nodes[i].parent = &(nodes[parentNodeIndex]);
-                    nodes[i].height = nodes[i].parent->height + 1;
-                    edges.push_back({i, parentNodeIndex});
-                }
-                nodes[i].numCoins = rand() % 20;
-                nodes[i].nodeId = i;
-                largestHeight = max(largestHeight, nodes[i].height);
-            }
-            cerr << "largestHeight:" << largestHeight << endl;
-
-            int numQueriesToGenerate = numQueries;
-            int numAttempts = 0;
-            vector<pair<int, int>> potentialQueries;
-            int64_t numPotentialQueries = 0;
-            int64_t numZeroGrundies = 0;
-            auto rootNode = &(nodes.front());
-            for (int nodeIndexToMove = 0; nodeIndexToMove < numNodes; nodeIndexToMove++)
-            {
-                if (nodeIndexToMove % 100 == 0)
-                    cerr << "nodeIndexToMove: " << nodeIndexToMove << " / " << numNodes << endl;
-                auto& nodeToMove = nodes[nodeIndexToMove];
-                auto oldParent = nodeToMove.parent;
-                markDescendentsAsUsable(&nodeToMove, false);
-                for (int newParentNodeIndex = 0; newParentNodeIndex < numNodes; newParentNodeIndex++)
-                {
-                    auto newParent = &(nodes[newParentNodeIndex]);
-                    if (newParent->usable)
-                    {
-                        //potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
-                        numPotentialQueries++;
-                        //cout << "numPotentialQueries: " << numPotentialQueries << endl;
-#if 0
-                        auto originalParent = nodeToMove.parent;
-                        reparentNode(&nodeToMove, newParent);
-                        const auto grundyNumber = grundyNumberForTreeBruteForce(rootNode);
-                        //const auto grundyNumber = 1;
-                        reparentNode(&nodeToMove, originalParent);
-                        if (grundyNumber == 0)
-                        {
-                            numZeroGrundies++;
-                            cout << "numZeroGrundies: " << numZeroGrundies << " newParent height: " << newParent->height << endl;
-                        }
-#endif
-                    }
-                }
-                markDescendentsAsUsable(&nodeToMove, true);
-            }
-            cerr << "numZeroGrundies: " << numZeroGrundies << " numPotentialQueries: " << numPotentialQueries << endl;
-            //assert(RAND_MAX >= numPotentialQueries);
-            const bool successful = (numPotentialQueries >= numQueries);
-            if (successful)
-            {
-                vector<int64_t> queriesChosen;
-                while (queriesChosen.size() < numQueries)
-                {
-                    int64_t queryIndex = ((uint64_t(rand()) << 32) | rand()) % numPotentialQueries;
-                    if (find(queriesChosen.begin(), queriesChosen.end(), queryIndex) == queriesChosen.end())
-                    {
-                        queriesChosen.push_back(queryIndex);
-                        if (queriesChosen.size() % 100 == 0)
-                        {
-                            cerr << "chosen " << queriesChosen.size() << " out of " << numQueries << " queries" << endl;
-                        }
-                    }
-                }
-                sort(queriesChosen.begin(), queriesChosen.end());
-
-                int64_t queryIndex = 0;
-                vector<pair<int, int>> queries;
-                queries.reserve(numQueries);
-                auto queryIndexIter = queriesChosen.begin();
-                for (int nodeIndexToMove = 0; nodeIndexToMove < numNodes; nodeIndexToMove++)
-                {
-                    if (nodeIndexToMove % 100 == 0)
-                        cerr << "nodeIndexToMove: " << nodeIndexToMove << " / " << numNodes << endl;
-                    auto& nodeToMove = nodes[nodeIndexToMove];
-                    auto oldParent = nodeToMove.parent;
-                    markDescendentsAsUsable(&nodeToMove, false);
-                    for (int newParentNodeIndex = 0; newParentNodeIndex < numNodes; newParentNodeIndex++)
-                    {
-                        if (nodes[newParentNodeIndex].usable)
-                        {
-                            //potentialQueries.push_back({nodeIndexToMove, newParentNodeIndex});
-                            if (queryIndexIter != queriesChosen.end() && *queryIndexIter == queryIndex)
-                            {
-                                queries.push_back({nodeIndexToMove, newParentNodeIndex});
-                                queryIndexIter++;
-                                if (queries.size() % 100 == 0)
-                                    cerr << "Fulfilled " << queries.size() << " out of " << numQueries << " queries" << endl;
-                            }
-                            queryIndex++;
-                            //cout << "numPotentialQueries: " << numPotentialQueries << endl;
-                        }
-                    }
-                    markDescendentsAsUsable(&nodeToMove, true);
-                }
-                random_shuffle(queries.begin(), queries.end());
-                cout << numNodes << endl;
-                for (const auto& node : nodes)
-                {
-                    cout << node.numCoins << " ";
-                }
-                cout << endl;
-                assert(edges.size() == numNodes - 1);
-                for (auto& edge : edges)
-                {
-                    if (rand() % 2 == 0)
-                        swap(edge.first, edge.second);
-                }
-                random_shuffle(edges.begin(), edges.end());
-                for (const auto& edge : edges)
-                {
-                    cout << (edge.first + 1) << " " << (edge.second + 1) << endl;
-                }
-                cout << numQueries << endl;
-                for (const auto& query : queries)
-                {
-                    cout << (query.first + 1) << " " << (query.second + 1) << endl;
-                }
-                break;
-            }
-            else
-            {
-                cerr << "Unsuccessful; numPotentialQueries: " << numPotentialQueries << " needed " << numQueries << endl;
-            }
-
-            numMetaAttempts++;
-            //cout << "numMetaAttempts: " << numMetaAttempts << endl;
-            if (numMetaAttempts > 1000)
-            {
-                //cout << "Whoops" << endl;
-                numNodes = rand() % maxNumNodes + 1;
-                numQueries = rand() % maxNumQueries + 1;
-                numMetaAttempts = 0;
-            }
+            testNode->data.numCoins = rand() % 20;
         }
+        int visitNum = 0;
+        vector<vector<TestNode*>> nodesWithHeight(numNodes + 1);
+        doDFS(rootNode, nullptr, 0, [&visitNum, &nodesWithHeight](TestNode* node, int depth) { node->data.visitNum = visitNum; visitNum++; nodesWithHeight[depth].push_back(node);},
+                                    [&visitNum](TestNode* node, int depth) { node->data.endVisitNum = visitNum; visitNum++;});
+                                     
+
+
         return 0;
     }
 
