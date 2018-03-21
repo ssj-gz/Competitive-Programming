@@ -1117,7 +1117,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
 {
     const int numThreads = thread::hardware_concurrency();
     vector<future<void>> futures;
-    cout << "Using numThreads: " << numThreads << endl;
+    cerr << "Using numThreads: " << numThreads << endl;
     for (int nodeBeginIndex = 0; nodeBeginIndex < numThreads; nodeBeginIndex++)
     {
         futures.push_back(std::async(std::launch::async, [nodeBeginIndex, numThreads, &treeGenerator, &nodesWithHeight]() { findZeroGrundies(treeGenerator, nodesWithHeight, nodeBeginIndex, numThreads); }));
