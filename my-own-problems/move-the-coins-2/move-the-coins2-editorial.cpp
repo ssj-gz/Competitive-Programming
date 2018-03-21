@@ -270,7 +270,7 @@ int main(int argc, char** argv)
     for (const auto queryResult : result)
     {
         if (queryResult == 0)
-            cout << queryNumber << endl;
+            cout << queryNumber << '\n';
         queryNumber++;
     }
     cout << endl;
