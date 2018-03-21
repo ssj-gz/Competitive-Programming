@@ -337,10 +337,10 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
     vector<int> grundyNumbersForQueries;
     int queryNum = 0;
     const auto originalTreeGrundyNumber = grundyNumberForTreeBruteForce(rootNode);
-    cout << "Original tree grundy number: " << originalTreeGrundyNumber << endl;
+    //cout << "Original tree grundy number: " << originalTreeGrundyNumber << endl;
     for (const auto& query : queries)
     {
-        cout << " grundy number for node to move: " << query.nodeToMove->grundyNumber << " new parent height: " << query.newParent->height << " grundyNumberMinusSubtree: " << (originalTreeGrundyNumber ^ query.nodeToMove->grundyNumber) << endl;
+        //cout << " grundy number for node to move: " << query.nodeToMove->grundyNumber << " new parent height: " << query.newParent->height << " grundyNumberMinusSubtree: " << (originalTreeGrundyNumber ^ query.nodeToMove->grundyNumber) << endl;
         auto originalParent = query.nodeToMove->parent;
         reparentNode(query.nodeToMove, query.newParent);
         grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
@@ -1356,10 +1356,13 @@ int main(int argc, char** argv)
     log2LargestHeight = log2(largestHeight) + 1;
     //cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
 
+    int queryNum = 1;
     const auto result = grundyNumbersForQueries(nodes, queries);
     for (const auto queryResult : result)
     {
-        cout << queryResult << " ";
+        if (queryResult == 0)
+            cout << queryNum << endl;
+        queryNum++;
     }
     cout << endl;
 
@@ -1367,15 +1370,21 @@ int main(int argc, char** argv)
 #ifdef BRUTE_FORCE
     const auto resultBruteForce = grundyNumbersForQueriesBruteForce(nodes, queries);
     cout << "resultBruteForce: " << endl;
+    queryNum = 1;
     for (const auto queryResult : resultBruteForce)
     {
-        cout << queryResult << " ";
+        if (queryResult == 0)
+            cout << queryNum << endl;
+        queryNum++;
     }
     cout << endl;
     cout << "result: " << endl;
+    queryNum = 1;
     for (const auto queryResult : result)
     {
-        cout << queryResult << " ";
+        if (queryResult == 0)
+            cout << queryNum << endl;
+        queryNum++;
     }
     cout << endl;
     assert(result == resultBruteForce);

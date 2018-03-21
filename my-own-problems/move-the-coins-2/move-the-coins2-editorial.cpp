@@ -266,9 +266,12 @@ int main(int argc, char** argv)
     }
 
     const auto result = grundyNumbersForQueries(rootNode, numQueries);
+    int queryNumber = 1;
     for (const auto queryResult : result)
     {
-        cout << queryResult << " ";
+        if (queryResult == 0)
+            cout << queryNumber << endl;
+        queryNumber++;
     }
     cout << endl;
 }
