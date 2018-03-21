@@ -162,7 +162,6 @@ void answerQueries(Node* node)
         } 
     };
     // Store the originalCoinsThatMakeDigitOneAfterHeightChange for each query, before exploring any further.
-    cout << "# queries for node: " << node->queriesForNode.size() << endl;
     for (auto& queryForNode : node->queriesForNode)
     {
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange);
