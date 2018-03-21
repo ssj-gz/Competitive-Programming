@@ -1114,6 +1114,14 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
 vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<TestNode*>& allowedNodesToReparent, const int numQueries, double percentageGrundyZero, const vector<vector<TestNode*>> nodesWithHeight)
 {
     set<TestQuery> queries;
+    vector<TestNode*> nodesThatCanBeReparentedForGrundyZero;
+    for (auto node : allowedNodesToReparent)
+    {
+        if (!node->data.newParentHeightsThatGiveZeroGrundy.empty())
+        {
+            nodesThatCanBeReparentedForGrundyZero.push_back(node);
+        }
+    }
     for (int i = 0; i < numQueries; i++)
     {
         int numAttempts = 0;
@@ -1121,25 +1129,21 @@ vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<Tes
         while (numAttempts < maxAttempts)
         {
             numAttempts++;
-            auto nodeToReparent = allowedNodesToReparent[rand() % allowedNodesToReparent.size()];
+            TestNode* nodeToReparent = nullptr;
             TestNode* newParent = nullptr;
             const double randomPercent = static_cast<double>(rand()) / RAND_MAX * 100;
             //cout << "randomPercent: " << randomPercent << " percentageGrundyZero: " << percentageGrundyZero << endl;
             if (randomPercent <= percentageGrundyZero)
             {
-                if (nodeToReparent->data.newParentHeightsThatGiveZeroGrundy.empty())
-                {
-                    cerr << "Could not pick zero grundy, alas" << endl;
-                    continue;
-                }
-
+                nodeToReparent = nodesThatCanBeReparentedForGrundyZero[rand() % nodesThatCanBeReparentedForGrundyZero.size()];
                 const int heightOfNewParent = nodeToReparent->data.newParentHeightsThatGiveZeroGrundy[rand() % nodeToReparent->data.newParentHeightsThatGiveZeroGrundy.size()];
-                
+
                 newParent = pickNodeAtHeightNotDescendantOf(heightOfNewParent, nodeToReparent, nodesWithHeight);
                 cerr << "picked grundy zero testcase, apparently - " << nodeToReparent->id() << " -> " << newParent->id() << endl;
             }
             else
             {
+                nodeToReparent = nodesThatCanBeReparentedForGrundyZero[rand() % nodesThatCanBeReparentedForGrundyZero.size()];
                 if (nodeToReparent->data.maxHeightOfNonDescendant == -1)
                     continue;
                 const int heightOfNewParent = rand() % (nodeToReparent->data.maxHeightOfNonDescendant + 1);
