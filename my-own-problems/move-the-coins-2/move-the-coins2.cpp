@@ -1092,7 +1092,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
             const int heightChange = newParentHeight - node->height + 1;
             if (pickNodeAtHeightNotDescendantOf(newParentHeight, node, nodesWithHeight) == nullptr)
                  break;
-            assert(pickNodeAtHeightNotDescendantOf(newParentHeight, node, nodesWithHeight)->height == newParentHeight);
+            //assert(pickNodeAtHeightNotDescendantOf(newParentHeight, node, nodesWithHeight)->height == newParentHeight);
             node->data.maxHeightOfNonDescendant = newParentHeight;
             const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->data.grundyNumber;
             int relocatedSubtreeGrundyNumber = heightTracker.grundyNumber();
@@ -1103,7 +1103,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
                 numZeroGrundies++;
                 cerr << "Forced a grundy number: nodeId: " << node->id() << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " new parent height:" << newParentHeight << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << " originalTreeGrundyNumber: " << originalTreeGrundyNumber << " grundyNumberMinusSubtree: " << grundyNumberMinusSubtree << endl;
                 node->data.newParentHeightsThatGiveZeroGrundy.push_back(newParentHeight);
-                assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
+                //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
             }
         }
         numNodesProcessed++;
@@ -1201,8 +1201,8 @@ int main(int argc, char** argv)
 
         //int numNodes = rand() % maxNumNodes + 1;
         //int numQueries = rand() % maxNumQueries + 1;
-        const int numNodes = 100;
-        const int numQueries = 100;
+        const int numNodes = 100'000;
+        const int numQueries = 100'000;
 
 
         TreeGenerator treeGenerator;
@@ -1227,7 +1227,7 @@ int main(int argc, char** argv)
         }
         
         findZeroGrundies(treeGenerator, nodesWithHeight);
-        const auto queries = generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 75., nodesWithHeight);
+        const auto queries = generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 25., nodesWithHeight);
 
         scrambleAndPrintTestcase(treeGenerator, queries);
                                      
