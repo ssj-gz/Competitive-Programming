@@ -1060,20 +1060,23 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
     cerr << "findZeroGrundies" << endl;
     auto rootNode = treeGenerator.nodes().front();
     const auto numNodes = treeGenerator.numNodes();
-    originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
+    auto originalTreeGrundyNumber = rootNode->data.grundyNumber;
     //assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
     int numZeroGrundies = 0;
     int numNodesProcessed = 0;
     HeightTracker heightTracker;
     auto nodes = treeGenerator.nodes();
+    vector<int> numDescendantsWithHeight(numNodes + 1);
     for (int nodeIndex = nodeBeginIndex; nodeIndex < numNodes; nodeIndex += nodeIndexStep)
     {
         auto node = nodes[nodeIndex];
+        if ((nodeIndex - nodeBeginIndex) % 100 == 0)
         {
             lock_guard<mutex> lock(printMutex);
             cerr << "node: " << node->id() << " thread id: " << nodeBeginIndex << endl;
         }
-        vector<int> numDescendantsWithHeight(numNodes + 1);
+        numDescendantsWithHeight.clear();
+        numDescendantsWithHeight.resize(numNodes + 1);
         doDFS(node, node->parent, 0, [&numDescendantsWithHeight](auto node, int depth) 
                 {
                     if ((node->data.numCoins % 2) == 1)
@@ -1107,10 +1110,12 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
             if (newGrundyNumber == 0)
             {
                 numZeroGrundies++;
+#if 0
                 {
                     lock_guard<mutex> lock(printMutex);
                     cerr << "Forced a grundy number: nodeId: " << node->id() << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " new parent height:" << newParentHeight << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << " originalTreeGrundyNumber: " << originalTreeGrundyNumber << " grundyNumberMinusSubtree: " << grundyNumberMinusSubtree << endl;
                 }
+#endif
                 node->data.newParentHeightsThatGiveZeroGrundy.push_back(newParentHeight);
                 //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
             }
@@ -1121,6 +1126,9 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
 
 void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight)
 {
+    auto rootNode = treeGenerator.nodes().front();
+    auto originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
+
     const int numThreads = thread::hardware_concurrency();
     vector<future<void>> futures;
     cerr << "Using numThreads: " << numThreads << endl;
