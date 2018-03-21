@@ -1107,9 +1107,9 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
     }
 }
 
-vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<TestNode*>& allowedNodesToReparent, const int numQueries, double percentageGrundyZero, const vector<vector<TestNode*>> nodesWithHeight)
+void generateQueries(TreeGenerator& treeGenerator, vector<TestQuery>& destQueries, const vector<TestNode*>& allowedNodesToReparent, const int numQueries, double percentageGrundyZero, const vector<vector<TestNode*>> nodesWithHeight)
 {
-    set<TestQuery> queries;
+    set<TestQuery> queries(destQueries.begin(), destQueries.end());
     vector<TestNode*> nodesThatCanBeReparentedForGrundyZero;
     for (auto node : allowedNodesToReparent)
     {
@@ -1139,7 +1139,7 @@ vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<Tes
             }
             else
             {
-                nodeToReparent = nodesThatCanBeReparentedForGrundyZero[rand() % nodesThatCanBeReparentedForGrundyZero.size()];
+                nodeToReparent = allowedNodesToReparent[rand() % allowedNodesToReparent.size()];
                 if (nodeToReparent->data.maxHeightOfNonDescendant == -1)
                     continue;
                 const int heightOfNewParent = rand() % (nodeToReparent->data.maxHeightOfNonDescendant + 1);
@@ -1155,13 +1155,13 @@ vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<Tes
                 continue;
 
             queries.insert(query);
+            destQueries.push_back(query);
             //cerr << "Generated query: " << query.nodeToReparent->id() << " -> " << query.newParent->id() << endl;
             break;
         }
         if (numAttempts == maxAttempts)
             break;
     }
-    return vector<TestQuery>(queries.begin(), queries.end());
 }
 
 void scrambleAndPrintTestcase(TreeGenerator& treeGenerator, vector<TestQuery> testQueries)
@@ -1201,7 +1201,7 @@ int main(int argc, char** argv)
 
         //int numNodes = rand() % maxNumNodes + 1;
         //int numQueries = rand() % maxNumQueries + 1;
-        const int numNodes = 100'000;
+        const int numNodes = 10'000;
         const int numQueries = 100'000;
 
 
@@ -1225,9 +1225,17 @@ int main(int argc, char** argv)
         {
             sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->visitNum < rhs->visitNum; });
         }
+
+        vector<TestNode*> halfChain1;
+        for (int i = 0; i < chain1.size() / 2; i++)
+        {
+            halfChain1.push_back(chain1[i]);
+        }
         
         findZeroGrundies(treeGenerator, nodesWithHeight);
-        const auto queries = generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 25., nodesWithHeight);
+        vector<TestQuery> queries;
+        generateQueries(treeGenerator, queries, halfChain1, numQueries - 5000, 10., nodesWithHeight);
+        generateQueries(treeGenerator, queries, treeGenerator.nodes(), numQueries - queries.size(), 10.0, nodesWithHeight);
 
         scrambleAndPrintTestcase(treeGenerator, queries);
                                      
