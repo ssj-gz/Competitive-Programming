@@ -1167,17 +1167,18 @@ vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<Tes
 void scrambleAndPrintTestcase(TreeGenerator& treeGenerator, vector<TestQuery> testQueries)
 {
     cout << treeGenerator.numNodes() << endl;
-    //treeGenerator.scrambleNodeIdsAndReorder(treeGenerator.nodes().front());
+    treeGenerator.scrambleNodeIdsAndReorder(treeGenerator.nodes().front());
     for (auto node : treeGenerator.nodes())
     {
         cout << node->data.numCoins << endl;
     }
 
+    treeGenerator.scrambleEdgeOrder();
     treeGenerator.printEdges();
 
     cout << testQueries.size() << endl;
 
-    //random_shuffle(testQueries.begin(), testQueries.end());
+    random_shuffle(testQueries.begin(), testQueries.end());
     for (const auto query : testQueries)
     {
         cout << query.nodeToReparent->id() << " " << query.newParent->id() << endl;
@@ -1201,7 +1202,7 @@ int main(int argc, char** argv)
         //int numNodes = rand() % maxNumNodes + 1;
         //int numQueries = rand() % maxNumQueries + 1;
         const int numNodes = 100;
-        const int numQueries = 1;
+        const int numQueries = 100;
 
 
         TreeGenerator treeGenerator;
@@ -1226,7 +1227,7 @@ int main(int argc, char** argv)
         }
         
         findZeroGrundies(treeGenerator, nodesWithHeight);
-        const auto queries = generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 100.0, nodesWithHeight);
+        const auto queries = generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 75., nodesWithHeight);
 
         scrambleAndPrintTestcase(treeGenerator, queries);
                                      
