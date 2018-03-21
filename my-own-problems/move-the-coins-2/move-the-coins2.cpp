@@ -1049,7 +1049,7 @@ bool operator<(const TestQuery& lhs, const TestQuery& rhs)
 
 void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight)
 {
-    cout << "findZeroGrundies" << endl;
+    cerr << "findZeroGrundies" << endl;
 #ifdef FIND_ZERO_GRUNDYS
     auto rootNode = treeGenerator.nodes().front();
     const auto numNodes = treeGenerator.numNodes();
@@ -1060,7 +1060,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
     HeightTracker heightTracker;
     for (auto& node  : treeGenerator.nodes())
     {
-        cout << "node: " << node->id() << endl;
+        cerr << "node: " << node->id() << endl;
         vector<int> numDescendantsWithHeight(numNodes + 1);
         doDFS(node, node->parent, 0, [&numDescendantsWithHeight](auto node, int depth) 
                 {
@@ -1093,7 +1093,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
             if (newGrundyNumber == 0)
             {
                 numZeroGrundies++;
-                cout << "Forced a grundy number: nodeId: " << node->id() << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
+                cerr << "Forced a grundy number: nodeId: " << node->id() << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
                 node->data.heightDiffsThatGiveZeroGrundy.push_back(heightChange);
                 //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
             }
@@ -1116,15 +1116,20 @@ vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<Tes
             auto nodeToReparent = allowedNodesToReparent[rand() % allowedNodesToReparent.size()];
             TestNode* newParent = nullptr;
             const double randomPercent = static_cast<double>(rand()) / RAND_MAX * 100;
+            //cout << "randomPercent: " << randomPercent << " percentageGrundyZero: " << percentageGrundyZero << endl;
             if (randomPercent <= percentageGrundyZero)
             {
                 if (nodeToReparent->data.heightDiffsThatGiveZeroGrundy.empty())
+                {
+                    cerr << "Could not pick zero grundy, alas" << endl;
                     continue;
+                }
 
                 const int randomHeightDiff = nodeToReparent->data.heightDiffsThatGiveZeroGrundy[rand() % nodeToReparent->data.heightDiffsThatGiveZeroGrundy.size()];
                 const int heightOfNewParent = nodeToReparent->height + randomHeightDiff;
                 
                 newParent = pickNodeAtHeightNotDescendantOf(heightOfNewParent, nodeToReparent, nodesWithHeight);
+                cerr << "picked grundy zero testcase, apparently!" << endl;
             }
             else
             {
@@ -1143,13 +1148,33 @@ vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<Tes
                 continue;
 
             queries.insert(query);
-            cout << "Generated query: " << query.nodeToReparent->id() << " -> " << query.newParent->id() << endl;
+            //cerr << "Generated query: " << query.nodeToReparent->id() << " -> " << query.newParent->id() << endl;
             break;
         }
         if (numAttempts == maxAttempts)
             break;
     }
     return vector<TestQuery>(queries.begin(), queries.end());
+}
+
+void scrambleAndPrintTestcase(TreeGenerator& treeGenerator, vector<TestQuery> testQueries)
+{
+    cout << treeGenerator.numNodes() << endl;
+    treeGenerator.scrambleNodeIdsAndReorder(treeGenerator.nodes().front());
+    for (auto node : treeGenerator.nodes())
+    {
+        cout << node->data.numCoins << endl;
+    }
+
+    treeGenerator.printEdges();
+
+    cout << testQueries.size() << endl;
+
+    random_shuffle(testQueries.begin(), testQueries.end());
+    for (const auto query : testQueries)
+    {
+        cout << query.nodeToReparent->id() << " " << query.newParent->id() << endl;
+    }
 }
 
 int main(int argc, char** argv)
@@ -1194,8 +1219,9 @@ int main(int argc, char** argv)
         }
         
         findZeroGrundies(treeGenerator, nodesWithHeight);
-        generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 75.0, nodesWithHeight);
+        const auto queries = generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 75.0, nodesWithHeight);
 
+        scrambleAndPrintTestcase(treeGenerator, queries);
                                      
 #if 0
         for (auto node : treeGenerator.nodes())
