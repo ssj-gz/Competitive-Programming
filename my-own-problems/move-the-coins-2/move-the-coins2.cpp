@@ -31,101 +31,82 @@ constexpr int log2MaxN = log2(maxN);
 constexpr int maxBinaryDigits = log2(maxN);
 constexpr int maxHeight = maxN * 2;
 
-
 class HeightTracker
 {
     public:
         HeightTracker()
         {
-            m_makesDigitOneBegin.resize(maxBinaryDigits + 1);
-            m_makesDigitOneEnd.resize(maxBinaryDigits + 1);
-
-            int powerOf2 = 2;
-            for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            auto powerOf2 = 2;
+            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2.push_back(vector<VersionedValue>(powerOf2));
+                m_heightsModPowerOf2[binaryDigitNum] = vector<VersionedValue>(powerOf2);
                 powerOf2 <<= 1;
             }
             clear();
         }
         void insertHeight(const int newHeight)
         {
-            //cout << "insertHeight: " << newHeight << " m_cumulativeHeightAdjustment: " << m_cumulativeHeightAdjustment << endl;
-            if (newHeight < m_smallestHeight)
-                m_smallestHeight = newHeight;
-            int powerOf2 = 2;
-            int newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment;
-            if (newHeightAdjusted < 0)
-            {
-                newHeightAdjusted += (1 << (maxBinaryDigits + 1));
-            }
+            doPendingAdjustAllHeights();
+            const auto newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment
+                // Add a number guarantees makes newHeightAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
+                + (1 << (maxBinaryDigits + 1)); 
             assert(newHeightAdjusted >= 0);
-            for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            auto powerOf2 = 2;
+            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                const int heightModPowerOf2 = newHeightAdjusted % powerOf2;
+                const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1);
                 numHeightsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
-                    {
                         m_grundyNumber ^= (powerOf2 >> 1);
-                    }
                 }
                 else
                 {
-                    const int makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
-                    const int makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
+                    const auto makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
+                    const auto makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
                     assert(makeDigitZeroBegin <= makeDigitZeroEnd);
                     assert(0 <= makeDigitZeroEnd < powerOf2);
                     assert(0 <= makeDigitZeroBegin < powerOf2);
                     if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
-                    {
                         m_grundyNumber ^= (powerOf2 >> 1);
-                    }
                 }
 
                 powerOf2 <<= 1;
             }
-#ifdef VERIFY_HEIGHT_TRACKER
-            m_dbgHeights.push_back(newHeight);
-#endif
         };
-        bool canDecreaseHeights() const
-        {
-            // This is just  for testing - won't be needed in real-life.
-            // TODO - remove this!
-            if (m_smallestHeight == 0)
-                return false;
-            return true;
-        }
-        bool canIncreaseHeights() const
-        {
-            // This is just  for testing - won't be needed in real-life.
-            // TODO - remove this!
-            return m_cumulativeHeightAdjustment <= maxHeight;
-        }
+
         void adjustAllHeights(int heightDiff)
         {
+            m_pendingHeightAdjustment += heightDiff;
+        }
+        void doPendingAdjustAllHeights()
+        {
+            int heightDiff = m_pendingHeightAdjustment;
             if (heightDiff == 0)
                 return;
-            assert(heightDiff == 1 || heightDiff == -1);
+            //assert(heightDiff == 1 || heightDiff == -1);
+            m_pendingHeightAdjustment = 0;
             m_cumulativeHeightAdjustment += heightDiff;
-            m_smallestHeight += heightDiff;
-            if (heightDiff == 1)
+
+            auto powerOf2 = 2;
+            if (heightDiff > 0)
             {
-                int powerOf2 = 2;
-                for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+                for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
-                    int changeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    changeToNumberOfHeightsThatMakeDigitsOne -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
-                    m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) % powerOf2;
+                    auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
+                    for (int i = 0; i < heightDiff; i++)
+                    {
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
+                        m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) & (powerOf2 - 1);
 
-                    m_makesDigitOneBegin[binaryDigitNum] = (powerOf2 + m_makesDigitOneBegin[binaryDigitNum] - 1) % powerOf2;
-                    changeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
+                        m_makesDigitOneBegin[binaryDigitNum] = (powerOf2 + m_makesDigitOneBegin[binaryDigitNum] - 1) & (powerOf2 - 1);
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
+                    }
 
-                    if (abs(changeToNumberOfHeightsThatMakeDigitsOne) % 2 == 1)
+                    if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
                         m_grundyNumber ^= (powerOf2 >> 1);
 
                     powerOf2 <<= 1;
@@ -133,31 +114,27 @@ class HeightTracker
             }
             else
             {
-                int powerOf2 = 2;
-                for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+                heightDiff = -heightDiff;
+                assert(heightDiff > 0);
+                for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
-                    int changeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    changeToNumberOfHeightsThatMakeDigitsOne -= numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
-                    m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) % powerOf2;
+                    auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
+                    for (int i = 0; i < heightDiff; i++)
+                    {
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
+                        m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) & (powerOf2 - 1);
 
-                    m_makesDigitOneEnd[binaryDigitNum] = (m_makesDigitOneEnd[binaryDigitNum] + 1) % powerOf2;
-                    changeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
+                        m_makesDigitOneEnd[binaryDigitNum] = (m_makesDigitOneEnd[binaryDigitNum] + 1) & (powerOf2 - 1);
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
+                    }
 
-                    if (abs(changeToNumberOfHeightsThatMakeDigitsOne) % 2 == 1)
+                    if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
                         m_grundyNumber ^= (powerOf2 >> 1);
 
                     powerOf2 <<= 1;
                 } 
             }
-
-#ifdef VERIFY_HEIGHT_TRACKER
-            for (auto& height : m_dbgHeights)
-            {
-                height += heightDiff;
-                assert(height >= 0);
-            }
-#endif
         }
         int& numHeightsModPowerOf2(int binaryDigitNum, int modPowerOf2)
         {
@@ -169,27 +146,20 @@ class HeightTracker
             }
             return numHeights.value;
         }
-        int grundyNumber() const
+        int grundyNumber()
         {
-#ifdef VERIFY_HEIGHT_TRACKER
-            int dbgGrundyNumber = 0;
-            for (const auto height : m_dbgHeights)
+            if (m_pendingHeightAdjustment != 0)
             {
-                dbgGrundyNumber ^= height;
+                doPendingAdjustAllHeights();
             }
-            cout << "dbgGrundyNumber: " << dbgGrundyNumber << " m_grundyNumber: " << m_grundyNumber << endl;
-            assert(dbgGrundyNumber == m_grundyNumber);
-#endif
             return m_grundyNumber;
         }
         void clear()
         {
-            //cout << "Clear!" << endl;
             m_versionNumber++;
-            int powerOf2 = 2;
-            for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            auto powerOf2 = 2;
+            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                //m_heightsModPowerOf2.push_back(vector<int>(powerOf2, 0));
                 m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
                 m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
 
@@ -197,30 +167,24 @@ class HeightTracker
             }
             m_grundyNumber = 0;
             m_cumulativeHeightAdjustment = 0;
-#ifdef VERIFY_HEIGHT_TRACKER
-            m_dbgHeights.clear();
-#endif
         }
-#ifdef VERIFY_HEIGHT_TRACKER
-        vector<int> m_dbgHeights;
-#endif
+    private:
         struct VersionedValue
         {
             int value = 0;
             int versionNumber = -1;
         };
-        vector<vector<VersionedValue>> m_heightsModPowerOf2;
-        vector<int> m_makesDigitOneBegin;
-        vector<int> m_makesDigitOneEnd;
+        vector<VersionedValue> m_heightsModPowerOf2[maxBinaryDigits + 1];
+        int m_makesDigitOneBegin[maxBinaryDigits + 1];
+        int m_makesDigitOneEnd[maxBinaryDigits + 1];
 
         int m_cumulativeHeightAdjustment = 0;
         int m_grundyNumber = 0;
 
         int m_versionNumber = 0;
-        int m_smallestHeight = 0;
+
+        int m_pendingHeightAdjustment = 0;
 };
-
-
 
 struct Node;
 struct Query
@@ -993,7 +957,7 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
         retval =  *(beginOfAfterNodeIter + (randomIndex - numBefore));
     }
 
-#if 1
+#if 0
     vector<TestNode*> dbgValidNodes;
     int dbgNumBefore = 0;
     int dbgNumAfter = 0;
