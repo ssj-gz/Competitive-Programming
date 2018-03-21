@@ -1074,7 +1074,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
             if (newGrundyNumber == 0)
             {
                 numZeroGrundies++;
-#if 0
+#if 1
                 {
                     lock_guard<mutex> lock(printMutex);
                     cerr << "Forced a grundy number: nodeId: " << node->id() << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " new parent height:" << newParentHeight << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << " originalTreeGrundyNumber: " << originalTreeGrundyNumber << " grundyNumberMinusSubtree: " << grundyNumberMinusSubtree << endl;
