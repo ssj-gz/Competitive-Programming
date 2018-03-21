@@ -633,6 +633,8 @@ struct NodeData
 {
     int numCoins = -1;
     bool usable = true;
+    int grundyNumber = -1;
+    vector<int> heightDiffsThatGiveZeroGrundy;
 };
 struct TestEdge;
 struct TestNode
@@ -924,6 +926,29 @@ void markDescendentsAsUsable(TestNode* node, bool usable)
     doDFS(node, node->parent, 0, [usable](TestNode* node, int depth) { node->data.usable = usable; });
 }
 
+int findGrundyNumberForNodes(TestNode* node, const int depth)
+{
+    int grundyNumber = 0;
+    if ((node->data.numCoins % 2) == 1)
+        grundyNumber ^= depth;
+
+    for (auto childEdge : node->neighbours)
+    {
+        auto child = childEdge->otherNode(node);
+        if (child == node->parent)
+            continue;
+        grundyNumber ^= findGrundyNumberForNodes(child, depth + 1);
+    }
+
+    node->data.grundyNumber = grundyNumber;
+
+    return grundyNumber;
+}
+int findGrundyNumberForNodes(TestNode* node)
+{
+    return findGrundyNumberForNodes(node, 0);
+}
+
 TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendantsOf, const vector<vector<TestNode*>>& nodesWithHeight)
 {
 #if 0
@@ -1007,6 +1032,62 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
     return retval;
 }
 
+
+void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight)
+{
+    cout << "findZeroGrundies" << endl;
+#ifdef FIND_ZERO_GRUNDYS
+    auto rootNode = treeGenerator.nodes().front();
+    const auto numNodes = treeGenerator.numNodes();
+    originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
+    //assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
+    int numZeroGrundies = 0;
+    int numNodesProcessed = 0;
+    HeightTracker heightTracker;
+    for (auto& node  : treeGenerator.nodes())
+    {
+        cout << "node: " << node->id() << endl;
+        vector<int> numDescendantsWithHeight(numNodes + 1);
+        doDFS(node, node->parent, 0, [&numDescendantsWithHeight](auto node, int depth) 
+                {
+                    if ((node->data.numCoins % 2) == 1)
+                        numDescendantsWithHeight[node->height]++;
+                });
+        vector<int> descendentHeights;
+        heightTracker.clear();
+        for (int height = 0; height < numDescendantsWithHeight.size(); height++)
+        {
+            if ((numDescendantsWithHeight[height] % 2) == 1)
+            {
+                descendentHeights.push_back(height);
+                heightTracker.insertHeight(height - node->height);
+            }
+        }
+        //cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " <<  << endl;
+        const int depthUnderneath = (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height);
+        for (int heightChange = -node->height; node->height + heightChange <= 2 * numNodes; heightChange++)
+        {
+            const int height = heightChange + node->height;
+            if (pickNodeAtHeightNotDescendantOf(height, node, nodesWithHeight) == nullptr)
+                 break;
+            const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->data.grundyNumber;
+            int relocatedSubtreeGrundyNumber = heightTracker.grundyNumber();
+            heightTracker.adjustAllHeights(1);
+            const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
+            //cout << "newGrundyNumber: " << newGrundyNumber << endl;
+            if (newGrundyNumber == 0)
+            {
+                numZeroGrundies++;
+                cout << "Forced a grundy number: nodeId: " << node->id() << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
+                node->data.heightDiffsThatGiveZeroGrundy.push_back(heightChange);
+                //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
+            }
+        }
+        numNodesProcessed++;
+    }
+#endif // FIND_ZERO_GRUNDYS
+}
+
 int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
@@ -1036,7 +1117,6 @@ int main(int argc, char** argv)
             testNode->data.numCoins = rand() % 20;
         }
         doGenericInfoDFS(rootNode);
-
         vector<vector<TestNode*>> nodesWithHeight(treeGenerator.numNodes());
         for (auto& node : treeGenerator.nodes())
         {
@@ -1046,6 +1126,9 @@ int main(int argc, char** argv)
         {
             sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->visitNum < rhs->visitNum; });
         }
+        
+        findZeroGrundies(treeGenerator, nodesWithHeight);
+
                                      
 #if 0
         for (auto node : treeGenerator.nodes())
@@ -1169,53 +1252,6 @@ int main(int argc, char** argv)
 
     log2LargestHeight = log2(largestHeight) + 1;
     //cout << "largestHeight: " << largestHeight << " log2LargestHeight: " << log2LargestHeight << endl;
-
-#ifdef FIND_ZERO_GRUNDYS
-    originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
-    assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
-    int numZeroGrundies = 0;
-    vector<int> nodeIds;
-    for (int i = 0; i < numNodes; i++)
-    {
-        nodeIds.push_back(i);
-    }
-    //random_shuffle(nodeIds.begin(), nodeIds.end());
-    int numNodesProcessed = 0;
-    HeightTracker heightTracker;
-    for (auto nodeId : nodeIds)
-    {
-        auto node = &(nodes[nodeId]);
-        vector<int> numWithHeight(numNodes + 1);
-        buildHeightHistogram(node, numWithHeight);
-        vector<int> descendentHeights;
-        heightTracker.clear();
-        for (int height = 0; height < numWithHeight.size(); height++)
-        {
-            if ((numWithHeight[height] % 2) == 1)
-            {
-                descendentHeights.push_back(height);
-                heightTracker.insertHeight(height - node->height);
-            }
-        }
-        //cout << "node: " << node->nodeId << " height: " << node->height << " depth underneath: " <<  << endl;
-        const int depthUnderneath = (descendentHeights.empty() ? - 1 :  descendentHeights.back() - node->height);
-        for (int heightChange = -node->height; node->height + heightChange <= largestHeight; heightChange++)
-        {
-            const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyNumber;
-            int relocatedSubtreeGrundyNumber = heightTracker.grundyNumber();
-            heightTracker.adjustAllHeights(1);
-            const int newGrundyNumber = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
-            if (newGrundyNumber == 0)
-            {
-                numZeroGrundies++;
-                cout << "Forced a grundy number: nodeId: " << nodeId << " node height: " << node->height << " depthUnderneath: " << depthUnderneath << " heightChange: " << heightChange << " total: " << numZeroGrundies << " numNodesProcessed: " << numNodesProcessed << " numNodes: " << numNodes << endl;
-                //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
-            }
-        }
-        numNodesProcessed++;
-    }
-    return 0;
-#endif // FIND_ZERO_GRUNDYS
 
     const auto result = grundyNumbersForQueries(nodes, queries);
     for (const auto queryResult : result)
