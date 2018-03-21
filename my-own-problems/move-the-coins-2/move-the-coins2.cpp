@@ -1084,6 +1084,11 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
                 //assert((grundyNumberMinusSubtree ^ grundyNumberWithHeightChange(node, heightChange)) == newGrundyNumber);
             }
         }
+        {
+            lock_guard<mutex> lock(printMutex);
+            if (!node->data.newParentHeightsThatGiveZeroGrundy.empty())
+                cerr << "node " << node->id() << " had " << node->data.newParentHeightsThatGiveZeroGrundy.size() << " heights that give zero grundy" << endl;
+        }
         numNodesProcessed++;
     }
 }
@@ -1201,7 +1206,7 @@ int main(int argc, char** argv)
 
         //int numNodes = rand() % maxNumNodes + 1;
         //int numQueries = rand() % maxNumQueries + 1;
-        const int numNodes = 10'000;
+        const int numNodes = 100'000;
         const int numQueries = 100'000;
 
 
@@ -1226,16 +1231,25 @@ int main(int argc, char** argv)
             sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->visitNum < rhs->visitNum; });
         }
 
-        vector<TestNode*> halfChain1;
-        for (int i = 0; i < chain1.size() / 2; i++)
-        {
-            halfChain1.push_back(chain1[i]);
-        }
         
         findZeroGrundies(treeGenerator, nodesWithHeight);
+        vector<TestNode*> nodesThatCanBeReparentedForGrundyZero;
+        for (auto node : treeGenerator.nodes())
+        {
+            if (node->data.newParentHeightsThatGiveZeroGrundy.size() > 8)
+            {
+                nodesThatCanBeReparentedForGrundyZero.push_back(node);
+            }
+        }
+        assert(nodesThatCanBeReparentedForGrundyZero.size() >= 3);
+        vector<TestNode*> nodesToAddQueriesTo;
+        for (int i = 0; i < 3; i++)
+        {
+            nodesToAddQueriesTo.push_back(nodesThatCanBeReparentedForGrundyZero[rand() % nodesThatCanBeReparentedForGrundyZero.size()]);
+        }
         vector<TestQuery> queries;
-        generateQueries(treeGenerator, queries, halfChain1, numQueries - 5000, 10., nodesWithHeight);
-        generateQueries(treeGenerator, queries, treeGenerator.nodes(), numQueries - queries.size(), 10.0, nodesWithHeight);
+        generateQueries(treeGenerator, queries, nodesToAddQueriesTo, numQueries - 5000, 20., nodesWithHeight);
+        generateQueries(treeGenerator, queries, treeGenerator.nodes(), numQueries - queries.size(), 20.0, nodesWithHeight);
 
         scrambleAndPrintTestcase(treeGenerator, queries);
                                      
