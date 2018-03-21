@@ -635,6 +635,7 @@ struct NodeData
     bool usable = true;
     int grundyNumber = -1;
     vector<int> heightDiffsThatGiveZeroGrundy;
+    int maxHeightOfNonDescendant = -1;
 };
 struct TestEdge;
 struct TestNode
@@ -1032,6 +1033,19 @@ TestNode* pickNodeAtHeightNotDescendantOf(int height, TestNode* forbidDescendant
     return retval;
 }
 
+struct TestQuery
+{
+    TestNode* nodeToReparent = nullptr;
+    TestNode* newParent = nullptr;
+};
+
+bool operator<(const TestQuery& lhs, const TestQuery& rhs)
+{
+    if (lhs.nodeToReparent != rhs.nodeToReparent)
+        return lhs.nodeToReparent < rhs.nodeToReparent;
+    return lhs.newParent < rhs.newParent;
+}
+
 
 void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight)
 {
@@ -1070,6 +1084,7 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
             const int height = heightChange + node->height;
             if (pickNodeAtHeightNotDescendantOf(height, node, nodesWithHeight) == nullptr)
                  break;
+            node->data.maxHeightOfNonDescendant = height;
             const int grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->data.grundyNumber;
             int relocatedSubtreeGrundyNumber = heightTracker.grundyNumber();
             heightTracker.adjustAllHeights(1);
@@ -1088,6 +1103,55 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
 #endif // FIND_ZERO_GRUNDYS
 }
 
+vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<TestNode*>& allowedNodesToReparent, const int numQueries, double percentageGrundyZero, const vector<vector<TestNode*>> nodesWithHeight)
+{
+    set<TestQuery> queries;
+    for (int i = 0; i < numQueries; i++)
+    {
+        int numAttempts = 0;
+        const int maxAttempts = 10'000;
+        while (numAttempts < maxAttempts)
+        {
+            numAttempts++;
+            auto nodeToReparent = allowedNodesToReparent[rand() % allowedNodesToReparent.size()];
+            TestNode* newParent = nullptr;
+            const double randomPercent = static_cast<double>(rand()) / RAND_MAX * 100;
+            if (randomPercent <= percentageGrundyZero)
+            {
+                if (nodeToReparent->data.heightDiffsThatGiveZeroGrundy.empty())
+                    continue;
+
+                const int randomHeightDiff = nodeToReparent->data.heightDiffsThatGiveZeroGrundy[rand() % nodeToReparent->data.heightDiffsThatGiveZeroGrundy.size()];
+                const int heightOfNewParent = nodeToReparent->height + randomHeightDiff;
+                
+                newParent = pickNodeAtHeightNotDescendantOf(heightOfNewParent, nodeToReparent, nodesWithHeight);
+            }
+            else
+            {
+                if (nodeToReparent->data.maxHeightOfNonDescendant == -1)
+                    continue;
+                const int heightOfNewParent = rand() % (nodeToReparent->data.maxHeightOfNonDescendant + 1);
+                newParent = pickNodeAtHeightNotDescendantOf(heightOfNewParent, nodeToReparent, nodesWithHeight);
+            }
+
+            TestQuery query;
+            assert(nodeToReparent);
+            assert(newParent);
+            query.nodeToReparent = nodeToReparent;
+            query.newParent = newParent;
+            if (queries.find(query) != queries.end())
+                continue;
+
+            queries.insert(query);
+            cout << "Generated query: " << query.nodeToReparent->id() << " -> " << query.newParent->id() << endl;
+            break;
+        }
+        if (numAttempts == maxAttempts)
+            break;
+    }
+    return vector<TestQuery>(queries.begin(), queries.end());
+}
+
 int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
@@ -1102,16 +1166,18 @@ int main(int argc, char** argv)
         const int maxNumNodes = 100;
         const int maxNumQueries = 100;
 
-        int numNodes = rand() % maxNumNodes + 1;
-        int numQueries = rand() % maxNumQueries + 1;
+        //int numNodes = rand() % maxNumNodes + 1;
+        //int numQueries = rand() % maxNumQueries + 1;
+        const int numNodes = 10'000;
+        const int numQueries = 10'000;
 
 
         TreeGenerator treeGenerator;
         auto rootNode = treeGenerator.createNode();
-        auto chain1 = treeGenerator.addNodeChain(rootNode, 40'000);
-        auto chain2 = treeGenerator.addNodeChain(rootNode, 40'000);
-        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(5'000, 1.0);
-        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15'000, 98.0);
+        auto chain1 = treeGenerator.addNodeChain(rootNode, numNodes * 4 / 10);
+        auto chain2 = treeGenerator.addNodeChain(rootNode, numNodes * 4/ 10);
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes / 20, 1.0);
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
         for (auto testNode : treeGenerator.nodes())
         {
             testNode->data.numCoins = rand() % 20;
@@ -1128,6 +1194,7 @@ int main(int argc, char** argv)
         }
         
         findZeroGrundies(treeGenerator, nodesWithHeight);
+        generateQueries(treeGenerator, treeGenerator.nodes(), numQueries, 75.0, nodesWithHeight);
 
                                      
 #if 0
@@ -1150,6 +1217,7 @@ int main(int argc, char** argv)
             markDescendentsAsUsable(node, true);
         }
 #endif
+#if 0
         for (auto node : treeGenerator.nodes())
         {
             cout << "testing node: " << node->id() << endl;
@@ -1159,6 +1227,7 @@ int main(int argc, char** argv)
                 //cout << " picked " << (pick ? pick->id() : -1) << endl;
             }
         }
+#endif
 
 
         return 0;
