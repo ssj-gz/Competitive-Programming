@@ -15,6 +15,8 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <thread>
+#include <future>
 #include <cassert>
 #include <sys/time.h>
 
@@ -1053,10 +1055,9 @@ int grundyNumberWithHeightChange(TestNode* node, const int heightChange)
     return grundyNumber;
 }
 
-void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight)
+void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight, int nodeBeginIndex, int nodeIndexStep)
 {
     cerr << "findZeroGrundies" << endl;
-#ifdef FIND_ZERO_GRUNDYS
     auto rootNode = treeGenerator.nodes().front();
     const auto numNodes = treeGenerator.numNodes();
     originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
@@ -1064,9 +1065,11 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
     int numZeroGrundies = 0;
     int numNodesProcessed = 0;
     HeightTracker heightTracker;
-    for (auto& node  : treeGenerator.nodes())
+    auto nodes = treeGenerator.nodes();
+    for (int nodeIndex = nodeBeginIndex; nodeIndex < numNodes; nodeIndex += nodeIndexStep)
     {
-        cerr << "node: " << node->id() << endl;
+        auto node = nodes[nodeIndex];
+        cerr << "node: " << node->id() << " thread id: " << nodeBeginIndex << endl;
         vector<int> numDescendantsWithHeight(numNodes + 1);
         doDFS(node, node->parent, 0, [&numDescendantsWithHeight](auto node, int depth) 
                 {
@@ -1108,7 +1111,21 @@ void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNod
         }
         numNodesProcessed++;
     }
-#endif // FIND_ZERO_GRUNDYS
+}
+
+void findZeroGrundies(TreeGenerator&  treeGenerator, const vector<vector<TestNode*>> nodesWithHeight)
+{
+    const int numThreads = thread::hardware_concurrency();
+    vector<future<void>> futures;
+    cout << "Using numThreads: " << numThreads << endl;
+    for (int nodeBeginIndex = 0; nodeBeginIndex < numThreads; nodeBeginIndex++)
+    {
+        futures.push_back(std::async(std::launch::async, [nodeBeginIndex, numThreads, &treeGenerator, &nodesWithHeight]() { findZeroGrundies(treeGenerator, nodesWithHeight, nodeBeginIndex, numThreads); }));
+    }
+    for (auto& fut : futures)
+    {
+        fut.get();
+    }
 }
 
 vector<TestQuery> generateQueries(TreeGenerator& treeGenerator, const vector<TestNode*>& allowedNodesToReparent, const int numQueries, double percentageGrundyZero, const vector<vector<TestNode*>> nodesWithHeight)
