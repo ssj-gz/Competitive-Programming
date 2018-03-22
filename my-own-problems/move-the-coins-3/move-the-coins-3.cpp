@@ -668,6 +668,15 @@ int main(int argc, char* argv[])
         nodes[nodeIndex].id = nodeIndex + 1;
     }
 
+    for (int i = 0; i < numNodes; i++)
+    {
+        int numCoins;
+        cin >> numCoins;
+        //cout << "numCoins: " << numCoins << endl;
+        nodes[i].hasCoin = ((numCoins % 2) == 1);
+        //nodes[i].hasCoin = rand() % 2;
+    }
+
     for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
     {
         int node1;
@@ -687,16 +696,6 @@ int main(int argc, char* argv[])
 
         nodes[node1].neighbours.push_back(&(nodes[node2]));
         nodes[node2].neighbours.push_back(&(nodes[node1]));
-    }
-
-    for (int i = 0; i < numNodes; i++)
-    {
-        int numCoins;
-        cin >> numCoins;
-        //cout << "numCoins: " << numCoins << endl;
-
-        nodes[i].hasCoin = ((numCoins % 2) == 1);
-        //nodes[i].hasCoin = rand() % 2;
     }
     assert(cin);
 

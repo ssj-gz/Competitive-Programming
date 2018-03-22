@@ -338,6 +338,13 @@ int main(int argc, char* argv[])
     const auto numNodes = readInt();
     vector<Node> nodes(numNodes);
 
+    for (auto i = 0; i < numNodes; i++)
+    {
+        const auto numCoins = readInt();
+
+        nodes[i].hasCoin = ((numCoins % 2) == 1);
+    }
+
     for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
     {
         const auto node1Index = readInt() - 1;
@@ -345,13 +352,6 @@ int main(int argc, char* argv[])
 
         nodes[node1Index].children.push_back(&(nodes[node2Index]));
         nodes[node2Index].children.push_back(&(nodes[node1Index]));
-    }
-
-    for (auto i = 0; i < numNodes; i++)
-    {
-        const auto numCoins = readInt();
-
-        nodes[i].hasCoin = ((numCoins % 2) == 1);
     }
 
     auto rootNode = &(nodes.front());
