@@ -123,7 +123,7 @@ class SegmentTree
         vector<int> m_elements;
 };
 
-vector<int> queryResults;
+vector<int> queryGrundyNumbers;
 int originalTreeGrundyNumber;
 
 SegmentTree numNodesWithHeightModuloPowerOf2[maxBinaryDigits + 1];
@@ -202,12 +202,12 @@ void answerQueries(Node* node)
         const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
         assert(queryForNode.originalQueryIndex >= 0);
 
-        queryResults[queryForNode.originalQueryIndex] = grundyNumberAfterRelocatingNode;
+        queryGrundyNumbers[queryForNode.originalQueryIndex] = grundyNumberAfterRelocatingNode;
     }
 
 }
 
-vector<int> grundyNumbersForQueries(Node* rootNode, const int numQueries)
+vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
 {
     // Initialise the SegmentTrees.
     for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
@@ -215,10 +215,19 @@ vector<int> grundyNumbersForQueries(Node* rootNode, const int numQueries)
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
     originalTreeGrundyNumber = findGrundyNumbersForNodes(rootNode);
-    queryResults.resize(numQueries);
+    queryGrundyNumbers.resize(numQueries);
     answerQueries(rootNode);
 
-    return queryResults;
+    vector<int> queryNumbersWhereBobWins;
+    int queryNumber = 1;
+    for (const auto queryGrundyNumber : queryGrundyNumbers)
+    {
+        if (queryGrundyNumber == 0)
+            queryNumbersWhereBobWins.push_back(queryNumber);
+        queryNumber++;
+    }
+
+    return queryNumbersWhereBobWins;
 }
 
 int main(int argc, char** argv)
@@ -265,13 +274,10 @@ int main(int argc, char** argv)
         nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, newParent->originalHeight - nodeToMove->parent->originalHeight});
     }
 
-    const auto result = grundyNumbersForQueries(rootNode, numQueries);
-    int queryNumber = 1;
-    for (const auto queryResult : result)
+    const auto result = queryNumbersWhereBobWins(rootNode, numQueries);
+    cout << result.size() << endl;
+    for (const auto queryNum : result)
     {
-        if (queryResult == 0)
-            cout << queryNumber << '\n';
-        queryNumber++;
+        cout << queryNum << endl;
     }
-    cout << endl;
 }

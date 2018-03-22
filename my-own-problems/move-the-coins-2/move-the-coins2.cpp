@@ -215,22 +215,23 @@ struct Node
 };
 
 
-void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber)
+void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber, int& numNodes)
 {
+    numNodes++;
     for (int i = 0; i < node->numCoins; i++)
     {
         grundyNumber ^= depth;
     }
     for (Node* child : node->children)
     {
-        grundyNumberForTreeBruteForce(child, depth + 1, grundyNumber);
+        grundyNumberForTreeBruteForce(child, depth + 1, grundyNumber, numNodes);
     }
 }
 
-int grundyNumberForTreeBruteForce(Node* node)
+int grundyNumberForTreeBruteForce(Node* node, int& numNodes)
 {
     int grundyNumber = 0;
-    grundyNumberForTreeBruteForce(node, 0, grundyNumber);
+    grundyNumberForTreeBruteForce(node, 0, grundyNumber, numNodes);
     //cout << "grundyNumberForTreeBruteForce node: " << node->nodeId << " = " << grundyNumber << endl;
     return grundyNumber;
 }
@@ -302,14 +303,17 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
     auto rootNode = &(nodes.front());
     vector<int> grundyNumbersForQueries;
     int queryNum = 0;
-    const auto originalTreeGrundyNumber = grundyNumberForTreeBruteForce(rootNode);
+    int unused = 0;
+    const auto originalTreeGrundyNumber = grundyNumberForTreeBruteForce(rootNode, unused);
     //cout << "Original tree grundy number: " << originalTreeGrundyNumber << endl;
     for (const auto& query : queries)
     {
         //cout << " grundy number for node to move: " << query.nodeToMove->grundyNumber << " new parent height: " << query.newParent->height << " grundyNumberMinusSubtree: " << (originalTreeGrundyNumber ^ query.nodeToMove->grundyNumber) << endl;
         auto originalParent = query.nodeToMove->parent;
         reparentNode(query.nodeToMove, query.newParent);
-        grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
+        int numNodesInModifiedTree = 0;
+        grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode, numNodesInModifiedTree));
+        assert(numNodesInModifiedTree == nodes.size());
         reparentNode(query.nodeToMove, originalParent);
         queryNum++;
         if (queryNum % 100 == 0)
@@ -545,7 +549,8 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
 #endif
     auto rootNode = &(nodes.front());
     originalTreeGrundyNumber = findGrundyNumberForNodes(rootNode);
-    assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode));
+    int unused = 0;
+    assert(rootNode->grundyNumber == grundyNumberForTreeBruteForce(rootNode, unused));
     for (int queryIndex = 0; queryIndex < queries.size(); queryIndex++)
     {
         const auto query = queries[queryIndex];
@@ -559,10 +564,10 @@ vector<int> grundyNumbersForQueries(vector<Node>& nodes, const vector<Query>& qu
         auto originalParent = query.nodeToMove->parent;
         {
             reparentNode(query.nodeToMove, nullptr);
-            assert(grundyNumberForTreeBruteForce(rootNode) == (originalTreeGrundyNumber ^ query.nodeToMove->grundyNumber));
+            assert(grundyNumberForTreeBruteForce(rootNode, unused) == (originalTreeGrundyNumber ^ query.nodeToMove->grundyNumber));
         }
         reparentNode(query.nodeToMove, query.newParent);
-        grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode));
+        grundyNumbersForQueries.push_back(grundyNumberForTreeBruteForce(rootNode, unused));
         reparentNode(query.nodeToMove, originalParent);
     }
 #endif
