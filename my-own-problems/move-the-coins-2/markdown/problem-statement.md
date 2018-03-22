@@ -26,13 +26,13 @@ Let's assume he moves the coin to vertex $2$.  Then the tree now looks like
 
 and it is the other player's turn to move.
 
-For a tree $T'$ on vertices $1,2,...,N$, Let $\textit{winner}(T')$ be whichever of Alice or Bob will win if both players play the game optimally on $T'$ and Alice moves first.
+For a tree $T'$ on vertices $1,2,...,N$, let $\textit{winner}(T')$ be whichever of Alice or Bob will win if both players play the game optimally on $T'$ and Alice moves first.
 
 Alice has $q$ queries numbered $1...q$, and the $i$th query consists of a pair $(u_i, v_i)$ of vertices.  She applies the following transform to create a tree $\textit{transform}(T, (u_i, v_i))$ as follows:
 
 - For a given vertex v, let the parent of v, $p(v)$, be the first vertex in the shortest path from $v$ to $1$.
-- Form $\textit{transform}(T, u_i, v_i)$ a new tree by first removing the edge from $p(u_i)$ to $u_i$ and then adding a new edge from $v_i$ to $u_i$ i.e. $\textit{transform}(T, u_i, v_i)$ simply changes $u_i$s parent to $v_i$.
+- Form $\textit{transform}(T, (u_i, v_i))$, a new tree, by first removing the edge from $p(u_i)$ to $u_i$ and then adding a new edge from $v_i$ to $u_i$ i.e. $\textit{transform}(T, (u_i, v_i))$ simply changes $u_i$s parent to $v_i$.
 
-Alice promises that for all her queries, $\textit{transform}(T, u_i, v_i)$ will be a connected tree on the original $N$ vertices.
+Alice promises that for all her queries, $\textit{transform}(T, (u_i, v_i))$ will be a connected tree on the original $N$ vertices.
 
-You need to output, in sorted order, the $i$s for which $\textit{winner}(\textit{transform}(T, u_i, v_i))$ is Bob. 
+You need to output, in sorted order, the $i$s for which $\textit{winner}(\textit{transform}(T, (u_i, v_i)))$ is Bob. 
