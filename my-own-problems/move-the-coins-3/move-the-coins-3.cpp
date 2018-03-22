@@ -648,12 +648,12 @@ int main(int argc, char* argv[])
                     addNewNodeToSet = parentWasPreferred;
                 });
 #endif
-        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 99.4);
-        treeGenerator.printEdges();
         for (int i = 0; i < numNodes; i++)
         {
             cout << rand() % 20 << endl;
         }
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 99.4);
+        treeGenerator.printEdges();
         return 0;
     }
 
