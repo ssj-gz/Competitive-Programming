@@ -701,44 +701,89 @@ int main(int argc, char* argv[])
 #endif
     if (argc == 2)
     {
-        //const int numNodes = rand() % 10 + 1;
-        TreeGenerator treeGenerator;
-        const int numNodes = 100;
-        const int numEdges = numNodes - 1;
-        cout << numNodes << endl;
-        auto rootNode = treeGenerator.createNode();
+        if (string(argv[1]) == "--test")
+        {
+            //const int numNodes = rand() % 10 + 1;
+            TreeGenerator treeGenerator;
+            const int numNodes = 100;
+            const int numEdges = numNodes - 1;
+            cout << numNodes << endl;
+            auto rootNode = treeGenerator.createNode();
 #if 0
-        //auto blah = treeGenerator.addNodeChain(rootNode, 4 * numNodes / 10);
-        auto blah = treeGenerator.addNodeChain(rootNode, 4);
-        //auto endOfChain = blah.back();
-        //for (auto chainNode : blah)
-        //{
+            //auto blah = treeGenerator.addNodeChain(rootNode, 4 * numNodes / 10);
+            auto blah = treeGenerator.addNodeChain(rootNode, 4);
+            //auto endOfChain = blah.back();
+            //for (auto chainNode : blah)
+            //{
             //treeGenerator.createNode(chainNode);
-        //}
+            //}
 #endif
 #if 0
-        //set<TestNode*> preferredSet = {rootNode, endOfChain};
-        set<TestNode*> preferredSet(blah.begin(), blah.end());
-        treeGenerator.createNodesWithRandomParentPreferringFromSet(preferredSet, numNodes - treeGenerator.numNodes(), 99.0f, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
-                {
+            //set<TestNode*> preferredSet = {rootNode, endOfChain};
+            set<TestNode*> preferredSet(blah.begin(), blah.end());
+            treeGenerator.createNodesWithRandomParentPreferringFromSet(preferredSet, numNodes - treeGenerator.numNodes(), 99.0f, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                    {
                     //addNewNodeToSet = parentWasPreferred;
-                addNewNodeToSet = false;
-                removeParentFromSet = false;
-                });
+                    addNewNodeToSet = false;
+                    removeParentFromSet = false;
+                    });
 #endif
-        //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
-        treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+            //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
+            treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
-        for (int i = 0; i < numNodes; i++)
-        {
-            cout << rand() % 20 << endl;
+            for (int i = 0; i < numNodes; i++)
+            {
+                cout << rand() % 20 << endl;
+            }
+            for (auto node : treeGenerator.nodes())
+            {
+                cerr << node->neighbours.size() << endl;
+            }
+            treeGenerator.printEdges();
+            return 0;
         }
-        for (auto node : treeGenerator.nodes())
+        else if (string(argv[1]) == "--scramble")
         {
-            cerr << node->neighbours.size() << endl;
+            TreeGenerator treeGenerator;
+            int numNodes;
+            cin >> numNodes;
+            for (int i = 0; i < numNodes; i++)
+                treeGenerator.createNode();
+
+            auto nodes = treeGenerator.nodes();
+            assert(nodes.size() == numNodes);
+            for (int i = 0; i < numNodes; i++)
+            {
+                int numCoins;
+                cin >> numCoins;
+                nodes[i]->data.numCoins = numCoins;
+            }
+            for (int i = 0; i < numNodes - 1; i++)
+            {
+                int u, v;
+                cin >> u >> v;
+                u--;
+                v--;
+                cerr << "u: " << u << " v: " << v << endl;
+                treeGenerator.addEdge(nodes[u], nodes[v]);
+            }
+            treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+            treeGenerator.scrambleEdgeOrder();
+            cout << numNodes << endl;
+
+            for (auto node : treeGenerator.nodes())
+            {
+                cout << node->data.numCoins << endl;
+            }
+
+            treeGenerator.printEdges();
+
+            return 0;
         }
-        treeGenerator.printEdges();
-        return 0;
+        else
+        {
+            assert(false && "Unrecognised argument");
+        }
     }
 
     int numNodes;
