@@ -320,14 +320,19 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         }
     }
 
-    int numBlah = 0;
+    vector<int> nodesThatGiveBobWinWhenRoot;
+    int nodeNum = 1;
     for (auto& node : nodes)
     {
-        cout << node.grundyNumber << '\n';
         if (node.grundyNumber == 0)
-            numBlah++;
+            nodesThatGiveBobWinWhenRoot.push_back(nodeNum);
+        nodeNum++;
     }
-    cout << "numBlah (editorial):" << numBlah << endl;
+    cout << nodesThatGiveBobWinWhenRoot.size() << endl;
+    for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
+    {
+        cout << bobWinNodeNum << endl;
+    }
 }
 
 int main(int argc, char* argv[])
