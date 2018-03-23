@@ -41,6 +41,8 @@ vector<vector<Node*>> heavyChains;
 
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 {
+    node->numDescendents = 1;
+
     node->parent = parentNode;
     if (parentNode)
     {
