@@ -525,15 +525,15 @@ class TreeGenerator
                     //cerr << " choosing preferred" << endl;
                     newNodeParent = chooseRandomNodeFromSet(preferredSetCopy); 
                     parentWasPreferred = true;
-                    cerr << "Chose leaf: " << newNodeParent->neighbours.size() << endl;
-                    assert(newNodeParent->neighbours.size() <= 1);
+                    //cerr << "Chose leaf: " << newNodeParent->neighbours.size() << endl;
+                    //assert(newNodeParent->neighbours.size() <= 1);
                 }
                 else if (!nonPreferredSet.empty())
                 {
                     // Choose a random element from nonPreferredSet as a parent.
-                    cerr << " choosing non-leaf" << endl;
+                    //cerr << " choosing non-leaf" << endl;
                     newNodeParent = chooseRandomNodeFromSet(nonPreferredSet); 
-                    assert(newNodeParent->neighbours.size() > 1);
+                    //assert(newNodeParent->neighbours.size() > 1);
                 }
                 if (newNodeParent)
                 {
@@ -703,30 +703,40 @@ int main(int argc, char* argv[])
     {
         //const int numNodes = rand() % 10 + 1;
         TreeGenerator treeGenerator;
-        const int numNodes = 100'000;
+        const int numNodes = 100;
         const int numEdges = numNodes - 1;
         cout << numNodes << endl;
         auto rootNode = treeGenerator.createNode();
 #if 0
-        auto blah = treeGenerator.addNodeChain(rootNode, 40'000);
-        auto endOfChain = blah.back();
-        for (auto chainNode : blah)
-        {
-            treeGenerator.createNode(chainNode);
-        }
+        //auto blah = treeGenerator.addNodeChain(rootNode, 4 * numNodes / 10);
+        auto blah = treeGenerator.addNodeChain(rootNode, 4);
+        //auto endOfChain = blah.back();
+        //for (auto chainNode : blah)
+        //{
+            //treeGenerator.createNode(chainNode);
+        //}
 #endif
 #if 0
-        set<TestNode*> preferredSet = {rootNode, endOfChain};
-        treeGenerator.createNodesWithRandomParentPreferringFromSet(preferredSet, numNodes - treeGenerator.numNodes(), 75.0f, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+        //set<TestNode*> preferredSet = {rootNode, endOfChain};
+        set<TestNode*> preferredSet(blah.begin(), blah.end());
+        treeGenerator.createNodesWithRandomParentPreferringFromSet(preferredSet, numNodes - treeGenerator.numNodes(), 99.0f, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                 {
-                    addNewNodeToSet = parentWasPreferred;
+                    //addNewNodeToSet = parentWasPreferred;
+                addNewNodeToSet = false;
+                removeParentFromSet = false;
                 });
 #endif
+        //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
+        treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+
         for (int i = 0; i < numNodes; i++)
         {
             cout << rand() % 20 << endl;
         }
-        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 99.4);
+        for (auto node : treeGenerator.nodes())
+        {
+            cerr << node->neighbours.size() << endl;
+        }
         treeGenerator.printEdges();
         return 0;
     }
