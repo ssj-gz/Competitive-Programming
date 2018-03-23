@@ -30,6 +30,7 @@ vector<vector<Node*>> heavyChains;
 
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 {
+    node->numDescendants = 1;
     if (parentNode)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
 
