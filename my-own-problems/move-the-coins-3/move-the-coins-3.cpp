@@ -395,6 +395,17 @@ vector<int> computeGrundyNumberForAllNodes(vector<Node>& nodes)
     return grundyNumbers;
 }
 
+#include <set> 
+#include <memory> 
+struct TestNode;
+struct NodeData
+{
+    int numCoins = -1;
+    bool usable = true;
+    int grundyNumber = -1;
+    vector<int> newParentHeightsThatGiveZeroGrundy;
+    int maxHeightOfNonDescendant = -1;
+};
 struct TestEdge;
 struct TestNode
 {
@@ -405,11 +416,27 @@ struct TestNode
     {
         return (scrambledId == -1) ? originalId : scrambledId;
     }
+    NodeData data;
+
+    // Filled in my doGenericInfoDFS.
+    TestNode* parent = nullptr;
+    int visitNum = -1;
+    int endVisitNum = -1;
+    int height = -1;
 };
 struct TestEdge
 {
     TestNode* nodeA = nullptr;
     TestNode* nodeB = nullptr;
+    TestNode* otherNode(TestNode* node)
+    {
+        if (node == nodeA)
+            return nodeB;
+        if (node == nodeB)
+            return nodeA;
+        assert(false);
+        return nullptr;
+    }
 };
 class TreeGenerator
 {
@@ -454,9 +481,9 @@ class TreeGenerator
 
             return createNodesWithRandomParentPreferringFromSet(leaves, numNewNodes, leafNodePreferencePercent, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                     {
-                        addNewNodeToSet = true;
-                        if (newNodeParent->neighbours.size() > 1)
-                            removeParentFromSet = true;
+                    addNewNodeToSet = true;
+                    if (newNodeParent->neighbours.size() > 1)
+                    removeParentFromSet = true;
                     });
         }
 
@@ -579,12 +606,23 @@ class TreeGenerator
         }
         // Scrambles the order of the nodes, then re-ids them, in new order, with the first
         // node in the new order having scrambledId 1, then next 2, etc.
-        void scrambleNodeIdsAndReorder()
+        void scrambleNodeIdsAndReorder(TestNode* forceAsRootNode)
         {
             scrambleNodeOrder();
             for (int i = 0; i < m_nodes.size(); i++)
             {
                 m_nodes[i]->scrambledId = (i + 1);
+            }
+            if (forceAsRootNode)
+            {
+                auto forcedRootNodeIter = find_if(m_nodes.begin(), m_nodes.end(), [forceAsRootNode](const auto& nodePtr) { return nodePtr.get() == forceAsRootNode; });
+                assert(forcedRootNodeIter != m_nodes.end());
+                if (forcedRootNodeIter != m_nodes.begin())
+                {
+                    swap((*m_nodes.begin())->scrambledId, forceAsRootNode->scrambledId);
+                    iter_swap(m_nodes.begin(), forcedRootNodeIter);
+                } 
+                assert(forceAsRootNode->scrambledId == 1);
             }
         }
         vector<TestNode*> nodes() const
@@ -616,6 +654,42 @@ class TreeGenerator
         vector<unique_ptr<TestNode>> m_nodes;
         vector<unique_ptr<TestEdge>> m_edges;
 };
+
+void doDFS(TestNode* node, TestNode* parent, int depth, std::function<void(TestNode* node, int depth)> onVisitNode, std::function<void(TestNode*, int depth)> onEndVisitNode = std::function<void(TestNode*, int depth)>())
+{
+    onVisitNode(node, depth);
+    for (auto edge : node->neighbours)
+    {
+        auto child = edge->otherNode(node);
+        if (child == parent)
+            continue;
+
+        doDFS(child, node, depth + 1, onVisitNode, onEndVisitNode);
+    }
+    if (onEndVisitNode)
+        onEndVisitNode(node, depth);
+}
+
+void doGenericInfoDFS(TestNode* rootNode)
+{
+    int visitNum = 0;
+    vector<TestNode*> ancestors = {nullptr};
+    doDFS(rootNode, nullptr, 0, [&ancestors, &visitNum](TestNode* node, int depth) 
+            { 
+                node->parent = ancestors.back(); 
+                node->height = depth; 
+                node->visitNum = visitNum;
+                visitNum++;
+                ancestors.push_back(node);
+            },
+            [&ancestors, &visitNum](TestNode* node, int depth)
+            { 
+                ancestors.pop_back();
+                node->endVisitNum = visitNum;
+                visitNum++;
+            });
+
+}
 
 int main(int argc, char* argv[])
 {
