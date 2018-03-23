@@ -122,7 +122,6 @@ class HeightTracker
             int heightDiff = m_pendingHeightAdjustment;
             if (heightDiff == 0)
                 return;
-            //assert(heightDiff == 1 || heightDiff == -1);
             m_pendingHeightAdjustment = 0;
             m_cumulativeHeightAdjustment += heightDiff;
 
