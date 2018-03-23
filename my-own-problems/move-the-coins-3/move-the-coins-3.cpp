@@ -766,7 +766,6 @@ int main(int argc, char* argv[])
                 cin >> u >> v;
                 u--;
                 v--;
-                cerr << "u: " << u << " v: " << v << endl;
                 treeGenerator.addEdge(nodes[u], nodes[v]);
             }
             treeGenerator.scrambleNodeIdsAndReorder(nullptr);
