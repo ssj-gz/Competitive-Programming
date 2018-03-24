@@ -516,7 +516,7 @@ class TreeGenerator
 
             for (int i = 0; i < numNewNodes; )
             {
-                cerr << "createNodesWithRandomParentPreferringFromSet: " << (i + 1) << " / " << numNewNodes << endl;
+                //cerr << "createNodesWithRandomParentPreferringFromSet: " << (i + 1) << " / " << numNewNodes << endl;
                 const double random = static_cast<double>(rand()) / RAND_MAX * 100;
                 TestNode* newNodeParent = nullptr;
                 bool parentWasPreferred = false;
@@ -707,9 +707,8 @@ int main(int argc, char* argv[])
         {
             //const int numNodes = rand() % 10 + 1;
             TreeGenerator treeGenerator;
-            const int numNodes = 100;
+            const int numNodes = 100'000;
             const int numEdges = numNodes - 1;
-            cout << numNodes << endl;
             auto rootNode = treeGenerator.createNode();
 #if 0
             //auto blah = treeGenerator.addNodeChain(rootNode, 4 * numNodes / 10);
@@ -731,15 +730,29 @@ int main(int argc, char* argv[])
                     });
 #endif
             //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
-            treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+            //treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+            treeGenerator.addNodeChain(rootNode, 22'000);
+            treeGenerator.addNodeChain(rootNode, 22'000);
+            treeGenerator.addNodeChain(rootNode, 22'000);
+            treeGenerator.addNodeChain(rootNode, 22'000);
+            const int randomNodes1 = rand() % (numNodes - treeGenerator.numNodes());
+            const double preferLeafNodes1 = static_cast<double>(rand()) / RAND_MAX * 100.0;
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(randomNodes1, preferLeafNodes1);
+            const double preferLeafNodes2 = static_cast<double>(rand()) / RAND_MAX * 100.0;
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), preferLeafNodes2);
+            cerr << "randomNodes1: " << randomNodes1 << " preferLeafNodes1: " << preferLeafNodes1 << " preferLeafNodes2: " << preferLeafNodes2 << endl;
 
-            for (int i = 0; i < numNodes; i++)
-            {
-                cout << rand() % 20 << endl;
-            }
             for (auto node : treeGenerator.nodes())
             {
-                cerr << node->neighbours.size() << endl;
+                node->data.numCoins = rand() % 20;
+            }
+
+            cout << numNodes << endl;
+            treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+            treeGenerator.scrambleEdgeOrder();
+            for (auto node : treeGenerator.nodes())
+            {
+                cout << node->data.numCoins << endl;
             }
             treeGenerator.printEdges();
             return 0;
