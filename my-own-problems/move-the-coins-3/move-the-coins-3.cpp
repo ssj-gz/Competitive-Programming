@@ -847,7 +847,8 @@ int main(int argc, char* argv[])
     doHeavyLightDecomposition(rootNode, false);
 
     computeGrundyNumberForAllNodes(nodes);
-    int numBlah = 0;
+    int nodeNum = 1;
+    vector<int> nodeNumbersBobWin;
     for (auto& node : nodes)
     {
         const auto resultBruteForce = grundyNumberBruteForce(&node);
@@ -856,9 +857,15 @@ int main(int argc, char* argv[])
         assert(resultBruteForce == node.grundyNumber);
         if (node.grundyNumber == 0)
         {
-            numBlah++;
+            nodeNumbersBobWin.push_back(nodeNum);
         }
+        nodeNum++;
     }
 
-    cout << "numBlah: " << numBlah << " numNodes: " << numNodes << endl;
+    //cout << "numBlah: " << numBlah << " numNodes: " << numNodes << endl;
+    cout << nodeNumbersBobWin.size() << endl;
+    for (const auto nodeNum : nodeNumbersBobWin)
+    {
+        cout << nodeNum << endl; 
+    }
 }
