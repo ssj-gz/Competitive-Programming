@@ -185,7 +185,6 @@ void answerQueries(Node* node)
     // to work out relocatedSubtreeGrundyNumber for each query.
     for (const auto& queryForNode : node->queriesForNode)
     {
-        const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyContribForSubtree;
 
         int descendantCoinsThatMakeDigitOneAfterHeightChange[maxBinaryDigits + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOneAfterHeightChange);
@@ -199,6 +198,7 @@ void answerQueries(Node* node)
                 relocatedSubtreeGrundyNumber += (1 << binaryDigitNum);
         }
 
+        const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyContribForSubtree;
         const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
         assert(queryForNode.originalQueryIndex >= 0);
 
