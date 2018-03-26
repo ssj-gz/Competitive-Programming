@@ -4,24 +4,23 @@ require 'fileutils'
 require 'zip'
 
 class TestCase
-    def initialize(filename, num_nodes, num_queries)
+    def initialize(filename, priority)
         @filename = filename
-        @num_nodes = num_nodes
-        @num_queries = num_queries
+        @priority = priority
     end
-    attr_reader :filename, :num_nodes, :num_queries
+    attr_reader :filename, :priority
 end
 
 testcases = []
 Dir.glob("*.txt") do |test_file|
-    if (test_file =~ /move-the-coins2-testcase-custom-([0-9]+)n-([0-9]+)q-.*\.txt/)
-        testcases << TestCase.new(test_file, $1.to_i, $2.to_i)
+    if (test_file =~ /.*-testcase-custom-.*p([0-9]+)\.txt/)
+        testcases << TestCase.new(test_file, $1.to_i)
     else
         STDERR.print "Ignoring file #{test_file}\n"
     end
 end
 
-testcases.sort! { |x, y| x.num_nodes <=> y.num_nodes }
+testcases.sort! { |x, y| x.priority <=> y.priority }
 
 EXPORTED_SUBDIR_NAME = "exported"
 
@@ -35,8 +34,8 @@ testcase_number = 0
 input_filenames_to_zip = []
 output_filenames_to_zip = []
 testcases.each do |testcase|
-    print "Processing #{testcase.filename} (#{testcase_number + 1}/#{testcases.length})\n"
     input_filename = sprintf("input%02d.txt", testcase_number)
+    print "Processing #{testcase.filename} [#{input_filename}] (#{testcase_number + 1}/#{testcases.length})\n"
     FileUtils.cp(testcase.filename, "#{EXPORTED_SUBDIR_NAME}/#{input_filename}")
     output = `../editorial < #{testcase.filename}`
     output_filename = sprintf("output%02d.txt", testcase_number)
