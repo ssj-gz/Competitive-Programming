@@ -1,5 +1,5 @@
-// Editorial solution for "Move the Coins 2".
 // Simon St James (ssjgz) 2018-02-21.
+// Editorial solution for "Move the Coins, Again!".
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
