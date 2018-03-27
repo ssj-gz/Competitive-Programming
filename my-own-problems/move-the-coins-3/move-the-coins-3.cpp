@@ -731,16 +731,12 @@ int main(int argc, char* argv[])
 #endif
             //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
             //treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
-            treeGenerator.addNodeChain(rootNode, 22'000);
-            treeGenerator.addNodeChain(rootNode, 22'000);
-            treeGenerator.addNodeChain(rootNode, 22'000);
-            treeGenerator.addNodeChain(rootNode, 22'000);
-            const int randomNodes1 = rand() % (numNodes - treeGenerator.numNodes());
-            const double preferLeafNodes1 = static_cast<double>(rand()) / RAND_MAX * 100.0;
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(randomNodes1, preferLeafNodes1);
-            const double preferLeafNodes2 = static_cast<double>(rand()) / RAND_MAX * 100.0;
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), preferLeafNodes2);
-            cerr << "randomNodes1: " << randomNodes1 << " preferLeafNodes1: " << preferLeafNodes1 << " preferLeafNodes2: " << preferLeafNodes2 << endl;
+            //treeGenerator.addNodeChain(rootNode, 22'000);
+            //treeGenerator.addNodeChain(rootNode, 22'000);
+            //treeGenerator.addNodeChain(rootNode, 22'000);
+            treeGenerator.addNodeChain(rootNode, 70'000);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(5000, 2.0);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
 
             for (auto node : treeGenerator.nodes())
             {
