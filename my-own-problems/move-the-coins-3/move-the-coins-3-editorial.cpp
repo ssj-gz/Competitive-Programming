@@ -252,7 +252,7 @@ void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdju
     }
 }
 
-void computeGrundyNumberForAllNodes(vector<Node>& nodes)
+void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
 {
     HeightTracker heightTracker;
     auto collectHeights = [&heightTracker](Node* node, int depth)
@@ -321,19 +321,6 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         }
     }
 
-    vector<int> nodesThatGiveBobWinWhenRoot;
-    auto nodeNum = 1;
-    for (auto& node : nodes)
-    {
-        if (node.grundyNumberIfRoot == 0)
-            nodesThatGiveBobWinWhenRoot.push_back(nodeNum);
-        nodeNum++;
-    }
-    cout << nodesThatGiveBobWinWhenRoot.size() << endl;
-    for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
-    {
-        cout << bobWinNodeNum << endl;
-    }
 }
 
 int main(int argc, char* argv[])
@@ -364,5 +351,19 @@ int main(int argc, char* argv[])
     fixParentChildAndCountDescendants(rootNode, nullptr);
     doHeavyLightDecomposition(rootNode, false);
 
-    computeGrundyNumberForAllNodes(nodes);
+    computeGrundyNumberIfRootForAllNodes(nodes);
+
+    vector<int> nodesThatGiveBobWinWhenRoot;
+    auto nodeNum = 1;
+    for (auto& node : nodes)
+    {
+        if (node.grundyNumberIfRoot == 0)
+            nodesThatGiveBobWinWhenRoot.push_back(nodeNum);
+        nodeNum++;
+    }
+    cout << nodesThatGiveBobWinWhenRoot.size() << endl;
+    for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
+    {
+        cout << bobWinNodeNum << endl;
+    }
 }
