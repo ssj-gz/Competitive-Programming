@@ -233,23 +233,22 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
 int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
+    auto readInt = [](){ int x; cin >> x; return x; };
 
-    int numNodes;
-    cin >> numNodes;
+
+    const auto numNodes = readInt();
 
     vector<Node> nodes(numNodes);
     for (auto i = 0; i < numNodes; i++)
     {
-        int numCoins;
-        cin >> numCoins;
+        const auto numCoins = readInt();
         nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins at each height.
     }
     for (auto i = 0; i < numNodes - 1; i++)
     {
-        int a, b;
-        cin >> a >> b;
-        a--;
-        b--;
+        // Make a and b 0-relative.
+        const auto a = readInt() - 1;
+        const auto b = readInt() - 1;
 
         nodes[a].children.push_back(&nodes[b]);
         nodes[b].children.push_back(&nodes[a]);
@@ -258,15 +257,13 @@ int main(int argc, char** argv)
     auto rootNode = &(nodes.front());
     fixParentChildAndHeights(rootNode);
 
-    int numQueries;
-    cin >> numQueries;
+    const auto numQueries = readInt();
 
     for (auto queryIndex = 0; queryIndex < numQueries; queryIndex++)
     {
-        int u, v;
-        cin >> u >> v;
-        u--;
-        v--;
+        // Make u and v 0-relative.
+        const auto u = readInt() - 1;
+        const auto v = readInt() - 1;
 
         // Re-order queries so that all queries that move a given node u are accessible from u.
         auto nodeToMove = &(nodes[u]);
