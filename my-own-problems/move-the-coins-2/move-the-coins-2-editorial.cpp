@@ -16,7 +16,7 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
     return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
-constexpr int maxBinaryDigits = log2(maxN);
+constexpr auto maxBinaryDigits = log2(maxN);
 
 struct QueryForNode
 {
@@ -105,7 +105,7 @@ class SegmentTree
 
         void addOne(int pos)
         {
-            const int n = m_numElements;
+            const auto n = m_numElements;
             auto elements = m_elements.data();
             pos++; // Make 1-relative.
             while(pos <= n)
@@ -219,7 +219,7 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
     answerQueries(rootNode);
 
     vector<int> queryNumbersWhereBobWins;
-    int queryNumber = 1;
+    auto queryNumber = 1;
     for (const auto queryGrundyNumber : queryGrundyNumbers)
     {
         if (queryGrundyNumber == 0)
