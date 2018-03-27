@@ -24,7 +24,7 @@ struct Node
     vector<Node*> children;
     int numDescendants = 0;
 
-    int grundyNumber = 0;
+    int grundyNumberIfRoot = 0;
 };
 
 vector<vector<Node*>> heavyChains;
@@ -262,7 +262,7 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
                         };
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
-                            node->grundyNumber ^= heightTracker.grundyNumber();
+                            node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     for (auto& chain : heavyChains)
     {
@@ -293,14 +293,14 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&node](Node* descendantNode, int depth) 
                 { 
                     if (descendantNode->hasCoin) 
-                        node.grundyNumber ^= depth; 
+                        node.grundyNumberIfRoot ^= depth; 
                 });
         if (node.hasCoin)
         {
             // Propagate this node's coin info to descendants.
             doLightFirstDFS(&node, heightTracker, DoNotAdjust, [](Node* node, int depth) 
                     { 
-                        node->grundyNumber ^= depth; 
+                        node->grundyNumberIfRoot ^= depth; 
                     });
         }
         // Propagate light-first descendant info to other light-first descendants.
@@ -325,7 +325,7 @@ void computeGrundyNumberForAllNodes(vector<Node>& nodes)
     int nodeNum = 1;
     for (auto& node : nodes)
     {
-        if (node.grundyNumber == 0)
+        if (node.grundyNumberIfRoot == 0)
             nodesThatGiveBobWinWhenRoot.push_back(nodeNum);
         nodeNum++;
     }
