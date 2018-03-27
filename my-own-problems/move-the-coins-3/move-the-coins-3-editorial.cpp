@@ -1,4 +1,5 @@
 // Simon St James (ssjgz) 16/3/18.
+// Editorial solution for "Move the Coins, Yet Again!".
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
