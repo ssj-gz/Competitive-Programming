@@ -108,6 +108,21 @@ void Node::addElbow(Edge* edge1, Edge* edge2, int score)
     }
 }
 
+struct WordPath
+{
+    Word word;
+    set<Node*> nodesInPath;
+};
+
+bool operator<(const WordPath& lhs, const WordPath& rhs)
+{
+    if (lhs.word.word != rhs.word.word)
+       return lhs.word.word < rhs.word.word; 
+    if (lhs.word.score != rhs.word.score)
+       return lhs.word.score < rhs.word.score; 
+    return lhs.nodesInPath < rhs.nodesInPath;
+}
+
 
 ostream& operator<<(ostream& os, const PathValue& pathValue)
 {
@@ -442,14 +457,23 @@ void doGenericInfoDFS(TestNode* rootNode)
 
 }
 
-void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<Node*>& nodesFollowedSoFar, string& wordFollowedSoFar, const vector<Word>& words)
+void findWordPathsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<Node*>& nodesFollowedSoFar, string& wordFollowedSoFar, const vector<Word>& words, set<WordPath>& wordPaths)
 {
     for (const auto& word : words)
     {
         if (wordFollowedSoFar == word.word)
         {
-            nodesFollowedSoFar.push_back(currentNode);
             cout << "Found word: " << word.word << endl;
+            set<Node*> nodesInPath = {currentNode};
+            for (auto node : nodesFollowedSoFar)
+            {
+                nodesInPath.insert(node);
+            }
+            WordPath wordPath;
+            wordPath.nodesInPath = nodesInPath;
+            wordPaths.insert(wordPath);
+#if 0
+            nodesFollowedSoFar.push_back(currentNode);
             Edge* previousEdge = nullptr;
             assert(nodesFollowedSoFar.size() == edgesFollowedSoFar.size() + 1);
             for (int i = 0; i < word.word.size(); i++)
@@ -460,6 +484,7 @@ void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<
                 previousEdge = thisEdge;
             }
             nodesFollowedSoFar.pop_back();
+#endif
 
         }
     }
@@ -473,7 +498,7 @@ void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<
         nodesFollowedSoFar.push_back(currentNode);
         wordFollowedSoFar.push_back(edge->letterFollowed);
 
-        findWordsFrom(childNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words);
+        findWordPathsFrom(childNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words, wordPaths);
 
         wordFollowedSoFar.pop_back();
         nodesFollowedSoFar.pop_back();
@@ -482,20 +507,22 @@ void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<
     }
 }
 
-void findWordsFrom(Node* currentNode, const vector<Word>& words)
+set<WordPath> findWordPathsFrom(Node* currentNode, const vector<Word>& words, set<WordPath>& wordPaths)
 {
     vector<Edge*> edgesFollowedSoFar; 
     vector<Node*> nodesFollowedSoFar; 
     string wordFollowedSoFar;
-    findWordsFrom(currentNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words);
+    findWordPathsFrom(currentNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words, wordPaths);
+    return wordPaths;
 }
 
 vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& words)
 {
     vector<int> nodeScores;
+    set<WordPath> wordPaths;
     for (auto& node : nodes)
     {
-        findWordsFrom(&node, words);
+        findWordPathsFrom(&node, words, wordPaths);
     }
     return nodeScores;
 }
@@ -522,7 +549,6 @@ int main(int argc, char* argv[])
         const int numWords = (rand() % maxNumWords) + 1;
         const int maxWordLength = (rand() % maxMaxWordLength) + 1;
 
-        cout << numNodes << endl;
 
 
         TreeGenerator treeGenerator;
@@ -571,6 +597,7 @@ int main(int argc, char* argv[])
             treeGenerator.scrambleEdgeOrder();
             random_shuffle(words.begin(), words.end());
         }
+        cout << treeGenerator.numNodes() << endl;
 
         for (auto node : treeGenerator.nodes())
         {
