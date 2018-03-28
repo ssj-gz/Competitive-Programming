@@ -547,10 +547,37 @@ vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& wo
                              back_inserter(pathIntersection));
             if (pathIntersection.size() == 1)
             {
-                cout << "paths with words " << p1.word.word << " & " << p2.word.word << " intersect at node: " << pathIntersection.front()->index << endl;
+                auto crossNode = pathIntersection.front();
+                cout << "paths with words " << p1.word.word << " & " << p2.word.word << " intersect at node: " << crossNode->index << endl;
+                crossNode->crossedWordsBestScore = max(crossNode->crossedWordsBestScore, p1.word.score * p2.word.score);
+
             }
 
         }
+    }
+    for (const auto& path : wordPaths)
+    {
+        for (auto node : path.nodesInPath)
+        {
+            node->singleWordBestScore = max(node->singleWordBestScore, path.word.score);
+        }
+    }
+
+    for (auto& node : nodes)
+    {
+        int nodeScore = 0;
+        if (node.crossedWordsBestScore > 0)
+        {
+            nodeScore = node.crossedWordsBestScore;
+        }
+        else
+        {
+            nodeScore = node.singleWordBestScore;
+        }
+        nodeScore *= node.multiplier;
+
+        nodeScores.push_back(nodeScore);
+        cout << "node: " << nodeScores.size() << " has score: " << nodeScores.back() << endl;
     }
 
     return nodeScores;
@@ -566,7 +593,7 @@ int main(int argc, char* argv[])
 
     if (argc == 2)
     {
-        const int maxNumNodes = 20;
+        const int maxNumNodes = 50;
         const int maxNumWords = 50;
         const int maxNumLetters = 26;
         const int maxWordScore = 500;
@@ -813,5 +840,5 @@ int main(int argc, char* argv[])
         cout << "word: " << word.word << " score: " << word.score << endl;
     }
 
-    findNodeScoresBruteForce(nodes, words);
+    const auto bruteForceNodeScores = findNodeScoresBruteForce(nodes, words);
 }
