@@ -24,6 +24,9 @@ struct Node
     int index = -1;
     int multiplier;
     void addElbow(Edge* edge1, Edge* edge2, int score);
+
+    int crossedWordsBestScore = 0;
+    int singleWordBestScore = 0;
 };
 struct BestTracker
 {
@@ -51,6 +54,7 @@ struct Edge
             return nodeB;
         return nodeA;
     }
+
 };
 struct Word
 {
@@ -471,7 +475,9 @@ void findWordPathsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vec
             }
             WordPath wordPath;
             wordPath.nodesInPath = nodesInPath;
+            wordPath.word = word;
             wordPaths.insert(wordPath);
+            assert(wordPath.nodesInPath.size() == word.word.size() + 1);
 #if 0
             nodesFollowedSoFar.push_back(currentNode);
             Edge* previousEdge = nullptr;
@@ -524,6 +530,29 @@ vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& wo
     {
         findWordPathsFrom(&node, words, wordPaths);
     }
+
+    for (auto& node : nodes)
+    {
+        node.crossedWordsBestScore = 0;
+        node.singleWordBestScore = 0;
+    }
+
+    for (const auto& p1 : wordPaths)
+    {
+        for (const auto& p2 : wordPaths)
+        {
+            vector<Node*> pathIntersection;
+            set_intersection(p1.nodesInPath.begin(), p1.nodesInPath.end(),
+                             p2.nodesInPath.begin(), p2.nodesInPath.end(),
+                             back_inserter(pathIntersection));
+            if (pathIntersection.size() == 1)
+            {
+                cout << "paths with words " << p1.word.word << " & " << p2.word.word << " intersect at node: " << pathIntersection.front()->index << endl;
+            }
+
+        }
+    }
+
     return nodeScores;
 }
 
@@ -543,10 +572,12 @@ int main(int argc, char* argv[])
         const int maxWordScore = 500;
         const int maxMaxWordLength = 100;
         const int maxNodeMultiplier = 500;
+        const int numForcedWords = 2;
         const string forcedWord("haggis");
-        const int numNodes = max(static_cast<int>(forcedWord.size()), (rand() % maxNumNodes) + 1);
+        const string forcedWord2("ragamuffin");
+        const int numNodes = max(static_cast<int>(forcedWord.size() + forcedWord2.size()), (rand() % maxNumNodes) + 1);
         const int numLettersToUse = (rand() % maxNumLetters) + 1;
-        const int numWords = (rand() % maxNumWords) + 1;
+        const int numWords = max(numForcedWords, (rand() % maxNumWords) + 1);
         const int maxWordLength = (rand() % maxMaxWordLength) + 1;
 
 
@@ -563,9 +594,14 @@ int main(int argc, char* argv[])
                 edge->data.letterFollowed = word[wordCharIndex];
                 wordCharIndex++;
             }
+            cerr << "added word: " << word << endl;
         };
         auto rootNode = treeGenerator.createNode();
         addWord(forcedWord, rootNode);
+        assert(treeGenerator.nodes().size() >= 4);
+        auto crossNode = treeGenerator.nodes()[3];
+        addWord(forcedWord2.substr(3), crossNode);
+        addWord(string(forcedWord2.rbegin(), forcedWord2.rend()).substr(forcedWord2.size() - 3), crossNode);
 
         treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
@@ -590,7 +626,8 @@ int main(int argc, char* argv[])
                 testWord.word.push_back('a' + (rand() % numLettersToUse));
             }
         }
-        words.front().word = forcedWord;
+        words[0].word = forcedWord;
+        words[1].word = forcedWord2;
 
         {
             treeGenerator.scrambleNodeIdsAndReorder(nullptr);
