@@ -101,7 +101,7 @@ struct NodeData
 };
 struct EdgeData
 {
-    char letterFollowed;
+    char letterFollowed = '\0';
 };
 struct TestEdge;
 struct TestNode
@@ -294,6 +294,30 @@ class TreeGenerator
 
             return nodeChain;
         }
+        vector<TestEdge*> edgeChainForNodeChain(const vector<TestNode*>& nodeChain)
+        {
+            vector<TestEdge*> edgeChain;
+            auto nodeIter = nodeChain.begin();
+            auto currentNode = *nodeIter;
+            while (nodeIter + 1 != nodeChain.end())
+            {
+                nodeIter++;
+                bool foundEdge = false;
+                for (auto edge : currentNode->neighbours)
+                {
+                    if (edge->otherNode(currentNode) == *nodeIter)
+                    {
+                        foundEdge = true;
+                        edgeChain.push_back(edge);
+                        break;
+                    }
+                }
+
+                currentNode = *nodeIter;
+            }
+
+            return edgeChain;
+        }
         void scrambleNodeOrder()
         {
             random_shuffle(m_nodes.begin(), m_nodes.end());
@@ -405,7 +429,7 @@ int main(int argc, char* argv[])
 
     if (argc == 2)
     {
-        const int maxNumNodes = 100'000;
+        const int maxNumNodes = 20;
         const int maxNumWords = 50;
         const int maxNumLetters = 26;
         const int maxWordScore = 500;
@@ -420,6 +444,17 @@ int main(int argc, char* argv[])
 
         TreeGenerator treeGenerator;
         auto rootNode = treeGenerator.createNode();
+        const string forcedWord = "haggis";
+        auto nodeChain = treeGenerator.addNodeChain(rootNode, forcedWord.size());
+        nodeChain.insert(nodeChain.begin(), rootNode);
+        const auto edgeChain = treeGenerator.edgeChainForNodeChain(nodeChain);
+
+        int forcedWordCharIndex = 0;
+        for (auto edge : edgeChain)
+        {
+            edge->data.letterFollowed = forcedWord[forcedWordCharIndex];
+            forcedWordCharIndex++;
+        }
         treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
         for (auto node : treeGenerator.nodes())
@@ -429,7 +464,8 @@ int main(int argc, char* argv[])
 
         for (auto edge : treeGenerator.edges())
         {
-            edge->data.letterFollowed = (rand() % numLettersToUse) + 'a';
+            if (edge->data.letterFollowed == '\0')
+                edge->data.letterFollowed = (rand() % numLettersToUse) + 'a';
         }
 
         vector<TestWord> words(numWords);
@@ -441,12 +477,13 @@ int main(int argc, char* argv[])
             {
                 testWord.word.push_back('a' + (rand() % numLettersToUse));
             }
-
         }
+        words.front().word = forcedWord;
 
         {
             treeGenerator.scrambleNodeIdsAndReorder(nullptr);
             treeGenerator.scrambleEdgeOrder();
+            random_shuffle(words.begin(), words.end());
         }
 
         for (auto node : treeGenerator.nodes())
