@@ -42,8 +42,15 @@ struct Edge
     Node* nodeA = nullptr;
     Node* nodeB = nullptr;
     int edgeId = -1;
-    BestTracker bestTracker;
+    BestTracker bestTrackerNodeA;
+    BestTracker bestTrackerNodeB;
     char letterFollowed;
+    Node* otherNode(Node* node)
+    {
+        if (node == nodeA)
+            return nodeB;
+        return nodeA;
+    }
 };
 struct Word
 {
@@ -418,6 +425,51 @@ void doGenericInfoDFS(TestNode* rootNode)
 
 }
 
+void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<Node*>& nodesFollowedSoFar, string& wordFollowedSoFar, const vector<Word>& words)
+{
+    for (auto word : words)
+    {
+        if (wordFollowedSoFar == word.word)
+        {
+            cout << "Found word: " << word.word << endl;
+        }
+    }
+    for (auto edge : currentNode->neighbours)
+    {
+        if (!edgesFollowedSoFar.empty() && edgesFollowedSoFar.back() == edge)
+            continue;
+
+        auto childNode = edge->otherNode(currentNode);
+        edgesFollowedSoFar.push_back(edge);
+        nodesFollowedSoFar.push_back(currentNode);
+        wordFollowedSoFar.push_back(edge->letterFollowed);
+
+        findWordsFrom(childNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words);
+
+        wordFollowedSoFar.pop_back();
+        nodesFollowedSoFar.pop_back();
+        edgesFollowedSoFar.pop_back();
+
+    }
+}
+
+void findWordsFrom(Node* currentNode, const vector<Word>& words)
+{
+    vector<Edge*> edgesFollowedSoFar; 
+    vector<Node*> nodesFollowedSoFar = {currentNode}; 
+    string wordFollowedSoFar;
+    findWordsFrom(currentNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words);
+}
+
+vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& words)
+{
+    vector<int> nodeScores;
+    for (auto& node : nodes)
+    {
+        findWordsFrom(&node, words);
+    }
+    return nodeScores;
+}
 
 int main(int argc, char* argv[])
 {
@@ -435,7 +487,8 @@ int main(int argc, char* argv[])
         const int maxWordScore = 500;
         const int maxMaxWordLength = 100;
         const int maxNodeMultiplier = 500;
-        const int numNodes = (rand() % maxNumNodes) + 1;
+        const string forcedWord("haggis");
+        const int numNodes = max(static_cast<int>(forcedWord.size()), (rand() % maxNumNodes) + 1);
         const int numLettersToUse = (rand() % maxNumLetters) + 1;
         const int numWords = (rand() % maxNumWords) + 1;
         const int maxWordLength = (rand() % maxMaxWordLength) + 1;
@@ -457,7 +510,6 @@ int main(int argc, char* argv[])
             }
         };
         auto rootNode = treeGenerator.createNode();
-        const string forcedWord("haggis");
         addWord(forcedWord, rootNode);
 
         treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
@@ -555,8 +607,8 @@ int main(int argc, char* argv[])
             }
             for (const auto& pathValue : pathValues)
             {
-                pathValue.edgeA->bestTracker.add(pathValue.value, pathValue.edgeB); 
-                pathValue.edgeB->bestTracker.add(pathValue.value, pathValue.edgeA); 
+                pathValue.edgeA->bestTrackerNodeA.add(pathValue.value, pathValue.edgeB); 
+                pathValue.edgeB->bestTrackerNodeA.add(pathValue.value, pathValue.edgeA); 
             }
 
             auto shareAnEdge = [](const PathValue& pathValue1, const PathValue& pathValue2)
@@ -598,7 +650,7 @@ int main(int argc, char* argv[])
             for (auto& edge : edges)
             {
                 int64_t maxFromThis = -1;
-                for (auto blahIter = begin(edge.bestTracker.stored); blahIter != begin(edge.bestTracker.stored) + edge.bestTracker.num; blahIter++)
+                for (auto blahIter = begin(edge.bestTrackerNodeA.stored); blahIter != begin(edge.bestTrackerNodeA.stored) + edge.bestTrackerNodeA.num; blahIter++)
                 {
                     PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
                     //cout << " Blee: " << blee << endl;
@@ -613,7 +665,7 @@ int main(int argc, char* argv[])
                     }
                     maxPathValueProduct = max(maxPathValueProduct, maxFromThis);
                 }
-                for (auto blahIter = begin(edge.bestTracker.stored); blahIter != begin(edge.bestTracker.stored) + edge.bestTracker.num; blahIter++)
+                for (auto blahIter = begin(edge.bestTrackerNodeA.stored); blahIter != begin(edge.bestTrackerNodeA.stored) + edge.bestTrackerNodeA.num; blahIter++)
                 {
                     PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
                     pathValuesByVal.insert(blee);
@@ -664,4 +716,6 @@ int main(int argc, char* argv[])
         cin >> word.score;
         cout << "word: " << word.word << " score: " << word.score << endl;
     }
+
+    findNodeScoresBruteForce(nodes, words);
 }
