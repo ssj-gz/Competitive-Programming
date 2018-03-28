@@ -442,19 +442,24 @@ int main(int argc, char* argv[])
 
         cout << numNodes << endl;
 
-        TreeGenerator treeGenerator;
-        auto rootNode = treeGenerator.createNode();
-        const string forcedWord = "haggis";
-        auto nodeChain = treeGenerator.addNodeChain(rootNode, forcedWord.size());
-        nodeChain.insert(nodeChain.begin(), rootNode);
-        const auto edgeChain = treeGenerator.edgeChainForNodeChain(nodeChain);
 
-        int forcedWordCharIndex = 0;
-        for (auto edge : edgeChain)
+        TreeGenerator treeGenerator;
+        auto addWord = [&treeGenerator](const string& word, TestNode* startNode)
         {
-            edge->data.letterFollowed = forcedWord[forcedWordCharIndex];
-            forcedWordCharIndex++;
-        }
+            auto nodeChain = treeGenerator.addNodeChain(startNode, word.size());
+            nodeChain.insert(nodeChain.begin(), startNode);
+            const auto edgeChain = treeGenerator.edgeChainForNodeChain(nodeChain);
+            int wordCharIndex = 0;
+            for (auto edge : edgeChain)
+            {
+                edge->data.letterFollowed = word[wordCharIndex];
+                wordCharIndex++;
+            }
+        };
+        auto rootNode = treeGenerator.createNode();
+        const string forcedWord("haggis");
+        addWord(forcedWord, rootNode);
+
         treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
         for (auto node : treeGenerator.nodes())
