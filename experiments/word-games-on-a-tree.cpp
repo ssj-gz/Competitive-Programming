@@ -7,8 +7,6 @@
 
 // TODO - 
 //
-// - Read in testcase; form graph with Nodes and Edges.
-// - Generate random testcases.
 // - Crudely splice in the centroid decomposition stuff from Ticket to Ride.
 // - Maybe fix up the decomposition stuff so that edges end up being actually removed - need to keep a "backup" of original edges, if so.  In any case, this can be left unti later.
 // - Crudely splice in SuffixTreeBuilder.
@@ -23,7 +21,9 @@ struct Edge;
 struct Node
 {
     vector<Edge*> neighbours;
+    int index = -1;
     int multiplier;
+    void addElbow(Edge* edge1, Edge* edge2, int score);
 };
 struct BestTracker
 {
@@ -90,6 +90,23 @@ struct PathValue
     Edge* edgeB = nullptr;
     int64_t value = 0;
 };
+
+void Node::addElbow(Edge* edge1, Edge* edge2, int score)
+{
+    assert(edge1 != nullptr || edge2 != nullptr);
+    assert(edge1 == nullptr || (edge1->nodeA == this || edge1->nodeB == this));
+    assert(edge2 == nullptr || (edge2->nodeA == this || edge2->nodeB == this));
+    if (edge1 != nullptr)
+    {
+        auto& bestTracker = (edge1->nodeA == this ? edge1->bestTrackerNodeA : edge1->bestTrackerNodeB);
+        bestTracker.add(score, edge2);
+    }
+    if (edge2 != nullptr)
+    {
+        auto& bestTracker = (edge2->nodeA == this ? edge2->bestTrackerNodeA : edge2->bestTrackerNodeB);
+        bestTracker.add(score, edge1);
+    }
+}
 
 
 ostream& operator<<(ostream& os, const PathValue& pathValue)
@@ -427,11 +444,23 @@ void doGenericInfoDFS(TestNode* rootNode)
 
 void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<Node*>& nodesFollowedSoFar, string& wordFollowedSoFar, const vector<Word>& words)
 {
-    for (auto word : words)
+    for (const auto& word : words)
     {
         if (wordFollowedSoFar == word.word)
         {
+            nodesFollowedSoFar.push_back(currentNode);
             cout << "Found word: " << word.word << endl;
+            Edge* previousEdge = nullptr;
+            assert(nodesFollowedSoFar.size() == edgesFollowedSoFar.size() + 1);
+            for (int i = 0; i < word.word.size(); i++)
+            {
+                auto thisEdge = (i == edgesFollowedSoFar.size() ? nullptr : edgesFollowedSoFar[i]);
+                nodesFollowedSoFar[i]->addElbow(previousEdge, thisEdge, word.score);
+
+                previousEdge = thisEdge;
+            }
+            nodesFollowedSoFar.pop_back();
+
         }
     }
     for (auto edge : currentNode->neighbours)
@@ -456,7 +485,7 @@ void findWordsFrom(Node* currentNode, vector<Edge*>& edgesFollowedSoFar, vector<
 void findWordsFrom(Node* currentNode, const vector<Word>& words)
 {
     vector<Edge*> edgesFollowedSoFar; 
-    vector<Node*> nodesFollowedSoFar = {currentNode}; 
+    vector<Node*> nodesFollowedSoFar; 
     string wordFollowedSoFar;
     findWordsFrom(currentNode, edgesFollowedSoFar, nodesFollowedSoFar, wordFollowedSoFar, words);
 }
@@ -681,9 +710,12 @@ int main(int argc, char* argv[])
     vector<Node> nodes(numNodes);
     cout << "num nodes: " << numNodes << endl;
 
+    int nodeIndex = 1;
     for (auto& node : nodes)
     {
         node.multiplier = readInt();
+        node.index = nodeIndex;
+        nodeIndex++;
     }
 
 
