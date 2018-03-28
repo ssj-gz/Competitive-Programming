@@ -737,6 +737,8 @@ int main(int argc, char* argv[])
                         pathValue1.edgeB != pathValue2.edgeA && pathValue1.edgeB != pathValue2.edgeB);
             };
 
+            PathValue dbgBest1;
+            PathValue dbgBest2;
             int64_t dbgMaxPathValueProduct = -1;
             for (const auto& pathValue1 : pathValues)
             {
@@ -748,6 +750,8 @@ int main(int argc, char* argv[])
                         if (pathValueProduct > dbgMaxPathValueProduct)
                         {
                             dbgMaxPathValueProduct = pathValueProduct;
+                            dbgBest1 = pathValue1;
+                            dbgBest2 = pathValue2;
                             //cout << "New best: " << pathValueProduct << " from " << pathValue1 << " and " << pathValue2 << endl;
                         }
                     }
@@ -767,9 +771,11 @@ int main(int argc, char* argv[])
             set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
 
             int64_t maxPathValueProduct = -1;
+            PathValue best1;
+            PathValue best2;
             for (auto& edge : edges)
             {
-                int64_t maxFromThis = -1;
+                //int64_t maxFromThis = -1;
                 for (auto blahIter = begin(edge.bestTrackerNodeA.stored); blahIter != begin(edge.bestTrackerNodeA.stored) + edge.bestTrackerNodeA.num; blahIter++)
                 {
                     PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
@@ -779,11 +785,17 @@ int main(int argc, char* argv[])
                         //cout << " otherPathValue: " << otherPathValue << endl;
                         if (!shareAnEdge(blee, otherPathValue))
                         {
-                            maxFromThis = max(maxFromThis, blee.value * otherPathValue.value);
-                            break;
+                            //maxFromThis = max(maxFromThis, );
+                            const int product = blee.value * otherPathValue.value;
+                            if (product > maxPathValueProduct)
+                            {
+                                maxPathValueProduct = product;
+                                best1 = blee;
+                                best2 = otherPathValue;
+                                break;
+                            }
                         }
                     }
-                    maxPathValueProduct = max(maxPathValueProduct, maxFromThis);
                 }
                 for (auto blahIter = begin(edge.bestTrackerNodeA.stored); blahIter != begin(edge.bestTrackerNodeA.stored) + edge.bestTrackerNodeA.num; blahIter++)
                 {
@@ -792,6 +804,16 @@ int main(int argc, char* argv[])
                 }
             }
             cout << "maxPathValueProduct: " << maxPathValueProduct << " dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << " " << (maxPathValueProduct == dbgMaxPathValueProduct ? "MATCH" : "NOMATCH") <<  " numTests: " << numTests << endl;
+            if (maxPathValueProduct != dbgMaxPathValueProduct)
+            {
+                cout << "Mismatch found!" << endl;
+                cout << "best1: " << best1 << " best2: " << best2 << " dbgBest1: " << dbgBest1 << " dbgBest2: " << dbgBest2 << endl;
+                cout << "numNeighbours: " << numNeighbours << " numPathValues: " << numPathValues << " path values: " << endl;
+                for (const auto& pathValue : pathValues)
+                {
+                    cout << " " << pathValue << endl;
+                }
+            }
             assert(maxPathValueProduct == dbgMaxPathValueProduct);
             numTests++;
         }
