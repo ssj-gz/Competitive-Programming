@@ -17,6 +17,8 @@
 
 using namespace std;
 
+const int maxK = 50;
+
 struct Edge;
 struct Node
 {
@@ -760,7 +762,8 @@ vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& wo
 // Ukkonen's Algorithm.
 struct StateData
 {
-        int wordLength = -1;
+    int wordLength = -1;
+    vector<int> wordIndicesIsFinalStateFor;
 };
 
 /**
@@ -785,8 +788,11 @@ class SuffixTreeBuilder
             }
             int length(int fullStringLength) const
             {
-                const auto adjustedEndIndex = (endIndex == openTransitionEnd ? fullStringLength - 1: endIndex - 1);
-                const auto length = adjustedEndIndex - startIndex + 2;
+                assert(endIndex != openTransitionEnd);
+                //const auto adjustedEndIndex = (endIndex == openTransitionEnd ? fullStringLength - 1: endIndex - 1);
+                //const auto adjustedEndIndex = endIndex;
+                const auto length = endIndex - startIndex + 1;
+                cout << "endIndex: " << endIndex << " startIndex: " << startIndex << endl;
                 assert(length >= 0);
                 return length;
             }
@@ -821,7 +827,7 @@ class SuffixTreeBuilder
             StateData data;
         };
     public:
-        SuffixTreeBuilder()
+        SuffixTreeBuilder(const vector<Word>& words)
         {
             m_states.reserve(1'000'000);
 
@@ -837,6 +843,74 @@ class SuffixTreeBuilder
 
             m_s = m_root;
             m_k = 1;
+
+
+            assert(words.size() <= maxK);
+            string combinedWords;
+            for (int i = 0; i < words.size(); i++)
+            {
+                combinedWords += words[i].word + static_cast<char>(wordSeparatorCharBegin + i);
+            }
+            cout << "combinedWords: " << combinedWords << endl;
+            appendString(combinedWords);
+            vector<int> indexOfNextSeparatorChar(combinedWords.size());
+            int lastSeenSeparatorIndex = -1;
+            for (int i = combinedWords.size() - 1; i >= 0; i--)
+            {
+                //cout << " i: " << i << " char: " << combinedWords[i] << " bloo: " << (combinedWords[i] >= wordSeparatorCharBegin) << " blee: " << (static_cast<int>(combinedWords[i]) <= static_cast<int>(wordSeparatorCharEnd)) << " glarp: " << static_cast<int>(wordSeparatorCharEnd) << endl;
+
+                if (combinedWords[i] >= wordSeparatorCharBegin && combinedWords[i] <= wordSeparatorCharEnd)
+                {
+                    lastSeenSeparatorIndex = i;
+                    cout << "Seen separator :" << lastSeenSeparatorIndex << endl;
+                }
+                indexOfNextSeparatorChar[i] = lastSeenSeparatorIndex;
+            }
+            stripWordSeparatorsAndStoreWordEndStates(m_root, indexOfNextSeparatorChar);
+
+            for (auto state : m_states)
+            {
+                //cout << " state: " << &state << " # is final for: " << state.data.wordIndicesIsFinalStateFor.size() << endl;
+            }
+        }
+        void stripWordSeparatorsAndStoreWordEndStates(State* state, const vector<int>& indexOfNextSeparatorChar)
+        {
+            cout << "stripWordSeparatorsAndStoreWordEndStates:" << state << endl;
+            auto transitionIter = state->transitions.begin();
+            while (transitionIter != state->transitions.end())
+            {
+                auto& substringFollowed = transitionIter->substringFollowed;
+                assert(substringFollowed.startIndex >= 1);
+                substringFollowed.startIndex--;
+                if (substringFollowed.endIndex == openTransitionEnd)
+                    substringFollowed.endIndex = m_currentString.size() - 1;
+                else
+                    substringFollowed.endIndex--;
+
+                const int nextSepartorCharIndex = indexOfNextSeparatorChar[substringFollowed.startIndex];
+
+                cout << " startIndex: " << substringFollowed.startIndex << " endIndex: " << substringFollowed.endIndex << " nextSepartorCharIndex: " << nextSepartorCharIndex << " char: " << (nextSepartorCharIndex != -1 ? m_currentString[m_currentString[nextSepartorCharIndex]] : '-') << endl;
+                
+                if (nextSepartorCharIndex == substringFollowed.startIndex)
+                {
+                    transitionIter = state->transitions.erase(transitionIter);
+                    state->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
+                    cout << "state " << state << " is final (erased transition) for: " << state->data.wordIndicesIsFinalStateFor.back() << endl;
+                    continue;
+                }
+                if (nextSepartorCharIndex >= substringFollowed.startIndex && nextSepartorCharIndex <= substringFollowed.endIndex)
+                {
+                    substringFollowed.endIndex = nextSepartorCharIndex - 1;
+                    transitionIter->nextState->transitions.clear();
+                    transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
+                    cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
+                }
+
+                stripWordSeparatorsAndStoreWordEndStates(transitionIter->nextState, indexOfNextSeparatorChar);
+
+                transitionIter++;
+            }
+
         }
         SuffixTreeBuilder(const SuffixTreeBuilder& other) = delete;
         void appendLetter(char letter)
@@ -1028,6 +1102,7 @@ class SuffixTreeBuilder
                     {
                         for (auto& transition : m_state->transitions)
                         {
+                            assert(transition.substringFollowed.startIndex >= 0);
                             if (-transition.substringFollowed.startIndex == (letter - 'a' + 1))
                             {
                                 m_transition = &transition;
@@ -1035,7 +1110,7 @@ class SuffixTreeBuilder
                             }
                             else 
                             {
-                                assert(theString[transition.substringFollowed.startIndex - 1] == transition.firstLetter);
+                                assert(theString[transition.substringFollowed.startIndex] == transition.firstLetter);
                                 if (transition.firstLetter == letter)
                                 {
                                     m_transition = &transition;
@@ -1044,6 +1119,7 @@ class SuffixTreeBuilder
                             }
                         }
                         assert(m_transition);
+                        cout << "followLetter: substringLength: " << m_transition->substringLength(m_string->size()) << endl;
                         if (m_transition->substringLength(m_string->size()) == 1)
                         {
                             followToTransitionEnd();
@@ -1129,7 +1205,7 @@ class SuffixTreeBuilder
                         }
                         char nextLetter()
                         {
-                            return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex - 1];
+                            return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex];
                         }
                         NextLetterIterator operator++(int)
                         {
@@ -1200,6 +1276,10 @@ class SuffixTreeBuilder
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 } 
+                State* state()
+                {
+                    return m_state;
+                }
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -1263,7 +1343,9 @@ class SuffixTreeBuilder
             return Cursor();
         }
     private:
-        static const int alphabetSize = 27; // Include the magic '{' for making final states explicit.
+        static const int alphabetSize = 26 + maxK; // Include the magic "separator" characters for putting up to maxK words in suffix tree.
+        const char wordSeparatorCharBegin = 'a' - 1 - maxK;
+        const char wordSeparatorCharEnd = wordSeparatorCharBegin + maxK;
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
@@ -1276,12 +1358,14 @@ class SuffixTreeBuilder
         State *m_s; 
         int m_k;
 
+
         std::pair<State*, int> update(State* s, int k, int i)
         {
             State* oldr = m_root;
             const auto testAndSplitResult = testAndSplit(s, k, i - 1, t(i));
             auto isEndPoint = testAndSplitResult.first;
             auto r = testAndSplitResult.second;
+            cout << "r: " << r << endl;
             while (!isEndPoint)
             {
                 auto rPrime = createNewState(r);
@@ -1390,7 +1474,7 @@ class SuffixTreeBuilder
         int t(int i)
         {
             // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
-            return m_currentString[i - 1] - 'a' + 1;
+            return m_currentString[i - 1] - wordSeparatorCharBegin + 1;
         }
 };
 
@@ -1632,7 +1716,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (true)
+    if (false)
     {
         const int maxNodes = 10000;
         const int numNodes = (rand() % (maxNodes - 1)) + 2;
@@ -1693,6 +1777,54 @@ int main(int argc, char* argv[])
         }
 #endif
         cout << "numNodes: " << numNodes << " numNodesTotal: " << numNodesTotal << endl;
+        return 0;
+    }
+
+    if (true)
+    {
+        vector<Word> testWords(3);
+        testWords[0].word = "aab";
+
+        testWords[1].word = "aabc";
+
+        testWords[2].word = "a";
+
+        SuffixTreeBuilder blah(testWords);
+        auto blee = blah.rootCursor();
+
+        auto nose = [&testWords](auto c)
+        {
+            if (c.isOnExplicitState())
+            {
+                cout << "Blag: " << c.stateData().wordIndicesIsFinalStateFor.size() << endl;
+                for (const auto wordIndex : c.stateData().wordIndicesIsFinalStateFor)
+                {
+                    cout << "is final state for word " << testWords[wordIndex].word << endl;
+                }
+            }
+            else
+            {
+                cout << "Not on explicit state" << endl;
+            }
+        };
+
+#if 0
+        assert(blee.canFollowLetter('a'));
+        blee.followLetter('a');
+        assert(blee.isOnExplicitState());
+        nose(blee);
+        assert(blee.canFollowLetter('b'));
+        blee.followLetter('b');
+        nose(blee);
+#endif
+        assert(blee.canFollowLetter('b'));
+        blee.followLetter('b');
+        nose(blee);
+        assert(blee.canFollowLetter('c'));
+        blee.followLetter('c');
+        nose(blee);
+        
+
         return 0;
     }
 
