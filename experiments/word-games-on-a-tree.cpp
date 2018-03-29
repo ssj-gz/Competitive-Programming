@@ -49,6 +49,7 @@ struct Edge
     BestTracker bestTrackerNodeA;
     BestTracker bestTrackerNodeB;
     char letterFollowed;
+    bool remove = false;
     Node* otherNode(Node* node)
     {
         if (node == nodeA)
@@ -180,19 +181,25 @@ vector<Node*> getDescendants(Node* node, Node* parentNode)
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
-    if (currentNode->doNotExplore)
-        return 0;
+    //if (currentNode->doNotExplore)
+        //return 0;
     int numDescendents = 1;
 
     bool childHasTooManyDescendants = false;
+
+    currentNode->neighbours.erase(remove_if(currentNode->neighbours.begin(), currentNode->neighbours.end(), 
+                [](Edge* edge)
+                {
+                    return edge->remove;
+                }), currentNode->neighbours.end());
 
     for (const auto& edge : currentNode->neighbours)
     {
         auto child = edge->otherNode(currentNode);
         if (child == parentNode)
             continue;
-        if (child->doNotExplore)
-            continue;
+        //if (child->doNotExplore)
+            //continue;
 
         const auto numChildDescendants = findCentroidAux(child, currentNode, totalNodes, centroid);
         if (numChildDescendants > totalNodes / 2)
@@ -285,6 +292,10 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
     if (centroid->doNotExplore)
         return;
     centroid->doNotExplore = true;
+    for (auto& edge : centroid->neighbours)
+    {
+        edge->remove = true;
+    }
 
     vector<Node*> descendantsSoFar;
     descendantsSoFar.push_back(centroid);
