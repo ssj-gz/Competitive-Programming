@@ -41,6 +41,7 @@ struct BestTracker
     };
     Blah stored[maxToStore];
 };
+constexpr int BestTracker::maxToStore;
 struct Edge
 {
     Node* nodeA = nullptr;
@@ -49,7 +50,7 @@ struct Edge
     BestTracker bestTrackerNodeA;
     BestTracker bestTrackerNodeB;
     char letterFollowed;
-    bool remove = false;
+    //bool remove = false;
     Node* otherNode(Node* node)
     {
         if (node == nodeA)
@@ -138,17 +139,25 @@ ostream& operator<<(ostream& os, const PathValue& pathValue)
 
 int countDescendants(Node* node, Node* parentNode)
 {
-    if (node->doNotExplore)
-        return 0;
+    //if (node->doNotExplore)
+        //return 0;
     int numDescendants = 1; // Current node.
+
+#if 0
+    node->neighbours.erase(remove_if(node->neighbours.begin(), node->neighbours.end(), 
+                [](Edge* edge)
+                {
+                    return edge->remove;
+                }), node->neighbours.end());
+#endif
 
     for (const auto& edge : node->neighbours)
     {
         auto child = edge->otherNode(node);
         if (child == parentNode)
             continue;
-        if (child->doNotExplore)
-            continue;
+        //if (child->doNotExplore)
+            //continue;
 
         numDescendants += countDescendants(child, node);
     }
@@ -159,8 +168,8 @@ int countDescendants(Node* node, Node* parentNode)
 vector<Node*> getDescendants(Node* node, Node* parentNode)
 {
     vector<Node*> descendants;
-    if (node->doNotExplore)
-        return descendants;
+    //if (node->doNotExplore)
+        //return descendants;
 
     descendants.push_back(node);
 
@@ -169,8 +178,8 @@ vector<Node*> getDescendants(Node* node, Node* parentNode)
         auto child = edge->otherNode(node);
         if (child == parentNode)
             continue;
-        if (child->doNotExplore)
-            continue;
+        //if (child->doNotExplore)
+            //continue;
 
         const auto& childDescendants = getDescendants(child, node);
         descendants.insert(descendants.end(), childDescendants.begin(), childDescendants.end());
@@ -187,11 +196,6 @@ int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, N
 
     bool childHasTooManyDescendants = false;
 
-    currentNode->neighbours.erase(remove_if(currentNode->neighbours.begin(), currentNode->neighbours.end(), 
-                [](Edge* edge)
-                {
-                    return edge->remove;
-                }), currentNode->neighbours.end());
 
     for (const auto& edge : currentNode->neighbours)
     {
@@ -230,6 +234,10 @@ Node* findCentroid(Node* startNode)
     const auto totalNumNodes = countDescendants(startNode, nullptr);
     Node* centroid = nullptr;
     findCentroidAux(startNode, nullptr, totalNumNodes, &centroid);
+    if (!centroid)
+    {
+        cout << "totalNumNodes: " << totalNumNodes << endl;
+    }
     assert(centroid);
     return centroid;
 }
@@ -266,10 +274,11 @@ Node* findCentroidBruteForce(Node* startNode, int numNodes)
 }
 #endif
 
+int numNodesTotal = 0;
 void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
 {
-    if (startNode->doNotExplore)
-        return;
+    //if (startNode->doNotExplore)
+        //return;
     auto countPair = [&blee](Node* node1, Node* node2)
     {
         assert(node1 != node2);
@@ -281,27 +290,34 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
     const string indent(indentLevel, ' ');
     //cout << indent << "Decomposing graph containing " << startNode->index << endl;
     const auto numNodes = countDescendants(startNode, nullptr);
+    assert(numNodes > 0);
     Node* centroid = findCentroid(startNode);
     //cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
     //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
 
-    static int numNodesTotal = 0;
     numNodesTotal += numNodes;
-    cout << "numNodesTotal: " << numNodesTotal << endl;
+    //cout << "numNodesTotal: " << numNodesTotal << endl;
 
-    if (centroid->doNotExplore)
-        return;
-    centroid->doNotExplore = true;
+    //if (centroid->doNotExplore)
+        //return;
+    //centroid->doNotExplore = true;
     for (auto& edge : centroid->neighbours)
     {
-        edge->remove = true;
+        //edge->remove = true;
+        auto neighbour = edge->otherNode(centroid);
+        auto thisEdge = find(neighbour->neighbours.begin(), neighbour->neighbours.end(), edge);
+        assert(thisEdge != neighbour->neighbours.end());
+        //cout << "Fleep: " << (thisEdge - neighbour->neighbours.begin()) << endl;
+        neighbour->neighbours.erase(thisEdge);
     }
+    //centroid->neighbours.clear();
 
     vector<Node*> descendantsSoFar;
     descendantsSoFar.push_back(centroid);
     for (auto& edge : centroid->neighbours)
     {
         auto neighbour = edge->otherNode(centroid);
+        //neighbour->neighbours.erase(find(neighbour->neighbours.begin(), neighbour->neighbours.end(), edge));
         auto newDescendants = getDescendants(neighbour, centroid);
         assert(newDescendants.size() <= numNodes / 2);
 #if 1
@@ -1007,7 +1023,7 @@ int main(int argc, char* argv[])
     if (true)
     {
         const int maxNodes = 10000;
-        const int numNodes = (rand() % maxNodes) + 1;
+        const int numNodes = (rand() % (maxNodes - 1)) + 2;
         //const int numNodes = 20000;
         vector<Node> nodes(numNodes);
         vector<Edge> edges(numNodes - 1);
@@ -1022,7 +1038,7 @@ int main(int argc, char* argv[])
                 auto neighbourNode = &(nodes[neighbourNodeIndex]);
                 auto newNode = &(nodes[nodeIndex]);
 
-                Edge* edge = &(edges[nodeIndex]);
+                Edge* edge = &(edges[nodeIndex - 1]);
                 edge->nodeA = newNode;
                 edge->nodeB = neighbourNode;
 
@@ -1052,6 +1068,7 @@ int main(int argc, char* argv[])
 
         decompose(&(nodes.front()), blee);
 
+#if 0
         for (int i = 0; i < numNodes; i++)
         {
             for (int j = 0; j < numNodes; j++)
@@ -1062,6 +1079,8 @@ int main(int argc, char* argv[])
                 assert(blee[i][j] == 1);
             }
         }
+#endif
+        cout << "numNodes: " << numNodes << " numNodesTotal: " << numNodesTotal << endl;
         return 0;
     }
 
