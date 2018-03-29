@@ -24,7 +24,6 @@ struct Node
     int index = -1;
     int multiplier;
     void addElbow(Edge* edge1, Edge* edge2, int score);
-    bool doNotExplore = false;
 
     int crossedWordsBestScore = 0;
     int singleWordBestScore = 0;
@@ -50,7 +49,6 @@ struct Edge
     BestTracker bestTrackerNodeA;
     BestTracker bestTrackerNodeB;
     char letterFollowed;
-    //bool remove = false;
     Node* otherNode(Node* node)
     {
         if (node == nodeA)
@@ -139,25 +137,14 @@ ostream& operator<<(ostream& os, const PathValue& pathValue)
 
 int countDescendants(Node* node, Node* parentNode)
 {
-    //if (node->doNotExplore)
-        //return 0;
     int numDescendants = 1; // Current node.
 
-#if 0
-    node->neighbours.erase(remove_if(node->neighbours.begin(), node->neighbours.end(), 
-                [](Edge* edge)
-                {
-                    return edge->remove;
-                }), node->neighbours.end());
-#endif
 
     for (const auto& edge : node->neighbours)
     {
         auto child = edge->otherNode(node);
         if (child == parentNode)
             continue;
-        //if (child->doNotExplore)
-            //continue;
 
         numDescendants += countDescendants(child, node);
     }
@@ -168,8 +155,6 @@ int countDescendants(Node* node, Node* parentNode)
 vector<Node*> getDescendants(Node* node, Node* parentNode)
 {
     vector<Node*> descendants;
-    //if (node->doNotExplore)
-        //return descendants;
 
     descendants.push_back(node);
 
@@ -178,8 +163,6 @@ vector<Node*> getDescendants(Node* node, Node* parentNode)
         auto child = edge->otherNode(node);
         if (child == parentNode)
             continue;
-        //if (child->doNotExplore)
-            //continue;
 
         const auto& childDescendants = getDescendants(child, node);
         descendants.insert(descendants.end(), childDescendants.begin(), childDescendants.end());
@@ -190,8 +173,6 @@ vector<Node*> getDescendants(Node* node, Node* parentNode)
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
-    //if (currentNode->doNotExplore)
-        //return 0;
     int numDescendents = 1;
 
     bool childHasTooManyDescendants = false;
@@ -202,8 +183,6 @@ int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, N
         auto child = edge->otherNode(currentNode);
         if (child == parentNode)
             continue;
-        //if (child->doNotExplore)
-            //continue;
 
         const auto numChildDescendants = findCentroidAux(child, currentNode, totalNodes, centroid);
         if (numChildDescendants > totalNodes / 2)
@@ -277,8 +256,6 @@ Node* findCentroidBruteForce(Node* startNode, int numNodes)
 int numNodesTotal = 0;
 void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
 {
-    //if (startNode->doNotExplore)
-        //return;
     auto countPair = [&blee](Node* node1, Node* node2)
     {
         assert(node1 != node2);
@@ -298,22 +275,9 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
     numNodesTotal += numNodes;
     //cout << "numNodesTotal: " << numNodesTotal << endl;
 
-    //if (centroid->doNotExplore)
-        //return;
-    //centroid->doNotExplore = true;
-    for (auto& edge : centroid->neighbours)
-    {
-        //edge->remove = true;
-        auto neighbour = edge->otherNode(centroid);
-        auto thisEdge = find(neighbour->neighbours.begin(), neighbour->neighbours.end(), edge);
-        assert(thisEdge != neighbour->neighbours.end());
-        //cout << "Fleep: " << (thisEdge - neighbour->neighbours.begin()) << endl;
-        neighbour->neighbours.erase(thisEdge);
-    }
-    //centroid->neighbours.clear();
-
     vector<Node*> descendantsSoFar;
     descendantsSoFar.push_back(centroid);
+    // Do processing around this centroid.
     for (auto& edge : centroid->neighbours)
     {
         auto neighbour = edge->otherNode(centroid);
@@ -330,9 +294,18 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
         }
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
-        decompose(neighbour, blee, indentLevel + 1);
     }
 
+    // Decompose further.
+    for (auto& edge : centroid->neighbours)
+    {
+        auto neighbour = edge->otherNode(centroid);
+        auto thisEdge = find(neighbour->neighbours.begin(), neighbour->neighbours.end(), edge);
+        assert(thisEdge != neighbour->neighbours.end());
+        neighbour->neighbours.erase(thisEdge);
+
+        decompose(neighbour, blee, indentLevel + 1);
+    }
 }
 
 #include <set> 
