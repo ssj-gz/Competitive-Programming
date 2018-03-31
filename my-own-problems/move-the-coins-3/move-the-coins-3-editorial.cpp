@@ -84,7 +84,7 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
-            doPendingAdjustAllHeights();
+            doPendingHeightAdjustments();
             const auto newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment
                 // Add a number guarantees makes newHeightAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
                 + (1 << (maxBinaryDigits + 1)); 
@@ -118,7 +118,7 @@ class HeightTracker
         {
             m_pendingHeightAdjustment += heightDiff;
         }
-        void doPendingAdjustAllHeights()
+        void doPendingHeightAdjustments()
         {
             int heightDiff = m_pendingHeightAdjustment;
             if (heightDiff == 0)
@@ -187,7 +187,7 @@ class HeightTracker
         {
             if (m_pendingHeightAdjustment != 0)
             {
-                doPendingAdjustAllHeights();
+                doPendingHeightAdjustments();
             }
             return m_grundyNumber;
         }
@@ -289,6 +289,7 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
         const bool hasLightChildren = (node.children.size() > 1);
         if (!hasLightChildren)
             continue;
+
         // Update node with height info from all its light-first descendants.
         doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&node](Node* descendantNode, int depth) 
                 { 
