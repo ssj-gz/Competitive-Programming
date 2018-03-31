@@ -167,7 +167,7 @@ void answerQueries(Node* node)
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange);
     }
     // Update numNodesWithHeightModuloPowerOf2 with information from this node.
-    for (int binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+    for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
     {
         if (node->hasCoin)
         {
