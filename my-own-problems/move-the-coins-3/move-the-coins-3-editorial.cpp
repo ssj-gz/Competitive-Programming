@@ -120,7 +120,7 @@ class HeightTracker
         }
         void doPendingHeightAdjustments()
         {
-            int heightDiff = m_pendingHeightAdjustment;
+            auto heightDiff = m_pendingHeightAdjustment;
             if (heightDiff == 0)
                 return;
             m_pendingHeightAdjustment = 0;
@@ -134,7 +134,7 @@ class HeightTracker
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
                     auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    for (int i = 0; i < heightDiff; i++)
+                    for (auto i = 0; i < heightDiff; i++)
                     {
                         parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
                         m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) & (powerOf2 - 1);
@@ -157,7 +157,7 @@ class HeightTracker
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
                     auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    for (int i = 0; i < heightDiff; i++)
+                    for (auto i = 0; i < heightDiff; i++)
                     {
                         parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
                         m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) & (powerOf2 - 1);
