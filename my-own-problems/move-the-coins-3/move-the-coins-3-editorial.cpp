@@ -92,7 +92,7 @@ class HeightTracker
             auto powerOf2 = 2;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1);
+                const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
                 numHeightsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
@@ -103,9 +103,7 @@ class HeightTracker
                 {
                     const auto makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
                     const auto makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
-                    assert(makeDigitZeroBegin <= makeDigitZeroEnd);
-                    assert(0 <= makeDigitZeroEnd < powerOf2);
-                    assert(0 <= makeDigitZeroBegin < powerOf2);
+                    assert(0 <= m_makesDigitOneBegin && makeDigitZeroBegin <= makeDigitZeroEnd && makeDigitZeroEnd < powerOf2);
                     if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
                         m_grundyNumber ^= (powerOf2 >> 1);
                 }
@@ -144,7 +142,7 @@ class HeightTracker
                     }
 
                     if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
-                        m_grundyNumber ^= (powerOf2 >> 1);
+                        m_grundyNumber ^= (powerOf2 >> 1); // This binary digit in the grundy number has flipped; update grundyNumber.
 
                     powerOf2 <<= 1;
                 } 
@@ -193,6 +191,7 @@ class HeightTracker
         }
         void clear()
         {
+            // Lazily "clear" in O(log2 N) by updating the version number.
             m_versionNumber++;
             auto powerOf2 = 2;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
@@ -225,29 +224,29 @@ class HeightTracker
 
 enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 template <typename NodeProcessor>
-void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& nodeProcessor)
+void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
 {
     if (heightTrackerAdjustment == AdjustWithDepth)
         heightTracker.adjustAllHeights(1);
 
-    nodeProcessor(node, depth);
+    processNode(node, depth);
 
     for (auto child : node->children)
-        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, nodeProcessor);
+        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
 
     if (heightTrackerAdjustment == AdjustWithDepth)
         heightTracker.adjustAllHeights(-1);
 }
 
 template <typename NodeProcessor>
-void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor nodeProcessor)
+void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor processNode)
 {
-    nodeProcessor(node, 0);
+    processNode(node, 0);
     if (node->children.size() > 1)
     {
         for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
         {
-            doDfs(*lightChildIter, 1, heightTracker, heightTrackerAdjustment, nodeProcessor);
+            doDfs(*lightChildIter, 1, heightTracker, heightTrackerAdjustment, processNode);
         }
     }
 }
@@ -298,13 +297,14 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                 });
         if (node.hasCoin)
         {
-            // Propagate this node's coin info to descendants.
+            // Propagate this node's coin info to light-first descendants.
             doLightFirstDFS(&node, heightTracker, DoNotAdjust, [](Node* node, int depth) 
                     { 
                         node->grundyNumberIfRoot ^= depth; 
                     });
         }
         // Propagate light-first descendant info to other light-first descendants.
+        // Note that this is just a "manual" version of doLightFirstDFS, and is computationally equivalent to it.
         vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
         for (auto lightChild : lightChildren)
@@ -312,9 +312,9 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
             doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
             doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
         }
-        reverse(lightChildren.begin(), lightChildren.end());
         // ... and again, using reversed order of children.
         heightTracker.clear();
+        reverse(lightChildren.begin(), lightChildren.end());
         for (auto lightChild : lightChildren)
         {
             doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
