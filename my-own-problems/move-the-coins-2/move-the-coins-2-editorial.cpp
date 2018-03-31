@@ -11,7 +11,7 @@
 
 using namespace std;
 
-constexpr auto maxN = 100000;
+constexpr auto maxN = 100'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
     return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
@@ -147,16 +147,16 @@ void answerQueries(Node* node)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto oneThreshold = (1 << (binaryDigitNum));
-            const auto begin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
-            const auto end = modPosOrNeg(-heightChange - 1, powerOf2);
-            if (begin <= end)
+            const auto makeDigitZeroBegin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
+            const auto makeDigitZeroEnd = modPosOrNeg(-heightChange - 1, powerOf2);
+            if (makeDigitZeroBegin <= makeDigitZeroEnd)
             {
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(begin, end);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(makeDigitZeroBegin, makeDigitZeroEnd);
             }
             else
             {
                 // Range is split in two - count the number that make digit 0 instead, and subtract from the total over the whole range.
-                const auto numThatMakeDigitZero = numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(end + 1, begin - 1);
+                const auto numThatMakeDigitZero = numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(makeDigitZeroEnd + 1, makeDigitZeroBegin - 1);
                 destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].total() - numThatMakeDigitZero;
             }
         } 
@@ -193,7 +193,7 @@ void answerQueries(Node* node)
         {
             descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum];
             assert(descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] >= 0);
-            const auto isRelocatedSubtreeGrundyDigitOne = (descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] % 2);
+            const auto isRelocatedSubtreeGrundyDigitOne = ((descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] % 2) == 1);
             if (isRelocatedSubtreeGrundyDigitOne)
                 relocatedSubtreeGrundyNumber += (1 << binaryDigitNum);
         }
