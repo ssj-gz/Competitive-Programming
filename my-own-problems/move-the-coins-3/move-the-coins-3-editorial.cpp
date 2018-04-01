@@ -85,8 +85,10 @@ class HeightTracker
         void insertHeight(const int newHeight)
         {
             doPendingHeightAdjustments();
-            const auto newHeightAdjusted = newHeight - m_cumulativeHeightAdjustment
-                // Add a number guarantees makes newHeightAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
+            const auto newHeightAdjusted = newHeight 
+                // The m_makesDigitOneBegin/End will have been shifted by a total of m_cumulativeHeightAdjustment, so counteract that.
+                - m_cumulativeHeightAdjustment
+                // Add a number guarantees that newHeightAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
                 + (1 << (maxBinaryDigits + 1)); 
             assert(newHeightAdjusted >= 0);
             auto powerOf2 = 2;
