@@ -230,7 +230,7 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
     return queryNumbersWhereBobWins;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; cin >> x; return x; };
