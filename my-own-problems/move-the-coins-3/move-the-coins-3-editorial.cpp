@@ -20,6 +20,7 @@ constexpr auto maxBinaryDigits = log2(maxHeight);
 
 struct Node
 {
+    int nodeNumber = -1;
     bool hasCoin = false;
     vector<Node*> children;
     int numDescendants = 0;
@@ -339,6 +340,7 @@ int main(int argc, char* argv[])
         const auto numCoins = readInt();
 
         nodes[i].hasCoin = ((numCoins % 2) == 1);
+        nodes[i].nodeNumber = (i + 1);
     }
 
     for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
@@ -357,12 +359,10 @@ int main(int argc, char* argv[])
     computeGrundyNumberIfRootForAllNodes(nodes);
 
     vector<int> nodesThatGiveBobWinWhenRoot;
-    auto nodeNum = 1;
     for (auto& node : nodes)
     {
         if (node.grundyNumberIfRoot == 0)
-            nodesThatGiveBobWinWhenRoot.push_back(nodeNum);
-        nodeNum++;
+            nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
     }
     cout << nodesThatGiveBobWinWhenRoot.size() << endl;
     for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
