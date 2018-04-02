@@ -147,16 +147,16 @@ void answerQueries(Node* node)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto oneThreshold = (1 << (binaryDigitNum));
-            const auto makeDigitZeroBegin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
-            const auto makeDigitZeroEnd = modPosOrNeg(-heightChange - 1, powerOf2);
-            if (makeDigitZeroBegin <= makeDigitZeroEnd)
+            const auto makeDigitOneBegin = modPosOrNeg(oneThreshold - heightChange, powerOf2);
+            const auto makeDigitOneEnd = modPosOrNeg(-heightChange - 1, powerOf2);
+            if (makeDigitOneBegin <= makeDigitOneEnd)
             {
-                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(makeDigitZeroBegin, makeDigitZeroEnd);
+                destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(makeDigitOneBegin, makeDigitOneEnd);
             }
             else
             {
                 // Range is split in two - count the number that make digit 0 instead, and subtract from the total over the whole range.
-                const auto numThatMakeDigitZero = numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(makeDigitZeroEnd + 1, makeDigitZeroBegin - 1);
+                const auto numThatMakeDigitZero = numNodesWithHeightModuloPowerOf2[binaryDigitNum].numInRange(makeDigitOneEnd + 1, makeDigitOneBegin - 1);
                 destination[binaryDigitNum] += numNodesWithHeightModuloPowerOf2[binaryDigitNum].total() - numThatMakeDigitZero;
             }
         } 
