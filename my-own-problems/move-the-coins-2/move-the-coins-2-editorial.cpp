@@ -103,7 +103,7 @@ class SegmentTree
             return sum;
         }
 
-        void addOne(int pos)
+        void addOneAt(int pos)
         {
             const auto n = m_numElements;
             auto elements = m_elements.data();
@@ -173,7 +173,7 @@ void answerQueries(Node* node)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto heightModuloPowerOf2 = node->originalHeight % powerOf2;
-            numNodesWithHeightModuloPowerOf2[binaryDigitNum].addOne(heightModuloPowerOf2);
+            numNodesWithHeightModuloPowerOf2[binaryDigitNum].addOneAt(heightModuloPowerOf2);
         }
     }
     // Recurse.
