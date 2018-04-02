@@ -646,3 +646,11 @@ class SuffixTreeBuilder
 using Cursor = SuffixTreeBuilder::Cursor;
 
 // End Ukkonen's Algorithm
+
+// Bash scripts.
+// Re-rest own problem testcases.
+
+// cd testcases/exported/; time -p for i in input*.txt; do echo $i; cat $i | ../../editorial > last-output ; diff ${i//input/output} last-output ; if [ $? -eq "0" ]; then echo -e "[\033[0;32mOK\033[0m]"; else  echo -e "[\033[0;31mNO MATCH\033[0m]"; fi; done; cd -
+
+// Generate and execute testcases until assertion is triggered. 
+// while true; do ./a.out --test | tee last-testcase.txt | ./a.out ; if [ "$?" -ne "0" ]; then break; fi; done | grep Result
