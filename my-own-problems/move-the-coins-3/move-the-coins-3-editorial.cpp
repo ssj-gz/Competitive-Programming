@@ -105,7 +105,7 @@ class HeightTracker
                 {
                     const auto makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
                     const auto makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
-                    assert(0 <= m_makesDigitOneBegin && makeDigitZeroBegin <= makeDigitZeroEnd && makeDigitZeroEnd < powerOf2);
+                    assert(0 <= makeDigitZeroBegin && makeDigitZeroBegin <= makeDigitZeroEnd && makeDigitZeroEnd < powerOf2);
                     if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
                         m_grundyNumber ^= (powerOf2 >> 1);
                 }
