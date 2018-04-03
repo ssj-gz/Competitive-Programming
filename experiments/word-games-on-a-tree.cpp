@@ -12,13 +12,6 @@
 #include <cassert>
 #include <sys/time.h>
 
-// TODO - 
-//
-// - Modify SuffixTreeBuilder so we can find the list of words that the currently read word is a suffix of.
-// - Do the main processCentroid algorithm, and hook it into the decomposition stuff.
-//   - Track word cursor as we do depth-first search; find longest word; transmit back along path from centroid; track the word suffixes we've generated; etc.
-// - Do the final calculation of max crossed words for each node, etc.
-
 using namespace std;
 
 const int maxK = 50;
@@ -83,7 +76,6 @@ struct Word
 };
 void BestTracker::add(int64_t value, Edge* otherEdge)
 {
-    //cout << "add: " << value << " otherEdge: " << otherEdge->edgeId << endl;
     assert(num <= maxToStore);
     for (int i = 0; i < num; i++)
     {
@@ -1281,17 +1273,6 @@ class SuffixTreeBuilder
         {
             return Cursor();
         }
-        void dumpGraph()
-        {
-            dumpGraphAux(m_root, "");
-        }
-        vector<string> dumpExplicitStrings()
-        {
-            vector<string> strings;
-            dumpExplicitStringsAux(m_root, "", strings);
-            sort(strings.begin(), strings.end(), [](const string& lhs, const string& rhs) { return lhs.size() < rhs.size(); });
-            return strings;
-        }
     private:
         static const int alphabetSize = 26 + maxK + 1; // Include the magic "separator" characters for putting up to maxK words in suffix tree.
         const char wordSeparatorCharBegin = 'a' - 1 - maxK;
@@ -1425,46 +1406,6 @@ class SuffixTreeBuilder
         {
             // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
             return m_currentString[i - 1] - wordSeparatorCharBegin + 1;
-        }
-        void dumpGraphAux(State* s, const string& indent)
-        {
-            cout << indent << "state: " << s << " " << findStateIndex(s) << " suffix link: " << (s->suffixLink ? findStateIndex(s->suffixLink) : 0) << " parent: " << (s->parent ? findStateIndex(s->parent) : 0);
-            const bool isTerminal = (s->transitions.empty());
-            assert((s->suffixLink == nullptr) == isTerminal);
-            if (isTerminal)
-            {
-                cout << " (terminal)" << endl;
-                return;
-            }
-            cout << endl;
-            for (const auto& transition : s->transitions)
-            {
-                const auto substringStartIndex = transition.substringFollowed.startIndex;
-                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex);
-                cout << indent + " " << "transition: " << substringStartIndex << "," << substringEndIndex << (substringEndIndex == m_currentString.size() - 1 ? " (open) " : "") << " " << m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1) << " next state: " << findStateIndex(transition.nextState) << endl;
-                dumpGraphAux(transition.nextState, indent + "  ");
-            }
-        }
-        void dumpExplicitStringsAux(State* s, const string& currentString, vector<string>& destStrings)
-        {
-            if (s->transitions.empty())
-            {
-                destStrings.push_back(currentString);
-                return;
-            }
-            for (const auto& transition : s->transitions)
-            {
-                const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
-                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
-                const auto newCurrentString = currentString + m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1);
-                dumpExplicitStringsAux(transition.nextState, newCurrentString, destStrings);
-            }
-        }
-        long findStateIndex(State* s)
-        {
-            auto statePos = find_if(m_states.begin(), m_states.end(), [s](const State& state) { return &state == s; });
-            assert(statePos != m_states.end());
-            return statePos - m_states.begin();
         }
 
 };
