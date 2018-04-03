@@ -1709,8 +1709,8 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
                 for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
                 {
                     currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, words[wordIndex].score);
-                    maxScore = max(maxScore, words[wordIndex].score);
                 }
+                maxScore = max(maxScore, words[wordIndex].score);
             }
             //const auto suffixBeginPos = words[wordIndex].word.size() - depth;
             //wasSuffixForWordBeginningAtFound[wordIndex][suffixBeginPos] = true;
@@ -1738,6 +1738,7 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
             maxScore = max(maxScore, childScore);
         }
     }
+    node->singleWordBestScore = max(node->singleWordBestScore, maxScore);
 
     return maxScore;
 
@@ -1761,7 +1762,8 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
         {
             wordFollowed += letterToFollow;
             reversedWordPrefixCursor.followLetter(letterToFollow); 
-            findPrefixes(child, centroid, childEdge, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, suffixTracker);
+            const int childScore = findPrefixes(child, centroid, childEdge, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, suffixTracker);
+            centroid->singleWordBestScore = max(centroid->singleWordBestScore, childScore);
             reversedWordPrefixCursor.moveUp();
             wordFollowed.clear();
         }
@@ -1781,7 +1783,6 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
 void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
 {
     cout << "processCentroid" << endl;
-    string wordFollowed;
 
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, suffixTracker);
 
@@ -2269,6 +2270,7 @@ int main(int argc, char* argv[])
     for (const auto& node : nodes)
     {
         cout << "node: " << node.index << " singleWordBestScoreBruteForce: " << node.singleWordBestScoreBruteForce << endl;
+        assert(node.singleWordBestScoreBruteForce == node.singleWordBestScore);
     }
 #endif
 }
