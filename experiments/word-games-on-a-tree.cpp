@@ -7,9 +7,6 @@
 
 // TODO - 
 //
-// - Crudely splice in the centroid decomposition stuff from Ticket to Ride.
-// - Maybe fix up the decomposition stuff so that edges end up being actually removed - need to keep a "backup" of original edges, if so.  In any case, this can be left unti later.
-// - Crudely splice in SuffixTreeBuilder.
 // - Modify SuffixTreeBuilder so we can find the list of words that the currently read word is a suffix of.
 // - Do the main processCentroid algorithm, and hook it into the decomposition stuff.
 //   - Track word cursor as we do depth-first search; find longest word; transmit back along path from centroid; track the word suffixes we've generated; etc.
