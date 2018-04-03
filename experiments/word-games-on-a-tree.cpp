@@ -1701,8 +1701,8 @@ void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTree
     cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
     findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
 
-    // TODO - do we need to do this?
-#if 0
+    // TODO - do we need to do this? Answer: Yes, for filling in the arrow chains for both prefixes and suffixes(?)
+#if 1
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     cout << " Switched child order" << endl;
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
