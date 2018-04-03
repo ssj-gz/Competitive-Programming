@@ -1148,12 +1148,11 @@ class SuffixTreeBuilder
                 {
                     if (isOnExplicitState())
                     {
-                        auto nextLetterIterator = getNextLetterIterator();
-                        while (nextLetterIterator.hasNext())
+                        for (const auto& transition : m_state->transitions)
                         {
-                            if (nextLetterIterator.nextLetter() == letter)
+                            const auto transitionStartLetter = (*m_string)[transition.substringFollowed.startIndex];
+                            if (transitionStartLetter == letter)
                                 return true;
-                            nextLetterIterator++;
                         }
                         return false;
                     }
