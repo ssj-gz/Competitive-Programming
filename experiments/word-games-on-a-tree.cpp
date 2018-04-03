@@ -1595,6 +1595,10 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
+Node* currentCentroid = nullptr;
+Edge* firstEdgeFromCentroid = nullptr;
+vector<Word> words;
+
 class SuffixTracker
 {
     public:
@@ -1604,12 +1608,14 @@ class SuffixTracker
         for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
         {
             m_wasSuffixForWordBeginningAtFound[wordIndex].clear();
-            m_wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size() + 1);
+            m_wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size() 
+                    // "+ 1" allows us to deal with "empty" suffix, which is always (trivially) found.
+                    + 1);
         }
     }
     bool wasSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos)
     {
-        if (suffixBeginPos == m_wasSuffixForWordBeginningAtFound[wordIndex].size() - 1) // Yes - the empty suffix!
+        if (suffixBeginPos == words[wordIndex].word.length()) // Yes - the empty suffix!
             return true;
         return !value(wordIndex, suffixBeginPos).empty();
     }
@@ -1649,10 +1655,6 @@ class SuffixTracker
             return versionedValue.firstEdgesFromCentroid;
         }
 };
-
-Node* currentCentroid = nullptr;
-Edge* firstEdgeFromCentroid = nullptr;
-vector<Word> words;
 
 void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& wordSuffixes, const vector<Word>& words, SuffixTracker& suffixTracker)
 {
