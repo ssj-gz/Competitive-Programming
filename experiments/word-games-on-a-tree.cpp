@@ -43,7 +43,7 @@ struct BestTracker
         int64_t value = -1;
         Edge* otherEdge = nullptr;
     };
-    Blah stored[maxToStore];
+    Blah stored[maxToStore + 1]; // "+ 1" as we temporarily add one more than maxToStore.
 };
 struct Edge
 {
@@ -85,15 +85,11 @@ void BestTracker::add(int64_t value, Edge* otherEdge)
             return;
         }
     }
-    vector<Blah> blee(begin(stored), begin(stored) + num);
-    Blah newBlah;
-    newBlah.value = value;
-    newBlah.otherEdge = otherEdge;
-    blee.push_back(newBlah);
-    sort(blee.begin(), blee.end(), [](const auto& lhs,  const auto& rhs) { return lhs.value > rhs.value; });
-    const int newNum = min(static_cast<int>(blee.size()), maxToStore);
-    copy(blee.begin(), blee.begin() + newNum, stored);
-    num = newNum;
+    stored[num].value = value;
+    stored[num].otherEdge = otherEdge;
+    num++;
+    sort(stored, stored + num, [](const auto& lhs,  const auto& rhs) { return lhs.value > rhs.value; });
+    num = min(num, maxToStore);
 };
 struct PathValue
 {
