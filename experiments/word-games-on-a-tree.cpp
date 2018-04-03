@@ -56,6 +56,13 @@ struct Edge
     Node* nodeA = nullptr;
     Node* nodeB = nullptr;
     int edgeId = -1;
+    BestTracker& bestTrackerForNode(Node* node)
+    {
+        if (node == nodeA)
+            return bestTrackerNodeA;
+        assert(node == nodeB);
+        return bestTrackerNodeB;
+    }
     BestTracker bestTrackerNodeA;
     BestTracker bestTrackerNodeB;
     char letterFollowed;
@@ -105,23 +112,85 @@ struct PathValue
     Edge* edgeB = nullptr;
     int64_t value = 0;
 };
+ostream& operator<<(ostream& os, const PathValue& pathValue)
+{
+    os << "pathValue - value: " << pathValue.value << " edgeA: " << (pathValue.edgeA ? pathValue.edgeA->edgeId : -1) << " edgeB: " << (pathValue.edgeB ? pathValue.edgeB->edgeId : -1);
+    return os;
+}
+
+int bestCrosswordScore(Node* node)
+{
+    cout << "bestCrosswordScore: " << node->index << endl; 
+    auto comparePathValues = [](const PathValue& lhs, const PathValue& rhs) 
+    {
+        if (lhs.value != rhs.value)
+            return lhs.value > rhs.value;
+        if (lhs.edgeA != rhs.edgeA)
+            return lhs.edgeA < rhs.edgeA;
+        return lhs.edgeB < rhs.edgeB;
+    };
+    auto shareAnEdge = [](const PathValue& pathValue1, const PathValue& pathValue2)
+    {
+        return !( pathValue1.edgeA != pathValue2.edgeA && pathValue1.edgeA != pathValue2.edgeB &&
+                pathValue1.edgeB != pathValue2.edgeA && pathValue1.edgeB != pathValue2.edgeB);
+    };
+    set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
+
+    int64_t maxPathValueProduct = 0;
+    PathValue best1;
+    PathValue best2;
+    for (auto& edge : node->neighbours)
+    {
+        //int64_t maxFromThis = -1;
+        for (auto blahIter = begin(edge->bestTrackerForNode(node).stored); blahIter != begin(edge->bestTrackerForNode(node).stored) + edge->bestTrackerForNode(node).num; blahIter++)
+        {
+            PathValue blee(edge, blahIter->otherEdge, blahIter->value);
+            cout << " Blee: " << blee << endl;
+            for (const auto& otherPathValue : pathValuesByVal)
+            {
+                cout << " otherPathValue: " << otherPathValue << endl;
+                if (!shareAnEdge(blee, otherPathValue))
+                {
+                    //maxFromThis = max(maxFromThis, );
+                    const int product = blee.value * otherPathValue.value;
+                    if (product > maxPathValueProduct)
+                    {
+                        cout << " paths: " << blee << " and " << otherPathValue << " do not share an edge and give new best product, " << product << endl;
+                        maxPathValueProduct = product;
+                        best1 = blee;
+                        best2 = otherPathValue;
+                        break;
+                    }
+                }
+            }
+        }
+        for (auto blahIter = begin(edge->bestTrackerNodeA.stored); blahIter != begin(edge->bestTrackerNodeA.stored) + edge->bestTrackerNodeA.num; blahIter++)
+        {
+            PathValue blee(edge, blahIter->otherEdge, blahIter->value);
+            pathValuesByVal.insert(blee);
+        }
+    }
+    return maxPathValueProduct;
+}
 
 void Node::addElbow(Edge* edge1, Edge* edge2, int score)
 {
     singleWordBestScore = max(singleWordBestScore, score);
+    cout << "Add elbow to node: " << index << " edge1: " << (edge1 != nullptr ? edge1->edgeId : -1) << " edge2: " << (edge2 != nullptr ? edge2->edgeId : -1) << " score: " << score << endl;
 
     assert(edge1 != nullptr || edge2 != nullptr);
     assert(edge1 == nullptr || (edge1->nodeA == this || edge1->nodeB == this));
     assert(edge2 == nullptr || (edge2->nodeA == this || edge2->nodeB == this));
     if (edge1 != nullptr)
     {
-        auto& bestTracker = (edge1->nodeA == this ? edge1->bestTrackerNodeA : edge1->bestTrackerNodeB);
-        bestTracker.add(score, edge2);
+        //auto& bestTracker = (edge1->nodeA == this ? edge1->bestTrackerNodeA : edge1->bestTrackerNodeB);
+        edge1->bestTrackerForNode(this).add(score, edge2);
     }
     if (edge2 != nullptr)
     {
-        auto& bestTracker = (edge2->nodeA == this ? edge2->bestTrackerNodeA : edge2->bestTrackerNodeB);
-        bestTracker.add(score, edge1);
+        //auto& bestTracker = (edge2->nodeA == this ? edge2->bestTrackerNodeA : edge2->bestTrackerNodeB);
+        //bestTracker.add(score, edge1);
+        edge2->bestTrackerForNode(this).add(score, edge1);
     }
 }
 
@@ -140,12 +209,6 @@ bool operator<(const WordPath& lhs, const WordPath& rhs)
     return lhs.nodesInPath < rhs.nodesInPath;
 }
 
-
-ostream& operator<<(ostream& os, const PathValue& pathValue)
-{
-    os << "pathValue - value: " << pathValue.value << " edgeA: " << (pathValue.edgeA ? pathValue.edgeA->edgeId : -1) << " edgeB: " << (pathValue.edgeB ? pathValue.edgeB->edgeId : -1);
-    return os;
-}
 
 int countDescendants(Node* node, Node* parentNode)
 {
@@ -1646,10 +1709,13 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
             cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
             {
+                cout << "Found complete word, " << words[wordIndex].word << endl;
                 maxScore = max(maxScore, words[wordIndex].score);
+                cout << "Adding elbow from parent edge to node: " << node->index << endl;
                 node->addElbow(parentEdge, nullptr, words[wordIndex].score);
                 for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
                 {
+                    cout << "Adding elbow from centroid (" << currentCentroid->index << ")" << " firstEdgeFromCentroid: " << firstEdgeFromCentroid->edgeId << " firstEdgeFromCentroidForMatchingSuffix: " << firstEdgeFromCentroidForMatchingSuffix->edgeId << endl;
                     currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, words[wordIndex].score);
                 }
             }
@@ -1787,9 +1853,10 @@ vector<int> findNodeScores(vector<Node>& nodes)
                 processCentroid(node, wordSuffixes, reversedWordPrefixes, suffixTracker);
             });
 
-    for (const auto& node : nodes)
+    for (auto& node : nodes)
     {
-        cout << "node: " << node.index << " singleWordBestScore: " << node.singleWordBestScore << endl;
+        node.crossedWordsBestScore = bestCrosswordScore(&node);
+        cout << "node: " << node.index << " singleWordBestScore: " << node.singleWordBestScore << " crossedWordsBestScore: " << node.crossedWordsBestScore << endl;
     }
 
     return nodeScores;
@@ -1894,6 +1961,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+#if 0
     if (false)
     {
 
@@ -2031,6 +2099,7 @@ int main(int argc, char* argv[])
             numTests++;
         }
     }
+#endif
 
     if (false)
     {
@@ -2180,6 +2249,7 @@ int main(int argc, char* argv[])
 
 
     vector<Edge> edges(numNodes - 1);
+    int edgeId = 1;
     for (auto& edge : edges)
     {
         const int node1Index = readInt() - 1;
@@ -2195,9 +2265,12 @@ int main(int argc, char* argv[])
         edge.nodeA = node1;
         edge.nodeB = node2;
         edge.letterFollowed = letter;
+        edge.edgeId = edgeId;
 
         node1->neighbours.push_back(&edge);
         node2->neighbours.push_back(&edge);
+
+        edgeId++;
     }
 
     const int numWords = readInt();
@@ -2226,8 +2299,10 @@ int main(int argc, char* argv[])
     const auto bruteForceNodeScores = findNodeScoresBruteForce(nodes, words);
     for (const auto& node : nodes)
     {
-        cout << "node: " << node.index << " singleWordBestScoreBruteForce: " << node.singleWordBestScoreBruteForce << endl;
+        cout << "wee node: " << node.index << " singleWordBestScoreBruteForce: " << node.singleWordBestScoreBruteForce << " singleWordBestScore: " << node.singleWordBestScore << endl;
+        cout << "wee node: " << node.index << " crossedWordsBestScoreBruteForce: " << node.crossedWordsBestScoreBruteForce << " crossedWordsBestScore: " << node.crossedWordsBestScore << endl;
         assert(node.singleWordBestScoreBruteForce == node.singleWordBestScore);
+        assert(node.crossedWordsBestScoreBruteForce == node.crossedWordsBestScore);
     }
 #endif
 }
