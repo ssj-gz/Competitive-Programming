@@ -131,8 +131,27 @@ int bestCrosswordScore(Node* node)
     };
     auto shareAnEdge = [](const PathValue& pathValue1, const PathValue& pathValue2)
     {
-        return !( pathValue1.edgeA != pathValue2.edgeA && pathValue1.edgeA != pathValue2.edgeB &&
-                pathValue1.edgeB != pathValue2.edgeA && pathValue1.edgeB != pathValue2.edgeB);
+        if (pathValue1.edgeA != nullptr)
+        {
+            if (pathValue2.edgeA == pathValue1.edgeA || pathValue2.edgeB == pathValue1.edgeA)
+                return true;
+        }
+        if (pathValue1.edgeB != nullptr)
+        {
+            if (pathValue2.edgeA == pathValue1.edgeB || pathValue2.edgeB == pathValue1.edgeB)
+                return true;
+        }
+        if (pathValue2.edgeA != nullptr)
+        {
+            if (pathValue1.edgeA == pathValue2.edgeA || pathValue1.edgeB == pathValue2.edgeA)
+                return true;
+        }
+        if (pathValue2.edgeB != nullptr)
+        {
+            if (pathValue1.edgeA == pathValue2.edgeB || pathValue1.edgeB == pathValue2.edgeB)
+                return true;
+        }
+        return false;
     };
     set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
 
@@ -164,7 +183,7 @@ int bestCrosswordScore(Node* node)
                 }
             }
         }
-        for (auto blahIter = begin(edge->bestTrackerNodeA.stored); blahIter != begin(edge->bestTrackerNodeA.stored) + edge->bestTrackerNodeA.num; blahIter++)
+        for (auto blahIter = begin(edge->bestTrackerForNode(node).stored); blahIter != begin(edge->bestTrackerForNode(node).stored) + edge->bestTrackerForNode(node).num; blahIter++)
         {
             PathValue blee(edge, blahIter->otherEdge, blahIter->value);
             pathValuesByVal.insert(blee);
@@ -792,6 +811,15 @@ vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& wo
     {
         node.crossedWordsBestScoreBruteForce = 0;
         node.singleWordBestScoreBruteForce = 0;
+    }
+    for (const auto& p1 : wordPaths)
+    {
+        cout << "path word: " << p1.word.word << " nodes: " << endl;
+        for (auto node : p1.nodesInPath)
+        {
+            cout << node->index << " ";
+        }
+        cout << endl;
     }
 
     for (const auto& p1 : wordPaths)
@@ -1700,7 +1728,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
 
 int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
 {
-    cout << "findPrefixes; word followed: " << wordFollowed << " isOnExplicitState? " << cursor.isOnExplicitState() << endl;
+    cout << "findPrefixes; word followed: " << wordFollowed << " isOnExplicitState? " << cursor.isOnExplicitState() << " current node: " << node->index << " parent node: " << parent->index << endl;
     int maxScore = 0;
     if (cursor.isOnExplicitState())
     {
@@ -1709,14 +1737,20 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
             cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
             {
-                cout << "Found complete word, " << words[wordIndex].word << endl;
-                maxScore = max(maxScore, words[wordIndex].score);
+                const int completeWordScore = words[wordIndex].score;
+                cout << "Found complete word, " << words[wordIndex].word << " score: " << completeWordScore << " at node: " << node->index  << endl;
+                if (wordFollowed.size() == words[wordIndex].word.length())
+                {
+                    cout << "Adding elbow from centroid (" << currentCentroid->index << ")" << " firstEdgeFromCentroid: " << firstEdgeFromCentroid->edgeId << " no other edge" << endl;
+                    currentCentroid->addElbow(firstEdgeFromCentroid, nullptr, completeWordScore);
+                }
+                maxScore = max(maxScore, completeWordScore);
                 cout << "Adding elbow from parent edge to node: " << node->index << endl;
-                node->addElbow(parentEdge, nullptr, words[wordIndex].score);
+                node->addElbow(parentEdge, nullptr, completeWordScore);
                 for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
                 {
                     cout << "Adding elbow from centroid (" << currentCentroid->index << ")" << " firstEdgeFromCentroid: " << firstEdgeFromCentroid->edgeId << " firstEdgeFromCentroidForMatchingSuffix: " << firstEdgeFromCentroidForMatchingSuffix->edgeId << endl;
-                    currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, words[wordIndex].score);
+                    currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, completeWordScore);
                 }
             }
 #if 0
@@ -1805,7 +1839,7 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
 
 void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
 {
-    cout << "processCentroid" << endl;
+    cout << "processCentroid: " << centroid->index << " # neighbours: " << centroid->neighbours.size() << endl;
 
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, suffixTracker);
 
@@ -1852,6 +1886,12 @@ vector<int> findNodeScores(vector<Node>& nodes)
             {
                 processCentroid(node, wordSuffixes, reversedWordPrefixes, suffixTracker);
             });
+
+    // Decomposition removed the edges - restore them.
+    for (auto& node : nodes)
+    {
+        node.neighbours = node.originalNeighbours;
+    }
 
     for (auto& node : nodes)
     {
@@ -2280,21 +2320,16 @@ int main(int argc, char* argv[])
         cin >> word.word;
         cin >> word.score;
         cout << "word: " << word.word << " score: " << word.score << endl;
+        assert(word.score != 0);
     }
-#ifdef BRUTE_FORCE
     for (auto& node : nodes)
     {
         node.originalNeighbours = node.neighbours;
     }
-#endif
 
     const auto nodeScores = findNodeScores(nodes);
 
 #ifdef BRUTE_FORCE
-    for (auto& node : nodes)
-    {
-        node.neighbours = node.originalNeighbours;
-    }
 
     const auto bruteForceNodeScores = findNodeScoresBruteForce(nodes, words);
     for (const auto& node : nodes)
