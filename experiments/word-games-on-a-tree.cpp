@@ -22,6 +22,7 @@
 using namespace std;
 
 const int maxK = 50;
+constexpr int maxToStore = 3;
 
 struct Edge;
 struct Node
@@ -36,7 +37,6 @@ struct Node
 };
 struct BestTracker
 {
-    static constexpr int maxToStore = 3;
     void add(int64_t value, Edge* otherEdge);
     int num = 0;
     struct Blah
@@ -46,7 +46,6 @@ struct BestTracker
     };
     Blah stored[maxToStore];
 };
-constexpr int BestTracker::maxToStore;
 struct Edge
 {
     Node* nodeA = nullptr;
@@ -1602,11 +1601,14 @@ class SuffixTracker
     }
     bool wasSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos)
     {
-        return value(wordIndex, suffixBeginPos);
+        return !value(wordIndex, suffixBeginPos).empty();
     }
-    void setSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos)
+    void setSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos, Edge* firstEdgeFromCentroid)
     {
-        value(wordIndex, suffixBeginPos) = true;
+        auto& firstEdgesFromCentroid = value(wordIndex, suffixBeginPos);
+        if (firstEdgesFromCentroid.size() >= maxToStore)
+            return;
+        firstEdgesFromCentroid.push_back(firstEdgeFromCentroid);
     }
     void clear()
     {
@@ -1620,23 +1622,23 @@ class SuffixTracker
         struct VersionedValue
         {
             int versionNumber = 0;
-            bool value = false;
+            vector<Edge*> firstEdgesFromCentroid;
         };
         vector<vector<VersionedValue>> m_wasSuffixForWordBeginningAtFound;
         int m_versionNumber = 0;
-        bool& value(int wordIndex, int suffixBeginPos)
+        vector<Edge*>& value(int wordIndex, int suffixBeginPos)
         {
             auto& versionedValue = m_wasSuffixForWordBeginningAtFound[wordIndex][suffixBeginPos];
             if (versionedValue.versionNumber != m_versionNumber)
             {
-                versionedValue.value = false;
+                versionedValue.firstEdgesFromCentroid.clear();
                 versionedValue.versionNumber = m_versionNumber;
             }
-            return versionedValue.value;
+            return versionedValue.firstEdgesFromCentroid;
         }
 };
 
-void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& wordSuffixes, const vector<Word>& words, SuffixTracker& suffixTracker)
+void findAndLogSuffixes(Node* node, Node* parent, Edge* firstEdgeFromCentroid, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& wordSuffixes, const vector<Word>& words, SuffixTracker& suffixTracker)
 {
     if (cursor.isOnExplicitState())
     {
@@ -1644,7 +1646,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
         {
             cout << "Found suffix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             const auto suffixBeginPos = words[wordIndex].word.size() - depth;
-            suffixTracker.setSuffixForWordBeginningAtFound(wordIndex, suffixBeginPos);
+            suffixTracker.setSuffixForWordBeginningAtFound(wordIndex, suffixBeginPos, firstEdgeFromCentroid);
         }
 
     }
@@ -1659,7 +1661,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
         {
             cursor.followLetter(childEdgeLetter);
             wordFollowed += childEdgeLetter;
-            findAndLogSuffixes(child, node, depth + 1, wordFollowed, cursor, wordSuffixes, words, suffixTracker);
+            findAndLogSuffixes(child, node, firstEdgeFromCentroid, depth + 1, wordFollowed, cursor, wordSuffixes, words, suffixTracker);
             wordFollowed.pop_back();
 
             cursor.moveUp();
@@ -1705,6 +1707,8 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, Edge* firstEdgeFrom
             const int childScore = findPrefixes(child, node, childEdge, firstEdgeFromCentroid, depth + 1, wordFollowed, cursor, reversedWordPrefixes, words, suffixTracker);
             wordFollowed.pop_back();
 
+            node->addElbow(childEdge, parentEdge, childScore);
+
             cursor.moveUp();
 
             maxScoreFromChildren = max(maxScoreFromChildren, childScore);
@@ -1723,22 +1727,23 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
     for (auto childEdge : centroid->neighbours)
     {
         auto child = childEdge->otherNode(centroid);
+        auto letterToFollow = childEdge->letterFollowed;
         Cursor reversedWordPrefixCursor = reversedWordPrefixes.rootCursor();
-        if (reversedWordPrefixCursor.canFollowLetter(childEdge->letterFollowed))
+        if (reversedWordPrefixCursor.canFollowLetter(letterToFollow))
         {
-            wordFollowed += childEdge->letterFollowed;
-            reversedWordPrefixCursor.followLetter(childEdge->letterFollowed); 
+            wordFollowed += letterToFollow;
+            reversedWordPrefixCursor.followLetter(letterToFollow); 
             findPrefixes(child, centroid, childEdge, childEdge, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, words, suffixTracker);
             reversedWordPrefixCursor.moveUp();
             wordFollowed.clear();
         }
 
         Cursor suffixCursor = wordSuffixes.rootCursor();
-        if (suffixCursor.canFollowLetter(childEdge->letterFollowed))
+        if (suffixCursor.canFollowLetter(letterToFollow))
         {
-            wordFollowed += childEdge->letterFollowed;
-            suffixCursor.followLetter(childEdge->letterFollowed);
-            findAndLogSuffixes(child, centroid, 1, wordFollowed, suffixCursor, wordSuffixes, words, suffixTracker);
+            wordFollowed += letterToFollow;
+            suffixCursor.followLetter(letterToFollow);
+            findAndLogSuffixes(child, centroid, childEdge, 1, wordFollowed, suffixCursor, wordSuffixes, words, suffixTracker);
             suffixCursor.moveUp();
             wordFollowed.clear();
         }
