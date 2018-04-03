@@ -29,14 +29,15 @@ struct Node
 {
     vector<Edge*> neighbours;
     int index = -1;
-    int multiplier;
-    void addElbow(Edge* edge1, Edge* edge2, int score);
+    int64_t multiplier;
+    void addElbow(Edge* edge1, Edge* edge2, int64_t score);
 
-    int crossedWordsBestScore = 0;
-    int singleWordBestScore = 0;
+    int64_t crossedWordsBestScore = 0;
+    int64_t singleWordBestScore = 0;
+    int64_t score = 0;
 
-    int crossedWordsBestScoreBruteForce = 0;
-    int singleWordBestScoreBruteForce = 0;
+    int64_t crossedWordsBestScoreBruteForce = 0;
+    int64_t singleWordBestScoreBruteForce = 0;
 
     vector<Edge*> originalNeighbours;
 };
@@ -77,7 +78,7 @@ struct Edge
 struct Word
 {
     string word;
-    int score;
+    int64_t score;
 };
 void BestTracker::add(int64_t value, Edge* otherEdge)
 {
@@ -118,7 +119,7 @@ ostream& operator<<(ostream& os, const PathValue& pathValue)
     return os;
 }
 
-int bestCrosswordScore(Node* node)
+int64_t bestCrosswordScore(Node* node)
 {
     cout << "bestCrosswordScore: " << node->index << endl; 
     auto comparePathValues = [](const PathValue& lhs, const PathValue& rhs) 
@@ -193,7 +194,7 @@ int bestCrosswordScore(Node* node)
     return maxPathValueProduct;
 }
 
-void Node::addElbow(Edge* edge1, Edge* edge2, int score)
+void Node::addElbow(Edge* edge1, Edge* edge2, int64_t score)
 {
     singleWordBestScore = max(singleWordBestScore, score);
     cout << "Add elbow to node: " << index << " edge1: " << (edge1 != nullptr ? edge1->edgeId : -1) << " edge2: " << (edge2 != nullptr ? edge2->edgeId : -1) << " score: " << score << endl;
@@ -799,9 +800,9 @@ set<WordPath> findWordPathsFrom(Node* currentNode, const vector<Word>& words, se
     return wordPaths;
 }
 
-vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& words)
+vector<int64_t> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& words)
 {
-    vector<int> nodeScores;
+    vector<int64_t> nodeScores;
     set<WordPath> wordPaths;
     for (auto& node : nodes)
     {
@@ -852,7 +853,7 @@ vector<int> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>& wo
 
     for (auto& node : nodes)
     {
-        int nodeScore = 0;
+        int64_t nodeScore = 0;
         if (node.crossedWordsBestScoreBruteForce > 0)
         {
             nodeScore = node.crossedWordsBestScoreBruteForce;
@@ -1727,10 +1728,10 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
 
 }
 
-int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
+int64_t findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
 {
     cout << "findPrefixes; word followed: " << wordFollowed << " isOnExplicitState? " << cursor.isOnExplicitState() << " current node: " << node->index << " parent node: " << parent->index << endl;
-    int maxScore = 0;
+    int64_t maxScore = 0;
     if (cursor.isOnExplicitState())
     {
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
@@ -1738,7 +1739,7 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
             cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
             {
-                const int completeWordScore = words[wordIndex].score;
+                const int64_t completeWordScore = words[wordIndex].score;
                 cout << "Found complete word, " << words[wordIndex].word << " score: " << completeWordScore << " at node: " << node->index  << endl;
                 if (wordFollowed.size() == words[wordIndex].word.length())
                 {
@@ -1786,7 +1787,7 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
         {
             cursor.followLetter(childEdgeLetter);
             wordFollowed += childEdgeLetter;
-            const int childScore = findPrefixes(child, node, childEdge, depth + 1, wordFollowed, cursor, reversedWordPrefixes, suffixTracker);
+            const int64_t childScore = findPrefixes(child, node, childEdge, depth + 1, wordFollowed, cursor, reversedWordPrefixes, suffixTracker);
             wordFollowed.pop_back();
 
             node->addElbow(childEdge, parentEdge, childScore);
@@ -1820,7 +1821,7 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
         {
             wordFollowed += letterToFollow;
             reversedWordPrefixCursor.followLetter(letterToFollow); 
-            const int childScore = findPrefixes(child, centroid, childEdge, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, suffixTracker);
+            const int64_t childScore = findPrefixes(child, centroid, childEdge, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, suffixTracker);
             centroid->singleWordBestScore = max(centroid->singleWordBestScore, childScore);
             reversedWordPrefixCursor.moveUp();
             wordFollowed.clear();
@@ -1859,9 +1860,9 @@ void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTree
 
 }
 
-vector<int> findNodeScores(vector<Node>& nodes)
+vector<int64_t> findNodeScores(vector<Node>& nodes)
 {
-    vector<int> nodeScores;
+    vector<int64_t> nodeScores;
     SuffixTreeBuilder wordSuffixes(words);
     vector<Word> reversedWords(words);
     for (auto& word : reversedWords)
