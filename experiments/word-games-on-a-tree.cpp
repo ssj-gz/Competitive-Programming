@@ -1,7 +1,14 @@
+#define BRUTE_FORCE
+//#define SUBMISSION
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <functional>
 #include <cassert>
 #include <sys/time.h>
 
@@ -253,8 +260,9 @@ Node* findCentroidBruteForce(Node* startNode, int numNodes)
 #endif
 
 int numNodesTotal = 0;
-void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
+void decompose(Node* startNode, std::function<void(Node*)> processCentroid )
 {
+#if 0
     auto countPair = [&blee](Node* node1, Node* node2)
     {
         assert(node1 != node2);
@@ -264,18 +272,24 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
         blee[node2->index][node1->index]++;
     };
     const string indent(indentLevel, ' ');
+#endif
     //cout << indent << "Decomposing graph containing " << startNode->index << endl;
     const auto numNodes = countDescendants(startNode, nullptr);
     assert(numNodes > 0);
     Node* centroid = findCentroid(startNode);
+
+    assert(centroid);
+    processCentroid(centroid);
+
     //cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
     //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
 
-    numNodesTotal += numNodes;
+    //numNodesTotal += numNodes;
     //cout << "numNodesTotal: " << numNodesTotal << endl;
 
-    vector<Node*> descendantsSoFar;
-    descendantsSoFar.push_back(centroid);
+    //vector<Node*> descendantsSoFar;
+    //descendantsSoFar.push_back(centroid);
+#if 0
     // Do processing around this centroid.
     for (auto& edge : centroid->neighbours)
     {
@@ -294,6 +308,7 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
     }
+#endif
 
     // Decompose further.
     for (auto& edge : centroid->neighbours)
@@ -303,7 +318,7 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
         assert(thisEdge != neighbour->neighbours.end());
         neighbour->neighbours.erase(thisEdge);
 
-        decompose(neighbour, blee, indentLevel + 1);
+        decompose(neighbour, processCentroid);
     }
 }
 
@@ -891,16 +906,22 @@ class SuffixTreeBuilder
                 if (nextSepartorCharIndex == substringFollowed.startIndex)
                 {
                     transitionIter = state->transitions.erase(transitionIter);
-                    state->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
-                    cout << "state " << state << " is final (erased transition) for: " << state->data.wordIndicesIsFinalStateFor.back() << endl;
+                    if (state != m_root)
+                    {
+                        state->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
+                        cout << "state " << state << " is final (erased transition) for: " << state->data.wordIndicesIsFinalStateFor.back() << endl;
+                    }
                     continue;
                 }
                 if (nextSepartorCharIndex >= substringFollowed.startIndex && nextSepartorCharIndex <= substringFollowed.endIndex)
                 {
                     substringFollowed.endIndex = nextSepartorCharIndex - 1;
                     transitionIter->nextState->transitions.clear();
-                    transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
-                    cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
+                    if (state != m_root)
+                    {
+                        transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
+                        cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
+                    }
                 }
 
                 stripWordSeparatorsAndStoreWordEndStates(transitionIter->nextState, indexOfNextSeparatorChar);
@@ -1140,6 +1161,37 @@ class SuffixTreeBuilder
 
                     }
                 }
+                char moveUp()
+                {
+                    if (m_transition)
+                    {
+                        assert(m_posInTransition > 0);
+                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition - 1];
+                        if (m_posInTransition != 1)
+                        {
+                            m_posInTransition--;
+                        }
+                        else
+                        {
+                            movedToExplicitState();
+                        }
+                        return charFollowed;
+                    }
+                    else
+                    {
+                        Transition* transitionFromParent = findTransitionFromParent();
+                        m_state = m_state->parent;
+                        m_transition = transitionFromParent;
+                        m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
+                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition];
+                        if (m_posInTransition == 0)
+                        {
+                            movedToExplicitState();
+                        }
+                        return charFollowed;
+                    }
+                }
+
                 void followLetters(const string& letters, string::size_type startIndex = 0, string::size_type numLetters = string::npos)
                 {
                     if (numLetters == string::npos)
@@ -1477,6 +1529,64 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
+void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& wordSuffixes, const vector<Word>& words)
+{
+    if (cursor.isOnExplicitState())
+    {
+        for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
+        {
+            cout << "Found suffix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
+        }
+
+    }
+    for (auto childEdge : node->neighbours)
+    {
+        auto child = childEdge->otherNode(node);
+        if (child == parent)
+            continue;
+
+        const auto childEdgeLetter = childEdge->letterFollowed;
+        if (cursor.canFollowLetter(childEdgeLetter))
+        {
+            cursor.followLetter(childEdgeLetter);
+            wordFollowed += childEdgeLetter;
+            findAndLogSuffixes(child, node, depth + 1, wordFollowed, cursor, wordSuffixes, words);
+            wordFollowed.pop_back();
+
+            cursor.moveUp();
+        }
+    }
+
+}
+
+void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words)
+{
+    string wordFollowed;
+    findAndLogSuffixes(centroid, nullptr, 0, wordFollowed, wordSuffixes.rootCursor(), wordSuffixes, words);
+
+}
+
+vector<int> findNodeScores(vector<Node>& nodes, const vector<Word>& words)
+{
+    vector<int> nodeScores;
+    SuffixTreeBuilder wordSuffixes(words);
+    vector<Word> reversedWords(words);
+    for (auto& word : reversedWords)
+    {
+        reverse(word.word.begin(), word.word.end());
+    }
+    SuffixTreeBuilder reversedWordPrefixes(reversedWords);
+
+    auto someNode = &(nodes.front());
+    decompose(someNode, [&wordSuffixes, &reversedWordPrefixes, &words](Node* node) 
+            {
+                processCentroid(node, wordSuffixes, reversedWordPrefixes, words);
+            });
+
+    return nodeScores;
+}
+
+
 int main(int argc, char* argv[])
 {
     struct timeval time;
@@ -1757,9 +1867,9 @@ int main(int argc, char* argv[])
         }
 #endif
 
-        vector<vector<int>> blee(numNodes, vector<int>(numNodes, 0));
+        //vector<vector<int>> blee(numNodes, vector<int>(numNodes, 0));
 
-        decompose(&(nodes.front()), blee);
+        //decompose(&(nodes.front()), blee);
 
 #if 0
         for (int i = 0; i < numNodes; i++)
@@ -1777,7 +1887,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    if (true)
+    if (false)
     {
         vector<Word> testWords(3);
         testWords[0].word = "aab";
@@ -1867,6 +1977,8 @@ int main(int argc, char* argv[])
         cin >> word.score;
         cout << "word: " << word.word << " score: " << word.score << endl;
     }
+
+    const auto nodeScores = findNodeScores(nodes, words);
 
     const auto bruteForceNodeScores = findNodeScoresBruteForce(nodes, words);
 }
