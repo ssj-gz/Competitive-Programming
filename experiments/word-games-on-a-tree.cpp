@@ -64,8 +64,6 @@ struct Edge
         assert(node == nodeB);
         return bestTrackerNodeB;
     }
-    BestTracker bestTrackerNodeA;
-    BestTracker bestTrackerNodeB;
     char letterFollowed;
     Node* otherNode(Node* node)
     {
@@ -73,6 +71,9 @@ struct Edge
             return nodeB;
         return nodeA;
     }
+    private:
+        BestTracker bestTrackerNodeA;
+        BestTracker bestTrackerNodeB;
 
 };
 struct Word
