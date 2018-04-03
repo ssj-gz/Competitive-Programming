@@ -1123,50 +1123,6 @@ class SuffixTreeBuilder
                         movedToExplicitState();
                     }
                 }
-                class NextLetterIterator
-                {
-                    public:
-                        NextLetterIterator()
-                        {
-                        }
-                        bool hasNext()
-                        {
-                            return transitionIterator != endtransitionIterator;
-                        }
-                        char nextLetter()
-                        {
-                            //cout << " nextLetter: " << (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex] << endl;
-                            return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex];
-                        }
-                        NextLetterIterator operator++(int)
-                        {
-                            transitionIterator++;
-                            return *this;
-                        }
-                        Cursor afterFollowingNextLetter()
-                        {
-                            Cursor afterCursor(*cursor);
-                            afterCursor.enterTransitionAndSkipLetter(*transitionIterator);
-                            return afterCursor;
-                        }
-                    private:
-                        NextLetterIterator(vector<Transition>& transitions, const Cursor* cursor)
-                            : transitionIterator(transitions.begin()),
-                            endtransitionIterator(transitions.end()),
-                            cursor(cursor)
-                    {
-                    };
-                        friend class Cursor;
-                        vector<Transition>::iterator transitionIterator;
-                        vector<Transition>::iterator endtransitionIterator;
-                        const Cursor* cursor = nullptr;
-                };
-                friend class NextLetterIterator;
-                NextLetterIterator getNextLetterIterator() const
-                {
-                    assert(isOnExplicitState());
-                    return NextLetterIterator(m_state->transitions, this);
-                }
                 class Substring
                 {
                     public:
@@ -1507,49 +1463,23 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
 
 int64_t findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
 {
-    cout << "findPrefixes; word followed: " << wordFollowed << " isOnExplicitState? " << cursor.isOnExplicitState() << " current node: " << node->index << " parent node: " << parent->index << endl;
     int64_t maxScore = 0;
     if (cursor.isOnExplicitState())
     {
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
         {
-            cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
             {
                 const int64_t completeWordScore = words[wordIndex].score;
-                cout << "Found complete word, " << words[wordIndex].word << " score: " << completeWordScore << " at node: " << node->index  << endl;
-                if (wordFollowed.size() == words[wordIndex].word.length())
-                {
-                    cout << "Adding elbow from centroid (" << currentCentroid->index << ")" << " firstEdgeFromCentroid: " << firstEdgeFromCentroid->edgeId << " no other edge" << endl;
-                    currentCentroid->addElbow(firstEdgeFromCentroid, nullptr, completeWordScore);
-                }
                 maxScore = max(maxScore, completeWordScore);
-                cout << "Adding elbow from parent edge to node: " << node->index << endl;
+
+                if (wordFollowed.size() == words[wordIndex].word.length())
+                    currentCentroid->addElbow(firstEdgeFromCentroid, nullptr, completeWordScore);
+
                 node->addElbow(parentEdge, nullptr, completeWordScore);
                 for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
-                {
-                    cout << "Adding elbow from centroid (" << currentCentroid->index << ")" << " firstEdgeFromCentroid: " << firstEdgeFromCentroid->edgeId << " firstEdgeFromCentroidForMatchingSuffix: " << firstEdgeFromCentroidForMatchingSuffix->edgeId << endl;
                     currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, completeWordScore);
-                }
             }
-#if 0
-            if (depth == words[wordIndex].length())
-            {
-                cout << "** Found complete word ending at centroid: " << words[wordIndex].word << endl;
-            }
-            else if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
-            {
-                cout << "** Found complete word: " << words[wordIndex].word << endl;
-                for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
-                {
-                    currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, words[wordIndex].score);
-                }
-                maxScore = max(maxScore, words[wordIndex].score);
-                node->addElbow(parentEdge, nullptr, words[wordIndex].score);
-            }
-#endif
-            //const auto suffixBeginPos = words[wordIndex].word.size() - depth;
-            //wasSuffixForWordBeginningAtFound[wordIndex][suffixBeginPos] = true;
         }
 
     }
@@ -1574,10 +1504,8 @@ int64_t findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, stri
             maxScore = max(maxScore, childScore);
         }
     }
-    //node->singleWordBestScore = max(node->singleWordBestScore, maxScore);
 
     return maxScore;
-
 }
 
 
@@ -1618,23 +1546,13 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
 
 void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, SuffixTracker& suffixTracker)
 {
-    cout << "processCentroid: " << centroid->index << " # neighbours: " << centroid->neighbours.size() << endl;
-
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, suffixTracker);
-
-    cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
     findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, suffixTracker);
 
-    // TODO - do we need to do this? Answer: Yes, for filling in the arrow chains for both prefixes and suffixes(?)
-#if 1
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
-    cout << " Switched child order" << endl;
+
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, suffixTracker);
-    cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
     findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, suffixTracker);
-#endif
-
-
 }
 
 vector<int64_t> findNodeScores(vector<Node>& nodes)
@@ -1658,9 +1576,7 @@ vector<int64_t> findNodeScores(vector<Node>& nodes)
 
     // Decomposition removed the edges - restore them.
     for (auto& node : nodes)
-    {
         node.neighbours = node.originalNeighbours;
-    }
 
     for (auto& node : nodes)
     {
