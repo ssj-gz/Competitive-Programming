@@ -1019,8 +1019,7 @@ class SuffixTreeBuilder
                     {
                         for (const auto& transition : m_state->transitions)
                         {
-                            const auto transitionStartLetter = (*m_string)[transition.substringFollowed.startIndex];
-                            if (transitionStartLetter == letter)
+                            if (transition.firstLetter == letter)
                                 return true;
                         }
                         return false;
