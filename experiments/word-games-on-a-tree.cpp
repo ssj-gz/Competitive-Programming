@@ -133,54 +133,33 @@ int64_t bestCrosswordScore(Node* node)
     };
     auto shareAnEdge = [](const PathValue& pathValue1, const PathValue& pathValue2)
     {
-        if (pathValue1.edgeA != nullptr)
-        {
-            if (pathValue2.edgeA == pathValue1.edgeA || pathValue2.edgeB == pathValue1.edgeA)
+        if (pathValue1.edgeA != nullptr && (pathValue2.edgeA == pathValue1.edgeA || pathValue2.edgeB == pathValue1.edgeA))
                 return true;
-        }
-        if (pathValue1.edgeB != nullptr)
-        {
-            if (pathValue2.edgeA == pathValue1.edgeB || pathValue2.edgeB == pathValue1.edgeB)
+        if (pathValue1.edgeB != nullptr && (pathValue2.edgeA == pathValue1.edgeB || pathValue2.edgeB == pathValue1.edgeB))
                 return true;
-        }
-        if (pathValue2.edgeA != nullptr)
-        {
-            if (pathValue1.edgeA == pathValue2.edgeA || pathValue1.edgeB == pathValue2.edgeA)
+        if (pathValue2.edgeA != nullptr && (pathValue1.edgeA == pathValue2.edgeA || pathValue1.edgeB == pathValue2.edgeA))
                 return true;
-        }
-        if (pathValue2.edgeB != nullptr)
-        {
-            if (pathValue1.edgeA == pathValue2.edgeB || pathValue1.edgeB == pathValue2.edgeB)
+        if (pathValue2.edgeB != nullptr && (pathValue1.edgeA == pathValue2.edgeB || pathValue1.edgeB == pathValue2.edgeB))
                 return true;
-        }
         return false;
     };
     set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
 
     int64_t maxPathValueProduct = 0;
-    PathValue best1;
-    PathValue best2;
     for (auto& edge : node->neighbours)
     {
-        //int64_t maxFromThis = -1;
         BestTracker& bestTrackerForEdgeAndNode = edge->bestTrackerForNode(node);
         for (auto blahIter = begin(bestTrackerForEdgeAndNode.stored); blahIter != begin(bestTrackerForEdgeAndNode.stored) + bestTrackerForEdgeAndNode.num; blahIter++)
         {
             PathValue pathValue(edge, blahIter->otherEdge, blahIter->value);
-            cout << " pathValue: " << pathValue << endl;
             for (const auto& otherPathValue : pathValuesByVal)
             {
-                cout << " otherPathValue: " << otherPathValue << endl;
                 if (!shareAnEdge(pathValue, otherPathValue))
                 {
-                    //maxFromThis = max(maxFromThis, );
                     const int product = pathValue.value * otherPathValue.value;
                     if (product > maxPathValueProduct)
                     {
-                        cout << " paths: " << pathValue << " and " << otherPathValue << " do not share an edge and give new best product, " << product << endl;
                         maxPathValueProduct = product;
-                        best1 = pathValue;
-                        best2 = otherPathValue;
                         break;
                     }
                 }
@@ -204,16 +183,9 @@ void Node::addElbow(Edge* edge1, Edge* edge2, int64_t score)
     assert(edge1 == nullptr || (edge1->nodeA == this || edge1->nodeB == this));
     assert(edge2 == nullptr || (edge2->nodeA == this || edge2->nodeB == this));
     if (edge1 != nullptr)
-    {
-        //auto& bestTracker = (edge1->nodeA == this ? edge1->bestTrackerNodeA : edge1->bestTrackerNodeB);
         edge1->bestTrackerForNode(this).add(score, edge2);
-    }
     if (edge2 != nullptr)
-    {
-        //auto& bestTracker = (edge2->nodeA == this ? edge2->bestTrackerNodeA : edge2->bestTrackerNodeB);
-        //bestTracker.add(score, edge1);
         edge2->bestTrackerForNode(this).add(score, edge1);
-    }
 }
 
 struct WordPath
@@ -231,11 +203,9 @@ bool operator<(const WordPath& lhs, const WordPath& rhs)
     return lhs.nodesInPath < rhs.nodesInPath;
 }
 
-
 int countDescendants(Node* node, Node* parentNode)
 {
     int numDescendants = 1; // Current node.
-
 
     for (const auto& edge : node->neighbours)
     {
@@ -249,31 +219,11 @@ int countDescendants(Node* node, Node* parentNode)
     return numDescendants;
 }
 
-vector<Node*> getDescendants(Node* node, Node* parentNode)
-{
-    vector<Node*> descendants;
-
-    descendants.push_back(node);
-
-    for (const auto& edge : node->neighbours)
-    {
-        auto child = edge->otherNode(node);
-        if (child == parentNode)
-            continue;
-
-        const auto& childDescendants = getDescendants(child, node);
-        descendants.insert(descendants.end(), childDescendants.begin(), childDescendants.end());
-    }
-
-    return descendants;
-}
-
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
     int numDescendents = 1;
 
     bool childHasTooManyDescendants = false;
-
 
     for (const auto& edge : currentNode->neighbours)
     {
@@ -319,87 +269,14 @@ Node* findCentroid(Node* startNode)
 }
 
 
-#if 0
-Node* findCentroidBruteForce(Node* startNode, int numNodes)
-{
-    int numInGraph = 1;
-    //vector<Node*> allNodes = getDescendants(startNode, nullptr);
-    //const auto numNodes = countDescendants(startNode, nullptr);
-
-    if (numNodes == 1)
-        return startNode;
-
-    for (auto& node : allNodes)
-    {
-        bool isMedian = true;
-        for (auto& neighbour : node->neighbours)
-        {
-            if (getDescendants(neighbour, node).size() > numNodes / 2)
-            {
-                isMedian = false;
-                break;
-            }
-        }
-        if (isMedian)
-            return node;
-
-    }
-
-    assert(false);
-    return nullptr;
-}
-#endif
-
-int numNodesTotal = 0;
 void decompose(Node* startNode, std::function<void(Node*)> processCentroid )
 {
-#if 0
-    auto countPair = [&blee](Node* node1, Node* node2)
-    {
-        assert(node1 != node2);
-        if (node1->index > node2->index)
-            swap(node1, node2);
-        blee[node1->index][node2->index]++;
-        blee[node2->index][node1->index]++;
-    };
-    const string indent(indentLevel, ' ');
-#endif
-    //cout << indent << "Decomposing graph containing " << startNode->index << endl;
     const auto numNodes = countDescendants(startNode, nullptr);
     assert(numNodes > 0);
     Node* centroid = findCentroid(startNode);
 
     assert(centroid);
     processCentroid(centroid);
-
-    //cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
-    //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
-
-    //numNodesTotal += numNodes;
-    //cout << "numNodesTotal: " << numNodesTotal << endl;
-
-    //vector<Node*> descendantsSoFar;
-    //descendantsSoFar.push_back(centroid);
-#if 0
-    // Do processing around this centroid.
-    for (auto& edge : centroid->neighbours)
-    {
-        auto neighbour = edge->otherNode(centroid);
-        //neighbour->neighbours.erase(find(neighbour->neighbours.begin(), neighbour->neighbours.end(), edge));
-        auto newDescendants = getDescendants(neighbour, centroid);
-        assert(newDescendants.size() <= numNodes / 2);
-#if 1
-        for (const auto& descendant : newDescendants)
-        {
-            for (const auto& oldDescendant : descendantsSoFar)
-            {
-                countPair(descendant, oldDescendant);
-            }
-        }
-        descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
-#endif
-    }
-#endif
 
     // Decompose further.
     for (auto& edge : centroid->neighbours)
@@ -1958,280 +1835,6 @@ int main(int argc, char* argv[])
             cout << word.word << " " << word.score << endl;
         }
         return 0;
-    }
-
-#if 0
-    if (false)
-    {
-
-        const int maxNumNeighbours = 20;
-        const int maxMaxValue = 100;
-        const int maxPathValues = 20;
-
-        int numTests = 0;
-
-        while (true)
-        {
-            Node rootNode;
-            const int numNeighbours = (rand() % (maxNumNeighbours - 1)) + 2;
-            vector<Edge> edges(numNeighbours);
-            int edgeId = 0;
-            for (auto& edge : edges)
-            {
-                edge.nodeA = &rootNode;
-                edge.edgeId = edgeId;
-                edgeId++;
-            }
-
-            const int numPathValues = (rand() % maxPathValues) + 1;
-            const int64_t maxValue = (rand() % maxMaxValue) + 1;
-            vector<PathValue> pathValues;
-            for (int i = 0; i < numPathValues; i++)
-            {
-                while (true)
-                {
-                    auto edge1 = &(edges[rand() % numNeighbours]);
-                    auto edge2 = &(edges[rand() % numNeighbours]);
-                    if (edge1 == edge2)
-                        continue;
-
-
-                    pathValues.push_back({edge1, edge2, (rand() % maxValue) + 1});
-                    break;
-                }
-            }
-
-            for (const auto& pathValue : pathValues)
-            {
-                //cout << pathValue << endl;
-            }
-            for (const auto& pathValue : pathValues)
-            {
-                pathValue.edgeA->bestTrackerNodeA.add(pathValue.value, pathValue.edgeB); 
-                pathValue.edgeB->bestTrackerNodeA.add(pathValue.value, pathValue.edgeA); 
-            }
-
-            auto shareAnEdge = [](const PathValue& pathValue1, const PathValue& pathValue2)
-            {
-                return !( pathValue1.edgeA != pathValue2.edgeA && pathValue1.edgeA != pathValue2.edgeB &&
-                        pathValue1.edgeB != pathValue2.edgeA && pathValue1.edgeB != pathValue2.edgeB);
-            };
-
-            PathValue dbgBest1;
-            PathValue dbgBest2;
-            int64_t dbgMaxPathValueProduct = -1;
-            for (const auto& pathValue1 : pathValues)
-            {
-                for (const auto& pathValue2 : pathValues)
-                {
-                    if (!shareAnEdge(pathValue1, pathValue2))
-                    {
-                        const auto pathValueProduct = pathValue1.value * pathValue2.value;
-                        if (pathValueProduct > dbgMaxPathValueProduct)
-                        {
-                            dbgMaxPathValueProduct = pathValueProduct;
-                            dbgBest1 = pathValue1;
-                            dbgBest2 = pathValue2;
-                            //cout << "New best: " << pathValueProduct << " from " << pathValue1 << " and " << pathValue2 << endl;
-                        }
-                    }
-                }
-            }
-
-            //cout << "dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << endl;
-
-            auto comparePathValues = [](const PathValue& lhs, const PathValue& rhs) 
-            {
-                if (lhs.value != rhs.value)
-                    return lhs.value > rhs.value;
-                if (lhs.edgeA != rhs.edgeA)
-                    return lhs.edgeA < rhs.edgeA;
-                return lhs.edgeB < rhs.edgeB;
-            };
-            set<PathValue, decltype(comparePathValues)> pathValuesByVal(comparePathValues);
-
-            int64_t maxPathValueProduct = -1;
-            PathValue best1;
-            PathValue best2;
-            for (auto& edge : edges)
-            {
-                //int64_t maxFromThis = -1;
-                for (auto blahIter = begin(edge.bestTrackerNodeA.stored); blahIter != begin(edge.bestTrackerNodeA.stored) + edge.bestTrackerNodeA.num; blahIter++)
-                {
-                    PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
-                    //cout << " Blee: " << blee << endl;
-                    for (const auto& otherPathValue : pathValuesByVal)
-                    {
-                        //cout << " otherPathValue: " << otherPathValue << endl;
-                        if (!shareAnEdge(blee, otherPathValue))
-                        {
-                            //maxFromThis = max(maxFromThis, );
-                            const int product = blee.value * otherPathValue.value;
-                            if (product > maxPathValueProduct)
-                            {
-                                maxPathValueProduct = product;
-                                best1 = blee;
-                                best2 = otherPathValue;
-                                break;
-                            }
-                        }
-                    }
-                }
-                for (auto blahIter = begin(edge.bestTrackerNodeA.stored); blahIter != begin(edge.bestTrackerNodeA.stored) + edge.bestTrackerNodeA.num; blahIter++)
-                {
-                    PathValue blee(&edge, blahIter->otherEdge, blahIter->value);
-                    pathValuesByVal.insert(blee);
-                }
-            }
-            cout << "maxPathValueProduct: " << maxPathValueProduct << " dbgMaxPathValueProduct: " << dbgMaxPathValueProduct << " " << (maxPathValueProduct == dbgMaxPathValueProduct ? "MATCH" : "NOMATCH") <<  " numTests: " << numTests << endl;
-            if (maxPathValueProduct != dbgMaxPathValueProduct)
-            {
-                cout << "Mismatch found!" << endl;
-                cout << "best1: " << best1 << " best2: " << best2 << " dbgBest1: " << dbgBest1 << " dbgBest2: " << dbgBest2 << endl;
-                cout << "numNeighbours: " << numNeighbours << " numPathValues: " << numPathValues << " path values: " << endl;
-                for (const auto& pathValue : pathValues)
-                {
-                    cout << " " << pathValue << endl;
-                }
-            }
-            assert(maxPathValueProduct == dbgMaxPathValueProduct);
-            numTests++;
-        }
-    }
-#endif
-
-    if (false)
-    {
-        const int maxNodes = 10000;
-        const int numNodes = (rand() % (maxNodes - 1)) + 2;
-        //const int numNodes = 20000;
-        vector<Node> nodes(numNodes);
-        vector<Edge> edges(numNodes - 1);
-
-        int nodeIndex = 0;
-        for (auto& node : nodes)
-        {
-            node.index = nodeIndex;
-            if (nodeIndex != 0)
-            {
-                const int neighbourNodeIndex = rand() % nodeIndex;
-                auto neighbourNode = &(nodes[neighbourNodeIndex]);
-                auto newNode = &(nodes[nodeIndex]);
-
-                Edge* edge = &(edges[nodeIndex - 1]);
-                edge->nodeA = newNode;
-                edge->nodeB = neighbourNode;
-
-                newNode->neighbours.push_back(edge);
-                neighbourNode->neighbours.push_back(edge);
-
-            }
-
-            nodeIndex++;
-
-        }
-
-#if 0
-        cout << "Tree: " << endl;
-        for (const auto& node : nodes)
-        {
-            cout << "Node id: " << node.index << " neighbour ids: ";
-            for (const auto& neighbour : node.neighbours)
-            {
-                cout << neighbour->index << " ";
-            }
-            cout << endl;
-        }
-#endif
-
-        //vector<vector<int>> blee(numNodes, vector<int>(numNodes, 0));
-
-        //decompose(&(nodes.front()), blee);
-
-#if 0
-        for (int i = 0; i < numNodes; i++)
-        {
-            for (int j = 0; j < numNodes; j++)
-            {
-                if (i == j)
-                    continue;
-                //cout << "i: " << i << " j: " << j << " blee: " << blee[i][j] << endl;
-                assert(blee[i][j] == 1);
-            }
-        }
-#endif
-        cout << "numNodes: " << numNodes << " numNodesTotal: " << numNodesTotal << endl;
-        return 0;
-    }
-
-    if (false)
-    {
-        vector<Word> testWords(3);
-        testWords[0].word = "aab";
-
-        testWords[1].word = "aabc";
-
-        testWords[2].word = "a";
-
-        SuffixTreeBuilder blah(testWords);
-        auto blee = blah.rootCursor();
-
-        auto nose = [&testWords](auto c)
-        {
-            if (c.isOnExplicitState())
-            {
-                cout << "Blag: " << c.stateData().wordIndicesIsFinalStateFor.size() << endl;
-                for (const auto wordIndex : c.stateData().wordIndicesIsFinalStateFor)
-                {
-                    cout << "is final state for word " << testWords[wordIndex].word << endl;
-                }
-            }
-            else
-            {
-                cout << "Not on explicit state" << endl;
-            }
-        };
-
-#if 0
-        assert(blee.canFollowLetter('a'));
-        blee.followLetter('a');
-        assert(blee.isOnExplicitState());
-        nose(blee);
-        assert(blee.canFollowLetter('b'));
-        blee.followLetter('b');
-        nose(blee);
-#endif
-        assert(blee.canFollowLetter('b'));
-        blee.followLetter('b');
-        nose(blee);
-        assert(blee.canFollowLetter('c'));
-        blee.followLetter('c');
-        nose(blee);
-        
-
-        return 0;
-    }
-
-    if (false)
-    {
-        vector<Word> testWords(1);
-        testWords[0].word = "ragamuffin";
-
-        SuffixTreeBuilder wordSuffixes(testWords);
-        wordSuffixes.dumpGraph();
-
-        const string blee = "uffin";
-        Cursor blah = wordSuffixes.rootCursor();
-        for (const auto letter : blee)
-        {
-            cout << "following letter: " << letter << endl;
-            assert(blah.canFollowLetter(letter));
-            blah.followLetter(letter);
-        }
-        blah.stateData();
-        cout << "Bleep!" << endl;
-        return 0;
-
     }
 
     const int numNodes = readInt();
