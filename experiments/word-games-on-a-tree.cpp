@@ -921,7 +921,8 @@ class SuffixTreeBuilder
                 {
                     substringFollowed.endIndex = nextSeparatorCharIndex - 1;
                     transitionIter->nextState->transitions.clear();
-                    if (state != m_root)
+                    cout << "Cleared transitions for " << transitionIter->nextState << endl;
+                    //if (state != m_root)
                     {
                         transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSeparatorCharIndex] - wordSeparatorCharBegin);
                         cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
@@ -1056,6 +1057,7 @@ class SuffixTreeBuilder
                 }
                 StateData& stateData()
                 {
+                    cout << "Asking for state data for state: " << m_state << endl;
                     return m_state->data;
                 }
                 int stateId() const
@@ -1258,7 +1260,7 @@ class SuffixTreeBuilder
                         }
                         char nextLetter()
                         {
-                            cout << " nextLetter: " << (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex] << endl;
+                            //cout << " nextLetter: " << (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex] << endl;
                             return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex];
                         }
                         NextLetterIterator operator++(int)
@@ -1278,7 +1280,6 @@ class SuffixTreeBuilder
                             endtransitionIterator(transitions.end()),
                             cursor(cursor)
                     {
-                        cout << "created next letter iterator with " << transitions.size() << " transitions " << endl;
                     };
                         friend class Cursor;
                         vector<Transition>::iterator transitionIterator;
@@ -1396,6 +1397,17 @@ class SuffixTreeBuilder
         static Cursor invalidCursor()
         {
             return Cursor();
+        }
+        void dumpGraph()
+        {
+            dumpGraphAux(m_root, "");
+        }
+        vector<string> dumpExplicitStrings()
+        {
+            vector<string> strings;
+            dumpExplicitStringsAux(m_root, "", strings);
+            sort(strings.begin(), strings.end(), [](const string& lhs, const string& rhs) { return lhs.size() < rhs.size(); });
+            return strings;
         }
     private:
         static const int alphabetSize = 26 + maxK; // Include the magic "separator" characters for putting up to maxK words in suffix tree.
@@ -1531,6 +1543,47 @@ class SuffixTreeBuilder
             // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
             return m_currentString[i - 1] - wordSeparatorCharBegin + 1;
         }
+        void dumpGraphAux(State* s, const string& indent)
+        {
+            cout << indent << "state: " << s << " " << findStateIndex(s) << " suffix link: " << (s->suffixLink ? findStateIndex(s->suffixLink) : 0) << " parent: " << (s->parent ? findStateIndex(s->parent) : 0);
+            const bool isTerminal = (s->transitions.empty());
+            assert((s->suffixLink == nullptr) == isTerminal);
+            if (isTerminal)
+            {
+                cout << " (terminal)" << endl;
+                return;
+            }
+            cout << endl;
+            for (const auto& transition : s->transitions)
+            {
+                const auto substringStartIndex = transition.substringFollowed.startIndex;
+                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex);
+                cout << indent + " " << "transition: " << substringStartIndex << "," << substringEndIndex << (substringEndIndex == m_currentString.size() - 1 ? " (open) " : "") << " " << m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1) << " next state: " << findStateIndex(transition.nextState) << endl;
+                dumpGraphAux(transition.nextState, indent + "  ");
+            }
+        }
+        void dumpExplicitStringsAux(State* s, const string& currentString, vector<string>& destStrings)
+        {
+            if (s->transitions.empty())
+            {
+                destStrings.push_back(currentString);
+                return;
+            }
+            for (const auto& transition : s->transitions)
+            {
+                const auto substringStartIndex = transition.substringFollowed.startIndex - 1;
+                const auto substringEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? m_currentString.size() - 1: transition.substringFollowed.endIndex - 1);
+                const auto newCurrentString = currentString + m_currentString.substr(substringStartIndex, substringEndIndex - substringStartIndex + 1);
+                dumpExplicitStringsAux(transition.nextState, newCurrentString, destStrings);
+            }
+        }
+        long findStateIndex(State* s)
+        {
+            auto statePos = find_if(m_states.begin(), m_states.end(), [s](const State& state) { return &state == s; });
+            assert(statePos != m_states.end());
+            return statePos - m_states.begin();
+        }
+
 };
 
 using Cursor = SuffixTreeBuilder::Cursor;
@@ -1569,6 +1622,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
 
 void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, vector<vector<bool>>& wasSuffixForWordBeginningAtFound)
 {
+    cout << "findPrefixes; word followed: " << wordFollowed << " isOnExplicitState? " << cursor.isOnExplicitState() << endl;
     if (cursor.isOnExplicitState())
     {
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
@@ -1647,11 +1701,14 @@ void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTree
     cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
     findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
 
+    // TODO - do we need to do this?
+#if 1
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     cout << " Switched child order" << endl;
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
     cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
     findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
+#endif
 
 
 }
@@ -2041,8 +2098,9 @@ int main(int argc, char* argv[])
         testWords[0].word = "ragamuffin";
 
         SuffixTreeBuilder wordSuffixes(testWords);
+        wordSuffixes.dumpGraph();
 
-        const string blee = "amuffin";
+        const string blee = "uffin";
         Cursor blah = wordSuffixes.rootCursor();
         for (const auto letter : blee)
         {
@@ -2050,6 +2108,8 @@ int main(int argc, char* argv[])
             assert(blah.canFollowLetter(letter));
             blah.followLetter(letter);
         }
+        blah.stateData();
+        cout << "Bleep!" << endl;
         return 0;
 
     }
