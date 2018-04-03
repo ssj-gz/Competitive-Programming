@@ -964,53 +964,6 @@ class SuffixTreeBuilder
         {
             return m_states.size();
         }
-        void makeFinalStatesExplicitAndMarkThemAsFinal()
-        {
-            // Trick described in Ukkonen's paper.
-            const char unusedLetter = '{';
-            appendLetter(unusedLetter);
-
-            // Remove the unused letter again!
-            for (auto& state : m_states)
-            {
-                for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
-                {
-                    const Transition& transition = *transitionIter;
-                    if (transition.substringFollowed.startIndex < 1)
-                    {
-                        transitionIter++;
-                        continue;
-                    }
-                    const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
-                    const char lastCharInTransition = m_currentString[realEndIndex];
-                    bool needToRemoveTransition = false;
-                    if (lastCharInTransition == unusedLetter)
-                    {
-                        const bool transitionConsistsSolelyOfUnusedChar = (transition.substringFollowed.length(m_currentString.size()) == 1);
-                        if (transitionConsistsSolelyOfUnusedChar)
-                        {
-                            needToRemoveTransition = true;
-                            state.isFinal = true;
-                        }
-                        else
-                        {
-                            transition.nextState->isFinal = true;
-                        }
-                    }
-
-                    if (needToRemoveTransition)
-                        transitionIter = state.transitions.erase(transitionIter);
-                    else
-                        transitionIter++;
-                }
-            }
-            for (auto& state : m_states)
-            {
-                //cout << "state: " << &state << " wordLength: " << state.data.wordLength << endl;
-            }
-
-            m_currentString.pop_back(); // Remove the unusedLetter we just added.
-        }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
          */
@@ -1134,12 +1087,6 @@ class SuffixTreeBuilder
                         for (auto& transition : m_state->transitions)
                         {
                             assert(transition.substringFollowed.startIndex >= 0);
-                            if (-transition.substringFollowed.startIndex == (letter - 'a' + 1))
-                            {
-                                m_transition = &transition;
-                                break;
-                            }
-                            else 
                             {
                                 assert(theString[transition.substringFollowed.startIndex] == transition.firstLetter);
                                 if (transition.firstLetter == letter)
@@ -1417,7 +1364,7 @@ class SuffixTreeBuilder
             return strings;
         }
     private:
-        static const int alphabetSize = 26 + maxK; // Include the magic "separator" characters for putting up to maxK words in suffix tree.
+        static const int alphabetSize = 26 + maxK + 1; // Include the magic "separator" characters for putting up to maxK words in suffix tree.
         const char wordSeparatorCharBegin = 'a' - 1 - maxK;
         const char wordSeparatorCharEnd = wordSeparatorCharBegin + maxK;
         static const int openTransitionEnd = numeric_limits<int>::max();
