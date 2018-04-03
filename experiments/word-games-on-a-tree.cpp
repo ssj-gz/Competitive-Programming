@@ -856,6 +856,8 @@ class SuffixTreeBuilder
             m_s = m_root;
             m_k = 1;
 
+            cout << "wordSeparatorCharEnd: " << wordSeparatorCharEnd << endl;
+
 
             assert(words.size() <= maxK);
             string combinedWords;
@@ -874,7 +876,7 @@ class SuffixTreeBuilder
                 if (combinedWords[i] >= wordSeparatorCharBegin && combinedWords[i] <= wordSeparatorCharEnd)
                 {
                     lastSeenSeparatorIndex = i;
-                    cout << "Seen separator :" << lastSeenSeparatorIndex << endl;
+                    cout << "Seen separator :" << lastSeenSeparatorIndex << "(" << combinedWords[i] << ")" << endl;
                 }
                 indexOfNextSeparatorChar[i] = lastSeenSeparatorIndex;
             }
@@ -887,39 +889,41 @@ class SuffixTreeBuilder
         }
         void stripWordSeparatorsAndStoreWordEndStates(State* state, const vector<int>& indexOfNextSeparatorChar)
         {
-            cout << "stripWordSeparatorsAndStoreWordEndStates:" << state << endl;
+            cout << "stripWordSeparatorsAndStoreWordEndStates:" << state << " num transitions: " << state->transitions.size() << endl;
             auto transitionIter = state->transitions.begin();
             while (transitionIter != state->transitions.end())
             {
                 auto& substringFollowed = transitionIter->substringFollowed;
+                cout << " transition: original startIndex: " << substringFollowed.startIndex << " original endIndex: " << substringFollowed.endIndex << endl;
                 assert(substringFollowed.startIndex >= 1);
                 substringFollowed.startIndex--;
                 if (substringFollowed.endIndex == openTransitionEnd)
                     substringFollowed.endIndex = m_currentString.size() - 1;
                 else
                     substringFollowed.endIndex--;
+                cout << " transition: final startIndex: " << transitionIter->substringFollowed.startIndex << " final endIndex: " << transitionIter->substringFollowed.endIndex << endl;
 
-                const int nextSepartorCharIndex = indexOfNextSeparatorChar[substringFollowed.startIndex];
+                const int nextSeparatorCharIndex = indexOfNextSeparatorChar[substringFollowed.startIndex];
 
-                cout << " startIndex: " << substringFollowed.startIndex << " endIndex: " << substringFollowed.endIndex << " nextSepartorCharIndex: " << nextSepartorCharIndex << " char: " << (nextSepartorCharIndex != -1 ? m_currentString[m_currentString[nextSepartorCharIndex]] : '-') << endl;
-                
-                if (nextSepartorCharIndex == substringFollowed.startIndex)
+                cout << " startIndex: " << substringFollowed.startIndex << " endIndex: " << substringFollowed.endIndex << " nextSeparatorCharIndex: " << nextSeparatorCharIndex << " char: " << (nextSeparatorCharIndex != -1 ? m_currentString[nextSeparatorCharIndex] : '-') << endl;
+
+                if (nextSeparatorCharIndex == substringFollowed.startIndex)
                 {
                     transitionIter = state->transitions.erase(transitionIter);
                     if (state != m_root)
                     {
-                        state->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
+                        state->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSeparatorCharIndex] - wordSeparatorCharBegin);
                         cout << "state " << state << " is final (erased transition) for: " << state->data.wordIndicesIsFinalStateFor.back() << endl;
                     }
                     continue;
                 }
-                if (nextSepartorCharIndex >= substringFollowed.startIndex && nextSepartorCharIndex <= substringFollowed.endIndex)
+                if (nextSeparatorCharIndex >= substringFollowed.startIndex && nextSeparatorCharIndex <= substringFollowed.endIndex)
                 {
-                    substringFollowed.endIndex = nextSepartorCharIndex - 1;
+                    substringFollowed.endIndex = nextSeparatorCharIndex - 1;
                     transitionIter->nextState->transitions.clear();
                     if (state != m_root)
                     {
-                        transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSepartorCharIndex] - wordSeparatorCharBegin);
+                        transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSeparatorCharIndex] - wordSeparatorCharBegin);
                         cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
                     }
                 }
@@ -1076,7 +1080,7 @@ class SuffixTreeBuilder
                     {
                         for (const auto& transition : m_state->transitions)
                         {
-                            const char letter = (*m_string)[transition.substringFollowed.startIndex - 1];
+                            const char letter = (*m_string)[transition.substringFollowed.startIndex];
                             *dest = letter;
                             dest++;
                             numNextLetters++;
@@ -1084,7 +1088,7 @@ class SuffixTreeBuilder
                     }
                     else
                     {
-                        *dest = (*m_string)[m_transition->substringFollowed.startIndex + m_posInTransition - 1];
+                        *dest = (*m_string)[m_transition->substringFollowed.startIndex + m_posInTransition];
                         dest++;
                         numNextLetters++;
                     }
@@ -1254,6 +1258,7 @@ class SuffixTreeBuilder
                         }
                         char nextLetter()
                         {
+                            cout << " nextLetter: " << (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex] << endl;
                             return (*(cursor->m_string))[transitionIterator->substringFollowed.startIndex];
                         }
                         NextLetterIterator operator++(int)
@@ -1273,6 +1278,7 @@ class SuffixTreeBuilder
                             endtransitionIterator(transitions.end()),
                             cursor(cursor)
                     {
+                        cout << "created next letter iterator with " << transitions.size() << " transitions " << endl;
                     };
                         friend class Cursor;
                         vector<Transition>::iterator transitionIterator;
@@ -1568,7 +1574,7 @@ void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cur
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
         {
             cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
-            if (wasSuffixForWordBeginningAtFound[wordIndex][words[wordIndex].word.size() - depth])
+            if (wasSuffixForWordBeginningAtFound[wordIndex][depth])
             {
                 cout << "** Found complete word: " << words[wordIndex].word << endl;
             }
@@ -1597,42 +1603,57 @@ void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cur
 
 }
 
+void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, vector<vector<bool>>& wasSuffixForWordBeginningAtFound)
+{
+    for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
+    {
+        wasSuffixForWordBeginningAtFound[wordIndex].clear();
+        wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
+    }
+    string wordFollowed;
+    for (auto childEdge : centroid->neighbours)
+    {
+        auto child = childEdge->otherNode(centroid);
+        Cursor reversedWordPrefixCursor = reversedWordPrefixes.rootCursor();
+        if (reversedWordPrefixCursor.canFollowLetter(childEdge->letterFollowed))
+        {
+            wordFollowed += childEdge->letterFollowed;
+            reversedWordPrefixCursor.followLetter(childEdge->letterFollowed); 
+            findPrefixes(child, centroid, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
+            reversedWordPrefixCursor.moveUp();
+            wordFollowed.clear();
+        }
+
+        Cursor suffixCursor = wordSuffixes.rootCursor();
+        if (suffixCursor.canFollowLetter(childEdge->letterFollowed))
+        {
+            wordFollowed += childEdge->letterFollowed;
+            suffixCursor.followLetter(childEdge->letterFollowed);
+            findAndLogSuffixes(child, centroid, 1, wordFollowed, suffixCursor, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
+            suffixCursor.moveUp();
+            wordFollowed.clear();
+        }
+    }
+}
+
 void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words)
 {
+    cout << "processCentroid" << endl;
     string wordFollowed;
     vector<vector<bool>> wasSuffixForWordBeginningAtFound(words.size());
-    for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
-    {
-        wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
-    }
-    findPrefixes(centroid, nullptr, 0, wordFollowed, reversedWordPrefixes.rootCursor(), reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
-    findAndLogSuffixes(centroid, nullptr, 0, wordFollowed, wordSuffixes.rootCursor(), wordSuffixes, words, wasSuffixForWordBeginningAtFound);
-    for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
-    {
-        wasSuffixForWordBeginningAtFound[wordIndex].clear();
-        wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
-    }
 
-    findPrefixes(centroid, nullptr, 0, wordFollowed, wordSuffixes.rootCursor(), wordSuffixes, words, wasSuffixForWordBeginningAtFound);
-    findAndLogSuffixes(centroid, nullptr, 0, wordFollowed, reversedWordPrefixes.rootCursor(), reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
-    for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
-    {
-        wasSuffixForWordBeginningAtFound[wordIndex].clear();
-        wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
-    }
+    findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
+
+    cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
+    findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
 
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
+    cout << " Switched child order" << endl;
+    findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
+    cout << " Switched wordSuffixes and reversedWordPrefixes" << endl;
+    findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
 
-    findPrefixes(centroid, nullptr, 0, wordFollowed, reversedWordPrefixes.rootCursor(), reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
-    findAndLogSuffixes(centroid, nullptr, 0, wordFollowed, wordSuffixes.rootCursor(), wordSuffixes, words, wasSuffixForWordBeginningAtFound);
-    for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
-    {
-        wasSuffixForWordBeginningAtFound[wordIndex].clear();
-        wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
-    }
 
-    findPrefixes(centroid, nullptr, 0, wordFollowed, wordSuffixes.rootCursor(), wordSuffixes, words, wasSuffixForWordBeginningAtFound);
-    findAndLogSuffixes(centroid, nullptr, 0, wordFollowed, reversedWordPrefixes.rootCursor(), reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
 }
 
 vector<int> findNodeScores(vector<Node>& nodes, const vector<Word>& words)
@@ -1645,6 +1666,16 @@ vector<int> findNodeScores(vector<Node>& nodes, const vector<Word>& words)
         reverse(word.word.begin(), word.word.end());
     }
     SuffixTreeBuilder reversedWordPrefixes(reversedWords);
+
+    const string blee = "amuffin";
+    Cursor blah = wordSuffixes.rootCursor();
+    for (const auto letter : blee)
+    {
+        cout << "following letter: " << letter << endl;
+        assert(blah.canFollowLetter(letter));
+        blah.followLetter(letter);
+
+    }
 
     auto someNode = &(nodes.front());
     decompose(someNode, [&wordSuffixes, &reversedWordPrefixes, &words](Node* node) 
@@ -2002,6 +2033,25 @@ int main(int argc, char* argv[])
         
 
         return 0;
+    }
+
+    if (false)
+    {
+        vector<Word> testWords(1);
+        testWords[0].word = "ragamuffin";
+
+        SuffixTreeBuilder wordSuffixes(testWords);
+
+        const string blee = "amuffin";
+        Cursor blah = wordSuffixes.rootCursor();
+        for (const auto letter : blee)
+        {
+            cout << "following letter: " << letter << endl;
+            assert(blah.canFollowLetter(letter));
+            blah.followLetter(letter);
+        }
+        return 0;
+
     }
 
     const int numNodes = readInt();
