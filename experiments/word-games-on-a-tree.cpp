@@ -898,11 +898,9 @@ class SuffixTreeBuilder
                 : startIndex(startIndex), endIndex(endIndex)
             {
             }
-            int length(int fullStringLength) const
+            int length() const
             {
                 assert(endIndex != openTransitionEnd);
-                //const auto adjustedEndIndex = (endIndex == openTransitionEnd ? fullStringLength - 1: endIndex - 1);
-                //const auto adjustedEndIndex = endIndex;
                 const auto length = endIndex - startIndex + 1;
                 assert(length >= 0);
                 return length;
@@ -918,9 +916,9 @@ class SuffixTreeBuilder
                 if (substringFollowed.startIndex >= 1)
                     firstLetter = currentString[substringFollowed.startIndex - 1];
             }
-            int substringLength(int fullStringLength) const
+            int substringLength() const
             {
-                return substringFollowed.length(fullStringLength);
+                return substringFollowed.length();
             }
 
             State *nextState = nullptr;
@@ -1187,7 +1185,7 @@ class SuffixTreeBuilder
                         }
                         assert(m_transition);
                         //cout << "followLetter: substringLength: " << m_transition->substringLength(m_string->size()) << endl;
-                        if (m_transition->substringLength(m_string->size()) == 1)
+                        if (m_transition->substringLength() == 1)
                         {
                             followToTransitionEnd();
                         }
@@ -1199,7 +1197,7 @@ class SuffixTreeBuilder
                     else
                     {
                         assert(m_posInTransition != -1);
-                        const int transitionStringLength = m_transition->substringLength(m_string->size());
+                        const int transitionStringLength = m_transition->substringLength();
                         assert(m_posInTransition <= transitionStringLength);
                         m_posInTransition++;
                         if (m_posInTransition == transitionStringLength)
@@ -1231,7 +1229,7 @@ class SuffixTreeBuilder
                         Transition* transitionFromParent = findTransitionFromParent();
                         m_state = m_state->parent;
                         m_transition = transitionFromParent;
-                        m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
+                        m_posInTransition = transitionFromParent->substringLength() - 1;
                         const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition];
                         if (m_posInTransition == 0)
                         {
@@ -1241,40 +1239,6 @@ class SuffixTreeBuilder
                     }
                 }
 
-                void followLetters(const string& letters, string::size_type startIndex = 0, string::size_type numLetters = string::npos)
-                {
-                    if (numLetters == string::npos)
-                    {
-                        numLetters = letters.size();
-                    }
-                    while (numLetters > 0)
-                    {
-                        if (m_transition)
-                        {
-                            const auto numLeftInTransition = m_transition->substringLength(m_string->size()) - m_posInTransition;
-                            int numLettersConsumed = 0;
-                            if (numLeftInTransition > numLetters)
-                            {
-                                m_posInTransition += numLetters;
-                                numLettersConsumed = numLetters;
-                            }
-                            else
-                            {
-                                numLettersConsumed = numLeftInTransition;
-                                followToTransitionEnd();
-                            }
-                            numLetters -= numLettersConsumed;
-                            startIndex += numLettersConsumed;
-                        }
-                        else
-                        {
-                            const auto letterToFollow = letters[startIndex];
-                            followLetter(letterToFollow);
-                            numLetters -= 1;
-                            startIndex += 1;
-                        }
-                    }
-                }
                 void followNextLetter()
                 {
                     followNextLetters(1);
@@ -1284,7 +1248,7 @@ class SuffixTreeBuilder
                     assert(m_transition);
                     assert(remainderOfCurrentTransition().length() >= numLetters);
                     m_posInTransition += numLetters;
-                    const int transitionStringLength = m_transition->substringLength(m_string->size());
+                    const int transitionStringLength = m_transition->substringLength();
                     if (m_posInTransition == transitionStringLength)
                     {
                         m_state = m_transition->nextState;
@@ -1398,7 +1362,7 @@ class SuffixTreeBuilder
                 void enterTransitionAndSkipLetter(Transition& transition)
                 {
                     m_transition = &transition;
-                    if (m_transition->substringLength(m_string->size()) == 1)
+                    if (m_transition->substringLength() == 1)
                     {
                         followToTransitionEnd();
                     }
