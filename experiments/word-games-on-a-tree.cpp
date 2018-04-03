@@ -848,7 +848,6 @@ vector<int64_t> findNodeScoresBruteForce(vector<Node>& nodes, const vector<Word>
         for (auto node : path.nodesInPath)
         {
             node->singleWordBestScoreBruteForce = max(node->singleWordBestScoreBruteForce, path.word.score);
-            cout << "Bloople" << endl;
         }
     }
 
@@ -905,7 +904,6 @@ class SuffixTreeBuilder
                 //const auto adjustedEndIndex = (endIndex == openTransitionEnd ? fullStringLength - 1: endIndex - 1);
                 //const auto adjustedEndIndex = endIndex;
                 const auto length = endIndex - startIndex + 1;
-                cout << "endIndex: " << endIndex << " startIndex: " << startIndex << endl;
                 assert(length >= 0);
                 return length;
             }
@@ -990,23 +988,20 @@ class SuffixTreeBuilder
         }
         void stripWordSeparatorsAndStoreWordEndStates(State* state, const vector<int>& indexOfNextSeparatorChar)
         {
-            cout << "stripWordSeparatorsAndStoreWordEndStates:" << state << " num transitions: " << state->transitions.size() << endl;
             auto transitionIter = state->transitions.begin();
             while (transitionIter != state->transitions.end())
             {
                 auto& substringFollowed = transitionIter->substringFollowed;
-                cout << " transition: original startIndex: " << substringFollowed.startIndex << " original endIndex: " << substringFollowed.endIndex << endl;
                 assert(substringFollowed.startIndex >= 1);
                 substringFollowed.startIndex--;
                 if (substringFollowed.endIndex == openTransitionEnd)
                     substringFollowed.endIndex = m_currentString.size() - 1;
                 else
                     substringFollowed.endIndex--;
-                cout << " transition: final startIndex: " << transitionIter->substringFollowed.startIndex << " final endIndex: " << transitionIter->substringFollowed.endIndex << endl;
 
                 const int nextSeparatorCharIndex = indexOfNextSeparatorChar[substringFollowed.startIndex];
 
-                cout << " startIndex: " << substringFollowed.startIndex << " endIndex: " << substringFollowed.endIndex << " nextSeparatorCharIndex: " << nextSeparatorCharIndex << " char: " << (nextSeparatorCharIndex != -1 ? m_currentString[nextSeparatorCharIndex] : '-') << endl;
+                //cout << " startIndex: " << substringFollowed.startIndex << " endIndex: " << substringFollowed.endIndex << " nextSeparatorCharIndex: " << nextSeparatorCharIndex << " char: " << (nextSeparatorCharIndex != -1 ? m_currentString[nextSeparatorCharIndex] : '-') << endl;
 
                 if (nextSeparatorCharIndex == substringFollowed.startIndex)
                 {
@@ -1111,7 +1106,7 @@ class SuffixTreeBuilder
                 }
                 StateData& stateData()
                 {
-                    cout << "Asking for state data for state: " << m_state << endl;
+                    //cout << "Asking for state data for state: " << m_state << endl;
                     return m_state->data;
                 }
                 int stateId() const
@@ -1191,7 +1186,7 @@ class SuffixTreeBuilder
                             }
                         }
                         assert(m_transition);
-                        cout << "followLetter: substringLength: " << m_transition->substringLength(m_string->size()) << endl;
+                        //cout << "followLetter: substringLength: " << m_transition->substringLength(m_string->size()) << endl;
                         if (m_transition->substringLength(m_string->size()) == 1)
                         {
                             followToTransitionEnd();
@@ -1480,7 +1475,7 @@ class SuffixTreeBuilder
             const auto testAndSplitResult = testAndSplit(s, k, i - 1, t(i));
             auto isEndPoint = testAndSplitResult.first;
             auto r = testAndSplitResult.second;
-            cout << "r: " << r << endl;
+            //cout << "r: " << r << endl;
             while (!isEndPoint)
             {
                 auto rPrime = createNewState(r);
@@ -1872,16 +1867,6 @@ vector<int64_t> findNodeScores(vector<Node>& nodes)
     }
     SuffixTreeBuilder reversedWordPrefixes(reversedWords);
 
-    const string blee = "amuffin";
-    Cursor blah = wordSuffixes.rootCursor();
-    for (const auto letter : blee)
-    {
-        cout << "following letter: " << letter << endl;
-        assert(blah.canFollowLetter(letter));
-        blah.followLetter(letter);
-
-    }
-
     SuffixTracker suffixTracker(words);
 
     auto someNode = &(nodes.front());
@@ -1900,6 +1885,12 @@ vector<int64_t> findNodeScores(vector<Node>& nodes)
     {
         node.crossedWordsBestScore = bestCrosswordScore(&node);
         cout << "node: " << node.index << " singleWordBestScore: " << node.singleWordBestScore << " crossedWordsBestScore: " << node.crossedWordsBestScore << endl;
+        if (node.crossedWordsBestScore != 0)
+            node.score = node.crossedWordsBestScore;
+        else
+            node.score = node.singleWordBestScore;
+
+        nodeScores.push_back(node.score);
     }
 
     return nodeScores;
@@ -2322,7 +2313,6 @@ int main(int argc, char* argv[])
     {
         cin >> word.word;
         cin >> word.score;
-        cout << "word: " << word.word << " score: " << word.score << endl;
         assert(word.score != 0);
     }
     for (auto& node : nodes)
@@ -2330,7 +2320,21 @@ int main(int argc, char* argv[])
         node.originalNeighbours = node.neighbours;
     }
 
-    const auto nodeScores = findNodeScores(nodes);
+    auto nodeScores = findNodeScores(nodes);
+    sort(nodeScores.begin(), nodeScores.end());
+    bool currentPlayerIsAlice = true;
+    int aliceScore = 0;
+    int bobScore = 0;
+    while (!nodeScores.empty())
+    {
+        (currentPlayerIsAlice ? aliceScore : bobScore) += nodeScores.back();
+
+        currentPlayerIsAlice = !currentPlayerIsAlice;
+        nodeScores.pop_back();
+    }
+
+    cout << aliceScore << endl;
+    cout << bobScore << endl;
 
 #ifdef BRUTE_FORCE
 
@@ -2342,5 +2346,6 @@ int main(int argc, char* argv[])
         assert(node.singleWordBestScoreBruteForce == node.singleWordBestScore);
         assert(node.crossedWordsBestScoreBruteForce == node.crossedWordsBestScore);
     }
+    cout << "aliceScore: " << aliceScore << " bobScore: " << bobScore << endl;
 #endif
 }
