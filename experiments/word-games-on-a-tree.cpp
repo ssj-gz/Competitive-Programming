@@ -1604,11 +1604,13 @@ class SuffixTracker
         for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
         {
             m_wasSuffixForWordBeginningAtFound[wordIndex].clear();
-            m_wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
+            m_wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size() + 1);
         }
     }
     bool wasSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos)
     {
+        if (suffixBeginPos == m_wasSuffixForWordBeginningAtFound[wordIndex].size() - 1) // Yes - the empty suffix!
+            return true;
         return !value(wordIndex, suffixBeginPos).empty();
     }
     const vector<Edge*>& firstEdgesFromCentroidForFoundSuffix(int wordIndex, int suffixBeginPos)
@@ -1627,10 +1629,6 @@ class SuffixTracker
     void clear()
     {
         m_versionNumber++;
-    }
-    int wordLength(int wordIndex)
-    {
-        return m_wasSuffixForWordBeginningAtFound[wordIndex].size();
     }
     private:
         struct VersionedValue
@@ -1697,11 +1695,19 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
         {
             cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
-            if (depth == suffixTracker.wordLength(wordIndex))
+            if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
+            {
+                maxScore = max(maxScore, words[wordIndex].score);
+                node->addElbow(parentEdge, nullptr, words[wordIndex].score);
+                for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
+                {
+                    currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, words[wordIndex].score);
+                }
+            }
+#if 0
+            if (depth == words[wordIndex].length())
             {
                 cout << "** Found complete word ending at centroid: " << words[wordIndex].word << endl;
-                node->addElbow(parentEdge, nullptr, words[wordIndex].score);
-                maxScore = max(maxScore, words[wordIndex].score);
             }
             else if (suffixTracker.wasSuffixForWordBeginningAtFound(wordIndex, depth))
             {
@@ -1711,7 +1717,9 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
                     currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, words[wordIndex].score);
                 }
                 maxScore = max(maxScore, words[wordIndex].score);
+                node->addElbow(parentEdge, nullptr, words[wordIndex].score);
             }
+#endif
             //const auto suffixBeginPos = words[wordIndex].word.size() - depth;
             //wasSuffixForWordBeginningAtFound[wordIndex][suffixBeginPos] = true;
         }
@@ -1738,7 +1746,7 @@ int findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, string& 
             maxScore = max(maxScore, childScore);
         }
     }
-    node->singleWordBestScore = max(node->singleWordBestScore, maxScore);
+    //node->singleWordBestScore = max(node->singleWordBestScore, maxScore);
 
     return maxScore;
 
