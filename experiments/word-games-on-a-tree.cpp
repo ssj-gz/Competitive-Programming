@@ -161,32 +161,33 @@ int bestCrosswordScore(Node* node)
     for (auto& edge : node->neighbours)
     {
         //int64_t maxFromThis = -1;
-        for (auto blahIter = begin(edge->bestTrackerForNode(node).stored); blahIter != begin(edge->bestTrackerForNode(node).stored) + edge->bestTrackerForNode(node).num; blahIter++)
+        BestTracker& bestTrackerForEdgeAndNode = edge->bestTrackerForNode(node);
+        for (auto blahIter = begin(bestTrackerForEdgeAndNode.stored); blahIter != begin(bestTrackerForEdgeAndNode.stored) + bestTrackerForEdgeAndNode.num; blahIter++)
         {
-            PathValue blee(edge, blahIter->otherEdge, blahIter->value);
-            cout << " Blee: " << blee << endl;
+            PathValue pathValue(edge, blahIter->otherEdge, blahIter->value);
+            cout << " pathValue: " << pathValue << endl;
             for (const auto& otherPathValue : pathValuesByVal)
             {
                 cout << " otherPathValue: " << otherPathValue << endl;
-                if (!shareAnEdge(blee, otherPathValue))
+                if (!shareAnEdge(pathValue, otherPathValue))
                 {
                     //maxFromThis = max(maxFromThis, );
-                    const int product = blee.value * otherPathValue.value;
+                    const int product = pathValue.value * otherPathValue.value;
                     if (product > maxPathValueProduct)
                     {
-                        cout << " paths: " << blee << " and " << otherPathValue << " do not share an edge and give new best product, " << product << endl;
+                        cout << " paths: " << pathValue << " and " << otherPathValue << " do not share an edge and give new best product, " << product << endl;
                         maxPathValueProduct = product;
-                        best1 = blee;
+                        best1 = pathValue;
                         best2 = otherPathValue;
                         break;
                     }
                 }
             }
         }
-        for (auto blahIter = begin(edge->bestTrackerForNode(node).stored); blahIter != begin(edge->bestTrackerForNode(node).stored) + edge->bestTrackerForNode(node).num; blahIter++)
+        for (auto blahIter = begin(bestTrackerForEdgeAndNode.stored); blahIter != begin(bestTrackerForEdgeAndNode.stored) + bestTrackerForEdgeAndNode.num; blahIter++)
         {
-            PathValue blee(edge, blahIter->otherEdge, blahIter->value);
-            pathValuesByVal.insert(blee);
+            PathValue pathValue(edge, blahIter->otherEdge, blahIter->value);
+            pathValuesByVal.insert(pathValue);
         }
     }
     return maxPathValueProduct;
