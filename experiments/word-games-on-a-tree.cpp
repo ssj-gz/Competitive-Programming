@@ -1702,7 +1702,7 @@ void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTree
     findWordsCenteredAroundCentroid(centroid, reversedWordPrefixes, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
 
     // TODO - do we need to do this?
-#if 1
+#if 0
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     cout << " Switched child order" << endl;
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
