@@ -1588,7 +1588,55 @@ class SuffixTreeBuilder
 
 using Cursor = SuffixTreeBuilder::Cursor;
 
-void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& wordSuffixes, const vector<Word>& words, vector<vector<bool>>& wasSuffixForWordBeginningAtFound)
+class SuffixTracker
+{
+    public:
+    SuffixTracker(const vector<Word>& words)
+    {
+        m_wasSuffixForWordBeginningAtFound.resize(words.size());
+        for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
+        {
+            m_wasSuffixForWordBeginningAtFound[wordIndex].clear();
+            m_wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
+        }
+    }
+    bool wasSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos)
+    {
+        return value(wordIndex, suffixBeginPos);
+    }
+    void setSuffixForWordBeginningAtFound(int wordIndex, int suffixBeginPos)
+    {
+        value(wordIndex, suffixBeginPos) = true;
+    }
+    void clear()
+    {
+        m_versionNumber++;
+    }
+    int wordLength(int wordIndex)
+    {
+        return m_wasSuffixForWordBeginningAtFound[wordIndex].size();
+    }
+    private:
+        struct VersionedValue
+        {
+            int versionNumber = 0;
+            bool value = false;
+        };
+        vector<vector<VersionedValue>> m_wasSuffixForWordBeginningAtFound;
+        int m_versionNumber = 0;
+        bool& value(int wordIndex, int suffixBeginPos)
+        {
+            auto& versionedValue = m_wasSuffixForWordBeginningAtFound[wordIndex][suffixBeginPos];
+            if (versionedValue.versionNumber != m_versionNumber)
+            {
+                versionedValue.value = false;
+                versionedValue.versionNumber = m_versionNumber;
+            }
+            return versionedValue.value;
+        }
+};
+
+void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& wordSuffixes, const vector<Word>& words, SuffixTracker& wasSuffixForWordBeginningAtFound)
 {
     if (cursor.isOnExplicitState())
     {
@@ -1596,7 +1644,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
         {
             cout << "Found suffix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             const auto suffixBeginPos = words[wordIndex].word.size() - depth;
-            wasSuffixForWordBeginningAtFound[wordIndex][suffixBeginPos] = true;
+            wasSuffixForWordBeginningAtFound.setSuffixForWordBeginningAtFound(wordIndex, suffixBeginPos);
         }
 
     }
@@ -1620,7 +1668,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
 
 }
 
-void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, vector<vector<bool>>& wasSuffixForWordBeginningAtFound)
+int findPrefixes(Node* node, Node* parent, Edge* parentEdge, Edge* firstEdgeFromCentroid, int depth, string& wordFollowed, Cursor cursor, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, SuffixTracker& wasSuffixForWordBeginningAtFound)
 {
     cout << "findPrefixes; word followed: " << wordFollowed << " isOnExplicitState? " << cursor.isOnExplicitState() << endl;
     if (cursor.isOnExplicitState())
@@ -1628,7 +1676,12 @@ void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cur
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
         {
             cout << "Found reversed prefix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
-            if (wasSuffixForWordBeginningAtFound[wordIndex][depth])
+            if (depth == wasSuffixForWordBeginningAtFound.wordLength(wordIndex))
+            {
+                cout << "** Found complete word ending at centroid: " << words[wordIndex].word << endl;
+                node->addElbow(parentEdge, nullptr, words[wordIndex].score);
+            }
+            else if (wasSuffixForWordBeginningAtFound.wasSuffixForWordBeginningAtFound(wordIndex, depth))
             {
                 cout << "** Found complete word: " << words[wordIndex].word << endl;
             }
@@ -1637,6 +1690,7 @@ void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cur
         }
 
     }
+    int maxScoreFromChildren = 0;
     for (auto childEdge : node->neighbours)
     {
         auto child = childEdge->otherNode(node);
@@ -1648,22 +1702,23 @@ void findPrefixes(Node* node, Node* parent, int depth, string& wordFollowed, Cur
         {
             cursor.followLetter(childEdgeLetter);
             wordFollowed += childEdgeLetter;
-            findPrefixes(child, node, depth + 1, wordFollowed, cursor, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
+            const int childScore = findPrefixes(child, node, childEdge, firstEdgeFromCentroid, depth + 1, wordFollowed, cursor, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
             wordFollowed.pop_back();
 
             cursor.moveUp();
+
+            maxScoreFromChildren = max(maxScoreFromChildren, childScore);
         }
     }
 
+    return maxScoreFromChildren;
+
 }
 
-void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, vector<vector<bool>>& wasSuffixForWordBeginningAtFound)
+
+void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, SuffixTracker& suffixTracker)
 {
-    for (int wordIndex = 0; wordIndex < words.size(); wordIndex++)
-    {
-        wasSuffixForWordBeginningAtFound[wordIndex].clear();
-        wasSuffixForWordBeginningAtFound[wordIndex].resize(words[wordIndex].word.size());
-    }
+    suffixTracker.clear();
     string wordFollowed;
     for (auto childEdge : centroid->neighbours)
     {
@@ -1673,7 +1728,7 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
         {
             wordFollowed += childEdge->letterFollowed;
             reversedWordPrefixCursor.followLetter(childEdge->letterFollowed); 
-            findPrefixes(child, centroid, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
+            findPrefixes(child, centroid, childEdge, childEdge, 1, wordFollowed, reversedWordPrefixCursor, reversedWordPrefixes, words, suffixTracker);
             reversedWordPrefixCursor.moveUp();
             wordFollowed.clear();
         }
@@ -1683,18 +1738,17 @@ void findWordsCenteredAroundCentroid(Node* centroid, SuffixTreeBuilder& wordSuff
         {
             wordFollowed += childEdge->letterFollowed;
             suffixCursor.followLetter(childEdge->letterFollowed);
-            findAndLogSuffixes(child, centroid, 1, wordFollowed, suffixCursor, wordSuffixes, words, wasSuffixForWordBeginningAtFound);
+            findAndLogSuffixes(child, centroid, 1, wordFollowed, suffixCursor, wordSuffixes, words, suffixTracker);
             suffixCursor.moveUp();
             wordFollowed.clear();
         }
     }
 }
 
-void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words)
+void processCentroid(Node* centroid, SuffixTreeBuilder& wordSuffixes, SuffixTreeBuilder& reversedWordPrefixes, const vector<Word>& words, SuffixTracker& wasSuffixForWordBeginningAtFound)
 {
     cout << "processCentroid" << endl;
     string wordFollowed;
-    vector<vector<bool>> wasSuffixForWordBeginningAtFound(words.size());
 
     findWordsCenteredAroundCentroid(centroid, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
 
@@ -1734,10 +1788,12 @@ vector<int> findNodeScores(vector<Node>& nodes, const vector<Word>& words)
 
     }
 
+    SuffixTracker wasSuffixForWordBeginningAtFound(words);
+
     auto someNode = &(nodes.front());
-    decompose(someNode, [&wordSuffixes, &reversedWordPrefixes, &words](Node* node) 
+    decompose(someNode, [&wordSuffixes, &reversedWordPrefixes, &words, &wasSuffixForWordBeginningAtFound](Node* node) 
             {
-                processCentroid(node, wordSuffixes, reversedWordPrefixes, words);
+                processCentroid(node, wordSuffixes, reversedWordPrefixes, words, wasSuffixForWordBeginningAtFound);
             });
 
     return nodeScores;
