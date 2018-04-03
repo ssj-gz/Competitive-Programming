@@ -1853,6 +1853,8 @@ vector<int64_t> findNodeScores(vector<Node>& nodes)
         else
             node.score = node.singleWordBestScore;
 
+        node.score *= node.multiplier;
+
         nodeScores.push_back(node.score);
     }
 
@@ -1870,7 +1872,7 @@ int main(int argc, char* argv[])
 
     if (argc == 2)
     {
-        const int maxNumNodes = 50;
+        const int maxNumNodes = 100;
         const int maxNumWords = 50;
         const int maxNumLetters = 26;
         const int maxWordScore = 500;
@@ -2284,6 +2286,9 @@ int main(int argc, char* argv[])
     }
 
     auto nodeScores = findNodeScores(nodes);
+#ifdef BRUTE_FORCE
+    const auto nodeScoresOriginal = nodeScores;
+#endif
     sort(nodeScores.begin(), nodeScores.end());
     bool currentPlayerIsAlice = true;
     int aliceScore = 0;
@@ -2302,6 +2307,7 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
 
     const auto bruteForceNodeScores = findNodeScoresBruteForce(nodes, words);
+    assert(bruteForceNodeScores == nodeScoresOriginal);
     for (const auto& node : nodes)
     {
         cout << "wee node: " << node.index << " singleWordBestScoreBruteForce: " << node.singleWordBestScoreBruteForce << " singleWordBestScore: " << node.singleWordBestScore << endl;
