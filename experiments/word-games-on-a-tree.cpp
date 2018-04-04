@@ -14,8 +14,8 @@
 
 using namespace std;
 
-const int maxK = 50;
-constexpr int maxToStore = 3;
+const auto maxK = 50;
+constexpr auto maxToStore = 3;
 
 struct Edge;
 struct Node
@@ -77,7 +77,7 @@ struct Word
 void BestTracker::add(int64_t value, Edge* otherEdge)
 {
     assert(num <= maxToStore);
-    for (int i = 0; i < num; i++)
+    for (auto i = 0; i < num; i++)
     {
         if (stored[i].otherEdge == otherEdge)
         {
@@ -144,7 +144,7 @@ int64_t bestCrosswordScore(Node* node)
             {
                 if (!shareAnEdge(pathValue, otherPathValue))
                 {
-                    const int product = pathValue.value * otherPathValue.value;
+                    const auto product = pathValue.value * otherPathValue.value;
                     if (product > maxPathValueProduct)
                     {
                         maxPathValueProduct = product;
@@ -1703,11 +1703,11 @@ int main(int argc, char* argv[])
 
 
     vector<Edge> edges(numNodes - 1);
-    int edgeId = 1;
+    auto edgeId = 1;
     for (auto& edge : edges)
     {
-        const int node1Index = readInt() - 1;
-        const int node2Index = readInt() - 1;
+        const auto node1Index = readInt() - 1;
+        const auto node2Index = readInt() - 1;
         cout << "node1Index: " << node1Index << " node2Index: " << node2Index << endl;
         char letter;
         cin >> letter;
@@ -1727,7 +1727,7 @@ int main(int argc, char* argv[])
         edgeId++;
     }
 
-    const int numWords = readInt();
+    const auto numWords = readInt();
     words.resize(numWords);
     for (auto& word : words)
     {
