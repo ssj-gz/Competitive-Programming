@@ -1746,8 +1746,8 @@ int main(int argc, char* argv[])
 #endif
     sort(nodeScores.begin(), nodeScores.end());
     bool currentPlayerIsAlice = true;
-    int aliceScore = 0;
-    int bobScore = 0;
+    int64_t aliceScore = 0;
+    int64_t bobScore = 0;
     while (!nodeScores.empty())
     {
         (currentPlayerIsAlice ? aliceScore : bobScore) += nodeScores.back();
