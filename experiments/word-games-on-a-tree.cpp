@@ -38,6 +38,8 @@ struct BestTracker
 {
     void add(int64_t value, Edge* otherEdge);
     int num = 0;
+    //int64_t lowestValue = numeric_limits<int64_t>::min();
+    int64_t lowestValue = 0;
     struct Blah
     {
         int64_t value = -1;
@@ -77,6 +79,8 @@ struct Word
 void BestTracker::add(int64_t value, Edge* otherEdge)
 {
     assert(num <= maxToStore);
+    if (value < lowestValue && num == 3)
+        return;
     for (auto i = 0; i < num; i++)
     {
         if (stored[i].otherEdge == otherEdge)
@@ -90,6 +94,13 @@ void BestTracker::add(int64_t value, Edge* otherEdge)
     num++;
     sort(stored, stored + num, [](const auto& lhs,  const auto& rhs) { return lhs.value > rhs.value; });
     num = min(num, maxToStore);
+    assert(num > 0);
+    lowestValue = numeric_limits<int64_t>::max();
+    for (int i = 0; i < num; i++)
+    {
+        if (stored[i].value < lowestValue)
+            lowestValue = stored[i].value;
+    }
 };
 struct PathValue
 {
@@ -110,7 +121,7 @@ ostream& operator<<(ostream& os, const PathValue& pathValue)
 
 int64_t bestCrosswordScore(Node* node)
 {
-    cout << "bestCrosswordScore: " << node->index << endl; 
+    //cout << "bestCrosswordScore: " << node->index << endl; 
     auto comparePathValues = [](const PathValue& lhs, const PathValue& rhs) 
     {
         if (lhs.value != rhs.value)
@@ -165,7 +176,7 @@ int64_t bestCrosswordScore(Node* node)
 void Node::addElbow(Edge* edge1, Edge* edge2, int64_t score)
 {
     singleWordBestScore = max(singleWordBestScore, score);
-    cout << "Add elbow to node: " << index << " edge1: " << (edge1 != nullptr ? edge1->edgeId : -1) << " edge2: " << (edge2 != nullptr ? edge2->edgeId : -1) << " score: " << score << endl;
+    //cout << "Add elbow to node: " << index << " edge1: " << (edge1 != nullptr ? edge1->edgeId : -1) << " edge2: " << (edge2 != nullptr ? edge2->edgeId : -1) << " score: " << score << endl;
 
     assert(edge1 != nullptr || edge2 != nullptr);
     assert(edge1 == nullptr || (edge1->nodeA == this || edge1->nodeB == this));
@@ -872,7 +883,7 @@ class SuffixTreeBuilder
                     if (state != m_root)
                     {
                         state->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSeparatorCharIndex] - wordSeparatorCharBegin);
-                        cout << "state " << state << " is final (erased transition) for: " << state->data.wordIndicesIsFinalStateFor.back() << endl;
+                        //cout << "state " << state << " is final (erased transition) for: " << state->data.wordIndicesIsFinalStateFor.back() << endl;
                     }
                     continue;
                 }
@@ -880,11 +891,11 @@ class SuffixTreeBuilder
                 {
                     substringFollowed.endIndex = nextSeparatorCharIndex - 1;
                     transitionIter->nextState->transitions.clear();
-                    cout << "Cleared transitions for " << transitionIter->nextState << endl;
+                    //cout << "Cleared transitions for " << transitionIter->nextState << endl;
                     //if (state != m_root)
                     {
                         transitionIter->nextState->data.wordIndicesIsFinalStateFor.push_back(m_currentString[nextSeparatorCharIndex] - wordSeparatorCharBegin);
-                        cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
+                        //cout << "state " << transitionIter->nextState << " is final (next state) for: " << transitionIter->nextState->data.wordIndicesIsFinalStateFor.back() << endl;
                     }
                 }
 
@@ -1430,7 +1441,7 @@ void findAndLogSuffixes(Node* node, Node* parent, int depth, string& wordFollowe
     {
         for (auto wordIndex : cursor.stateData().wordIndicesIsFinalStateFor)
         {
-            cout << "Found suffix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
+            //cout << "Found suffix of word: " << words[wordIndex].word << " length: " << depth << " wordFollowed: " << wordFollowed << endl;
             const auto suffixBeginPos = words[wordIndex].word.size() - depth;
             suffixTracker.setSuffixForWordBeginningAtFound(wordIndex, suffixBeginPos, firstEdgeFromCentroid);
         }
@@ -1467,11 +1478,12 @@ int64_t findPrefixes(Node* node, Node* parent, Edge* parentEdge, int depth, stri
             {
                 const int64_t completeWordScore = words[wordIndex].score;
                 maxScore = max(maxScore, completeWordScore);
-
                 if (wordFollowed.size() == words[wordIndex].word.length())
                     currentCentroid->addElbow(firstEdgeFromCentroid, nullptr, completeWordScore);
 
+
                 node->addElbow(parentEdge, nullptr, completeWordScore);
+
                 for (const auto& firstEdgeFromCentroidForMatchingSuffix : suffixTracker.firstEdgesFromCentroidForFoundSuffix(wordIndex, depth))
                     currentCentroid->addElbow(firstEdgeFromCentroid, firstEdgeFromCentroidForMatchingSuffix, completeWordScore);
             }
@@ -1576,7 +1588,7 @@ vector<int64_t> findNodeScores(vector<Node>& nodes)
     for (auto& node : nodes)
     {
         node.crossedWordsBestScore = bestCrosswordScore(&node);
-        cout << "node: " << node.index << " singleWordBestScore: " << node.singleWordBestScore << " crossedWordsBestScore: " << node.crossedWordsBestScore << endl;
+        //cout << "node: " << node.index << " singleWordBestScore: " << node.singleWordBestScore << " crossedWordsBestScore: " << node.crossedWordsBestScore << endl;
         if (node.crossedWordsBestScore != 0)
             node.score = node.crossedWordsBestScore;
         else
@@ -1610,9 +1622,9 @@ int main(int argc, char* argv[])
         const int numForcedWords = 2;
         const string forcedWord("haggis");
         const string forcedWord2("ragamuffin");
-        const int numNodes = max(static_cast<int>(forcedWord.size() + forcedWord2.size()), (rand() % maxNumNodes) + 1);
+        //const int numNodes = max(static_cast<int>(forcedWord.size() + forcedWord2.size()), (rand() % maxNumNodes) + 1);
         const int numLettersToUse = (rand() % maxNumLetters) + 1;
-        const int numWords = max(numForcedWords, (rand() % maxNumWords) + 1);
+        //const int numWords = max(numForcedWords, (rand() % maxNumWords) + 1);
         const int maxWordLength = (rand() % maxMaxWordLength) + 1;
 
 
@@ -1632,6 +1644,7 @@ int main(int argc, char* argv[])
             cerr << "added word: " << word << endl;
         };
         auto rootNode = treeGenerator.createNode();
+#if 0
         addWord(forcedWord, rootNode);
         assert(treeGenerator.nodes().size() >= 4);
         auto crossNode = treeGenerator.nodes()[3];
@@ -1663,6 +1676,30 @@ int main(int argc, char* argv[])
         }
         words[0].word = forcedWord;
         words[1].word = forcedWord2;
+#else
+        const int numNodes = 100'000;
+        treeGenerator.addNodeChain(rootNode, 300);
+        treeGenerator.addNodeChain(rootNode, 300);
+        treeGenerator.addNodeChain(rootNode, 300);
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 50.0);
+        cerr << "Blee: " << treeGenerator.numNodes() << endl;
+        for (auto& edge : treeGenerator.edges())
+        {
+            edge->data.letterFollowed = 'a';
+        }
+        for (auto& node : treeGenerator.nodes())
+        {
+            node->data.multiplier = (rand() % maxNodeMultiplier) + 1;
+        }
+        const int numWords = 50;
+        vector<TestWord> words(numWords);
+        for (int i = 0; i < numWords; i++)
+        {
+            words[i].score = i + 1;
+            words[i].word = string(3 * i + 1, 'a');
+        }
+#endif
+
 
         {
             treeGenerator.scrambleNodeIdsAndReorder(nullptr);
@@ -1708,10 +1745,10 @@ int main(int argc, char* argv[])
     {
         const auto node1Index = readInt() - 1;
         const auto node2Index = readInt() - 1;
-        cout << "node1Index: " << node1Index << " node2Index: " << node2Index << endl;
+        //cout << "node1Index: " << node1Index << " node2Index: " << node2Index << endl;
         char letter;
         cin >> letter;
-        cout << "letter followed: " << letter << endl;
+        //cout << "letter followed: " << letter << endl;
 
         auto node1 = &(nodes[node1Index]);
         auto node2 = &(nodes[node2Index]);
