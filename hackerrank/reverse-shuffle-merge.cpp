@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     }
 
     assert(s.size() % 2 == 0);
-    const auto numLettersInA = s.size() / 2;
+    const auto desiredNumLettersInA = s.size() / 2;
 
     int numOfLetterCanAddToA[alphabetSize] = {};
     for (auto letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     const string originalSReversed(sReversed);
 
     string A;
-    while (A.size() < numLettersInA)
+    while (A.size() < desiredNumLettersInA)
     {
         // Update numOfLetterCanAddToShuffleA, according to the logic in (*): every letter in the prefix we've removed so far
         // must be treated as "added to shuffle", *except* for those that have been added to A.
