@@ -10,13 +10,11 @@
 
 using namespace std;
 
-const int numLetters = 26;
+constexpr auto alphabetSize = 26;
 
 string reversed(const string& s)
 {
-    string reversedS(s);
-    reverse(reversedS.begin(), reversedS.end());
-    return reversedS;
+    return {s.rbegin(), s.rend()};
 }
 
 int main(int argc, char* argv[])
@@ -112,17 +110,17 @@ int main(int argc, char* argv[])
     string s;
     cin >> s;
 
-    int letterHistogram[numLetters] = {};
+    int letterHistogram[alphabetSize] = {};
     for (const auto letter : s)
     {
         letterHistogram[letter - 'a']++;
     }
 
     assert(s.size() % 2 == 0);
-    const int numLettersInA = s.size() / 2;
+    const auto numLettersInA = s.size() / 2;
 
-    int numOfLetterCanAddToA[numLetters] = {};
-    for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
+    int numOfLetterCanAddToA[alphabetSize] = {};
+    for (auto letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
     {
         assert(letterHistogram[letterIndex] % 2 == 0);
         numOfLetterCanAddToA[letterIndex] = letterHistogram[letterIndex] / 2;
@@ -136,27 +134,27 @@ int main(int argc, char* argv[])
     {
         // Update numOfLetterCanAddToShuffleA, according to the logic in (*): every letter in the prefix we've removed so far
         // must be treated as "added to shuffle", *except* for those that have been added to A.
-        int numOfLetterCanAddToShuffleA[numLetters] = {};
-        for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
+        int numOfLetterCanAddToShuffleA[alphabetSize] = {};
+        for (auto letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
         {
-            const int numOfLetterInPrefixAddedToA = (letterHistogram[letterIndex] - numOfLetterCanAddToA[letterIndex]);
+            const auto numOfLetterInPrefixAddedToA = (letterHistogram[letterIndex] - numOfLetterCanAddToA[letterIndex]);
             numOfLetterCanAddToShuffleA[letterIndex] = numOfLetterInPrefixAddedToA;
         }
-        const int sizeOfRemovedPrefix = originalSReversed.size() - sReversed.size();
-        for (int i = 0; i < sizeOfRemovedPrefix; i++)
+        const auto sizeOfRemovedPrefix = originalSReversed.size() - sReversed.size();
+        for (auto i = 0; i < sizeOfRemovedPrefix; i++)
         {
-            const int letterIndex = originalSReversed[i] - 'a';
+            const auto letterIndex = originalSReversed[i] - 'a';
             numOfLetterCanAddToShuffleA[letterIndex]--;
         }
 
         // Find the next best character for A.
-        int bestNextLetterIndex = -1;
-        bool haveCandidateBestNextLetter = false;
+        auto bestNextLetterIndex = -1;
+        auto haveCandidateBestNextLetter = false;
         for (const auto letter : sReversed)
         {
-            const int letterIndex = letter - 'a';
-            const bool isBetterCandidate = ((!haveCandidateBestNextLetter || letterIndex < bestNextLetterIndex) && numOfLetterCanAddToA[letterIndex] > 0);
-            const bool canAddPreviousBestToShuffleA = (!haveCandidateBestNextLetter || numOfLetterCanAddToShuffleA[bestNextLetterIndex] > 0);
+            const auto letterIndex = letter - 'a';
+            const auto isBetterCandidate = ((!haveCandidateBestNextLetter || letterIndex < bestNextLetterIndex) && numOfLetterCanAddToA[letterIndex] > 0);
+            const auto canAddPreviousBestToShuffleA = (!haveCandidateBestNextLetter || numOfLetterCanAddToShuffleA[bestNextLetterIndex] > 0);
             if (isBetterCandidate && canAddPreviousBestToShuffleA)
             {                                          
                 if (haveCandidateBestNextLetter)
@@ -169,7 +167,7 @@ int main(int argc, char* argv[])
             {  
                 // Add to shuffleA.
                 numOfLetterCanAddToShuffleA[letterIndex]--;
-                const bool hitInvalidState = (numOfLetterCanAddToShuffleA[letterIndex] < 0);
+                const auto hitInvalidState = (numOfLetterCanAddToShuffleA[letterIndex] < 0);
                 if (hitInvalidState)         
                     break;                   
             }
