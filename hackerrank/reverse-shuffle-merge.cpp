@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     }
 
     string sReversed = reversed(s);
-    const string originalSReversed(sReversed);
+    const auto originalSReversed{sReversed};
 
     string A;
     while (A.size() < desiredNumLettersInA)
