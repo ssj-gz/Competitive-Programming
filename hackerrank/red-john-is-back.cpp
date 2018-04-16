@@ -13,7 +13,7 @@ int findNumWaysToMakeN(int N, vector<int>& numWaysToMakeNLookup)
     if (numWaysToMakeNLookup[N] != -1)
         return numWaysToMakeNLookup[N];
 
-    int result = 0;
+    auto result = 0;
     if (N >= 1)
         result += findNumWaysToMakeN(N - 1, numWaysToMakeNLookup);
     if (N >= 4)
@@ -40,7 +40,7 @@ int main()
     vector<int> numWaysToMakeNLookup(maxN + 1, -1);
 
     auto maxNumWaysToMakeN = 0;
-    for (int i = 1; i <= maxN; i++)
+    for (auto i = 1; i <= maxN; i++)
     {
         // Populate lookup table and find maxNumWaysToMakeN.
         maxNumWaysToMakeN = max(maxNumWaysToMakeN, findNumWaysToMakeN(i, numWaysToMakeNLookup));
@@ -48,23 +48,23 @@ int main()
 
     vector<bool> isPrime(maxNumWaysToMakeN + 1, true);
     isPrime[1] = false;
-    for (int factor = 2; factor < isPrime.size(); factor++)
+    for (auto factor = 2; factor < isPrime.size(); factor++)
     {
-        for (int composite = 2 * factor; composite < isPrime.size(); composite += factor)
+        for (auto composite = 2 * factor; composite < isPrime.size(); composite += factor)
         {
             isPrime[composite] = false;
         }
     }
 
-    for (int t = 0; t < T; t++)
+    for (auto t = 0; t < T; t++)
     {
         int N;
         cin >> N;
 
         const auto numWaysToMakeN = findNumWaysToMakeN(N, numWaysToMakeNLookup);
 
-        int numPrimes = 0;
-        for (int i = 1; i <= numWaysToMakeN; i++)
+        auto numPrimes = 0;
+        for (auto i = 1; i <= numWaysToMakeN; i++)
         {
             if (isPrime[i])
                 numPrimes++;
