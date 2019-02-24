@@ -16,7 +16,6 @@
 #include <cassert>
 
 using namespace std;
-const int numLetters = 26;
 
 /**
  * Simple implementation of Ukkonen's algorithm:
@@ -638,38 +637,9 @@ class SuffixTreeBuilder
         }
 };
 
-char bruteForce(const string& s, long k)
-{
-    set<string> allSubstrings;
-    for (int i = 0; i < s.size(); i++)
-    {
-        for (int j = i; j < s.size(); j++)
-        {
-            const string substring = s.substr(i, j - i + 1);
-            allSubstrings.insert(substring);
-        }
-    }
-    string concatenatedSubstrings;
-    string concatenatedSubstringsWithBreaks;
-    for (const auto& substring : allSubstrings)
-    {
-        concatenatedSubstrings += substring;
-        concatenatedSubstringsWithBreaks += substring + "|";
-    }
-    //cout << "concatenatedSubstrings: " << concatenatedSubstrings << " concatenatedSubstrings.size(): " << concatenatedSubstrings.size() << endl;
-    //cout << "concatenatedSubstringsWithBreaks: " << concatenatedSubstringsWithBreaks << endl;
-
-    if (k >= concatenatedSubstrings.size())
-        return '\0';
-
-    return concatenatedSubstrings[k - 1];
-}
-
-#define EXHAUSTIVE
-
 char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substringCursor, int lengthSoFar, long& sizeOfConcatenatedStrings)
 {
-    //cout << "computeResultAux: cursor: " << substringCursor.description() << " followed: " << substringCursor.dbgStringFollowed() << " lengthSoFar: " << lengthSoFar << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
+    assert(lengthSoFar == substringCursor.dbgStringFollowed().size());
     if (substringCursor.isOnExplicitState())
     {
         vector<char> sortedNextLetters = substringCursor.nextLetters();
@@ -679,13 +649,12 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
         {
             if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
             {
-                //cout << "Found during thingy: lengthSoFar: " << lengthSoFar << " followed: " << substringCursor.dbgStringFollowed() << endl;
-                const auto substring = substringCursor.dbgStringFollowed() + nextLetter;
-                //cout << "substring: " << substring << endl;
+                // Following this letter makes the length of the concatenated string exceed k; compute
+                // the final result.
+                const auto substringFollowedToExceedK = substringCursor.dbgStringFollowed() + nextLetter;
+                assert(substring.length() == newLengthSoFar);
                 const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                //cout << "Index in substring: " << indexInSubstring << endl;
-                //cout << "Letter: " << substring[indexInSubstring] << endl;
-                return substring[indexInSubstring];
+                return substringFollowedToExceedK[indexInSubstring];
             }
             sizeOfConcatenatedStrings += newLengthSoFar;
             auto cursorAfterLetter(substringCursor);
@@ -697,46 +666,39 @@ char computeResultAux(const string& s, long k, SuffixTreeBuilder::Cursor substri
     }
     else
     {
-        const long originalSizeOfConcatenatedStrings = sizeOfConcatenatedStrings;
-        const auto remainderOfCurrentTransition = substringCursor.remainderOfCurrentTransition();
-        int newLengthSoFar = lengthSoFar + 1;
-        // TODO - optimise this - a closed-form solution is possible.
-        //long sizeOfConcatenatedStringsIncrease = 0;
-        //cout << "Bloop: remainderOfCurrentTransition().length() " << remainderOfCurrentTransition.length() << " lengthSoFar: " << lengthSoFar << endl;
-        auto sumOfUpToN = [](const long n)
+        auto sumOfUpToN = [](long n)
         {
             return n * (n + 1) / 2;
         };
-        const long sizeOfConcatenatedStringsIncreaseOptimised = sumOfUpToN(lengthSoFar + remainderOfCurrentTransition.length()) - sumOfUpToN(lengthSoFar);
-        if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + sizeOfConcatenatedStringsIncreaseOptimised)
+        const auto remainderOfCurrentTransition = substringCursor.remainderOfCurrentTransition();
+        // Use closed-form computation to compute the increase in the length of the concatenated string if we followed the
+        // current transition character-by-character.
+        const long increaseInConcatenatedStringLength = sumOfUpToN(lengthSoFar + remainderOfCurrentTransition.length()) - sumOfUpToN(lengthSoFar);
+        if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + increaseInConcatenatedStringLength)
         {
+            // Following this transition would make the current concatenated string exceed k.
+            int newLengthSoFar = lengthSoFar + 1;
             for (int i = 0; i < remainderOfCurrentTransition.length(); i++)
             {
-                //cout << "i: " << i << " remainderOfCurrentTransition.length(): " << remainderOfCurrentTransition.length() << " sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << endl;
                 if (k >= sizeOfConcatenatedStrings && k <= sizeOfConcatenatedStrings + newLengthSoFar)
                 {
-                    //cout << "Found: sizeOfConcatenatedStrings: " << sizeOfConcatenatedStrings << " (sizeOfConcatenatedStrings + newLengthSoFar): " << (sizeOfConcatenatedStrings + newLengthSoFar) << endl;
-                    const auto substring = substringCursor.dbgStringFollowed() + s.substr(remainderOfCurrentTransition.startIndex() + i, remainderOfCurrentTransition.length() - i);
-                    //cout << "substring: " << substring << endl;
+                    // Following i characters from the transition makes the concatenated string length exceed k;
+                    // compute the final result.
+                    substringCursor.followNextLetters(i);
+                    const auto substringFollowedToExceedK = substringCursor.dbgStringFollowed() + s.substr(remainderOfCurrentTransition.startIndex() + i, remainderOfCurrentTransition.length() - i);
                     const int indexInSubstring = k - sizeOfConcatenatedStrings - 1;
-                    //cout << "Index in substring: " << indexInSubstring << endl;
-                    //cout << "Letter: " << substring[indexInSubstring] << endl;
-                    return substring[indexInSubstring];
+                    return substringFollowedToExceedK[indexInSubstring];
                 }
-                //sizeOfConcatenatedStringsIncrease += newLengthSoFar;
-                //cout << " added: " << newLengthSoFar << endl;
-                //newLengthSoFar++;
-                //substringCursor.followNextLetter();
+                sizeOfConcatenatedStrings += newLengthSoFar;
+                newLengthSoFar++;
             }
+            assert(false);
         }
-        const long newLengthSoFarOptimised = lengthSoFar + remainderOfCurrentTransition.length();
+        // Follow remainder of transition in constant time and recurse.
+        sizeOfConcatenatedStrings += increaseInConcatenatedStringLength;
         auto cursorAfter(substringCursor);
         cursorAfter.followNextLetters(remainderOfCurrentTransition.length());
-        //assert(sizeOfConcatenatedStringsIncreaseOptimised == sizeOfConcatenatedStringsIncrease);
-        sizeOfConcatenatedStrings += sizeOfConcatenatedStringsIncreaseOptimised;
-        //cout << "sizeOfConcatenatedStringsIncrease: " << sizeOfConcatenatedStringsIncrease << "  sizeOfConcatenatedStringsIncreaseOptimised: " << sizeOfConcatenatedStringsIncreaseOptimised << endl;
-        //cout << " after: " << substringCursor.dbgStringFollowed() << endl;
-        const char result = computeResultAux(s, k, cursorAfter, newLengthSoFarOptimised, sizeOfConcatenatedStrings);
+        const char result = computeResultAux(s, k, cursorAfter, lengthSoFar + remainderOfCurrentTransition.length(), sizeOfConcatenatedStrings);
         if (result)
             return result;
     }
@@ -747,14 +709,30 @@ char computeResult(const string& s, long k)
 {
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
-    //suffixTree.dumpGraph();
 
     long sizeOfConcatenatedStrings = 0;
     return computeResultAux(s, k, suffixTree.initialCursor(), 0, sizeOfConcatenatedStrings);
 }
 
 int main() {
-#ifndef EXHAUSTIVE
+    // Another fairly easy one.  Imagine we did a DFS of the suffix tree where, when given a choice
+    // of the next letter to follow, we follow them in alphabetical order.  As we do this character-by-character,
+    // we would sketch out the list of substrings in lexicographic order.  Imagine further that as we went, 
+    // we appended the current substring sketched out to some string, x; then x[k - 1] would give us
+    // the result.  This would be about O(n^3), though :)
+    // Instead of actually appending the substring, we could just keep track of the length of this imaginary
+    // string x (with each character explored, it would increase by the length of the current substring
+    // sketched out).  As soon as |x| >= k, we can, with a little care, find x[k - 1] - it will be some
+    // index of the current substring sketched out.  This would still be o(n^2), though.
+    // So, even better: if we've sketched out some substring s' of length l,  and if we, in our DFS, are currently on a transition
+    // with m remaining characters, we could deduce the increase in |x| that would be obtained by following
+    // the transition char by char: the increase is:
+    //  (l + 1) + (l + 2) + ... + (l + m)
+    // This is easily computed in constant time: it is (l + m) * (l + m + 1) / 2 - l * (l + 1) / 2.
+    // If |x| plus this increase still does not exceed k, then we can just jump to end of the transition
+    // (in constant time), update |x| (again, constant time) and continue the search.  If it does, we 
+    // can then descend to exploring the transition character by character until the concatenated string
+    // exceeds k, as we do in the unoptimised case.  And that's it!
     int T;
     cin >> T;
     for (int t = 0; t < T; t++)
@@ -763,53 +741,8 @@ int main() {
         cin >> s;
         long k;
         cin >> k;
-        cout << "s: " << s << " k: " << k << endl;
         const auto result = computeResult(s, k);
-        const auto bruteForceResult = bruteForce(s, k);
-        cout << "optimised result: " << result << endl;
-        cout << "Brute force: " << bruteForceResult << endl;
         cout << result << endl;
     }
-#else
-    string s = "a";
-    const int numLetters = 3;
-    while (true)
-    {
-        cout << "s: " << s <<  " size: " << s.size() << endl;
-
-        long k = 1;
-        while (true)
-        {
-            //cout << " k: " << k << endl;
-            const auto result = computeResult(s, k);
-            const auto bruteForceResult = bruteForce(s, k);
-            if (bruteForceResult == '\0')
-            {
-                assert(result == bruteForceResult);
-                break;
-            }
-            cout << "optimised result: " << result << endl;
-            cout << "Brute force: " << bruteForceResult << endl;
-            assert(result == bruteForceResult);
-            k++;
-        }
-
-        int index = 0;
-        while (index < s.size() && s[index] == 'a' + numLetters)
-        {
-            s[index] = 'a';
-            index++;
-        }
-        if (index == s.size())
-        {
-            s.push_back('a');
-        }
-        else
-        {
-            s[index]++;
-        }
-    }
-#endif
     return 0;
 }
-
