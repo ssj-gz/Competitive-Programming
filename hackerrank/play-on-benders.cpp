@@ -6,10 +6,12 @@
 
 using namespace std;
 
+constexpr int unknownGrundyNumber = -1;
+
 struct Location
 {
     vector<Location*> neighbours;
-    int grundyNumberForSoldier = -1;
+    int grundyNumberForSoldier = unknownGrundyNumber;
 };
 
 int mex(const vector<int>& numbers)
@@ -33,7 +35,7 @@ int mex(const vector<int>& numbers)
 
 int findGrundyNumber(Location* location)
 {
-    if (location->grundyNumberForSoldier != -1)
+    if (location->grundyNumberForSoldier != unknownGrundyNumber)
         return location->grundyNumberForSoldier;
 
     vector<int> grundyNumbersForNeighbours;
