@@ -28,7 +28,7 @@ class SegmentTree
         using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
         SegmentTree(int maxNumber, CombineValues combineValues, ApplyOperator applyOperator, CombineOperators combineOperators)
-            : m_maxNumber{maxNumber}, m_combineValues{combineValues}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
+            : m_combineValues{combineValues}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}, m_maxNumber{maxNumber}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -59,10 +59,10 @@ class SegmentTree
                 powerOf2 /= 2;
             }
             // Cell matrix parent/child.
-            for (int cellRow = 0; cellRow < m_cellMatrix.size() - 1; cellRow++)
+            for (std::size_t cellRow = 0; cellRow < m_cellMatrix.size() - 1; cellRow++)
             {
                 int childCellIndex = 0;
-                for (int cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
+                for (std::size_t cellCol = 0; cellCol < m_cellMatrix[cellRow].size(); cellCol++)
                 {
                     auto& cell = m_cellMatrix[cellRow][cellCol];
                     cell.leftChild = &(m_cellMatrix[cellRow + 1][childCellIndex]);
@@ -249,14 +249,14 @@ class SegmentTree
 #ifdef VERIFY_SEGMENT_TREE
             assert(destCells.front()->rangeBegin == start);
             assert(destCells.back()->rangeEnd == end);
-            for (int i = 1; i < destCells.size(); i++)
+            for (std::size_t i = 1; i < destCells.size(); i++)
             {
                 assert(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1);
             }
 #endif
         }
 
-        void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
+        void collectMinCellsForRange(int start, int end, std::size_t cellRow, int powerOf2, vector<Cell*>& destCells)
         {
             if (cellRow == m_cellMatrix.size())
                 return;
