@@ -345,26 +345,26 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
     vector<int64_t> minCostStartingWithStudent(n);
     minCostStartingWithStudent.back() = 1; // Just run instantly to finish line.
 
-    for (int i = n - 2; i >= 0; i--)
+    for (int studentIndex = n - 2; studentIndex >= 0; studentIndex--)
     {
-        auto costIfPassedToStudent = [i, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
+        auto costIfPassedToStudent = [studentIndex, &heights, &prices, &minCostStartingWithStudent](const int nextStudentIndex)
         {
-            const int64_t costIfPassedToNextStudent = (nextStudent - i) // Cost of running to student.
-                + prices[nextStudent] // Student charge
-                + abs(heights[nextStudent] - heights[i]) // Height difference (time taken to exchange).
-                + minCostStartingWithStudent[nextStudent]; 
+            const int64_t costIfPassedToNextStudent = (nextStudentIndex - studentIndex) // Cost of running to student.
+                + prices[nextStudentIndex] // Student charge
+                + abs(heights[nextStudentIndex] - heights[studentIndex]) // Height difference (time taken to exchange).
+                + minCostStartingWithStudent[nextStudentIndex]; 
             return costIfPassedToNextStudent;
         };
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
         bool forcedExchange = false;
-        for (int nextStudent = i + 1; nextStudent < n; nextStudent++)
+        for (int nextStudentIndex = studentIndex + 1; nextStudentIndex < n; nextStudentIndex++)
         {
-            const auto costIfPassedToNextStudent = costIfPassedToStudent(nextStudent);
+            const auto costIfPassedToNextStudent = costIfPassedToStudent(nextStudentIndex);
             if (costIfPassedToNextStudent < minCostStartingHere)
             {
                 minCostStartingHere = costIfPassedToNextStudent;
             }
-            if (heights[nextStudent] > heights[i])
+            if (heights[nextStudentIndex] > heights[studentIndex])
             {
                 forcedExchange = true;
                 break;
@@ -373,9 +373,9 @@ vector<int64_t> minCostBruteForce(const vector<int64_t>& heights, const vector<i
         if (!forcedExchange)
         {
             // Run to finish line.
-            minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - i));
+            minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - studentIndex));
         }
-        minCostStartingWithStudent[i] = minCostStartingHere;
+        minCostStartingWithStudent[studentIndex] = minCostStartingHere;
     }
 
     return minCostStartingWithStudent;
@@ -461,12 +461,12 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     int64_t heightDifferential = 0;
     for (int studentIndex = n - 2; studentIndex >= 0; studentIndex--)
     {
-        auto costIfPassedToStudent = [studentIndex, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
+        auto costIfPassedToStudent = [studentIndex, &heights, &prices, &minCostStartingWithStudent](const int nextStudentIndex)
         {
-            const int64_t costIfPassedToNextStudent = (nextStudent - studentIndex) // Cost of running to student.
-                + prices[nextStudent] // Student charge
-                + abs(heights[nextStudent] - heights[studentIndex]) // Height difference (time taken to exchange).
-                + minCostStartingWithStudent[nextStudent]; 
+            const int64_t costIfPassedToNextStudent = (nextStudentIndex - studentIndex) // Cost of running to student.
+                + prices[nextStudentIndex] // Student charge
+                + abs(heights[nextStudentIndex] - heights[studentIndex]) // Height difference (time taken to exchange).
+                + minCostStartingWithStudent[nextStudentIndex]; 
             return costIfPassedToNextStudent;
         };
         const int tallerStudentIndex = indexOfNextTallerStudent[studentIndex];
