@@ -461,26 +461,26 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
     }
     
     int64_t heightDifferential = 0;
-    for (int i = n - 2; i >= 0; i--)
+    for (int studentIndex = n - 2; studentIndex >= 0; studentIndex--)
     {
-        auto costIfPassedToStudent = [i, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
+        auto costIfPassedToStudent = [studentIndex, &heights, &prices, &minCostStartingWithStudent](const int nextStudent)
         {
-            const int64_t costIfPassedToNextStudent = (nextStudent - i) // Cost of running to student.
+            const int64_t costIfPassedToNextStudent = (nextStudent - studentIndex) // Cost of running to student.
                 + prices[nextStudent] // Student charge
-                + abs(heights[nextStudent] - heights[i]) // Height difference (time taken to exchange).
+                + abs(heights[nextStudent] - heights[studentIndex]) // Height difference (time taken to exchange).
                 + minCostStartingWithStudent[nextStudent]; 
             return costIfPassedToNextStudent;
         };
-        const int tallerStudentIndex = indexOfNextTallerStudent[i];
+        const int tallerStudentIndex = indexOfNextTallerStudent[studentIndex];
 
         int64_t minCostStartingHere = numeric_limits<int64_t>::max();
-        const auto rangeMin = i + 1;
+        const auto rangeMin = studentIndex + 1;
         const auto rangeMax = tallerStudentIndex == -1 ? n - 1 : tallerStudentIndex - 1;
         if (rangeMax >= rangeMin)
         {
             const auto minD = minDTree.combinedValuesInRange(rangeMin, rangeMax, numeric_limits<int64_t>::max());
             const int bestUnforcedPassStudent = nextIndexOfDWithValue[minD];
-            assert(bestUnforcedPassStudent >= i + 1);
+            assert(bestUnforcedPassStudent >= studentIndex + 1);
             minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(bestUnforcedPassStudent));
         }
 
@@ -488,22 +488,22 @@ vector<int64_t> minCost(const vector<int64_t>& heights, const vector<int64_t>& p
         if (!forcedExchange)
         {
             // Run to finish line.
-            minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - i));
+            minCostStartingHere = min(minCostStartingHere, static_cast<int64_t>(n - studentIndex));
         }
         else
         {
             minCostStartingHere = min(minCostStartingHere, costIfPassedToStudent(tallerStudentIndex));
         }
-        minCostStartingWithStudent[i] = minCostStartingHere;
+        minCostStartingWithStudent[studentIndex] = minCostStartingHere;
 
         // Update d.
-        heightDifferential += heights[i + 1] - heights[i];
-        d[i] = minCostStartingWithStudent[i] + 
-            (prices[i])      // Equalise price comparison.
-            - (n - 1 - i) +  // Equalise "cost to run to".
+        heightDifferential += heights[studentIndex + 1] - heights[studentIndex];
+        d[studentIndex] = minCostStartingWithStudent[studentIndex] + 
+            (prices[studentIndex])      // Equalise price comparison.
+            - (n - 1 - studentIndex) +  // Equalise "cost to run to".
             heightDifferential; // Equalise height-difference (time to exchange) cost comparison.
-        minDTree.setValue(i, d[i]);
-        nextIndexOfDWithValue[d[i]] = i;
+        minDTree.setValue(studentIndex, d[studentIndex]);
+        nextIndexOfDWithValue[d[studentIndex]] = studentIndex;
     }
 
     return minCostStartingWithStudent;
@@ -515,6 +515,7 @@ int main(int argc, char** argv)
 {
     if (argc == 2)
     {
+        // Generate randomised testcase.
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
