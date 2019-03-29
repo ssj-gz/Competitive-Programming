@@ -18,6 +18,12 @@
 
 using namespace std;
 
+/**
+  * SegmentTree (with an operator that can be applied to each element in the tree).
+  * Lifted directly from another problem I did (Factorial Array).
+  * The operator is actually unused in A Race Against Time, so this is kind of overkill,
+  * but oh well :)
+  */
 template <typename ValueType, typename OperatorInfo>
 class SegmentTree
 {
