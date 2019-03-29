@@ -7,7 +7,7 @@ Alice and Bob are playing a game with coins on a tree $T$ over $N$ vertices numb
 
 - Alice moves first.
 - If the current player cannot make a move, then that player loses the game.
-- A valid move for a player is to pick a vertex $v \ne 1$ which has at least one coin in it, and move a coin in $v$ $X$ vertices along the shortest path from $v$ to vertex 1, where $X > 0$.
+- A valid move for a player is to pick a vertex $v \ne 1$ which has at least one coin in it, and move a coin in $v$ $X$ vertices along the shortest path from $v$ to vertex 1, where $X \gt 0$.
 
 For example, if the tree $T$ currently looks like this:
 
@@ -30,7 +30,7 @@ For a tree $T'$ on vertices $1,2,...,N$, let $\textit{winner}(T')$ be whichever 
 
 Alice has $q$ queries numbered $1...q$, and the $i$th query consists of a pair $(u_i, v_i)$ of vertices.  She applies the following transform to create a tree $\textit{transform}(T, (u_i, v_i))$ as follows:
 
-- For a given vertex v, let the parent of v, $p(v)$, be the first vertex in the shortest path from $v$ to $1$.
+- For a given vertex $v$, let the parent of $v$, $p(v)$, be the first vertex in the shortest path from $v$ to $1$.
 - Form $\textit{transform}(T, (u_i, v_i))$, a new tree, by first removing the edge from $p(u_i)$ to $u_i$ and then adding a new edge from $v_i$ to $u_i$ i.e. $\textit{transform}(T, (u_i, v_i))$ simply changes $u_i$s parent to $v_i$.
 
 Alice promises that for all her queries, $\textit{transform}(T, (u_i, v_i))$ will be a connected tree on the original $N$ vertices.
