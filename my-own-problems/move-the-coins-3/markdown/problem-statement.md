@@ -7,7 +7,7 @@ Alice and Bob are playing a game with coins on a tree $T$ over $N$ vertices numb
 
 - Alice moves first.
 - If the current player cannot make a move, then that player loses the game.
-- A valid move for a player is to pick a vertex $v \ne R$ which has at least one coin in it, and move a coin in $v$ $X$ vertices along the shortest path from $v$ to vertex R, where $X > 0$.
+- A valid move for a player is to pick a vertex $v \ne R$ which has at least one coin in it, and move a coin in $v$ $X$ vertices along the shortest path from $v$ to vertex $R$, where $X > 0$.
 
 For example, if the tree $T$ currently looks like this and $R=1$:
 
@@ -26,7 +26,7 @@ Let's assume he moves the coin to vertex $2$.  Then the tree now looks like
 
 and it is the other player's turn to move.
 
-For a tree $T$ on vertices $1,2,...,N$ with root $R$, let $\textit{winner}(T, R)$ be whichever of Alice or Bob will win if both players play the game optimally on $T'$ and Alice moves first.
+For a tree $T$ on vertices $1,2,...,N$ with root $R$, let $\textit{winner}(T, R)$ be whichever of Alice or Bob will win if both players play the game optimally on $T$ and Alice moves first.
 
-Given a tree $T$, find the $R$'s such $\textit{winner}(T, R)$ is Bob.
+Given a tree $T$, find the $R$'s such that $\textit{winner}(T, R)$ is Bob.
 
