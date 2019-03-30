@@ -92,7 +92,7 @@ int findNumCorrectGuesses(const Node* node)
     return numCorrectGuessed;
 }
 
-void findMatchingRootNodes(const Node* node, int numCorrectGuessedRequired, int& numMatching, int rootNumCorrectGuesses, int numCorrectlyGuessedForParentNode = -1)
+void findMatchingRootNodes(const Node* node, const int numCorrectGuessedRequired, int& numMatching, const int rootNumCorrectGuesses, const int numCorrectlyGuessedForParentNode = -1)
 {
     const Node* parentNode = node->parentNode;
     const Edge* edgeFollowedFromParent = node->edgeFollowedFromParent;
