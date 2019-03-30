@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <set>
 #include <algorithm>
 #include <memory>
 #include <iomanip>
@@ -98,7 +99,7 @@ double decimalPortionOfDistance(int x, int y)
     return distanceDecimal;
 }
 
-void findFullStonePlacement(int initialStonex, int initialStoneY)
+vector<std::pair<int, int>> findFullStonePlacement(int initialStonex, int initialStoneY)
 {
     vector<int64_t> stoneDistances;
     map<int64_t, vector<pair<int, int>>> stonesWithDistance;
@@ -192,11 +193,7 @@ void findFullStonePlacement(int initialStonex, int initialStoneY)
 
                         if (isValidPlacement)
                         {
-                            for (const auto& stone : stonePlacement)
-                            {
-                                cout << stone.first << " " << stone.second << endl;
-                            }
-                            return;
+                            return stonePlacement;
                         }
                     }
                     highPointer--;
@@ -205,6 +202,8 @@ void findFullStonePlacement(int initialStonex, int initialStoneY)
             }
         }
     }
+    assert(false && "Should always be able  to find a valid placement!");
+    return vector<std::pair<int, int>>();
 }
 
 int main() {
@@ -258,22 +257,43 @@ int main() {
     // to a kind of fixed-point representation using int64_t - this may or may not have speed advantages, but I mainly did it for
     // accuracy when adding!
 
-#if 0
+#if 1
     int x, y;
     cin >> x >> y;
-    findFullStonePlacement(x, y);
+    const auto stonePlacement = findFullStonePlacement(x, y);
+
+    for (const auto& stone : stonePlacement)
+    {
+        cout << stone.first << " " << stone.second << endl;
+    }
 #else
+    int numDistinctDistances = 0;
+    std::set<int> distanceSquareds;
     for (int x = 0; x <= 12; x++)
     {
         for (int y = x; y <= 12; y++)
         {
-            cout << "x: " << x << " y: " << y << endl;
+            const auto distanceSquared = x * x + y * y;
+            if ( isSquare(distanceSquared) )
+                continue;
+            if ( distanceSquareds.find(distanceSquared) != distanceSquareds.end())
+                continue;
+            distanceSquareds.insert(distanceSquared);
+            numDistinctDistances++;
+            cout << "x: " << x << " y: " << y << " distance squared: " << distanceSquared << endl;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            findFullStonePlacement(x, y);
+            const auto stonePlacement = findFullStonePlacement(x, y);
             std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-            std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 <<std::endl;
+            std::cout << "Time taken (seconds) = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 <<std::endl;
+            long double sum = sqrt(x * x + y * y);
+            for (const auto& stone : stonePlacement)
+            {
+                sum += sqrt(stone.first * stone.first + stone.second * stone.second);
+            }
+            std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << "sum: " << sum << std::endl;
             //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono
         }
     }
+    std::cout << "num distinct distances  = " << numDistinctDistances << std::endl;
 #endif
 }
