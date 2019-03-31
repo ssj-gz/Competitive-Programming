@@ -283,6 +283,10 @@ int main() {
             cout << "x: " << x << " y: " << y << " distance squared: " << distanceSquared << endl;
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
             const auto stonePlacement = findFullStonePlacement(x, y);
+            for (const auto& stone : stonePlacement)
+            {
+                cout << stone.first << " " << stone.second << endl;
+            }
             std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
             std::cout << "Time taken (seconds) = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() / 1000.0 <<std::endl;
             long double sum = sqrt(x * x + y * y);
@@ -291,6 +295,14 @@ int main() {
                 sum += sqrt(stone.first * stone.first + stone.second * stone.second);
             }
             std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << "sum: " << sum << std::endl;
+            if (static_cast<int>(sum + 0.5) == static_cast<int>(sum))
+            {
+                std::cout << "diff: " << (sum - static_cast<int>(sum)) << std::endl;
+            }
+            else
+            {
+                std::cout << "diff: " << (static_cast<int>(sum) + 1 - sum) << std::endl;
+            }
             //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono
         }
     }
