@@ -7,7 +7,7 @@ Alice and Bob are playing a game with coins on a tree $T=(E,C)$ over $N$ vertice
 
 -  The players take turns to make a *valid move*, with Alice taking the first turn.
 - If the current player cannot make a valid move, then the game ends and the other player is deemed the winner.
-- A *valid move* for a player is to pick a vertex $v \ne R$ which has at least one coin in it, and move a single coin in $v$ to a vertex some non-zero number of steps along the path from $v$ to the vertex $1$. 
+- A *valid move* for a player is to pick a vertex $v \ne 1$ which has at least one coin in it, and move a single coin in $v$ to a vertex some non-zero number of steps along the path from $v$ to the vertex $1$. 
 
 
 For example, if the tree $T$ currently looks like this:
@@ -42,4 +42,4 @@ Note that each vertex $i$ in $\textit{transform}(T, (u_i, v_i))$ still has its o
 
 Alice promises that for all her queries, $\textit{transform}(T, (u_i, v_i))$ will be a connected tree on the original $N$ vertices.
 
-You need to output, in sorted order, the $i$s for which $\textit{winner}(\textit{transform}(T, (u_i, v_i)))$ is Bob. 
+You need to output, in sorted order, the numbers $i$ of the queries for which $\textit{winner}(\textit{transform}(T, (u_i, v_i)))$ is Bob. 
