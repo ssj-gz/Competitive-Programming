@@ -3,11 +3,12 @@
 *I'll skip adding the story for now as it just follows from the original Move the Coins and just give a brief description of the problem.*
 )
 
-Alice and Bob are playing a game with coins on a tree $T$ over $N$ vertices numbered $1...N$. The vertex numbered $i$ initially has $c_i$ coins on it.  The rules of the game are as follows:
+Alice and Bob are playing a game with coins on a tree $T=(E,C)$ over $N$ vertices numbered $1...N$. $E$ is the set of *edges* of $T$, and $C$ describes the number of *coins* on each vertex; the vertex numbered $i$ initially has $C(i)$ coins on it.  The rules of the game are as follows:
 
-- Alice moves first.
-- If the current player cannot make a move, then that player loses the game.
-- A valid move for a player is to pick a vertex $v \ne 1$ which has at least one coin in it, and move a coin in $v$ $X$ vertices along the shortest path from $v$ to vertex 1, where $X \gt 0$.
+-  The players take turns to make a *valid move*, with Alice taking the first turn.
+- If the current player cannot make a valid move, then the game ends and the other player is deemed the winner.
+- A *valid move* for a player is to pick a vertex $v \ne R$ which has at least one coin in it, and move a single coin in $v$ to a vertex some non-zero number of steps along the path from $v$ to the vertex $1$. 
+
 
 For example, if the tree $T$ currently looks like this:
 
@@ -26,12 +27,18 @@ Let's assume he moves the coin to vertex $2$.  Then the tree now looks like
 
 and it is the other player's turn to move.
 
-For a tree $T'$ on vertices $1,2,...,N$, let $\textit{winner}(T')$ be whichever of Alice or Bob will win if both players play the game optimally on $T'$ and Alice moves first.
+In the tree $T$, for each vertex $v \ne 1$, let $p(v)$ be the *parent* of $v$ if we did a DFS from vertex $1$; in other words, $p(v)$ is the first vertex we'd encounter on the path from $v$ to vertex $1$.
 
-Alice has $q$ queries numbered $1...q$, and the $i$th query consists of a pair $(u_i, v_i)$ of vertices.  She applies the following transform to create a tree $\textit{transform}(T, (u_i, v_i))$ as follows:
+For a tree $T'=(E',C')$ on vertices $1,2,...,N$, let $\textit{winner}(T')$ be whichever of Alice or Bob will win if both players play the game optimally on $T'$ and Alice moves first.
 
-- For a given vertex $v$, let the parent of $v$, $p(v)$, be the first vertex in the shortest path from $v$ to $1$.
-- Form $\textit{transform}(T, (u_i, v_i))$, a new tree, by first removing the edge from $p(u_i)$ to $u_i$ and then adding a new edge from $v_i$ to $u_i$ i.e. $\textit{transform}(T, (u_i, v_i))$ simply changes $u_i$s parent to $v_i$.
+Alice and Bob soon figure out how to predict $\textit{winner}(T)$ for their original $T$, so Alice proposes that Bob allows her to make a simple transformation to the original $T$ to get a brand-new tree to play the game on.
+
+Alice has $q$ queries numbered $1...q$, and the $i$th query consists of a pair $(u_i, v_i)$ of vertices.  She applies the following transform to create a new tree $T'=(E',C)=\textit{transform}(T, (u_i, v_i))$ (leaving the original $T$ unchanged) as follows:
+
+- Initially, $\textit{transform}(T, (u_i, v_i))$ is set to be a copy of $T=(E,C)$.
+- $\textit{transform}(T, (u_i, v_i))$ is then modified by first removing the edge from $p(u_i)$ to $u_i$ and then adding a new edge from $v_i$ to $u_i$ i.e. $\textit{transform}(T, (u_i, v_i))$ is a copy of $T$, but with $u_i$s parent now changed to be $v_i$.
+
+Note that each vertex $i$ in $\textit{transform}(T, (u_i, v_i))$ still has its original $C(i)$ coins in it.
 
 Alice promises that for all her queries, $\textit{transform}(T, (u_i, v_i))$ will be a connected tree on the original $N$ vertices.
 
