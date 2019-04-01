@@ -30,3 +30,23 @@ It's fairly easy to see an efficient way of getting a part-way solution: for $q_
 TODO - example
 
 Severing $v$ would remove the *contributions* of all descendants of $v$ which $hasCoin$ to *originalTreeGrundyNumber*.  We can very easily calculate this *grundyContribForSubtree* for all $v$ in just $O(N)$ - see *findGrundyContribsForNodes* in the Editorial code.
+
+The grundy number for $T(q_i)$ then, is (note that, to remove the contribution $x$ from a xor'd sum $xorSum$, we can do $xorSum \wedge x$):
+
+
+$\textit{queryGrundyNumber} = \textit{originalTreeGrundyNumber} \wedge u_i.\textit{grundyContribForSubtree} \wedge \textit{contribution from re-adding } u_i \textit{ with new parent}$
+
+Let's write *relocatedSubtreeGrundyContrib* for the last term in that xor sum: if we can figure out how to calculate that efficiently, then we're done!  
+
+When we add $u_i$ back in to $T(q_i)$, now with parent $v_i$, we re-add all $\textit{descendants(u_i)}$ (and so, all coins on nodes that were in $\textit{descendants(u_i)}$), but now their height is probably changed as the height of the re-parented $u_i$ may have changed: if a vertex $x \in \textit{descendants(v)}$ *hasCoin*, then its contribution to the grundy number for $T(q_i)$ will be:
+
+$height(x)+(height(v_i) - height(p(u_i))$
+
+Thus
+
+```
+relocatedSubtreeGrundyContrib = 0
+for vertex x in descendants(u_i):
+    if x->hasCoin:
+        relocatedSubtreeGrundyContrib = relocatedSubtreeGrundyContrib ^ (height(x)+(height(v_i) - height(p(u_i))
+```        
