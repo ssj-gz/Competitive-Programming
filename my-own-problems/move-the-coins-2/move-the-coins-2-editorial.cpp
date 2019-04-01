@@ -41,6 +41,7 @@ struct Node
 };
 
 
+// Calculate the height of each node, and remove its parent from its list of "children".
 void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
 {
     node->originalHeight = height;
@@ -54,6 +55,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
+// Calculate grundyContribForSubtree for the given node, and return the result.
 int findGrundyNumbersForNodes(Node* node)
 {
     auto grundyContribForSubtree = 0;
@@ -70,6 +72,7 @@ int findGrundyNumbersForNodes(Node* node)
     return grundyContribForSubtree;
 }
 
+// Typical SegmentTree - you can find similar implementations all over the place :)
 class SegmentTree
 {
     public:
@@ -161,7 +164,7 @@ void answerQueries(Node* node)
             }
         } 
     };
-    // Store the originalCoinsThatMakeDigitOneAfterHeightChange for each query, before exploring any further.
+    // Store the originalCoinsThatMakeDigitOneAfterHeightChange for each query, before exploring any of this node's descendants.
     for (auto& queryForNode : node->queriesForNode)
     {
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange);
@@ -176,16 +179,17 @@ void answerQueries(Node* node)
             numNodesWithHeightModuloPowerOf2[binaryDigitNum].addOneAt(heightModuloPowerOf2);
         }
     }
-    // Recurse.
+    // Recurse, and so explore this node's descendants.
     for (auto child : node->children)
     {
         answerQueries(child);
     }
-    // Now we've explored all descendants, use the stored originalCoinsThatMakeDigitOneAfterHeightChange and the newly-updated numNodesWithHeightModuloPowerOf2
-    // to work out relocatedSubtreeGrundyContrib for each query.
+    // We've now explored all this node's descendants. Now for each query that moves this node: use the stored 
+    // originalCoinsThatMakeDigitOneAfterHeightChange and the newly-updated numNodesWithHeightModuloPowerOf2
+    // to work out descendantCoinsThatMakeDigitOneAfterHeightChange, and use that to calculate relocatedSubtreeGrundyContrib 
+    // for that query.
     for (const auto& queryForNode : node->queriesForNode)
     {
-
         int descendantCoinsThatMakeDigitOneAfterHeightChange[maxBinaryDigits + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOneAfterHeightChange);
         auto relocatedSubtreeGrundyContrib = 0;
@@ -204,7 +208,6 @@ void answerQueries(Node* node)
 
         queryGrundyNumbers[queryForNode.originalQueryIndex] = grundyNumberAfterRelocatingNode;
     }
-
 }
 
 vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
@@ -223,7 +226,10 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
     for (const auto queryGrundyNumber : queryGrundyNumbers)
     {
         if (queryGrundyNumber == 0)
+        {
+            // First player (i.e. Alice) loses according to Sprague-Grundy i.e. Bob wins.
             queryNumbersWhereBobWins.push_back(queryNumber);
+        }
         queryNumber++;
     }
 
@@ -234,7 +240,6 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; cin >> x; return x; };
-
 
     const auto numNodes = readInt();
 
