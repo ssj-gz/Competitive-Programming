@@ -13,7 +13,7 @@ for each vertex v:
 
 Then $\textit{winner}(T)$ is the first player (Alice) if *originalTreeGrundyNumber* is non-zero, and the second player otherwise.
 
-We can simplify slightly by noting that, since $x^x=0$, the precise number of coins on a vertex is not needed: only the *parity* of the number of coins is important.  We say $v$ *hasCoin* if and only if $c_v$ is odd.  Then: 
+We can simplify slightly by noting that, since $x^x=0$, the precise number of coins on a vertex is not needed: only the *parity* of the number of coins is important.  We say $v$ *hasCoin* if and only if $c_v$ is odd.  Then we only care about whether a vertex *hasCoin* or not: 
 
 
 ```
@@ -24,3 +24,9 @@ for each vertex v:
 ```
 
 This pseudocode runs in $O(N)$, so the naive approach to solving this problem would be, for each query $q_i$, to construct $T(q_i)$ (which could probably be easily done in $O(1)$), and then just run the pseudocode above on $T(q_i)$ and so find $\textit{winner}(T(q_i))$.  This would, of course, be $O(N \times Q)$, which is far too slow :)
+
+It's fairly easy to see an efficient way of getting a part-way solution: for $q_i=(u_i,v_i)$, $T(q_i)$ is formed by first severing $u_i$ from its parent, then re-parenting $u_i$ to $v_i$.  We can quite easily get the grundy number for the tree formed by just doing the first (severing) operation: for a vertex $v$, define $\textit{descendants(v)}$ to be the set of vertices explored from $v$ during a DFS starting at vertex $1$ i.e. it's the subtree rooted at $v$ in $T$, if we say that $T$  is rooted at vertex $1$.
+
+TODO - example
+
+Severing $v$ would remove the *contributions* of all descendants of $v$ which $hasCoin$ to *originalTreeGrundyNumber*.  We can very easily calculate this *grundyContribForSubtree* for all $v$ in just $O(N)$ - see *findGrundyContribsForNodes* in the Editorial code.
