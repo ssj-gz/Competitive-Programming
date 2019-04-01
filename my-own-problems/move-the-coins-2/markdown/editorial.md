@@ -1,6 +1,6 @@
 The original [Move the Coins](https://www.hackerrank.com/challenges/move-the-coins/problem) was tough from a Game Theory point of view, but after solving the Game Theory part, it was not too difficult.  The reverse is true, here: as we'll see, the Game Theory portion is very easy, but then actually computing the solutions is fairly hard :)
 
-If you've done a few Game Theory challenges, you may immediately recognise that this is the game of Nim in disguise, with a one-to-one correspondence between coins on the tree and piles of stones: each coin corresponds to a pile of stones with $h$ stones in the pile, where $height$ is the distance from the vertex the coin is initially placed on to the vertex $1$.  For each vertex $v$, let $\textit{originalHeight}(v)$ be the distance from $v$ to vertex $1$.
+If you've done a few Game Theory challenges, you may immediately recognise that this is the game of Nim in disguise, with a one-to-one correspondence between coins on the tree and piles of stones: each coin corresponds to a pile of stones with $height(v)$ stones in the pile, where $v$ is the vertex the coin is placed on and $\textit{height}(v)$ is the distance from $v$ to vertex $1$.
 
 Thus, we can determine the $\textit{winner}(T)$ for the original tree $T$ very easily using the well-known approach of calculating the Grundy number or nimber, using the following pseudocode:
 
@@ -38,7 +38,7 @@ $\textit{queryGrundyNumber} = \textit{originalTreeGrundyNumber} \wedge u_i.\text
 
 Let's write *relocatedSubtreeGrundyContrib* for the last term in that xor sum: if we can figure out how to calculate that efficiently, then we're done!  
 
-When we add $u_i$ back in to $T(q_i)$, now with parent $v_i$, we re-add all $\textit{descendants(u_i)}$ (and so, all coins on nodes that were in $\textit{descendants(u_i)}$), but now their height is probably changed as the height of the re-parented $u_i$ may have changed: if a vertex $x \in \textit{descendants(v)}$ *hasCoin*, then its contribution to the grundy number for $T(q_i)$ will be:
+When we add $u_i$ back in to $T(q_i)$, now with parent $v_i$, we re-add all $\textit{descendants}(u_i)$ (and so, all coins on nodes that were in $\textit{descendants}(u_i)$), but now their height is probably changed as the height of the re-parented $u_i$ may have changed: if a vertex $x \in \textit{descendants(v)}$ *hasCoin*, then its contribution to the grundy number for $T(q_i)$ will be:
 
 $height(x)+(height(v_i) - height(p(u_i))$
 
@@ -50,3 +50,27 @@ for vertex x in descendants(u_i):
     if x->hasCoin:
         relocatedSubtreeGrundyContrib = relocatedSubtreeGrundyContrib ^ (height(x)+(height(v_i) - height(p(u_i))
 ```        
+
+Obviously, the size of $descendants(u_i)$ can be $O(N)$, so this is not yet good enough - we'd still have a $O(N \times Q)$ solution.
+
+For a query $q_i=(u_i, v_i)$, let $\textit{heightChange}=(height(v_i) - height(p(u_i))$ i.e. *heightChange* is the ... well, height-change for all $x \in \textit{descendants(v)}$ in $T(q_i)$ compared to $x$'s original height in $T$. Let's look at how *relocatedSubtreeGrundyContrib* is built up bitwise: it's hopefully fairly clear that:
+
+```
+relocatedSubtreeGrundyContrib = 0
+for bitNum = 0 to maxBinaryDigits:
+    for vertex x in descendants(u_i):
+        if x->hasCoin && bit bitNum is set in (height(x) + heightChange):
+            toggle bit bitNum in relocatedSubtreeGrundyContrib 
+```        
+
+```
+  5 4 3 2 1 0
+  ============
+0| 0 0 0 0 0 0
+1| 0 0 0 0 0 1
+2| 0 0 0 0 1 0
+3| 0 0 0 0 1 1
+4| 0 0 0 1 0 0
+5| 0 0 0 1 0 1
+
+```
