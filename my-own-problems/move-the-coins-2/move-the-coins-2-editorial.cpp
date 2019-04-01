@@ -182,24 +182,24 @@ void answerQueries(Node* node)
         answerQueries(child);
     }
     // Now we've explored all descendants, use the stored originalCoinsThatMakeDigitOneAfterHeightChange and the newly-updated numNodesWithHeightModuloPowerOf2
-    // to work out relocatedSubtreeGrundyNumber for each query.
+    // to work out relocatedSubtreeGrundyContrib for each query.
     for (const auto& queryForNode : node->queriesForNode)
     {
 
         int descendantCoinsThatMakeDigitOneAfterHeightChange[maxBinaryDigits + 1] = {};
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, descendantCoinsThatMakeDigitOneAfterHeightChange);
-        auto relocatedSubtreeGrundyNumber = 0;
+        auto relocatedSubtreeGrundyContrib = 0;
         for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
         {
             descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] -= queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum];
             assert(descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] >= 0);
             const auto isRelocatedSubtreeGrundyDigitOne = ((descendantCoinsThatMakeDigitOneAfterHeightChange[binaryDigitNum] % 2) == 1);
             if (isRelocatedSubtreeGrundyDigitOne)
-                relocatedSubtreeGrundyNumber += (1 << binaryDigitNum);
+                relocatedSubtreeGrundyContrib += (1 << binaryDigitNum);
         }
 
         const auto grundyNumberMinusSubtree = originalTreeGrundyNumber ^ node->grundyContribForSubtree;
-        const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyNumber;
+        const auto grundyNumberAfterRelocatingNode = grundyNumberMinusSubtree ^ relocatedSubtreeGrundyContrib;
         assert(queryForNode.originalQueryIndex >= 0);
 
         queryGrundyNumbers[queryForNode.originalQueryIndex] = grundyNumberAfterRelocatingNode;
