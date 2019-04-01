@@ -37,7 +37,7 @@ Alice and Bob soon figure out how to predict $\textit{winner}(T)$ for their orig
 
 Note that each vertex $x$ in $T(q_i)$ still has its original $c_x$ coins in it, and that the original $T$ is never altered.
 
-Alice promises that for each of her queries, the resulting $T((u_i,v_i))$ will be a connected tree on the original $N$ vertices.
+Alice promises that for each of her queries $q_i$, the resulting $T(q_i)$ will be a connected tree on the original $N$ vertices.
 
 You need to output, in sorted order, the numbers $i$ of the queries for which $T(q_i)$ is Bob. 
 
