@@ -1,4 +1,4 @@
-The original [Move the Coins](https://www.hackerrank.com/challenges/move-the-coins/problem) was tough from a Game Theory point of view, but after solving the Game Theory part, it was not too difficult.  The reverse is true, here: as we'll see, the Game Theory portion is very easy, but then actually computing the solutions is fairly hard :)
+The original [Move the Coins](https://www.hackerrank.com/challenges/move-the-coins/problem) was tough from a Game Theory point of view, but after solving the Game Theory part, computing the solutions was not too difficult.  The reverse is true, here: as we'll see, the Game Theory portion is very easy, but then actually computing the solutions is fairly hard :)
 
 If you've done a few Game Theory challenges, you may immediately recognise that this is the game of Nim in disguise, with a one-to-one correspondence between coins on the tree and piles of stones: each coin corresponds to a pile of stones with $height(v)$ stones in the pile, where $v$ is the vertex the coin is placed on and $\textit{height}(v)$ is the distance from $v$ to vertex $1$.
 
@@ -13,7 +13,7 @@ for each vertex v:
 
 Then $\textit{winner}(T)$ is the first player (Alice) if *originalTreeGrundyNumber* is non-zero, and the second player otherwise.
 
-We can simplify slightly by noting that, since $x^x=0$, the precise number of coins on a vertex is not needed: only the *parity* of the number of coins is important.  We say $v$ *hasCoin* if and only if $c_v$ is odd.  Then we only care about whether a vertex *hasCoin* or not: 
+We can simplify slightly by noting that, since $x \wedge x=0$, the precise number of coins on a vertex is not needed: only the *parity* of the number of coins is important.  We say $v$ *hasCoin* if and only if $c_v$ is odd.  Then we only care about whether a vertex *hasCoin* or not: 
 
 
 ```
@@ -53,7 +53,7 @@ for vertex x in descendants(u_i):
 
 Obviously, the size of $descendants(u_i)$ can be $O(N)$, so this is not yet good enough - we'd still have a $O(N \times Q)$ solution.
 
-For a query $q_i=(u_i, v_i)$, let $\textit{heightChange}=(height(v_i) - height(p(u_i))$ i.e. *heightChange* is the ... well, height-change for all $x \in \textit{descendants(v)}$ in $T(q_i)$ compared to $x$'s original height in $T$. Let's look at how *relocatedSubtreeGrundyContrib* is built up bitwise: it's hopefully fairly clear that:
+For a query $q_i=(u_i, v_i)$, let $\textit{heightChange}=(height(v_i) - height(p(u_i))$ i.e. *heightChange* is the ... well, height-change for all $x \in \textit{descendants}(v)$ in $T(q_i)$ compared to $x$'s original height in $T$. Let's look at how *relocatedSubtreeGrundyContrib* is built up bitwise: it's hopefully fairly clear that:
 
 ```
 relocatedSubtreeGrundyContrib = 0
@@ -64,7 +64,7 @@ for bitNum = 0 to maxBinaryDigits:
 ```        
 
 ```
-  5 4 3 2 1 0
+   5 4 3 2 1 0
   ============
 0| 0 0 0 0 0 0
 1| 0 0 0 0 0 1
@@ -72,5 +72,7 @@ for bitNum = 0 to maxBinaryDigits:
 3| 0 0 0 0 1 1
 4| 0 0 0 1 0 0
 5| 0 0 0 1 0 1
-
+6| 0 0 0 1 1 0
+7| 0 0 0 1 1 1
+8| 0 0 1 0 0 0
 ```
