@@ -64,7 +64,7 @@ for bitNum = 0 to maxBinaryDigits:
 ```        
 So it looks like we need to compute, for each *bitNum*, the *number* of descendants $x$ of $u_i$ which *hasCoin* and for which bit *bitNum* is set in the value of $height(x) + heightChange$; the bit *bitNum* of  *relocatedSubtreeGrundyContrib* will be set to 1 if and only if this number is odd.
 
-When does $height(x) + heightChange$ have its *bitNum*th bit set to 1? Let's look at a simpler case: when does a number *m* have its *bitNum*th bit set to 1? The pattern is hopefully clear from the table below: *m*'s *bitnum*th bit is set to 1 if and only if $2^{\textit{bitNum}} \le m \pmod{2^{\textit{bitNum} + 1}} \le 2^{\textit{bitNum} + 1}-1$.
+When does $height(x) + heightChange$ have its $\textit{bitNum}$th bit set to 1? Let's look at a simpler case: when does a number *m* have its $\textit{bitNum}$th bit set to 1? The pattern is hopefully clear from the table below: *m*'s $\textit{bitNum}$th bit is set to 1 if and only if $2^{\textit{bitNum}} \le m \pmod{2^{\textit{bitNum} + 1}} \le 2^{\textit{bitNum} + 1}-1$.
 
 ```
    5 4 3 2 1 0 <-- bitNum
@@ -80,7 +80,7 @@ When does $height(x) + heightChange$ have its *bitNum*th bit set to 1? Let's loo
 8| 0 0 1 0 0 0
 ```
 
-So, for example, a number $m$ will have its $3$th bit set if and only if, the value $m \pmod{2^{3 + 1}}=m \pmod{2^{4}} = m \pmod{16}$ is in the (inclusive) range $2^3=8$ to $2^{3+1}-1=2^{4}-1=15$.
+So, for example, a number $m$ will have its $3$rd bit set if and only if, the value $m \pmod{2^{3 + 1}}=m \pmod{2^{4}} = m \pmod{16}$ is in the (inclusive) range $2^3=8$ to $2^{3+1}-1=2^{4}-1=15$.
 
 It's hopefully clear that considering $m+p$ for some $p$ *scrolls* this range by $p$ units.  Thus, the values of $m$ for which $m+5$ has its $4$th bit set to 1 are precisely those for which $m \pmod{16}$ is in the (inclusive) range $8-5=3$ to $15-5=10$.
 
@@ -96,6 +96,8 @@ Except that, no - *numNodesWithHeightModuloPowerOf2* will indeed contain the num
 
 Or are we? What if, when our DFS first encounters $u_i$, we store the number of vertices satisfying bit $bitNum$ of $height(x)+heightChange$ is 1 (this is the contribution of the $y$s - let's call it *originalCoinsThatMakeDigitOneAfterHeightChange*) and then, when we finish processing $u_i$, we subtract this from the current number of vertices satisfying bit $bitNum$ of $height(x)+heightChange$ is 1 (the contributions of the $x$'s and the $y$'s)? That's it - this will give us precisely the number of descendants $x$ of $u_i$ for which bit *bitNum* is set in the value of $height(x)+heightChange$, and we're done!
 
-We store the *maxBinaryDigits* values *originalCoinsThatMakeDigitOneAfterHeightChange* in the query that makes use of it.  This means that we do a couple of bits of processing for the query $q_i=(u_i,v_i)$ first when we encounter $u_i$ in our DFS, and then again when we have finished processing $u_i$ in our DFS - therefore, it makes sense to process the queries in an order that is not necessarily the same in which we were given the queries - we attach $q_i$ to $u_i) (see *queriesForNode*) and handle it when our DFS handles $u_i$, then figure out how to put them back in their original order at the end.
+We store the *maxBinaryDigits* values *originalCoinsThatMakeDigitOneAfterHeightChange* in the query that makes use of it.  This means that we do a couple of bits of processing for the query $q_i=(u_i,v_i)$: first when we encounter $u_i$ in our DFS, and then again when we have finished processing $u_i$ in our DFS - therefore, it makes sense to process the queries in an order that is not necessarily the same in which we were given the queries - we attach $q_i$ to $u_i) (see *queriesForNode*) and handle it when our DFS handles $u_i$, then figure out how to put them back in their original order at the end.
+
+
 
 
