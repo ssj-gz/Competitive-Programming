@@ -62,9 +62,12 @@ for bitNum = 0 to maxBinaryDigits:
         if x->hasCoin && bit bitNum is set in (height(x) + heightChange):
             toggle bit bitNum in relocatedSubtreeGrundyContrib 
 ```        
+So it looks like we need to compute, for each *bitNum*, the *number* of descendants $x$ of $u_i$ which *hasCoin* and for which bit *bitNum* is set in the value of $height(x) + heightChange$; the bit *bitNum* of  *relocatedSubtreeGrundyContrib* will be set to 1 if and only if this number is odd.
+
+When does $height(x) + heightChange$ have its *bitNum*th bit set to 1? Let's look at a simpler case: when does a number *m* have its *bitNum*th bit set to 1? The pattern is hopefully clear from the table below: *m*'s *bitnum*th bit is set to 1 if and only if $2^{\textit{bitNum}} \le m \pmod{2^{\textit{bitNum} + 1}} \le 2^{\textit{bitNum} + 1}-1$.
 
 ```
-   5 4 3 2 1 0
+   5 4 3 2 1 0 <-- bitNum
   ============
 0| 0 0 0 0 0 0
 1| 0 0 0 0 0 1
@@ -76,3 +79,23 @@ for bitNum = 0 to maxBinaryDigits:
 7| 0 0 0 1 1 1
 8| 0 0 1 0 0 0
 ```
+
+So, for example, a number $m$ will have its $3$th bit set if and only if, the value $m \pmod{2^{3 + 1}}=m \pmod{2^{4}} = m \pmod{16}$ is in the (inclusive) range $2^3=8$ to $2^{3+1}-1=2^{4}-1=15$.
+
+It's hopefully clear that considering $m+p$ for some $p$ *scrolls* this range by $p$ units.  Thus, the values of $m$ for which $m+5$ has its $4$th bit set to 1 are precisely those for which $m \pmod{16}$ is in the (inclusive) range $8-5=3$ to $15-5=10$.
+
+Finding the set of values of $m$ for which $m-5$ has its $4$th bit set to 1 is a little trickier: here, that bit is set to 1 if and only if $m \pmod{16}$ falls into one of a *pair* of (inclusive) ranges: $8+5=13$ to 15; and $0$ to $4$, but in general, we see that (setting $m=height(x)$ and $p=heightChange$):
+
+Calculating *relocatedSubtreeGrundyContrib* for $u_i$ and $heightChange$ merely requires us to count, for each *bitNum* the number of descendants $x$ of $u_i$ whose $height(x) \pmod{2^{bitNum+1}}$ lies in either one or two ranges, depending on $heightChange$.
+
+This is now sounding much more tractable - why don't we, as we perform our DFS, tally, for each *bitNum*, the heights of vertices $\pmod{2^{\textit{bitNum} + 1}}$? Even better: let's use a SegmentTree for each *bitNum*, allowing us to count the number of tallies in a range very efficiently! See the *numNodesWithHeightModuloPowerOf2* array in the code.
+
+Then, when our DFS has finished processing the node $u_i$, each descendant $x$ of $u_i$ will have been tallied in *numNodesWithHeightModuloPowerOf2*, so we can find the number of $x$'s satisfying bit $bitNum$ of $height(x)+heightChange$ is 1, and so compute *relocatedSubtreeGrundyContrib*!
+
+Except that, no - *numNodesWithHeightModuloPowerOf2* will indeed contain the number of such $x$'s, but it will also contain all such $y$'s, where the $y$'s are vertices our DFS explored *before* we reached $u_i$.  Rats! Foiled again!
+
+Or are we? What if, when our DFS first encounters $u_i$, we store the number of vertices satisfying bit $bitNum$ of $height(x)+heightChange$ is 1 (this is the contribution of the $y$s - let's call it *originalCoinsThatMakeDigitOneAfterHeightChange*) and then, when we finish processing $u_i$, we subtract this from the current number of vertices satisfying bit $bitNum$ of $height(x)+heightChange$ is 1 (the contributions of the $x$'s and the $y$'s)? That's it - this will give us precisely the number of descendants $x$ of $u_i$ for which bit *bitNum* is set in the value of $height(x)+heightChange$, and we're done!
+
+We store the *maxBinaryDigits* values *originalCoinsThatMakeDigitOneAfterHeightChange* in the query that makes use of it.  This means that we do a couple of bits of processing for the query $q_i=(u_i,v_i)$ first when we encounter $u_i$ in our DFS, and then again when we have finished processing $u_i$ in our DFS - therefore, it makes sense to process the queries in an order that is not necessarily the same in which we were given the queries - we attach $q_i$ to $u_i) (see *queriesForNode*) and handle it when our DFS handles $u_i$, then figure out how to put them back in their original order at the end.
+
+
