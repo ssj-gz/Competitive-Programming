@@ -86,7 +86,7 @@ class SegmentTree
         {
             return m_total;
         }
-        // Find the number in the given range (O(log2(numElements))).
+        // Find the number in the given range (inclusive) in O(log2(numElements)).
         int numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
@@ -107,7 +107,7 @@ class SegmentTree
             return sum;
         }
 
-        // Increment the value at pos by one (O(log2(numElements))).
+        // Increment the value at pos by one in O(log2(numElements)).
         void addOneAt(int pos)
         {
             const auto n = m_numElements;
