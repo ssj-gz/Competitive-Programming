@@ -275,7 +275,8 @@ int main(int argc, char* argv[])
         // Re-order queries so that all queries that move a given node u are accessible from u.
         auto nodeToMove = &(nodes[u]);
         auto newParent = &(nodes[v]);
-        nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, newParent->originalHeight - nodeToMove->parent->originalHeight});
+        const auto heightChange = newParent->originalHeight - nodeToMove->parent->originalHeight;
+        nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, heightChange} );
     }
 
     const auto result = queryNumbersWhereBobWins(rootNode, numQueries);
