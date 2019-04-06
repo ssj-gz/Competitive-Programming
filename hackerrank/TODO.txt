@@ -1,4 +1,3 @@
-GCD Matrix (60) [60]
 Matrix Land (55) [115]
 Airports (100) [215]
 Mandagora Forest (50) [265]
