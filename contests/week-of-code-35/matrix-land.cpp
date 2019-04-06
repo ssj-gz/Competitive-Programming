@@ -144,19 +144,19 @@ int maxSum(const vector<vector<int>>& A)
             const int bestGobbleStartIndex = bestGobbleToLeftFrom[startCol].subArrayStartIndex;
             bestGobbleSum += bestGobbleToLeftFrom[startCol].sum;
             int bestGobbleEndIndex = startCol;
-            int maxInGobbleRange = bestGobbleToLeftFrom[startCol].maxDescendValue;
+            int maxDescendInGobbleRange = bestGobbleToLeftFrom[startCol].maxDescendValue;
             if (startCol < numCols - 1 && bestGobbleToRightFrom[startCol + 1].sum >= 0)
             {
                 bestGobbleEndIndex = bestGobbleToRightFrom[startCol + 1].subArrayStartIndex;
                 bestGobbleSum += bestGobbleToRightFrom[startCol + 1].sum;
-                maxInGobbleRange = max(maxInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxDescendValue);
+                maxDescendInGobbleRange = max(maxDescendInGobbleRange, bestGobbleToRightFrom[startCol + 1].maxDescendValue);
             }
-            maxInGobbleRange += bestGobbleSum;
+            maxDescendInGobbleRange += bestGobbleSum;
 
             int bestForStartCol = std::numeric_limits<int>::min();
 
             // Descend in the middle of gobble-range.
-            bestForStartCol = max(bestForStartCol, maxInGobbleRange);
+            bestForStartCol = max(bestForStartCol, maxDescendInGobbleRange);
 
             // Descend to the left of gobble-range.
             if (bestGobbleStartIndex > 0)
