@@ -350,9 +350,11 @@ int main(int argc, char** argv)
     // The number of pairs of a and b that satisfy any of the conditions is 14, and naively, we might have expected that
     // the number of pairs that generated x = 3^3*5*11^2 was 14.  But instead, it is 7 - the other pairs make
     // 2*3^3*5*11^2 (3 pairs), 3^3*5*7*11^2 (3 pairs) and 2*3^3*5*7*11^2 (1 pair).
-
-
-
+    //
+    // Actually, I'm just going to stop documenting, now - this whole solution is really stupid and the Editorial
+    // one is vastly better.
+    //
+    // Just ignore this whole thing XD
     int n, m, q;
 
     cin >> n >> m >> q;
