@@ -1,9 +1,7 @@
 // Simon St James (ssjgz).
 #define SUBMISSION
-#define VERIFY_SEGMENT_TREE
 #ifdef SUBMISSION
 #define NDEBUG
-#undef VERIFY_SEGMENT_TREE
 #endif
 #include <iostream>
 #include <vector>
@@ -34,16 +32,21 @@ struct NodeInfo
     int numDescendants = 0;
 };
 
-template <typename ValueType>
-class SegmentTree {
+/**
+ * Allows fast updates/ queries for the numDescendants of ranges of NodeInfo's.
+ * Uses a Segment Tree (adapted from Quadrant Queries) to allow us to subtract
+ * a number of descendants from a range of NodeInfo's in O(log2N), and 
+ * retrieve the number of descendants for a given NodeInfo in O(log2N).
+ */
+class DescendantTracker {
     public:
 
-        SegmentTree(int maxNumber)
-            : m_maxNumber{maxNumber}
+        DescendantTracker(int numNodeInfos)
+            : m_numNodeInfos{numNodeInfos}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
-            while (maxNumber > powerOf2)
+            while (numNodeInfos > powerOf2)
             {
                 exponentOfPowerOf2++;
                 powerOf2 *= 2;
@@ -85,22 +88,19 @@ class SegmentTree {
                     childCellIndex++;
                 }
             }
-#ifdef VERIFY_SEGMENT_TREE
-            m_dbgValues.resize(maxNumber);
-#endif
         }
-        void setInitialValues(const vector<ValueType>& initialValues)
+        void setInitialValues(const vector<NodeInfo>& initialValues)
         {
             for (int i = 0; i < initialValues.size(); i++)
             {
                 auto& cell = m_cellMatrix.back()[i];
-                cell.value = initialValues[i];
+                cell.nodeInfo = initialValues[i];
             }
         }
         void subtractNumDescendantsFromAllInRange(int left, int right, int numDescendantsToSubtract)
         {
-            assert(left >= 0 && left < m_maxNumber);
-            assert(right >= 0 && right < m_maxNumber);
+            assert(left >= 0 && left < m_numNodeInfos);
+            assert(right >= 0 && right < m_numNodeInfos);
             assert(left <= right);
             vector<Cell*> cells;
             collectMinCellsForRange(left, right, cells);
@@ -110,26 +110,26 @@ class SegmentTree {
                 cell->servicePendingDescendantSubtractions();
             }
         }
-        ValueType valueAt(int pos)
+        NodeInfo valueAt(int pos)
         {
-            assert(pos >= 0 && pos < m_maxNumber);
+            assert(pos >= 0 && pos < m_numNodeInfos);
             vector<Cell*> cells;
             collectMinCellsForRange(pos, pos, cells);
             assert(cells.size() == 1);
             auto cell = cells.front();
             cell->servicePendingDescendantSubtractions();
-            ValueType valueAt = cell->value; 
+            NodeInfo valueAt = cell->nodeInfo; 
             return valueAt;
         }
     private:
-        int m_maxNumber;
+        int m_numNodeInfos;
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
 
         struct Cell
         {
-            SegmentTree* container = nullptr;
-            ValueType value;
+            DescendantTracker* container = nullptr;
+            NodeInfo nodeInfo;
 
             int64_t rangeBegin = -1;
             int64_t rangeEnd = -1;
@@ -163,7 +163,7 @@ class SegmentTree {
                         rightChild->addPendingDescendantSubtraction(pendingNumDescendantsToSubtract);
                     }
 
-                    value.numDescendants -= pendingNumDescendantsToSubtract;
+                    nodeInfo.numDescendants -= pendingNumDescendantsToSubtract;
 
                     hasPendingDescendantSubtraction = false;
                 }
@@ -180,14 +180,6 @@ class SegmentTree {
         void collectMinCellsForRange(const int start, const int end, vector<Cell*>& destCells)
         {
             collectMinCellsForRange(start, end, 0, m_powerOf2BiggerThanMaxNumber, destCells);
-#ifdef VERIFY_SEGMENT_TREE
-            assert(destCells.front()->rangeBegin == start);
-            assert(destCells.back()->rangeEnd == end);
-            for (int i = 1; i < destCells.size(); i++)
-            {
-                assert(destCells[i]->rangeBegin == destCells[i - 1]->rangeEnd + 1);
-            }
-#endif
         }
 
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
@@ -198,7 +190,7 @@ class SegmentTree {
                 return;
             if (cellRow != 0)
             {
-                // Ensure parent has serviced its pending operations.
+                // Ensure parent has serviced its pending descendant subtractions.
                 const int parentCellIndex = (start >> (m_numCellRows - cellRow ));
                 const int parentCellRow = cellRow - 1;
                 Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellIndex]);
@@ -314,7 +306,6 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     doHeavyLightDecomposition(rootNode, false);
 
     // Set up the descendantTracker.
-    using DescendantTracker = SegmentTree<NodeInfo>;
     DescendantTracker descendantTracker(nodes.size());
 
     // Put all the chains into indexInChainSegmentTree, one after the other, and 
