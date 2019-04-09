@@ -452,6 +452,57 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 
 int main(int argc, char* argv[])
 {
+    // Took me ages, in that I first started thinking about it probably a couple of
+    // years ago, and could never do it.
+    //
+    // Recently re-tried, though, now I have more knowledge under my belt, and it
+    // was quite easy now :)
+    //
+    // So: let's assume that we can somehow, for all nodes, efficiently keep track
+    // of the number of *descendants* each node has (assuming that we pick some
+    // arbitrary node as the "root" node) as we remove nodes from the tree.
+    //
+    // Answering a query, then, would be as easy as finding the "root" of the component
+    // containing the nodeToRemove (i.e. that node found my working our way up from the
+    // parent of nodeToRemove, to the parent of the parent of nodeToRemove, etc)
+    // and finding the number of descendants of that node.
+    //
+    // To remove nodeToRemove, we need only find all ancestor nodes of nodeToRemove, and subtract
+    // nodeToRemove.numDescendants from the number of descendants of each ancestor node of nodeToRemove.
+    //
+    // Since the number of ancestors can be O(N), naive attempts to perform either of these operations
+    // (finding the root of the component containing nodeToRemove; subtracting the number of descendants
+    // from all ancestors when we remove nodeToRemove) are O(N), giving a O(N^2) algorithm
+    // in practice, which is no good.
+    //
+    // Can we do better?
+    //
+    // Yes - if we perform a heavy-light decomposition of the graph, then the number of *chains* 
+    // that nodeToRemove will have in its list of ancestor nodes will be just O(N^2). By
+    // laying all these chains end-to-end into one big array (initialChainSegmentTreeInfo), we can
+    // easily figure out how to find the root of chain containing nodeToRemove (see findChainRoot())
+    // and so work our way up the list of ancestors in O(log2N * log2N) (there are O(log2N) ancestor 
+    // chains, and finding the root of a chain is O(log2N) - chainRootIndices is the key to this) until 
+    // we find the required root of the component containing nodeToRemove.
+    //
+    // Likewise, if we loaded initialChainSegmentTreeInfo into a SegmentTree, and each element of 
+    // initialChainSegmentTreeInfo consisted of a node and the number of descendants in that node,
+    // then subtracting the number of descendants from all ancestors of nodeToRemove is similarly
+    // efficient - again, O(log2N * log2N) (O(log2N) ancestor chains, and subtracting the number of 
+    // descendants from all of the elements in a chain - or from the root of the chain down to nodeToRemove - 
+    // in the Segment Tree is O(log2N)).
+    //
+    // And that's essentially it: the loading of chains into initialChainSegmentTreeInfo is done in
+    // and arbitrary order - only the order of the nodes within each chain (root of chain; child of
+    // root of chain; child of child of root of chain; etc!) matters.  When removing a node, we need
+    // only adjust the numDescendants of its ancestors (by traversing the chains as far as we can go),
+    // and mark the children of nodeToRemove as new roots of chains (by adding their indexInChainSegmentTree
+    // to chainRootIndices).
+    //
+    // The total runtime is num queries (O(N)) times O(log2N * log2N) == O(N * log2N * log2N).
+    //
+    // The main challenge here was getting the constant factor down small enough - my SegmentTree is bit shit :)
+
     ios::sync_with_stdio(false);
 
     auto readInt = []() { int x; cin >> x; return x; };
