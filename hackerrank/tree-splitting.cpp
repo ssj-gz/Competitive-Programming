@@ -302,7 +302,6 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     fixParentChildAndCountDescendants(rootNode, nullptr);
     doHeavyLightDecomposition(rootNode, false);
 
-    // Set up the descendantTracker.
     DescendantTracker descendantTracker(nodes.size());
 
     // Put all the chains into indexInChainSegmentTree, one after the other, and 
