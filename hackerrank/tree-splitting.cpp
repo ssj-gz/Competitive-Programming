@@ -32,12 +32,11 @@ template <typename ValueType, typename OperatorInfo>
 class SegmentTree {
     public:
 
-        using CombineValues = std::function<ValueType(const ValueType& lhs, const ValueType& rhs)>;
         using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
         using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
-        SegmentTree(int maxNumber, CombineValues combineValues, ApplyOperator applyOperator, CombineOperators combineOperators)
-            : m_maxNumber{maxNumber}, m_combineValues{combineValues}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
+        SegmentTree(int maxNumber, ApplyOperator applyOperator, CombineOperators combineOperators)
+            : m_maxNumber{maxNumber}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -92,10 +91,7 @@ class SegmentTree {
             {
                 auto& cell = m_cellMatrix.back()[i];
                 cell.value = initialValues[i];
-                //if (cell.parent)
-                    //cell.parent->setNeedsUpdateFromChildren();
             }
-            //updateAllFromChildren();
 #ifdef VERIFY_SEGMENT_TREE
             m_dbgValues = initialValues;
 #endif
@@ -108,10 +104,7 @@ class SegmentTree {
             {
                 cell->addPendingOperation(operatorInfo);
                 cell->servicePendingOperations();
-                //if (cell->parent)
-                    //cell->parent->setNeedsUpdateFromChildren();
             }
-            //updateAllFromChildren();
 #ifdef VERIFY_SEGMENT_TREE
             for (int i = left; i <= right; i++)
             {
@@ -128,9 +121,6 @@ class SegmentTree {
             cell->servicePendingOperations();
             cell->value = newValue;
 
-            //if (cell->parent)
-                //cell->parent->setNeedsUpdateFromChildren();
-            //updateAllFromChildren();
 #ifdef VERIFY_SEGMENT_TREE
             m_dbgValues[pos] = newValue;
 #endif
@@ -146,23 +136,11 @@ class SegmentTree {
 #ifdef VERIFY_SEGMENT_TREE
             {
                 assert(m_dbgValues[pos] == valueAt);
-
-#if 0
-                ValueType dbgCombinedValuesInRange;
-
-                for (int i = left; i <= right; i++)
-                {
-                    dbgCombinedValuesInRange = m_combineValues(dbgCombinedValuesInRange, m_dbgValues[i]);
-                }
-
-                assert(dbgCombinedValuesInRange == combinedValuesInRange);
-#endif
             }
 #endif
             return valueAt;
         }
     private:
-        CombineValues m_combineValues;
         ApplyOperator m_applyOperator;
         CombineOperators m_combineOperators;
         int64_t m_powerOf2BiggerThanMaxNumber;
@@ -407,15 +385,6 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     doHeavyLightDecomposition(rootNode, false);
 
     using DescendantTracker = SegmentTree<NodeInfo, int>;
-    auto combineNodeInfos = [](const NodeInfo& lhs, const NodeInfo& rhs) 
-    {
-        // Dummy - remove TODO
-        NodeInfo newNodeInfo;
-        newNodeInfo.node = rhs.node;
-        newNodeInfo.numDescendants = rhs.numDescendants;
-
-        return newNodeInfo;
-    };
     auto applyRemoveDescendants = [](const int numDescendantsToRemove, NodeInfo& nodeInfo)
     {
         nodeInfo.numDescendants -= numDescendantsToRemove;
@@ -424,7 +393,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     {
         return numDescendantsToRemove1 + numDescendantsToRemove2;
     };
-    DescendantTracker descendantTracker(nodes.size(),  combineNodeInfos, applyRemoveDescendants, combineRemoveDescendants);
+    DescendantTracker descendantTracker(nodes.size(),  applyRemoveDescendants, combineRemoveDescendants);
 
     vector<NodeInfo> initialNodeInfo;
     set<int> chainRootIndices;
