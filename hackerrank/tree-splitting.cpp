@@ -413,19 +413,6 @@ class SegmentTree {
             }
 #endif
         }
-        void setValue(int pos, const ValueType& newValue)
-        {
-            vector<Cell*> cells;
-            collectMinCellsForRange(pos, pos, cells);
-            assert(cells.size() == 1);
-            auto cell = cells.front();
-            cell->servicePendingOperations();
-            cell->value = newValue;
-
-#ifdef VERIFY_SEGMENT_TREE
-            m_dbgValues[pos] = newValue;
-#endif
-        }
         ValueType valueAt(int pos)
         {
             assert(pos >= 0 && pos < m_maxNumber);
