@@ -416,6 +416,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     descendantTracker.setInitialValues(initialNodeInfo);
     assert(initialNodeInfo.size() == nodes.size());
 
+#if 0
     // TODO - remove
     {
         for (int i = 0; i < nodes.size(); i++)
@@ -444,6 +445,14 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             cout << "i: " << i << " descendantTracker.valueAt(i).numDescendants : " << descendantTracker.valueAt(i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
         }
     }
+#endif
+    auto findChainRoot = [&chainRootIndices, &initialNodeInfo](Node* nodeInChain)
+    {
+        const auto chainRootIndexIter = chainRootIndices.lower_bound(nodeInChain->indexInChainSegmentTree);
+        assert(chainRootIndexIter != chainRootIndices.end());
+        const auto chainRootIndex = *chainRootIndexIter;
+        return initialNodeInfo[chainRootIndex].node;
+    };
 
 
     vector<int> queryResults;
@@ -453,7 +462,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         const int nodeIndex = (encryptedNodeIndex ^ previousAnswer) - 1;
 
         Node* nodeToRemove = &(nodes[nodeIndex]);
-        const int thisAnswer = -1; // TODO
+        auto rootOfChainWithNodeToRemove = findChainRoot(nodeToRemove);
+        const int thisAnswer = descendantTracker.valueAt(rootOfChainWithNodeToRemove->indexInChainSegmentTree).numDescendants;
+
         queryResults.push_back(thisAnswer);
 
         previousAnswer = thisAnswer;
@@ -490,13 +501,19 @@ int main()
         queries.push_back(readInt());
     }
 
+
     const auto bruteForceResults = bruteForce(nodes, queries);
     for (const auto result : bruteForceResults)
     {
         std::cout << result << std::endl;
     }
-
     const auto optimisedResults = findSolutionOptimised(nodes, queries);
+
+    for (int queryNum = 0; queryNum < numQueries; queryNum++)
+    {
+        cout << "queryNum: " << queryNum << " bruteForce: " << bruteForceResults[queryNum] << " optimised result: " << optimisedResults[queryNum] << endl;
+    }
+
 
     assert(bruteForceResults == optimisedResults);
 
