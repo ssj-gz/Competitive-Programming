@@ -1,4 +1,12 @@
 // Simon St James (ssjgz).
+//#define SUBMISSION
+#define VERIFY_SEGMENT_TREE
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#define NDEBUG
+#undef VERIFY_SEGMENT_TREE
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <set>
@@ -7,7 +15,6 @@
 #include <memory>
 #include <cassert>
 #include <sys/time.h>
-#define VERIFY_SEGMENT_TREE
 
 using namespace std;
 
@@ -388,7 +395,7 @@ class SegmentTree {
         }
         void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
-            std::cout << "applyOperatorToAllInRange left: " << left << " right: " << right << std::endl;
+            //std::cout << "applyOperatorToAllInRange left: " << left << " right: " << right << std::endl;
             assert(left >= 0 && left < m_maxNumber);
             assert(right >= 0 && right < m_maxNumber);
             assert(left <= right);
@@ -706,7 +713,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     vector<NodeInfo> initialNodeInfo;
     set<int> chainRootIndices;
     int chainSegmentTreeIndex = 0;
-    cout << " Num heavy chains: " << heavyChains.size() << endl;
+    //cout << " Num heavy chains: " << heavyChains.size() << endl;
     for (const auto& chain : heavyChains)
     {
         chainRootIndices.insert(chainSegmentTreeIndex);
@@ -758,12 +765,12 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     auto findChainRoot = [&chainRootIndices, &initialNodeInfo](Node* nodeInChain)
     {
         assert(!chainRootIndices.empty());
-        cout << "findChainRoot nodeInChain index: " << nodeInChain->indexInChainSegmentTree << "  chainRootIndices:" << std::endl;
-        for (const auto index : chainRootIndices)
-        {
-            cout << " " << index << std::endl;
-        }
-        cout << "nodeInChain index: " << nodeInChain->indexInChainSegmentTree << endl;
+        //cout << "findChainRoot nodeInChain index: " << nodeInChain->indexInChainSegmentTree << "  chainRootIndices:" << std::endl;
+        //for (const auto index : chainRootIndices)
+        //{
+            //cout << " " << index << std::endl;
+        //}
+        //cout << "nodeInChain index: " << nodeInChain->indexInChainSegmentTree << endl;
 
         auto chainRootIndexIter = chainRootIndices.lower_bound(nodeInChain->indexInChainSegmentTree);
         if (chainRootIndexIter == chainRootIndices.end())
@@ -789,9 +796,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 
         Node* nodeToRemove = &(nodes[nodeIndex]);
         assert(!nodeToRemove->removed);
-        std::cout << "Query - nodeToRemove: " << nodeToRemove << " indexInChainSegmentTree: " << nodeToRemove->indexInChainSegmentTree << endl;
-        cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
-        cout << " nodeToRemove parent: " << nodeToRemove->parent << endl;
+        //std::cout << "Query - nodeToRemove: " << nodeToRemove << " indexInChainSegmentTree: " << nodeToRemove->indexInChainSegmentTree << endl;
+        //cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
+        //cout << " nodeToRemove parent: " << nodeToRemove->parent << endl;
         auto rootOfChainWithNodeToRemove = findChainRoot(nodeToRemove);
 
         auto rootOfComponent = rootOfChainWithNodeToRemove;
@@ -799,10 +806,10 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         {
             rootOfComponent = findChainRoot(rootOfComponent->parent);
         }
-        cout << "rootOfComponent index: " << rootOfComponent->indexInChainSegmentTree << endl;
+        //cout << "rootOfComponent index: " << rootOfComponent->indexInChainSegmentTree << endl;
 
         const int thisAnswer = descendantTracker.valueAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
-        cout << " thisAnswer: " << thisAnswer << endl;
+        //cout << " thisAnswer: " << thisAnswer << endl;
         queryResults.push_back(thisAnswer);
 
         const int numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
@@ -819,16 +826,16 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         }
 
         // "Remove" nodeToRemove.
-        cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
+        //cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
         for (auto& child : nodeToRemove->children)
         {
             child->parent = nullptr;
-            cout << " child indexInChainSegmentTree: " << child->indexInChainSegmentTree << endl;
+            //cout << " child indexInChainSegmentTree: " << child->indexInChainSegmentTree << endl;
             chainRootIndices.insert(child->indexInChainSegmentTree);
         }
         nodeToRemove->children.clear();
         nodeToRemove->parent = nullptr;
-        cout << "Blah: " << nodeToRemove << endl;
+        //cout << "Blah: " << nodeToRemove << endl;
         chainRootIndices.erase(nodeToRemove->indexInChainSegmentTree);
         nodeToRemove->removed = true;
 
@@ -846,7 +853,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 100 + 1;
+        const int n = rand() % 1000 + 1;
         TreeGenerator treeGenerator;
         treeGenerator.createNode();
         treeGenerator.createNodesWithRandomParent(n - treeGenerator.numNodes());
@@ -915,20 +922,28 @@ int main(int argc, char* argv[])
     }
 
 
+#ifdef BRUTE_FORCE
     const auto bruteForceResults = bruteForce(nodes, queries);
     for (const auto result : bruteForceResults)
     {
         std::cout << result << std::endl;
     }
+#endif
     const auto optimisedResults = findSolutionOptimised(nodes, queries);
 
+#ifdef BRUTE_FORCE
     for (int queryNum = 0; queryNum < numQueries; queryNum++)
     {
         cout << "queryNum: " << queryNum << " bruteForce: " << bruteForceResults[queryNum] << " optimised result: " << optimisedResults[queryNum] << endl;
     }
 
-
     assert(bruteForceResults == optimisedResults);
     cout << "Result: " << (bruteForceResults == optimisedResults) << endl;
+#else
+    for (int queryNum = 0; queryNum < numQueries; queryNum++)
+    {
+        cout << optimisedResults[queryNum] << endl;
+    }
+#endif
 
 }
