@@ -38,11 +38,8 @@ template <typename ValueType, typename OperatorInfo>
 class SegmentTree {
     public:
 
-        using ApplyOperator = std::function<void(OperatorInfo operatorInfo, ValueType& value)>;
-        using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
-
-        SegmentTree(int maxNumber, CombineOperators combineOperators)
-            : m_maxNumber{maxNumber},  m_combineOperators{combineOperators}
+        SegmentTree(int maxNumber)
+            : m_maxNumber{maxNumber}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -126,7 +123,6 @@ class SegmentTree {
         }
     private:
         int m_maxNumber;
-        CombineOperators m_combineOperators;
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
 
@@ -319,11 +315,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 
     // Set up the descendantTracker.
     using DescendantTracker = SegmentTree<NodeInfo, int>;
-    auto combineRemoveDescendants = [](const int numDescendantsToRemove1, const int numDescendantsToRemove2)
-    {
-        return numDescendantsToRemove1 + numDescendantsToRemove2;
-    };
-    DescendantTracker descendantTracker(nodes.size(),  combineRemoveDescendants);
+    DescendantTracker descendantTracker(nodes.size());
 
     // Put all the chains into indexInChainSegmentTree, one after the other, and 
     // load that info into descendantTracker.
