@@ -98,6 +98,10 @@ class SegmentTree {
         }
         void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
+            std::cout << "applyOperatorToAllInRange left: " << left << " right: " << right << std::endl;
+            assert(left >= 0 && left < m_maxNumber);
+            assert(right >= 0 && right < m_maxNumber);
+            assert(left <= right);
             vector<Cell*> cells;
             collectMinCellsForRange(left, right, cells);
             for (auto cell : cells)
@@ -127,6 +131,7 @@ class SegmentTree {
         }
         ValueType valueAt(int pos)
         {
+            assert(pos >= 0 && pos < m_maxNumber);
             vector<Cell*> cells;
             collectMinCellsForRange(pos, pos, cells);
             assert(cells.size() == 1);
@@ -409,9 +414,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             nodeInfo.node = nodeInChain;
             nodeInfo.numDescendants = nodeInChain->originalNumDescendants;
             initialNodeInfo.push_back(nodeInfo);
+            chainSegmentTreeIndex++;
         }
 
-        chainSegmentTreeIndex++;
     }
     descendantTracker.setInitialValues(initialNodeInfo);
     assert(initialNodeInfo.size() == nodes.size());
@@ -448,9 +453,25 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 #endif
     auto findChainRoot = [&chainRootIndices, &initialNodeInfo](Node* nodeInChain)
     {
-        const auto chainRootIndexIter = chainRootIndices.lower_bound(nodeInChain->indexInChainSegmentTree);
-        assert(chainRootIndexIter != chainRootIndices.end());
+        assert(!chainRootIndices.empty());
+        cout << "findChainRoot chainRootIndices:" << std::endl;
+        for (const auto index : chainRootIndices)
+        {
+            cout << " " << index << std::endl;
+        }
+        cout << "nodeInChain index: " << nodeInChain->indexInChainSegmentTree << endl;
+
+        auto chainRootIndexIter = chainRootIndices.lower_bound(nodeInChain->indexInChainSegmentTree);
+        if (chainRootIndexIter == chainRootIndices.end())
+            chainRootIndexIter = std::prev(chainRootIndices.end());
+        if (*chainRootIndexIter > nodeInChain->indexInChainSegmentTree)
+        {
+            assert(chainRootIndexIter != chainRootIndices.begin());
+            chainRootIndexIter = std::prev(chainRootIndexIter);
+        }
         const auto chainRootIndex = *chainRootIndexIter;
+        auto root = initialNodeInfo[chainRootIndex].node;
+        assert(root->indexInChainSegmentTree <= nodeInChain->indexInChainSegmentTree);
         return initialNodeInfo[chainRootIndex].node;
     };
 
@@ -460,10 +481,14 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     for (int encryptedNodeIndex : queries)
     {
         const int nodeIndex = (encryptedNodeIndex ^ previousAnswer) - 1;
+        assert(nodeIndex >= 0 && nodeIndex < nodes.size());
 
         Node* nodeToRemove = &(nodes[nodeIndex]);
+        std::cout << "Query - nodeToRemove: " << nodeToRemove << " indexInChainSegmentTree: " << nodeToRemove->indexInChainSegmentTree << endl;
+        cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
         auto rootOfChainWithNodeToRemove = findChainRoot(nodeToRemove);
         const int thisAnswer = descendantTracker.valueAt(rootOfChainWithNodeToRemove->indexInChainSegmentTree).numDescendants;
+        cout << " thisAnswer: " << thisAnswer << endl;
 
         queryResults.push_back(thisAnswer);
 
@@ -481,13 +506,17 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         }
 
         // "Remove" nodeToRemove.
+        cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
         for (auto& child : nodeToRemove->children)
         {
             child->parent = nullptr;
+            cout << " child indexInChainSegmentTree: " << child->indexInChainSegmentTree << endl;
             chainRootIndices.insert(child->indexInChainSegmentTree);
         }
         nodeToRemove->children.clear();
         nodeToRemove->parent = nullptr;
+        cout << "Blah: " << nodeToRemove << endl;
+        chainRootIndices.erase(nodeToRemove->indexInChainSegmentTree);
 
         previousAnswer = thisAnswer;
     }
