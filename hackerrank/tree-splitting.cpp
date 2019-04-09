@@ -34,7 +34,7 @@ struct NodeInfo
     int numDescendants = 0;
 };
 
-template <typename ValueType, typename OperatorInfo>
+template <typename ValueType>
 class SegmentTree {
     public:
 
@@ -314,7 +314,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     doHeavyLightDecomposition(rootNode, false);
 
     // Set up the descendantTracker.
-    using DescendantTracker = SegmentTree<NodeInfo, int>;
+    using DescendantTracker = SegmentTree<NodeInfo>;
     DescendantTracker descendantTracker(nodes.size());
 
     // Put all the chains into indexInChainSegmentTree, one after the other, and 
