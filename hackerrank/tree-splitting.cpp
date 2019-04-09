@@ -42,7 +42,7 @@ class SegmentTree {
         using CombineOperators = std::function<OperatorInfo(const OperatorInfo& lhs, const OperatorInfo& rhs)>;
 
         SegmentTree(int maxNumber, ApplyOperator applyOperator, CombineOperators combineOperators)
-            : m_maxNumber{maxNumber}, m_applyOperator{applyOperator}, m_combineOperators{combineOperators}
+            : m_maxNumber{maxNumber},  m_combineOperators{combineOperators}
         {
             int exponentOfPowerOf2 = 0;
             int64_t powerOf2 = 1;
@@ -99,9 +99,6 @@ class SegmentTree {
                 auto& cell = m_cellMatrix.back()[i];
                 cell.value = initialValues[i];
             }
-#ifdef VERIFY_SEGMENT_TREE
-            m_dbgValues = initialValues;
-#endif
         }
         void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
@@ -115,12 +112,6 @@ class SegmentTree {
                 cell->addPendingOperation(operatorInfo);
                 cell->servicePendingOperations();
             }
-#ifdef VERIFY_SEGMENT_TREE
-            for (int i = left; i <= right; i++)
-            {
-                m_applyOperator(operatorInfo, m_dbgValues[i]);
-            }
-#endif
         }
         ValueType valueAt(int pos)
         {
@@ -131,23 +122,13 @@ class SegmentTree {
             auto cell = cells.front();
             cell->servicePendingOperations();
             ValueType valueAt = cell->value; 
-#ifdef VERIFY_SEGMENT_TREE
-            {
-                assert(m_dbgValues[pos] == valueAt);
-            }
-#endif
             return valueAt;
         }
     private:
         int m_maxNumber;
-        ApplyOperator m_applyOperator;
         CombineOperators m_combineOperators;
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
-
-#ifdef VERIFY_SEGMENT_TREE
-        vector<ValueType> m_dbgValues;
-#endif
 
         struct Cell
         {
@@ -186,7 +167,7 @@ class SegmentTree {
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
 
-                    container->m_applyOperator(pendingOperatorInfo, value);
+                    value.numDescendants -= pendingOperatorInfo;
 
                     hasPendingOperator = false;
                 }
