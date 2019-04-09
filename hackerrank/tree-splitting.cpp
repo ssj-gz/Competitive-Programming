@@ -1,7 +1,8 @@
 // Simon St James (ssjgz).
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <set>
+#include <set>
 #include <functional>
 #include <cassert>
 
@@ -433,8 +434,12 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     using DescendantTracker = SegmentTree<NodeInfo, int>;
     auto combineNodeInfos = [](const NodeInfo& lhs, const NodeInfo& rhs) 
     {
-        // Dummy - TODO - remove.
-        return NodeInfo{};
+        // Dummy - remove TODO
+        NodeInfo newNodeInfo;
+        newNodeInfo.node = rhs.node;
+        newNodeInfo.numDescendants = rhs.numDescendants;
+
+        return newNodeInfo;
     };
     auto applyRemoveDescendants = [](const int numDescendantsToRemove, NodeInfo& nodeInfo)
     {
@@ -446,6 +451,35 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     };
     DescendantTracker descendantTracker(nodes.size(),  combineNodeInfos, applyRemoveDescendants, combineRemoveDescendants);
 
+    vector<NodeInfo> initialNodeInfo;
+    set<int> chainRootIndices;
+    int chainSegmentTreeIndex = 0;
+    for (const auto& chain : heavyChains)
+    {
+        chainRootIndices.insert(chainSegmentTreeIndex);
+
+        for (auto& nodeInChain : chain)
+        {
+            nodeInChain->indexInChainSegmentTree = chainSegmentTreeIndex;
+            NodeInfo nodeInfo;
+            nodeInfo.node = nodeInChain;
+            nodeInfo.numDescendants = nodeInChain->originalNumDescendants;
+            initialNodeInfo.push_back(nodeInfo);
+        }
+
+        chainSegmentTreeIndex++;
+    }
+    descendantTracker.setInitialValues(initialNodeInfo);
+    assert(initialNodeInfo.size() == nodes.size());
+
+    // TODO - remove
+    {
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            cout << "i: " << i << " descendantTracker.combinedValuesInRange(i, i).numDescendants : " << descendantTracker.combinedValuesInRange(i, i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
+            assert(descendantTracker.combinedValuesInRange(i, i).numDescendants == initialNodeInfo[i].numDescendants);
+        }
+    }
 
 
     vector<int> queryResults;
@@ -493,10 +527,13 @@ int main()
     }
 
     const auto bruteForceResults = bruteForce(nodes, queries);
-
     for (const auto result : bruteForceResults)
     {
         std::cout << result << std::endl;
     }
+
+    const auto optimisedResults = findSolutionOptimised(nodes, queries);
+
+    assert(bruteForceResults == optimisedResults);
 
 }
