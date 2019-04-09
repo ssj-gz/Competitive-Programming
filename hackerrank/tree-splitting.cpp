@@ -332,7 +332,7 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
 
 vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& queries)
 {
-    Node* rootNode = &(nodes.front());
+    auto rootNode = &(nodes.front());
     fixParentChildAndCountDescendants(rootNode, nullptr);
     doHeavyLightDecomposition(rootNode, false);
 
@@ -354,7 +354,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     // nodes within a chain obviously does!
     vector<NodeInfo> initialChainSegmentTreeInfo;
     set<int> chainRootIndices;
-    int chainSegmentTreeIndex = 0;
+    auto chainSegmentTreeIndex = 0;
     for (const auto& chain : heavyChains)
     {
         chainRootIndices.insert(chainSegmentTreeIndex);
@@ -391,14 +391,14 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     };
 
     vector<int> queryResults;
-    int previousAnswer = 0;
-    for (int encryptedNodeIndex : queries)
+    auto previousAnswer = 0;
+    for (auto encryptedNodeIndex : queries)
     {
         // Decrypt the index (in nodes) of the node to remove using the previous query answer.
-        const int nodeIndex = (encryptedNodeIndex ^ previousAnswer) - 1;
-        assert(nodeIndex >= 0 && nodeIndex < nodes.size());
+        const auto nodeToRemoveIndex = (encryptedNodeIndex ^ previousAnswer) - 1;
+        assert(nodeToRemoveIndex >= 0 && nodeToRemoveIndex < nodes.size());
 
-        Node* nodeToRemove = &(nodes[nodeIndex]);
+        Node* nodeToRemove = &(nodes[nodeToRemoveIndex]);
         assert(!nodeToRemove->removed);
 
         // Find the root of the component containing nodeToRemove - the number of descendants for this
@@ -412,10 +412,10 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             rootOfComponent = findChainRoot(rootOfComponent->parent);
         }
 
-        const int thisAnswer = descendantTracker.valueAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
+        const auto thisAnswer = descendantTracker.valueAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
         queryResults.push_back(thisAnswer);
 
-        const int numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
+        const auto numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
 
         // Work our way up the ancestors, chain-by-chain, adjusting the numDescendants for all nodes to reflect
         // the fact that nodeToRemove (and all its descendants) have been removed.
@@ -506,29 +506,29 @@ int main(int argc, char* argv[])
 
     auto readInt = []() { int x; cin >> x; return x; };
 
-    const int n = readInt();
+    const auto n = readInt();
 
     vector<Node> nodes(n);
 
-    for (int edge = 0; edge < n - 1; edge++)
+    for (auto edge = 0; edge < n - 1; edge++)
     {
-        const int u = readInt() - 1;
-        const int v = readInt() - 1;
+        const auto u = readInt() - 1;
+        const auto v = readInt() - 1;
 
         nodes[u].children.push_back(&(nodes[v]));
         nodes[v].children.push_back(&(nodes[u]));
     }
 
-    const int numQueries = readInt();
+    const auto numQueries = readInt();
 
     vector<int> queries;
-    for (int queryNum = 0; queryNum < numQueries; queryNum++)
+    for (auto queryNum = 0; queryNum < numQueries; queryNum++)
     {
         queries.push_back(readInt());
     }
 
     const auto optimisedResults = findSolutionOptimised(nodes, queries);
-    for (int queryNum = 0; queryNum < numQueries; queryNum++)
+    for (auto queryNum = 0; queryNum < numQueries; queryNum++)
     {
         cout << optimisedResults[queryNum] << endl;
     }
