@@ -10,8 +10,8 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include <set>
 #include <functional>
+#include <algorithm>
 #include <memory>
 #include <cassert>
 #include <sys/time.h>
@@ -853,10 +853,11 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 1000 + 1;
+        //const int n = rand() % 1000 + 1;
+        const int n = 100'000;
         TreeGenerator treeGenerator;
         treeGenerator.createNode();
-        treeGenerator.createNodesWithRandomParent(n - treeGenerator.numNodes());
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(n - treeGenerator.numNodes(), 95.0);
         cout << treeGenerator.numNodes() << endl;
         treeGenerator.printEdges();
         const int numQueries = treeGenerator.numNodes();
@@ -880,6 +881,8 @@ int main(int argc, char* argv[])
         vector<int> queriesEncrypted;
         for (auto rawQuery : queriesRaw)
         {
+            if ( queriesEncrypted.size() % 100 == 0)
+                cerr << "Generating query: " << queriesEncrypted.size() << " / " << numQueries << endl;
             queriesEncrypted.push_back(rawQuery ^ previousAnswer);
 
             Node* nodeToRemove = &(nodes[rawQuery - 1]);
