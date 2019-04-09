@@ -454,7 +454,6 @@ class SegmentTree {
 
             OperatorInfo pendingOperatorInfo;
             bool hasPendingOperator = false;
-            //bool needsUpdateFromChildren = false;
 
             void addPendingOperation(OperatorInfo operatorInfo)
             {
@@ -733,7 +732,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         const auto chainRootIndex = *chainRootIndexIter;
         auto chainRoot = initialChainSegmentTreeInfo[chainRootIndex].node;
         assert(chainRoot->indexInChainSegmentTree <= nodeInChain->indexInChainSegmentTree);
-        return initialChainSegmentTreeInfo[chainRootIndex].node;
+        return chainRoot;
     };
 
 
