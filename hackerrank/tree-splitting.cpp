@@ -584,8 +584,6 @@ class SegmentTree {
 
 };
 
-
-
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 {
     node->parent = parentNode;
@@ -598,7 +596,6 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 
     return node->originalNumDescendants;
 }
-
 
 vector<vector<Node*>> heavyChains;
 
@@ -629,7 +626,6 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
             doHeavyLightDecomposition(*lightChildIter, false);
     }
 }
-
 
 int numInComponent(Node* nodeInComponent, Node* previousNode = nullptr)
 {
