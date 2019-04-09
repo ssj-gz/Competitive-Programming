@@ -135,18 +135,19 @@ class SegmentTree {
             m_dbgValues[pos] = newValue;
 #endif
         }
-        ValueType combinedValuesInRange(int left, int right)
+        ValueType valueAt(int pos)
         {
             vector<Cell*> cells;
-            collectMinCellsForRange(left, right, cells);
-            ValueType combinedValuesInRange;
-            for (auto cell : cells)
-            {
-                cell->servicePendingOperations();
-                combinedValuesInRange = m_combineValues(combinedValuesInRange, cell->value);
-            }
+            collectMinCellsForRange(pos, pos, cells);
+            assert(cells.size() == 1);
+            auto cell = cells.front();
+            cell->servicePendingOperations();
+            ValueType valueAt = cell->value; 
 #ifdef VERIFY_SEGMENT_TREE
             {
+                assert(m_dbgValues[pos] == valueAt);
+
+#if 0
                 ValueType dbgCombinedValuesInRange;
 
                 for (int i = left; i <= right; i++)
@@ -155,9 +156,10 @@ class SegmentTree {
                 }
 
                 assert(dbgCombinedValuesInRange == combinedValuesInRange);
+#endif
             }
 #endif
-            return combinedValuesInRange;
+            return valueAt;
         }
     private:
         CombineValues m_combineValues;
@@ -481,28 +483,28 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     {
         for (int i = 0; i < nodes.size(); i++)
         {
-            cout << "i: " << i << " descendantTracker.combinedValuesInRange(i, i).numDescendants : " << descendantTracker.combinedValuesInRange(i, i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
-            assert(descendantTracker.combinedValuesInRange(i, i).numDescendants == initialNodeInfo[i].numDescendants);
+            cout << "i: " << i << " descendantTracker.valueAt(i).numDescendants : " << descendantTracker.valueAt(i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
+            assert(descendantTracker.valueAt(i).numDescendants == initialNodeInfo[i].numDescendants);
         }
 
 
         descendantTracker.applyOperatorToAllInRange(1, 2, 10);
         for (int i = 0; i < nodes.size(); i++)
         {
-            (void)descendantTracker.combinedValuesInRange(i, i);
+            (void)descendantTracker.valueAt(i);
         }
 
         descendantTracker.applyOperatorToAllInRange(0, 3, 20);
         for (int i = 0; i < nodes.size(); i++)
         {
-            (void)descendantTracker.combinedValuesInRange(i, i);
+            (void)descendantTracker.valueAt(i);
         }
 
         descendantTracker.applyOperatorToAllInRange(2, 3, 15);
         for (int i = 0; i < nodes.size(); i++)
         {
-            (void)descendantTracker.combinedValuesInRange(i, i);
-            cout << "i: " << i << " descendantTracker.combinedValuesInRange(i, i).numDescendants : " << descendantTracker.combinedValuesInRange(i, i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
+            (void)descendantTracker.valueAt(i);
+            cout << "i: " << i << " descendantTracker.valueAt(i).numDescendants : " << descendantTracker.valueAt(i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
         }
     }
 
