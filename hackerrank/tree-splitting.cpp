@@ -1,20 +1,16 @@
 // Simon St James (ssjgz).
-//#define SUBMISSION
+#define SUBMISSION
 #define VERIFY_SEGMENT_TREE
-#define BRUTE_FORCE
 #ifdef SUBMISSION
 #define NDEBUG
 #undef VERIFY_SEGMENT_TREE
-#undef BRUTE_FORCE
 #endif
 #include <iostream>
 #include <vector>
 #include <set>
-#include <functional>
 #include <algorithm>
-#include <memory>
+#include <functional>
 #include <cassert>
-#include <sys/time.h>
 
 using namespace std;
 
@@ -42,293 +38,6 @@ struct NodeInfo
         return (node == other.node) && (numDescendants == other.numDescendants);
     }
 };
-
-struct TestNode;
-struct NodeData
-{
-    int multiplier = -1;
-};
-struct EdgeData
-{
-    char letterFollowed = '\0';
-};
-struct TestEdge;
-struct TestNode
-{
-    vector<TestEdge*> neighbours;
-    int originalId = -1;
-    int scrambledId = -1;
-    int id() const
-    {
-        return (scrambledId == -1) ? originalId : scrambledId;
-    }
-    NodeData data;
-
-    // Filled in my doGenericInfoDFS.
-    TestNode* parent = nullptr;
-    int visitNum = -1;
-    int endVisitNum = -1;
-    int height = -1;
-};
-struct TestEdge
-{
-    TestNode* nodeA = nullptr;
-    TestNode* nodeB = nullptr;
-    EdgeData data;
-    TestNode* otherNode(TestNode* node)
-    {
-        if (node == nodeA)
-            return nodeB;
-        if (node == nodeB)
-            return nodeA;
-        assert(false);
-        return nullptr;
-    }
-};
-
-
-
-class TreeGenerator
-{
-    public:
-        TestNode* createNode()
-        {
-            m_nodes.emplace_back(new TestNode);
-            auto newNode = m_nodes.back().get();
-            newNode->originalId = m_nodes.size();
-            return newNode;
-        }
-        TestNode* createNode(TestNode* attachedTo)
-        {
-            auto newNode = createNode();
-            addEdge(newNode, attachedTo);
-            return newNode;
-        }
-        TestNode* createNodeWithRandomParent()
-        {
-            const int parentIndex = rand() % m_nodes.size();
-            auto randomParent = m_nodes[parentIndex].get();
-            return createNode(randomParent);
-        }
-        vector<TestNode*> createNodesWithRandomParent(int numNewNodes)
-        {
-            vector<TestNode*> newNodes;
-            for (int i = 0; i < numNewNodes; i++)
-            {
-                newNodes.push_back(createNodeWithRandomParent());
-            }
-
-            return newNodes;
-        }
-        vector<TestNode*> createNodesWithRandomParentPreferringLeafNodes(int numNewNodes, double leafNodePreferencePercent)
-        {
-            set<TestNode*> leaves;
-            for (auto& node : m_nodes)
-            {
-                if (node->neighbours.size() <= 1)
-                    leaves.insert(node.get());
-            }
-
-            return createNodesWithRandomParentPreferringFromSet(leaves, numNewNodes, leafNodePreferencePercent, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
-                    {
-                    addNewNodeToSet = true;
-                    if (newNodeParent->neighbours.size() > 1)
-                    removeParentFromSet = true;
-                    });
-        }
-
-        vector<TestNode*> createNodesWithRandomParentPreferringFromSet(const set<TestNode*>& preferredSet, int numNewNodes, double preferencePercent, std::function<void(TestNode* newNode, TestNode* parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)> onCreateNode)
-        {
-            vector<TestNode*> newNodes;
-            set<TestNode*> preferredSetCopy(preferredSet);
-            set<TestNode*> nonPreferredSet;
-            for (auto& node : m_nodes)
-            {
-                if (preferredSetCopy.find(node.get()) == preferredSetCopy.end())
-                {
-                    nonPreferredSet.insert(node.get());
-                }
-            }
-
-            auto chooseRandomNodeFromSet = [](set<TestNode*>& nodeSet)
-            {
-                const int randomIndex = rand() % nodeSet.size();
-                //cerr << "nodeSet.size(): " << nodeSet.size() << " randomIndex: " << randomIndex << endl;
-                auto nodeIter = nodeSet.begin();
-                for (int i = 0; i < randomIndex; i++)
-                {
-                    nodeIter++;
-                }
-                return *nodeIter;
-            };
-
-            for (int i = 0; i < numNewNodes; )
-            {
-                cerr << "createNodesWithRandomParentPreferringFromSet: " << (i + 1) << " / " << numNewNodes << endl;
-                const double random = static_cast<double>(rand()) / RAND_MAX * 100;
-                TestNode* newNodeParent = nullptr;
-                bool parentWasPreferred = false;
-                //cerr << "random: " << random << " preferencePercent: " << preferencePercent << endl;
-                if (random <= preferencePercent && !preferredSetCopy.empty())
-                {
-                    // Choose a random element from preferredSetCopy as a parent.
-                    //cerr << " choosing preferred" << endl;
-                    newNodeParent = chooseRandomNodeFromSet(preferredSetCopy); 
-                    parentWasPreferred = true;
-                    cerr << "Chose leaf: " << newNodeParent->neighbours.size() << endl;
-                    assert(newNodeParent->neighbours.size() <= 1);
-                }
-                else if (!nonPreferredSet.empty())
-                {
-                    // Choose a random element from nonPreferredSet as a parent.
-                    cerr << " choosing non-leaf" << endl;
-                    newNodeParent = chooseRandomNodeFromSet(nonPreferredSet); 
-                    assert(newNodeParent->neighbours.size() > 1);
-                }
-                if (newNodeParent)
-                {
-                    auto newNode = createNode(newNodeParent);
-                    newNodes.push_back(newNode);
-                    bool addNewNodeToSet = false;
-                    bool removeParentFromSet = false;
-                    onCreateNode(newNode, newNodeParent, parentWasPreferred, addNewNodeToSet, removeParentFromSet);
-                    if (addNewNodeToSet)
-                        preferredSetCopy.insert(newNode);
-                    else
-                        nonPreferredSet.insert(newNode);
-                    if (removeParentFromSet)
-                    {
-                        preferredSetCopy.erase(newNodeParent);
-                        nonPreferredSet.insert(newNodeParent);
-                    }
-                    i++;
-                }
-            }
-
-            return newNodes;
-        }
-
-        int numNodes() const
-        {
-            return m_nodes.size();
-        };
-        TestNode* firstNode() const
-        {
-            assert(!m_nodes.empty());
-            return m_nodes.front().get();
-        }
-        TestEdge* addEdge(TestNode* nodeA, TestNode* nodeB)
-        {
-            m_edges.emplace_back(new TestEdge);
-            auto newEdge = m_edges.back().get();
-            newEdge->nodeA = nodeA;
-            newEdge->nodeB = nodeB;
-            nodeA->neighbours.push_back(newEdge);
-            nodeB->neighbours.push_back(newEdge);
-
-            return newEdge;
-        }
-        vector<TestNode*> addNodeChain(TestNode* chainStart, int numInChain)
-        {
-            vector<TestNode*> nodeChain;
-
-            auto lastNodeInChain = chainStart;
-            for (int i = 0; i < numInChain; i++)
-            {
-                lastNodeInChain = createNode(lastNodeInChain);
-                nodeChain.push_back(lastNodeInChain);
-            }
-
-            return nodeChain;
-        }
-        vector<TestEdge*> edgeChainForNodeChain(const vector<TestNode*>& nodeChain)
-        {
-            vector<TestEdge*> edgeChain;
-            auto nodeIter = nodeChain.begin();
-            auto currentNode = *nodeIter;
-            while (nodeIter + 1 != nodeChain.end())
-            {
-                nodeIter++;
-                bool foundEdge = false;
-                for (auto edge : currentNode->neighbours)
-                {
-                    if (edge->otherNode(currentNode) == *nodeIter)
-                    {
-                        foundEdge = true;
-                        edgeChain.push_back(edge);
-                        break;
-                    }
-                }
-
-                currentNode = *nodeIter;
-            }
-
-            return edgeChain;
-        }
-        void scrambleNodeOrder()
-        {
-            random_shuffle(m_nodes.begin(), m_nodes.end());
-        }
-        void scrambleEdgeOrder()
-        {
-            random_shuffle(m_edges.begin(), m_edges.end());
-            for (auto& edge : m_edges)
-            {
-                if (rand() % 2 == 1)
-                    swap(edge->nodeA, edge->nodeB);
-            }
-        }
-        // Scrambles the order of the nodes, then re-ids them, in new order, with the first
-        // node in the new order having scrambledId 1, then next 2, etc.
-        void scrambleNodeIdsAndReorder(TestNode* forceAsRootNode)
-        {
-            scrambleNodeOrder();
-            for (int i = 0; i < m_nodes.size(); i++)
-            {
-                m_nodes[i]->scrambledId = (i + 1);
-            }
-            if (forceAsRootNode)
-            {
-                auto forcedRootNodeIter = find_if(m_nodes.begin(), m_nodes.end(), [forceAsRootNode](const auto& nodePtr) { return nodePtr.get() == forceAsRootNode; });
-                assert(forcedRootNodeIter != m_nodes.end());
-                if (forcedRootNodeIter != m_nodes.begin())
-                {
-                    swap((*m_nodes.begin())->scrambledId, forceAsRootNode->scrambledId);
-                    iter_swap(m_nodes.begin(), forcedRootNodeIter);
-                } 
-                assert(forceAsRootNode->scrambledId == 1);
-            }
-        }
-        vector<TestNode*> nodes() const
-        {
-            vector<TestNode*> nodes;
-            for (auto& node : m_nodes)
-            {
-                nodes.push_back(node.get());
-            }
-            return nodes;
-        }
-        vector<TestEdge*> edges() const
-        {
-            vector<TestEdge*> edges;
-            for (auto& edge : m_edges)
-            {
-                edges.push_back(edge.get());
-            }
-            return edges;
-        }
-        void printEdges() const
-        {
-            for (const auto& edge : m_edges)
-            {
-                cout << edge->nodeA->id() << " " << edge->nodeB->id() << endl;
-            }
-        }
-    private:
-        vector<unique_ptr<TestNode>> m_nodes;
-        vector<unique_ptr<TestEdge>> m_edges;
-};
-
 
 template <typename ValueType, typename OperatorInfo>
 class SegmentTree {
@@ -631,56 +340,6 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     }
 }
 
-int numInComponent(Node* nodeInComponent, Node* previousNode = nullptr)
-{
-    int num = 1; // This node.
-    for (Node* neighbour : nodeInComponent->neighbours)
-    {
-        if ( neighbour == previousNode)
-            continue;
-
-        num += numInComponent(neighbour, nodeInComponent);
-    }
-    return num;
-}
-
-void removeNode(Node* nodeToRemove)
-{
-    const auto neighbours = nodeToRemove->neighbours;
-    nodeToRemove->neighbours.clear();
-
-    for (const auto neighbour : neighbours)
-    {
-        neighbour->neighbours.erase(remove(neighbour->neighbours.begin(), neighbour->neighbours.end(), nodeToRemove), neighbour->neighbours.end());
-    }
-}
-
-vector<int> bruteForce(vector<Node>& nodes, const vector<int>& queries)
-{
-    vector<int> queryResults;
-    int previousAnswer = 0;
-    vector<bool> nodeWasRemoved(nodes.size(), false);
-    for (int encryptedNodeIndex : queries)
-    {
-        const int nodeIndex = (encryptedNodeIndex ^ previousAnswer) - 1;
-
-        Node* nodeToRemove = &(nodes[nodeIndex]);
-        const int thisAnswer = numInComponent(nodeToRemove);
-        queryResults.push_back(thisAnswer);
-
-        removeNode(nodeToRemove);
-
-        nodeWasRemoved[nodeIndex] = true;
-
-        previousAnswer = thisAnswer;
-    }
-    for (const auto blah : nodeWasRemoved)
-    {
-        assert(blah);
-    }
-    return queryResults;
-}
-
 vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& queries)
 {
     Node* rootNode = &(nodes.front());
@@ -807,58 +466,6 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int n = rand() % 100 + 1;
-        //const int n = 100'000;
-        TreeGenerator treeGenerator;
-        treeGenerator.createNode();
-        //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(n - treeGenerator.numNodes(), 95.0);
-        treeGenerator.createNodesWithRandomParent(n - treeGenerator.numNodes());
-        cout << treeGenerator.numNodes() << endl;
-        treeGenerator.printEdges();
-        const int numQueries = treeGenerator.numNodes();
-        vector<int> queriesRaw;
-        for (int i = 1; i <= numQueries; i++)
-        {
-            queriesRaw.push_back(i);
-        }
-        random_shuffle(queriesRaw.begin(), queriesRaw.end());
-        vector<Node> nodes(treeGenerator.numNodes());
-        for (const auto edge : treeGenerator.edges())
-        {
-            const int u = edge->nodeA->id() - 1;
-            const int v = edge->nodeB->id() - 1;
-
-            nodes[u].neighbours.push_back(&(nodes[v]));
-            nodes[v].neighbours.push_back(&(nodes[u]));
-
-        }
-        int previousAnswer = 0;
-        vector<int> queriesEncrypted;
-        for (auto rawQuery : queriesRaw)
-        {
-            //if ( queriesEncrypted.size() % 100 == 0)
-                //cerr << "Generating query: " << queriesEncrypted.size() << " / " << numQueries << endl;
-            queriesEncrypted.push_back(rawQuery ^ previousAnswer);
-
-            Node* nodeToRemove = &(nodes[rawQuery - 1]);
-
-
-            previousAnswer = numInComponent(nodeToRemove);
-            removeNode(nodeToRemove);
-        }
-        cout << numQueries << endl;
-        for (const auto query : queriesEncrypted)
-        {
-            cout << query << endl;
-        }
-        return 0;
-    }
     auto readInt = []() { int x; cin >> x; return x; };
 
     const int n = readInt();
@@ -886,28 +493,9 @@ int main(int argc, char* argv[])
     }
 
 
-#ifdef BRUTE_FORCE
-    const auto bruteForceResults = bruteForce(nodes, queries);
-    for (const auto result : bruteForceResults)
-    {
-        std::cout << result << std::endl;
-    }
-#endif
     const auto optimisedResults = findSolutionOptimised(nodes, queries);
-
-#ifdef BRUTE_FORCE
-    for (int queryNum = 0; queryNum < numQueries; queryNum++)
-    {
-        cout << "queryNum: " << queryNum << " bruteForce: " << bruteForceResults[queryNum] << " optimised result: " << optimisedResults[queryNum] << endl;
-    }
-
-    assert(bruteForceResults == optimisedResults);
-    cout << "Result: " << (bruteForceResults == optimisedResults) << endl;
-#else
     for (int queryNum = 0; queryNum < numQueries; queryNum++)
     {
         cout << optimisedResults[queryNum] << endl;
     }
-#endif
-
 }
