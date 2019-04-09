@@ -508,20 +508,16 @@ class SegmentTree {
         {
             if (cellRow == m_cellMatrix.size())
                 return;
-            if (cellRow != 0)
-            {
-                // Ensure all parents have serviced their pending operations.
-                const int parentCellStartIndex = start / (powerOf2 * 2);
-                const int parentCellEndIndex = end / (powerOf2 * 2);
-                const int parentCellRow = cellRow - 1;
-                for (int parentCellCol = parentCellStartIndex; parentCellCol <= parentCellEndIndex; parentCellCol++)
-                {
-                    Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellCol]);
-                    parentCell->servicePendingOperations();
-                }
-            }
             if (end < start)
                 return;
+            if (cellRow != 0)
+            {
+                // Ensure parents has service their pending operations.
+                const int parentCellIndex = start / (powerOf2 * 2);
+                const int parentCellRow = cellRow - 1;
+                Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellIndex]);
+                parentCell->servicePendingOperations();
+            }
 
             if (end == start)
             {
@@ -842,11 +838,12 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const int n = rand() % 1000 + 1;
-        const int n = 100'000;
+        const int n = rand() % 100 + 1;
+        //const int n = 100'000;
         TreeGenerator treeGenerator;
         treeGenerator.createNode();
-        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(n - treeGenerator.numNodes(), 95.0);
+        //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(n - treeGenerator.numNodes(), 95.0);
+        treeGenerator.createNodesWithRandomParent(n - treeGenerator.numNodes());
         cout << treeGenerator.numNodes() << endl;
         treeGenerator.printEdges();
         const int numQueries = treeGenerator.numNodes();
@@ -870,8 +867,8 @@ int main(int argc, char* argv[])
         vector<int> queriesEncrypted;
         for (auto rawQuery : queriesRaw)
         {
-            if ( queriesEncrypted.size() % 100 == 0)
-                cerr << "Generating query: " << queriesEncrypted.size() << " / " << numQueries << endl;
+            //if ( queriesEncrypted.size() % 100 == 0)
+                //cerr << "Generating query: " << queriesEncrypted.size() << " / " << numQueries << endl;
             queriesEncrypted.push_back(rawQuery ^ previousAnswer);
 
             Node* nodeToRemove = &(nodes[rawQuery - 1]);
