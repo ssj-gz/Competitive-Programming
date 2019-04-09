@@ -5,6 +5,7 @@
 #include <set>
 #include <functional>
 #include <cassert>
+#define VERIFY_SEGMENT_TREE
 
 using namespace std;
 
@@ -21,6 +22,10 @@ struct NodeInfo
 {
     Node* node = nullptr;
     int numDescendants = 0;
+    bool operator==(const NodeInfo& other)
+    {
+        return (node == other.node) && (numDescendants == other.numDescendants);
+    }
 };
 
 template <typename ValueType, typename OperatorInfo>
@@ -478,6 +483,26 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         {
             cout << "i: " << i << " descendantTracker.combinedValuesInRange(i, i).numDescendants : " << descendantTracker.combinedValuesInRange(i, i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
             assert(descendantTracker.combinedValuesInRange(i, i).numDescendants == initialNodeInfo[i].numDescendants);
+        }
+
+
+        descendantTracker.applyOperatorToAllInRange(1, 2, 10);
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            (void)descendantTracker.combinedValuesInRange(i, i);
+        }
+
+        descendantTracker.applyOperatorToAllInRange(0, 3, 20);
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            (void)descendantTracker.combinedValuesInRange(i, i);
+        }
+
+        descendantTracker.applyOperatorToAllInRange(2, 3, 15);
+        for (int i = 0; i < nodes.size(); i++)
+        {
+            (void)descendantTracker.combinedValuesInRange(i, i);
+            cout << "i: " << i << " descendantTracker.combinedValuesInRange(i, i).numDescendants : " << descendantTracker.combinedValuesInRange(i, i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
         }
     }
 
