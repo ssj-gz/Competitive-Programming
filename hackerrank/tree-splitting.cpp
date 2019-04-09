@@ -16,6 +16,7 @@ struct Node
     Node* parent = nullptr;
     int originalNumDescendants = 0;
     int indexInChainSegmentTree = -1;
+    bool removed = false;
 };
 
 struct NodeInfo
@@ -302,6 +303,7 @@ class SegmentTree {
 
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
 {
+    node->parent = parentNode;
     node->originalNumDescendants = 1;
     if (parentNode)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
@@ -403,6 +405,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     vector<NodeInfo> initialNodeInfo;
     set<int> chainRootIndices;
     int chainSegmentTreeIndex = 0;
+    cout << " Num heavy chains: " << heavyChains.size() << endl;
     for (const auto& chain : heavyChains)
     {
         chainRootIndices.insert(chainSegmentTreeIndex);
@@ -454,7 +457,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     auto findChainRoot = [&chainRootIndices, &initialNodeInfo](Node* nodeInChain)
     {
         assert(!chainRootIndices.empty());
-        cout << "findChainRoot chainRootIndices:" << std::endl;
+        cout << "findChainRoot nodeInChain index: " << nodeInChain->indexInChainSegmentTree << "  chainRootIndices:" << std::endl;
         for (const auto index : chainRootIndices)
         {
             cout << " " << index << std::endl;
@@ -484,12 +487,21 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         assert(nodeIndex >= 0 && nodeIndex < nodes.size());
 
         Node* nodeToRemove = &(nodes[nodeIndex]);
+        assert(!nodeToRemove->removed);
         std::cout << "Query - nodeToRemove: " << nodeToRemove << " indexInChainSegmentTree: " << nodeToRemove->indexInChainSegmentTree << endl;
         cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
+        cout << " nodeToRemove parent: " << nodeToRemove->parent << endl;
         auto rootOfChainWithNodeToRemove = findChainRoot(nodeToRemove);
-        const int thisAnswer = descendantTracker.valueAt(rootOfChainWithNodeToRemove->indexInChainSegmentTree).numDescendants;
-        cout << " thisAnswer: " << thisAnswer << endl;
 
+        auto rootOfComponent = rootOfChainWithNodeToRemove;
+        while (rootOfComponent->parent)
+        {
+            rootOfComponent = findChainRoot(rootOfComponent->parent);
+        }
+        cout << "rootOfComponent index: " << rootOfComponent->indexInChainSegmentTree << endl;
+
+        const int thisAnswer = descendantTracker.valueAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
+        cout << " thisAnswer: " << thisAnswer << endl;
         queryResults.push_back(thisAnswer);
 
         const int numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
@@ -517,6 +529,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         nodeToRemove->parent = nullptr;
         cout << "Blah: " << nodeToRemove << endl;
         chainRootIndices.erase(nodeToRemove->indexInChainSegmentTree);
+        nodeToRemove->removed = true;
 
         previousAnswer = thisAnswer;
     }
