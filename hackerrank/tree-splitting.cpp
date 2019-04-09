@@ -30,6 +30,11 @@ struct Node
 
 struct NodeInfo
 {
+    NodeInfo(Node* node, int numDescendants)
+        : node{node}, numDescendants{numDescendants}
+    {
+    }
+    NodeInfo() = default;
     Node* node = nullptr;
     int numDescendants = 0;
     bool operator==(const NodeInfo& other)
@@ -680,9 +685,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 {
     Node* rootNode = &(nodes.front());
     fixParentChildAndCountDescendants(rootNode, nullptr);
-
     doHeavyLightDecomposition(rootNode, false);
 
+    // Set up the descendantTracker.
     using DescendantTracker = SegmentTree<NodeInfo, int>;
     auto applyRemoveDescendants = [](const int numDescendantsToRemove, NodeInfo& nodeInfo)
     {
@@ -694,6 +699,10 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     };
     DescendantTracker descendantTracker(nodes.size(),  applyRemoveDescendants, combineRemoveDescendants);
 
+    // Put all the chains into indexInChainSegmentTree, one after the other, and 
+    // load that info into descendantTracker.
+    // The order of the chains doesn't matter, particular, but the order of the
+    // nodes within a chain obviously does!
     vector<NodeInfo> initialChainSegmentTreeInfo;
     set<int> chainRootIndices;
     int chainSegmentTreeIndex = 0;
@@ -704,13 +713,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         for (auto& nodeInChain : chain)
         {
             nodeInChain->indexInChainSegmentTree = chainSegmentTreeIndex;
-            NodeInfo nodeInfo;
-            nodeInfo.node = nodeInChain;
-            nodeInfo.numDescendants = nodeInChain->originalNumDescendants;
-            initialChainSegmentTreeInfo.push_back(nodeInfo);
+            initialChainSegmentTreeInfo.emplace_back(nodeInChain, nodeInChain->originalNumDescendants);
             chainSegmentTreeIndex++;
         }
-
     }
     descendantTracker.setInitialValues(initialChainSegmentTreeInfo);
     assert(initialChainSegmentTreeInfo.size() == nodes.size());
@@ -719,6 +724,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     {
         // The indexInChainSegmentTree of the root of the chain containing nodeInChain is the largest
         // indexInChainSegmentTree which is less than or equal to nodeInChain->indexInChainSegmentTree.
+        // Finding this is O(log2N).
         assert(!chainRootIndices.empty());
 
         auto chainRootIndexIter = chainRootIndices.lower_bound(nodeInChain->indexInChainSegmentTree);
