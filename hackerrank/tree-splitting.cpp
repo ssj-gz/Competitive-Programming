@@ -781,8 +781,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         for (auto& child : nodeToRemove->children)
         {
             child->parent = nullptr;
-            // The child is now definitely the root of a chain, if it wasn't before.
-            chainRootIndices.insert(child->indexInChainSegmentTree);
+            // The child (if not removed) is now definitely the root of a chain, if it wasn't before.
+            if (!child->removed)
+                chainRootIndices.insert(child->indexInChainSegmentTree);
         }
         nodeToRemove->parent = nullptr;
         // nodeToRemove is no longer the root of a chain.
