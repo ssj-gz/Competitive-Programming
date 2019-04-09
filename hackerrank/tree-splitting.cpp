@@ -106,7 +106,6 @@ class SegmentTree {
         }
         void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
         {
-            //std::cout << "applyOperatorToAllInRange left: " << left << " right: " << right << std::endl;
             assert(left >= 0 && left < m_maxNumber);
             assert(right >= 0 && right < m_maxNumber);
             assert(left <= right);
@@ -226,9 +225,6 @@ class SegmentTree {
             {
                 // Ensure parents has service their pending operations.
                 const int parentCellIndex = (start >> (m_numCellRows - cellRow ));
-                //const auto blah = (start >> (m_cellMatrix.size() - cellRow ));
-                //std::cout << "start: " << start << " Blee: " << parentCellIndex << " blah: " << blah << " power of 2: " << powerOf2 << " cellRow: " << cellRow << " num cells rows:" << m_cellMatrix.size() << endl;
-                //assert(parentCellIndex == blah);
                 const int parentCellRow = cellRow - 1;
                 Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellIndex]);
                 parentCell->servicePendingOperations();
@@ -396,7 +392,6 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         return chainRoot;
     };
 
-
     vector<int> queryResults;
     int previousAnswer = 0;
     for (int encryptedNodeIndex : queries)
@@ -454,9 +449,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         previousAnswer = thisAnswer;
     }
     return queryResults;
-
 }
-
 
 int main(int argc, char* argv[])
 {
@@ -487,7 +480,6 @@ int main(int argc, char* argv[])
     {
         queries.push_back(readInt());
     }
-
 
     const auto optimisedResults = findSolutionOptimised(nodes, queries);
     for (int queryNum = 0; queryNum < numQueries; queryNum++)
