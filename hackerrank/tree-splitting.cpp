@@ -110,7 +110,7 @@ class DescendantTracker {
                 cell->servicePendingDescendantSubtractions();
             }
         }
-        NodeInfo valueAt(int pos)
+        NodeInfo nodeInfoAt(int pos)
         {
             assert(pos >= 0 && pos < m_numNodeInfos);
             vector<Cell*> cells;
@@ -118,8 +118,8 @@ class DescendantTracker {
             assert(cells.size() == 1);
             auto cell = cells.front();
             cell->servicePendingDescendantSubtractions();
-            NodeInfo valueAt = cell->nodeInfo; 
-            return valueAt;
+            NodeInfo nodeInfoAt = cell->nodeInfo; 
+            return nodeInfoAt;
         }
     private:
         int m_numNodeInfos;
@@ -372,10 +372,10 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             rootOfComponent = findChainRoot(rootOfComponent->parent);
         }
 
-        const auto thisAnswer = descendantTracker.valueAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
+        const auto thisAnswer = descendantTracker.nodeInfoAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
         queryResults.push_back(thisAnswer);
 
-        const auto numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
+        const auto numDescendantsOfNodeToRemove = descendantTracker.nodeInfoAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
 
         // Work our way up the ancestors, chain-by-chain, adjusting the numDescendants for all nodes to reflect
         // the fact that nodeToRemove (and all its descendants) have been removed.
