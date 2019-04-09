@@ -1,5 +1,5 @@
 // Simon St James (ssjgz).
-//#define SUBMISSION
+#define SUBMISSION
 #define VERIFY_SEGMENT_TREE
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -847,6 +847,8 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
+
     if (argc == 2)
     {
         struct timeval time;
