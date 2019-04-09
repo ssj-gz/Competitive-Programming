@@ -181,9 +181,8 @@ class DescendantTracker {
 
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
+            assert(start <= end);
             if (cellRow == m_numCellRows)
-                return;
-            if (end < start)
                 return;
             if (cellRow != 0)
             {
@@ -216,7 +215,8 @@ class DescendantTracker {
                     destCells.push_back(&(m_cellMatrix[cellRow][start/powerOf2]));
                     start += powerOf2;
                 }
-                collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
+                if (start <= end)
+                    collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
                 return;
             }
             if (((end + 1) % powerOf2) == 0)
@@ -228,7 +228,8 @@ class DescendantTracker {
                     cellToAdd = &(m_cellMatrix[cellRow][end/powerOf2]);
                     end -= powerOf2;
                 }
-                collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
+                if (start <= end)
+                    collectMinCellsForRange(start, end, cellRow + 1, powerOf2 >> 1, destCells);
                 if (cellToAdd)
                     destCells.push_back(cellToAdd);
                 return;
@@ -244,9 +245,11 @@ class DescendantTracker {
             }
             // ... and then split into two, and recurse: for each of two split regions, at least one of the start or end will be a multiple of powerOf2, so they
             // will not split further.
+            assert(start <= powerOf2AfterStart - 1);
             collectMinCellsForRange(start, powerOf2AfterStart - 1, cellRow + 1, powerOf2 >> 1, destCells); // Left region.
             if (middleCellToAdd)
                 destCells.push_back(middleCellToAdd);
+            assert(powerOf2BeforeEnd <= end);
             collectMinCellsForRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1, destCells); // Right region.
             return;
         }
