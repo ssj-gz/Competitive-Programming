@@ -168,9 +168,6 @@ class DescendantTracker {
                     hasPendingDescendantSubtraction = false;
                 }
             }
-
-
-
         };
 
         vector<vector<Cell>> m_cellMatrix;
