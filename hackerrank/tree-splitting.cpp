@@ -109,8 +109,8 @@ class SegmentTree {
             collectMinCellsForRange(left, right, cells);
             for (auto cell : cells)
             {
-                cell->addPendingOperation(operatorInfo);
-                cell->servicePendingOperations();
+                cell->addPendingDescendantSubtraction(operatorInfo);
+                cell->servicePendingDescendantSubtractions();
             }
         }
         ValueType valueAt(int pos)
@@ -120,7 +120,7 @@ class SegmentTree {
             collectMinCellsForRange(pos, pos, cells);
             assert(cells.size() == 1);
             auto cell = cells.front();
-            cell->servicePendingOperations();
+            cell->servicePendingDescendantSubtractions();
             ValueType valueAt = cell->value; 
             return valueAt;
         }
@@ -142,13 +142,13 @@ class SegmentTree {
             Cell* rightChild = nullptr;
 
             int pendingNumDescendantsToSubtract;
-            bool hasPendingOperator = false;
+            bool hasPendingDescendantSubtraction = false;
 
-            void addPendingOperation(int numDescendantsToSubtract)
+            void addPendingDescendantSubtraction(int numDescendantsToSubtract)
             {
-                if (!hasPendingOperator)
+                if (!hasPendingDescendantSubtraction)
                 {
-                    hasPendingOperator = true;
+                    hasPendingDescendantSubtraction = true;
                     pendingNumDescendantsToSubtract = numDescendantsToSubtract;
                 }
                 else
@@ -157,19 +157,19 @@ class SegmentTree {
                 }
             }
 
-            void servicePendingOperations()
+            void servicePendingDescendantSubtractions()
             {
-                if (hasPendingOperator)
+                if (hasPendingDescendantSubtraction)
                 {
                     if (leftChild && rightChild)
                     {
-                        leftChild->addPendingOperation(pendingNumDescendantsToSubtract);
-                        rightChild->addPendingOperation(pendingNumDescendantsToSubtract);
+                        leftChild->addPendingDescendantSubtraction(pendingNumDescendantsToSubtract);
+                        rightChild->addPendingDescendantSubtraction(pendingNumDescendantsToSubtract);
                     }
 
                     value.numDescendants -= pendingNumDescendantsToSubtract;
 
-                    hasPendingOperator = false;
+                    hasPendingDescendantSubtraction = false;
                 }
             }
 
@@ -206,7 +206,7 @@ class SegmentTree {
                 const int parentCellIndex = (start >> (m_numCellRows - cellRow ));
                 const int parentCellRow = cellRow - 1;
                 Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellIndex]);
-                parentCell->servicePendingOperations();
+                parentCell->servicePendingDescendantSubtractions();
             }
 
             if (end == start)
