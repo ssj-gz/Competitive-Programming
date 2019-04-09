@@ -467,6 +467,28 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 
         queryResults.push_back(thisAnswer);
 
+        const int numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
+
+        descendantTracker.applyOperatorToAllInRange(rootOfChainWithNodeToRemove->indexInChainSegmentTree, nodeToRemove->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
+
+        auto bottomOfAncestorChain = rootOfChainWithNodeToRemove->parent;
+        while (bottomOfAncestorChain != nullptr)
+        {
+            auto rootOfAncestorChain = findChainRoot(bottomOfAncestorChain);
+            descendantTracker.applyOperatorToAllInRange(rootOfAncestorChain->indexInChainSegmentTree, bottomOfAncestorChain->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
+
+            bottomOfAncestorChain = rootOfAncestorChain->parent;
+        }
+
+        // "Remove" nodeToRemove.
+        for (auto& child : nodeToRemove->children)
+        {
+            child->parent = nullptr;
+            chainRootIndices.insert(child->indexInChainSegmentTree);
+        }
+        nodeToRemove->children.clear();
+        nodeToRemove->parent = nullptr;
+
         previousAnswer = thisAnswer;
     }
     return queryResults;
