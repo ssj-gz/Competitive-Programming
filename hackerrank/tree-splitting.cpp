@@ -139,11 +139,11 @@ class SegmentTree {
             return valueAt;
         }
     private:
+        int m_maxNumber;
         ApplyOperator m_applyOperator;
         CombineOperators m_combineOperators;
         int64_t m_powerOf2BiggerThanMaxNumber;
         int m_exponentOfPowerOf2BiggerThanMaxNumber;
-        int m_maxNumber;
 
 #ifdef VERIFY_SEGMENT_TREE
         vector<ValueType> m_dbgValues;
