@@ -16,7 +16,6 @@ using namespace std;
 
 struct Node
 {
-    vector<Node*> neighbours;
     vector<Node*> children;
     Node* parent = nullptr;
     int originalNumDescendants = 0;
@@ -515,9 +514,6 @@ int main(int argc, char* argv[])
     {
         const int u = readInt() - 1;
         const int v = readInt() - 1;
-
-        nodes[u].neighbours.push_back(&(nodes[v]));
-        nodes[v].neighbours.push_back(&(nodes[u]));
 
         nodes[u].children.push_back(&(nodes[v]));
         nodes[v].children.push_back(&(nodes[u]));
