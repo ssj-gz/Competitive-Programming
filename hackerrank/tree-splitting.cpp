@@ -359,6 +359,17 @@ int numInComponent(Node* nodeInComponent, Node* previousNode = nullptr)
     return num;
 }
 
+void removeNode(Node* nodeToRemove)
+{
+    const auto neighbours = nodeToRemove->neighbours;
+    nodeToRemove->neighbours.clear();
+
+    for (const auto neighbour : neighbours)
+    {
+        neighbour->neighbours.erase(remove(neighbour->neighbours.begin(), neighbour->neighbours.end(), nodeToRemove), neighbour->neighbours.end());
+    }
+}
+
 vector<int> bruteForce(vector<Node>& nodes, const vector<int>& queries)
 {
     vector<int> queryResults;
@@ -371,13 +382,7 @@ vector<int> bruteForce(vector<Node>& nodes, const vector<int>& queries)
         const int thisAnswer = numInComponent(nodeToRemove);
         queryResults.push_back(thisAnswer);
 
-        const auto neighbours = nodeToRemove->neighbours;
-        nodeToRemove->neighbours.clear();
-
-        for (const auto neighbour : neighbours)
-        {
-            neighbour->neighbours.erase(remove(neighbour->neighbours.begin(), neighbour->neighbours.end(), nodeToRemove), neighbour->neighbours.end());
-        }
+        removeNode(nodeToRemove);
 
         previousAnswer = thisAnswer;
     }
@@ -537,8 +542,12 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
 
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        return 0;
+    }
     auto readInt = []() { int x; cin >> x; return x; };
 
     const int n = readInt();
