@@ -363,6 +363,7 @@ class SegmentTree {
                 numCellsInThisRow *= 2;
                 powerOf2 /= 2;
             }
+            m_numCellRows = m_cellMatrix.size();
             // Cell matrix parent/child.
             for (int cellRow = 0; cellRow < m_cellMatrix.size() - 1; cellRow++)
             {
@@ -478,7 +479,8 @@ class SegmentTree {
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
 
-                    container->m_applyOperator(pendingOperatorInfo, value);
+                    //container->m_applyOperator(pendingOperatorInfo, value);
+                    value.numDescendants -= pendingOperatorInfo;
 
                     hasPendingOperator = false;
                 }
@@ -489,6 +491,7 @@ class SegmentTree {
         };
 
         vector<vector<Cell>> m_cellMatrix;
+        int m_numCellRows = -1;
 
         // Collect O(log2(end - start + 1)) cells in range-order that span the interval start-end (inclusive).
         void collectMinCellsForRange(const int start, const int end, vector<Cell*>& destCells)
@@ -506,14 +509,17 @@ class SegmentTree {
 
         void collectMinCellsForRange(int start, int end, int cellRow, int powerOf2, vector<Cell*>& destCells)
         {
-            if (cellRow == m_cellMatrix.size())
+            if (cellRow == m_numCellRows)
                 return;
             if (end < start)
                 return;
             if (cellRow != 0)
             {
                 // Ensure parents has service their pending operations.
-                const int parentCellIndex = start / (powerOf2 * 2);
+                const int parentCellIndex = (start >> (m_numCellRows - cellRow ));
+                //const auto blah = (start >> (m_cellMatrix.size() - cellRow ));
+                //std::cout << "start: " << start << " Blee: " << parentCellIndex << " blah: " << blah << " power of 2: " << powerOf2 << " cellRow: " << cellRow << " num cells rows:" << m_cellMatrix.size() << endl;
+                //assert(parentCellIndex == blah);
                 const int parentCellRow = cellRow - 1;
                 Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellIndex]);
                 parentCell->servicePendingOperations();
