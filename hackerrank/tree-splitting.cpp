@@ -100,7 +100,7 @@ class SegmentTree {
                 cell.value = initialValues[i];
             }
         }
-        void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
+        void subtractNumDescendantsFromAllInRange(int left, int right, int numDescendantsToSubtract)
         {
             assert(left >= 0 && left < m_maxNumber);
             assert(right >= 0 && right < m_maxNumber);
@@ -109,7 +109,7 @@ class SegmentTree {
             collectMinCellsForRange(left, right, cells);
             for (auto cell : cells)
             {
-                cell->addPendingDescendantSubtraction(operatorInfo);
+                cell->addPendingDescendantSubtraction(numDescendantsToSubtract);
                 cell->servicePendingDescendantSubtractions();
             }
         }
@@ -397,12 +397,12 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
         // Work our way up the ancestors, chain-by-chain, adjusting the numDescendants for all nodes to reflect
         // the fact that nodeToRemove (and all its descendants) have been removed.
         // There are at most O(log2N) such "ancestor chains", and we can adjust each chain (using a segment tree) in O(log2N).
-        descendantTracker.applyOperatorToAllInRange(rootOfChainWithNodeToRemove->indexInChainSegmentTree, nodeToRemove->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
+        descendantTracker.subtractNumDescendantsFromAllInRange(rootOfChainWithNodeToRemove->indexInChainSegmentTree, nodeToRemove->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
         auto bottomOfAncestorChain = rootOfChainWithNodeToRemove->parent;
         while (bottomOfAncestorChain != nullptr)
         {
             auto rootOfAncestorChain = findChainRoot(bottomOfAncestorChain);
-            descendantTracker.applyOperatorToAllInRange(rootOfAncestorChain->indexInChainSegmentTree, bottomOfAncestorChain->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
+            descendantTracker.subtractNumDescendantsFromAllInRange(rootOfAncestorChain->indexInChainSegmentTree, bottomOfAncestorChain->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
 
             bottomOfAncestorChain = rootOfAncestorChain->parent;
         }
