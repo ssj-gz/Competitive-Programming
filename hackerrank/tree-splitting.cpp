@@ -1,5 +1,5 @@
 // Simon St James (ssjgz).
-#define SUBMISSION
+//#define SUBMISSION
 #define VERIFY_SEGMENT_TREE
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -699,10 +699,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     };
     DescendantTracker descendantTracker(nodes.size(),  applyRemoveDescendants, combineRemoveDescendants);
 
-    vector<NodeInfo> initialNodeInfo;
+    vector<NodeInfo> initialChainSegmentTreeInfo;
     set<int> chainRootIndices;
     int chainSegmentTreeIndex = 0;
-    //cout << " Num heavy chains: " << heavyChains.size() << endl;
     for (const auto& chain : heavyChains)
     {
         chainRootIndices.insert(chainSegmentTreeIndex);
@@ -713,53 +712,19 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             NodeInfo nodeInfo;
             nodeInfo.node = nodeInChain;
             nodeInfo.numDescendants = nodeInChain->originalNumDescendants;
-            initialNodeInfo.push_back(nodeInfo);
+            initialChainSegmentTreeInfo.push_back(nodeInfo);
             chainSegmentTreeIndex++;
         }
 
     }
-    descendantTracker.setInitialValues(initialNodeInfo);
-    assert(initialNodeInfo.size() == nodes.size());
+    descendantTracker.setInitialValues(initialChainSegmentTreeInfo);
+    assert(initialChainSegmentTreeInfo.size() == nodes.size());
 
-#if 0
-    // TODO - remove
+    auto findChainRoot = [&chainRootIndices, &initialChainSegmentTreeInfo](Node* nodeInChain)
     {
-        for (int i = 0; i < nodes.size(); i++)
-        {
-            cout << "i: " << i << " descendantTracker.valueAt(i).numDescendants : " << descendantTracker.valueAt(i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
-            assert(descendantTracker.valueAt(i).numDescendants == initialNodeInfo[i].numDescendants);
-        }
-
-
-        descendantTracker.applyOperatorToAllInRange(1, 2, 10);
-        for (int i = 0; i < nodes.size(); i++)
-        {
-            (void)descendantTracker.valueAt(i);
-        }
-
-        descendantTracker.applyOperatorToAllInRange(0, 3, 20);
-        for (int i = 0; i < nodes.size(); i++)
-        {
-            (void)descendantTracker.valueAt(i);
-        }
-
-        descendantTracker.applyOperatorToAllInRange(2, 3, 15);
-        for (int i = 0; i < nodes.size(); i++)
-        {
-            (void)descendantTracker.valueAt(i);
-            cout << "i: " << i << " descendantTracker.valueAt(i).numDescendants : " << descendantTracker.valueAt(i).numDescendants  << " initialNodeInfo[i].numDescendants: " << initialNodeInfo[i].numDescendants << std::endl;
-        }
-    }
-#endif
-    auto findChainRoot = [&chainRootIndices, &initialNodeInfo](Node* nodeInChain)
-    {
+        // The indexInChainSegmentTree of the root of the chain containing nodeInChain is the largest
+        // indexInChainSegmentTree which is less than or equal to nodeInChain->indexInChainSegmentTree.
         assert(!chainRootIndices.empty());
-        //cout << "findChainRoot nodeInChain index: " << nodeInChain->indexInChainSegmentTree << "  chainRootIndices:" << std::endl;
-        //for (const auto index : chainRootIndices)
-        //{
-            //cout << " " << index << std::endl;
-        //}
-        //cout << "nodeInChain index: " << nodeInChain->indexInChainSegmentTree << endl;
 
         auto chainRootIndexIter = chainRootIndices.lower_bound(nodeInChain->indexInChainSegmentTree);
         if (chainRootIndexIter == chainRootIndices.end())
@@ -770,9 +735,9 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             chainRootIndexIter = std::prev(chainRootIndexIter);
         }
         const auto chainRootIndex = *chainRootIndexIter;
-        auto root = initialNodeInfo[chainRootIndex].node;
-        assert(root->indexInChainSegmentTree <= nodeInChain->indexInChainSegmentTree);
-        return initialNodeInfo[chainRootIndex].node;
+        auto chainRoot = initialChainSegmentTreeInfo[chainRootIndex].node;
+        assert(chainRoot->indexInChainSegmentTree <= nodeInChain->indexInChainSegmentTree);
+        return initialChainSegmentTreeInfo[chainRootIndex].node;
     };
 
 
@@ -780,31 +745,33 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     int previousAnswer = 0;
     for (int encryptedNodeIndex : queries)
     {
+        // Decrypt the index (in nodes) of the node to remove using the previous query answer.
         const int nodeIndex = (encryptedNodeIndex ^ previousAnswer) - 1;
         assert(nodeIndex >= 0 && nodeIndex < nodes.size());
 
         Node* nodeToRemove = &(nodes[nodeIndex]);
         assert(!nodeToRemove->removed);
-        //std::cout << "Query - nodeToRemove: " << nodeToRemove << " indexInChainSegmentTree: " << nodeToRemove->indexInChainSegmentTree << endl;
-        //cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
-        //cout << " nodeToRemove parent: " << nodeToRemove->parent << endl;
-        auto rootOfChainWithNodeToRemove = findChainRoot(nodeToRemove);
 
+        // Find the root of the component containing nodeToRemove - the number of descendants for this
+        // root is the number of nodes in the component containing nodeToRemove.
+        // We work our way up a chain at a time - since there are at most O(log2N) such chains, 
+        // this is a fast operation.
+        auto rootOfChainWithNodeToRemove = findChainRoot(nodeToRemove);
         auto rootOfComponent = rootOfChainWithNodeToRemove;
         while (rootOfComponent->parent)
         {
             rootOfComponent = findChainRoot(rootOfComponent->parent);
         }
-        //cout << "rootOfComponent index: " << rootOfComponent->indexInChainSegmentTree << endl;
 
         const int thisAnswer = descendantTracker.valueAt(rootOfComponent->indexInChainSegmentTree).numDescendants;
-        //cout << " thisAnswer: " << thisAnswer << endl;
         queryResults.push_back(thisAnswer);
 
         const int numDescendantsOfNodeToRemove = descendantTracker.valueAt(nodeToRemove->indexInChainSegmentTree).numDescendants;
 
+        // Work our way up the ancestors, chain-by-chain, adjusting the numDescendants for all nodes to reflect
+        // the fact that nodeToRemove (and all its descendants) have been removed.
+        // There are at most O(log2N) such "ancestor chains", and we can adjust each chain (using a segment tree) in O(log2N).
         descendantTracker.applyOperatorToAllInRange(rootOfChainWithNodeToRemove->indexInChainSegmentTree, nodeToRemove->indexInChainSegmentTree, numDescendantsOfNodeToRemove);
-
         auto bottomOfAncestorChain = rootOfChainWithNodeToRemove->parent;
         while (bottomOfAncestorChain != nullptr)
         {
@@ -814,17 +781,16 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
             bottomOfAncestorChain = rootOfAncestorChain->parent;
         }
 
-        // "Remove" nodeToRemove.
-        //cout << " nodeToRemove has " << nodeToRemove->children.size() << " children" << endl;
+        // "Remove" nodeToRemove.  Note that we don't have to clear nodeToRemove's children, nor 
+        // remove nodeToRemove from the list of its parents' children.
         for (auto& child : nodeToRemove->children)
         {
             child->parent = nullptr;
-            //cout << " child indexInChainSegmentTree: " << child->indexInChainSegmentTree << endl;
+            // The child is now definitely the root of a chain, if it wasn't before.
             chainRootIndices.insert(child->indexInChainSegmentTree);
         }
-        nodeToRemove->children.clear();
         nodeToRemove->parent = nullptr;
-        //cout << "Blah: " << nodeToRemove << endl;
+        // nodeToRemove is no longer the root of a chain.
         chainRootIndices.erase(nodeToRemove->indexInChainSegmentTree);
         nodeToRemove->removed = true;
 
@@ -833,6 +799,7 @@ vector<int> findSolutionOptimised(vector<Node>& nodes, const vector<int>& querie
     return queryResults;
 
 }
+
 
 int main(int argc, char* argv[])
 {
