@@ -496,7 +496,8 @@ int main(int argc, char* argv[])
     // root of chain; child of child of root of chain; etc!) matters.  When removing a node, we need
     // only adjust the numDescendants of its ancestors (by traversing the chains as far as we can go),
     // and mark the children of nodeToRemove as new roots of chains (by adding their indexInChainSegmentTree
-    // to chainRootIndices).
+    // to chainRootIndices) - in particular, removing nodeToRemove from its parents list of children, or clearing
+    // nodeToRemove's own list of children is not necessary, so we skip it for efficiency.
     //
     // The total runtime is num queries (O(N)) times O(log2N * log2N) == O(N * log2N * log2N).
     //
