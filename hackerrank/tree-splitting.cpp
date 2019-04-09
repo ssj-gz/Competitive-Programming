@@ -222,7 +222,7 @@ class SegmentTree {
                 return;
             if (cellRow != 0)
             {
-                // Ensure parents has service their pending operations.
+                // Ensure parent has serviced its pending operations.
                 const int parentCellIndex = (start >> (m_numCellRows - cellRow ));
                 const int parentCellRow = cellRow - 1;
                 Cell *parentCell = &(m_cellMatrix[parentCellRow][parentCellIndex]);
