@@ -33,10 +33,6 @@ struct NodeInfo
     NodeInfo() = default;
     Node* node = nullptr;
     int numDescendants = 0;
-    bool operator==(const NodeInfo& other)
-    {
-        return (node == other.node) && (numDescendants == other.numDescendants);
-    }
 };
 
 template <typename ValueType, typename OperatorInfo>
