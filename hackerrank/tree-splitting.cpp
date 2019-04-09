@@ -480,7 +480,7 @@ class SegmentTree {
                     }
 
                     //container->m_applyOperator(pendingOperatorInfo, value);
-                    value.numDescendants -= pendingOperatorInfo;
+                    value.numDescendants -= pendingOperatorInfo; // <-- Unfortunate micro-optimisation that seems to be necessary to pass this one :(
 
                     hasPendingOperator = false;
                 }
