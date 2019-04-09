@@ -141,19 +141,19 @@ class SegmentTree {
             Cell* leftChild = nullptr;
             Cell* rightChild = nullptr;
 
-            OperatorInfo pendingOperatorInfo;
+            int pendingNumDescendantsToSubtract;
             bool hasPendingOperator = false;
 
-            void addPendingOperation(OperatorInfo operatorInfo)
+            void addPendingOperation(int numDescendantsToSubtract)
             {
                 if (!hasPendingOperator)
                 {
                     hasPendingOperator = true;
-                    pendingOperatorInfo = operatorInfo;
+                    pendingNumDescendantsToSubtract = numDescendantsToSubtract;
                 }
                 else
                 {
-                    pendingOperatorInfo = container->m_combineOperators(operatorInfo, pendingOperatorInfo);
+                    pendingNumDescendantsToSubtract += numDescendantsToSubtract;
                 }
             }
 
@@ -163,11 +163,11 @@ class SegmentTree {
                 {
                     if (leftChild && rightChild)
                     {
-                        leftChild->addPendingOperation(pendingOperatorInfo);
-                        rightChild->addPendingOperation(pendingOperatorInfo);
+                        leftChild->addPendingOperation(pendingNumDescendantsToSubtract);
+                        rightChild->addPendingOperation(pendingNumDescendantsToSubtract);
                     }
 
-                    value.numDescendants -= pendingOperatorInfo;
+                    value.numDescendants -= pendingNumDescendantsToSubtract;
 
                     hasPendingOperator = false;
                 }
