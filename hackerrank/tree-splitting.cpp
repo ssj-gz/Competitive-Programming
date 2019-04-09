@@ -92,10 +92,10 @@ class SegmentTree {
             {
                 auto& cell = m_cellMatrix.back()[i];
                 cell.value = initialValues[i];
-                if (cell.parent)
-                    cell.parent->setNeedsUpdateFromChildren();
+                //if (cell.parent)
+                    //cell.parent->setNeedsUpdateFromChildren();
             }
-            updateAllFromChildren();
+            //updateAllFromChildren();
 #ifdef VERIFY_SEGMENT_TREE
             m_dbgValues = initialValues;
 #endif
@@ -108,10 +108,10 @@ class SegmentTree {
             {
                 cell->addPendingOperation(operatorInfo);
                 cell->servicePendingOperations();
-                if (cell->parent)
-                    cell->parent->setNeedsUpdateFromChildren();
+                //if (cell->parent)
+                    //cell->parent->setNeedsUpdateFromChildren();
             }
-            updateAllFromChildren();
+            //updateAllFromChildren();
 #ifdef VERIFY_SEGMENT_TREE
             for (int i = left; i <= right; i++)
             {
@@ -128,9 +128,9 @@ class SegmentTree {
             cell->servicePendingOperations();
             cell->value = newValue;
 
-            if (cell->parent)
-                cell->parent->setNeedsUpdateFromChildren();
-            updateAllFromChildren();
+            //if (cell->parent)
+                //cell->parent->setNeedsUpdateFromChildren();
+            //updateAllFromChildren();
 #ifdef VERIFY_SEGMENT_TREE
             m_dbgValues[pos] = newValue;
 #endif
@@ -186,7 +186,7 @@ class SegmentTree {
 
             OperatorInfo pendingOperatorInfo;
             bool hasPendingOperator = false;
-            bool needsUpdateFromChildren = false;
+            //bool needsUpdateFromChildren = false;
 
             void addPendingOperation(OperatorInfo operatorInfo)
             {
@@ -217,35 +217,7 @@ class SegmentTree {
                 }
             }
 
-            void setNeedsUpdateFromChildren()
-            {
-                if (needsUpdateFromChildren)
-                    return;
-                if (!(leftChild && rightChild))
-                    return;
 
-                needsUpdateFromChildren = true;
-                if (parent)
-                    parent->setNeedsUpdateFromChildren();
-            }
-
-            void updateFromChildren()
-            {
-                if (!needsUpdateFromChildren)
-                    return;
-                if (!(leftChild && rightChild))
-                    return;
-
-                leftChild->servicePendingOperations();
-                rightChild->servicePendingOperations();
-
-                leftChild->updateFromChildren();
-                rightChild->updateFromChildren();
-
-                value = container->m_combineValues(leftChild->value, rightChild->value);
-
-                needsUpdateFromChildren = false;
-            }
 
         };
 
@@ -341,10 +313,6 @@ class SegmentTree {
             return;
         }
 
-        void updateAllFromChildren()
-        {
-            m_cellMatrix.front().front().updateFromChildren();
-        }
 };
 
 
