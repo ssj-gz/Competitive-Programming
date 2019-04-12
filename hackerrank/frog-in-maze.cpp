@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <iomanip>
 #include <sys/time.h>
 
 
@@ -88,7 +89,7 @@ double simulate(const vector<vector<CellType>>& cellTypes, const vector<vector<s
 {
     int numSims = 0;
     int numEscapes = 0;
-    for (int sim = 0; sim < 1'000'000; sim++)
+    for (int sim = 0; sim < 10'000'000; sim++)
     {
         if (simulateRun(cellTypes, tunnelDestinations, frogStartX, frogStartY))
             numEscapes++;
@@ -117,20 +118,26 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
 
     for (int sim = 0; sim < 1'000'000; sim++)
     {
-        cout << "probabilities:" << endl;
-        for (int y = 0; y < height; y++)
+#if 0
+        if ( (sim % 100) == 0)
         {
-            for (int x = 0; x < width; x++)
+            cout << "probabilities:" << endl;
+            for (int y = 0; y < height; y++)
             {
-                cout << successProbabilities[x][y] << " ";
+                for (int x = 0; x < width; x++)
+                {
+                    cout << successProbabilities[x][y] << " ";
+                }
+                cout << endl;
             }
-            cout << endl;
         }
+#endif
         vector<vector<double>> nextSuccessProbabilities(width, vector<double>(height, 0.0));
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
+                //nextSuccessProbabilities[x][y] = 0.0;
                 if (cellTypes[x][y] != CellType::Free && cellTypes[x][y] != CellType::Tunnel)
                 {
                     nextSuccessProbabilities[x][y] = successProbabilities[x][y];
@@ -173,6 +180,7 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
             }
 
         }
+        //std::swap(successProbabilities, nextSuccessProbabilities);
         successProbabilities = nextSuccessProbabilities;
     }
     return successProbabilities[frogStartX][frogStartY];
@@ -242,8 +250,17 @@ int main()
         tunnelDestinations[endX][endY] = {beginX, beginY};
     }
 
-    const double simulatedResult = simulate(cellTypes, tunnelDestinations, frogStartX, frogStartY);
-    cout << "simulated: " << simulatedResult << endl;
-    const double calculatedResult = resultOptimized(cellTypes, tunnelDestinations, frogStartX, frogStartY);
-    cout << "calculated: " << calculatedResult << endl;
+    for (int frogStartX = 0; frogStartX < width; frogStartX++)
+    {
+        for (int frogStartY = 0; frogStartY < height; frogStartY++)
+        {
+            cout << "frogStartX: " << frogStartX << " frogStartY: " << frogStartY << endl;
+            const double simulatedResult = simulate(cellTypes, tunnelDestinations, frogStartX, frogStartY);
+            cout << " simulated: " << simulatedResult << endl;
+            const double calculatedResult = resultOptimized(cellTypes, tunnelDestinations, frogStartX, frogStartY);
+            cout << " calculated: " << calculatedResult << endl;
+            cout << " diff: "  << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << abs(calculatedResult - simulatedResult) << std::endl;
+
+        }
+    }
 }
