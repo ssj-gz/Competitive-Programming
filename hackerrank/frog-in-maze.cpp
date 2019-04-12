@@ -7,6 +7,7 @@
 #include <vector>
 #include <cassert>
 #include <iomanip>
+#include <limits>
 #include <sys/time.h>
 
 
@@ -109,7 +110,7 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
     const std::pair<int, int> possibleDirections[] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
     const int width = cellTypes.size();
     const int height = cellTypes[0].size();
-    vector<vector<double>> successProbabilities(width, vector<double>(height, 0.0));
+    vector<vector<long double>> successProbabilities(width, vector<long double>(height, 0.0));
     for (int x = 0; x < width; x++)
     {
         for (int y = 0; y < height; y++)
@@ -120,7 +121,7 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
             }
         }
     }
-    vector<vector<double>> nextSuccessProbabilities(width, vector<double>(height, 0.0));
+    vector<vector<long double>> nextSuccessProbabilities(width, vector<long double>(height, 0.0));
 
     for (int sim = 0; sim < 1'000'000; sim++)
     {
@@ -232,7 +233,7 @@ int main()
                 case 'A':
                     frogStartX = x;
                     frogStartY = y;
-                    cout << "frogStartX: " << frogStartX << " frogStartY: " << frogStartY << endl;
+                    //cout << "frogStartX: " << frogStartX << " frogStartY: " << frogStartY << endl;
                     break;
             };
             cellTypes[x][y] = cellType;
@@ -246,7 +247,7 @@ int main()
         const int endY = readInt() - 1;
         const int endX = readInt() - 1;
         assert(beginX >= 0 && beginY >= 0 && endX >= 0 && endY >= 0);
-        cout << "Tunnel: (" << beginX << "," << beginY << ") - (" << endX << "," << endY << ")" << endl;
+        //cout << "Tunnel: (" << beginX << "," << beginY << ") - (" << endX << "," << endY << ")" << endl;
 
         cellTypes[beginX][beginY] = CellType::Tunnel;
         cellTypes[endX][endY] = CellType::Tunnel;
@@ -271,6 +272,6 @@ int main()
     }
 #else
     const double calculatedResult = resultOptimized(cellTypes, tunnelDestinations, frogStartX, frogStartY);
-    cout << calculatedResult << endl;
+    cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << calculatedResult << endl;
 #endif
 }
