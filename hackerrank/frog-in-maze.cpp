@@ -1,3 +1,4 @@
+// Simon St James - 2019-04-12
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -8,6 +9,7 @@
 #include <cassert>
 #include <iomanip>
 #include <limits>
+#include <chrono>
 #include <sys/time.h>
 
 
@@ -95,7 +97,7 @@ double simulate(const vector<vector<CellType>>& cellTypes, const vector<vector<s
 {
     int numSims = 0;
     int numEscapes = 0;
-    for (int sim = 0; sim < 100'000'000; sim++)
+    for (int sim = 0; sim < 10'000'000; sim++)
     {
         if (simulateRun(cellTypes, tunnelDestinations, frogStartX, frogStartY))
             numEscapes++;
@@ -107,6 +109,8 @@ double simulate(const vector<vector<CellType>>& cellTypes, const vector<vector<s
 
 double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<vector<std::pair<int,int>>>& tunnelDestinations, const int frogStartX, const int frogStartY)
 {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     const std::pair<int, int> possibleDirections[] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
     const int width = cellTypes.size();
     const int height = cellTypes[0].size();
@@ -125,6 +129,15 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
 
     for (int sim = 0; sim < 1'000'000; sim++)
     {
+        if ( (sim % 100) == 0)
+        {
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() >= 1800)
+            {
+                break;
+            }
+        }
 #if 0
         if ( (sim % 100) == 0)
         {
@@ -257,10 +270,12 @@ int main()
     }
 
 #ifdef BRUTE_FORCE
+#if 0
     for (int frogStartX = 0; frogStartX < width; frogStartX++)
     {
         for (int frogStartY = 0; frogStartY < height; frogStartY++)
         {
+#endif
             cout << "frogStartX: " << frogStartX << " frogStartY: " << frogStartY << endl;
             const double simulatedResult = simulate(cellTypes, tunnelDestinations, frogStartX, frogStartY);
             cout << " simulated: " << simulatedResult << endl;
@@ -268,8 +283,10 @@ int main()
             cout << " calculated: " << calculatedResult << endl;
             cout << " diff: "  << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << abs(calculatedResult - simulatedResult) << std::endl;
 
+#if 0
         }
     }
+#endif
 #else
     const double calculatedResult = resultOptimized(cellTypes, tunnelDestinations, frogStartX, frogStartY);
     cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << calculatedResult << endl;
