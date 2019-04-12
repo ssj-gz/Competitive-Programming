@@ -1,3 +1,8 @@
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -89,7 +94,7 @@ double simulate(const vector<vector<CellType>>& cellTypes, const vector<vector<s
 {
     int numSims = 0;
     int numEscapes = 0;
-    for (int sim = 0; sim < 10'000'000; sim++)
+    for (int sim = 0; sim < 100'000'000; sim++)
     {
         if (simulateRun(cellTypes, tunnelDestinations, frogStartX, frogStartY))
             numEscapes++;
@@ -115,6 +120,7 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
             }
         }
     }
+    vector<vector<double>> nextSuccessProbabilities(width, vector<double>(height, 0.0));
 
     for (int sim = 0; sim < 1'000'000; sim++)
     {
@@ -132,12 +138,11 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
             }
         }
 #endif
-        vector<vector<double>> nextSuccessProbabilities(width, vector<double>(height, 0.0));
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                //nextSuccessProbabilities[x][y] = 0.0;
+                nextSuccessProbabilities[x][y] = 0.0;
                 if (cellTypes[x][y] != CellType::Free && cellTypes[x][y] != CellType::Tunnel)
                 {
                     nextSuccessProbabilities[x][y] = successProbabilities[x][y];
@@ -180,8 +185,8 @@ double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<v
             }
 
         }
-        //std::swap(successProbabilities, nextSuccessProbabilities);
-        successProbabilities = nextSuccessProbabilities;
+        std::swap(successProbabilities, nextSuccessProbabilities);
+        //successProbabilities = nextSuccessProbabilities;
     }
     return successProbabilities[frogStartX][frogStartY];
 }
@@ -250,6 +255,7 @@ int main()
         tunnelDestinations[endX][endY] = {beginX, beginY};
     }
 
+#ifdef BRUTE_FORCE
     for (int frogStartX = 0; frogStartX < width; frogStartX++)
     {
         for (int frogStartY = 0; frogStartY < height; frogStartY++)
@@ -263,4 +269,8 @@ int main()
 
         }
     }
+#else
+    const double calculatedResult = resultOptimized(cellTypes, tunnelDestinations, frogStartX, frogStartY);
+    cout << calculatedResult << endl;
+#endif
 }
