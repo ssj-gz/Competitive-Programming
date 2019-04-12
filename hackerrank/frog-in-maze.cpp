@@ -17,11 +17,13 @@ enum class CellType
 
 bool simulateRun(const vector<vector<CellType>>& cellTypes, const vector<vector<std::pair<int,int>>>& tunnelDestinations, int frogStartX, int frogStartY)
 {
+    //cout << "simulate run" << endl;
     const std::pair<int, int> possibleDirections[] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
     const int width = cellTypes.size();
     const int height = cellTypes[0].size();
     while (true)
     {
+        //cout << "Frog at (" << frogStartX << "," << frogStartY << ")" << endl;
         std::pair<int, int> directionsCanMoveIn[4];
         int numDirectionsCanMoveIn = 0;
         for (const auto direction : possibleDirections)
@@ -38,16 +40,20 @@ bool simulateRun(const vector<vector<CellType>>& cellTypes, const vector<vector<
 
             directionsCanMoveIn[numDirectionsCanMoveIn] = direction;
             numDirectionsCanMoveIn++;
+            //cout << " can move in direction: " << direction.first << " " << direction.second << endl;
         }
 
         if (numDirectionsCanMoveIn == 0)
         {
             // Stuck.
+            //cout << "Stuck!" << endl;
             return false;
         }
         const int directionIndex = rand() % numDirectionsCanMoveIn;
+        //cout << " chose: " << directionsCanMoveIn[directionIndex].first << " " << directionsCanMoveIn[directionIndex].second << endl;
         int newFrogX = frogStartX + directionsCanMoveIn[directionIndex].first;
         int newFrogY = frogStartY + directionsCanMoveIn[directionIndex].second;
+        //cout << " moved to " << newFrogX << "," << newFrogY << endl;
 
         switch(cellTypes[newFrogX][newFrogY])
         {
@@ -58,12 +64,18 @@ bool simulateRun(const vector<vector<CellType>>& cellTypes, const vector<vector<
                 assert(false);
                 break;
             case CellType::Mine:
+                //cout << " Boom!" << endl;
                 return false;
             case CellType::Exit:
+                //cout << " Free!" << endl;
                 return true;
             case CellType::Tunnel:
-                newFrogX = tunnelDestinations[frogStartX][frogStartY].first;
-                newFrogY = tunnelDestinations[frogStartX][frogStartY].second;
+                const int afterTunnelFrogX = tunnelDestinations[newFrogX][newFrogY].first;
+                const int afterTunnelFrogY = tunnelDestinations[newFrogX][newFrogY].second;
+                //cout << " slid down tunnel to: " << afterTunnelFrogX << "," << afterTunnelFrogY << endl;
+                newFrogX = afterTunnelFrogX;
+                newFrogY = afterTunnelFrogY;
+                assert(newFrogX != -1 && newFrogY != -1);
                 break;
         }
 
@@ -76,7 +88,7 @@ double simulate(const vector<vector<CellType>>& cellTypes, const vector<vector<s
 {
     int numSims = 0;
     int numEscapes = 0;
-    for (int sim = 0; sim < 100'000; sim++)
+    for (int sim = 0; sim < 1'000'000; sim++)
     {
         if (simulateRun(cellTypes, tunnelDestinations, frogStartX, frogStartY))
             numEscapes++;
@@ -84,6 +96,86 @@ double simulate(const vector<vector<CellType>>& cellTypes, const vector<vector<s
     }
 
     return static_cast<double>(numEscapes) / numSims;
+}
+
+double resultOptimized(const vector<vector<CellType>>& cellTypes, const vector<vector<std::pair<int,int>>>& tunnelDestinations, const int frogStartX, const int frogStartY)
+{
+    const std::pair<int, int> possibleDirections[] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
+    const int width = cellTypes.size();
+    const int height = cellTypes[0].size();
+    vector<vector<double>> successProbabilities(width, vector<double>(height, 0.0));
+    for (int x = 0; x < width; x++)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            if (cellTypes[x][y] == CellType::Exit)
+            {
+                successProbabilities[x][y] = 1.0;
+            }
+        }
+    }
+
+    for (int sim = 0; sim < 1'000'000; sim++)
+    {
+        cout << "probabilities:" << endl;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                cout << successProbabilities[x][y] << " ";
+            }
+            cout << endl;
+        }
+        vector<vector<double>> nextSuccessProbabilities(width, vector<double>(height, 0.0));
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (cellTypes[x][y] != CellType::Free && cellTypes[x][y] != CellType::Tunnel)
+                {
+                    nextSuccessProbabilities[x][y] = successProbabilities[x][y];
+                    continue;
+                } 
+                std::pair<int, int> directionsCanMoveIn[4];
+                int numDirectionsCanMoveIn = 0;
+                for (const auto direction : possibleDirections)
+                {
+                    const int newFrogX = x + direction.first;
+                    const int newFrogY = y + direction.second;
+
+                    if (newFrogX < 0 || newFrogX >= width)
+                        continue;
+                    if (newFrogY < 0 || newFrogY >= height)
+                        continue;
+                    if (cellTypes[newFrogX][newFrogY] == CellType::Wall)
+                        continue;
+
+                    directionsCanMoveIn[numDirectionsCanMoveIn] = direction;
+                    numDirectionsCanMoveIn++;
+                    //cout << " can move in direction: " << direction.first << " " << direction.second << endl;
+                }
+
+                for(int directionIndex = 0; directionIndex < numDirectionsCanMoveIn; directionIndex++)
+                {
+                    int newFrogX = x + directionsCanMoveIn[directionIndex].first;
+                    int newFrogY = y + directionsCanMoveIn[directionIndex].second;
+
+                    if (cellTypes[newFrogX][newFrogY] == CellType::Tunnel)
+                    {
+                        const int afterTunnelFrogX = tunnelDestinations[newFrogX][newFrogY].first;
+                        const int afterTunnelFrogY = tunnelDestinations[newFrogX][newFrogY].second;
+                        newFrogX = afterTunnelFrogX;
+                        newFrogY = afterTunnelFrogY;
+                    }
+                    assert(newFrogX != -1 && newFrogY != -1);
+                    nextSuccessProbabilities[x][y] += successProbabilities[newFrogX][newFrogY] / numDirectionsCanMoveIn;
+                }
+            }
+
+        }
+        successProbabilities = nextSuccessProbabilities;
+    }
+    return successProbabilities[frogStartX][frogStartY];
 }
 
 int main()
@@ -127,6 +219,7 @@ int main()
                 case 'A':
                     frogStartX = x;
                     frogStartY = y;
+                    cout << "frogStartX: " << frogStartX << " frogStartY: " << frogStartY << endl;
                     break;
             };
             cellTypes[x][y] = cellType;
@@ -139,6 +232,8 @@ int main()
         const int beginX = readInt() - 1;
         const int endY = readInt() - 1;
         const int endX = readInt() - 1;
+        assert(beginX >= 0 && beginY >= 0 && endX >= 0 && endY >= 0);
+        cout << "Tunnel: (" << beginX << "," << beginY << ") - (" << endX << "," << endY << ")" << endl;
 
         cellTypes[beginX][beginY] = CellType::Tunnel;
         cellTypes[endX][endY] = CellType::Tunnel;
@@ -147,6 +242,8 @@ int main()
         tunnelDestinations[endX][endY] = {beginX, beginY};
     }
 
-    const double result = simulate(cellTypes, tunnelDestinations, frogStartX, frogStartY);
-    cout << result << endl;
+    const double simulatedResult = simulate(cellTypes, tunnelDestinations, frogStartX, frogStartY);
+    cout << "simulated: " << simulatedResult << endl;
+    const double calculatedResult = resultOptimized(cellTypes, tunnelDestinations, frogStartX, frogStartY);
+    cout << "calculated: " << calculatedResult << endl;
 }
