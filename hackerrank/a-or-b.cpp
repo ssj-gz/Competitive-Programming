@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-04-14
+// Simon St James (ssjgz) - 2019-04-14 11:29
 #include <iostream>
 #include <vector>
 #include <string>
@@ -8,6 +8,7 @@ using namespace std;
 
 string hexToBinary(const string& hexString)
 {
+    // One hex digit == exactly 4 binary digits.
     string asBinary;
     for (const auto& hexDigit : hexString)
     {
@@ -41,6 +42,7 @@ string hexToBinary(const string& hexString)
 
 string binaryToHex(const string& binaryString)
 {
+    
     string asHex;
     int powerOf2 = 8;
     int hexDigitValue = 0;
@@ -50,6 +52,7 @@ string binaryToHex(const string& binaryString)
         powerOf2 >>= 1;
         if (powerOf2 == 0)
         {
+            // We've processed 4 binary digits, which is one 1 hex digit.
             string hexDigit;
             if (hexDigitValue <= 9)
             {
@@ -59,32 +62,15 @@ string binaryToHex(const string& binaryString)
             {
                 hexDigit = 'A' + (hexDigitValue - 10);
             }
-            powerOf2 = 8;
+
             asHex += hexDigit;
+            powerOf2 = 8;
             hexDigitValue = 0;
         }
     }
     return asHex;
 }
-int hexToDecimal(const string& hexString)
-{
-    int asDecimal = 0;
-    for (const auto& hexDigit : hexString)
-    {
-        int digitValue = 0;
-        if ( hexDigit >= '0' && hexDigit <= '9')
-        {
-            digitValue = hexDigit - '0';
-        }
-        else
-        {
-            assert(hexDigit >= 'A' && hexDigit <= 'F');
-            digitValue = 10 + hexDigit - 'A';
-        }
-        asDecimal = 16 * asDecimal + digitValue;
-    }
-    return asDecimal;
-}
+
 string withLeadingZerosTrimmed(const string& str)
 {
     string::size_type i = 0;
@@ -102,11 +88,12 @@ void solve(const string& A, const string& B, const string& C, int K)
     string AAsBinary = hexToBinary(A);
     string BAsBinary = hexToBinary(B);
     string CAsBinary = hexToBinary(C);
-    assert(A == binaryToHex(AAsBinary));
-    assert(B == binaryToHex(BAsBinary));
-    assert(C == binaryToHex(CAsBinary));
     const int binaryLength = AAsBinary.size();
 
+    // Make all *necessary* changes, but do so
+    // in a way that favours making A smaller.
+    // Note: We can make A smaller greedily without jeopardising our
+    // chances at later minimising B.
     for (string::size_type i = 0; i < binaryLength; i++)
     {
         const int aDigit = AAsBinary[i] - '0';
@@ -117,8 +104,11 @@ void solve(const string& A, const string& B, const string& C, int K)
         {
             if (cDigit == 0)
             {
+                // Need to change some bits: this digit in *both*
+                // A and B must be 0.
                 if (aDigit == 1 && bDigit == 1)
                 {
+                    // Must change both.
                     AAsBinary[i] = '0';
                     BAsBinary[i] = '0';
                     K -= 2;
@@ -138,6 +128,8 @@ void solve(const string& A, const string& B, const string& C, int K)
             {
                 assert(cDigit == 1);
                 assert(aDigit == 0 && bDigit == 0);
+                // One of A or B must be changed into a 1; obviously, do it to B 
+                // instead of A!
                 BAsBinary[i] = '1';
                 K--;
             }
@@ -145,13 +137,18 @@ void solve(const string& A, const string& B, const string& C, int K)
     }
     if (K < 0)
     {
+        // We exceeded our allotted number of changes for the *necessary* changes - 
+        // no solution exists.
         cout << -1 << endl;
         return;
     }
     // At this point, we've changed at most K bits and have A | B == C.
 
-    // Do we have any changes left? If so, made the leftmost "1" in A a "0" if we can
-    // until we can no longer do so.
+    // Do we have any changes left? If so, make the leftmost (and so, highest-valued)
+    // "1" in A into a "0" if we can until we can no longer do so.
+    // We can be greedy, here: if we can make a leftmost-er digit into a 0, then
+    // it doesn't matter if this reduces the chances to change digits to the right:
+    // changing a leftmost-er digit trumps changing any number of digits to the right.
     for (string::size_type i = 0; i < binaryLength; i++)
     {
         if (AAsBinary[i] == '1' && BAsBinary[i] == '1')
@@ -177,12 +174,20 @@ void solve(const string& A, const string& B, const string& C, int K)
             }
         }
     }
+    // Note: At this point, there are no changes we can make to shrink B any smaller than it
+    // is already: changing any digit of B from a 1 to a 0 will always
+    // make (A | B) != C as it is guaranteed that the corresponding digit of A will be 0 at 
+    // this point i.e. it will change the corresponding digit of (A | B) from a (correct) 1
+    // to an (incorrect) 0.
     cout << withLeadingZerosTrimmed(binaryToHex(AAsBinary)) << endl;
     cout << withLeadingZerosTrimmed(binaryToHex(BAsBinary)) << endl;
 }
 
 int main()
 {
+    // Pretty easy one, though lots of schoolboy errors on the way - chief amongst them,
+    // completely misreading the question as one involving "xor", not "or" XD
+    // Hopefully the inline comments above explain everything satisfactorily :)
     int Q;
     cin >> Q;
 
@@ -195,8 +200,6 @@ int main()
         cin >> A;
         cin >> B;
         cin >> C;
-
-        //cout << "A: " << hexToDecimal(A) << " B: " << hexToDecimal(B) << " C: " << hexToDecimal(C) << endl;
 
         solve(A, B, C, K);
 
