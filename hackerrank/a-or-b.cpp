@@ -1,4 +1,5 @@
 // Simon St James (ssjgz) - 2019-04-14
+#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <string>
@@ -102,9 +103,11 @@ void solve(const string& A, const string& B, const string& C, int K)
     string AAsBinary = hexToBinary(A);
     string BAsBinary = hexToBinary(B);
     string CAsBinary = hexToBinary(C);
-    //cout << "A: " << A << " AAsBinary: " << AAsBinary << " binaryToHex(AAsBinary): " << binaryToHex(AAsBinary) << endl;
-    //cout << "B: " << B << " BAsBinary: " << BAsBinary << " binaryToHex(BAsBinary): " << binaryToHex(BAsBinary) << endl;
-    //cout << "C: " << C << " CAsBinary: " << CAsBinary << " binaryToHex(CAsBinary): " << binaryToHex(CAsBinary) << endl;
+#ifndef SUBMISSION
+    cout << "A: " << A << " AAsBinary: " << AAsBinary << " binaryToHex(AAsBinary): " << binaryToHex(AAsBinary) << endl;
+    cout << "B: " << B << " BAsBinary: " << BAsBinary << " binaryToHex(BAsBinary): " << binaryToHex(BAsBinary) << endl;
+    cout << "C: " << C << " CAsBinary: " << CAsBinary << " binaryToHex(CAsBinary): " << binaryToHex(CAsBinary) << endl;
+#endif
     assert(A == binaryToHex(AAsBinary));
     assert(B == binaryToHex(BAsBinary));
     assert(C == binaryToHex(CAsBinary));
@@ -146,7 +149,9 @@ void solve(const string& A, const string& B, const string& C, int K)
             }
         }
     }
-    //cout << "K: " << K << endl;
+#ifndef SUBMISSION
+    cout << "K: " << K << endl;
+#endif
     if (K < 0)
     {
         cout << -1 << endl;
@@ -181,6 +186,16 @@ void solve(const string& A, const string& B, const string& C, int K)
                 K--;
             }
         }
+        else if (AAsBinary[i] == '1' && BAsBinary[i] == '0')
+        {
+            assert(CAsBinary[i] == '1');
+            if ( K >= 2)
+            {
+                AAsBinary[i] = '0';
+                BAsBinary[i] = '1';
+                K -= 2;
+            }
+        }
     }
     // Now do the same for B.
     for (string::size_type i = 0; i < binaryLength; i++)
@@ -205,12 +220,14 @@ void solve(const string& A, const string& B, const string& C, int K)
     }
     cout << withLeadingZerosTrimmed(binaryToHex(AAsBinary)) << endl;
     cout << withLeadingZerosTrimmed(binaryToHex(BAsBinary)) << endl;
-    //cout << "A' as binary: " << AAsBinary << endl;
-    //cout << "B' as binary: " << BAsBinary << endl;
-    //cout << "A' as decimal: " << hexToDecimal(binaryToHex(AAsBinary)) << endl;
-    //cout << "B' as decimal: " << hexToDecimal(binaryToHex(BAsBinary)) << endl;
-    //cout << "C as decimal: " << hexToDecimal(binaryToHex(CAsBinary)) << endl;
-    //cout << "A' | B' == " << (hexToDecimal(binaryToHex(AAsBinary)) | hexToDecimal(binaryToHex(BAsBinary))) << endl;
+#ifndef SUBMISSION
+    cout << "A' as binary: " << AAsBinary << endl;
+    cout << "B' as binary: " << BAsBinary << endl;
+    cout << "A' as decimal: " << hexToDecimal(binaryToHex(AAsBinary)) << endl;
+    cout << "B' as decimal: " << hexToDecimal(binaryToHex(BAsBinary)) << endl;
+    cout << "C as decimal: " << hexToDecimal(binaryToHex(CAsBinary)) << endl;
+    cout << "A' | B' == " << (hexToDecimal(binaryToHex(AAsBinary)) | hexToDecimal(binaryToHex(BAsBinary))) << endl;
+#endif
     for (string::size_type i = 0; i < binaryLength; i++)
     {
         const int aDigit = AAsBinary[i] - '0';
