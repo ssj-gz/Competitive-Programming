@@ -1,14 +1,11 @@
 // Simon St James (ssjgz) 2019-04-14
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include <sys/time.h>
 
 
 using namespace std;
@@ -28,8 +25,6 @@ namespace
 
     int64_t nCr(int64_t n, int64_t r, int64_t modulus)
     {
-        //cout << "nCr: n: " << n << " r: " << r << endl;
-        //cout << "factorialLookup.size(): " << factorialLookup.size() << endl;
         assert(n >= 0 && r >= 0);
         assert(n >= r);
         int64_t result = factorial(n);
@@ -82,39 +77,9 @@ namespace
     }
 }
 
-
-void bruteForceAux(const vector<int64_t>& a, int index, vector<int64_t>& setSoFar, int64_t& result)
+int64_t calcXorSum(const vector<int64_t>& a)
 {
-    if (index == a.size())
-    {
-        int64_t xorSum = 0;
-        for (const auto x : setSoFar)
-        {
-            xorSum ^= x;
-        }
-        result = (result + xorSum) % Mod;
-        return;
-    }
-    // Without this element.
-    bruteForceAux(a, index + 1, setSoFar, result);
-    // With this element.
-    setSoFar.push_back(a[index]);
-    bruteForceAux(a, index + 1, setSoFar, result);
-    setSoFar.pop_back();
-}
-int64_t bruteForce(const vector<int64_t>& a)
-{
-    int64_t result = 0;
-    vector<int64_t> setSoFar;
-
-    bruteForceAux(a, 0, setSoFar, result);
-
-    return result;
-}
-
-int64_t optimized(const vector<int64_t>& a)
-{
-    int64_t result = 0;
+    int64_t xorSum = 0;
     int64_t powerOf2 = 1;
 
     while (true)
@@ -130,49 +95,27 @@ int64_t optimized(const vector<int64_t>& a)
             if ((x & powerOf2) != 0)
                 numWithThisPower++;
         }
-        //cout << "powerOf2: " << powerOf2 << " numWithThisPower: " << numWithThisPower << endl;
 
-        int64_t thisTerm = 0;
-        for (int odd = 1; odd <= numWithThisPower; odd += 2)
+        int64_t contributionToSumFromThisPower = 0;
+        for (int oddFromNumWithThisPower = 1; oddFromNumWithThisPower <= numWithThisPower; oddFromNumWithThisPower += 2)
         {
-            //cout << "odd: " << odd << " numWithThisPower: " << numWithThisPower << endl;
-            int64_t numWaysToChoose = nCr(numWithThisPower, odd, Mod) % Mod;
-            numWaysToChoose = (numWaysToChoose * quickPower(2, a.size() - numWithThisPower, Mod)) % Mod;
-            thisTerm = (thisTerm + numWaysToChoose) % Mod;
+            int64_t numWaysToChooseOdd = nCr(numWithThisPower, oddFromNumWithThisPower, Mod) % Mod;
+            numWaysToChooseOdd = (numWaysToChooseOdd * quickPower(2, a.size() - numWithThisPower, Mod)) % Mod;
+            contributionToSumFromThisPower = (contributionToSumFromThisPower + numWaysToChooseOdd) % Mod;
         }
-        thisTerm = (thisTerm * powerOf2) % Mod;
-        result = (result + thisTerm) % Mod;
+        contributionToSumFromThisPower = (contributionToSumFromThisPower * powerOf2) % Mod;
+        xorSum = (xorSum + contributionToSumFromThisPower) % Mod;
 
         if (!foundHigherThanPowerOf2)
             break;
 
-
         powerOf2 <<= 1;
     }
-    return result;
+    return xorSum;
 }
 
 int main(int argc, char* argv[])
 {
-#ifdef BRUTE_FORCE
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        cout << 1 << endl;
-        const int n = rand() % 20 + 1;
-        const int maxA = rand() % 1'000'000;
-        cout << n << endl;
-        for (int i = 0; i < n; i++)
-        {
-            cout << rand() % maxA << endl;
-        }
-        return 0;
-    }
-
-#endif
     int T;
     cin >> T;
 
@@ -188,16 +131,7 @@ int main(int argc, char* argv[])
         {
             cin >> a[i];
         }
-#ifdef BRUTE_FORCE
-        const auto bruteForceResult = bruteForce(a);
-        cout << "bruteForceResult: " << bruteForceResult << endl;
-        const auto optimizedResult = optimized(a);
-        cout << "optimizedResult: " << optimizedResult << endl;
-        assert(bruteForceResult == optimizedResult);
-#else
-        cout << optimized(a) << endl;
-#endif
+        cout << calcXorSum(a) << endl;
     }
-
 }
 
