@@ -152,7 +152,23 @@ vector<int64_t> optimized(const vector<int64_t>& a)
     }
     else
     {
-        return bruteForce(a);
+        const int num1s = a[a.size() - 1];
+        result.pop_back();
+        if (!result.empty())
+        {
+            result.back()--; // One of the 0's has become a 1.
+            result.push_back(1); // Add a single 1.
+            result.push_back(1); // Add a single 0.
+            result.push_back(num1s - 1);
+        }
+        else
+        {
+            result.push_back(1); // Add a single 1.
+            result.push_back(1); // Add a single 0.
+            result.push_back(num1s - 1);
+            return bruteForce(a);
+        }
+        return result;
     }
 }
 
@@ -170,7 +186,7 @@ int main(int argc, char* argv[])
         while (true)
         {
             binaryString.clear();
-            const int numDigits = rand() % 5 + 1;
+            const int numDigits = rand() % 30 + 1;
             for (int i = 0; i < numDigits; i++)
             {
                 binaryString += '0' + rand() % 2;
