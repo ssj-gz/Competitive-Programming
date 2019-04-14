@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-04-14
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -216,6 +223,7 @@ int main(int argc, char* argv[])
         {
             cin >> a[i];
         }
+#ifdef BRUTE_FORCE
         cout << "Elements: " << uncompressToBinaryString(a)<< endl;
         for (const auto x : a)
         {
@@ -239,5 +247,15 @@ int main(int argc, char* argv[])
         }
         cout << endl;
         assert(withLeadingZerosTrimmed(uncompressToBinaryString(optimizedResult)) == withLeadingZerosTrimmed(uncompressToBinaryString(bruteForceResult)));
+#else
+        const auto optimizedResult = optimized(a);
+        cout << optimizedResult.size() << endl;
+        for (const auto x : optimizedResult)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+
+#endif
     }
 }
