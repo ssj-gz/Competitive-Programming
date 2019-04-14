@@ -104,38 +104,41 @@ void solve(const string& A, const string& B, const string& C, int K)
         const int bDigit = BAsBinary[i] - '0';
         const int cDigit = CAsBinary[i] - '0';
 
-        if ((aDigit ^ bDigit) != cDigit)
+        if ((aDigit | bDigit) != cDigit)
         {
-            // Must change this digit.
-            if (K == 0)
+            if (cDigit == 0)
             {
-                // ... but no changes left :(
-                cout << -1 << endl;
-                return;
-            }
-            if (aDigit == 1)
-            {
-                AAsBinary[i] = '0';
+                if (aDigit == 1 && bDigit == 1)
+                {
+                    AAsBinary[i] = '0';
+                    BAsBinary[i] = '0';
+                    K -= 2;
+                }
+                else if (aDigit == 1)
+                {
+                    AAsBinary[i] = '0';
+                    K--;
+                }
+                else
+                {
+                    BAsBinary[i] = '0';
+                    K--;
+                }
             }
             else
             {
-                BAsBinary[i] = '0' + (1 - bDigit);
+                assert(cDigit == 1);
+                assert(aDigit == 0 && bDigit == 0);
+                BAsBinary[i] = '1';
+                K--;
             }
-            K--;
         }
     }
-    // Do we have any changes left? If so, made the leftmost "1" in A a "0" (and toggle
-    // corresponding digit in B) until we can no longer do so.
-    for (string::size_type i = 0; i < binaryLength; i++)
+    cout << "K: " << K << endl;
+    if (K < 0)
     {
-        if (AAsBinary[i] == '1')
-        {
-            AAsBinary[i] = '0';
-            BAsBinary[i] = '0' + ('1' - BAsBinary[i]);
-            K -= 2;;
-            if (K < 2)
-                break;
-        }
+        cout << -1 << endl;
+        return;
     }
     for (string::size_type i = 0; i < binaryLength; i++)
     {
@@ -143,7 +146,50 @@ void solve(const string& A, const string& B, const string& C, int K)
         const int bDigit = BAsBinary[i] - '0';
         const int cDigit = CAsBinary[i] - '0';
 
-        assert ((aDigit ^ bDigit) == cDigit);
+        assert ((aDigit | bDigit) == cDigit);
+    }
+    // Do we have any changes left? If so, made the leftmost "1" in A a "0" if we can
+    // until we can no longer do so.
+    for (string::size_type i = 0; i < binaryLength; i++)
+    {
+        if (AAsBinary[i] == '1' && CAsBinary[i] == '0')
+        {
+            if ( K > 0)
+            {
+                AAsBinary[i] = '0';
+                K--;
+            }
+        }
+        else if (AAsBinary[i] == '1' && BAsBinary[i] == '1')
+        {
+            assert(CAsBinary[i] == '1');
+            if ( K > 0)
+            {
+                AAsBinary[i] = '0';
+                K--;
+            }
+        }
+    }
+    // Now do the same for B.
+    for (string::size_type i = 0; i < binaryLength; i++)
+    {
+        if (BAsBinary[i] == '1' && CAsBinary[i] == '0')
+        {
+            if (K > 0)
+            {
+                BAsBinary[i] = '0';
+                K--;
+            }
+        }
+        else if (BAsBinary[i] == '1' && AAsBinary[i] == '1')
+        {
+            assert(CAsBinary[i] == '1');
+            if (K > 0)
+            {
+                BAsBinary[i] = '0';
+                K--;
+            }
+        }
     }
     cout << binaryToHex(AAsBinary) << endl;
     cout << binaryToHex(BAsBinary) << endl;
@@ -152,7 +198,15 @@ void solve(const string& A, const string& B, const string& C, int K)
     cout << "A' as decimal: " << hexToDecimal(binaryToHex(AAsBinary)) << endl;
     cout << "B' as decimal: " << hexToDecimal(binaryToHex(BAsBinary)) << endl;
     cout << "C as decimal: " << hexToDecimal(binaryToHex(CAsBinary)) << endl;
-    cout << "A' ^ B' == " << (hexToDecimal(binaryToHex(AAsBinary)) ^ hexToDecimal(binaryToHex(BAsBinary))) << endl;
+    cout << "A' | B' == " << (hexToDecimal(binaryToHex(AAsBinary)) | hexToDecimal(binaryToHex(BAsBinary))) << endl;
+    for (string::size_type i = 0; i < binaryLength; i++)
+    {
+        const int aDigit = AAsBinary[i] - '0';
+        const int bDigit = BAsBinary[i] - '0';
+        const int cDigit = CAsBinary[i] - '0';
+
+        assert ((aDigit | bDigit) == cDigit);
+    }
 }
 
 int main()
