@@ -654,3 +654,11 @@ using Cursor = SuffixTreeBuilder::Cursor;
 
 // Generate and execute testcases until assertion is triggered. 
 // while true; do ./a.out --test | tee last-testcase.txt | ./a.out ; if [ "$?" -ne "0" ]; then break; fi; done | grep Result
+
+// Seed random number generator.
+#include <sys/time.h>
+
+struct timeval time; 
+gettimeofday(&time,NULL);
+srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
