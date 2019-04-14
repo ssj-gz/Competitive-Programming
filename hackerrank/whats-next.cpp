@@ -12,7 +12,7 @@
 
 using namespace std;
 
-vector<int64_t> optimized(const vector<int64_t>& a)
+vector<int64_t> solve(const vector<int64_t>& a)
 {
     vector<int64_t> result = a;
     const bool lastDigitsAre0s = ((a.size() % 2) == 0);
@@ -126,9 +126,9 @@ int main(int argc, char* argv[])
         {
             cin >> a[i];
         }
-        const auto optimizedResult = optimized(a);
-        cout << optimizedResult.size() << endl;
-        for (const auto x : optimizedResult)
+        const auto result = solve(a);
+        cout << result.size() << endl;
+        for (const auto x : result)
         {
             cout << x << " ";
         }
