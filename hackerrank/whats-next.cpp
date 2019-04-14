@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-04-14
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #define NDEBUG
@@ -138,8 +138,8 @@ vector<int64_t> optimized(const vector<int64_t>& a)
     if (lastDigitsAre0s)
     {
         assert(a.size() > 1);
-        const int num0s = a[a.size() - 1];
-        const int num1sBefore = a[a.size() - 2];
+        const auto num0s = a[a.size() - 1];
+        const auto num1sBefore = a[a.size() - 2];
         result.pop_back();
         result.pop_back();
         if (!result.empty())
@@ -155,11 +155,10 @@ vector<int64_t> optimized(const vector<int64_t>& a)
             result.push_back(num0s + num1sBefore - (num1sBefore - 1));
             result.push_back(num1sBefore - 1);
         }
-        return result;
     }
     else
     {
-        const int num1s = a[a.size() - 1];
+        const auto num1s = a[a.size() - 1];
         result.pop_back();
         if (!result.empty())
         {
@@ -174,8 +173,28 @@ vector<int64_t> optimized(const vector<int64_t>& a)
             result.push_back(1); // Add a single 0.
             result.push_back(num1s - 1);
         }
-        return result;
     }
+    while (!result.empty() && result.back() == 0)
+    {
+        // No trailing 0's in the compressed version.
+        result.pop_back();
+    }
+    vector<int64_t> cleanedResult;
+    cleanedResult.push_back(result.front());
+    for (int i = 1; i < result.size(); i++)
+    {
+        if (result[i] != 0)
+        {
+            cleanedResult.push_back(result[i]);
+        }
+        else
+        {
+            i++;
+            assert(!cleanedResult.empty());
+            cleanedResult.back() += result[i];
+        }
+    }
+    return cleanedResult;
 }
 
 int main(int argc, char* argv[])
