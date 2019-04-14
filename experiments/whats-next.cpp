@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -110,8 +111,37 @@ vector<int64_t> bruteForce(const vector<int64_t>& a)
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+
+    struct timeval time; 
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+    if (argc == 2)
+    {
+        cout << 1 << endl;
+        string binaryString;
+        while (true)
+        {
+            binaryString.clear();
+            const int numDigits = rand() % 20 + 1;
+            for (int i = 0; i < numDigits; i++)
+            {
+                binaryString += '0' + rand() % 2;
+            }
+            if (countBits(binaryString) != 0)
+                break;
+        }
+        const auto compressed = compressBinaryString(binaryString);
+        cout << compressed.size() << endl;
+        for (const auto x : compressed)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        return 0;
+    }
     int T;
     cin >> T;
 
@@ -125,6 +155,12 @@ int main()
         {
             cin >> a[i];
         }
+        cout << "Elements: " << endl;
+        for (const auto x : a)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
         const auto bruteForceResult = bruteForce(a);
         cout << "bruteForceResult: " << endl;
         cout << bruteForceResult.size() << endl;
