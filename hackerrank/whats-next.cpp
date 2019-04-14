@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-04-14
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #define NDEBUG
@@ -173,7 +173,6 @@ vector<int64_t> optimized(const vector<int64_t>& a)
             result.push_back(1); // Add a single 1.
             result.push_back(1); // Add a single 0.
             result.push_back(num1s - 1);
-            return bruteForce(a);
         }
         return result;
     }
@@ -182,12 +181,12 @@ vector<int64_t> optimized(const vector<int64_t>& a)
 int main(int argc, char* argv[])
 {
 
-    struct timeval time; 
-    gettimeofday(&time,NULL);
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
     if (argc == 2)
     {
+        struct timeval time; 
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
         cout << 1 << endl;
         string binaryString;
         while (true)
