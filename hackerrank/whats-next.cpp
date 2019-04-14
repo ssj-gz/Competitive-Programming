@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-04-14
+// Simon St James (ssjgz) - 2019-04-14 19:07
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -140,21 +140,16 @@ vector<int64_t> optimized(const vector<int64_t>& a)
         assert(a.size() > 1);
         const auto num0s = a[a.size() - 1];
         const auto num1sBefore = a[a.size() - 2];
-        result.pop_back();
+        // Pop off last two blocks (the 1's and the 0's).
+        result.pop_back(); 
         result.pop_back();
         if (!result.empty())
         {
             result.back()--; // One of the 0's has become a 1.
-            result.push_back(1); // Add a single 1.
-            result.push_back(num0s + num1sBefore - (num1sBefore - 1));
-            result.push_back(num1sBefore - 1);
         }
-        else
-        {
-            result.insert(result.begin(), 1); // Add a single 1.
-            result.push_back(num0s + num1sBefore - (num1sBefore - 1));
-            result.push_back(num1sBefore - 1);
-        }
+        result.push_back(1); // Add a single 1.
+        result.push_back(num0s + num1sBefore - (num1sBefore - 1)); // Add the block of 0's.
+        result.push_back(num1sBefore - 1); // Add the block of 1's.
     }
     else
     {
@@ -163,22 +158,19 @@ vector<int64_t> optimized(const vector<int64_t>& a)
         if (!result.empty())
         {
             result.back()--; // One of the 0's has become a 1.
-            result.push_back(1); // Add a single 1.
-            result.push_back(1); // Add a single 0.
-            result.push_back(num1s - 1);
         }
-        else
-        {
-            result.push_back(1); // Add a single 1.
-            result.push_back(1); // Add a single 0.
-            result.push_back(num1s - 1);
-        }
+        result.push_back(1); // Add a single 1.
+        result.push_back(1); // Add a single 0.
+        result.push_back(num1s - 1); // Add remaining block of 1's.
     }
+    // Prepare output to be in correct format.
+    // No trailing 0's in the compressed version.
     while (!result.empty() && result.back() == 0)
     {
-        // No trailing 0's in the compressed version.
         result.pop_back();
     }
+    // Also, no 0's anywhere except the first place (if the number
+    // begins with 0's) - though I'm not sure if that's allowed.
     vector<int64_t> cleanedResult;
     cleanedResult.push_back(result.front());
     for (int i = 1; i < result.size(); i++)
