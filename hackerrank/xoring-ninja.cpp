@@ -99,8 +99,11 @@ int64_t calcXorSum(const vector<int64_t>& a)
         int64_t contributionToSumFromThisPower = 0;
         for (int oddFromNumWithThisPower = 1; oddFromNumWithThisPower <= numWithThisPower; oddFromNumWithThisPower += 2)
         {
+            // Choose this odd number of elements that have this powerOf2 ...
             int64_t numWaysToChooseOdd = nCr(numWithThisPower, oddFromNumWithThisPower, Mod) % Mod;
+            // ... then choose any number from remaining (i.e. - (a.size() - numWithThisPower)) numbers.
             numWaysToChooseOdd = (numWaysToChooseOdd * quickPower(2, a.size() - numWithThisPower, Mod)) % Mod;
+
             contributionToSumFromThisPower = (contributionToSumFromThisPower + numWaysToChooseOdd) % Mod;
         }
         contributionToSumFromThisPower = (contributionToSumFromThisPower * powerOf2) % Mod;
@@ -116,6 +119,26 @@ int64_t calcXorSum(const vector<int64_t>& a)
 
 int main(int argc, char* argv[])
 {
+    // Pretty easy one: let's take a Bit's-eye view of things!
+    //
+    // Take a subset S of A, and calculate the xor of its elements.
+    // If the bit binaryDigitNum is set in this xor, then S will
+    // contribute 2 ** binaryDigitNum to the xorSum.
+    //
+    // Thus:
+    //
+    //  xorSum = sum[ binaryDigitNum: 0 to maxBinaryDigits ]{ 
+    //              sum [S is a subset of A and S has bit binaryDigitNum set in its xor ] { 2 ** binaryDigitNum }]
+    //            }
+    //         = sum[ binaryDigitNum: 0 to maxBinaryDigits ]
+    //              { number of subsets S of A that have bit binaryDigitNum set in its xor * 2 ** binaryDigitNum }
+    //            }
+    //
+    // When does an S have bit binaryDigitNum set in its xor? It's when the number of elements in S that have
+    // their bit binaryDigitNum set is *odd* (a consequence of the fact that x ^ x == 0).
+    //
+    // We then have a simple combinatorics problem to solve in order to count such s - see the calculation
+    // of numWaysToChooseOdd, above.  And that's pretty much it!
     int T;
     cin >> T;
 
