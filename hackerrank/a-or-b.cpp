@@ -1,5 +1,4 @@
 // Simon St James (ssjgz) - 2019-04-14
-#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <string>
@@ -103,11 +102,6 @@ void solve(const string& A, const string& B, const string& C, int K)
     string AAsBinary = hexToBinary(A);
     string BAsBinary = hexToBinary(B);
     string CAsBinary = hexToBinary(C);
-#ifndef SUBMISSION
-    cout << "A: " << A << " AAsBinary: " << AAsBinary << " binaryToHex(AAsBinary): " << binaryToHex(AAsBinary) << endl;
-    cout << "B: " << B << " BAsBinary: " << BAsBinary << " binaryToHex(BAsBinary): " << binaryToHex(BAsBinary) << endl;
-    cout << "C: " << C << " CAsBinary: " << CAsBinary << " binaryToHex(CAsBinary): " << binaryToHex(CAsBinary) << endl;
-#endif
     assert(A == binaryToHex(AAsBinary));
     assert(B == binaryToHex(BAsBinary));
     assert(C == binaryToHex(CAsBinary));
@@ -149,22 +143,13 @@ void solve(const string& A, const string& B, const string& C, int K)
             }
         }
     }
-#ifndef SUBMISSION
-    cout << "K: " << K << endl;
-#endif
     if (K < 0)
     {
         cout << -1 << endl;
         return;
     }
-    for (string::size_type i = 0; i < binaryLength; i++)
-    {
-        const int aDigit = AAsBinary[i] - '0';
-        const int bDigit = BAsBinary[i] - '0';
-        const int cDigit = CAsBinary[i] - '0';
+    // At this point, we've changed at most K bits and have A | B == C.
 
-        assert ((aDigit | bDigit) == cDigit);
-    }
     // Do we have any changes left? If so, made the leftmost "1" in A a "0" if we can
     // until we can no longer do so.
     for (string::size_type i = 0; i < binaryLength; i++)
@@ -220,22 +205,6 @@ void solve(const string& A, const string& B, const string& C, int K)
     }
     cout << withLeadingZerosTrimmed(binaryToHex(AAsBinary)) << endl;
     cout << withLeadingZerosTrimmed(binaryToHex(BAsBinary)) << endl;
-#ifndef SUBMISSION
-    cout << "A' as binary: " << AAsBinary << endl;
-    cout << "B' as binary: " << BAsBinary << endl;
-    cout << "A' as decimal: " << hexToDecimal(binaryToHex(AAsBinary)) << endl;
-    cout << "B' as decimal: " << hexToDecimal(binaryToHex(BAsBinary)) << endl;
-    cout << "C as decimal: " << hexToDecimal(binaryToHex(CAsBinary)) << endl;
-    cout << "A' | B' == " << (hexToDecimal(binaryToHex(AAsBinary)) | hexToDecimal(binaryToHex(BAsBinary))) << endl;
-#endif
-    for (string::size_type i = 0; i < binaryLength; i++)
-    {
-        const int aDigit = AAsBinary[i] - '0';
-        const int bDigit = BAsBinary[i] - '0';
-        const int cDigit = CAsBinary[i] - '0';
-
-        assert ((aDigit | bDigit) == cDigit);
-    }
 }
 
 int main()
