@@ -154,16 +154,9 @@ void solve(const string& A, const string& B, const string& C, int K)
     // until we can no longer do so.
     for (string::size_type i = 0; i < binaryLength; i++)
     {
-        if (AAsBinary[i] == '1' && CAsBinary[i] == '0')
+        if (AAsBinary[i] == '1' && BAsBinary[i] == '1')
         {
-            if ( K > 0)
-            {
-                AAsBinary[i] = '0';
-                K--;
-            }
-        }
-        else if (AAsBinary[i] == '1' && BAsBinary[i] == '1')
-        {
+            // Don't need this digit of A to be 1: B is handling it already!
             assert(CAsBinary[i] == '1');
             if ( K > 0)
             {
@@ -173,33 +166,14 @@ void solve(const string& A, const string& B, const string& C, int K)
         }
         else if (AAsBinary[i] == '1' && BAsBinary[i] == '0')
         {
+            // B is not handling making this digit 1, but it could do:
+            // arrange this instead.
             assert(CAsBinary[i] == '1');
             if ( K >= 2)
             {
                 AAsBinary[i] = '0';
                 BAsBinary[i] = '1';
                 K -= 2;
-            }
-        }
-    }
-    // Now do the same for B.
-    for (string::size_type i = 0; i < binaryLength; i++)
-    {
-        if (BAsBinary[i] == '1' && CAsBinary[i] == '0')
-        {
-            if (K > 0)
-            {
-                BAsBinary[i] = '0';
-                K--;
-            }
-        }
-        else if (BAsBinary[i] == '1' && AAsBinary[i] == '1')
-        {
-            assert(CAsBinary[i] == '1');
-            if (K > 0)
-            {
-                BAsBinary[i] = '0';
-                K--;
             }
         }
     }
