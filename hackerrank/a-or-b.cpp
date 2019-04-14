@@ -164,8 +164,8 @@ void solve(const string& A, const string& B, const string& C, int K)
         }
         else if (AAsBinary[i] == '1' && BAsBinary[i] == '0')
         {
-            // B is not handling making this digit 1, but it could do:
-            // arrange this instead.
+            // B is not handling making this digit 1, but perhaps it could do:
+            // check, and if it can, arrange this instead.
             assert(CAsBinary[i] == '1');
             if ( K >= 2)
             {
