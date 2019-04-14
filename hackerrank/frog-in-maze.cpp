@@ -59,7 +59,7 @@ double calculateResult(const vector<vector<CellType>>& cellTypes, const vector<v
             for (int y = 0; y < height; y++)
             {
                 // nextSuccessProbabilities is the probability (for each cell) of reaching
-                // the Exit with exactly # simulations + 1 moves.
+                // the Exit with up to (# simulations + 1) moves.
                 nextSuccessProbabilities[x][y] = 0.0;
                 if (cellTypes[x][y] != CellType::Free && cellTypes[x][y] != CellType::Tunnel)
                 {
@@ -112,7 +112,7 @@ double calculateResult(const vector<vector<CellType>>& cellTypes, const vector<v
 int main()
 {
     // Easy one - use some elementary probability theory to get a simple recurrence relation
-    // that tells us the probability of a given cell reaching an Exit in precisely N
+    // that tells us the probability of a given cell reaching an Exit in up to N
     // moves, and iterate for a large number of N.
     auto readInt = [](){int x; cin >> x; return x;};
 
