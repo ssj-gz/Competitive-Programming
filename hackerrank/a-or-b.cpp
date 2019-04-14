@@ -94,7 +94,7 @@ string withLeadingZerosTrimmed(const string& str)
         i++;
     }
     if (i == str.size())
-        return str;
+        return "0";
     return str.substr(i);
 }
 
