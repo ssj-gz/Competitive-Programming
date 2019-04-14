@@ -1,9 +1,23 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cassert>
 #include <sys/time.h>
 
 using namespace std;
+
+string withLeadingZerosTrimmed(const string& str)
+{
+    string::size_type i = 0;
+    while (str[i] == '0' && i < str.size())
+    {
+        i++;
+    }
+    if (i == str.size())
+        return "0";
+    return str.substr(i);
+}
+
 
 string asBinary(int64_t x)
 {
@@ -110,6 +124,37 @@ vector<int64_t> bruteForce(const vector<int64_t>& a)
     return compressBinaryString(asBinary(candidate));
 }
 
+vector<int64_t> optimized(const vector<int64_t>& a)
+{
+    vector<int64_t> result = a;
+    const bool lastDigitsAre0s = ((a.size() % 2) == 0);
+    if (lastDigitsAre0s)
+    {
+        assert(a.size() > 1);
+        const int num0s = a[a.size() - 1];
+        const int num1sBefore = a[a.size() - 2];
+        result.pop_back();
+        result.pop_back();
+        if (!result.empty())
+        {
+            result.back()--; // One of the 0's has become a 1.
+            result.push_back(1); // Add a single 1.
+            result.push_back(num0s + num1sBefore - (num1sBefore - 1));
+            result.push_back(num1sBefore - 1);
+        }
+        else
+        {
+            result.insert(result.begin(), 1); // Add a single 1.
+            result.push_back(num0s + num1sBefore - (num1sBefore - 1));
+            result.push_back(num1sBefore - 1);
+        }
+        return result;
+    }
+    else
+    {
+        return bruteForce(a);
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -125,7 +170,7 @@ int main(int argc, char* argv[])
         while (true)
         {
             binaryString.clear();
-            const int numDigits = rand() % 20 + 1;
+            const int numDigits = rand() % 5 + 1;
             for (int i = 0; i < numDigits; i++)
             {
                 binaryString += '0' + rand() % 2;
@@ -155,18 +200,28 @@ int main(int argc, char* argv[])
         {
             cin >> a[i];
         }
-        cout << "Elements: " << endl;
+        cout << "Elements: " << uncompressToBinaryString(a)<< endl;
         for (const auto x : a)
         {
             cout << x << " ";
         }
         cout << endl;
         const auto bruteForceResult = bruteForce(a);
-        cout << "bruteForceResult: " << endl;
+        cout << "bruteForceResult: " << uncompressToBinaryString(bruteForceResult) << endl;
         cout << bruteForceResult.size() << endl;
         for (const auto x : bruteForceResult)
         {
             cout << x << " ";
         }
+        cout << endl;
+        const auto optimizedResult = optimized(a);
+        cout << "optimizedResult: " << uncompressToBinaryString(optimizedResult) << endl;
+        cout << optimizedResult.size() << endl;
+        for (const auto x : optimizedResult)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        assert(withLeadingZerosTrimmed(uncompressToBinaryString(optimizedResult)) == withLeadingZerosTrimmed(uncompressToBinaryString(bruteForceResult)));
     }
 }
