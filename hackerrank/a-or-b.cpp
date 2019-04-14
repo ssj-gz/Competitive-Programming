@@ -145,7 +145,8 @@ void solve(const string& A, const string& B, const string& C, int K)
     // At this point, we've changed at most K bits and have A | B == C.
 
     // Do we have any changes left? If so, make the leftmost (and so, highest-valued)
-    // "1" in A into a "0" if we can until we can no longer do so.
+    // "1" in A into a "0" if we can (i.e. without changing the value of A | B) 
+    // until we can no longer do so.
     // We can be greedy, here: if we can make a leftmost-er digit into a 0, then
     // it doesn't matter if this reduces the chances to change digits to the right:
     // changing a leftmost-er digit trumps changing any number of digits to the right.
