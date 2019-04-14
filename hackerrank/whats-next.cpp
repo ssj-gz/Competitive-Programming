@@ -1,9 +1,7 @@
 // Simon St James (ssjgz) - 2019-04-14 19:07
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
 #define NDEBUG
-#undef BRUTE_FORCE
 #endif
 #include <iostream>
 #include <vector>
