@@ -103,6 +103,7 @@ vector<int64_t> solve(const vector<int64_t>& a)
         {
             i++;
             assert(!cleanedResult.empty());
+            assert(i < result.size()); // There are no trailing 0's in result at this point, remember!
             cleanedResult.back() += result[i];
         }
     }
@@ -111,6 +112,52 @@ vector<int64_t> solve(const vector<int64_t>& a)
 
 int main(int argc, char* argv[])
 {
+    // Fairly easy one.  Note that the size of the uncompressed binary strings
+    // are too large to deal with, so we must instead manipulate the compressed
+    // representations, though as we'll see, this is not too difficult.
+    //
+    // Imagine that we did uncompress the binary string, and counted the number
+    // of bits in it.  Then imagine we incremented this binary number by 1
+    // until we had a number with the same number of set bits in it.  How many
+    // times would we have to do this, and what would the resultant binary string
+    // look like?
+    //
+    // Imagine that the binary string happens to end in a string of X 0's.  If we
+    // increment once, then we have a 1 at the end of this string of 0's, and the
+    // number of set bits is one more than it was originally.  Here's an example with
+    // X = 6, after we've incremented once: the original number of bits was 4.
+    //
+    //   01111000001 
+    //
+    // Increment again, and we *still* have strictly more set bits than we had 
+    // originally.  And again.  And again.
+    //
+    //   01111000010 
+    //   01111000011 
+    //
+    // In fact, we will always have strictly more set bits than we had originally until
+    // we "overflow" the 0's (and the 1's immediately to the left of these 0's), 
+    // 2 ** x increments to the original number later:
+    //
+    //   10000000000 
+    //
+    // We now have fewer set bits than we originally had.  What's the smallest number
+    // of increments we can add to restore the original number of set bits (4)?
+    // This is the number of increments we need to achieve in order to get the
+    // rightmost 4 - 1 = 3 bits all set to 1, which is (2 ** 3) - 1:
+    //
+    //   10000000111
+    //
+    // and this is the number we want.
+    //
+    // Note that no digits to the left of the initial leading 0 will have changed: in general,
+    // answering the question where we have trailing 0's will only alter the last 3
+    // compressed elements, leaving the rest of the compressed representation completely
+    // unchanged.  With a bit of jiggery-pokery, we can then easily answer the question
+    // with only minor changes to the compressed representation of the input.
+    //
+    // And that's the basic gist of it: the case where the number ends in 1's is similar.
+    // Hopefully the inline comments inside solve(...) explain the rest!
     int T;
     cin >> T;
 
