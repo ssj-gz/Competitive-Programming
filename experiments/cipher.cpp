@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 
+#include <sys/time.h>
+
 using namespace std;
 
 string encode(const string& toEncode, int k)
@@ -21,6 +23,7 @@ string encode(const string& toEncode, int k)
 string bruteForce(const string& s, int n, int k)
 {
     string binaryString(n, '0');
+    string solution;
     while (true)
     {
         string::reverse_iterator r = binaryString.rbegin();
@@ -37,18 +40,45 @@ string bruteForce(const string& s, int n, int k)
         {
             break;
         }
-        cout << "Trying " << binaryString << endl;
+        //cout << "Trying " << binaryString << endl;
 
         if (encode(binaryString, k) == s)
         {
-            return binaryString;
+            if (!solution.empty())
+                return "";
+            solution = binaryString;
         }
     }
-    return "";
+    return solution;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        while (true)
+        {
+            const int n = rand() % 20 + 1;
+            const int k = rand() % 20 + 1;
+
+            string binaryString;
+            for (int i = 0; i < n; i++)
+            {
+                binaryString += ('0' + rand() % 2);
+            }
+            if (!bruteForce(encode(binaryString, k), n, k).empty())
+            {
+                cout << n << endl;
+                cout << k << endl;
+                cout << encode(binaryString, k) << endl;
+                return 0;
+            }
+        }
+    }
     int n;
     cin >> n;
     int k;
@@ -58,7 +88,5 @@ int main()
     cin >> s;
 
     const auto bruteForceResult = bruteForce(s, n, k);
-    cout << bruteForceResult << endl;
-
-      
+    cout << "Result: " << bruteForceResult << endl;
 }
