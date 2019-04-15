@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cassert>
 
 #include <sys/time.h>
 
@@ -52,6 +53,29 @@ string bruteForce(const string& s, int n, int k)
     return solution;
 }
 
+string optimised(const string& s, int n, int k)
+{
+    string result;
+    int xorOfLastKDigitsOfResult = 0;
+    for (int i = 0; i < s.size(); i++)
+    {
+        if (i >= k)
+        {
+            // We've got the xor of the last k+1 digits of result, not just k:
+            // trim off the first of these k+1 digits.
+            xorOfLastKDigitsOfResult ^= (result[i - k] - '0');
+        }
+        const int encodedBinDigit = s[i] - '0';
+        const int decodedNextDigit = encodedBinDigit ^ xorOfLastKDigitsOfResult;
+        result.push_back('0' + decodedNextDigit);
+        xorOfLastKDigitsOfResult ^= decodedNextDigit;
+
+        if (result.size() == n)
+            return result;
+    }
+    return "";
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2)
@@ -62,7 +86,7 @@ int main(int argc, char* argv[])
 
         while (true)
         {
-            const int n = rand() % 20 + 1;
+            const int n = rand() % 12 + 1;
             const int k = rand() % 20 + 1;
 
             string binaryString;
@@ -77,6 +101,9 @@ int main(int argc, char* argv[])
                 cout << encode(binaryString, k) << endl;
                 return 0;
             }
+            else
+            {
+            }
         }
     }
     int n;
@@ -88,5 +115,8 @@ int main(int argc, char* argv[])
     cin >> s;
 
     const auto bruteForceResult = bruteForce(s, n, k);
-    cout << "Result: " << bruteForceResult << endl;
+    cout << "bruteForceResult: " << bruteForceResult << endl;
+    const auto optimisedResult = optimised(s, n, k);
+    cout << "optimisedResult : " << optimisedResult << endl;
+    assert(bruteForceResult == optimisedResult);
 }
