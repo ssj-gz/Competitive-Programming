@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <map>
+#include <queue>
 #include <cassert>
 
 #include <sys/time.h>
@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
         {
             a.push_back(rand() % (maxValue + 1));
         }
+        sort(a.begin(), a.end());
 
         cerr << "a: ";
         for (const auto x : a)
@@ -133,122 +134,118 @@ int main(int argc, char* argv[])
         return 0;
     }
 #if 0
-        sort(a.begin(), a.end());
+    sort(a.begin(), a.end());
 
-        a = {1, 20, 21, 22, 23, 24, 25000 };
+    a = {1, 20, 21, 22, 23, 24, 25000 };
 
-        cout << "n: " << a.size() << " k: " << k << endl;
-        cout << "a:" << endl;
+    cout << "n: " << a.size() << " k: " << k << endl;
+    cout << "a:" << endl;
+    for (const auto x : a)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+
+    ChoiceIndices indices(k);
+    vector<Sum> sums;
+    findSums(a, indices, k - 1, a.size() - 1, sums);
+    stable_sort(sums.begin(), sums.end());
+
+
+    cout << "sums: " << endl;
+    for (const auto& x : sums)
+    {
+        cout << x.value << " ";
+
+        cout << "(";
+        for (int i = 0; i < x.choiceIndices.numIndices(); i++)
+        {
+            cout << x.choiceIndices[i] << " ";
+        }
+        cout << ") "; 
+        cout << "(";
+        string indices(a.size(), '.');
+        for (int i = 0; i < x.choiceIndices.numIndices(); i++)
+        {
+            indices[x.choiceIndices[i]] = 'X';
+        }
+        cout << indices;
+        cout << ")" << endl;
+    }
+    cout << endl;
+    //assert(is_sorted(sums.begin(), sums.end()));
+#endif
+    int T;
+    cin >> T;
+
+    for (int t = 0; t < T; t++)
+    {
+        int N;
+        cin >> N;
+        int K;
+        cin >> K;
+
+        int64_t x;
+        vector<int64_t> s;
+        while (cin >> x)
+        {
+            s.push_back(x);
+        }
+
+
+        ChoiceIndices indices(K);
+        vector<Sum> sums;
+        vector<int64_t> dummyA(N);
+        findSums(dummyA, indices, K - 1, dummyA.size() - 1, sums);
+        vector<vector<ChoiceIndices>> choiceIndicesWithForLastIndex(N);
+
+        for (const auto& sum : sums)
+        {
+            choiceIndicesWithForLastIndex[sum.choiceIndices[K - 1]].push_back(sum.choiceIndices);
+        }
+
+
+        sort(s.begin(), s.end());
+        assert((s.front() % K) == 0);
+        vector<int64_t> a(N);
+        a[0] = s.front() / K;
+        std::priority_queue<int64_t, std::vector<int64_t>, std::greater<int64_t> >  blah;
+        blah.push(K * a[0]);
+        cout << "First num: " << a[0] << endl;
+        int numKnownElementsOfA = 1;
+        for (const auto x : s)
+        {
+            if (blah.empty() || blah.top() != x)
+            {
+                const int64_t newNum = x - (K - 1) * a[0];
+                cout << "New!" << newNum << " x: " << x << endl;
+                a[numKnownElementsOfA] = newNum;
+                for (const auto& blee : choiceIndicesWithForLastIndex[numKnownElementsOfA])
+                {
+                    int64_t value = 0;
+                    for (int i = 0; i < K; i++)
+                    {
+                        assert(blee[i] <= numKnownElementsOfA);
+                        value += a[blee[i]];
+                    }
+                    blah.push(value);
+                }
+                numKnownElementsOfA++;
+                if (numKnownElementsOfA == N)
+                    break;
+            }
+            else
+            {
+                blah.pop();
+            }
+        }
+        cout << "A:" << endl;
         for (const auto x : a)
         {
             cout << x << " ";
         }
         cout << endl;
-
-        ChoiceIndices indices(k);
-        vector<Sum> sums;
-        findSums(a, indices, k - 1, a.size() - 1, sums);
-        stable_sort(sums.begin(), sums.end());
-
-
-        cout << "sums: " << endl;
-        for (const auto& x : sums)
-        {
-            cout << x.value << " ";
-
-            cout << "(";
-            for (int i = 0; i < x.choiceIndices.numIndices(); i++)
-            {
-                cout << x.choiceIndices[i] << " ";
-            }
-            cout << ") "; 
-            cout << "(";
-            string indices(a.size(), '.');
-            for (int i = 0; i < x.choiceIndices.numIndices(); i++)
-            {
-                indices[x.choiceIndices[i]] = 'X';
-            }
-            cout << indices;
-            cout << ")" << endl;
-        }
-        cout << endl;
-        //assert(is_sorted(sums.begin(), sums.end()));
-#endif
-        int T;
-        cin >> T;
-
-        for (int t = 0; t < T; t++)
-        {
-            int N;
-            cin >> N;
-            int K;
-            cin >> K;
-
-            int64_t x;
-            vector<int64_t> s;
-            while (cin >> x)
-            {
-                s.push_back(x);
-            }
-
-
-            ChoiceIndices indices(K);
-            vector<Sum> sums;
-            vector<int64_t> dummyA(N);
-            findSums(dummyA, indices, K - 1, dummyA.size() - 1, sums);
-            vector<vector<ChoiceIndices>> choiceIndicesWithForLastIndex(N);
-
-            for (const auto& sum : sums)
-            {
-                choiceIndicesWithForLastIndex[sum.choiceIndices[K - 1]].push_back(sum.choiceIndices);
-            }
-
-            sort(s.begin(), s.end());
-            assert((s.front() % K) == 0);
-            vector<int64_t> a(N);
-            a[0] = s.front() / K;
-            map<int64_t, int> blah;
-            blah[K * a[0]]++;
-            cout << "First num: " << a[0] << endl;
-            auto blahIter = blah.begin();
-            auto posInBlahIter = 0;
-            auto previousValidIter = blahIter;
-            auto previousPosInBlahIter = posInBlahIter;
-            int numKnownElementsOfA = 1;
-            for (const auto x : s)
-            {
-                if (blahIter == blah.end() || blahIter->first != x)
-                {
-                    const int64_t newNum = x - (K - 1) * a[0];
-                    cout << "New!" << newNum << " x: " << x << endl;
-                    a[numKnownElementsOfA] = newNum;
-                    for (const auto& blee : choiceIndicesWithForLastIndex[numKnownElementsOfA])
-                    {
-                        int64_t value = 0;
-                        for (int i = 0; i < K; i++)
-                        {
-                            value += a[blee[i]];
-                        }
-                        blah[value]++;
-                    }
-                    numKnownElementsOfA++;
-
-                    if (blahIter == blah.end())
-                    {
-                        blahIter = previousValidIter;
-                        posInBlahIter = previousPosInBlahIter;
-                    }
-                }
-                posInBlahIter++;
-                if (posInBlahIter > blahIter->second)
-                {
-                    previousPosInBlahIter = posInBlahIter;
-                    posInBlahIter = 0;
-                    previousValidIter = blahIter;
-                    blahIter++;
-                }
-            }
-        }
+    }
 }
 
 
