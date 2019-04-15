@@ -1,0 +1,133 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+
+#include <sys/time.h>
+
+using namespace std;
+
+class ChoiceIndices
+{
+    public:
+        ChoiceIndices(int numIndices)
+            : m_indices(numIndices)
+        {
+        }
+        ChoiceIndices() = default;
+        int& operator[](int i)
+        {
+            return m_indices[i];
+        }
+        const int& operator[](int i) const
+        {
+            return m_indices[i];
+        }
+        int numIndices() const
+        {
+            return m_indices.size();
+        }
+    private:
+        vector<int> m_indices;
+};
+struct Sum
+{
+    ChoiceIndices choiceIndices;
+    int64_t value = 0;
+};
+
+
+bool operator<(const Sum& lhs, const Sum& rhs)
+{
+    return lhs.value < rhs.value;
+}
+
+void findSums(const vector<int64_t>& a, ChoiceIndices& indices, int indexToChange, int maxValueOfIndex, vector<Sum>& destSums)
+{
+    if (indexToChange == -1)
+    {
+        int64_t value = 0;
+        for (int i = 0; i < indices.numIndices(); i++)
+        {
+            value += a[indices[i]];
+        }
+        Sum sum;
+        sum.value = value;
+        sum.choiceIndices = indices;
+        destSums.push_back(sum);
+        cout << "--" << endl;
+        cout << "indices: " << endl;
+        for (int i = 0; i < indices.numIndices(); i++)
+        {
+            cout << indices[i] << " ";
+        }
+        cout << endl;
+        cout << "sum: " << value << endl;
+        return;
+    }
+
+    for (int indexValue = 0; indexValue <= maxValueOfIndex; indexValue++)
+    {
+        indices[indexToChange] = indexValue;
+        findSums(a, indices, indexToChange - 1, indexValue, destSums); 
+    }
+}
+
+int main()
+{
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+    const int n = rand() % 10 + 1;
+    const int k = rand() % n + 1;
+    const int maxValue = rand() % 100;
+
+    vector<int64_t> a;
+    for (int i = 0; i < n; i++)
+    {
+        a.push_back(rand() % (maxValue + 1));
+    }
+    sort(a.begin(), a.end());
+
+    a = {1, 20, 21, 22, 23, 24, 25000 };
+
+    cout << "n: " << a.size() << " k: " << k << endl;
+    cout << "a:" << endl;
+    for (const auto x : a)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+
+    ChoiceIndices indices(k);
+    vector<Sum> sums;
+    findSums(a, indices, k - 1, a.size() - 1, sums);
+    stable_sort(sums.begin(), sums.end());
+
+
+    cout << "sums: " << endl;
+    for (const auto& x : sums)
+    {
+        cout << x.value << " ";
+
+        cout << "(";
+        for (int i = 0; i < x.choiceIndices.numIndices(); i++)
+        {
+            cout << x.choiceIndices[i] << " ";
+        }
+        cout << ") "; 
+        cout << "(";
+        string indices(a.size(), '.');
+        for (int i = 0; i < x.choiceIndices.numIndices(); i++)
+        {
+            indices[x.choiceIndices[i]] = 'X';
+        }
+        cout << indices;
+        cout << ")" << endl;
+    }
+    cout << endl;
+    //assert(is_sorted(sums.begin(), sums.end()));
+}
+
+
