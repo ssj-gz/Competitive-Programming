@@ -1,7 +1,15 @@
+// Simon St James (ssjgz) - 2019-04-15
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <sstream>
 #include <cassert>
 
 #include <sys/time.h>
@@ -100,9 +108,11 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 10 + 1;
-        const int k = rand() % n + 1;
-        const int maxValue = rand() % 100;
+        //const int n = rand() % 10 + 1;
+        //const int k = rand() % n + 1;
+        const int n = 15;
+        const int k = 7;
+        const int maxValue = rand() % 10000;
 
         vector<int64_t> a;
         for (int i = 0; i < n; i++)
@@ -131,7 +141,7 @@ int main(int argc, char* argv[])
         }
         cout << endl;
 
-        cout << "sums: " << endl;
+        cout << "sums: (" << sums.size() << ")" << endl;
         for (const auto& x : sums)
         {
             cout << x.value << " ";
@@ -197,19 +207,29 @@ int main(int argc, char* argv[])
     cout << endl;
     //assert(is_sorted(sums.begin(), sums.end()));
 #endif
+    string line;
+    getline(cin, line);
+    istringstream tStream(line);
     int T;
-    cin >> T;
+    tStream >> T;
 
     for (int t = 0; t < T; t++)
     {
+        getline(cin, line);
+        istringstream nkStream(line);
+        cout << "nkStream: " << line << endl;
         int N;
-        cin >> N;
+        nkStream >> N;
         int K;
-        cin >> K;
+        nkStream >> K;
 
-        int64_t x;
+        getline(cin, line);
+        istringstream sStream(line);
+        cout << "sStream: " << line << endl;
+
         vector<int64_t> s;
-        while (cin >> x)
+        int64_t x;
+        while (sStream >> x)
         {
             s.push_back(x);
         }
@@ -226,22 +246,21 @@ int main(int argc, char* argv[])
             choiceIndicesWithForLastIndex[sum.choiceIndices[K - 1]].push_back(sum.choiceIndices);
         }
 
-
         sort(s.begin(), s.end());
         assert((s.front() % K) == 0);
         vector<int64_t> a(N);
         a[0] = s.front() / K;
         std::priority_queue<int64_t, std::vector<int64_t>, std::greater<int64_t> >  blah;
         blah.push(K * a[0]);
-        cout << "First num: " << a[0] << endl;
+        //cout << "First num: " << a[0] << endl;
         int numKnownElementsOfA = 1;
         for (const auto x : s)
         {
-            cout << "x: " << x << " top: " << (blah.empty() ? -1 : blah.top()) << endl;
+            //cout << "x: " << x << " top: " << (blah.empty() ? -1 : blah.top()) << endl;
             if (blah.empty() || blah.top() != x)
             {
                 const int64_t newNum = x - (K - 1) * a[0];
-                cout << "New!" << newNum << " x: " << x << endl;
+                //cout << "New!" << newNum << " x: " << x << endl;
                 a[numKnownElementsOfA] = newNum;
                 for (const auto& blee : choiceIndicesWithForLastIndex[numKnownElementsOfA])
                 {
@@ -264,13 +283,17 @@ int main(int argc, char* argv[])
                 blah.pop();
             }
         }
-        cout << "A:" << endl;
+        //cout << "A:" << endl;
         for (const auto x : a)
         {
             cout << x << " ";
         }
         cout << endl;
-        cout << "correct? " << isSolutionCorrect(a, s, K) << endl;
+        const bool correct = isSolutionCorrect(a, s, K);
+#ifdef BRUTE_FORCE
+        cout << "correct? " << correct << endl;
+#endif
+        assert(correct);
     }
 }
 
