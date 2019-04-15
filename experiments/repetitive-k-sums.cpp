@@ -111,13 +111,6 @@ int main(int argc, char* argv[])
         }
         sort(a.begin(), a.end());
 
-        cerr << "a: ";
-        for (const auto x : a)
-        {
-            cerr << x << " ";
-        }
-        cerr << endl;
-
 
         cout << n << " " << k << endl;
 
@@ -131,6 +124,35 @@ int main(int argc, char* argv[])
             cout << x.value << " ";
         }
         cout << endl;
+        cout << "a: ";
+        for (const auto x : a)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+
+        cout << "sums: " << endl;
+        for (const auto& x : sums)
+        {
+            cout << x.value << " ";
+
+            cout << "(";
+            for (int i = 0; i < x.choiceIndices.numIndices(); i++)
+            {
+                cout << x.choiceIndices[i] << " ";
+            }
+            cout << ") "; 
+            cout << "(";
+            string indices(a.size(), '.');
+            for (int i = 0; i < x.choiceIndices.numIndices(); i++)
+            {
+                indices[x.choiceIndices[i]] = 'X';
+            }
+            cout << indices;
+            cout << ")" << endl;
+        }
+        cout << endl;
+
         return 0;
     }
 #if 0
@@ -215,6 +237,7 @@ int main(int argc, char* argv[])
         int numKnownElementsOfA = 1;
         for (const auto x : s)
         {
+            cout << "x: " << x << " top: " << (blah.empty() ? -1 : blah.top()) << endl;
             if (blah.empty() || blah.top() != x)
             {
                 const int64_t newNum = x - (K - 1) * a[0];
@@ -228,9 +251,11 @@ int main(int argc, char* argv[])
                         assert(blee[i] <= numKnownElementsOfA);
                         value += a[blee[i]];
                     }
+                    //cout << " adding " << value << endl;
                     blah.push(value);
                 }
                 numKnownElementsOfA++;
+                blah.pop();
                 if (numKnownElementsOfA == N)
                     break;
             }
@@ -245,6 +270,7 @@ int main(int argc, char* argv[])
             cout << x << " ";
         }
         cout << endl;
+        cout << "correct? " << isSolutionCorrect(a, s, K) << endl;
     }
 }
 
