@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) 2019-04-15
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -52,9 +52,8 @@ string bruteForce(const string& s, int n, int k)
 
         if (encode(binaryString, k) == s)
         {
-            if (!solution.empty())
-                return "";
             solution = binaryString;
+            cout << " found a brute force solution: " << solution << endl;
         }
     }
     return solution;
@@ -78,7 +77,11 @@ string optimised(const string& s, int n, int k)
         xorOfLastKDigitsOfResult ^= decodedNextDigit;
 
         if (result.size() == n)
+        {
+            while (result.back() == '0')
+                result.pop_back();
             return result;
+        }
     }
     return "";
 }
