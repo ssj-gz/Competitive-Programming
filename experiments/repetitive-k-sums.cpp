@@ -191,6 +191,18 @@ int main(int argc, char* argv[])
                 s.push_back(x);
             }
 
+
+            ChoiceIndices indices(K);
+            vector<Sum> sums;
+            vector<int64_t> dummyA(N);
+            findSums(dummyA, indices, K - 1, dummyA.size() - 1, sums);
+            vector<vector<ChoiceIndices>> choiceIndicesWithForLastIndex(N);
+
+            for (const auto& sum : sums)
+            {
+                choiceIndicesWithForLastIndex[sum.choiceIndices[K - 1]].push_back(sum.choiceIndices);
+            }
+
             sort(s.begin(), s.end());
             assert((s.front() % K) == 0);
             vector<int64_t> a(N);
@@ -200,18 +212,39 @@ int main(int argc, char* argv[])
             cout << "First num: " << a[0] << endl;
             auto blahIter = blah.begin();
             auto posInBlahIter = 0;
+            auto previousValidIter = blahIter;
+            auto previousPosInBlahIter = posInBlahIter;
+            int numKnownElementsOfA = 1;
             for (const auto x : s)
             {
                 if (blahIter == blah.end() || blahIter->first != x)
                 {
                     const int64_t newNum = x - (K - 1) * a[0];
                     cout << "New!" << newNum << " x: " << x << endl;
-                    break;
+                    a[numKnownElementsOfA] = newNum;
+                    for (const auto& blee : choiceIndicesWithForLastIndex[numKnownElementsOfA])
+                    {
+                        int64_t value = 0;
+                        for (int i = 0; i < K; i++)
+                        {
+                            value += a[blee[i]];
+                        }
+                        blah[value]++;
+                    }
+                    numKnownElementsOfA++;
+
+                    if (blahIter == blah.end())
+                    {
+                        blahIter = previousValidIter;
+                        posInBlahIter = previousPosInBlahIter;
+                    }
                 }
                 posInBlahIter++;
                 if (posInBlahIter > blahIter->second)
                 {
+                    previousPosInBlahIter = posInBlahIter;
                     posInBlahIter = 0;
+                    previousValidIter = blahIter;
                     blahIter++;
                 }
             }
