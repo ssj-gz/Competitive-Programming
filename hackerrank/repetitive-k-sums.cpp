@@ -47,34 +47,22 @@ bool operator<(const Sum& lhs, const Sum& rhs)
     return lhs.value < rhs.value;
 }
 
-void findSums(const vector<int64_t>& a, Choice& choice, int indexToChange, int maxValueOfIndex, vector<Sum>& destSums)
+void findChoices(Choice& choice, int indexToChange, int maxValueOfIndex, vector<Sum>& destSums)
 {
     if (indexToChange == -1)
     {
         int64_t value = 0;
-        for (int i = 0; i < choice.numIndices(); i++)
-        {
-            value += a[choice[i]];
-        }
         Sum sum;
         sum.value = value;
         sum.choiceIndices = choice;
         destSums.push_back(sum);
-        //cout << "--" << endl;
-        //cout << "choice: " << endl;
-        //for (int i = 0; i < choice.numIndices(); i++)
-        //{
-            //cout << choice[i] << " ";
-        //}
-        //cout << endl;
-        //cout << "sum: " << value << endl;
         return;
     }
 
     for (int indexValue = 0; indexValue <= maxValueOfIndex; indexValue++)
     {
         choice[indexToChange] = indexValue;
-        findSums(a, choice, indexToChange - 1, indexValue, destSums); 
+        findChoices(choice, indexToChange - 1, indexValue, destSums); 
     }
 }
 
@@ -105,10 +93,10 @@ int main(int argc, char* argv[])
             s.push_back(x);
         }
 
+        // Build up choicesWithLastIndexEqualTo.
         Choice choice(K);
         vector<Sum> sums;
-        vector<int64_t> dummyA(N);
-        findSums(dummyA, choice, K - 1, dummyA.size() - 1, sums);
+        findChoices(choice, K - 1, N - 1, sums);
         vector<vector<Choice>> choicesWithLastIndexEqualTo(N);
 
         for (const auto& sum : sums)
