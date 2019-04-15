@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-04-15
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -110,9 +110,10 @@ int main(int argc, char* argv[])
 
         //const int n = rand() % 10 + 1;
         //const int k = rand() % n + 1;
-        const int n = 15;
-        const int k = 7;
-        const int maxValue = rand() % 10000;
+        const int n = 19;
+        const int k = 8;
+        //const int maxValue = rand() % 100'000'000;
+        const int maxValue = rand() % 100;
 
         vector<int64_t> a;
         for (int i = 0; i < n; i++)
@@ -217,7 +218,7 @@ int main(int argc, char* argv[])
     {
         getline(cin, line);
         istringstream nkStream(line);
-        cout << "nkStream: " << line << endl;
+        //cout << "nkStream: " << line << endl;
         int N;
         nkStream >> N;
         int K;
@@ -225,7 +226,7 @@ int main(int argc, char* argv[])
 
         getline(cin, line);
         istringstream sStream(line);
-        cout << "sStream: " << line << endl;
+        //cout << "sStream: " << line << endl;
 
         vector<int64_t> s;
         int64_t x;
@@ -289,11 +290,11 @@ int main(int argc, char* argv[])
             cout << x << " ";
         }
         cout << endl;
-        const bool correct = isSolutionCorrect(a, s, K);
 #ifdef BRUTE_FORCE
+        const bool correct = isSolutionCorrect(a, s, K);
         cout << "correct? " << correct << endl;
-#endif
         assert(correct);
+#endif
     }
 }
 
