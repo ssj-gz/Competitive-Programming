@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) 2019-04-15
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <string>
 #include <cassert>
@@ -56,7 +63,7 @@ string bruteForce(const string& s, int n, int k)
 string optimised(const string& s, int n, int k)
 {
     string result;
-    int xorOfLastKDigitsOfResult = 0;
+    int xorOfLastKDigitsOfResult = 0; // Will be less than "last K digits" if length of result < k, obviously!
     for (int i = 0; i < s.size(); i++)
     {
         if (i >= k)
@@ -114,9 +121,13 @@ int main(int argc, char* argv[])
     string s;
     cin >> s;
 
+#ifdef BRUTE_FORCE
     const auto bruteForceResult = bruteForce(s, n, k);
     cout << "bruteForceResult: " << bruteForceResult << endl;
     const auto optimisedResult = optimised(s, n, k);
     cout << "optimisedResult : " << optimisedResult << endl;
     assert(bruteForceResult == optimisedResult);
+#else
+    cout << optimised(s, n, k) << endl;
+#endif
 }
