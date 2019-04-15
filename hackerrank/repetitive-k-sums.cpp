@@ -47,22 +47,18 @@ bool operator<(const Sum& lhs, const Sum& rhs)
     return lhs.value < rhs.value;
 }
 
-void findChoices(Choice& choice, int indexToChange, int maxValueOfIndex, vector<Sum>& destSums)
+void findChoices(Choice& choice, int indexToChange, int maxValueOfIndex, vector<Choice>& destChoices)
 {
     if (indexToChange == -1)
     {
-        int64_t value = 0;
-        Sum sum;
-        sum.value = value;
-        sum.choiceIndices = choice;
-        destSums.push_back(sum);
+        destChoices.push_back(choice);
         return;
     }
 
     for (int indexValue = 0; indexValue <= maxValueOfIndex; indexValue++)
     {
         choice[indexToChange] = indexValue;
-        findChoices(choice, indexToChange - 1, indexValue, destSums); 
+        findChoices(choice, indexToChange - 1, indexValue, destChoices); 
     }
 }
 
@@ -86,25 +82,26 @@ int main(int argc, char* argv[])
         getline(cin, line);
         istringstream sStream(line);
 
+        // Read in and sort s.
         vector<int64_t> s;
         int64_t x;
         while (sStream >> x)
         {
             s.push_back(x);
         }
+        sort(s.begin(), s.end());
 
         // Build up choicesWithLastIndexEqualTo.
         Choice choice(K);
-        vector<Sum> sums;
-        findChoices(choice, K - 1, N - 1, sums);
+        vector<Choice> choices;
+        findChoices(choice, K - 1, N - 1, choices);
         vector<vector<Choice>> choicesWithLastIndexEqualTo(N);
 
-        for (const auto& sum : sums)
+        for (const auto& choice : choices)
         {
-            choicesWithLastIndexEqualTo[sum.choiceIndices[K - 1]].push_back(sum.choiceIndices);
+            choicesWithLastIndexEqualTo[choice[K - 1]].push_back(choice);
         }
 
-        sort(s.begin(), s.end());
 
         // Extract first element.
         assert((s.front() % K) == 0);
