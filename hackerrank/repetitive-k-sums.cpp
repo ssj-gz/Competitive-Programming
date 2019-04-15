@@ -19,7 +19,6 @@ class Choice
             : m_indices(numIndices)
         {
         }
-        Choice() = default;
         int& operator[](int i)
         {
             return m_indices[i];
@@ -35,17 +34,6 @@ class Choice
     private:
         vector<int> m_indices;
 };
-struct Sum
-{
-    Choice choiceIndices;
-    int64_t value = 0;
-};
-
-
-bool operator<(const Sum& lhs, const Sum& rhs)
-{
-    return lhs.value < rhs.value;
-}
 
 void findChoices(Choice& choice, int indexToChange, int maxValueOfIndex, vector<Choice>& destChoices)
 {
