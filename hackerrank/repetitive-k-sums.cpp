@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-04-15
+// Simon St James (ssjgz) - 2019-04-15 21:45
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -90,7 +90,6 @@ int main(int argc, char* argv[])
             choicesWithLastIndexEqualTo[choice[K - 1]].push_back(choice);
         }
 
-
         // Extract first element.
         assert((s.front() % K) == 0);
         vector<int64_t> a(N);
@@ -104,7 +103,7 @@ int main(int argc, char* argv[])
         {
             if (expectedValuesUsingKnownElements.empty() || expectedValuesUsingKnownElements.top() != x)
             {
-                // This is not expected: therefore, we must be using the next unknown value of a,
+                // This element x of s is not expected: therefore, it must be using the next unknown value of a,
                 // which we can now deduce.
                 const int64_t newNum = x - (K - 1) * a[0];
                 a[numKnownElementsOfA] = newNum;
@@ -127,6 +126,7 @@ int main(int argc, char* argv[])
             }
             else
             {
+                // This element x of s was what we expected; discard it, so we don't expect it again :)
                 expectedValuesUsingKnownElements.pop();
             }
         }
