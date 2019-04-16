@@ -120,15 +120,12 @@ int main(int argc, char* argv[])
                     expectedValuesUsingKnownElements.push(newValueUsingKnownElements);
                 }
                 numKnownElementsOfA++;
-                expectedValuesUsingKnownElements.pop();
                 if (numKnownElementsOfA == N)
                     break;
             }
-            else
-            {
-                // This element x of s was what we expected; discard it, so we don't expect it again :)
-                expectedValuesUsingKnownElements.pop();
-            }
+
+            // We matched this expected element against x (possibly after just adding it!): discard it.
+            expectedValuesUsingKnownElements.pop();
         }
         for (const auto x : a)
         {
