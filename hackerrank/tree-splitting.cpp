@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
     // Can we do better?
     //
     // Yes - if we perform a heavy-light decomposition of the graph, then the number of *chains* 
-    // that nodeToRemove will have in its list of ancestor nodes will be just O(N^2). By
+    // that nodeToRemove will have in its list of ancestor nodes will be just O(log2N). By
     // laying all these chains end-to-end into one big array (initialChainSegmentTreeInfo), we can
     // easily figure out how to find the root of chain containing nodeToRemove (see findChainRoot())
     // and so work our way up the list of ancestors in O(log2N * log2N) (there are O(log2N) ancestor 
