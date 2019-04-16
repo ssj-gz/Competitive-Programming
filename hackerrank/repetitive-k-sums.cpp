@@ -52,25 +52,23 @@ void findChoices(Choice& choice, int indexToChange, int maxValueOfIndex, vector<
 
 int main(int argc, char* argv[])
 {
-    string line;
-    getline(cin, line);
-    istringstream tStream(line);
     int T;
-    tStream >> T;
+    cin >> T;
 
     for (int t = 0; t < T; t++)
     {
-        getline(cin, line);
-        istringstream nkStream(line);
         int N;
-        nkStream >> N;
+        cin >> N;
         int K;
-        nkStream >> K;
+        cin >> K;
 
-        getline(cin, line);
-        istringstream sStream(line);
+        // Skip to next line, so we can read in s.
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         // Read in and sort s.
+        string sLine;
+        getline(cin, sLine);
+        istringstream sStream(sLine);
         vector<int64_t> s;
         int64_t x;
         while (sStream >> x)
