@@ -103,8 +103,8 @@ int main(int argc, char* argv[])
             {
                 // This element x of s is not expected: therefore, it must be using the next unknown value of a,
                 // which we can now deduce.
-                const int64_t newNum = x - (K - 1) * a[0];
-                a[numKnownElementsOfA] = newNum;
+                const int64_t nextElementOfA = x - (K - 1) * a[0];
+                a[numKnownElementsOfA] = nextElementOfA;
                 // Add values where the last chosen index (i.e. i_k) equals numKnownElementsOfA,
                 // thus keeping expectedValuesUsingKnownElements up-to-date with our new known element of a.
                 for (const auto& choice : choicesWithLastIndexEqualTo[numKnownElementsOfA])
