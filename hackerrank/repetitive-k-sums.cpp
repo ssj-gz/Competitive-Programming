@@ -108,8 +108,12 @@ int main(int argc, char* argv[])
                 // which we can now deduce.
                 const int64_t nextElementOfA = x - (K - 1) * a[0];
                 a[numKnownElementsOfA] = nextElementOfA;
-                // Add values where the last chosen index (i.e. i_k) equals numKnownElementsOfA,
-                // thus keeping expectedValuesUsingKnownElements up-to-date with our new known element of a.
+                // We now need to ensure that expectedValuesUsingKnownElements now contains precisely the set of 
+                // elements where the last chosen index (i.e. i_k) is *at most* numKnownElementsOfA.
+                // It is already (from previous passes) precisely the set of elements where the last chosen index 
+                // is *at most* (numKnownElementsOfA - 1), which is a subset of what we want.
+                // So, to avoid re-adding duplicates of values added in previous passes, we add precisely the values
+                // where the last chosen index (i.e. i_k) *is equal to* numKnownElementsOfA.
                 for (const auto& choice : choicesWithLastIndexEqualTo[numKnownElementsOfA])
                 {
                     int64_t newValueUsingKnownElements = 0;
