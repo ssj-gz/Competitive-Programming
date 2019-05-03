@@ -50,6 +50,9 @@ void findChoices(Choice& choice, int indexToChange, int maxValueOfIndex, vector<
     }
 }
 
+template<typename T>
+using IncreasingPriorityQueue = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+
 int main(int argc, char* argv[])
 {
     int T;
@@ -94,7 +97,7 @@ int main(int argc, char* argv[])
         a[0] = s.front() / K;
         int numKnownElementsOfA = 1;
 
-        std::priority_queue<int64_t, std::vector<int64_t>, std::greater<int64_t>> expectedValuesUsingKnownElements;
+        IncreasingPriorityQueue<int64_t> expectedValuesUsingKnownElements;
         expectedValuesUsingKnownElements.push(K * a[0]);
 
         for (const auto x : s)
