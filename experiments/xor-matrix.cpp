@@ -79,7 +79,7 @@ int main()
     {
         //cout << "row: " << row << " glarp: " << std::endl;
         int blork = 0;
-        if (row == powerOf2)
+        //if (row == powerOf2)
         {
             for (int i = 0; i < narb; i++)
             {
@@ -112,10 +112,10 @@ int main()
 }
 #endif
 
-vector<int64_t> solutionBruteForce(const vector<int64_t>& originalA, int n, int64_t m)
+vector<int64_t> solutionBruteForce(const vector<int64_t>& originalA, int n, uint64_t m)
 {
     vector<int64_t> currentRow(originalA);
-    int64_t row = 1;
+    uint64_t row = 1;
     while (row != m)
     {
 
@@ -131,11 +131,40 @@ vector<int64_t> solutionBruteForce(const vector<int64_t>& originalA, int n, int6
     return currentRow;
 }
 
+vector<int64_t> solution(const vector<int64_t>& originalA, int n, uint64_t m)
+{
+    m--; // Already know the 0th row.
+    vector<int64_t> currentRow(originalA);
+
+    uint64_t powerOf2 = static_cast<uint64_t>(1) << static_cast<uint64_t>(63);
+    while (powerOf2 != 0)
+    {
+        cout << "powerOf2: " << powerOf2 << " m: " << m << endl;
+        if (m >= powerOf2)
+        {
+            cout << "power of 2 is greater >= m" << std::endl;
+            vector<int64_t> currentPlusPowerOf2thRow(n);
+            for (int i = 0; i < n; i++)
+            {
+                currentPlusPowerOf2thRow[i] ^= currentRow[i];
+                currentPlusPowerOf2thRow[(i + powerOf2) % n] ^= currentRow[i];
+            }
+            currentRow = currentPlusPowerOf2thRow;
+
+
+            m -= powerOf2;
+        }
+        powerOf2 >>= 1;
+    }
+    return currentRow;
+}
+
+#if 1
 int main()
 {
     int n;
     cin >> n;
-    int64_t m;
+    uint64_t m;
     cin >> m;
 
     vector<int64_t> a(n);
@@ -150,6 +179,16 @@ int main()
     {
         cout << bruteForceSolution[i] << " ";
     }
+    cout << endl;
+
+    const auto optimisedSolution = solution(a, n, m);
+    cout << "optimisedSolution: " << endl; 
+    for (int i = 0; i < n; i++)
+    {
+        cout << optimisedSolution[i] << " ";
+    }
+    cout << endl;
 }
+#endif
 
 
