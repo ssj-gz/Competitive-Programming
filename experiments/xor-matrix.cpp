@@ -72,7 +72,7 @@ int main()
         count++;
     }
 #endif
-#if 1
+#if 0
     int row = 0;
     uint64_t powerOf2 = 1;
     while (true)
@@ -147,7 +147,7 @@ vector<int64_t> solution(const vector<int64_t>& originalA, int n, uint64_t m)
             for (int i = 0; i < n; i++)
             {
                 currentPlusPowerOf2thRow[i] ^= currentRow[i];
-                currentPlusPowerOf2thRow[(i + powerOf2) % n] ^= currentRow[i];
+                currentPlusPowerOf2thRow[i] ^= currentRow[(i + powerOf2) % n];
             }
             currentRow = currentPlusPowerOf2thRow;
 
