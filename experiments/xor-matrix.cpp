@@ -1,7 +1,13 @@
+// Simon St James (ssjgz) 2019-05-06
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <string>
-#include <map>
 #include <cassert>
 
 #include <sys/time.h>
@@ -193,6 +199,7 @@ int main(int argc, char* argv[])
         cin >> a[i];
     }
 
+#ifdef BRUTE_FORCE
     const auto bruteForceSolution = solutionBruteForce(a, n, m);
     cout << "bruteForceSolution: " << endl; 
     for (int i = 0; i < n; i++)
@@ -200,9 +207,12 @@ int main(int argc, char* argv[])
         cout << bruteForceSolution[i] << " ";
     }
     cout << endl;
+#endif
 
     const auto optimisedSolution = solution(a, n, m);
+#ifdef BRUTE_FORCE
     cout << "optimisedSolution: " << endl; 
+#endif
     for (int i = 0; i < n; i++)
     {
         cout << optimisedSolution[i] << " ";
