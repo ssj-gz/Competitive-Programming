@@ -2,6 +2,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <cassert>
+
+#include <sys/time.h>
 
 using namespace std;
 
@@ -139,10 +142,10 @@ vector<int64_t> solution(const vector<int64_t>& originalA, int n, uint64_t m)
     uint64_t powerOf2 = static_cast<uint64_t>(1) << static_cast<uint64_t>(63);
     while (powerOf2 != 0)
     {
-        cout << "powerOf2: " << powerOf2 << " m: " << m << endl;
+        //cout << "powerOf2: " << powerOf2 << " m: " << m << endl;
         if (m >= powerOf2)
         {
-            cout << "power of 2 is greater >= m" << std::endl;
+            //cout << "power of 2 is greater >= m" << std::endl;
             vector<int64_t> currentPlusPowerOf2thRow(n);
             for (int i = 0; i < n; i++)
             {
@@ -160,8 +163,25 @@ vector<int64_t> solution(const vector<int64_t>& originalA, int n, uint64_t m)
 }
 
 #if 1
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+
+        const int n = rand() % 20 + 1;
+        const int m = rand() % 1000 + 1;
+        cout << n << " " << m << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout << (rand() % 50 + 1) <<  " ";
+        }
+        cout << endl;
+        return 0;
+    }
     int n;
     cin >> n;
     uint64_t m;
@@ -188,6 +208,7 @@ int main()
         cout << optimisedSolution[i] << " ";
     }
     cout << endl;
+    assert(bruteForceSolution == optimisedSolution);
 }
 #endif
 
