@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-05-07
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -31,13 +38,13 @@ string calcRowOfMatrix(const string& originalProteinString, int n, uint64_t m)
             // Set the row to be all the identity element : we'll update it by 
             // transforming each element.
             string currentPlusPowerOf2thRow(n, 'A');
+
             for (int i = 0; i < n; i++)
             {
                 currentPlusPowerOf2thRow[i] = transform(currentPlusPowerOf2thRow[i],  currentRow[i]);
                 currentPlusPowerOf2thRow[i] = transform(currentPlusPowerOf2thRow[i], currentRow[(i + powerOf2) % n]);
             }
             currentRow = currentPlusPowerOf2thRow;
-
 
             m -= powerOf2;
         }
@@ -100,9 +107,16 @@ int main(int argc, char* argv[])
     string proteinString;
     cin >> proteinString;
 
+#ifdef BRUTE_FORCE
     const auto bruteForceSolution = solveBruteForce(proteinString, N, K);
     cout << "bruteForceSolution: " << bruteForceSolution << endl;
+#endif
     const auto optimisedSolution = calcRowOfMatrix(proteinString, N, K);
+#ifdef BRUTE_FORCE
     cout << "optimisedSolution: " << optimisedSolution << endl;
     assert(bruteForceSolution == optimisedSolution);
+#else
+    cout << optimisedSolution << endl;
+#endif
+
 }
