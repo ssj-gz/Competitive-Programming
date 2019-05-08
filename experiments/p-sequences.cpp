@@ -70,6 +70,7 @@ ModNum solutionOptimised(int N, int P)
         }
     }
     factorsOfP.erase(std::unique(factorsOfP.begin(), factorsOfP.end()), factorsOfP.end());
+    assert(std::is_sorted(factorsOfP.begin(), factorsOfP.end()));
     for (const auto x : factorsOfP)
     {
         cout << " factor of P: " << x << endl;
@@ -81,20 +82,53 @@ ModNum solutionOptimised(int N, int P)
     }
     for (int i = 1; i < N; i++)
     {
+        cout << "i: " << i << endl;
+        ModNum sumUpToLast = 0;
         int lastFactorIndex = 0;
         int newFactorIndex = factorsOfP.size() - 1;
         firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+        sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
 
         while (newFactorIndex >= 1)
         {
             lastFactorIndex++;
             newFactorIndex--;
-            cout << "lastFactorIndex: " << lastFactorIndex << " newFactorIndex: " << newFactorIndex << " factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] : " << factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] << endl;
+            const auto diffFromPreviousLastFactor = factorsOfP[lastFactorIndex] - factorsOfP[lastFactorIndex - 1];
+            //const auto diffToNextLastFactor = (lastFactorIndex == factorsOfP.size() - 1) ? 1 : factorsOfP[lastFactorIndex + 1] - factorsOfP[lastFactorIndex];
+            //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * diffFromPreviousLastFactor;
+            sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * (diffFromPreviousLastFactor - 0);
+            //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] + (diffFromPreviousLastFactor - 1) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex - 1];
+
+            const auto diffUntilNextFactor = factorsOfP[newFactorIndex + 1] - factorsOfP[newFactorIndex];
+            cout << "lastFactorIndex: " << lastFactorIndex << " newFactorIndex: " << newFactorIndex << " factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] : " << factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] << " diffUntilNextFactor: " << diffUntilNextFactor  << " diffFromPreviousLastFactor: " << diffFromPreviousLastFactor << " sumUpToLast: "<< sumUpToLast << endl;
             assert(factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] <= P);
             assert(lastFactorIndex == factorsOfP.size() - 1 || factorsOfP[lastFactorIndex + 1] * factorsOfP[newFactorIndex] > P);
+#if 0
+            if (lastFactorIndex != factorsOfP.size() - 1)
+            {
+                for (int dbg = factorsOfP[lastFactorIndex]; dbg < factorsOfP[lastFactorIndex + 1]; dbg++)
+                {
+                    cout << " factorsOfP[lastFactorIndex]: " << factorsOfP[lastFactorIndex] << " dbg: " << dbg << " dbg * factorsOfP[newFactorIndex]: " << dbg * factorsOfP[newFactorIndex] << endl;
+                    assert(dbg * factorsOfP[newFactorIndex] <= P);
+                }
+            }
+#endif
+            //for (int dbg = factorsOfP[lastFactorIndex]; dbg < ; dbg++)
+            //{
+                //assert(
+            //}
+
+
+            //firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * diffUntilNextFactor;
+            firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * 1;
+            cout << "firstNEndingOnP[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnFactorIndex[i][newFactorIndex] << endl;
         }
     }
 
+    for (int r = 0; r < factorsOfP.size(); r++)
+    {
+        result += firstNEndingOnFactorIndex[N - 1][r];
+    }
 
     return result;
 }
