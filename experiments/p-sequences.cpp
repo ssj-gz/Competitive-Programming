@@ -58,16 +58,16 @@ ModNum solutionOptimised(int N, int P)
     vector<int> factorsOfP;
     for (int i = 1; i <= sqrt(P); i++)
     {
-        if ((P % i) == 0)
+        //if ((P % i) == 0)
         {
             factorsOfP.push_back(i);
         }
     }
-    for (int i = sqrt(P); i >= 1; i--)
+    for (int i = sqrt(P) + 1; i > 1; i--)
     {
-        if ((P % i) == 0)
+        //if ((P % i) == 0)
         {
-            factorsOfP.push_back(P / i);
+            factorsOfP.push_back(P / i + 1);
         }
     }
     factorsOfP.erase(std::unique(factorsOfP.begin(), factorsOfP.end()), factorsOfP.end());
@@ -104,6 +104,7 @@ ModNum solutionOptimised(int N, int P)
             cout << "lastFactorIndex: " << lastFactorIndex << " newFactorIndex: " << newFactorIndex << " factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] : " << factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] << " diffUntilNextFactor: " << diffUntilNextFactor  << " diffFromPreviousLastFactor: " << diffFromPreviousLastFactor << " sumUpToLast: "<< sumUpToLast << endl;
             assert(factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] <= P);
             assert(lastFactorIndex == factorsOfP.size() - 1 || factorsOfP[lastFactorIndex + 1] * factorsOfP[newFactorIndex] > P);
+            //assert((factorsOfP[lastFactorIndex] + 1) * factorsOfP[newFactorIndex] > P);
 #if 0
             if (lastFactorIndex != factorsOfP.size() - 1)
             {
@@ -136,6 +137,7 @@ ModNum solutionOptimised(int N, int P)
 
 ModNum solutionBruteForce(int N, int P)
 {
+#if 0
     cout << "Blah" << endl;
     int a = 1;
     int lastDivision = P / a;
@@ -160,12 +162,13 @@ ModNum solutionBruteForce(int N, int P)
     {
         optimisedBlah.push_back(P / i + 1);
     }
+    cout << "blah.size(): " << blah.size() << " optimisedBlah.size(): " << optimisedBlah.size() << endl;
+    optimisedBlah.erase(std::unique(optimisedBlah.begin(), optimisedBlah.end()), optimisedBlah.end());
     for (const auto x : optimisedBlah)
     {
         cout << " optimised a: " << x << endl;
     }
-    cout << "blah.size(): " << blah.size() << " optimisedBlah.size(): " << optimisedBlah.size() << endl;
-    optimisedBlah.erase(std::unique(optimisedBlah.begin(), optimisedBlah.end()), optimisedBlah.end());
+    assert(is_sorted(optimisedBlah.begin(), optimisedBlah.end()));
     assert(optimisedBlah == blah);
     //a = 1;
     //lastDivision = P / a;
@@ -178,6 +181,7 @@ ModNum solutionBruteForce(int N, int P)
         //cout << " optimised a: " << a << endl;
     //}
     return 0;
+#endif
     ModNum result = 0;
     vector<vector<ModNum>> firstNEndingOnP(N, vector<ModNum>(P + 1, 0));
     for (int r = 0; r <= P; r++)
