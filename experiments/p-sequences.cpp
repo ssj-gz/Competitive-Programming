@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 using namespace std;
 
@@ -135,6 +136,48 @@ ModNum solutionOptimised(int N, int P)
 
 ModNum solutionBruteForce(int N, int P)
 {
+    cout << "Blah" << endl;
+    int a = 1;
+    int lastDivision = P / a;
+    cout << " brute force a: 1 " << endl;
+    vector<int> blah = {a};
+    while (a < P)
+    {
+        a++;
+        if ((P / a) != lastDivision)
+        {
+            lastDivision = P / a;
+            cout << " brute force a: " << a << " lastDivision: " << lastDivision << endl;
+            blah.push_back(a);
+        }
+    }
+    vector<int> optimisedBlah;
+    for (int i = 1; i <= sqrt(P); i++)
+    {
+        optimisedBlah.push_back(i);
+    }
+    for (int i = sqrt(P) + 1; i > 1; i--)
+    {
+        optimisedBlah.push_back(P / i + 1);
+    }
+    for (const auto x : optimisedBlah)
+    {
+        cout << " optimised a: " << x << endl;
+    }
+    cout << "blah.size(): " << blah.size() << " optimisedBlah.size(): " << optimisedBlah.size() << endl;
+    optimisedBlah.erase(std::unique(optimisedBlah.begin(), optimisedBlah.end()), optimisedBlah.end());
+    assert(optimisedBlah == blah);
+    //a = 1;
+    //lastDivision = P / a;
+    //cout << " optimised a: 1 " << endl;
+
+    //while (a <= P)
+    //{
+        //a = (P / (lastDivision - 1));
+        //lastDivision = P / a;
+        //cout << " optimised a: " << a << endl;
+    //}
+    return 0;
     ModNum result = 0;
     vector<vector<ModNum>> firstNEndingOnP(N, vector<ModNum>(P + 1, 0));
     for (int r = 0; r <= P; r++)
