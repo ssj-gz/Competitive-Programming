@@ -1,3 +1,9 @@
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#define NDEBUG
+#undef BRUTE_FORCE
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -53,6 +59,24 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
 
 ModNum solutionOptimised(int N, int P)
 {
+#ifdef BRUTE_FORCE
+    vector<vector<ModNum>> firstNEndingOnP(N, vector<ModNum>(P + 1, 0));
+    for (int r = 0; r <= P; r++)
+    {
+        firstNEndingOnP[0][r] = 1;
+    }
+    for (int i = 1; i < N; i++)
+    {
+        for (int q = 1; q <= P; q++)
+        {
+            for (int r = 1; r * q <= P; r++)
+            {
+                firstNEndingOnP[i][q] += firstNEndingOnP[i - 1][r];
+            }
+            cout << "firstNEndingOnP[" << i << "][" << q << "] = " << firstNEndingOnP[i][q] << endl;
+        }
+    }
+#endif
     ModNum result = 0;
 
     vector<int> factorsOfP;
@@ -85,25 +109,46 @@ ModNum solutionOptimised(int N, int P)
     {
         cout << "i: " << i << endl;
         ModNum sumUpToLast = 0;
-        int lastFactorIndex = 0;
+        //int lastFactorIndex = 0;
         int newFactorIndex = factorsOfP.size() - 1;
-        firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
-        sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+        firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][0];
+        //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
 
         while (newFactorIndex >= 1)
         {
-            lastFactorIndex++;
+            int lastFactorIndex = 0;
+            int summedSoFar = 1;
+            ModNum sumUpToLast = 1;
             newFactorIndex--;
             const auto diffFromPreviousLastFactor = factorsOfP[lastFactorIndex] - factorsOfP[lastFactorIndex - 1];
             //const auto diffToNextLastFactor = (lastFactorIndex == factorsOfP.size() - 1) ? 1 : factorsOfP[lastFactorIndex + 1] - factorsOfP[lastFactorIndex];
             //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * diffFromPreviousLastFactor;
-            sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * (diffFromPreviousLastFactor - 0);
+            //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * (diffFromPreviousLastFactor - 0);
+            const auto needSumUpTo = P / factorsOfP[newFactorIndex];
+            while (lastFactorIndex + 1 < factorsOfP.size() && factorsOfP[lastFactorIndex + 1] < needSumUpTo)
+            {
+                assert(lastFactorIndex + 1 < factorsOfP.size());
+                lastFactorIndex++;
+                sumUpToLast += (factorsOfP[lastFactorIndex] - summedSoFar) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+                summedSoFar = factorsOfP[lastFactorIndex];
+            }
+            sumUpToLast += (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+            summedSoFar = needSumUpTo;
+
+#ifdef BRUTE_FORCE
+            ModNum debugSumUpToLast;
+            for (int k = 1; k <= needSumUpTo; k++)
+            {
+                debugSumUpToLast += firstNEndingOnP[i - 1][k];
+            }
+            cout << "sumUpToLast: " << sumUpToLast << " debugSumUpToLast: " << debugSumUpToLast << endl;
+#endif
             //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] + (diffFromPreviousLastFactor - 1) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex - 1];
 
             const auto diffUntilNextFactor = factorsOfP[newFactorIndex + 1] - factorsOfP[newFactorIndex];
             cout << "lastFactorIndex: " << lastFactorIndex << " newFactorIndex: " << newFactorIndex << " factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] : " << factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] << " diffUntilNextFactor: " << diffUntilNextFactor  << " diffFromPreviousLastFactor: " << diffFromPreviousLastFactor << " sumUpToLast: "<< sumUpToLast << endl;
             assert(factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] <= P);
-            assert(lastFactorIndex == factorsOfP.size() - 1 || factorsOfP[lastFactorIndex + 1] * factorsOfP[newFactorIndex] > P);
+            //assert(lastFactorIndex == factorsOfP.size() - 1 || factorsOfP[lastFactorIndex + 1] * factorsOfP[newFactorIndex] > P);
             //assert((factorsOfP[lastFactorIndex] + 1) * factorsOfP[newFactorIndex] > P);
 #if 0
             if (lastFactorIndex != factorsOfP.size() - 1)
