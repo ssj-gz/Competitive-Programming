@@ -270,6 +270,13 @@ ModNum solutionBruteForce(int N, int P)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        const int N = rand() % 100 + 1;
+        const int P = rand() % 100 + 1;
+        cout << N << " " << P << endl;
+        return 0;
+    }
     int N;
     cin >> N;
 
