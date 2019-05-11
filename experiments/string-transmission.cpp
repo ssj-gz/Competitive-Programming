@@ -70,7 +70,8 @@ uint64_t computeNumStringsWithUpToKChanges(int N, int K)
 {
     vector<vector<uint64_t>> numOfLengthWithChanges(N + 1, vector<uint64_t>(K + 1, 0));
     numOfLengthWithChanges[1][0] = 1;
-    numOfLengthWithChanges[1][1] = 1;
+    if (K > 0)
+        numOfLengthWithChanges[1][1] = 1;
     for (int i = 2; i <= N; i++)
     {
         for (int numChanges = 0; numChanges <= min(K, i); numChanges++)
@@ -92,7 +93,7 @@ uint64_t computeNumStringsWithUpToKChanges(int N, int K)
 uint64_t solveOptimised(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
-    uint64_t result = 0;
+    uint64_t nonPeriodicStringsMade = 0;
     vector<bool> isPrime(N + 1, true);
 
     isPrime[1] = false;
@@ -115,7 +116,67 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    return result;
+    for (const auto prime : primesUpToN)
+    {
+        if ((N % prime) != 0)
+            continue;
+
+        const auto blockSize = prime;
+        const auto numBlocks = N / blockSize;
+
+        vector<int64_t> nonPeriodicLastWithNumChanges(K + 1, 0);
+
+        for (int posInBlock = 0; posInBlock < blockSize; posInBlock++)
+        {
+            vector<int64_t> nextNonPeriodicLastWithNumChanges(K + 1, 0);
+            auto numChangesIfDontChange = 0;
+            auto numChangesIfChange = 1;
+
+            auto posInString = posInBlock + blockSize;
+            while (posInString < N)
+            {
+                cout << "posInString: " << posInString << " N: " << N << " posInBlock: " << posInBlock << endl;
+                if (binaryString[posInString] == binaryString[posInBlock])
+                {
+                    numChangesIfChange++;
+                }
+                else
+                {
+                    numChangesIfDontChange++;
+                }
+                posInString += blockSize;
+            }
+
+            cout << "blockSize: " << blockSize << " posInBlock: " << posInBlock << " numChangesIfChange: " << numChangesIfChange << " numChangesIfDontChange: " << numChangesIfDontChange << endl;
+            if (posInBlock == 0)
+            {
+                if (numChangesIfDontChange <= K)
+                    nextNonPeriodicLastWithNumChanges[numChangesIfDontChange] = 1;
+                if (numChangesIfChange <= K)
+                    nextNonPeriodicLastWithNumChanges[numChangesIfChange] = 1;
+            }
+            else
+            {
+                for (int numChanges = 0; numChanges <= K; numChanges++)
+                {
+                    if (numChanges - numChangesIfDontChange >= 0)
+                        nextNonPeriodicLastWithNumChanges[numChanges] = nonPeriodicLastWithNumChanges[numChanges - numChangesIfDontChange];
+                    if (numChanges - numChangesIfChange >= 0)
+                        nextNonPeriodicLastWithNumChanges[numChanges] = nonPeriodicLastWithNumChanges[numChanges - numChangesIfChange];
+                }
+            }
+            nonPeriodicLastWithNumChanges = nextNonPeriodicLastWithNumChanges;
+
+        }
+        for (int numChanges = 0; numChanges <= K; numChanges++)
+        {
+            nonPeriodicStringsMade += nonPeriodicLastWithNumChanges[numChanges];
+        }
+
+    }
+
+    cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " nonPeriodicStringsMade: " << nonPeriodicStringsMade << endl;
+    return totalStringsMadeWithChanges - nonPeriodicStringsMade;
 }
 
 int main(int argc, char* argv[])
