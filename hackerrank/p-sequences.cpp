@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) 2019-05-11.
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #define NDEBUG
