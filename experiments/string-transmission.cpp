@@ -18,7 +18,8 @@ int numChanges(const string& a, const string& b)
     return numChanges;
 
 }
-bool isPeriodic(const string& a)
+
+int period(const string& a)
 {
     for (int length = 1; length < a.size(); length++)
     {
@@ -34,9 +35,14 @@ bool isPeriodic(const string& a)
             startPos += length;
         }
         if (periodIsLength)
-            return true;
+            return length;
     }
-    return false;
+    return -1;
+}
+
+bool isPeriodic(const string& a)
+{
+    return period(a) != -1;
 }
 
 void blah(string& alteredStringSoFar, int nextIndex, int K, const string& originalString, uint64_t& numNonPeriodicFound, uint64_t& totalFound)
@@ -52,7 +58,7 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
             totalFound++;
             if (isPeriodic(alteredStringSoFar))
             {
-                cout << "Made periodic string " << alteredStringSoFar << " with " << numChanges(alteredStringSoFar, originalString) << " changes" << endl;
+                cout << "Made periodic string " << alteredStringSoFar << "(period " << period(alteredStringSoFar) << ") with " << numChanges(alteredStringSoFar, originalString) << " changes" << endl;
             }
         }
         return;
@@ -187,17 +193,22 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             }
 
         }
+        uint64_t periodicStringsMadeWithBlocksize = 0;
         for (int numChanges = 0; numChanges <= K; numChanges++)
         {
-            periodicStringsMade += periodicLastWithNumChanges[numChanges];
+            periodicStringsMadeWithBlocksize += periodicLastWithNumChanges[numChanges];
         }
-        cout << " periodicStringsMade: " << periodicStringsMade << endl;
+        cout << " periodicStringsMadeWithBlocksize: " << blockSize << " = "  << periodicStringsMadeWithBlocksize << endl;
+        periodicStringsMade += periodicStringsMadeWithBlocksize;
 
         if (blockSize == 1)
             numPeriodicWithBlocksizeOne = periodicStringsMade;
         else
             periodicStringsMade -= numPeriodicWithBlocksizeOne;
 
+        cout << " periodicStringsMade: " << periodicStringsMade << endl;
+
+        cout << "numPeriodicWithBlocksizeOne: " << numPeriodicWithBlocksizeOne << endl;
     }
 
     cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
@@ -212,7 +223,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 10 + 1;
+        const int N = rand() % 15 + 2;
         const int K = rand() % (N + 1);
 
         string binaryString;
