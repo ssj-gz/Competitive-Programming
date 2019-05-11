@@ -107,16 +107,14 @@ uint64_t computeNumStringsWithUpToKChanges(int N, int K)
 uint64_t solveOptimised(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
-    uint64_t periodicStringsMade = 0;
-    vector<bool> isPrime(N + 1, true);
+    vector<vector<int>> factorsOf(N + 1);
 
-    isPrime[1] = false;
-    for (int factor = 2; factor <= N; factor++)
+    for (int factor = 1; factor <= N; factor++)
     {
-        int mutiplied = 2 * factor;
+        int mutiplied = 1 * factor;
         while (mutiplied <= N)
         {
-            isPrime[mutiplied] = false;
+            factorsOf[mutiplied].push_back(factor);
             mutiplied += factor;
         }
     }
@@ -124,17 +122,28 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
     vector<int> blockSizes;
     for (int i = 1; i < N; i++)
     {
-        if ((N % i) == 0 && isPrime[N / i])
+        if ((N % i) == 0)
         {
             blockSizes.push_back(i);
         }
     }
 
-    cout << "blockSizes.size(): " << blockSizes.size() << endl;
-    if (std::find(blockSizes.begin(), blockSizes.end(), 1) == blockSizes.end())
-        blockSizes.insert(blockSizes.begin(), 1);
+    for (int i = 1; i <= N; i++)
+    {
+        cout << "Factors of " << i << ": " << endl;
+        for (const auto x : factorsOf[i])
+        {
+            cout  << " " << x << endl;
+        }
+    }
 
-    int numPeriodicWithBlocksizeOne = 0;
+    vector<uint64_t> periodicStringsMadeBy(N + 1);
+
+    //cout << "blockSizes.size(): " << blockSizes.size() << endl;
+    //if (std::find(blockSizes.begin(), blockSizes.end(), 1) == blockSizes.end())
+        //blockSizes.insert(blockSizes.begin(), 1);
+
+    //int numPeriodicWithBlocksizeOne = 0;
 
     for (const auto blockSize : blockSizes)
     {
@@ -199,18 +208,33 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             periodicStringsMadeWithBlocksize += periodicLastWithNumChanges[numChanges];
         }
         cout << " periodicStringsMadeWithBlocksize: " << blockSize << " = "  << periodicStringsMadeWithBlocksize << endl;
-        periodicStringsMade += periodicStringsMadeWithBlocksize;
+        //periodicStringsMade += periodicStringsMadeWithBlocksize;
 
-        if (blockSize == 1)
-            numPeriodicWithBlocksizeOne = periodicStringsMade;
-        else
-            periodicStringsMade -= numPeriodicWithBlocksizeOne;
+        //if (blockSize == 1)
+            ////numPeriodicWithBlocksizeOne = periodicStringsMade;
+        //else
+            //periodicStringsMade -= numPeriodicWithBlocksizeOne;
 
-        cout << " periodicStringsMade: " << periodicStringsMade << endl;
+        //cout << " periodicStringsMade: " << periodicStringsMade << endl;
 
-        cout << "numPeriodicWithBlocksizeOne: " << numPeriodicWithBlocksizeOne << endl;
+        //cout << "numPeriodicWithBlocksizeOne: " << numPeriodicWithBlocksizeOne << endl;
+
+        periodicStringsMadeBy[blockSize] = periodicStringsMadeWithBlocksize;
     }
 
+    uint64_t periodicStringsMade = 0;
+    for (const auto blockSize : blockSizes)
+    {
+        periodicStringsMade += periodicStringsMadeBy[blockSize];
+        for (const auto factorOfBlockSize : factorsOf[blockSize])
+        {
+            if (factorOfBlockSize != blockSize)
+            {
+                periodicStringsMade -= periodicStringsMadeBy[factorOfBlockSize];
+                cout << "subtracted  " << periodicStringsMadeBy[factorOfBlockSize] << " from periodicStringsMade" << endl;
+            }
+        }
+    }
     cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
     return totalStringsMadeWithChanges - periodicStringsMade;
 }
