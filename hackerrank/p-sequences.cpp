@@ -68,6 +68,7 @@ bool operator==(const ModNum& lhs, const ModNum& rhs)
 
 ModNum calcNumPSequences(int N, int P)
 {
+    // Compute divisionChangesOfP.
     vector<int> divisionChangesOfP;
     for (int i = 1; i <= sqrt(P); i++)
     {
@@ -79,9 +80,11 @@ ModNum calcNumPSequences(int N, int P)
     }
     divisionChangesOfP.erase(std::unique(divisionChangesOfP.begin(), divisionChangesOfP.end()), divisionChangesOfP.end());
     assert(std::is_sorted(divisionChangesOfP.begin(), divisionChangesOfP.end()));
+
     vector<ModNum> firstNEndingOnFactorIndex(divisionChangesOfP.size() + 1, 0);
     for (int i = 0; i < divisionChangesOfP.size(); i++)
     {
+        // One P-Sequence of length 1.
         firstNEndingOnFactorIndex[i] = 1;
     }
     for (int i = 1; i < N; i++)
