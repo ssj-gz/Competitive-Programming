@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) 2019-05-11.
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -106,7 +107,7 @@ ModNum solutionOptimised(int N, int P)
     assert(std::is_sorted(factorsOfP.begin(), factorsOfP.end()));
     for (const auto x : factorsOfP)
     {
-        cout << " factor of P: " << x << endl;
+        //cout << " factor of P: " << x << endl;
     }
     vector<ModNum> firstNEndingOnFactorIndex(factorsOfP.size() + 1, 0);
     for (int i = 0; i < factorsOfP.size(); i++)
@@ -116,7 +117,7 @@ ModNum solutionOptimised(int N, int P)
     for (int i = 1; i < N; i++)
     {
         vector<ModNum> nextEndingOnFactorIndex(factorsOfP.size() + 1, 0);
-        cout << "i: " << i << endl;
+        //cout << "i: " << i << endl;
         int lastFactorIndex = 0;
         ModNum sumUpToLast = firstNEndingOnFactorIndex[lastFactorIndex];
         int summedSoFar = factorsOfP[lastFactorIndex];
@@ -126,7 +127,7 @@ ModNum solutionOptimised(int N, int P)
 
         while (newFactorIndex >= 1)
         {
-            cout << " blah: newFactorIndex: " << newFactorIndex << endl;
+            //cout << " blah: newFactorIndex: " << newFactorIndex << endl;
             //int lastFactorIndex = 0;
             //ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][0];
             newFactorIndex--;
@@ -141,12 +142,12 @@ ModNum solutionOptimised(int N, int P)
                 lastFactorIndex++;
                 const auto globble = (factorsOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[lastFactorIndex - 1]
                      + firstNEndingOnFactorIndex[lastFactorIndex];
-                cout << " in loop: adding " << globble << " to sumUpToLast" << endl; 
+                //cout << " in loop: adding " << globble << " to sumUpToLast" << endl; 
                 sumUpToLast += globble;
                 summedSoFar = factorsOfP[lastFactorIndex];
             }
             const auto globble = (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[lastFactorIndex];
-            cout << " after loop: adding " << globble << " to sumUpToLast.  " << " needSumUpTo: " << needSumUpTo << " lastFactorIndex: " << lastFactorIndex << " firstNEndingOnFactorIndex[i - 1][lastFactorIndex]: " << firstNEndingOnFactorIndex[lastFactorIndex] << endl;
+            //cout << " after loop: adding " << globble << " to sumUpToLast.  " << " needSumUpTo: " << needSumUpTo << " lastFactorIndex: " << lastFactorIndex << " firstNEndingOnFactorIndex[i - 1][lastFactorIndex]: " << firstNEndingOnFactorIndex[lastFactorIndex] << endl;
             sumUpToLast += globble;
             summedSoFar = needSumUpTo;
 
@@ -163,7 +164,7 @@ ModNum solutionOptimised(int N, int P)
             //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] + (diffFromPreviousLastFactor - 1) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex - 1];
 
             const auto diffUntilNextFactor = factorsOfP[newFactorIndex + 1] - factorsOfP[newFactorIndex];
-            cout << "lastFactorIndex: " << lastFactorIndex << " newFactorIndex: " << newFactorIndex << " factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] : " << factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] << " diffUntilNextFactor: " << diffUntilNextFactor  << " diffFromPreviousLastFactor: " << diffFromPreviousLastFactor << " sumUpToLast: "<< sumUpToLast << endl;
+            //cout << "lastFactorIndex: " << lastFactorIndex << " newFactorIndex: " << newFactorIndex << " factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] : " << factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] << " diffUntilNextFactor: " << diffUntilNextFactor  << " diffFromPreviousLastFactor: " << diffFromPreviousLastFactor << " sumUpToLast: "<< sumUpToLast << endl;
             assert(factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] <= P);
             //assert(lastFactorIndex == factorsOfP.size() - 1 || factorsOfP[lastFactorIndex + 1] * factorsOfP[newFactorIndex] > P);
             //assert((factorsOfP[lastFactorIndex] + 1) * factorsOfP[newFactorIndex] > P);
@@ -197,7 +198,7 @@ ModNum solutionOptimised(int N, int P)
     ModNum result = 0;
     for (int r = 0; r < factorsOfP.size(); r++)
     {
-        cout << " calc result: firstNEndingOnFactorIndex[N - 1][r] : " << firstNEndingOnFactorIndex[r]  << endl;
+        //cout << " calc result: firstNEndingOnFactorIndex[N - 1][r] : " << firstNEndingOnFactorIndex[r]  << endl;
         if (r + 1 < factorsOfP.size())
         {
             result += firstNEndingOnFactorIndex[r] * (factorsOfP[r + 1] - factorsOfP[r]);
@@ -308,9 +309,12 @@ int main(int argc, char* argv[])
 #endif
 
     const auto optimisedResult = solutionOptimised(N, P);
-    cout << "optimisedResult: " << optimisedResult << endl;
 
 #ifdef BRUTE_FORCE
+    cout << "optimisedResult: " << optimisedResult << endl;
     assert(optimisedResult == bruteForceResult);
+#else
+    cout << optimisedResult << endl;
 #endif
+
 }
