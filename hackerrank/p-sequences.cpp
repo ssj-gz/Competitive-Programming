@@ -87,12 +87,14 @@ ModNum calcNumPSequences(int N, int P)
     for (int i = 1; i < N; i++)
     {
         int divChangeIndex = divisionChangesOfP.size();
+        int inverseChangeIndex = 0;
 
         vector<ModNum> nextFirstNEndingOnFactorIndex(divisionChangesOfP.size() + 1, 0);
-        int inverseChangeIndex = 0;
+        nextFirstNEndingOnFactorIndex[divChangeIndex] = firstNEndingOnFactorIndex[inverseChangeIndex];
+        // Machinery for incrementally computing the sum of the number of P-Sequences for previous
+        // (i-1) case, up to numOfPSequencesNeededInSum.
         ModNum sumOfPreviousPSequences = firstNEndingOnFactorIndex[inverseChangeIndex];
         int numPSequencesSummed = divisionChangesOfP[inverseChangeIndex];
-        nextFirstNEndingOnFactorIndex[divChangeIndex] = firstNEndingOnFactorIndex[0];
 
         while (divChangeIndex >= 1)
         {
@@ -102,14 +104,19 @@ ModNum calcNumPSequences(int N, int P)
             {
                 assert(inverseChangeIndex + 1 < divisionChangesOfP.size());
                 inverseChangeIndex++;
-                const auto globble = (divisionChangesOfP[inverseChangeIndex] - numPSequencesSummed - 1) * firstNEndingOnFactorIndex[inverseChangeIndex - 1]
-                     + firstNEndingOnFactorIndex[inverseChangeIndex];
-                sumOfPreviousPSequences += globble;
+                sumOfPreviousPSequences += 
+                    // The remainder of divisionChangesOfP[inverseChangeIndex - 1], using the fact that the number of P-sequences ending with X 
+                    // is the same for X between two consecutive divisionChangesOfP ...
+                    (divisionChangesOfP[inverseChangeIndex] - numPSequencesSummed - 1) * firstNEndingOnFactorIndex[inverseChangeIndex - 1]
+                    // ... plus the new divisionChangesOfP[inverseChangeIndex].
+                    + firstNEndingOnFactorIndex[inverseChangeIndex];
                 numPSequencesSummed = divisionChangesOfP[inverseChangeIndex];
             }
-            const auto globble = (numOfPSequencesNeededInSum - divisionChangesOfP[inverseChangeIndex]) * firstNEndingOnFactorIndex[inverseChangeIndex];
-            sumOfPreviousPSequences += globble;
+            // Add the remaining divisionChangesOfP[inverseChangeIndex].
+            sumOfPreviousPSequences += (numOfPSequencesNeededInSum - divisionChangesOfP[inverseChangeIndex]) * firstNEndingOnFactorIndex[inverseChangeIndex];
             numPSequencesSummed = numOfPSequencesNeededInSum;
+            // At this point, sumOfPreviousPSequences is the sum of previous P-Sequences, of length one less than we are calculating (i.e. i-1), whose last element
+            // is between 1 and numOfPSequencesNeededInSum.
 
             assert(divisionChangesOfP[inverseChangeIndex] * divisionChangesOfP[divChangeIndex] <= P);
             nextFirstNEndingOnFactorIndex[divChangeIndex] = sumOfPreviousPSequences;
@@ -117,15 +124,15 @@ ModNum calcNumPSequences(int N, int P)
         firstNEndingOnFactorIndex = nextFirstNEndingOnFactorIndex;
     }
 
+    // Unpack the results, again using the fact that the number of P-sequences ending with X is the same for X between two consecutive divisionChangesOfP.
     ModNum result = 0;
-    for (int r = 0; r < divisionChangesOfP.size(); r++)
+    for (int r = 0; r < divisionChangesOfP.size() - 1; r++)
     {
-        if (r + 1 < divisionChangesOfP.size())
-        {
-            result += firstNEndingOnFactorIndex[r] * (divisionChangesOfP[r + 1] - divisionChangesOfP[r]);
-        }
+        result += firstNEndingOnFactorIndex[r] * (divisionChangesOfP[r + 1] - divisionChangesOfP[r]);
     }
-    result += firstNEndingOnFactorIndex[divisionChangesOfP.size() - 1] * (P - divisionChangesOfP.back() + 1);
+    // Scoop up the remainder (from the last divisionChangesOfP up to P).
+    const auto numRemainingUpToP = (P - divisionChangesOfP.back() + 1);
+    result += firstNEndingOnFactorIndex[divisionChangesOfP.size() - 1]  * numRemainingUpToP;
 
     return result;
 }
