@@ -10,6 +10,8 @@
 #include <cassert>
 #include <cmath>
 
+#include <sys/time.h>
+
 using namespace std;
 
 
@@ -83,7 +85,6 @@ ModNum solutionOptimised(int N, int P)
         }
     }
 #endif
-    ModNum result = 0;
 
     vector<int> factorsOfP;
     for (int i = 1; i <= sqrt(P); i++)
@@ -100,6 +101,7 @@ ModNum solutionOptimised(int N, int P)
             factorsOfP.push_back(P / i + 1);
         }
     }
+    //factorsOfP.push_back(P + 1);
     factorsOfP.erase(std::unique(factorsOfP.begin(), factorsOfP.end()), factorsOfP.end());
     assert(std::is_sorted(factorsOfP.begin(), factorsOfP.end()));
     for (const auto x : factorsOfP)
@@ -117,12 +119,13 @@ ModNum solutionOptimised(int N, int P)
         int lastFactorIndex = 0;
         ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
         int summedSoFar = factorsOfP[lastFactorIndex];
-        int newFactorIndex = factorsOfP.size() - 1;
+        int newFactorIndex = factorsOfP.size();
         firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][0];
         //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
 
         while (newFactorIndex >= 1)
         {
+            cout << " blah: newFactorIndex: " << newFactorIndex << endl;
             //int lastFactorIndex = 0;
             //ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][0];
             newFactorIndex--;
@@ -187,10 +190,17 @@ ModNum solutionOptimised(int N, int P)
         }
     }
 
+    ModNum result = 0;
     for (int r = 0; r < factorsOfP.size(); r++)
     {
-        result += firstNEndingOnFactorIndex[N - 1][r];
+        cout << " calc result: firstNEndingOnFactorIndex[N - 1][r] : " << firstNEndingOnFactorIndex[N - 1][r]  << endl;
+        if (r + 1 < factorsOfP.size())
+        {
+            result += firstNEndingOnFactorIndex[N - 1][r] * (factorsOfP[r + 1] - factorsOfP[r]);
+            //result += firstNEndingOnFactorIndex[N - 1][r + 1];
+        }
     }
+    result += firstNEndingOnFactorIndex[N - 1][factorsOfP.size() - 1] * (P - factorsOfP.back() + 1);
 
     return result;
 }
@@ -260,7 +270,7 @@ ModNum solutionBruteForce(int N, int P)
         }
     }
 
-    for (int r = 0; r <= P; r++)
+    for (int r = 1; r <= P; r++)
     {
         result += firstNEndingOnP[N - 1][r];
     }
@@ -272,6 +282,11 @@ int main(int argc, char* argv[])
 {
     if (argc == 2)
     {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+
         const int N = rand() % 100 + 1;
         const int P = rand() % 100 + 1;
         cout << N << " " << P << endl;
@@ -289,4 +304,5 @@ int main(int argc, char* argv[])
     const auto optimisedResult = solutionOptimised(N, P);
     cout << "optimisedResult: " << optimisedResult << endl;
 
+    assert(optimisedResult == bruteForceResult);
 }
