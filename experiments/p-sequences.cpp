@@ -108,19 +108,20 @@ ModNum solutionOptimised(int N, int P)
     {
         cout << " factor of P: " << x << endl;
     }
-    vector<vector<ModNum>> firstNEndingOnFactorIndex(N, vector<ModNum>(factorsOfP.size() + 1, 0));
+    vector<ModNum> firstNEndingOnFactorIndex(factorsOfP.size() + 1, 0);
     for (int i = 0; i < factorsOfP.size(); i++)
     {
-        firstNEndingOnFactorIndex[0][i] = 1;
+        firstNEndingOnFactorIndex[i] = 1;
     }
     for (int i = 1; i < N; i++)
     {
+        vector<ModNum> nextEndingOnFactorIndex(factorsOfP.size() + 1, 0);
         cout << "i: " << i << endl;
         int lastFactorIndex = 0;
-        ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+        ModNum sumUpToLast = firstNEndingOnFactorIndex[lastFactorIndex];
         int summedSoFar = factorsOfP[lastFactorIndex];
         int newFactorIndex = factorsOfP.size();
-        firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][0];
+        nextEndingOnFactorIndex[newFactorIndex] = firstNEndingOnFactorIndex[0];
         //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
 
         while (newFactorIndex >= 1)
@@ -138,14 +139,14 @@ ModNum solutionOptimised(int N, int P)
             {
                 assert(lastFactorIndex + 1 < factorsOfP.size());
                 lastFactorIndex++;
-                const auto globble = (factorsOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex - 1]
-                     + firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+                const auto globble = (factorsOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[lastFactorIndex - 1]
+                     + firstNEndingOnFactorIndex[lastFactorIndex];
                 cout << " in loop: adding " << globble << " to sumUpToLast" << endl; 
                 sumUpToLast += globble;
                 summedSoFar = factorsOfP[lastFactorIndex];
             }
-            const auto globble = (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
-            cout << " after loop: adding " << globble << " to sumUpToLast.  " << " needSumUpTo: " << needSumUpTo << " lastFactorIndex: " << lastFactorIndex << " firstNEndingOnFactorIndex[i - 1][lastFactorIndex]: " << firstNEndingOnFactorIndex[i - 1][lastFactorIndex] << endl;
+            const auto globble = (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[lastFactorIndex];
+            cout << " after loop: adding " << globble << " to sumUpToLast.  " << " needSumUpTo: " << needSumUpTo << " lastFactorIndex: " << lastFactorIndex << " firstNEndingOnFactorIndex[i - 1][lastFactorIndex]: " << firstNEndingOnFactorIndex[lastFactorIndex] << endl;
             sumUpToLast += globble;
             summedSoFar = needSumUpTo;
 
@@ -183,24 +184,25 @@ ModNum solutionOptimised(int N, int P)
 
 
             //firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * diffUntilNextFactor;
-            firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * 1;
-            cout << "firstNEndingOnFactorIndex[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnFactorIndex[i][newFactorIndex] << endl;
+            nextEndingOnFactorIndex[newFactorIndex] = sumUpToLast * 1;
+            cout << "firstNEndingOnFactorIndex[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << nextEndingOnFactorIndex[newFactorIndex] << endl;
             cout << "firstNEndingOnP[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnP[i][factorsOfP[newFactorIndex]] << endl;
-            assert(firstNEndingOnFactorIndex[i][newFactorIndex] == firstNEndingOnP[i][factorsOfP[newFactorIndex]]);
+            assert(nextEndingOnFactorIndex[newFactorIndex] == firstNEndingOnP[i][factorsOfP[newFactorIndex]]);
         }
+        firstNEndingOnFactorIndex = nextEndingOnFactorIndex;
     }
 
     ModNum result = 0;
     for (int r = 0; r < factorsOfP.size(); r++)
     {
-        cout << " calc result: firstNEndingOnFactorIndex[N - 1][r] : " << firstNEndingOnFactorIndex[N - 1][r]  << endl;
+        cout << " calc result: firstNEndingOnFactorIndex[N - 1][r] : " << firstNEndingOnFactorIndex[r]  << endl;
         if (r + 1 < factorsOfP.size())
         {
-            result += firstNEndingOnFactorIndex[N - 1][r] * (factorsOfP[r + 1] - factorsOfP[r]);
+            result += firstNEndingOnFactorIndex[r] * (factorsOfP[r + 1] - factorsOfP[r]);
             //result += firstNEndingOnFactorIndex[N - 1][r + 1];
         }
     }
-    result += firstNEndingOnFactorIndex[N - 1][factorsOfP.size() - 1] * (P - factorsOfP.back() + 1);
+    result += firstNEndingOnFactorIndex[factorsOfP.size() - 1] * (P - factorsOfP.back() + 1);
 
     return result;
 }
