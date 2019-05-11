@@ -114,17 +114,17 @@ ModNum solutionOptimised(int N, int P)
     for (int i = 1; i < N; i++)
     {
         cout << "i: " << i << endl;
-        //ModNum sumUpToLast = 0;
-        //int lastFactorIndex = 0;
+        int lastFactorIndex = 0;
+        ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+        int summedSoFar = factorsOfP[lastFactorIndex];
         int newFactorIndex = factorsOfP.size() - 1;
         firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][0];
         //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
 
         while (newFactorIndex >= 1)
         {
-            int lastFactorIndex = 0;
-            int summedSoFar = factorsOfP[lastFactorIndex];
-            ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][0];
+            //int lastFactorIndex = 0;
+            //ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][0];
             newFactorIndex--;
             const auto diffFromPreviousLastFactor = factorsOfP[lastFactorIndex] - factorsOfP[lastFactorIndex - 1];
             //const auto diffToNextLastFactor = (lastFactorIndex == factorsOfP.size() - 1) ? 1 : factorsOfP[lastFactorIndex + 1] - factorsOfP[lastFactorIndex];
