@@ -66,7 +66,7 @@ bool operator==(const ModNum& lhs, const ModNum& rhs)
 }
 
 
-ModNum solutionOptimised(int N, int P)
+ModNum calcNumPSequences(int N, int P)
 {
     vector<int> factorsOfP;
     for (int i = 1; i <= sqrt(P); i++)
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     cout << "bruteForceResult: " << bruteForceResult << endl;
 #endif
 
-    const auto optimisedResult = solutionOptimised(N, P);
+    const auto optimisedResult = calcNumPSequences(N, P);
 
 #ifdef BRUTE_FORCE
     cout << "optimisedResult: " << optimisedResult << endl;
