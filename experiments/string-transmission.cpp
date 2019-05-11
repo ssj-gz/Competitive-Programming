@@ -2,6 +2,8 @@
 #include <vector>
 #include <cassert>
 
+#include <sys/time.h>
+
 using namespace std;
 
 int numChanges(const string& a, const string& b)
@@ -185,6 +187,27 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int N = rand() % 10 + 1;
+        const int K = rand() % (N + 1);
+
+        string binaryString;
+        for (int i = 0; i < N; i++)
+        {
+            binaryString += '0' + (rand() % 2);
+        }
+        cout << 1 << endl;
+        cout << N << " " << K << endl;
+        cout << binaryString << endl;
+
+        return 0;
+
+    }
     cout << "flipple: " << isPeriodic("011010011") << endl;
     int T;
     cin >> T;
