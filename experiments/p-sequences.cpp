@@ -114,7 +114,7 @@ ModNum solutionOptimised(int N, int P)
     for (int i = 1; i < N; i++)
     {
         cout << "i: " << i << endl;
-        ModNum sumUpToLast = 0;
+        //ModNum sumUpToLast = 0;
         //int lastFactorIndex = 0;
         int newFactorIndex = factorsOfP.size() - 1;
         firstNEndingOnFactorIndex[i][newFactorIndex] = firstNEndingOnFactorIndex[i - 1][0];
@@ -123,28 +123,34 @@ ModNum solutionOptimised(int N, int P)
         while (newFactorIndex >= 1)
         {
             int lastFactorIndex = 0;
-            int summedSoFar = 1;
-            ModNum sumUpToLast = 1;
+            int summedSoFar = factorsOfP[lastFactorIndex];
+            ModNum sumUpToLast = firstNEndingOnFactorIndex[i - 1][0];
             newFactorIndex--;
             const auto diffFromPreviousLastFactor = factorsOfP[lastFactorIndex] - factorsOfP[lastFactorIndex - 1];
             //const auto diffToNextLastFactor = (lastFactorIndex == factorsOfP.size() - 1) ? 1 : factorsOfP[lastFactorIndex + 1] - factorsOfP[lastFactorIndex];
             //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * diffFromPreviousLastFactor;
             //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] * (diffFromPreviousLastFactor - 0);
             const auto needSumUpTo = P / factorsOfP[newFactorIndex];
-            while (lastFactorIndex + 1 < factorsOfP.size() && factorsOfP[lastFactorIndex + 1] < needSumUpTo)
+            while (lastFactorIndex + 1 < factorsOfP.size() && factorsOfP[lastFactorIndex + 1] <= needSumUpTo)
             {
                 assert(lastFactorIndex + 1 < factorsOfP.size());
                 lastFactorIndex++;
-                sumUpToLast += (factorsOfP[lastFactorIndex] - summedSoFar) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+                const auto globble = (factorsOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex - 1]
+                     + firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+                cout << " in loop: adding " << globble << " to sumUpToLast" << endl; 
+                sumUpToLast += globble;
                 summedSoFar = factorsOfP[lastFactorIndex];
             }
-            sumUpToLast += (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+            const auto globble = (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex];
+            cout << " after loop: adding " << globble << " to sumUpToLast.  " << " needSumUpTo: " << needSumUpTo << " lastFactorIndex: " << lastFactorIndex << " firstNEndingOnFactorIndex[i - 1][lastFactorIndex]: " << firstNEndingOnFactorIndex[i - 1][lastFactorIndex] << endl;
+            sumUpToLast += globble;
             summedSoFar = needSumUpTo;
 
 #ifdef BRUTE_FORCE
             ModNum debugSumUpToLast;
             for (int k = 1; k <= needSumUpTo; k++)
             {
+                cout << "Adding " << firstNEndingOnP[i - 1][k] << " to debugSumUpToLast" << endl;
                 debugSumUpToLast += firstNEndingOnP[i - 1][k];
             }
             cout << "sumUpToLast: " << sumUpToLast << " debugSumUpToLast: " << debugSumUpToLast << endl;
