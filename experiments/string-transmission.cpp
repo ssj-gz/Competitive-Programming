@@ -48,7 +48,13 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
             numNonPeriodicFound++;
         }
         if (numChanges(alteredStringSoFar, originalString) <= K)
+        {
             totalFound++;
+            if (isPeriodic(alteredStringSoFar))
+            {
+                cout << "Made periodic string " << alteredStringSoFar << " with " << numChanges(alteredStringSoFar, originalString) << " changes" << endl;
+            }
+        }
         return;
     }
     blah(alteredStringSoFar, nextIndex + 1, K, originalString, numNonPeriodicFound, totalFound);
@@ -109,17 +115,18 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    vector<int> primesUpToN;
+    vector<int> blockSizes;
     for (int i = 1; i < N; i++)
     {
-        if (isPrime[i])
+        if (isPrime[i] && (N % i) == 0)
         {
-            primesUpToN.push_back(i);
+            blockSizes.push_back(i);
         }
     }
 
-    vector<int> blockSizes(primesUpToN);
-    blockSizes.insert(blockSizes.begin(), 1);
+    cout << "blockSizes.size(): " << blockSizes.size() << endl;
+    if (blockSizes.empty())
+        blockSizes.insert(blockSizes.begin(), 1);
 
     for (const auto blockSize : blockSizes)
     {
@@ -156,21 +163,26 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             if (posInBlock == 0)
             {
                 if (numChangesIfDontChange <= K)
-                    nextPeriodicLastWithNumChanges[numChangesIfDontChange] = 1;
+                    nextPeriodicLastWithNumChanges[numChangesIfDontChange]++;
                 if (numChangesIfChange <= K)
-                    nextPeriodicLastWithNumChanges[numChangesIfChange] = 1;
+                    nextPeriodicLastWithNumChanges[numChangesIfChange]++;
             }
             else
             {
                 for (int numChanges = 0; numChanges <= K; numChanges++)
                 {
                     if (numChanges - numChangesIfDontChange >= 0)
-                        nextPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
+                        nextPeriodicLastWithNumChanges[numChanges] += periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
                     if (numChanges - numChangesIfChange >= 0)
-                        nextPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfChange];
+                        nextPeriodicLastWithNumChanges[numChanges] += periodicLastWithNumChanges[numChanges - numChangesIfChange];
                 }
             }
             periodicLastWithNumChanges = nextPeriodicLastWithNumChanges;
+            cout << " after posInBlock: " << posInBlock << " periodicLastWithNumChanges: " << endl;
+            for (int numChanges = 0; numChanges <= K; numChanges++)
+            {
+                cout << " periodicLastWithNumChanges[" << numChanges << " ]: " << periodicLastWithNumChanges[numChanges] << endl;
+            }
 
         }
         for (int numChanges = 0; numChanges <= K; numChanges++)
@@ -214,6 +226,7 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
+        cout << "t: " << t << endl;
         int N;
         cin >> N;
         int K;
