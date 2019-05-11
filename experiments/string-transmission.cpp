@@ -93,6 +93,28 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
     uint64_t result = 0;
+    vector<bool> isPrime(N + 1, true);
+
+    isPrime[1] = false;
+    for (int factor = 2; factor <= N; factor++)
+    {
+        int mutiplied = 2 * factor;
+        while (mutiplied <= N)
+        {
+            isPrime[mutiplied] = false;
+            mutiplied += factor;
+        }
+    }
+
+    vector<int> primesUpToN;
+    for (int i = 1; i <= N; i++)
+    {
+        if (isPrime[i])
+        {
+            primesUpToN.push_back(i);
+        }
+    }
+
     return result;
 }
 
