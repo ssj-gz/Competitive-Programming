@@ -93,7 +93,7 @@ uint64_t computeNumStringsWithUpToKChanges(int N, int K)
 uint64_t solveOptimised(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
-    uint64_t nonPeriodicStringsMade = 0;
+    uint64_t periodicStringsMade = 0;
     vector<bool> isPrime(N + 1, true);
 
     isPrime[1] = false;
@@ -116,15 +116,18 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    for (const auto prime : primesUpToN)
+    vector<int> blockSizes(primesUpToN);
+    blockSizes.insert(blockSizes.begin(), 1);
+
+    for (const auto blockSize : blockSizes)
     {
-        if ((N % prime) != 0)
+        if ((N % blockSize) != 0)
             continue;
 
-        const auto blockSize = prime;
+        cout << "blockSize: " << blockSize << endl;
         const auto numBlocks = N / blockSize;
 
-        vector<int64_t> nonPeriodicLastWithNumChanges(K + 1, 0);
+        vector<int64_t> periodicLastWithNumChanges(K + 1, 0);
 
         for (int posInBlock = 0; posInBlock < blockSize; posInBlock++)
         {
@@ -160,23 +163,23 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
                 for (int numChanges = 0; numChanges <= K; numChanges++)
                 {
                     if (numChanges - numChangesIfDontChange >= 0)
-                        nextNonPeriodicLastWithNumChanges[numChanges] = nonPeriodicLastWithNumChanges[numChanges - numChangesIfDontChange];
+                        nextNonPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
                     if (numChanges - numChangesIfChange >= 0)
-                        nextNonPeriodicLastWithNumChanges[numChanges] = nonPeriodicLastWithNumChanges[numChanges - numChangesIfChange];
+                        nextNonPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfChange];
                 }
             }
-            nonPeriodicLastWithNumChanges = nextNonPeriodicLastWithNumChanges;
+            periodicLastWithNumChanges = nextNonPeriodicLastWithNumChanges;
 
         }
         for (int numChanges = 0; numChanges <= K; numChanges++)
         {
-            nonPeriodicStringsMade += nonPeriodicLastWithNumChanges[numChanges];
+            periodicStringsMade += periodicLastWithNumChanges[numChanges];
         }
 
     }
 
-    cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " nonPeriodicStringsMade: " << nonPeriodicStringsMade << endl;
-    return totalStringsMadeWithChanges - nonPeriodicStringsMade;
+    cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
+    return totalStringsMadeWithChanges - periodicStringsMade;
 }
 
 int main(int argc, char* argv[])
@@ -195,10 +198,12 @@ int main(int argc, char* argv[])
         cin >> binaryString;
 
         const auto solutionBruteForce = solveBruteForce(binaryString, N, K);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
 
         const auto solutionOptimised = solveOptimised(binaryString, N, K);
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
         cout << "solutionOptimised: " << solutionOptimised << endl;
+        
+        assert(solutionOptimised == solutionBruteForce);
     }
 
 
