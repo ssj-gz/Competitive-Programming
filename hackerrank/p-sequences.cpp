@@ -86,32 +86,33 @@ ModNum calcNumPSequences(int N, int P)
     }
     for (int i = 1; i < N; i++)
     {
+        int divChangeIndex = divisionChangesOfP.size();
+
         vector<ModNum> nextFirstNEndingOnFactorIndex(divisionChangesOfP.size() + 1, 0);
-        int lastFactorIndex = 0;
-        ModNum sumUpToLast = firstNEndingOnFactorIndex[lastFactorIndex];
-        int summedSoFar = divisionChangesOfP[lastFactorIndex];
-        int newFactorIndex = divisionChangesOfP.size();
-        nextFirstNEndingOnFactorIndex[newFactorIndex] = firstNEndingOnFactorIndex[0];
+        int inverseChangeIndex = 0;
+        ModNum sumOfPreviousPSequences = firstNEndingOnFactorIndex[inverseChangeIndex];
+        int numPSequencesSummed = divisionChangesOfP[inverseChangeIndex];
+        nextFirstNEndingOnFactorIndex[divChangeIndex] = firstNEndingOnFactorIndex[0];
 
-        while (newFactorIndex >= 1)
+        while (divChangeIndex >= 1)
         {
-            newFactorIndex--;
-            const auto needSumUpTo = P / divisionChangesOfP[newFactorIndex];
-            while (lastFactorIndex + 1 < divisionChangesOfP.size() && divisionChangesOfP[lastFactorIndex + 1] <= needSumUpTo)
+            divChangeIndex--;
+            const auto numOfPSequencesNeededInSum = P / divisionChangesOfP[divChangeIndex];
+            while (inverseChangeIndex + 1 < divisionChangesOfP.size() && divisionChangesOfP[inverseChangeIndex + 1] <= numOfPSequencesNeededInSum)
             {
-                assert(lastFactorIndex + 1 < divisionChangesOfP.size());
-                lastFactorIndex++;
-                const auto globble = (divisionChangesOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[lastFactorIndex - 1]
-                     + firstNEndingOnFactorIndex[lastFactorIndex];
-                sumUpToLast += globble;
-                summedSoFar = divisionChangesOfP[lastFactorIndex];
+                assert(inverseChangeIndex + 1 < divisionChangesOfP.size());
+                inverseChangeIndex++;
+                const auto globble = (divisionChangesOfP[inverseChangeIndex] - numPSequencesSummed - 1) * firstNEndingOnFactorIndex[inverseChangeIndex - 1]
+                     + firstNEndingOnFactorIndex[inverseChangeIndex];
+                sumOfPreviousPSequences += globble;
+                numPSequencesSummed = divisionChangesOfP[inverseChangeIndex];
             }
-            const auto globble = (needSumUpTo - divisionChangesOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[lastFactorIndex];
-            sumUpToLast += globble;
-            summedSoFar = needSumUpTo;
+            const auto globble = (numOfPSequencesNeededInSum - divisionChangesOfP[inverseChangeIndex]) * firstNEndingOnFactorIndex[inverseChangeIndex];
+            sumOfPreviousPSequences += globble;
+            numPSequencesSummed = numOfPSequencesNeededInSum;
 
-            assert(divisionChangesOfP[lastFactorIndex] * divisionChangesOfP[newFactorIndex] <= P);
-            nextFirstNEndingOnFactorIndex[newFactorIndex] = sumUpToLast;
+            assert(divisionChangesOfP[inverseChangeIndex] * divisionChangesOfP[divChangeIndex] <= P);
+            nextFirstNEndingOnFactorIndex[divChangeIndex] = sumOfPreviousPSequences;
         }
         firstNEndingOnFactorIndex = nextFirstNEndingOnFactorIndex;
     }
