@@ -118,15 +118,17 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
     vector<int> blockSizes;
     for (int i = 1; i < N; i++)
     {
-        if (isPrime[i] && (N % i) == 0)
+        if ((N % i) == 0 && isPrime[N / i])
         {
             blockSizes.push_back(i);
         }
     }
 
     cout << "blockSizes.size(): " << blockSizes.size() << endl;
-    if (blockSizes.empty())
+    if (std::find(blockSizes.begin(), blockSizes.end(), 1) == blockSizes.end())
         blockSizes.insert(blockSizes.begin(), 1);
+
+    int numPeriodicWithBlocksizeOne = 0;
 
     for (const auto blockSize : blockSizes)
     {
@@ -190,6 +192,11 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             periodicStringsMade += periodicLastWithNumChanges[numChanges];
         }
         cout << " periodicStringsMade: " << periodicStringsMade << endl;
+
+        if (blockSize == 1)
+            numPeriodicWithBlocksizeOne = periodicStringsMade;
+        else
+            periodicStringsMade -= numPeriodicWithBlocksizeOne;
 
     }
 
