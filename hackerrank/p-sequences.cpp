@@ -68,65 +68,64 @@ bool operator==(const ModNum& lhs, const ModNum& rhs)
 
 ModNum calcNumPSequences(int N, int P)
 {
-    vector<int> factorsOfP;
+    vector<int> divisionChangesOfP;
     for (int i = 1; i <= sqrt(P); i++)
     {
-        factorsOfP.push_back(i);
+        divisionChangesOfP.push_back(i);
     }
     for (int i = sqrt(P) + 1; i > 1; i--)
     {
-        factorsOfP.push_back(P / i + 1);
+        divisionChangesOfP.push_back(P / i + 1);
     }
-    factorsOfP.erase(std::unique(factorsOfP.begin(), factorsOfP.end()), factorsOfP.end());
-    assert(std::is_sorted(factorsOfP.begin(), factorsOfP.end()));
-    vector<ModNum> firstNEndingOnFactorIndex(factorsOfP.size() + 1, 0);
-    for (int i = 0; i < factorsOfP.size(); i++)
+    divisionChangesOfP.erase(std::unique(divisionChangesOfP.begin(), divisionChangesOfP.end()), divisionChangesOfP.end());
+    assert(std::is_sorted(divisionChangesOfP.begin(), divisionChangesOfP.end()));
+    vector<ModNum> firstNEndingOnFactorIndex(divisionChangesOfP.size() + 1, 0);
+    for (int i = 0; i < divisionChangesOfP.size(); i++)
     {
         firstNEndingOnFactorIndex[i] = 1;
     }
     for (int i = 1; i < N; i++)
     {
-        vector<ModNum> nextFirstNEndingOnFactorIndex(factorsOfP.size() + 1, 0);
+        vector<ModNum> nextFirstNEndingOnFactorIndex(divisionChangesOfP.size() + 1, 0);
         int lastFactorIndex = 0;
         ModNum sumUpToLast = firstNEndingOnFactorIndex[lastFactorIndex];
-        int summedSoFar = factorsOfP[lastFactorIndex];
-        int newFactorIndex = factorsOfP.size();
+        int summedSoFar = divisionChangesOfP[lastFactorIndex];
+        int newFactorIndex = divisionChangesOfP.size();
         nextFirstNEndingOnFactorIndex[newFactorIndex] = firstNEndingOnFactorIndex[0];
 
         while (newFactorIndex >= 1)
         {
             newFactorIndex--;
-            const auto diffFromPreviousLastFactor = factorsOfP[lastFactorIndex] - factorsOfP[lastFactorIndex - 1];
-            const auto needSumUpTo = P / factorsOfP[newFactorIndex];
-            while (lastFactorIndex + 1 < factorsOfP.size() && factorsOfP[lastFactorIndex + 1] <= needSumUpTo)
+            const auto needSumUpTo = P / divisionChangesOfP[newFactorIndex];
+            while (lastFactorIndex + 1 < divisionChangesOfP.size() && divisionChangesOfP[lastFactorIndex + 1] <= needSumUpTo)
             {
-                assert(lastFactorIndex + 1 < factorsOfP.size());
+                assert(lastFactorIndex + 1 < divisionChangesOfP.size());
                 lastFactorIndex++;
-                const auto globble = (factorsOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[lastFactorIndex - 1]
+                const auto globble = (divisionChangesOfP[lastFactorIndex] - summedSoFar - 1) * firstNEndingOnFactorIndex[lastFactorIndex - 1]
                      + firstNEndingOnFactorIndex[lastFactorIndex];
                 sumUpToLast += globble;
-                summedSoFar = factorsOfP[lastFactorIndex];
+                summedSoFar = divisionChangesOfP[lastFactorIndex];
             }
-            const auto globble = (needSumUpTo - factorsOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[lastFactorIndex];
+            const auto globble = (needSumUpTo - divisionChangesOfP[lastFactorIndex]) * firstNEndingOnFactorIndex[lastFactorIndex];
             sumUpToLast += globble;
             summedSoFar = needSumUpTo;
 
-            const auto diffUntilNextFactor = factorsOfP[newFactorIndex + 1] - factorsOfP[newFactorIndex];
-            assert(factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] <= P);
+            const auto diffUntilNextFactor = divisionChangesOfP[newFactorIndex + 1] - divisionChangesOfP[newFactorIndex];
+            assert(divisionChangesOfP[lastFactorIndex] * divisionChangesOfP[newFactorIndex] <= P);
             nextFirstNEndingOnFactorIndex[newFactorIndex] = sumUpToLast * 1;
         }
         firstNEndingOnFactorIndex = nextFirstNEndingOnFactorIndex;
     }
 
     ModNum result = 0;
-    for (int r = 0; r < factorsOfP.size(); r++)
+    for (int r = 0; r < divisionChangesOfP.size(); r++)
     {
-        if (r + 1 < factorsOfP.size())
+        if (r + 1 < divisionChangesOfP.size())
         {
-            result += firstNEndingOnFactorIndex[r] * (factorsOfP[r + 1] - factorsOfP[r]);
+            result += firstNEndingOnFactorIndex[r] * (divisionChangesOfP[r + 1] - divisionChangesOfP[r]);
         }
     }
-    result += firstNEndingOnFactorIndex[factorsOfP.size() - 1] * (P - factorsOfP.back() + 1);
+    result += firstNEndingOnFactorIndex[divisionChangesOfP.size() - 1] * (P - divisionChangesOfP.back() + 1);
 
     return result;
 }
