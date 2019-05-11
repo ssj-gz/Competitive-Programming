@@ -57,6 +57,12 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
+
 ModNum solutionOptimised(int N, int P)
 {
 #ifdef BRUTE_FORCE
@@ -142,6 +148,7 @@ ModNum solutionOptimised(int N, int P)
                 debugSumUpToLast += firstNEndingOnP[i - 1][k];
             }
             cout << "sumUpToLast: " << sumUpToLast << " debugSumUpToLast: " << debugSumUpToLast << endl;
+            assert(sumUpToLast == debugSumUpToLast);
 #endif
             //sumUpToLast += firstNEndingOnFactorIndex[i - 1][lastFactorIndex] + (diffFromPreviousLastFactor - 1) * firstNEndingOnFactorIndex[i - 1][lastFactorIndex - 1];
 
@@ -168,7 +175,9 @@ ModNum solutionOptimised(int N, int P)
 
             //firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * diffUntilNextFactor;
             firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * 1;
-            cout << "firstNEndingOnP[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnFactorIndex[i][newFactorIndex] << endl;
+            cout << "firstNEndingOnFactorIndex[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnFactorIndex[i][newFactorIndex] << endl;
+            cout << "firstNEndingOnP[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnP[i][factorsOfP[newFactorIndex]] << endl;
+            assert(firstNEndingOnFactorIndex[i][newFactorIndex] == firstNEndingOnP[i][factorsOfP[newFactorIndex]]);
         }
     }
 
