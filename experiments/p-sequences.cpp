@@ -86,12 +86,12 @@ ModNum solutionOptimised(int N, int P)
     }
     for (int i = 1; i < N; i++)
     {
-        vector<ModNum> nextEndingOnFactorIndex(factorsOfP.size() + 1, 0);
+        vector<ModNum> nextFirstNEndingOnFactorIndex(factorsOfP.size() + 1, 0);
         int lastFactorIndex = 0;
         ModNum sumUpToLast = firstNEndingOnFactorIndex[lastFactorIndex];
         int summedSoFar = factorsOfP[lastFactorIndex];
         int newFactorIndex = factorsOfP.size();
-        nextEndingOnFactorIndex[newFactorIndex] = firstNEndingOnFactorIndex[0];
+        nextFirstNEndingOnFactorIndex[newFactorIndex] = firstNEndingOnFactorIndex[0];
 
         while (newFactorIndex >= 1)
         {
@@ -113,9 +113,9 @@ ModNum solutionOptimised(int N, int P)
 
             const auto diffUntilNextFactor = factorsOfP[newFactorIndex + 1] - factorsOfP[newFactorIndex];
             assert(factorsOfP[lastFactorIndex] * factorsOfP[newFactorIndex] <= P);
-            nextEndingOnFactorIndex[newFactorIndex] = sumUpToLast * 1;
+            nextFirstNEndingOnFactorIndex[newFactorIndex] = sumUpToLast * 1;
         }
-        firstNEndingOnFactorIndex = nextEndingOnFactorIndex;
+        firstNEndingOnFactorIndex = nextFirstNEndingOnFactorIndex;
     }
 
     ModNum result = 0;
