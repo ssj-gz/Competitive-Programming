@@ -108,7 +108,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
     }
 
     vector<int> primesUpToN;
-    for (int i = 1; i <= N; i++)
+    for (int i = 1; i < N; i++)
     {
         if (isPrime[i])
         {
@@ -131,7 +131,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
 
         for (int posInBlock = 0; posInBlock < blockSize; posInBlock++)
         {
-            vector<int64_t> nextNonPeriodicLastWithNumChanges(K + 1, 0);
+            vector<int64_t> nextPeriodicLastWithNumChanges(K + 1, 0);
             auto numChangesIfDontChange = 0;
             auto numChangesIfChange = 1;
 
@@ -154,27 +154,28 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             if (posInBlock == 0)
             {
                 if (numChangesIfDontChange <= K)
-                    nextNonPeriodicLastWithNumChanges[numChangesIfDontChange] = 1;
+                    nextPeriodicLastWithNumChanges[numChangesIfDontChange] = 1;
                 if (numChangesIfChange <= K)
-                    nextNonPeriodicLastWithNumChanges[numChangesIfChange] = 1;
+                    nextPeriodicLastWithNumChanges[numChangesIfChange] = 1;
             }
             else
             {
                 for (int numChanges = 0; numChanges <= K; numChanges++)
                 {
                     if (numChanges - numChangesIfDontChange >= 0)
-                        nextNonPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
+                        nextPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
                     if (numChanges - numChangesIfChange >= 0)
-                        nextNonPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfChange];
+                        nextPeriodicLastWithNumChanges[numChanges] = periodicLastWithNumChanges[numChanges - numChangesIfChange];
                 }
             }
-            periodicLastWithNumChanges = nextNonPeriodicLastWithNumChanges;
+            periodicLastWithNumChanges = nextPeriodicLastWithNumChanges;
 
         }
         for (int numChanges = 0; numChanges <= K; numChanges++)
         {
             periodicStringsMade += periodicLastWithNumChanges[numChanges];
         }
+        cout << " periodicStringsMade: " << periodicStringsMade << endl;
 
     }
 
