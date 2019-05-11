@@ -2,6 +2,9 @@
 #include <vector>
 #include <set>
 #include <limits>
+#include <cassert>
+
+#include <sys/time.h>
 
 using namespace std;
 
@@ -25,9 +28,20 @@ struct Missile
 
 void solution(int currentMissileNumber, int numHitByCurrentMissile, int currentTime, int currentFrequency, set<Missile>& remainingMissiles, int& minMissiles)
 {
-    cout << "currentMissileNumber: " << currentMissileNumber << " currentTime: " << currentTime  << " currentFrequency: " << currentFrequency << " # remainingMissiles: " << remainingMissiles.size() << endl;
+    if (currentMissileNumber >= minMissiles)
+    {
+        return;
+    }
+    //cout << "currentMissileNumber: " << currentMissileNumber << " currentTime: " << currentTime  << " currentFrequency: " << currentFrequency << " # remainingMissiles: " << remainingMissiles.size() << endl;
     if (remainingMissiles.empty())
     {
+        if (currentMissileNumber < minMissiles)
+        {
+            static int numImprovedresults = 0;
+            cout << "New best solution: " << currentMissileNumber << endl;
+            numImprovedresults++;
+            assert(numImprovedresults < 2);
+        }
         minMissiles = std::min(minMissiles, currentMissileNumber);
     }
     for (const Missile& targetMissile : remainingMissiles)
@@ -40,10 +54,15 @@ void solution(int currentMissileNumber, int numHitByCurrentMissile, int currentT
             remainingMissiles.erase(targetMissile);
             solution(currentMissileNumber, numHitByCurrentMissile + 1, targetMissile.time, targetMissile.frequency, remainingMissiles, minMissiles);
             remainingMissiles.insert(targetMissile);
+            if (currentMissileNumber == -1)
+            {
+                // WLOG, missile should pick the earliest target as its first target.
+                break;
+            }
         }
-        if (numHitByCurrentMissile != 0)
-            solution(currentMissileNumber + 1, 0, 0, -1, remainingMissiles, minMissiles);
     }
+    if (numHitByCurrentMissile != 0)
+        solution(currentMissileNumber + 1, 0, 0, -1, remainingMissiles, minMissiles);
 }
 
 int solutionBruteForce(const vector<Missile>& missiles)
@@ -56,6 +75,25 @@ int solutionBruteForce(const vector<Missile>& missiles)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int numMissiles = rand() % 14 + 1;
+        const int maxTime = rand() % 300 + 1;
+        const int maxFrequency = rand() % 300 + 1;
+
+        cout << numMissiles << endl;
+        for (int i = 0; i < numMissiles; i++)
+        {
+            cout << (rand() % maxTime) << " " << (rand() % maxFrequency) << endl;
+        }
+
+
+        return 0;
+    }
     int N;
     cin >> N;
 
