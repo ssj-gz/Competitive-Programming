@@ -19,8 +19,9 @@ int numChanges(const string& a, const string& b)
 
 }
 
-int period(const string& a)
+vector<int> periods(const string& a)
 {
+    vector<int> periods;
     for (int length = 1; length < a.size(); length++)
     {
         int startPos = length;
@@ -35,15 +36,17 @@ int period(const string& a)
             startPos += length;
         }
         if (periodIsLength)
-            return length;
+            periods.push_back(length);
     }
-    return -1;
+    return periods;
 }
 
 bool isPeriodic(const string& a)
 {
-    return period(a) != -1;
+    return !periods(a).empty();
 }
+
+vector<int> numWithPeriod;
 
 void blah(string& alteredStringSoFar, int nextIndex, int K, const string& originalString, uint64_t& numNonPeriodicFound, uint64_t& totalFound)
 {
@@ -58,7 +61,13 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
             totalFound++;
             if (isPeriodic(alteredStringSoFar))
             {
-                cout << "Made periodic string " << alteredStringSoFar << "(period " << period(alteredStringSoFar) << ") with " << numChanges(alteredStringSoFar, originalString) << " changes" << endl;
+                cout << "Made periodic string " << alteredStringSoFar << "(periods: ";
+                for (const auto period : periods(alteredStringSoFar))
+                {
+                    cout << " " << period;
+                    numWithPeriod[period]++;
+                }
+                cout <<  ") with " << numChanges(alteredStringSoFar, originalString) << " changes" << endl;
             }
         }
         return;
@@ -72,6 +81,8 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
 
 uint64_t solveBruteForce(const string& binaryString, int N, int K)
 {
+    numWithPeriod.clear();
+    numWithPeriod.resize(N + 1);
     string alteredStringSoFar = binaryString;
     uint64_t numNonPeriodicFound = 0;
     uint64_t totalFound = 0;
@@ -225,6 +236,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
     uint64_t periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
+        assert(numWithPeriod[blockSize] == periodicStringsMadeBy[blockSize]);
         periodicStringsMade += periodicStringsMadeBy[blockSize];
         for (const auto factorOfBlockSize : factorsOf[blockSize])
         {
@@ -241,6 +253,8 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
 
 int main(int argc, char* argv[])
 {
+
+
     if (argc == 2)
     {
         struct timeval time;
