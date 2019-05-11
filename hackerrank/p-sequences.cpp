@@ -110,9 +110,8 @@ ModNum calcNumPSequences(int N, int P)
             sumUpToLast += globble;
             summedSoFar = needSumUpTo;
 
-            const auto diffUntilNextFactor = divisionChangesOfP[newFactorIndex + 1] - divisionChangesOfP[newFactorIndex];
             assert(divisionChangesOfP[lastFactorIndex] * divisionChangesOfP[newFactorIndex] <= P);
-            nextFirstNEndingOnFactorIndex[newFactorIndex] = sumUpToLast * 1;
+            nextFirstNEndingOnFactorIndex[newFactorIndex] = sumUpToLast;
         }
         firstNEndingOnFactorIndex = nextFirstNEndingOnFactorIndex;
     }
