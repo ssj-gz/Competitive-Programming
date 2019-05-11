@@ -65,9 +65,9 @@ uint64_t solveBruteForce(const string& binaryString, int N, int K)
     cout << "totalFound: " << totalFound << endl;
     return numNonPeriodicFound;
 }
-uint64_t solveOptimised(const string& binaryString, int N, int K)
+
+uint64_t computeNumStringsWithUpToKChanges(int N, int K)
 {
-    uint64_t result = 0;
     vector<vector<uint64_t>> numOfLengthWithChanges(N + 1, vector<uint64_t>(K + 1, 0));
     numOfLengthWithChanges[1][0] = 1;
     numOfLengthWithChanges[1][1] = 1;
@@ -80,13 +80,19 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
                 numOfLengthWithChanges[i][numChanges] += numOfLengthWithChanges[i - 1][numChanges - 1];
         }
     }
-    uint64_t total = 0;
+    uint64_t numStrings = 0;
     for (int numChanges = 0; numChanges <= K; numChanges++)
     {
-        total += numOfLengthWithChanges[N][numChanges];
+        numStrings += numOfLengthWithChanges[N][numChanges];
     }
-    cout << "total optimised: " <<  total << endl;
-    cout << "GLoop: " << numOfLengthWithChanges[N][K] << endl;
+    cout << "total optimised: " <<  numStrings << endl;
+    return numStrings;
+}
+
+uint64_t solveOptimised(const string& binaryString, int N, int K)
+{
+    const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
+    uint64_t result = 0;
     return result;
 }
 
