@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #define NDEBUG
@@ -185,9 +185,11 @@ ModNum solutionOptimised(int N, int P)
 
             //firstNEndingOnFactorIndex[i][newFactorIndex] = sumUpToLast * diffUntilNextFactor;
             nextEndingOnFactorIndex[newFactorIndex] = sumUpToLast * 1;
+#ifdef BRUTE_FORCE
             cout << "firstNEndingOnFactorIndex[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << nextEndingOnFactorIndex[newFactorIndex] << endl;
             cout << "firstNEndingOnP[" << i << "][" << factorsOfP[newFactorIndex] << "] = " << firstNEndingOnP[i][factorsOfP[newFactorIndex]] << endl;
             assert(nextEndingOnFactorIndex[newFactorIndex] == firstNEndingOnP[i][factorsOfP[newFactorIndex]]);
+#endif
         }
         firstNEndingOnFactorIndex = nextEndingOnFactorIndex;
     }
@@ -300,11 +302,15 @@ int main(int argc, char* argv[])
     int P;
     cin >> P;
 
+#ifdef BRUTE_FORCE
     const auto bruteForceResult = solutionBruteForce(N, P);
     cout << "bruteForceResult: " << bruteForceResult << endl;
+#endif
 
     const auto optimisedResult = solutionOptimised(N, P);
     cout << "optimisedResult: " << optimisedResult << endl;
 
+#ifdef BRUTE_FORCE
     assert(optimisedResult == bruteForceResult);
+#endif
 }
