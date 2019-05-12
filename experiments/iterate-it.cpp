@@ -122,11 +122,11 @@ int solutionOptimised(const vector<int>& aOriginal)
     };
     while (!a.empty())
     {
-        cout << " Iteration: " << numIterations << " optimised # elements: " << a.size() << " max element: " << *std::max_element(a.begin(), a.end()) << endl;
+        //cout << " Iteration: " << numIterations << " optimised # elements: " << a.size() << " max element: " << *std::max_element(a.begin(), a.end()) << endl;
         if (a.size() == *std::max_element(a.begin(), a.end()))
         {
             numIterations += a.size();
-            cout << "Bailing!" << endl;
+            //cout << "Bailing!" << endl;
             break;
         }
         
@@ -149,7 +149,7 @@ int solutionOptimised(const vector<int>& aOriginal)
                 }
                 if (gcdOfAllInA != 1)
                 {
-                    cout << "reducing by: " << gcdOfAllInA << endl;
+                    //cout << "reducing by: " << gcdOfAllInA << endl;
                     for (auto& x : a)
                     {
                         x /= gcdOfAllInA;
@@ -335,15 +335,15 @@ int main(int argc, char* argv[])
         assert(a[i] != 0);
     }
 
-#if 1
 #ifdef BRUTE_FORCE
     const int bruteForceResult = solutionBruteForce(a);
     cout << "bruteForceResult: " << bruteForceResult << endl;
-#endif
-#endif
-
     const int optimisedResult = solutionOptimised(a);
     cout << "optimisedResult: " << optimisedResult << endl;
+#else
+    cout << solutionOptimised(a) << endl;
+#endif
+
 
 #if 1
 #ifdef BRUTE_FORCE
