@@ -233,7 +233,25 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         periodicStringsMadeBy[blockSize] = periodicStringsMadeWithBlocksize;
     }
 
+    vector<uint64_t> F(periodicStringsMadeBy);
+
+    for (const auto blockSize : blockSizes)
+    {
+        int factor = 2 * blockSize;
+        while (factor <= N)
+        {
+            F[factor] -= F[blockSize];
+            factor += blockSize;
+        }
+    }
+
     uint64_t periodicStringsMade = 0;
+    for (const auto blockSize : blockSizes)
+    {
+        cout << "blockSize: " << blockSize << " F: " << F[blockSize] << endl;
+        periodicStringsMade += F[blockSize];
+    }
+#if 0
     for (const auto blockSize : blockSizes)
     {
         assert(numWithPeriod[blockSize] == periodicStringsMadeBy[blockSize]);
@@ -247,6 +265,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             }
         }
     }
+#endif
     cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
     return totalStringsMadeWithChanges - periodicStringsMade;
 }
@@ -261,7 +280,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 15 + 2;
+        const int N = rand() % 24 + 1;
         const int K = rand() % (N + 1);
 
         string binaryString;
