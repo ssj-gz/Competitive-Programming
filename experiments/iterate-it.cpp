@@ -18,6 +18,8 @@ using namespace std;
 int solutionBruteForce(const vector<int>& aOriginal)
 {
     vector<int> a(aOriginal);
+    std::sort(a.begin(), a.end());
+    a.erase(std::unique(a.begin(), a.end()), a.end());
     int rep = 0;
     std::chrono::steady_clock::time_point totalBegin = std::chrono::steady_clock::now();
     while (!a.empty())
@@ -26,13 +28,15 @@ int solutionBruteForce(const vector<int>& aOriginal)
         std::chrono::steady_clock::time_point iterationBegin = std::chrono::steady_clock::now();
 
 
+#if 0
         cout << "Iterate: a: " << endl;
         for (const auto x : a)
         {
             cout << " " << x;
         }
         cout << endl;
-        cout << " # elements: " << originalSize << " max element: " << *std::max_element(a.begin(), a.end()) << endl;
+#endif
+        cout << " Iteration: " << rep << " brute force # elements: " << a.size() << " max element: " << *std::max_element(a.begin(), a.end()) << endl;
 #if 0
         set<int> bSet;
         for (const auto x : a)
@@ -45,7 +49,7 @@ int solutionBruteForce(const vector<int>& aOriginal)
         }
         a.assign(bSet.begin(), bSet.end());
 #else
-        vector<bool> b(*std::max_element(a.begin(), a.end()), false);
+        vector<bool> b(*std::max_element(a.begin(), a.end()) + 1, false);
         for (const auto x : a)
         {
             for (const auto y : a)
@@ -99,6 +103,7 @@ int solutionOptimised(const vector<int>& aOriginal)
     };
     while (!a.empty())
     {
+        cout << " Iteration: " << numIterations << " optimised # elements: " << a.size() << " max element: " << *std::max_element(a.begin(), a.end()) << endl;
         vector<uint64_t> blocks(numBlocks);
         for (const auto x : a)
         {
@@ -176,22 +181,17 @@ int solutionOptimised(const vector<int>& aOriginal)
             for (const auto x : withRemainder[i])
             {
                 const auto numBlocksToShift = x / numInBlock;
-                //cout << "About to add all shifted by " << x << "; (numBlocksToShift: " << numBlocksToShift << ") bBlocks now: " << blocksToBinaryString(bBlocks) << endl;
-                //cout << "(blocksShiftedBy[" << i << "] : " << blocksToBinaryString(blocksShiftedBy[i]) << ")" << endl;
                 for (int j = 0; j + numBlocksToShift < numBlocks; j++)
                 {
                     bBlocks[j] |= blocksShiftedBy[i][j + numBlocksToShift];
                 }
-                //cout << "Add all shifted by " << x << "; (numBlocksToShift: " << numBlocksToShift << ") bBlocks now: " << blocksToBinaryString(bBlocks) << endl;
-                //cout << "(blocksShiftedBy[" << i << "] : " << blocksToBinaryString(blocksShiftedBy[i]) << ")" << endl;
             }
         }
-        cout << "bBlocks: " << blocksToBinaryString(bBlocks) << endl;
+        //cout << "bBlocks: " << blocksToBinaryString(bBlocks) << endl;
         vector<int> b;
         for (int j = 0; j < numBlocks; j++)
         {
             const uint64_t block = bBlocks[j];
-            //cout << "block[" << j << "]: " << block << endl;
             for (int k = 0; k < numInBlock; k++)
             {
                 if (((block >> static_cast<uint64_t>(k)) & 1) == 1)
@@ -200,8 +200,9 @@ int solutionOptimised(const vector<int>& aOriginal)
                 }
             }
         }
-        if (!b.empty() && b.front() == 0)
+        if (!b.empty())
         {
+            assert(b.front() == 0);
             b.erase(b.begin());
         }
 
@@ -218,6 +219,7 @@ int solutionOptimised(const vector<int>& aOriginal)
             }
         }
         vector<int> bDebug(bDebugSet.begin(), bDebugSet.end());
+#if 0
         cout << "bDebug: " << endl;
         for (const auto x : bDebug)
         {
@@ -230,6 +232,7 @@ int solutionOptimised(const vector<int>& aOriginal)
             cout << " " << x;
         }
         cout << endl;
+#endif
         assert(bDebug == b);
 #endif
 
@@ -245,24 +248,25 @@ int main(int argc, char* argv[])
     if (argc == 2)
     {
 
-#if 0
+#if 1
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
 
-        const int n = rand() % 1000;
-#endif
+        const int n = rand() % 100;
+#else
         const int n = 25000;
+#endif
         cout << (n + 1) << endl;
         for (int i = 0; i < n; i++)
         {
-#if 0
-            cout << (rand() % 10'000 + 1) << " ";
-#endif
+#if 1
+            cout << (rand() % 300 + 1) << " ";
+#else
             cout << (i * 2) << " ";
+#endif
         }
-        cout << 25679;
         cout << endl;
         return 0;
     }
@@ -280,4 +284,6 @@ int main(int argc, char* argv[])
 
     const int optimisedResult = solutionOptimised(a);
     cout << "optimisedResult: " << optimisedResult << endl;
+
+    assert(optimisedResult == bruteForceResult);
 }
