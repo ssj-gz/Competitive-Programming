@@ -42,6 +42,7 @@ class ModNum
         ModNum operator++(int)
         {
             m_n += 1;
+            return *this;
         }
         int64_t value() const { return m_n; };
     private:
