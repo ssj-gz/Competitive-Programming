@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-05-12
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -177,7 +177,7 @@ ModNum computeNumStringsWithUpToKChanges(int N, int K)
     return numStrings;
 }
 
-ModNum solveOptimised(const string& binaryString, int N, int K)
+ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
 
@@ -273,6 +273,8 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
+    // Final tally - numWithMinPeriod is used instead of numWithPeriod as the latter overcounts
+    // e.g. numWithPeriod[4] would also include numWithPeriod[2] and numWithPeriod[1].
     ModNum periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
@@ -321,14 +323,14 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(binaryString, N, K);
 #endif
 
-        const auto solutionOptimised = solveOptimised(binaryString, N, K);
+        const auto solution = findPossibleSourceMessages(binaryString, N, K);
 #ifdef BRUTE_FORCE
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        cout << "solutionOptimised: " << solutionOptimised << endl;
+        cout << "solutionOptimised: " << solution << endl;
 #else
-        cout << solutionOptimised << endl;
+        cout << solution << endl;
 #endif
         
-        assert(solutionOptimised == solutionBruteForce);
+        assert(solution == solutionBruteForce);
     }
 }
