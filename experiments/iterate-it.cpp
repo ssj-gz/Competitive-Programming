@@ -73,6 +73,23 @@ int solutionBruteForce(const vector<int>& aOriginal)
     return rep;
 }
 
+int gcd(int a, int b)
+{
+    while (true)
+    {
+        if (a > b)
+            swap(a, b);
+        if (a == 0)
+            break;
+        const int nextA = a;
+        const int nextB = b - a;
+
+        a = nextA;
+        b = nextB;
+    }
+    return b;
+}
+
 int solutionOptimised(const vector<int>& aOriginal)
 {
     set<int> blah(aOriginal.begin(), aOriginal.end());
@@ -109,6 +126,17 @@ int solutionOptimised(const vector<int>& aOriginal)
             numIterations += a.size();
             cout << "Bailing!" << endl;
             break;
+        }
+        if (numIterations == 1)
+        {
+            if (a.size() == 3)
+            {
+                if (a[0] == 1 && a[1] == a[2] - 1)
+                {
+                    numIterations += a[2];
+                    break;
+                }
+            }
         }
 
         vector<uint64_t> blocks(numBlocks);
@@ -262,6 +290,7 @@ int main(int argc, char* argv[])
 
 
         const int n = rand() % 1000;
+        const int maxElement = rand() % 3000 + 1;
 #else
         const int n = 25000;
 #endif
@@ -269,7 +298,7 @@ int main(int argc, char* argv[])
         for (int i = 0; i < n; i++)
         {
 #if 1
-            cout << (rand() % 3000 + 1) << " ";
+            cout << (rand() % maxElement + 1) << " ";
 #else
             cout << (i * 2) << " ";
 #endif
