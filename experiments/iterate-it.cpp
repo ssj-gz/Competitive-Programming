@@ -18,8 +18,10 @@ using namespace std;
 int solutionBruteForce(const vector<int>& aOriginal)
 {
     vector<int> a(aOriginal);
+#if 0
     std::sort(a.begin(), a.end());
     a.erase(std::unique(a.begin(), a.end()), a.end());
+#endif
     int rep = 0;
     std::chrono::steady_clock::time_point totalBegin = std::chrono::steady_clock::now();
     while (!a.empty())
@@ -28,7 +30,7 @@ int solutionBruteForce(const vector<int>& aOriginal)
         std::chrono::steady_clock::time_point iterationBegin = std::chrono::steady_clock::now();
 
 
-#if 0
+#if 1
         cout << "Iterate: a: " << endl;
         for (const auto x : a)
         {
@@ -306,16 +308,16 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
 
-        const int n = rand() % 1000;
+        const int n = rand() % 1000 + 1;
         const int maxElement = rand() % 3000 + 1;
 #else
         const int n = 25000;
 #endif
-        cout << (n + 1) << endl;
+        cout << n << endl;
         for (int i = 0; i < n; i++)
         {
 #if 1
-            cout << (rand() % maxElement + 1) << " ";
+            cout << ((rand() % maxElement) + 1) << " ";
 #else
             cout << (i * 2) << " ";
 #endif
@@ -330,6 +332,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < n; i++)
     {
         cin >> a[i];
+        assert(a[i] != 0);
     }
 
     const int bruteForceResult = solutionBruteForce(a);
