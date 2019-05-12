@@ -104,6 +104,13 @@ int solutionOptimised(const vector<int>& aOriginal)
     while (!a.empty())
     {
         cout << " Iteration: " << numIterations << " optimised # elements: " << a.size() << " max element: " << *std::max_element(a.begin(), a.end()) << endl;
+        if (a.size() == *std::max_element(a.begin(), a.end()))
+        {
+            numIterations += a.size();
+            cout << "Bailing!" << endl;
+            break;
+        }
+
         vector<uint64_t> blocks(numBlocks);
         for (const auto x : a)
         {
@@ -254,7 +261,7 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
 
-        const int n = rand() % 100;
+        const int n = rand() % 1000;
 #else
         const int n = 25000;
 #endif
@@ -262,7 +269,7 @@ int main(int argc, char* argv[])
         for (int i = 0; i < n; i++)
         {
 #if 1
-            cout << (rand() % 300 + 1) << " ";
+            cout << (rand() % 3000 + 1) << " ";
 #else
             cout << (i * 2) << " ";
 #endif
