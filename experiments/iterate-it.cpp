@@ -137,6 +137,23 @@ int solutionOptimised(const vector<int>& aOriginal)
                     break;
                 }
             }
+
+            if (a.size() > 1)
+            {
+                int gcdOfAllInA = a.front();
+                for (int i = 1; i < a.size(); i++)
+                {
+                    gcdOfAllInA = gcd(gcdOfAllInA, a[i]);
+                }
+                if (gcdOfAllInA != 1)
+                {
+                    cout << "reducing by: " << gcdOfAllInA << endl;
+                    for (auto& x : a)
+                    {
+                        x /= gcdOfAllInA;
+                    }
+                }
+            }
         }
 
         vector<uint64_t> blocks(numBlocks);
