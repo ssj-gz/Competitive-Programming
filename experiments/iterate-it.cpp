@@ -1,4 +1,4 @@
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -129,17 +129,17 @@ int solutionOptimised(const vector<int>& aOriginal)
             cout << "Bailing!" << endl;
             break;
         }
+        
+        if (a[2] - a[1] == a[0])
+        {
+            const int skipIterations = (a[1] - a[0]) / a[0];
+            a[1] -= skipIterations * a[0];
+            a[2] -= skipIterations * a[0];
+            numIterations += skipIterations;
+        }
+
         if (numIterations == 1)
         {
-            if (a.size() == 3)
-            {
-                if (a[0] == 1 && a[1] == a[2] - 1)
-                {
-                    numIterations += a[2];
-                    break;
-                }
-            }
-
             if (a.size() > 1)
             {
                 int gcdOfAllInA = a.front();
@@ -273,7 +273,7 @@ int solutionOptimised(const vector<int>& aOriginal)
             }
         }
         vector<int> bDebug(bDebugSet.begin(), bDebugSet.end());
-#if 0
+#if 1
         cout << "bDebug: " << endl;
         for (const auto x : bDebug)
         {
@@ -335,11 +335,19 @@ int main(int argc, char* argv[])
         assert(a[i] != 0);
     }
 
+#if 1
+#ifdef BRUTE_FORCE
     const int bruteForceResult = solutionBruteForce(a);
     cout << "bruteForceResult: " << bruteForceResult << endl;
+#endif
+#endif
 
     const int optimisedResult = solutionOptimised(a);
     cout << "optimisedResult: " << optimisedResult << endl;
 
+#if 1
+#ifdef BRUTE_FORCE
     assert(optimisedResult == bruteForceResult);
+#endif
+#endif
 }
