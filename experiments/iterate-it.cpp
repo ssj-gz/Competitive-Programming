@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-05-12
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -30,7 +31,7 @@ int solutionBruteForce(const vector<int>& aOriginal)
         std::chrono::steady_clock::time_point iterationBegin = std::chrono::steady_clock::now();
 
 
-#if 1
+#if 0
         cout << "Iterate: a: " << endl;
         for (const auto x : a)
         {
@@ -132,10 +133,13 @@ int solutionOptimised(const vector<int>& aOriginal)
         
         if (a[2] - a[1] == a[0])
         {
-            const int skipIterations = (a[1] - a[0]) / a[0];
-            a[1] -= skipIterations * a[0];
-            a[2] -= skipIterations * a[0];
-            numIterations += skipIterations;
+            const int skipIterations = (a[1] - a[0]) / a[0] - 1;
+            if (skipIterations > 0)
+            {
+                a[1] -= skipIterations * a[0];
+                a[2] -= skipIterations * a[0];
+                numIterations += skipIterations;
+            }
         }
 
         if (numIterations == 1)
