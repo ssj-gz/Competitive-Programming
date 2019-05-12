@@ -6,6 +6,74 @@
 
 using namespace std;
 
+const int64_t modulus = 1'000'000'007ULL;
+
+class ModNum
+{
+    public:
+        ModNum(int64_t n = 0)
+            : m_n{n}
+        {
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % ::modulus;
+            return *this;
+        }
+        ModNum& operator-=(const ModNum& other)
+        {
+            m_n += ::modulus;
+            assert(m_n >= other.m_n);
+            m_n = (m_n - other.m_n) % ::modulus;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % ::modulus;
+            return *this;
+        }
+        ModNum operator++(int)
+        {
+            m_n += 1;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
+
+
 int numChanges(const string& a, const string& b)
 {
     int numChanges = 0;
@@ -48,7 +116,7 @@ bool isPeriodic(const string& a)
 
 vector<int> numWithPeriod;
 
-void blah(string& alteredStringSoFar, int nextIndex, int K, const string& originalString, uint64_t& numNonPeriodicFound, uint64_t& totalFound)
+void blah(string& alteredStringSoFar, int nextIndex, int K, const string& originalString, ModNum& numNonPeriodicFound, ModNum& totalFound)
 {
     if (nextIndex == originalString.size())
     {
@@ -79,21 +147,21 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
     alteredStringSoFar[nextIndex] = '0' + ('1' - alteredStringSoFar[nextIndex]);
 } 
 
-uint64_t solveBruteForce(const string& binaryString, int N, int K)
+ModNum solveBruteForce(const string& binaryString, int N, int K)
 {
     numWithPeriod.clear();
     numWithPeriod.resize(N + 1);
     string alteredStringSoFar = binaryString;
-    uint64_t numNonPeriodicFound = 0;
-    uint64_t totalFound = 0;
+    ModNum numNonPeriodicFound = 0;
+    ModNum totalFound = 0;
     blah(alteredStringSoFar, 0, K, binaryString, numNonPeriodicFound, totalFound);
     cout << "totalFound: " << totalFound << endl;
     return numNonPeriodicFound;
 }
 
-uint64_t computeNumStringsWithUpToKChanges(int N, int K)
+ModNum computeNumStringsWithUpToKChanges(int N, int K)
 {
-    vector<vector<uint64_t>> numOfLengthWithChanges(N + 1, vector<uint64_t>(K + 1, 0));
+    vector<vector<ModNum>> numOfLengthWithChanges(N + 1, vector<ModNum>(K + 1, 0));
     numOfLengthWithChanges[1][0] = 1;
     if (K > 0)
         numOfLengthWithChanges[1][1] = 1;
@@ -106,7 +174,7 @@ uint64_t computeNumStringsWithUpToKChanges(int N, int K)
                 numOfLengthWithChanges[i][numChanges] += numOfLengthWithChanges[i - 1][numChanges - 1];
         }
     }
-    uint64_t numStrings = 0;
+    ModNum numStrings = 0;
     for (int numChanges = 0; numChanges <= K; numChanges++)
     {
         numStrings += numOfLengthWithChanges[N][numChanges];
@@ -115,7 +183,7 @@ uint64_t computeNumStringsWithUpToKChanges(int N, int K)
     return numStrings;
 }
 
-uint64_t solveOptimised(const string& binaryString, int N, int K)
+ModNum solveOptimised(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
     vector<vector<int>> factorsOf(N + 1);
@@ -148,7 +216,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    vector<uint64_t> periodicStringsMadeBy(N + 1);
+    vector<ModNum> periodicStringsMadeBy(N + 1);
 
     //cout << "blockSizes.size(): " << blockSizes.size() << endl;
     //if (std::find(blockSizes.begin(), blockSizes.end(), 1) == blockSizes.end())
@@ -164,11 +232,11 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         cout << "blockSize: " << blockSize << endl;
         const auto numBlocks = N / blockSize;
 
-        vector<int64_t> periodicLastWithNumChanges(K + 1, 0);
+        vector<ModNum> periodicLastWithNumChanges(K + 1, 0);
 
         for (int posInBlock = 0; posInBlock < blockSize; posInBlock++)
         {
-            vector<int64_t> nextPeriodicLastWithNumChanges(K + 1, 0);
+            vector<ModNum> nextPeriodicLastWithNumChanges(K + 1, 0);
             auto numChangesIfDontChange = 0;
             auto numChangesIfChange = 1;
 
@@ -213,7 +281,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
             }
 
         }
-        uint64_t periodicStringsMadeWithBlocksize = 0;
+        ModNum periodicStringsMadeWithBlocksize = 0;
         for (int numChanges = 0; numChanges <= K; numChanges++)
         {
             periodicStringsMadeWithBlocksize += periodicLastWithNumChanges[numChanges];
@@ -233,7 +301,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         periodicStringsMadeBy[blockSize] = periodicStringsMadeWithBlocksize;
     }
 
-    vector<uint64_t> F(periodicStringsMadeBy);
+    vector<ModNum> F(periodicStringsMadeBy);
 
     for (const auto blockSize : blockSizes)
     {
@@ -245,7 +313,7 @@ uint64_t solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    uint64_t periodicStringsMade = 0;
+    ModNum periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
         cout << "blockSize: " << blockSize << " F: " << F[blockSize] << endl;
