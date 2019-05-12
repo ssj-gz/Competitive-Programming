@@ -131,11 +131,12 @@ int solutionOptimised(const vector<int>& aOriginal)
             break;
         }
         
-        if (a[2] - a[1] == a[0])
+        if (a.size() == 3 && (a[2] - a[1] == a[0]))
         {
-            const int skipIterations = (a[1] - a[0]) / a[0] - 1;
+            const int skipIterations = ((a[1] - a[0]) / a[0]) - 1;
             if (skipIterations > 0)
             {
+                cout << "skip" << endl;
                 a[1] -= skipIterations * a[0];
                 a[2] -= skipIterations * a[0];
                 numIterations += skipIterations;
@@ -313,7 +314,7 @@ int main(int argc, char* argv[])
 
 
         const int n = rand() % 1000 + 1;
-        const int maxElement = rand() % 3000 + 1;
+        const int maxElement = rand() % 1000 + 1;
 #else
         const int n = 25000;
 #endif
