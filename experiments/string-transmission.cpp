@@ -194,8 +194,8 @@ ModNum computeNumStringsWithUpToKChanges(int N, int K)
 ModNum solveOptimised(const string& binaryString, int N, int K)
 {
     const auto totalStringsMadeWithChanges = computeNumStringsWithUpToKChanges(N, K);
-    vector<vector<int>> factorsOf(N + 1);
 
+    vector<vector<int>> factorsOf(N + 1);
     for (int factor = 1; factor <= N; factor++)
     {
         int mutiplied = 1 * factor;
@@ -215,29 +215,10 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    for (int i = 1; i <= N; i++)
-    {
-        //cout << "Factors of " << i << ": " << endl;
-        //for (const auto x : factorsOf[i])
-        //{
-            //cout  << " " << x << endl;
-        //}
-    }
-
     vector<ModNum> periodicStringsMadeBy(N + 1);
-
-    //cout << "blockSizes.size(): " << blockSizes.size() << endl;
-    //if (std::find(blockSizes.begin(), blockSizes.end(), 1) == blockSizes.end())
-        //blockSizes.insert(blockSizes.begin(), 1);
-
-    //int numPeriodicWithBlocksizeOne = 0;
 
     for (const auto blockSize : blockSizes)
     {
-        if ((N % blockSize) != 0)
-            continue;
-
-        //cout << "blockSize: " << blockSize << endl;
         const auto numBlocks = N / blockSize;
 
         vector<ModNum> periodicLastWithNumChanges(K + 1, 0);
@@ -246,12 +227,11 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         {
             vector<ModNum> nextPeriodicLastWithNumChanges(K + 1, 0);
             auto numChangesIfDontChange = 0;
-            auto numChangesIfChange = 1;
+            auto numChangesIfChange = 1; // At least one change if we change the digit at this posInBlock!
 
             auto posInString = posInBlock + blockSize;
             while (posInString < N)
             {
-                //cout << "posInString: " << posInString << " N: " << N << " posInBlock: " << posInBlock << endl;
                 if (binaryString[posInString] == binaryString[posInBlock])
                 {
                     numChangesIfChange++;
@@ -263,7 +243,6 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
                 posInString += blockSize;
             }
 
-            //cout << "blockSize: " << blockSize << " posInBlock: " << posInBlock << " numChangesIfChange: " << numChangesIfChange << " numChangesIfDontChange: " << numChangesIfDontChange << endl;
             if (posInBlock == 0)
             {
                 if (numChangesIfDontChange <= K)
@@ -282,11 +261,6 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
                 }
             }
             periodicLastWithNumChanges = nextPeriodicLastWithNumChanges;
-            //cout << " after posInBlock: " << posInBlock << " periodicLastWithNumChanges: " << endl;
-            for (int numChanges = 0; numChanges <= K; numChanges++)
-            {
-                //cout << " periodicLastWithNumChanges[" << numChanges << " ]: " << periodicLastWithNumChanges[numChanges] << endl;
-            }
 
         }
         ModNum periodicStringsMadeWithBlocksize = 0;
@@ -294,17 +268,6 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         {
             periodicStringsMadeWithBlocksize += periodicLastWithNumChanges[numChanges];
         }
-        //cout << " periodicStringsMadeWithBlocksize: " << blockSize << " = "  << periodicStringsMadeWithBlocksize << endl;
-        //periodicStringsMade += periodicStringsMadeWithBlocksize;
-
-        //if (blockSize == 1)
-            ////numPeriodicWithBlocksizeOne = periodicStringsMade;
-        //else
-            //periodicStringsMade -= numPeriodicWithBlocksizeOne;
-
-        //cout << " periodicStringsMade: " << periodicStringsMade << endl;
-
-        //cout << "numPeriodicWithBlocksizeOne: " << numPeriodicWithBlocksizeOne << endl;
 
         periodicStringsMadeBy[blockSize] = periodicStringsMadeWithBlocksize;
     }
@@ -314,7 +277,6 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
     }
 
     vector<ModNum> F(periodicStringsMadeBy);
-
     for (const auto blockSize : blockSizes)
     {
         int factor = 2 * blockSize;
@@ -328,25 +290,8 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
     ModNum periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
-        //cout << "blockSize: " << blockSize << " F: " << F[blockSize] << endl;
         periodicStringsMade += F[blockSize];
     }
-#if 0
-    for (const auto blockSize : blockSizes)
-    {
-        assert(numWithPeriod[blockSize] == periodicStringsMadeBy[blockSize]);
-        periodicStringsMade += periodicStringsMadeBy[blockSize];
-        for (const auto factorOfBlockSize : factorsOf[blockSize])
-        {
-            if (factorOfBlockSize != blockSize)
-            {
-                periodicStringsMade -= periodicStringsMadeBy[factorOfBlockSize];
-                cout << "subtracted  " << periodicStringsMadeBy[factorOfBlockSize] << " from periodicStringsMade" << endl;
-            }
-        }
-    }
-#endif
-    //cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
     return totalStringsMadeWithChanges - periodicStringsMade;
 }
 
