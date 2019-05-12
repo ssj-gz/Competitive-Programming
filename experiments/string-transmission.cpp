@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-05-12
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -179,7 +186,7 @@ ModNum computeNumStringsWithUpToKChanges(int N, int K)
     {
         numStrings += numOfLengthWithChanges[N][numChanges];
     }
-    cout << "total optimised: " <<  numStrings << endl;
+    //cout << "total optimised: " <<  numStrings << endl;
     return numStrings;
 }
 
@@ -209,11 +216,11 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
 
     for (int i = 1; i <= N; i++)
     {
-        cout << "Factors of " << i << ": " << endl;
-        for (const auto x : factorsOf[i])
-        {
-            cout  << " " << x << endl;
-        }
+        //cout << "Factors of " << i << ": " << endl;
+        //for (const auto x : factorsOf[i])
+        //{
+            //cout  << " " << x << endl;
+        //}
     }
 
     vector<ModNum> periodicStringsMadeBy(N + 1);
@@ -229,7 +236,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         if ((N % blockSize) != 0)
             continue;
 
-        cout << "blockSize: " << blockSize << endl;
+        //cout << "blockSize: " << blockSize << endl;
         const auto numBlocks = N / blockSize;
 
         vector<ModNum> periodicLastWithNumChanges(K + 1, 0);
@@ -243,7 +250,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
             auto posInString = posInBlock + blockSize;
             while (posInString < N)
             {
-                cout << "posInString: " << posInString << " N: " << N << " posInBlock: " << posInBlock << endl;
+                //cout << "posInString: " << posInString << " N: " << N << " posInBlock: " << posInBlock << endl;
                 if (binaryString[posInString] == binaryString[posInBlock])
                 {
                     numChangesIfChange++;
@@ -255,7 +262,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
                 posInString += blockSize;
             }
 
-            cout << "blockSize: " << blockSize << " posInBlock: " << posInBlock << " numChangesIfChange: " << numChangesIfChange << " numChangesIfDontChange: " << numChangesIfDontChange << endl;
+            //cout << "blockSize: " << blockSize << " posInBlock: " << posInBlock << " numChangesIfChange: " << numChangesIfChange << " numChangesIfDontChange: " << numChangesIfDontChange << endl;
             if (posInBlock == 0)
             {
                 if (numChangesIfDontChange <= K)
@@ -274,10 +281,10 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
                 }
             }
             periodicLastWithNumChanges = nextPeriodicLastWithNumChanges;
-            cout << " after posInBlock: " << posInBlock << " periodicLastWithNumChanges: " << endl;
+            //cout << " after posInBlock: " << posInBlock << " periodicLastWithNumChanges: " << endl;
             for (int numChanges = 0; numChanges <= K; numChanges++)
             {
-                cout << " periodicLastWithNumChanges[" << numChanges << " ]: " << periodicLastWithNumChanges[numChanges] << endl;
+                //cout << " periodicLastWithNumChanges[" << numChanges << " ]: " << periodicLastWithNumChanges[numChanges] << endl;
             }
 
         }
@@ -286,7 +293,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         {
             periodicStringsMadeWithBlocksize += periodicLastWithNumChanges[numChanges];
         }
-        cout << " periodicStringsMadeWithBlocksize: " << blockSize << " = "  << periodicStringsMadeWithBlocksize << endl;
+        //cout << " periodicStringsMadeWithBlocksize: " << blockSize << " = "  << periodicStringsMadeWithBlocksize << endl;
         //periodicStringsMade += periodicStringsMadeWithBlocksize;
 
         //if (blockSize == 1)
@@ -299,6 +306,10 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         //cout << "numPeriodicWithBlocksizeOne: " << numPeriodicWithBlocksizeOne << endl;
 
         periodicStringsMadeBy[blockSize] = periodicStringsMadeWithBlocksize;
+    }
+    for (const auto blockSize : blockSizes)
+    {
+        assert(numWithPeriod[blockSize] == periodicStringsMadeBy[blockSize]);
     }
 
     vector<ModNum> F(periodicStringsMadeBy);
@@ -316,7 +327,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
     ModNum periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
-        cout << "blockSize: " << blockSize << " F: " << F[blockSize] << endl;
+        //cout << "blockSize: " << blockSize << " F: " << F[blockSize] << endl;
         periodicStringsMade += F[blockSize];
     }
 #if 0
@@ -334,7 +345,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         }
     }
 #endif
-    cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
+    //cout << "totalStringsMadeWithChanges: " << totalStringsMadeWithChanges << " periodicStringsMade: " << periodicStringsMade << endl;
     return totalStringsMadeWithChanges - periodicStringsMade;
 }
 
@@ -348,7 +359,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 24 + 1;
+        const int N = rand() % 15 + 1;
         const int K = rand() % (N + 1);
 
         string binaryString;
@@ -363,13 +374,12 @@ int main(int argc, char* argv[])
         return 0;
 
     }
-    cout << "flipple: " << isPeriodic("011010011") << endl;
     int T;
     cin >> T;
 
     for (int t = 0; t < T; t++)
     {
-        cout << "t: " << t << endl;
+        //cout << "t: " << t << endl;
         int N;
         cin >> N;
         int K;
@@ -377,11 +387,17 @@ int main(int argc, char* argv[])
         string binaryString;
         cin >> binaryString;
 
+#ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(binaryString, N, K);
+#endif
 
         const auto solutionOptimised = solveOptimised(binaryString, N, K);
+#ifdef BRUTE_FORCE
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
         cout << "solutionOptimised: " << solutionOptimised << endl;
+#else
+        cout << solutionOptimised << endl;
+#endif
         
         assert(solutionOptimised == solutionBruteForce);
     }
