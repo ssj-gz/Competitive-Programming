@@ -127,6 +127,9 @@ int solutionOptimised(const vector<int>& aOriginal)
             const auto& blocks = blocksShiftedBy[i];
             cout << "i: " << i << endl;
             cout << "shifted as binary string: " << blocksToBinaryString(blocks) << endl;
+        }
+#endif
+#if 0
             vector<int> bBlah;
             for (auto x : a)
             {
@@ -167,18 +170,23 @@ int solutionOptimised(const vector<int>& aOriginal)
         {
             withRemainder[x % numInBlock].push_back(x);
         }
-        vector<uint64_t> bBlocks(a.size());
+        vector<uint64_t> bBlocks(numBlocks + 1, 0);
         for (int i = 0; i < numInBlock; i++)
         {
             for (const auto x : withRemainder[i])
             {
                 const auto numBlocksToShift = x / numInBlock;
+                //cout << "About to add all shifted by " << x << "; (numBlocksToShift: " << numBlocksToShift << ") bBlocks now: " << blocksToBinaryString(bBlocks) << endl;
+                //cout << "(blocksShiftedBy[" << i << "] : " << blocksToBinaryString(blocksShiftedBy[i]) << ")" << endl;
                 for (int j = 0; j + numBlocksToShift < numBlocks; j++)
                 {
                     bBlocks[j] |= blocksShiftedBy[i][j + numBlocksToShift];
                 }
+                //cout << "Add all shifted by " << x << "; (numBlocksToShift: " << numBlocksToShift << ") bBlocks now: " << blocksToBinaryString(bBlocks) << endl;
+                //cout << "(blocksShiftedBy[" << i << "] : " << blocksToBinaryString(blocksShiftedBy[i]) << ")" << endl;
             }
         }
+        cout << "bBlocks: " << blocksToBinaryString(bBlocks) << endl;
         vector<int> b;
         for (int j = 0; j < numBlocks; j++)
         {
@@ -197,6 +205,7 @@ int solutionOptimised(const vector<int>& aOriginal)
             b.erase(b.begin());
         }
 
+#ifdef BRUTE_FORCE
         set<int> bDebugSet;
         for (const auto x : a)
         {
@@ -209,8 +218,6 @@ int solutionOptimised(const vector<int>& aOriginal)
             }
         }
         vector<int> bDebug(bDebugSet.begin(), bDebugSet.end());
-
-
         cout << "bDebug: " << endl;
         for (const auto x : bDebug)
         {
@@ -224,6 +231,7 @@ int solutionOptimised(const vector<int>& aOriginal)
         }
         cout << endl;
         assert(bDebug == b);
+#endif
 
         a = b;
         numIterations++;
@@ -267,8 +275,8 @@ int main(int argc, char* argv[])
         cin >> a[i];
     }
 
-    //const int bruteForceResult = solutionBruteForce(a);
-    //cout << "bruteForceResult: " << bruteForceResult << endl;
+    const int bruteForceResult = solutionBruteForce(a);
+    cout << "bruteForceResult: " << bruteForceResult << endl;
 
     const int optimisedResult = solutionOptimised(a);
     cout << "optimisedResult: " << optimisedResult << endl;
