@@ -173,7 +173,6 @@ ModNum computeNumStringsWithUpToKChanges(int N, int K)
     {
         numStrings += numOfLengthWithChanges[N][numChanges];
     }
-    //cout << "total optimised: " <<  numStrings << endl;
     return numStrings;
 }
 
@@ -259,7 +258,7 @@ ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
     }
 
     // Calculate numWithMinPeriod[blockSize] for each blockSize: this is the number
-    // of strings of period blockSize which do *not* have period less than blockSize. 
+    // of strings of period blockSize which do *not* also have a period less than blockSize. 
     vector<ModNum> numWithMinPeriod(numWithPeriod);
     for (const auto blockSize : blockSizes)
     {
@@ -274,7 +273,8 @@ ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
     }
 
     // Final tally - numWithMinPeriod is used instead of numWithPeriod as the latter overcounts
-    // e.g. numWithPeriod[4] would also include numWithPeriod[2] and numWithPeriod[1].
+    // e.g. numWithPeriod[4] would also include numWithPeriod[2] and numWithPeriod[1],
+    // whereas numWithMinPeriod[4] does not.
     ModNum periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
