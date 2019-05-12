@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-05-12
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -122,8 +122,6 @@ bool isPeriodic(const string& a)
     return !periods(a).empty();
 }
 
-vector<int> numWithPeriod;
-
 void blah(string& alteredStringSoFar, int nextIndex, int K, const string& originalString, ModNum& numNonPeriodicFound, ModNum& totalFound)
 {
     if (nextIndex == originalString.size())
@@ -135,16 +133,6 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
         if (numChanges(alteredStringSoFar, originalString) <= K)
         {
             totalFound++;
-            if (isPeriodic(alteredStringSoFar))
-            {
-                cout << "Made periodic string " << alteredStringSoFar << "(periods: ";
-                for (const auto period : periods(alteredStringSoFar))
-                {
-                    cout << " " << period;
-                    numWithPeriod[period]++;
-                }
-                cout <<  ") with " << numChanges(alteredStringSoFar, originalString) << " changes" << endl;
-            }
         }
         return;
     }
@@ -157,8 +145,6 @@ void blah(string& alteredStringSoFar, int nextIndex, int K, const string& origin
 
 ModNum solveBruteForce(const string& binaryString, int N, int K)
 {
-    numWithPeriod.clear();
-    numWithPeriod.resize(N + 1);
     string alteredStringSoFar = binaryString;
     ModNum numNonPeriodicFound = 0;
     ModNum totalFound = 0;
@@ -215,7 +201,7 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
         }
     }
 
-    vector<ModNum> periodicStringsMadeBy(N + 1);
+    vector<ModNum> numWithPeriod(N + 1);
 
     for (const auto blockSize : blockSizes)
     {
@@ -269,20 +255,20 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
             periodicStringsMadeWithBlocksize += periodicLastWithNumChanges[numChanges];
         }
 
-        periodicStringsMadeBy[blockSize] = periodicStringsMadeWithBlocksize;
-    }
-    for (const auto blockSize : blockSizes)
-    {
-        assert(numWithPeriod[blockSize] == periodicStringsMadeBy[blockSize]);
+        numWithPeriod[blockSize] = periodicStringsMadeWithBlocksize;
     }
 
-    vector<ModNum> F(periodicStringsMadeBy);
+    // Calculate numWithMinPeriod[blockSize] for each blockSize: this is the number
+    // of strings of period blockSize which do *not* have period less than blockSize. 
+    vector<ModNum> numWithMinPeriod(numWithPeriod);
     for (const auto blockSize : blockSizes)
     {
         int factor = 2 * blockSize;
         while (factor <= N)
         {
-            F[factor] -= F[blockSize];
+            // All periodics strings with period "factor" also give rise to numWithMinPeriod[blockSize]
+            // strings with period blockSize - subtract.
+            numWithMinPeriod[factor] -= numWithMinPeriod[blockSize];
             factor += blockSize;
         }
     }
@@ -290,15 +276,13 @@ ModNum solveOptimised(const string& binaryString, int N, int K)
     ModNum periodicStringsMade = 0;
     for (const auto blockSize : blockSizes)
     {
-        periodicStringsMade += F[blockSize];
+        periodicStringsMade += numWithMinPeriod[blockSize];
     }
     return totalStringsMadeWithChanges - periodicStringsMade;
 }
 
 int main(int argc, char* argv[])
 {
-
-
     if (argc == 2)
     {
         struct timeval time;
@@ -347,6 +331,4 @@ int main(int argc, char* argv[])
         
         assert(solutionOptimised == solutionBruteForce);
     }
-
-
 }
