@@ -340,6 +340,8 @@ int main(int argc, char* argv[])
     //
     // That's about it - kind of a weird problem, and not really Expert-rated, IMO, especially if you skip some of the
     // more awkward logic and just use the "if |A| <= sqrt(N), compute B naively" approach.
+    //
+    // Kind of surprised at the (at the time of writing) < 10% completion rate.
 
     if (argc == 2)
     {
