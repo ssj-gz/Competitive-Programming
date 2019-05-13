@@ -56,8 +56,8 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         grundyNumbers.insert(xorSum);
         return;
     }
-#if 0
-    if (pilesSoFar.size() == maxNewPilesPerMove)
+#if 1
+    if (pilesSoFar.size() == maxNewPilesPerMove - 1)
     {
         if (numStonesRemaining >= 1)
         {
@@ -78,7 +78,7 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
 }
 int main(int argc, char* argv[])
 {
-    const int maxGrundyNumber = 300;
+    const int maxGrundyNumber = 600;
     for (int i = 1; i <= maxGrundyNumber; i++)
     {
         //cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
