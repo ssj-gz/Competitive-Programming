@@ -7,12 +7,16 @@ using namespace std;
 const int maxPileSize = 600;
 vector<int> grundyNumberForPileSizeLookup(maxPileSize + 1, -1);
 
+const int maxNewPilesPerMove = 3;
+
 void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, vector<int>& pilesSoFar, set<int>& grundyNumbers);
 
 int grundyNumberForPileSize(int pileSize)
 {
     if (grundyNumberForPileSizeLookup[pileSize] != -1)
         return grundyNumberForPileSizeLookup[pileSize];
+
+    cout << "Computing grundyNumberForPileSize: " << pileSize << endl;
 
     vector<int> pilesSoFar;
     set<int> grundyNumbersFromMoves;
@@ -26,19 +30,24 @@ int grundyNumberForPileSize(int pileSize)
     }
 
     grundyNumberForPileSizeLookup[pileSize] = grundyNumber;
+    cout << "Finished computing grundyNumberForPileSize: " << pileSize << endl;
     return grundyNumber;
 }
 
 void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, vector<int>& pilesSoFar, set<int>& grundyNumbers)
 {
+    if (pilesSoFar.size() > maxNewPilesPerMove)
+    {
+        return;
+    }
     if (numStonesRemaining == 0 && pilesSoFar.size() >= 2)
     {
-        cout << "Found new set of piles: " << endl;
-        for (const auto x : pilesSoFar)
-        {
-            cout << " " << x;
-        }
-        cout << endl;
+        //cout << "Found new set of piles: " << endl;
+        //for (const auto x : pilesSoFar)
+        //{
+            //cout << " " << x;
+        //}
+        //cout << endl;
         int xorSum = 0;
         for (const auto x : pilesSoFar)
         {
@@ -47,6 +56,18 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         grundyNumbers.insert(xorSum);
         return;
     }
+#if 0
+    if (pilesSoFar.size() == maxNewPilesPerMove)
+    {
+        if (numStonesRemaining >= 1)
+        {
+            pilesSoFar.push_back(numStonesRemaining);
+            computeGrundyNumbersForMovesWithPileSize(0, 0, pilesSoFar, grundyNumbers);
+            pilesSoFar.pop_back();
+        }
+        return;
+    }
+#endif
 
     for (int i = nextMinStones; numStonesRemaining - i >= 0; i++)
     {
@@ -57,12 +78,13 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
 }
 int main(int argc, char* argv[])
 {
-    for (int i = 1; i <= 10; i++)
+    const int maxGrundyNumber = 300;
+    for (int i = 1; i <= maxGrundyNumber; i++)
     {
         //cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
         grundyNumberForPileSize(i);
     }
-    for (int i = 1; i <= 10; i++)
+    for (int i = 1; i <= maxGrundyNumber; i++)
     {
         cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
     }
