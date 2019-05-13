@@ -7,6 +7,18 @@
 
 using namespace std;
 
+string asBinary(int n)
+{
+    string binaryString;
+    while (n > 0)
+    {
+        const char digit = '0' + (n & 1);
+        binaryString.push_back(digit);
+        n >>= 1;
+    }
+    return binaryString;
+}
+
 void solve(int indexToChange, vector<uint64_t>& permutationSoFar, int& solution)
 {
     if (indexToChange == permutationSoFar.size())
@@ -17,6 +29,10 @@ void solve(int indexToChange, vector<uint64_t>& permutationSoFar, int& solution)
             cout << " " << x;
         }
         cout << endl;
+        for (const auto x : permutationSoFar)
+        {
+            cout << asBinary(x) << endl;
+        }
         uint64_t xorSum = std::numeric_limits<uint64_t>::max();
         for (int i = 0; i < permutationSoFar.size() - 1; i++)
         {
