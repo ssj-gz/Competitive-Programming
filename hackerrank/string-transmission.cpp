@@ -210,7 +210,7 @@ ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
 
         for (int posInBlock = 0; posInBlock < blockSize; posInBlock++)
         {
-            vector<ModNum> nextPeriodicLastWithNumChanges(K + 1, 0);
+            vector<ModNum> nextPeriodicWithNumChanges(K + 1, 0);
             auto numChangesIfDontChange = 0;
             auto numChangesIfChange = 1; // At least one change if we change the digit at this posInBlock!
 
@@ -231,21 +231,21 @@ ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
             if (posInBlock == 0)
             {
                 if (numChangesIfDontChange <= K)
-                    nextPeriodicLastWithNumChanges[numChangesIfDontChange]++;
+                    nextPeriodicWithNumChanges[numChangesIfDontChange]++;
                 if (numChangesIfChange <= K)
-                    nextPeriodicLastWithNumChanges[numChangesIfChange]++;
+                    nextPeriodicWithNumChanges[numChangesIfChange]++;
             }
             else
             {
                 for (int numChanges = 0; numChanges <= K; numChanges++)
                 {
                     if (numChanges - numChangesIfDontChange >= 0)
-                        nextPeriodicLastWithNumChanges[numChanges] += periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
+                        nextPeriodicWithNumChanges[numChanges] += periodicLastWithNumChanges[numChanges - numChangesIfDontChange];
                     if (numChanges - numChangesIfChange >= 0)
-                        nextPeriodicLastWithNumChanges[numChanges] += periodicLastWithNumChanges[numChanges - numChangesIfChange];
+                        nextPeriodicWithNumChanges[numChanges] += periodicLastWithNumChanges[numChanges - numChangesIfChange];
                 }
             }
-            periodicLastWithNumChanges = nextPeriodicLastWithNumChanges;
+            periodicLastWithNumChanges = nextPeriodicWithNumChanges;
 
         }
         ModNum periodicStringsMadeWithBlocksize = 0;
@@ -285,6 +285,98 @@ ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
 
 int main(int argc, char* argv[])
 {
+    // Fundamentally fairly easy, but the final hurdle - the bit that assembles the "numWithPeriod"
+    // information into the final answer - was quite hard :)
+    //
+    // So: as is probably obvious, the easiest approach is to count the number of *periodic* strings
+    // that can be formed by up to K changes and then subtract that from the number of *all* strings
+    // (totalStringsMadeWithChanges) that can be formed by up to K changes to give the final result.
+    //
+    // If a string has a length N, then the only possible periods it can have are the proper factors
+    // of N, so it makes sense to try, for each proper factor (blockSize, say) of N, to find the number of 
+    // strings with period blockSize that can be formed from that string.
+    //
+    // So divide N into N / blockSize chunks e.g. for N = 12, blockSize = 4 (a proper factor of N):
+    //
+    //    1101 1111 1001
+    //
+    // A string s has period blockSize if and only if all of the following hold:
+    //
+    //    s[0] == s[blockSize] == s[blockSize * 2] ... == s[N - blockSize]
+    //    s[1] == s[blockSize + 1] == s[blockSize * 2 + 1] ... == s[N - blockSize + 1]
+    //     ...
+    //    s[blockSize - 1] == s[blockSize + (blockSize - 1)] == s[blockSize * 2 + (blockSize - 1)] ... == s[N - blockSize + (blockSize - 1)]
+    //
+    // That is, for a string with period blockSize, all digits from blockSize up to N - 1 are *dictated* by the values 0 ... blockSize - 1.
+    // So let's concentrate on these first blockSize digits.
+    //
+    // Let F[x][y] represent the number of ways of changing the first x elements (and then, accordingly, the elements 
+    // s[blockSize], s[2 * blockSize] ... s[N - blockSize]; s[blockSize + 1], s[blockSize + 2] ... s[N - blockSize + 1]; ...
+   //  s[blockSize + (x - 1)], s[2 * blockSize + (x - 1)] ... s[N - blockSize + (x - 1)] of s) so that
+    //   
+    //    s[0] == s[blockSize] == s[blockSize * 2] ... == s[N - blockSize]
+    //    s[1] == s[blockSize + 1] == s[blockSize * 2 + 1] ... == s[N - blockSize + 1]
+    //    ...
+    //    s[x - 1] == s[blockSize + (x - 1)] == s[blockSize * 2 + (x - 1)] ... == s[N - blockSize + (x - 1)] (*)
+    //
+    // and so that the total number of changes made is precisely equal to y; then the number of ways of generating a string
+    // with period blockSize by making up to K changes to s would be:
+    //
+    //   F[blockSize][0] + F[blockSize][1] ... F[blockSize][K].
+    //
+    // How do we calculate F[x][y]? Assume we've calculated F[x - 1][y] for all y <= K.
+    // We need to change, or leave alone, s[x-1], and then change, or leave alone, 
+    // the elements s[blockSize + (x - 1)], s[2 * blockSize + (x - 1)] ... s[N - blockSize + (x - 1)] so as to ensure that (*) holds
+    //
+    // If we leave s[x-1] unchanged, then we need to change all elements s[z * blockSize + (x - 1)] (z > 1)
+    // such that s[z * blockSize + (x - 1)] != s[x-1].  This number of changes is easily computable, and is called numChangesIfDontChange
+    // in the code.
+    //
+    // Similarly, if we do change s[x-1], then we need to change all elements s[z * blockSize + (x - 1)] (z > 1)
+    // such that s[z * blockSize + (x - 1)] == s[x-1], and s[x-1] itself.  This number of changes is called numChangesIfChange in the code.
+    //
+    // Thus:
+    //
+    //   for y = 0, 1, ... K, F[x][y] = F[x-1][y - numChangesIfChange] + F[x-1][y - numChangesIfDontChange]
+    //
+    // So this is all easily computable.  Note that computing F[x][y] only requires F[x-1][y'], so we don't need a two dimensional array.
+    // The one-dimensional version of F is called periodicLastWithNumChanges in the code.
+    //
+    // So we can compute F very easily, and from this we can find numWithPeriod[blockSize]; now we can just sum numWithPeriod[blockSize] for
+    // each proper factor blockSize of N and get the result, yes?
+    //
+    // Not quite that simple, alas: the "period" of a string is not very well-defined.
+    //
+    // Consider the string s of length N = 8, below: 
+    //
+    //   1010 1010
+    //
+    // It's clearly periodic, with period 4.  But it's also periodic with period 2:
+    //
+    //   10 10 10 10
+    //
+    // and so naively summing the numWithPeriod[blockSize] for each factor blockSize would count this particular string multiple times: once
+    // for blockSize = 4; again for blockSize = 2.
+    //
+    // An even worse example:
+    //
+    //   11111111
+    //
+    // This has periods 1, 2 and 4, so would be counted three times.
+    //
+    // This is a little tricky to deal with: the central insight is that if a string has period blockSize, then it has period blockSize * factor
+    // for each factor such that blockSize * factor is still a factor of N.  For example, the 11111111 has period blockSize = 1, and also has 
+    // period blockSize * 2 = 4 (factor == 2), and period blockSize * 4 = 4 (factor == 4).  Thus, let's create a new array, numWithMinPeriod:
+    // numWithMinPeriod[x] will be the number of strings formable of period x, but not of period less than x.  It's hopefully easy to see that
+    // we can form numWithMinPeriod fairly simply: first set numWithMinPeriod = numWithPeriod.  Then note that numWithMinPeriod[1] == numWithPeriod[1]
+    // (can't have a period less than 1!).  Then, whenever we have definitely computed numWithMinPeriod[x], subtract numWithMinPeriod[x] from
+    // all numWithMinPeriod[y] such that y is a multiple of x and a factor of N.  We have "definitely computed" numWithMinPeriod[x] when we have
+    // definitely computed numWithMinPeriod[f] for each proper factor of f.
+
+    // This essential filters out the overcounting once and only once for each string that would have been overcounted had we just naively tallied numWithPeriod,
+    // so tallying numWithMinPeriod now gives the correct result.
+    //
+    // And that's it!
     if (argc == 2)
     {
         struct timeval time;
