@@ -1,15 +1,11 @@
 // Simon St James (ssjgz) - 2019-05-12
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <cassert>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -80,79 +76,6 @@ bool operator==(const ModNum& lhs, const ModNum& rhs)
     return lhs.value() == rhs.value();
 }
 
-
-
-int numChanges(const string& a, const string& b)
-{
-    int numChanges = 0;
-    assert(a.size() == b.size());
-    for (int i = 0; i < a.size(); i++)
-    {
-        if (a[i] != b[i])
-            numChanges++;
-    }
-    return numChanges;
-
-}
-
-vector<int> periods(const string& a)
-{
-    vector<int> periods;
-    for (int length = 1; length < a.size(); length++)
-    {
-        int startPos = length;
-        bool periodIsLength = true;
-        while (startPos < a.size())
-        {
-            if (a.substr(0, length) != a.substr(startPos, length))
-            {
-                periodIsLength = false;
-                break;
-            }
-            startPos += length;
-        }
-        if (periodIsLength)
-            periods.push_back(length);
-    }
-    return periods;
-}
-
-bool isPeriodic(const string& a)
-{
-    return !periods(a).empty();
-}
-
-void blah(string& alteredStringSoFar, int nextIndex, int K, const string& originalString, ModNum& numNonPeriodicFound, ModNum& totalFound)
-{
-    if (nextIndex == originalString.size())
-    {
-        if (numChanges(alteredStringSoFar, originalString) <= K && !isPeriodic(alteredStringSoFar))
-        {
-            numNonPeriodicFound++;
-        }
-        if (numChanges(alteredStringSoFar, originalString) <= K)
-        {
-            totalFound++;
-        }
-        return;
-    }
-    blah(alteredStringSoFar, nextIndex + 1, K, originalString, numNonPeriodicFound, totalFound);
-
-    alteredStringSoFar[nextIndex] = '0' + ('1' - alteredStringSoFar[nextIndex]);
-    blah(alteredStringSoFar, nextIndex + 1, K, originalString, numNonPeriodicFound, totalFound);
-    alteredStringSoFar[nextIndex] = '0' + ('1' - alteredStringSoFar[nextIndex]);
-} 
-
-ModNum solveBruteForce(const string& binaryString, int N, int K)
-{
-    string alteredStringSoFar = binaryString;
-    ModNum numNonPeriodicFound = 0;
-    ModNum totalFound = 0;
-    blah(alteredStringSoFar, 0, K, binaryString, numNonPeriodicFound, totalFound);
-    cout << "totalFound: " << totalFound << endl;
-    return numNonPeriodicFound;
-}
-
 ModNum computeNumStringsWithUpToKChanges(int N, int K)
 {
     vector<vector<ModNum>> numOfLengthWithChanges(N + 1, vector<ModNum>(K + 1, 0));
@@ -204,8 +127,6 @@ ModNum findPossibleSourceMessages(const string& binaryString, int N, int K)
 
     for (const auto blockSize : blockSizes)
     {
-        const auto numBlocks = N / blockSize;
-
         vector<ModNum> periodicLastWithNumChanges(K + 1, 0);
 
         for (int posInBlock = 0; posInBlock < blockSize; posInBlock++)
@@ -377,33 +298,11 @@ int main(int argc, char* argv[])
     // so tallying numWithMinPeriod now gives the correct result.
     //
     // And that's it!
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int N = rand() % 15 + 1;
-        const int K = rand() % (N + 1);
-
-        string binaryString;
-        for (int i = 0; i < N; i++)
-        {
-            binaryString += '0' + (rand() % 2);
-        }
-        cout << 1 << endl;
-        cout << N << " " << K << endl;
-        cout << binaryString << endl;
-
-        return 0;
-
-    }
     int T;
     cin >> T;
 
     for (int t = 0; t < T; t++)
     {
-        //cout << "t: " << t << endl;
         int N;
         cin >> N;
         int K;
@@ -411,18 +310,9 @@ int main(int argc, char* argv[])
         string binaryString;
         cin >> binaryString;
 
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(binaryString, N, K);
-#endif
 
         const auto solution = findPossibleSourceMessages(binaryString, N, K);
-#ifdef BRUTE_FORCE
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        cout << "solutionOptimised: " << solution << endl;
-#else
         cout << solution << endl;
-#endif
         
-        assert(solution == solutionBruteForce);
     }
 }
