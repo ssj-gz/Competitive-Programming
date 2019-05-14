@@ -2,12 +2,16 @@
 #include <vector>
 #include <set>
 
+#include <chrono>
+
+
+
 using namespace std;
 
 const int maxPileSize = 600;
 vector<int> grundyNumberForPileSizeLookup(maxPileSize + 1, -1);
 
-const int maxNewPilesPerMove = 3;
+const int maxNewPilesPerMove = 4;
 
 void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, vector<int>& pilesSoFar, set<int>& grundyNumbers);
 
@@ -30,7 +34,7 @@ int grundyNumberForPileSize(int pileSize)
     }
 
     grundyNumberForPileSizeLookup[pileSize] = grundyNumber;
-    cout << "Finished computing grundyNumberForPileSize: " << pileSize << endl;
+    cout << "Finished computing grundyNumberForPileSize: " << pileSize << " (result is: " << grundyNumber << "; max(grundyNumbersFromMoves): " << (grundyNumbersFromMoves.empty() ? -1 : *std::prev(grundyNumbersFromMoves.end())) << ")" << endl;
     return grundyNumber;
 }
 
@@ -78,7 +82,7 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
 }
 int main(int argc, char* argv[])
 {
-    const int maxGrundyNumber = 600;
+    const int maxGrundyNumber = 100;
     for (int i = 1; i <= maxGrundyNumber; i++)
     {
         //cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
@@ -89,5 +93,30 @@ int main(int argc, char* argv[])
         cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
     }
 
+
+    // This just actually *do* anything - it's just a simulation of the kind of computations
+    // we'll have to perform in order to solve this problem, so we can see roughly how long
+    // it will take to run.
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    const int blah = 600;
+    vector<vector<int>> blee(blah, vector<int>(blah));
+    for (int i = 1; i <= 10; i++)
+    {
+        vector<vector<int>> bloo(blah, vector<int>(blah));
+        for (int x = 0; x < blah; x++)
+        {
+            for (int y = 0; y < blah; y++)
+            {
+                for (int z = x; z < blah; z++)
+                {
+                    bloo[z - x][y] = blee[x][y] ^ y;
+                }
+            }
+        }
+
+        blee = bloo;
+    }
+    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
 }
 
