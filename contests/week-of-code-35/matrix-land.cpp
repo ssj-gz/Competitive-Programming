@@ -60,10 +60,10 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     //
     // The answer is "yes, if and only if bestCumulative[bestDescend[r] - 1] is >= 0".  If it is not i.e. if bestCumulative[bestDescend[r] - 1] < 0,
     // then by definition of bestCumulative[bestDescend[r] - 1], eating any squares starting from bestDescend[r] - 1 and moving leftward must worsen
-    // our score.  Otherwise, if bestCumulative[bestDescend[r] - 1], then we can (and indeed, must!) increase our score by also eating from
+    // our score.  Otherwise, if bestCumulative[bestDescend[r] - 1] >= 0, then we can (and indeed, must!) increase our score by also eating from
     // bestCumulativeLeft[bestDescend[r] - 1] to bestDescend[r] - 1.  So if bestCumulative[bestDescend[r] - 1] >= 0, 
-    // bestCumulativeLeft[r] == bestCumulative[bestDescend[r] - 1]; else bestCumulativeLeft[r] = bestDescend[r].  With a little book-keeping, 
-    // we can then, assumiong we already know bestDescend[r], instantly (O(1)) compute bestScore[r].
+    // bestLeft[r] == bestCumulative[bestDescend[r] - 1]; else bestLeft[r] = bestDescend[r].  With a little book-keeping, 
+    // we can then, assuming we already know bestDescend[r], instantly (O(1)) compute bestScore[r].
     // 
     // For index r and d <= r, define then:
     //
@@ -106,7 +106,7 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     // Assume otherwise; that is, that bestDescend[y + 1] is neither bestDescend[r] nor r + 1.
     //
     // Since bestDescend[r + 1] != bestDescend[r], it must be that descending at bestDescend[r + 1] (when trying to compute bestScore[r + 1])
-    // gives a strictly better score than descending at bestDescend[y]; that is:
+    // gives a strictly better score than descending at bestDescend[r]; that is:
     //
     //    deducedFromBestDescend(bestDescend[r + 1], r + 1) > deducedFromBestDescend(bestDescend[r], r + 1)
     //
@@ -116,7 +116,7 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     //  
     //    deducedFromBestDescend(bestDescend[r + 1], r) + row[r + 1] > deducedFromBestDescend(bestDescend[r], r + 1)
     //
-    // and since bestDescend[r] <= r by definition, we can use the Lemma to re-write the RHS giving:
+    // and since bestDescend[r] <= r by definition, we can use the Lemma again this time to re-write the RHS, giving:
     //  
     //    deducedFromBestDescend(bestDescend[r + 1], r) + row[r + 1] > deducedFromBestDescend(bestDescend[r], r) + row[r + 1]
     //
@@ -134,7 +134,7 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     //  QED
     //
     //  How does this help? Well, it means that if we have computed bestDescend[x] for 0 <= x <= r, we can easily deduce bestDescend[r + 1] from 
-    //  it: it is either bestDescend[r] or r + 1, which ever gives the largest value when we plug it into deducedFromBestDescend i.e.
+    //  it: it is either bestDescend[r] or r + 1, whichever gives the largest value when we plug it into deducedFromBestDescend i.e.
     //
     //  bestDescend[r + 1] = r + 1 if deducedFromBestDescend(r + 1, r + 1) is greater than deducedFromBestDescend(bestDescend[r], r + 1), or 
     //                       bestDescend[r] otherwise.
@@ -146,8 +146,8 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     //
     // Computing deducedFromBestDescend(r + 1, r + 1) is also trivial:
     //
-    //    deducedFromBestDescend(r + 1, r + 1) = sum [ r + 1 <= x <= r + 1 ] { row[x] } + max(0, bestCumulative[(r + 1) - 1] + scoreIfDescendAt[r + 1]
-    //                                         = row[r + 1] + max(0, bestCumulative[r] + scoreIfDescendAt[r + 1]
+    //    deducedFromBestDescend(r + 1, r + 1) = sum [ r + 1 <= x <= r + 1 ] { row[x] } + max(0, bestCumulative[(r + 1) - 1]) + scoreIfDescendAt[r + 1]
+    //                                         = row[r + 1] + max(0, bestCumulative[r]) + scoreIfDescendAt[r + 1]
     //
     // If we keep bestCumulative up to date as we go along (using Kadane's Algorithm), then this can be computed in O(1).
     // 
@@ -156,25 +156,25 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     vector<int> result(row.size());
     int bestScore = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
     int bestCumulative = numeric_limits<int>::min();
-    for (int startPoint = 0; startPoint < row.size(); startPoint++)
+    for (int r = 0; r < row.size(); r++)
     {
-        bestScore += row[startPoint];
+        bestScore += row[r];
 
         if (bestCumulative < 0)
         {
             // Just as in Kadane's algorithm, if breaking with the existing
             // bestCumulative give a better result, then do so.
-            bestCumulative = row[startPoint];
+            bestCumulative = row[r];
         }
         else
-            bestCumulative += row[startPoint];
+            bestCumulative += row[r];
 
-        if (bestCumulative + scoreIfDescendAt[startPoint] > bestScore)
+        if (bestCumulative + scoreIfDescendAt[r] > bestScore)
         {
-            bestScore = bestCumulative + scoreIfDescendAt[startPoint];
+            bestScore = bestCumulative + scoreIfDescendAt[r];
         }
 
-        result[startPoint] = bestScore;
+        result[r] = bestScore;
 
     }
     return result;
