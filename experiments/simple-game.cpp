@@ -108,16 +108,17 @@ int main(int argc, char* argv[])
     // we'll have to perform in order to solve this problem, so we can see roughly how long
     // it will take to run.
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    vector<vector<uint64_t>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
+    vector<vector<int>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1));
     for (int i = 1; i <= totalNumStones; i++)
     {
         numWithGrundyNumberAndNumStones[grundyNumberForPileSizeLookup[i]][i] = 1;
     }
     for (int i = 1; i <= numPiles; i++)
     {
-        vector<vector<uint64_t>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1, 0));
+        vector<vector<int>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1, 0));
         for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
         {
+            const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
             for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
             {
                 for (int numStonesNewColumn = 1; numStonesNewColumn + numStonesSoFar <= totalNumStones; numStonesNewColumn++)
@@ -131,7 +132,7 @@ int main(int argc, char* argv[])
                     }
 #endif
                     //assert(newGrundyNumber <= maxGrundyNumber);
-                    nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] = (nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] + numWithGrundyNumberAndNumStones[grundySoFar][numStonesNewColumn + numStonesSoFar]) % ::modulus;
+                    nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] = (nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] + numWithNumStonesForGrundySoFar[numStonesNewColumn + numStonesSoFar]) % ::modulus;
                 }
             }
         }
