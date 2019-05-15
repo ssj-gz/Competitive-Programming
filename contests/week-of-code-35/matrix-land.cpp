@@ -64,14 +64,101 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
     // bestCumulativeLeft[bestDescend[r] - 1] to bestDescend[r] - 1.  So if bestCumulative[bestDescend[r] - 1] >= 0, 
     // bestCumulativeLeft[r] == bestCumulative[bestDescend[r] - 1]; else bestCumulativeLeft[r] = bestDescend[r].  With a little book-keeping, 
     // we can then, assumiong we already know bestDescend[r], instantly (O(1)) compute bestScore[r].
+    // 
+    // For index r and d <= r, define then:
     //
-    // So the problem reduces to efficiently computing bestDescend[r] for each index r. TODO
+    //    deducedFromBestDescend(d, r) = sum [ d <= x <= r ] { row[x] } + max(0, bestCumulative[d - 1]) + scoreIfDescendAt[d].
+    //
+    // We can then write:
+    //
+    //    bestScore[r] = deducedFromBestDescend[bestDescend[r], r] 
+    //
+    // So the problem reduces to efficiently computing bestDescend[r] for each index r.
+    //
+    // Here's a quick lemma:
+    //
+    // Lemma
+    //
+    // If d <= r, then
+    //
+    //    deducedFromBestDescend(d, r + 1) = deducedFromBestDescend(d, r) + row[r + 1].
+    //
+    // Proof
+    //
+    // Expand deducedFromBestDescend(d, r + 1):
+    //
+    //    deducedFromBestDescend(d, r + 1) = sum [ d <= x <= r + 1 ] { row[x] } + max(0, bestCumulative[d - 1] + scoreIfDescendAt[d])
+    //                                     = sum [ d <= x <= r ] { row[x] } + row[r + 1] + max(0, bestCumulative[d - 1]) + scoreIfDescendAt[d]
+    //                                     = sum [ d <= x <= r ] { row[x] } + max(0, bestCumulative[d - 1]) + scoreIfDescendAt[d] + row[r + 1]
+    //
+    //  Since d <= r, we can rewrite this as 
+    //
+    //                                     = deducedFromBestDescend(d, r) + row[r + 1]
+    //
+    // QED
+    //
+    // Theorem
+    //
+    // bestDescend[r + 1] is either bestDescend[r] or r + 1.
+    //
+    // Proof
+    //
+    // Assume otherwise; that is, that bestDescend[y + 1] is neither bestDescend[r] nor r + 1.
+    //
+    // Since bestDescend[r + 1] != bestDescend[r], it must be that descending at bestDescend[r + 1] (when trying to compute bestScore[r + 1])
+    // gives a strictly better score than descending at bestDescend[y]; that is:
+    //
+    //    deducedFromBestDescend(bestDescend[r + 1], r + 1) > deducedFromBestDescend(bestDescend[r], r + 1)
+    //
+    // Since bestDescend[r + 1] <= r + 1 by definition, and bestDescend[r + 1] != r + 1 by assumption, we have that bestDescend[r + 1] <= r.
+    //
+    // Thus we may use the Lemma to re-write the LHS, giving:
+    //  
+    //    deducedFromBestDescend(bestDescend[r + 1], r) + row[r + 1] > deducedFromBestDescend(bestDescend[r], r + 1)
+    //
+    // and since bestDescend[r] <= r by definition, we can use the Lemma to re-write the RHS giving:
+    //  
+    //    deducedFromBestDescend(bestDescend[r + 1], r) + row[r + 1] > deducedFromBestDescend(bestDescend[r], r) + row[r + 1]
+    //
+    // i.e.
+    //
+    //    deducedFromBestDescend(bestDescend[r + 1], r) > deducedFromBestDescend(bestDescend[r], r)
+    //
+    // i.e.
+    //
+    //    deducedFromBestDescend(bestDescend[r + 1], r) > bestScore[r]
+    //
+    //  That is, if when computing bestScore[r], we descend at bestDescend[r + 1] instead of bestDescend[r], we end up with a strictly
+    //  better score, contradicting the maximality of bestScore[r].  Thus, our assumption leads to a contradiction.
+    //
+    //  QED
+    //
+    //  How does this help? Well, it means that if we have computed bestDescend[x] for 0 <= x <= r, we can easily deduce bestDescend[r + 1] from 
+    //  it: it is either bestDescend[r] or r + 1, which ever gives the largest value when we plug it into deducedFromBestDescend i.e.
+    //
+    //  bestDescend[r + 1] = r + 1 if deducedFromBestDescend(r + 1, r + 1) is greater than deducedFromBestDescend(bestDescend[r], r + 1), or 
+    //                       bestDescend[r] otherwise.
+    //
+    // Computing deducedFromBestDescend(bestDescend[r], r + 1) is easy (O(1)): from the lemma, it is just deducedFromBestDescend(bestDescend[r], r + 1) + row[r + 1]
+    // i.e. 
+    //
+    //    deducedFromBestDescend(bestDescend[r], r + 1) = bestScore[r] + row[r + 1]
+    //
+    // Computing deducedFromBestDescend(r + 1, r + 1) is also trivial:
+    //
+    //    deducedFromBestDescend(r + 1, r + 1) = sum [ r + 1 <= x <= r + 1 ] { row[x] } + max(0, bestCumulative[(r + 1) - 1] + scoreIfDescendAt[r + 1]
+    //                                         = row[r + 1] + max(0, bestCumulative[r] + scoreIfDescendAt[r + 1]
+    //
+    // If we keep bestCumulative up to date as we go along (using Kadane's Algorithm), then this can be computed in O(1).
+    // 
+    // And that's it! The code looks a little different to the analysis above, but this is mainly so that we can combine several steps and bits of bookkeeping
+    // into one for efficiency.
     vector<int> result(row.size());
-    int bestSum = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
+    int bestScore = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
     int bestCumulative = numeric_limits<int>::min();
     for (int startPoint = 0; startPoint < row.size(); startPoint++)
     {
-        bestSum += row[startPoint];
+        bestScore += row[startPoint];
 
         if (bestCumulative < 0)
         {
@@ -82,12 +169,12 @@ vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector
         else
             bestCumulative += row[startPoint];
 
-        if (bestCumulative + scoreIfDescendAt[startPoint] > bestSum)
+        if (bestCumulative + scoreIfDescendAt[startPoint] > bestScore)
         {
-            bestSum = bestCumulative + scoreIfDescendAt[startPoint];
+            bestScore = bestCumulative + scoreIfDescendAt[startPoint];
         }
 
-        result[startPoint] = bestSum;
+        result[startPoint] = bestScore;
 
     }
     return result;
