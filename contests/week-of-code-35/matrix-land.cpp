@@ -26,9 +26,46 @@ struct SubArrayInfo
     int maxDescendValue = 0;
 };
 
-
+/**
+ * Return an array F such that F(r) is the largest score we can obtain if we start r; eat
+ * some number of squares to the left of r (call l the square where we stop eating); and
+ * finally descend at some point d in the range we are from (i.e. l <= d <= r).
+ *
+ * That is, each F(r) is the maximal value over all l, d with l <= d <= r of 
+ *
+ *    sum [ l <= x <= r ] {row[x] } + scoreIfDescendAt[d]
+ */
 vector<int> findBestIfMovedFromAndDescended(const vector<int>& row, const vector<int>& scoreIfDescendAt)
 {
+    // For a given index r, define:
+    //
+    //   bestDescend[r] = d (as defined above);
+    //   bestLeft[r] = l (as defined above);
+    //   bestScore[r] = F(r) (as defined above).
+    //
+    // bestLeft[r], bestDescend[r] and bestScore[r] are all tightly related and knowing one of them
+    // often allows us to deduce the others: for example, if we know bestLeft[r], then bestDescend[d]
+    // is the d (l <= d <= r) that maximises scoreIfDescendAt[r], and 
+    // bestScore[r] = sum [ bestLeft[r] <= x <= r ] {row[x]} + bestDescend[d].
+    //
+    // Even more importantly, if we somehow know bestDescend[r], we can deduce bestLeft[r], and then bestScore[r]:
+    // define bestCumulativeLeft[x] for an index x to be the index in 0, 1, ... x such that the
+    // sum sum [bestCumulativeLeft[x] <= i <= x] {row[i]} (bestCumulativeLeft can be easily computed for all x using
+    // Kadane's algorithm).  Let bestCumulative[r] be this sum i.e 
+    // 
+    //   bestCumulative[x] = sum [bestCumulativeLeft[x] <= i <= x] {row[i]}
+    // 
+    // We must eat at least everything in the range bestDescend[r] ... r by definition of bestDescend[r], but to maximise 
+    // our score, should we eat beyond this range i.e. eat from bestDescend[r] - 1 and leftwards?
+    //
+    // The answer is "yes, if and only if bestCumulative[bestDescend[r] - 1] is >= 0".  If it is not i.e. if bestCumulative[bestDescend[r] - 1] < 0,
+    // then by definition of bestCumulative[bestDescend[r] - 1], eating any squares starting from bestDescend[r] - 1 and moving leftward must worsen
+    // our score.  Otherwise, if bestCumulative[bestDescend[r] - 1], then we can (and indeed, must!) increase our score by also eating from
+    // bestCumulativeLeft[bestDescend[r] - 1] to bestDescend[r] - 1.  So if bestCumulative[bestDescend[r] - 1] >= 0, 
+    // bestCumulativeLeft[r] == bestCumulative[bestDescend[r] - 1]; else bestCumulativeLeft[r] = bestDescend[r].  With a little book-keeping, 
+    // we can then, assumiong we already know bestDescend[r], instantly (O(1)) compute bestScore[r].
+    //
+    // So the problem reduces to efficiently computing bestDescend[r] for each index r. TODO
     vector<int> result(row.size());
     int bestSum = scoreIfDescendAt.front(); // Should be scoreIfDescendAt.front() + row[0], but the body of the loop adds the row[0] on the first iteration.
     int bestCumulative = numeric_limits<int>::min();
