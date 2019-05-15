@@ -132,7 +132,8 @@ int main(int argc, char* argv[])
                     }
 #endif
                     //assert(newGrundyNumber <= maxGrundyNumber);
-                    nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] = (nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] + numWithNumStonesForGrundySoFar[numStonesSoFar]) % ::modulus;
+                    auto& blah = nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar];
+                    blah = (blah + numWithNumStonesForGrundySoFar[numStonesSoFar]) % ::modulus;
                 }
             }
         }
