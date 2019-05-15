@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <cassert>
 
 #include <chrono>
 
@@ -11,7 +12,8 @@ using namespace std;
 const int maxPileSize = 600;
 vector<int> grundyNumberForPileSizeLookup(maxPileSize + 1, -1);
 
-const int maxNewPilesPerMove = 4;
+int maxNewPilesPerMove = -1;
+const uint64_t modulus = 1'000'000'007ULL;
 
 void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, vector<int>& pilesSoFar, set<int>& grundyNumbers);
 
@@ -82,13 +84,21 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
 }
 int main(int argc, char* argv[])
 {
-    const int maxGrundyNumber = 100;
-    for (int i = 1; i <= maxGrundyNumber; i++)
+    int maxGrundyNumber = 1023;
+    int totalNumStones;
+    cin >> totalNumStones;
+
+    int numPiles;
+    cin >> numPiles;
+
+    cin >> maxNewPilesPerMove;
+
+    for (int i = 1; i <= totalNumStones; i++)
     {
         //cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
         grundyNumberForPileSize(i);
     }
-    for (int i = 1; i <= maxGrundyNumber; i++)
+    for (int i = 1; i <= totalNumStones; i++)
     {
         cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
     }
@@ -98,25 +108,38 @@ int main(int argc, char* argv[])
     // we'll have to perform in order to solve this problem, so we can see roughly how long
     // it will take to run.
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    const int blah = 600;
-    vector<vector<int>> blee(blah, vector<int>(blah));
-    for (int i = 1; i <= 10; i++)
+    vector<vector<uint64_t>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
+    for (int i = 1; i <= totalNumStones; i++)
     {
-        vector<vector<int>> bloo(blah, vector<int>(blah));
-        for (int x = 0; x < blah; x++)
+        numWithGrundyNumberAndNumStones[grundyNumberForPileSizeLookup[i]][i] = 1;
+    }
+    for (int i = 1; i <= numPiles; i++)
+    {
+        vector<vector<uint64_t>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
+        for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
         {
-            for (int y = 0; y < blah; y++)
+            for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
             {
-                for (int z = x; z < blah; z++)
+                for (int numStonesNewColumn = 1; numStonesNewColumn + numStonesSoFar <= totalNumStones; numStonesNewColumn++)
                 {
-                    bloo[z - x][y] = blee[x][y] ^ y;
+                    const int newGrundyNumber = grundySoFar ^ grundyNumberForPileSizeLookup[numStonesNewColumn] ;
+#if 0
+                    if (newGrundyNumber > maxGrundyNumber)
+                    {
+                        cout << "Whoops: " << newGrundyNumber << endl;
+                        maxGrundyNumber = newGrundyNumber;
+                    }
+#endif
+                    //assert(newGrundyNumber <= maxGrundyNumber);
+                    nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] = (numWithGrundyNumberAndNumStones[grundySoFar][numStonesNewColumn + numStonesSoFar] + 1) % ::modulus;
                 }
             }
         }
 
-        blee = bloo;
+        numWithGrundyNumberAndNumStones = nextNumWithGrundyNumberAndNumStones;
     }
     std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
+    cout << "answer: " << numWithGrundyNumberAndNumStones[0][totalNumStones] << endl;
 }
 
