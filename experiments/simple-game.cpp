@@ -142,6 +142,11 @@ int main(int argc, char* argv[])
     }
     std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
-    cout << "answer: " << numWithGrundyNumberAndNumStones[0][totalNumStones] << endl;
+    int result = 0;
+    for (int grundyNumber = 1; grundyNumber <= maxGrundyNumber; grundyNumber++)
+    {
+        result += numWithGrundyNumberAndNumStones[grundyNumber][totalNumStones];
+    }
+    cout << "answer: " << result << endl;
 }
 
