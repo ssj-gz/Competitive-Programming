@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     }
     for (int i = 1; i <= numPiles; i++)
     {
-        vector<vector<uint64_t>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
+        vector<vector<uint64_t>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1, 0));
         for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
         {
             for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
                     }
 #endif
                     //assert(newGrundyNumber <= maxGrundyNumber);
-                    nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] = (numWithGrundyNumberAndNumStones[grundySoFar][numStonesNewColumn + numStonesSoFar] + 1) % ::modulus;
+                    nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] = (nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar] + numWithGrundyNumberAndNumStones[grundySoFar][numStonesNewColumn + numStonesSoFar]) % ::modulus;
                 }
             }
         }
