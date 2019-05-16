@@ -1,18 +1,12 @@
 // Simon St James (ssjgz) - 2019-05-16
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <set>
 #include <cassert>
-
-#include <chrono>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -124,6 +118,7 @@ int main(int argc, char* argv[])
     vector<vector<uint64_t>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
     for (int i = 1; i <= totalNumStones; i++)
     {
+        // Fill out numWithGrundyNumberAndNumStones for single pile case.
         numWithGrundyNumberAndNumStones[grundyNumberForPileSizeLookup[i]][i] = 1;
     }
     for (int numPilesSoFar = 1; numPilesSoFar <= numPiles - 1; numPilesSoFar++)
