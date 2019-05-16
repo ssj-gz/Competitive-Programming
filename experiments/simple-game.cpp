@@ -161,11 +161,23 @@ int main(int argc, char* argv[])
     {
         cout << "Iteration: " << i << endl;
         vector<vector<int>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1, 0));
-        for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
+        for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
         {
-            const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
-            for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
+            int maxPowerOf2 = 1;
+            while (maxPowerOf2 < numStonesSoFar)
             {
+                maxPowerOf2 <<= 1;
+            }
+            const int maxGrundyForNumStones = 2 * maxPowerOf2 - 1;
+            for (int grundySoFar = 0; grundySoFar <= maxGrundyForNumStones; grundySoFar++)
+            {
+#if 0
+                if (grundySoFar > maxGrundyForNumStones)
+                {
+                    assert(numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] == 0);
+                }
+#endif
+                const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
                 //cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
                 for (int numStonesNewColumn = 1; numStonesNewColumn + numStonesSoFar <= totalNumStones; numStonesNewColumn++)
                 {
@@ -202,7 +214,7 @@ int main(int argc, char* argv[])
     {
         result += numWithGrundyNumberAndNumStones[grundyNumber][totalNumStones];
     }
-    cout << "answer                        : " << result << endl;
+    cout << "totalNumStones: " << totalNumStones << " numPiles: " << numPiles << " maxNewPilesPerMove: " << maxNewPilesPerMove << " answer : " << result << " numWithNonZeroGrundyBruteForce: " << numWithNonZeroGrundyBruteForce << endl;
 
     assert(result == numWithNonZeroGrundyBruteForce);
 }
