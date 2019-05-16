@@ -42,7 +42,12 @@ void findMaxGWithChanges(const vector<bool>& originalBinaryString, vector<bool>&
 {
     if (numDigitsLeft == 0)
     {
-        greatestG = max(greatestG, g(binaryStringSoFar));
+        const auto gForTheseChanges = g(binaryStringSoFar);
+        if (gForTheseChanges >= greatestG)
+        {
+            greatestG = gForTheseChanges;
+            cout << "Got new best " << greatestG << " from " << binaryAsString(binaryStringSoFar) << endl;
+        }
         return;
     }
 
@@ -72,6 +77,7 @@ vector<int64_t> solveBruteForce(const vector<bool>& a, const vector<Query>& quer
     vector<int64_t> result;
     for (const auto& query : queries)
     {
+        cout << "Query: x " << query.x << " y: " << query.y << " k: " << query.k << endl;
         vector<bool> extractedRange(a.begin() + query.x, a.begin() + query.y + 1);
         result.push_back(findMaxGWithChanges(extractedRange, query.k));
     }
