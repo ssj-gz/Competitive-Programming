@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-05-16
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <set>
@@ -22,7 +29,7 @@ int grundyNumberForPileSize(int pileSize)
     if (grundyNumberForPileSizeLookup[pileSize] != -1)
         return grundyNumberForPileSizeLookup[pileSize];
 
-    cout << "Computing grundyNumberForPileSize: " << pileSize << endl;
+    //cout << "Computing grundyNumberForPileSize: " << pileSize << endl;
 
     vector<int> pilesSoFar;
     set<int> grundyNumbersFromMoves;
@@ -36,7 +43,7 @@ int grundyNumberForPileSize(int pileSize)
     }
 
     grundyNumberForPileSizeLookup[pileSize] = grundyNumber;
-    cout << "Finished computing grundyNumberForPileSize: " << pileSize << " (result is: " << grundyNumber << "; max(grundyNumbersFromMoves): " << (grundyNumbersFromMoves.empty() ? -1 : *std::prev(grundyNumbersFromMoves.end())) << ")" << endl;
+    //cout << "Finished computing grundyNumberForPileSize: " << pileSize << " (result is: " << grundyNumber << "; max(grundyNumbersFromMoves): " << (grundyNumbersFromMoves.empty() ? -1 : *std::prev(grundyNumbersFromMoves.end())) << ")" << endl;
     return grundyNumber;
 }
 
@@ -132,15 +139,11 @@ int main(int argc, char* argv[])
 
     if (maxNewPilesPerMove <= 3)
     {
-    for (int i = 1; i <= totalNumStones; i++)
-    {
-        //cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
-        grundyNumberForPileSize(i);
-    }
-    for (int i = 1; i <= totalNumStones; i++)
-    {
-        cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
-    }
+        // Spur population of grundyNumberForPileSizeLookup.
+        for (int i = 1; i <= totalNumStones; i++)
+        {
+            grundyNumberForPileSize(i);
+        }
     }
     else
     {
@@ -151,7 +154,7 @@ int main(int argc, char* argv[])
         }
     }
 
-#if 0
+#ifdef BRUTE_FORCE
     int numWithNonZeroGrundyBruteForce = 0;
     {
         vector<int> pilesSoFar;
@@ -172,7 +175,7 @@ int main(int argc, char* argv[])
     }
     for (int i = 1; i <= numPiles - 1; i++)
     {
-        cout << "Iteration: " << i << endl;
+        //cout << "Iteration: " << i << endl;
         vector<vector<int>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1, 0));
         for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
         {
@@ -225,14 +228,18 @@ int main(int argc, char* argv[])
     }
 #endif
     std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
+    //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
     int result = 0;
     for (int grundyNumber = 1; grundyNumber <= maxGrundyNumber; grundyNumber++)
     {
         result = (result + numWithGrundyNumberAndNumStones[grundyNumber][totalNumStones]) % ::modulus;
     }
-    //cout << "totalNumStones: " << totalNumStones << " numPiles: " << numPiles << " maxNewPilesPerMove: " << maxNewPilesPerMove << " answer : " << result << " numWithNonZeroGrundyBruteForce: " << numWithNonZeroGrundyBruteForce << endl;
-    cout << " answer : " << result << endl;
+    //cout << " answer : " << result << endl;
+#ifdef BRUTE_FORCE
+    cout << "totalNumStones: " << totalNumStones << " numPiles: " << numPiles << " maxNewPilesPerMove: " << maxNewPilesPerMove << " answer : " << result << " numWithNonZeroGrundyBruteForce: " << numWithNonZeroGrundyBruteForce << endl;
+#else
+    cout << result << endl;
+#endif
 
     //assert(result == numWithNonZeroGrundyBruteForce);
 }
