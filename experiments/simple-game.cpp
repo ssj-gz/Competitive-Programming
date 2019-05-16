@@ -113,14 +113,16 @@ int main(int argc, char* argv[])
     {
         numWithGrundyNumberAndNumStones[grundyNumberForPileSizeLookup[i]][i] = 1;
     }
-    for (int i = 1; i <= numPiles; i++)
+    for (int i = 1; i <= numPiles - 1; i++)
     {
+        cout << "Iteration: " << i << endl;
         vector<vector<int>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1, 0));
         for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
         {
             const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
             for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
             {
+                cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
                 for (int numStonesNewColumn = 1; numStonesNewColumn + numStonesSoFar <= totalNumStones; numStonesNewColumn++)
                 {
                     const int newGrundyNumber = grundySoFar ^ grundyNumberForPileSizeLookup[numStonesNewColumn] ;
@@ -139,6 +141,15 @@ int main(int argc, char* argv[])
         }
 
         numWithGrundyNumberAndNumStones = nextNumWithGrundyNumberAndNumStones;
+    }
+    cout << "After final: " << endl;
+    for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
+    {
+        const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
+        for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
+        {
+            cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
+        }
     }
     std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
