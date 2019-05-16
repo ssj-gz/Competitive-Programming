@@ -29,8 +29,6 @@ int grundyNumberForPileSize(int pileSize)
     if (grundyNumberForPileSizeLookup[pileSize] != -1)
         return grundyNumberForPileSizeLookup[pileSize];
 
-    //cout << "Computing grundyNumberForPileSize: " << pileSize << endl;
-
     vector<int> pilesSoFar;
     set<int> grundyNumbersFromMoves;
     computeGrundyNumbersForMovesWithPileSize(pileSize, 1, pilesSoFar, grundyNumbersFromMoves);
@@ -43,7 +41,6 @@ int grundyNumberForPileSize(int pileSize)
     }
 
     grundyNumberForPileSizeLookup[pileSize] = grundyNumber;
-    //cout << "Finished computing grundyNumberForPileSize: " << pileSize << " (result is: " << grundyNumber << "; max(grundyNumbersFromMoves): " << (grundyNumbersFromMoves.empty() ? -1 : *std::prev(grundyNumbersFromMoves.end())) << ")" << endl;
     return grundyNumber;
 }
 
@@ -55,12 +52,6 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
     }
     if (numStonesRemaining == 0 && pilesSoFar.size() >= 2)
     {
-        //cout << "Found new set of piles: " << endl;
-        //for (const auto x : pilesSoFar)
-        //{
-            //cout << " " << x;
-        //}
-        //cout << endl;
         int xorSum = 0;
         for (const auto x : pilesSoFar)
         {
@@ -69,7 +60,6 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         grundyNumbers.insert(xorSum);
         return;
     }
-#if 1
     if (pilesSoFar.size() == maxNewPilesPerMove - 1)
     {
         if (numStonesRemaining >= 1)
@@ -80,7 +70,6 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         }
         return;
     }
-#endif
 
     for (int i = nextMinStones; numStonesRemaining - i >= 0; i++)
     {
@@ -139,14 +128,11 @@ int main(int argc, char* argv[])
 
     if (maxNewPilesPerMove <= 3)
     {
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         // Spur population of grundyNumberForPileSizeLookup.
         for (int i = 1; i <= totalNumStones; i++)
         {
             grundyNumberForPileSize(i);
         }
-        std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-        //std::cout << "Time to compute grundyNumberForPileSizeLookup = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
     }
     else
     {
