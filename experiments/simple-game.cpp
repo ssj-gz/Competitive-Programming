@@ -139,11 +139,14 @@ int main(int argc, char* argv[])
 
     if (maxNewPilesPerMove <= 3)
     {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         // Spur population of grundyNumberForPileSizeLookup.
         for (int i = 1; i <= totalNumStones; i++)
         {
             grundyNumberForPileSize(i);
         }
+        std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+        //std::cout << "Time to compute grundyNumberForPileSizeLookup = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
     }
     else
     {
@@ -168,7 +171,7 @@ int main(int argc, char* argv[])
     // we'll have to perform in order to solve this problem, so we can see roughly how long
     // it will take to run.
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    vector<vector<int>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1));
+    vector<vector<uint64_t>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
     for (int i = 1; i <= totalNumStones; i++)
     {
         numWithGrundyNumberAndNumStones[grundyNumberForPileSizeLookup[i]][i] = 1;
@@ -176,7 +179,7 @@ int main(int argc, char* argv[])
     for (int i = 1; i <= numPiles - 1; i++)
     {
         //cout << "Iteration: " << i << endl;
-        vector<vector<int>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<int>(totalNumStones + 1, 0));
+        vector<vector<uint64_t>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1, 0));
         for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
         {
             int maxPowerOf2 = 1;
@@ -208,9 +211,23 @@ int main(int argc, char* argv[])
 #endif
                     //assert(newGrundyNumber <= maxGrundyNumber);
                     auto& blah = nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar];
-                    blah = (blah + numWithNumStonesForGrundySoFar[numStonesSoFar]) % ::modulus;
+                    //blah = (blah + numWithNumStonesForGrundySoFar[numStonesSoFar]) % ::modulus;
+                    blah = (blah + numWithNumStonesForGrundySoFar[numStonesSoFar]);
                     assert(blah >= 0);
                 }
+            }
+        }
+        for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
+        {
+            int maxPowerOf2 = 1;
+            while (maxPowerOf2 < numStonesSoFar)
+            {
+                maxPowerOf2 <<= 1;
+            }
+            const int maxGrundyForNumStones = maxPowerOf2 - 1;
+            for (int grundySoFar = 0; grundySoFar <= maxGrundyForNumStones; grundySoFar++)
+            {
+                nextNumWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] %= ::modulus;
             }
         }
 
