@@ -5,7 +5,7 @@
 
 #include <chrono>
 
-
+#include <sys/time.h>
 
 using namespace std;
 
@@ -108,6 +108,19 @@ void computePileConfigsWithNonZeroGrundy(int numStonesRemaining, const int numPi
 }
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int N = rand() % 20 + 1;
+        const int M = rand() % 20 + 1;
+        const int K = rand() % 50 + 1;
+
+        cout << N << " " << M << " " << K << endl;
+        return 0;
+    }
     int maxGrundyNumber = 1023;
     int totalNumStones;
     cin >> totalNumStones;
@@ -189,6 +202,8 @@ int main(int argc, char* argv[])
     {
         result += numWithGrundyNumberAndNumStones[grundyNumber][totalNumStones];
     }
-    cout << "answer: " << result << endl;
+    cout << "answer                        : " << result << endl;
+
+    assert(result == numWithNonZeroGrundyBruteForce);
 }
 
