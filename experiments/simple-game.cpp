@@ -19,19 +19,18 @@ using namespace std;
 const int maxPileSize = 600;
 vector<int> grundyNumberForPileSizeLookup(maxPileSize + 1, -1);
 
-int maxNewPilesPerMove = -1;
 const uint64_t modulus = 1'000'000'007ULL;
 
-void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, vector<int>& pilesSoFar, set<int>& grundyNumbers);
+void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, const int maxNewPilesPerMove, vector<int>& pilesSoFar, set<int>& grundyNumbers);
 
-int grundyNumberForPileSize(int pileSize)
+int grundyNumberForPileSize(int pileSize, int maxNewPilesPerMove)
 {
     if (grundyNumberForPileSizeLookup[pileSize] != -1)
         return grundyNumberForPileSizeLookup[pileSize];
 
     vector<int> pilesSoFar;
     set<int> grundyNumbersFromMoves;
-    computeGrundyNumbersForMovesWithPileSize(pileSize, 1, pilesSoFar, grundyNumbersFromMoves);
+    computeGrundyNumbersForMovesWithPileSize(pileSize, 1, maxNewPilesPerMove, pilesSoFar, grundyNumbersFromMoves);
 
     // Mex of all found grundy numbers.
     int grundyNumber = 0;
@@ -44,7 +43,7 @@ int grundyNumberForPileSize(int pileSize)
     return grundyNumber;
 }
 
-void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, vector<int>& pilesSoFar, set<int>& grundyNumbers)
+void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMinStones, const int maxNewPilesPerMove, vector<int>& pilesSoFar, set<int>& grundyNumbers)
 {
     if (pilesSoFar.size() > maxNewPilesPerMove)
     {
@@ -55,7 +54,7 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         int xorSum = 0;
         for (const auto x : pilesSoFar)
         {
-            xorSum ^= grundyNumberForPileSize(x);
+            xorSum ^= grundyNumberForPileSize(x, maxNewPilesPerMove);
         }
         grundyNumbers.insert(xorSum);
         return;
@@ -65,7 +64,7 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         if (numStonesRemaining >= 1)
         {
             pilesSoFar.push_back(numStonesRemaining);
-            computeGrundyNumbersForMovesWithPileSize(0, 0, pilesSoFar, grundyNumbers);
+            computeGrundyNumbersForMovesWithPileSize(0, 0, maxNewPilesPerMove, pilesSoFar, grundyNumbers);
             pilesSoFar.pop_back();
         }
         return;
@@ -74,7 +73,7 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
     for (int i = nextMinStones; numStonesRemaining - i >= 0; i++)
     {
         pilesSoFar.push_back(i);
-        computeGrundyNumbersForMovesWithPileSize(numStonesRemaining - i, i, pilesSoFar, grundyNumbers);
+        computeGrundyNumbersForMovesWithPileSize(numStonesRemaining - i, i, maxNewPilesPerMove, pilesSoFar, grundyNumbers);
         pilesSoFar.pop_back();
     }
 }
@@ -87,6 +86,7 @@ int main(int argc, char* argv[])
     int numPiles;
     cin >> numPiles;
 
+    int maxNewPilesPerMove;
     cin >> maxNewPilesPerMove;
 
     auto calcMaxGrundyNumberWithTotalStones = [](const int totalNumStones)
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
         // Spur population of grundyNumberForPileSizeLookup.
         for (int i = 1; i <= totalNumStones; i++)
         {
-            grundyNumberForPileSize(i);
+            grundyNumberForPileSize(i, maxNewPilesPerMove);
         }
     }
     else
