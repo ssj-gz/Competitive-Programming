@@ -79,45 +79,8 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
     }
 }
 
-void computePileConfigsWithNonZeroGrundy(int numStonesRemaining, const int numPiles, vector<int>& pilesSoFar, int& numWithNonZeroGrundy)
-{
-    if (pilesSoFar.size() == numPiles)
-    {
-        if (numStonesRemaining != 0)
-            return;
-        int xorSum = 0;
-        for (const auto pileSize : pilesSoFar)
-        {
-            xorSum ^= grundyNumberForPileSizeLookup[pileSize];
-        }
-        if (xorSum != 0)
-        {
-            numWithNonZeroGrundy++;
-        }
-    }
-    for (int i = 1; numStonesRemaining - i >= 0; i++)
-    {
-        pilesSoFar.push_back(i);
-        computePileConfigsWithNonZeroGrundy(numStonesRemaining - i, numPiles, pilesSoFar, numWithNonZeroGrundy);
-        pilesSoFar.pop_back();
-    }
-}
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int N = rand() % 20 + 1;
-        const int M = rand() % 20 + 1;
-        const int K = rand() % 50 + 1;
-
-        cout << N << " " << M << " " << K << endl;
-        return 0;
-    }
-    int maxGrundyNumber = 1023;
     int totalNumStones;
     cin >> totalNumStones;
 
@@ -126,6 +89,19 @@ int main(int argc, char* argv[])
 
     cin >> maxNewPilesPerMove;
 
+    auto calcMaxGrundyNumberWithTotalStones = [](const int totalNumStones)
+    {
+        // If the xth bit is the maximum bit set in totalNumStones, then
+        // we can't generate a xor sum with the (x+1)th bit set.
+        int maxPowerOf2 = 1;
+        while (maxPowerOf2 < totalNumStones)
+        {
+            maxPowerOf2 <<= 1;
+        }
+        return maxPowerOf2 - 1;
+    };
+
+    const int maxGrundyNumber = calcMaxGrundyNumberWithTotalStones(totalNumStones);
     if (maxNewPilesPerMove <= 3)
     {
         // Spur population of grundyNumberForPileSizeLookup.
@@ -136,6 +112,7 @@ int main(int argc, char* argv[])
     }
     else
     {
+        // With 4 or more piles, the grundy number is easily predictable.
         grundyNumberForPileSizeLookup.resize(maxGrundyNumber + 1);
         for (int i = 1; i <= totalNumStones; i++)
         {
@@ -143,74 +120,36 @@ int main(int argc, char* argv[])
         }
     }
 
-#ifdef BRUTE_FORCE
-    int numWithNonZeroGrundyBruteForce = 0;
-    {
-        vector<int> pilesSoFar;
-        computePileConfigsWithNonZeroGrundy(totalNumStones, numPiles, pilesSoFar, numWithNonZeroGrundyBruteForce);
-    }
-    cout << "numWithNonZeroGrundyBruteForce: " << numWithNonZeroGrundyBruteForce << endl;
-#endif
 
-
-    // This just actually *do* anything - it's just a simulation of the kind of computations
-    // we'll have to perform in order to solve this problem, so we can see roughly how long
-    // it will take to run.
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     vector<vector<uint64_t>> numWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1));
     for (int i = 1; i <= totalNumStones; i++)
     {
         numWithGrundyNumberAndNumStones[grundyNumberForPileSizeLookup[i]][i] = 1;
     }
-    for (int i = 1; i <= numPiles - 1; i++)
+    for (int numPilesSoFar = 1; numPilesSoFar <= numPiles - 1; numPilesSoFar++)
     {
-        //cout << "Iteration: " << i << endl;
         vector<vector<uint64_t>> nextNumWithGrundyNumberAndNumStones(maxGrundyNumber + 1, vector<uint64_t>(totalNumStones + 1, 0));
         for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
         {
-            int maxPowerOf2 = 1;
-            while (maxPowerOf2 < numStonesSoFar)
-            {
-                maxPowerOf2 <<= 1;
-            }
-            const int maxGrundyForNumStones = maxPowerOf2 - 1;
-            //cout << "numStonesSoFar: " << numStonesSoFar << " maxGrundyForNumStones: " << maxGrundyForNumStones << endl;
+            const int maxGrundyForNumStones = calcMaxGrundyNumberWithTotalStones(numStonesSoFar);
             for (int grundySoFar = 0; grundySoFar <= maxGrundyForNumStones; grundySoFar++)
             {
-#if 0
-                if (grundySoFar > maxGrundyForNumStones)
-                {
-                    assert(numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] == 0);
-                }
-#endif
                 const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
-                //cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
                 for (int numStonesNewColumn = 1; numStonesNewColumn + numStonesSoFar <= totalNumStones; numStonesNewColumn++)
                 {
                     const int newGrundyNumber = grundySoFar ^ grundyNumberForPileSizeLookup[numStonesNewColumn] ;
-#if 0
-                    if (newGrundyNumber > maxGrundyNumber)
-                    {
-                        cout << "Whoops: " << newGrundyNumber << endl;
-                        maxGrundyNumber = newGrundyNumber;
-                    }
-#endif
-                    //assert(newGrundyNumber <= maxGrundyNumber);
-                    auto& blah = nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar];
-                    //blah = (blah + numWithNumStonesForGrundySoFar[numStonesSoFar]) % ::modulus;
-                    blah = (blah + numWithNumStonesForGrundySoFar[numStonesSoFar]);
-                    assert(blah >= 0);
+                    auto& itemToUpdate = nextNumWithGrundyNumberAndNumStones[newGrundyNumber][numStonesNewColumn + numStonesSoFar];
+                    // NB: we don't need to take the modulus here, as it's impossible for a given iteration to add more
+                    // than 600 * 600 * 600 * ::modulus to itemToUpdate, which easily fits in a uint64_t.
+                    itemToUpdate = (itemToUpdate + numWithNumStonesForGrundySoFar[numStonesSoFar]);
+                    assert(itemToUpdate >= 0);
                 }
             }
         }
+        // Take the modulus now that we have completed an iteration.
         for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
         {
-            int maxPowerOf2 = 1;
-            while (maxPowerOf2 < numStonesSoFar)
-            {
-                maxPowerOf2 <<= 1;
-            }
-            const int maxGrundyForNumStones = maxPowerOf2 - 1;
+            const int maxGrundyForNumStones = calcMaxGrundyNumberWithTotalStones(numStonesSoFar);
             for (int grundySoFar = 0; grundySoFar <= maxGrundyForNumStones; grundySoFar++)
             {
                 nextNumWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] %= ::modulus;
@@ -219,31 +158,12 @@ int main(int argc, char* argv[])
 
         numWithGrundyNumberAndNumStones = nextNumWithGrundyNumberAndNumStones;
     }
-#if 0
-    cout << "After final: " << endl;
-    for (int grundySoFar = 0; grundySoFar <= maxGrundyNumber; grundySoFar++)
-    {
-        const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
-        for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
-        {
-            //cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
-        }
-    }
-#endif
-    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-    //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" <<std::endl;
+    // Add up the final result - all configs with non-zero grundy number and totalNumStones stones.
     int result = 0;
     for (int grundyNumber = 1; grundyNumber <= maxGrundyNumber; grundyNumber++)
     {
         result = (result + numWithGrundyNumberAndNumStones[grundyNumber][totalNumStones]) % ::modulus;
     }
-    //cout << " answer : " << result << endl;
-#ifdef BRUTE_FORCE
-    cout << "totalNumStones: " << totalNumStones << " numPiles: " << numPiles << " maxNewPilesPerMove: " << maxNewPilesPerMove << " answer : " << result << " numWithNonZeroGrundyBruteForce: " << numWithNonZeroGrundyBruteForce << endl;
-#else
     cout << result << endl;
-#endif
-
-    //assert(result == numWithNonZeroGrundyBruteForce);
 }
 
