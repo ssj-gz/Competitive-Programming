@@ -82,6 +82,30 @@ void computeGrundyNumbersForMovesWithPileSize(int numStonesRemaining, int nextMi
         pilesSoFar.pop_back();
     }
 }
+
+void computePileConfigsWithNonZeroGrundy(int numStonesRemaining, const int numPiles, vector<int>& pilesSoFar, int& numWithNonZeroGrundy)
+{
+    if (pilesSoFar.size() == numPiles)
+    {
+        if (numStonesRemaining != 0)
+            return;
+        int xorSum = 0;
+        for (const auto pileSize : pilesSoFar)
+        {
+            xorSum ^= grundyNumberForPileSizeLookup[pileSize];
+        }
+        if (xorSum != 0)
+        {
+            numWithNonZeroGrundy++;
+        }
+    }
+    for (int i = 1; numStonesRemaining - i >= 0; i++)
+    {
+        pilesSoFar.push_back(i);
+        computePileConfigsWithNonZeroGrundy(numStonesRemaining - i, numPiles, pilesSoFar, numWithNonZeroGrundy);
+        pilesSoFar.pop_back();
+    }
+}
 int main(int argc, char* argv[])
 {
     int maxGrundyNumber = 1023;
@@ -103,6 +127,13 @@ int main(int argc, char* argv[])
         cout << "grundyNumber[" << i << " ] = " << grundyNumberForPileSize(i) << endl;
     }
 
+    int numWithNonZeroGrundyBruteForce = 0;
+    {
+        vector<int> pilesSoFar;
+        computePileConfigsWithNonZeroGrundy(totalNumStones, numPiles, pilesSoFar, numWithNonZeroGrundyBruteForce);
+    }
+    cout << "numWithNonZeroGrundyBruteForce: " << numWithNonZeroGrundyBruteForce << endl;
+
 
     // This just actually *do* anything - it's just a simulation of the kind of computations
     // we'll have to perform in order to solve this problem, so we can see roughly how long
@@ -122,7 +153,7 @@ int main(int argc, char* argv[])
             const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
             for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
             {
-                cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
+                //cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
                 for (int numStonesNewColumn = 1; numStonesNewColumn + numStonesSoFar <= totalNumStones; numStonesNewColumn++)
                 {
                     const int newGrundyNumber = grundySoFar ^ grundyNumberForPileSizeLookup[numStonesNewColumn] ;
@@ -148,7 +179,7 @@ int main(int argc, char* argv[])
         const auto& numWithNumStonesForGrundySoFar = numWithGrundyNumberAndNumStones[grundySoFar];
         for (int numStonesSoFar = 0; numStonesSoFar <= totalNumStones; numStonesSoFar++)
         {
-            cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
+            //cout << "grundySoFar: " << grundySoFar << " numStonesSoFar: " << numStonesSoFar << " numWithGrundyNumberAndNumStones: " << numWithGrundyNumberAndNumStones[grundySoFar][numStonesSoFar] << endl;
         }
     }
     std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
