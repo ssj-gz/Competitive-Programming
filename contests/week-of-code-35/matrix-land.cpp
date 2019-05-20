@@ -1,4 +1,5 @@
-// Simon St James (ssjgz) - 2017-11-16 - 2017-11-17
+// Simon St James (ssjgz) - 2017-11-16 - 2017-11-17 (Week of Code 35).
+// Tidied up and re-submitted to the Practice track on 2019-05-20.
 #define RANDOM
 #define SUBMISSION
 #ifdef SUBMISSION
