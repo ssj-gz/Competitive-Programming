@@ -27,9 +27,9 @@ struct SubArrayInfo
 };
 
 /**
- * Return an array F such that F(r) is the largest score we can obtain if we start r; eat
+ * Return an array F such that F(r) is the largest score we can obtain if we start at r column; eat
  * some number of squares to the left of r (call l the square where we stop eating); and
- * finally descend at some point d in the range we are from (i.e. l <= d <= r).
+ * finally descend at some point d in the range we ate from (i.e. l <= d <= r).
  *
  * That is, each F(r) is the maximal value over all l, d with l <= d <= r of 
  *
@@ -238,8 +238,8 @@ int maxSum(const vector<vector<int>>& A)
     // didn't get full marks for it.  Oh well :)
     //
     // It's actually *mostly* easy - we start at the bottom row and work our way up, and fundamentally answer
-    // the question: if I am now at column x on row r, what is the best score I can achieve my eating some
-    // of the cells on this row, and then descending to the next rows, r + 1, and then repeating, until no rows remain.
+    // the question: if I am now at column x on row r, what is the best score I can achieve by eating some
+    // of the cells on this row, and then descending to the next row, r + 1, and then repeating, until no rows remain.
     //
     // The question is formulated a little oddly - it equates to "if I find myself at column x on row r - perhaps because this
     // is the top row and I've been initially positioned here, or because I descended from the previous row r - 1 at column x -
@@ -252,8 +252,8 @@ int maxSum(const vector<vector<int>>& A)
     // not to reduce our max score - indeed, in order to get the max score when starting at x, one *must* eat all the
     // cells in the Gobble Zone! - and where eating outside of this Gobble Zone *will* reduce our score for this row,
     // so if we stray outside of this Zone, we *must* pay for this loss by finding a better descend point (i.e.
-    // a dx < bestGobbleStartIndex or dx > bestGobbleEndIndex which is better than any bestGobbleStartIndex <= dx <= bestGobbleEndIndex
-    // by the amount we'd lose by straying outside of the Gobble Zone for this row).
+    // a dx < bestGobbleStartIndex or dx > bestGobbleEndIndex) which is better than any bestGobbleStartIndex <= dx <= bestGobbleEndIndex
+    // by at least the amount we'd lose by straying outside of the Gobble Zone for this row).
     //
     // bestGobbleStartIndex and bestGobbleEndIndex are easily computed: bestGobbleStartIndex is simply the index such that, over all
     // s <= x, the sum [s <= i <= x] {row[i]} is maximised, and is easily computed using Kadane's algorithm.  Similarly,
@@ -281,11 +281,11 @@ int maxSum(const vector<vector<int>>& A)
     //
     // It might be tempting, if we decide to descend at a point dx to the left of bestGobbleStartIndex, to gobble as far as dx 
     // and no further, but in fact, having taken the hit to the score of eating to the left of bestGobbleStartIndex, it might
-    // be that by ignoring cells to the left of dx, we're leaving extra points on the table.  Thus, we can now phrase
-    // the recurrence relation we want to solve as follows:
+    // be that by ignoring cells to the left of dx, we're leaving extra points on the table (and similarly if dx > bestGobbleEndIndex).  
+    // Thus, we can now phrase the recurrence relation we want to solve as follows:
     //
-    //   Let F(x, r) be the maximum score we can obtain by starting at column x on row r.  Then (for all but the bottommost row):
-    //      F(x, r) = max[ lx, rx, dx such that lx <= x <= rx and lx <= dx <= rx] { sum [lx <= i <= rx] {row[i]} + F(dx, r + 1)}
+    //   Let Best(x, r) be the maximum score we can obtain by starting at column x on row r.  Then (for all but the bottommost row):
+    //      Best(x, r) = max[ lx, rx, dx such that lx <= x <= rx and lx <= dx <= rx] { sum [lx <= i <= rx] {row[i]} + Best(dx, r + 1)}
     //
     // A pretty tall order! However, we see that computing a) is very easy with Kadane's algorithm, so the problem reduces
     // to computing b) and c), which are actually the same algorithm, just with the row reversed.  This is the bit that
