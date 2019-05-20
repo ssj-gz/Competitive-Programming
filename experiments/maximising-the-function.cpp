@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <map>
 
 using namespace std;
 
@@ -38,7 +39,7 @@ int64_t g(const vector<bool>& binaryString)
     return result;
 }
 
-void findMaxGWithChanges(const vector<bool>& originalBinaryString, vector<bool>& binaryStringSoFar, int numChangesLeft, int numDigitsLeft, int64_t& greatestG)
+void findMaxGWithChanges(const vector<bool>& originalBinaryString, vector<bool>& binaryStringSoFar, int numChangesLeft, int numDigitsLeft, int64_t& greatestG, map<int, int>& numWithValue)
 {
     if (numDigitsLeft == 0)
     {
@@ -48,18 +49,19 @@ void findMaxGWithChanges(const vector<bool>& originalBinaryString, vector<bool>&
             greatestG = gForTheseChanges;
             cout << "Got new best " << greatestG << " from " << binaryAsString(binaryStringSoFar) << endl;
         }
+        numWithValue[gForTheseChanges]++;
         return;
     }
 
     const bool currentDigit = originalBinaryString[originalBinaryString.size() - numDigitsLeft];
     binaryStringSoFar.push_back(currentDigit);
-    findMaxGWithChanges(originalBinaryString, binaryStringSoFar, numChangesLeft, numDigitsLeft - 1, greatestG);
+    findMaxGWithChanges(originalBinaryString, binaryStringSoFar, numChangesLeft, numDigitsLeft - 1, greatestG, numWithValue);
     binaryStringSoFar.pop_back();
     
     if (numChangesLeft > 0)
     {
-        binaryStringSoFar.push_back(~currentDigit);
-        findMaxGWithChanges(originalBinaryString, binaryStringSoFar, numChangesLeft - 1, numDigitsLeft - 1, greatestG);
+        binaryStringSoFar.push_back(!currentDigit);
+        findMaxGWithChanges(originalBinaryString, binaryStringSoFar, numChangesLeft - 1, numDigitsLeft - 1, greatestG, numWithValue);
         binaryStringSoFar.pop_back();
     }
 }
@@ -68,7 +70,12 @@ int64_t findMaxGWithChanges(const vector<bool>& binaryString, int k)
 {
     vector<bool> binaryStringSoFar;
     int64_t greatestG = -1;
-    findMaxGWithChanges(binaryString, binaryStringSoFar, k, binaryString.size(), greatestG);
+    map<int, int> numWithValue;
+    findMaxGWithChanges(binaryString, binaryStringSoFar, k, binaryString.size(), greatestG, numWithValue);
+    for (const auto& [value, num] : numWithValue)
+    {
+        cout << "Num with value " << value << " = " << num << endl;
+    }
     return greatestG;
 }
 
