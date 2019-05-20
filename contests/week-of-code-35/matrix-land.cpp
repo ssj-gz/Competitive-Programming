@@ -233,6 +233,71 @@ vector<SubArrayInfo> findMaxSubarraySumEndingAtReversed(const vector<int>& A, co
 
 int maxSum(const vector<vector<int>>& A)
 {
+    // Ouch - fairly tough one (at least, one part - findBestIfMovedFromAndDescended - was), and I didn't
+    // manage to complete it within the 24 hours (I first tackled it during my first Week of Code - 35) so I 
+    // didn't get full marks for it.  Oh well :)
+    //
+    // It's actually *mostly* easy - we start at the bottom row and work our way up, and fundamentally answer
+    // the question: if I am now at column x on row r, what is the best score I can achieve my eating some
+    // of the cells on this row, and then descending to the next rows, r + 1, and then repeating, until no rows remain.
+    //
+    // The question is formulated a little oddly - it equates to "if I find myself at column x on row r - perhaps because this
+    // is the top row and I've been initially positioned here, or because I descended from the previous row r - 1 at column x -
+    // what are the lx and rx surrounding x (i.e. lx <= x <= rx) and the descend point dx that give the highest score
+    // when I eat all cells (and only the cells) on this row between lx and rx and then descend to the next row r + 1
+    // at dx (lx <= dx <= rx)?"
+    //
+    // So, to begin with - there's always a Free Lunch Zone (or, as I like to call it, a "Gobble Zone") around x - say 
+    // bestGobbleStartIndex <= x <= bestGobbleEndIndex - such that eating all cells in this range in this row is guaranteed
+    // not to reduce our max score - indeed, in order to get the max score when starting at x, one *must* eat all the
+    // cells in the Gobble Zone! - and where eating outside of this Gobble Zone *will* reduce our score for this row,
+    // so if we stray outside of this Zone, we *must* pay for this loss by finding a better descend point (i.e.
+    // a dx < bestGobbleStartIndex or dx > bestGobbleEndIndex which is better than any bestGobbleStartIndex <= dx <= bestGobbleEndIndex
+    // by the amount we'd lose by straying outside of the Gobble Zone for this row).
+    //
+    // bestGobbleStartIndex and bestGobbleEndIndex are easily computed: bestGobbleStartIndex is simply the index such that, over all
+    // s <= x, the sum [s <= i <= x] {row[i]} is maximised, and is easily computed using Kadane's algorithm.  Similarly,
+    // bestGobbleEndIndex is simply the index such that, over all e >= x, sum [x <= i <= e] {row[i]} is maximised.
+    //
+    // On the bottom row - which is the first row we compute - there is no descend point, so the maximum score we can obtain
+    // if we start at column x on this row is the result of eating all cells in the Gobble Zone - straying outside of this
+    // Zone, as mentioned, reduces our score, and there are no lower rows to descend to in order to recoup this loss.
+    //
+    // What about rows other than the last row? As mentioned, we need to eat everything in the Gobble Zone.  We could then descend 
+    // inside the Gobble Zone, but what if straying outside the Gobble Zone - with the loss we'd incur by doing so -
+    // enabled us to descend somewhere else, giving us a score that would more than offset this loss?
+    //
+    // Note that, if our descend point is to the left of bestGobbleStartIndex, then we must *not* eat to the right of bestGobbleEndIndex:
+    // this would immediately reduce our score for no ultimate benefit, and similarly for if our descend point is to the right
+    // of bestGobbleEndIndex; that is:
+    //
+    //   when starting at column x on row r, we must eat all in the Gobble Zone (and no more), then either:
+    //     a) descend inside the Gobble Zone;
+    //     b) eat to the left of bestGobbleStartIndex so that we may take a hit which is paid for by allowing us to descend to the
+    //        left of the Gobble Zone; or
+    //     c) eat to the right of bestGobbleEndIndex so that we may take a hit which is paid for by allowing us to descend to the
+    //        right of the Gobble Zone
+    //   whichever of the three gives us a better score.
+    //
+    // It might be tempting, if we decide to descend at a point dx to the left of bestGobbleStartIndex, to gobble as far as dx 
+    // and no further, but in fact, having taken the hit to the score of eating to the left of bestGobbleStartIndex, it might
+    // be that by ignoring cells to the left of dx, we're leaving extra points on the table.  Thus, we can now phrase
+    // the recurrence relation we want to solve as follows:
+    //
+    //   Let F(x, r) be the maximum score we can obtain by starting at column x on row r.  Then (for all but the bottommost row):
+    //      F(x, r) = max[ lx, rx, dx such that lx <= x <= rx and lx <= dx <= rx] { sum [lx <= i <= rx] {row[i]} + F(dx, r + 1)}
+    //
+    // A pretty tall order! However, we see that computing a) is very easy with Kadane's algorithm, so the problem reduces
+    // to computing b) and c), which are actually the same algorithm, just with the row reversed.  This is the bit that
+    // really baked my noodle and made me miss the deadline, but it can be efficiently computed using the algorithm in
+    // findBestIfMovedFromAndDescended - see that for details! 
+    //
+    // And that's about it - everything but findBestIfMovedFromAndDescended is pretty obvious and easy, but that part of it
+    // was a bit of a pig, I found, though I think if I'd sat down with pen and paper and properly tried to figure it out
+    // rather that getting stuck in some stupid trial-and-error rabbit hole I might have solved it quicker.  Who knows? :)
+    //
+    // One happy outcome from all this - my next Week of Code had a problem ("Cut a Strip") which had computing the equivalent
+    // of findBestIfMovedFromAndDescended as a subproblem, so I ended up finding that fairly easy :)
     const int numRows = A.size();
     const int numCols = A[0].size();
 
