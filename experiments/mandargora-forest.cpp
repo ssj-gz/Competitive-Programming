@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 #include <sys/time.h>
 
@@ -51,6 +52,28 @@ int64_t solveBruteForce(const vector<int>& originalH)
     return bestExperience;
 }
 
+int64_t solveOptimised(const vector<int>& originalH)
+{
+    int64_t bestExperience = 0;
+    auto sortedH = originalH;
+    sort(sortedH.begin(), sortedH.end());
+
+    int64_t currentHealthIfOnlyEat = 1;
+    int64_t currentExperienceIfOnlyEat = 0;
+    const int n = originalH.size();
+    for (int i = 0; i < n; i++)
+    {
+        int64_t currentExperience = currentExperienceIfOnlyEat;
+        for (int j = i; j < n; j++)
+        {
+            currentExperience += currentHealthIfOnlyEat * sortedH[j];
+        }
+        bestExperience = max(bestExperience, currentExperience);
+        currentHealthIfOnlyEat++;
+    }
+    return bestExperience;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2)
@@ -59,7 +82,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 10 + 1;
+        const int n = rand() % 9 + 1;
         const int maxHealth = rand() % 100 + 1;
 
         cout << 1 << endl;
@@ -87,6 +110,11 @@ int main(int argc, char* argv[])
 
         const auto solutionBruteForce = solveBruteForce(H);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
+
+        const auto solutionOptimised = solveOptimised(H);
+        cout << "solutionOptimised: " << solutionOptimised << endl;
+
+        assert(solutionOptimised == solutionBruteForce);
     }
 
 
