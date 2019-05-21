@@ -1,5 +1,13 @@
+// Simon St James (ssjgz) - 2019-05-21
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <cassert>
 
 #include <sys/time.h>
@@ -118,6 +126,7 @@ int main(int argc, char* argv[])
             cin >> H[i];
         }
 
+#ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(H);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 
@@ -125,6 +134,9 @@ int main(int argc, char* argv[])
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
+#else
+        cout << solveOptimised(H) << endl;
+#endif
     }
 
 
