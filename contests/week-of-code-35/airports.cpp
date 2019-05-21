@@ -279,7 +279,57 @@ vector<int> findMinCostOfArrangementForDays(const vector<int>& airportAddedOnDay
 
 int main(int argc, char** argv)
 {
-    ios::sync_with_stdio(false);
+    // A fairly tough one, but I really liked it - it's a nice, multi-layered one with plenty of interesting
+    // sub-problems to solve.  Plus, it's the first Expert-rated question I solved in a live contest ;)
+    //
+    // So, where to start? Let's introduce the notion of "coverage" as a shorthand for "reachability in one
+    // move" - we say that airport A *covers* airport B if |B - A| >= d.  Coverage is symmetric, but not
+    // necessarily transitive, and is anti-reflexive.
+    //
+    // Let L and R be the leftmost and rightmost airports (respectively) before we start moving things around.
+    // Note that if A covers B, then at least one L or R also covers B - this is easily seen: assume wlog that 
+    // A <= B, so B >= A + D since A covers B.  A >= L by definition of L, so B - L >= A + D - L >= D,
+    // so L covers B.  Similarly, if B <= A, then R covers B.
+    //
+    // So it looks like endpoints are key, here, as they seem to cover "at least" as many airports as other airports.
+    // In fact:
+    //
+    // Theorem
+    //
+    // All airports are mutually reachable from each other if and only if all airports are covered by at least one of L or R.
+    //
+    // Proof
+    //
+    // (=>) Assume all airports are mutually reachable.  Pick any airport A: then since A is reachable from any airport X we care to name.
+    // Take a path from X to A, and let B be the penultimate airport it in: then B covers A, as it can reach it in one
+    // move.  If B is an endpoint, then we're done.
+    //
+    // If B is not an endpoint, then, if B >= A, then B - A >= d as it covers it.  Since B is not an endpoint, then R > B.
+    //
+    // So
+    //    R > B
+    // therefore
+    //    R - A > B - A
+    //          >= d
+    // i.e. R - A >= d, so d covers A.  Similarly, if B <= A, then L covers A.  So in any case, every airport A is covered
+    // by at least one of L or R.
+    //
+    // (<=) Assume all airports are mutually covered by at least one of L or R.
+    //
+    // As a corollary, since an airport cannot cover itself, we must have that L is covered by R and R is covered by L.
+    // Let A and B be any pair of airports - it suffices to show that we can form from A to B.
+    //
+    // There are four cases:
+    //   i) A is covered by L, and B is covered by L.
+    //
+    //      Then A -> L -> B is a path from A to B.
+    //   ii) A is covered by L, and B is covered by R.
+    //      Then, since L and R cover each other, A -> L -> R -> B is a path from A to B.
+    //   iii) and iv) - obvious variants of i) and ii); proof omitted.
+    //
+    // QED.
+    //
+    ios::sync_with_stdio(false;
     int Q;
     cin >> Q;
     for (int q = 0; q < Q; q++)
