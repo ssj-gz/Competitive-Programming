@@ -1,17 +1,19 @@
 #include <iostream>
 #include <vector>
 
+#include <sys/time.h>
+
 using namespace std;
 
 void solveBruteForce(const vector<int>& H, int mandragoraNum, int64_t currentHealth, int64_t currentExperience, int64_t& bestExperience, string& choicesSoFar)
 {
-    cout << "mandragoraNum: " << mandragoraNum << " choicesSoFar: " << choicesSoFar << " currentHealth: " << currentHealth << " currentExperience: " << currentExperience << endl;
+    //cout << "mandragoraNum: " << mandragoraNum << " choicesSoFar: " << choicesSoFar << " currentHealth: " << currentHealth << " currentExperience: " << currentExperience << endl;
     if (mandragoraNum == H.size())
     {
-        if (currentExperience > bestExperience)
+        if (currentExperience >= bestExperience)
         {
             bestExperience = currentExperience;
-            cout << "new best experience: " << bestExperience << endl;
+            cout << "new best experience: " << bestExperience << " choicesSoFar: " << choicesSoFar << endl;
         }
         return;
     }
@@ -38,9 +40,10 @@ int64_t solveBruteForce(const vector<int>& originalH)
         cout << endl;
         int64_t bestExperienceForPermutation = 0;
         string choicesSoFar;
-        solveBruteForce(hPermutation, 0, 1, 0, bestExperience, choicesSoFar);
+        solveBruteForce(hPermutation, 0, 1, 0, bestExperienceForPermutation, choicesSoFar);
 
         bestExperience = max(bestExperience, bestExperienceForPermutation);
+        cout << " best experience for this permutation: " << bestExperienceForPermutation << endl;
         next_permutation(hPermutation.begin(), hPermutation.end());
 
     }
@@ -50,6 +53,24 @@ int64_t solveBruteForce(const vector<int>& originalH)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = rand() % 10 + 1;
+        const int maxHealth = rand() % 100 + 1;
+
+        cout << 1 << endl;
+        cout << n << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout << (rand() % maxHealth) + 1 << " ";
+        }
+        cout <<endl;
+        return 0;
+    }
     int T;
     cin >> T;
 
