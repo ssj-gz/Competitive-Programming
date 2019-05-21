@@ -329,6 +329,72 @@ int main(int argc, char** argv)
     //
     // QED.
     //
+    // Let's introduce some terminology.  Call an arrangement of airports such that all are reachable from each other
+    // (equivalent, by the Theorem, to "all airports are covered by at least one of L and R") a Fully Reachable
+    // Arrangement, or FRA.  If the number of moves required to construct this FRA is minimal out of all FRAs, then
+    // call it an Optimal FRA or OFRA.  The goal of  this problem is to find the number of moves in an OFRA.
+    //
+    // What observations can we make about forming an OFRA?
+    //
+    // Firstly, an airport only ever moves in one direction when forming the OFRA - if it "doubled-back", as it where,
+    // then we could eliminate the move where it moved left then right (or right then left) for strictly fewer moves
+    // so couldn't have been optimal.
+    //
+    // Secondly, note that moving R rightwards or L leftwards covers at least the original airports, so such a move
+    // never makes things worse.
+    //
+    // The sequence of moves necessary to form the OFRA can be made in any order - only the final resting place of airports
+    // and the number of moves we took to get there are of any importance.
+    //
+    // The second point hints that we might be able to get an OFRA by moving *only* the L and R airports, and this is in fact
+    // the case, as we will shortly prove.  First, though, a quick Lemma.
+    //
+    // Lemma
+    //
+    // We can assume that forming an OFRA does not involve any pair of airports (A and B, say), initially at different locations,
+    // passing through each other.
+    //
+    // Proof
+    //
+    // Let E_A and E_B be the final resting places of A and B (respectively) after forming the OFRA, and that A and B were initially
+    // at different locations and that they passed through each other when forming the OFRA.
+    // Then we can form an OFRA that looks exactly the same except that the final resting places of A and B are now E_B and E_A.
+    // It's hopefully clear that such an arrangement is still FRA, and that it takes at most as many moves as does forming
+    // the original FRA.  The latter case is fiddly to prove but simple: proof omitted.
+    //
+    // Theorem
+    //
+    // We can assume that an OFRA moves only its endpoints.
+    //
+    // Proof
+    //
+    // Take any OFRA where an airport other than one of L and R is moved, and call it A.  We know that A must moved in only one
+    // direction, so assume wlog that it moves rightwards (the case where it moves leftwards is almost identical and is omitted).
+    //
+    // As noted early, we can re-arrange the movements in any order we please, so re-order so that A makes all of its moves last.
+    //
+    // Then after the penultimate move of A, we cannot have an FRA (else, we could stop here with one less move than in the original OFRA,
+    // contradicting the original's optimality). Thus, after the last move, A must not have been covered by either of L or R, but after
+    // the final move, it was.
+    //
+    // Since A is moving rightwards, it must have been that A was not covered by L (not R), and then after moving A its final step to E_A, it was:
+    // if it had been R that A's final move made it covered by, then moving rightwards would have moved it further from R, 
+    // and so A and R must have crossed paths, contradicting optimality of original OFRA. 
+    //
+    // However, instead of making this final move of A, we could instead have moved L leftwards: since moving L leftwards is never a "bad move",
+    // this gives us an OFRA which has the same number of total moves; where A makes exactly one less move; and which does not make
+    // any thing worse.
+    //
+    // Thus, by repeated application, we can eventually end up with an OFRA with the same amount of moves where A makes 0 moves.
+    //
+    // If some other airport, B, say (B != L nor R), then we can repeat the procedure for B, etc.
+    //
+    // Thus, we can always turn an OFRA where a non-endpoint airport moves into one of equivalent cost where no non-endpoint moves.
+    //
+    // QED.
+    //
+    // So, to recap: we need only find the minimum number of moves for L and R, where L never moves rightwards and R never moves rightwards,
+    // so that L and R cover every airport (including each other).
     ios::sync_with_stdio(false;
     int Q;
     cin >> Q;
