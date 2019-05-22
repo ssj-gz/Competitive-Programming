@@ -394,7 +394,42 @@ int main(int argc, char** argv)
     // QED.
     //
     // So, to recap: we need only find the minimum number of moves for L and R, where L never moves rightwards and R never moves rightwards,
-    // so that L and R cover every airport (including each other).
+    // so that L and R (collectively) cover every airport (including each other).
+    //
+    // How can L and R cover every airport? Well, R could cover all airports to its left.  We can easily work out the cost of this: find the 
+    // rightmost airport other than R, and move R so that it is at this rightmost airport's position + d.  Similarly, we could have
+    // L cover all airports to its right, and the cost of this is also easily computed.
+    //
+    // Or, L and R could cover all airports collaboratively.  Assume for the moment that no airports occupy the same position, except for 
+    // the positions occupied by L and R: it's hopefully clear that this doesn't affect the cost of anything, as two airports at 
+    // the same position are covered by one of L and R iff the other is.  It's also hopefully clear that, if L and R collaborate to
+    // cover all airports, then there are two *consecutive* airports X and Y (such that X <= Y, and there is no airport Z with X <= Z <= Y)
+    // such that X and all airports to its left are covered by R, and and Y and all airports to its right are covered by L.
+    //
+    // For this to hold, R would have to be at X + d and L would have to be at Y - d.  The cost of this arrangement (we'll assume that 
+    // L doesn't already cover Y and R doesn't already cover X!) is:
+    //   
+    //   (X + d) - R + (moving R into place)
+    //   L - (Y - d)   (moving L into place) 
+    //   = X + d - R + L - Y + d
+    //   = (X - Y) + L - R + 2 * d
+    //   = L - R + 2 * d - (Y - X)
+    //
+    // This is interesting, as the cost doesn't depend on the locations of X and Y - only on the difference between them! (L, R and d are
+    // all constants for this Day), and to minimum the cost, we need to pick the successive pairs of airports that have the *largest* gap
+    // between them.
+    //
+    // So it seems that all we need to do is maintain (incrementally, for each day):
+    //
+    //   The leftmost and rightmost endpoints, L and R;
+    //   The list of airports not covered by this L and R;
+    //   The rightmost and leftmost such uncovered airports other than L and R (in case it's cheaper for one of L or R to cover all airports); and
+    //   The maximum distance between successive pairs of such airports (in case it's cheaper for L and R to cover all airports collaboratively).
+    //
+    // And that's basically it - maintaining all this information per day is pretty easy.  There are some edge-cases where two or most
+    // airports occupy the same position of one of L and R, but these are "simple" to deal with.
+    //
+    // Hopefully the comments in the code fill in any blanks :)
     ios::sync_with_stdio(false;
     int Q;
     cin >> Q;
