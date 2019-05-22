@@ -1,4 +1,5 @@
-// Simon St James (ssjgz) 2017-11-18
+// Simon St James (ssjgz) 2017-11-18 (Week of Code 35).
+// Tidied up and re-submitted to the Practice track on 2019-05-22.
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -434,7 +435,7 @@ int main(int argc, char** argv)
     // airports occupy the same position of one of L and R, but these are "simple" to deal with.
     //
     // Hopefully the comments in the code fill in any blanks :)
-    ios::sync_with_stdio(false;
+    ios::sync_with_stdio(false);
     int Q;
     cin >> Q;
     for (int q = 0; q < Q; q++)
