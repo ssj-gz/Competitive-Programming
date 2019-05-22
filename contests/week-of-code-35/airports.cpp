@@ -286,7 +286,7 @@ int main(int argc, char** argv)
     // move" - we say that airport A *covers* airport B if |B - A| >= d.  Coverage is symmetric, but not
     // necessarily transitive, and is anti-reflexive.
     //
-    // Let L and R be the leftmost and rightmost airports (respectively) before we start moving things around.
+    // Let L and R be the leftmost and rightmost airports (respectively) before we start moving things around on a given Day.
     // Note that if A covers B, then at least one L or R also covers B - this is easily seen: assume wlog that 
     // A <= B, so B >= A + D since A covers B.  A >= L by definition of L, so B - L >= A + D - L >= D,
     // so L covers B.  Similarly, if B <= A, then R covers B.
@@ -300,8 +300,8 @@ int main(int argc, char** argv)
     //
     // Proof
     //
-    // (=>) Assume all airports are mutually reachable.  Pick any airport A: then since A is reachable from any airport X we care to name.
-    // Take a path from X to A, and let B be the penultimate airport it in: then B covers A, as it can reach it in one
+    // (=>) Assume all airports are mutually reachable.  Pick any airport A: then since A is reachable from any airport X we care to name,
+    // take a path from X to A, and let B be the penultimate airport it in: then B covers A, as it can reach A in one
     // move.  If B is an endpoint, then we're done.
     //
     // If B is not an endpoint, then, if B >= A, then B - A >= d as it covers it.  Since B is not an endpoint, then R > B.
@@ -311,20 +311,23 @@ int main(int argc, char** argv)
     // therefore
     //    R - A > B - A
     //          >= d
-    // i.e. R - A >= d, so d covers A.  Similarly, if B <= A, then L covers A.  So in any case, every airport A is covered
+    // i.e. R - A > d, so R covers A.  Similarly, if B <= A, then L covers A.  So in any case, every airport A is covered
     // by at least one of L or R.
     //
     // (<=) Assume all airports are mutually covered by at least one of L or R.
     //
     // As a corollary, since an airport cannot cover itself, we must have that L is covered by R and R is covered by L.
-    // Let A and B be any pair of airports - it suffices to show that we can form from A to B.
+    // Let A and B be any pair of airports - it suffices to show that we can form a path from A to B.
     //
     // There are four cases:
     //   i) A is covered by L, and B is covered by L.
     //
     //      Then A -> L -> B is a path from A to B.
+    //
     //   ii) A is covered by L, and B is covered by R.
-    //      Then, since L and R cover each other, A -> L -> R -> B is a path from A to B.
+    //
+    //       Then, since L and R cover each other, A -> L -> R -> B is a path from A to B.
+    //
     //   iii) and iv) - obvious variants of i) and ii); proof omitted.
     //
     // QED.
@@ -332,7 +335,7 @@ int main(int argc, char** argv)
     // Let's introduce some terminology.  Call an arrangement of airports such that all are reachable from each other
     // (equivalent, by the Theorem, to "all airports are covered by at least one of L and R") a Fully Reachable
     // Arrangement, or FRA.  If the number of moves required to construct this FRA is minimal out of all FRAs, then
-    // call it an Optimal FRA or OFRA.  The goal of  this problem is to find the number of moves in an OFRA.
+    // call it an Optimal FRA or OFRA.  The goal of this problem is to find the number of moves in an OFRA.
     //
     // What observations can we make about forming an OFRA?
     //
@@ -368,10 +371,10 @@ int main(int argc, char** argv)
     //
     // Proof
     //
-    // Take any OFRA where an airport other than one of L and R is moved, and call it A.  We know that A must moved in only one
+    // Take any OFRA where an airport other than one of L and R is moved, and call that airport A.  We know that A must move in only one
     // direction, so assume wlog that it moves rightwards (the case where it moves leftwards is almost identical and is omitted).
     //
-    // As noted early, we can re-arrange the movements in any order we please, so re-order so that A makes all of its moves last.
+    // As noted earlier, we can re-arrange the movements in any order we please, so re-order so that A makes all of its moves last.
     //
     // Then after the penultimate move of A, we cannot have an FRA (else, we could stop here with one less move than in the original OFRA,
     // contradicting the original's optimality). Thus, after the last move, A must not have been covered by either of L or R, but after
@@ -414,9 +417,10 @@ int main(int argc, char** argv)
     //   = X + d - R + L - Y + d
     //   = (X - Y) + L - R + 2 * d
     //   = L - R + 2 * d - (Y - X)
+    //   = L - R + 2 * d - (distance between X and Y)
     //
     // This is interesting, as the cost doesn't depend on the locations of X and Y - only on the difference between them! (L, R and d are
-    // all constants for this Day), and to minimum the cost, we need to pick the successive pairs of airports that have the *largest* gap
+    // all constants for this Day), and to minimise the cost, we need to pick the successive pairs of airports that have the *largest* gap
     // between them.
     //
     // So it seems that all we need to do is maintain (incrementally, for each day):
