@@ -57,13 +57,13 @@ int main(int argc, char* argv[])
     //
     // Observation: given an ordered list of k Mandragoras (H(j_1), H(j_2), ... , H(j_k)), the maximum
     // *gain* in experience from Eating/ Battling each in turn does not depend on the current
-    // experience, though it *does* depend on our current health; thus if we currently have s health
+    // experience, though it *does* depend on our current health; thus if we currently have h health
     // it makes sense to define:
     //
-    //   maxExpIncrease(s, (H(j_1), H(j_2), ... , H(j_k)))
+    //   maxExpIncrease(h, (H(j_1), H(j_2), ... , H(j_k)))
     //
-    // as the maximum increase in experience we can gain if our current health is s and we must
-    // Eat/ Battle, in order, the Mandragoras with healths. H(j_1), H(j_2), ... , H(j_k).  To 
+    // as the maximum increase in experience we can gain if our current health is h and we must
+    // Eat/ Battle, in order, the Mandragoras with healths H(j_1), H(j_2), ... , H(j_k).  To 
     // solve this challenge, we must compute:
     //
     //   initialExperience + maxExpIncrease(initialHealth, (H(i_1), H(i_2), ... , H(i_n)))
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     //
     // In a strategy that gives the largest experience gain, we may assume that the permutation 
     // i_1, i_2, ... , i_n of 1, 2, ... , n is the one that places the healths of the Mandragoras
-    // we face into increase order i.e. H(i_1) <= H(i_2) <= ... <= H(i_n).
+    // we face into increasing order i.e. H(i_1) <= H(i_2) <= ... <= H(i_n).
     //
     // Proof
     //
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     // 
     // The total experience from this modified strategy is then:
     //
-    //   e + h * H(i_j) + h * H(i_(j+1)) + maxExpIncrease(h, (H(i_(j+2)), H(i_(j+3)), ... , H(i_n))) 
+    //   e + h * H(i_(j+1)) + h * H(i_j)) + maxExpIncrease(h, (H(i_(j+2)), H(i_(j+3)), ... , H(i_n))) 
     //
     // i.e. exactly the same as that of the original strategy, (O1).  Thus, in this case, we can make the order of
     // Mandragora's "more ordered" with respect to health, but not lose any experience points from
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
     //
     // The total experience for this modified strategy would then be:
     //
-    //   e + (h + 1) * H(i_j) + 0 + maxExpIncrease(h + 1, (H(i_(j+2)), H(i_(j+3)), ... , H(i_n))) 
+    //   e + 0 + (h + 1) * H(i_j) + maxExpIncrease(h + 1, (H(i_(j+2)), H(i_(j+3)), ... , H(i_n))) 
     //
     // Subtracting (O2) from this gives:
     //  
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     //
     // The total experience for this modified strategy would then be:
     //
-    //   e + (h + 1) * H(i_j) + 0 + maxExpIncrease(h + 1, (H(i_(j+2)), H(i_(j+3)), ... , H(i_n))) 
+    //   e + 0 + (h + 1) * H(i_j) + maxExpIncrease(h + 1, (H(i_(j+2)), H(i_(j+3)), ... , H(i_n))) 
     //
     // Subtracting (O3) from this gives:
     //
@@ -223,10 +223,10 @@ int main(int argc, char* argv[])
     //
     //    experience from strategy that Eats first k, then Battles remaining.
     //
-    // For any k, this is easily computed: after eating the first k, our health is 1 + k and our experience still 0  
-    // The remaining (n - k) each give current health * Health of remaining Mandragora == (1 + k) * (sum of remaining
-    // (n - k) healths).  With a simple lookup table (sumOfRemainingHealths), we can easy compute this for all
-    // k and compute the best resulting experience in O(n).  Easy-peasy :)
+    // For any k, this is easily computed: after eating the first k, our health is 1 + k and our experience still 0.
+    // The remaining (n - k) each give current health * Health of remaining Mandragora so the total experience for this k
+    // is  (1 + k) * (sum of remaining (n - k) healths).  With a simple lookup table (sumOfRemainingHealths), we can easy compute this for all
+    // k and compute the best resulting experience all in O(n).  Easy-peasy :)
 
     int T;
     cin >> T;
