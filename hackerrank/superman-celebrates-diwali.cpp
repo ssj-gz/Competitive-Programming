@@ -6,36 +6,6 @@
 
 using namespace std;
 
-int64_t findMaxScoreFromBuildingAndFloor(int buildingNum, int floorNum, const int buildingSwitchHeightLoss, const vector<vector<int>>& numInBuildingOnFloor, vector<vector<int64_t>>& maxScoreFromBuildingAndFloorLookup)
-{
-    if (floorNum < 0)
-        return 0;
-    if (maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum] != -1)
-    {
-        return maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum];
-    }
-    int64_t result = numInBuildingOnFloor[buildingNum][floorNum]; // Rescue these people.
-    //cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " rescue: " << result << endl;
-
-    int64_t bestResultAfterMove = 0;
-    // Stay in same building; descend to next floor.
-    bestResultAfterMove = max(bestResultAfterMove, findMaxScoreFromBuildingAndFloor(buildingNum, floorNum - 1, buildingSwitchHeightLoss, numInBuildingOnFloor, maxScoreFromBuildingAndFloorLookup));
-    // Switch to other buildings.
-    const int numBuildings = numInBuildingOnFloor.size();
-    for (int otherBuildingNum = 0; otherBuildingNum < numBuildings; otherBuildingNum++)
-    {
-        if (otherBuildingNum == buildingNum)
-            continue;
-
-        bestResultAfterMove = max(bestResultAfterMove, findMaxScoreFromBuildingAndFloor(otherBuildingNum, floorNum - buildingSwitchHeightLoss, buildingSwitchHeightLoss, numInBuildingOnFloor, maxScoreFromBuildingAndFloorLookup));
-    }
-
-    result += bestResultAfterMove;
-    maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum] = result;
-
-    return result;
-}
-
 int main()
 {
     int numBuildings;
@@ -66,12 +36,43 @@ int main()
     }
     assert(cin);
 
-    vector<vector<int64_t>> maxScoreFromBuildingAndFloorLookup(numBuildings, vector<int64_t>(buildingHeight + 1, -1));
+    vector<vector<int64_t>> maxScoreFromBuildingAndFloorLookup(numBuildings, vector<int64_t>(buildingHeight + 1, 0));
+
+    for (int floorNum = 1; floorNum <= buildingHeight; floorNum++)
+    {
+        for (int buildingNum = 0; buildingNum < numBuildings; buildingNum++)
+        {
+            int64_t result = numInBuildingOnFloor[buildingNum][floorNum]; // Rescue these people.
+            cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " rescue: " << result << endl;
+
+            int64_t bestResultAfterMove = 0;
+            // Stay in same building; descend to next floor.
+            bestResultAfterMove = max(bestResultAfterMove, maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum - 1]);
+            if (floorNum - buildingSwitchHeightLoss >= 0)
+            {
+                // Switch to other buildings.
+                const int numBuildings = numInBuildingOnFloor.size();
+                for (int otherBuildingNum = 0; otherBuildingNum < numBuildings; otherBuildingNum++)
+                {
+                    if (otherBuildingNum == buildingNum)
+                        continue;
+
+                    if (floorNum - buildingSwitchHeightLoss >= 0)
+                    {
+                        bestResultAfterMove = max(bestResultAfterMove, maxScoreFromBuildingAndFloorLookup[otherBuildingNum][floorNum - buildingSwitchHeightLoss]);
+                    }
+                }
+            }
+
+            result += bestResultAfterMove;
+            maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum] = result;
+        }
+    }
 
     int64_t result = 0;
     for (int buildingNum = 0; buildingNum < numBuildings; buildingNum++)
     {
-        result = max(result, findMaxScoreFromBuildingAndFloor(buildingNum, buildingHeight, buildingSwitchHeightLoss, numInBuildingOnFloor, maxScoreFromBuildingAndFloorLookup));
+        result = max(result, maxScoreFromBuildingAndFloorLookup[buildingNum][buildingHeight]);
     }
 
     cout << result << endl;
