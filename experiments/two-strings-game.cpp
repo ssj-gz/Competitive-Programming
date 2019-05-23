@@ -1024,6 +1024,10 @@ int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 
 int findGrundyNumberForState( Cursor state, int wordLength = 0)
 {
+    if (state.stateData().grundyNumber != -1)
+    {
+        return state.stateData().grundyNumber;
+    }
     cout << "findGrundyNumberForState: " << state.dbgStringFollowed() << endl;
     state.stateData().wordLength = wordLength;
     set<int> grundyNumbersAfterNextMove;
@@ -1059,6 +1063,9 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
     state.stateData().grundyNumber = mex;
     cout << "state: " << state.dbgStringFollowed() << " grundyNumber: " << mex << endl;
 
+    cout << "bloo: " << state.stateData().grundyNumber << endl;
+    assert(state.stateData().grundyNumber <= 4);
+
     return state.stateData().grundyNumber;
 }
 
@@ -1089,8 +1096,8 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int lengthA = (rand() % 20) + 1;
-        const int lengthB = (rand() % 20) + 1;
+        const int lengthA = (rand() % 40) + 1;
+        const int lengthB = (rand() % 40) + 1;
         const int K = rand() % (lengthA * lengthB) + 1;
         cout << lengthA << " " << lengthB << " " << K << endl;
         const int maxLetterA = rand() % 26 + 1;
@@ -1173,7 +1180,14 @@ int main(int argc, char** argv)
             assert(grundyNumber == 0);
         }
     }
-    cout << "result: " << firstPlayerWinsStates[K - 1] << endl;
+    if (K >= firstPlayerWinsStates.size())
+    {
+        cout << "no solution" << endl;
+    }
+    else
+    {
+        cout << "result: " << firstPlayerWinsStates[K - 1] << endl;
+    }
 }
 
 
