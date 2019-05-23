@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-05-23
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -74,7 +80,7 @@ int main(int argc, char* argv[])
             for (int otherBuildingNum = numBuildings - 1; otherBuildingNum >= 0; otherBuildingNum--)
             {
                 maxScoreIfSwitchToBuildingGreaterThan[otherBuildingNum] = max(maxScoreIfSwitchToBuildingGreaterThan[otherBuildingNum + 1], maxScoreFromBuildingAndFloorLookup[otherBuildingNum + 1][floorNumIfSwitchBuildings]);
-                cout << "floorNum: " << floorNum <<" maxScoreIfSwitchToBuildingGreaterThan[" << otherBuildingNum << "] = " << maxScoreIfSwitchToBuildingGreaterThan[otherBuildingNum]<< endl;
+                //cout << "floorNum: " << floorNum <<" maxScoreIfSwitchToBuildingGreaterThan[" << otherBuildingNum << "] = " << maxScoreIfSwitchToBuildingGreaterThan[otherBuildingNum]<< endl;
             }
         }
 
@@ -89,6 +95,7 @@ int main(int argc, char* argv[])
             int64_t bestResultAfterSwitch = 0;
             if (canSwitchBuildings)
             {
+#ifdef BRUTE_FORCE
                 // Switch to other buildings.
                 const int numBuildings = numInBuildingOnFloor.size();
                 for (int otherBuildingNum = 0; otherBuildingNum < numBuildings; otherBuildingNum++)
@@ -101,13 +108,15 @@ int main(int argc, char* argv[])
                         bestResultAfterSwitch = max(bestResultAfterSwitch, maxScoreFromBuildingAndFloorLookup[otherBuildingNum][floorNumIfSwitchBuildings]);
                     }
                 }
+#endif
                 if (buildingNum > 0)
                 {
                     maxScoreIfSwitchToBuildingLessThanCurrent = max(maxScoreIfSwitchToBuildingLessThanCurrent, maxScoreFromBuildingAndFloorLookup[buildingNum - 1][floorNumIfSwitchBuildings]);
                 }
                 const auto bestResultAfterSwitchOptimised = max(maxScoreIfSwitchToBuildingGreaterThan[buildingNum], maxScoreIfSwitchToBuildingLessThanCurrent);
-                cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " bestResultAfterSwitch: " << bestResultAfterSwitch << " bestResultAfterSwitchOptimised: " << bestResultAfterSwitchOptimised << " maxScoreIfSwitchToBuildingGreaterThan[buildingNum]: " << maxScoreIfSwitchToBuildingGreaterThan[buildingNum] << " maxScoreIfSwitchToBuildingLessThanCurrent: " << maxScoreIfSwitchToBuildingLessThanCurrent << endl;
+                //cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " bestResultAfterSwitch: " << bestResultAfterSwitch << " bestResultAfterSwitchOptimised: " << bestResultAfterSwitchOptimised << " maxScoreIfSwitchToBuildingGreaterThan[buildingNum]: " << maxScoreIfSwitchToBuildingGreaterThan[buildingNum] << " maxScoreIfSwitchToBuildingLessThanCurrent: " << maxScoreIfSwitchToBuildingLessThanCurrent << endl;
                 assert(bestResultAfterSwitch == bestResultAfterSwitchOptimised);
+                bestResultAfterSwitch = bestResultAfterSwitchOptimised;
             }
 
 
@@ -115,7 +124,7 @@ int main(int argc, char* argv[])
                                max(bestResultAfterDescend, bestResultAfterSwitch);
             maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum] = result;
 
-            cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " result: " << result << endl;
+            //cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " result: " << result << endl;
         }
     }
 
