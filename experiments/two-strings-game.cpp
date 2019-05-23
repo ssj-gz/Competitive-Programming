@@ -458,6 +458,53 @@ class SuffixTreeBuilder
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 } 
+                bool canMoveUp()
+                {
+                    return (m_state != m_root || m_transition);
+                }
+                char moveUp()
+                {
+                    assert(canMoveUp());
+                    if (m_transition)
+                    {
+                        assert(m_posInTransition > 0);
+                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition - 1];
+                        if (m_posInTransition != 1)
+                        {
+                            m_posInTransition--;
+                        }
+                        else
+                        {
+                            movedToExplicitState();
+                        }
+                        return charFollowed;
+                    }
+                    else
+                    {
+                        Transition* transitionFromParent = findTransitionFromParent();
+                        m_state = m_state->parent;
+                        m_transition = transitionFromParent;
+                        m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
+                        const char charFollowed = (*m_string)[m_transition->substringFollowed.startIndex - 1 + m_posInTransition];
+                        if (m_posInTransition == 0)
+                        {
+                            movedToExplicitState();
+                        }
+                        return charFollowed;
+                    }
+                }
+
+                string dbgStringFollowed() const
+                {
+                    Cursor copy(*this);
+                    string stringFollowedReversed;
+                    while (copy.canMoveUp())
+                    {
+                        stringFollowedReversed += copy.moveUp();
+                    }
+                    return string(stringFollowedReversed.rbegin(), stringFollowedReversed.rend());
+                }
+
             private:
                 Cursor(State* state, const string& str, State* root)
                     : m_state{state}, 
@@ -997,6 +1044,70 @@ PlayState findWinner(Player firstPlayer, const GameState& initialGameState, Play
     return result;
 }
 
+int findGrundyNumberForState(Cursor state)
+{
+    set<int> grundyNumbersAfterNextMove;
+    auto nextLetterIterator = state.getNextLetterIterator();
+    while (nextLetterIterator.hasNext())
+    {
+        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        if (!afterFollowingLetter.isOnExplicitState())
+        {
+            afterFollowingLetter.followToTransitionEnd();
+            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter));
+            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            const int numLettersUntilNextState = afterFollowingLetter.stateData().wordLength - state.stateData().wordLength;
+            if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
+            {
+                grundyNumbersAfterNextMove.insert(0);
+            }
+            else
+            {
+                grundyNumbersAfterNextMove.insert(1);
+            }
+        }
+        else
+        {
+            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter));
+        }
+
+        nextLetterIterator++;
+    }
+    int mex = 0;
+    while (grundyNumbersAfterNextMove.find(mex) != grundyNumbersAfterNextMove.end())
+    {
+        mex++;
+    }
+    state.stateData().grundyNumber = mex;
+    cout << "state: " << state.dbgStringFollowed() << " grundyNumber: " << mex << endl;
+
+    return state.stateData().grundyNumber;
+}
+
+int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
+{
+    Cursor wordCursor = suffixTree.rootCursor();
+    wordCursor.followLetters(s);
+    if (wordCursor.isOnExplicitState())
+    {
+        return wordCursor.stateData().grundyNumber;
+    }
+    else
+    {
+        wordCursor.followToTransitionEnd();
+        const int grundyNumberAtNextState = wordCursor.stateData().grundyNumber;
+        const int numLettersUntilNextState = wordCursor.stateData().wordLength - s.size();
+        if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
+        {
+            return 0;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+}
+
 
 int main(int argc, char** argv)
 {
@@ -1004,16 +1115,26 @@ int main(int argc, char** argv)
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    ifstream testCaseFileIn;
-    bool isTestcaseFromFile = false;
     if (argc == 2)
     {
-        const auto testCaseFilename = argv[1];
-        testCaseFileIn.open(testCaseFilename);
-        assert(testCaseFileIn.is_open());
-        isTestcaseFromFile = true;
+        const int lengthA = (rand() % 20) + 1;
+        const int lengthB = (rand() % 20) + 1;
+        const int K = rand() % (lengthA * lengthB) + 1;
+        cout << lengthA << " " << lengthB << " " << K << endl;
+        const int maxLetterA = rand() % 26;
+        for (int i = 0; i < lengthA; i++)
+        {
+            cout << static_cast<char>('a' + rand() % maxLetterA);
+        }
+        cout << endl;
+        const int maxLetterB = rand() % 26;
+        for (int i = 0; i < lengthB; i++)
+        {
+            cout << static_cast<char>('a' + rand() % maxLetterB);
+        }
+        cout << endl;
+        return 0;
     }
-    istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
 
     int N;
     cin >> N;
@@ -1052,17 +1173,30 @@ int main(int argc, char** argv)
         }
     }
 
+    SuffixTreeBuilder aSuffixTree;
+    aSuffixTree.appendString(A);
+    findGrundyNumberForState(aSuffixTree.rootCursor());
+
+    SuffixTreeBuilder bSuffixTree;
+    bSuffixTree.appendString(B);
+    findGrundyNumberForState(bSuffixTree.rootCursor());
+
     vector<GameState> firstPlayerWinsStates;
     for (const auto& gameState : allGameStates)
     {
+        const auto grundyNumber = findGrundyNumberForString(gameState.aPrime, aSuffixTree) ^ findGrundyNumberForString(gameState.bPrime, bSuffixTree);
+        cout << "grundyNumber for A' " << gameState.aPrime << " : " << findGrundyNumberForString(gameState.aPrime, aSuffixTree) << endl;
+        cout << "grundyNumber for B' " << gameState.bPrime << " : " << findGrundyNumberForString(gameState.bPrime, bSuffixTree) << endl;
         if (findWinner(Player1, gameState) == Player1)
         {
             firstPlayerWinsStates.push_back(gameState);
             cout << "First player wins for game state: " << gameState << endl;
+            assert(grundyNumber != 0);
         }
         else
         {
             cout << "Second player wins for game state: " << gameState << endl;
+            assert(grundyNumber == 0);
         }
     }
     cout << "result: " << firstPlayerWinsStates[K - 1] << endl;
