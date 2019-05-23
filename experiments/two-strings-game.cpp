@@ -1024,19 +1024,21 @@ int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 
 int findGrundyNumberForState( Cursor state, int wordLength = 0)
 {
+    cout << "findGrundyNumberForState: " << state.dbgStringFollowed() << endl;
     state.stateData().wordLength = wordLength;
     set<int> grundyNumbersAfterNextMove;
     auto nextLetterIterator = state.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        cout << " findGrundyNumberForState: " << state.dbgStringFollowed() << " following letter" << endl;
         if (!afterFollowingLetter.isOnExplicitState())
         {
-            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length();
             afterFollowingLetter.followToTransitionEnd();
-            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState));
+            findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-            cout << "afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
+            cout << " afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
             assert(state.stateData().wordLength == state.dbgStringFollowed().size());
             assert(afterFollowingLetter.stateData().wordLength == afterFollowingLetter.dbgStringFollowed().size());
             assert(numLettersUntilNextState > 0);
@@ -1145,10 +1147,12 @@ int main(int argc, char** argv)
 
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
+    cout << "findGrundyNumberForState A" << endl;
     findGrundyNumberForState(aSuffixTree.rootCursor());
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
+    cout << "findGrundyNumberForState B" << endl;
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
     vector<GameState> firstPlayerWinsStates;
