@@ -72,8 +72,12 @@ int main()
 
                     if (floorNum - buildingSwitchHeightLoss >= 0)
                     {
-                        bestResultAfterSwitch = max(bestResultAfterSwitch, maxScoreFromBuildingAndFloorLookup[otherBuildingNum][floorNum - buildingSwitchHeightLoss]);
+                        bestResultAfterSwitch = max(bestResultAfterSwitch, maxScoreFromBuildingAndFloorLookup[otherBuildingNum][floorNumIfSwitchBuildings]);
                     }
+                }
+                if (buildingNum > 0)
+                {
+                    maxScoreIfSwitchToBuildingLessThanCurrent = max(maxScoreIfSwitchToBuildingLessThanCurrent, maxScoreFromBuildingAndFloorLookup[buildingNum - 1][floorNumIfSwitchBuildings]);
                 }
                 const auto bestResultAfterSwitchOptimised = max(maxScoreIfSwitchToBuildingGreaterThan[buildingNum], maxScoreIfSwitchToBuildingLessThanCurrent);
                 cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " bestResultAfterSwitch: " << bestResultAfterSwitch << " bestResultAfterSwitchOptimised: " << bestResultAfterSwitchOptimised << " maxScoreIfSwitchToBuildingGreaterThan[buildingNum]: " << maxScoreIfSwitchToBuildingGreaterThan[buildingNum] << " maxScoreIfSwitchToBuildingLessThanCurrent: " << maxScoreIfSwitchToBuildingLessThanCurrent << endl;
@@ -85,10 +89,6 @@ int main()
                                max(bestResultAfterDescend, bestResultAfterSwitch);
             maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum] = result;
 
-            if (canSwitchBuildings && buildingNum > 0)
-            {
-                maxScoreIfSwitchToBuildingLessThanCurrent = max(maxScoreIfSwitchToBuildingLessThanCurrent, maxScoreFromBuildingAndFloorLookup[buildingNum - 1][floorNumIfSwitchBuildings]);
-            }
             cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " result: " << result << endl;
         }
     }
