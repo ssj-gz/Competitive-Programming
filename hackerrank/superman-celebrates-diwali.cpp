@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-05-23
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -14,7 +15,7 @@ int64_t findMaxScoreFromBuildingAndFloor(int buildingNum, int floorNum, const in
         return maxScoreFromBuildingAndFloorLookup[buildingNum][floorNum];
     }
     int64_t result = numInBuildingOnFloor[buildingNum][floorNum]; // Rescue these people.
-    cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " rescue: " << result << endl;
+    //cout << "buildingNum: " << buildingNum << " floorNum: " << floorNum << " rescue: " << result << endl;
 
     int64_t bestResultAfterMove = 0;
     // Stay in same building; descend to next floor.
@@ -52,7 +53,7 @@ int main()
     {
         int numInBuilding;
         cin >> numInBuilding;
-        cout << "numInBuilding: " << numInBuilding << endl;
+        //cout << "numInBuilding: " << numInBuilding << endl;
 
         for (int personNum = 0; personNum < numInBuilding; personNum++)
         {
@@ -60,7 +61,7 @@ int main()
             cin >> personsFloor;
 
             numInBuildingOnFloor[buildingNum][personsFloor]++;
-            cout << "numInBuildingOnFloor[" << buildingNum << "][" << personsFloor << "] = " << numInBuildingOnFloor[buildingNum][personsFloor] << endl;
+            //cout << "numInBuildingOnFloor[" << buildingNum << "][" << personsFloor << "] = " << numInBuildingOnFloor[buildingNum][personsFloor] << endl;
         }
     }
     assert(cin);
