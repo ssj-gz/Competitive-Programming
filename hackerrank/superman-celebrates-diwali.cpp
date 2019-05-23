@@ -4,10 +4,36 @@
 #include <utility>
 #include <cassert>
 
+#include <sys/time.h>
+
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+
+        const int numBuildings = rand() % 100 + 1;
+        const int buildingHeight = rand() % 100 + 1;
+        const int buildingSwitchHeightLoss = rand() % 100 + 1;
+
+        cout << numBuildings << " " << buildingHeight << " " << buildingSwitchHeightLoss << endl; 
+        for (int buildingNum = 0; buildingNum < numBuildings; buildingNum++)
+        {
+            const int numInBuilding = rand() % 100;
+            cout << numInBuilding;
+            for (int personNum = 0; personNum < numInBuilding; personNum++)
+            {
+                cout << " " << (rand() % buildingHeight + 1);
+            }
+            cout << endl;
+        }
+        return 0;
+    }
     int numBuildings;
     cin >> numBuildings;
 
