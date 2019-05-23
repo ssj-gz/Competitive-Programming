@@ -1089,17 +1089,17 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int lengthA = (rand() % 5) + 1;
-        const int lengthB = (rand() % 5) + 1;
+        const int lengthA = (rand() % 20) + 1;
+        const int lengthB = (rand() % 20) + 1;
         const int K = rand() % (lengthA * lengthB) + 1;
         cout << lengthA << " " << lengthB << " " << K << endl;
-        const int maxLetterA = rand() % 26;
+        const int maxLetterA = rand() % 26 + 1;
         for (int i = 0; i < lengthA; i++)
         {
             cout << static_cast<char>('a' + rand() % maxLetterA);
         }
         cout << endl;
-        const int maxLetterB = rand() % 26;
+        const int maxLetterB = rand() % 26 + 1;
         for (int i = 0; i < lengthB; i++)
         {
             cout << static_cast<char>('a' + rand() % maxLetterB);
