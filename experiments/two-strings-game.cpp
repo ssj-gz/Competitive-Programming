@@ -84,7 +84,6 @@ class SuffixTreeBuilder
             m_states.reserve(1'000'000);
 
             m_root = createNewState();
-            m_root->data.wordLength = 0;
             m_auxiliaryState = createNewState();
 
             for (int i = 0; i < alphabetSize; i++)
@@ -117,53 +116,6 @@ class SuffixTreeBuilder
         int numStates() const
         {
             return m_states.size();
-        }
-        void makeFinalStatesExplicitAndMarkThemAsFinal()
-        {
-            // Trick described in Ukkonen's paper.
-            const char unusedLetter = '{';
-            appendLetter(unusedLetter);
-
-            // Remove the unused letter again!
-            for (auto& state : m_states)
-            {
-                for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
-                {
-                    const Transition& transition = *transitionIter;
-                    if (transition.substringFollowed.startIndex < 1)
-                    {
-                        transitionIter++;
-                        continue;
-                    }
-                    const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
-                    const char lastCharInTransition = m_currentString[realEndIndex];
-                    bool needToRemoveTransition = false;
-                    if (lastCharInTransition == unusedLetter)
-                    {
-                        const bool transitionConsistsSolelyOfUnusedChar = (transition.substringFollowed.length(m_currentString.size()) == 1);
-                        if (transitionConsistsSolelyOfUnusedChar)
-                        {
-                            needToRemoveTransition = true;
-                            state.isFinal = true;
-                        }
-                        else
-                        {
-                            transition.nextState->isFinal = true;
-                        }
-                    }
-
-                    if (needToRemoveTransition)
-                        transitionIter = state.transitions.erase(transitionIter);
-                    else
-                        transitionIter++;
-                }
-            }
-            for (auto& state : m_states)
-            {
-                //cout << "state: " << &state << " wordLength: " << state.data.wordLength << endl;
-            }
-
-            m_currentString.pop_back(); // Remove the unusedLetter we just added.
         }
         /**
          * Class used to navigate the suffix tree.  Can be invalidated by making changes to the tree!
@@ -628,7 +580,6 @@ class SuffixTreeBuilder
                 {
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
-                    r->data.wordLength = s->data.wordLength + p - k + 1;
                     s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), m_currentString));
                     r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
                     sPrime->parent = r;
@@ -1044,8 +995,36 @@ PlayState findWinner(Player firstPlayer, const GameState& initialGameState, Play
     return result;
 }
 
-int findGrundyNumberForState(Cursor state)
+int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 {
+    cout << " grundyBlah: grundyNumberAtNextState: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
+    if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
+    {
+        cout << " 0" << endl;
+        return 0;
+    }
+    if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 0))
+    {
+        cout << " 1" << endl;
+        return 1;
+    }
+    if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 1))
+    {
+        cout << " 1" << endl;
+        return 1;
+    }
+    if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 0))
+    {
+        cout << " 0" << endl;
+        return 0;
+    }
+    assert(false);
+    return -1;
+}
+
+int findGrundyNumberForState( Cursor state, int wordLength = 0)
+{
+    state.stateData().wordLength = wordLength;
     set<int> grundyNumbersAfterNextMove;
     auto nextLetterIterator = state.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
@@ -1053,22 +1032,19 @@ int findGrundyNumberForState(Cursor state)
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
         if (!afterFollowingLetter.isOnExplicitState())
         {
+            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
             afterFollowingLetter.followToTransitionEnd();
-            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter));
+            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState));
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-            const int numLettersUntilNextState = afterFollowingLetter.stateData().wordLength - state.stateData().wordLength;
-            if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
-            {
-                grundyNumbersAfterNextMove.insert(0);
-            }
-            else
-            {
-                grundyNumbersAfterNextMove.insert(1);
-            }
+            cout << "afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
+            assert(state.stateData().wordLength == state.dbgStringFollowed().size());
+            assert(afterFollowingLetter.stateData().wordLength == afterFollowingLetter.dbgStringFollowed().size());
+            assert(numLettersUntilNextState > 0);
+            grundyNumbersAfterNextMove.insert(grundyBlah(grundyNumberAtNextState, numLettersUntilNextState));
         }
         else
         {
-            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter));
+            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter, wordLength + 1));
         }
 
         nextLetterIterator++;
@@ -1097,14 +1073,8 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
         wordCursor.followToTransitionEnd();
         const int grundyNumberAtNextState = wordCursor.stateData().grundyNumber;
         const int numLettersUntilNextState = wordCursor.stateData().wordLength - s.size();
-        if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
-        {
-            return 0;
-        }
-        else
-        {
-            return 1;
-        }
+        cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.dbgStringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
+        return grundyBlah(grundyNumberAtNextState, numLettersUntilNextState);
     }
 }
 
@@ -1117,8 +1087,8 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int lengthA = (rand() % 20) + 1;
-        const int lengthB = (rand() % 20) + 1;
+        const int lengthA = (rand() % 5) + 1;
+        const int lengthB = (rand() % 5) + 1;
         const int K = rand() % (lengthA * lengthB) + 1;
         cout << lengthA << " " << lengthB << " " << K << endl;
         const int maxLetterA = rand() % 26;
@@ -1187,7 +1157,7 @@ int main(int argc, char** argv)
         const auto grundyNumber = findGrundyNumberForString(gameState.aPrime, aSuffixTree) ^ findGrundyNumberForString(gameState.bPrime, bSuffixTree);
         cout << "grundyNumber for A' " << gameState.aPrime << " : " << findGrundyNumberForString(gameState.aPrime, aSuffixTree) << endl;
         cout << "grundyNumber for B' " << gameState.bPrime << " : " << findGrundyNumberForString(gameState.bPrime, bSuffixTree) << endl;
-        if (findWinner(Player1, gameState) == Player1)
+        if (findWinner(Player1, gameState) == Player1Win)
         {
             firstPlayerWinsStates.push_back(gameState);
             cout << "First player wins for game state: " << gameState << endl;
