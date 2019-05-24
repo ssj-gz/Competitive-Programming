@@ -1216,12 +1216,12 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
             if (answerIsOnThisTransition)
             {
                 Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
-                int grundyNumber = grundyNumberAfterFollowingLetter;
+                int grundyNumberOnTransition = grundyNumberAfterFollowingLetter;
                 while (true)
                 {
-                    if (K >= numInBWithoutGrundy[grundyNumber])
+                    if (K >= numInBWithoutGrundy[grundyNumberOnTransition])
                     {
-                        K -= numInBWithoutGrundy[grundyNumber];
+                        K -= numInBWithoutGrundy[grundyNumberOnTransition];
                     }
                     else
                     {
@@ -1233,14 +1233,14 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     if (K == 0)
                     {
                         result.aPrime = onTransition.dbgStringFollowed();
-                        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumber, numInBWithoutGrundy[grundyNumber]);
+                        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]);
                         result.isValid = true;
 
                         K = -1;
                         return;
                     }
                     onTransition.followNextLetter();
-                    grundyNumber = 1 - grundyNumber;
+                    grundyNumberOnTransition = 1 - grundyNumberOnTransition;
                 }
 
             }
