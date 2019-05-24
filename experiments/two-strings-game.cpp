@@ -1160,6 +1160,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
 {
     assert(aState.isOnExplicitState());
     const auto grundyForState = aState.stateData().grundyNumber;
+    cout << "findKthOptimised: aState: " << aState.dbgStringFollowed() << " K: " << K << " grundyForState: " << grundyForState << " numInBWithoutGrundy: " << numInBWithoutGrundy[grundyForState] << endl;
     if (K - numInBWithoutGrundy[grundyForState] >= 0)
     {
         K -= numInBWithoutGrundy[grundyForState];
@@ -1173,6 +1174,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
     if (K == 0)
     {
+        cout << "blah: " << endl;
         result.aPrime = aState.dbgStringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]);
         result.isValid = true;
@@ -1205,7 +1207,8 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                 numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
                 grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
             }
-            bool answerIsOnThisTransition = (K - (numWithGrundy0 * numInBWithoutGrundy[0] + numWithGrundy1 * numInBWithoutGrundy[1]) <= 0 );
+            const auto kAfterFollowingTransition = K - (numWithGrundy0 * numInBWithoutGrundy[0] + numWithGrundy1 * numInBWithoutGrundy[1]);
+            bool answerIsOnThisTransition = (kAfterFollowingTransition <= 0 );
             if (answerIsOnThisTransition)
             {
                 // TODO
@@ -1215,7 +1218,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
             }
             else
             {
-                K -= (numWithGrundy0 * numInBWithoutGrundy[0] + numWithGrundy1 * numInBWithoutGrundy[1]);
+                K = kAfterFollowingTransition;
             }
             if (K == 0)
             {
@@ -1463,7 +1466,7 @@ vector<GameState> solveOptimised(const string& A, const string& B)
 
 
     vector<GameState> results;
-    int64_t K = 0;
+    int64_t K = 1;
     while (true)
     {
         const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
