@@ -1417,6 +1417,11 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     }
     assert(dbgNumInBWithGrundy == numInBWithGrundy);
 
+    auto numInBWithoutGrundy = numInBWithGrundy;
+    for (auto& x : numInBWithoutGrundy)
+    {
+        x = numSubstringsOfBOpt - x;
+    }
 
     vector<GameState> results;
     int64_t K = 0;
