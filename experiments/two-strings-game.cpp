@@ -1156,13 +1156,13 @@ vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
 string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 
 #if 1
-void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithGrundy, GameState& result)
+void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithoutGrundy, GameState& result)
 {
     assert(aState.isOnExplicitState());
     const auto grundyForState = aState.stateData().grundyNumber;
-    if (K - numInBWithGrundy[grundyForState] >= 0)
+    if (K - numInBWithoutGrundy[grundyForState] >= 0)
     {
-        K -= numInBWithGrundy[grundyForState];
+        K -= numInBWithoutGrundy[grundyForState];
     }
     else
     {
@@ -1174,7 +1174,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     if (K == 0)
     {
         result.aPrime = aState.dbgStringFollowed();
-        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithGrundy[grundyForState]);
+        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]);
 
         K = -1;
         return;
@@ -1204,7 +1204,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                 numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
                 grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
             }
-            bool answerIsOnThisTransition = (K - (numWithGrundy0 * numInBWithGrundy[0] + numWithGrundy1 * numInBWithGrundy[1]) <= 0 );
+            bool answerIsOnThisTransition = (K - (numWithGrundy0 * numInBWithoutGrundy[0] + numWithGrundy1 * numInBWithoutGrundy[1]) <= 0 );
             if (answerIsOnThisTransition)
             {
                 // TODO
@@ -1214,7 +1214,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
             }
 
         }
-        findKthOptimised(afterFollowingLetter, bSuffixTree, K, numInBWithGrundy, result);
+        findKthOptimised(afterFollowingLetter, bSuffixTree, K, numInBWithoutGrundy, result);
 
         nextLetterIterator++;
     }
@@ -1324,9 +1324,11 @@ string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNum
 }
 
 
-GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K)
+GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithoutGrundy)
 {
-    return GameState::invalid();
+    GameState result;
+    findKthOptimised(aSuffixTree.rootCursor(), bSuffixTree, K, numInBWithoutGrundy, result);
+    return result;
 }
 
 vector<string> orderedSubstringsOf(const string& s)
@@ -1451,8 +1453,9 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     int64_t K = 0;
     while (true)
     {
-        const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, K);
-        if (!kthOptimised.isValid)
+        const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
+        cout << "k: " << K << " kthOptimised: " << kthOptimised << endl;
+        if (K >= numSubstringsOfBOpt)
         {
             break;
         }
@@ -1524,7 +1527,7 @@ int main(int argc, char** argv)
     }
 
     vector<GameState> firstPlayerWinsStates;
-#if 0
+#if 1
     for (const auto& gameState : allGameStates)
     {
         const auto grundyNumber = findGrundyNumberForString(gameState.aPrime, aSuffixTree) ^ findGrundyNumberForString(gameState.bPrime, bSuffixTree);
