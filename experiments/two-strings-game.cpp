@@ -1394,34 +1394,45 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree);
-    vector<int64_t> dbgNumInBWithGrundy(numInBWithGrundy.size());
+    const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
+    auto numInBWithoutGrundy = numInBWithGrundy;
+    for (auto& x : numInBWithoutGrundy)
+    {
+        x = numSubstringsOfBOpt - x;
+    }
+    vector<int64_t> dbgNumInBWithoutGrundy(numInBWithoutGrundy.size());
 
     const auto substringsOfB = orderedSubstringsOf(B);
     for (const auto& substringOfB : substringsOfB)
     {
         cout << "substringOfB: " << substringOfB << " grundy num: " << findGrundyNumberForString(substringOfB, bSuffixTree) << endl;
         const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
-        dbgNumInBWithGrundy[grundyForSubstring]++;
-        cout << "++++++++++++" << endl;
-        const auto nthWithGrundy = findNthWithGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
-        cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << nthWithGrundy << endl;
-        assert(nthWithGrundy == substringOfB);
+        for (int i = 0; i < dbgNumInBWithoutGrundy.size(); i++)
+        {
+            if (i != grundyForSubstring)
+            {
+                dbgNumInBWithoutGrundy[i]++;
+            }
+        }
+        //dbgNumInBWithGrundy[grundyForSubstring]++;
+        //cout << "++++++++++++" << endl;
+        //const auto nthWithGrundy = findNthWithGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
+        //cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << nthWithGrundy << endl;
+        //assert(nthWithGrundy == substringOfB);
     }
-    const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
+    assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
+    //for (const auto& substringOfB : substringsOfB)
+    //{
+    //}
     //const auto numSubstringsOfBOpt = (B.size() * (B.size() + 1)) / 2;
     cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
     assert(substringsOfB.size() == numSubstringsOfBOpt);
-    for (int i = 0; i < numInBWithGrundy.size(); i++)
-    {
-        cout << "i: " << i << " numInBWithGrundy: " << numInBWithGrundy[i] << " dbgNumInBWithGrundy: " << dbgNumInBWithGrundy[i] << endl;
-    }
-    assert(dbgNumInBWithGrundy == numInBWithGrundy);
+    //for (int i = 0; i < numInBWithGrundy.size(); i++)
+    //{
+        //cout << "i: " << i << " numInBWithGrundy: " << numInBWithGrundy[i] << " dbgNumInBWithGrundy: " << dbgNumInBWithGrundy[i] << endl;
+    //}
+    //assert(dbgNumInBWithGrundy == numInBWithGrundy);
 
-    auto numInBWithoutGrundy = numInBWithGrundy;
-    for (auto& x : numInBWithoutGrundy)
-    {
-        x = numSubstringsOfBOpt - x;
-    }
 
     vector<GameState> results;
     int64_t K = 0;
