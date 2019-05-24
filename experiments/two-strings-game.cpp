@@ -1153,10 +1153,25 @@ vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
     return numWithGrundy;
 } 
 
-#if 0
-GameState findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithGrundy)
+string findNthWithGrundy(SuffixTreeBuilder& suffixTree, int desiredGrundyNumber, int64_t N);
+
+#if 1
+void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithGrundy, GameState& result)
 {
-    assert(assert.isOnExplicitState());
+    assert(aState.isOnExplicitState());
+    const auto grundyForState = aState.stateData().grundyNumber;
+    if (K - numInBWithGrundy[grundyForState] >= 0)
+    {
+        K -= numInBWithGrundy[grundyForState];
+    }
+    if (K == 0)
+    {
+        result.aPrime = aState.dbgStringFollowed();
+        result.bPrime = findNthWithGrundy(bSuffixTree, grundyForState, numInBWithGrundy[grundyForState]);
+
+        K = -1;
+        return;
+    }
     auto nextLetterIterator = aState.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
@@ -1166,19 +1181,33 @@ GameState findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
             afterFollowingLetter.followToTransitionEnd();
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            int numWithGrundy0 = -1;
+            int numWithGrundy1 = -1;
+            int grundyNumberAfterFollowingLetter = -1;
             if (grundyNumberAtNextState > 0)
             {
-                numWithGrundy[0] += numLettersUntilNextState / 2;
-                numWithGrundy[1] += (numLettersUntilNextState - 1) / 2;
+                numWithGrundy0 = numLettersUntilNextState / 2;
+                numWithGrundy1 = (numLettersUntilNextState - 1) / 2;
+                grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
 
             }
             else
             {
-                numWithGrundy[1] += numLettersUntilNextState / 2;
-                numWithGrundy[0] += (numLettersUntilNextState - 1) / 2;
+                numWithGrundy1 = numLettersUntilNextState / 2;
+                numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
+                grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
             }
+            bool answerIsOnThisTransition = (K - (numWithGrundy0 * numInBWithGrundy[0] + numWithGrundy1 * numInBWithGrundy[1]) <= 0 );
+            if (answerIsOnThisTransition)
+            {
+                // TODO
+                result = GameState::unknown();
+                K = -1;
+                return;
+            }
+
         }
-        const auto result = findKthOptimised(afterFollowingLetter, );
+        findKthOptimised(afterFollowingLetter, bSuffixTree, K, numInBWithGrundy, result);
 
         nextLetterIterator++;
     }
