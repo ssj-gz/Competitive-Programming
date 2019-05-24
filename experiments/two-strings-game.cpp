@@ -1215,15 +1215,40 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
             bool answerIsOnThisTransition = (kAfterFollowingTransition <= 0 );
             if (answerIsOnThisTransition)
             {
-                // TODO
-                result = GameState::unknown();
-                K = -1;
-                return;
+                Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
+                int grundyNumber = grundyNumberAfterFollowingLetter;
+                while (true)
+                {
+                    if (K >= numInBWithoutGrundy[grundyNumber])
+                    {
+                        K -= numInBWithoutGrundy[grundyNumber];
+                    }
+                    else
+                    {
+                        // TODO
+                        result = GameState::unknown();
+                        K = -1;
+                        return;
+                    }
+                    if (K == 0)
+                    {
+                        result.aPrime = onTransition.dbgStringFollowed();
+                        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumber, numInBWithoutGrundy[grundyNumber]);
+                        result.isValid = true;
+
+                        K = -1;
+                        return;
+                    }
+                    onTransition.followNextLetter();
+                    grundyNumber = 1 - grundyNumber;
+                }
+
             }
             else
             {
                 K = kAfterFollowingTransition;
             }
+#if 0
             if (K == 0)
             {
                 // TODO
@@ -1231,6 +1256,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                 K = -1;
                 return;
             }
+#endif
 
         }
         findKthOptimised(afterFollowingLetter, bSuffixTree, K, numInBWithoutGrundy, result);
