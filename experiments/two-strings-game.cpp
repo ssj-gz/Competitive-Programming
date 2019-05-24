@@ -1234,7 +1234,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                 bool answerIsOnThisTransition = false;
                 if (desiredGrundyNumber == 0 && numWithGrundy0 > 0)
                 {
-                    if (N - numWithGrundy0 >= 0)
+                    if (N - numWithGrundy0 > 0)
                     {
                         N -= numWithGrundy0;
                     }
@@ -1245,7 +1245,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                 }
                 if (desiredGrundyNumber == 1 && numWithGrundy1 > 0)
                 {
-                    if (N - numWithGrundy1 >= 0)
+                    if (N - numWithGrundy1 > 0)
                     {
                         N -= numWithGrundy1;
                     }
