@@ -1099,6 +1099,32 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
 
     return state.stateData().grundyNumber;
 }
+void findMaxGrundy(Cursor state, int& maxGrundy)
+{
+    assert(state.isOnExplicitState());
+    auto nextLetterIterator = state.getNextLetterIterator();
+    maxGrundy = max(maxGrundy, state.stateData().grundyNumber);
+    while (nextLetterIterator.hasNext())
+    {
+        
+        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        if (!afterFollowingLetter.isOnExplicitState())
+        {
+            afterFollowingLetter.followToTransitionEnd();
+        }
+
+        findMaxGrundy(afterFollowingLetter, maxGrundy);
+
+        nextLetterIterator++;
+    }
+}
+
+int findMaxGrundy(SuffixTreeBuilder& suffixTree)
+{
+    int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
+    findMaxGrundy(suffixTree.rootCursor(), maxGrundy);
+    return maxGrundy;
+}
 
 int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
 {
@@ -1151,7 +1177,7 @@ void calcNumWithGrundy(Cursor state, vector<int64_t>& numWithGrundy)
 
 vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
 {
-    vector<int64_t> numWithGrundy(bSuffixTree.numStates() + 1);
+    vector<int64_t> numWithGrundy(findMaxGrundy(bSuffixTree));
     calcNumWithGrundy(bSuffixTree.rootCursor(), numWithGrundy);
 
     return numWithGrundy;
