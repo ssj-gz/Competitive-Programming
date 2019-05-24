@@ -1324,7 +1324,9 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     for (const auto& substringOfB : substringsOfB)
     {
         cout << "substringOfB: " << substringOfB << " grundy num: " << findGrundyNumberForString(substringOfB, bSuffixTree) << endl;
-        dbgNumInBWithGrundy[findGrundyNumberForString(substringOfB, bSuffixTree)]++;
+        const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
+        dbgNumInBWithGrundy[grundyForSubstring]++;
+        cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << findNthWithGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
     }
     for (int i = 0; i < numInBWithGrundy.size(); i++)
     {
