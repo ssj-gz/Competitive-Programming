@@ -1187,6 +1187,7 @@ GameState findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_
 
 void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string& result)
 {
+    cout << "findNthWithGrundy - state: " << state.dbgStringFollowed() << " desiredGrundyNumber: " << desiredGrundyNumber << " N: " << N << " result: " << result << endl;
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     if (state.stateData().grundyNumber == desiredGrundyNumber && N > 0)
@@ -1196,10 +1197,13 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
     if (N == 0)
     {
         result = state.dbgStringFollowed();
+        N = -1;
         return;
     }
     while (nextLetterIterator.hasNext())
     {
+        if (N == -1)
+            return;
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
         if (!afterFollowingLetter.isOnExplicitState())
         {
@@ -1226,7 +1230,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                 }
 
                 bool answerIsOnThisTransition = false;
-                if (desiredGrundyNumber == 0)
+                if (desiredGrundyNumber == 0 && numWithGrundy0 > 0)
                 {
                     if (N - numWithGrundy0 >= 0)
                     {
@@ -1237,7 +1241,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                         answerIsOnThisTransition = true;
                     }
                 }
-                if (desiredGrundyNumber == 1)
+                if (desiredGrundyNumber == 1 && numWithGrundy1 > 0)
                 {
                     if (N - numWithGrundy1 >= 0)
                     {
@@ -1277,7 +1281,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
 
 string findNthWithGrundy(SuffixTreeBuilder& suffixTree, int desiredGrundyNumber, int64_t N)
 {
-    string result;
+    string result = "-";
     findNthWithGrundy(suffixTree.rootCursor(), desiredGrundyNumber, N, result);
 
     return result;
