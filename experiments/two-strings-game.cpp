@@ -1349,6 +1349,38 @@ vector<string> orderedSubstringsOf(const string& s)
 };
 
 
+void countNumSubstrings(Cursor state, int64_t& result)
+{
+    //result += state.stateData().wordLength;
+    auto nextLetterIterator = state.getNextLetterIterator();
+    while (nextLetterIterator.hasNext())
+    {
+        auto afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        if (!afterFollowingLetter.isOnExplicitState())
+        {
+            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+            afterFollowingLetter.followToTransitionEnd();
+            result += numLettersUntilNextState;
+        }
+        else
+        {
+            result++;
+        }
+
+        countNumSubstrings(afterFollowingLetter, result);
+
+        nextLetterIterator++;
+    }
+}
+
+int64_t countNumSubstrings(SuffixTreeBuilder& suffixTree)
+{
+    int64_t result = 1; // Empty string.
+    countNumSubstrings(suffixTree.rootCursor(), result);
+    return result;
+}
+
+
 vector<GameState> solveOptimised(const string& A, const string& B)
 {
     SuffixTreeBuilder aSuffixTree;
@@ -1375,6 +1407,10 @@ vector<GameState> solveOptimised(const string& A, const string& B)
         cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << nthWithGrundy << endl;
         assert(nthWithGrundy == substringOfB);
     }
+    const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
+    //const auto numSubstringsOfBOpt = (B.size() * (B.size() + 1)) / 2;
+    cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
+    assert(substringsOfB.size() == numSubstringsOfBOpt);
     for (int i = 0; i < numInBWithGrundy.size(); i++)
     {
         cout << "i: " << i << " numInBWithGrundy: " << numInBWithGrundy[i] << " dbgNumInBWithGrundy: " << dbgNumInBWithGrundy[i] << endl;
@@ -1459,7 +1495,7 @@ int main(int argc, char** argv)
     }
 
     vector<GameState> firstPlayerWinsStates;
-#if 1
+#if 0
     for (const auto& gameState : allGameStates)
     {
         const auto grundyNumber = findGrundyNumberForString(gameState.aPrime, aSuffixTree) ^ findGrundyNumberForString(gameState.bPrime, bSuffixTree);
