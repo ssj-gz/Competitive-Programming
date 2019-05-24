@@ -1153,7 +1153,7 @@ vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
     return numWithGrundy;
 } 
 
-string findNthWithGrundy(SuffixTreeBuilder& suffixTree, int desiredGrundyNumber, int64_t N);
+string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 
 #if 1
 void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithGrundy, GameState& result)
@@ -1174,7 +1174,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     if (K == 0)
     {
         result.aPrime = aState.dbgStringFollowed();
-        result.bPrime = findNthWithGrundy(bSuffixTree, grundyForState, numInBWithGrundy[grundyForState]);
+        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithGrundy[grundyForState]);
 
         K = -1;
         return;
@@ -1221,12 +1221,12 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
 }
 #endif
 
-void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string& result)
+void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
 {
-    //cout << "findNthWithGrundy - state: " << state.dbgStringFollowed() << " grundy number at state:" << state.stateData().grundyNumber << " desiredGrundyNumber: " << desiredGrundyNumber << " N: " << N << " result: " << result << endl;
+    //cout << "findNthWithoutGrundy - state: " << state.dbgStringFollowed() << " grundy number at state:" << state.stateData().grundyNumber << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " result: " << result << endl;
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
-    if (state.stateData().grundyNumber == desiredGrundyNumber && N > 0)
+    if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
     {
         N--;
     }
@@ -1246,7 +1246,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
             afterFollowingLetter.followToTransitionEnd();
-            if (desiredGrundyNumber == 0 || desiredGrundyNumber == 1)
+            //if (unwantedGrundyNumber == 0 || unwantedGrundyNumber == 1)
             {
                 const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
                 //cout << " next state: " << afterFollowingLetter.dbgStringFollowed() << " grundyNumber: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
@@ -1268,36 +1268,37 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                 }
 
                 bool answerIsOnThisTransition = false;
-                if (desiredGrundyNumber == 0 && numWithGrundy0 > 0)
+                int tempN = N;
+                if (unwantedGrundyNumber != 0 && numWithGrundy0 > 0)
                 {
-                    if (N - numWithGrundy0 > 0)
+                    if (tempN - numWithGrundy0 > 0)
                     {
-                        N -= numWithGrundy0;
-                    }
-                    else
-                    {
-                        answerIsOnThisTransition = true;
+                        tempN -= numWithGrundy0;
                     }
                 }
-                if (desiredGrundyNumber == 1 && numWithGrundy1 > 0)
+                if (unwantedGrundyNumber != 1 && numWithGrundy1 > 0)
                 {
-                    if (N - numWithGrundy1 > 0)
+                    if (tempN - numWithGrundy1 > 0)
                     {
-                        N -= numWithGrundy1;
-                    }
-                    else
-                    {
-                        answerIsOnThisTransition = true;
+                        tempN -= numWithGrundy1;
                     }
                 }
-                //cout << "answerIsOnThisTransition: " << answerIsOnThisTransition << " state: " << state.dbgStringFollowed() << " desiredGrundyNumber: " << desiredGrundyNumber << " N: " << N << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << " grundyNumberAfterFollowingLetter: " << grundyNumberAfterFollowingLetter << endl;
+                if (tempN > 0)
+                {
+                    N = tempN;
+                }
+                else
+                {
+                    answerIsOnThisTransition = true;
+                }
+                //cout << "answerIsOnThisTransition: " << answerIsOnThisTransition << " state: " << state.dbgStringFollowed() << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << " grundyNumberAfterFollowingLetter: " << grundyNumberAfterFollowingLetter << endl;
                 if (answerIsOnThisTransition)
                 {
                     Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
                     int grundyNumber = grundyNumberAfterFollowingLetter;
                     while (true)
                     {
-                        if (grundyNumber == desiredGrundyNumber)
+                        if (grundyNumber != unwantedGrundyNumber)
                         {
                             N--;
                         }
@@ -1313,16 +1314,16 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                 }
             }
         }
-        findNthWithGrundy(afterFollowingLetter, desiredGrundyNumber, N, result);
+        findNthWithoutGrundy(afterFollowingLetter, unwantedGrundyNumber, N, result);
 
         nextLetterIterator++;
     }
 }
 
-string findNthWithGrundy(SuffixTreeBuilder& suffixTree, int desiredGrundyNumber, int64_t N)
+string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N)
 {
     string result = "-";
-    findNthWithGrundy(suffixTree.rootCursor(), desiredGrundyNumber, N, result);
+    findNthWithoutGrundy(suffixTree.rootCursor(), unwantedGrundyNumber, N, result);
 
     return result;
 }
@@ -1416,8 +1417,8 @@ vector<GameState> solveOptimised(const string& A, const string& B)
         }
         //dbgNumInBWithGrundy[grundyForSubstring]++;
         //cout << "++++++++++++" << endl;
-        //const auto nthWithGrundy = findNthWithGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
-        //cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << nthWithGrundy << endl;
+        //const auto nthWithGrundy = findNthWithoutGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
+        //cout << "substringOfB: " << substringOfB << " findNthWithoutGrundy: " << nthWithGrundy << endl;
         //assert(nthWithGrundy == substringOfB);
     }
     assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
@@ -1429,7 +1430,9 @@ vector<GameState> solveOptimised(const string& A, const string& B)
             const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
             if (grundyForSubstring != i)
             {
-                cout << substringNum << "th substring without grundy: " << i << " : " << substringOfB << endl;
+                const auto nthWithoutGrundy = findNthWithoutGrundy(bSuffixTree, grundyForSubstring, substringNum);
+                cout << substringNum << "th substring without grundy: " << i << " : " << substringOfB << " opt: " << nthWithoutGrundy << endl;
+                assert(substringOfB == nthWithoutGrundy);
             }
 
             substringNum++;
@@ -1440,7 +1443,7 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     //{
     //}
     //const auto numSubstringsOfBOpt = (B.size() * (B.size() + 1)) / 2;
-    cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
+    //cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
     assert(substringsOfB.size() == numSubstringsOfBOpt);
     //for (int i = 0; i < numInBWithGrundy.size(); i++)
     //{
