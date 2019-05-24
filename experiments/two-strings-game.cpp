@@ -759,7 +759,7 @@ class Move
 
 ostream& operator<<(ostream& os, const GameState& gameState)
 {
-    cout << "A': " << gameState.aPrime << " B': " << gameState.bPrime << endl;
+    cout << "A': " << gameState.aPrime << " B': " << gameState.bPrime;
     return os;
 }
 
@@ -1561,6 +1561,15 @@ int main(int argc, char** argv)
 #endif
     const auto optimisedResults = solveOptimised(A, B);
     cout << "brute force # winning: " << firstPlayerWinsStates.size() << " optimised # winning: " << optimisedResults.size() << endl;
+    for (int i = 0; i < firstPlayerWinsStates.size(); i++)
+    {
+        cout << i << "th win state: " << firstPlayerWinsStates[i] << " opt: ";
+        if (optimisedResults[i].isKnown)
+            cout << optimisedResults[i];
+        else
+            cout << "unknown";
+        cout << endl;
+    }
     if (K >= firstPlayerWinsStates.size())
     {
         cout << "no solution" << endl;
