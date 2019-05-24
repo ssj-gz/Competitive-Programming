@@ -231,6 +231,15 @@ class SuffixTreeBuilder
                     }
                 }
 
+                void sortTransitions()
+                {
+                    assert(isOnExplicitState());
+                    sort(m_state->transitions.begin(), m_state->transitions.end(), [](const Transition& lhs, const Transition& rhs)
+                    {
+                        return lhs.firstLetter < rhs.firstLetter;
+                    });
+                }
+
                 void followLetter(char letter)
                 {
                     const string& theString = *m_string;
@@ -1027,6 +1036,10 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
     if (state.stateData().grundyNumber != -1)
     {
         return state.stateData().grundyNumber;
+    }
+    if (state.isOnExplicitState())
+    {
+        state.sortTransitions();
     }
     cout << "findGrundyNumberForState: " << state.dbgStringFollowed() << endl;
     state.stateData().wordLength = wordLength;
