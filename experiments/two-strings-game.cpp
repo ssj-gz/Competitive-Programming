@@ -1065,21 +1065,21 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
     {
         state.sortTransitions();
     }
-    cout << "findGrundyNumberForState: " << state.dbgStringFollowed() << endl;
+    //cout << "findGrundyNumberForState: " << state.dbgStringFollowed() << endl;
     state.stateData().wordLength = wordLength;
     set<int> grundyNumbersAfterNextMove;
     auto nextLetterIterator = state.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
-        cout << " findGrundyNumberForState: " << state.dbgStringFollowed() << " following letter" << endl;
+        //cout << " findGrundyNumberForState: " << state.dbgStringFollowed() << " following letter" << endl;
         if (!afterFollowingLetter.isOnExplicitState())
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length();
             afterFollowingLetter.followToTransitionEnd();
             findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-            cout << " afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
+            //cout << " afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
             assert(state.stateData().wordLength == state.dbgStringFollowed().size());
             assert(afterFollowingLetter.stateData().wordLength == afterFollowingLetter.dbgStringFollowed().size());
             assert(numLettersUntilNextState > 0);
@@ -1098,9 +1098,9 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
         mex++;
     }
     state.stateData().grundyNumber = mex;
-    cout << "state: " << state.dbgStringFollowed() << " grundyNumber: " << mex << endl;
+    //cout << "state: " << state.dbgStringFollowed() << " grundyNumber: " << mex << endl;
 
-    cout << "bloo: " << state.stateData().grundyNumber << endl;
+    //cout << "bloo: " << state.stateData().grundyNumber << endl;
     //assert(state.stateData().grundyNumber <= 4);
 
     return state.stateData().grundyNumber;
@@ -1110,7 +1110,7 @@ void findMaxGrundy(Cursor state, int& maxGrundy)
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     maxGrundy = max(maxGrundy, state.stateData().grundyNumber);
-    cout << "findMaxGrundy: state: " << state.dbgStringFollowed() << " grundyNumber: " << state.stateData().grundyNumber << " maxGrundy: " << maxGrundy << endl;
+    //cout << "findMaxGrundy: state: " << state.dbgStringFollowed() << " grundyNumber: " << state.stateData().grundyNumber << " maxGrundy: " << maxGrundy << endl;
     while (nextLetterIterator.hasNext())
     {
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
@@ -1198,20 +1198,15 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
         return;
     assert(aState.isOnExplicitState());
     const auto grundyForState = aState.stateData().grundyNumber;
-    cout << "findKthOptimised: aState: " << aState.dbgStringFollowed() << " K: " << K << " grundyForState: " << grundyForState << " numInBWithoutGrundy: " << numInBWithoutGrundy[grundyForState] << endl;
+    //cout << "findKthOptimised: aState: " << aState.dbgStringFollowed() << " K: " << K << " grundyForState: " << grundyForState << " numInBWithoutGrundy: " << numInBWithoutGrundy[grundyForState] << endl;
     if (K - numInBWithoutGrundy[grundyForState] >= 0)
     {
         K -= numInBWithoutGrundy[grundyForState];
     }
     else
     {
-        // TODO
         result.aPrime = aState.dbgStringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, K);
-        if (result.bPrime == "-")
-        {
-            cout << " whoops: grundyForState: " << grundyForState << " K: " << K << " numInBWithoutGrundy:" << numInBWithoutGrundy[grundyForState] << endl;
-        }
         assert(result.bPrime != "-");
         result.isValid = true;
         K = -1;
@@ -1219,7 +1214,6 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
     if (K == 0)
     {
-        cout << "blah: " << endl;
         result.aPrime = aState.dbgStringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]);
         assert(result.bPrime != "-");
@@ -1316,7 +1310,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
 
 void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
 {
-    cout << "findNthWithoutGrundy - state: " << state.dbgStringFollowed() << " grundy number at state:" << state.stateData().grundyNumber << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " result: " << result << endl;
+    //cout << "findNthWithoutGrundy - state: " << state.dbgStringFollowed() << " grundy number at state:" << state.stateData().grundyNumber << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " result: " << result << endl;
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
@@ -1342,7 +1336,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
             //if (unwantedGrundyNumber == 0 || unwantedGrundyNumber == 1)
             {
                 const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-                cout << " next state: " << afterFollowingLetter.dbgStringFollowed() << " grundyNumber: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
+                //cout << " next state: " << afterFollowingLetter.dbgStringFollowed() << " grundyNumber: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
                 int numWithGrundy0 = -1;
                 int numWithGrundy1 = -1;
                 int grundyNumberAfterFollowingLetter = -1;
@@ -1359,7 +1353,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
                     numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
                     grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
                 }
-                cout << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << endl;
+                //cout << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << endl;
 
                 bool answerIsOnThisTransition = false;
                 int nAfterFollowingTransition = N;
@@ -1379,7 +1373,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
                 {
                     answerIsOnThisTransition = true;
                 }
-                cout << "answerIsOnThisTransition: " << answerIsOnThisTransition << " state: " << state.dbgStringFollowed() << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << " grundyNumberAfterFollowingLetter: " << grundyNumberAfterFollowingLetter << " nAfterFollowingTransition: " << nAfterFollowingTransition << endl;
+                //cout << "answerIsOnThisTransition: " << answerIsOnThisTransition << " state: " << state.dbgStringFollowed() << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << " grundyNumberAfterFollowingLetter: " << grundyNumberAfterFollowingLetter << " nAfterFollowingTransition: " << nAfterFollowingTransition << endl;
                 if (answerIsOnThisTransition)
                 {
                     Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
@@ -1488,12 +1482,12 @@ solveOptimised(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
-    cout << "findGrundyNumberForState A" << endl;
+    //cout << "findGrundyNumberForState A" << endl;
     findGrundyNumberForState(aSuffixTree.rootCursor());
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
-    cout << "findGrundyNumberForState B" << endl;
+    //cout << "findGrundyNumberForState B" << endl;
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
     const auto maxGrundy = max(findMaxGrundy(aSuffixTree), findMaxGrundy(bSuffixTree));
