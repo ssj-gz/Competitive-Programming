@@ -1114,6 +1114,45 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
     }
 }
 
+void calcNumWithGrundy(Cursor state, vector<int64_t>& numWithGrundy)
+{
+    assert(state.isOnExplicitState());
+    numWithGrundy[state.stateData().grundyNumber]++;
+    auto nextLetterIterator = state.getNextLetterIterator();
+    while (nextLetterIterator.hasNext())
+    {
+        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        if (!afterFollowingLetter.isOnExplicitState())
+        {
+            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+            afterFollowingLetter.followToTransitionEnd();
+            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            if (grundyNumberAtNextState > 0)
+            {
+                numWithGrundy[0] = numLettersUntilNextState / 2;
+                numWithGrundy[1] = (numLettersUntilNextState - 1) / 2;
+
+            }
+            else
+            {
+                numWithGrundy[1] = numLettersUntilNextState / 2;
+                numWithGrundy[0] = (numLettersUntilNextState - 1) / 2;
+            }
+        }
+        calcNumWithGrundy(afterFollowingLetter, numWithGrundy);
+
+        nextLetterIterator++;
+    }
+}
+
+vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
+{
+    vector<int64_t> numWithGrundy(bSuffixTree.numStates() + 1);
+    calcNumWithGrundy(bSuffixTree.rootCursor(), numWithGrundy);
+
+    return numWithGrundy;
+} 
+
 GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K)
 {
     return GameState::invalid();
@@ -1130,6 +1169,8 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     bSuffixTree.appendString(B);
     cout << "findGrundyNumberForState B" << endl;
     findGrundyNumberForState(bSuffixTree.rootCursor());
+
+    const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree);
 
     vector<GameState> results;
     int64_t K = 0;
