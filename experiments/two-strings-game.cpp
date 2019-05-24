@@ -709,11 +709,18 @@ class GameState
         string aPrime;
         string bPrime;
         bool isValid = true;
+        bool isKnown = true;
         static GameState invalid()
         {
             GameState invalidGameState;
             invalidGameState.isValid = false;
             return invalidGameState;
+        }
+        static GameState unknown()
+        {
+            GameState unknownGameState;
+            unknownGameState.isKnown = false;
+            return unknownGameState;
         }
         bool hasWinningPlayerOverride(Player currentPlayer) const
         {
