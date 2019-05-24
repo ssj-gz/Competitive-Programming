@@ -1162,6 +1162,8 @@ string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNum
 #if 1
 void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithoutGrundy, GameState& result)
 {
+    if (K < 0)
+        return;
     assert(aState.isOnExplicitState());
     const auto grundyForState = aState.stateData().grundyNumber;
     cout << "findKthOptimised: aState: " << aState.dbgStringFollowed() << " K: " << K << " grundyForState: " << grundyForState << " numInBWithoutGrundy: " << numInBWithoutGrundy[grundyForState] << endl;
