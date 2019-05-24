@@ -3,7 +3,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -1080,8 +1080,8 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
             findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             //cout << " afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
-            assert(state.stateData().wordLength == state.dbgStringFollowed().size());
-            assert(afterFollowingLetter.stateData().wordLength == afterFollowingLetter.dbgStringFollowed().size());
+            //assert(state.stateData().wordLength == state.dbgStringFollowed().size());
+            //assert(afterFollowingLetter.stateData().wordLength == afterFollowingLetter.dbgStringFollowed().size());
             assert(numLettersUntilNextState > 0);
             grundyNumbersAfterNextMove.insert(grundyBlah(grundyNumberAtNextState, numLettersUntilNextState));
         }
@@ -1233,8 +1233,8 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
             afterFollowingLetter.followToTransitionEnd();
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-            int numWithGrundy0 = -1;
-            int numWithGrundy1 = -1;
+            int64_t numWithGrundy0 = -1;
+            int64_t numWithGrundy1 = -1;
             int grundyNumberAfterFollowingLetter = -1;
             if (grundyNumberAtNextState > 0)
             {
@@ -1337,8 +1337,8 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
             {
                 const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
                 //cout << " next state: " << afterFollowingLetter.dbgStringFollowed() << " grundyNumber: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
-                int numWithGrundy0 = -1;
-                int numWithGrundy1 = -1;
+                int64_t numWithGrundy0 = -1;
+                int64_t numWithGrundy1 = -1;
                 int grundyNumberAfterFollowingLetter = -1;
                 if (grundyNumberAtNextState > 0)
                 {
@@ -1356,7 +1356,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
                 //cout << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << endl;
 
                 bool answerIsOnThisTransition = false;
-                int nAfterFollowingTransition = N;
+                int64_t nAfterFollowingTransition = N;
                 if (unwantedGrundyNumber != 0 && numWithGrundy0 > 0)
                 {
                     nAfterFollowingTransition -= numWithGrundy0;
