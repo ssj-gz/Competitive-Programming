@@ -1187,7 +1187,7 @@ GameState findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_
 
 void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string& result)
 {
-    cout << "findNthWithGrundy - state: " << state.dbgStringFollowed() << " desiredGrundyNumber: " << desiredGrundyNumber << " N: " << N << " result: " << result << endl;
+    cout << "findNthWithGrundy - state: " << state.dbgStringFollowed() << " grundy number at state:" << state.stateData().grundyNumber << " desiredGrundyNumber: " << desiredGrundyNumber << " N: " << N << " result: " << result << endl;
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     if (state.stateData().grundyNumber == desiredGrundyNumber && N > 0)
@@ -1197,6 +1197,7 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
     if (N == 0)
     {
         result = state.dbgStringFollowed();
+        cout << "found result at explicit state: " << result << endl;
         N = -1;
         return;
     }
@@ -1212,21 +1213,22 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
             if (desiredGrundyNumber == 0 || desiredGrundyNumber == 1)
             {
                 const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+                cout << " next state: " << afterFollowingLetter.dbgStringFollowed() << " grundyNumber: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
                 int numWithGrundy0 = -1;
                 int numWithGrundy1 = -1;
                 int grundyNumberAfterFollowingLetter = -1;
                 if (grundyNumberAtNextState > 0)
                 {
-                    numWithGrundy0 += numLettersUntilNextState / 2;
-                    numWithGrundy1 += (numLettersUntilNextState - 1) / 2;
-                    grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
+                    numWithGrundy0 = numLettersUntilNextState / 2;
+                    numWithGrundy1 = (numLettersUntilNextState - 1) / 2;
+                    grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
 
                 }
                 else
                 {
-                    numWithGrundy1 += numLettersUntilNextState / 2;
-                    numWithGrundy0 += (numLettersUntilNextState - 1) / 2;
-                    grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
+                    numWithGrundy1 = numLettersUntilNextState / 2;
+                    numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
+                    grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
                 }
 
                 bool answerIsOnThisTransition = false;
@@ -1252,9 +1254,10 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                         answerIsOnThisTransition = true;
                     }
                 }
+                cout << "answerIsOnThisTransition: " << answerIsOnThisTransition << " state: " << state.dbgStringFollowed() << " desiredGrundyNumber: " << desiredGrundyNumber << " N: " << N << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << " grundyNumberAfterFollowingLetter: " << grundyNumberAfterFollowingLetter << endl;
                 if (answerIsOnThisTransition)
                 {
-                    Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+                    Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
                     int grundyNumber = grundyNumberAfterFollowingLetter;
                     while (true)
                     {
@@ -1264,10 +1267,11 @@ void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string
                         }
                         if (N == 0)
                         {
-                            result = afterFollowingLetter.dbgStringFollowed();
+                            result = onTransition.dbgStringFollowed();
+                            N = -1;
                             return;
                         }
-                        afterFollowingLetter.followNextLetter();
+                        onTransition.followNextLetter();
                         grundyNumber = 1 - grundyNumber;
                     }
                 }
@@ -1330,7 +1334,10 @@ vector<GameState> solveOptimised(const string& A, const string& B)
         cout << "substringOfB: " << substringOfB << " grundy num: " << findGrundyNumberForString(substringOfB, bSuffixTree) << endl;
         const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
         dbgNumInBWithGrundy[grundyForSubstring]++;
-        cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << findNthWithGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
+        cout << "++++++++++++" << endl;
+        const auto nthWithGrundy = findNthWithGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
+        cout << "substringOfB: " << substringOfB << " findNthWithGrundy: " << nthWithGrundy << endl;
+        assert(nthWithGrundy == substringOfB);
     }
     for (int i = 0; i < numInBWithGrundy.size(); i++)
     {
