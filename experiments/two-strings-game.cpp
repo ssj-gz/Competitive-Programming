@@ -1172,7 +1172,9 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     else
     {
         // TODO
-        result = GameState::unknown();
+        result.aPrime = aState.dbgStringFollowed();
+        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, K);
+        result.isValid = true;
         K = -1;
         return;
     }
@@ -1227,7 +1229,6 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     }
                     else
                     {
-                        // TODO
                         result.aPrime = onTransition.dbgStringFollowed();
                         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K);
                         result.isValid = true;
