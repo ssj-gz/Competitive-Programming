@@ -1176,6 +1176,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
         // TODO
         result.aPrime = aState.dbgStringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, K);
+        assert(result.bPrime != "-");
         result.isValid = true;
         K = -1;
         return;
@@ -1185,6 +1186,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
         cout << "blah: " << endl;
         result.aPrime = aState.dbgStringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]);
+        assert(result.bPrime != "-");
         result.isValid = true;
 
         K = -1;
@@ -1233,6 +1235,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     {
                         result.aPrime = onTransition.dbgStringFollowed();
                         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K);
+                        assert(result.bPrime != "-");
                         result.isValid = true;
 
                         K = -1;
@@ -1242,6 +1245,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     {
                         result.aPrime = onTransition.dbgStringFollowed();
                         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]);
+                        assert(result.bPrime != "-");
                         result.isValid = true;
 
                         K = -1;
@@ -1380,8 +1384,14 @@ string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNum
 GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithoutGrundy)
 {
     GameState result;
+    result.aPrime = "-";
+    result.bPrime = "-";
     result.isValid = false;
     findKthOptimised(aSuffixTree.rootCursor(), bSuffixTree, K, numInBWithoutGrundy, result);
+    if (result.isValid)
+    {
+        assert(result.aPrime != "-" && result.bPrime != "-");
+    }
     return result;
 }
 
@@ -1508,7 +1518,7 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     while (true)
     {
         const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
-        cout << "k: " << K << " kthOptimised: " << kthOptimised << endl;
+        cout << "bloop k: " << K << " kthOptimised: " << kthOptimised << " valid? " << kthOptimised.isValid << endl;
         if (!kthOptimised.isValid)
         {
             break;
@@ -1600,6 +1610,7 @@ int main(int argc, char** argv)
         }
     }
 #endif
+    cout << "brute force # winning: " << firstPlayerWinsStates.size() << endl;
     const auto optimisedResults = solveOptimised(A, B);
     cout << "brute force # winning: " << firstPlayerWinsStates.size() << " optimised # winning: " << optimisedResults.size() << endl;
     assert(firstPlayerWinsStates.size() == optimisedResults.size());
