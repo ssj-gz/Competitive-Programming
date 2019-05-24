@@ -1586,9 +1586,11 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int lengthA = (rand() % 20) + 1;
-        const int lengthB = (rand() % 20) + 1;
-        const int K = rand() % (lengthA * lengthB) + 1;
+        //const int lengthA = (rand() % 20) + 1;
+        //const int lengthB = (rand() % 20) + 1;
+        const int64_t lengthA = 300'000;
+        const int64_t lengthB = 300'000;
+        const int64_t K = rand() % (lengthA * lengthB) + 1;
         cout << lengthA << " " << lengthB << " " << K << endl;
         const int maxLetterA = rand() % 26 + 1;
         for (int i = 0; i < lengthA; i++)
