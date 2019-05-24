@@ -13,7 +13,7 @@
 using namespace std;
 
 //#define VERY_VERBOSE
-#define PRINT_COMPUTER_MOVES
+//#define PRINT_COMPUTER_MOVES
 
 struct StateData
 {
@@ -1020,25 +1020,25 @@ PlayState findWinner(Player firstPlayer, const GameState& initialGameState, Play
 
 int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 {
-    cout << " grundyBlah: grundyNumberAtNextState: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
+    //cout << " grundyBlah: grundyNumberAtNextState: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
     if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
     {
-        cout << " 0" << endl;
+        //cout << " 0" << endl;
         return 0;
     }
     if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 0))
     {
-        cout << " 1" << endl;
+        //cout << " 1" << endl;
         return 1;
     }
     if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 1))
     {
-        cout << " 1" << endl;
+        //cout << " 1" << endl;
         return 1;
     }
     if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 0))
     {
-        cout << " 0" << endl;
+        //cout << " 0" << endl;
         return 0;
     }
     assert(false);
@@ -1109,7 +1109,7 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
         wordCursor.followToTransitionEnd();
         const int grundyNumberAtNextState = wordCursor.stateData().grundyNumber;
         const int numLettersUntilNextState = wordCursor.stateData().wordLength - s.size();
-        cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.dbgStringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
+        //cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.dbgStringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
         return grundyBlah(grundyNumberAtNextState, numLettersUntilNextState);
     }
 }
@@ -1129,14 +1129,14 @@ void calcNumWithGrundy(Cursor state, vector<int64_t>& numWithGrundy)
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             if (grundyNumberAtNextState > 0)
             {
-                numWithGrundy[0] = numLettersUntilNextState / 2;
-                numWithGrundy[1] = (numLettersUntilNextState - 1) / 2;
+                numWithGrundy[0] += numLettersUntilNextState / 2;
+                numWithGrundy[1] += (numLettersUntilNextState - 1) / 2;
 
             }
             else
             {
-                numWithGrundy[1] = numLettersUntilNextState / 2;
-                numWithGrundy[0] = (numLettersUntilNextState - 1) / 2;
+                numWithGrundy[1] += numLettersUntilNextState / 2;
+                numWithGrundy[0] += (numLettersUntilNextState - 1) / 2;
             }
         }
         calcNumWithGrundy(afterFollowingLetter, numWithGrundy);
@@ -1158,6 +1158,22 @@ GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bS
     return GameState::invalid();
 }
 
+vector<string> orderedSubstringsOf(const string& s)
+{
+    vector<string> substrings;
+    for (int start = 0; start < s.size(); start++)
+    {
+        for (int length = 0; start + length <= s.size(); length++)
+        {
+            substrings.push_back(s.substr(start, length));
+        }
+    }
+    sort(substrings.begin(), substrings.end());
+    substrings.erase(std::unique(substrings.begin(), substrings.end()), substrings.end());
+    return substrings;
+};
+
+
 vector<GameState> solveOptimised(const string& A, const string& B)
 {
     SuffixTreeBuilder aSuffixTree;
@@ -1171,6 +1187,20 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree);
+    vector<int64_t> dbgNumInBWithGrundy(numInBWithGrundy.size());
+
+    const auto substringsOfB = orderedSubstringsOf(B);
+    for (const auto& substringOfB : substringsOfB)
+    {
+        cout << "substringOfB: " << substringOfB << " grundy num: " << findGrundyNumberForString(substringOfB, bSuffixTree) << endl;
+        dbgNumInBWithGrundy[findGrundyNumberForString(substringOfB, bSuffixTree)]++;
+    }
+    for (int i = 0; i < numInBWithGrundy.size(); i++)
+    {
+        cout << "i: " << i << " numInBWithGrundy: " << numInBWithGrundy[i] << " dbgNumInBWithGrundy: " << dbgNumInBWithGrundy[i] << endl;
+    }
+    assert(dbgNumInBWithGrundy == numInBWithGrundy);
+
 
     vector<GameState> results;
     int64_t K = 0;
@@ -1197,8 +1227,8 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int lengthA = (rand() % 40) + 1;
-        const int lengthB = (rand() % 40) + 1;
+        const int lengthA = (rand() % 20) + 1;
+        const int lengthB = (rand() % 20) + 1;
         const int K = rand() % (lengthA * lengthB) + 1;
         cout << lengthA << " " << lengthB << " " << K << endl;
         const int maxLetterA = rand() % 26 + 1;
@@ -1225,21 +1255,6 @@ int main(int argc, char** argv)
 
     cin >> A;
     cin >> B;
-
-    auto orderedSubstringsOf = [](const string& s)
-    {
-        vector<string> substrings;
-        for (int start = 0; start < s.size(); start++)
-        {
-            for (int length = 0; start + length <= s.size(); length++)
-            {
-                substrings.push_back(s.substr(start, length));
-            }
-        }
-        sort(substrings.begin(), substrings.end());
-        substrings.erase(std::unique(substrings.begin(), substrings.end()), substrings.end());
-        return substrings;
-    };
 
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
