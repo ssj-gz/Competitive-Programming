@@ -1,5 +1,5 @@
 // Simon St James (ssjgz)
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -1198,7 +1198,6 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
         return;
     assert(aState.isOnExplicitState());
     const auto grundyForState = aState.stateData().grundyNumber;
-    //cout << "findKthOptimised: aState: " << aState.dbgStringFollowed() << " K: " << K << " grundyForState: " << grundyForState << " numInBWithoutGrundy: " << numInBWithoutGrundy[grundyForState] << endl;
     if (K - numInBWithoutGrundy[grundyForState] >= 0)
     {
         K -= numInBWithoutGrundy[grundyForState];
@@ -1290,15 +1289,6 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
             {
                 K = kAfterFollowingTransition;
             }
-#if 0
-            if (K == 0)
-            {
-                // TODO
-                result = GameState::unknown();
-                K = -1;
-                return;
-            }
-#endif
 
         }
         findKthOptimised(afterFollowingLetter, bSuffixTree, K, numInBWithoutGrundy, result);
@@ -1310,7 +1300,6 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
 
 void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
 {
-    //cout << "findNthWithoutGrundy - state: " << state.dbgStringFollowed() << " grundy number at state:" << state.stateData().grundyNumber << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " result: " << result << endl;
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
@@ -1320,7 +1309,6 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
     if (N == 0)
     {
         result = state.dbgStringFollowed();
-        //cout << "found result at explicit state: " << result << endl;
         N = -1;
         return;
     }
@@ -1333,66 +1321,61 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
             afterFollowingLetter.followToTransitionEnd();
-            //if (unwantedGrundyNumber == 0 || unwantedGrundyNumber == 1)
+
+            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            int64_t numWithGrundy0 = -1;
+            int64_t numWithGrundy1 = -1;
+            int grundyNumberAfterFollowingLetter = -1;
+            if (grundyNumberAtNextState > 0)
             {
-                const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-                //cout << " next state: " << afterFollowingLetter.dbgStringFollowed() << " grundyNumber: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
-                int64_t numWithGrundy0 = -1;
-                int64_t numWithGrundy1 = -1;
-                int grundyNumberAfterFollowingLetter = -1;
-                if (grundyNumberAtNextState > 0)
-                {
-                    numWithGrundy0 = numLettersUntilNextState / 2;
-                    numWithGrundy1 = (numLettersUntilNextState - 1) / 2;
-                    grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
+                numWithGrundy0 = numLettersUntilNextState / 2;
+                numWithGrundy1 = (numLettersUntilNextState - 1) / 2;
+                grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
 
-                }
-                else
-                {
-                    numWithGrundy1 = numLettersUntilNextState / 2;
-                    numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
-                    grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
-                }
-                //cout << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << endl;
+            }
+            else
+            {
+                numWithGrundy1 = numLettersUntilNextState / 2;
+                numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
+                grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
+            }
 
-                bool answerIsOnThisTransition = false;
-                int64_t nAfterFollowingTransition = N;
-                if (unwantedGrundyNumber != 0 && numWithGrundy0 > 0)
+            bool answerIsOnThisTransition = false;
+            int64_t nAfterFollowingTransition = N;
+            if (unwantedGrundyNumber != 0 && numWithGrundy0 > 0)
+            {
+                nAfterFollowingTransition -= numWithGrundy0;
+            }
+            if (unwantedGrundyNumber != 1 && numWithGrundy1 > 0)
+            {
+                nAfterFollowingTransition -= numWithGrundy1;
+            }
+            if (nAfterFollowingTransition > 0)
+            {
+                N = nAfterFollowingTransition;
+            }
+            else
+            {
+                answerIsOnThisTransition = true;
+            }
+            if (answerIsOnThisTransition)
+            {
+                Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
+                int grundyNumber = grundyNumberAfterFollowingLetter;
+                while (true)
                 {
-                    nAfterFollowingTransition -= numWithGrundy0;
-                }
-                if (unwantedGrundyNumber != 1 && numWithGrundy1 > 0)
-                {
-                    nAfterFollowingTransition -= numWithGrundy1;
-                }
-                if (nAfterFollowingTransition > 0)
-                {
-                    N = nAfterFollowingTransition;
-                }
-                else
-                {
-                    answerIsOnThisTransition = true;
-                }
-                //cout << "answerIsOnThisTransition: " << answerIsOnThisTransition << " state: " << state.dbgStringFollowed() << " unwantedGrundyNumber: " << unwantedGrundyNumber << " N: " << N << " numWithGrundy0: " << numWithGrundy0 << " numWithGrundy1: " << numWithGrundy1 << " grundyNumberAfterFollowingLetter: " << grundyNumberAfterFollowingLetter << " nAfterFollowingTransition: " << nAfterFollowingTransition << endl;
-                if (answerIsOnThisTransition)
-                {
-                    Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
-                    int grundyNumber = grundyNumberAfterFollowingLetter;
-                    while (true)
+                    if (grundyNumber != unwantedGrundyNumber)
                     {
-                        if (grundyNumber != unwantedGrundyNumber)
-                        {
-                            N--;
-                        }
-                        if (N == 0)
-                        {
-                            result = onTransition.dbgStringFollowed();
-                            N = -1;
-                            return;
-                        }
-                        onTransition.followNextLetter();
-                        grundyNumber = 1 - grundyNumber;
+                        N--;
                     }
+                    if (N == 0)
+                    {
+                        result = onTransition.dbgStringFollowed();
+                        N = -1;
+                        return;
+                    }
+                    onTransition.followNextLetter();
+                    grundyNumber = 1 - grundyNumber;
                 }
             }
         }
@@ -1443,7 +1426,6 @@ vector<string> orderedSubstringsOf(const string& s)
 
 void countNumSubstrings(Cursor state, int64_t& result)
 {
-    //result += state.stateData().wordLength;
     auto nextLetterIterator = state.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
@@ -1482,12 +1464,10 @@ solveOptimised(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
-    //cout << "findGrundyNumberForState A" << endl;
     findGrundyNumberForState(aSuffixTree.rootCursor());
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
-    //cout << "findGrundyNumberForState B" << endl;
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
     const auto maxGrundy = max(findMaxGrundy(aSuffixTree), findMaxGrundy(bSuffixTree));
@@ -1513,11 +1493,6 @@ solveOptimised(const string& A, const string& B, int64_t K)
                 dbgNumInBWithoutGrundy[i]++;
             }
         }
-        //dbgNumInBWithGrundy[grundyForSubstring]++;
-        //cout << "++++++++++++" << endl;
-        //const auto nthWithGrundy = findNthWithoutGrundy(bSuffixTree, grundyForSubstring, dbgNumInBWithGrundy[grundyForSubstring]);
-        //cout << "substringOfB: " << substringOfB << " findNthWithoutGrundy: " << nthWithGrundy << endl;
-        //assert(nthWithGrundy == substringOfB);
     }
     assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
     cout << "dbgNumInBWithoutGrundy.size():" << dbgNumInBWithoutGrundy.size() << endl;
@@ -1543,18 +1518,8 @@ solveOptimised(const string& A, const string& B, int64_t K)
         }
 
     }
-    //for (const auto& substringOfB : substringsOfB)
-    //{
-    //}
-    //const auto numSubstringsOfBOpt = (B.size() * (B.size() + 1)) / 2;
     cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
     assert(substringsOfB.size() == numSubstringsOfBOpt);
-    //for (int i = 0; i < numInBWithGrundy.size(); i++)
-    //{
-        //cout << "i: " << i << " numInBWithGrundy: " << numInBWithGrundy[i] << " dbgNumInBWithGrundy: " << dbgNumInBWithGrundy[i] << endl;
-    //}
-    //assert(dbgNumInBWithGrundy == numInBWithGrundy);
-
 
     vector<GameState> results;
     int64_t dbgK = 1;
@@ -1586,10 +1551,10 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        //const int lengthA = (rand() % 20) + 1;
-        //const int lengthB = (rand() % 20) + 1;
-        const int64_t lengthA = (rand() % 300'000) + 1;
-        const int64_t lengthB = (rand() % 300'000) + 1;
+        const int lengthA = (rand() % 20) + 1;
+        const int lengthB = (rand() % 20) + 1;
+        //const int64_t lengthA = (rand() % 300'000) + 1;
+        //const int64_t lengthB = (rand() % 300'000) + 1;
         const int64_t K = rand() % (lengthA * lengthB) + 1;
         cout << lengthA << " " << lengthB << " " << K << endl;
         const int maxLetterA = rand() % 26 + 1;
