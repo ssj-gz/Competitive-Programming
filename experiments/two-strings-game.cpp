@@ -1030,25 +1030,20 @@ PlayState findWinner(Player firstPlayer, const GameState& initialGameState, Play
 
 int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 {
-    //cout << " grundyBlah: grundyNumberAtNextState: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
     if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
     {
-        //cout << " 0" << endl;
         return 0;
     }
     if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 0))
     {
-        //cout << " 1" << endl;
         return 1;
     }
     if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 1))
     {
-        //cout << " 1" << endl;
         return 1;
     }
     if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 0))
     {
-        //cout << " 0" << endl;
         return 0;
     }
     assert(false);
@@ -1065,23 +1060,18 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
     {
         state.sortTransitions();
     }
-    //cout << "findGrundyNumberForState: " << state.dbgStringFollowed() << endl;
     state.stateData().wordLength = wordLength;
     set<int> grundyNumbersAfterNextMove;
     auto nextLetterIterator = state.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
-        //cout << " findGrundyNumberForState: " << state.dbgStringFollowed() << " following letter" << endl;
         if (!afterFollowingLetter.isOnExplicitState())
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length();
             afterFollowingLetter.followToTransitionEnd();
             findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-            //cout << " afterFollowingLetter: " << afterFollowingLetter.dbgStringFollowed() << " wordLength: " << afterFollowingLetter.stateData().wordLength << endl;
-            //assert(state.stateData().wordLength == state.dbgStringFollowed().size());
-            //assert(afterFollowingLetter.stateData().wordLength == afterFollowingLetter.dbgStringFollowed().size());
             assert(numLettersUntilNextState > 0);
             grundyNumbersAfterNextMove.insert(grundyBlah(grundyNumberAtNextState, numLettersUntilNextState));
         }
@@ -1098,10 +1088,6 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
         mex++;
     }
     state.stateData().grundyNumber = mex;
-    //cout << "state: " << state.dbgStringFollowed() << " grundyNumber: " << mex << endl;
-
-    //cout << "bloo: " << state.stateData().grundyNumber << endl;
-    //assert(state.stateData().grundyNumber <= 4);
 
     return state.stateData().grundyNumber;
 }
@@ -1110,7 +1096,6 @@ void findMaxGrundy(Cursor state, int& maxGrundy)
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     maxGrundy = max(maxGrundy, state.stateData().grundyNumber);
-    //cout << "findMaxGrundy: state: " << state.dbgStringFollowed() << " grundyNumber: " << state.stateData().grundyNumber << " maxGrundy: " << maxGrundy << endl;
     while (nextLetterIterator.hasNext())
     {
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
