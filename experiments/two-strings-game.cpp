@@ -708,6 +708,13 @@ class GameState
     public:
         string aPrime;
         string bPrime;
+        bool isValid = true;
+        static GameState invalid()
+        {
+            GameState invalidGameState;
+            invalidGameState.isValid = false;
+            return invalidGameState;
+        }
         bool hasWinningPlayerOverride(Player currentPlayer) const
         {
             // Assume that a GameState that has no moves that lead to a Lose for the
@@ -1098,6 +1105,11 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
         cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.dbgStringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
         return grundyBlah(grundyNumberAtNextState, numLettersUntilNextState);
     }
+}
+
+GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K)
+{
+    return GameState::invalid();
 }
 
 vector<GameState> solveOptimised(const string& A, const string& B)
