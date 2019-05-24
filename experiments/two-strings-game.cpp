@@ -1189,6 +1189,8 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     auto nextLetterIterator = aState.getNextLetterIterator();
     while (nextLetterIterator.hasNext())
     {
+        if (K < 0)
+            return;
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
         if (!afterFollowingLetter.isOnExplicitState())
         {
@@ -1226,7 +1228,10 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     else
                     {
                         // TODO
-                        result = GameState::unknown();
+                        result.aPrime = onTransition.dbgStringFollowed();
+                        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K);
+                        result.isValid = true;
+
                         K = -1;
                         return;
                     }
