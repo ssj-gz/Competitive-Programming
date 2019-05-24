@@ -1176,6 +1176,10 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
         // TODO
         result.aPrime = aState.dbgStringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, K);
+        if (result.bPrime == "-")
+        {
+            cout << " whoops: grundyForState: " << grundyForState << " K: " << K << " numInBWithoutGrundy:" << numInBWithoutGrundy[grundyForState] << endl;
+        }
         assert(result.bPrime != "-");
         result.isValid = true;
         K = -1;
@@ -1483,6 +1487,7 @@ vector<GameState> solveOptimised(const string& A, const string& B)
         //assert(nthWithGrundy == substringOfB);
     }
     assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
+    cout << "dbgNumInBWithoutGrundy.size():" << dbgNumInBWithoutGrundy.size() << endl;
     for (int unwantedGrundyNumber = 0; unwantedGrundyNumber < numInBWithoutGrundy.size(); unwantedGrundyNumber++)
     {
         int substringWithoutUnwantedNum = 1;
@@ -1504,7 +1509,7 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     //{
     //}
     //const auto numSubstringsOfBOpt = (B.size() * (B.size() + 1)) / 2;
-    //cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
+    cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfBOpt << endl;;
     assert(substringsOfB.size() == numSubstringsOfBOpt);
     //for (int i = 0; i < numInBWithGrundy.size(); i++)
     //{
