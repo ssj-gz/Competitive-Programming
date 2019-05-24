@@ -1421,6 +1421,21 @@ vector<GameState> solveOptimised(const string& A, const string& B)
         //assert(nthWithGrundy == substringOfB);
     }
     assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
+    for (int i = 0; i < numInBWithoutGrundy.size(); i++)
+    {
+        int substringNum = 1;
+        for (const auto& substringOfB : substringsOfB)
+        {
+            const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
+            if (grundyForSubstring != i)
+            {
+                cout << substringNum << "th substring without grundy: " << i << " : " << substringOfB << endl;
+            }
+
+            substringNum++;
+        }
+
+    }
     //for (const auto& substringOfB : substringsOfB)
     //{
     //}
