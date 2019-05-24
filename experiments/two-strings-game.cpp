@@ -1125,6 +1125,18 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
     vector<GameState> results;
+    int64_t K = 0;
+    while (true)
+    {
+        const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, K);
+        if (!kthOptimised.isValid)
+        {
+            break;
+        }
+        results.push_back(kthOptimised);
+        K++;
+    }
+
     return results;
 }
 
