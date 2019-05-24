@@ -1095,7 +1095,7 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
     cout << "state: " << state.dbgStringFollowed() << " grundyNumber: " << mex << endl;
 
     cout << "bloo: " << state.stateData().grundyNumber << endl;
-    assert(state.stateData().grundyNumber <= 4);
+    //assert(state.stateData().grundyNumber <= 4);
 
     return state.stateData().grundyNumber;
 }
