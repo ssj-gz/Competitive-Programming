@@ -1,4 +1,10 @@
-// Simon St James (ssjgz) - 2017-12-03.
+// Simon St James (ssjgz)
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <map>
@@ -1473,7 +1479,12 @@ int64_t countNumSubstrings(SuffixTreeBuilder& suffixTree)
 }
 
 
-vector<GameState> solveOptimised(const string& A, const string& B)
+#ifdef BRUTE_FORCE
+vector<GameState> 
+#else
+GameState
+#endif
+solveOptimised(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
@@ -1493,6 +1504,7 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     {
         x = numSubstringsOfBOpt - x;
     }
+#ifdef BRUTE_FORCE
     vector<int64_t> dbgNumInBWithoutGrundy(numInBWithoutGrundy.size());
 
     const auto substringsOfB = orderedSubstringsOf(B);
@@ -1551,20 +1563,24 @@ vector<GameState> solveOptimised(const string& A, const string& B)
 
 
     vector<GameState> results;
-    int64_t K = 1;
+    int64_t dbgK = 1;
     while (true)
     {
-        const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
-        cout << "bloop k: " << K << " kthOptimised: " << kthOptimised << " valid? " << kthOptimised.isValid << endl;
+        const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, dbgK, numInBWithoutGrundy);
+        cout << "bloop dbgK: " << dbgK << " kthOptimised: " << kthOptimised << " valid? " << kthOptimised.isValid << endl;
         if (!kthOptimised.isValid)
         {
             break;
         }
         results.push_back(kthOptimised);
-        K++;
+        dbgK++;
     }
 
     return results;
+#else
+    const auto result = findKthOptimised(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
+    return result;
+#endif
 }
 
 
@@ -1605,6 +1621,7 @@ int main(int argc, char** argv)
     cin >> A;
     cin >> B;
 
+#ifdef BRUTE_FORCE
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
     cout << "findGrundyNumberForState A" << endl;
@@ -1628,7 +1645,6 @@ int main(int argc, char** argv)
     }
 
     vector<GameState> firstPlayerWinsStates;
-#if 1
     for (const auto& gameState : allGameStates)
     {
         const auto grundyNumber = findGrundyNumberForString(gameState.aPrime, aSuffixTree) ^ findGrundyNumberForString(gameState.bPrime, bSuffixTree);
@@ -1646,9 +1662,9 @@ int main(int argc, char** argv)
             assert(grundyNumber == 0);
         }
     }
-#endif
+
     cout << "brute force # winning: " << firstPlayerWinsStates.size() << endl;
-    const auto optimisedResults = solveOptimised(A, B);
+    const auto optimisedResults = solveOptimised(A, B, K);
     cout << "brute force # winning: " << firstPlayerWinsStates.size() << " optimised # winning: " << optimisedResults.size() << endl;
     assert(firstPlayerWinsStates.size() == optimisedResults.size());
     int numSubstrings = 0;
@@ -1677,6 +1693,17 @@ int main(int argc, char** argv)
     {
         cout << "result: " << firstPlayerWinsStates[K - 1] << endl;
     }
+#else
+    const auto result = solveOptimised(A, B, K);
+    if (result.isValid)
+    {
+        cout << result.aPrime << endl << result.bPrime << endl;
+    }
+    else
+    {
+        cout << "no solution" << endl;
+    }
+#endif
 }
 
 
