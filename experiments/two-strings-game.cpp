@@ -1104,9 +1104,9 @@ void findMaxGrundy(Cursor state, int& maxGrundy)
     assert(state.isOnExplicitState());
     auto nextLetterIterator = state.getNextLetterIterator();
     maxGrundy = max(maxGrundy, state.stateData().grundyNumber);
+    cout << "findMaxGrundy: state: " << state.dbgStringFollowed() << " grundyNumber: " << state.stateData().grundyNumber << " maxGrundy: " << maxGrundy << endl;
     while (nextLetterIterator.hasNext())
     {
-        
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
         if (!afterFollowingLetter.isOnExplicitState())
         {
@@ -1175,9 +1175,9 @@ void calcNumWithGrundy(Cursor state, vector<int64_t>& numWithGrundy)
     }
 }
 
-vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
+vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree, int maxGrundy)
 {
-    vector<int64_t> numWithGrundy(findMaxGrundy(bSuffixTree));
+    vector<int64_t> numWithGrundy(maxGrundy + 1);
     calcNumWithGrundy(bSuffixTree.rootCursor(), numWithGrundy);
 
     return numWithGrundy;
@@ -1485,7 +1485,8 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     cout << "findGrundyNumberForState B" << endl;
     findGrundyNumberForState(bSuffixTree.rootCursor());
 
-    const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree);
+    const auto maxGrundy = max(findMaxGrundy(aSuffixTree), findMaxGrundy(bSuffixTree));
+    const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
     const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
     auto numInBWithoutGrundy = numInBWithGrundy;
     for (auto& x : numInBWithoutGrundy)
@@ -1514,6 +1515,11 @@ vector<GameState> solveOptimised(const string& A, const string& B)
     }
     assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
     cout << "dbgNumInBWithoutGrundy.size():" << dbgNumInBWithoutGrundy.size() << endl;
+    for(int i = 0; i < numInBWithoutGrundy.size(); i++)
+    {
+        cout << "numInBWithoutGrundy[" << i << "] = " << numInBWithoutGrundy[i] << endl;
+
+    }
     for (int unwantedGrundyNumber = 0; unwantedGrundyNumber < numInBWithoutGrundy.size(); unwantedGrundyNumber++)
     {
         int substringWithoutUnwantedNum = 1;
