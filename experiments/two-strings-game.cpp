@@ -733,6 +733,10 @@ class GameState
             assert(false);
             return Player1Win;
         }
+        bool operator==(const GameState& other) const
+        {
+            return (aPrime == other.aPrime) && (bPrime == other.bPrime); 
+        }
 };
 
 bool operator<(const GameState& lhs, const GameState& rhs)
@@ -1564,6 +1568,9 @@ int main(int argc, char** argv)
 #endif
     const auto optimisedResults = solveOptimised(A, B);
     cout << "brute force # winning: " << firstPlayerWinsStates.size() << " optimised # winning: " << optimisedResults.size() << endl;
+    assert(firstPlayerWinsStates.size() == optimisedResults.size());
+    int numSubstrings = 0;
+    int numOptKnown = 0;
     for (int i = 0; i < firstPlayerWinsStates.size(); i++)
     {
         cout << i << "th win state: " << firstPlayerWinsStates[i] << " opt: ";
@@ -1572,7 +1579,14 @@ int main(int argc, char** argv)
         else
             cout << "unknown";
         cout << endl;
+        if (optimisedResults[i].isKnown)
+        {
+            assert(optimisedResults[i] == firstPlayerWinsStates[i]);
+            numOptKnown++;
+        }
+        numSubstrings++;
     }
+    cout << "numSubstrings: " << numSubstrings << " numOptKnown: " << numOptKnown << endl;
     if (K >= firstPlayerWinsStates.size())
     {
         cout << "no solution" << endl;
