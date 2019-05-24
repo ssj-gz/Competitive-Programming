@@ -1100,6 +1100,22 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
     }
 }
 
+vector<GameState> solveOptimised(const string& A, const string& B)
+{
+    SuffixTreeBuilder aSuffixTree;
+    aSuffixTree.appendString(A);
+    cout << "findGrundyNumberForState A" << endl;
+    findGrundyNumberForState(aSuffixTree.rootCursor());
+
+    SuffixTreeBuilder bSuffixTree;
+    bSuffixTree.appendString(B);
+    cout << "findGrundyNumberForState B" << endl;
+    findGrundyNumberForState(bSuffixTree.rootCursor());
+
+    vector<GameState> results;
+    return results;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -1132,7 +1148,7 @@ int main(int argc, char** argv)
     cin >> N;
     int M;
     cin >> M;
-    int K;
+    int64_t K;
     cin >> K;
 
     cin >> A;
@@ -1153,6 +1169,16 @@ int main(int argc, char** argv)
         return substrings;
     };
 
+    SuffixTreeBuilder aSuffixTree;
+    aSuffixTree.appendString(A);
+    cout << "findGrundyNumberForState A" << endl;
+    findGrundyNumberForState(aSuffixTree.rootCursor());
+
+    SuffixTreeBuilder bSuffixTree;
+    bSuffixTree.appendString(B);
+    cout << "findGrundyNumberForState B" << endl;
+    findGrundyNumberForState(bSuffixTree.rootCursor());
+
     set<GameState> allGameStates;
     for (const auto& aSubstring : orderedSubstringsOf(A))
     {
@@ -1164,16 +1190,6 @@ int main(int argc, char** argv)
             allGameStates.insert(gameState);
         }
     }
-
-    SuffixTreeBuilder aSuffixTree;
-    aSuffixTree.appendString(A);
-    cout << "findGrundyNumberForState A" << endl;
-    findGrundyNumberForState(aSuffixTree.rootCursor());
-
-    SuffixTreeBuilder bSuffixTree;
-    bSuffixTree.appendString(B);
-    cout << "findGrundyNumberForState B" << endl;
-    findGrundyNumberForState(bSuffixTree.rootCursor());
 
     vector<GameState> firstPlayerWinsStates;
     for (const auto& gameState : allGameStates)
@@ -1193,6 +1209,7 @@ int main(int argc, char** argv)
             assert(grundyNumber == 0);
         }
     }
+    const auto optimisedResults = solveOptimised(A, B);
     if (K >= firstPlayerWinsStates.size())
     {
         cout << "no solution" << endl;
