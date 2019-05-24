@@ -1164,6 +1164,13 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     {
         K -= numInBWithGrundy[grundyForState];
     }
+    else
+    {
+        // TODO
+        result = GameState::unknown();
+        K = -1;
+        return;
+    }
     if (K == 0)
     {
         result.aPrime = aState.dbgStringFollowed();
@@ -1472,6 +1479,7 @@ int main(int argc, char** argv)
     }
 #endif
     const auto optimisedResults = solveOptimised(A, B);
+    cout << "brute force # winning: " << firstPlayerWinsStates.size() << " optimised # winning: " << optimisedResults.size() << endl;
     if (K >= firstPlayerWinsStates.size())
     {
         cout << "no solution" << endl;
