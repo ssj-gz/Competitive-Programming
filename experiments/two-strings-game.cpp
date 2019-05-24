@@ -1153,6 +1153,137 @@ vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree)
     return numWithGrundy;
 } 
 
+#if 0
+GameState findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithGrundy)
+{
+    assert(assert.isOnExplicitState());
+    auto nextLetterIterator = aState.getNextLetterIterator();
+    while (nextLetterIterator.hasNext())
+    {
+        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        if (!afterFollowingLetter.isOnExplicitState())
+        {
+            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+            afterFollowingLetter.followToTransitionEnd();
+            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            if (grundyNumberAtNextState > 0)
+            {
+                numWithGrundy[0] += numLettersUntilNextState / 2;
+                numWithGrundy[1] += (numLettersUntilNextState - 1) / 2;
+
+            }
+            else
+            {
+                numWithGrundy[1] += numLettersUntilNextState / 2;
+                numWithGrundy[0] += (numLettersUntilNextState - 1) / 2;
+            }
+        }
+        const auto result = findKthOptimised(afterFollowingLetter, );
+
+        nextLetterIterator++;
+    }
+}
+#endif
+
+void findNthWithGrundy(Cursor state, int desiredGrundyNumber, int64_t& N, string& result)
+{
+    assert(state.isOnExplicitState());
+    auto nextLetterIterator = state.getNextLetterIterator();
+    if (state.stateData().grundyNumber == desiredGrundyNumber && N > 0)
+    {
+        N--;
+    }
+    if (N == 0)
+    {
+        result = state.dbgStringFollowed();
+        return;
+    }
+    while (nextLetterIterator.hasNext())
+    {
+        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        if (!afterFollowingLetter.isOnExplicitState())
+        {
+            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+            afterFollowingLetter.followToTransitionEnd();
+            if (desiredGrundyNumber == 0 || desiredGrundyNumber == 1)
+            {
+                const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+                int numWithGrundy0 = -1;
+                int numWithGrundy1 = -1;
+                int grundyNumberAfterFollowingLetter = -1;
+                if (grundyNumberAtNextState > 0)
+                {
+                    numWithGrundy0 += numLettersUntilNextState / 2;
+                    numWithGrundy1 += (numLettersUntilNextState - 1) / 2;
+                    grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
+
+                }
+                else
+                {
+                    numWithGrundy1 += numLettersUntilNextState / 2;
+                    numWithGrundy0 += (numLettersUntilNextState - 1) / 2;
+                    grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
+                }
+
+                bool answerIsOnThisTransition = false;
+                if (desiredGrundyNumber == 0)
+                {
+                    if (N - numWithGrundy0 >= 0)
+                    {
+                        N -= numWithGrundy0;
+                    }
+                    else
+                    {
+                        answerIsOnThisTransition = true;
+                    }
+                }
+                if (desiredGrundyNumber == 1)
+                {
+                    if (N - numWithGrundy1 >= 0)
+                    {
+                        N -= numWithGrundy1;
+                    }
+                    else
+                    {
+                        answerIsOnThisTransition = true;
+                    }
+                }
+                if (answerIsOnThisTransition)
+                {
+                    Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+                    int grundyNumber = grundyNumberAfterFollowingLetter;
+                    while (true)
+                    {
+                        if (grundyNumber == desiredGrundyNumber)
+                        {
+                            N--;
+                        }
+                        if (N == 0)
+                        {
+                            result = afterFollowingLetter.dbgStringFollowed();
+                            return;
+                        }
+                        afterFollowingLetter.followNextLetter();
+                        grundyNumber = 1 - grundyNumber;
+                    }
+                }
+            }
+        }
+        findNthWithGrundy(afterFollowingLetter, desiredGrundyNumber, N, result);
+
+        nextLetterIterator++;
+    }
+}
+
+string findNthWithGrundy(SuffixTreeBuilder& suffixTree, int desiredGrundyNumber, int64_t N)
+{
+    string result;
+    findNthWithGrundy(suffixTree.rootCursor(), desiredGrundyNumber, N, result);
+
+    return result;
+}
+
+
 GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K)
 {
     return GameState::invalid();
