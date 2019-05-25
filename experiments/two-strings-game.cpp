@@ -1106,7 +1106,7 @@ int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 struct SuffixTreeInfo
 {
     int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
-    int numSubstrings = 1; // Empty string.
+    int64_t numSubstrings = 1; // Empty string.
     vector<int64_t> numWithGrundy = vector<int64_t>(2, 0); // Make room for grundy numbers 0 and 1 - for the others, we'll resize on-the-fly.
 
 };
@@ -1494,6 +1494,7 @@ solveOptimised(const string& A, const string& B, int64_t K)
     for (auto& x : numInBWithoutGrundy)
     {
         x = numSubstringsOfB - x;
+        assert(x >= 0);
     }
 #ifdef BRUTE_FORCE
     vector<int64_t> dbgNumInBWithoutGrundy(numInBWithoutGrundy.size());
