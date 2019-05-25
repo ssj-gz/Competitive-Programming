@@ -197,10 +197,6 @@ class SuffixTreeBuilder
                     else
                         return m_transition->grundyNumberAfterFirstLetter ^ ((m_posInTransition + 1) % 2);
                 }
-                bool isValid() const
-                {
-                    return m_isValid;
-                }
                 bool isOnExplicitState() const
                 {
                     return (m_transition == nullptr);
@@ -219,86 +215,6 @@ class SuffixTreeBuilder
                             });
                 }
 
-                void followLetter(char letter)
-                {
-                    const string& theString = *m_string;
-                    if (m_transition == nullptr)
-                    {
-                        for (auto& transition : m_state->transitions)
-                        {
-                            if (-transition.substringFollowed.startIndex == (letter - 'a' + 1))
-                            {
-                                m_transition = &transition;
-                                break;
-                            }
-                            else 
-                            {
-                                assert(theString[transition.substringFollowed.startIndex - 1] == transition.firstLetter);
-                                if (transition.firstLetter == letter)
-                                {
-                                    m_transition = &transition;
-                                    break;
-                                }
-                            }
-                        }
-                        assert(m_transition);
-                        if (m_transition->substringLength(m_string->size()) == 1)
-                        {
-                            followToTransitionEnd();
-                        }
-                        else
-                        {
-                            m_posInTransition = 1; // We've just followed the 0th.
-                        }
-                    }
-                    else
-                    {
-                        assert(m_posInTransition != -1);
-                        const int transitionStringLength = m_transition->substringLength(m_string->size());
-                        assert(m_posInTransition <= transitionStringLength);
-                        m_posInTransition++;
-                        if (m_posInTransition == transitionStringLength)
-                        {
-                            m_state = m_transition->nextState;
-                            movedToExplicitState();
-                        }
-
-                    }
-                }
-                void followLetters(const string& letters, string::size_type startIndex = 0, string::size_type numLetters = string::npos)
-                {
-                    if (numLetters == string::npos)
-                    {
-                        numLetters = letters.size();
-                    }
-                    while (numLetters > 0)
-                    {
-                        if (m_transition)
-                        {
-                            const auto numLeftInTransition = m_transition->substringLength(m_string->size()) - m_posInTransition;
-                            int numLettersConsumed = 0;
-                            if (numLeftInTransition > numLetters)
-                            {
-                                m_posInTransition += numLetters;
-                                numLettersConsumed = numLetters;
-                            }
-                            else
-                            {
-                                numLettersConsumed = numLeftInTransition;
-                                followToTransitionEnd();
-                            }
-                            numLetters -= numLettersConsumed;
-                            startIndex += numLettersConsumed;
-                        }
-                        else
-                        {
-                            const auto letterToFollow = letters[startIndex];
-                            followLetter(letterToFollow);
-                            numLetters -= 1;
-                            startIndex += 1;
-                        }
-                    }
-                }
                 void followNextLetter()
                 {
                     followNextLetters(1);
