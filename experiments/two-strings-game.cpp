@@ -1148,45 +1148,6 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
     }
 }
 
-void calcNumWithGrundy(Cursor state, vector<int64_t>& numWithGrundy)
-{
-    assert(state.isOnExplicitState());
-    numWithGrundy[state.stateData().grundyNumber]++;
-    auto nextLetterIterator = state.getNextLetterIterator();
-    while (nextLetterIterator.hasNext())
-    {
-        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
-        if (!afterFollowingLetter.isOnExplicitState())
-        {
-            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
-            afterFollowingLetter.followToTransitionEnd();
-            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
-            if (grundyNumberAtNextState > 0)
-            {
-                numWithGrundy[0] += numLettersUntilNextState / 2;
-                numWithGrundy[1] += (numLettersUntilNextState - 1) / 2;
-
-            }
-            else
-            {
-                numWithGrundy[1] += numLettersUntilNextState / 2;
-                numWithGrundy[0] += (numLettersUntilNextState - 1) / 2;
-            }
-        }
-        calcNumWithGrundy(afterFollowingLetter, numWithGrundy);
-
-        nextLetterIterator++;
-    }
-}
-
-vector<int64_t> calcNumInBWithGrundy(SuffixTreeBuilder& bSuffixTree, int maxGrundy)
-{
-    vector<int64_t> numWithGrundy(maxGrundy + 1);
-    calcNumWithGrundy(bSuffixTree.rootCursor(), numWithGrundy);
-
-    return numWithGrundy;
-} 
-
 string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 
 #if 1
@@ -1440,9 +1401,8 @@ solveOptimised(const string& A, const string& B, int64_t K)
     initialiseGrundyInfo(bSuffixTree.rootCursor(), bSuffixTreeInfo);
 
     const auto maxGrundy = max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy);
-    const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
     bSuffixTreeInfo.numWithGrundy.resize(maxGrundy + 1);
-    assert(numInBWithGrundy == bSuffixTreeInfo.numWithGrundy);
+    const auto numInBWithGrundy = bSuffixTreeInfo.numWithGrundy;
     const auto numSubstringsOfB = bSuffixTreeInfo.numSubstrings;
     auto numInBWithoutGrundy = numInBWithGrundy;
     for (auto& x : numInBWithoutGrundy)
