@@ -224,32 +224,6 @@ class SuffixTreeBuilder
                     assert(!isOnExplicitState());
                     return m_posInTransition;
                 }
-                vector<char> nextLetters() const
-                { char nextLetters[27];
-                    const int numNextLetters = this->nextLetters(nextLetters);
-                    return vector<char>(nextLetters, nextLetters + numNextLetters);
-                }
-                int nextLetters(char* dest) const
-                {
-                    int numNextLetters = 0;
-                    if (m_transition == nullptr)
-                    {
-                        for (const auto& transition : m_state->transitions)
-                        {
-                            const char letter = (*m_string)[transition.substringFollowed.startIndex - 1];
-                            *dest = letter;
-                            dest++;
-                            numNextLetters++;
-                        }
-                    }
-                    else
-                    {
-                        *dest = (*m_string)[m_transition->substringFollowed.startIndex + m_posInTransition - 1];
-                        dest++;
-                        numNextLetters++;
-                    }
-                    return numNextLetters;
-                }
 
                 void sortTransitions()
                 {
