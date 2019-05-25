@@ -19,9 +19,6 @@
 
 using namespace std;
 
-//#define VERY_VERBOSE
-//#define PRINT_COMPUTER_MOVES
-
 struct StateData
 {
     int wordLength = -1;
@@ -784,6 +781,16 @@ struct SuffixTreeInfo
 };
 void initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo)
 {
+    // Would be a very simple recursive algorithm, but would give stackoverflow on larger testcases :(
+
+    // * Sorts the transitions for each state in lexicographic order;
+    // * Updates wordLength for each state;
+    // * Find grundyNumber for each state;
+    // * Calculates grundy info for each transition (grundy number after following
+    //   first letter; number of words with grundy numbers 0 or 1 on this transition;
+    //   etc).
+    //
+    // All reasonably self-explanatory, I hope :)
     enum Phase { Initializing, ProcessingChildren, AfterRecurse };
     struct StackFrame
     {
@@ -891,28 +898,9 @@ void initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo)
     }
 }
 
-int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
-{
-    Cursor wordCursor = suffixTree.rootCursor();
-    wordCursor.followLetters(s);
-    if (wordCursor.isOnExplicitState())
-    {
-        return wordCursor.stateData().grundyNumber;
-    }
-    else
-    {
-        wordCursor.followToTransitionEnd();
-        const int grundyNumberAtNextState = wordCursor.stateData().grundyNumber;
-        const int numLettersUntilNextState = wordCursor.stateData().wordLength - s.size();
-        //cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.stringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
-        return grundyBlah(grundyNumberAtNextState, numLettersUntilNextState);
-    }
-}
-
 string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 
-#if 1
-void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithoutGrundy, GameState& result)
+void findKthWinningGameState(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithoutGrundy, GameState& result)
 {
     if (K < 0)
         return;
@@ -984,14 +972,15 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
 
             nextState.followToTransitionEnd();
         }
-        findKthOptimised(nextState, bSuffixTree, K, numInBWithoutGrundy, result);
+        findKthWinningGameState(nextState, bSuffixTree, K, numInBWithoutGrundy, result);
 
         nextLetterIterator++;
     }
 }
-#endif
+
 void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
 {
+    // Would be a very simple recursive algorithm, but would give stackoverflow on larger testcases :(
     enum Phase { Initializing, ProcessingChildren, AfterRecurse };
     struct StackFrame
     {
@@ -1060,6 +1049,9 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
                             }
                             if (answerIsOnThisTransition)
                             {
+                                // Walk along this transition letter-by-letter, as this is where we'll find the nth word
+                                // without unwantedGrundyNumber.
+                                // We'll only ever do this once per testcase, so it only contributes O(N) overall.
                                 Cursor onTransition = stackFrame.nextLetterIterator.afterFollowingNextLetter();
                                 while (true)
                                 {
@@ -1102,7 +1094,6 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
     }
 }
 
-
 string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N)
 {
     string result = "-";
@@ -1111,13 +1102,13 @@ string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNum
     return result;
 }
 
-GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithoutGrundy)
+GameState findKthWinningGameState(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithoutGrundy)
 {
     GameState result;
     result.aPrime = "-";
     result.bPrime = "-";
     result.isValid = false;
-    findKthOptimised(aSuffixTree.rootCursor(), bSuffixTree, K, numInBWithoutGrundy, result);
+    findKthWinningGameState(aSuffixTree.rootCursor(), bSuffixTree, K, numInBWithoutGrundy, result);
     if (result.isValid)
     {
         assert(result.aPrime != "-" && result.bPrime != "-");
@@ -1163,100 +1154,11 @@ GameState findKthWinningGameState(const string& A, const string& B, int64_t K)
         x = numSubstringsOfB - x;
         assert(x >= 0);
     }
-#ifdef BRUTE_FORCE
-    vector<int64_t> dbgNumInBWithoutGrundy(numInBWithoutGrundy.size());
-
-    const auto substringsOfB = orderedSubstringsOf(B);
-    for (const auto& substringOfB : substringsOfB)
-    {
-        cout << "substringOfB: " << substringOfB << " grundy num: " << findGrundyNumberForString(substringOfB, bSuffixTree) << endl;
-        const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
-        for (int i = 0; i < dbgNumInBWithoutGrundy.size(); i++)
-        {
-            if (i != grundyForSubstring)
-            {
-                dbgNumInBWithoutGrundy[i]++;
-            }
-        }
-    }
-    assert(dbgNumInBWithoutGrundy == numInBWithoutGrundy);
-    cout << "dbgNumInBWithoutGrundy.size():" << dbgNumInBWithoutGrundy.size() << endl;
-    for(int i = 0; i < numInBWithoutGrundy.size(); i++)
-    {
-        cout << "numInBWithoutGrundy[" << i << "] = " << numInBWithoutGrundy[i] << endl;
-
-    }
-    for (int unwantedGrundyNumber = 0; unwantedGrundyNumber < numInBWithoutGrundy.size(); unwantedGrundyNumber++)
-    {
-        int substringWithoutUnwantedNum = 1;
-        for (const auto& substringOfB : substringsOfB)
-        {
-            const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
-            if (grundyForSubstring != unwantedGrundyNumber)
-            {
-                const auto nthWithoutGrundy = findNthWithoutGrundy(bSuffixTree, unwantedGrundyNumber, substringWithoutUnwantedNum);
-                cout << substringWithoutUnwantedNum << "th substring without grundy: " << unwantedGrundyNumber << " : " << substringOfB << " opt: " << nthWithoutGrundy << endl;
-                assert(substringOfB == nthWithoutGrundy);
-                substringWithoutUnwantedNum++;
-            }
-
-        }
-
-    }
-    cout << "substringOfB.size(): " << substringsOfB.size() << " opt: " << numSubstringsOfB << endl;;
-    assert(substringsOfB.size() == numSubstringsOfB);
-
-    vector<GameState> results;
-    int64_t dbgK = 1;
-    while (true)
-    {
-        const auto kthOptimised = findKthOptimised(aSuffixTree, bSuffixTree, dbgK, numInBWithoutGrundy);
-        cout << "bloop dbgK: " << dbgK << " kthOptimised: " << kthOptimised << " valid? " << kthOptimised.isValid << endl;
-        if (!kthOptimised.isValid)
-        {
-            break;
-        }
-        results.push_back(kthOptimised);
-        dbgK++;
-    }
-
-    return results;
-#else
-    const auto result = findKthOptimised(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
-    return result;
-#endif
+    return findKthWinningGameState(aSuffixTree, bSuffixTree, K, numInBWithoutGrundy);
 }
-
 
 int main(int argc, char** argv)
 {
-    struct timeval time; 
-    gettimeofday(&time,NULL);
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-    if (argc == 2)
-    {
-        const int lengthA = (rand() % 15) + 1;
-        const int lengthB = (rand() % 15) + 1;
-        //const int64_t lengthA = (rand() % 300'000) + 1;
-        //const int64_t lengthB = (rand() % 300'000) + 1;
-        const int64_t K = rand() % (lengthA * lengthB) + 1;
-        cout << lengthA << " " << lengthB << " " << K << endl;
-        const int maxLetterA = rand() % 26 + 1;
-        for (int i = 0; i < lengthA; i++)
-        {
-            cout << static_cast<char>('a' + rand() % maxLetterA);
-        }
-        cout << endl;
-        const int maxLetterB = rand() % 26 + 1;
-        for (int i = 0; i < lengthB; i++)
-        {
-            cout << static_cast<char>('a' + rand() % maxLetterB);
-        }
-        cout << endl;
-        return 0;
-    }
-
     int N;
     cin >> N;
     int M;
@@ -1267,8 +1169,6 @@ int main(int argc, char** argv)
     cin >> A;
     cin >> B;
 
-#ifdef BRUTE_FORCE
-#else
     const auto result = findKthWinningGameState(A, B, K);
     if (result.isValid)
     {
@@ -1278,7 +1178,6 @@ int main(int argc, char** argv)
     {
         cout << "no solution" << endl;
     }
-#endif
 }
 
 
