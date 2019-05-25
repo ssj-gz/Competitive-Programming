@@ -203,7 +203,7 @@ class SuffixTreeBuilder
                     if (isOnExplicitState())
                         return m_state->data.grundyNumber;
                     else
-                        return m_transition->grundyNumberAfterFirstLetter ^ (m_posInTransition % 2);
+                        return m_transition->grundyNumberAfterFirstLetter ^ ((m_posInTransition + 1) % 2);
                 }
                 bool isValid() const
                 {
@@ -1387,6 +1387,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
                     }
                     onTransition.followNextLetter();
                     grundyNumber = 1 - grundyNumber;
+                    assert(grundyNumber == onTransition.grundyNumber());
                 }
             }
         }
