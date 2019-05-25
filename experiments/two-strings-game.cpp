@@ -161,6 +161,46 @@ class SuffixTreeBuilder
                         return false;
                     return false;
                 }
+                void calcGrundyInfoForTransition()
+                {
+                    assert(!isOnExplicitState());
+                    assert(m_posInTransition == 1);
+                    cout << "calcGrundyInfoForTransition; posInTransition: " << m_posInTransition << endl;
+                    auto nextState = m_transition->nextState;
+                    assert(nextState);
+                    const int grundyNumberAtNextState = nextState->data.grundyNumber;
+                    assert(grundyNumberAtNextState != -1);
+                    grundyNumberAfterFirstLetter = -1;
+                    const int numLettersOnTransition = remainderOfCurrentTransition().length() + 1;
+                    if (grundyNumberAtNextState > 0)
+                    {
+                        numWithGrundy0 = numLettersOnTransition / 2;
+                        numWithGrundy1 = (numLettersOnTransition - 1) / 2;
+                        grundyNumberAfterFirstLetter = (numLettersOnTransition % 2);
+
+                    }
+                    else
+                    {
+                        numWithGrundy1 = numLettersOnTransition / 2;
+                        numWithGrundy0 = (numLettersOnTransition - 1) / 2;
+                        grundyNumberAfterFirstLetter = 1 - (numLettersOnTransition % 2);
+                    }
+                }
+                int64_t numOnTransitionWithGrundyNumber(int grundyNumber)
+                {
+                    assert(grundyNumber == 0 || grundyNumber == 1);
+                    if (grundyNumber == 0)
+                        return numWithGrundy0;
+                    else
+                        return numWithGrundy1;
+                }
+                int64_t grundyNumber()
+                {
+                    if (isOnExplicitState())
+                        return m_state->data.grundyNumber;
+                    else
+                        return grundyNumberAfterFirstLetter ^ (m_posInTransition % 2);
+                }
                 bool isValid() const
                 {
                     return m_isValid;
@@ -241,9 +281,9 @@ class SuffixTreeBuilder
                 {
                     assert(isOnExplicitState());
                     sort(m_state->transitions.begin(), m_state->transitions.end(), [](const Transition& lhs, const Transition& rhs)
-                    {
-                        return lhs.firstLetter < rhs.firstLetter;
-                    });
+                            {
+                            return lhs.firstLetter < rhs.firstLetter;
+                            });
                 }
 
                 void followLetter(char letter)
@@ -480,6 +520,10 @@ class SuffixTreeBuilder
                     m_isValid{true}
                 {
                 }
+                // Grundy info for transitions.
+                int64_t numWithGrundy0 = -1;
+                int64_t numWithGrundy1 = -1;
+                int grundyNumberAfterFirstLetter = -1;
 
                 void movedToExplicitState()
                 {
@@ -1079,6 +1123,7 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
             afterFollowingLetter.followToTransitionEnd();
             suffixTreeInfo.numSubstrings += numLettersUntilNextState;
             initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + numLettersUntilNextState);
+            nextLetterIterator.afterFollowingNextLetter().calcGrundyInfoForTransition();
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             int64_t numWithGrundy0 = -1;
             int64_t numWithGrundy1 = -1;
