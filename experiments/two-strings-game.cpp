@@ -695,6 +695,7 @@ void initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo)
                 }
                 else
                 {
+                    // The grundyNumberForState is the mex of the grundy numbers after making each possible move.
                     int grundyNumberForState = 0;
                     while (stackFrame.grundyNumbersAfterNextMove.find(grundyNumberForState) != stackFrame.grundyNumbersAfterNextMove.end())
                     {
