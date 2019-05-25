@@ -946,10 +946,7 @@ string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNum
 
 GameState findKthWinningGameState(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithoutGrundy)
 {
-    GameState result;
-    result.aPrime = "-";
-    result.bPrime = "-";
-    result.isValid = false;
+    GameState result = GameState::invalid(); // Guilty until proven innocent!
     findKthWinningGameState(aSuffixTree.rootCursor(), bSuffixTree, K, numInBWithoutGrundy, result);
     if (result.isValid)
     {
