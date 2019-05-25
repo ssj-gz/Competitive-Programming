@@ -1319,6 +1319,116 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
 }
 #endif
+void findNthWithoutGrundy2(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
+{
+    enum Phase { Initializing, ProcessingChildren, AfterRecurse };
+    struct StackFrame
+    {
+        Cursor state;
+        Phase phase = Initializing;
+        Cursor::NextLetterIterator nextLetterIterator;
+        Cursor afterFollowingLetter;
+    };
+    StackFrame initialStackFrame;
+    initialStackFrame.state = state;
+    stack<StackFrame> stackFrames;
+    stackFrames.push(initialStackFrame);
+
+    while (!stackFrames.empty())
+    {
+        StackFrame& stackFrame = stackFrames.top();
+        auto& state = stackFrame.state;
+
+        switch (stackFrame.phase)
+        {
+            case Initializing:
+                if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
+                {
+                    N--;
+                }
+                if (N == 0)
+                {
+                    result = state.stringFollowed();
+                    N = -1;
+                    return;
+                }
+
+                stackFrame.nextLetterIterator = state.getNextLetterIterator();
+                stackFrame.phase = ProcessingChildren;
+                continue;
+            case ProcessingChildren:
+                {
+                    if (stackFrame.nextLetterIterator.hasNext())
+                    {
+                        Cursor nextState = stackFrame.afterFollowingLetter;
+                        if (!stackFrame.afterFollowingLetter.isOnExplicitState())
+                        {
+                            nextState.followToTransitionEnd();
+
+                            stackFrame.afterFollowingLetter = stackFrame.nextLetterIterator.afterFollowingNextLetter();
+                            const auto numWithGrundy0 = stackFrame.afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
+                            const auto numWithGrundy1 = stackFrame.afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
+                            bool answerIsOnThisTransition = false;
+                            int64_t nAfterFollowingTransition = N;
+                            if (unwantedGrundyNumber != 0 && numWithGrundy0 > 0)
+                            {
+                                nAfterFollowingTransition -= numWithGrundy0;
+                            }
+                            if (unwantedGrundyNumber != 1 && numWithGrundy1 > 0)
+                            {
+                                nAfterFollowingTransition -= numWithGrundy1;
+                            }
+                            if (nAfterFollowingTransition > 0)
+                            {
+                                N = nAfterFollowingTransition;
+                            }
+                            else
+                            {
+                                answerIsOnThisTransition = true;
+                            }
+                            if (answerIsOnThisTransition)
+                            {
+                                Cursor onTransition = stackFrame.nextLetterIterator.afterFollowingNextLetter();
+                                while (true)
+                                {
+                                    int grundyNumber = onTransition.grundyNumber();
+
+                                    if (grundyNumber != unwantedGrundyNumber)
+                                    {
+                                        N--;
+                                    }
+                                    if (N == 0)
+                                    {
+                                        result = onTransition.stringFollowed();
+                                        N = -1;
+                                        return;
+                                    }
+                                    onTransition.followNextLetter();
+                                }
+                            }
+
+                        }
+                        StackFrame nextStackFrame;
+                        nextStackFrame.state = nextState;
+                        stackFrames.push(nextStackFrame);
+                        stackFrame.phase = AfterRecurse;
+                        continue;
+                    }
+                    else
+                    {
+                        stackFrames.pop();
+                        continue;
+                    }
+                }
+                break;
+            case AfterRecurse:
+
+                stackFrame.nextLetterIterator++;
+                stackFrame.phase = ProcessingChildren;
+                break;
+        }
+    }
+}
 
 void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
 {
