@@ -782,7 +782,7 @@ struct SuffixTreeInfo
     vector<int64_t> numWithGrundy = vector<int64_t>(2, 0); // Make room for grundy numbers 0 and 1 - for the others, we'll resize on-the-fly.
 
 };
-void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo)
+void initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo)
 {
     enum Phase { Initializing, ProcessingChildren, AfterRecurse };
     struct StackFrame
@@ -1151,12 +1151,12 @@ solveOptimised(const string& A, const string& B, int64_t K)
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
     SuffixTreeInfo aSuffixTreeInfo;
-    initialiseGrundyInfo2(aSuffixTree.rootCursor(), aSuffixTreeInfo);
+    initialiseGrundyInfo(aSuffixTree.rootCursor(), aSuffixTreeInfo);
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
     SuffixTreeInfo bSuffixTreeInfo;
-    initialiseGrundyInfo2(bSuffixTree.rootCursor(), bSuffixTreeInfo);
+    initialiseGrundyInfo(bSuffixTree.rootCursor(), bSuffixTreeInfo);
 
     const auto maxGrundy = max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy);
     bSuffixTreeInfo.numWithGrundy.resize(maxGrundy + 1);
