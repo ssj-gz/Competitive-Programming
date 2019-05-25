@@ -3,7 +3,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-//#define NDEBUG
+#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -1139,7 +1139,6 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo)
                 assert(state.isOnExplicitState());
                 assert(state.stateData().grundyNumber == -1);
                 state.sortTransitions();
-                cout << "initialiseGrundyInfo2: state id: " << state.stateId() << endl;
 
                 state.stateData().wordLength = stackFrame.wordLength;
                 stackFrame.nextLetterIterator = state.getNextLetterIterator();
@@ -1183,8 +1182,6 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo)
                         grundyNumberForState++;
                     }
                     state.stateData().grundyNumber = grundyNumberForState;
-
-                    cout << "initialiseGrundyInfo2: state id: " << state.stateId() << " set grundy number to: " << grundyNumberForState << endl;
 
                     if (grundyNumberForState > suffixTreeInfo.maxGrundy)
                     {
