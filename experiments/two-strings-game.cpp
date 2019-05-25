@@ -251,28 +251,6 @@ class SuffixTreeBuilder
                     return numNextLetters;
                 }
 
-                bool canFollowLetter(char letter) const
-                {
-                    if (isOnExplicitState())
-                    {
-                        auto nextLetterIterator = getNextLetterIterator();
-                        while (nextLetterIterator.hasNext())
-                        {
-                            if (nextLetterIterator.nextLetter() == letter)
-                                return true;
-                            nextLetterIterator++;
-                        }
-                        return false;
-                    }
-                    else
-                    {
-                        char nextLetter;
-                        nextLetters(&nextLetter);
-                        return nextLetter == letter;
-
-                    }
-                }
-
                 void sortTransitions()
                 {
                     assert(isOnExplicitState());
