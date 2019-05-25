@@ -1111,7 +1111,7 @@ struct SuffixTreeInfo
     vector<int64_t> numWithGrundy = vector<int64_t>(2, 0); // Make room for grundy numbers 0 and 1 - for the others, we'll resize on-the-fly.
 
 };
-void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
+void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo)
 {
     enum Phase { Initializing, ProcessingChildren, AfterRecurse };
     struct StackFrame
@@ -1221,61 +1221,6 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wo
                 break;
         }
     }
-}
-void initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
-{
-    cout << "initialiseGrundyInfo: state id: " << state.stateId() << endl;
-    assert(state.isOnExplicitState());
-    assert(state.stateData().grundyNumber == -1);
-    state.sortTransitions();
-
-    state.stateData().wordLength = wordLength;
-    set<int> grundyNumbersAfterNextMove;
-    auto nextLetterIterator = state.getNextLetterIterator();
-    while (nextLetterIterator.hasNext())
-    {
-        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
-        Cursor nextState = afterFollowingLetter;
-        if (!afterFollowingLetter.isOnExplicitState())
-        {
-            const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
-
-            nextState.followToTransitionEnd();
-            initialiseGrundyInfo(nextState, suffixTreeInfo, wordLength + numLettersUntilNextState);
-
-            suffixTreeInfo.numSubstrings += numLettersUntilNextState;
-            afterFollowingLetter.calcGrundyInfoForTransition();
-            suffixTreeInfo.numWithGrundy[0] += afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
-            suffixTreeInfo.numWithGrundy[1] += afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
-            assert(numLettersUntilNextState > 0);
-            grundyNumbersAfterNextMove.insert(afterFollowingLetter.grundyNumber());
-        }
-        else
-        {
-            suffixTreeInfo.numSubstrings++;
-            initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + 1);
-            grundyNumbersAfterNextMove.insert(nextState.grundyNumber());
-        }
-
-        nextLetterIterator++;
-    }
-    int grundyNumberForState = 0;
-    while (grundyNumbersAfterNextMove.find(grundyNumberForState) != grundyNumbersAfterNextMove.end())
-    {
-        grundyNumberForState++;
-    }
-    state.stateData().grundyNumber = grundyNumberForState;
-
-    if (grundyNumberForState > suffixTreeInfo.maxGrundy)
-    {
-        suffixTreeInfo.maxGrundy = grundyNumberForState;
-    }
-
-    if (suffixTreeInfo.numWithGrundy.size() < grundyNumberForState + 1)
-    {
-        suffixTreeInfo.numWithGrundy.resize(grundyNumberForState + 1);
-    }
-    suffixTreeInfo.numWithGrundy[grundyNumberForState]++;
 }
 
 int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
@@ -1622,13 +1567,13 @@ int main(int argc, char** argv)
     aSuffixTree.appendString(A);
     cout << "initialiseGrundyInfo A" << endl;
     SuffixTreeInfo aSuffixTreeInfo;
-    initialiseGrundyInfo(aSuffixTree.rootCursor(), aSuffixTreeInfo);
+    initialiseGrundyInfo2(aSuffixTree.rootCursor(), aSuffixTreeInfo);
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
     cout << "initialiseGrundyInfo B" << endl;
     SuffixTreeInfo bSuffixTreeInfo;
-    initialiseGrundyInfo(bSuffixTree.rootCursor(), bSuffixTreeInfo);
+    initialiseGrundyInfo2(bSuffixTree.rootCursor(), bSuffixTreeInfo);
 
     set<GameState> allGameStates;
     for (const auto& aSubstring : orderedSubstringsOf(A))
