@@ -1076,8 +1076,24 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
             afterFollowingLetter.followToTransitionEnd();
             initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + numLettersUntilNextState);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            int64_t numWithGrundy0 = -1;
+            int64_t numWithGrundy1 = -1;
+            int grundyNumberAfterFollowingLetter = -1;
+            if (grundyNumberAtNextState > 0)
+            {
+                numWithGrundy0 = numLettersUntilNextState / 2;
+                numWithGrundy1 = (numLettersUntilNextState - 1) / 2;
+                grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
+
+            }
+            else
+            {
+                numWithGrundy1 = numLettersUntilNextState / 2;
+                numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
+                grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
+            }
             assert(numLettersUntilNextState > 0);
-            grundyNumbersAfterNextMove.insert(grundyBlah(grundyNumberAtNextState, numLettersUntilNextState - 1));
+            grundyNumbersAfterNextMove.insert(grundyNumberAfterFollowingLetter);
         }
         else
         {
