@@ -1238,7 +1238,6 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
     }
 }
 
-string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 string findNthWithoutGrundy2(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 
 #if 1
@@ -1434,83 +1433,6 @@ void findNthWithoutGrundy2(Cursor state, int unwantedGrundyNumber, int64_t& N, s
     }
 }
 
-void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, string& result)
-{
-    assert(state.isOnExplicitState());
-    auto nextLetterIterator = state.getNextLetterIterator();
-    if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
-    {
-        N--;
-    }
-    if (N == 0)
-    {
-        result = state.stringFollowed();
-        N = -1;
-        return;
-    }
-    while (nextLetterIterator.hasNext())
-    {
-        if (N == -1)
-            return;
-        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
-        Cursor nextState = afterFollowingLetter;
-        if (!afterFollowingLetter.isOnExplicitState())
-        {
-            const auto numWithGrundy0 = afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
-            const auto numWithGrundy1 = afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
-            bool answerIsOnThisTransition = false;
-            int64_t nAfterFollowingTransition = N;
-            if (unwantedGrundyNumber != 0 && numWithGrundy0 > 0)
-            {
-                nAfterFollowingTransition -= numWithGrundy0;
-            }
-            if (unwantedGrundyNumber != 1 && numWithGrundy1 > 0)
-            {
-                nAfterFollowingTransition -= numWithGrundy1;
-            }
-            if (nAfterFollowingTransition > 0)
-            {
-                N = nAfterFollowingTransition;
-            }
-            else
-            {
-                answerIsOnThisTransition = true;
-            }
-            if (answerIsOnThisTransition)
-            {
-                Cursor onTransition = nextLetterIterator.afterFollowingNextLetter();
-                while (true)
-                {
-                    int grundyNumber = onTransition.grundyNumber();
-
-                    if (grundyNumber != unwantedGrundyNumber)
-                    {
-                        N--;
-                    }
-                    if (N == 0)
-                    {
-                        result = onTransition.stringFollowed();
-                        N = -1;
-                        return;
-                    }
-                    onTransition.followNextLetter();
-                }
-            }
-            nextState.followToTransitionEnd();
-        }
-        findNthWithoutGrundy(nextState, unwantedGrundyNumber, N, result);
-
-        nextLetterIterator++;
-    }
-}
-
-string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N)
-{
-    string result = "-";
-    findNthWithoutGrundy(suffixTree.rootCursor(), unwantedGrundyNumber, N, result);
-
-    return result;
-}
 
 string findNthWithoutGrundy2(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N)
 {
@@ -1607,7 +1529,7 @@ solveOptimised(const string& A, const string& B, int64_t K)
             const auto grundyForSubstring = findGrundyNumberForString(substringOfB, bSuffixTree);
             if (grundyForSubstring != unwantedGrundyNumber)
             {
-                const auto nthWithoutGrundy = findNthWithoutGrundy(bSuffixTree, unwantedGrundyNumber, substringWithoutUnwantedNum);
+                const auto nthWithoutGrundy = findNthWithoutGrundy2(bSuffixTree, unwantedGrundyNumber, substringWithoutUnwantedNum);
                 cout << substringWithoutUnwantedNum << "th substring without grundy: " << unwantedGrundyNumber << " : " << substringOfB << " opt: " << nthWithoutGrundy << endl;
                 assert(substringOfB == nthWithoutGrundy);
                 substringWithoutUnwantedNum++;
