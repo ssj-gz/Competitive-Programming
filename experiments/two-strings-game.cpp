@@ -1103,10 +1103,7 @@ struct SuffixTreeInfo
 };
 int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
 {
-    if (state.stateData().grundyNumber != -1)
-    {
-        return state.stateData().grundyNumber;
-    }
+    assert(state.stateData().grundyNumber == -1);
     if (state.isOnExplicitState())
     {
         state.sortTransitions();
@@ -1117,14 +1114,15 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
     while (nextLetterIterator.hasNext())
     {
         Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
+        Cursor nextState = afterFollowingLetter;
         if (!afterFollowingLetter.isOnExplicitState())
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
-            Cursor nextState = afterFollowingLetter;
+
             nextState.followToTransitionEnd();
+            initialiseGrundyInfo(nextState, suffixTreeInfo, wordLength + numLettersUntilNextState);
 
             suffixTreeInfo.numSubstrings += numLettersUntilNextState;
-            initialiseGrundyInfo(nextState, suffixTreeInfo, wordLength + numLettersUntilNextState);
             afterFollowingLetter.calcGrundyInfoForTransition();
             suffixTreeInfo.numWithGrundy[0] += afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
             suffixTreeInfo.numWithGrundy[1] += afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
@@ -1134,7 +1132,8 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
         else
         {
             suffixTreeInfo.numSubstrings++;
-            grundyNumbersAfterNextMove.insert(initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + 1));
+            initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + 1);
+            grundyNumbersAfterNextMove.insert(nextState.grundyNumber());
         }
 
         nextLetterIterator++;
