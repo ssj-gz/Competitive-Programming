@@ -1111,22 +1111,6 @@ GameState findKthWinningGameState(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuil
     return result;
 }
 
-vector<string> orderedSubstringsOf(const string& s)
-{
-    vector<string> substrings;
-    for (int start = 0; start < s.size(); start++)
-    {
-        for (int length = 0; start + length <= s.size(); length++)
-        {
-            substrings.push_back(s.substr(start, length));
-        }
-    }
-    sort(substrings.begin(), substrings.end());
-    substrings.erase(std::unique(substrings.begin(), substrings.end()), substrings.end());
-    return substrings;
-};
-
-
 GameState findKthWinningGameState(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
