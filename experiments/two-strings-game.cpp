@@ -1050,7 +1050,11 @@ int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
     return -1;
 }
 
-int initialiseGrundyInfo( Cursor state, int wordLength = 0)
+struct SuffixTreeInfo
+{
+    int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
+};
+int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
 {
     if (state.stateData().grundyNumber != -1)
     {
@@ -1070,14 +1074,14 @@ int initialiseGrundyInfo( Cursor state, int wordLength = 0)
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length();
             afterFollowingLetter.followToTransitionEnd();
-            initialiseGrundyInfo(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
+            initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + numLettersUntilNextState + 1);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             assert(numLettersUntilNextState > 0);
             grundyNumbersAfterNextMove.insert(grundyBlah(grundyNumberAtNextState, numLettersUntilNextState));
         }
         else
         {
-            grundyNumbersAfterNextMove.insert(initialiseGrundyInfo(afterFollowingLetter, wordLength + 1));
+            grundyNumbersAfterNextMove.insert(initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + 1));
         }
 
         nextLetterIterator++;
@@ -1088,6 +1092,11 @@ int initialiseGrundyInfo( Cursor state, int wordLength = 0)
         mex++;
     }
     state.stateData().grundyNumber = mex;
+
+    if (state.stateData().grundyNumber > suffixTreeInfo.maxGrundy)
+    {
+        suffixTreeInfo.maxGrundy = state.stateData().grundyNumber;
+    }
 
     return state.stateData().grundyNumber;
 }
@@ -1449,13 +1458,16 @@ solveOptimised(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
-    initialiseGrundyInfo(aSuffixTree.rootCursor());
+    SuffixTreeInfo aSuffixTreeInfo;
+    initialiseGrundyInfo(aSuffixTree.rootCursor(), aSuffixTreeInfo);
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
-    initialiseGrundyInfo(bSuffixTree.rootCursor());
+    SuffixTreeInfo bSuffixTreeInfo;
+    initialiseGrundyInfo(bSuffixTree.rootCursor(), bSuffixTreeInfo);
 
     const auto maxGrundy = max(findMaxGrundy(aSuffixTree), findMaxGrundy(bSuffixTree));
+    assert(maxGrundy == max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy));
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
     const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
     auto numInBWithoutGrundy = numInBWithGrundy;
@@ -1536,8 +1548,8 @@ int main(int argc, char** argv)
 
     if (argc == 2)
     {
-        const int lengthA = (rand() % 20) + 1;
-        const int lengthB = (rand() % 20) + 1;
+        const int lengthA = (rand() % 15) + 1;
+        const int lengthB = (rand() % 15) + 1;
         //const int64_t lengthA = (rand() % 300'000) + 1;
         //const int64_t lengthB = (rand() % 300'000) + 1;
         const int64_t K = rand() % (lengthA * lengthB) + 1;
@@ -1571,12 +1583,14 @@ int main(int argc, char** argv)
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
     cout << "initialiseGrundyInfo A" << endl;
-    initialiseGrundyInfo(aSuffixTree.rootCursor());
+    SuffixTreeInfo aSuffixTreeInfo;
+    initialiseGrundyInfo(aSuffixTree.rootCursor(), aSuffixTreeInfo);
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
     cout << "initialiseGrundyInfo B" << endl;
-    initialiseGrundyInfo(bSuffixTree.rootCursor());
+    SuffixTreeInfo bSuffixTreeInfo;
+    initialiseGrundyInfo(bSuffixTree.rootCursor(), bSuffixTreeInfo);
 
     set<GameState> allGameStates;
     for (const auto& aSubstring : orderedSubstringsOf(A))
