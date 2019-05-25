@@ -1103,11 +1103,10 @@ struct SuffixTreeInfo
 };
 int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
 {
+    assert(state.isOnExplicitState());
     assert(state.stateData().grundyNumber == -1);
-    if (state.isOnExplicitState())
-    {
-        state.sortTransitions();
-    }
+    state.sortTransitions();
+
     state.stateData().wordLength = wordLength;
     set<int> grundyNumbersAfterNextMove;
     auto nextLetterIterator = state.getNextLetterIterator();
