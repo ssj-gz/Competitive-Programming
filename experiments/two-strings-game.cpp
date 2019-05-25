@@ -7,6 +7,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <map>
 #include <set>
 #include <sstream>
@@ -1109,7 +1110,37 @@ struct SuffixTreeInfo
     vector<int64_t> numWithGrundy = vector<int64_t>(2, 0); // Make room for grundy numbers 0 and 1 - for the others, we'll resize on-the-fly.
 
 };
-int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
+void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
+{
+    enum Phase { Initializing, ProcessingChildren, AfterRecurse };
+    struct StackFrame
+    {
+        Cursor state;
+        Phase phase = Initializing;
+        Cursor::NextLetterIterator nextLetterIterator;
+        set<int> grundyNumbersAfterNextMove;
+    };
+    StackFrame initialStackFrame;
+    initialStackFrame.state = state;
+    stack<StackFrame> stackFrames;
+    stackFrames.push(initialStackFrame);
+
+    while (!stackFrames.empty())
+    {
+        StackFrame& stackFrame = stackFrames.top();
+
+        switch (stackFrame.phase)
+        {
+            case Initializing:
+                break;
+            case ProcessingChildren:
+                break;
+            case AfterRecurse:
+                break;
+        }
+    }
+}
+void initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
 {
     assert(state.isOnExplicitState());
     assert(state.stateData().grundyNumber == -1);
@@ -1162,8 +1193,6 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
         suffixTreeInfo.numWithGrundy.resize(grundyNumberForState + 1);
     }
     suffixTreeInfo.numWithGrundy[grundyNumberForState]++;
-
-    return grundyNumberForState;
 }
 
 int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
