@@ -1239,6 +1239,7 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
 }
 
 string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
+string findNthWithoutGrundy2(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N);
 
 #if 1
 void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K, const vector<int64_t>& numInBWithoutGrundy, GameState& result)
@@ -1253,13 +1254,13 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
     else
     {
-        result = GameState(aState.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyForState, K));
+        result = GameState(aState.stringFollowed(), findNthWithoutGrundy2(bSuffixTree, grundyForState, K));
         K = -1;
         return;
     }
     if (K == 0)
     {
-        result = GameState(aState.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]));
+        result = GameState(aState.stringFollowed(), findNthWithoutGrundy2(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]));
 
         K = -1;
         return;
@@ -1290,14 +1291,14 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     }
                     else
                     {
-                        result = GameState(onTransition.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K));
+                        result = GameState(onTransition.stringFollowed(), findNthWithoutGrundy2(bSuffixTree, grundyNumberOnTransition, K));
 
                         K = -1;
                         return;
                     }
                     if (K == 0)
                     {
-                        result = GameState(onTransition.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]));
+                        result = GameState(onTransition.stringFollowed(), findNthWithoutGrundy2(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]));
 
                         K = -1;
                         return;
@@ -1336,12 +1337,15 @@ void findNthWithoutGrundy2(Cursor state, int unwantedGrundyNumber, int64_t& N, s
 
     while (!stackFrames.empty())
     {
+        cout << "iterating findNthWithoutGrundy2 " << endl;
         StackFrame& stackFrame = stackFrames.top();
         auto& state = stackFrame.state;
 
         switch (stackFrame.phase)
         {
             case Initializing:
+                assert(state.isOnExplicitState());
+                cout << "findNthWithoutGrundy2 state id: " << state.stateId() << endl;
                 if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
                 {
                     N--;
@@ -1360,12 +1364,12 @@ void findNthWithoutGrundy2(Cursor state, int unwantedGrundyNumber, int64_t& N, s
                 {
                     if (stackFrame.nextLetterIterator.hasNext())
                     {
+                        stackFrame.afterFollowingLetter = stackFrame.nextLetterIterator.afterFollowingNextLetter();
                         Cursor nextState = stackFrame.afterFollowingLetter;
                         if (!stackFrame.afterFollowingLetter.isOnExplicitState())
                         {
                             nextState.followToTransitionEnd();
 
-                            stackFrame.afterFollowingLetter = stackFrame.nextLetterIterator.afterFollowingNextLetter();
                             const auto numWithGrundy0 = stackFrame.afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
                             const auto numWithGrundy1 = stackFrame.afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
                             bool answerIsOnThisTransition = false;
@@ -1508,6 +1512,13 @@ string findNthWithoutGrundy(SuffixTreeBuilder& suffixTree, int unwantedGrundyNum
     return result;
 }
 
+string findNthWithoutGrundy2(SuffixTreeBuilder& suffixTree, int unwantedGrundyNumber, int64_t N)
+{
+    string result = "-";
+    findNthWithoutGrundy2(suffixTree.rootCursor(), unwantedGrundyNumber, N, result);
+
+    return result;
+}
 
 GameState findKthOptimised(SuffixTreeBuilder& aSuffixTree, SuffixTreeBuilder& bSuffixTree, int64_t K, const vector<int64_t>& numInBWithoutGrundy)
 {
