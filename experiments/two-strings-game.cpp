@@ -1100,31 +1100,6 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
 
     return state.stateData().grundyNumber;
 }
-void findMaxGrundy(Cursor state, int& maxGrundy)
-{
-    assert(state.isOnExplicitState());
-    auto nextLetterIterator = state.getNextLetterIterator();
-    maxGrundy = max(maxGrundy, state.stateData().grundyNumber);
-    while (nextLetterIterator.hasNext())
-    {
-        Cursor afterFollowingLetter = nextLetterIterator.afterFollowingNextLetter();
-        if (!afterFollowingLetter.isOnExplicitState())
-        {
-            afterFollowingLetter.followToTransitionEnd();
-        }
-
-        findMaxGrundy(afterFollowingLetter, maxGrundy);
-
-        nextLetterIterator++;
-    }
-}
-
-int findMaxGrundy(SuffixTreeBuilder& suffixTree)
-{
-    int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
-    findMaxGrundy(suffixTree.rootCursor(), maxGrundy);
-    return maxGrundy;
-}
 
 int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
 {
@@ -1466,8 +1441,7 @@ solveOptimised(const string& A, const string& B, int64_t K)
     SuffixTreeInfo bSuffixTreeInfo;
     initialiseGrundyInfo(bSuffixTree.rootCursor(), bSuffixTreeInfo);
 
-    const auto maxGrundy = max(findMaxGrundy(aSuffixTree), findMaxGrundy(bSuffixTree));
-    assert(maxGrundy == max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy));
+    const auto maxGrundy = max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy);
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
     const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
     auto numInBWithoutGrundy = numInBWithGrundy;
