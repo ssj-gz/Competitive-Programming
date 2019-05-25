@@ -1053,6 +1053,8 @@ int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
 struct SuffixTreeInfo
 {
     int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
+    int numSubstrings = 1; // Empty string.
+
 };
 int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
 {
@@ -1074,6 +1076,7 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
             afterFollowingLetter.followToTransitionEnd();
+            suffixTreeInfo.numSubstrings += numLettersUntilNextState;
             initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + numLettersUntilNextState);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             int64_t numWithGrundy0 = -1;
@@ -1097,6 +1100,7 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
         }
         else
         {
+            suffixTreeInfo.numSubstrings++;
             grundyNumbersAfterNextMove.insert(initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + 1));
         }
 
@@ -1460,6 +1464,8 @@ solveOptimised(const string& A, const string& B, int64_t K)
     const auto maxGrundy = max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy);
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
     const auto numSubstringsOfBOpt = countNumSubstrings(bSuffixTree);
+    cout << "numSubstringsOfBOpt: " << numSubstringsOfBOpt << " bSuffixTreeInfo.numSubstrings: " << bSuffixTreeInfo.numSubstrings << endl;
+    assert(numSubstringsOfBOpt == bSuffixTreeInfo.numSubstrings);
     auto numInBWithoutGrundy = numInBWithGrundy;
     for (auto& x : numInBWithoutGrundy)
     {
