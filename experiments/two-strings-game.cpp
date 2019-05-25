@@ -1128,12 +1128,45 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wo
     while (!stackFrames.empty())
     {
         StackFrame& stackFrame = stackFrames.top();
+        auto& state = stackFrame.state;
 
         switch (stackFrame.phase)
         {
             case Initializing:
-                break;
+                assert(state.isOnExplicitState());
+                assert(state.stateData().grundyNumber == -1);
+                state.sortTransitions();
+
+                state.stateData().wordLength = wordLength;
+                stackFrame.nextLetterIterator = state.getNextLetterIterator();
+                stackFrame.phase = ProcessingChildren;
+                continue;
             case ProcessingChildren:
+                if (stackFrame.nextLetterIterator.hasNext())
+                {
+                }
+                else
+                {
+                    int grundyNumberForState = 0;
+                    while (stackFrame.grundyNumbersAfterNextMove.find(grundyNumberForState) != stackFrame.grundyNumbersAfterNextMove.end())
+                    {
+                        grundyNumberForState++;
+                    }
+                    state.stateData().grundyNumber = grundyNumberForState;
+
+                    if (grundyNumberForState > suffixTreeInfo.maxGrundy)
+                    {
+                        suffixTreeInfo.maxGrundy = grundyNumberForState;
+                    }
+
+                    if (suffixTreeInfo.numWithGrundy.size() < grundyNumberForState + 1)
+                    {
+                        suffixTreeInfo.numWithGrundy.resize(grundyNumberForState + 1);
+                    }
+                    suffixTreeInfo.numWithGrundy[grundyNumberForState]++;
+                    stackFrames.pop();
+                    continue;
+                }
                 break;
             case AfterRecurse:
                 break;
