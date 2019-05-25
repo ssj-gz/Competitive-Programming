@@ -205,24 +205,9 @@ class SuffixTreeBuilder
                 {
                     return (m_transition == nullptr);
                 }
-                bool isOnFinalState() const
-                {
-                    assert(isOnExplicitState());
-                    return m_state->isFinal;
-                }
                 StateData& stateData()
                 {
                     return m_state->data;
-                }
-                int stateId() const
-                {
-                    const int stateId = m_state->index;
-                    return stateId;
-                }
-                int posInTransition() const
-                {
-                    assert(!isOnExplicitState());
-                    return m_posInTransition;
                 }
 
                 void sortTransitions()
