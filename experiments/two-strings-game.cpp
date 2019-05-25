@@ -1,4 +1,4 @@
-// Simon St James (ssjgz)
+// Simon St James (ssjgz) - 2019-05-25
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
