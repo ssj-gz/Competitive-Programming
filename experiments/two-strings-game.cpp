@@ -1236,20 +1236,14 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     }
                     else
                     {
-                        result.aPrime = onTransition.stringFollowed();
-                        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K);
-                        assert(result.bPrime != "-");
-                        result.isValid = true;
+                        result = GameState(onTransition.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K));
 
                         K = -1;
                         return;
                     }
                     if (K == 0)
                     {
-                        result.aPrime = onTransition.stringFollowed();
-                        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]);
-                        assert(result.bPrime != "-");
-                        result.isValid = true;
+                        result = GameState(onTransition.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]));
 
                         K = -1;
                         return;
