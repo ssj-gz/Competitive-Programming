@@ -1054,6 +1054,7 @@ struct SuffixTreeInfo
 {
     int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
     int numSubstrings = 1; // Empty string.
+    vector<int64_t> numWithGrundy = vector<int64_t>(2, 0); // Make room for grundy numbers 0 and 1 - for the others, we'll resize on-the-fly.
 
 };
 int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wordLength = 0)
@@ -1095,6 +1096,8 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
                 numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
                 grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
             }
+            suffixTreeInfo.numWithGrundy[0] += numWithGrundy0;
+            suffixTreeInfo.numWithGrundy[1] += numWithGrundy1;
             assert(numLettersUntilNextState > 0);
             grundyNumbersAfterNextMove.insert(grundyNumberAfterFollowingLetter);
         }
@@ -1106,19 +1109,25 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
 
         nextLetterIterator++;
     }
-    int mex = 0;
-    while (grundyNumbersAfterNextMove.find(mex) != grundyNumbersAfterNextMove.end())
+    int grundyNumberForState = 0;
+    while (grundyNumbersAfterNextMove.find(grundyNumberForState) != grundyNumbersAfterNextMove.end())
     {
-        mex++;
+        grundyNumberForState++;
     }
-    state.stateData().grundyNumber = mex;
+    state.stateData().grundyNumber = grundyNumberForState;
 
-    if (state.stateData().grundyNumber > suffixTreeInfo.maxGrundy)
+    if (grundyNumberForState > suffixTreeInfo.maxGrundy)
     {
-        suffixTreeInfo.maxGrundy = state.stateData().grundyNumber;
+        suffixTreeInfo.maxGrundy = grundyNumberForState;
     }
 
-    return state.stateData().grundyNumber;
+    if (suffixTreeInfo.numWithGrundy.size() < grundyNumberForState + 1)
+    {
+        suffixTreeInfo.numWithGrundy.resize(grundyNumberForState + 1);
+    }
+    suffixTreeInfo.numWithGrundy[grundyNumberForState]++;
+
+    return grundyNumberForState;
 }
 
 int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
@@ -1432,6 +1441,8 @@ solveOptimised(const string& A, const string& B, int64_t K)
 
     const auto maxGrundy = max(aSuffixTreeInfo.maxGrundy, bSuffixTreeInfo.maxGrundy);
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
+    bSuffixTreeInfo.numWithGrundy.resize(maxGrundy + 1);
+    assert(numInBWithGrundy == bSuffixTreeInfo.numWithGrundy);
     const auto numSubstringsOfB = bSuffixTreeInfo.numSubstrings;
     auto numInBWithoutGrundy = numInBWithGrundy;
     for (auto& x : numInBWithoutGrundy)
