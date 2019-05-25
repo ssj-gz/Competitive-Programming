@@ -73,6 +73,10 @@ class SuffixTreeBuilder
             State *nextState = nullptr;
             Substring substringFollowed;
             char firstLetter;
+            // Grundy info for this transition.
+            int64_t numWithGrundy0 = -1;
+            int64_t numWithGrundy1 = -1;
+            int grundyNumberAfterFirstLetter = -1;
         };
         struct State
         {
@@ -164,42 +168,42 @@ class SuffixTreeBuilder
                 void calcGrundyInfoForTransition()
                 {
                     assert(!isOnExplicitState());
-                    assert(m_posInTransition == 1);
-                    cout << "calcGrundyInfoForTransition; posInTransition: " << m_posInTransition << endl;
                     auto nextState = m_transition->nextState;
                     assert(nextState);
                     const int grundyNumberAtNextState = nextState->data.grundyNumber;
                     assert(grundyNumberAtNextState != -1);
-                    grundyNumberAfterFirstLetter = -1;
+                    m_transition->grundyNumberAfterFirstLetter = -1;
+                    assert(m_posInTransition == 1);
                     const int numLettersOnTransition = remainderOfCurrentTransition().length() + 1;
+                    cout << "calcGrundyInfoForTransition; posInTransition: " << m_posInTransition << " numLettersOnTransition: " << numLettersOnTransition << endl;
                     if (grundyNumberAtNextState > 0)
                     {
-                        numWithGrundy0 = numLettersOnTransition / 2;
-                        numWithGrundy1 = (numLettersOnTransition - 1) / 2;
-                        grundyNumberAfterFirstLetter = (numLettersOnTransition % 2);
+                        m_transition->numWithGrundy0 = numLettersOnTransition / 2;
+                        m_transition->numWithGrundy1 = (numLettersOnTransition - 1) / 2;
+                        m_transition->grundyNumberAfterFirstLetter = (numLettersOnTransition % 2);
 
                     }
                     else
                     {
-                        numWithGrundy1 = numLettersOnTransition / 2;
-                        numWithGrundy0 = (numLettersOnTransition - 1) / 2;
-                        grundyNumberAfterFirstLetter = 1 - (numLettersOnTransition % 2);
+                        m_transition->numWithGrundy1 = numLettersOnTransition / 2;
+                        m_transition->numWithGrundy0 = (numLettersOnTransition - 1) / 2;
+                        m_transition->grundyNumberAfterFirstLetter = 1 - (numLettersOnTransition % 2);
                     }
                 }
-                int64_t numOnTransitionWithGrundyNumber(int grundyNumber)
+                int64_t numOnTransitionWithGrundyNumber(int grundyNumber) const
                 {
                     assert(grundyNumber == 0 || grundyNumber == 1);
                     if (grundyNumber == 0)
-                        return numWithGrundy0;
+                        return m_transition->numWithGrundy0;
                     else
-                        return numWithGrundy1;
+                        return m_transition->numWithGrundy1;
                 }
-                int64_t grundyNumber()
+                int64_t grundyNumber() const
                 {
                     if (isOnExplicitState())
                         return m_state->data.grundyNumber;
                     else
-                        return grundyNumberAfterFirstLetter ^ (m_posInTransition % 2);
+                        return m_transition->grundyNumberAfterFirstLetter ^ (m_posInTransition % 2);
                 }
                 bool isValid() const
                 {
@@ -520,10 +524,6 @@ class SuffixTreeBuilder
                     m_isValid{true}
                 {
                 }
-                // Grundy info for transitions.
-                int64_t numWithGrundy0 = -1;
-                int64_t numWithGrundy1 = -1;
-                int grundyNumberAfterFirstLetter = -1;
 
                 void movedToExplicitState()
                 {
@@ -1120,11 +1120,13 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
         if (!afterFollowingLetter.isOnExplicitState())
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
-            afterFollowingLetter.followToTransitionEnd();
+            Cursor nextState = afterFollowingLetter;
+            nextState.followToTransitionEnd();
+
             suffixTreeInfo.numSubstrings += numLettersUntilNextState;
-            initialiseGrundyInfo(afterFollowingLetter, suffixTreeInfo, wordLength + numLettersUntilNextState);
-            nextLetterIterator.afterFollowingNextLetter().calcGrundyInfoForTransition();
-            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
+            initialiseGrundyInfo(nextState, suffixTreeInfo, wordLength + numLettersUntilNextState);
+            afterFollowingLetter.calcGrundyInfoForTransition();
+            const int grundyNumberAtNextState = nextState.stateData().grundyNumber;
             int64_t numWithGrundy0 = -1;
             int64_t numWithGrundy1 = -1;
             int grundyNumberAfterFollowingLetter = -1;
@@ -1141,6 +1143,11 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
                 numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
                 grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
             }
+            cout << "numLettersUntilNextState: " << numLettersUntilNextState << endl;
+            cout << "numWithGrundy0: " << numWithGrundy0 << " afterFollowingLetter.numOnTransitionWithGrundyNumber(0): " << afterFollowingLetter.numOnTransitionWithGrundyNumber(0) <<  endl;
+            cout << "numWithGrundy1: " << numWithGrundy1 << " afterFollowingLetter.numOnTransitionWithGrundyNumber(1): " << afterFollowingLetter.numOnTransitionWithGrundyNumber(1) <<  endl;
+            assert(numWithGrundy0 == afterFollowingLetter.numOnTransitionWithGrundyNumber(0));
+            assert(numWithGrundy1 == afterFollowingLetter.numOnTransitionWithGrundyNumber(1));
             suffixTreeInfo.numWithGrundy[0] += numWithGrundy0;
             suffixTreeInfo.numWithGrundy[1] += numWithGrundy1;
             assert(numLettersUntilNextState > 0);
