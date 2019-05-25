@@ -1,5 +1,5 @@
 // Simon St James (ssjgz)
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -176,7 +176,6 @@ class SuffixTreeBuilder
                     m_transition->grundyNumberAfterFirstLetter = -1;
                     assert(m_posInTransition == 1);
                     const int numLettersOnTransition = remainderOfCurrentTransition().length() + 1;
-                    cout << "calcGrundyInfoForTransition; posInTransition: " << m_posInTransition << " numLettersOnTransition: " << numLettersOnTransition << endl;
                     if (grundyNumberAtNextState > 0)
                     {
                         m_transition->numWithGrundy0 = numLettersOnTransition / 2;
@@ -1336,7 +1335,6 @@ void findNthWithoutGrundy2(Cursor state, int unwantedGrundyNumber, int64_t& N, s
 
     while (!stackFrames.empty())
     {
-        cout << "iterating findNthWithoutGrundy2 " << endl;
         StackFrame& stackFrame = stackFrames.top();
         auto& state = stackFrame.state;
 
@@ -1344,7 +1342,6 @@ void findNthWithoutGrundy2(Cursor state, int unwantedGrundyNumber, int64_t& N, s
         {
             case Initializing:
                 assert(state.isOnExplicitState());
-                cout << "findNthWithoutGrundy2 state id: " << state.stateId() << endl;
                 if (state.stateData().grundyNumber != unwantedGrundyNumber && N > 0)
                 {
                     N--;
