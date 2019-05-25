@@ -1141,12 +1141,7 @@ vector<string> orderedSubstringsOf(const string& s)
 };
 
 
-#ifdef BRUTE_FORCE
-vector<GameState> 
-#else
-GameState
-#endif
-solveOptimised(const string& A, const string& B, int64_t K)
+GameState findKthWinningGameState(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
@@ -1274,7 +1269,7 @@ int main(int argc, char** argv)
 
 #ifdef BRUTE_FORCE
 #else
-    const auto result = solveOptimised(A, B, K);
+    const auto result = findKthWinningGameState(A, B, K);
     if (result.isValid)
     {
         cout << result.aPrime << endl << result.bPrime << endl;
