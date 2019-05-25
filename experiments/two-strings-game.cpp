@@ -756,6 +756,14 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState);
 class GameState
 {
     public:
+        GameState()
+        {
+            isValid = false;
+        }
+        GameState(const string& aPrime, const string& bPrime)
+            : aPrime(aPrime), bPrime(bPrime)
+        {
+        }
         string aPrime;
         string bPrime;
         bool isValid = true;
@@ -1191,19 +1199,13 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
     else
     {
-        result.aPrime = aState.stringFollowed();
-        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, K);
-        assert(result.bPrime != "-");
-        result.isValid = true;
+        result = GameState(aState.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyForState, K));
         K = -1;
         return;
     }
     if (K == 0)
     {
-        result.aPrime = aState.stringFollowed();
-        result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]);
-        assert(result.bPrime != "-");
-        result.isValid = true;
+        result = GameState(aState.stringFollowed(), findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]));
 
         K = -1;
         return;
