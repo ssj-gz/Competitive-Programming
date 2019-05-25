@@ -1050,7 +1050,7 @@ int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
     return -1;
 }
 
-int findGrundyNumberForState( Cursor state, int wordLength = 0)
+int initialiseGrundyInfo( Cursor state, int wordLength = 0)
 {
     if (state.stateData().grundyNumber != -1)
     {
@@ -1070,14 +1070,14 @@ int findGrundyNumberForState( Cursor state, int wordLength = 0)
         {
             const int numLettersUntilNextState = afterFollowingLetter.remainderOfCurrentTransition().length();
             afterFollowingLetter.followToTransitionEnd();
-            findGrundyNumberForState(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
+            initialiseGrundyInfo(afterFollowingLetter, wordLength + numLettersUntilNextState + 1);
             const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             assert(numLettersUntilNextState > 0);
             grundyNumbersAfterNextMove.insert(grundyBlah(grundyNumberAtNextState, numLettersUntilNextState));
         }
         else
         {
-            grundyNumbersAfterNextMove.insert(findGrundyNumberForState(afterFollowingLetter, wordLength + 1));
+            grundyNumbersAfterNextMove.insert(initialiseGrundyInfo(afterFollowingLetter, wordLength + 1));
         }
 
         nextLetterIterator++;
@@ -1449,11 +1449,11 @@ solveOptimised(const string& A, const string& B, int64_t K)
 {
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
-    findGrundyNumberForState(aSuffixTree.rootCursor());
+    initialiseGrundyInfo(aSuffixTree.rootCursor());
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
-    findGrundyNumberForState(bSuffixTree.rootCursor());
+    initialiseGrundyInfo(bSuffixTree.rootCursor());
 
     const auto maxGrundy = max(findMaxGrundy(aSuffixTree), findMaxGrundy(bSuffixTree));
     const auto numInBWithGrundy = calcNumInBWithGrundy(bSuffixTree, maxGrundy);
@@ -1570,13 +1570,13 @@ int main(int argc, char** argv)
 #ifdef BRUTE_FORCE
     SuffixTreeBuilder aSuffixTree;
     aSuffixTree.appendString(A);
-    cout << "findGrundyNumberForState A" << endl;
-    findGrundyNumberForState(aSuffixTree.rootCursor());
+    cout << "initialiseGrundyInfo A" << endl;
+    initialiseGrundyInfo(aSuffixTree.rootCursor());
 
     SuffixTreeBuilder bSuffixTree;
     bSuffixTree.appendString(B);
-    cout << "findGrundyNumberForState B" << endl;
-    findGrundyNumberForState(bSuffixTree.rootCursor());
+    cout << "initialiseGrundyInfo B" << endl;
+    initialiseGrundyInfo(bSuffixTree.rootCursor());
 
     set<GameState> allGameStates;
     for (const auto& aSubstring : orderedSubstringsOf(A))
