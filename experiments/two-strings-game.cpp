@@ -1116,8 +1116,10 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wo
     struct StackFrame
     {
         Cursor state;
+        int wordLength = 0;
         Phase phase = Initializing;
         Cursor::NextLetterIterator nextLetterIterator;
+        Cursor afterFollowingLetter;
         set<int> grundyNumbersAfterNextMove;
     };
     StackFrame initialStackFrame;
@@ -1144,6 +1146,29 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wo
             case ProcessingChildren:
                 if (stackFrame.nextLetterIterator.hasNext())
                 {
+                    stackFrame.afterFollowingLetter = stackFrame.nextLetterIterator.afterFollowingNextLetter();
+                    Cursor nextState = stackFrame.afterFollowingLetter;
+                    if (!stackFrame.afterFollowingLetter.isOnExplicitState())
+                    {
+                        const int numLettersUntilNextState = stackFrame.afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+
+                        nextState.followToTransitionEnd();
+                        StackFrame nextStackFrame;
+                        nextStackFrame.state = nextState;
+                        nextStackFrame.wordLength = stackFrame.wordLength + numLettersUntilNextState;
+                        stackFrames.push(nextStackFrame);
+                        continue;
+
+                    }
+                    else
+                    {
+                        suffixTreeInfo.numSubstrings++;
+                        StackFrame nextStackFrame;
+                        nextStackFrame.state = nextState;
+                        nextStackFrame.wordLength = stackFrame.wordLength + 1;
+                        stackFrames.push(nextStackFrame);
+
+                    }
                 }
                 else
                 {
@@ -1169,6 +1194,24 @@ void initialiseGrundyInfo2( Cursor state, SuffixTreeInfo& suffixTreeInfo, int wo
                 }
                 break;
             case AfterRecurse:
+                    if (!stackFrame.afterFollowingLetter.isOnExplicitState())
+                    {
+                        const int numLettersUntilNextState = stackFrame.afterFollowingLetter.remainderOfCurrentTransition().length() + 1;
+                        suffixTreeInfo.numSubstrings += numLettersUntilNextState;
+                        stackFrame.afterFollowingLetter.calcGrundyInfoForTransition();
+                        suffixTreeInfo.numWithGrundy[0] += stackFrame.afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
+                        suffixTreeInfo.numWithGrundy[1] += stackFrame.afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
+                        assert(numLettersUntilNextState > 0);
+                        stackFrame.grundyNumbersAfterNextMove.insert(stackFrame.afterFollowingLetter.grundyNumber());
+                    }
+                    else
+                    {
+                        Cursor nextState = stackFrame.afterFollowingLetter;
+                        nextState.followToTransitionEnd();
+                        stackFrame.grundyNumbersAfterNextMove.insert(nextState.grundyNumber());
+                    }
+                    stackFrame.nextLetterIterator++;
+                    stackFrame.phase = ProcessingChildren;
                 break;
         }
     }
