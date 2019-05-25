@@ -1294,7 +1294,6 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
         Cursor nextState = afterFollowingLetter;
         if (!afterFollowingLetter.isOnExplicitState())
         {
-            const int grundyNumberAtNextState = afterFollowingLetter.stateData().grundyNumber;
             const auto numWithGrundy0 = afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
             const auto numWithGrundy1 = afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
             bool answerIsOnThisTransition = false;
