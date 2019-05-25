@@ -505,7 +505,7 @@ class SuffixTreeBuilder
                     }
                 }
 
-                string dbgStringFollowed() const
+                string stringFollowed() const
                 {
                     Cursor copy(*this);
                     string stringFollowedReversed;
@@ -1171,7 +1171,7 @@ int findGrundyNumberForString(const string& s, SuffixTreeBuilder& suffixTree)
         wordCursor.followToTransitionEnd();
         const int grundyNumberAtNextState = wordCursor.stateData().grundyNumber;
         const int numLettersUntilNextState = wordCursor.stateData().wordLength - s.size();
-        //cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.dbgStringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
+        //cout << "findGrundyNumberForString: " << s << " not explicit - next state: " << wordCursor.stringFollowed() << " grundy: " << grundyNumberAtNextState << endl;
         return grundyBlah(grundyNumberAtNextState, numLettersUntilNextState);
     }
 }
@@ -1191,7 +1191,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
     else
     {
-        result.aPrime = aState.dbgStringFollowed();
+        result.aPrime = aState.stringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, K);
         assert(result.bPrime != "-");
         result.isValid = true;
@@ -1200,7 +1200,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
     }
     if (K == 0)
     {
-        result.aPrime = aState.dbgStringFollowed();
+        result.aPrime = aState.stringFollowed();
         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyForState, numInBWithoutGrundy[grundyForState]);
         assert(result.bPrime != "-");
         result.isValid = true;
@@ -1234,7 +1234,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     }
                     else
                     {
-                        result.aPrime = onTransition.dbgStringFollowed();
+                        result.aPrime = onTransition.stringFollowed();
                         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, K);
                         assert(result.bPrime != "-");
                         result.isValid = true;
@@ -1244,7 +1244,7 @@ void findKthOptimised(Cursor aState, SuffixTreeBuilder& bSuffixTree, int64_t& K,
                     }
                     if (K == 0)
                     {
-                        result.aPrime = onTransition.dbgStringFollowed();
+                        result.aPrime = onTransition.stringFollowed();
                         result.bPrime = findNthWithoutGrundy(bSuffixTree, grundyNumberOnTransition, numInBWithoutGrundy[grundyNumberOnTransition]);
                         assert(result.bPrime != "-");
                         result.isValid = true;
@@ -1280,7 +1280,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
     }
     if (N == 0)
     {
-        result = state.dbgStringFollowed();
+        result = state.stringFollowed();
         N = -1;
         return;
     }
@@ -1325,7 +1325,7 @@ void findNthWithoutGrundy(Cursor state, int unwantedGrundyNumber, int64_t& N, st
                     }
                     if (N == 0)
                     {
-                        result = onTransition.dbgStringFollowed();
+                        result = onTransition.stringFollowed();
                         N = -1;
                         return;
                     }
