@@ -1126,32 +1126,10 @@ int initialiseGrundyInfo( Cursor state, SuffixTreeInfo& suffixTreeInfo, int word
             suffixTreeInfo.numSubstrings += numLettersUntilNextState;
             initialiseGrundyInfo(nextState, suffixTreeInfo, wordLength + numLettersUntilNextState);
             afterFollowingLetter.calcGrundyInfoForTransition();
-            const int grundyNumberAtNextState = nextState.stateData().grundyNumber;
-            int64_t numWithGrundy0 = -1;
-            int64_t numWithGrundy1 = -1;
-            int grundyNumberAfterFollowingLetter = -1;
-            if (grundyNumberAtNextState > 0)
-            {
-                numWithGrundy0 = numLettersUntilNextState / 2;
-                numWithGrundy1 = (numLettersUntilNextState - 1) / 2;
-                grundyNumberAfterFollowingLetter = (numLettersUntilNextState % 2);
-
-            }
-            else
-            {
-                numWithGrundy1 = numLettersUntilNextState / 2;
-                numWithGrundy0 = (numLettersUntilNextState - 1) / 2;
-                grundyNumberAfterFollowingLetter = 1 - (numLettersUntilNextState % 2);
-            }
-            cout << "numLettersUntilNextState: " << numLettersUntilNextState << endl;
-            cout << "numWithGrundy0: " << numWithGrundy0 << " afterFollowingLetter.numOnTransitionWithGrundyNumber(0): " << afterFollowingLetter.numOnTransitionWithGrundyNumber(0) <<  endl;
-            cout << "numWithGrundy1: " << numWithGrundy1 << " afterFollowingLetter.numOnTransitionWithGrundyNumber(1): " << afterFollowingLetter.numOnTransitionWithGrundyNumber(1) <<  endl;
-            assert(numWithGrundy0 == afterFollowingLetter.numOnTransitionWithGrundyNumber(0));
-            assert(numWithGrundy1 == afterFollowingLetter.numOnTransitionWithGrundyNumber(1));
-            suffixTreeInfo.numWithGrundy[0] += numWithGrundy0;
-            suffixTreeInfo.numWithGrundy[1] += numWithGrundy1;
+            suffixTreeInfo.numWithGrundy[0] += afterFollowingLetter.numOnTransitionWithGrundyNumber(0);
+            suffixTreeInfo.numWithGrundy[1] += afterFollowingLetter.numOnTransitionWithGrundyNumber(1);
             assert(numLettersUntilNextState > 0);
-            grundyNumbersAfterNextMove.insert(grundyNumberAfterFollowingLetter);
+            grundyNumbersAfterNextMove.insert(afterFollowingLetter.grundyNumber());
         }
         else
         {
