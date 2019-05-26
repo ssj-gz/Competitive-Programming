@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <iostream>
+#include <vector>
 #include <memory>
 #include <exception>
 
@@ -88,16 +89,46 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    const char* const childargv[] = {"./two-strings-game", "--test", (const char*)0};
-    spawn cat(childargv);
-    //cat.stdin << "Hello" << std::endl;
-    string s;
-    while (getline(cat.stdout, s))
+    vector<string> generatedTest;
     {
-        cout << "Read from program: '" << s << "'" << endl;
+        const char* const testgenargs[] = {"./two-strings-game", "--test", (const char*)0};
+        spawn testGenerator(testgenargs);
+        string s;
+        while (getline(testGenerator.stdout, s))
+        {
+            generatedTest.push_back(s);
+        }
+        testGenerator.send_eof();
+        cout << "Test generator Waiting to terminate..." << endl;
+        cout << "Test generator Status: " << testGenerator.wait() << endl;
     }
-    cat.send_eof();
-    cout << "Waiting to terminate..." << endl;
-    cout << "Status: " << cat.wait() << endl;
+    vector<string> result;
+    {
+        const char* const resultArgs[] = {"./two-strings-game", (const char*)0};
+        spawn resultGenerator(resultArgs);
+        for (const auto& testInputLine : generatedTest)
+        {
+            resultGenerator.stdin << testInputLine << endl;
+        }
+        string s;
+        while (getline(resultGenerator.stdout, s))
+        {
+            cout << "Read from program: '" << s << "'" << endl;
+            result.push_back(s);
+        }
+        resultGenerator.send_eof();
+        cout << "Result generator Waiting to terminate..." << endl;
+        cout << "Result generator Status: " << resultGenerator.wait() << endl;
+    }
+    cout << "Q: " << endl;
+    for (const auto& x : generatedTest)
+    {
+        cout << x << endl;
+    }
+    cout << "A: " << endl;
+    for (const auto& x : result)
+    {
+        cout << x << endl;
+    }
     return 0;
 }
