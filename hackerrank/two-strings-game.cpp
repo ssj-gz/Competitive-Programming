@@ -982,6 +982,54 @@ GameState findKthWinningGameState(const string& A, const string& B, int64_t K)
 
 int main(int argc, char** argv)
 {
+    // Fundamentally an easy one, though tricky to implement.
+    //
+    // Firstly - we should immediately recognise that we are playing two
+    // copies of an impartial game consecutively, so The Sprague-Grundy
+    // Theorem should immediately spring to mind.  The game that is being
+    // played twice is a simple one: given a substring x of S (where is either A or B, 
+    // depending on which "copy" of the game we are playing), add a letter y
+    // to x such that the resulting string xy is still in S - if we can't do
+    // this, then we lose.
+    //
+    // All this talk of substrings and choosing letters should call forth Suffix Automata:
+    // if we follow x in the Suffix Automaton representing S, then we can
+    // immediately find all possible "moves" (the letters y) for x: if x leads to
+    // an explicit state, then the set of moves is precisely the set of y such
+    // that y is the first letter in a transition leading from that state;
+    // if x does not lead to an explicit state, then x leads us partway along a transition,
+    // and the sole possibly y is simply the next letter on that transition.
+    //
+    // If following x leads to an explicit state with no transitions leading from it
+    // (a leaf state), then this is a losing position for the current player,
+    // and so its Grundy number would be 0.
+    //
+    // If following x does not lead to an explicit state, then we are partway along a transition, t.
+    // If following the next letter in t leads us to an explicit state S', and we know the Grundy
+    // Number for this state, then grundy(x) is mex({grundy(S')} by Sprague-Grundy, and
+    // so is equal to 0 if grundy(S') > 0, and 1 if grundy(S') == 0.
+    // Let x' be x with its final letter (y', say) removed.  If x' is still on t, then y' is the
+    // only possible move from x' (and forms x'y' = x), and so grundy(x') = mex(grundy(x)).
+    // Again, this is 0 if grundy(x) > 0, and 1 if grundy(x) == 0.
+    //
+    // Thus, we see that if x is on a transition, then the value of grundy(x) is either 0 or 1.
+    // Further, the grundy number of a word leading to a transition *alternates* between 0 and 1
+    // as we work our way backwards along a transition.
+    //
+    // If following x leads to an explicit state with at least one allowing move, then let
+    // y_1, y_2, ... y_p be these moves: then grundy(x) = mex({grundy(xy_1), grundy(xy_2), ... , grundy(xy_p)}).
+    //
+    // Putting all this together, we can work out the grundy number for all explicit states in the 
+    // Suffix Automaton by starting with the leaf states (grundy == 0) and using the fact
+    // that the grundy number of a word that leads along a transition alternates between 0 and 1
+    // (with the last word in the transition having grundy 0 if the explicit state that follows
+    // it has grundy > 0, and 1 otherwise) and the fact that the grundy number of an explicit
+    // state is the mex of all moves from that state.  This can be easily accomplished by a DFS,
+    // and initialiseGrundyInfo performs this calculation of grundy numbers for explicit states
+    // (amongst other things!).
+
+
+
     int N;
     cin >> N;
     int M;
