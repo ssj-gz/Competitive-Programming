@@ -994,7 +994,7 @@ int main(int argc, char** argv)
     // Firstly - we should immediately recognise that we are playing two
     // copies of an impartial game consecutively, so The Sprague-Grundy
     // Theorem should immediately spring to mind.  The game that is being
-    // played twice is a simple one: given a substring x of S (where is either A or B, 
+    // played twice is a simple one: given a substring x of S (where S is either A or B, 
     // depending on which "copy" of the game we are playing), add a letter y
     // to x such that the resulting string xy is still in S - if we can't do
     // this, then we lose.
@@ -1005,7 +1005,7 @@ int main(int argc, char** argv)
     // an explicit state, then the set of moves is precisely the set of y such
     // that y is the first letter in a transition leading from that state;
     // if x does not lead to an explicit state, then x leads us partway along a transition,
-    // and the sole possibly y is simply the next letter on that transition.
+    // and the sole possible y is simply the next letter on that transition.
     //
     // If following x leads to an explicit state with no transitions leading from it
     // (a leaf state), then this is a losing position for the current player,
@@ -1023,8 +1023,8 @@ int main(int argc, char** argv)
     // Further, the grundy number of a word leading to a transition *alternates* between 0 and 1
     // as we work our way backwards along a transition.
     //
-    // If following x leads to an explicit state with at least one allowing move, then let
-    // y_1, y_2, ... y_p be these moves: then grundy(x) = mex({grundy(xy_1), grundy(xy_2), ... , grundy(xy_p)}).
+    // If following x leads to an explicit state with at least one transition/ allowed move, then let
+    // y_1, y_2, ... y_p be all allowed moves: then grundy(x) = mex({grundy(xy_1), grundy(xy_2), ... , grundy(xy_p)}).
     //
     // Putting all this together, we can work out the grundy number for all explicit states in the 
     // Suffix Automaton by starting with the leaf states (grundy == 0) and using the fact
@@ -1033,7 +1033,7 @@ int main(int argc, char** argv)
     // it has grundy > 0, and 1 otherwise) and the fact that the grundy number of an explicit
     // state is the mex of all moves from that state.  This can be easily accomplished by a DFS,
     // and initialiseGrundyInfo performs this calculation of grundy numbers for explicit states
-    // (amongst other things!).  So given a substring x of S, we can easily compute the grundy
+    // (plus a whole bunch of other tasks!).  So given a substring x of S, we can easily compute the grundy
     // number of x: call it grundy(x, S).
     //
     // So: given a state (A', B') in the "full" game (where A' is a substring of A; B' is a substring of B),
@@ -1049,22 +1049,22 @@ int main(int argc, char** argv)
     // in alphabetical order of the first letter of that transition (initialiseGrundyInfo is responsible
     // for sorting the transitions in this order via sortTransitions).
     // 
-    // Let's x is the first string we've generated in this way (it will always be the empty string, but let's
+    // Let x be the first string we've generated in this way (it will always be the empty string, but let's
     // give it a name, anyway!).  We can immediately compute grundy(x) in O(1) if we've run initialiseGrundyInfo. 
     // Can we deduce whether the Kth winning state begins with x? Yes: it will begin with x if and only if
     // there are at most K words y in B such that grundy(x) ^ grundy(y) != 0: or in other words, at most
     // K words y in B such that grundy(y) != grundy(x).  If we precompute the number of words in B whose grundy
     // is different from a given value (numInBWithoutGrundy[grundy(x)]; computed by initialiseGrundyInfo), 
-    // then we can decide this very in O(1).
+    // then we can decide this very easily in O(1).
     //
-    // If numInBWithoutGrundy[grundy(x)] <= the current value of K, then the result we want is the (x, <Kth y (substring of B)
+    // If numInBWithoutGrundy[grundy(x)] <= the current value of K, then the result we want is the state (x, <Kth y (substring of B)
     // in lexicographic order with grundy(y) != grundy(x)>).  This can be computed easily (see findNthWithoutGrundy)
-    // and we'll discuss how to find it a bit later.  Otherwise, x is the first element in the pair we want:
-    // let's subtract numInBWithoutGrundy[grundy(x)] (essentially "skipping down the list" of winning states beginning
+    // and we'll discuss how to find it a bit later.  Otherwise, x is *not* the first element in the state we want:
+    // let's subtract numInBWithoutGrundy[grundy(x)] from K (essentially "skipping down the list" of winning states beginning
     // where the first element of the state pair is x), and continue with the next substring of A after X in 
     // lexicographic order; call it x'.  We repeat the procedure: if numInBWithoutGrundy[grundy(x')] <= the current value of K,
     // then the answer begins with x' and we can find the other element using findNthWithoutGrundy; otherwise, skip down
-    // numInBWithoutGrundy[grundy(x')] (i.e subtract this value from K), find the next substring of A in lexicographic order
+    // numInBWithoutGrundy[grundy(x')] in the list (i.e subtract this value from K), find the next substring of A in lexicographic order
     // after after x' (by continuing our letter-by-letter DFS of the suffix automaton representing A); etc.
     //
     // We'll see shortly that the complexity of findNthWithoutGrundy is O(N), so so far this procedure is O(N^2), dominated
@@ -1074,9 +1074,9 @@ int main(int argc, char** argv)
     //
     // Let's say we've done our DFS, and have ended up following the first letter of some transition, t, whose endpoint is
     // some explicit state, S.  Do we really have to crawl along t letter-by-letter? Not necessarily: we can immediately
-    // compute the result of performing the above procedure for each point along t by noting that  the grundy number
+    // compute the result of performing the above procedure for each point along t by noting that the grundy number
     // of any word that leads us partway along t will be 0 or 1, and that we can instantly compute how many will have
-    // a grundy number of each of these values by recall that the grundy numbers along t alternate between t, with the
+    // a grundy number of each of these values by recalling that the grundy numbers along t alternate between 0 and 1, with the
     // parity depending on the distance along t and the grundy number of S.  Assume that are numWithGrundy0 and numWithGrundy1
     // along t, respectively: then if we did the letter-by-letter procedure above, our K would decrease by
     //
@@ -1084,10 +1084,10 @@ int main(int argc, char** argv)
     //
     // (numWithGrundy0 and numWithGrundy1 are computed by initialiseGrundyInfo via calcGrundyInfoForTransition). 
     //
-    // If K >= 0, then we can skip crawling along t and jump straight to S.  Otherwise - and this will only happen once per testcase - 
-    // we must revert to the letter-by-letter crawl we originally performed, contributing an extra O(N).
+    // If after this decrease our K >= 0, then we can skip crawling along t and jump straight to S.  Otherwise - and this will only 
+    // happen once per testcase - we must revert to the letter-by-letter crawl we originally performed, contributing an extra O(N).
     //
-    // That's almost everything, except for the computation of findNthWithoutGrundy for some K an some grundy value g, which we perform once per testcase.  
+    // That's almost everything, except for the computation of findNthWithoutGrundy for some K and some grundy value g, which we perform once per testcase.  
     // We could this with an O(N^2) letter-by-letter DFS of the suffix automaton representing B (with transitions sorted by
     // their first letter), continuing until we've generated K substrings of B whose grundy number is other than g, but
     // again there is a better way where we can skip (all but at most one) transitions: if we've just embarked on a transition t,
@@ -1103,7 +1103,9 @@ int main(int argc, char** argv)
     // once per testcase); otherwise, we subtract this number from K and continue our DFS which, since we are skipping over
     // transitions in O(1), takes only a total of O(N).
     //
-    // And that's it!
+    // And that's it - the whole procedure is O(N).  There are some annoyances with the implementation - for example, the
+    // depth of recursion in our DFS of the suffix automata can trigger a stack overflow, so initialiseGrundyInfo and findNthWithoutGrundy
+    // had to be re-worked to be non-recursive, plus other minor annoyances.  Hopefully the rest of the code is self-explanatory!
 
     int N;
     cin >> N;
