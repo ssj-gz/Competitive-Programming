@@ -160,6 +160,11 @@ class SuffixTreeBuilder
                 }
                 void calcGrundyInfoForTransition()
                 {
+                    // Use the fact that the last word in a transition has grundy
+                    // number 0 if the nextState has grundy > 0 and 1 otherwise, 
+                    // coupled with the fact that the grundy number for words in a 
+                    // transition alternates between 0 and 1 so calculate 
+                    // numWithGrundy0, numWithGrundy1 and grundyNumberAfterFirstLetter.
                     assert(!isOnExplicitState());
                     auto nextState = m_transition->nextState;
                     assert(nextState);
@@ -195,7 +200,11 @@ class SuffixTreeBuilder
                     if (isOnExplicitState())
                         return m_state->data.grundyNumber;
                     else
+                    {
+                        // Again, use the fact that words along a transition alternate between
+                        // a grundy number of 0 an a grundy number of 1.
                         return m_transition->grundyNumberAfterFirstLetter ^ ((m_posInTransition + 1) % 2);
+                    }
                 }
                 bool isOnExplicitState() const
                 {
@@ -208,6 +217,7 @@ class SuffixTreeBuilder
 
                 void sortTransitions()
                 {
+                    // Ensure that a DFS of the suffix automaton would generate all substrings in lexicographic order.
                     assert(isOnExplicitState());
                     sort(m_state->transitions.begin(), m_state->transitions.end(), [](const Transition& lhs, const Transition& rhs)
                             {
@@ -555,9 +565,6 @@ class SuffixTreeBuilder
 };
 
 using Cursor = SuffixTreeBuilder::Cursor;
-
-string A;
-string B;
 
 class GameState
 {
@@ -1104,6 +1111,9 @@ int main(int argc, char** argv)
     cin >> M;
     int64_t K;
     cin >> K;
+
+    string A;
+    string B;
 
     cin >> A;
     cin >> B;
