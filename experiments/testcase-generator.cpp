@@ -172,11 +172,14 @@ class StopAfter
 
 int main(int argc, char* argv[])
 {
+    bool appendToOutputFile = false;
+
     po::options_description desc("Allowed options");
     desc.add_options()
       ("help", "produce help message")
        ("output-file", po::value< string >()->required(), "output file")
        ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
+       ("append", po::bool_switch(&appendToOutputFile), "append to the output file instead of overwriting it")
     ;
     po::positional_options_description p;
     p.add("output-file", -1);
@@ -211,7 +214,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    ofstream testsuiteFile(outputFilename);
+    ofstream testsuiteFile(outputFilename, appendToOutputFile ? ios_base::app : ios_base::out);
 
     stopAfter.notifyGenerationStarted();
     while (!stopAfter.shouldStop())
