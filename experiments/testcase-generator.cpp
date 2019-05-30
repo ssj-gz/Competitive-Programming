@@ -9,11 +9,6 @@
 #include <memory>
 #include <exception>
 
-#include <mutex>
-#include <future>
-
-using namespace std;
-
 // Wrapping pipe in a class makes sure they are closed when we leave scope
 class cpipe {
     private:
@@ -87,13 +82,13 @@ class spawn {
         }
 };
 
-int numGenerated = 0;
-std::mutex numGeneratedMutex;
 
 
-void generateTestcaseAndResult(int i)
+
+using namespace std;
+
+int main(int argc, char* argv[])
 {
-    //cout << "generateTestcaseAndResult " << i << " begins" << endl;
     vector<string> generatedTest;
     {
         const char* const testgenargs[] = {"./two-strings-game", "--test", (const char*)0};
@@ -125,40 +120,15 @@ void generateTestcaseAndResult(int i)
         cout << "Result generator Waiting to terminate..." << endl;
         cout << "Result generator Status: " << resultGenerator.wait() << endl;
     }
+    cout << "Q: " << endl;
+    for (const auto& x : generatedTest)
     {
-        std::lock_guard lock(numGeneratedMutex);
-        numGenerated++;
-        cout << "Generated testcase #" << numGenerated << endl;
-        cout << "Q: " << endl;
-        for (const auto& x : generatedTest)
-        {
-            cout << x << endl;
-        }
-        cout << "A: " << endl;
-        for (const auto& x : result)
-        {
-            cout << x << endl;
-        }
+        cout << x << endl;
     }
-    //if (numGenerated >= 1000)
-    //{
-        //return;
-    //}
-    //cout << "generateTestcaseAndResult " << i << " ends" << endl;
-}
-
-int main(int argc, char* argv[])
-{
-    vector<std::future<void>> blah;
-    for (int i = 0; i < 4; i++)
+    cout << "A: " << endl;
+    for (const auto& x : result)
     {
-        blah.push_back(std::async(std::launch::async, generateTestcaseAndResult, i));
+        cout << x << endl;
     }
-    for (auto& fut : blah)
-    {
-        cout << "Waiting for future" << endl;
-        fut.wait();
-    }
-
     return 0;
 }
