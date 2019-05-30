@@ -106,20 +106,15 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
     }
     exeNameAndArgs.push_back(static_cast<const char*>(0));
     spawn executable(exeNameAndArgs.data());
-    cout << "Here!" << endl;
     for (const auto& stdinLine : stdinInput)
     {
-        cout << "wrote stdinLine: " << stdinLine << endl;
         executable.stdin << stdinLine;
     }
     executable.send_eof();
-    cout << "Here2!" << endl;
     string outputLine;
     while (getline(executable.stdout, outputLine))
     {
-        cout << "Here3! - " << outputLine << endl;
         result.output.push_back(outputLine);
-        cout << "Here4!" << endl;
     }
     cout << "Waiting for executable to terminate" << endl;
     result.status = executable.wait();
