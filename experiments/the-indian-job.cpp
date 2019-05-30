@@ -1,19 +1,18 @@
+// Simon St James (ssjgz) - 2019-05-30
 #include <iostream>
 #include <vector>
 #include <map>
-
-#include <sys/time.h>
 
 using namespace std;
 
 enum class Possible { Unknown, Yes, No };
 
-struct A
+struct SlotAssignment
 {
     int remainingTimeSlot1 = -1;
     int remainingTimeSlot2 = -1;
     int robberIndex = -1;
-    bool operator<(const A& other) const
+    bool operator<(const SlotAssignment& other) const
     {
         if (remainingTimeSlot1 != other.remainingTimeSlot1)
             return remainingTimeSlot1 < other.remainingTimeSlot1;
@@ -25,7 +24,7 @@ struct A
 
 
 
-bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex, const vector<int>& timeNeeded, map<A, Possible>& possibilityLookup)
+bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex, const vector<int>& timeNeeded, map<SlotAssignment, Possible>& possibilityLookup)
 {
     //cout << "remainingTimeSlot1: " << remainingTimeSlot1 << " remainingTimeSlot2: " << remainingTimeSlot2 << " robberIndex: " << robberIndex <<  endl;
     if (remainingTimeSlot1 < 0)
@@ -36,7 +35,7 @@ bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex,
     {
         return true;
     }
-    A a;
+    SlotAssignment a;
     a.remainingTimeSlot1 = remainingTimeSlot1;
     a.remainingTimeSlot2 = remainingTimeSlot2;
     a.robberIndex = robberIndex;
@@ -48,7 +47,7 @@ bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex,
     bool possible = false;
 
     {
-        A aIfSlot1;
+        SlotAssignment aIfSlot1;
         aIfSlot1.remainingTimeSlot1 = remainingTimeSlot1 - timeNeeded[robberIndex];
         aIfSlot1.remainingTimeSlot2 = remainingTimeSlot2;
         aIfSlot1.robberIndex = robberIndex + 1;
@@ -56,7 +55,7 @@ bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex,
         possible = possible || solveNaive(aIfSlot1.remainingTimeSlot1, aIfSlot1.remainingTimeSlot2, aIfSlot1.robberIndex, timeNeeded, possibilityLookup);
     }
     {
-        A aIfSlot2;
+        SlotAssignment aIfSlot2;
         aIfSlot2.remainingTimeSlot1 = remainingTimeSlot1;
         aIfSlot2.remainingTimeSlot2 = remainingTimeSlot2 - timeNeeded[robberIndex];
         aIfSlot2.robberIndex = robberIndex + 1;
@@ -70,35 +69,13 @@ bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex,
 
 bool solveNaive(int n, int g, const vector<int>& timeNeeded)
 {
-    map<A, Possible> possibilityLookup;
+    map<SlotAssignment, Possible> possibilityLookup;
     return solveNaive(g, g, 0, timeNeeded, possibilityLookup);
 
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int n = 100;
-        const int g = rand() % 30'000;
-
-        cout << 1 << endl;
-        cout << n << " " << g << endl;
-        for (int i = 0; i < 50 ; i++)
-        {
-            cout << (100 - rand() % 3) << " ";
-        }
-        for (int i = 50; i < 100 ; i++)
-        {
-            cout << (rand() % 100) << " ";
-        }
-        cout << endl;
-        return 0;
-    }
     int T;
     cin >> T;
 
@@ -113,7 +90,6 @@ int main(int argc, char* argv[])
             cin >> timeNeeded[i];
         }
 
-        //cout << "t: " << t << " result: " << solveNaive(n, g, timeNeeded) << endl;
         const auto result = solveNaive(n, g, timeNeeded);
         if (result)
             cout << "YES";
