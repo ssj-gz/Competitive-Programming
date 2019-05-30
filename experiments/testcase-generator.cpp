@@ -4,6 +4,7 @@
 #include <ext/stdio_filebuf.h> // NB: Specific to libstdc++
 #include <sys/wait.h>
 #include <unistd.h>
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -124,6 +125,12 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
     return result;
 }
 
+struct StopAfter
+{
+    enum Type { NumIterations, ElapsedSeconds };
+    Type type = NumIterations;
+    int value = -1;
+};
 
 int main(int argc, char* argv[])
 {
@@ -131,6 +138,7 @@ int main(int argc, char* argv[])
     desc.add_options()
       ("help", "produce help message")
        ("output-file", po::value< string >()->required(), "output file")
+       ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
     ;
     po::positional_options_description p;
     p.add("output-file", -1);
@@ -146,6 +154,24 @@ int main(int argc, char* argv[])
     po::notify(vm);
 
     const string outputFilename = vm["output-file"].as<string>();
+    string stopAfterString = vm["stop-after"].as<string>();
+
+    // TODO - this still allows e.g. --stop-after=3dinosaur!garbageXXX(**&*
+    StopAfter stopAfter;
+    if (stopAfterString.back() == 's')
+    {
+        stopAfterString.pop_back();
+        stopAfter.type = StopAfter::ElapsedSeconds;
+    }
+    try
+    {
+        stopAfter.value = stoi(stopAfterString);
+    }
+    catch (std::exception&)
+    {
+        cerr << "Expected: either integer, or integer followed by 's' for --stop-after  - got \"" << stopAfterString << "\" instead" << endl;
+        return EXIT_FAILURE;
+    }
 
 
     vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
