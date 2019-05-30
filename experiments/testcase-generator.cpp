@@ -88,21 +88,46 @@ using namespace boost::program_options;
 
 using namespace std;
 
+struct ExecutionResult
+{
+    int status = -1;
+    vector<string> output;
+};
+
+ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {}, const vector<string>& stdinInput = {})
+{
+    ExecutionResult result;
+
+    vector<const char*> exeNameAndArgs;
+    exeNameAndArgs.push_back(exeName.c_str());
+    for (const auto& arg : exeArgs)
+    {
+        exeNameAndArgs.push_back(arg.c_str());
+    }
+    exeNameAndArgs.push_back(static_cast<const char*>(0));
+    spawn executable(exeNameAndArgs.data());
+    for (const auto& stdinLine : stdinInput)
+    {
+        executable.stdin << stdinLine;
+    }
+    string outputLine;
+    while (getline(executable.stdout, outputLine))
+    {
+        result.output.push_back(outputLine);
+    }
+    executable.send_eof();
+    cout << "Waiting for executable to terminate" << endl;
+    result.status = executable.wait();
+    
+    cout << "Executable status: " << result.status << endl;
+
+    return result;
+}
+
+
 int main(int argc, char* argv[])
 {
-    vector<string> generatedTest;
-    {
-        const char* const testgenargs[] = {"./a.out", "--test", (const char*)0};
-        spawn testGenerator(testgenargs);
-        string s;
-        while (getline(testGenerator.stdout, s))
-        {
-            generatedTest.push_back(s);
-        }
-        testGenerator.send_eof();
-        cout << "Test generator Waiting to terminate..." << endl;
-        cout << "Test generator Status: " << testGenerator.wait() << endl;
-    }
+    vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
     vector<string> result;
     {
         const char* const resultArgs[] = {"./a.out", (const char*)0};
