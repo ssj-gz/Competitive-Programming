@@ -217,6 +217,11 @@ int main(int argc, char* argv[])
     while (!stopAfter.shouldStop())
     {
         const ExecutionResult testGenerationResult = execute("./a.out", {"--test"}, {});
+        if (testGenerationResult.status != 0)
+        {
+            cerr << "Error while generating testcase - aborting" << endl;
+            return EXIT_FAILURE;
+        }
         const vector<string> generatedTest = testGenerationResult.output;
         cout << "generatedTest size: " << generatedTest.size() << endl;
         const ExecutionResult testRunResult = execute("./a.out", {}, generatedTest);
