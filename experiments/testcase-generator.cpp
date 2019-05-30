@@ -94,6 +94,10 @@ struct ExecutionResult
 {
     int status = -1;
     vector<string> output;
+    bool successful() const
+    {
+        return (status == 0);
+    }
 };
 
 ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {}, const vector<string>& stdinInput = {})
@@ -197,6 +201,8 @@ int main(int argc, char* argv[])
     const string outputFilename = vm["output-file"].as<string>();
     string stopAfterString = vm["stop-after"].as<string>();
 
+    const string failedTestcaseFilename = "failed_test_case.txt";
+
     // TODO - this still allows e.g. --stop-after=3dinosaur!garbageXXX(**&*
     StopAfter stopAfter;
     if (stopAfterString.back() == 's')
@@ -220,14 +226,30 @@ int main(int argc, char* argv[])
     while (!stopAfter.shouldStop())
     {
         const ExecutionResult testGenerationResult = execute("./a.out", {"--test"}, {});
-        if (testGenerationResult.status != 0)
+        if (!testGenerationResult.successful())
         {
             cerr << "Error while generating testcase - aborting" << endl;
             return EXIT_FAILURE;
         }
         const vector<string> generatedTest = testGenerationResult.output;
         cout << "generatedTest size: " << generatedTest.size() << endl;
+
         const ExecutionResult testRunResult = execute("./a.out", {}, generatedTest);
+        if (!testRunResult.successful())
+        {
+            cerr << "Executable returned unsuccessful upon an input testcase - the testcase has been written to " << failedTestcaseFilename << endl;
+            ofstream failedTestcaseFile(failedTestcaseFilename);
+
+            for (const auto& x : generatedTest)
+            {
+                failedTestcaseFile << x << endl;
+            }
+
+            failedTestcaseFile.close();
+
+            return EXIT_FAILURE;
+
+        }
         vector<string> testRunOutput = testRunResult.output;
 
         testsuiteFile << "Q: " << endl;
