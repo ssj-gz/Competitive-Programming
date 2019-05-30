@@ -1,16 +1,7 @@
 // Simon St James (ssjgz) - 2019-05-30
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <cassert>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -49,7 +40,9 @@ int64_t solveBruteForce(int N, int X, const vector<int>& v, const vector<int>& a
     return bestProfit;
 }
 
-int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
+int64_t numIterations = 0;
+
+int64_t findBestPriceForSellingAllGold(int N, int X, const vector<int>& v, const vector<int>& a)
 {
     vector<vector<int>> buyersOfGoldDecreasingPrice(X + 1);
     vector<int> distinctGoldAmounts;
@@ -71,7 +64,7 @@ int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
 
     for (const auto amountOfGoldToSell : distinctGoldAmounts)
     {
-        vector<int64_t> bestPriceForNextGold = bestPriceForSoldGold;
+        vector<int64_t> bestPriceForNextSoldGold = bestPriceForSoldGold; // Implicitly accounts for the numBuyers == 0 case.
         const int totalBuyersForGoldAmount = buyersOfGoldDecreasingPrice[amountOfGoldToSell].size();
         for (int existingGold = 0; existingGold <= X; existingGold++)
         {
@@ -84,43 +77,22 @@ int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
                 priceOfSoldGoldAmount += buyersOfGoldDecreasingPrice[amountOfGoldToSell][numBuyers - 1];
                 amountOfSoldGoldAmount += amountOfGoldToSell;
                 if (existingGold + amountOfSoldGoldAmount > X)
+                {
+                    // Can't sell more gold that we started with!
                     break;
-                bestPriceForNextGold[existingGold + amountOfSoldGoldAmount] = max(bestPriceForNextGold[existingGold + amountOfSoldGoldAmount], bestPriceForSoldGold[existingGold] + priceOfSoldGoldAmount);
+                }
+                bestPriceForNextSoldGold[existingGold + amountOfSoldGoldAmount] = max(bestPriceForNextSoldGold[existingGold + amountOfSoldGoldAmount], bestPriceForSoldGold[existingGold] + priceOfSoldGoldAmount);
+                numIterations++;
             }
         }
-        bestPriceForSoldGold = bestPriceForNextGold;
+        bestPriceForSoldGold = bestPriceForNextSoldGold;
     }
 
     return bestPriceForSoldGold[X];
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        //const int N = rand() % 1'000'000 + 1;
-        //const int X = (rand() % 5000) + 1;
-        const int N = 1'000'000;
-        const int X = 5'000;
-        const int maxA = rand() % 1000;
-        const int maxV = rand() % 1000;
-
-        cout << N << " " << X << endl;
-
-        for (int i = 0; i < N / 2; i++)
-        {
-            cout << ((rand() % maxA) + 1) << " " << ((rand() % maxV) + 1) << endl;
-        }
-        for (int i = 0; i < N / 2; i++)
-        {
-            cout << i << " " << ((rand() % maxV) + 1) << endl;
-        }
-        return 0;
-    }
     int N, X;
     cin >> N >> X;
 
@@ -133,20 +105,10 @@ int main(int argc, char* argv[])
         cin >> a[i];
     }
 
-#ifdef BRUTE_FORCE
-    const auto resultBruteForce = solveBruteForce(N, X, v, a);
-    cout << "resultBruteForce: " << resultBruteForce << endl;
-
-    const auto resultOptimised = solveOptimised(N, X, v, a);
-    cout << "resultOptimised: " << resultOptimised << endl;
-    
-    assert(resultOptimised == resultBruteForce);
-#else
-    const auto resultOptimised = solveOptimised(N, X, v, a);
-    if (resultOptimised == -1)
+    const auto result = findBestPriceForSellingAllGold(N, X, v, a);
+    if (result == -1)
         cout << "Got caught!";
     else
-        cout << resultOptimised;
+        cout << result;
     cout << endl;
-#endif
 }
