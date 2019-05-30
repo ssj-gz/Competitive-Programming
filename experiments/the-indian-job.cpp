@@ -2,6 +2,8 @@
 #include <vector>
 #include <map>
 
+#include <sys/time.h>
+
 using namespace std;
 
 enum class Possible { Unknown, Yes, No };
@@ -25,6 +27,7 @@ struct A
 
 bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex, const vector<int>& timeNeeded, map<A, Possible>& possibilityLookup)
 {
+    cout << "remainingTimeSlot1: " << remainingTimeSlot1 << " remainingTimeSlot2: " << remainingTimeSlot2 << " robberIndex: " << robberIndex <<  endl;
     if (remainingTimeSlot1 < 0)
         return false;
     if (remainingTimeSlot2 < 0)
@@ -74,6 +77,24 @@ bool solveNaive(int n, int g, const vector<int>& timeNeeded)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = 100;
+        const int g = rand() % 30'000;
+
+        cout << 1 << endl;
+        cout << n << " " << g << endl;
+        for (int i = 0; i < n ; i++)
+        {
+            cout << (100 - rand() % 3) << " ";
+        }
+        cout << endl;
+        return 0;
+    }
     int T;
     cin >> T;
 
