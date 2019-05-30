@@ -106,16 +106,21 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
     }
     exeNameAndArgs.push_back(static_cast<const char*>(0));
     spawn executable(exeNameAndArgs.data());
+    cout << "Here!" << endl;
     for (const auto& stdinLine : stdinInput)
     {
+        cout << "wrote stdinLine: " << stdinLine << endl;
         executable.stdin << stdinLine;
     }
+    executable.send_eof();
+    cout << "Here2!" << endl;
     string outputLine;
     while (getline(executable.stdout, outputLine))
     {
+        cout << "Here3! - " << outputLine << endl;
         result.output.push_back(outputLine);
+        cout << "Here4!" << endl;
     }
-    executable.send_eof();
     cout << "Waiting for executable to terminate" << endl;
     result.status = executable.wait();
     
@@ -128,24 +133,8 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
 int main(int argc, char* argv[])
 {
     vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
-    vector<string> result;
-    {
-        const char* const resultArgs[] = {"./a.out", (const char*)0};
-        spawn resultGenerator(resultArgs);
-        for (const auto& testInputLine : generatedTest)
-        {
-            resultGenerator.stdin << testInputLine << endl;
-        }
-        string s;
-        while (getline(resultGenerator.stdout, s))
-        {
-            cout << "Read from program: '" << s << "'" << endl;
-            result.push_back(s);
-        }
-        resultGenerator.send_eof();
-        cout << "Result generator Waiting to terminate..." << endl;
-        cout << "Result generator Status: " << resultGenerator.wait() << endl;
-    }
+    cout << "generatedTest size: " << generatedTest.size() << endl;
+    vector<string> result = execute("./a.out", {}, generatedTest).output;
     cout << "Q: " << endl;
     for (const auto& x : generatedTest)
     {
