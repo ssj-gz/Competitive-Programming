@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 {
     vector<string> generatedTest;
     {
-        const char* const testgenargs[] = {"./two-strings-game", "--test", (const char*)0};
+        const char* const testgenargs[] = {"./a.out", "--test", (const char*)0};
         spawn testGenerator(testgenargs);
         string s;
         while (getline(testGenerator.stdout, s))
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     }
     vector<string> result;
     {
-        const char* const resultArgs[] = {"./two-strings-game", (const char*)0};
+        const char* const resultArgs[] = {"./a.out", (const char*)0};
         spawn resultGenerator(resultArgs);
         for (const auto& testInputLine : generatedTest)
         {
