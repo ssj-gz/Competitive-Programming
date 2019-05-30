@@ -58,7 +58,7 @@ bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex,
         aIfSlot2.remainingTimeSlot2 = remainingTimeSlot2 - timeNeeded[robberIndex];
         aIfSlot2.robberIndex = robberIndex + 1;
 
-        possible = possible || solveNaive(aIfSlot2.remainingTimeSlot2, aIfSlot2.remainingTimeSlot2, aIfSlot2.robberIndex, timeNeeded, possibilityLookup);
+        possible = possible || solveNaive(aIfSlot2.remainingTimeSlot1, aIfSlot2.remainingTimeSlot2, aIfSlot2.robberIndex, timeNeeded, possibilityLookup);
     }
     possibilityLookup[a] = (possible ? Possible::Yes : Possible::No);
 
