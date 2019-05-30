@@ -5,14 +5,14 @@ using namespace std;
 
 void solveBruteForce(int passengerIndex, int remainingGold, int64_t profitSoFar, const vector<int>& v, const vector<int>& a, int64_t& bestProfit)
 {
-    cout << "passengerIndex: " << passengerIndex << " remainingGold: " << remainingGold << " profitSoFar: " << profitSoFar << endl;
+    //cout << "passengerIndex: " << passengerIndex << " remainingGold: " << remainingGold << " profitSoFar: " << profitSoFar << endl;
     if (remainingGold < 0) 
         return;
     if (remainingGold == 0)
     {
         if (profitSoFar > bestProfit)
         {
-            cout << "Found new best profit: " << profitSoFar << endl;
+            //cout << "Found new best profit: " << profitSoFar << endl;
             bestProfit = profitSoFar;
         }
         return;
