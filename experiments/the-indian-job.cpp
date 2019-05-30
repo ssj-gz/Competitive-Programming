@@ -24,53 +24,50 @@ struct SlotAssignment
 
 
 
-bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex, const vector<int>& timeNeeded, map<SlotAssignment, Possible>& possibilityLookup)
+bool isSlotAssignmentPossible(SlotAssignment& slotAssignment, const vector<int>& timeNeeded, map<SlotAssignment, Possible>& possibilityLookup)
 {
-    //cout << "remainingTimeSlot1: " << remainingTimeSlot1 << " remainingTimeSlot2: " << remainingTimeSlot2 << " robberIndex: " << robberIndex <<  endl;
-    if (remainingTimeSlot1 < 0)
+    if (slotAssignment.remainingTimeSlot1 < 0)
         return false;
-    if (remainingTimeSlot2 < 0)
+    if (slotAssignment.remainingTimeSlot2 < 0)
         return false;
-    if (robberIndex == timeNeeded.size())
+    if (slotAssignment.robberIndex == timeNeeded.size())
     {
         return true;
     }
-    SlotAssignment a;
-    a.remainingTimeSlot1 = remainingTimeSlot1;
-    a.remainingTimeSlot2 = remainingTimeSlot2;
-    a.robberIndex = robberIndex;
-    if (possibilityLookup[a] != Possible::Unknown)
+    if (possibilityLookup[slotAssignment] != Possible::Unknown)
     {
-        return (possibilityLookup[a] == Possible::Yes);
+        return (possibilityLookup[slotAssignment] == Possible::Yes);
     }
 
     bool possible = false;
 
     {
-        SlotAssignment aIfSlot1;
-        aIfSlot1.remainingTimeSlot1 = remainingTimeSlot1 - timeNeeded[robberIndex];
-        aIfSlot1.remainingTimeSlot2 = remainingTimeSlot2;
-        aIfSlot1.robberIndex = robberIndex + 1;
+        SlotAssignment assignmentIfSlot1 = slotAssignment;
+        assignmentIfSlot1.remainingTimeSlot1 -= timeNeeded[slotAssignment.robberIndex];
+        assignmentIfSlot1.robberIndex++;
 
-        possible = possible || solveNaive(aIfSlot1.remainingTimeSlot1, aIfSlot1.remainingTimeSlot2, aIfSlot1.robberIndex, timeNeeded, possibilityLookup);
+        possible = possible || isSlotAssignmentPossible(assignmentIfSlot1, timeNeeded, possibilityLookup);
     }
     {
-        SlotAssignment aIfSlot2;
-        aIfSlot2.remainingTimeSlot1 = remainingTimeSlot1;
-        aIfSlot2.remainingTimeSlot2 = remainingTimeSlot2 - timeNeeded[robberIndex];
-        aIfSlot2.robberIndex = robberIndex + 1;
+        SlotAssignment assignmentIfSlot2 = slotAssignment;
+        assignmentIfSlot2.remainingTimeSlot2 -= timeNeeded[slotAssignment.robberIndex];
+        assignmentIfSlot2.robberIndex++;
 
-        possible = possible || solveNaive(aIfSlot2.remainingTimeSlot1, aIfSlot2.remainingTimeSlot2, aIfSlot2.robberIndex, timeNeeded, possibilityLookup);
+        possible = possible || isSlotAssignmentPossible(assignmentIfSlot2, timeNeeded, possibilityLookup);
     }
-    possibilityLookup[a] = (possible ? Possible::Yes : Possible::No);
+    possibilityLookup[slotAssignment] = (possible ? Possible::Yes : Possible::No);
 
     return possible;
 }
 
-bool solveNaive(int n, int g, const vector<int>& timeNeeded)
+bool isSlotAssignmentPossible(int n, int g, const vector<int>& timeNeeded)
 {
     map<SlotAssignment, Possible> possibilityLookup;
-    return solveNaive(g, g, 0, timeNeeded, possibilityLookup);
+    SlotAssignment slotAssignment;
+    slotAssignment.remainingTimeSlot1 = g;
+    slotAssignment.remainingTimeSlot2 = g;
+    slotAssignment.robberIndex = 0;
+    return isSlotAssignmentPossible(slotAssignment, timeNeeded, possibilityLookup);
 
 }
 
@@ -90,7 +87,7 @@ int main(int argc, char* argv[])
             cin >> timeNeeded[i];
         }
 
-        const auto result = solveNaive(n, g, timeNeeded);
+        const auto result = isSlotAssignmentPossible(n, g, timeNeeded);
         if (result)
             cout << "YES";
         else
