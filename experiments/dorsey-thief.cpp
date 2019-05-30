@@ -69,29 +69,26 @@ int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
     vector<int64_t> bestPriceForSoldGold(X + 1, -1);
     bestPriceForSoldGold[0] = 0;
 
-    for (const auto goldToSell : distinctGoldAmounts)
+    for (const auto amountOfGoldToSell : distinctGoldAmounts)
     {
-        vector<int64_t> nextBestPriceForSoldGold = bestPriceForSoldGold;
-        const int totalBuyersForGold = buyersOfGoldDecreasingPrice[goldToSell].size();
-        //cout << "goldToSell: " << goldToSell << " totalBuyersForGold: " << totalBuyersForGold << endl;
+        vector<int64_t> bestPriceForNextGold = bestPriceForSoldGold;
+        const int totalBuyersForGoldAmount = buyersOfGoldDecreasingPrice[amountOfGoldToSell].size();
         for (int existingGold = 0; existingGold <= X; existingGold++)
         {
             if (bestPriceForSoldGold[existingGold] == -1)
                 continue;
-            //cout << " existingGold: " << existingGold << " bestPriceForSoldGold: " << bestPriceForSoldGold[existingGold] << endl;
-            int64_t priceOfSoldGold = 0;
-            int64_t amountOfSoldGold = 0;
-            for (int numBuyers = 1; numBuyers <= totalBuyersForGold; numBuyers++)
+            int64_t priceOfSoldGoldAmount = 0;
+            int64_t amountOfSoldGoldAmount = 0;
+            for (int numBuyers = 1; numBuyers <= totalBuyersForGoldAmount; numBuyers++)
             {
-                priceOfSoldGold += buyersOfGoldDecreasingPrice[goldToSell][numBuyers - 1];
-                amountOfSoldGold += goldToSell;
-                //cout << " numBuyers: " << numBuyers << " priceOfSoldGold: " << priceOfSoldGold << " amountOfSoldGold: " << amountOfSoldGold << endl;
-                if (existingGold + amountOfSoldGold > X)
+                priceOfSoldGoldAmount += buyersOfGoldDecreasingPrice[amountOfGoldToSell][numBuyers - 1];
+                amountOfSoldGoldAmount += amountOfGoldToSell;
+                if (existingGold + amountOfSoldGoldAmount > X)
                     break;
-                nextBestPriceForSoldGold[existingGold + amountOfSoldGold] = max(nextBestPriceForSoldGold[existingGold + amountOfSoldGold], bestPriceForSoldGold[existingGold] + priceOfSoldGold);
+                bestPriceForNextGold[existingGold + amountOfSoldGoldAmount] = max(bestPriceForNextGold[existingGold + amountOfSoldGoldAmount], bestPriceForSoldGold[existingGold] + priceOfSoldGoldAmount);
             }
         }
-        bestPriceForSoldGold = nextBestPriceForSoldGold;
+        bestPriceForSoldGold = bestPriceForNextGold;
     }
 
     return bestPriceForSoldGold[X];
