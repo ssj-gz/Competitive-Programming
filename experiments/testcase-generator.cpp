@@ -216,9 +216,11 @@ int main(int argc, char* argv[])
     stopAfter.notifyGenerationStarted();
     while (!stopAfter.shouldStop())
     {
-        vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
+        const ExecutionResult testGenerationResult = execute("./a.out", {"--test"}, {});
+        const vector<string> generatedTest = testGenerationResult.output;
         cout << "generatedTest size: " << generatedTest.size() << endl;
-        vector<string> result = execute("./a.out", {}, generatedTest).output;
+        const ExecutionResult testRunResult = execute("./a.out", {}, generatedTest);
+        vector<string> testRunOutput = testRunResult.output;
 
         testsuiteFile << "Q: " << endl;
         for (const auto& x : generatedTest)
@@ -226,7 +228,7 @@ int main(int argc, char* argv[])
             testsuiteFile << x << endl;
         }
         testsuiteFile << "A: " << endl;
-        for (const auto& x : result)
+        for (const auto& x : testRunOutput)
         {
             testsuiteFile << x << endl;
         }
