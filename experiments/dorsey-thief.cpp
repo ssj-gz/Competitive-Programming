@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -36,6 +37,23 @@ int64_t solveBruteForce(int N, int X, const vector<int>& v, const vector<int>& a
     solveBruteForce(0, X, 0, v, a, bestProfit);
 
     return bestProfit;
+}
+
+int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
+{
+    vector<vector<int>> buyersOfGoldDecreasingPrice(X + 1);
+    for (int i = 0; i < N; i++)
+    {
+        if (a[i] > X)
+            continue;
+        buyersOfGoldDecreasingPrice[a[i]].push_back(v[i]);
+    }
+    for (auto& prices : buyersOfGoldDecreasingPrice)
+    {
+        sort(prices.begin(), prices.end(), std::greater<>());
+    }
+
+    return 0;
 }
 
 int main(int argc, char* argv[])
