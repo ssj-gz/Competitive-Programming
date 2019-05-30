@@ -124,7 +124,7 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
     }
     cout << "Waiting for executable to terminate" << endl;
     result.status = executable.wait();
-    
+
     cout << "Executable status: " << result.status << endl;
 
     return result;
@@ -133,44 +133,44 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
 class StopAfter
 {
     public:
-    enum Type { NumIterations, ElapsedSeconds };
-    void setType(Type type)
-    {
-        m_type = type;
-    }
-    void setValue(int value)
-    {
-        m_value = value;
-        cout << "StopAfter::setValue: " << value << endl;
-    }
-    bool shouldStop() const
-    {
-        if (m_type == NumIterations)
+        enum Type { NumIterations, ElapsedSeconds };
+        void setType(Type type)
         {
-            return m_numTestcasesGenerated >= m_value;
+            m_type = type;
         }
-        else
+        void setValue(int value)
         {
-            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-            const auto numSecondsRunFor = std::chrono::duration_cast<std::chrono::seconds>(now - m_testcaseGenerationBeginTime).count();
-            cout << "numSecondsRunFor: " << numSecondsRunFor << endl;
-            return numSecondsRunFor >= m_value;
+            m_value = value;
+            cout << "StopAfter::setValue: " << value << endl;
         }
-    }
-    void notifyGenerationStarted()
-    {
-        m_testcaseGenerationBeginTime = std::chrono::steady_clock::now();
-    }
-    void notifyTestcaseGenerated()
-    {
-        m_numTestcasesGenerated++;
-    }
+        bool shouldStop() const
+        {
+            if (m_type == NumIterations)
+            {
+                return m_numTestcasesGenerated >= m_value;
+            }
+            else
+            {
+                std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+                const auto numSecondsRunFor = std::chrono::duration_cast<std::chrono::seconds>(now - m_testcaseGenerationBeginTime).count();
+                cout << "numSecondsRunFor: " << numSecondsRunFor << endl;
+                return numSecondsRunFor >= m_value;
+            }
+        }
+        void notifyGenerationStarted()
+        {
+            m_testcaseGenerationBeginTime = std::chrono::steady_clock::now();
+        }
+        void notifyTestcaseGenerated()
+        {
+            m_numTestcasesGenerated++;
+        }
     private:
-    Type m_type = NumIterations;
-    int m_value = -1;
+        Type m_type = NumIterations;
+        int m_value = -1;
 
-    int m_numTestcasesGenerated = 0;
-    std::chrono::steady_clock::time_point m_testcaseGenerationBeginTime;
+        int m_numTestcasesGenerated = 0;
+        std::chrono::steady_clock::time_point m_testcaseGenerationBeginTime;
 
 };
 
@@ -181,18 +181,18 @@ int main(int argc, char* argv[])
 
     po::options_description desc("Allowed options");
     desc.add_options()
-      ("help", "produce help message")
-       ("output-file", po::value< string >()->required(), "output file")
-       ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
-       ("append", po::bool_switch(&appendToOutputFile), "append to the output file instead of overwriting it")
-       ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
-    ;
+        ("help", "produce help message")
+        ("output-file", po::value< string >()->required(), "output file")
+        ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
+        ("append", po::bool_switch(&appendToOutputFile), "append to the output file instead of overwriting it")
+        ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
+        ;
     po::positional_options_description p;
     p.add("output-file", -1);
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).
-                      options(desc).positional(p).run(), vm);
+            options(desc).positional(p).run(), vm);
     if (vm.count("help"))
     {
         std::cout << desc << endl;
