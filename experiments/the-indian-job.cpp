@@ -27,7 +27,7 @@ struct A
 
 bool solveNaive(int remainingTimeSlot1, int remainingTimeSlot2, int robberIndex, const vector<int>& timeNeeded, map<A, Possible>& possibilityLookup)
 {
-    cout << "remainingTimeSlot1: " << remainingTimeSlot1 << " remainingTimeSlot2: " << remainingTimeSlot2 << " robberIndex: " << robberIndex <<  endl;
+    //cout << "remainingTimeSlot1: " << remainingTimeSlot1 << " remainingTimeSlot2: " << remainingTimeSlot2 << " robberIndex: " << robberIndex <<  endl;
     if (remainingTimeSlot1 < 0)
         return false;
     if (remainingTimeSlot2 < 0)
@@ -88,9 +88,13 @@ int main(int argc, char* argv[])
 
         cout << 1 << endl;
         cout << n << " " << g << endl;
-        for (int i = 0; i < n ; i++)
+        for (int i = 0; i < 50 ; i++)
         {
             cout << (100 - rand() % 3) << " ";
+        }
+        for (int i = 50; i < 100 ; i++)
+        {
+            cout << (rand() % 100) << " ";
         }
         cout << endl;
         return 0;
@@ -109,6 +113,12 @@ int main(int argc, char* argv[])
             cin >> timeNeeded[i];
         }
 
-        cout << "t: " << t << " result: " << solveNaive(n, g, timeNeeded) << endl;
+        //cout << "t: " << t << " result: " << solveNaive(n, g, timeNeeded) << endl;
+        const auto result = solveNaive(n, g, timeNeeded);
+        if (result)
+            cout << "YES";
+        else
+            cout << "NO";
+        cout << endl;
     }
 }
