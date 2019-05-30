@@ -56,23 +56,26 @@ int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
     {
         sort(prices.begin(), prices.end(), std::greater<>());
     }
-    vector<int64_t> bestPriceForSoldGold(X + 1, 0);
+    vector<int64_t> bestPriceForSoldGold(X + 1, -1);
 
     for (const auto goldToSell : distinctGoldAmounts)
     {
+        cout << "goldToSell: " << goldToSell << endl;
         vector<int64_t> nextBestPriceForSoldGold = bestPriceForSoldGold;
         const int totalBuyersForGold = buyersOfGoldDecreasingPrice[goldToSell].size();
         for (int existingGold = 0; existingGold <= X; existingGold++)
         {
+            cout << " existingGold: " << existingGold << " bestPriceForSoldGold: " << bestPriceForSoldGold[existingGold] << endl;
             int64_t priceOfSoldGold = 0;
             int64_t amountOfSoldGold = 0;
             for (int numBuyers = 1; numBuyers <= totalBuyersForGold; numBuyers++)
             {
                 priceOfSoldGold += buyersOfGoldDecreasingPrice[goldToSell][numBuyers - 1];
                 amountOfSoldGold += goldToSell;
-                if (existingGold - amountOfSoldGold < 0)
+                cout << " numBuyers: " << numBuyers << " priceOfSoldGold: " << priceOfSoldGold << " amountOfSoldGold: " << amountOfSoldGold << endl;
+                if (existingGold + amountOfSoldGold > X)
                     break;
-                nextBestPriceForSoldGold[existingGold - amountOfSoldGold] = max(nextBestPriceForSoldGold[existingGold - amountOfSoldGold], bestPriceForSoldGold[existingGold] + priceOfSoldGold);
+                nextBestPriceForSoldGold[existingGold + amountOfSoldGold] = max(nextBestPriceForSoldGold[existingGold + amountOfSoldGold], bestPriceForSoldGold[existingGold] + priceOfSoldGold);
             }
         }
         bestPriceForSoldGold = nextBestPriceForSoldGold;
