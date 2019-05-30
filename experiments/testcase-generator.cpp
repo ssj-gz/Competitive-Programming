@@ -230,6 +230,7 @@ int main(int argc, char* argv[])
         {
             testsuiteFile << x << endl;
         }
+        stopAfter.notifyTestcaseGenerated();
     }
     testsuiteFile.close();
     return 0;
