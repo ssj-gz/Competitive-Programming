@@ -84,7 +84,7 @@ class spawn {
 
 #include <boost/program_options.hpp>
 
-using namespace boost::program_options;
+namespace po = boost::program_options;
 
 using namespace std;
 
@@ -127,6 +127,20 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
 
 int main(int argc, char* argv[])
 {
+    po::options_description desc("Allowed options");
+    desc.add_options()
+      ("help", "produce help message")
+       ("output-file", po::value< vector<string> >()->required(), "output file")
+    ;
+    po::positional_options_description p;
+    p.add("output-file", -1);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).
+                      options(desc).positional(p).run(), vm);
+    po::notify(vm);
+
+
     vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
     cout << "generatedTest size: " << generatedTest.size() << endl;
     vector<string> result = execute("./a.out", {}, generatedTest).output;
