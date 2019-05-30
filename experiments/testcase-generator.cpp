@@ -177,6 +177,7 @@ class StopAfter
 int main(int argc, char* argv[])
 {
     bool appendToOutputFile = false;
+    string failedTestcaseFilename = "failed_test_case.txt";
 
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -184,6 +185,7 @@ int main(int argc, char* argv[])
        ("output-file", po::value< string >()->required(), "output file")
        ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
        ("append", po::bool_switch(&appendToOutputFile), "append to the output file instead of overwriting it")
+       ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
     ;
     po::positional_options_description p;
     p.add("output-file", -1);
@@ -201,7 +203,6 @@ int main(int argc, char* argv[])
     const string outputFilename = vm["output-file"].as<string>();
     string stopAfterString = vm["stop-after"].as<string>();
 
-    const string failedTestcaseFilename = "failed_test_case.txt";
 
     // TODO - this still allows e.g. --stop-after=3dinosaur!garbageXXX(**&*
     StopAfter stopAfter;
