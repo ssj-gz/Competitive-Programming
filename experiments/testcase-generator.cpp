@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
       ("help", "produce help message")
-       ("output-file", po::value< vector<string> >()->required(), "output file")
+       ("output-file", po::value< string >()->required(), "output file")
     ;
     po::positional_options_description p;
     p.add("output-file", -1);
@@ -145,19 +145,24 @@ int main(int argc, char* argv[])
     }
     po::notify(vm);
 
+    const string outputFilename = vm["output-file"].as<string>();
+
 
     vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
     cout << "generatedTest size: " << generatedTest.size() << endl;
     vector<string> result = execute("./a.out", {}, generatedTest).output;
-    cout << "Q: " << endl;
+
+    ofstream testsuiteFile(outputFilename);
+    testsuiteFile << "Q: " << endl;
     for (const auto& x : generatedTest)
     {
-        cout << x << endl;
+        testsuiteFile << x << endl;
     }
-    cout << "A: " << endl;
+    testsuiteFile << "A: " << endl;
     for (const auto& x : result)
     {
-        cout << x << endl;
+        testsuiteFile << x << endl;
     }
+    testsuiteFile.close();
     return 0;
 }
