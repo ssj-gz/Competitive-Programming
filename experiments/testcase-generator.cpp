@@ -9,6 +9,7 @@
 #include <vector>
 #include <memory>
 #include <exception>
+#include <chrono>
 
 // Wrapping pipe in a class makes sure they are closed when we leave scope
 class cpipe {
@@ -125,11 +126,48 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
     return result;
 }
 
-struct StopAfter
+class StopAfter
 {
+    public:
     enum Type { NumIterations, ElapsedSeconds };
-    Type type = NumIterations;
-    int value = -1;
+    void setType(Type type)
+    {
+        m_type = type;
+    }
+    void setValue(int value)
+    {
+        m_value = value;
+        cout << "StopAfter::setValue: " << value << endl;
+    }
+    bool shouldStop() const
+    {
+        if (m_type == NumIterations)
+        {
+            return m_numTestcasesGenerated >= m_value;
+        }
+        else
+        {
+            std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+            const auto numSecondsRunFor = std::chrono::duration_cast<std::chrono::seconds>(now - m_testcaseGenerationBeginTime).count();
+            cout << "numSecondsRunFor: " << numSecondsRunFor << endl;
+            return numSecondsRunFor >= m_value;
+        }
+    }
+    void notifyGenerationStarted()
+    {
+        m_testcaseGenerationBeginTime = std::chrono::steady_clock::now();
+    }
+    void notifyTestcaseGenerated()
+    {
+        m_numTestcasesGenerated++;
+    }
+    private:
+    Type m_type = NumIterations;
+    int m_value = -1;
+
+    int m_numTestcasesGenerated = 0;
+    std::chrono::steady_clock::time_point m_testcaseGenerationBeginTime;
+
 };
 
 int main(int argc, char* argv[])
@@ -161,11 +199,11 @@ int main(int argc, char* argv[])
     if (stopAfterString.back() == 's')
     {
         stopAfterString.pop_back();
-        stopAfter.type = StopAfter::ElapsedSeconds;
+        stopAfter.setType(StopAfter::ElapsedSeconds);
     }
     try
     {
-        stopAfter.value = stoi(stopAfterString);
+        stopAfter.setValue(stoi(stopAfterString));
     }
     catch (std::exception&)
     {
@@ -173,21 +211,25 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-
-    vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
-    cout << "generatedTest size: " << generatedTest.size() << endl;
-    vector<string> result = execute("./a.out", {}, generatedTest).output;
-
     ofstream testsuiteFile(outputFilename);
-    testsuiteFile << "Q: " << endl;
-    for (const auto& x : generatedTest)
+
+    stopAfter.notifyGenerationStarted();
+    while (!stopAfter.shouldStop())
     {
-        testsuiteFile << x << endl;
-    }
-    testsuiteFile << "A: " << endl;
-    for (const auto& x : result)
-    {
-        testsuiteFile << x << endl;
+        vector<string> generatedTest = execute("./a.out", {"--test"}, {}).output;
+        cout << "generatedTest size: " << generatedTest.size() << endl;
+        vector<string> result = execute("./a.out", {}, generatedTest).output;
+
+        testsuiteFile << "Q: " << endl;
+        for (const auto& x : generatedTest)
+        {
+            testsuiteFile << x << endl;
+        }
+        testsuiteFile << "A: " << endl;
+        for (const auto& x : result)
+        {
+            testsuiteFile << x << endl;
+        }
     }
     testsuiteFile.close();
     return 0;
