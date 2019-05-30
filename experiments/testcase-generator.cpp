@@ -138,6 +138,11 @@ int main(int argc, char* argv[])
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).
                       options(desc).positional(p).run(), vm);
+    if (vm.count("help"))
+    {
+        std::cout << desc << endl;
+        return 0;
+    }
     po::notify(vm);
 
 
