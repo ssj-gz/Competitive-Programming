@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cassert>
+
+#include <sys/time.h>
 
 using namespace std;
 
@@ -89,6 +92,25 @@ int64_t solveOptimised(int N, int X, const vector<int>& v, const vector<int>& a)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int N = rand() % 20 + 1;
+        const int X = (rand() % 5000) + 1;
+        const int maxA = rand() % 100;
+        const int maxV = rand() % 100;
+
+        cout << N << " " << X << endl;
+
+        for (int i = 0; i < N; i++)
+        {
+            cout << ((rand() % maxA) + 1) << " " << ((rand() % maxV) + 1) << endl;
+        }
+        return 0;
+    }
     int N, X;
     cin >> N >> X;
 
@@ -106,4 +128,6 @@ int main(int argc, char* argv[])
 
     const auto resultOptimised = solveOptimised(N, X, v, a);
     cout << "resultOptimised: " << resultOptimised << endl;
+    
+    assert(resultOptimised == resultBruteForce);
 }
