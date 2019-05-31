@@ -183,10 +183,13 @@ int main(int argc, char* argv[])
     int testResultRegexFilterCaptureGroup = 0;
     regex testResultRegexFilter;
 
+    bool verifyMode = false;
+
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
         ("testsuite-filename", po::value< string >()->required(), "testsuite filename")
+        ("verify", po::bool_switch(&verifyMode), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
         ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
@@ -214,91 +217,93 @@ int main(int argc, char* argv[])
     const string testSuiteFileName = vm["testsuite-filename"].as<string>();
     string stopAfterString = vm["stop-after"].as<string>();
 
-
-    // TODO - this still allows e.g. --stop-after=3dinosaur!garbageXXX(**&*
-    StopAfter stopAfter;
-    if (stopAfterString.back() == 's')
+    if (!verifyMode)
     {
-        stopAfterString.pop_back();
-        stopAfter.setType(StopAfter::ElapsedSeconds);
-    }
-    try
-    {
-        stopAfter.setValue(stoi(stopAfterString));
-    }
-    catch (std::exception&)
-    {
-        cerr << "Expected: either integer, or integer followed by 's' for --stop-after  - got \"" << stopAfterString << "\" instead" << endl;
-        return EXIT_FAILURE;
-    }
-
-    ofstream testSuiteFile(testSuiteFileName, appendToTestSuiteFile ? ios_base::app : ios_base::out);
-
-    stopAfter.notifyGenerationStarted();
-    while (!stopAfter.shouldStop())
-    {
-        const ExecutionResult testGenerationResult = execute("./a.out", {"--test"}, {});
-        if (!testGenerationResult.successful())
+        // TODO - this still allows e.g. --stop-after=3dinosaur!garbageXXX(**&*
+        StopAfter stopAfter;
+        if (stopAfterString.back() == 's')
         {
-            cerr << "Error while generating testcase - aborting" << endl;
+            stopAfterString.pop_back();
+            stopAfter.setType(StopAfter::ElapsedSeconds);
+        }
+        try
+        {
+            stopAfter.setValue(stoi(stopAfterString));
+        }
+        catch (std::exception&)
+        {
+            cerr << "Expected: either integer, or integer followed by 's' for --stop-after  - got \"" << stopAfterString << "\" instead" << endl;
             return EXIT_FAILURE;
         }
-        const vector<string> generatedTest = testGenerationResult.output;
-        cout << "generatedTest size: " << generatedTest.size() << endl;
 
-        const ExecutionResult testRunResult = execute("./a.out", {}, generatedTest);
-        if (!testRunResult.successful())
+        ofstream testSuiteFile(testSuiteFileName, appendToTestSuiteFile ? ios_base::app : ios_base::out);
+
+        stopAfter.notifyGenerationStarted();
+        while (!stopAfter.shouldStop())
         {
-            cerr << "Executable returned unsuccessful upon an input testcase - the testcase has been written to " << failedTestcaseFilename << endl;
-            ofstream failedTestcaseFile(failedTestcaseFilename);
+            const ExecutionResult testGenerationResult = execute("./a.out", {"--test"}, {});
+            if (!testGenerationResult.successful())
+            {
+                cerr << "Error while generating testcase - aborting" << endl;
+                return EXIT_FAILURE;
+            }
+            const vector<string> generatedTest = testGenerationResult.output;
+            cout << "generatedTest size: " << generatedTest.size() << endl;
 
+            const ExecutionResult testRunResult = execute("./a.out", {}, generatedTest);
+            if (!testRunResult.successful())
+            {
+                cerr << "Executable returned unsuccessful upon an input testcase - the testcase has been written to " << failedTestcaseFilename << endl;
+                ofstream failedTestcaseFile(failedTestcaseFilename);
+
+                for (const auto& x : generatedTest)
+                {
+                    failedTestcaseFile << x << endl;
+                }
+
+                failedTestcaseFile.close();
+
+                return EXIT_FAILURE;
+
+            }
+            vector<string> testRunOutput;
+            if (!testResultRegexFilterPattern.empty())
+            {
+                for (const auto& testResultLine : testRunResult.output)
+                {
+                    std::smatch match;
+                    cout << "line: " << testResultLine << endl;
+                    if (std::regex_search(testResultLine, match, testResultRegexFilter))
+                    {
+                        cout << " matches" << endl;
+                        assert(testResultRegexFilterCaptureGroup < match.size());
+                        testRunOutput.push_back(match[testResultRegexFilterCaptureGroup]);
+                    }
+                    else
+                    {
+                        cout << " does not match" << endl;
+                    }
+                }
+            }
+            else
+            {
+                testRunOutput = testRunResult.output;
+            }
+
+
+            testSuiteFile << "Q: " << endl;
             for (const auto& x : generatedTest)
             {
-                failedTestcaseFile << x << endl;
+                testSuiteFile << x << endl;
             }
-
-            failedTestcaseFile.close();
-
-            return EXIT_FAILURE;
-
-        }
-        vector<string> testRunOutput;
-        if (!testResultRegexFilterPattern.empty())
-        {
-            for (const auto& testResultLine : testRunResult.output)
+            testSuiteFile << "A: " << endl;
+            for (const auto& x : testRunOutput)
             {
-                std::smatch match;
-                cout << "line: " << testResultLine << endl;
-                if (std::regex_search(testResultLine, match, testResultRegexFilter))
-                {
-                    cout << " matches" << endl;
-                    assert(testResultRegexFilterCaptureGroup < match.size());
-                    testRunOutput.push_back(match[testResultRegexFilterCaptureGroup]);
-                }
-                else
-                {
-                    cout << " does not match" << endl;
-                }
+                testSuiteFile << x << endl;
             }
+            stopAfter.notifyTestcaseGenerated();
         }
-        else
-        {
-            testRunOutput = testRunResult.output;
-        }
-
-
-        testSuiteFile << "Q: " << endl;
-        for (const auto& x : generatedTest)
-        {
-            testSuiteFile << x << endl;
-        }
-        testSuiteFile << "A: " << endl;
-        for (const auto& x : testRunOutput)
-        {
-            testSuiteFile << x << endl;
-        }
-        stopAfter.notifyTestcaseGenerated();
+        testSuiteFile.close();
     }
-    testSuiteFile.close();
     return 0;
 }
