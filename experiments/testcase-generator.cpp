@@ -402,7 +402,6 @@ int main(int argc, char* argv[])
     }
     else
     {
-        // TODO - this is all dummy code for testing TestCaseReader.
         ifstream testSuiteFile(testSuiteFileName);
         TestCaseReader testCaseReader(testSuiteFile);
         int testCaseNum = 0;
@@ -411,8 +410,19 @@ int main(int argc, char* argv[])
             const auto testCase = testCaseReader.next();
             testCaseNum++;
             cout << "Read test case # " << testCaseNum << " input # lines: " << testCase.testInput.size() << " output # lines: " << testCase.testRunOutput.size() << endl; 
-
+            const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(testCase.testInput, testResultRegexFilter, testResultRegexFilterCaptureGroup);
+            if (!testRunResult.successful())
+            {
+                writeFailingTestInputAndDie(testCase.testInput, failedTestcaseFilename);
+            }
+            if (testRunResult.output != testCase.testRunOutput)
+            {
+                writeFailingTestInputAndDie(testCase.testInput, failedTestcaseFilename);
+            }
         }
+        cout << "All testcases passed!" << endl;
+        // All clear!
+        return 0;
     }
     return 0;
 }
