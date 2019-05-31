@@ -287,6 +287,21 @@ ExecutionResult runTestWithInputAndGetFilteredResult(const vector<string>& testI
     return testRunResult;
 }
 
+void writeFailingTestInputAndDie(const vector<string>& failingTestInput, const string& failedTestcaseFilename)
+{
+    cerr << "Executable returned unsuccessful upon an input testcase - the testcase has been written to " << failedTestcaseFilename << endl;
+    ofstream failedTestcaseFile(failedTestcaseFilename);
+
+    for (const auto& x : failingTestInput)
+    {
+        failedTestcaseFile << x << endl;
+    }
+
+    failedTestcaseFile.close();
+
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char* argv[])
 {
     bool appendToTestSuiteFile = false;
@@ -367,18 +382,7 @@ int main(int argc, char* argv[])
             const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(generatedTest, testResultRegexFilter, testResultRegexFilterCaptureGroup);
             if (!testRunResult.successful())
             {
-                cerr << "Executable returned unsuccessful upon an input testcase - the testcase has been written to " << failedTestcaseFilename << endl;
-                ofstream failedTestcaseFile(failedTestcaseFilename);
-
-                for (const auto& x : generatedTest)
-                {
-                    failedTestcaseFile << x << endl;
-                }
-
-                failedTestcaseFile.close();
-
-                return EXIT_FAILURE;
-
+                writeFailingTestInputAndDie(generatedTest, failedTestcaseFilename);
             }
             const vector<string> testRunOutput = testRunResult.output;
 
