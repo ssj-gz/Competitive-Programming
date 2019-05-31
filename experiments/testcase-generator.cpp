@@ -175,6 +175,94 @@ class StopAfter
 
 };
 
+struct TestCase
+{
+    vector<string> testInput;
+    vector<string> testRunOutput;
+};
+
+class TestCaseReader
+{
+    public:
+        TestCaseReader(istream& testSuiteStream)
+            : m_testSuiteStream(testSuiteStream)
+        {
+        }
+        bool hasNext()
+        {
+            if (m_loadedNextTestCase)
+                return true;
+            if (attemptLoadNext(m_nextTestCase))
+            {
+                m_loadedNextTestCase = true;
+                return true;
+            }
+            return false;
+        }
+        TestCase next()
+        {
+            assert(hasNext());
+            if (m_loadedNextTestCase)
+            {
+                m_loadedNextTestCase = false;
+                return m_nextTestCase;
+            }
+
+            // TODO - throw exception on fail? Or just rely on the assert, above?
+            attemptLoadNext(m_nextTestCase);
+            assert(!m_loadedNextTestCase);
+            return m_nextTestCase;
+        }
+    private:
+        istream& m_testSuiteStream;
+        bool m_loadedNextTestCase = false;
+        TestCase m_nextTestCase;
+        
+        bool attemptLoadNext(TestCase& destTestCase)
+        {
+            destTestCase.testInput.clear();
+            destTestCase.testRunOutput.clear();
+            string testInputHeader;
+            if (!std::getline(m_testSuiteStream, testInputHeader))
+                return false;
+
+            std::smatch inputHeaderMatch;
+            if (!std::regex_search(testInputHeader, inputHeaderMatch, testInputHeaderRegex))
+                return false;
+
+            const int numTestInputLines = stoi(inputHeaderMatch[1]);
+            for (int i = 0; i < numTestInputLines; i++)
+            {
+                string testInputLine;
+                std::getline(m_testSuiteStream, testInputLine);
+                destTestCase.testInput.push_back(testInputLine);
+            }
+
+            string testResultHeader;
+            if (!std::getline(m_testSuiteStream, testResultHeader))
+                return false;
+
+            std::smatch resultHeaderMatch;
+            if (!std::regex_search(testResultHeader, resultHeaderMatch, testResultHeaderRegex))
+                return false;
+
+            const int numTestResultLines = stoi(resultHeaderMatch[1]);
+            for (int i = 0; i < numTestResultLines; i++)
+            {
+                string testResultLine;
+                std::getline(m_testSuiteStream, testResultLine);
+                destTestCase.testRunOutput.push_back(testResultLine);
+            }
+            return m_testSuiteStream.good();
+        }
+
+        static std::regex testInputHeaderRegex;
+        static std::regex testResultHeaderRegex;
+};
+
+std::regex TestCaseReader::testInputHeaderRegex("^Q:\\s*(\\d+)");
+std::regex TestCaseReader::testResultHeaderRegex("^A:\\s*(\\d+)");
+
 int main(int argc, char* argv[])
 {
     bool appendToTestSuiteFile = false;
@@ -190,7 +278,7 @@ int main(int argc, char* argv[])
         ("help", "produce help message")
         ("testsuite-filename", po::value< string >()->required(), "testsuite filename")
         ("verify", po::bool_switch(&verifyMode), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
-        ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
+        ("stop-after", po::value< string >(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
         ("testcase-gen-regex-filter", po::value<string>(&testResultRegexFilterPattern), "when generating expected testcase output, pass all resulting output through this regex")
@@ -215,10 +303,15 @@ int main(int argc, char* argv[])
     }
 
     const string testSuiteFileName = vm["testsuite-filename"].as<string>();
-    string stopAfterString = vm["stop-after"].as<string>();
 
     if (!verifyMode)
     {
+        if (!vm.count("stop-after"))
+        {
+            cerr << "the option --stop-after is required but missing" << endl;
+            return EXIT_FAILURE;
+        }
+        string stopAfterString = vm["stop-after"].as<string>();
         // TODO - this still allows e.g. --stop-after=3dinosaur!garbageXXX(**&*
         StopAfter stopAfter;
         if (stopAfterString.back() == 's')
@@ -304,6 +397,20 @@ int main(int argc, char* argv[])
             stopAfter.notifyTestcaseGenerated();
         }
         testSuiteFile.close();
+    }
+    else
+    {
+        // TODO - this is all dummy code for testing TestCaseReader.
+        ifstream testSuiteFile(testSuiteFileName);
+        TestCaseReader testCaseReader(testSuiteFile);
+        int testCaseNum = 0;
+        while (testCaseReader.hasNext())
+        {
+            const auto testCase = testCaseReader.next();
+            testCaseNum++;
+            cout << "Read test case # " << testCaseNum << " input # lines: " << testCase.testInput.size() << " output # lines: " << testCase.testRunOutput.size() << endl; 
+
+        }
     }
     return 0;
 }
