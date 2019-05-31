@@ -10,6 +10,7 @@
 #include <memory>
 #include <exception>
 #include <chrono>
+#include <regex>
 
 // Wrapping pipe in a class makes sure they are closed when we leave scope
 class cpipe {
@@ -178,6 +179,9 @@ int main(int argc, char* argv[])
 {
     bool appendToOutputFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
+    string testResultRegexFilterPattern;
+    int testResultRegexFilterCaptureGroup = 0;
+    regex testResultRegexFilter;
 
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -186,6 +190,8 @@ int main(int argc, char* argv[])
         ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToOutputFile), "append to the output file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
+        ("testcase-gen-regex-filter", po::value<string>(&testResultRegexFilterPattern), "when generating expected testcase output, pass all resulting output through this regex")
+        ("testcase-gen-regex-filter-capture-group", po::value<int>(&testResultRegexFilterCaptureGroup), "Used in conjunction with --testcase-gen-regex-filter - each line of output is passed through the regex, then replaced with the contents of the given capture group")
         ;
     po::positional_options_description p;
     p.add("output-file", -1);
@@ -199,6 +205,11 @@ int main(int argc, char* argv[])
         return 0;
     }
     po::notify(vm);
+    cout << "testResultRegexFilterPattern: " << testResultRegexFilterPattern << endl;
+    if (!testResultRegexFilterPattern.empty())
+    {
+        testResultRegexFilter.assign(testResultRegexFilterPattern);
+    }
 
     const string outputFilename = vm["output-file"].as<string>();
     string stopAfterString = vm["stop-after"].as<string>();
@@ -251,7 +262,30 @@ int main(int argc, char* argv[])
             return EXIT_FAILURE;
 
         }
-        vector<string> testRunOutput = testRunResult.output;
+        vector<string> testRunOutput;
+        if (!testResultRegexFilterPattern.empty())
+        {
+            for (const auto& testResultLine : testRunResult.output)
+            {
+                std::smatch match;
+                cout << "line: " << testResultLine << endl;
+                if (std::regex_search(testResultLine, match, testResultRegexFilter))
+                {
+                    cout << " matches" << endl;
+                    assert(testResultRegexFilterCaptureGroup < match.size());
+                    testRunOutput.push_back(match[testResultRegexFilterCaptureGroup]);
+                }
+                else
+                {
+                    cout << " does not match" << endl;
+                }
+            }
+        }
+        else
+        {
+            testRunOutput = testRunResult.output;
+        }
+
 
         testsuiteFile << "Q: " << endl;
         for (const auto& x : generatedTest)
