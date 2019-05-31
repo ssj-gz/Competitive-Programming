@@ -177,7 +177,7 @@ class StopAfter
 
 int main(int argc, char* argv[])
 {
-    bool appendToOutputFile = false;
+    bool appendToTestSuiteFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
     string testResultRegexFilterPattern;
     int testResultRegexFilterCaptureGroup = 0;
@@ -186,15 +186,15 @@ int main(int argc, char* argv[])
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
-        ("output-file", po::value< string >()->required(), "output file")
+        ("testsuite-filename", po::value< string >()->required(), "testsuite filename")
         ("stop-after", po::value< string >()->required(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
-        ("append", po::bool_switch(&appendToOutputFile), "append to the output file instead of overwriting it")
+        ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
         ("testcase-gen-regex-filter", po::value<string>(&testResultRegexFilterPattern), "when generating expected testcase output, pass all resulting output through this regex")
         ("testcase-gen-regex-filter-capture-group", po::value<int>(&testResultRegexFilterCaptureGroup), "Used in conjunction with --testcase-gen-regex-filter - each line of output is passed through the regex, then replaced with the contents of the given capture group")
         ;
     po::positional_options_description p;
-    p.add("output-file", -1);
+    p.add("testsuite-filename", -1);
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
         testResultRegexFilter.assign(testResultRegexFilterPattern);
     }
 
-    const string outputFilename = vm["output-file"].as<string>();
+    const string outputFilename = vm["testsuite-filename"].as<string>();
     string stopAfterString = vm["stop-after"].as<string>();
 
 
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    ofstream testsuiteFile(outputFilename, appendToOutputFile ? ios_base::app : ios_base::out);
+    ofstream testsuiteFile(outputFilename, appendToTestSuiteFile ? ios_base::app : ios_base::out);
 
     stopAfter.notifyGenerationStarted();
     while (!stopAfter.shouldStop())
