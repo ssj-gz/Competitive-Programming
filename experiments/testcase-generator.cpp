@@ -263,6 +263,30 @@ class TestCaseReader
 std::regex TestCaseReader::testInputHeaderRegex("^Q:\\s*(\\d+)");
 std::regex TestCaseReader::testResultHeaderRegex("^A:\\s*(\\d+)");
 
+ExecutionResult runTestWithInputAndGetFilteredResult(const vector<string>& testInput, const std::regex& testResultRegexFilter, int testResultRegexFilterCaptureGroup)
+{
+    ExecutionResult testRunResult = execute("./a.out", {}, testInput);
+    const auto originalTestRunOutput = testRunResult.output;
+    testRunResult.output.clear();
+    for (const auto& testResultLine : originalTestRunOutput)
+    {
+        std::smatch match;
+        cout << "line: " << testResultLine << endl;
+        if (std::regex_search(testResultLine, match, testResultRegexFilter))
+        {
+            cout << " matches" << endl;
+            assert(testResultRegexFilterCaptureGroup < match.size());
+            testRunResult.output.push_back(match[testResultRegexFilterCaptureGroup]);
+        }
+        else
+        {
+            cout << " does not match" << endl;
+        }
+    }
+
+    return testRunResult;
+}
+
 int main(int argc, char* argv[])
 {
     bool appendToTestSuiteFile = false;
@@ -340,7 +364,7 @@ int main(int argc, char* argv[])
             const vector<string> generatedTest = testGenerationResult.output;
             cout << "generatedTest size: " << generatedTest.size() << endl;
 
-            const ExecutionResult testRunResult = execute("./a.out", {}, generatedTest);
+            const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(generatedTest, testResultRegexFilter, testResultRegexFilterCaptureGroup);
             if (!testRunResult.successful())
             {
                 cerr << "Executable returned unsuccessful upon an input testcase - the testcase has been written to " << failedTestcaseFilename << endl;
@@ -356,23 +380,7 @@ int main(int argc, char* argv[])
                 return EXIT_FAILURE;
 
             }
-            vector<string> testRunOutput;
-            for (const auto& testResultLine : testRunResult.output)
-            {
-                std::smatch match;
-                cout << "line: " << testResultLine << endl;
-                if (std::regex_search(testResultLine, match, testResultRegexFilter))
-                {
-                    cout << " matches" << endl;
-                    assert(testResultRegexFilterCaptureGroup < match.size());
-                    testRunOutput.push_back(match[testResultRegexFilterCaptureGroup]);
-                }
-                else
-                {
-                    cout << " does not match" << endl;
-                }
-            }
-
+            const vector<string> testRunOutput = testRunResult.output;
 
             testSuiteFile << "Q: " << generatedTest.size() << " lines" << endl;
             for (const auto& x : generatedTest)
