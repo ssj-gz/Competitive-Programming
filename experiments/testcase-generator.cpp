@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
 {
     bool appendToTestSuiteFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
-    string testResultRegexFilterPattern = "^.*$";
+    string testResultRegexFilterPattern = "^.*$"; // Match everything by default.
     int testResultRegexFilterCaptureGroup = 0;
     regex testResultRegexFilter;
 
@@ -297,10 +297,7 @@ int main(int argc, char* argv[])
     }
     po::notify(vm);
     cout << "testResultRegexFilterPattern: " << testResultRegexFilterPattern << endl;
-    if (!testResultRegexFilterPattern.empty())
-    {
-        testResultRegexFilter.assign(testResultRegexFilterPattern);
-    }
+    testResultRegexFilter.assign(testResultRegexFilterPattern);
 
     const string testSuiteFileName = vm["testsuite-filename"].as<string>();
 
@@ -360,27 +357,20 @@ int main(int argc, char* argv[])
 
             }
             vector<string> testRunOutput;
-            if (!testResultRegexFilterPattern.empty())
+            for (const auto& testResultLine : testRunResult.output)
             {
-                for (const auto& testResultLine : testRunResult.output)
+                std::smatch match;
+                cout << "line: " << testResultLine << endl;
+                if (std::regex_search(testResultLine, match, testResultRegexFilter))
                 {
-                    std::smatch match;
-                    cout << "line: " << testResultLine << endl;
-                    if (std::regex_search(testResultLine, match, testResultRegexFilter))
-                    {
-                        cout << " matches" << endl;
-                        assert(testResultRegexFilterCaptureGroup < match.size());
-                        testRunOutput.push_back(match[testResultRegexFilterCaptureGroup]);
-                    }
-                    else
-                    {
-                        cout << " does not match" << endl;
-                    }
+                    cout << " matches" << endl;
+                    assert(testResultRegexFilterCaptureGroup < match.size());
+                    testRunOutput.push_back(match[testResultRegexFilterCaptureGroup]);
                 }
-            }
-            else
-            {
-                testRunOutput = testRunResult.output;
+                else
+                {
+                    cout << " does not match" << endl;
+                }
             }
 
 
