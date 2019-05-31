@@ -291,12 +291,12 @@ int main(int argc, char* argv[])
             }
 
 
-            testSuiteFile << "Q: " << endl;
+            testSuiteFile << "Q: " << generatedTest.size() << " lines" << endl;
             for (const auto& x : generatedTest)
             {
                 testSuiteFile << x << endl;
             }
-            testSuiteFile << "A: " << endl;
+            testSuiteFile << "A: " << testRunOutput.size() << " lines" << endl;
             for (const auto& x : testRunOutput)
             {
                 testSuiteFile << x << endl;
