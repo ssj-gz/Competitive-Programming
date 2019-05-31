@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
 {
     bool appendToTestSuiteFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
-    string testResultRegexFilterPattern;
+    string testResultRegexFilterPattern = "^.*$";
     int testResultRegexFilterCaptureGroup = 0;
     regex testResultRegexFilter;
 
