@@ -263,9 +263,9 @@ class TestCaseReader
 std::regex TestCaseReader::testInputHeaderRegex("^Q:\\s*(\\d+)");
 std::regex TestCaseReader::testResultHeaderRegex("^A:\\s*(\\d+)");
 
-ExecutionResult runTestWithInputAndGetFilteredResult(const vector<string>& testInput, const std::regex& testResultRegexFilter, int testResultRegexFilterCaptureGroup)
+ExecutionResult runTestWithInputAndGetFilteredResult(const string& executableName, const vector<string>& testInput, const std::regex& testResultRegexFilter, int testResultRegexFilterCaptureGroup)
 {
-    ExecutionResult testRunResult = execute("./a.out", {}, testInput);
+    ExecutionResult testRunResult = execute(executableName, {}, testInput);
     const auto originalTestRunOutput = testRunResult.output;
     testRunResult.output.clear();
     for (const auto& testResultLine : originalTestRunOutput)
@@ -306,6 +306,7 @@ int main(int argc, char* argv[])
 {
     bool appendToTestSuiteFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
+    string executableName = "./a.out";
     string testResultRegexFilterPattern = "^.*$"; // Match everything by default.
     int testResultRegexFilterCaptureGroup = 0;
     regex testResultRegexFilter;
@@ -316,6 +317,7 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help", "produce help message")
         ("testsuite-filename", po::value< string >()->required(), "testsuite filename")
+        ("executable-name", po::value< string >(&executableName), "path to the executable that generates/ runs tests.  Defaults to ./a.out")
         ("verify", po::bool_switch(&verifyMode), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
         ("stop-after", po::value< string >(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
@@ -370,7 +372,7 @@ int main(int argc, char* argv[])
         stopAfter.notifyGenerationStarted();
         while (!stopAfter.shouldStop())
         {
-            const ExecutionResult testGenerationResult = execute("./a.out", {"--test"}, {});
+            const ExecutionResult testGenerationResult = execute(executableName, {"--test"}, {});
             if (!testGenerationResult.successful())
             {
                 cerr << "Error while generating testcase - aborting" << endl;
@@ -379,7 +381,7 @@ int main(int argc, char* argv[])
             const vector<string> generatedTest = testGenerationResult.output;
             cout << "generatedTest size: " << generatedTest.size() << endl;
 
-            const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(generatedTest, testResultRegexFilter, testResultRegexFilterCaptureGroup);
+            const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(executableName, generatedTest, testResultRegexFilter, testResultRegexFilterCaptureGroup);
             if (!testRunResult.successful())
             {
                 writeFailingTestInputAndDie(generatedTest, failedTestcaseFilename);
@@ -410,7 +412,7 @@ int main(int argc, char* argv[])
             const auto testCase = testCaseReader.next();
             testCaseNum++;
             cout << "Read test case # " << testCaseNum << " input # lines: " << testCase.testInput.size() << " output # lines: " << testCase.testRunOutput.size() << endl; 
-            const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(testCase.testInput, testResultRegexFilter, testResultRegexFilterCaptureGroup);
+            const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(executableName, testCase.testInput, testResultRegexFilter, testResultRegexFilterCaptureGroup);
             if (!testRunResult.successful())
             {
                 writeFailingTestInputAndDie(testCase.testInput, failedTestcaseFilename);
