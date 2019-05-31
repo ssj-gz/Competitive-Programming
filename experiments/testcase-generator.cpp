@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
         testResultRegexFilter.assign(testResultRegexFilterPattern);
     }
 
-    const string outputFilename = vm["testsuite-filename"].as<string>();
+    const string testSuiteFileName = vm["testsuite-filename"].as<string>();
     string stopAfterString = vm["stop-after"].as<string>();
 
 
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    ofstream testsuiteFile(outputFilename, appendToTestSuiteFile ? ios_base::app : ios_base::out);
+    ofstream testSuiteFile(testSuiteFileName, appendToTestSuiteFile ? ios_base::app : ios_base::out);
 
     stopAfter.notifyGenerationStarted();
     while (!stopAfter.shouldStop())
@@ -287,18 +287,18 @@ int main(int argc, char* argv[])
         }
 
 
-        testsuiteFile << "Q: " << endl;
+        testSuiteFile << "Q: " << endl;
         for (const auto& x : generatedTest)
         {
-            testsuiteFile << x << endl;
+            testSuiteFile << x << endl;
         }
-        testsuiteFile << "A: " << endl;
+        testSuiteFile << "A: " << endl;
         for (const auto& x : testRunOutput)
         {
-            testsuiteFile << x << endl;
+            testSuiteFile << x << endl;
         }
         stopAfter.notifyTestcaseGenerated();
     }
-    testsuiteFile.close();
+    testSuiteFile.close();
     return 0;
 }
