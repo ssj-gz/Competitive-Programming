@@ -115,7 +115,7 @@ ExecutionResult execute(const string& exeName, const vector<string>& exeArgs = {
     spawn executable(exeNameAndArgs.data());
     for (const auto& stdinLine : stdinInput)
     {
-        executable.stdin << stdinLine;
+        executable.stdin << stdinLine << endl;
     }
     executable.send_eof();
     string outputLine;
