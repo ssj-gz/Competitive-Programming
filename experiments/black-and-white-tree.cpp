@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 20 + 1;
+        const int N = rand() % 30 + 1;
         const int M = rand() % (N * (N - 1) / 2 + 1);
         cout << N << " " << M << endl;
 
