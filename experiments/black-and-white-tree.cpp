@@ -25,6 +25,7 @@ struct Component
     Node* rootNode = nullptr;
     int numNodes = 0;
     int numNodesSameColorAsRoot = 0;
+    int absColorDiff = -1;
     
 };
 
@@ -103,13 +104,14 @@ int main()
                 depth++;
             }
 
+            newComponent.absColorDiff = abs((newComponent.numNodesSameColorAsRoot) - (newComponent.numNodes - newComponent.numNodesSameColorAsRoot));
             components.push_back(newComponent);
         }
     }
 
     for (const auto& component : components)
     {
-        cout << "component: " << endl;
+        cout << "component: absColorDiff: " << component.absColorDiff <<  endl;
         for (const auto& node : component.nodes)
         {
             assert(node->color != Node::Unknown);
