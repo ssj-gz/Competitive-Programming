@@ -114,6 +114,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     {
         numWithAbsColorDiff[diff]++;
     }
+    vector<int> distinctAbsDiffs;
     int maxPossibleDiff = 0;
     vector<Vec<D>> things;
     Vec<D> initial(0, 0);
@@ -123,6 +124,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     {
         const int absColorDiff = pair.first;
         const int numWithAbsColorDiff = pair.second;
+        distinctAbsDiffs.push_back(absColorDiff);
         maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
         cout << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
         const Vec<D>& previous = things.back();
@@ -164,18 +166,49 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         things.push_back(next);
 
     }
+
+
+    destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
+
     const auto& last = things.back();
-    int minAbsIndex = numeric_limits<int>::max();
+    int minAbsDiff = numeric_limits<int>::max();
+    int numAdditionsOfThisAbsDiff = -1;
     for (int i = last.minIndex(); i <= last.maxIndex(); i++)
     {
         cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
         if (last[i].numAdditions != -1)
         {
-            minAbsIndex = min(minAbsIndex, abs(i));
+            minAbsDiff = min(minAbsDiff, abs(i));
+            numAdditionsOfThisAbsDiff = last[i].numAdditions;
         }
     }
 
-    return minAbsIndex;
+    int thisAbsDiff = minAbsDiff;
+    while (!things.empty())
+    {
+        const int numAdditionsOfThisAbsDiff = things.back()[thisAbsDiff].numAdditions;
+        const int previousAbsDiff = thisAbsDiff - distinctAbsDiffs.back() * numAdditionsOfThisAbsDiff;
+
+        destNumAdditionsOfEachAbsDiff[thisAbsDiff] = numAdditionsOfThisAbsDiff;
+
+        thisAbsDiff = previousAbsDiff;
+        things.pop_back();
+        distinctAbsDiffs.pop_back();
+    }
+
+    {
+        int sum = 0;
+        for (int absDiff = 0; absDiff < destNumAdditionsOfEachAbsDiff.size(); absDiff++)
+        {
+            assert(destNumAdditionsOfEachAbsDiff[absDiff] <= numWithAbsColorDiff[absDiff]);
+            sum += destNumAdditionsOfEachAbsDiff[absDiff] * absDiff;
+            sum -= (numWithAbsColorDiff[absDiff] - destNumAdditionsOfEachAbsDiff[absDiff]) * absDiff;
+        }
+        assert(abs(sum) == minAbsDiff);
+    }
+
+
+    return minAbsDiff;
 }
 
 int main(int argc, char* argv[])
