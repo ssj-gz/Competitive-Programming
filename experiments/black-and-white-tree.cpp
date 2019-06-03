@@ -201,7 +201,9 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     int diffWithMinAbs = numeric_limits<int>::max();
     //int numAdditionsOfThisAbsDiff = -1;
     cout << "Extracting minAbsDiff: " << endl;
-    for (int i = last.minIndex(); i <= last.maxIndex(); i++)
+    // Go backwards so that we prefer positive sums (we can form -x for x >= 0 if and only if we can
+    // form +x).
+    for (int i = last.maxIndex(); i >= last.minIndex(); i--)
     {
         cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
         if (last[i].numAdditions != -1)
@@ -214,6 +216,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         }
     }
     cout << "** diffWithMinAbs: " << diffWithMinAbs << endl;
+    assert(diffWithMinAbs >= 0);
 #if 1
     cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
@@ -401,10 +404,63 @@ int main(int argc, char* argv[])
 
     for (auto& component : components)
     {
+        Node::Color componentRootColor = Node::Color::Unknown;
+        const int numSameColorAsRoot = component.numNodesSameColorAsRoot;
+        const int numDifferentColorFromRoot = component.numNodes - component.numNodesSameColorAsRoot;
         if (numAdditionsOfEachAbsDiff[component.absColorDiff] > 0)
         {
             // Need to make this contribute *positively* to the diff i.e. need more
-            // black nodes that white nodes!
+            // black nodes than white nodes!
+            if (numSameColorAsRoot > numDifferentColorFromRoot)
+            {
+                componentRootColor = Node::Color::Black;
+            }
+            else
+            {
+                componentRootColor = Node::Color::White;
+            }
+            numAdditionsOfEachAbsDiff[component.absColorDiff]--;
+        }
+        else
+        {
+            // Need to make this contribute *negatively* to the diff i.e. need more
+            // white nodes than black nodes!
+            if (numSameColorAsRoot > numDifferentColorFromRoot)
+            {
+                componentRootColor = Node::Color::White;
+            }
+            else
+            {
+                componentRootColor = Node::Color::Black;
+            }
+        }
+        for(auto node : component.nodes)
+        {
+            assert(node->colorCategory != Node::Unknown);
+            assert(node->color == Node::Color::Unknown);
+            if (node->colorCategory == Node::SameAsRoot)
+            {
+                node->color = componentRootColor;
+            }
+            else
+            {
+                node->color = (componentRootColor == Node::Color::White) ? Node::Color::Black : Node::Color::White;
+            }
         }
     }
+    int numWhiteNodes = 0;
+    int numBlackNodes = 0;
+    for (auto node : nodes)
+    {
+        assert(node.color != Node::Color::Unknown);
+        if (node.color == Node::Color::White)
+        {
+            numWhiteNodes++;
+        }
+        else
+        {
+            numBlackNodes++;
+        }
+    }
+    assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
 }
