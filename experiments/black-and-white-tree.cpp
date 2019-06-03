@@ -129,7 +129,6 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         cout << endl << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
         const Vec<D>& previous = things.back();
         Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
-        const int startNumAdditons = (numWithAbsColorDiff + 0) / 2;
 
         const int start = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
         const int end = numWithAbsColorDiff * absColorDiff;
@@ -141,6 +140,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
+                const int startNumAdditons = (numWithAbsColorDiff + 1) / 2;
                 int numAdditions = startNumAdditons;
                 for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
                 {
@@ -163,7 +163,8 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
-                int numAdditions = startNumAdditons;
+                const int startNumSubtractions = (numWithAbsColorDiff + 1) / 2;
+                int numAdditions = numWithAbsColorDiff - startNumSubtractions;
                 for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
                 {
                     if (next[j].numAdditions != -1)
@@ -172,7 +173,8 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                     next[j].numAdditions = numAdditions;
                     assert(numAdditions != -1);
                     assert(numAdditions <= numWithAbsColorDiff);
-                    numAdditions++;
+                    assert(numAdditions >= 0);
+                    numAdditions--;
                 }
             }
 
@@ -197,7 +199,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         }
     }
     cout << "** minAbsDiff: " << minAbsDiff << endl;
-#if 0
+#if 1
     cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
     int generatedAbsDiff = minAbsDiff;
@@ -209,7 +211,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
         const int subtractedFromPrevious = absDiffAddedOrSubtracted * numSubtractions;
         const int previousGeneratedAbsDiff = generatedAbsDiff - addedToPrevious + subtractedFromPrevious;
-        cout << "loop - generatedAbsDiff: " << generatedAbsDiff << " numAdditionsOfThisAbsDiff: " << numAdditions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedAbsDiff: " << previousGeneratedAbsDiff << endl;
+        cout << "loop - generatedAbsDiff: " << generatedAbsDiff << " absDiffAddedOrSubtracted:" << absDiffAddedOrSubtracted << " numAdditionsOfThisAbsDiff: " << numAdditions << " numSubtractions: " << numSubtractions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedAbsDiff: " << previousGeneratedAbsDiff << endl;
 
         destNumAdditionsOfEachAbsDiff[absDiffAddedOrSubtracted] = numAdditions;
 
