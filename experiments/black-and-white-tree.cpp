@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <limits>
 #include <cassert>
 
 using namespace std;
@@ -52,6 +53,7 @@ class Vec
         }
         T& operator[](int index)
         {
+            cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
             assert(index >= m_minIndex);
             assert(index <= m_maxIndex);
             assert(index - m_minIndex < m_vector.size());
@@ -59,6 +61,7 @@ class Vec
         }
         const T& operator[](int index) const
         {
+            cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
             assert(index >= m_minIndex);
             assert(index <= m_maxIndex);
             assert(index - m_minIndex < m_vector.size());
@@ -75,6 +78,98 @@ struct D
 {
     int numWithDiff = 0;
 };
+
+void minAbsDiffBruteForce(const vector<int>& absDiffs, int absDiffIndex, int diffSoFar, int& minAbsDiff)
+{
+    if (absDiffIndex == absDiffs.size())
+    {
+        if (abs(diffSoFar) < minAbsDiff)
+        {
+            cout << "Found new smallest minAbsDiff: " << minAbsDiff << endl;
+            minAbsDiff = min(minAbsDiff, abs(diffSoFar));
+        }
+
+        return;
+    }
+    // Add this diff.
+    minAbsDiffBruteForce(absDiffs, absDiffIndex + 1, diffSoFar + absDiffs[absDiffIndex], minAbsDiff);
+    // Subtract this diff.
+    minAbsDiffBruteForce(absDiffs, absDiffIndex + 1, diffSoFar - absDiffs[absDiffIndex], minAbsDiff);
+}
+
+int minAbsDiffBruteForce(const vector<int>& absDiffs)
+{
+    int minAbsDiff = numeric_limits<int>::max();
+    minAbsDiffBruteForce(absDiffs, 0, 0, minAbsDiff);
+    return minAbsDiff;
+}
+
+int minAbsDiffOptimsed(const vector<int>& absDiffs)
+{
+    map<int, int> numWithAbsColorDiff;
+    for (const auto diff : absDiffs)
+    {
+        numWithAbsColorDiff[diff]++;
+    }
+    int maxPossibleDiff = 0;
+    vector<Vec<D>> things;
+    Vec<D> initial(0, 0);
+    initial[0].numWithDiff = 1;
+    things.push_back(initial);
+    for (const auto pair : numWithAbsColorDiff)
+    {
+        const int absColorDiff = pair.first;
+        const int numWithAbsColorDiff = pair.second;
+        maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
+        cout << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
+        const Vec<D>& previous = things.back();
+        Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
+        const int start = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
+        const int end = numWithAbsColorDiff * absColorDiff;
+        // What diffs can we form by adding multiples of this absColorDiff?
+        for (int i = previous.maxIndex(); i >= previous.minIndex(); i--)
+        {
+            cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
+            if (previous[i].numWithDiff > 0)
+            {
+                for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
+                {
+                    cout << "j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << endl;
+                    if (next[j].numWithDiff > 0)
+                        break;
+                    next[j].numWithDiff = 1; // TODO - figure out better name for numWithDiff, and put correct value here.
+                }
+            }
+
+        }
+        // What diffs can we form by subtracting multiples of this absColorDiff?
+        for (int i = previous.minIndex(); i <= previous.maxIndex(); i++)
+        {
+            if (previous[i].numWithDiff > 0)
+            {
+                for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
+                {
+                    if (next[j].numWithDiff > 0)
+                        break;
+                    next[j].numWithDiff = 1; // TODO - figure out better name for numWithDiff, and put correct value here.
+                }
+            }
+
+        }
+
+    }
+    const auto& last = things.back();
+    int minAbsIndex = numeric_limits<int>::max();
+    for (int i = last.minIndex(); i <= last.maxIndex(); i++)
+    {
+        if (last[i].numWithDiff > 0)
+        {
+            minAbsIndex = min(minAbsIndex, abs(i));
+        }
+    }
+
+    return minAbsIndex;
+}
 
 int main()
 {
@@ -157,7 +252,7 @@ int main()
     }
 
     bool allComponentsHaveSizeOne = true;
-    map<int, int> numWithAbsColorDiff;
+    vector<int> absDiffs;
     for (const auto& component : components)
     {
         cout << "component: absColorDiff: " << component.absColorDiff <<  endl;
@@ -165,7 +260,7 @@ int main()
         {
             allComponentsHaveSizeOne = false;
         }
-        numWithAbsColorDiff[component.absColorDiff]++;
+        absDiffs.push_back(component.absColorDiff);
 
         for (const auto& node : component.nodes)
         {
@@ -174,57 +269,9 @@ int main()
         }
     }
 
-    if (allComponentsHaveSizeOne)
-    {
-        assert(false && "Case not handled yet");
-    }
-    else
-    {
-        int maxPossibleDiff = 0;
-        vector<Vec<D>> things;
-        Vec<D> initial(0, 0);
-        initial[0].numWithDiff = 1;
-        things.push_back(initial);
-        for (const auto pair : numWithAbsColorDiff)
-        {
-            const int absColorDiff = pair.first;
-            const int numWithAbsColorDiff = pair.second;
-            maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
-            const Vec<D>& previous = things.back();
-            Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
-            const int start = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
-            const int end = numWithAbsColorDiff * absColorDiff;
-            // What diffs can we form by adding multiples of this absColorDiff?
-            for (int i = next.maxIndex(); i >= next.minIndex(); i--)
-            {
-                if (previous[i].numWithDiff > 0)
-                {
-                    for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
-                    {
-                        if (next[j].numWithDiff > 0)
-                            break;
-                        next[j].numWithDiff = 1; // TODO - figure out better name for numWithDiff, and put correct value here.
-                    }
-                }
+    const auto minAbsDiff_BruteForce = minAbsDiffBruteForce(absDiffs);
+    const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs);
 
-            }
-            // What diffs can we form by subtracting multiples of this absColorDiff?
-            for (int i = next.minIndex(); i <= next.maxIndex(); i++)
-            {
-                if (previous[i].numWithDiff > 0)
-                {
-                    for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
-                    {
-                        if (next[j].numWithDiff > 0)
-                            break;
-                        next[j].numWithDiff = 1; // TODO - figure out better name for numWithDiff, and put correct value here.
-                    }
-                }
-
-            }
-
-        }
-
-    }
+    cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
 
 }
