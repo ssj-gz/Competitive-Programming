@@ -175,7 +175,11 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                 for (int j = i + minNonNegativeDiff; j <= i + maxNonNegativeDiff; j += 2 * absColorDiff)
                 {
                     if (next[j].markedForward)
+                    {
+                        // This j - and subsequent j's - have been marked by a previous i.
+                        // No need to continue.  This squashes the complexity down from O(N ^ 2) to O(N).
                         break;
+                    }
                     next[j].numAdditions = numAdditions;
                     next[j].markedForward = true;
                     assert(numAdditions >= 0 && numAdditions <= numWithAbsColorDiff);
@@ -196,7 +200,11 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                 for (int j = i - minNonNegativeDiff; j >= i - maxNonNegativeDiff; j -= 2 * absColorDiff)
                 {
                     if (next[j].markedBackward)
+                    {
+                        // This j - and subsequent j's - have been marked by a previous i.
+                        // No need to continue.  This squashes the complexity down from O(N ^ 2) to O(N).
                         break;
+                    }
                     next[j].numAdditions = numAdditions;
                     next[j].markedBackward = true;
                     assert(numAdditions >= 0 && numAdditions <= numWithAbsColorDiff);
@@ -488,6 +496,11 @@ int main(int argc, char* argv[])
     }
     else if (componentWithMoreThanOneNode)
     {
+        // Pick an "official" black and white node from this component.
+        // For all other components, join an arbitrary node in that component
+        // to either the offical white or black node, as appropriate.
+        // Graph will then be completely connected, with componentWithMoreThanOneNode 
+        // acting as a "hub".
         Node* rootNode = componentWithMoreThanOneNode->rootNode;
         Node* rootNodeNeighbour = rootNode->neighbours.front();
         Node* whiteNode = rootNode;
@@ -550,6 +563,7 @@ int main(int argc, char* argv[])
         }
     }
 
+    // Output the result.
     cout << minAbsDiff_Optimised << " " << nodesToConnect.size() << endl;
     for (const auto nodePair : nodesToConnect)
     {
