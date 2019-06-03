@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-06-03
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -162,32 +162,25 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         const int numWithAbsColorDiff = pair.second;
         distinctAbsDiffs.push_back(absColorDiff);
         maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
-        //cout << endl << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
         const Vec<D>& previous = things.back();
         Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
 
-        const int start = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
-        const int end = numWithAbsColorDiff * absColorDiff;
+        const int minNonNegativeDiff = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
+        const int maxNonNegativeDiff = numWithAbsColorDiff * absColorDiff;
         // What diffs can we form by adding multiples of this absColorDiff?
-        //cout << "Marking forwards - previous.minIndex(): " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() << endl;
-
         for (int i = previous.maxIndex(); i >= previous.minIndex(); i--)
         {
-            //cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
-                const int startNumAdditons = (numWithAbsColorDiff + 1) / 2;
-                int numAdditions = startNumAdditons;
-                for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
+                const int startNumAdditions = (numWithAbsColorDiff + 1) / 2;
+                int numAdditions = startNumAdditions;
+                for (int j = i + minNonNegativeDiff; j <= i + maxNonNegativeDiff; j += 2 * absColorDiff)
                 {
-                    //cout << "forwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumAdditons: " << startNumAdditons << endl;
                     if (next[j].markedForward)
                         break;
-                    //cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << " startNumAdditons: " << startNumAdditons << endl;
                     next[j].numAdditions = numAdditions;
                     next[j].markedForward = true;
-                    assert(numAdditions != -1);
-                    assert(numAdditions <= numWithAbsColorDiff);
+                    assert(numAdditions >= 0 && numAdditions <= numWithAbsColorDiff);
                     const int numSubtractions = numWithAbsColorDiff - numAdditions;
                     assert(i + numAdditions * absColorDiff - numSubtractions * absColorDiff == j);
                     numAdditions++;
@@ -195,26 +188,20 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             }
 
         }
-        //cout << "Marking backwards" << endl;
         // What diffs can we form by subtracting multiples of this absColorDiff?
         for (int i = previous.minIndex(); i <= previous.maxIndex(); i++)
         {
-            //cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
                 const int startNumSubtractions = (numWithAbsColorDiff + 1) / 2;
                 int numAdditions = numWithAbsColorDiff - startNumSubtractions;
-                for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
+                for (int j = i - minNonNegativeDiff; j >= i - maxNonNegativeDiff; j -= 2 * absColorDiff)
                 {
-                    //cout << "backwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumSubtractions: " << startNumSubtractions << " start: " << start << " end: " << end << " i - end: " << (i - end) << endl;
                     if (next[j].markedBackward)
                         break;
-                    //cout << " backwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
                     next[j].numAdditions = numAdditions;
                     next[j].markedBackward = true;
-                    assert(numAdditions != -1);
-                    assert(numAdditions <= numWithAbsColorDiff);
-                    assert(numAdditions >= 0);
+                    assert(numAdditions >= 0 && numAdditions <= numWithAbsColorDiff);
                     const int numSubtractions = numWithAbsColorDiff - numAdditions;
                     assert(i + numAdditions * absColorDiff - numSubtractions * absColorDiff == j);
                     numAdditions--;
@@ -230,19 +217,14 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 
     }
 
-
     destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
-
 
     const auto& last = things.back();
     int diffWithMinAbs = numeric_limits<int>::max();
-    //int numAdditionsOfThisAbsDiff = -1;
-    //cout << "Extracting minAbsDiff: " << endl;
     // Go backwards so that we prefer positive sums (we can form -x for x >= 0 if and only if we can
     // form +x).
     for (int i = last.maxIndex(); i >= last.minIndex(); i--)
     {
-        //cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
         assert((last[i].numAdditions == -1) == (last[-i].numAdditions == -1));
         if (last[i].numAdditions != -1)
         {
@@ -250,13 +232,9 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             {
                 diffWithMinAbs = i;
             }
-            //numAdditionsOfThisAbsDiff = last[i].numAdditions;
         }
     }
-    //cout << "** diffWithMinAbs: " << diffWithMinAbs << endl;
     assert(diffWithMinAbs >= 0);
-    //cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
-    //assert(distinctAbsDiffs.size() <= 3);
 
     int generatedDiff = diffWithMinAbs;
     while (!things.empty())
@@ -268,7 +246,6 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
         const int subtractedFromPrevious = absDiffAddedOrSubtracted * numSubtractions;
         const int previousGeneratedDiff = generatedDiff - addedToPrevious + subtractedFromPrevious;
-        //cout << "loop - generatedDiff: " << generatedDiff << " absDiffAddedOrSubtracted:" << absDiffAddedOrSubtracted << " numAdditionsOfThisAbsDiff: " << numAdditions << " numSubtractions: " << numSubtractions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedDiff: " << previousGeneratedDiff << endl;
 
         destNumAdditionsOfEachAbsDiff[absDiffAddedOrSubtracted] = numAdditions;
 
@@ -446,8 +423,9 @@ int main(int argc, char* argv[])
 
     cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
     assert(minAbsDiff_Optimised == minAbsDiff_BruteForce);
-#endif
+#else
     const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
+#endif
 
     // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum sum
     // by choosing the actual colour of the root node of each component (and so,
