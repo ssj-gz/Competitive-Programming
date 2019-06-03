@@ -180,6 +180,8 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs)
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
+
     if (argc == 2)
     {
         struct timeval time;
