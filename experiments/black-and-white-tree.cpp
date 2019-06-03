@@ -2,7 +2,10 @@
 #include <vector>
 #include <map>
 #include <limits>
+#include <algorithm>
 #include <cassert>
+
+#include <sys/time.h>
 
 using namespace std;
 
@@ -173,8 +176,38 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs)
     return minAbsIndex;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int N = rand() % 20 + 1;
+        const int M = rand() % (N * (N - 1) / 2 + 2);
+        cout << N << " " << M << endl;
+
+        vector<string> blah;
+        for (int i = 1; i <= N; i++)
+        {
+            for (int j = i + 1; j <= N; j++)
+            {
+                blah.push_back(to_string(i) + " " + to_string(j));
+            }
+        }
+        assert(blah.size() >= M);
+
+        random_shuffle(blah.begin(), blah.end());
+
+        for(int i = 0; i < M; i++)
+        {
+            cout << blah[i] << endl;
+        }
+
+        return 0;
+
+    }
     int N, M;
     cin >> N >> M;
 
