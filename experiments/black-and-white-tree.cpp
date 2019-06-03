@@ -423,7 +423,7 @@ int main(int argc, char* argv[])
         const int numDifferentColorFromRoot = component.numNodes - component.numNodesSameColorAsRoot;
         if (component.numNodes > 1)
         {
-            componentWithMoreThanOneNode = nullptr;
+            componentWithMoreThanOneNode = &component;
         }
         if (numAdditionsOfEachAbsDiff[component.absColorDiff] > 0)
         {
@@ -488,6 +488,7 @@ int main(int argc, char* argv[])
     }
     else if (componentWithMoreThanOneNode)
     {
+        cout << "Have componentWithMoreThanOneNode" << endl;
         Node* rootNode = componentWithMoreThanOneNode->rootNode;
         Node* rootNodeNeighbour = rootNode->neighbours.front();
         Node* whiteNode = rootNode;
@@ -497,7 +498,9 @@ int main(int argc, char* argv[])
         {
             swap(whiteNode, blackNode);
         }
-        for(auto component : components)
+        cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
+        assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
+        for(auto& component : components)
         {
             if (component.id == whiteOrBlackNodeComponentId)
             {
@@ -518,6 +521,7 @@ int main(int argc, char* argv[])
     else
     {
         // Pick a white and black node arbitrarily.
+        cout << "Do not have component with more than one node" << endl;
         Node* whiteNode = nullptr;
         Node* blackNode = nullptr;
         for (auto& node : nodes)
@@ -531,31 +535,39 @@ int main(int argc, char* argv[])
                 blackNode = &node;
             }
         }
+        assert(whiteNode != nullptr && blackNode != nullptr);
+        assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
+        cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
         for (auto& node : nodes)
         {
             if (node.color == Node::Color::White)
             {
-                nodesToConnect.push_back({&node, blackNode});
+                if (&node != whiteNode) // Prevent double-links between whiteNode and blackNode.
+                {
+                    nodesToConnect.push_back({&node, blackNode});
+                }
             }
             else
             {
                 nodesToConnect.push_back({&node, whiteNode});
             }
         }
-        assert(whiteNode != nullptr && blackNode != nullptr);
     }
     {
         // Verify.
         cout << "Verifying construction of graph" << endl;
         assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
         cout << "nodesToConnect.size():" << nodesToConnect.size() << endl;
+#if 1
         for (const auto nodePair : nodesToConnect)
         {
             cout << " adding edge: " << nodePair.first->id << " - " << nodePair.second->id << endl;
             nodePair.first->neighbours.push_back(nodePair.second);
             nodePair.second->neighbours.push_back(nodePair.first);
+            assert(nodePair.first->color != nodePair.second->color);
         }
         cout << "added new edges" << endl;
+#endif
         for (auto& node : nodes)
         {
             node.visitScheduled = false;
