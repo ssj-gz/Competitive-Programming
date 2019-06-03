@@ -31,6 +31,24 @@ struct Node
     bool visitScheduled = false;
 };
 
+ostream& operator<<(ostream& os, Node::Color color)
+{
+    if (color == Node::Color::White)
+    {
+        os << "white";
+    }
+    else if (color == Node::Color::Black)
+    {
+        os << "black";
+    }
+    else
+    {
+        os << "unknown";
+    }
+
+    return os;
+}
+
 struct Component
 {
     vector<Node*> nodes;
@@ -468,15 +486,17 @@ int main(int argc, char* argv[])
     }
     int numWhiteNodes = 0;
     int numBlackNodes = 0;
-    for (auto node : nodes)
+    for (auto& node : nodes)
     {
         assert(node.color != Node::Color::Unknown);
         if (node.color == Node::Color::White)
         {
+            cout << "Node: " << node.id << " is white" << endl;
             numWhiteNodes++;
         }
         else
         {
+            cout << "Node: " << node.id << " is black" << endl;
             numBlackNodes++;
         }
     }
@@ -558,12 +578,13 @@ int main(int argc, char* argv[])
         cout << "Verifying construction of graph" << endl;
         assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
         cout << "nodesToConnect.size():" << nodesToConnect.size() << endl;
-#if 1
+#if 0
         for (const auto nodePair : nodesToConnect)
         {
             cout << " adding edge: " << nodePair.first->id << " - " << nodePair.second->id << endl;
             nodePair.first->neighbours.push_back(nodePair.second);
             nodePair.second->neighbours.push_back(nodePair.first);
+            assert(nodePair.first->color != nodePair.second->color);
             assert(nodePair.first->color != nodePair.second->color);
         }
         cout << "added new edges" << endl;
@@ -572,35 +593,41 @@ int main(int argc, char* argv[])
         {
             node.visitScheduled = false;
         }
-        auto& node = nodes.front();
-        vector<Node*> nodesToExplore = { &node };
-        node.visitScheduled = true;
-        int depth = 0;
-        Node::Color expectedColor = node.color;
-
-        while (!nodesToExplore.empty())
+        for (auto& node : nodes)
         {
-            cout << "Iteration - depth: " << depth << endl;
-            for (Node* nodeToExplore : nodesToExplore)
+            if (node.visitScheduled)
+                continue;
+
+            vector<Node*> nodesToExplore = { &node };
+            node.visitScheduled = true;
+            int depth = 0;
+            Node::Color expectedColor = node.color;
+
+            while (!nodesToExplore.empty())
             {
-                assert(nodeToExplore->color == expectedColor);
-            }
-            vector<Node*> nextNodesToExplore;
-            for (Node* nodeToExplore : nodesToExplore)
-            {
-                for (Node* neighbour : nodeToExplore->neighbours)
+                cout << "Iteration - depth: " << depth << endl;
+                for (Node* nodeToExplore : nodesToExplore)
                 {
-                    cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
-                    if (!neighbour->visitScheduled)
+                    cout << "nodeToExplore: " << nodeToExplore->id << " color: " << nodeToExplore->color << " expected: " << expectedColor << endl;
+                    assert(nodeToExplore->color == expectedColor);
+                }
+                vector<Node*> nextNodesToExplore;
+                for (Node* nodeToExplore : nodesToExplore)
+                {
+                    for (Node* neighbour : nodeToExplore->neighbours)
                     {
-                        nextNodesToExplore.push_back(neighbour);
-                        neighbour->visitScheduled = true;
+                        cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
+                        if (!neighbour->visitScheduled)
+                        {
+                            nextNodesToExplore.push_back(neighbour);
+                            neighbour->visitScheduled = true;
+                        }
                     }
                 }
+                nodesToExplore = nextNodesToExplore;
+                depth++;
+                expectedColor = (expectedColor == Node::Color::White) ? Node::Color::Black : Node::Color::White;
             }
-            nodesToExplore = nextNodesToExplore;
-            depth++;
-            expectedColor = (expectedColor == Node::Color::White) ? Node::Color::Black : Node::Color::White;
         }
     }
 
