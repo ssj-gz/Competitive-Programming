@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         const int N = rand() % 20 + 1;
-        const int M = rand() % (N * (N - 1) / 2 + 2);
+        const int M = rand() % (N * (N - 1) / 2 + 1);
         cout << N << " " << M << endl;
 
         vector<string> blah;
@@ -308,5 +308,6 @@ int main(int argc, char* argv[])
     const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs);
 
     cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
+    assert(minAbsDiff_Optimised == minAbsDiff_BruteForce);
 
 }
