@@ -38,6 +38,7 @@ struct Component
     int numNodes = 0;
     int numNodesSameColorAsRoot = 0;
     int absColorDiff = -1;
+    int id = -1;
 
 };
 
@@ -330,6 +331,7 @@ int main(int argc, char* argv[])
             Component newComponent;
             newComponent.rootNode = &node;
             const int componentNum = components.size();
+            newComponent.id = componentNum;
             cout << "found new component beginning at : " << node.id << endl;
 
 
@@ -413,11 +415,16 @@ int main(int argc, char* argv[])
     // Arbitrarily, we ensure that the number of black nodes is at least equal to
     // the number of white nodes, and so the difference is nB - nW (i.e. no abs() needed!).
 
+    Component* componentWithMoreThanOneNode = nullptr;
     for (auto& component : components)
     {
         Node::Color componentRootColor = Node::Color::Unknown;
         const int numSameColorAsRoot = component.numNodesSameColorAsRoot;
         const int numDifferentColorFromRoot = component.numNodes - component.numNodesSameColorAsRoot;
+        if (component.numNodes > 1)
+        {
+            componentWithMoreThanOneNode = nullptr;
+        }
         if (numAdditionsOfEachAbsDiff[component.absColorDiff] > 0)
         {
             // Need to make this contribute *positively* to the diff i.e. need more
@@ -473,5 +480,122 @@ int main(int argc, char* argv[])
             numBlackNodes++;
         }
     }
-    assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
+    vector<std::pair<Node*, Node*>> nodesToConnect;
+    if (numWhiteNodes == 0 || numBlackNodes == 0)
+    {
+        assert(N == 1);
+        // Nothing to do.
+    }
+    else if (componentWithMoreThanOneNode)
+    {
+        Node* rootNode = componentWithMoreThanOneNode->rootNode;
+        Node* rootNodeNeighbour = rootNode->neighbours.front();
+        Node* whiteNode = rootNode;
+        Node* blackNode = rootNodeNeighbour;
+        const int whiteOrBlackNodeComponentId = componentWithMoreThanOneNode->id;
+        if (rootNode->color != Node::Color::White)
+        {
+            swap(whiteNode, blackNode);
+        }
+        for(auto component : components)
+        {
+            if (component.id == whiteOrBlackNodeComponentId)
+            {
+                continue;
+            }
+            auto node = component.nodes.front();
+            if (node->color == Node::Color::White)
+            {
+                nodesToConnect.push_back({node, blackNode});
+            }
+            else
+            {
+                nodesToConnect.push_back({node, whiteNode});
+            }
+
+        }
+    }
+    else
+    {
+        // Pick a white and black node arbitrarily.
+        Node* whiteNode = nullptr;
+        Node* blackNode = nullptr;
+        for (auto& node : nodes)
+        {
+            if (node.color == Node::Color::White)
+            {
+                whiteNode = &node;
+            }
+            else
+            {
+                blackNode = &node;
+            }
+        }
+        for (auto& node : nodes)
+        {
+            if (node.color == Node::Color::White)
+            {
+                nodesToConnect.push_back({&node, blackNode});
+            }
+            else
+            {
+                nodesToConnect.push_back({&node, whiteNode});
+            }
+        }
+        assert(whiteNode != nullptr && blackNode != nullptr);
+    }
+    {
+        // Verify.
+        cout << "Verifying construction of graph" << endl;
+        assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
+        cout << "nodesToConnect.size():" << nodesToConnect.size() << endl;
+        for (const auto nodePair : nodesToConnect)
+        {
+            cout << " adding edge: " << nodePair.first->id << " - " << nodePair.second->id << endl;
+            nodePair.first->neighbours.push_back(nodePair.second);
+            nodePair.second->neighbours.push_back(nodePair.first);
+        }
+        cout << "added new edges" << endl;
+        for (auto& node : nodes)
+        {
+            node.visitScheduled = false;
+        }
+        auto& node = nodes.front();
+        vector<Node*> nodesToExplore = { &node };
+        node.visitScheduled = true;
+        int depth = 0;
+        Node::Color expectedColor = node.color;
+
+        while (!nodesToExplore.empty())
+        {
+            cout << "Iteration - depth: " << depth << endl;
+            for (Node* nodeToExplore : nodesToExplore)
+            {
+                assert(nodeToExplore->color == expectedColor);
+            }
+            vector<Node*> nextNodesToExplore;
+            for (Node* nodeToExplore : nodesToExplore)
+            {
+                for (Node* neighbour : nodeToExplore->neighbours)
+                {
+                    cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
+                    if (!neighbour->visitScheduled)
+                    {
+                        nextNodesToExplore.push_back(neighbour);
+                        neighbour->visitScheduled = true;
+                    }
+                }
+            }
+            nodesToExplore = nextNodesToExplore;
+            depth++;
+            expectedColor = (expectedColor == Node::Color::White) ? Node::Color::Black : Node::Color::White;
+        }
+    }
+
+
+    cout << nodesToConnect.size() << endl;
+    for (const auto nodePair : nodesToConnect)
+    {
+        cout << nodePair.first->id << " " << nodePair.second->id << endl;
+    }
 }
