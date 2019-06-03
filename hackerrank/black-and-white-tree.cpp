@@ -236,26 +236,24 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
 
     const auto& last = generatableDiffsForDistinctAbsDiff.back();
-    int diffWithMinAbs = numeric_limits<int>::max();
-    // Go backwards so that we prefer positive sums (we can form -x for x >= 0 if and only if we can
-    // form +x) - they're vaguely easier to deal with.
-    for (int i = last.maxIndex(); i >= last.minIndex(); i--)
+    int minAbsDiff = -1;
+    // We can assume that minAbsDiff is non-negative, since we can generate minAbsDiff iff we can generate
+    // -minAbsDiff.
+    for (int i = 0; i <= last.maxIndex(); i++)
     {
         assert((last[i].numAdditions == -1) == (last[-i].numAdditions == -1));
         if (last[i].numAdditions != -1)
         {
-            if (abs(i) < abs(diffWithMinAbs))
-            {
-                diffWithMinAbs = i;
-            }
+            minAbsDiff = i;
+            break;
         }
     }
-    assert(diffWithMinAbs >= 0);
+    assert(minAbsDiff >= 0);
 
     // Reconstruct how many of each distinctAbsDiffs we added (and subtracted) in order
-    // to obtain the final diffWithMinAbs, and store the results in destNumAdditionsOfEachAbsDiff.
+    // to obtain the final minAbsDiff, and store the results in destNumAdditionsOfEachAbsDiff.
     // See the "Verify" block below.
-    int generatedDiff = diffWithMinAbs;
+    int generatedDiff = minAbsDiff;
     while (!generatableDiffsForDistinctAbsDiff.empty())
     {
         const int absDiffAddedOrSubtracted = distinctAbsDiffs.back();
@@ -283,11 +281,11 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             sum += destNumAdditionsOfEachAbsDiff[absDiff] * absDiff;
             sum -= (numWithAbsColorDiff[absDiff] - destNumAdditionsOfEachAbsDiff[absDiff]) * absDiff;
         }
-        assert(sum == diffWithMinAbs);
+        assert(sum == minAbsDiff);
 #endif
     }
 
-    return abs(diffWithMinAbs);
+    return minAbsDiff;
 }
 
 int main(int argc, char* argv[])
@@ -302,7 +300,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 200'000 + 1;
+        const int N = rand() % 30 + 1;
         const int M = min(rand() % (N * (N - 1) / 2 + 1), 500'000);
         cout << N << " " << M << endl;
 
@@ -571,6 +569,7 @@ int main(int argc, char* argv[])
     }
 
     // Output the result.
+    //cout << "minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
     cout << minAbsDiff_Optimised << " " << nodesToConnect.size() << endl;
     for (const auto nodePair : nodesToConnect)
     {
