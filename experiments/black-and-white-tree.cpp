@@ -210,21 +210,21 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 #if 1
     cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
-    int generatedAbsDiff = diffWithMinAbs;
+    int generatedDiff = diffWithMinAbs;
     while (!things.empty())
     {
         const int absDiffAddedOrSubtracted = distinctAbsDiffs.back();
-        const int numAdditions = things.back()[generatedAbsDiff].numAdditions;
+        const int numAdditions = things.back()[generatedDiff].numAdditions;
         assert(numAdditions >= 0);
         const int numSubtractions = numWithAbsColorDiff[absDiffAddedOrSubtracted] - numAdditions;
         const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
         const int subtractedFromPrevious = absDiffAddedOrSubtracted * numSubtractions;
-        const int previousGeneratedAbsDiff = generatedAbsDiff - addedToPrevious + subtractedFromPrevious;
-        cout << "loop - generatedAbsDiff: " << generatedAbsDiff << " absDiffAddedOrSubtracted:" << absDiffAddedOrSubtracted << " numAdditionsOfThisAbsDiff: " << numAdditions << " numSubtractions: " << numSubtractions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedAbsDiff: " << previousGeneratedAbsDiff << endl;
+        const int previousGeneratedDiff = generatedDiff - addedToPrevious + subtractedFromPrevious;
+        cout << "loop - generatedDiff: " << generatedDiff << " absDiffAddedOrSubtracted:" << absDiffAddedOrSubtracted << " numAdditionsOfThisAbsDiff: " << numAdditions << " numSubtractions: " << numSubtractions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedDiff: " << previousGeneratedDiff << endl;
 
         destNumAdditionsOfEachAbsDiff[absDiffAddedOrSubtracted] = numAdditions;
 
-        generatedAbsDiff = previousGeneratedAbsDiff;
+        generatedDiff = previousGeneratedDiff;
         things.pop_back();
         distinctAbsDiffs.pop_back();
     }
