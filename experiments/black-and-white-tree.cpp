@@ -88,8 +88,8 @@ void minAbsDiffBruteForce(const vector<int>& absDiffs, int absDiffIndex, int dif
     {
         if (abs(diffSoFar) < minAbsDiff)
         {
-            cout << "Found new smallest minAbsDiff: " << minAbsDiff << endl;
             minAbsDiff = min(minAbsDiff, abs(diffSoFar));
+            cout << "Found new smallest minAbsDiff: " << minAbsDiff << endl;
         }
 
         return;
@@ -144,6 +144,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                     if (next[j].numAdditions != -1)
                         break;
                     next[j].numAdditions = numAdditions;
+                    cout << " marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
                     numAdditions++;
                 }
             }
@@ -172,38 +173,46 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 
     const auto& last = things.back();
     int minAbsDiff = numeric_limits<int>::max();
-    int numAdditionsOfThisAbsDiff = -1;
+    //int numAdditionsOfThisAbsDiff = -1;
     for (int i = last.minIndex(); i <= last.maxIndex(); i++)
     {
         cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
         if (last[i].numAdditions != -1)
         {
             minAbsDiff = min(minAbsDiff, abs(i));
-            numAdditionsOfThisAbsDiff = last[i].numAdditions;
+            //numAdditionsOfThisAbsDiff = last[i].numAdditions;
         }
     }
 
-    int thisAbsDiff = minAbsDiff;
+    int generatedAbsDiff = minAbsDiff;
     while (!things.empty())
     {
-        const int numAdditionsOfThisAbsDiff = things.back()[thisAbsDiff].numAdditions;
-        const int previousAbsDiff = thisAbsDiff - distinctAbsDiffs.back() * numAdditionsOfThisAbsDiff;
+        const int absDiffAddedOrSubtracted = distinctAbsDiffs.back();
+        const int numAdditions = things.back()[generatedAbsDiff].numAdditions;
+        const int numSubtractions = numWithAbsColorDiff[absDiffAddedOrSubtracted] - numAdditions;
+        const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
+        const int subtractedFromPrevious = absDiffAddedOrSubtracted * numSubtractions;
+        const int previousGeneratedAbsDiff = generatedAbsDiff - addedToPrevious + subtractedFromPrevious;
+        cout << "loop - generatedAbsDiff: " << generatedAbsDiff << " numAdditionsOfThisAbsDiff: " << numAdditions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedAbsDiff: " << previousGeneratedAbsDiff << endl;
 
-        destNumAdditionsOfEachAbsDiff[thisAbsDiff] = numAdditionsOfThisAbsDiff;
+        destNumAdditionsOfEachAbsDiff[absDiffAddedOrSubtracted] = numAdditions;
 
-        thisAbsDiff = previousAbsDiff;
+        generatedAbsDiff = previousGeneratedAbsDiff;
         things.pop_back();
         distinctAbsDiffs.pop_back();
     }
 
     {
+        cout << "Verifying" << endl;
         int sum = 0;
         for (int absDiff = 0; absDiff < destNumAdditionsOfEachAbsDiff.size(); absDiff++)
         {
+            cout << " absDiff: " << absDiff << " destNumAdditionsOfEachAbsDiff: " << destNumAdditionsOfEachAbsDiff[absDiff] << endl;
             assert(destNumAdditionsOfEachAbsDiff[absDiff] <= numWithAbsColorDiff[absDiff]);
             sum += destNumAdditionsOfEachAbsDiff[absDiff] * absDiff;
             sum -= (numWithAbsColorDiff[absDiff] - destNumAdditionsOfEachAbsDiff[absDiff]) * absDiff;
         }
+        cout << "Verify: sum: " << sum << " minAbsDiff: " << minAbsDiff << endl;
         assert(abs(sum) == minAbsDiff);
     }
 
