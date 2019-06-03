@@ -151,6 +151,8 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                     next[j].numAdditions = numAdditions;
                     assert(numAdditions != -1);
                     assert(numAdditions <= numWithAbsColorDiff);
+                    const int numSubtractions = numWithAbsColorDiff - numAdditions;
+                    assert(i + numAdditions * absColorDiff - numSubtractions * absColorDiff == j);
                     numAdditions++;
                 }
             }
@@ -174,6 +176,8 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                     assert(numAdditions != -1);
                     assert(numAdditions <= numWithAbsColorDiff);
                     assert(numAdditions >= 0);
+                    const int numSubtractions = numWithAbsColorDiff - numAdditions;
+                    assert(i + numAdditions * absColorDiff - numSubtractions * absColorDiff == j);
                     numAdditions--;
                 }
             }
