@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <limits>
 #include <algorithm>
 #include <cassert>
@@ -255,6 +256,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     //cout << "** diffWithMinAbs: " << diffWithMinAbs << endl;
     assert(diffWithMinAbs >= 0);
     //cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
+    //assert(distinctAbsDiffs.size() <= 3);
 
     int generatedDiff = diffWithMinAbs;
     while (!things.empty())
@@ -306,25 +308,30 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 30 + 1;
-        const int M = rand() % (N * (N - 1) / 2 + 1);
+        const int N = rand() % 200'000 + 1;
+        const int M = min(rand() % (N * (N - 1) / 2 + 1), 500'000);
         cout << N << " " << M << endl;
 
-        vector<string> blah;
-        for (int i = 1; i <= N; i++)
+        set<string> blah;
+        while (blah.size() < M)
         {
-            for (int j = i + 1; j <= N; j++)
-            {
-                blah.push_back(to_string(i) + " " + to_string(j));
-            }
+            int node1 = (rand() % N) + 1;
+            int node2 = (rand() % N) + 1;
+            if (node1 == node2)
+                continue;
+
+            if (node1 > node2)
+                swap(node1, node2);
+
+            blah.insert(to_string(node1) + " " + to_string(node2));
         }
         assert(blah.size() >= M);
 
-        random_shuffle(blah.begin(), blah.end());
+        //random_shuffle(blah.begin(), blah.end());
 
-        for(int i = 0; i < M; i++)
+        for(const auto& edge : blah)
         {
-            cout << blah[i] << endl;
+            cout << edge << endl;
         }
 
         return 0;
@@ -408,6 +415,7 @@ int main(int argc, char* argv[])
             components.push_back(newComponent);
         }
     }
+#ifdef BRUTE_FORCE
     for (auto& node : nodes)
     {
         assert(node.colorCategory != Node::Unknown);
@@ -416,6 +424,7 @@ int main(int argc, char* argv[])
             assert(node.colorCategory != neighbourNode->colorCategory);
         }
     }
+#endif
 
     vector<int> absDiffs;
     for (const auto& component : components)
