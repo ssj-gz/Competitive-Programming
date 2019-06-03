@@ -136,18 +136,18 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         // What diffs can we form by adding multiples of this absColorDiff?
         cout << "Marking forwards - previous.minIndex(): " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() << endl;
 
-        int numAdditions = startNumAdditons;
         for (int i = previous.maxIndex(); i >= previous.minIndex(); i--)
         {
             cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
+                int numAdditions = startNumAdditons;
                 for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
                 {
-                    cout << "j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << endl;
+                    cout << "j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumAdditons: " << startNumAdditons << endl;
                     if (next[j].numAdditions != -1)
                         break;
-                    cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
+                    cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << " startNumAdditons: " << startNumAdditons << endl;
                     next[j].numAdditions = numAdditions;
                     assert(numAdditions != -1);
                     assert(numAdditions <= numWithAbsColorDiff);
@@ -158,12 +158,12 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         }
         cout << "Marking backwards" << endl;
         // What diffs can we form by subtracting multiples of this absColorDiff?
-        numAdditions = startNumAdditons;
         for (int i = previous.minIndex(); i <= previous.maxIndex(); i++)
         {
             cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
+                int numAdditions = startNumAdditons;
                 for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
                 {
                     if (next[j].numAdditions != -1)
@@ -197,7 +197,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         }
     }
     cout << "** minAbsDiff: " << minAbsDiff << endl;
-#if 1
+#if 0
     cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
     int generatedAbsDiff = minAbsDiff;
