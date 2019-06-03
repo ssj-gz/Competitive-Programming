@@ -400,16 +400,19 @@ int main(int argc, char* argv[])
             components.push_back(newComponent);
         }
     }
+    for (auto& node : nodes)
+    {
+        assert(node.colorCategory != Node::Unknown);
+        for (auto& neighbourNode : node.neighbours)
+        {
+            assert(node.colorCategory != neighbourNode->colorCategory);
+        }
+    }
 
-    bool allComponentsHaveSizeOne = true;
     vector<int> absDiffs;
     for (const auto& component : components)
     {
         cout << "component: absColorDiff: " << component.absColorDiff <<  endl;
-        if (component.numNodes != 1)
-        {
-            allComponentsHaveSizeOne = false;
-        }
         absDiffs.push_back(component.absColorDiff);
 
         for (const auto& node : component.nodes)
@@ -592,6 +595,13 @@ int main(int argc, char* argv[])
         for (auto& node : nodes)
         {
             node.visitScheduled = false;
+        }
+        for (auto& node : nodes)
+        {
+            for (auto& neighbourNode : node.neighbours)
+            {
+                assert(node.color != neighbourNode->color);
+            }
         }
         for (auto& node : nodes)
         {
