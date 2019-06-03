@@ -87,6 +87,8 @@ class Vec
 struct D
 {
     int numAdditions = -1;
+    bool markedForward = false;
+    bool markedBackward = false;
 };
 
 void minAbsDiffBruteForce(const vector<int>& absDiffs, int absDiffIndex, int diffSoFar, int& minAbsDiff)
@@ -151,11 +153,12 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                 int numAdditions = startNumAdditons;
                 for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
                 {
-                    cout << "j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumAdditons: " << startNumAdditons << endl;
-                    if (next[j].numAdditions != -1)
+                    cout << "forwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumAdditons: " << startNumAdditons << endl;
+                    if (next[j].markedForward)
                         break;
                     cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << " startNumAdditons: " << startNumAdditons << endl;
                     next[j].numAdditions = numAdditions;
+                    next[j].markedForward = true;
                     assert(numAdditions != -1);
                     assert(numAdditions <= numWithAbsColorDiff);
                     const int numSubtractions = numWithAbsColorDiff - numAdditions;
@@ -176,10 +179,12 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                 int numAdditions = numWithAbsColorDiff - startNumSubtractions;
                 for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
                 {
-                    if (next[j].numAdditions != -1)
+                    cout << "backwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumSubtractions: " << startNumSubtractions << " start: " << start << " end: " << end << " i - end: " << (i - end) << endl;
+                    if (next[j].markedBackward)
                         break;
                     cout << " backwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
                     next[j].numAdditions = numAdditions;
+                    next[j].markedBackward = true;
                     assert(numAdditions != -1);
                     assert(numAdditions <= numWithAbsColorDiff);
                     assert(numAdditions >= 0);
@@ -190,12 +195,17 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             }
 
         }
+        for (int i = 0; i <= next.maxIndex(); i++)
+        {
+            assert((next[i].numAdditions == -1) == (next[-i].numAdditions == -1));
+        }
         things.push_back(next);
 
     }
 
 
     destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
+
 
     const auto& last = things.back();
     int diffWithMinAbs = numeric_limits<int>::max();
@@ -206,6 +216,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     for (int i = last.maxIndex(); i >= last.minIndex(); i--)
     {
         cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
+        assert((last[i].numAdditions == -1) == (last[-i].numAdditions == -1));
         if (last[i].numAdditions != -1)
         {
             if (abs(i) < abs(diffWithMinAbs))
