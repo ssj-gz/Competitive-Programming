@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-06-03
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <map>
@@ -154,28 +161,28 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         const int numWithAbsColorDiff = pair.second;
         distinctAbsDiffs.push_back(absColorDiff);
         maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
-        cout << endl << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
+        //cout << endl << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
         const Vec<D>& previous = things.back();
         Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
 
         const int start = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
         const int end = numWithAbsColorDiff * absColorDiff;
         // What diffs can we form by adding multiples of this absColorDiff?
-        cout << "Marking forwards - previous.minIndex(): " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() << endl;
+        //cout << "Marking forwards - previous.minIndex(): " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() << endl;
 
         for (int i = previous.maxIndex(); i >= previous.minIndex(); i--)
         {
-            cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
+            //cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
                 const int startNumAdditons = (numWithAbsColorDiff + 1) / 2;
                 int numAdditions = startNumAdditons;
                 for (int j = i + start; j <= i + end; j += 2 * absColorDiff)
                 {
-                    cout << "forwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumAdditons: " << startNumAdditons << endl;
+                    //cout << "forwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumAdditons: " << startNumAdditons << endl;
                     if (next[j].markedForward)
                         break;
-                    cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << " startNumAdditons: " << startNumAdditons << endl;
+                    //cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << " startNumAdditons: " << startNumAdditons << endl;
                     next[j].numAdditions = numAdditions;
                     next[j].markedForward = true;
                     assert(numAdditions != -1);
@@ -187,21 +194,21 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             }
 
         }
-        cout << "Marking backwards" << endl;
+        //cout << "Marking backwards" << endl;
         // What diffs can we form by subtracting multiples of this absColorDiff?
         for (int i = previous.minIndex(); i <= previous.maxIndex(); i++)
         {
-            cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
+            //cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
                 const int startNumSubtractions = (numWithAbsColorDiff + 1) / 2;
                 int numAdditions = numWithAbsColorDiff - startNumSubtractions;
                 for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
                 {
-                    cout << "backwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumSubtractions: " << startNumSubtractions << " start: " << start << " end: " << end << " i - end: " << (i - end) << endl;
+                    //cout << "backwards j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << " numAdditions: " << numAdditions << " startNumSubtractions: " << startNumSubtractions << " start: " << start << " end: " << end << " i - end: " << (i - end) << endl;
                     if (next[j].markedBackward)
                         break;
-                    cout << " backwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
+                    //cout << " backwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
                     next[j].numAdditions = numAdditions;
                     next[j].markedBackward = true;
                     assert(numAdditions != -1);
@@ -229,12 +236,12 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     const auto& last = things.back();
     int diffWithMinAbs = numeric_limits<int>::max();
     //int numAdditionsOfThisAbsDiff = -1;
-    cout << "Extracting minAbsDiff: " << endl;
+    //cout << "Extracting minAbsDiff: " << endl;
     // Go backwards so that we prefer positive sums (we can form -x for x >= 0 if and only if we can
     // form +x).
     for (int i = last.maxIndex(); i >= last.minIndex(); i--)
     {
-        cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
+        //cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
         assert((last[i].numAdditions == -1) == (last[-i].numAdditions == -1));
         if (last[i].numAdditions != -1)
         {
@@ -245,10 +252,9 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             //numAdditionsOfThisAbsDiff = last[i].numAdditions;
         }
     }
-    cout << "** diffWithMinAbs: " << diffWithMinAbs << endl;
+    //cout << "** diffWithMinAbs: " << diffWithMinAbs << endl;
     assert(diffWithMinAbs >= 0);
-#if 1
-    cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
+    //cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
     int generatedDiff = diffWithMinAbs;
     while (!things.empty())
@@ -260,7 +266,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
         const int subtractedFromPrevious = absDiffAddedOrSubtracted * numSubtractions;
         const int previousGeneratedDiff = generatedDiff - addedToPrevious + subtractedFromPrevious;
-        cout << "loop - generatedDiff: " << generatedDiff << " absDiffAddedOrSubtracted:" << absDiffAddedOrSubtracted << " numAdditionsOfThisAbsDiff: " << numAdditions << " numSubtractions: " << numSubtractions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedDiff: " << previousGeneratedDiff << endl;
+        //cout << "loop - generatedDiff: " << generatedDiff << " absDiffAddedOrSubtracted:" << absDiffAddedOrSubtracted << " numAdditionsOfThisAbsDiff: " << numAdditions << " numSubtractions: " << numSubtractions << " addedToPrevious:" << addedToPrevious << " subtractedFromPrevious: " << subtractedFromPrevious << " previousGeneratedDiff: " << previousGeneratedDiff << endl;
 
         destNumAdditionsOfEachAbsDiff[absDiffAddedOrSubtracted] = numAdditions;
 
@@ -270,6 +276,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     }
 
     {
+#ifdef BRUTE_FORCE
         cout << "Verifying" << endl;
         int sum = 0;
         for (int absDiff = 0; absDiff < destNumAdditionsOfEachAbsDiff.size(); absDiff++)
@@ -281,8 +288,8 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         }
         cout << "Verify: sum: " << sum << " diffWithMinAbs: " << diffWithMinAbs << endl;
         assert(sum == diffWithMinAbs);
-    }
 #endif
+    }
 
 
     return abs(diffWithMinAbs);
@@ -294,6 +301,7 @@ int main(int argc, char* argv[])
 
     if (argc == 2)
     {
+        // XXX This does not guarantee a solution!
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -350,7 +358,7 @@ int main(int argc, char* argv[])
             newComponent.rootNode = &node;
             const int componentNum = components.size();
             newComponent.id = componentNum;
-            cout << "found new component beginning at : " << node.id << endl;
+            //cout << "found new component beginning at : " << node.id << endl;
 
 
             vector<Node*> nodesToExplore = { &node };
@@ -358,11 +366,11 @@ int main(int argc, char* argv[])
             int depth = 0;
             while (!nodesToExplore.empty())
             {
-                cout << "Iteration - depth: " << depth << endl;
+                //cout << "Iteration - depth: " << depth << endl;
                 Node::ColorCategory colorCategory = ((depth % 2) == 0) ? Node::SameAsRoot : Node::DifferentFromRoot;
                 for (Node* nodeToExplore : nodesToExplore)
                 {
-                    cout << "nodeToExplore: " << nodeToExplore->id << " colorCategory: " << nodeToExplore->colorCategory << endl;
+                    //cout << "nodeToExplore: " << nodeToExplore->id << " colorCategory: " << nodeToExplore->colorCategory << endl;
                     if (nodeToExplore->colorCategory != Node::Unknown)
                     {
                         assert(nodeToExplore->colorCategory == colorCategory);
@@ -370,7 +378,7 @@ int main(int argc, char* argv[])
                     }
                     nodeToExplore->colorCategory = colorCategory;
                     nodeToExplore->componentNum = componentNum;
-                    cout << " set node: " << nodeToExplore->id << " to colorCategory: " << colorCategory << endl;
+                    //cout << " set node: " << nodeToExplore->id << " to colorCategory: " << colorCategory << endl;
                     if (colorCategory == Node::SameAsRoot)
                     {
                         newComponent.numNodesSameColorAsRoot++;
@@ -384,7 +392,7 @@ int main(int argc, char* argv[])
                 {
                     for (Node* neighbour : nodeToExplore->neighbours)
                     {
-                        cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
+                        //cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
                         if (!neighbour->visitScheduled)
                         {
                             nextNodesToExplore.push_back(neighbour);
@@ -412,22 +420,25 @@ int main(int argc, char* argv[])
     vector<int> absDiffs;
     for (const auto& component : components)
     {
-        cout << "component: absColorDiff: " << component.absColorDiff <<  endl;
+        //cout << "component: absColorDiff: " << component.absColorDiff <<  endl;
         absDiffs.push_back(component.absColorDiff);
 
         for (const auto& node : component.nodes)
         {
             assert(node->colorCategory != Node::Unknown);
-            cout << node->id << " " << (node->colorCategory == Node::SameAsRoot ? "Same colorCategory as root" : "Different colorCategory from root") << endl;
+            //cout << node->id << " " << (node->colorCategory == Node::SameAsRoot ? "Same colorCategory as root" : "Different colorCategory from root") << endl;
         }
     }
 
-    const auto minAbsDiff_BruteForce = minAbsDiffBruteForce(absDiffs);
     vector<int> numAdditionsOfEachAbsDiff;
+#ifdef BRUTE_FORCE
+    const auto minAbsDiff_BruteForce = minAbsDiffBruteForce(absDiffs);
     const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
 
     cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
     assert(minAbsDiff_Optimised == minAbsDiff_BruteForce);
+#endif
+    const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
 
     // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum sum
     // by choosing the actual colour of the root node of each component (and so,
@@ -494,12 +505,12 @@ int main(int argc, char* argv[])
         assert(node.color != Node::Color::Unknown);
         if (node.color == Node::Color::White)
         {
-            cout << "Node: " << node.id << " is white" << endl;
+            //cout << "Node: " << node.id << " is white" << endl;
             numWhiteNodes++;
         }
         else
         {
-            cout << "Node: " << node.id << " is black" << endl;
+            //cout << "Node: " << node.id << " is black" << endl;
             numBlackNodes++;
         }
     }
@@ -511,7 +522,7 @@ int main(int argc, char* argv[])
     }
     else if (componentWithMoreThanOneNode)
     {
-        cout << "Have componentWithMoreThanOneNode" << endl;
+        //cout << "Have componentWithMoreThanOneNode" << endl;
         Node* rootNode = componentWithMoreThanOneNode->rootNode;
         Node* rootNodeNeighbour = rootNode->neighbours.front();
         Node* whiteNode = rootNode;
@@ -521,7 +532,7 @@ int main(int argc, char* argv[])
         {
             swap(whiteNode, blackNode);
         }
-        cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
+        //cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
         assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
         for(auto& component : components)
         {
@@ -544,7 +555,7 @@ int main(int argc, char* argv[])
     else
     {
         // Pick a white and black node arbitrarily.
-        cout << "Do not have component with more than one node" << endl;
+        //cout << "Do not have component with more than one node" << endl;
         Node* whiteNode = nullptr;
         Node* blackNode = nullptr;
         for (auto& node : nodes)
@@ -560,7 +571,7 @@ int main(int argc, char* argv[])
         }
         assert(whiteNode != nullptr && blackNode != nullptr);
         assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
-        cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
+        //cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
         for (auto& node : nodes)
         {
             if (node.color == Node::Color::White)
@@ -577,6 +588,7 @@ int main(int argc, char* argv[])
         }
     }
     {
+#ifdef BRUTE_FORCE
         // Verify.
         cout << "Verifying construction of graph" << endl;
         assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
@@ -639,10 +651,11 @@ int main(int argc, char* argv[])
                 expectedColor = (expectedColor == Node::Color::White) ? Node::Color::Black : Node::Color::White;
             }
         }
+#endif
     }
 
 
-    cout << nodesToConnect.size() << endl;
+    cout << minAbsDiff_Optimised << " " << nodesToConnect.size() << endl;
     for (const auto nodePair : nodesToConnect)
     {
         cout << nodePair.first->id << " " << nodePair.second->id << endl;
