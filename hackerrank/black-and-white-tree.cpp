@@ -510,7 +510,6 @@ int main(int argc, char* argv[])
         Node* rootNodeNeighbour = rootNode->neighbours.front();
         Node* whiteNode = rootNode;
         Node* blackNode = rootNodeNeighbour;
-        const int whiteOrBlackNodeComponentId = componentWithMoreThanOneNode->id;
         if (rootNode->color != Node::Color::White)
         {
             swap(whiteNode, blackNode);
@@ -518,7 +517,7 @@ int main(int argc, char* argv[])
         assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
         for(auto& component : components)
         {
-            if (component.id == whiteOrBlackNodeComponentId)
+            if (&component == componentWithMoreThanOneNode)
             {
                 continue;
             }
