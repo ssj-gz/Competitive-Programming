@@ -56,7 +56,7 @@ class Vec
         }
         T& operator[](int index)
         {
-            cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
+            //cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
             assert(index >= m_minIndex);
             assert(index <= m_maxIndex);
             assert(index - m_minIndex < m_vector.size());
@@ -64,7 +64,7 @@ class Vec
         }
         const T& operator[](int index) const
         {
-            cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
+            //cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
             assert(index >= m_minIndex);
             assert(index <= m_maxIndex);
             assert(index - m_minIndex < m_vector.size());
@@ -191,26 +191,31 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
 
     const auto& last = things.back();
-    int minAbsDiff = numeric_limits<int>::max();
+    int diffWithMinAbs = numeric_limits<int>::max();
     //int numAdditionsOfThisAbsDiff = -1;
+    cout << "Extracting minAbsDiff: " << endl;
     for (int i = last.minIndex(); i <= last.maxIndex(); i++)
     {
         cout << "i: " << i << " last[i].numAdditions: " << last[i].numAdditions << endl;
         if (last[i].numAdditions != -1)
         {
-            minAbsDiff = min(minAbsDiff, abs(i));
+            if (abs(i) < abs(diffWithMinAbs))
+            {
+                diffWithMinAbs = i;
+            }
             //numAdditionsOfThisAbsDiff = last[i].numAdditions;
         }
     }
-    cout << "** minAbsDiff: " << minAbsDiff << endl;
+    cout << "** diffWithMinAbs: " << diffWithMinAbs << endl;
 #if 1
     cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
-    int generatedAbsDiff = minAbsDiff;
+    int generatedAbsDiff = diffWithMinAbs;
     while (!things.empty())
     {
         const int absDiffAddedOrSubtracted = distinctAbsDiffs.back();
         const int numAdditions = things.back()[generatedAbsDiff].numAdditions;
+        assert(numAdditions >= 0);
         const int numSubtractions = numWithAbsColorDiff[absDiffAddedOrSubtracted] - numAdditions;
         const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
         const int subtractedFromPrevious = absDiffAddedOrSubtracted * numSubtractions;
@@ -234,13 +239,13 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             sum += destNumAdditionsOfEachAbsDiff[absDiff] * absDiff;
             sum -= (numWithAbsColorDiff[absDiff] - destNumAdditionsOfEachAbsDiff[absDiff]) * absDiff;
         }
-        cout << "Verify: sum: " << sum << " minAbsDiff: " << minAbsDiff << endl;
-        assert(abs(sum) == minAbsDiff);
+        cout << "Verify: sum: " << sum << " diffWithMinAbs: " << diffWithMinAbs << endl;
+        assert(sum == diffWithMinAbs);
     }
 #endif
 
 
-    return minAbsDiff;
+    return abs(diffWithMinAbs);
 }
 
 int main(int argc, char* argv[])
