@@ -90,7 +90,6 @@ class Vec
         }
         T& operator[](int index)
         {
-            //cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
             assert(index >= m_minIndex);
             assert(index <= m_maxIndex);
             assert(index - m_minIndex < m_vector.size());
@@ -98,7 +97,6 @@ class Vec
         }
         const T& operator[](int index) const
         {
-            //cout << "index: " << index << " m_minIndex: " << m_minIndex << endl;
             assert(index >= m_minIndex);
             assert(index <= m_maxIndex);
             assert(index - m_minIndex < m_vector.size());
@@ -209,10 +207,13 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             }
 
         }
+#ifndef NDEBUG
         for (int i = 0; i <= next.maxIndex(); i++)
         {
+            // Should be able to form x if and only if we can form -x.
             assert((next[i].numAdditions == -1) == (next[-i].numAdditions == -1));
         }
+#endif
         things.push_back(next);
 
     }
@@ -222,7 +223,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     const auto& last = things.back();
     int diffWithMinAbs = numeric_limits<int>::max();
     // Go backwards so that we prefer positive sums (we can form -x for x >= 0 if and only if we can
-    // form +x).
+    // form +x) - they're vaguely easier to deal with.
     for (int i = last.maxIndex(); i >= last.minIndex(); i--)
     {
         assert((last[i].numAdditions == -1) == (last[-i].numAdditions == -1));
@@ -236,6 +237,9 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     }
     assert(diffWithMinAbs >= 0);
 
+    // Reconstruct how many of each distinctAbsDiffs we added (and subtracted) in order
+    // to obtain the final diffWithMinAbs, and store the results in destNumAdditionsOfEachAbsDiff.
+    // See the "Verify" block below.
     int generatedDiff = diffWithMinAbs;
     while (!things.empty())
     {
@@ -255,17 +259,15 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     }
 
     {
-#ifdef BRUTE_FORCE
-        cout << "Verifying" << endl;
+#ifndef NDEBUG
+        // Verify that our reconstruction is indeed correct.
         int sum = 0;
         for (int absDiff = 0; absDiff < destNumAdditionsOfEachAbsDiff.size(); absDiff++)
         {
-            cout << " absDiff: " << absDiff << " destNumAdditionsOfEachAbsDiff: " << destNumAdditionsOfEachAbsDiff[absDiff] << endl;
             assert(destNumAdditionsOfEachAbsDiff[absDiff] <= numWithAbsColorDiff[absDiff]);
             sum += destNumAdditionsOfEachAbsDiff[absDiff] * absDiff;
             sum -= (numWithAbsColorDiff[absDiff] - destNumAdditionsOfEachAbsDiff[absDiff]) * absDiff;
         }
-        cout << "Verify: sum: " << sum << " diffWithMinAbs: " << diffWithMinAbs << endl;
         assert(sum == diffWithMinAbs);
 #endif
     }
