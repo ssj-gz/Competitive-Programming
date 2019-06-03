@@ -126,13 +126,17 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         const int numWithAbsColorDiff = pair.second;
         distinctAbsDiffs.push_back(absColorDiff);
         maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
-        cout << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
+        cout << endl << "absColorDiff: " << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " maxPossibleDiff: " << maxPossibleDiff << endl;
         const Vec<D>& previous = things.back();
         Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
-        int numAdditions = (numWithAbsColorDiff + 1) / 2;
+        const int startNumAdditons = (numWithAbsColorDiff + 0) / 2;
+
         const int start = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
         const int end = numWithAbsColorDiff * absColorDiff;
         // What diffs can we form by adding multiples of this absColorDiff?
+        cout << "Marking forwards - previous.minIndex(): " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() << endl;
+
+        int numAdditions = startNumAdditons;
         for (int i = previous.maxIndex(); i >= previous.minIndex(); i--)
         {
             cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
@@ -143,23 +147,32 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                     cout << "j: " << j << " next min: " << next.minIndex() << " next max: " << next.maxIndex() << endl;
                     if (next[j].numAdditions != -1)
                         break;
+                    cout << " forwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
                     next[j].numAdditions = numAdditions;
-                    cout << " marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
+                    assert(numAdditions != -1);
+                    assert(numAdditions <= numWithAbsColorDiff);
                     numAdditions++;
                 }
             }
 
         }
+        cout << "Marking backwards" << endl;
         // What diffs can we form by subtracting multiples of this absColorDiff?
+        numAdditions = startNumAdditons;
         for (int i = previous.minIndex(); i <= previous.maxIndex(); i++)
         {
+            cout << "i: " << i << " previous.minIndex: " << previous.minIndex() << " previous.maxIndex(): " << previous.maxIndex() <<  endl;
             if (previous[i].numAdditions != -1)
             {
                 for (int j = i - start; j >= i - end; j -= 2 * absColorDiff)
                 {
                     if (next[j].numAdditions != -1)
                         break;
+                    cout << " backwards marked j = " << j << " as " << numAdditions << " absColorDiff:" << absColorDiff << " numWithAbsColorDiff: " << numWithAbsColorDiff << " start: " << start << " end: " << end << endl;
                     next[j].numAdditions = numAdditions;
+                    assert(numAdditions != -1);
+                    assert(numAdditions <= numWithAbsColorDiff);
+                    numAdditions++;
                 }
             }
 
@@ -183,6 +196,9 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             //numAdditionsOfThisAbsDiff = last[i].numAdditions;
         }
     }
+    cout << "** minAbsDiff: " << minAbsDiff << endl;
+#if 1
+    cout << "Reconstructing - distinctAbsDiffs.size():" << distinctAbsDiffs.size() << endl;
 
     int generatedAbsDiff = minAbsDiff;
     while (!things.empty())
@@ -215,6 +231,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         cout << "Verify: sum: " << sum << " minAbsDiff: " << minAbsDiff << endl;
         assert(abs(sum) == minAbsDiff);
     }
+#endif
 
 
     return minAbsDiff;
