@@ -68,6 +68,9 @@ struct Component
 
 };
 
+/**
+  * Simple vector-ish data structure that allows negative indices.
+  */
 template<typename T>
 class Vec
 {
@@ -150,6 +153,10 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     }
     vector<int> distinctAbsDiffs;
     int maxPossibleDiff = 0;
+    // generatableDiffsForDistinctAbsDiff[i][x].numAdditions != -1 if and only if we can generate x by combinations of
+    // additions or subtractions of all absDiffs <= distinctAbsDiffs[i].
+    // The "numAdditions" is a backlink that helps us reconstruct *which* absDiffs should be added and which
+    // subtracted in order to form the minAbsDiff.
     vector<Vec<D>> generatableDiffsForDistinctAbsDiff;
     Vec<D> initial(0, 0);
     initial[0].numAdditions = 0;
