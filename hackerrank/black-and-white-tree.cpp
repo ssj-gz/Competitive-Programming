@@ -150,17 +150,17 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     }
     vector<int> distinctAbsDiffs;
     int maxPossibleDiff = 0;
-    vector<Vec<D>> things;
+    vector<Vec<D>> generatableDiffsForDistinctAbsDiff;
     Vec<D> initial(0, 0);
     initial[0].numAdditions = 0;
-    things.push_back(initial);
+    generatableDiffsForDistinctAbsDiff.push_back(initial);
     for (const auto pair : numWithAbsColorDiff)
     {
         const int absColorDiff = pair.first;
         const int numWithAbsColorDiff = pair.second;
         distinctAbsDiffs.push_back(absColorDiff);
         maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
-        const Vec<D>& previous = things.back();
+        const Vec<D>& previous = generatableDiffsForDistinctAbsDiff.back();
         Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
 
         const int minNonNegativeDiff = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
@@ -214,13 +214,13 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             assert((next[i].numAdditions == -1) == (next[-i].numAdditions == -1));
         }
 #endif
-        things.push_back(next);
+        generatableDiffsForDistinctAbsDiff.push_back(next);
 
     }
 
     destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
 
-    const auto& last = things.back();
+    const auto& last = generatableDiffsForDistinctAbsDiff.back();
     int diffWithMinAbs = numeric_limits<int>::max();
     // Go backwards so that we prefer positive sums (we can form -x for x >= 0 if and only if we can
     // form +x) - they're vaguely easier to deal with.
@@ -241,10 +241,10 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
     // to obtain the final diffWithMinAbs, and store the results in destNumAdditionsOfEachAbsDiff.
     // See the "Verify" block below.
     int generatedDiff = diffWithMinAbs;
-    while (!things.empty())
+    while (!generatableDiffsForDistinctAbsDiff.empty())
     {
         const int absDiffAddedOrSubtracted = distinctAbsDiffs.back();
-        const int numAdditions = things.back()[generatedDiff].numAdditions;
+        const int numAdditions = generatableDiffsForDistinctAbsDiff.back()[generatedDiff].numAdditions;
         assert(numAdditions >= 0);
         const int numSubtractions = numWithAbsColorDiff[absDiffAddedOrSubtracted] - numAdditions;
         const int addedToPrevious = absDiffAddedOrSubtracted * numAdditions;
@@ -254,7 +254,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         destNumAdditionsOfEachAbsDiff[absDiffAddedOrSubtracted] = numAdditions;
 
         generatedDiff = previousGeneratedDiff;
-        things.pop_back();
+        generatableDiffsForDistinctAbsDiff.pop_back();
         distinctAbsDiffs.pop_back();
     }
 
@@ -272,7 +272,6 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 #endif
     }
 
-
     return abs(diffWithMinAbs);
 }
 
@@ -282,7 +281,8 @@ int main(int argc, char* argv[])
 
     if (argc == 2)
     {
-        // XXX This does not guarantee a solution!
+        // XXX This does not guarantee a solution, but is good for verifying the 
+        // important part of this problem (minAbsDiff_Optimised).
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -335,6 +335,8 @@ int main(int argc, char* argv[])
         nodes[nodeId - 1].id = nodeId;
     }
 
+    // Find the connected components, and also decide the colorCategory for each
+    // node in each component using the usual Bipartite Graph algorithm.
     vector<Component> components;
     for (Node& node : nodes)
     {
@@ -344,19 +346,16 @@ int main(int argc, char* argv[])
             newComponent.rootNode = &node;
             const int componentNum = components.size();
             newComponent.id = componentNum;
-            //cout << "found new component beginning at : " << node.id << endl;
-
 
             vector<Node*> nodesToExplore = { &node };
             node.visitScheduled = true;
             int depth = 0;
             while (!nodesToExplore.empty())
             {
-                //cout << "Iteration - depth: " << depth << endl;
+                // Alternate the colorCategory as depth increases.
                 Node::ColorCategory colorCategory = ((depth % 2) == 0) ? Node::SameAsRoot : Node::DifferentFromRoot;
                 for (Node* nodeToExplore : nodesToExplore)
                 {
-                    //cout << "nodeToExplore: " << nodeToExplore->id << " colorCategory: " << nodeToExplore->colorCategory << endl;
                     if (nodeToExplore->colorCategory != Node::Unknown)
                     {
                         assert(nodeToExplore->colorCategory == colorCategory);
@@ -364,7 +363,6 @@ int main(int argc, char* argv[])
                     }
                     nodeToExplore->colorCategory = colorCategory;
                     nodeToExplore->componentNum = componentNum;
-                    //cout << " set node: " << nodeToExplore->id << " to colorCategory: " << colorCategory << endl;
                     if (colorCategory == Node::SameAsRoot)
                     {
                         newComponent.numNodesSameColorAsRoot++;
@@ -378,7 +376,6 @@ int main(int argc, char* argv[])
                 {
                     for (Node* neighbour : nodeToExplore->neighbours)
                     {
-                        //cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
                         if (!neighbour->visitScheduled)
                         {
                             nextNodesToExplore.push_back(neighbour);
@@ -398,14 +395,7 @@ int main(int argc, char* argv[])
     vector<int> absDiffs;
     for (const auto& component : components)
     {
-        //cout << "component: absColorDiff: " << component.absColorDiff <<  endl;
         absDiffs.push_back(component.absColorDiff);
-
-        for (const auto& node : component.nodes)
-        {
-            assert(node->colorCategory != Node::Unknown);
-            //cout << node->id << " " << (node->colorCategory == Node::SameAsRoot ? "Same colorCategory as root" : "Different colorCategory from root") << endl;
-        }
     }
 
     vector<int> numAdditionsOfEachAbsDiff;
@@ -419,13 +409,12 @@ int main(int argc, char* argv[])
     const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
 #endif
 
-    // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum sum
+    // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum diff
     // by choosing the actual colour of the root node of each component (and so,
     // the colours of all nodes in that component) appropriately.
     //
-    // Arbitrarily, we ensure that the number of black nodes is at least equal to
+    // Arbitrarily, we ensure that, in the final graph, the number of black nodes is at least equal to
     // the number of white nodes, and so the difference is nB - nW (i.e. no abs() needed!).
-
     Component* componentWithMoreThanOneNode = nullptr;
     for (auto& component : components)
     {
@@ -438,7 +427,7 @@ int main(int argc, char* argv[])
         }
         if (numAdditionsOfEachAbsDiff[component.absColorDiff] > 0)
         {
-            // Need to make this contribute *positively* to the diff i.e. need more
+            // Need to make this component contribute *positively* to the diff i.e. need more
             // black nodes than white nodes!
             if (numSameColorAsRoot > numDifferentColorFromRoot)
             {
@@ -452,7 +441,7 @@ int main(int argc, char* argv[])
         }
         else
         {
-            // Need to make this contribute *negatively* to the diff i.e. need more
+            // Need to make this component contribute *negatively* to the diff i.e. need more
             // white nodes than black nodes!
             if (numSameColorAsRoot > numDifferentColorFromRoot)
             {
@@ -484,12 +473,10 @@ int main(int argc, char* argv[])
         assert(node.color != Node::Color::Unknown);
         if (node.color == Node::Color::White)
         {
-            //cout << "Node: " << node.id << " is white" << endl;
             numWhiteNodes++;
         }
         else
         {
-            //cout << "Node: " << node.id << " is black" << endl;
             numBlackNodes++;
         }
     }
@@ -501,7 +488,6 @@ int main(int argc, char* argv[])
     }
     else if (componentWithMoreThanOneNode)
     {
-        //cout << "Have componentWithMoreThanOneNode" << endl;
         Node* rootNode = componentWithMoreThanOneNode->rootNode;
         Node* rootNodeNeighbour = rootNode->neighbours.front();
         Node* whiteNode = rootNode;
@@ -511,7 +497,6 @@ int main(int argc, char* argv[])
         {
             swap(whiteNode, blackNode);
         }
-        //cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
         assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
         for(auto& component : components)
         {
@@ -534,7 +519,6 @@ int main(int argc, char* argv[])
     else
     {
         // Pick a white and black node arbitrarily.
-        //cout << "Do not have component with more than one node" << endl;
         Node* whiteNode = nullptr;
         Node* blackNode = nullptr;
         for (auto& node : nodes)
@@ -550,12 +534,11 @@ int main(int argc, char* argv[])
         }
         assert(whiteNode != nullptr && blackNode != nullptr);
         assert(whiteNode->color == Node::Color::White && blackNode->color == Node::Color::Black);
-        //cout << "whiteNode: " << whiteNode->id << " blackNode: " << blackNode->id << endl;
         for (auto& node : nodes)
         {
             if (node.color == Node::Color::White)
             {
-                if (&node != whiteNode) // Prevent double-links between whiteNode and blackNode.
+                if (&node != whiteNode) // Prevent double-links between whiteNode and blackNode - not strictly necessary, but neater!
                 {
                     nodesToConnect.push_back({&node, blackNode});
                 }
