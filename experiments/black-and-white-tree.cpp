@@ -392,16 +392,6 @@ int main(int argc, char* argv[])
             components.push_back(newComponent);
         }
     }
-#ifdef BRUTE_FORCE
-    for (auto& node : nodes)
-    {
-        assert(node.colorCategory != Node::Unknown);
-        for (auto& neighbourNode : node.neighbours)
-        {
-            assert(node.colorCategory != neighbourNode->colorCategory);
-        }
-    }
-#endif
 
     vector<int> absDiffs;
     for (const auto& component : components)
@@ -574,73 +564,6 @@ int main(int argc, char* argv[])
             }
         }
     }
-    {
-#ifdef BRUTE_FORCE
-        // Verify.
-        cout << "Verifying construction of graph" << endl;
-        assert(numBlackNodes - numWhiteNodes == minAbsDiff_Optimised);
-        cout << "nodesToConnect.size():" << nodesToConnect.size() << endl;
-#if 0
-        for (const auto nodePair : nodesToConnect)
-        {
-            cout << " adding edge: " << nodePair.first->id << " - " << nodePair.second->id << endl;
-            nodePair.first->neighbours.push_back(nodePair.second);
-            nodePair.second->neighbours.push_back(nodePair.first);
-            assert(nodePair.first->color != nodePair.second->color);
-            assert(nodePair.first->color != nodePair.second->color);
-        }
-        cout << "added new edges" << endl;
-#endif
-        for (auto& node : nodes)
-        {
-            node.visitScheduled = false;
-        }
-        for (auto& node : nodes)
-        {
-            for (auto& neighbourNode : node.neighbours)
-            {
-                assert(node.color != neighbourNode->color);
-            }
-        }
-        for (auto& node : nodes)
-        {
-            if (node.visitScheduled)
-                continue;
-
-            vector<Node*> nodesToExplore = { &node };
-            node.visitScheduled = true;
-            int depth = 0;
-            Node::Color expectedColor = node.color;
-
-            while (!nodesToExplore.empty())
-            {
-                cout << "Iteration - depth: " << depth << endl;
-                for (Node* nodeToExplore : nodesToExplore)
-                {
-                    cout << "nodeToExplore: " << nodeToExplore->id << " color: " << nodeToExplore->color << " expected: " << expectedColor << endl;
-                    assert(nodeToExplore->color == expectedColor);
-                }
-                vector<Node*> nextNodesToExplore;
-                for (Node* nodeToExplore : nodesToExplore)
-                {
-                    for (Node* neighbour : nodeToExplore->neighbours)
-                    {
-                        cout << " adding neighbour: " << neighbour->id << " of " << nodeToExplore->id << endl;
-                        if (!neighbour->visitScheduled)
-                        {
-                            nextNodesToExplore.push_back(neighbour);
-                            neighbour->visitScheduled = true;
-                        }
-                    }
-                }
-                nodesToExplore = nextNodesToExplore;
-                depth++;
-                expectedColor = (expectedColor == Node::Color::White) ? Node::Color::Black : Node::Color::White;
-            }
-        }
-#endif
-    }
-
 
     cout << minAbsDiff_Optimised << " " << nodesToConnect.size() << endl;
     for (const auto nodePair : nodesToConnect)
