@@ -107,7 +107,7 @@ int minAbsDiffBruteForce(const vector<int>& absDiffs)
     return minAbsDiff;
 }
 
-int minAbsDiffOptimsed(const vector<int>& absDiffs)
+int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAdditionsOfEachAbsDiff)
 {
     map<int, int> numWithAbsColorDiff;
     for (const auto diff : absDiffs)
@@ -309,7 +309,8 @@ int main(int argc, char* argv[])
     }
 
     const auto minAbsDiff_BruteForce = minAbsDiffBruteForce(absDiffs);
-    const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs);
+    vector<int> numAdditionsOfEachAbsDiff;
+    const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
 
     cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
     assert(minAbsDiff_Optimised == minAbsDiff_BruteForce);
