@@ -14,13 +14,20 @@ struct Node
     int id = 0;
     vector<Node*> neighbours;
     int componentNum = -1;
-    enum Color
+    enum ColorCategory
     {
         Unknown,
         SameAsRoot,
         DifferentFromRoot
     };
-    Color color = Unknown;
+    enum class Color 
+    {
+        Unknown,
+        Black,
+        White
+    };
+    ColorCategory colorCategory = Unknown;
+    Color color = Color::Unknown;
     bool visitScheduled = false;
 };
 
@@ -318,19 +325,19 @@ int main(int argc, char* argv[])
             while (!nodesToExplore.empty())
             {
                 cout << "Iteration - depth: " << depth << endl;
-                Node::Color color = ((depth % 2) == 0) ? Node::SameAsRoot : Node::DifferentFromRoot;
+                Node::ColorCategory colorCategory = ((depth % 2) == 0) ? Node::SameAsRoot : Node::DifferentFromRoot;
                 for (Node* nodeToExplore : nodesToExplore)
                 {
-                    cout << "nodeToExplore: " << nodeToExplore->id << " color: " << nodeToExplore->color << endl;
-                    if (nodeToExplore->color != Node::Unknown)
+                    cout << "nodeToExplore: " << nodeToExplore->id << " colorCategory: " << nodeToExplore->colorCategory << endl;
+                    if (nodeToExplore->colorCategory != Node::Unknown)
                     {
-                        assert(nodeToExplore->color == color);
+                        assert(nodeToExplore->colorCategory == colorCategory);
                         continue;
                     }
-                    nodeToExplore->color = color;
+                    nodeToExplore->colorCategory = colorCategory;
                     nodeToExplore->componentNum = componentNum;
-                    cout << " set node: " << nodeToExplore->id << " to color: " << color << endl;
-                    if (color == Node::SameAsRoot)
+                    cout << " set node: " << nodeToExplore->id << " to colorCategory: " << colorCategory << endl;
+                    if (colorCategory == Node::SameAsRoot)
                     {
                         newComponent.numNodesSameColorAsRoot++;
                     }
@@ -373,8 +380,8 @@ int main(int argc, char* argv[])
 
         for (const auto& node : component.nodes)
         {
-            assert(node->color != Node::Unknown);
-            cout << node->id << " " << (node->color == Node::SameAsRoot ? "Same color as root" : "Different color from root") << endl;
+            assert(node->colorCategory != Node::Unknown);
+            cout << node->id << " " << (node->colorCategory == Node::SameAsRoot ? "Same colorCategory as root" : "Different colorCategory from root") << endl;
         }
     }
 
@@ -385,4 +392,19 @@ int main(int argc, char* argv[])
     cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
     assert(minAbsDiff_Optimised == minAbsDiff_BruteForce);
 
+    // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum sum
+    // by choosing the actual colour of the root node of each component (and so,
+    // the colours of all nodes in that component) appropriately.
+    //
+    // Arbitrarily, we ensure that the number of black nodes is at least equal to
+    // the number of white nodes, and so the difference is nB - nW (i.e. no abs() needed!).
+
+    for (auto& component : components)
+    {
+        if (numAdditionsOfEachAbsDiff[component.absColorDiff] > 0)
+        {
+            // Need to make this contribute *positively* to the diff i.e. need more
+            // black nodes that white nodes!
+        }
+    }
 }
