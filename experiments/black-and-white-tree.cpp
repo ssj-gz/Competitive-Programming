@@ -156,12 +156,14 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs)
             }
 
         }
+        things.push_back(next);
 
     }
     const auto& last = things.back();
     int minAbsIndex = numeric_limits<int>::max();
     for (int i = last.minIndex(); i <= last.maxIndex(); i++)
     {
+        cout << "i: " << i << " last[i].numWithDiff: " << last[i].numWithDiff << endl;
         if (last[i].numWithDiff > 0)
         {
             minAbsIndex = min(minAbsIndex, abs(i));
