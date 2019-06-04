@@ -667,3 +667,7 @@ ios::sync_with_stdio(false);
 
 // Generate and execute testcases until assertion is triggered. 
 // while true; do ./a.out --test | tee last-testcase.txt | ./a.out ; if [ "$?" -ne "0" ]; then break; fi; done | grep Result
+
+// Compile with libc++'s debug mode.
+clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEBUG=1
+
