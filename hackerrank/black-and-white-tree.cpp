@@ -404,11 +404,11 @@ int main(int argc, char* argv[])
     //
     // It's hopefully obvious that the result of assigning +'s and -'s to the numWithAbsColorDiff(da_(i+1)) da_(i+1)'s depends only on
     // how many +'s and -'s there are, and that the number of -'s is fixed when we decide on the number of +'s - it is # +'s * da_(i+1)
-    // - # -'s da_(i+1), where # -'s is numAdditionsOfEachAbsDiff(da_(i+1)) - # +'s.  Thus, our recurrence relation can be re-written as:
+    // - # -'s da_(i+1), where # -'s is numWithAbsColorDiff(da_(i+1)) - # +'s.  Thus, our recurrence relation can be re-written as:
     //
     //   for each d such that canBeGenerated[i][d],
-    //      for each numAdditions = 0, 1, ... numAdditionsOfEachAbsDiff(da_(i+1))
-    //         canBeGenerated[i+1][d + numAdditions * da_(i+1) - (numAdditionsOfEachAbsDiff(da_(i+1) - numAdditions) * da_(i+1)  to true
+    //      for each numAdditions = 0, 1, ... numWithAbsColorDiff(da_(i+1))
+    //         set canBeGenerated[i+1][d + numAdditions * da_(i+1) - (numWithAbsColorDiff(da_(i+1) - numAdditions) * da_(i+1)]  to true
     //
     // There are O(N) such d, as before, and O(N) possible values of numAdditions, and we need to do this for O(sqrt(N)) values of i,
     // giving a total of O(sqrt(N) * N * N) computations.  Rats - this is even worse than before!
@@ -418,10 +418,49 @@ int main(int argc, char* argv[])
     // subtractions by one) - then we *decrease* the amount we are subtracting by 2 * da_(i+1).  As we keep increasing numAdditions, we
     // decrease the amount we are subtracting(!) until, when numAdditions is greater than or equal to numWithAbsColorDiff(da_(i+1)) / 2,
     // we stop subtracting and either do nothing (if numWithAbsColorDiff(da_(i+1)) is even) or start adding (otherwise).
+    //
+    // Let minNonNegativeDiff be the smallest non-negative number that can be formed by changing the value of numAdditions - it is 
+    // 0 if numWithAbsColorDiff(da_(i+1)) is even, and da_(i+1) otherwise.
+    //
+    // Then, we can replace the above recurrence relation by:
 
-
-
-
+    //   for each d such that canBeGenerated[i][d],
+    //      # Mark d's forward.
+    //      for each positiveDiff = minNonNegativeDiff, minNonNegativeDiff + 2 * da_(i+1),  ... numWithAbsColorDiff(da_(i+1)) * da_(i+1)
+    //         canBeGenerated[i+1][d + positiveDiff] to true
+    //      # Mark d's backward.
+    //      for each negDiff = -minNonNegativeDiff, minNonNegativeDiff - 2 * da_(i+1), ... , -numWithAbsColorDiff(da_(i+1)) * da_(i+1)
+    //         canBeGenerated[i+1][d + negDiff] to true
+    //
+    // Not much better. Here, we start at each d, and then make two passes: "forward" and "backward".  In the forward pass, we 
+    // mark each d + minNonNegativeDiff, minNonNegativeDiff + 2 * da_(i+1), d + 4 * da_(i+1), ... , d + numWithAbsColorDiff(da_(i+1)) * da_(i+1)
+    // i.e starting at d + minNonNegativeDiff, we mark each 2 * da_(i+1)th element until we reach d + numWithAbsColorDiff(da_(i+1)) * da_(i+1),
+    // and similar for the "backward" pass, except we start at d - minNonNegativeDiff and mark each 2 * da_(i+1)th element going backwards.
+    // This is O(N^2) over all d.
+    //
+    // However, imagine in the forward pass we started at the maximum value of d and went backwards to the minimum value of d.  Then, if 
+    // any of the sequence d + minNonNegativeDiff, d + minNonNegativeDiff + 2 * da_(i+1) etc has been marked by a forward pass, then we
+    // don't have to mark the remainder of this sequence for this d: they would have been marked by a "previous" (i.e. - larger) d.
+    // Likewise, if in a backward pass we started at the minimum value of d and went forwards, then if any of the sequence
+    // d - minNonNegativeDiff, d - minNonNegativeDiff - 2 * da_(i+1) etc has been marked by a backward pass, then we know that the 
+    // remainder of this sequence has already been marked by a "previous" (i.e. - smaller) d.
+    //
+    // This simple optimisation collapses the time taken to compute canBeGenerated[i+1] from canBeGenerated[i] from O(N^2) to O(N): 
+    // to see that it is now O(N), note that the algorithm (considering only the "forward" pass here - the "backward" pass is the 
+    // same by symmetry):
+    //
+    //    i) sweep d from its maximum value to its minimum value (contributes O(N) to computation of canBeGenerated[i+1]).
+    //    ii) for each d, mark each element in the sequence d + minNonNegativeDiff, d + minNonNegativeDiff + 2 * da_(i+1) etc
+    //        unless it is already marked, in which case we abort and continue i).
+    //
+    // Each step in ii) must mark an unmarked element, so its total contribution across all d for canBeGenerated[i+1] is bounded
+    // by the number of elements that can be marked, which is O(N).  Thus, computed canBeGenerated[i+1] is O(N), so computing
+    // all canBeGenerated's is O(sqrt(N) * N) - nice and tractable :)
+    //
+    // That's about it - this enables us to find the minimum generatable d, and with a bit of book-keeping and memory usage we can
+    // reconstruct the precise number of additions for each da_i (i = 1, 2, ... l) that gave rise to this minimum d, which
+    // we store as numAdditionsOfEachAbsDiff and which we can finally use to give the final, concrete colouring that minimises
+    // numBlackNodes - numWhiteNodes.  We then just perform the simple step of making the graph connected etc, and we're done!
     ios::sync_with_stdio(false);
 
     if (argc == 2)
