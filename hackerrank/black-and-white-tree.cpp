@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-06-03
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -464,6 +464,7 @@ int main(int argc, char* argv[])
     // reconstruct the precise number of additions for each da_i (i = 1, 2, ... l) that gave rise to this minimum d, which
     // we store as numAdditionsOfEachAbsDiff and which we can use to give the final, concrete colouring that minimises
     // numBlackNodes - numWhiteNodes.  We then just perform the simple step of making the graph connected etc, and we're done!
+    // In the code, what we've been referring to as canBeGenerated is called generatableDiffsForDistinctAbsDiff.
     ios::sync_with_stdio(false);
 
     if (argc == 2)
@@ -742,7 +743,6 @@ int main(int argc, char* argv[])
     }
 
     // Output the result.
-    //cout << "minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
     cout << minAbsDiff_Optimised << " " << nodesToConnect.size() << endl;
     for (const auto nodePair : nodesToConnect)
     {
