@@ -168,11 +168,13 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
         distinctAbsDiffs.push_back(absColorDiff);
         maxPossibleDiff += absColorDiff * numWithAbsColorDiff;
         const Vec<D>& previous = generatableDiffsForDistinctAbsDiff.back();
+        // We could use -N to +N as a range, but that might take up too much memory:
+        // -maxPossibleDiff to maxPossibleDiff is a much more memory-efficient bound.
         Vec<D> next(-maxPossibleDiff, maxPossibleDiff);
 
         const int minNonNegativeDiff = ((numWithAbsColorDiff % 2) == 0) ? 0 : absColorDiff;
         const int maxNonNegativeDiff = numWithAbsColorDiff * absColorDiff;
-        // What diffs can we form by adding multiples of this absColorDiff?
+        // What diffs can we form by adding multiples of this absColorDiff? ("Forward" pass)
         for (int i = previous.maxIndex(); i >= previous.minIndex(); i--)
         {
             if (previous[i].numAdditions != -1)
@@ -197,7 +199,7 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
             }
 
         }
-        // What diffs can we form by subtracting multiples of this absColorDiff?
+        // What diffs can we form by subtracting multiples of this absColorDiff? ("Backward" pass)
         for (int i = previous.minIndex(); i <= previous.maxIndex(); i++)
         {
             if (previous[i].numAdditions != -1)
@@ -313,9 +315,10 @@ int main(int argc, char* argv[])
     // the set of these components.
     //
     // It would be a little premature to give concrete colours to the root node of each C_i,
-    // but we can categorise them, using the above logic, to SameAsRoot or DifferentFromRoot.
+    // but we can categorise them, using the above logic, to SameAsRoot or DifferentFromRoot: a simple
+    // breadth-first search is sufficient to do this.
     //
-    // Note that, if we decide on a colouration of all nodes in the graph and compute D for it, 
+    // Note that, if we decide on a colouring of all nodes in the graph and compute D for it, 
     // then switching the colours of all nodes gives the same D (since we take the *absolute value*
     // of the difference between number of black and number of white nodes).  So let's assume,
     // quite arbitrarily, that our final constructed graph will have at least as many black nodes
@@ -326,10 +329,10 @@ int main(int argc, char* argv[])
     // Let's quickly dismiss the rest of the graph theory part of the problem.  If we have decided on
     // a colouring of all nodes that minimises D, then we can make it connected very easily:
     // if one of the components, C_j say, has more than one node in it, then it has both a Black and a 
-    // White node - pick one of each colour from C_j and call them whiteNode and blackNode. Then for
-    // every C_i != C_j, simply pick any node from C_i and add a new edge from that node to either
-    // whiteNode or blackNode, as appropriate: the resulting graph is connected (using C_j) as a central
-    // "hub" and has different colour nodes at the ends of each edge, so is a solution to the problem.
+    // White node - pick one of each colour from C_j and call them whiteNode and blackNode, respectively. 
+    // Then for every C_i != C_j, simply pick any node from C_i and add a new edge from that node to either
+    // whiteNode or blackNode, as appropriate: the resulting graph is connected (using C_j as a central
+    // "hub") and has different colour nodes at the ends of each edge, so is a solution to the problem.
     // There's some minor difficulties arising from graphs where none of the C_is have more than one
     // node, but these are easily dealt with.
     //
@@ -340,7 +343,7 @@ int main(int argc, char* argv[])
     // each component contributes either +(num SameAsRoot in C_i - num DifferentFromRoot in C_i) or
     // -(num SameAsRoot in C_i - num DifferentFromRoot in C_i) to D, depending on what colour we 
     // set the root of that node.  This (num SameAsRoot in C_i - num DifferentFromRoot in C_i) is very
-    // important - let's call it absColorDiff(C_i) i.e. ech C_i contributes either +absColorDiff(C_i)
+    // important - let's call it absColorDiff(C_i) i.e. each C_i contributes either +absColorDiff(C_i)
     // or -absColorDiff(C_i) to D.
     //
     // Consider the set of 2^x vectors of the form (s1, s2, ... sx) where each s_i is either +1 or -1.
@@ -351,7 +354,7 @@ int main(int argc, char* argv[])
     // It's hopefully obvious that we're looking for the generated diff that has the minimum absolute value
     // of all generated diffs arising from the set of all 2^x vectors of this form.
     //
-    // A quick observation: (-s1, -s2, ... -sx) will also be in tihs set of vectors, and will generate a negative
+    // A quick observation: (-s1, -s2, ... -sx) will also be in tihs set of vectors, and will generate the negative
     // diff to (-s1, -s2, ... -sx): that is, we can generate d' if and only if we can generate -d'.  So wlog
     // we can assume that the generated diff with the min absolute value is non-negative.
     //
@@ -366,16 +369,16 @@ int main(int argc, char* argv[])
     // Well, we can immediately squish it down to polynomial time using standard dynamic programming techniques.
     //
     // Let canBeGenerated[i][d] be true if and only if we can generate d by adding positive or negative versions of
-    // absColorDiff(C_1), absColorDiff(C_2) ... absColorDiff(C_i) - then  there's a simple recurrent relation:
+    // absColorDiff(C_1), absColorDiff(C_2) ... absColorDiff(C_i) - then  there's a simple recurrence relation:
     //
     //   for each d such that canBeGenerated[i][d], set 
     //      canBeGenerated[i+1][d + absColorDiff(C_(i+1))] to true and set
     //      canBeGenerated[i+1][d - absColorDiff(C_(i+1))] to true.
     //
-    //  We then just need to find the smallest d such that canBeGenerated[x][d] is true.
+    // We then just need to find the smallest d such that canBeGenerated[x][d] is true.
     //
-    // Each step (from i to i+1) in the recurrent relation is O(N) (there can be O(N) such d), and x itself is O(N)
-    // so this is (N^2) - still too high.  How can we improve matters further?
+    // Each step (from i to i+1) in the recurrence relation is O(N) (there can be O(N) such d), and x itself is O(N)
+    // so this is O(N^2) - still too high.  How can we improve matters further?
     //
     // Well, we can note that a component C_i obviously has at least absColorDiff(C_i) nodes in it, and so
     //
@@ -396,15 +399,15 @@ int main(int argc, char* argv[])
     // and then we can solve the problem by finding the smallest d such that canBeGenerated[l][d] is true.
     //
     // Since l is O(sqrt(N)), it looks like we have asymptotically fewer iteration i's to compute (O(N) previously; O(sqrt(N)) now),
-    // so  that sounds like progress! But how do we compute canBeGenerated[i+1][d] when we have canBeGenerated[i+1]?
+    // so that sounds like progress! But how do we compute canBeGenerated[i+1][d] when we have canBeGenerated[i+1]?
     //
     // Well, canBeGenerated[i+1][d] is true if and only if there is some assignment of +'s and minus's to the numWithAbsColorDiff(da_(i+1))
     // da_(i+1)'s such that d minus the result is true in canBeGenerated[i+1].  But, of course, there are O(2^numWithAbsColorDiff(da_(i+1))
     // ways of doing this, and numWithAbsColorDiff(da_(i+1)) can be O(N), so this is no immediate help.
     //
     // It's hopefully obvious that the result of assigning +'s and -'s to the numWithAbsColorDiff(da_(i+1)) da_(i+1)'s depends only on
-    // how many +'s and -'s there are, and that the number of -'s is fixed when we decide on the number of +'s - it is # +'s * da_(i+1)
-    // - # -'s da_(i+1), where # -'s is numWithAbsColorDiff(da_(i+1)) - # +'s.  Thus, our recurrence relation can be re-written as:
+    // how many +'s and -'s there are - it is # +'s * da_(i+1) - # -'s da_(i+1).  Further, fixing # +'s automatically fixes # -'s -  
+    // # -'s is numWithAbsColorDiff(da_(i+1)) - # +'s.  Thus, our recurrence relation can be re-written as:
     //
     //   for each d such that canBeGenerated[i][d],
     //      for each numAdditions = 0, 1, ... numWithAbsColorDiff(da_(i+1))
@@ -416,14 +419,14 @@ int main(int argc, char* argv[])
     // But there is a shortcut.  Consider what happens with numAdditions as we increase or decrease it.  Let's start it off as 0 - then 
     // we are subtracting numWithAbsColorDiff(da_(i+1)) * da_(i+1)).  Let's increase numAdditions by one (and so, also reduce the number of 
     // subtractions by one) - then we *decrease* the amount we are subtracting by 2 * da_(i+1).  As we keep increasing numAdditions, we
-    // decrease the amount we are subtracting(!) until, when numAdditions is greater than or equal to numWithAbsColorDiff(da_(i+1)) / 2,
+    // decrease the amount we are subtracting(!) until, when numAdditions becomes greater than or equal to numWithAbsColorDiff(da_(i+1)) / 2,
     // we stop subtracting and either do nothing (if numWithAbsColorDiff(da_(i+1)) is even) or start adding (otherwise).
     //
     // Let minNonNegativeDiff be the smallest non-negative number that can be formed by changing the value of numAdditions - it is 
     // 0 if numWithAbsColorDiff(da_(i+1)) is even, and da_(i+1) otherwise.
     //
     // Then, we can replace the above recurrence relation by:
-
+    //
     //   for each d such that canBeGenerated[i][d],
     //      # Mark d's forward.
     //      for each positiveDiff = minNonNegativeDiff, minNonNegativeDiff + 2 * da_(i+1),  ... numWithAbsColorDiff(da_(i+1)) * da_(i+1)
@@ -439,7 +442,7 @@ int main(int argc, char* argv[])
     // This is O(N^2) over all d.
     //
     // However, imagine in the forward pass we started at the maximum value of d and went backwards to the minimum value of d.  Then, if 
-    // any of the sequence d + minNonNegativeDiff, d + minNonNegativeDiff + 2 * da_(i+1) etc has been marked by a forward pass, then we
+    // any of the sequence d + minNonNegativeDiff, d + minNonNegativeDiff + 2 * da_(i+1) etc has already been marked by a forward pass, then we
     // don't have to mark the remainder of this sequence for this d: they would have been marked by a "previous" (i.e. - larger) d.
     // Likewise, if in a backward pass we started at the minimum value of d and went forwards, then if any of the sequence
     // d - minNonNegativeDiff, d - minNonNegativeDiff - 2 * da_(i+1) etc has been marked by a backward pass, then we know that the 
@@ -451,7 +454,7 @@ int main(int argc, char* argv[])
     //
     //    i) sweep d from its maximum value to its minimum value (contributes O(N) to computation of canBeGenerated[i+1]).
     //    ii) for each d, mark each element in the sequence d + minNonNegativeDiff, d + minNonNegativeDiff + 2 * da_(i+1) etc
-    //        unless it is already marked, in which case we abort and continue i).
+    //        unless it is already marked, in which case we abort and continue with i).
     //
     // Each step in ii) must mark an unmarked element, so its total contribution across all d for canBeGenerated[i+1] is bounded
     // by the number of elements that can be marked, which is O(N).  Thus, computed canBeGenerated[i+1] is O(N), so computing
@@ -459,7 +462,7 @@ int main(int argc, char* argv[])
     //
     // That's about it - this enables us to find the minimum generatable d, and with a bit of book-keeping and memory usage we can
     // reconstruct the precise number of additions for each da_i (i = 1, 2, ... l) that gave rise to this minimum d, which
-    // we store as numAdditionsOfEachAbsDiff and which we can finally use to give the final, concrete colouring that minimises
+    // we store as numAdditionsOfEachAbsDiff and which we can use to give the final, concrete colouring that minimises
     // numBlackNodes - numWhiteNodes.  We then just perform the simple step of making the graph connected etc, and we're done!
     ios::sync_with_stdio(false);
 
