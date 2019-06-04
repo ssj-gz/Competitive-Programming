@@ -114,7 +114,7 @@ struct D
     bool markedDuringSubtractions = false;
 };
 
-int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAdditionsOfEachAbsDiff)
+int computeMinAbsDiff(const vector<int>& absDiffs, vector<int>& destNumAdditionsOfEachAbsDiff)
 {
     map<int, int> numWithAbsColorDiff;
     for (const auto diff : absDiffs)
@@ -520,7 +520,7 @@ int main(int argc, char* argv[])
     }
 
     vector<int> numAdditionsOfEachAbsDiff;
-    const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
+    const auto minAbsDiff = computeMinAbsDiff(absDiffs, numAdditionsOfEachAbsDiff);
 
     // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum diff
     // by choosing the actual colour of the root node of each component (and so,
@@ -668,7 +668,7 @@ int main(int argc, char* argv[])
     }
 
     // Output the result.
-    cout << minAbsDiff_Optimised << " " << nodesToConnect.size() << endl;
+    cout << minAbsDiff << " " << nodesToConnect.size() << endl;
     for (const auto nodePair : nodesToConnect)
     {
         cout << nodePair.first->id << " " << nodePair.second->id << endl;
