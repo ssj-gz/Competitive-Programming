@@ -235,14 +235,14 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 
     destNumAdditionsOfEachAbsDiff.resize(*max_element(absDiffs.begin(), absDiffs.end()) + 1);
 
-    const auto& last = generatableDiffsForDistinctAbsDiff.back();
+    const auto& generatableDiffsFromAllAbsDiffs = generatableDiffsForDistinctAbsDiff.back();
     int minAbsDiff = -1;
     // We can assume that minAbsDiff is non-negative, since we can generate minAbsDiff iff we can generate
     // -minAbsDiff.
-    for (int i = 0; i <= last.maxIndex(); i++)
+    for (int i = 0; i <= generatableDiffsFromAllAbsDiffs.maxIndex(); i++)
     {
-        assert((last[i].numAdditions == -1) == (last[-i].numAdditions == -1));
-        if (last[i].numAdditions != -1)
+        assert((generatableDiffsFromAllAbsDiffs[i].numAdditions == -1) == (generatableDiffsFromAllAbsDiffs[-i].numAdditions == -1));
+        if (generatableDiffsFromAllAbsDiffs[i].numAdditions != -1)
         {
             minAbsDiff = i;
             break;
@@ -252,7 +252,10 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 
     // Reconstruct how many of each distinctAbsDiffs we added (and subtracted) in order
     // to obtain the final minAbsDiff, and store the results in destNumAdditionsOfEachAbsDiff.
-    // See the "Verify" block below.
+    // We work backwards, moving back through the list of distinctAbsDiffs and the corresponding
+    // generatableDiffsForDistinctAbsDiff's.
+    // The "Verify" block below ensures that we have a correct reconstructions and may clarify things
+    // a little.
     int generatedDiff = minAbsDiff;
     while (!generatableDiffsForDistinctAbsDiff.empty())
     {
