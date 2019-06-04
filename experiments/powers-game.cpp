@@ -104,13 +104,17 @@ class GameState
         int currentModulus = 0;
         bool hasWinningPlayerOverride(Player currentPlayer) const
         {
-            // Assume that a GameState that has no moves that lead to a Lose for the
-            // other player is a losing state (and vice-versa).
+            if (movesFor(currentPlayer, *this).empty())
+            {
+                return true;
+            }
             return false;
         }
         PlayState winningPlayerOverride(Player currentPlayer) const
         {
-            assert(false);
+            assert(movesFor(currentPlayer, *this).empty());
+            if (currentModulus == 0)
+                return Player1Lose;
             return Player1Win;
         }
 };
