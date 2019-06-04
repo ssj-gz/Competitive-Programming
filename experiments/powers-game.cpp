@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define VERY_VERBOSE
+//#define VERY_VERBOSE
 #define PRINT_COMPUTER_MOVES
 
 //#define MOVE_COINS_EXAMPLE_RANDOM
@@ -52,6 +52,7 @@ class GameState;
 class Move;
 
 vector<Move> movesFor(Player currentPlayer, const GameState& gameState);
+ostream& operator<<(ostream& os, const GameState& gameState);
 
 class GameState
 {
@@ -68,8 +69,8 @@ class GameState
         }
         PlayState winningPlayerOverride(Player currentPlayer) const
         {
-            cout << " Bleep" << endl;
             assert(movesFor(currentPlayer, *this).empty());
+            cout << "winningPlayerOverride: " << *this << endl;
             if (currentModulus == 0)
                 return Player1Lose;
             return Player1Win;
@@ -182,18 +183,14 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
 
 PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, PlayerType player1Type, PlayerType player2Type, bool isBruteForceMoveSearch)
 {
-    cout << "Exploring: " << gameState << endl;
     const auto playThisMoveAsType = (currentPlayer == Player1 ? player1Type : player2Type);
     const bool playThisMoveInteractively = !isBruteForceMoveSearch && (playThisMoveAsType == Human);
     const bool playThisMoveRandomly = !isBruteForceMoveSearch && (playThisMoveAsType == Random);
-    if (playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
+    if (isBruteForceMoveSearch && playStateForLookup.find({gameState, currentPlayer}) != playStateForLookup.end())
     {
-        // Have a cache hit.
-        if (!playThisMoveInteractively && !playThisMoveRandomly)
         {
             // Don't use the cache if we're interactive/ random: it will know all losing states from earlier dry-runs,
             // and if the human player is in a losing state, won't give them a chance to make a move!
-            cout << "Returning cache hit for " << gameState << endl;
             return playStateForLookup[{gameState, currentPlayer}];
         }
     }
@@ -347,10 +344,10 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
         }
     }
 
-//#ifdef VERY_VERBOSE
+#ifdef VERY_VERBOSE
     cout << "At game state: " << gameState << " with player " << currentPlayer << ", the player " << (playState == winForPlayer(currentPlayer) ? "Wins" : playState == winForPlayer(otherPlayer(currentPlayer)) ? "Loses" : "Draws") << endl;
 
-//#endif
+#endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
 
     return playState;
@@ -408,8 +405,8 @@ int main(int argc, char** argv)
             initialGameState.numWithEachModulus[powerOf2]++;
             powerOf2 = (powerOf2 * 2) % 17;
         }
-        //const auto result = findWinner(Player1, initialGameState, Human, CPU);
-        const auto result = findWinner(Player1, initialGameState, CPU, CPU);
+        const auto result = findWinner(Player1, initialGameState, Human, CPU);
+        //const auto result = findWinner(Player1, initialGameState, CPU, CPU);
         if (result == Player1Win)
         {
             cout << "FIRST";
