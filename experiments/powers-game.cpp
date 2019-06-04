@@ -14,51 +14,7 @@ using namespace std;
 //#define VERY_VERBOSE
 #define PRINT_COMPUTER_MOVES
 
-#define MOVE_COINS_EXAMPLE
 //#define MOVE_COINS_EXAMPLE_RANDOM
-#ifdef MOVE_COINS_EXAMPLE
-struct Node
-{
-    vector<Node*> children;
-    Node* parent = nullptr;
-    int numCoins = 0;
-    int nodeId = -1;
-    int height = -1;
-
-    vector<Node*> neighbours;
-};
-
-void fixTree(Node* rootNode, int height, Node* parent)
-{
-    rootNode->parent = parent;
-    rootNode->height = height;
-    for (Node* child : rootNode->neighbours)
-    {
-        if (child == parent)
-            continue;
-
-        rootNode->children.push_back(child);
-        fixTree(child, height + 1, rootNode);
-    }
-    rootNode->neighbours.clear();
-}
-
-void printTree(const vector<Node>& nodes)
-{
-    for (const auto& node : nodes)
-    {
-        cout << "Node: " << (node.nodeId + 1) << " coins: " << node.numCoins << " parent: " << (node.parent == nullptr ? -1 : node.parent->nodeId + 1) << " children: " ;
-        for (const auto& child : node.children)
-        {
-            cout << (child->nodeId + 1) << " ";
-
-        }
-        cout << endl;
-    }
-}
-
-vector<Node> nodes;
-#endif
 
 enum PlayState { Player1Win, Player1Lose, Draw };
 enum Player { Player1, Player2 };
@@ -144,7 +100,7 @@ class Move
 ostream& operator<<(ostream& os, const GameState& gameState)
 {
     os << "currentModulus: " << gameState.currentModulus << " num in Pile: ";
-    for (int i = 1; i <= 17; i++)
+    for (int i = 1; i < 17; i++)
     {
         os << i << ": = " << gameState.numWithEachModulus[i] << " ";
     }
@@ -185,7 +141,7 @@ map<pair<GameState, Player>, PlayState> playStateForLookup;
 vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
 {
     vector<Move> moves;
-    for (int i = 1; i <= 17; i++)
+    for (int i = 0; i < 17; i++)
     {
         if (gameState.numWithEachModulus[i] > 0)
         {
@@ -215,6 +171,7 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
     {
         nextGameState.currentModulus = (nextGameState.currentModulus + 17 - move.modulus) % 17;
     }
+    assert(move.modulus >= 0 && move.modulus < nextGameState.numWithEachModulus.size());
     nextGameState.numWithEachModulus[move.modulus]--;
     assert(nextGameState.currentModulus >= 0 && nextGameState.currentModulus < 17);
     assert(nextGameState.numWithEachModulus[move.modulus] >= 0);
@@ -427,13 +384,15 @@ int main(int argc, char** argv)
         int N;
         cin >> N;
 
+        cout << "N: " << N << endl;
+
         GameState initialGameState;
         initialGameState.numWithEachModulus.resize(17);
         int powerOf2 = 1;
         for (int i = 0; i < N; i++)
         {
             initialGameState.numWithEachModulus[powerOf2]++;
-            powerOf2 *= 2;
+            powerOf2 = (powerOf2 * 2) % 17;
         }
         const auto result = findWinner(Player1, initialGameState);
         if (result == Player1Win)
