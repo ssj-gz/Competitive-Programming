@@ -115,8 +115,8 @@ class Vec
 struct D
 {
     int numAdditions = -1;
-    bool markedForward = false;
-    bool markedBackward = false;
+    bool markedDuringAdditions = false;
+    bool markedDuringSubtractions = false;
 };
 
 void minAbsDiffBruteForce(const vector<int>& absDiffs, int absDiffIndex, int diffSoFar, int& minAbsDiff)
@@ -181,14 +181,14 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                 int numAdditions = startNumAdditions;
                 for (int j = i + minNonNegativeDiff; j <= i + maxNonNegativeDiff; j += 2 * absColorDiff)
                 {
-                    if (next[j].markedForward)
+                    if (next[j].markedDuringAdditions)
                     {
                         // This j - and subsequent j's - have been marked by a previous i.
                         // No need to continue.  This squashes the complexity down from O(N ^ 2) to O(N).
                         break;
                     }
                     next[j].numAdditions = numAdditions;
-                    next[j].markedForward = true;
+                    next[j].markedDuringAdditions = true;
                     assert(numAdditions >= 0 && numAdditions <= numWithAbsColorDiff);
                     const int numSubtractions = numWithAbsColorDiff - numAdditions;
                     assert(i + numAdditions * absColorDiff - numSubtractions * absColorDiff == j);
@@ -206,14 +206,14 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
                 int numAdditions = numWithAbsColorDiff - startNumSubtractions;
                 for (int j = i - minNonNegativeDiff; j >= i - maxNonNegativeDiff; j -= 2 * absColorDiff)
                 {
-                    if (next[j].markedBackward)
+                    if (next[j].markedDuringSubtractions)
                     {
                         // This j - and subsequent j's - have been marked by a previous i.
                         // No need to continue.  This squashes the complexity down from O(N ^ 2) to O(N).
                         break;
                     }
                     next[j].numAdditions = numAdditions;
-                    next[j].markedBackward = true;
+                    next[j].markedDuringSubtractions = true;
                     assert(numAdditions >= 0 && numAdditions <= numWithAbsColorDiff);
                     const int numSubtractions = numWithAbsColorDiff - numAdditions;
                     assert(i + numAdditions * absColorDiff - numSubtractions * absColorDiff == j);
@@ -290,6 +290,99 @@ int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAddition
 
 int main(int argc, char* argv[])
 {
+    // Hmmm ... this is a rather baffling one from a "history" point of view:
+    // apparently, I looked at the Editorial on 24-01-18, but have no recollection
+    // of doing so, but *do* recall solving each individual subproblem, though
+    // perhaps these latter are phantoms.  Having reviewed the Editorial, it is 
+    // unusually unhelpful, so I'm very confused as to why I would have ever looked at it.
+    // Anyway - no points for this one, sadly :(
+    //
+    // So: how to solve? Firstly, all the graph theory stuff is kind of a red herring, or
+    // rather it's by far the easiest part.
+    //
+    // For a given connected component of the original graph, we have very limited choice
+    // about the colourings for each node: once we've picked some arbitrary "root" of the
+    // component and decided on a colour for it, the colours of all the other nodes in
+    // that component are pre-ordained - if the root node is chosen to be black, then its
+    // immediately neighbours *must* be coloured white, and their immediate neighbours black, etc.
+    // The ability to add new edges gives us absolutely no extra leeway here.
+    // Let x be the number of connected components in the original graph, and C_1, C_2, ... C_x
+    // the set of these components.
+    //
+    // It would be a little premature to give concrete colours to the root node of each C_i,
+    // but we can categorise them, using the above logic, to SameAsRoot or DifferentFromRoot.
+    //
+    // Note that, if we decide on a colouration of all nodes in the graph and compute D for it, 
+    // then switching the colours of all nodes gives the same D (since we take the *absolute value*
+    // of the difference between number of black and number of white nodes).  So let's assume,
+    // quite arbitrarily, that our final constructed graph will have at least as many black nodes
+    // as white (if we had a graph that did not satisfy this, we could produce one with the exact
+    // same D and with at least as many black just by switching the colours of all nodes).
+    // Then, D = (num black nodes - num white nodes) - no "abs" required.
+    //
+    // Let's quickly dismiss the rest of the graph theory part of the problem.  If we have decided on
+    // a colouring of all nodes that minimises D, then we can make it connected very easily:
+    // if one of the components, C_j say, has more than one node in it, then it has both a Black and a 
+    // White node - pick one of each colour from C_j and call them whiteNode and blackNode. Then for
+    // every C_i != C_j, simply pick any node from C_i and add a new edge from that node to either
+    // whiteNode or blackNode, as appropriate: the resulting graph is connected (using C_j) as a central
+    // "hub" and has different colour nodes at the ends of each edge, so is a solution to the problem.
+    // There's some minor difficulties arising from graphs where none of the C_is have more than one
+    // node, but these are easily dealt with.
+    //
+    // Back to the main problem: we've computed for each C_i a partitioning of all nodes in that C_i into SameAsRoot and 
+    // DifferentFromRoot.  Now, note that if we set the root node of C_i to Black, then we contribute
+    // (num SameAsRoot in C_i - num DifferentFromRoot in C_i) to D; likewise, if we set it to White,
+    // we contribute (num DifferentFromRoot in C_i - num SameAsRoot in C_i) to D.  That is:
+    // each component contributes either +(num SameAsRoot in C_i - num DifferentFromRoot in C_i) or
+    // -(num SameAsRoot in C_i - num DifferentFromRoot in C_i) to D, depending on what colour we 
+    // set the root of that node.  This (num SameAsRoot in C_i - num DifferentFromRoot in C_i) is very
+    // important - let's call it absColorDiff(C_i) i.e. ech C_i contributes either +absColorDiff(C_i)
+    // or -absColorDiff(C_i) to D.
+    //
+    // Consider the set of 2^x vectors of the form (s1, s2, ... sx) where each s_i is either +1 or -1.
+    // Let the "diff generated from this vector" be:
+    //
+    //    s1 * absColorDiff(C_1) + s2 * absColorDiff(C_2) * + ... + sx * absColorDiff(C_x)
+    //
+    // It's hopefully obvious that we're looking for the generated diff that has the minimum absolute value
+    // of all generated diffs arising from the set of all 2^x vectors of this form.
+    //
+    // A quick observation: (-s1, -s2, ... -sx) will also be in tihs set of vectors, and will generate a negative
+    // diff to (-s1, -s2, ... -sx): that is, we can generate d' if and only if we can generate -d'.  So wlog
+    // we can assume that the generated diff with the min absolute value is non-negative.
+    //
+    // Having found the vector (s1, s2, ... sx) that generates this minimum non-negative diff, we can the use
+    // it to finally assign a colouring to each component that gives the minimum D.  This vector is essentially 
+    // represented in the code by numAdditionsOfEachAbsDiff, although it is does not take the form of a x-vector
+    // of +/-1's (it instead encodes how many times each absColorDiff is *added* to the total - and so, implicitly,
+    // how many times it is subtracted).
+    //
+    // So: 2^x vectors to try, and x ~O(N) - not very tractable :) How can we improve this?
+    //
+    // Well, we can immediately squish it down to polynomial time using standard dynamic programming techniques.
+    //
+    // Let canBeGenerated[i][d] be true if and only if we can generate d by adding positive or negative versions of
+    // absColorDiff(C_1), absColorDiff(C_2) ... absColorDiff(C_i) - then  there's a simple recurrent relation:
+    //
+    //   for each d such that canBeGenerated[i][d], set 
+    //      canBeGenerated[i+1][d + absColorDiff(C_(i+1)) to true and set
+    //      canBeGenerated[i+1][d - absColorDiff(C_(i+1)) to true.
+    //
+    //  We then just need to find the smallest d such that canBeGenerated[x][d] is true.
+    //
+    // Each step (from i to i+1) in the recurrent relation is O(N) (there can be O(N) such d), and x itself is O(N)
+    // so this is (N^2) - still too high.  How can we improve matters further?
+    //
+    // Well, we can note that a component C_i obviously has at least absColorDiff(C_i) nodes in it, and so
+    //
+    //   absColorDiff(C_1) + absColorDiff(C_2) + ... + absColorDiff(C_x) <= N.
+    //
+    // From this, we can deduce that the number of *distinct* absColorDiff(C_i)'s is O(sqrt(N)) (for the same reason
+    // that if 1 + 2 + ... + k <= N, then k can be at most O(sqrt(N)) - a fairly well-known result).
+    // Thus, we can boil down the set of absColorDiff(C_1) ... absColorDiff(C_x) to a set of O(sqrt(N)) distinctAbsDiffs
+    // and a tally of how many copies of each distinct abs diff there are (numWithAbsColorDiff).
+
     ios::sync_with_stdio(false);
 
     if (argc == 2)
