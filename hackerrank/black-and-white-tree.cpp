@@ -369,8 +369,8 @@ int main(int argc, char* argv[])
     // absColorDiff(C_1), absColorDiff(C_2) ... absColorDiff(C_i) - then  there's a simple recurrent relation:
     //
     //   for each d such that canBeGenerated[i][d], set 
-    //      canBeGenerated[i+1][d + absColorDiff(C_(i+1)) to true and set
-    //      canBeGenerated[i+1][d - absColorDiff(C_(i+1)) to true.
+    //      canBeGenerated[i+1][d + absColorDiff(C_(i+1))] to true and set
+    //      canBeGenerated[i+1][d - absColorDiff(C_(i+1))] to true.
     //
     //  We then just need to find the smallest d such that canBeGenerated[x][d] is true.
     //
@@ -385,6 +385,42 @@ int main(int argc, char* argv[])
     // that if 1 + 2 + ... + k <= N, then k can be at most O(sqrt(N)) - a fairly well-known result).
     // Thus, we can boil down the set of absColorDiff(C_1) ... absColorDiff(C_x) to a set of O(sqrt(N)) distinctAbsDiffs
     // and a tally of how many copies of each distinct abs diff there are (numWithAbsColorDiff).
+    //
+    // Does this help? Initially, it seems not that much: if we enumerate the distinctAbsDiffs, da1, da2, ... da_l, 
+    // then we can reformulate canBeGenerated[i][d] as:
+    //
+    //    canBeGenerated[i][d] is true if and only if d can be generated using only additions and subtractions of the diffs
+    //    da1 (numWithAbsColorDiff(da1) of these), da2 (numWithAbsColorDiff(da2) of these), ... da_l (numWithAbsColorDiff(da_l)
+    // of these)
+    //
+    // and then we can solve the problem by finding the smallest d such that canBeGenerated[l][d] is true.
+    //
+    // Since l is O(sqrt(N)), it looks like we have asymptotically fewer iteration i's to compute (O(N) previously; O(sqrt(N)) now),
+    // so  that sounds like progress! But how do we compute canBeGenerated[i+1][d] when we have canBeGenerated[i+1]?
+    //
+    // Well, canBeGenerated[i+1][d] is true if and only if there is some assignment of +'s and minus's to the numWithAbsColorDiff(da_(i+1))
+    // da_(i+1)'s such that d minus the result is true in canBeGenerated[i+1].  But, of course, there are O(2^numWithAbsColorDiff(da_(i+1))
+    // ways of doing this, and numWithAbsColorDiff(da_(i+1)) can be O(N), so this is no immediate help.
+    //
+    // It's hopefully obvious that the result of assigning +'s and -'s to the numWithAbsColorDiff(da_(i+1)) da_(i+1)'s depends only on
+    // how many +'s and -'s there are, and that the number of -'s is fixed when we decide on the number of +'s - it is # +'s * da_(i+1)
+    // - # -'s da_(i+1), where # -'s is numAdditionsOfEachAbsDiff(da_(i+1)) - # +'s.  Thus, our recurrence relation can be re-written as:
+    //
+    //   for each d such that canBeGenerated[i][d],
+    //      for each numAdditions = 0, 1, ... numAdditionsOfEachAbsDiff(da_(i+1))
+    //         canBeGenerated[i+1][d + numAdditions * da_(i+1) - (numAdditionsOfEachAbsDiff(da_(i+1) - numAdditions) * da_(i+1)  to true
+    //
+    // There are O(N) such d, as before, and O(N) possible values of numAdditions, and we need to do this for O(sqrt(N)) values of i,
+    // giving a total of O(sqrt(N) * N * N) computations.  Rats - this is even worse than before!
+    //
+    // But there is a shortcut.  Consider what happens with numAdditions as we increase or decrease it.  Let's start it off as 0 - then 
+    // we are subtracting numWithAbsColorDiff(da_(i+1)) * da_(i+1)).  Let's increase numAdditions by one (and so, also reduce the number of 
+    // subtractions by one) - then we *decrease* the amount we are subtracting by 2 * da_(i+1).  As we keep increasing numAdditions, we
+    // decrease the amount we are subtracting(!) until, when numAdditions is greater than or equal to numWithAbsColorDiff(da_(i+1)) / 2,
+    // we stop subtracting and either do nothing (if numWithAbsColorDiff(da_(i+1)) is even) or start adding (otherwise).
+
+
+
 
     ios::sync_with_stdio(false);
 
