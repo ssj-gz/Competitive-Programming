@@ -1,19 +1,14 @@
 // Simon St James (ssjgz) - 2019-06-03
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <map>
-#include <set>
-#include <limits>
 #include <algorithm>
 #include <cassert>
 
-#include <sys/time.h>
 
 using namespace std;
 
@@ -118,31 +113,6 @@ struct D
     bool markedDuringAdditions = false;
     bool markedDuringSubtractions = false;
 };
-
-void minAbsDiffBruteForce(const vector<int>& absDiffs, int absDiffIndex, int diffSoFar, int& minAbsDiff)
-{
-    if (absDiffIndex == absDiffs.size())
-    {
-        if (abs(diffSoFar) < minAbsDiff)
-        {
-            minAbsDiff = min(minAbsDiff, abs(diffSoFar));
-            cout << "Found new smallest minAbsDiff: " << minAbsDiff << endl;
-        }
-
-        return;
-    }
-    // Add this diff.
-    minAbsDiffBruteForce(absDiffs, absDiffIndex + 1, diffSoFar + absDiffs[absDiffIndex], minAbsDiff);
-    // Subtract this diff.
-    minAbsDiffBruteForce(absDiffs, absDiffIndex + 1, diffSoFar - absDiffs[absDiffIndex], minAbsDiff);
-}
-
-int minAbsDiffBruteForce(const vector<int>& absDiffs)
-{
-    int minAbsDiff = numeric_limits<int>::max();
-    minAbsDiffBruteForce(absDiffs, 0, 0, minAbsDiff);
-    return minAbsDiff;
-}
 
 int minAbsDiffOptimsed(const vector<int>& absDiffs, vector<int>& destNumAdditionsOfEachAbsDiff)
 {
@@ -467,43 +437,6 @@ int main(int argc, char* argv[])
     // In the code, what we've been referring to as canBeGenerated is called generatableDiffsForDistinctAbsDiff.
     ios::sync_with_stdio(false);
 
-    if (argc == 2)
-    {
-        // XXX This does not guarantee a solution, but is good for verifying the 
-        // important part of this problem (minAbsDiff_Optimised).
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int N = rand() % 30 + 1;
-        const int M = min(rand() % (N * (N - 1) / 2 + 1), 500'000);
-        cout << N << " " << M << endl;
-
-        set<string> blah;
-        while (blah.size() < M)
-        {
-            int node1 = (rand() % N) + 1;
-            int node2 = (rand() % N) + 1;
-            if (node1 == node2)
-                continue;
-
-            if (node1 > node2)
-                swap(node1, node2);
-
-            blah.insert(to_string(node1) + " " + to_string(node2));
-        }
-        assert(blah.size() >= M);
-
-        //random_shuffle(blah.begin(), blah.end());
-
-        for(const auto& edge : blah)
-        {
-            cout << edge << endl;
-        }
-
-        return 0;
-
-    }
     int N, M;
     cin >> N >> M;
 
@@ -587,15 +520,7 @@ int main(int argc, char* argv[])
     }
 
     vector<int> numAdditionsOfEachAbsDiff;
-#ifdef BRUTE_FORCE
-    const auto minAbsDiff_BruteForce = minAbsDiffBruteForce(absDiffs);
     const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
-
-    cout << "minAbsDiff_BruteForce: " << minAbsDiff_BruteForce << " minAbsDiff_Optimised: " << minAbsDiff_Optimised << endl;
-    assert(minAbsDiff_Optimised == minAbsDiff_BruteForce);
-#else
-    const auto minAbsDiff_Optimised = minAbsDiffOptimsed(absDiffs, numAdditionsOfEachAbsDiff);
-#endif
 
     // Apply the resulting numAdditionsOfEachAbsDiff that give the minimum diff
     // by choosing the actual colour of the root node of each component (and so,
