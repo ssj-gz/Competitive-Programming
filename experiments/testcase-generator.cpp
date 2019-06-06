@@ -223,10 +223,22 @@ class TestCaseReader
         }
     private:
         istream& m_testSuiteStream;
+        int m_numLinesOfInputRead = 0;
+
         bool m_loadedNextTestCase = false;
         TestCase m_nextTestCase;
         bool m_hasError = false;
         string m_errorMessage;
+
+        bool readNextLine(string& destString)
+        {
+            const bool successful = static_cast<bool>(std::getline(m_testSuiteStream, destString));
+            if (successful)
+            {
+                m_numLinesOfInputRead++;
+            }
+            return successful;
+        }
         
         bool attemptLoadNext(TestCase& destTestCase)
         {
@@ -235,12 +247,12 @@ class TestCaseReader
             destTestCase.testInput.clear();
             destTestCase.testRunOutput.clear();
             string testInputHeader;
-            if (!std::getline(m_testSuiteStream, testInputHeader))
+            if (!readNextLine(testInputHeader))
             {
                 if (!m_testSuiteStream.eof())
                 {
                     m_hasError = true;
-                    m_errorMessage = "Unknown read error (not eof) when attempting to load next test input header";
+                    m_errorMessage = "Unknown read error (not eof) when attempting to load next test input header at line: " + to_string(m_numLinesOfInputRead);
                 }
                 return false;
             }
@@ -249,7 +261,7 @@ class TestCaseReader
             if (!std::regex_search(testInputHeader, inputHeaderMatch, testInputHeaderRegex))
             {
                 m_hasError = true;
-                m_errorMessage = "The line " + testInputHeader + " does not match the format of a test input header";
+                m_errorMessage = "The line " + testInputHeader + " does not match the format of a test input header at line: " + to_string(m_numLinesOfInputRead);
                 return false;
             }
 
@@ -257,20 +269,20 @@ class TestCaseReader
             for (int i = 0; i < numTestInputLines; i++)
             {
                 string testInputLine;
-                if (!std::getline(m_testSuiteStream, testInputLine))
+                if (!readNextLine(testInputLine))
                 {
                     m_hasError = true;
-                    m_errorMessage = "Could not load line " + to_string(i + 1) + "/" + to_string(numTestInputLines) + " of the test input";
+                    m_errorMessage = "Could not load line " + to_string(i + 1) + "/" + to_string(numTestInputLines) + " of the test input at line: " + to_string(m_numLinesOfInputRead + 1);
                     return false;
                 }
                 destTestCase.testInput.push_back(testInputLine);
             }
 
             string testResultHeader;
-            if (!std::getline(m_testSuiteStream, testResultHeader))
+            if (!readNextLine(testResultHeader))
             {
                 m_hasError = true;
-                m_errorMessage = "Unknown read error when attempting to load next test result header";
+                m_errorMessage = "Unknown read error when attempting to load next test result header at line: " + to_string(m_numLinesOfInputRead);
                 return false;
             }
 
@@ -278,7 +290,7 @@ class TestCaseReader
             if (!std::regex_search(testResultHeader, resultHeaderMatch, testResultHeaderRegex))
             {
                 m_hasError = true;
-                m_errorMessage = "The line " + testResultHeader + " does not match the format of a test result header";
+                m_errorMessage = "The line " + testResultHeader + " does not match the format of a test result header at line: " + to_string(m_numLinesOfInputRead);
                 return false;
             }
 
@@ -286,10 +298,10 @@ class TestCaseReader
             for (int i = 0; i < numTestResultLines; i++)
             {
                 string testResultLine;
-                if (!std::getline(m_testSuiteStream, testResultLine))
+                if (!readNextLine(testResultLine))
                 {
                     m_hasError = true;
-                    m_errorMessage = "Could not load line " + to_string(i + 1) + "/" + to_string(numTestResultLines) + " of the test result";
+                    m_errorMessage = "Could not load line " + to_string(i + 1) + "/" + to_string(numTestResultLines) + " of the test result at line: " + to_string(m_numLinesOfInputRead + 1);
                     return false;
                 }
                 destTestCase.testRunOutput.push_back(testResultLine);
