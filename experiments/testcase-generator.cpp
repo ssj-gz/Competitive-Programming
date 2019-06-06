@@ -301,8 +301,8 @@ class TestCaseReader
         static std::regex testResultHeaderRegex;
 };
 
-std::regex TestCaseReader::testInputHeaderRegex("^Q:\\s*(\\d+)");
-std::regex TestCaseReader::testResultHeaderRegex("^A:\\s*(\\d+)");
+std::regex TestCaseReader::testInputHeaderRegex("^Q:\\s*(\\d+) lines");
+std::regex TestCaseReader::testResultHeaderRegex("^A:\\s*(\\d+) lines");
 
 ExecutionResult runTestWithInputAndGetFilteredResult(const string& executableName, const vector<string>& testInput, const std::regex& testResultRegexFilter, int testResultRegexFilterCaptureGroup)
 {
@@ -484,7 +484,20 @@ int main(int argc, char* argv[])
     }
     else if (mode == Validate)
     {
-        assert(false && "TODO");
+        ifstream testSuiteFile(testSuiteFileName);
+        TestCaseReader testCaseReader(testSuiteFile);
+        while (testCaseReader.hasNext())
+        {
+            testCaseReader.next();
+        }
+        if (testCaseReader.hasError())
+        {
+            cerr << "Validation error: " << testCaseReader.errorMessage() << endl;
+            return EXIT_FAILURE;
+        }
+        cout << "Validation successful!" << endl;
+        return EXIT_SUCCESS;
+
     }
     else
     {
