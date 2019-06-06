@@ -480,7 +480,7 @@ int main(int argc, char* argv[])
         }
         cout << "All testcases passed!" << endl;
         // All clear!
-        return 0;
+        return EXIT_SUCCESS;
     }
     else if (mode == Validate)
     {
