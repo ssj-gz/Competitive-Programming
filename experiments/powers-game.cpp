@@ -70,7 +70,6 @@ class GameState
         PlayState winningPlayerOverride(Player currentPlayer) const
         {
             assert(movesFor(currentPlayer, *this).empty());
-            cout << "winningPlayerOverride: " << *this << endl;
             if (currentModulus == 0)
                 return Player1Lose;
             return Player1Win;
@@ -356,7 +355,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 PlayState findWinner(Player firstPlayer, const GameState& initialGameState, PlayerType player1Type = CPU, PlayerType player2Type = CPU)
 {
     cout << "Initial game state: " << initialGameState << endl;
-    playStateForLookup.clear();
+    //playStateForLookup.clear();
     const auto result = findWinnerAux(firstPlayer, initialGameState, player1Type, player2Type, false);
 
     if (player1Type == Human || player2Type == Human)
@@ -405,17 +404,37 @@ int main(int argc, char** argv)
             initialGameState.numWithEachModulus[powerOf2]++;
             powerOf2 = (powerOf2 * 2) % 17;
         }
-        const auto result = findWinner(Player1, initialGameState, Human, CPU);
+        //cout << "initialGameState: " << initialGameState << endl;
+#if 1
+        //const auto result = findWinner(Player1, initialGameState, CPU, Human);
+        const auto result = findWinner(Player1, initialGameState, Random, CPU);
         //const auto result = findWinner(Player1, initialGameState, CPU, CPU);
         if (result == Player1Win)
         {
-            cout << "FIRST";
+            cout << "woo - FIRST N: " << N;
         }
         else
         {
-            cout << "SECOND";
+            cout << "woo - SECOND N: " << N;
         }
         cout << endl;
+#endif
+        int numMirrored = 0;
+        int numNotMirrored = 0;
+        for (int i = 1; i < 17; i++)
+        {
+            if (((initialGameState.numWithEachModulus[i] + initialGameState.numWithEachModulus[17 - i]) % 2) == 0)
+            {
+                numMirrored++;
+                cout << "i: " << i << " mirrored" << endl;
+            }
+            else
+            {
+                numNotMirrored++;
+                cout << "i: " << i << " not mirrored" << endl;
+            }
+        }
+        cout << "N: " << N << " numMirrored: " << numMirrored << " numNotMirrored: " << numNotMirrored << " modulus 8: " << (N % 8) << endl;
     }
 
 }
