@@ -304,6 +304,8 @@ void writeFailingTestInputAndDie(const vector<string>& failingTestInput, const s
 
 int main(int argc, char* argv[])
 {
+    enum Mode {Generate, Verify, Validate};
+    Mode mode = Generate;
     bool appendToTestSuiteFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
     string executableName = "./a.out";
@@ -311,14 +313,16 @@ int main(int argc, char* argv[])
     int testResultRegexFilterCaptureGroup = 0;
     regex testResultRegexFilter;
 
-    bool verifyMode = false;
+    bool verifyModeFlag = false;
+    bool validateModeFlag = false;
 
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
         ("testsuite-filename", po::value< string >()->required(), "testsuite filename")
         ("executable-name", po::value< string >(&executableName), "path to the executable that generates/ runs tests.  Defaults to ./a.out")
-        ("verify", po::bool_switch(&verifyMode), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
+        ("verify", po::bool_switch(&verifyModeFlag), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
+        ("validate", po::bool_switch(&validateModeFlag), "perform simple validation of the testsuite to check for obvious corruption")
         ("stop-after", po::value< string >(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
@@ -337,12 +341,23 @@ int main(int argc, char* argv[])
         return 0;
     }
     po::notify(vm);
+
+    if (verifyModeFlag)
+    {
+        mode = Verify;
+    }
+    if (validateModeFlag)
+    {
+        mode = Validate;
+    }
+
+
     cout << "testResultRegexFilterPattern: " << testResultRegexFilterPattern << endl;
     testResultRegexFilter.assign(testResultRegexFilterPattern);
 
     const string testSuiteFileName = vm["testsuite-filename"].as<string>();
 
-    if (!verifyMode)
+    if (mode == Generate)
     {
         if (!vm.count("stop-after"))
         {
@@ -402,7 +417,7 @@ int main(int argc, char* argv[])
         }
         testSuiteFile.close();
     }
-    else
+    else if (mode == Verify)
     {
         ifstream testSuiteFile(testSuiteFileName);
         TestCaseReader testCaseReader(testSuiteFile);
@@ -425,6 +440,14 @@ int main(int argc, char* argv[])
         cout << "All testcases passed!" << endl;
         // All clear!
         return 0;
+    }
+    else if (mode == Validate)
+    {
+        assert(false && "TODO");
+    }
+    else
+    {
+        assert(false && "Unhandled mode");
     }
     return 0;
 }
