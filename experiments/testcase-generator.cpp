@@ -213,44 +213,85 @@ class TestCaseReader
             assert(!m_loadedNextTestCase);
             return m_nextTestCase;
         }
+        bool hasError() const
+        {
+            return m_hasError;
+        }
+        string errorMessage() const
+        {
+            return m_errorMessage;
+        }
     private:
         istream& m_testSuiteStream;
         bool m_loadedNextTestCase = false;
         TestCase m_nextTestCase;
+        bool m_hasError = false;
+        string m_errorMessage;
         
         bool attemptLoadNext(TestCase& destTestCase)
         {
+            if (m_hasError)
+                return false;
             destTestCase.testInput.clear();
             destTestCase.testRunOutput.clear();
             string testInputHeader;
             if (!std::getline(m_testSuiteStream, testInputHeader))
+            {
+                if (!m_testSuiteStream.eof())
+                {
+                    m_hasError = true;
+                    m_errorMessage = "Unknown read error (not eof) when attempting to load next test input header";
+                }
                 return false;
+            }
 
             std::smatch inputHeaderMatch;
             if (!std::regex_search(testInputHeader, inputHeaderMatch, testInputHeaderRegex))
+            {
+                m_hasError = true;
+                m_errorMessage = "The line " + testInputHeader + " does not match the format of a test input header";
                 return false;
+            }
 
             const int numTestInputLines = stoi(inputHeaderMatch[1]);
             for (int i = 0; i < numTestInputLines; i++)
             {
                 string testInputLine;
-                std::getline(m_testSuiteStream, testInputLine);
+                if (!std::getline(m_testSuiteStream, testInputLine))
+                {
+                    m_hasError = true;
+                    m_errorMessage = "Could not load line " + to_string(i + 1) + "/" + to_string(numTestInputLines) + " of the test input";
+                    return false;
+                }
                 destTestCase.testInput.push_back(testInputLine);
             }
 
             string testResultHeader;
             if (!std::getline(m_testSuiteStream, testResultHeader))
+            {
+                m_hasError = true;
+                m_errorMessage = "Unknown read error when attempting to load next test result header";
                 return false;
+            }
 
             std::smatch resultHeaderMatch;
             if (!std::regex_search(testResultHeader, resultHeaderMatch, testResultHeaderRegex))
+            {
+                m_hasError = true;
+                m_errorMessage = "The line " + testResultHeader + " does not match the format of a test result header";
                 return false;
+            }
 
             const int numTestResultLines = stoi(resultHeaderMatch[1]);
             for (int i = 0; i < numTestResultLines; i++)
             {
                 string testResultLine;
-                std::getline(m_testSuiteStream, testResultLine);
+                if (!std::getline(m_testSuiteStream, testResultLine))
+                {
+                    m_hasError = true;
+                    m_errorMessage = "Could not load line " + to_string(i + 1) + "/" + to_string(numTestResultLines) + " of the test result";
+                    return false;
+                }
                 destTestCase.testRunOutput.push_back(testResultLine);
             }
             return m_testSuiteStream.good();
