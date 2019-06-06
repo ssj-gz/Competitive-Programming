@@ -343,6 +343,23 @@ void writeFailingTestInputAndDie(const vector<string>& failingTestInput, const s
     exit(EXIT_FAILURE);
 }
 
+bool validateTestSuite(const string& testSuiteFileName)
+{
+    ifstream testSuiteFile(testSuiteFileName);
+    TestCaseReader testCaseReader(testSuiteFile);
+    while (testCaseReader.hasNext())
+    {
+        testCaseReader.next();
+    }
+    if (testCaseReader.hasError())
+    {
+        cerr << "Validation error: " << testCaseReader.errorMessage() << endl;
+        return false;
+    }
+    cout << "Validation successful!" << endl;
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
     enum Mode {Generate, Verify, Validate};
@@ -484,20 +501,7 @@ int main(int argc, char* argv[])
     }
     else if (mode == Validate)
     {
-        ifstream testSuiteFile(testSuiteFileName);
-        TestCaseReader testCaseReader(testSuiteFile);
-        while (testCaseReader.hasNext())
-        {
-            testCaseReader.next();
-        }
-        if (testCaseReader.hasError())
-        {
-            cerr << "Validation error: " << testCaseReader.errorMessage() << endl;
-            return EXIT_FAILURE;
-        }
-        cout << "Validation successful!" << endl;
-        return EXIT_SUCCESS;
-
+        return validateTestSuite(testSuiteFileName) ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     else
     {
