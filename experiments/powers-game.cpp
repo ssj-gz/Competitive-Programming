@@ -15,6 +15,7 @@ using namespace std;
 #define PRINT_COMPUTER_MOVES
 
 //#define MOVE_COINS_EXAMPLE_RANDOM
+const auto mod = 17;
 
 enum PlayState { Player1Win, Player1Lose, Draw };
 enum Player { Player1, Player2 };
@@ -101,7 +102,7 @@ class Move
 ostream& operator<<(ostream& os, const GameState& gameState)
 {
     os << "currentModulus: " << gameState.currentModulus << " num in Pile: ";
-    for (int i = 1; i < 17; i++)
+    for (int i = 1; i < mod; i++)
     {
         os << i << ": = " << gameState.numWithEachModulus[i] << " ";
     }
@@ -142,7 +143,7 @@ map<pair<GameState, Player>, PlayState> playStateForLookup;
 vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
 {
     vector<Move> moves;
-    for (int i = 0; i < 17; i++)
+    for (int i = 0; i < mod; i++)
     {
         if (gameState.numWithEachModulus[i] > 0)
         {
@@ -166,15 +167,15 @@ GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, c
     GameState nextGameState = gameState;
     if (move.add)
     {
-        nextGameState.currentModulus = (nextGameState.currentModulus + move.modulus) % 17;
+        nextGameState.currentModulus = (nextGameState.currentModulus + move.modulus) % mod;
     }
     else
     {
-        nextGameState.currentModulus = (nextGameState.currentModulus + 17 - move.modulus) % 17;
+        nextGameState.currentModulus = (nextGameState.currentModulus + mod - move.modulus) % mod;
     }
     assert(move.modulus >= 0 && move.modulus < nextGameState.numWithEachModulus.size());
     nextGameState.numWithEachModulus[move.modulus]--;
-    assert(nextGameState.currentModulus >= 0 && nextGameState.currentModulus < 17);
+    assert(nextGameState.currentModulus >= 0 && nextGameState.currentModulus < mod);
     assert(nextGameState.numWithEachModulus[move.modulus] >= 0);
 
     return nextGameState;
@@ -397,18 +398,18 @@ int main(int argc, char** argv)
         cout << "N: " << N << endl;
 
         GameState initialGameState;
-        initialGameState.numWithEachModulus.resize(17);
+        initialGameState.numWithEachModulus.resize(mod);
         int powerOf2 = 1;
         for (int i = 0; i < N; i++)
         {
             initialGameState.numWithEachModulus[powerOf2]++;
-            powerOf2 = (powerOf2 * 2) % 17;
+            powerOf2 = (powerOf2 * 2) % mod;
         }
         //cout << "initialGameState: " << initialGameState << endl;
 #if 1
         //const auto result = findWinner(Player1, initialGameState, CPU, Human);
-        const auto result = findWinner(Player1, initialGameState, Random, CPU);
-        //const auto result = findWinner(Player1, initialGameState, CPU, CPU);
+        //const auto result = findWinner(Player1, initialGameState, Random, CPU);
+        const auto result = findWinner(Player1, initialGameState, CPU, CPU);
         if (result == Player1Win)
         {
             cout << "woo - FIRST N: " << N;
@@ -421,9 +422,9 @@ int main(int argc, char** argv)
 #endif
         int numMirrored = 0;
         int numNotMirrored = 0;
-        for (int i = 1; i < 17; i++)
+        for (int i = 1; i < mod; i++)
         {
-            if (((initialGameState.numWithEachModulus[i] + initialGameState.numWithEachModulus[17 - i]) % 2) == 0)
+            if (((initialGameState.numWithEachModulus[i] + initialGameState.numWithEachModulus[mod - i]) % 2) == 0)
             {
                 numMirrored++;
                 cout << "i: " << i << " mirrored" << endl;
