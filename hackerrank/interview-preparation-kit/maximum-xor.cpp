@@ -66,7 +66,6 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
             if (query & powerOf2)
             {
                 auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
-                const int oldRangeEnd = rangeEnd;
                 if (blah != sortedA.begin() + rangeEnd + 1)
                 {
                     if (blah != sortedA.begin() + rangeBegin)
@@ -74,7 +73,7 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
                         blah = std::prev(blah);
                         rangeEnd = blah - sortedA.begin();
                     }
-                    if (oldRangeEnd == rangeEnd)
+                    else
                     {
                         cumulativeSubtraction += powerOf2;
 #ifdef BRUTE_FORCE
