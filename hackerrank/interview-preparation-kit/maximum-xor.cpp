@@ -65,15 +65,16 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
         while (powerOf2 >= 1)
         {
             //cout << " powerOf2: " << powerOf2 << " query & powerOf2: " << (query & powerOf2) << endl;
+            auto firstInRangeAtLeastPowerOf2Iter = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
+            const bool haveAtLeastPowerOf2InRange = (firstInRangeAtLeastPowerOf2Iter != sortedA.begin() + rangeEnd + 1);
             if (query & powerOf2)
             {
-                auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
-                if (blah != sortedA.begin() + rangeEnd + 1)
+                if (haveAtLeastPowerOf2InRange)
                 {
-                    if (blah != sortedA.begin() + rangeBegin)
+                    if (firstInRangeAtLeastPowerOf2Iter != sortedA.begin() + rangeBegin)
                     {
-                        blah = std::prev(blah);
-                        rangeEnd = blah - sortedA.begin();
+                        firstInRangeAtLeastPowerOf2Iter = std::prev(firstInRangeAtLeastPowerOf2Iter);
+                        rangeEnd = firstInRangeAtLeastPowerOf2Iter - sortedA.begin();
                     }
                     else
                     {
@@ -90,11 +91,10 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
             }
             else
             {
-                auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
-                if (blah != sortedA.begin() + rangeEnd + 1)
+                if (haveAtLeastPowerOf2InRange)
                 {
                     //cout << " adjusting rangeBegin" << endl;
-                    rangeBegin = blah - sortedA.begin();
+                    rangeBegin = firstInRangeAtLeastPowerOf2Iter - sortedA.begin();
 
                     cumulativeSubtraction += powerOf2;
 #ifdef BRUTE_FORCE
