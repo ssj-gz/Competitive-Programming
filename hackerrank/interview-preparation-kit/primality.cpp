@@ -23,15 +23,12 @@ int main()
     for (int factor = 2; factor <= rootMaxN; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
-#if 0
         if (isFactorPrime)
         {
             primesUpToRootMaxN.push_back(factor);
         }
-#endif
         for (int multiple = factor * 2; multiple <= rootMaxN; multiple += factor)
         {
-#if 0
             if (!isPrime[multiple] && !isFactorPrime)
             {
                 // This multiple has already been marked, and since factor is not prime,
@@ -39,26 +36,10 @@ int main()
                 // prime factors of factor!).
                 break;
             }
-#endif
             isPrime[multiple] = false;
         }
     }
-#if 1
-    for (int i = 2; i <= rootMaxN; i++)
-    {
-        if (isPrime[i])
-        {
-            primesUpToRootMaxN.push_back(i);
-        }
-    }
-#endif
 
-    for (const auto x : primesUpToRootMaxN)
-    {
-        cout << x << " is prime" << endl;
-    }
-
-#if 0
     int p;
     cin >> p;
 
@@ -68,14 +49,21 @@ int main()
         cin >> n;
 
         bool isPrime = true;
-        for (const auto prime : primesUpToRootMaxN)
+        if (n == 1)
         {
-            if (prime >= n)
-                break;
-            if ((n % prime) == 0)
+            isPrime = false;
+        }
+        else
+        {
+            for (const auto prime : primesUpToRootMaxN)
             {
-                isPrime = false;
-                break;
+                if (prime >= n)
+                    break;
+                if ((n % prime) == 0)
+                {
+                    isPrime = false;
+                    break;
+                }
             }
         }
         if (isPrime)
@@ -87,6 +75,4 @@ int main()
             cout << "Not prime" << endl;
         }
     }
-
-#endif
 }
