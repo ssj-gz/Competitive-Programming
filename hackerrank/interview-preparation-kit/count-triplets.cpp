@@ -41,14 +41,14 @@ int64_t solveBruteForce(const vector<int64_t>& a, int64_t r)
 int64_t solveOptimised(const vector<int64_t>& a, int64_t r)
 {
     int64_t numTriplets = 0;
-    map<int64_t, int> numRemainingOccurrencesOf;
+    map<int64_t, int64_t> numRemainingOccurrencesOf;
     for (const auto x : a)
     {
         numRemainingOccurrencesOf[x]++;
     }
     const auto numRemainingOccurrencesOfOriginal = numRemainingOccurrencesOf;
 
-    map<int64_t, int> numRemainingPairsBeginningWith;
+    map<int64_t, int64_t> numRemainingPairsBeginningWith;
     for (const auto x : a)
     {
         // The order is important, here: x * r == x if r == 1.
