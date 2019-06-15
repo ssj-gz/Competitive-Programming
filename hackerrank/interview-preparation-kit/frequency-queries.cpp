@@ -14,9 +14,9 @@ int main()
     int Q;
     cin >> Q;
 
-    const int maxInSet = Q; // We can add at most one element per query.
+    const int maxFrequency = Q; // We can add at most one element per query.
     map<int, int> numOccurrencesOf;
-    vector<int> numWithFrequency(maxInSet + 1);
+    vector<int> numWithFrequency(maxFrequency + 1, 0);
 
     for (int q = 0; q < Q; q++)
     {
@@ -25,6 +25,7 @@ int main()
         int queryValue;
         cin >> queryValue;
 
+        assert(queryValue != 0);
         switch (queryType)
         {
             case 1:
@@ -42,6 +43,7 @@ int main()
                     if (prevFrequency > 0)
                     {
                         const auto newFrequency = prevFrequency - 1;
+                        assert(newFrequency >= 0);
                         numOccurrencesOf[queryValue]--;
                         numWithFrequency[prevFrequency]--;
                         numWithFrequency[newFrequency]++;
@@ -50,7 +52,7 @@ int main()
                 }
             case 3:
                 {
-                    if (numWithFrequency[queryValue] > 0)
+                    if (queryValue < numWithFrequency.size() && numWithFrequency[queryValue] > 0)
                     {
                         cout << 1 << endl;
                     }
