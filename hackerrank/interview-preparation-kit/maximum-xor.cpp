@@ -3,7 +3,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -45,26 +45,17 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
     vector<int> sortedA(originalA);
     sort(sortedA.begin(), sortedA.end());
 
-
-    //cout << "sorted A" << endl;
-    for (const auto x : sortedA)
-    {
-        //cout << x << " ";
-    }
-    //cout << endl;
     for (const auto query : queries)
     {
 #ifdef BRUTE_FORCE
-    vector<int> dbgSortedA(sortedA);
+        vector<int> dbgSortedA(sortedA);
 #endif
-        //cout << "query: " << query << endl;
         int rangeBegin = 0;
         int rangeEnd = sortedA.size() - 1;
         uint32_t cumulativeSubtraction = 0;
         uint32_t powerOf2 = (1U << 31U);
         while (powerOf2 >= 1)
         {
-            //cout << " powerOf2: " << powerOf2 << " query & powerOf2: " << (query & powerOf2) << endl;
             auto firstInRangeAtLeastPowerOf2Iter = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
             const bool haveAtLeastPowerOf2InRange = (firstInRangeAtLeastPowerOf2Iter != sortedA.begin() + rangeEnd + 1);
             if (query & powerOf2)
@@ -93,26 +84,18 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
             {
                 if (haveAtLeastPowerOf2InRange)
                 {
-                    //cout << " adjusting rangeBegin" << endl;
                     rangeBegin = firstInRangeAtLeastPowerOf2Iter - sortedA.begin();
 
                     cumulativeSubtraction += powerOf2;
 #ifdef BRUTE_FORCE
-                        for(auto& x : dbgSortedA)
-                        {
-                            x -= powerOf2;
-                        }
+                    for(auto& x : dbgSortedA)
+                    {
+                        x -= powerOf2;
+                    }
 #endif
                 }
             }
-            //cout << " rangeBegin: " << rangeBegin << " rangeEnd: " << rangeEnd << " cumulativeSubtraction: " << cumulativeSubtraction << endl;
 #ifdef BRUTE_FORCE
-            cout << "dbgSortedA" << endl;
-            for(const auto& x : dbgSortedA)
-            {
-                cout << x << " ";
-            }
-            cout << endl;
             for (int i = rangeBegin; i <= rangeEnd; i++)
             {
                 assert (dbgSortedA[i] >= 0);
@@ -124,8 +107,9 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
 
             powerOf2 >>= 1;
         }
-        auto blah = max(query ^ sortedA[rangeBegin], query ^ sortedA[rangeEnd]);
-        results.push_back(blah);
+        assert(rangeEnd - rangeBegin <= 1);
+        auto maxXor = max(query ^ sortedA[rangeBegin], query ^ sortedA[rangeEnd]);
+        results.push_back(maxXor);
 
     }
     return results;
