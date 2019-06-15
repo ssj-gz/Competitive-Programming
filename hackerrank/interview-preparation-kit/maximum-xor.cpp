@@ -69,25 +69,19 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
                 const int oldRangeEnd = rangeEnd;
                 if (blah != sortedA.begin() + rangeEnd + 1)
                 {
-                    if (blah != sortedA.begin())
+                    if (blah != sortedA.begin() + rangeBegin)
                     {
                         blah = std::prev(blah);
-                        if (blah - sortedA.begin() >= rangeBegin)
-                        {
-                            //cout << " adjusting rangeEnd" << endl;
-                            rangeEnd = blah - sortedA.begin();
-                        }
+                        rangeEnd = blah - sortedA.begin();
                     }
                     if (oldRangeEnd == rangeEnd)
                     {
-#if 1
                         cumulativeSubtraction += powerOf2;
 #ifdef BRUTE_FORCE
                         for(auto& x : dbgSortedA)
                         {
                             x -= powerOf2;
                         }
-#endif
 #endif
                     }
                 }
