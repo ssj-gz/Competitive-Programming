@@ -1,6 +1,7 @@
 // Simon St James (ssjgz) - 2019-06-15
 #include <iostream>
 #include <map>
+#include <vector>
 #include <cassert>
 
 using namespace std;
@@ -10,8 +11,9 @@ int main()
     int Q;
     cin >> Q;
 
+    const int maxInSet = Q; // We can add at most one element per query.
     map<int, int> numOccurrencesOf;
-    map<int, int> numWithFrequency;
+    vector<int> numWithFrequency(maxInSet + 1);
 
     for (int q = 0; q < Q; q++)
     {
