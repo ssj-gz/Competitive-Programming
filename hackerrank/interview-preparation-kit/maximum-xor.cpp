@@ -18,16 +18,17 @@ using namespace std;
 vector<int> solveBruteForce(const vector<int>& a, const vector<int>& queries)
 {
     vector<int> results;
+    results.reserve(queries.size());
     for (const auto query : queries)
     {
-        cout << "query: " << query << endl;
+        //cout << "query: " << query << endl;
         int largestXor = -1;
         for (const auto x : a)
         {
             const auto thisXor = x ^ query;
             if (thisXor > largestXor)
             {
-                cout << " found new best of " << thisXor << " by xoring with " << x << endl;
+                //cout << " found new best of " << thisXor << " by xoring with " << x << endl;
                 largestXor = thisXor;
             }
         }
@@ -39,6 +40,8 @@ vector<int> solveBruteForce(const vector<int>& a, const vector<int>& queries)
 vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& queries)
 {
     vector<int> results;
+    results.reserve(queries.size());
+
     vector<int> sortedA(originalA);
     sort(sortedA.begin(), sortedA.end());
 
