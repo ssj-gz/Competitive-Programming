@@ -13,10 +13,16 @@ vector<int> solveBruteForce(const vector<int>& a, const vector<int>& queries)
     vector<int> results;
     for (const auto query : queries)
     {
+        cout << "query: " << query << endl;
         int largestXor = -1;
         for (const auto x : a)
         {
-            largestXor = std::max(largestXor, x ^ query);
+            const auto thisXor = x ^ query;
+            if (thisXor > largestXor)
+            {
+                cout << " found new best of " << thisXor << " by xoring with " << x << endl;
+                largestXor = thisXor;
+            }
         }
         results.push_back(largestXor);
     }
@@ -28,41 +34,51 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
     vector<int> results;
     vector<int> sortedA(originalA);
     sort(sortedA.begin(), sortedA.end());
+
+    cout << "sorted A" << endl;
+    for (const auto x : sortedA)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
     for (const auto query : queries)
     {
-        //cout << "query: " << query << endl;
+        cout << "query: " << query << endl;
         int rangeBegin = 0;
         int rangeEnd = sortedA.size() - 1;
+        int cumulativeSubtraction = 0;
         uint32_t powerOf2 = (1U << 31U);
         while (powerOf2 >= 1)
         {
-            //cout << " powerOf2: " << powerOf2 << endl;
+            cout << " powerOf2: " << powerOf2 << endl;
             if (query & powerOf2)
             {
-                auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2);
+                auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
                 if (blah != sortedA.begin() + rangeEnd + 1)
                 {
                     if (blah != sortedA.begin())
                     {
                         blah = std::prev(blah);
                         rangeEnd = blah - sortedA.begin();
+                        cumulativeSubtraction += powerOf2;
                     }
                 }
 
             }
             else
             {
-                auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2);
+                auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
                 if (blah != sortedA.begin() + rangeEnd + 1)
                 {
                     rangeBegin = blah - sortedA.begin();
+                    cumulativeSubtraction += powerOf2;
                 }
             }
-            //cout << " rangeBegin: " << rangeBegin << " rangeEnd: " << rangeEnd << endl;
+            cout << " rangeBegin: " << rangeBegin << " rangeEnd: " << rangeEnd << endl;
 
             powerOf2 >>= 1;
         }
-        results.push_back(sortedA[rangeEnd]);
+        results.push_back(query ^ sortedA[rangeBegin]);
 
     }
     return results;
@@ -76,8 +92,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 100;
-        const int m = rand() % 100;
+        const int n = rand() % 100 + 1;
+        const int m = rand() % 100 + 1;
 
         const int maxA = rand() % 10'000'000;
         const int maxQ = rand() % 10'000'000;
