@@ -3,6 +3,8 @@
 #include <utility>
 #include <cassert>
 
+#include <sys/time.h>
+
 using namespace std;
 
 vector<int> solveBruteForce(const vector<int>& a, const vector<int>& queries)
@@ -22,6 +24,36 @@ vector<int> solveBruteForce(const vector<int>& a, const vector<int>& queries)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = rand() % 100;
+        const int m = rand() % 100;
+
+        const int maxA = rand() % 10'000'000;
+        const int maxQ = rand() % 10'000'000;
+
+        cout << n << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout << (rand() % maxA) << " ";
+        }
+        cout << endl;
+
+        cout << m << endl;
+        for (int i = 0; i < m; i++)
+        {
+            cout << (rand() % maxQ) << " ";
+        }
+        cout << endl;
+
+        return 0;
+
+
+    }
     int n;
     cin >> n;
 
