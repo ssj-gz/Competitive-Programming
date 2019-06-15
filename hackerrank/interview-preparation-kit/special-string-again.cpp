@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     // We then just need to count the number of ways of forming such a Special substring centred around a[i-1], and
     // this is hopefully obviously min(length of run ending at a[i - 2], length of run beginning at a[i]).
     //
-    // For example, at our string above, i = 3 begins a run of 5 a's, and i - 2 = 1 ends a run of 2 a's (a[i-1] = b).
+    // For example, at our string above, i = 3 begins a run of 5 a's, and i - 2 = 1 ends a run of 2 a's (a[i-1] = b, != a.).
     // We can form the following Special allSameButOne substrings centred around b:
     //
     //    aba
