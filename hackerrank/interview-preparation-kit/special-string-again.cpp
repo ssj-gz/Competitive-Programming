@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <sys/time.h>
 
@@ -62,6 +63,43 @@ int64_t solveBruteForce(const string& a)
     return numSpecialSubstrings;
 }
 
+int64_t solveOptimised(const string& a)
+{
+    const int n = a.size();
+    int64_t numSpecialSubstrings = 0;
+
+    vector<int> numInRunContainingIndex(n, -1);
+    char previousLetter = '\0';
+    int numInCurrentRun = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if (a[i] != previousLetter)
+        {
+            for (int j = i - 1; j >= 0 && j >= i - numInCurrentRun; j--)
+            {
+                numInRunContainingIndex[j] = numInCurrentRun;
+            }
+            numInCurrentRun = 1;
+        }
+        else
+        {
+            numInCurrentRun++;
+        }
+
+        previousLetter = a[i];
+    }
+    for (int j = n - 1; j >= 0 && j >= n - 1 - (numInCurrentRun - 1); j--)
+    {
+        numInRunContainingIndex[j] = numInCurrentRun;
+    }
+    for (int i = 0; i < n; i++)
+    {
+        cout << "i: " << i << " numInRunContainingIndex: " << numInRunContainingIndex[i] << endl;
+    }
+
+    return numSpecialSubstrings;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2)
@@ -90,5 +128,8 @@ int main(int argc, char* argv[])
 
     const auto solutionBruteForce = solveBruteForce(a);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
+
+    const auto optimisedSolution = solveOptimised(a);
+    cout << "optimisedSolution: " << optimisedSolution << endl;
 
 }
