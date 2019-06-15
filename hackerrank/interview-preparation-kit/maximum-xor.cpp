@@ -3,7 +3,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-//#define NDEBUG
+#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
