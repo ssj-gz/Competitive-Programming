@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-06-15
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -118,10 +124,10 @@ int main(int argc, char* argv[])
     int64_t maxTotalToAdd = std::numeric_limits<int64_t>::min();
     for (const auto& query : queries)
     {
-        cout << "New query: " << query << endl;
+        //cout << "New query: " << query << endl;
         while (!activeQueriesByRightIndex.empty() && activeQueriesByRightIndex.top().rightIndex < query.leftIndex)
         {
-            cout << " popping expired query: " << activeQueriesByRightIndex.top() << endl;
+            //cout << " popping expired query: " << activeQueriesByRightIndex.top() << endl;
             totalToAddFromActiveQueries -= activeQueriesByRightIndex.top().amountToAdd;
             activeQueriesByRightIndex.pop();
         }
@@ -129,15 +135,17 @@ int main(int argc, char* argv[])
         activeQueriesByRightIndex.push(query);
         totalToAddFromActiveQueries += query.amountToAdd;
 
-        cout << " totalToAddFromActiveQueries: " << totalToAddFromActiveQueries << endl;
+        //cout << " totalToAddFromActiveQueries: " << totalToAddFromActiveQueries << endl;
 
         maxTotalToAdd = std::max(maxTotalToAdd, totalToAddFromActiveQueries);
     }
 
     cout << maxTotalToAdd << endl;
 
+#ifdef BRUTE_FORCE
     const auto bruteForce = solveBruteForce(queries, n);
     cout << "bruteForce: " << bruteForce << " optimised: " << maxTotalToAdd << endl;
     assert(bruteForce == maxTotalToAdd);
+#endif
 }
 
