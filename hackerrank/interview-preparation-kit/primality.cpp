@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-06-15
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -11,6 +12,9 @@ int main()
     // by assumption.  But then n / p is an integer <= sqrt(n), and is either prime (in
     // which case we're done) or itself has a prime factor p' < n / p <= sqrt(n) (in
     // which case we're done!).
+    //
+    // Thus, for a given n, we need only  check n's divisibility by primes <= sqrt(N),
+    // of which there are not very many.
     const int rootMaxN = sqrt(2'000'000'000UL);
     vector<bool> isPrime(rootMaxN + 1, true);
 
