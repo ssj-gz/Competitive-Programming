@@ -77,21 +77,8 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
                             //cout << " adjusting rangeEnd" << endl;
                             rangeEnd = blah - sortedA.begin();
                         }
-                        else
-                        {
-                            //cout << "would have rangeEnd < rangeBegin" << endl;
-#if 1
-                            cumulativeSubtraction += powerOf2;
-#ifdef BRUTE_FORCE
-                            for(auto& x : dbgSortedA)
-                            {
-                                x -= powerOf2;
-                            }
-#endif
-#endif
-                        }
                     }
-                    else
+                    if (oldRangeEnd == rangeEnd)
                     {
 #if 1
                         cumulativeSubtraction += powerOf2;
@@ -103,9 +90,6 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
 #endif
 #endif
                     }
-                }
-                if (oldRangeEnd == rangeEnd)
-                {
                 }
 
             }
