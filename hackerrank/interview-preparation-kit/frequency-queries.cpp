@@ -8,6 +8,9 @@ using namespace std;
 
 int main()
 {
+    // This one is pretty I/O heavy.
+    ios::sync_with_stdio(false);
+
     int Q;
     cin >> Q;
 
