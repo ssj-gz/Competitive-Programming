@@ -4,6 +4,7 @@
 #include <queue>
 #include <algorithm>
 #include <limits>
+#include <cassert>
 
 #include <sys/time.h>
 
@@ -18,14 +19,10 @@ struct Query
     int uniqueId = -1; // So we don't "lose" Queries with the same leftIndex and rightIndex!
 };
 
-bool operator<(const Query& lhs, const Query& rhs)
+ostream& operator<<(ostream& os, const Query& query)
 {
-    if (lhs.leftIndex != rhs.leftIndex)
-        return lhs.leftIndex < rhs.leftIndex;
-    if (lhs.rightIndex != rhs.rightIndex)
-        return lhs.rightIndex < rhs.rightIndex;
-
-    return lhs.uniqueId < rhs.uniqueId;
+    os << "(leftIndex: " << query.leftIndex << " rightIndex: " << query.rightIndex << " amountToAdd: " << query.amountToAdd << ")";
+    return os;
 }
 
 int64_t solveBruteForce(const vector<Query>& queries, int n)
@@ -38,6 +35,13 @@ int64_t solveBruteForce(const vector<Query>& queries, int n)
             a[i] += query.amountToAdd;
         }
     }
+
+    cout << "Result from brute force: " << endl;
+    for (const auto& x : a)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
 
     return *max_element(a.begin(), a.end());
 }
@@ -88,39 +92,44 @@ int main(int argc, char* argv[])
 
         queries.push_back(query);
     }
+    assert(cin);
 
     auto compareLeftIndices = [](const Query& lhs, const Query& rhs) 
     { 
-        if (lhs.rightIndex != rhs.rightIndex)
-            return lhs.rightIndex < rhs.rightIndex;
+        if (lhs.leftIndex != rhs.leftIndex)
+            return lhs.leftIndex < rhs.leftIndex;
 
         return lhs.uniqueId < rhs.uniqueId;
     };
     auto compareRightIndices = [](const Query& lhs, const Query& rhs) 
     { 
         if (lhs.rightIndex != rhs.rightIndex)
-            return lhs.rightIndex < rhs.rightIndex;
+            return lhs.rightIndex > rhs.rightIndex;
 
-        return lhs.uniqueId < rhs.uniqueId;
+        return lhs.uniqueId > rhs.uniqueId;
     };
-    using PriorityQueue = std::priority_queue<Query, std::vector<Query>, decltype(compareRightIndices) >;
+    using PriorityQueueIncreasingRightIndex = std::priority_queue<Query, std::vector<Query>, decltype(compareRightIndices) >;
     
     sort(queries.begin(), queries.end(), compareLeftIndices);
 
-    PriorityQueue activeQueriesByRightIndex(compareRightIndices);
+    PriorityQueueIncreasingRightIndex activeQueriesByRightIndex(compareRightIndices);
     int64_t totalToAddFromActiveQueries = 0;
 
     int64_t maxTotalToAdd = std::numeric_limits<int64_t>::min();
     for (const auto& query : queries)
     {
+        cout << "New query: " << query << endl;
         while (!activeQueriesByRightIndex.empty() && activeQueriesByRightIndex.top().rightIndex < query.leftIndex)
         {
+            cout << " popping expired query: " << activeQueriesByRightIndex.top() << endl;
             totalToAddFromActiveQueries -= activeQueriesByRightIndex.top().amountToAdd;
             activeQueriesByRightIndex.pop();
         }
 
         activeQueriesByRightIndex.push(query);
         totalToAddFromActiveQueries += query.amountToAdd;
+
+        cout << " totalToAddFromActiveQueries: " << totalToAddFromActiveQueries << endl;
 
         maxTotalToAdd = std::max(maxTotalToAdd, totalToAddFromActiveQueries);
     }
@@ -129,5 +138,6 @@ int main(int argc, char* argv[])
 
     const auto bruteForce = solveBruteForce(queries, n);
     cout << "bruteForce: " << bruteForce << " optimised: " << maxTotalToAdd << endl;
+    assert(bruteForce == maxTotalToAdd);
 }
 
