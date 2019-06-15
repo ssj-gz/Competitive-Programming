@@ -14,7 +14,7 @@
 using namespace std;
 
 
-vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& queries)
+vector<int> findMaxXorForQueries(const vector<int>& originalA, const vector<int>& queries)
 {
     vector<int> results;
     results.reserve(queries.size());
@@ -56,10 +56,10 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
                 }
             }
 #ifdef VERIFY_INVARIANT
-            for (int i = rangeBegin; i <= rangeEnd; i++)
+            for (auto i = rangeBegin; i != rangeEnd; i++)
             {
-                assert (sortedA[i] - cumulativeSubtraction >= 0);
-                assert (sortedA[i] - cumulativeSubtraction < powerOf2);
+                assert (*i - cumulativeSubtraction >= 0);
+                assert (*i - cumulativeSubtraction < powerOf2);
             }
 #endif
 
@@ -100,9 +100,9 @@ int main(int argc, char* argv[])
     }
     assert(cin);
 
-    const auto optimisedResults = solveOptimised(a, queries);
-    for (const auto x : optimisedResults)
+    const auto maxXorsForQueries = findMaxXorForQueries(a, queries);
+    for (const auto maxXor : maxXorsForQueries)
     {
-        cout << x << endl;
+        cout << maxXor << endl;
     }
 }
