@@ -34,10 +34,13 @@ int main()
             case 2:
                 {
                     const auto prevFrequency = numOccurrencesOf[queryValue];
-                    const auto newFrequency = prevFrequency - 1;
-                    numOccurrencesOf[queryValue]--;
-                    numWithFrequency[prevFrequency]--;
-                    numWithFrequency[newFrequency]++;
+                    if (prevFrequency > 0)
+                    {
+                        const auto newFrequency = prevFrequency - 1;
+                        numOccurrencesOf[queryValue]--;
+                        numWithFrequency[prevFrequency]--;
+                        numWithFrequency[newFrequency]++;
+                    }
                     break;
                 }
             case 3:
