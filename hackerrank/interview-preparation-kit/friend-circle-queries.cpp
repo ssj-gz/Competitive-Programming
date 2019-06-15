@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-06-05
 #include <iostream>
 #include <vector>
 #include <map>
@@ -7,6 +8,12 @@ using namespace std;
 
 int main()
 {
+    // Easy one, and similar to a bunch of other challenges (Value of Friendship;
+    // Journey to the Moon; etc) - friendship is an equivalence relation, and so
+    // partitions the people into disjoint components.  Introducing a friendship
+    // between people in difference components merges the two components.
+    // We can do this merging efficiently using the well-known Disjoint Set Union
+    // algorithm to process all queries in O(Q log2 Q).
     int Q;
     cin >> Q;
 
@@ -68,19 +75,24 @@ int main()
         const auto componentPerson1 = componentForSquashedPersonId[query.person1];
         const auto componentPerson2 = componentForSquashedPersonId[query.person2];
 
-        const auto absorbingComponent = (componentPerson1->squashedPersonIdsInComponent.size() > componentPerson2->squashedPersonIdsInComponent.size()) ? 
-            componentPerson1 : componentPerson1;
-        const auto componentToAbsorb = (absorbingComponent == componentPerson1) ? componentPerson2 : componentPerson1;
-
-        for (auto squashedPersonId : componentToAbsorb->squashedPersonIdsInComponent)
+        if (componentPerson1 != componentPerson2)
         {
-            componentForSquashedPersonId[squashedPersonId] = absorbingComponent;
-            absorbingComponent->squashedPersonIdsInComponent.push_back(squashedPersonId);
+            // Standard Disjoint Set Union - absorb the smaller component into the larger component and update.
+            // This changes what looks like a O(Q ^ 2) algorithm into an O(Q log2 Q) algorithm.
+            const auto absorbingComponent = (componentPerson1->squashedPersonIdsInComponent.size() > componentPerson2->squashedPersonIdsInComponent.size()) ? 
+                componentPerson1 : componentPerson1;
+            const auto componentToAbsorb = (absorbingComponent == componentPerson1) ? componentPerson2 : componentPerson1;
+
+            for (auto squashedPersonId : componentToAbsorb->squashedPersonIdsInComponent)
+            {
+                componentForSquashedPersonId[squashedPersonId] = absorbingComponent;
+                absorbingComponent->squashedPersonIdsInComponent.push_back(squashedPersonId);
+            }
+            componentToAbsorb->squashedPersonIdsInComponent.clear();
+
+
+            largestComponentSize = std::max(largestComponentSize, static_cast<int>(absorbingComponent->squashedPersonIdsInComponent.size()));
         }
-        componentToAbsorb->squashedPersonIdsInComponent.clear();
-
-
-        largestComponentSize = std::max(largestComponentSize, static_cast<int>(absorbingComponent->squashedPersonIdsInComponent.size()));
 
         cout << largestComponentSize << endl;
     }
