@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+
+int main()
+{
+    // Easy one: if n is composite, then it will have a prime factor <= sqrt(n).
+    // To see this, assume otherwise.  Pick a prime factor p of n; then n > sqrt(n)
+    // by assumption.  But then n / p is an integer <= sqrt(n), and is either prime (in
+    // which case we're done) or itself has a prime factor p' < n / p <= sqrt(n) (in
+    // which case we're done!).
+    const int rootMaxN = sqrt(2'000'000'000UL);
+    vector<bool> isPrime(rootMaxN + 1, true);
+
+    // Sieve of Erastophenes.
+    vector<int> primesUpToRootMaxN;
+    for (int factor = 2; factor <= rootMaxN; factor++)
+    {
+        const bool isFactorPrime = isPrime[factor];
+        if (isFactorPrime)
+        {
+            primesUpToRootMaxN.push_back(factor);
+        }
+        for (int multiple = factor * 2; multiple <= rootMaxN; multiple += factor)
+        {
+            if (!isPrime[multiple] && !isFactorPrime)
+            {
+                // This multiple has already been marked, and since factor is not prime,
+                // all subsequent multiple will already have been marked (by any of the
+                // prime factors of factor!).
+                break;
+            }
+            isPrime[multiple] = false;
+        }
+    }
+
+    int p;
+    cin >> p;
+
+    for (int i = 0; i < p; i++)
+    {
+        int n;
+        cin >> n;
+
+        bool isPrime = true;
+        for (const auto prime : primesUpToRootMaxN)
+        {
+            if (prime >= n)
+                break;
+            if ((n % prime) == 0)
+            {
+                isPrime = false;
+                break;
+            }
+        }
+        if (isPrime)
+        {
+            cout << "Prime" << endl;
+        }
+        else
+        {
+            cout << "Not prime" << endl;
+        }
+    }
+
+}
