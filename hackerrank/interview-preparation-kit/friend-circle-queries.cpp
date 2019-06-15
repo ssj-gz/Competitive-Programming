@@ -80,7 +80,7 @@ int main()
             // Standard Disjoint Set Union - absorb the smaller component into the larger component and update.
             // This changes what looks like a O(Q ^ 2) algorithm into an O(Q log2 Q) algorithm.
             const auto absorbingComponent = (componentPerson1->squashedPersonIdsInComponent.size() > componentPerson2->squashedPersonIdsInComponent.size()) ? 
-                componentPerson1 : componentPerson1;
+                componentPerson1 : componentPerson2;
             const auto componentToAbsorb = (absorbingComponent == componentPerson1) ? componentPerson2 : componentPerson1;
 
             for (auto squashedPersonId : componentToAbsorb->squashedPersonIdsInComponent)
