@@ -58,8 +58,7 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
         int rangeBegin = 0;
         int rangeEnd = sortedA.size() - 1;
         uint32_t cumulativeSubtraction = 0;
-        uint32_t powerOf2 = (1U << 31U); // TODO - restore this!
-        //uint32_t powerOf2 = (1U << 10U);
+        uint32_t powerOf2 = (1U << 31U);
         while (powerOf2 >= 1)
         {
             //cout << " powerOf2: " << powerOf2 << " query & powerOf2: " << (query & powerOf2) << endl;
@@ -131,6 +130,9 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
 
 int main(int argc, char* argv[])
 {
+    // A fair amount of I/O on this one.
+    ios::sync_with_stdio(false);
+
     if (argc == 2)
     {
         struct timeval time;
