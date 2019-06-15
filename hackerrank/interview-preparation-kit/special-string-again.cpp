@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-06-15
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE 
+#define NDEBUG
+#endif
 #include <iostream>
 #include <string>
 #include <vector>
@@ -98,10 +105,10 @@ int64_t solveOptimised(const string& a)
     }
     for (int i = 0; i < n; i++)
     {
-        cout << "i: " << i << " numInRunContainingIndex: " << numInRunContainingIndex[i] << endl;
+        //cout << "i: " << i << " numInRunContainingIndex: " << numInRunContainingIndex[i] << endl;
     }
 
-    auto numPairs = [](const int m)
+    auto numSubstrings = [](const int m)
     {
         int64_t result = m;
         result *= m + 1;
@@ -111,15 +118,15 @@ int64_t solveOptimised(const string& a)
 
     for (int i = 0; i < n;)
     {
-        const auto numFromRun = numPairs(numInRunContainingIndex[i]);
-        cout << "i: " << i << " numFromRun: " << numFromRun << endl;
+        const auto numFromRun = numSubstrings(numInRunContainingIndex[i]);
+        //cout << "i: " << i << " numFromRun: " << numFromRun << endl;
         numSpecialSubstrings += numFromRun;
         if (i >= 2)
         {
             if (a[i - 2] == a[i] && a[i - 1] != a[i])
             {
                 const auto numFromAllButOne = min(numInRunContainingIndex[i - 2], numInRunContainingIndex[i]);
-                cout << "i: " << i << " numFromAllButOne: " << numFromAllButOne << endl;
+                //cout << "i: " << i << " numFromAllButOne: " << numFromAllButOne << endl;
                 numSpecialSubstrings += numFromAllButOne;
             }
         }
@@ -157,11 +164,15 @@ int main(int argc, char* argv[])
     string a;
     cin >> a;
 
-    const auto solutionBruteForce = solveBruteForce(a);
 
+#ifdef BRUTE_FORCE
     const auto optimisedSolution = solveOptimised(a);
+    const auto solutionBruteForce = solveBruteForce(a);
     cout << "optimisedSolution: " << optimisedSolution << " solutionBruteForce: " << solutionBruteForce << endl;
-
     assert(solutionBruteForce == optimisedSolution);
+#else
+    cout << solveOptimised(a) << endl;
+#endif
+
 
 }
