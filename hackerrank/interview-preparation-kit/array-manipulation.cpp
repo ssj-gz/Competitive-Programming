@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <limits>
 
+#include <sys/time.h>
+
 using namespace std;
 
 struct Query
@@ -26,8 +28,45 @@ bool operator<(const Query& lhs, const Query& rhs)
     return lhs.uniqueId < rhs.uniqueId;
 }
 
-int main()
+int64_t solveBruteForce(const vector<Query>& queries, int n)
 {
+    vector<int64_t> a(n);
+    for (const auto& query : queries)
+    {
+        for (int i = query.leftIndex; i <= query.rightIndex; i++)
+        {
+            a[i] += query.amountToAdd;
+        }
+    }
+
+    return *max_element(a.begin(), a.end());
+}
+
+int main(int argc, char* argv[])
+{
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const auto n = rand() % 1000 + 1;
+        const auto m = rand() % 1000 + 1;
+
+        cout << n << " " << m << endl;
+
+        for (int i = 0; i < m; i++)
+        {
+            int left = (rand() % n) + 1;
+            int right = (rand() % n) + 1;
+            if (left > right)
+                swap(left, right);
+
+            cout << left << " " << right << " " << rand() % 20'000 << endl;
+        }
+        return 0;
+
+    }
     int n;
     cin >> n;
 
@@ -88,5 +127,7 @@ int main()
 
     cout << maxTotalToAdd << endl;
 
+    const auto bruteForce = solveBruteForce(queries, n);
+    cout << "bruteForce: " << bruteForce << " optimised: " << maxTotalToAdd << endl;
 }
 
