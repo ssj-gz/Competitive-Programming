@@ -44,6 +44,7 @@ int64_t solveOptimised(const vector<int64_t>& a, int64_t r)
     map<int64_t, int> numRemainingPairsBeginningWith;
     for (const auto x : a)
     {
+        // The order is important, here: x * r == x if r == 1.
         numRemainingOccurrencesOf[x]--;
         numRemainingPairsBeginningWith[x] += numRemainingOccurrencesOf[x * r];
 
@@ -52,10 +53,12 @@ int64_t solveOptimised(const vector<int64_t>& a, int64_t r)
     numRemainingOccurrencesOf = numRemainingOccurrencesOfOriginal;
     for (const auto x : a)
     {
-        numTriplets += numRemainingPairsBeginningWith[x * r];
-
+        // The order is important, here: x * r == x if r == 1.
         numRemainingOccurrencesOf[x]--;
         numRemainingPairsBeginningWith[x] -= numRemainingOccurrencesOf[x * r];
+
+        numTriplets += numRemainingPairsBeginningWith[x * r];
+
 
     }
 
