@@ -31,6 +31,37 @@ int64_t solveBruteForce(const vector<int64_t>& a, int64_t r)
     return numTriplets;
 }
 
+int64_t solveOptimised(const vector<int64_t>& a, int64_t r)
+{
+    int64_t numTriplets = 0;
+    map<int64_t, int> numRemainingOccurrencesOf;
+    for (const auto x : a)
+    {
+        numRemainingOccurrencesOf[x]++;
+    }
+    const auto numRemainingOccurrencesOfOriginal = numRemainingOccurrencesOf;
+
+    map<int64_t, int> numRemainingPairsBeginningWith;
+    for (const auto x : a)
+    {
+        numRemainingOccurrencesOf[x]--;
+        numRemainingPairsBeginningWith[x] += numRemainingOccurrencesOf[x * r];
+
+    }
+
+    numRemainingOccurrencesOf = numRemainingOccurrencesOfOriginal;
+    for (const auto x : a)
+    {
+        numTriplets += numRemainingPairsBeginningWith[x * r];
+
+        numRemainingOccurrencesOf[x]--;
+        numRemainingPairsBeginningWith[x] -= numRemainingOccurrencesOf[x * r];
+
+    }
+
+    return numTriplets;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2)
@@ -65,6 +96,9 @@ int main(int argc, char* argv[])
     assert(cin);
 
     const auto solutionBruteForce = solveBruteForce(a, r);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    const auto solutionOptimiesd = solveOptimised(a, r);
+    cout << "solutionBruteForce: " << solutionBruteForce << " solutionOptimiesd: " << solutionOptimiesd << endl;
+
+    assert(solutionBruteForce == solutionOptimiesd);
 }
 
