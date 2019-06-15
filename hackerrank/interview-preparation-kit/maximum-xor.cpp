@@ -32,9 +32,9 @@ vector<int> findMaxXorForQueries(const vector<int>& originalA, const vector<int>
         {
             auto firstInRangeAtLeastPowerOf2Iter = std::lower_bound(rangeBegin, rangeEnd, powerOf2 + cumulativeSubtraction);
             const bool haveAtLeastPowerOf2InRange = (firstInRangeAtLeastPowerOf2Iter != rangeEnd);
-            if (query & powerOf2)
+            if (haveAtLeastPowerOf2InRange)
             {
-                if (haveAtLeastPowerOf2InRange)
+                if (query & powerOf2)
                 {
                     if (firstInRangeAtLeastPowerOf2Iter != rangeBegin)
                     {
@@ -44,12 +44,9 @@ vector<int> findMaxXorForQueries(const vector<int>& originalA, const vector<int>
                     {
                         cumulativeSubtraction += powerOf2;
                     }
-                }
 
-            }
-            else
-            {
-                if (haveAtLeastPowerOf2InRange)
+                }
+                else
                 {
                     rangeBegin = firstInRangeAtLeastPowerOf2Iter;
                     cumulativeSubtraction += powerOf2;
