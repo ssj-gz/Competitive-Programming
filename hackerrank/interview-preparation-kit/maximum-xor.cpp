@@ -25,20 +25,19 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
     for (const auto query : queries)
     {
         auto rangeBegin = sortedA.begin();
-        auto rangeEnd = std::prev(sortedA.end());
+        auto rangeEnd = sortedA.end();
         uint32_t cumulativeSubtraction = 0;
         uint32_t powerOf2 = (1U << 31U);
         while (powerOf2 >= 1)
         {
-            auto firstInRangeAtLeastPowerOf2Iter = std::lower_bound(rangeBegin, rangeEnd + 1, powerOf2 + cumulativeSubtraction);
-            const bool haveAtLeastPowerOf2InRange = (firstInRangeAtLeastPowerOf2Iter != rangeEnd + 1);
+            auto firstInRangeAtLeastPowerOf2Iter = std::lower_bound(rangeBegin, rangeEnd, powerOf2 + cumulativeSubtraction);
+            const bool haveAtLeastPowerOf2InRange = (firstInRangeAtLeastPowerOf2Iter != rangeEnd);
             if (query & powerOf2)
             {
                 if (haveAtLeastPowerOf2InRange)
                 {
                     if (firstInRangeAtLeastPowerOf2Iter != rangeBegin)
                     {
-                        firstInRangeAtLeastPowerOf2Iter = std::prev(firstInRangeAtLeastPowerOf2Iter);
                         rangeEnd = firstInRangeAtLeastPowerOf2Iter;
                     }
                     else
@@ -67,6 +66,8 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
 
             powerOf2 >>= 1;
         }
+        // Make rangeEnd inclusive, rather than one-past-the-end.
+        rangeEnd = std::prev(rangeEnd);
         assert(rangeEnd - rangeBegin <= 1);
         auto maxXor = max(query ^ *rangeBegin, query ^ *rangeEnd);
         results.push_back(maxXor);
