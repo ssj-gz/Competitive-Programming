@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-06-15
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -35,6 +42,10 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
     vector<int> sortedA(originalA);
     sort(sortedA.begin(), sortedA.end());
 
+#ifdef BRUTE_FORCE
+    vector<int> dbgSortedA(sortedA);
+#endif
+
     cout << "sorted A" << endl;
     for (const auto x : sortedA)
     {
@@ -46,11 +57,12 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
         cout << "query: " << query << endl;
         int rangeBegin = 0;
         int rangeEnd = sortedA.size() - 1;
-        int cumulativeSubtraction = 0;
-        uint32_t powerOf2 = (1U << 31U);
+        uint32_t cumulativeSubtraction = 0;
+        //uint32_t powerOf2 = (1U << 31U); // TODO - restore this!
+        uint32_t powerOf2 = (1U << 10U);
         while (powerOf2 >= 1)
         {
-            cout << " powerOf2: " << powerOf2 << endl;
+            cout << " powerOf2: " << powerOf2 << " query & powerOf2: " << (query & powerOf2) << endl;
             if (query & powerOf2)
             {
                 auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
@@ -59,8 +71,15 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
                     if (blah != sortedA.begin())
                     {
                         blah = std::prev(blah);
+                        cout << " adjusting rangeEnd" << endl;
                         rangeEnd = blah - sortedA.begin();
-                        cumulativeSubtraction += powerOf2;
+                        //cumulativeSubtraction += powerOf2;
+#ifdef BRUTE_FORCE
+                        for(auto& x : dbgSortedA)
+                        {
+                            x -= powerOf2;
+                        }
+#endif
                     }
                 }
 
@@ -70,11 +89,27 @@ vector<int> solveOptimised(const vector<int>& originalA, const vector<int>& quer
                 auto blah = std::lower_bound(sortedA.begin() + rangeBegin, sortedA.begin() + rangeEnd + 1, powerOf2 + cumulativeSubtraction);
                 if (blah != sortedA.begin() + rangeEnd + 1)
                 {
+                    cout << " adjusting rangeBegin" << endl;
                     rangeBegin = blah - sortedA.begin();
                     cumulativeSubtraction += powerOf2;
+#ifdef BRUTE_FORCE
+                        for(auto& x : dbgSortedA)
+                        {
+                            x -= powerOf2;
+                        }
+#endif
                 }
             }
-            cout << " rangeBegin: " << rangeBegin << " rangeEnd: " << rangeEnd << endl;
+            cout << " rangeBegin: " << rangeBegin << " rangeEnd: " << rangeEnd << " cumulativeSubtraction: " << cumulativeSubtraction << endl;
+#ifdef BRUTE_FORCE
+            cout << "dbgSortedA" << endl;
+            for(const auto& x : dbgSortedA)
+            {
+                cout << x << " ";
+            }
+            cout << endl;
+#endif
+
 
             powerOf2 >>= 1;
         }
@@ -92,11 +127,15 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 100 + 1;
-        const int m = rand() % 100 + 1;
+        //const int n = rand() % 100 + 1;
+        //const int m = rand() % 100 + 1;
+        const int n = 10;
+        const int m = 1;
 
-        const int maxA = rand() % 10'000'000;
-        const int maxQ = rand() % 10'000'000;
+        //const int maxA = rand() % 10'000'000;
+        //const int maxQ = rand() % 10'000'000;
+        const int maxA = rand() % 512;
+        const int maxQ = rand() % 512;
 
         cout << n << endl;
         for (int i = 0; i < n; i++)
@@ -135,6 +174,7 @@ int main(int argc, char* argv[])
     }
     assert(cin);
 
+#ifdef BRUTE_FORCE
     const auto bruteForceResults = solveBruteForce(a, queries);
     cout << "Brute force results: " << endl;
     for (const auto x : bruteForceResults)
@@ -148,4 +188,12 @@ int main(int argc, char* argv[])
     {
         cout << "glarp: " << x << endl;
     }
+    assert(bruteForceResults == optimisedResults);
+#else
+    const auto optimisedResults = solveOptimised(a, queries);
+    for (const auto x : optimisedResults)
+    {
+        cout << x << endl;
+    }
+#endif
 }
