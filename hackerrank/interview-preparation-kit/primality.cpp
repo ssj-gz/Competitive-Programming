@@ -7,14 +7,15 @@ using namespace std;
 
 int main()
 {
-    // Easy one: if n is composite, then it will have a prime factor <= sqrt(n).
+    // Easy one, though a few schoolboy errors along the way; I forgot about the n == 1 case XD
+    // Anyway: if n is composite, then it will have a prime factor <= sqrt(n).
     // To see this, assume otherwise.  Pick a prime factor p of n; then n > sqrt(n)
     // by assumption.  But then n / p is an integer <= sqrt(n), and is either prime (in
     // which case we're done) or itself has a prime factor p' < n / p <= sqrt(n) (in
     // which case we're done!).
     //
-    // Thus, for a given n, we need only  check n's divisibility by primes <= sqrt(N),
-    // of which there are not very many.
+    // Thus, for a given n, we need only check n's divisibility by primes <= sqrt(N),
+    // of which there are not very many (approx 4000 in the worse case).
     const int rootMaxN = sqrt(2'000'000'000UL);
     vector<bool> isPrime(rootMaxN + 1, true);
 
@@ -32,8 +33,8 @@ int main()
             if (!isPrime[multiple] && !isFactorPrime)
             {
                 // This multiple has already been marked, and since factor is not prime,
-                // all subsequent multiple will already have been marked (by any of the
-                // prime factors of factor!).
+                // all subsequent multiples will already have been marked (by any of the
+                // prime factors of factor!), so we can stop here.
                 break;
             }
             isPrime[multiple] = false;
@@ -51,6 +52,8 @@ int main()
         bool isPrime = true;
         if (n == 1)
         {
+            // The n == 1 case does not emerge as a special case of this algorithm,
+            // so deal with it manually.
             isPrime = false;
         }
         else
