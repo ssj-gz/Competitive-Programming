@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include <sys/time.h>
 
@@ -18,6 +19,7 @@ int64_t solveBruteForce(const string& a)
             const auto substring = a.substr(i, length);
             if (length == 1)
             {
+                cout << " i: " << i << " length: " << length << " substring: " << substring << " allSameLetter!" << endl;
                 numSpecialSubstrings++;
                 continue;
             }
@@ -45,13 +47,15 @@ int64_t solveBruteForce(const string& a)
                 }
                 if (allSameLetter)
                 {
+                    cout << " i: " << i << " length: " << length << " substring: " << substring << " allSameLetter!" << endl;
                     numSpecialSubstrings++;
                     continue;
                 }
                 if (allSameButOne && ((length % 2) == 1))
                 {
-                    if (substring[length / 2] != substring[0])
+                    if (substring[length / 2] != substring[0] && letterHistogram[substring[0] - 'a'] == length - 1)
                     {
+                        cout << " i: " << i << " length: " << length << " substring: " << substring << " allSameButOne!" << endl;
                         numSpecialSubstrings++;
                         continue;
                     }
@@ -97,6 +101,33 @@ int64_t solveOptimised(const string& a)
         cout << "i: " << i << " numInRunContainingIndex: " << numInRunContainingIndex[i] << endl;
     }
 
+    auto numPairs = [](const int m)
+    {
+        int64_t result = m;
+        result *= m + 1;
+        result /= 2;
+        return result;
+    };
+
+    for (int i = 0; i < n;)
+    {
+        const auto numFromRun = numPairs(numInRunContainingIndex[i]);
+        cout << "i: " << i << " numFromRun: " << numFromRun << endl;
+        numSpecialSubstrings += numFromRun;
+        if (i >= 2)
+        {
+            if (a[i - 2] == a[i] && a[i - 1] != a[i])
+            {
+                const auto numFromAllButOne = min(numInRunContainingIndex[i - 2], numInRunContainingIndex[i]);
+                cout << "i: " << i << " numFromAllButOne: " << numFromAllButOne << endl;
+                numSpecialSubstrings += numFromAllButOne;
+            }
+        }
+
+        i += numInRunContainingIndex[i];
+
+    }
+
     return numSpecialSubstrings;
 }
 
@@ -127,9 +158,10 @@ int main(int argc, char* argv[])
     cin >> a;
 
     const auto solutionBruteForce = solveBruteForce(a);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
 
     const auto optimisedSolution = solveOptimised(a);
-    cout << "optimisedSolution: " << optimisedSolution << endl;
+    cout << "optimisedSolution: " << optimisedSolution << " solutionBruteForce: " << solutionBruteForce << endl;
+
+    assert(solutionBruteForce == optimisedSolution);
 
 }
