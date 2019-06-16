@@ -1,5 +1,7 @@
+// Simon St James (ssjgz) - 2019-06-16
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
@@ -52,13 +54,21 @@ int main()
         }
     }
 
+    if (nodesToExplore.size() <= 1)
+    {
+        cout << -1 << endl;
+        return 0;
+    }
+
     int distance = -1;
     int numIterations = 0;
-    while (distance != -1 && !nodesToExplore.empty())
+    while (!nodesToExplore.empty() && distance == -1)
     {
+        //cout << "iteration: " << numIterations << endl;
         vector<Node*> nextNodesToExplore;
         for (auto node : nodesToExplore)
         {
+            //cout << " exploring node: " << node << " colour: " << node->colour << endl;
             if (numIterations != 0 && node->colour == colourToSolveFor)
             {
                 distance = numIterations;
@@ -68,13 +78,16 @@ int main()
             {
                 if (!neighbour->visited)
                 {
+                    //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
                     nextNodesToExplore.push_back(neighbour);
                 }
                 neighbour->visited = true;
             }
         }
         nodesToExplore = nextNodesToExplore;
+        numIterations++;
     }
 
+    assert(distance != -1);
     cout << distance << endl;
 }
