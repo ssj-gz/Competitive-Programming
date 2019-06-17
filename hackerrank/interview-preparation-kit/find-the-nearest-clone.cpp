@@ -12,10 +12,16 @@ using namespace std;
 
 struct Node
 {
+    Node()
+    {
+        distinctSourceInfo.containerNode = this;
+        nextDistinctSourceInfo.containerNode = this;
+    }
     int colour = -1;
     bool visited = false;
     vector<Node*> neigbours;
     int id = -1;
+    bool alreadyInNextNodesToExplore = false;
 
     bool shouldReExploreAfterVisitFrom(Node* visitor)
     {
@@ -48,10 +54,16 @@ struct Node
     {
         int numDistinctSources = 0;
         DistinctSource distinctSources[2] = {};
+        Node* containerNode = nullptr;
+
         void incorporateSourcesFrom(Node* visitor)
         {
+            cout << " incorporateSourcesFrom: " << visitor->id << " this node: " << containerNode->id << " colour: " << containerNode->colour << endl;
             if (numDistinctSources > 1)
+            {
+                cout << " already saturated";
                 return;
+            }
             for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
             {
                 bool hasSourceAlready = false;
@@ -73,7 +85,7 @@ struct Node
                     numDistinctSources++;
                 }
             }
-            cout << " new numDistinctSources: " << numDistinctSources << endl;
+            cout << "  new numDistinctSources: " << numDistinctSources << endl;
         }
     };
 
@@ -86,6 +98,8 @@ struct Node
 int solveBruteForce(vector<Node>& nodes, int colourToSolveFor)
 {
     int minDistance = numeric_limits<int>::max();
+    Node *bestNode1 = nullptr;
+    Node *bestNode2 = nullptr;
     for (auto& rootNode : nodes)
     {
         if (rootNode.colour != colourToSolveFor)
@@ -108,7 +122,12 @@ int solveBruteForce(vector<Node>& nodes, int colourToSolveFor)
             {
                 if (numIterations != 0 && node->colour == colourToSolveFor)
                 {
-                    minDistance = min(minDistance, numIterations);
+                    if (numIterations < minDistance)
+                    {
+                        bestNode1 = &rootNode;
+                        bestNode2 = node;
+                        minDistance = numIterations;
+                    }
                 }
 
                 for (auto neighbour : node->neigbours)
@@ -128,7 +147,15 @@ int solveBruteForce(vector<Node>& nodes, int colourToSolveFor)
         }
     }
 
-    return (minDistance == std::numeric_limits<int>::max() ? -1 : minDistance);
+    if (minDistance == std::numeric_limits<int>::max())
+        minDistance = -1;
+
+    if (minDistance != -1)
+    {
+        cout << "Coloured nodes " << bestNode1->id << " and " << bestNode2->id << " can reach each other in " << minDistance << endl;
+    }
+
+    return minDistance;
 }
 
 int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
@@ -175,10 +202,11 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
             cout << " exploring node: " << node->id << " colour: " << node->colour << " numDistinctSources: " << node->distinctSourceInfo.numDistinctSources << endl;
             for (auto neighbour : node->neigbours)
             {
-                if (neighbour->shouldReExploreAfterVisitFrom(node))
+                if (!neighbour->alreadyInNextNodesToExplore && neighbour->shouldReExploreAfterVisitFrom(node))
                 {
                     //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
                     nextNodesToExplore.push_back(neighbour);
+                    neighbour->alreadyInNextNodesToExplore = true;
                 }
                 neighbour->nextDistinctSourceInfo.incorporateSourcesFrom(node);
             }
@@ -187,6 +215,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         for (auto node : nextNodesToExplore)
         {
             node->distinctSourceInfo = node->nextDistinctSourceInfo;
+            node->alreadyInNextNodesToExplore = false;
         }
         nodesToExplore = nextNodesToExplore;
         numIterations++;
