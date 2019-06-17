@@ -50,6 +50,8 @@ struct Node
         DistinctSource distinctSources[2] = {};
         void incorporateSourcesFrom(Node* visitor)
         {
+            if (numDistinctSources > 1)
+                return;
             for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
             {
                 bool hasSourceAlready = false;
@@ -178,7 +180,13 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
                     //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
                     nextNodesToExplore.push_back(neighbour);
                 }
+                neighbour->nextDistinctSourceInfo.incorporateSourcesFrom(node);
             }
+        }
+
+        for (auto node : nextNodesToExplore)
+        {
+            node->distinctSourceInfo = node->nextDistinctSourceInfo;
         }
         nodesToExplore = nextNodesToExplore;
         numIterations++;
