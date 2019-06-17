@@ -131,6 +131,40 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        const int n = 1'000'000;
+        vector<pair<int, int>> edges;
+        vector<int> colours(n);
+        colours[0] = 1;
+        for (int i = 0; i < n / 2; i++)
+        {
+            edges.push_back({1, i + 2});
+            colours[i + 1] = 1;
+        }
+        for (int i = n / 2; i < n; i++)
+        {
+            edges.push_back({1, i + 1});
+            colours[i] = 2;
+        }
+
+        cout << n << " " << edges.size() << endl;
+
+        for (const auto& edge : edges)
+        {
+            cout << edge.first << " " << edge.second << endl;
+        }
+
+        for (const auto colour : colours)
+        {
+            cout << colour << endl;
+        }
+
+        cout << 2 << endl;
+
+        return 0;
+    }
+
     auto readInt = []() { int x; cin >> x; assert(cin); return x; };
     const int numNodes = readInt();
 
