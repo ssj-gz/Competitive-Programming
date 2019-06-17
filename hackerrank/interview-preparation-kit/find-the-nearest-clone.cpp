@@ -19,49 +19,64 @@ struct Node
 
     bool shouldReExploreAfterVisitFrom(Node* visitor)
     {
-        cout << "shouldReExploreAfterVisitFrom: " << visitor->id << " this node: " << this->id << " numDistinctSources: " << numDistinctSources << endl;
-        if (numDistinctSources > 1)
+        if (distinctSourceInfo.numDistinctSources > 1)
             return false;
-
-        const int originalNumDistinctSources = numDistinctSources;
-        for (int i = 0; i < visitor->numDistinctSources; i++)
+        for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
         {
             bool hasSourceAlready = false;
-            auto visitorSource = visitor->distinctSources[i].node;
-            auto visitorDistance = visitor->distinctSources[i].distance;
-            cout << "visitorSource: " << visitorSource->id << endl;
-            for (int j = 0; j < numDistinctSources; j++)
+            auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
+            for (int j = 0; j < distinctSourceInfo.numDistinctSources; j++)
             {
-                if (visitorSource == distinctSources[j].node)
+                if (visitorSource == distinctSourceInfo.distinctSources[j].node)
                 {
                     hasSourceAlready = true;
                     break;
                 }
             }
-            cout << " hasSourceAlready: " << hasSourceAlready << endl;
             if (!hasSourceAlready)
-            {
-                distinctSources[numDistinctSources].node = visitorSource;
-                distinctSources[numDistinctSources].distance = visitorDistance + 1;
-
-                numDistinctSources++;
-            }
-        }
-        cout << " new numDistinctSources: " << numDistinctSources << endl;
-        if (originalNumDistinctSources != numDistinctSources)
-        {
-            return true;
+                return true;
         }
         return false;
     }
 
-    int numDistinctSources = 0;
     struct DistinctSource
     {
         Node* node = nullptr;
         int distance = -1;
     };
-    DistinctSource distinctSources[2] = {};
+    struct DistinctSourceInfo
+    {
+        int numDistinctSources = 0;
+        DistinctSource distinctSources[2] = {};
+        void incorporateSourcesFrom(Node* visitor)
+        {
+            for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
+            {
+                bool hasSourceAlready = false;
+                auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
+                auto visitorDistance = visitor->distinctSourceInfo.distinctSources[i].distance;
+                for (int j = 0; j < numDistinctSources; j++)
+                {
+                    if (visitorSource == distinctSources[j].node)
+                    {
+                        hasSourceAlready = true;
+                        break;
+                    }
+                }
+                if (!hasSourceAlready)
+                {
+                    distinctSources[numDistinctSources].node = visitorSource;
+                    distinctSources[numDistinctSources].distance = visitorDistance + 1;
+
+                    numDistinctSources++;
+                }
+            }
+            cout << " new numDistinctSources: " << numDistinctSources << endl;
+        }
+    };
+
+    DistinctSourceInfo distinctSourceInfo;
+    DistinctSourceInfo nextDistinctSourceInfo;
 
     bool visitedBruteForce = false;
 };
@@ -122,9 +137,9 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         if (node.colour == colourToSolveFor)
         {
             nodesToExplore.push_back(&node);
-            node.numDistinctSources = 1;
-            node.distinctSources[0].node = &node;
-            node.distinctSources[0].distance = 0;
+            node.distinctSourceInfo.numDistinctSources = 1;
+            node.distinctSourceInfo.distinctSources[0].node = &node;
+            node.distinctSourceInfo.distinctSources[0].distance = 0;
         }
     }
 
@@ -147,15 +162,15 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         vector<Node*> nextNodesToExplore;
         for (auto node : nodesToExplore)
         {
-            if (node->colour == colourToSolveFor && node->numDistinctSources > 1)
+            if (node->colour == colourToSolveFor && node->distinctSourceInfo.numDistinctSources > 1)
             {
-                cout << " found correct node " << node->id << " sources: " << node->distinctSources[0].node->id << ", " << node->distinctSources[1].node->id << endl;
+                cout << " found correct node " << node->id << " sources: " << node->distinctSourceInfo.distinctSources[0].node->id << ", " << node->distinctSourceInfo.distinctSources[1].node->id << endl;
                 return numIterations;
             }
         }
         for (auto node : nodesToExplore)
         {
-            cout << " exploring node: " << node->id << " colour: " << node->colour << " numDistinctSources: " << node->numDistinctSources << endl;
+            cout << " exploring node: " << node->id << " colour: " << node->colour << " numDistinctSources: " << node->distinctSourceInfo.numDistinctSources << endl;
             for (auto neighbour : node->neigbours)
             {
                 if (neighbour->shouldReExploreAfterVisitFrom(node))
