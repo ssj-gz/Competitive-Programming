@@ -54,7 +54,6 @@ struct Node
     struct DistinctSource
     {
         Node* node = nullptr;
-        int distance = -1;
     };
     struct DistinctSourceInfo
     {
@@ -74,7 +73,6 @@ struct Node
             {
                 bool hasSourceAlready = false;
                 auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
-                auto visitorDistance = visitor->distinctSourceInfo.distinctSources[i].distance;
                 for (int j = 0; j < numDistinctSources; j++)
                 {
                     if (visitorSource == distinctSources[j].node)
@@ -86,7 +84,6 @@ struct Node
                 if (!hasSourceAlready)
                 {
                     distinctSources[numDistinctSources].node = visitorSource;
-                    distinctSources[numDistinctSources].distance = visitorDistance + 1;
 
                     numDistinctSources++;
                 }
@@ -174,7 +171,6 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
             nodesToExplore.push_back(&node);
             node.distinctSourceInfo.numDistinctSources = 1;
             node.distinctSourceInfo.distinctSources[0].node = &node;
-            node.distinctSourceInfo.distinctSources[0].distance = 0;
             node.nextDistinctSourceInfo = node.distinctSourceInfo;
         }
     }
