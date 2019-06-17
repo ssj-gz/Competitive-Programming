@@ -58,7 +58,7 @@ struct Node
 
         void incorporateSourcesFrom(Node* visitor)
         {
-            cout << " incorporateSourcesFrom: " << visitor->id << " this node: " << containerNode->id << " colour: " << containerNode->colour << endl;
+            cout << " incorporateSourcesFrom: " << visitor->id << " this node: " << containerNode->id << " colour: " << containerNode->colour << " numDistinctSources: " << numDistinctSources << endl;
             if (numDistinctSources > 1)
             {
                 cout << " already saturated";
@@ -169,6 +169,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
             node.distinctSourceInfo.numDistinctSources = 1;
             node.distinctSourceInfo.distinctSources[0].node = &node;
             node.distinctSourceInfo.distinctSources[0].distance = 0;
+            node.nextDistinctSourceInfo = node.distinctSourceInfo;
         }
     }
 
