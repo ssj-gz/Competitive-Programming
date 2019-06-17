@@ -15,9 +15,11 @@ struct Node
     int colour = -1;
     bool visited = false;
     vector<Node*> neigbours;
+    int id = -1;
 
     bool shouldReExploreAfterVisitFrom(Node* visitor)
     {
+        cout << "shouldReExploreAfterVisitFrom: " << visitor->id << " this node: " << this->id << " numDistinctSources: " << numDistinctSources << endl;
         if (numDistinctSources > 1)
             return false;
 
@@ -27,6 +29,7 @@ struct Node
             bool hasSourceAlready = false;
             auto visitorSource = visitor->distinctSources[i].node;
             auto visitorDistance = visitor->distinctSources[i].distance;
+            cout << "visitorSource: " << visitorSource->id << endl;
             for (int j = 0; j < numDistinctSources; j++)
             {
                 if (visitorSource == distinctSources[j].node)
@@ -35,6 +38,7 @@ struct Node
                     break;
                 }
             }
+            cout << " hasSourceAlready: " << hasSourceAlready << endl;
             if (!hasSourceAlready)
             {
                 distinctSources[numDistinctSources].node = visitorSource;
@@ -43,6 +47,7 @@ struct Node
                 numDistinctSources++;
             }
         }
+        cout << " new numDistinctSources: " << numDistinctSources << endl;
         if (originalNumDistinctSources != numDistinctSources)
         {
             return true;
@@ -132,15 +137,25 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
     int numIterations = 0;
     while (!nodesToExplore.empty())
     {
-        //cout << "iteration: " << numIterations << endl;
+        cout << "iteration: " << numIterations << " nodes to explore: ";
+        for (auto node : nodesToExplore)
+        {
+            cout << node->id << " ";
+        }
+        cout << endl;
+
         vector<Node*> nextNodesToExplore;
         for (auto node : nodesToExplore)
         {
-            //cout << " exploring node: " << node << " colour: " << node->colour << endl;
             if (node->colour == colourToSolveFor && node->numDistinctSources > 1)
             {
+                cout << " found correct node " << node->id << " sources: " << node->distinctSources[0].node->id << ", " << node->distinctSources[1].node->id << endl;
                 return numIterations;
             }
+        }
+        for (auto node : nodesToExplore)
+        {
+            cout << " exploring node: " << node->id << " colour: " << node->colour << " numDistinctSources: " << node->numDistinctSources << endl;
             for (auto neighbour : node->neigbours)
             {
                 if (neighbour->shouldReExploreAfterVisitFrom(node))
@@ -148,7 +163,6 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
                     //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
                     nextNodesToExplore.push_back(neighbour);
                 }
-                //neighbour->visited = true;
             }
         }
         nodesToExplore = nextNodesToExplore;
@@ -165,7 +179,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numNodes = rand() % 100 + 1;
+        const int numNodes = rand() % 10 + 1;
         const int maxEdges = numNodes * (numNodes - 1) / 2;
         const int minEdges = numNodes - 1;
         const int numEdges = (rand() % (maxEdges - minEdges + 1)) + minEdges;
@@ -228,6 +242,10 @@ int main(int argc, char* argv[])
     cin >> numEdges;
 
     vector<Node> nodes(numNodes);
+    for (int i = 0; i < numNodes; i++)
+    {
+        nodes[i].id = i + 1;
+    }
 
     for (int i = 0; i < numEdges; i++)
     {
@@ -251,6 +269,8 @@ int main(int argc, char* argv[])
 
     int colourToSolveFor;
     cin >> colourToSolveFor;
+
+    cout << "colourToSolveFor: " << colourToSolveFor << endl;
 
     const auto bruteForceSolution = solveBruteForce(nodes, colourToSolveFor);
 
