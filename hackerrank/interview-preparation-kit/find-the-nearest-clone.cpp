@@ -7,15 +7,12 @@
 #include <vector>
 #include <cassert>
 
-
 using namespace std;
 
 struct Node
 {
     int colour = -1;
-    bool visited = false;
     vector<Node*> neigbours;
-    int id = -1;
     bool alreadyInNextNodesToExplore = false;
 
     bool shouldReExploreAfterVisitFrom(Node* visitor)
@@ -134,27 +131,18 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
 
 int main(int argc, char* argv[])
 {
-    int numNodes;
-    cin >> numNodes;
+    auto readInt = []() { int x; cin >> x; assert(cin); return x; };
+    const int numNodes = readInt();
 
-    int numEdges;
-    cin >> numEdges;
+    const int numEdges = readInt();
 
     vector<Node> nodes(numNodes);
-    for (int i = 0; i < numNodes; i++)
-    {
-        nodes[i].id = i + 1;
-    }
 
     for (int i = 0; i < numEdges; i++)
     {
-        int node1;
-        cin >> node1;
-        int node2;
-        cin >> node2;
-
-        node1--;
-        node2--;
+        // The "- 1" makes node ids 0-relative.
+        const int node1 = readInt() - 1;
+        const int node2 = readInt() - 1;
 
         nodes[node1].neigbours.push_back(&(nodes[node2]));
         nodes[node2].neigbours.push_back(&(nodes[node1]));
@@ -166,8 +154,7 @@ int main(int argc, char* argv[])
     }
     assert(cin);
 
-    int colourToSolveFor;
-    cin >> colourToSolveFor;
+    const int colourToSolveFor = readInt();
 
     cout << solveOptimised(nodes, colourToSolveFor) << endl;
 }
