@@ -10,7 +10,103 @@ struct Node
     int colour = -1;
     bool visited = false;
     vector<Node*> neigbours;
+
+    bool visitedBruteForce = false;
 };
+
+int solveBruteForce(vector<Node>& nodes, int colourToSolveFor)
+{
+    int minDistance = numeric_limits<int>::max();
+    for (auto& rootNode : nodes)
+    {
+        if (rootNode.colour != colourToSolveFor)
+        {
+            continue;
+        }
+        for (auto& node : nodes)
+        {
+            node.visitedBruteForce = false;
+        }
+
+        vector<Node*> toExplore = { &rootNode };
+        rootNode.visitedBruteForce = true;
+
+        int numIterations = 0;
+        while (!toExplore.empty())
+        {
+            vector<Node*> nextToExplore;
+            for (auto node : toExplore)
+            {
+                if (numIterations != 0 && node->colour == colourToSolveFor)
+                {
+                    minDistance = min(minDistance, numIterations);
+                }
+
+                for (auto neighbour : node->neigbours)
+                {
+                    if (!neighbour->visitedBruteForce)
+                    {
+                        nextToExplore.push_back(neighbour);
+                        neighbour->visitedBruteForce = true;
+                    }
+                }
+
+            }
+
+            toExplore = nextToExplore;
+            numIterations++;
+
+        }
+    }
+
+    return (minDistance == std::numeric_limits<int>::max() ? -1 : minDistance);
+}
+
+int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
+{
+    vector<Node*> nodesToExplore;
+    for (auto& node : nodes)
+    {
+        if (node.colour == colourToSolveFor)
+        {
+            // Don't mark as visited!
+            nodesToExplore.push_back(&node);
+        }
+    }
+
+    if (nodesToExplore.size() <= 1)
+    {
+        cout << -1 << endl;
+        return -1;
+    }
+
+    int numIterations = 0;
+    while (!nodesToExplore.empty())
+    {
+        //cout << "iteration: " << numIterations << endl;
+        vector<Node*> nextNodesToExplore;
+        for (auto node : nodesToExplore)
+        {
+            //cout << " exploring node: " << node << " colour: " << node->colour << endl;
+            if (numIterations != 0 && node->colour == colourToSolveFor)
+            {
+                return numIterations;
+            }
+            for (auto neighbour : node->neigbours)
+            {
+                if (!neighbour->visited)
+                {
+                    //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
+                    nextNodesToExplore.push_back(neighbour);
+                }
+                neighbour->visited = true;
+            }
+        }
+        nodesToExplore = nextNodesToExplore;
+        numIterations++;
+    }
+    return -1;
+}
 
 int main()
 {
@@ -44,50 +140,9 @@ int main()
     int colourToSolveFor;
     cin >> colourToSolveFor;
 
-    vector<Node*> nodesToExplore;
-    for (auto& node : nodes)
-    {
-        if (node.colour == colourToSolveFor)
-        {
-            // Don't mark as visited!
-            nodesToExplore.push_back(&node);
-        }
-    }
+    const auto bruteForceSolution = solveBruteForce(nodes, colourToSolveFor);
+    cout << "bruteForceSolution: " << bruteForceSolution << endl;
 
-    if (nodesToExplore.size() <= 1)
-    {
-        cout << -1 << endl;
-        return 0;
-    }
-
-    int distance = -1;
-    int numIterations = 0;
-    while (!nodesToExplore.empty() && distance == -1)
-    {
-        //cout << "iteration: " << numIterations << endl;
-        vector<Node*> nextNodesToExplore;
-        for (auto node : nodesToExplore)
-        {
-            //cout << " exploring node: " << node << " colour: " << node->colour << endl;
-            if (numIterations != 0 && node->colour == colourToSolveFor)
-            {
-                distance = numIterations;
-                break;
-            }
-            for (auto neighbour : node->neigbours)
-            {
-                if (!neighbour->visited)
-                {
-                    //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
-                    nextNodesToExplore.push_back(neighbour);
-                }
-                neighbour->visited = true;
-            }
-        }
-        nodesToExplore = nextNodesToExplore;
-        numIterations++;
-    }
-
-    assert(distance != -1);
-    cout << distance << endl;
+    const auto optimisedSolution = solveOptimised(nodes, colourToSolveFor);
+    cout << "optimisedSolution: " << optimisedSolution << endl;
 }
