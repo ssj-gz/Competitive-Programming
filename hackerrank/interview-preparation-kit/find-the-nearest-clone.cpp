@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-06-16
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -58,10 +64,10 @@ struct Node
 
         void incorporateSourcesFrom(Node* visitor)
         {
-            cout << " incorporateSourcesFrom: " << visitor->id << " this node: " << containerNode->id << " colour: " << containerNode->colour << " numDistinctSources: " << numDistinctSources << endl;
+            //cout << " incorporateSourcesFrom: " << visitor->id << " this node: " << containerNode->id << " colour: " << containerNode->colour << " numDistinctSources: " << numDistinctSources << endl;
             if (numDistinctSources > 1)
             {
-                cout << " already saturated";
+                //cout << " already saturated";
                 return;
             }
             for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
@@ -85,7 +91,7 @@ struct Node
                     numDistinctSources++;
                 }
             }
-            cout << "  new numDistinctSources: " << numDistinctSources << endl;
+            //cout << "  new numDistinctSources: " << numDistinctSources << endl;
         }
     };
 
@@ -173,34 +179,28 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         }
     }
 
-    if (nodesToExplore.size() <= 1)
-    {
-        cout << -1 << endl;
-        return -1;
-    }
-
     int numIterations = 0;
     while (!nodesToExplore.empty())
     {
-        cout << "iteration: " << numIterations << " nodes to explore: ";
-        for (auto node : nodesToExplore)
-        {
-            cout << node->id << " ";
-        }
-        cout << endl;
+        //cout << "iteration: " << numIterations << " nodes to explore: ";
+        //for (auto node : nodesToExplore)
+        //{
+            //cout << node->id << " ";
+        //}
+        //cout << endl;
 
         vector<Node*> nextNodesToExplore;
         for (auto node : nodesToExplore)
         {
             if (node->colour == colourToSolveFor && node->distinctSourceInfo.numDistinctSources > 1)
             {
-                cout << " found correct node " << node->id << " sources: " << node->distinctSourceInfo.distinctSources[0].node->id << ", " << node->distinctSourceInfo.distinctSources[1].node->id << endl;
+                //cout << " found correct node " << node->id << " sources: " << node->distinctSourceInfo.distinctSources[0].node->id << ", " << node->distinctSourceInfo.distinctSources[1].node->id << endl;
                 return numIterations;
             }
         }
         for (auto node : nodesToExplore)
         {
-            cout << " exploring node: " << node->id << " colour: " << node->colour << " numDistinctSources: " << node->distinctSourceInfo.numDistinctSources << endl;
+            //cout << " exploring node: " << node->id << " colour: " << node->colour << " numDistinctSources: " << node->distinctSourceInfo.numDistinctSources << endl;
             for (auto neighbour : node->neigbours)
             {
                 if (!neighbour->alreadyInNextNodesToExplore && neighbour->shouldReExploreAfterVisitFrom(node))
@@ -323,6 +323,7 @@ int main(int argc, char* argv[])
     int colourToSolveFor;
     cin >> colourToSolveFor;
 
+#ifdef BRUTE_FORCE
     cout << "colourToSolveFor: " << colourToSolveFor << endl;
 
     const auto bruteForceSolution = solveBruteForce(nodes, colourToSolveFor);
@@ -331,4 +332,7 @@ int main(int argc, char* argv[])
     cout << "bruteForceSolution: " << bruteForceSolution << " optimisedSolution: " << optimisedSolution << endl;
 
     assert(bruteForceSolution == optimisedSolution);
+#else
+    cout << solveOptimised(nodes, colourToSolveFor) << endl;
+#endif
 }
