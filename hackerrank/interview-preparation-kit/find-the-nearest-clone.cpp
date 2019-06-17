@@ -3,6 +3,11 @@
 #include <vector>
 #include <cassert>
 
+
+#include <algorithm>
+#include <set>
+#include <sys/time.h>
+
 using namespace std;
 
 struct Node
@@ -108,8 +113,70 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
     return -1;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int numNodes = rand() % 100 + 1;
+        const int maxEdges = numNodes * (numNodes - 1) / 2;
+        const int minEdges = numNodes - 1;
+        const int numEdges = (rand() % (maxEdges - minEdges + 1)) + minEdges;
+        assert(numEdges >= minEdges && numEdges <= maxEdges);
+
+        set<pair<int, int>> allPossibleEdges;
+        for (int node1 = 1; node1 <= numNodes; node1++)
+        {
+            for (int node2 = node1 + 1; node2 <= numNodes; node2++)
+            {
+                allPossibleEdges.insert({node1, node2});
+            }
+        }
+        assert(allPossibleEdges.size() == maxEdges);
+
+        vector<pair<int, int>> edges;
+        for (int i = 0; i < numNodes; i++)
+        {
+            if (i > 0)
+            {
+                const pair<int, int> edge = { (rand() % i) + 1, i + 1 };
+                assert(edge.first < edge.second);
+                edges.push_back(edge);
+                allPossibleEdges.erase(edge);
+            }
+        }
+        vector<pair<int, int>> remainingEdges(allPossibleEdges.begin(), allPossibleEdges.end());
+        random_shuffle(remainingEdges.begin(), remainingEdges.end());
+
+        while (edges.size() < numEdges)
+        {
+            edges.push_back(remainingEdges.back());
+            remainingEdges.pop_back();
+        }
+
+        cout << numNodes << " " << numEdges << endl;
+
+        for (const auto edge : edges)
+        {
+            cout << edge.first << " " << edge.second << endl;
+        }
+
+        const int maxColour = rand() % 100 + 1;
+
+        for (int i = 0; i < numNodes; i++)
+        {
+            cout << ((rand() % maxColour) + 1) << endl;
+        }
+
+        cout << ((rand() % maxColour) + 1) << endl;
+
+
+        return 0;
+
+    }
     int numNodes;
     cin >> numNodes;
 
@@ -136,6 +203,7 @@ int main()
     {
         cin >> nodes[i].colour;
     }
+    assert(cin);
 
     int colourToSolveFor;
     cin >> colourToSolveFor;
