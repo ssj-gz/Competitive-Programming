@@ -16,6 +16,48 @@ struct Node
     bool visited = false;
     vector<Node*> neigbours;
 
+    bool shouldReExploreAfterVisitFrom(Node* visitor)
+    {
+        if (numDistinctSources > 1)
+            return false;
+
+        const int originalNumDistinctSources = numDistinctSources;
+        for (int i = 0; i < visitor->numDistinctSources; i++)
+        {
+            bool hasSourceAlready = false;
+            auto visitorSource = visitor->distinctSources[i].node;
+            auto visitorDistance = visitor->distinctSources[i].distance;
+            for (int j = 0; j < numDistinctSources; j++)
+            {
+                if (visitorSource == distinctSources[j].node)
+                {
+                    hasSourceAlready = true;
+                    break;
+                }
+            }
+            if (!hasSourceAlready)
+            {
+                distinctSources[numDistinctSources].node = visitorSource;
+                distinctSources[numDistinctSources].distance = visitorDistance + 1;
+
+                numDistinctSources++;
+            }
+        }
+        if (originalNumDistinctSources != numDistinctSources)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    int numDistinctSources = 0;
+    struct DistinctSource
+    {
+        Node* node = nullptr;
+        int distance = -1;
+    };
+    DistinctSource distinctSources[2] = {};
+
     bool visitedBruteForce = false;
 };
 
@@ -74,8 +116,10 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
     {
         if (node.colour == colourToSolveFor)
         {
-            // Don't mark as visited!
             nodesToExplore.push_back(&node);
+            node.numDistinctSources = 1;
+            node.distinctSources[0].node = &node;
+            node.distinctSources[0].distance = 0;
         }
     }
 
@@ -93,18 +137,18 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         for (auto node : nodesToExplore)
         {
             //cout << " exploring node: " << node << " colour: " << node->colour << endl;
-            if (numIterations != 0 && node->colour == colourToSolveFor)
+            if (node->colour == colourToSolveFor && node->numDistinctSources > 1)
             {
                 return numIterations;
             }
             for (auto neighbour : node->neigbours)
             {
-                if (!neighbour->visited)
+                if (neighbour->shouldReExploreAfterVisitFrom(node))
                 {
                     //cout << "  adding neighbour: " << neighbour << " colour: " << neighbour->colour << endl;
                     nextNodesToExplore.push_back(neighbour);
                 }
-                neighbour->visited = true;
+                //neighbour->visited = true;
             }
         }
         nodesToExplore = nextNodesToExplore;
@@ -209,8 +253,9 @@ int main(int argc, char* argv[])
     cin >> colourToSolveFor;
 
     const auto bruteForceSolution = solveBruteForce(nodes, colourToSolveFor);
-    cout << "bruteForceSolution: " << bruteForceSolution << endl;
 
     const auto optimisedSolution = solveOptimised(nodes, colourToSolveFor);
-    cout << "optimisedSolution: " << optimisedSolution << endl;
+    cout << "bruteForceSolution: " << bruteForceSolution << " optimisedSolution: " << optimisedSolution << endl;
+
+    assert(bruteForceSolution == optimisedSolution);
 }
