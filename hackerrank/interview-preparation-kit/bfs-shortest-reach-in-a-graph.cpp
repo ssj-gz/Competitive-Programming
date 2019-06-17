@@ -13,6 +13,12 @@ struct Node
 
 int main()
 {
+    // "Hard"?? This is utterly trivial - and what's weirder, a challenge that precedes
+    // this in this track - Find the Nearest Clone - is rated Medium but is considerably
+    // more difficult.
+    //
+    // Anyway - just do a BFS to find minimum distance from the root (== number of steps
+    // to reach it, times 6).  Bizarre.
     int Q;
     cin >> Q;
 
