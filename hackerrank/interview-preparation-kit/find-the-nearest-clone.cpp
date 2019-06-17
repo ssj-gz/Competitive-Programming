@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numNodes = rand() % 10 + 1;
+        const int numNodes = rand() % 1000 + 1;
         const int maxEdges = numNodes * (numNodes - 1) / 2;
         const int minEdges = numNodes - 1;
         const int numEdges = (rand() % (maxEdges - minEdges + 1)) + minEdges;
