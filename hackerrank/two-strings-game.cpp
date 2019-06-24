@@ -992,7 +992,7 @@ int main(int argc, char** argv)
     // Fundamentally an easy one, though tricky to implement.
     //
     // Firstly - we should immediately recognise that we are playing two
-    // copies of an impartial game consecutively, so The Sprague-Grundy
+    // copies of an impartial game concurrently, so The Sprague-Grundy
     // Theorem should immediately spring to mind.  The game that is being
     // played twice is a simple one: given a substring x of S (where S is either A or B, 
     // depending on which "copy" of the game we are playing), add a letter y
