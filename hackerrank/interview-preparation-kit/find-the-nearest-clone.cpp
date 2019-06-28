@@ -90,7 +90,6 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
             nodesToExplore.push_back(&node);
             node.distinctSourceInfo.numDistinctSources = 1;
             node.distinctSourceInfo.distinctSources[0].node = &node;
-            node.nextDistinctSourceInfo = node.distinctSourceInfo;
         }
     }
 
@@ -112,6 +111,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
                 if (!neighbour->alreadyInNextNodesToExplore && neighbour->shouldReExploreAfterVisitFrom(node))
                 {
                     nextNodesToExplore.push_back(neighbour);
+                    neighbour->nextDistinctSourceInfo = neighbour->distinctSourceInfo;
                     neighbour->alreadyInNextNodesToExplore = true;
                 }
                 neighbour->nextDistinctSourceInfo.incorporateSourcesFrom(node);
