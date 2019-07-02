@@ -20,10 +20,10 @@ vector<int64_t> calcRowOfMatrix(const vector<int64_t>& originalA, int n, uint64_
         if (m >= powerOf2)
         {
             vector<int64_t> currentPlusPowerOf2thRow(n);
-            for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
             {
-                currentPlusPowerOf2thRow[i] ^= currentRow[i];
-                currentPlusPowerOf2thRow[i] ^= currentRow[(i + powerOf2) % n];
+                currentPlusPowerOf2thRow[j] ^= currentRow[j];
+                currentPlusPowerOf2thRow[j] ^= currentRow[(j + powerOf2) % n];
             }
             currentRow = currentPlusPowerOf2thRow;
 
@@ -76,9 +76,9 @@ int main(int argc, char* argv[])
     // By pure pattern recognition, we can observe the following: (*)
     //
     //   if i is a power of 2, then the jth column of that row has
-    //   contributions from a[0][0] and a[0][i % n] i.e. a[0][0] and a[0][i % n],
-    //   and only these two first row elements, occur and odd number of times in the xor
-    //   sum of such a a[i][j]
+    //   contributions from a[0][0] and a[0][i % n] i.e. the two first row elements 
+    //   a[0][0] and a[0][i % n], and only these two first row elements, occur an odd 
+    //   number of times in the xor sum of such a a[i][j]
     //
     // Again from the rotational symmetry argument above, this means that
     //
