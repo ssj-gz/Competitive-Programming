@@ -105,20 +105,13 @@ void solve(const string& A, const string& B, const string& C, int K)
             if (cDigit == 0)
             {
                 // Need to change some bits: this digit in *both*
-                // A and B must be 0.
-                if (aDigit == 1 && bDigit == 1)
-                {
-                    // Must change both.
-                    AAsBinary[i] = '0';
-                    BAsBinary[i] = '0';
-                    K -= 2;
-                }
-                else if (aDigit == 1)
+                // A and B is required to be 0.
+                if (aDigit == 1)
                 {
                     AAsBinary[i] = '0';
                     K--;
                 }
-                else
+                if (bDigit == 1)
                 {
                     BAsBinary[i] = '0';
                     K--;
