@@ -30,6 +30,9 @@ void swapNodes(Node* currentNode, const int currentDepth, const int swapAtDepthM
 
 int main()
 {
+    // Trivial: just do as the challenge description says, with no special
+    // tricks or cleverness: the testcases are small enough that this
+    // naive approach works.
     int n;
     cin >> n;
 
