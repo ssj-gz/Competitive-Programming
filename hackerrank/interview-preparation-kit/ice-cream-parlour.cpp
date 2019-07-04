@@ -9,32 +9,31 @@ using namespace std;
 
 int main()
 {
-    int numTrips;
-    cin >> numTrips;
+    // Trivially easy, though the case where the solution consists of two
+    // icecreams with the same cost is a little fiddly!
+
+    auto readInt = []() { int x; cin >> x; assert(cin); return x;};
+
+    const int numTrips = readInt();
 
     for (int t = 0; t < numTrips; t++)
     {
-        int money;
-        cin >> money;
-
-        int numCosts;
-        cin >> numCosts;
+        const int money = readInt();
+        const int numCosts = readInt();
 
         unordered_map<int, vector<int>> indicesWithCost;
-        int index = 1;
         for (int i = 0; i < numCosts; i++)
         {
-            int cost;
-            cin >> cost;
-            indicesWithCost[cost].push_back(index);
-
-            index++;
+            const int cost = readInt();
+            indicesWithCost[cost].push_back(i + 1); // Store indices as 1-relative.
         }
 
         int iceCream1Index = -1;
         int iceCream2Index = -1;
         for (const auto [iceCream1Cost, unused] : indicesWithCost)
         {
+            // NB: the assertions below assert the uniqueness of a solution
+            // (as promised by the Challenge description).
             const auto iceCream2Cost = money - iceCream1Cost;
             if (indicesWithCost.find(iceCream2Cost) != indicesWithCost.end())
             {
@@ -57,12 +56,10 @@ int main()
                     iceCream2Index = indicesWithCost[iceCream2Cost].front(); 
                 }
             }
-
-            index++;
         }
         assert(iceCream1Index != -1 && iceCream2Index != -1);
         if (iceCream2Index < iceCream1Index)
-            swap(iceCream1Index, iceCream2Index);
+            swap(iceCream1Index, iceCream2Index); // Output should be in ascending order of index.
 
         cout << iceCream1Index << " " << iceCream2Index << endl;
     }
