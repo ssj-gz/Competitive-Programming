@@ -2,6 +2,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <sys/time.h>
+
 using namespace std;
 
 int64_t bruteForce(const vector<int>& aOrig, const vector<int>& bOrig, const vector<int>& cOrig)
@@ -36,6 +38,41 @@ int64_t bruteForce(const vector<int>& aOrig, const vector<int>& bOrig, const vec
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+
+        const int lenA = rand() % 100 + 1;
+        const int lenB = rand() % 100 + 1;
+        const int lenC = rand() % 100 + 1;
+
+        const int maxA = rand() % 1000 + 1;
+        const int maxB = rand() % 1000 + 1;
+        const int maxC = rand() % 1000 + 1;
+
+        cout << lenA << " " << lenB << " " << lenC << endl;
+
+        for (int i = 0; i < lenA; i++)
+        {
+            cout << ((rand() % maxA) + 1) << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < lenB; i++)
+        {
+            cout << ((rand() % maxB) + 1) << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < lenC; i++)
+        {
+            cout << ((rand() % maxC) + 1) << " ";
+        }
+        cout << endl;
+
+        return 0;
+    }
     int lenA, lenB, lenC;
     cin >> lenA >> lenB >> lenC;
 
