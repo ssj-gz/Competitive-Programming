@@ -36,6 +36,40 @@ int64_t bruteForce(const vector<int>& aOrig, const vector<int>& bOrig, const vec
     return numTriples;
 }
 
+int64_t optimised(const vector<int>& aOrig, const vector<int>& bOrig, const vector<int>& cOrig)
+{
+    auto a = aOrig;
+    auto b = bOrig;
+    auto c = cOrig;
+
+    sort(a.begin(), a.end());
+    a.erase(std::unique(a.begin(), a.end()), a.end());
+    sort(b.begin(), b.end());
+    b.erase(std::unique(b.begin(), b.end()), b.end());
+    sort(c.begin(), c.end());
+    c.erase(std::unique(c.begin(), c.end()), c.end());
+
+    int64_t indexOfGreaterThanQInA = 0;
+    int64_t indexOfGreaterThanQInC = 0;
+
+    int64_t numTriples = 0;
+
+    for (const auto q : b)
+    {
+        while (indexOfGreaterThanQInA < a.size() && a[indexOfGreaterThanQInA] <= q)
+        {
+            indexOfGreaterThanQInA++;
+        }
+        while (indexOfGreaterThanQInC < a.size() && c[indexOfGreaterThanQInC] <= q)
+        {
+            indexOfGreaterThanQInC++;
+        }
+        numTriples += indexOfGreaterThanQInA * indexOfGreaterThanQInC;
+    }
+
+    return numTriples;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2)
@@ -93,4 +127,6 @@ int main(int argc, char* argv[])
     const auto solutionBruteForce = bruteForce(a, b, c);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
 
+    const auto solutionOptimised = optimised(a, b, c);
+    cout << "solutionOptimised: " << solutionOptimised << endl;
 }
