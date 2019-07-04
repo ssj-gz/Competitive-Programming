@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-07-04
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -126,10 +133,15 @@ int main(int argc, char* argv[])
     vector<int> b = readVector(lenB);
     vector<int> c = readVector(lenC);
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = bruteForce(a, b, c);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
 
     const auto solutionOptimised = optimised(a, b, c);
     cout << "solutionOptimised: " << solutionOptimised << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = optimised(a, b, c);
+    cout << solutionOptimised << endl;
+#endif
 }
