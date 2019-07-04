@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <sys/time.h>
+#include <cassert>
 
 using namespace std;
 
@@ -60,10 +61,11 @@ int64_t optimised(const vector<int>& aOrig, const vector<int>& bOrig, const vect
         {
             indexOfGreaterThanQInA++;
         }
-        while (indexOfGreaterThanQInC < a.size() && c[indexOfGreaterThanQInC] <= q)
+        while (indexOfGreaterThanQInC < c.size() && c[indexOfGreaterThanQInC] <= q)
         {
             indexOfGreaterThanQInC++;
         }
+
         numTriples += indexOfGreaterThanQInA * indexOfGreaterThanQInC;
     }
 
@@ -129,4 +131,5 @@ int main(int argc, char* argv[])
 
     const auto solutionOptimised = optimised(a, b, c);
     cout << "solutionOptimised: " << solutionOptimised << endl;
+    assert(solutionOptimised == solutionBruteForce);
 }
