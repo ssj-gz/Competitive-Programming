@@ -36,7 +36,7 @@ int main()
         for (const auto [iceCream1Cost, unused] : indicesWithCost)
         {
             const auto iceCream2Cost = money - iceCream1Cost;
-            if (!indicesWithCost[iceCream2Cost].empty())
+            if (indicesWithCost.find(iceCream2Cost) != indicesWithCost.end())
             {
                 if (iceCream1Cost == iceCream2Cost)
                 {
