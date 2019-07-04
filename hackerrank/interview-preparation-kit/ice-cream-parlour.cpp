@@ -38,9 +38,10 @@ int main()
             const auto iceCream2Cost = money - iceCream1Cost;
             if (indicesWithCost.find(iceCream2Cost) != indicesWithCost.end())
             {
+                // We have an icecream that can be pooled with Icecream 1!
                 if (iceCream1Cost == iceCream2Cost)
                 {
-                    // For this to be a solution, we need two icecreams with this cost.
+                    // For this to be a solution, we need at least *two* icecreams with this cost.
                     if (indicesWithCost[iceCream1Cost].size() > 1)
                     {
                         assert(indicesWithCost[iceCream1Cost].size() == 2);
