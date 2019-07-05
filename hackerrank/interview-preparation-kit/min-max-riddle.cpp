@@ -69,22 +69,53 @@ vector<int> findIndexOfPrevLowerThan(const vector<int>& arr)
 vector<int> solveOptimised(const vector<int>& arr)
 {
     const int n = arr.size();
-    vector<int> results;
 
     const auto indexOfNextLowerThan = findIndexOfNextLowerThan(arr);
     const auto indexOfPrevLowerThan = findIndexOfPrevLowerThan(arr);
 
+    struct ElementInfo
+    {
+        int value = -1;
+        int lengthOfRangeWhereElementIsMin = -1;
+    };
+
+    vector<ElementInfo> elementInfos;
 
     for (int index = 0; index < n; index++)
     {
-        const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
-        const int64_t distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
-        const int64_t lengthOfRangeWhereWeAreMin = distanceToLeftWhereWeAreMin 
+        const int distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
+        const int distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
+        const int lengthOfRangeWhereWeAreMin = distanceToLeftWhereWeAreMin 
             + 1  // Include this element!
             + distanceToRightWhereWeAreMin;
+
+        elementInfos.push_back({arr[index], lengthOfRangeWhereWeAreMin});
     }
 
-    return results;
+    vector<int> maxMinForWindowSize(n + 1, -1);
+
+    sort(elementInfos.begin(), elementInfos.end(), [](const ElementInfo& lhs, const ElementInfo& rhs)
+            {
+                if (lhs.value != rhs.value)
+                    return lhs.value > rhs.value;
+                return lhs.lengthOfRangeWhereElementIsMin > rhs.lengthOfRangeWhereElementIsMin;
+
+            });
+
+    for (const ElementInfo& elementInfo : elementInfos)
+    {
+        int windowSize = elementInfo.lengthOfRangeWhereElementIsMin;
+        while (windowSize > 0 && maxMinForWindowSize[windowSize] == -1)
+        {
+            maxMinForWindowSize[windowSize] = elementInfo.value;
+            windowSize--;
+        }
+    }
+
+    // Ditch the "window size 0" case.
+    maxMinForWindowSize.erase(maxMinForWindowSize.begin());
+
+    return maxMinForWindowSize;
 }
 
 int main()
