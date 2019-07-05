@@ -3,6 +3,8 @@
 
 #include <list>
 
+#include <sys/time.h>
+
 using namespace std;
 
 int solveBruteForce(const vector<int>& pVec)
@@ -51,8 +53,27 @@ int solveBruteForce(const vector<int>& pVec)
     return day - 1;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = rand() % 1000 + 1;
+        const int maxP = rand() % 1000 + 1;
+
+        cout << n << endl;
+
+        for (int i = 0; i < n; i++)
+        {
+            cout << ((rand() % maxP) + 1) << " ";
+        }
+        cout << endl;
+
+        return 0;
+    }
     int n;
     cin >> n;
 
