@@ -22,10 +22,10 @@ struct Node
         for (int i = 0; i < visitor->distinctSourceInfo.distinctSources.size(); i++)
         {
             bool hasSourceAlready = false;
-            auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
+            auto visitorSource = visitor->distinctSourceInfo.distinctSources[i];
             for (int j = 0; j < distinctSourceInfo.distinctSources.size(); j++)
             {
-                if (visitorSource == distinctSourceInfo.distinctSources[j].node)
+                if (visitorSource == distinctSourceInfo.distinctSources[j])
                 {
                     hasSourceAlready = true;
                     break;
@@ -37,13 +37,9 @@ struct Node
         return false;
     }
 
-    struct DistinctSource
-    {
-        Node* node = nullptr;
-    };
     struct DistinctSourceInfo
     {
-        vector<DistinctSource> distinctSources;
+        vector<Node*> distinctSources;
 
         void incorporateSourcesFrom(Node* visitor)
         {
@@ -55,10 +51,10 @@ struct Node
             for (int i = 0; i < visitor->distinctSourceInfo.distinctSources.size(); i++)
             {
                 bool hasSourceAlready = false;
-                auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
+                auto visitorSource = visitor->distinctSourceInfo.distinctSources[i];
                 for (int j = 0; j < distinctSources.size(); j++)
                 {
-                    if (visitorSource == distinctSources[j].node)
+                    if (visitorSource == distinctSources[j])
                     {
                         hasSourceAlready = true;
                         break;
@@ -86,7 +82,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         if (node.colour == colourToSolveFor)
         {
             nodesToExplore.push_back(&node);
-            node.distinctSourceInfo.distinctSources = {{&node}};
+            node.distinctSourceInfo.distinctSources = {&node};
         }
     }
 
