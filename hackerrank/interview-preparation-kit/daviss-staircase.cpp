@@ -4,17 +4,15 @@
 
 using namespace std;
 
-int64_t modulus = 1'000'000'007ULL;
+int64_t modulus = 10'000'000'007ULL;
 
-int64_t findNumWaysToClimbStairs(int numStairs, vector<int64_t>& numWaysToClimbStairsLookup)
+int64_t findNumWaysToClimbStairs(const int numStairs, vector<int64_t>& numWaysToClimbStairsLookup)
 {
-    if (numStairs < 0)
-        return 0;
     if (numStairs == 0)
         return 1;
 
     if (numWaysToClimbStairsLookup[numStairs] != -1)
-        return numWaysToClimbStairsLookup[numStairs];
+       return numWaysToClimbStairsLookup[numStairs];
 
 
     int64_t numWays = 0;
