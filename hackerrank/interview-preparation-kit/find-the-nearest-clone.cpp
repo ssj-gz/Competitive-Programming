@@ -5,6 +5,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <cassert>
 
 using namespace std;
@@ -17,21 +18,15 @@ struct Node
 
     bool shouldReExploreAfterVisitFrom(Node* visitor)
     {
-        if (distinctSourceInfo.distinctSources.size() > 1)
-            return false;
-        for (int i = 0; i < visitor->distinctSourceInfo.distinctSources.size(); i++)
+        if (distinctSourceInfo.distinctSources.size() >= 2)
         {
-            bool hasSourceAlready = false;
-            auto visitorSource = visitor->distinctSourceInfo.distinctSources[i];
-            for (int j = 0; j < distinctSourceInfo.distinctSources.size(); j++)
-            {
-                if (visitorSource == distinctSourceInfo.distinctSources[j])
-                {
-                    hasSourceAlready = true;
-                    break;
-                }
-            }
-            if (!hasSourceAlready)
+            // We have two distinct sources for this; no need to re-explore.
+            return false;
+        }
+        for (auto visitorSource : visitor->distinctSourceInfo.distinctSources)
+        {
+            const auto haveVisitorSource = (std::find(distinctSourceInfo.distinctSources.begin(), distinctSourceInfo.distinctSources.end(), visitorSource) != distinctSourceInfo.distinctSources.end());
+            if (!haveVisitorSource)
                 return true;
         }
         return false;
