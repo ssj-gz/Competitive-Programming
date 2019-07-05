@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <cassert>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -72,6 +73,25 @@ int64_t solveOptimised(const vector<int>& machineTimeToProduce, int64_t goal)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = (rand() % 1000) + 1;
+        const int goal = rand() % 1000000;
+
+        cout << n << " " << goal << endl;
+
+        for (int i = 0; i < n; i++)
+        {
+            cout << ((rand() % 100) + 1) << " ";
+        }
+        cout << endl;
+
+        return 0;
+    }
     int numMachines;
     cin >> numMachines;
 
