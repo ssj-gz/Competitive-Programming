@@ -63,6 +63,11 @@ struct Node
                 if (!hasSourceAlready)
                 {
                     distinctSources.push_back({visitorSource});
+                    if (distinctSources.size() > 1)
+                    {
+                        // Already have all the sources we need.
+                        return;
+                    }
                 }
             }
         }
