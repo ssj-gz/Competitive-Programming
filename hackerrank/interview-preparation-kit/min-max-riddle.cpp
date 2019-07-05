@@ -109,7 +109,7 @@ vector<int> findMaxMinsForWindowSizes(const vector<int>& arr)
 int main(int argc, char* argv[])
 {
     // Fairly easy one.  Imagine if, for each element x, we could find the size
-    // of the range surrounding x such  that x has the minimum value in that range 
+    // of the range surrounding x such that x has the minimum value in that range 
     // (lengthOfRangeWhereElementIsMin): this is easily accomplished in O(n) using
     // indexOfPrevLowerThan/ indexOfNextLowerThan, which are copy-and-pasted from
     // the "Largest Rectangle" challenge.  Store x and its corresponding lengthOfRangeWhereElementIsMin
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     //          maxMinsForWindowSizes[windowSize] = max(maxMinsForWindowSizes[windowSize], elementInfo.value)
     //
     // But now, each iteration of the inner (windowSize) loop now either: sets an element of maxMinsForWindowSizes for the first time
-    // (can only happen O(n) times), or stops iterating; thus, its total contribution to the whole runtime, over all elementInfos,
+    // (can only happen O(n) times), or aborts the iteration; thus, its total contribution to the whole runtime, over all elementInfos,
     // is now O(n) instead of O(n^2).
     //
     // And that will do - finding each elementInfo.lengthOfRangeWhereElementIsMin takes O(n); sorting elementInfos takes O(n log2 n);
