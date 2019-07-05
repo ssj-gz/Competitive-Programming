@@ -13,8 +13,6 @@ int64_t findMinDaysToReachGoal(const vector<int>& machineTimeToProduce, int64_t 
     int64_t topDay = maxDaysToProduceGoal;
     int64_t bottomDay = 0;
 
-    int64_t middleDay = -1;
-
     auto numProducedAfterDays = [&machineTimeToProduce](int64_t daysElapsed)
     {
         int64_t numProduced = 0;
@@ -25,28 +23,26 @@ int64_t findMinDaysToReachGoal(const vector<int>& machineTimeToProduce, int64_t 
         return numProduced;
     };
     // Binary chop.
-    while (topDay - bottomDay > 1)
+    int answer = -1;
+    while (bottomDay <= topDay)
     {
-        middleDay = bottomDay + (topDay - bottomDay) / 2;
+        int64_t middleDay = bottomDay + ((topDay - bottomDay) / 2);
 
         const auto numProducedByMiddleDay = numProducedAfterDays(middleDay);
-        if (numProducedByMiddleDay < goal)
+        if (numProducedByMiddleDay >= goal)
         {
-            bottomDay = middleDay;
+            // Store this as a candidate answer.
+            // We want to find the *smallest* middleDay, though, so keep going,
+            // searching "to the left" in case we find a smaller satisfactory middleDay.
+            topDay = middleDay - 1;
+            answer = middleDay;
         }
         else
         {
-            topDay = middleDay;
+            bottomDay = middleDay + 1;
         }
     }
-    if (numProducedAfterDays(bottomDay) >= goal)
-    {
-        return bottomDay;
-    }
-    else
-    {
-        return topDay;
-    }
+    return answer;
 }
 
 int main(int argc, char* argv[])
