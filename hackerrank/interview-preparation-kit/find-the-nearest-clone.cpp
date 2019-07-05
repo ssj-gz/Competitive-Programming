@@ -61,8 +61,6 @@ struct Node
 
     DistinctSourceInfo distinctSourceInfo;
     DistinctSourceInfo nextDistinctSourceInfo;
-
-    bool visitedBruteForce = false;
 };
 
 int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
