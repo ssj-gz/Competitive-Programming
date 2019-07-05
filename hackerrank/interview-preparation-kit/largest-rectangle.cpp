@@ -83,12 +83,12 @@ int64_t solveOptimised(const vector<int>& heights)
 
     for (int index = 0; index < n; index++)
     {
-        //cout << "index: " << index << " height: " << heights[index] << " indexOfNextLowerThan: " << indexOfNextLowerThan[index] << " indexOfPrevLowerThan: " << indexOfPrevLowerThan[index] << endl;
         assert(indexOfNextLowerThan[index] == -1 || indexOfNextLowerThan[index] > index);
         assert(indexOfPrevLowerThan[index] == -1 || indexOfPrevLowerThan[index] < index);
-        const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index]);
-        const int64_t distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 : indexOfNextLowerThan[index] - index);
+        const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
+        const int64_t distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
         const int64_t largestRectangleWhereWeAreMin = (distanceToLeftWhereWeAreMin + 1 + distanceToRightWhereWeAreMin) * heights[index];
+        cout << "index: " << index << " height: " << heights[index] << " indexOfNextLowerThan: " << indexOfNextLowerThan[index] << " indexOfPrevLowerThan: " << indexOfPrevLowerThan[index] << " distanceToRightWhereWeAreMin: " << distanceToRightWhereWeAreMin << endl;
 
         largestRectangle = max(largestRectangle, largestRectangleWhereWeAreMin);
     }
