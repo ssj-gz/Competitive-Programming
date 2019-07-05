@@ -43,21 +43,12 @@ struct Node
                 // Already have all the sources we need.
                 return;
             }
-            for (int i = 0; i < visitor->distinctSourceInfo.distinctSources.size(); i++)
+            for (auto visitorSource : visitor->distinctSourceInfo.distinctSources)
             {
-                bool hasSourceAlready = false;
-                auto visitorSource = visitor->distinctSourceInfo.distinctSources[i];
-                for (int j = 0; j < distinctSources.size(); j++)
+                const auto alreadyHaveVisitorSource = (std::find(distinctSources.begin(), distinctSources.end(), visitorSource) != distinctSources.end());
+                if (!alreadyHaveVisitorSource)
                 {
-                    if (visitorSource == distinctSources[j])
-                    {
-                        hasSourceAlready = true;
-                        break;
-                    }
-                }
-                if (!hasSourceAlready)
-                {
-                    distinctSources.push_back({visitorSource});
+                    distinctSources.push_back(visitorSource);
                     if (distinctSources.size() > 1)
                     {
                         // Already have all the sources we need.
