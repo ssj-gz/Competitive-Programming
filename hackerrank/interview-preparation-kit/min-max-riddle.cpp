@@ -1,10 +1,4 @@
 // Simon St James (ssjgz) - 2019-04-05
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -12,27 +6,7 @@
 
 #include <cassert>
 
-#include <sys/time.h>
-
 using namespace std;
-
-vector<int> solveBruteForce(const vector<int>& arr)
-{
-    const int n = arr.size();
-    vector<int> results;
-
-    for (int windowSize = 1; windowSize <= n; windowSize++)
-    {
-        int result = 0;
-        for (int start = 0; start + windowSize <= n; start++)
-        {
-            const auto minInWindow = *std::min_element(arr.begin() + start, arr.begin() + start + windowSize);
-            result = max(result, minInWindow);
-        }
-        results.push_back(result);
-    }
-    return results;
-}
 
 vector<int> findIndexOfNextLowerThan(const vector<int>& arr)
 {
@@ -75,7 +49,7 @@ vector<int> findIndexOfPrevLowerThan(const vector<int>& arr)
 }
 
 
-vector<int> solveOptimised(const vector<int>& arr)
+vector<int> findMaxMinsForWindowSizes(const vector<int>& arr)
 {
     const int n = arr.size();
 
@@ -94,11 +68,11 @@ vector<int> solveOptimised(const vector<int>& arr)
     {
         const int distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
         const int distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
-        const int lengthOfRangeWhereWeAreMin = distanceToLeftWhereWeAreMin 
+        const int lengthOfRangeWhereElementIsMin = distanceToLeftWhereWeAreMin 
             + 1  // Include this element!
             + distanceToRightWhereWeAreMin;
 
-        elementInfos.push_back({arr[index], lengthOfRangeWhereWeAreMin});
+        elementInfos.push_back({arr[index], lengthOfRangeWhereElementIsMin});
     }
 
     vector<int> maxMinForWindowSize(n + 1, -1);
@@ -114,6 +88,11 @@ vector<int> solveOptimised(const vector<int>& arr)
     for (const ElementInfo& elementInfo : elementInfos)
     {
         int windowSize = elementInfo.lengthOfRangeWhereElementIsMin;
+        // If we find a maxMinForWindowSize[windowSize] != -1, we can stop
+        // marking the lower window sizes - they've always been marked
+        // by a value at least equal to elementInfo.value.
+        // The total contribution of this while-loop across all elementInfos
+        // is just O(n).
         while (windowSize > 0 && maxMinForWindowSize[windowSize] == -1)
         {
             maxMinForWindowSize[windowSize] = elementInfo.value;
@@ -129,27 +108,6 @@ vector<int> solveOptimised(const vector<int>& arr)
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-
-        const int n = rand() % 100 + 1;
-        const int maxValue = rand() % 1000 + 1;
-
-        cout << n << endl;
-
-        for (int i = 0; i < n; i++)
-        {
-            cout << (rand() % maxValue) << " ";
-        }
-        cout << endl;
-
-
-        return 0;
-    }
     int n;
     cin >> n;
 
@@ -159,29 +117,10 @@ int main(int argc, char* argv[])
         cin >> arr[i];
     }
 
-#ifdef BRUTE_FORCE
-    const auto solutionBruteForce = solveBruteForce(arr);
-    cout << "brute force solution: ";
-    for (const auto x : solutionBruteForce)
+    const auto maxMinsForWindowSizes = findMaxMinsForWindowSizes(arr);
+    for (const auto x : maxMinsForWindowSizes)
     {
         cout << x << " ";
     }
     cout << endl;
-
-    const auto solutionOptimised = solveOptimised(arr);
-    cout << "optimised solution: ";
-    for (const auto x : solutionOptimised)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
-    assert(solutionOptimised == solutionBruteForce);
-#else
-    const auto solutionOptimised = solveOptimised(arr);
-    for (const auto x : solutionOptimised)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
-#endif
 }
