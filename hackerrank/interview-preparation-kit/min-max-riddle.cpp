@@ -32,8 +32,8 @@ vector<int> findIndexOfPrevLowerThan(const vector<int>& arr)
     // Leave the heavy-lifting to findIndexOfNextLowerThan after passing it
     // a reversed copy of arr.
     const int n = arr.size();
-    const vector<int> reversedHeights(arr.rbegin(), arr.rend());
-    auto indexOfPrevLowerThan = findIndexOfNextLowerThan(reversedHeights);
+    const vector<int> reversedArr(arr.rbegin(), arr.rend());
+    auto indexOfPrevLowerThan = findIndexOfNextLowerThan(reversedArr);
 
     // Correct for the fact that we gave findIndexOfNextLowerThan a reversed version 
     // of arr: Reverse order indexOfPrevLowerThan, and also "reverse" (flip from 
