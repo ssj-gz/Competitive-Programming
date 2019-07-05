@@ -1,37 +1,11 @@
 // Simon St James (ssjgz) - 2019-04-05
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
-#include <cassert>
-#include <sys/time.h>
-
 using namespace std;
 
-int64_t solveBruteForce(const vector<int>& machineTimeToProduce, int64_t goal)
-{
-    int64_t daysElapsed = 0;
-    int64_t numMade = 0;
-    while (numMade < goal)
-    {
-        daysElapsed++;
-        for (const auto daysToProduce : machineTimeToProduce)
-        {
-            if ((daysElapsed % daysToProduce) == 0)
-            {
-                numMade++;
-            }
-        }
-    }
-    return daysElapsed;
-}
-int64_t solveOptimised(const vector<int>& machineTimeToProduce, int64_t goal)
+int64_t findMinDaysToReachGoal(const vector<int>& machineTimeToProduce, int64_t goal)
 {
     const auto longestDaysToProduceOneItem = *std::max_element(machineTimeToProduce.begin(), machineTimeToProduce.end());
     const auto maxDaysToProduceGoal = goal * longestDaysToProduceOneItem;
@@ -50,6 +24,7 @@ int64_t solveOptimised(const vector<int>& machineTimeToProduce, int64_t goal)
         }
         return numProduced;
     };
+    // Binary chop.
     while (topDay - bottomDay > 1)
     {
         middleDay = bottomDay + (topDay - bottomDay) / 2;
@@ -68,35 +43,20 @@ int64_t solveOptimised(const vector<int>& machineTimeToProduce, int64_t goal)
     {
         return bottomDay;
     }
-    if (numProducedAfterDays(topDay) >= goal)
+    else
     {
         return topDay;
     }
-    assert(false);
-    return middleDay;
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int n = (rand() % 1000) + 1;
-        const int goal = rand() % 1000000;
-
-        cout << n << " " << goal << endl;
-
-        for (int i = 0; i < n; i++)
-        {
-            cout << ((rand() % 100) + 1) << " ";
-        }
-        cout << endl;
-
-        return 0;
-    }
+    // Very easy: we can find a maximum upper bound for the number of days
+    // to reach our goal (maxDaysToProduceGoal); we can determine how many
+    // items have been produced in O(numMachines) for a given day (numProducedAfterDays);
+    // just do a binary chop to find the number of days needed to reach goal.
+    //
+    // Hopefully the code is self-explanatory :)
     int numMachines;
     cin >> numMachines;
 
@@ -109,14 +69,5 @@ int main(int argc, char* argv[])
         cin >> machineTimeToProduce[i];
     }
 
-#ifdef BRUTE_FORCE
-    const auto solutionBruteForce = solveBruteForce(machineTimeToProduce, goal);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
-    const auto solutionOptimised = solveOptimised(machineTimeToProduce, goal);
-    cout << "solutionOptimised: " << solutionOptimised << endl;
-    assert(solutionOptimised == solutionBruteForce);
-#else
-    const auto solutionOptimised = solveOptimised(machineTimeToProduce, goal);
-    cout << solutionOptimised << endl;
-#endif
+    cout << findMinDaysToReachGoal(machineTimeToProduce, goal) << endl;
 }
