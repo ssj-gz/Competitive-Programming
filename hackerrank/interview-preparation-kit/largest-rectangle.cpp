@@ -63,7 +63,10 @@ int64_t findLargestRectangle(const vector<int>& heights)
         assert(indexOfPrevLowerThan[index] == -1 || indexOfPrevLowerThan[index] < index);
         const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
         const int64_t distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
-        const int64_t largestRectangleWhereWeAreMin = (distanceToLeftWhereWeAreMin + 1 + distanceToRightWhereWeAreMin) * heights[index];
+        const int64_t lengthOfRangeWhereWeAreMin = distanceToLeftWhereWeAreMin 
+                                                   + 1  // Include this building!
+                                                   + distanceToRightWhereWeAreMin;
+        const int64_t largestRectangleWhereWeAreMin = lengthOfRangeWhereWeAreMin * heights[index];
 
         largestRectangle = max(largestRectangle, largestRectangleWhereWeAreMin);
     }
