@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-04-05
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -46,10 +53,8 @@ int64_t solveOptimised(const vector<int>& machineTimeToProduce, int64_t goal)
     while (topDay - bottomDay > 1)
     {
         middleDay = bottomDay + (topDay - bottomDay) / 2;
-        cout << "topDay: " << topDay << " middleDay: " << middleDay << " bottomDay: " << bottomDay << endl;
 
         const auto numProducedByMiddleDay = numProducedAfterDays(middleDay);
-        cout << " numProducedByMiddleDay: " << numProducedByMiddleDay << endl;
         if (numProducedByMiddleDay < goal)
         {
             bottomDay = middleDay;
@@ -104,9 +109,14 @@ int main(int argc, char* argv[])
         cin >> machineTimeToProduce[i];
     }
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(machineTimeToProduce, goal);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(machineTimeToProduce, goal);
     cout << "solutionOptimised: " << solutionOptimised << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = solveOptimised(machineTimeToProduce, goal);
+    cout << solutionOptimised << endl;
+#endif
 }
