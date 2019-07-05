@@ -2,6 +2,8 @@
 #include <vector>
 #include <limits>
 
+#include <sys/time.h>
+
 using namespace std;
 
 int64_t solveBruteForce(const vector<int>& heights)
@@ -30,8 +32,26 @@ int64_t solveBruteForce(const vector<int>& heights)
     return largestRectangle;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = (rand() % 100) + 1;
+        const int maxHeight = rand() % 10000 + 1;
+
+        cout << n << endl;
+
+        for (int i = 0; i < n; i++)
+        {
+            cout << ((rand() % maxHeight) + 1) << " ";
+        }
+
+        return 0;
+    }
     int n;
     cin >> n;
 
