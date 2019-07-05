@@ -5,6 +5,8 @@
 
 #include <cassert>
 
+#include <sys/time.h>
+
 using namespace std;
 
 vector<int> solveBruteForce(const vector<int>& arr)
@@ -118,8 +120,29 @@ vector<int> solveOptimised(const vector<int>& arr)
     return maxMinForWindowSize;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+
+        const int n = rand() % 100 + 1;
+        const int maxValue = rand() % 1000 + 1;
+
+        cout << n << endl;
+
+        for (int i = 0; i < n; i++)
+        {
+            cout << (rand() % maxValue) << " ";
+        }
+        cout << endl;
+
+
+        return 0;
+    }
     int n;
     cin >> n;
 
