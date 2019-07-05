@@ -8,22 +8,22 @@ using namespace std;
 
 bool isBalanced(const string& bracketString)
 {
-    std::stack<char> bracketStack;
+    std::stack<char> openingBracketStack;
 
     for (const auto bracket : bracketString)
     {
         if (bracket == '{' || bracket == '[' || bracket == '(')
         {
             // Opening bracket.
-            bracketStack.push(bracket);
+            openingBracketStack.push(bracket);
         }
         else
         {
             // Closing bracket.
-            if (bracketStack.empty())
+            if (openingBracketStack.empty())
                 return false;
 
-            const auto candidateMatchingBracket = bracketStack.top();
+            const auto candidateMatchingBracket = openingBracketStack.top();
             switch (bracket)
             {
                 case '}':
@@ -42,16 +42,18 @@ bool isBalanced(const string& bracketString)
                     assert(false);
             }
             // Matched - pop the matching opening bracket off the stack.
-            bracketStack.pop();
+            openingBracketStack.pop();
 
         }
     }
     
-    return bracketStack.empty();
+    // To be balanced, there must be no opening brackets remaining on the stack.
+    return openingBracketStack.empty();
 }
 
 int main()
 {
+    // Trivially easy (though I missed an important case initially XD); hopefully the code is self-explanatory :)
     int n;
     cin >> n;
 
