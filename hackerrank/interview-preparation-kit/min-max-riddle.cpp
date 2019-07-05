@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <algorithm>
+
+#include <cassert>
 
 using namespace std;
 
@@ -22,6 +25,68 @@ vector<int> solveBruteForce(const vector<int>& arr)
     return results;
 }
 
+vector<int> findIndexOfNextLowerThan(const vector<int>& heights)
+{
+    std::stack<int> buildingHeightIndices;
+    const int n = heights.size();
+
+    vector<int> indexOfNextLowerThan(n, -1);
+
+    for (int index = 0; index < n; index++)
+    {
+        while (!buildingHeightIndices.empty() && heights[buildingHeightIndices.top()] > heights[index])
+        {
+            indexOfNextLowerThan[buildingHeightIndices.top()] = index;
+            buildingHeightIndices.pop();
+        }
+        buildingHeightIndices.push(index);
+    }
+
+    return indexOfNextLowerThan;
+}
+vector<int> findIndexOfPrevLowerThan(const vector<int>& heights)
+{
+    // Leave the heavy-lifting to findIndexOfNextLowerThan after passing it
+    // a reversed copy of heights.
+    const int n = heights.size();
+    const vector<int> reversedHeights(heights.rbegin(), heights.rend());
+    auto indexOfPrevLowerThan = findIndexOfNextLowerThan(reversedHeights);
+
+    // Correct for the fact that we gave findIndexOfNextLowerThan a reversed version 
+    // of heights: Reverse order indexOfPrevLowerThan, and also "reverse" (flip from 
+    // left to right) each index.
+    for (auto& index : indexOfPrevLowerThan)
+    {
+        if (index != -1)
+            index = (n - 1) - index;
+    }
+    reverse(indexOfPrevLowerThan.begin(), indexOfPrevLowerThan.end());
+
+    return indexOfPrevLowerThan;
+}
+
+
+vector<int> solveOptimised(const vector<int>& arr)
+{
+    const int n = arr.size();
+    vector<int> results;
+
+    const auto indexOfNextLowerThan = findIndexOfNextLowerThan(arr);
+    const auto indexOfPrevLowerThan = findIndexOfPrevLowerThan(arr);
+
+
+    for (int index = 0; index < n; index++)
+    {
+        const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
+        const int64_t distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
+        const int64_t lengthOfRangeWhereWeAreMin = distanceToLeftWhereWeAreMin 
+            + 1  // Include this building!
+            + distanceToRightWhereWeAreMin;
+    }
+
+    return results;
+}
+
 int main()
 {
     int n;
@@ -40,4 +105,13 @@ int main()
         cout << x << " ";
     }
     cout << endl;
+
+    const auto solutionOptimised = solveOptimised(arr);
+    cout << "optimised solution: ";
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    assert(solutionOptimised == solutionBruteForce);
 }
