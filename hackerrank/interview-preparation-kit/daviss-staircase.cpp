@@ -18,13 +18,13 @@ int64_t findNumWaysToClimbStairs(int numStairs, vector<int64_t>& numWaysToClimbS
 
 
     int64_t numWays = 0;
-    for (int numStairsToClimb = 1; numStairsToClimb <= 3; numStairsToClimb++)
+    for (int numStairsInOneGo = 1; numStairsInOneGo <= 3; numStairsInOneGo++)
     {
-        if (numStairs < numStairsToClimb)
+        if (numStairs < numStairsInOneGo)
         {
             break;
         }
-        numWays += findNumWaysToClimbStairs(numStairs - numStairsToClimb, numWaysToClimbStairsLookup);
+        numWays += findNumWaysToClimbStairs(numStairs - numStairsInOneGo, numWaysToClimbStairsLookup);
         numWays %= ::modulus;
     }
 
