@@ -108,6 +108,57 @@ vector<int> findMaxMinsForWindowSizes(const vector<int>& arr)
 
 int main(int argc, char* argv[])
 {
+    // Fairly easy one.  Imagine if, for each element x, we could find the size
+    // of the range surrounding x such  that x has the minimum value in that range 
+    // (lengthOfRangeWhereElementIsMin): this is easily accomplished in O(n) using
+    // indexOfPrevLowerThan/ indexOfNextLowerThan, which are copy-and-pasted from
+    // the "Largest Rectangle" challenge.  Store x and its corresponding lengthOfRangeWhereElementIsMin
+    // in the elementInfos array.
+    //
+    // Set maxMinsForWindowSizes to be an array of n values (well - n + 1) all initially set to 0.
+    // To get maxMinsForWindowSizes to be correct, and so solve the problem, the following pseudocode
+    // would do - it uses the fact that since element x has a range of lengthOfRangeWhereElementIsMin(x)
+    // where x is minimum, then all the windows sizes
+    //
+    //    w = 1, 2, .... lengthOfRangeWhereElementIsMin(x) 
+    //
+    // have maxMinsForWindowSizes[w] >= x:
+    //
+    //    for elementInfo in elementInfos:
+    //       for windowSize = 1, 2, ..., elementInfo.lengthOfRangeWhereElementIsMin:
+    //          maxMinsForWindowSizes[windowSize] = max(maxMinsForWindowSizes[windowSize], elementInfo.value)
+    //
+    // Easy-peasy, but unfortunately this is O(n^2) - there are O(n) elementInfos, and each can cause lengthOfRangeWhereElementIsMin
+    // iterations of the inner loop, and O(lengthOfRangeWhereElementIsMin) == o(n) :/
+    //
+    // Fear not, though: let's instead sort the element infos by decreasing value, and then (if two values are the same), by decreasing
+    // lengthOfRangeWhereElementIsMin.  Let us also now count windowSize backwards down to 1.  Hopefully it's clear
+    // that the following pseudocode accomplishes the same as the above:
+    //
+    //    for elementInfo in (sorted) elementInfos:
+    //       for windowSize = elementInfo.lengthOfRangeWhereElementIsMin, elementInfo.lengthOfRangeWhereElementIsMin -1, ... , 1.
+    //          maxMinsForWindowSizes[windowSize] = max(maxMinsForWindowSizes[windowSize], elementInfo.value)
+    //
+    // No gain there, alas.  But wait: imagine, when we were counting down our windowSize, we encountered a maxMinsForWindowSizes[windowSize]
+    // which has already been set.  We could *stop counting down windowSize* immediately: if maxMinsForWindowSizes[windowSize] has been set,
+    // then so has windowSize - 1, windowSize - 2, ... , 1 and moreover, it was set by an "earlier" elementInfo in our sorted elementInfos
+    // i.e. by a previous element info whose value was at least equal to our current value.  Thus, maxMinsForWindowSizes[windowSize],
+    // maxMinsForWindowSizes[windowSize - 1], ... maxMinsForWindowSizes[1] are already >= elementInfo.value, so 
+    // the "maxMinsForWindowSizes[windowSize] = max(..." part of the algorithm would be a no-op, so no point continuing.  Thus
+    // the following pseudocode is equivalent to the original:
+    //
+    //    for elementInfo in (sorted) elementInfos:
+    //       for windowSize = elementInfo.lengthOfRangeWhereElementIsMin, elementInfo.lengthOfRangeWhereElementIsMin -1, ... , 1.
+    //          if maxMinsForWindowSizes[windowSize] is already set:
+    //             break
+    //          maxMinsForWindowSizes[windowSize] = max(maxMinsForWindowSizes[windowSize], elementInfo.value)
+    //
+    // But now, each iteration of the inner (windowSize) loop now either: sets an element of maxMinsForWindowSizes for the first time
+    // (can only happen O(n) times), or stops iterating; thus, its total contribution to the whole runtime, over all elementInfos,
+    // is now O(n) instead of O(n^2).
+    //
+    // And that will do - finding each elementInfo.lengthOfRangeWhereElementIsMin takes O(n); sorting elementInfos takes O(n log2 n);
+    // and finally updating maxMinsForWindowSizes takes O(n), so just O(n log2 n) in total.   Hooray!
     int n;
     cin >> n;
 
