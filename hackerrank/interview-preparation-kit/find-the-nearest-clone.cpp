@@ -63,12 +63,12 @@ struct Node
     DistinctSourceInfo nextDistinctSourceInfo;
 };
 
-int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
+int findNearestClone(vector<Node>& nodes, int cloneColour)
 {
     vector<Node*> nodesToExplore;
     for (auto& node : nodes)
     {
-        if (node.colour == colourToSolveFor)
+        if (node.colour == cloneColour)
         {
             nodesToExplore.push_back(&node);
             node.distinctSourceInfo.distinctSources = {&node};
@@ -81,7 +81,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         vector<Node*> nextNodesToExplore;
         for (auto node : nodesToExplore)
         {
-            if (node->colour == colourToSolveFor && node->distinctSourceInfo.distinctSources.size() > 1)
+            if (node->colour == cloneColour && node->distinctSourceInfo.distinctSources.size() > 1)
             {
                 return numIterations;
             }
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
     }
     assert(cin);
 
-    const int colourToSolveFor = readInt();
+    const int cloneColour = readInt();
 
-    cout << solveOptimised(nodes, colourToSolveFor) << endl;
+    cout << findNearestClone(nodes, cloneColour) << endl;
 }
