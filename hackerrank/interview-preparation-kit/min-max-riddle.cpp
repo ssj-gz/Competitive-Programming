@@ -25,35 +25,35 @@ vector<int> solveBruteForce(const vector<int>& arr)
     return results;
 }
 
-vector<int> findIndexOfNextLowerThan(const vector<int>& heights)
+vector<int> findIndexOfNextLowerThan(const vector<int>& arr)
 {
-    std::stack<int> buildingHeightIndices;
-    const int n = heights.size();
+    std::stack<int> indices;
+    const int n = arr.size();
 
     vector<int> indexOfNextLowerThan(n, -1);
 
     for (int index = 0; index < n; index++)
     {
-        while (!buildingHeightIndices.empty() && heights[buildingHeightIndices.top()] > heights[index])
+        while (!indices.empty() && arr[indices.top()] > arr[index])
         {
-            indexOfNextLowerThan[buildingHeightIndices.top()] = index;
-            buildingHeightIndices.pop();
+            indexOfNextLowerThan[indices.top()] = index;
+            indices.pop();
         }
-        buildingHeightIndices.push(index);
+        indices.push(index);
     }
 
     return indexOfNextLowerThan;
 }
-vector<int> findIndexOfPrevLowerThan(const vector<int>& heights)
+vector<int> findIndexOfPrevLowerThan(const vector<int>& arr)
 {
     // Leave the heavy-lifting to findIndexOfNextLowerThan after passing it
-    // a reversed copy of heights.
-    const int n = heights.size();
-    const vector<int> reversedHeights(heights.rbegin(), heights.rend());
+    // a reversed copy of arr.
+    const int n = arr.size();
+    const vector<int> reversedHeights(arr.rbegin(), arr.rend());
     auto indexOfPrevLowerThan = findIndexOfNextLowerThan(reversedHeights);
 
     // Correct for the fact that we gave findIndexOfNextLowerThan a reversed version 
-    // of heights: Reverse order indexOfPrevLowerThan, and also "reverse" (flip from 
+    // of arr: Reverse order indexOfPrevLowerThan, and also "reverse" (flip from 
     // left to right) each index.
     for (auto& index : indexOfPrevLowerThan)
     {
@@ -80,7 +80,7 @@ vector<int> solveOptimised(const vector<int>& arr)
         const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index] - 1);
         const int64_t distanceToRightWhereWeAreMin = (indexOfNextLowerThan[index] == -1 ? n - 1 - index : indexOfNextLowerThan[index] - index - 1);
         const int64_t lengthOfRangeWhereWeAreMin = distanceToLeftWhereWeAreMin 
-            + 1  // Include this building!
+            + 1  // Include this element!
             + distanceToRightWhereWeAreMin;
     }
 
