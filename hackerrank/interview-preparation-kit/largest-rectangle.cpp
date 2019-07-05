@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-04-05
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -44,11 +51,11 @@ vector<int> findIndexOfNextLowerThan(const vector<int>& heights)
 
     for (int index = 0; index < n; index++)
     {
-        cout << " findIndexOfNextLowerThan: index: " << index << " buildingHeightIndices.size(): " << buildingHeightIndices.size() << endl;
+        //cout << " findIndexOfNextLowerThan: index: " << index << " buildingHeightIndices.size(): " << buildingHeightIndices.size() << endl;
         while (!buildingHeightIndices.empty() && heights[buildingHeightIndices.top()] > heights[index])
         {
             indexOfNextLowerThan[buildingHeightIndices.top()] = index;
-            cout << " Did an assignment to " << buildingHeightIndices.top() << " of " << index  << endl;
+            //cout << " Did an assignment to " << buildingHeightIndices.top() << " of " << index  << endl;
             buildingHeightIndices.pop();
         }
         buildingHeightIndices.push(index);
@@ -76,7 +83,7 @@ int64_t solveOptimised(const vector<int>& heights)
 
     for (int index = 0; index < n; index++)
     {
-        cout << "index: " << index << " height: " << heights[index] << " indexOfNextLowerThan: " << indexOfNextLowerThan[index] << " indexOfPrevLowerThan: " << indexOfPrevLowerThan[index] << endl;
+        //cout << "index: " << index << " height: " << heights[index] << " indexOfNextLowerThan: " << indexOfNextLowerThan[index] << " indexOfPrevLowerThan: " << indexOfPrevLowerThan[index] << endl;
         assert(indexOfNextLowerThan[index] == -1 || indexOfNextLowerThan[index] > index);
         assert(indexOfPrevLowerThan[index] == -1 || indexOfPrevLowerThan[index] < index);
         const int64_t distanceToLeftWhereWeAreMin = (indexOfPrevLowerThan[index] == -1 ? index : index - indexOfPrevLowerThan[index]);
@@ -119,9 +126,15 @@ int main(int argc, char* argv[])
         cin >> heights[i];
     }
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(heights);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(heights);
     cout << "solutionOptimised: " << solutionOptimised << endl;
+    assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = solveOptimised(heights);
+    cout << solutionOptimised << endl;
+#endif
 }
 
