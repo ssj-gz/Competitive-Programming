@@ -46,7 +46,8 @@ bool isBalanced(const string& bracketString)
 
         }
     }
-    return true;
+    
+    return bracketStack.empty();
 }
 
 int main()
