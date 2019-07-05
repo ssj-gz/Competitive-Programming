@@ -73,6 +73,16 @@ int64_t findLargestRectangle(const vector<int>& heights)
 
 int main(int argc, char* argv[])
 {
+    // Easy one: for each building B, we answer the question: what is the largest range, containing
+    // B, where this heights[B] is the minimum height out of all buildings in that range?
+    // If the range has length L, then the largest rectangle for that range is heights[B] x L.
+    // Doing this for all buildings B and finding the largest rectangle gives us the result we
+    // want.
+    //
+    // Finding the largest range where heights[B] is minimum is trivial, and involves finding the height
+    // index l < B such that heights[l] < B and the lowest index r > B such that heights[r] < B - this
+    // is easily done with a stack - see indexOfNextLowerThan for more details - hopefully the code is self-explanatory :)
+    // (indexOfPrevLowerThan just delegates to indexOfNextLowerThan with a "flipped" version of the heights).
     int n;
     cin >> n;
 
