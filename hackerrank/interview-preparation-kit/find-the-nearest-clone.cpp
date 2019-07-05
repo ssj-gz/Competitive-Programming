@@ -17,13 +17,13 @@ struct Node
 
     bool shouldReExploreAfterVisitFrom(Node* visitor)
     {
-        if (distinctSourceInfo.numDistinctSources > 1)
+        if (distinctSourceInfo.distinctSources.size() > 1)
             return false;
-        for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
+        for (int i = 0; i < visitor->distinctSourceInfo.distinctSources.size(); i++)
         {
             bool hasSourceAlready = false;
             auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
-            for (int j = 0; j < distinctSourceInfo.numDistinctSources; j++)
+            for (int j = 0; j < distinctSourceInfo.distinctSources.size(); j++)
             {
                 if (visitorSource == distinctSourceInfo.distinctSources[j].node)
                 {
@@ -43,21 +43,20 @@ struct Node
     };
     struct DistinctSourceInfo
     {
-        int numDistinctSources = 0;
-        DistinctSource distinctSources[2] = {};
+        vector<DistinctSource> distinctSources;
 
         void incorporateSourcesFrom(Node* visitor)
         {
-            if (numDistinctSources > 1)
+            if (distinctSources.size() > 1)
             {
                 // Already have all the sources we need.
                 return;
             }
-            for (int i = 0; i < visitor->distinctSourceInfo.numDistinctSources; i++)
+            for (int i = 0; i < visitor->distinctSourceInfo.distinctSources.size(); i++)
             {
                 bool hasSourceAlready = false;
                 auto visitorSource = visitor->distinctSourceInfo.distinctSources[i].node;
-                for (int j = 0; j < numDistinctSources; j++)
+                for (int j = 0; j < distinctSources.size(); j++)
                 {
                     if (visitorSource == distinctSources[j].node)
                     {
@@ -67,8 +66,7 @@ struct Node
                 }
                 if (!hasSourceAlready)
                 {
-                    distinctSources[numDistinctSources].node = visitorSource;
-                    numDistinctSources++;
+                    distinctSources.push_back({visitorSource});
                 }
             }
         }
@@ -88,8 +86,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         if (node.colour == colourToSolveFor)
         {
             nodesToExplore.push_back(&node);
-            node.distinctSourceInfo.numDistinctSources = 1;
-            node.distinctSourceInfo.distinctSources[0].node = &node;
+            node.distinctSourceInfo.distinctSources = {{&node}};
         }
     }
 
@@ -99,7 +96,7 @@ int solveOptimised(vector<Node>& nodes, int colourToSolveFor)
         vector<Node*> nextNodesToExplore;
         for (auto node : nodesToExplore)
         {
-            if (node->colour == colourToSolveFor && node->distinctSourceInfo.numDistinctSources > 1)
+            if (node->colour == colourToSolveFor && node->distinctSourceInfo.distinctSources.size() > 1)
             {
                 return numIterations;
             }
