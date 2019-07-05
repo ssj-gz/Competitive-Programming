@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-05-04
 #include <iostream>
 #include <stack>
 
