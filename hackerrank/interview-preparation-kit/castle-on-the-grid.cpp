@@ -39,7 +39,6 @@ int main()
     int goalX, goalY;
     cin >> goalX >> goalY;
 
-
     auto canMoveTo = [&grid](const int x, const int y)
     {
         if (y < 0 || y >= grid.size())
@@ -49,8 +48,8 @@ int main()
         return (grid[y][x] == '.');
     };
 
-    //const Coord startCoord = { startX, startY };
-    //const Coord goalCoord = { goalX, goalY };
+    // *Sigh* - looks like the X/Y in the Problem Description 
+    // are actually Row/Col (!)
     const Coord startCoord = { startY, startX };
     const Coord goalCoord = { goalY, goalX };
 
@@ -61,11 +60,9 @@ int main()
     bool found = false;
     while (!coordsToExplore.empty() && !found)
     {
-        //cout << "iteration: " << numIterations << endl;
         vector<Coord> nextCoordsToExplore;
         for (const auto& coord : coordsToExplore)
         {
-            //cout << " coord: " << coord.x << "," << coord.y << endl;
             if (coord == goalCoord)
             {
                 found = true;
@@ -75,17 +72,17 @@ int main()
             const pair<int, int> directions[] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
             for (const auto direction : directions)
             {
-                int x = coord.x;
-                int y = coord.y;
                 const int dx = direction.first;
                 const int dy = direction.second;
+                j
+                int x = coord.x;
+                int y = coord.y;
 
                 while (canMoveTo(x + dx, y + dy))
                 {
                     x += dx;
                     y += dy;
                     const Coord coordAfterMove = { x, y };
-                    //cout << " coordAfterMove: " << coordAfterMove.x << "," << coordAfterMove.y << endl;
                     if (visitedCoords.find(coordAfterMove) == visitedCoords.end())
                     {
                         visitedCoords.insert(coordAfterMove);
@@ -97,8 +94,8 @@ int main()
         }
         if (!found)
         {
-        coordsToExplore = nextCoordsToExplore;
-        numIterations++;
+            coordsToExplore = nextCoordsToExplore;
+            numIterations++;
         }
     }
 
