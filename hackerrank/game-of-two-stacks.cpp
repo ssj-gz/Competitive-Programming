@@ -28,8 +28,6 @@ int main()
         {
             cin >> b[i];
         }
-        reverse(a.begin(), a.end());
-        reverse(b.begin(), b.end());
 
         int indexTakenFromB = m - 1;
         int64_t sumTakenFromB = 0;
@@ -54,6 +52,7 @@ int main()
                 const int numMoves = numTakenFromA + (indexTakenFromB + 1);
                 largestNumMoves = max(largestNumMoves, numMoves);
             }
+            numTakenFromA++;
         }
         cout << largestNumMoves << endl;
     }
