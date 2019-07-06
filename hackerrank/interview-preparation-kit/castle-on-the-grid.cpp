@@ -61,11 +61,11 @@ int main()
     bool found = false;
     while (!coordsToExplore.empty() && !found)
     {
-        cout << "iteration: " << numIterations << endl;
+        //cout << "iteration: " << numIterations << endl;
         vector<Coord> nextCoordsToExplore;
         for (const auto& coord : coordsToExplore)
         {
-            cout << " coord: " << coord.x << "," << coord.y << endl;
+            //cout << " coord: " << coord.x << "," << coord.y << endl;
             if (coord == goalCoord)
             {
                 found = true;
@@ -87,7 +87,7 @@ int main()
                 }
 
                 const Coord coordAfterMove = { x, y };
-                cout << " coordAfterMove: " << coordAfterMove.x << "," << coordAfterMove.y << endl;
+                //cout << " coordAfterMove: " << coordAfterMove.x << "," << coordAfterMove.y << endl;
                 if (visitedCoords.find(coordAfterMove) == visitedCoords.end())
                 {
                     visitedCoords.insert(coordAfterMove);
