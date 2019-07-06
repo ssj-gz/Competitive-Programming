@@ -84,15 +84,15 @@ int main()
                 {
                     x += dx;
                     y += dy;
+                    const Coord coordAfterMove = { x, y };
+                    //cout << " coordAfterMove: " << coordAfterMove.x << "," << coordAfterMove.y << endl;
+                    if (visitedCoords.find(coordAfterMove) == visitedCoords.end())
+                    {
+                        visitedCoords.insert(coordAfterMove);
+                        nextCoordsToExplore.push_back(coordAfterMove);
+                    }
                 }
 
-                const Coord coordAfterMove = { x, y };
-                //cout << " coordAfterMove: " << coordAfterMove.x << "," << coordAfterMove.y << endl;
-                if (visitedCoords.find(coordAfterMove) == visitedCoords.end())
-                {
-                    visitedCoords.insert(coordAfterMove);
-                    nextCoordsToExplore.push_back(coordAfterMove);
-                }
             }
         }
         if (!found)
