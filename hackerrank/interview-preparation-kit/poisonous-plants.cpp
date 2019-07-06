@@ -53,56 +53,62 @@ int solveBruteForce(const vector<int>& pVec)
 
     return day - 1;
 }
-int solveOptimised(const vector<int>& p)
+int solveOptimised(const vector<int>& pOrig)
 {
+    vector<int> p(pOrig);
     struct ElementInfo
     {
         int value = -1;
         int killsAt = 0;
         int killedAt = 0;
     };
-    vector<ElementInfo> blah;
+    vector<ElementInfo> killerStack;
     int previousValue = -1;
     int stackKillsOnDay = 1;
     int result = 0;
 
     int index = 0;
+    // Stick the first element on the stack: it hasn't killed yet,
+    // and can never be killed.
+    killerStack.push_back({p.front(), 0, 0});
+    p.erase(p.begin());
+
     for (const auto x : p)
     {
         cout << "index: " << index << " x: " << x << " previousValue: " << previousValue << " stackKillsOnDay: " << stackKillsOnDay << " result: " << result << " stack: " << endl;
-        for (const auto s : blah)
+        for (const auto s : killerStack)
         {
             cout << s.value << "[" << s.killsAt << "," << s.killedAt << "]" << " ";
         }
         cout << endl;
+        assert(!killerStack.empty());
 
-        if (blah.empty())
+        while (!killerStack.empty() && x <= killerStack.back().value)
         {
-            blah.push_back({x, 0, 0});
+            // We're lower than the current "killer" value, so cannot be killed yet;
+            // unwind the stack of all that are now to be killed.
+            // Do them in continuous blocks of all elements that die on the same day.
+            const int topKilledAt = killerStack.back().killedAt;
+            while (!killerStack.empty() && killerStack.back().killedAt == topKilledAt)
+            {
+                killerStack.pop_back();
+            }
+        }
+        if (!killerStack.empty() && x > killerStack.back().value)
+        {
+            // Put us on the stack as the new killer, but note that we will be killed
+            // soon.
+            // Update the previous killer's "killsAt" to reflect when it will kill us.
+            killerStack.back().killsAt++;
+            result = max(result, killerStack.back().killsAt);
+            killerStack.push_back({x, 0, killerStack.back().killsAt});
         }
         else
         {
-            while (!blah.empty() && x <= blah.back().value)
-            {
-                const int topKilledAt = blah.back().killedAt;
-                cout << " removing killed at from stack : " << topKilledAt << endl;
-                while (!blah.empty() && blah.back().killedAt == topKilledAt)
-                {
-                    blah.pop_back();
-                }
-            }
-            if (!blah.empty() && x > blah.back().value)
-            {
-                blah.back().killsAt++;
-                result = max(result, blah.back().killsAt);
-                blah.push_back({x, 0, blah.back().killsAt});
-            }
-            else
-            {
-                blah.push_back({x, 0, 0});
-            }
-
+            // We cannot be killed, and are the new killer.
+            killerStack.push_back({x, 0, 0});
         }
+
         previousValue = x;
         index++;
 
