@@ -13,11 +13,10 @@ int main()
     // is an equivalence relation, and so partitions the people into disjoint components.  
     // Merging two communities can be accomplished in O(lg2 N)  using the well-known 
     // Disjoint Set Union algorithm, so we can process all queries in O(Q log2 N).
-    int numDistinctPersons;
-    cin >> numDistinctPersons;
-
-    int numQueries;
-    cin >> numQueries;
+    auto readInt = [](){ int x; cin >> x; assert(cin); return x; };
+            
+    const int numDistinctPersons = readInt();
+    const int numQueries = readInt();
 
     struct Component
     {
@@ -39,14 +38,8 @@ int main()
 
         if (queryType == 'M')
         {
-            int personId1;
-            cin >> personId1;
-            int personId2;
-            cin >> personId2;
-
-            personId1--;
-            personId2--;
-
+            const int personId1 = readInt() - 1;
+            const int personId2 = readInt() - 1;
 
             const auto componentPerson1 = componentForPersonId[personId1];
             const auto componentPerson2 = componentForPersonId[personId2];
@@ -69,9 +62,7 @@ int main()
         }
         else if (queryType == 'Q')
         {
-            int personId;
-            cin >> personId;
-            personId--;
+            const int personId = readInt() - 1;
 
             cout << componentForPersonId[personId]->personIdsInComponent.size() << endl;
         }
