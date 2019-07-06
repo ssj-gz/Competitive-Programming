@@ -1,6 +1,7 @@
 // Simon St James (ssjgz) - 2019-04-06
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <algorithm>
 
 #include <cassert>
@@ -55,10 +56,13 @@ int main()
         }
 
         // Take every element in B, initially.
-        int indexTakenFromB = m - 1;
         int64_t sumTakenFromB = 0;
+        stack<int> takenFromBStack;
         for (const auto bElement : b)
+        {
             sumTakenFromB += bElement;
+            takenFromBStack.push(bElement);
+        }
 
 
         // A bit of a hack to make the case where we choose no elements
@@ -71,16 +75,16 @@ int main()
         for (const auto aElement : a)
         {
             sumTakenFromA += aElement;
-            while (indexTakenFromB != -1 && (sumTakenFromA + sumTakenFromB > limit))
+            while (!takenFromBStack.empty() && (sumTakenFromA + sumTakenFromB > limit))
             {
                 // Winnow the amount taken from B down so we are below the limit.
-                sumTakenFromB -= b[indexTakenFromB];
-                indexTakenFromB--;
+                sumTakenFromB -= takenFromBStack.top();
+                takenFromBStack.pop();
             }
             if (sumTakenFromA + sumTakenFromB <= limit)
             {
                 // This is a valid sequence of moves: update largestNumMoves.
-                const int numTakenFromB = (indexTakenFromB + 1);
+                const int numTakenFromB = takenFromBStack.size();
                 const int numMoves = numTakenFromA + numTakenFromB;
                 largestNumMoves = max(largestNumMoves, numMoves);
             }
