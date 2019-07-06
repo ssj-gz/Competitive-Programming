@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-04-06
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -63,11 +70,8 @@ int solveOptimised(const vector<int>& pOrig)
         int killedAt = 0;
     };
     vector<ElementInfo> killerStack;
-    int previousValue = -1;
-    int stackKillsOnDay = 1;
     int result = 0;
 
-    int index = 0;
     // Stick the first element on the stack: it hasn't killed yet,
     // and can never be killed.
     killerStack.push_back({p.front(), 0, 0});
@@ -75,12 +79,12 @@ int solveOptimised(const vector<int>& pOrig)
 
     for (const auto x : p)
     {
-        cout << "index: " << index << " x: " << x << " previousValue: " << previousValue << " stackKillsOnDay: " << stackKillsOnDay << " result: " << result << " stack: " << endl;
-        for (const auto s : killerStack)
-        {
-            cout << s.value << "[" << s.killsAt << "," << s.killedAt << "]" << " ";
-        }
-        cout << endl;
+        //cout << "index: " << index << " x: " << x << " previousValue: " << previousValue << " stackKillsOnDay: " << stackKillsOnDay << " result: " << result << " stack: " << endl;
+        //for (const auto s : killerStack)
+        //{
+            //cout << s.value << "[" << s.killsAt << "," << s.killedAt << "]" << " ";
+        //}
+        //cout << endl;
         assert(!killerStack.empty());
 
         while (!killerStack.empty() && x <= killerStack.back().value)
@@ -109,8 +113,6 @@ int solveOptimised(const vector<int>& pOrig)
             killerStack.push_back({x, 0, 0});
         }
 
-        previousValue = x;
-        index++;
 
     }
     return result;
@@ -147,11 +149,16 @@ int main(int argc, char* argv[])
         cin >> p[i];
     }
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(p);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(p);
     cout << "solutionOptimised: " << solutionOptimised << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = solveOptimised(p);
+    cout << solutionOptimised << endl;
+#endif
 }
 
 
