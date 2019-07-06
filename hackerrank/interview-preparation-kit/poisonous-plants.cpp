@@ -82,7 +82,16 @@ int solveOptimised(const vector<int>& p)
         }
         else
         {
-            if (x > blah.back().value)
+            while (!blah.empty() && x <= blah.back().value)
+            {
+                const int topKilledAt = blah.back().killedAt;
+                cout << " removing killed at from stack : " << topKilledAt << endl;
+                while (!blah.empty() && blah.back().killedAt == topKilledAt)
+                {
+                    blah.pop_back();
+                }
+            }
+            if (!blah.empty() && x > blah.back().value)
             {
                 blah.back().killsAt++;
                 result = max(result, blah.back().killsAt);
@@ -90,25 +99,7 @@ int solveOptimised(const vector<int>& p)
             }
             else
             {
-                while (!blah.empty() && x <= blah.back().value)
-                {
-                    const int topKilledAt = blah.back().killedAt;
-                    cout << " removing killed at from stack : " << topKilledAt << endl;
-                    while (!blah.empty() && blah.back().killedAt == topKilledAt)
-                    {
-                        blah.pop_back();
-                    }
-                }
-                if (!blah.empty() && x > blah.back().value)
-                {
-                    blah.back().killsAt++;
-                    result = max(result, blah.back().killsAt);
-                    blah.push_back({x, 0, blah.back().killsAt});
-                }
-                else
-                {
-                    blah.push_back({x, 0, 0});
-                }
+                blah.push_back({x, 0, 0});
             }
 
         }
