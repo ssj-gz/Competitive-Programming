@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-04-06
 #include <iostream>
 #include <vector>
 #include <set>
@@ -77,6 +78,10 @@ int findShortestPathToGoal(const vector<string>& grid, const Coord& startCoord, 
 
 int main()
 {
+    // Trivially easy - just do a bread-first search.
+    // A spanner in the works is that there is some confusion
+    // as to whether the "X/Y" coords are really X/Y or
+    // "Row/Col" - treating them as the latter seems to work!
     int n;
     cin >> n;
 
