@@ -21,24 +21,8 @@ bool operator==(const Coord& lhs, const Coord& rhs)
     return (lhs.x == rhs.x) && (lhs.y == rhs.y);
 }
 
-int main()
+int findShortestPathToGoal(const vector<string>& grid, const Coord& startCoord, const Coord& goalCoord)
 {
-    int n;
-    cin >> n;
-
-    vector<string> grid(n);
-
-    for (int i = 0; i < n; i++)
-    {
-        cin >> grid[i];
-    }
-
-    int startX, startY;
-    cin >> startX >> startY;
-
-    int goalX, goalY;
-    cin >> goalX >> goalY;
-
     auto canMoveTo = [&grid](const int x, const int y)
     {
         if (y < 0 || y >= grid.size())
@@ -48,15 +32,10 @@ int main()
         return (grid[y][x] == '.');
     };
 
-    // *Sigh* - looks like the X/Y in the Problem Description 
-    // are actually Row/Col (!)
-    const Coord startCoord = { startY, startX };
-    const Coord goalCoord = { goalY, goalX };
-
     set<Coord> visitedCoords = { startCoord };
     vector<Coord> coordsToExplore = { startCoord };
 
-    int numIterations = 0;
+    int numMoves = 0;
     bool found = false;
     while (!coordsToExplore.empty() && !found)
     {
@@ -74,7 +53,6 @@ int main()
             {
                 const int dx = direction.first;
                 const int dy = direction.second;
-                j
                 int x = coord.x;
                 int y = coord.y;
 
@@ -95,10 +73,37 @@ int main()
         if (!found)
         {
             coordsToExplore = nextCoordsToExplore;
-            numIterations++;
+            numMoves++;
         }
     }
 
-    cout << numIterations << endl;
+    return numMoves;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<string> grid(n);
+
+    for (int i = 0; i < n; i++)
+    {
+        cin >> grid[i];
+    }
+
+    int startX, startY;
+    cin >> startX >> startY;
+
+    int goalX, goalY;
+    cin >> goalX >> goalY;
+
+    // *Sigh* - looks like the X/Y in the Problem Description 
+    // are actually Row/Col (!)
+    const Coord startCoord = { startY, startX };
+    const Coord goalCoord = { goalY, goalX };
+
+
+    cout << findShortestPathToGoal(grid, startCoord, goalCoord) << endl;
 }
 
