@@ -36,16 +36,14 @@ int findShortestPathToGoal(const vector<string>& grid, const Coord& startCoord, 
     vector<Coord> coordsToExplore = { startCoord };
 
     int numMoves = 0;
-    bool found = false;
-    while (!coordsToExplore.empty() && !found)
+    while (!coordsToExplore.empty())
     {
         vector<Coord> nextCoordsToExplore;
         for (const auto& coord : coordsToExplore)
         {
             if (coord == goalCoord)
             {
-                found = true;
-                break;
+                return numMoves;
             }
 
             const pair<int, int> directions[] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
@@ -70,14 +68,11 @@ int findShortestPathToGoal(const vector<string>& grid, const Coord& startCoord, 
 
             }
         }
-        if (!found)
-        {
-            coordsToExplore = nextCoordsToExplore;
-            numMoves++;
-        }
+        coordsToExplore = nextCoordsToExplore;
+        numMoves++;
     }
 
-    return numMoves;
+    return -1;
 }
 
 int main()
