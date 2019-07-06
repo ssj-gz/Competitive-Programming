@@ -1,9 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 
 #include <list>
-
 #include <sys/time.h>
+#include <cassert>
 
 using namespace std;
 
@@ -52,6 +53,71 @@ int solveBruteForce(const vector<int>& pVec)
 
     return day - 1;
 }
+int solveOptimised(const vector<int>& p)
+{
+    struct ElementInfo
+    {
+        int value = -1;
+        int killsAt = 0;
+        int killedAt = 0;
+    };
+    vector<ElementInfo> blah;
+    int previousValue = -1;
+    int stackKillsOnDay = 1;
+    int result = 0;
+
+    int index = 0;
+    for (const auto x : p)
+    {
+        cout << "index: " << index << " x: " << x << " previousValue: " << previousValue << " stackKillsOnDay: " << stackKillsOnDay << " result: " << result << " stack: " << endl;
+        for (const auto s : blah)
+        {
+            cout << s.value << "[" << s.killsAt << "," << s.killedAt << "]" << " ";
+        }
+        cout << endl;
+
+        if (blah.empty())
+        {
+            blah.push_back({x, 0, 0});
+        }
+        else
+        {
+            if (x > blah.back().value)
+            {
+                blah.back().killsAt++;
+                result = max(result, blah.back().killsAt);
+                blah.push_back({x, 0, blah.back().killsAt});
+            }
+            else
+            {
+                while (!blah.empty() && x <= blah.back().value)
+                {
+                    const int topKilledAt = blah.back().killedAt;
+                    cout << " removing killed at from stack : " << topKilledAt << endl;
+                    while (!blah.empty() && blah.back().killedAt == topKilledAt)
+                    {
+                        blah.pop_back();
+                    }
+                }
+                if (!blah.empty() && x > blah.back().value)
+                {
+                    blah.back().killsAt++;
+                    result = max(result, blah.back().killsAt);
+                    blah.push_back({x, 0, blah.back().killsAt});
+                }
+                else
+                {
+                    blah.push_back({x, 0, 0});
+                }
+            }
+
+        }
+        previousValue = x;
+        index++;
+
+    }
+    return result;
+}
 
 int main(int argc, char* argv[])
 {
@@ -86,6 +152,9 @@ int main(int argc, char* argv[])
 
     const auto solutionBruteForce = solveBruteForce(p);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    const auto solutionOptimised = solveOptimised(p);
+    cout << "solutionOptimised: " << solutionOptimised << endl;
+    assert(solutionOptimised == solutionBruteForce);
 }
 
 
