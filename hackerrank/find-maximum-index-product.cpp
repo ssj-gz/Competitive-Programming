@@ -71,6 +71,10 @@ int64_t findMaxIndexProduct(const vector<int>& a)
 
 int main()
 {
+    // Trivially easy, if you've done Min Max Riddle (the heavy lifting
+    // is done by findIndexOfNextGreaterThan, which is copy-n-pasted,
+    // with minor modifications, from there!), of which this is a minor
+    // variant.
     int n;
     cin >> n;
 
