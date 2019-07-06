@@ -8,7 +8,11 @@ using namespace std;
 
 int main()
 {
-
+    // Easy one, and similar to a bunch of other challenges (Value of Friendship;
+    // Journey to the Moon; Friend Circle Queries etc) - membership in a community  
+    // is an equivalence relation, and so partitions the people into disjoint components.  
+    // Merging two communities can be accomplished in O(lg2 N)  using the well-known 
+    // Disjoint Set Union algorithm, so we can process all queries in O(Q log2 N).
     int numDistinctPersons;
     cin >> numDistinctPersons;
 
