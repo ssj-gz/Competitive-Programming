@@ -58,7 +58,7 @@ int64_t findMaxIndexProduct(const vector<int>& a)
     for (int i = 0; i < n; i++)
     {
         const int64_t left_i = indexOfPrevGreaterThan[i] + 1;
-        const int64_t right_i = indexOfPrevGreaterThan[i] + 1;
+        const int64_t right_i = indexOfNextGreaterThan[i] + 1;
 
         const int64_t indexProduct_i = left_i * right_i;
 
