@@ -48,8 +48,31 @@ vector<int> solveBruteForce(const vector<Node>& nodes, const vector<Node*>& quer
     return queryResults;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        const int n = (rand() % 1000) + 1;
+        const int numQueries = n;
+        const int maxColor = (rand() % 1000) + 1;
+        const int rootId = (rand() % n) + 1;
+
+        cout << n << " " << numQueries << " " << rootId << endl;
+        for (int i = 1; i <= n; i++)
+        {
+            cout << (i + 1) << " " << ((rand() % i) + 1) << endl;
+        }
+        for (int i = 0; i < n; i++)
+        {
+            cout << ((rand() % maxColor) + 1) << endl;
+        }
+        for (int i = 0; i < numQueries; i++)
+        {
+            cout << (i + 1) << endl;
+        }
+
+        return 0;
+    }
     int numNodes;
     cin >> numNodes;
 
