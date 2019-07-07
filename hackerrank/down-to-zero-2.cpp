@@ -21,9 +21,10 @@ int findMinDownToZero(int N, vector<int>& minDownToZeroLookup, const vector<vect
     minDownToZero = min(minDownToZero, 1 + findMinDownToZero(N - 1, minDownToZeroLookup, factorsLookup));
     for (const auto factor : factorsLookup[N])
     {
-        if (factor * factor > N)
-            break;
-
+        if (N / factor != max(N / factor, factor))
+        {
+            cout << "Shit: N: " << N << " factor: " << factor << endl;
+        }
         assert(N / factor == max(N / factor, factor));
         minDownToZero = min(minDownToZero, 1 + findMinDownToZero(N / factor, minDownToZeroLookup, factorsLookup));
     }
@@ -45,9 +46,9 @@ int main()
     minDownToZeroLookup[0] = 0;
 
     vector<vector<int>> factorsLookup(maxN);
-    for (int factor = 2; factor <= maxN; factor++)
+    for (int64_t factor = 2; factor <= maxN; factor++)
     {
-        for (int multiple = factor; multiple <= maxN; multiple += factor)
+        for (int64_t multiple = factor; multiple <= maxN; multiple += factor)
         {
             if (factor * factor <= multiple)
             {
