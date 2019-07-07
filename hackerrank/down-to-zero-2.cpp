@@ -30,6 +30,15 @@ int findMinDownToZero(int N, vector<int>& minDownToZeroLookup, const vector<vect
 
 int main()
 {
+    // I was a bit over-confident with this one XD
+    // It looks like a simple Dynamic Programming problem, but you need to be wary:
+    // the recursion step in findMinDownToZero includes the case where we
+    // subtract 1 from N and recurse, which for large N is prone to causing a stack
+    // overflow (and is very slow besides).  
+    // Instead, pre-compute all minDownToZeroLookup from the bottom-up
+    // which eliminates this possibility and makes things much more efficient.
+    //
+    // Not much else besides that - hopefully the comments explain the rest!
     int Q;
     cin >> Q;
 
@@ -54,9 +63,7 @@ int main()
         }
     }
 
-    // Precompute minDownToZeroLookup from bottom-up - top-down is less
-    // efficient and prone to stackoverflows, due to the "findMinDownToZero(N - 1, ... " branch
-    // of the computation.
+    // Precompute minDownToZeroLookup from bottom-up.
     for (int i = 1; i <= maxN; i++)
     {
         findMinDownToZero(i, minDownToZeroLookup, factorsLookup);
