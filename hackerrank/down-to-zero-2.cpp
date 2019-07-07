@@ -7,23 +7,42 @@
 
 using namespace std;
 
-int findMinDownToZero(int N, vector<int>& minDownToZeroLookup, const vector<vector<int>>& factorsLookup)
+struct Blah
 {
-    if (minDownToZeroLookup[N] != -1)
+    enum Action { SubtractOne, SetEqualToMaxProdand };
+
+    Action action = SubtractOne;
+
+    int prodand = -1;
+    int minMovesToZero = -1;
+};
+
+int findMinDownToZero(int N, vector<Blah>& minDownToZeroLookup, const vector<vector<int>>& factorsLookup)
+{
+    if (minDownToZeroLookup[N].minMovesToZero != -1)
     {
-        return minDownToZeroLookup[N];
+        return minDownToZeroLookup[N].minMovesToZero;
     }
 
     // The "subtract 1 from N" case.
     int minDownToZero = 1 + findMinDownToZero(N - 1, minDownToZeroLookup, factorsLookup);
+    Blah action;
     // The "reduce to largest of prodands in product equalling N" case.
     for (const auto factor : factorsLookup[N])
     {
         assert(N / factor == max(N / factor, factor));
-        minDownToZero = min(minDownToZero, 1 + findMinDownToZero(N / factor, minDownToZeroLookup, factorsLookup));
+        const int result = 1 + findMinDownToZero(N / factor, minDownToZeroLookup, factorsLookup);
+        if (result < minDownToZero)
+        {
+            action.action = Blah::SetEqualToMaxProdand;
+            action.prodand = N / factor;
+            minDownToZero = result;
+        }
     }
 
-    minDownToZeroLookup[N] = minDownToZero;
+    action.minMovesToZero = minDownToZero;
+
+    minDownToZeroLookup[N] = action;
 
     return minDownToZero;
 }
@@ -43,8 +62,8 @@ int main()
     cin >> Q;
 
     const int maxN = 1'000'000;
-    vector<int> minDownToZeroLookup(maxN + 1, -1);
-    minDownToZeroLookup[0] = 0;
+    vector<Blah> minDownToZeroLookup(maxN + 1);
+    minDownToZeroLookup[0].minMovesToZero = 0;
 
     // Compute list of factors for all N =  1 ... maxN using Sieve of 
     // Erastophenes.
@@ -77,6 +96,30 @@ int main()
 
         assert(N <= maxN);
 
-        cout << minDownToZeroLookup[N] << endl;
+        cout << minDownToZeroLookup[N].minMovesToZero << endl;
+
+        int movesMade = 0;
+        while (true)
+        {
+            cout << "N is now: " << N << " after making " << movesMade << " moves" << endl;
+            if (N == 0)
+            {
+                cout << "Done!" << endl;
+                break;
+            }
+            const auto thing = minDownToZeroLookup[N];
+            if (thing.action == Blah::SubtractOne)
+            {
+                cout << " subtract one" << endl;
+                N--;
+            }
+            else
+            {
+                cout << " N = " << thing.prodand << " x " << N / thing.prodand << " - set N to max of these (" << thing.prodand << ")" << endl;
+                N = thing.prodand;
+            }
+            movesMade++;
+
+        }
     }
 }
