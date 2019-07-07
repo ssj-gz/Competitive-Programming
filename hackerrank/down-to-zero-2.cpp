@@ -12,8 +12,8 @@ int findMinDownToZero(int N, vector<int>& minDownToZeroLookup)
     if (minDownToZeroLookup[N] != -1)
         return minDownToZeroLookup[N];
 
-    int minDownToZero = 1 + findMinDownToZero(N - 1, minDownToZeroLookup);
 
+    int minDownToZero = std::numeric_limits<int>::max();
     for (int factor = 2; factor * factor <= N; factor++)
     {
         if ((N % factor) != 0)
@@ -23,6 +23,8 @@ int findMinDownToZero(int N, vector<int>& minDownToZeroLookup)
 
         minDownToZero = min(minDownToZero, 1 + findMinDownToZero(N / factor, minDownToZeroLookup));
     }
+
+    minDownToZero = min(minDownToZero, 1 + findMinDownToZero(N - 1, minDownToZeroLookup));
 
     minDownToZeroLookup[N] = minDownToZero;
 
@@ -42,6 +44,10 @@ int main()
     {
         int N;
         cin >> N;
+        assert(cin);
+        cout << "N: " << N << endl;
+
+        assert(N <= maxN);
 
         cout << findMinDownToZero(N, minDownToZeroLookup) << endl;
     }
