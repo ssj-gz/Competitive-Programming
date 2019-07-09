@@ -68,6 +68,11 @@ class SimpleTrie
 
 int main()
 {
+    // Trivially easy, but I messed up my Trie implementation to begin with - 
+    // a kind of "off-by-one" error with which Node's "numOccurrences" got
+    // updated/ queried XD
+    //
+    // Apart from that - yep, just use a Trie.
     int n;
     cin >> n;
 
