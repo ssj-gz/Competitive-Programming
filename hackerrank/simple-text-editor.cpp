@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
         cout << ops.size() << endl;
         for (const auto& op : ops)
         {
-            cout << op.opType;
+            cout << op.opType << " ";
             if (op.opType == 1)
             {
                 cout << op.opArgString;
