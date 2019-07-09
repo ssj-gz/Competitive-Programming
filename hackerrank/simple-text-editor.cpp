@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 
         int sumOfCharsAdded = 0;
         int sumOfCharsRemoved = 0;
+        int stepsSinceCouldDoOtherThanPrint = 0;
 
         while (currentText.length() <= 500'000)
         {
@@ -96,6 +97,13 @@ int main(int argc, char* argv[])
                 allowableOpTypes.push_back(1);
             if (currentText.size() > 0)
                 allowableOpTypes.push_back(3);
+
+            if (allowableOpTypes == vector<int>{ 3 })
+            {
+                stepsSinceCouldDoOtherThanPrint++;
+                if (stepsSinceCouldDoOtherThanPrint > 10'000)
+                    break;
+            }
 
             const int opType = allowableOpTypes[rand() % allowableOpTypes.size()];
 
