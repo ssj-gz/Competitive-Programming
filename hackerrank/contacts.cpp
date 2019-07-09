@@ -78,6 +78,8 @@ int main()
 
     SimpleTrie contactsTrie;
 
+    auto readString = []() { string s; cin >> s; assert(cin); return s; };
+
     for (int i = 0; i < n; i++)
     {
         string command;
@@ -85,15 +87,13 @@ int main()
 
         if (command == "add")
         {
-            string nameToAdd;
-            cin >> nameToAdd;
+            const string nameToAdd = readString();
 
             contactsTrie.addString(nameToAdd);
         }
         else if (command == "find")
         {
-            string namePrefixToFind;
-            cin >> namePrefixToFind;
+            const string namePrefixToFind = readString();
 
             const auto numFound = contactsTrie.countStringsWithPrefix(namePrefixToFind);
             cout << numFound << endl;
