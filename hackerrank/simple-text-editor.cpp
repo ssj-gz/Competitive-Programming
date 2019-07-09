@@ -44,11 +44,12 @@ int main()
                 {
                     int numToRemove;
                     cin >> numToRemove;
+                    assert(numToRemove <= currentText.length());
                     const string removedText = currentText.substr(currentText.size() - numToRemove);
 
                     currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
 
-                    UndoableOp deleteOp = { UndoableOp::Append, removedText };
+                    UndoableOp deleteOp = { UndoableOp::Delete, removedText };
                     undoStack.push(deleteOp);
                     break;
                 }
@@ -58,7 +59,7 @@ int main()
                 // Make 0-relative.
                 charIndexToPrint--;
                 assert(charIndexToPrint >= 0 && charIndexToPrint < currentText.size());
-                cout << currentText[charIndexToPrint];
+                cout << currentText[charIndexToPrint] << endl;
                 break;
             case 4:
                 assert(!undoStack.empty());
@@ -68,6 +69,7 @@ int main()
                     case UndoableOp::Append:
                         {
                             const int numToRemove = opToUndo.opData.size();
+                            assert(numToRemove <= currentText.size());
                             currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
                             break;
                         }
