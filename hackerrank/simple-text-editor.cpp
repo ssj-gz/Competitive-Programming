@@ -69,6 +69,14 @@ int main(int argc, char* argv[])
         // with opType == 3 to get a bit more variety in what we are asked to print out.
         int firstChangedCharIndexSincePrint = -1;
 
+        auto updateFirstChangedIndex = [&firstChangedCharIndexSincePrint](int indexOfChange)
+        {
+            if (firstChangedCharIndexSincePrint == -1)
+                firstChangedCharIndexSincePrint = indexOfChange;
+            else
+                firstChangedCharIndexSincePrint = min(firstChangedCharIndexSincePrint, indexOfChange);
+        };
+
         while (ops.size() <= 1'000'000 && sumOfCharsAdded < 1'000'000 && sumOfCharsRemoved < 2 * 1'000'000)
         {
             vector<int> allowableOpTypes;
@@ -93,16 +101,21 @@ int main(int argc, char* argv[])
                 const int numCharsToAdd = (rand() % maxCharsToAdd ) + 1;
                 const string stringToAdd = randomStringOfLength(numCharsToAdd);
 
+                updateFirstChangedIndex(currentText.size());
+
                 currentText += stringToAdd;
                 undoStack.push({UndoableOp::Append, stringToAdd});
                 ops.push_back({1, stringToAdd, -1});
                 sumOfCharsAdded += stringToAdd.length();
+
             }
             else if (opType == 2)
             {
                 const int maxCharsToRemove = min<int>(100, currentText.size());
                 const int numToRemove = (rand() % maxCharsToRemove) + 1;
                 const string removedText = currentText.substr(currentText.size() - numToRemove);
+
+                updateFirstChangedIndex(currentText.size() - numToRemove);
 
                 currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
                 undoStack.push({UndoableOp::Delete, removedText});
@@ -111,8 +124,26 @@ int main(int argc, char* argv[])
             }
             else if (opType == 3)
             {
-                // TODO - use firstChangedCharIndexSincePrint for variety!
-                ops.push_back({3, "", (rand() % static_cast<int>(currentText.length()) + 1)});
+                if (firstChangedCharIndexSincePrint == -1)
+                {
+                    firstChangedCharIndexSincePrint = 0;
+                }
+
+                int indexToPrint = -1;
+                if (firstChangedCharIndexSincePrint >= currentText.size() - 1)
+                {
+                    indexToPrint = (rand() % static_cast<int>(currentText.length()) + 1);
+                }
+                else
+                {
+                    indexToPrint = firstChangedCharIndexSincePrint + 1 + rand() % (currentText.length() - 1 - firstChangedCharIndexSincePrint);
+
+                }
+
+                assert(indexToPrint >= 1 && indexToPrint <= currentText.size());
+                ops.push_back({3, "", indexToPrint});
+
+                firstChangedCharIndexSincePrint = -1;
             }
             else if (opType == 4)
             {
@@ -123,11 +154,16 @@ int main(int argc, char* argv[])
                     case UndoableOp::Append:
                         {
                             const int numToRemove = opToUndo.opData.size();
+
+                            updateFirstChangedIndex(currentText.size() - numToRemove);
+
                             assert(numToRemove <= currentText.size());
                             currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
                             break;
                         }
                     case UndoableOp::Delete:
+                        updateFirstChangedIndex(currentText.size());
+                        
                         currentText += opToUndo.opData;
                         break;
                     default:
