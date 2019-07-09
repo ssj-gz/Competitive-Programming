@@ -4,6 +4,7 @@
 #include <map>
 
 #include <sys/time.h>
+#include <cassert>
 
 using namespace std;
 
@@ -54,16 +55,18 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
         numCompletedIfStartAt.push_back(numStudentsCompleted);
 
         blah[extraTimeNeededForStudent[startPos] - startPos]--;
-        if (extraTimeNeededForStudent[startPos] - startPos > 0)
-        {
-            numStudentsCompleted--;
-        }
-        const int blee = extraTimeNeededForStudent[startPos] + n - startPos;
-        blah[blee]++;
-        if (blee + n - startPos <= 0)
+        assert(blah[extraTimeNeededForStudent[startPos] - startPos] >= 0);
+        if (extraTimeNeededForStudent[startPos] + 1> 0)
         {
             numStudentsCompleted++;
         }
+        const int blee = extraTimeNeededForStudent[startPos] + n - 1;
+        blah[extraTimeNeededForStudent[startPos] + n - 1 - startPos]++;
+        if (extraTimeNeededForStudent[startPos] + n - 1 > 0)
+        {
+            numStudentsCompleted--;
+        }
+        cout << " startPos: " << startPos << " blah[startPos]: " << blah[startPos] << endl;
         numStudentsCompleted -= blah[startPos];
     }
 
@@ -112,4 +115,5 @@ int main(int argc, char* argv[])
         cout << x << " ";
     }
     cout << endl;
+    assert(solutionOptimised == solutionBruteForce);
 }
