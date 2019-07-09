@@ -23,8 +23,10 @@ int main()
     // Append, the length of the string appended (though I actually store the
     // whole appended string itself rather than the length, for simplicity) -
     // keeps it to O(n).  
-    int numOperations;
-    cin >> numOperations;
+
+    auto readInt = []() { int x; cin >> x; assert(cin); return x; };
+
+    const int numOperations = readInt();
 
     std::stack<UndoableOp> undoStack;
 
@@ -32,8 +34,7 @@ int main()
 
     for (int i = 0; i < numOperations; i++)
     {
-        int opType;
-        cin >> opType;
+        const int opType = readInt();
 
         switch (opType)
         {
@@ -44,53 +45,53 @@ int main()
 
                     currentText += toAppend;
 
-                    UndoableOp appendOp = { UndoableOp::Append, toAppend };
+                    const UndoableOp appendOp = { UndoableOp::Append, toAppend };
                     undoStack.push(appendOp);
                     break;
                 }
             case 2:
                 {
-                    int numToRemove;
-                    cin >> numToRemove;
+                    const int numToRemove = readInt();
                     assert(numToRemove <= currentText.length());
                     const string removedText = currentText.substr(currentText.size() - numToRemove);
 
                     currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
 
-                    UndoableOp deleteOp = { UndoableOp::Delete, removedText };
+                    const UndoableOp deleteOp = { UndoableOp::Delete, removedText };
                     undoStack.push(deleteOp);
                     break;
                 }
             case 3:
-                int charIndexToPrint;
-                cin >> charIndexToPrint;
-                // Make 0-relative.
-                charIndexToPrint--;
-                assert(charIndexToPrint >= 0 && charIndexToPrint < currentText.size());
-                cout << currentText[charIndexToPrint] << endl;
-                break;
-            case 4:
-                assert(!undoStack.empty());
-                const auto& opToUndo = undoStack.top();
-                switch (opToUndo.opType)
                 {
-                    case UndoableOp::Append:
-                        {
-                            const int numToRemove = opToUndo.opData.size();
-                            assert(numToRemove <= currentText.size());
-                            currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
-                            break;
-                        }
-                    case UndoableOp::Delete:
-                        currentText += opToUndo.opData;
-                        break;
-                    default:
-                        assert(false);
-                        break;
+                    const int charIndexToPrint = readInt() - 1; // The "- 1" makes charIndexToPrint 0-relative.
+                    assert(charIndexToPrint >= 0 && charIndexToPrint < currentText.size());
+                    cout << currentText[charIndexToPrint] << endl;
+                    break;
                 }
+            case 4:
+                {
+                    assert(!undoStack.empty());
+                    const auto& opToUndo = undoStack.top();
+                    switch (opToUndo.opType)
+                    {
+                        case UndoableOp::Append:
+                            {
+                                const int numToRemove = opToUndo.opData.size();
+                                assert(numToRemove <= currentText.size());
+                                currentText.erase(currentText.begin() + currentText.size() - numToRemove, currentText.end());
+                                break;
+                            }
+                        case UndoableOp::Delete:
+                            currentText += opToUndo.opData;
+                            break;
+                        default:
+                            assert(false);
+                            break;
+                    }
 
-                undoStack.pop();
-                break;
+                    undoStack.pop();
+                    break;
+                }
         }
     }
 
