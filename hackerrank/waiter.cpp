@@ -1,3 +1,4 @@
+// Simon St James (ssjgz) - 2019-04-09
 #include <iostream>
 #include <stack>
 #include <vector>
@@ -45,7 +46,6 @@ int main()
 
     for (int queryNum = 0; queryNum < numQueries; queryNum++)
     {
-        cout << "queryNum: " << queryNum << endl;
         auto& sourceAStack = a[queryNum];
         auto& destAStack = a[queryNum + 1];
         auto& destBStack = b[queryNum + 1];
