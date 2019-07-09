@@ -208,6 +208,11 @@ int main(int argc, char* argv[])
 
     const int numOperations = readInt();
 
+    assert(numOperations <= 1'000'000);
+
+    int sumOfAdded = 0;
+    int sumOfDeleted = 0;
+
     std::stack<UndoableOp> undoStack;
 
     string currentText;
@@ -227,6 +232,8 @@ int main(int argc, char* argv[])
 
                     const UndoableOp appendOp = { UndoableOp::Append, toAppend };
                     undoStack.push(appendOp);
+
+                    sumOfAdded += toAppend.size();
                     break;
                 }
             case 2:
@@ -239,6 +246,8 @@ int main(int argc, char* argv[])
 
                     const UndoableOp deleteOp = { UndoableOp::Delete, removedText };
                     undoStack.push(deleteOp);
+
+                    sumOfDeleted += numToRemove;
                     break;
                 }
             case 3:
@@ -273,6 +282,11 @@ int main(int argc, char* argv[])
                     break;
                 }
         }
+
+        assert(sumOfAdded <= 1'000'000);
+        assert(sumOfDeleted <= 2 * 1'000'000);
     }
+
+    assert(cin);
 
 }
