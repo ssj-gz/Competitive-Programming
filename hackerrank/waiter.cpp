@@ -9,9 +9,12 @@ using namespace std;
 
 int main()
 {
-    vector<int> primesUpToMaxValue;
+    // A trivially easy 75 points(!) - just do, naively, what the Problem requests of us.
+    // Constraits are small enough that we don't need any clever optimisations.
 
-    const int maxValue = 50'000;
+    // Compute primes up to maximum possible value using Sieve of Erastophenes.
+    vector<int> primesUpToMaxValue;
+    const int maxValue = 50'000; // From the "Constraints" for the problem.
     vector<bool> primeSieve(maxValue + 1, true);
     for (int factor = 2; factor <= maxValue; factor++)
     {
@@ -62,7 +65,8 @@ int main()
             }
             else
             {
-                // the (queryNum + 1th) prime is > maxValue, and so > n.
+                // the (queryNum + 1th) prime is > maxValue, and so > n, so
+                // n cannot be divisible by it.
                 isDivisibleByIthPrime = false;
             }
 
@@ -85,11 +89,10 @@ int main()
 
     };
 
+    // Output the requested stacks in the requested format.
     for (int i = 1; i <= numQueries; i++)
     {
         printStackTopToBottom(b[i]);
     }
     printStackTopToBottom(a[numQueries]);
-
-
 }
