@@ -1,6 +1,7 @@
 // Simon St James (ssjgz) - 2019-04-09
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include <sys/time.h>
 
@@ -26,6 +27,44 @@ vector<int> solveBruteForce(const vector<int>& extraTimeNeededForStudent)
         }
         cout << "startPos: " << startPos << " numStudentsCompleted:" << numStudentsCompleted << endl;
         numCompletedIfStartAt.push_back(numStudentsCompleted);
+    }
+
+    return numCompletedIfStartAt;
+}
+
+vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
+{
+    vector<int> numCompletedIfStartAt;
+    const int n = extraTimeNeededForStudent.size();
+
+    map<int, int> blah;
+    int numStudentsCompleted = 0;
+    for (int i = 0; i < n; i++)
+    {
+        const int timeRequiredWhenTeacherVisits = extraTimeNeededForStudent[i] - i;
+        if (timeRequiredWhenTeacherVisits <= 0)
+            numStudentsCompleted++;
+
+        blah[timeRequiredWhenTeacherVisits]++;
+    }
+
+
+    for (int startPos = 0; startPos < n; startPos++)
+    {
+        numCompletedIfStartAt.push_back(numStudentsCompleted);
+
+        blah[extraTimeNeededForStudent[startPos] - startPos]--;
+        if (extraTimeNeededForStudent[startPos] - startPos > 0)
+        {
+            numStudentsCompleted--;
+        }
+        const int blee = extraTimeNeededForStudent[startPos] + n - startPos;
+        blah[blee]++;
+        if (blee + n - startPos <= 0)
+        {
+            numStudentsCompleted++;
+        }
+        numStudentsCompleted -= blah[startPos];
     }
 
     return numCompletedIfStartAt;
@@ -63,6 +102,12 @@ int main(int argc, char* argv[])
 
     const auto solutionBruteForce = solveBruteForce(extraTimeNeededForStudent);
     for (const auto x : solutionBruteForce)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+    const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
+    for (const auto x : solutionOptimised)
     {
         cout << x << " ";
     }
