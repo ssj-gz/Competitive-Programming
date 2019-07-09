@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <sys/time.h>
+#include <algorithm>
 
 #include <cassert>
 
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
                 firstChangedCharIndexSincePrint = min(firstChangedCharIndexSincePrint, indexOfChange);
         };
 
-        while (ops.size() <= 1'000'000 && sumOfCharsAdded < 1'000'000 && sumOfCharsRemoved < 2 * 1'000'000)
+        while (ops.size() < 1'000'000)
         {
             vector<int> allowableOpTypes;
             assert(!undoStack.empty());
@@ -85,11 +86,12 @@ int main(int argc, char* argv[])
             {
                 allowableOpTypes.push_back(4);
             }
-            if (currentText.size() > 0)
+            if (currentText.size() > 0 && sumOfCharsRemoved < 2 * 1'000'000)
             {
                 allowableOpTypes.push_back(2);
             }
-            allowableOpTypes.push_back(1);
+            if (sumOfCharsAdded < 1'000'000)
+                allowableOpTypes.push_back(1);
             if (currentText.size() > 0)
                 allowableOpTypes.push_back(3);
 
@@ -111,7 +113,7 @@ int main(int argc, char* argv[])
             }
             else if (opType == 2)
             {
-                const int maxCharsToRemove = min<int>(100, currentText.size());
+                const int maxCharsToRemove = min(min(100, static_cast<int>(currentText.size())), 2 * 1'000'000 - sumOfCharsRemoved);
                 const int numToRemove = (rand() % maxCharsToRemove) + 1;
                 const string removedText = currentText.substr(currentText.size() - numToRemove);
 
@@ -288,5 +290,4 @@ int main(int argc, char* argv[])
     }
 
     assert(cin);
-
 }
