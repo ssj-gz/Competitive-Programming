@@ -19,6 +19,8 @@ struct UndoableOp
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
+
     if (argc == 2)
     {
         // Try to generate a testcase that will trigger OOM if someone keeps
