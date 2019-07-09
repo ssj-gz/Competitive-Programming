@@ -33,8 +33,8 @@ int main()
     int numQueries;
     cin >> numQueries;
 
-    vector<stack<int>> a(numQueries + 2);
-    vector<stack<int>> b(numQueries + 2);
+    vector<stack<int>> a(numQueries + 1);
+    vector<stack<int>> b(numQueries + 1);
 
     for (int i = 0; i < n; i++)
     {
