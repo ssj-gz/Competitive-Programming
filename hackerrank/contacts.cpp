@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include <cassert>
+
 using namespace std;
 
 class SimpleTrie
@@ -18,7 +20,6 @@ class SimpleTrie
             for (const auto letter : stringToAdd)
             {
                 const int letterIndex = letter - 'a';
-                currentNode->numOccurrences++;
                 if (currentNode->nodeAfterLetterIndex[letterIndex] == nullptr)
                 {
                     auto newNode = createNode();
@@ -26,16 +27,17 @@ class SimpleTrie
                 }
 
                 currentNode = currentNode->nodeAfterLetterIndex[letterIndex];
+                currentNode->numOccurrences++;
             }
         }
         int countStringsWithPrefix(const string& stringPrefixToFind) const
         {
             Node* currentNode = m_rootNode;
-            int numOccurrences = 0;
             for (const auto letter : stringPrefixToFind)
             {
-                numOccurrences = currentNode->numOccurrences;
+                assert(currentNode != nullptr);
                 const int letterIndex = letter - 'a';
+                assert(letterIndex >= 0 && letterIndex < numLetters);
                 if (currentNode->nodeAfterLetterIndex[letterIndex] == nullptr)
                 {
                     return 0;
@@ -43,7 +45,8 @@ class SimpleTrie
 
                 currentNode = currentNode->nodeAfterLetterIndex[letterIndex];
             }
-            return numOccurrences;
+            assert(currentNode != nullptr);
+            return currentNode->numOccurrences;
         }
     private:
         static constexpr int numLetters = 26;
