@@ -15,6 +15,14 @@ struct UndoableOp
 
 int main()
 {
+    // Trivially easy.  The only potential snag is the memory usage needed for Undo-ability:
+    // if we stored the complete current text for each Undoable
+    // operation, we'd use O(n^2) memory under certain circumstances.
+    // However, simply storing the information needed to perform the Undo -
+    // in the case of Delete, the string deleted from the end; in the case of 
+    // Append, the length of the string appended (though I actually store the
+    // whole appended string itself rather than the length, for simplicity) -
+    // keeps it to O(n).  
     int numOperations;
     cin >> numOperations;
 
