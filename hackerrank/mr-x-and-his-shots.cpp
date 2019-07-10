@@ -45,9 +45,21 @@ class RangeTracker
                 m_rangesByBegin.insert({range, id});
                 id++;
             }
+            m_dbgRange = ranges;
         }
         int numRangesAroundX() const
         {
+            // TODO - remove this.
+            int dbgResult = 0;
+            for (const auto& range : m_dbgRange)
+            {
+                if (m_x < range.begin || m_x > range.end)
+                    continue;
+
+                dbgResult++;
+
+            }
+            assert(dbgResult == m_activeRangesByEnd.size());
             return m_activeRangesByEnd.size();
         }
         void incrementX()
@@ -79,6 +91,7 @@ class RangeTracker
             int id = -1;
         };
         int m_x = 0;
+        vector<Range> m_dbgRange; // TODO - remove this.
 
 
         static bool compareRangeBegins(const RangeWithId& lhs, const RangeWithId& rhs)
