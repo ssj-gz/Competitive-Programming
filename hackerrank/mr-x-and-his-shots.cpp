@@ -140,7 +140,7 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
         if (newShotRangesActive > 0)
             result += newShotRangesActive * numPlayerRangesActive;
         if (newPlayerRangesActive > 0)
-        result += newPlayerRangesActive * numShotRangesActiveAtStartOfIteration;
+            result += newPlayerRangesActive * numShotRangesActive;
 
         numIterations++;
     }
