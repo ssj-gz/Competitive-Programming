@@ -116,43 +116,34 @@ class RangeTracker
         set<RangeWithId, bool(*)(const RangeWithId&, const RangeWithId&)>  m_activeRangesByEnd{compareRangeEnds};
 };
 
-int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
+int64_t findNumShotsThatCanBeStopped(const vector<Range>& shots, const vector<Range>& players)
 {
-    int64_t result = 0;
+    int64_t numShotsThatCanBeStopped = 0;
     RangeTracker shotRangeTracker(shots);
     RangeTracker playerRangeTracker(players);
 
-    int64_t numShotRangesActive = 0;
-    int64_t numPlayerRangesActive = 0;
-    int numIterations = 1;
     while (shotRangeTracker.hasRangesLeft() || playerRangeTracker.hasRangesLeft())
     {
-        //cout << "iteration: numIterations " << endl;
-        const int64_t numShotRangesActiveAtStartOfIteration = numShotRangesActive;
-        const int64_t numPlayerRangesActiveAtStartOfIteration = numPlayerRangesActive;
-
         shotRangeTracker.incrementX();
         playerRangeTracker.incrementX();
 
-        numShotRangesActive = shotRangeTracker.numRangesAroundX();
-        numPlayerRangesActive = playerRangeTracker.numRangesAroundX();
+        const int64_t numShotRangesActive = shotRangeTracker.numRangesAroundX();
+        const int64_t numPlayerRangesActive = playerRangeTracker.numRangesAroundX();
 
-        //const int64_t newShotRangesActive = numShotRangesActive - numShotRangesActiveAtStartOfIteration;
-        //const int64_t newPlayerRangesActive = numPlayerRangesActive - numPlayerRangesActiveAtStartOfIteration;
         const int64_t newShotRangesActive = shotRangeTracker.numActiveRangesAddedAfterIncrement();
         const int64_t newPlayerRangesActive = playerRangeTracker.numActiveRangesAddedAfterIncrement();
 
-        //cout << " newShotRangesActive: " << newShotRangesActive << " newPlayerRangesActive: " << newPlayerRangesActive << endl;
+        // Update numShotsThatCanBeStopped based on the new shot ranges and player ranges that
+        // became active.
+        // Note that this overcounts.
+        numShotsThatCanBeStopped += newShotRangesActive * numPlayerRangesActive;
+        numShotsThatCanBeStopped += newPlayerRangesActive * numShotRangesActive;
+        // Remove the amount we overcounted by, above.
+        numShotsThatCanBeStopped -= newPlayerRangesActive * newShotRangesActive;
 
-        result += newShotRangesActive * numPlayerRangesActive;
-        result += newPlayerRangesActive * numShotRangesActive;
-        // Remove overcount.
-        result -= newPlayerRangesActive * newShotRangesActive;
-
-        numIterations++;
     }
 
-    return result;
+    return numShotsThatCanBeStopped;
 }
 
 int main(int argc, char* argv[])
@@ -224,8 +215,8 @@ int main(int argc, char* argv[])
     cout << "solutionOptimised: " << solutionOptimised << endl;
     assert(solutionOptimised == solutionBruteForce);
 #else
-    const auto solutionOptimised = solveOptimised(shots, players);
-    cout << solutionOptimised << endl;
+    const auto numShotsThatCanBeStopped = findNumShotsThatCanBeStopped(shots, players);
+    cout << numShotsThatCanBeStopped << endl;
 #endif
 
 }
