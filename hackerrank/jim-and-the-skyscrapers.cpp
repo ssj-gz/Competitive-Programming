@@ -1,6 +1,7 @@
 // Simon St James (ssgz) - 2019-07-10
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <algorithm>
 
 #include <cassert>
@@ -17,7 +18,7 @@ int64_t findNumValidPaths(const vector<int>& heightsOriginal)
     // flushing the stack manually.
     heights.push_back(*max_element(heightsOriginal.begin(), heightsOriginal.end()) + 1);
 
-    vector<int> heightStack;
+    stack<int> heightStack;
 
     auto nChoose2 = [](int n)
     {
@@ -28,9 +29,9 @@ int64_t findNumValidPaths(const vector<int>& heightsOriginal)
     {
         int prevHeightPopped = -1;
         int numOfSameHeightPoppedInARow = 1;
-        while (!heightStack.empty() && height > heightStack.back())
+        while (!heightStack.empty() && height > heightStack.top())
         {
-            const int heightToPop = heightStack.back();
+            const int heightToPop = heightStack.top();
             if (heightToPop == prevHeightPopped)
             {
                 numOfSameHeightPoppedInARow++;
@@ -44,10 +45,10 @@ int64_t findNumValidPaths(const vector<int>& heightsOriginal)
 
             prevHeightPopped = heightToPop;
 
-            heightStack.pop_back();
+            heightStack.pop();
         }
         numPaths += nChoose2(numOfSameHeightPoppedInARow) * 2;
-        heightStack.push_back(height);
+        heightStack.push(height);
     }
 
     assert(heightStack.size() == 1); // The "dummy" largest element we appended to the end of heights.
