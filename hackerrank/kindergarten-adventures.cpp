@@ -38,7 +38,14 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
     vector<int> numCompletedIfStartAt;
     const int n = extraTimeNeededForStudent.size();
 
-    map<int, int> blah;
+    // The numNeedingTimeWhenTeacherVisitedAdjusted has the following property:
+    // if we started at student startPos, then 
+    //  
+    //   numNeedingTimeWhenTeacherVisitedAdjusted[x - startPos] 
+    //
+    // will be the number of students who need time x to finish by the time
+    // the teacher visits them.
+    map<int, int> numNeedingTimeWhenTeacherVisitedAdjusted;
     int numStudentsCompleted = 0;
     for (int i = 0; i < n; i++)
     {
@@ -46,15 +53,15 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
         if (timeRequiredWhenTeacherVisits <= 0)
             numStudentsCompleted++;
 
-        blah[timeRequiredWhenTeacherVisits]++;
+        numNeedingTimeWhenTeacherVisitedAdjusted[timeRequiredWhenTeacherVisits]++;
     }
 
-    auto subtractFromBlah = [&blah](int index, int amount)
+    auto subtractFromBlah = [&numNeedingTimeWhenTeacherVisitedAdjusted](int index, int amount)
     {
-        blah[index] -= amount;
-        assert(blah[index] >= 0);
-        if (blah[index] == 0)
-            blah.erase(blah.find(index));
+        numNeedingTimeWhenTeacherVisitedAdjusted[index] -= amount;
+        assert(numNeedingTimeWhenTeacherVisitedAdjusted[index] >= 0);
+        if (numNeedingTimeWhenTeacherVisitedAdjusted[index] == 0)
+            numNeedingTimeWhenTeacherVisitedAdjusted.erase(numNeedingTimeWhenTeacherVisitedAdjusted.find(index));
 
     };
 
@@ -65,7 +72,7 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
 
         // Update lookups/ calculations resulting from the move of
         // starting position from startPos to startPos + 1.
-        // Remove contribution of the student at startPos + 1 from blah.
+        // Remove contribution of the student at startPos + 1 from numNeedingTimeWhenTeacherVisitedAdjusted.
         subtractFromBlah(extraTimeNeededForStudent[startPos] - startPos, 1);
         if (extraTimeNeededForStudent[startPos] > 0)
         {
@@ -73,14 +80,15 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
             // remove him from the list of failures.
             numStudentsCompleted++;
         }
-        const int studentFailThreshold = -(startPos); 
-        if (blah.find(studentFailThreshold) != blah.end())
-            numStudentsCompleted -= blah[studentFailThreshold];
-        // Re-add student to blah - if starting at (startPos + 1), querying the time remaining
-        // when the teacher visits the student at startPos (via blah[-(startPos + 1)]) should
-        // give the correct time remaining for this student, which will be 
-        // extraTimeNeededForStudent[startPos] - (n - 1). 
-        blah[extraTimeNeededForStudent[startPos] - (n - 1) -(startPos + 1)]++;
+        // All students who currently need 0 time when teacher visits them when teacher starts at startPos will
+        // fail when we start from startPos.
+        const int numNewFailures = numNeedingTimeWhenTeacherVisitedAdjusted[-startPos];
+        numStudentsCompleted -= numNewFailures;
+        // Re-add student to numNeedingTimeWhenTeacherVisitedAdjusted - if starting at (startPos + 1), querying the time remaining
+        // when the teacher visits the student at startPos give the correct time remaining for this student, which will be 
+        // extraTimeNeededForStudent[startPos] - (n - 1); i.e. we need to increase the value of 
+        // numNeedingTimeWhenTeacherVisitedAdjusted[x - (startPos + 1)], where x = extraTimeNeededForStudent[startPos] - (n - 1).
+        numNeedingTimeWhenTeacherVisitedAdjusted[extraTimeNeededForStudent[startPos] - (n - 1) -(startPos + 1)]++;
 
         if (extraTimeNeededForStudent[startPos] - (n - 1) > 0)
         {
@@ -130,7 +138,7 @@ int main(int argc, char* argv[])
     }
     cout << endl;
     const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
-    cout << "solutionBruteForce: ";
+    cout << "solutionOptimised: ";
     for (const auto x : solutionOptimised)
     {
         cout << x << " ";
