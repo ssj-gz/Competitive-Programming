@@ -67,6 +67,10 @@ class RangeTracker
             }
 
         }
+        bool hasRangesLeft() const
+        {
+            return !m_rangesByBegin.empty() || !m_activeRangesByEnd.empty();
+        }
     private:
         struct RangeWithId
         {
@@ -96,7 +100,31 @@ class RangeTracker
 
 int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
 {
-    return 0;
+    int64_t result = 0;
+    RangeTracker shotRangeTracker(shots);
+    RangeTracker playerRangeTracker(players);
+
+    int64_t numShotRangesActive = 0;
+    int64_t numPlayerRangesActive = 0;
+    while (shotRangeTracker.hasRangesLeft() || playerRangeTracker.hasRangesLeft())
+    {
+        const int64_t numShotRangesActiveAtStartOfIteration = numShotRangesActive;
+        const int64_t numPlayerRangesActiveAtStartOfIteration = numPlayerRangesActive;
+
+        shotRangeTracker.incrementX();
+        playerRangeTracker.incrementX();
+
+        numShotRangesActive = shotRangeTracker.numRangesAroundX();
+        numPlayerRangesActive = playerRangeTracker.numRangesAroundX();
+
+        const int64_t newShotRangesActive = numShotRangesActive - numShotRangesActiveAtStartOfIteration;
+        const int64_t newPlayerRangesActive = numPlayerRangesActive - numPlayerRangesActiveAtStartOfIteration;
+
+        result += newShotRangesActive * numPlayerRangesActive;
+        result += newPlayerRangesActive * numShotRangesActiveAtStartOfIteration;
+    }
+
+    return result;
 }
 
 int main()
