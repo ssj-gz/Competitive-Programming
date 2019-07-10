@@ -1,9 +1,9 @@
 // Simon St James (ssjgz) - 2019-07-10
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -40,6 +40,51 @@ vector<int> solveBruteForce(const vector<int>& extraTimeNeededForStudent)
     return numCompletedIfStartAt;
 }
 
+/**
+ * Simple vector-ish data structure that allows negative indices.
+ */
+template<typename T>
+class Vec
+{
+    public:
+        Vec(int minIndex, int maxIndex)
+            : m_minIndex(minIndex),
+            m_maxIndex(maxIndex),
+            m_numElements(maxIndex - minIndex + 1),
+            m_vector(m_numElements)
+    {
+
+    }
+        int minIndex() const
+        {
+            return m_minIndex;
+        }
+        int maxIndex() const
+        {
+            return m_maxIndex;
+        }
+        T& operator[](int index)
+        {
+            assert(index >= m_minIndex);
+            assert(index <= m_maxIndex);
+            assert(index - m_minIndex < m_vector.size());
+            return m_vector[index - m_minIndex];
+        }
+        const T& operator[](int index) const
+        {
+            assert(index >= m_minIndex);
+            assert(index <= m_maxIndex);
+            assert(index - m_minIndex < m_vector.size());
+            return m_vector[index - m_minIndex];
+        }
+    private:
+        int m_minIndex = -1;
+        int m_maxIndex = -1;
+        int m_numElements = -1;
+        vector<T> m_vector;
+};
+
+
 vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
 {
     vector<int> numCompletedIfStartAt;
@@ -52,7 +97,7 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
     //
     // will be the number of students who need time x to finish by the time
     // the teacher visits them.
-    map<int, int> numNeedingTimeWhenTeacherVisitedAdjusted;
+    Vec<int> numNeedingTimeWhenTeacherVisitedAdjusted(-(2 * n), n);
     int numStudentsCompleted = 0;
     for (int i = 0; i < n; i++)
     {
@@ -63,16 +108,6 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
         numNeedingTimeWhenTeacherVisitedAdjusted[timeRequiredWhenTeacherVisits]++;
     }
 
-    auto subtractFromBlah = [&numNeedingTimeWhenTeacherVisitedAdjusted](int index, int amount)
-    {
-        numNeedingTimeWhenTeacherVisitedAdjusted[index] -= amount;
-        assert(numNeedingTimeWhenTeacherVisitedAdjusted[index] >= 0);
-        if (numNeedingTimeWhenTeacherVisitedAdjusted[index] == 0)
-            numNeedingTimeWhenTeacherVisitedAdjusted.erase(numNeedingTimeWhenTeacherVisitedAdjusted.find(index));
-
-    };
-
-
     for (int startPos = 0; startPos < n; startPos++)
     {
         numCompletedIfStartAt.push_back(numStudentsCompleted);
@@ -80,7 +115,7 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
         // Update lookups/ calculations resulting from the move of
         // starting position from startPos to startPos + 1.
         // Remove contribution of the student at startPos + 1 from numNeedingTimeWhenTeacherVisitedAdjusted.
-        subtractFromBlah(extraTimeNeededForStudent[startPos] - startPos, 1);
+        numNeedingTimeWhenTeacherVisitedAdjusted[extraTimeNeededForStudent[startPos] - startPos]--;
         if (extraTimeNeededForStudent[startPos] > 0)
         {
             // When starting at startPos, the student at startPos won't have finished;
