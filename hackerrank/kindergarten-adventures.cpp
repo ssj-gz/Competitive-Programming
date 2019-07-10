@@ -117,6 +117,37 @@ vector<int> findNumCompletedIfStartAt(const vector<int>& extraTimeNeededForStude
 
 int main(int argc, char* argv[])
 {
+    // Fundamentally easy, but the devil is in the details - actually took
+    // me quite a long time to implement: if I'd sat down with pen and paper
+    // instead of trying to do it all in my head, it would have been quicker XD
+    //
+    // The number of students completed when the teacher visits them when starting at
+    // student startPos + 1 can be derived from the number completed when teacher
+    // starts at startPos: those who *just* passed when starting from startPos - i.e
+    // those who, when the time arrives, need precisely 0 additional time to finish (where 
+    // "additional time to finish" can be negative, in the case of students who have
+    // finished before the teacher visits them) will *not* pass when the teacher visits
+    // them but starts at startPos + 1.  If we can compute the number who need precisely
+    // 0 additional time, we'd be mostly done: however, the student currently at startPos
+    // needs some special treatment, but we'll ignore them for now (see the code
+    // for how to actually deal with them!).
+    //
+    // Let's say we knew, for each student, the additional time they'd need when the teacher
+    // visits them while starting at startPos.  This time will increase by 1 for each student 
+    // (again, ignoring the problematic student at startPos) when the teacher visits 
+    // them while staring at startPos + 1.  Obviously, adding 1 to the additional time required
+    // by each student would make this O(n ^ 2), but we can use the time-honoured trick
+    // of "pretending" to add 1 by adjusting how we query this information.
+    //
+    // That's about it - the code is probably a better description of it all works from here on 
+    // in.  numNeedingTimeWhenTeacherVisitedAdjusted is used for finding the number of students
+    // who "just passed" when teacher starts at startPos, and so will fail when teacher starts from
+    // startPos + 1 (numNewFailures).  We handle adding "1" to all values in this as startPos
+    // increases by changing the query (if we want to find the number needing time t when 
+    // teacher starts at startPos, we query for numNeedingTimeWhenTeacherVisitedAdjusted[x - startPos] instead
+    // of numNeedingTimeWhenTeacherVisitedAdjusted[x]).  
+    // 
+    // The total complexity is O(n).
     int n;
     cin >> n;
 
