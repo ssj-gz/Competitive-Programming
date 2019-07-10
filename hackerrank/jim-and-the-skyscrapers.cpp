@@ -1,3 +1,10 @@
+// Simon St James (ssgz) - 2019-07-10
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -41,17 +48,17 @@ int64_t solveOptimised(const vector<int>& heightsOriginal)
 
     for (const auto height : heights)
     {
-        cout << "height: " << height << " current stack: " << endl;
+        //cout << "height: " << height << " current stack: " << endl;
         for (const auto x : heightStack)
         {
-            cout << x << " ";
+            //cout << x << " ";
         }
-        cout << endl;
+        //cout << endl;
         int lastHeightPopped = -1;
         int numOfSameHeightPopped = 1;
         while (!heightStack.empty() && height > heightStack.back())
         {
-            cout << "numOfSameHeightPopped: " << numOfSameHeightPopped << endl;
+            //cout << "numOfSameHeightPopped: " << numOfSameHeightPopped << endl;
             const int heightToPop = heightStack.back();
             if (heightToPop == lastHeightPopped)
             {
@@ -59,7 +66,7 @@ int64_t solveOptimised(const vector<int>& heightsOriginal)
             }
             else
             {
-                cout << "Flushing" << endl;
+                //cout << "Flushing" << endl;
                 numPaths += nChoose2(numOfSameHeightPopped) * 2;
                 numOfSameHeightPopped = 1;
             }
@@ -108,11 +115,15 @@ int main(int argc, char* argv[])
         cin >> heights[i];
     }
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(heights);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(heights);
     cout << "solutionOptimised: " << solutionOptimised << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    cout << solveOptimised(heights) << endl;
+#endif
 
 }
 
