@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-07-09
+// Simon St James (ssjgz) - 2019-07-10
 #include <iostream>
 #include <vector>
 #include <map>
@@ -49,25 +49,35 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
         blah[timeRequiredWhenTeacherVisits]++;
     }
 
+    auto subtractFromBlah = [&blah](int index, int amount)
+    {
+        blah[index] -= amount;
+        assert(blah[index] >= 0);
+        if (blah[index] == 0)
+            blah.erase(blah.find(index));
+
+    };
+
 
     for (int startPos = 0; startPos < n; startPos++)
     {
         numCompletedIfStartAt.push_back(numStudentsCompleted);
 
-        blah[extraTimeNeededForStudent[startPos] - startPos]--;
-        assert(blah[extraTimeNeededForStudent[startPos] - startPos] >= 0);
-        if (extraTimeNeededForStudent[startPos] + 1> 0)
+        subtractFromBlah(extraTimeNeededForStudent[startPos] - startPos, 1);
+        if (extraTimeNeededForStudent[startPos] > 0)
         {
+            cout << " removing student at startPos increases numStudentsCompleted" << endl;
             numStudentsCompleted++;
         }
         const int blee = extraTimeNeededForStudent[startPos] + n - 1;
-        blah[extraTimeNeededForStudent[startPos] + n - 1 - startPos]++;
-        if (extraTimeNeededForStudent[startPos] + n - 1 > 0)
+        cout << " startPos: " << startPos << " blah[-(startPos)+1]: " << blah[-(startPos+1)] << endl;
+        numStudentsCompleted -= blah[-(startPos+1)];
+        blah[extraTimeNeededForStudent[startPos] - (n - 1) + startPos]++;
+        if (extraTimeNeededForStudent[startPos] - (n - 1) > 0)
         {
+            cout << " re-adding student at startPos decreases numStudentsCompleted" << endl;
             numStudentsCompleted--;
         }
-        cout << " startPos: " << startPos << " blah[startPos]: " << blah[startPos] << endl;
-        numStudentsCompleted -= blah[startPos];
     }
 
     return numCompletedIfStartAt;
