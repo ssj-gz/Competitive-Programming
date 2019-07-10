@@ -12,20 +12,32 @@ struct Node
 
 };
 
-int findNumInComponentAndMarkAll(Node* node, Node* parent, int componentNum)
+int findNumInComponentAndMarkAll(Node* node, int componentNum)
 {
-    int num = 1;
+    int numInComponent = 1;
+    vector<Node*> nodesToExplore = { node };
     node->componentNum = componentNum;
 
-    for (auto child : node->neighbours)
+    while (!nodesToExplore.empty())
     {
-        if (child == parent)
-            continue;
+        vector<Node*> nextNodesToExplore;
+        for (auto nodeToExplore : nodesToExplore)
+        {
+            for (auto neighbour : nodeToExplore->neighbours)
+            {
+                if (neighbour->componentNum == -1)
+                {
+                    neighbour->componentNum = componentNum;
+                    nextNodesToExplore.push_back(neighbour);
+                    numInComponent++;
+                }
+            }
+        }
 
-        num += findNumInComponentAndMarkAll(child, node, componentNum);
+        nodesToExplore = nextNodesToExplore;
     }
 
-    return num;
+    return numInComponent;
 }
 
 int main()
@@ -52,7 +64,7 @@ int main()
         if (node.componentNum != -1)
             continue;
 
-        const auto numInNewComponent = findNumInComponentAndMarkAll(&node, nullptr, componentSizes.size());
+        const auto numInNewComponent = findNumInComponentAndMarkAll(&node, componentSizes.size());
         if (numInNewComponent != 1)
             componentSizes.push_back(numInNewComponent);
     }
