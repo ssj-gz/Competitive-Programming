@@ -1,4 +1,4 @@
-// Simon St James (ssgz) - 2019-07-10
+// Simon St James (ssjgz) - 2019-07-10
 #include <iostream>
 #include <vector>
 #include <stack>
