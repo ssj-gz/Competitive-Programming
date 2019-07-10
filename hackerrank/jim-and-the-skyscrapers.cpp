@@ -1,42 +1,20 @@
 // Simon St James (ssgz) - 2019-07-10
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 #include <cassert>
-#include <sys/time.h>
 
 using namespace std;
 
-int64_t solveBruteForce(const vector<int>& heights)
-{
-    int64_t numPaths = 0;
-    const int n = heights.size();
-    for (int start = 0; start < n; start++)
-    {
-        const int initialHeight = heights[start];
-        for (int end = start + 1; end < n; end++)
-        {
-            if (heights[end] == initialHeight)
-                numPaths += 2;
-            else if (heights[end] > initialHeight)
-                break;
-        }
-    }
-
-    return numPaths;
-}
-
-int64_t solveOptimised(const vector<int>& heightsOriginal)
+int64_t findNumValidPaths(const vector<int>& heightsOriginal)
 {
     int64_t numPaths = 0;
     vector<int> heights(heightsOriginal);
+    // A bit of a hack, but append a dummy element to the end of "heights"
+    // that is larger than all other heights - this causes the stack to
+    // be flushed automatically, so we don't have to duplicate code
+    // flushing the stack manually.
     heights.push_back(*max_element(heightsOriginal.begin(), heightsOriginal.end()) + 1);
 
     vector<int> heightStack;
@@ -48,63 +26,36 @@ int64_t solveOptimised(const vector<int>& heightsOriginal)
 
     for (const auto height : heights)
     {
-        //cout << "height: " << height << " current stack: " << endl;
-        for (const auto x : heightStack)
-        {
-            //cout << x << " ";
-        }
-        //cout << endl;
-        int lastHeightPopped = -1;
-        int numOfSameHeightPopped = 1;
+        int prevHeightPopped = -1;
+        int numOfSameHeightPoppedInARow = 1;
         while (!heightStack.empty() && height > heightStack.back())
         {
-            //cout << "numOfSameHeightPopped: " << numOfSameHeightPopped << endl;
             const int heightToPop = heightStack.back();
-            if (heightToPop == lastHeightPopped)
+            if (heightToPop == prevHeightPopped)
             {
-                numOfSameHeightPopped++;
+                numOfSameHeightPoppedInARow++;
             }
             else
             {
-                //cout << "Flushing" << endl;
-                numPaths += nChoose2(numOfSameHeightPopped) * 2;
-                numOfSameHeightPopped = 1;
+                numPaths += nChoose2(numOfSameHeightPoppedInARow) * 2;
+                numOfSameHeightPoppedInARow = 1;
             }
 
-            lastHeightPopped = heightToPop;
+            prevHeightPopped = heightToPop;
 
             heightStack.pop_back();
         }
-        numPaths += nChoose2(numOfSameHeightPopped) * 2;
+        numPaths += nChoose2(numOfSameHeightPoppedInARow) * 2;
         heightStack.push_back(height);
     }
 
-    assert(heightStack.size() == 1);
-
+    assert(heightStack.size() == 1); // The "dummy" largest element we appended to the end of heights.
 
     return numPaths;
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int n = rand() % 100 + 1;
-        cout << n << endl;
-
-        const int maxHeight = rand() % 1000 + 1;
-
-        for (int i = 0; i < n; i++)
-        {
-            cout << ((rand() % maxHeight) + 1) << " ";
-        }
-        cout << endl;
-        return 0;
-    }
     int n;
     cin >> n;
 
@@ -115,15 +66,6 @@ int main(int argc, char* argv[])
         cin >> heights[i];
     }
 
-#ifdef BRUTE_FORCE
-    const auto solutionBruteForce = solveBruteForce(heights);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
-    const auto solutionOptimised = solveOptimised(heights);
-    cout << "solutionOptimised: " << solutionOptimised << endl;
-    assert(solutionOptimised == solutionBruteForce);
-#else
-    cout << solveOptimised(heights) << endl;
-#endif
-
+    cout << findNumValidPaths(heights) << endl;
 }
 
