@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int n = rand() % 100;
+        const int n = rand() % 100 + 1;
         cout << n << endl;
 
         const int maxHeight = rand() % 1000 + 1;
