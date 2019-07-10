@@ -1,44 +1,9 @@
 // Simon St James (ssjgz) - 2019-07-10
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-//#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
-#include <map>
 #include <algorithm>
 
-#include <sys/time.h>
-#include <cassert>
-
 using namespace std;
-
-vector<int> solveBruteForce(const vector<int>& extraTimeNeededForStudent)
-{
-    vector<int> numCompletedIfStartAt;
-    const int n = extraTimeNeededForStudent.size();
-
-    for (int startPos = 0; startPos < n; startPos++)
-    {
-        int numStudentsCompleted = 0;
-        int studentId = startPos;
-        for (int timeElapsed = 0; timeElapsed < n; timeElapsed++)
-        {
-            //cout << " studentId: " << studentId << " startPos:" << startPos << " timeElapsed: " << timeElapsed << " extraTimeNeededForStudent: " << extraTimeNeededForStudent[studentId] << endl;
-            if ( timeElapsed >= extraTimeNeededForStudent[studentId])
-            {
-                numStudentsCompleted++;
-            }
-            studentId = (studentId + 1) % n;
-        }
-        //cout << "startPos: " << startPos << " numStudentsCompleted:" << numStudentsCompleted << endl;
-        numCompletedIfStartAt.push_back(numStudentsCompleted);
-    }
-
-    return numCompletedIfStartAt;
-}
 
 /**
  * Simple vector-ish data structure that allows negative indices.
@@ -85,18 +50,19 @@ class Vec
 };
 
 
-vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
+vector<int> findNumCompletedIfStartAt(const vector<int>& extraTimeNeededForStudent)
 {
     vector<int> numCompletedIfStartAt;
     const int n = extraTimeNeededForStudent.size();
 
     // The numNeedingTimeWhenTeacherVisitedAdjusted has the following property:
-    // if we started at student startPos, then 
+    // 
+    //    if teacher started at student startPos, then 
     //  
-    //   numNeedingTimeWhenTeacherVisitedAdjusted[x - startPos] 
+    //      numNeedingTimeWhenTeacherVisitedAdjusted[x - startPos] 
     //
-    // will be the number of students who need time x to finish by the time
-    // the teacher visits them.
+    //    will be the number of students who need time x to finish by the time
+    //    the teacher visits them.
     //
     // The min and max index for numNeedingTimeWhenTeacherVisitedAdjusted are derived
     // from inspecting the code: we never query for an index < 2 * n, nor an index
@@ -105,6 +71,7 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
     int numStudentsCompleted = 0;
     for (int i = 0; i < n; i++)
     {
+        assert(0 <= extraTimeNeededForStudent[i] && extraTimeNeededForStudent[i] <= n);
         const int timeRequiredWhenTeacherVisits = extraTimeNeededForStudent[i] - i;
         if (timeRequiredWhenTeacherVisits <= 0)
             numStudentsCompleted++;
@@ -178,26 +145,8 @@ int main(int argc, char* argv[])
         cin >> extraTimeNeededForStudent[i];
     }
 
-#ifdef BRUTE_FORCE
-    const auto solutionBruteForce = solveBruteForce(extraTimeNeededForStudent);
-    const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
-    assert(solutionOptimised == solutionBruteForce);
-    int bestStartingPosition = -1;
-
-    const auto maxStudentsPassing = *max_element(solutionOptimised.begin(), solutionOptimised.end());
-    for (int startPos = 0; startPos < n; startPos++)
-    {
-        if (solutionBruteForce[startPos] == maxStudentsPassing)
-        {
-            bestStartingPosition = startPos;
-            break;
-        }
-    }
-    // We "+ 1" as the answer is expected to be 1-relative.
-    cout << "solutionBruteForce: " << (bestStartingPosition + 1) << endl;
-#else
-    const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
-    const auto maxStudentsPassing = *max_element(solutionOptimised.begin(), solutionOptimised.end());
+    const auto numCompletedIfStartAt = findNumCompletedIfStartAt(extraTimeNeededForStudent);
+    const auto maxStudentsPassing = *max_element(numCompletedIfStartAt.begin(), numCompletedIfStartAt.end());
     int bestStartingPosition = -1;
 
     for (int startPos = 0; startPos < n; startPos++)
@@ -211,6 +160,4 @@ int main(int argc, char* argv[])
 
     // We "+ 1" as the answer is expected to be 1-relative.
     cout << (bestStartingPosition + 1) << endl;
-
-#endif
 }
