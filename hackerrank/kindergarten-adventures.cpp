@@ -3,6 +3,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <cassert>
+
 using namespace std;
 
 /**
@@ -115,27 +117,6 @@ vector<int> findNumCompletedIfStartAt(const vector<int>& extraTimeNeededForStude
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-
-        const int n = rand() % 100 + 1;
-        cout << n << endl;
-
-        const int maxTime = 1 + (rand() % n); // 0 <= ti <= n according to constraints.
-        for (int i = 0; i < n; i++)
-        {
-            const int time = (rand() % (maxTime + 1));
-            assert(0 <= time && time <= n);
-            cout << time << " ";
-        }
-        cout << endl;
-
-        return 0;
-    }
     int n;
     cin >> n;
 
@@ -146,12 +127,12 @@ int main(int argc, char* argv[])
     }
 
     const auto numCompletedIfStartAt = findNumCompletedIfStartAt(extraTimeNeededForStudent);
-    const auto maxStudentsPassing = *max_element(numCompletedIfStartAt.begin(), numCompletedIfStartAt.end());
+    const auto maxStudentsCompleted = *max_element(numCompletedIfStartAt.begin(), numCompletedIfStartAt.end());
     int bestStartingPosition = -1;
 
     for (int startPos = 0; startPos < n; startPos++)
     {
-        if (solutionOptimised[startPos] == maxStudentsPassing)
+        if (numCompletedIfStartAt[startPos] == maxStudentsCompleted)
         {
             bestStartingPosition = startPos;
             break;
