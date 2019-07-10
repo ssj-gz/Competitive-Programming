@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-07-10
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -26,14 +26,14 @@ vector<int> solveBruteForce(const vector<int>& extraTimeNeededForStudent)
         int studentId = startPos;
         for (int timeElapsed = 0; timeElapsed < n; timeElapsed++)
         {
-            cout << " studentId: " << studentId << " startPos:" << startPos << " timeElapsed: " << timeElapsed << " extraTimeNeededForStudent: " << extraTimeNeededForStudent[studentId] << endl;
+            //cout << " studentId: " << studentId << " startPos:" << startPos << " timeElapsed: " << timeElapsed << " extraTimeNeededForStudent: " << extraTimeNeededForStudent[studentId] << endl;
             if ( timeElapsed >= extraTimeNeededForStudent[studentId])
             {
                 numStudentsCompleted++;
             }
             studentId = (studentId + 1) % n;
         }
-        cout << "startPos: " << startPos << " numStudentsCompleted:" << numStudentsCompleted << endl;
+        //cout << "startPos: " << startPos << " numStudentsCompleted:" << numStudentsCompleted << endl;
         numCompletedIfStartAt.push_back(numStudentsCompleted);
     }
 
@@ -97,6 +97,10 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
     //
     // will be the number of students who need time x to finish by the time
     // the teacher visits them.
+    //
+    // The min and max index for numNeedingTimeWhenTeacherVisitedAdjusted are derived
+    // from inspecting the code: we never query for an index < 2 * n, nor an index
+    // > n.
     Vec<int> numNeedingTimeWhenTeacherVisitedAdjusted(-(2 * n), n);
     int numStudentsCompleted = 0;
     for (int i = 0; i < n; i++)
@@ -123,11 +127,11 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
             numStudentsCompleted++;
         }
         // All students who currently need 0 time when teacher visits them when teacher starts at startPos will
-        // fail when we start from startPos.
+        // fail when teacher starts from startPos + 1.
         const int numNewFailures = numNeedingTimeWhenTeacherVisitedAdjusted[-startPos];
         numStudentsCompleted -= numNewFailures;
         // Re-add student to numNeedingTimeWhenTeacherVisitedAdjusted - if starting at (startPos + 1), querying the time remaining
-        // when the teacher visits the student at startPos give the correct time remaining for this student, which will be 
+        // when the teacher visits the student at startPos should give the correct time remaining for this student, which will be 
         // extraTimeNeededForStudent[startPos] - (n - 1); i.e. we need to increase the value of 
         // numNeedingTimeWhenTeacherVisitedAdjusted[x - (startPos + 1)], where x = extraTimeNeededForStudent[startPos] - (n - 1).
         numNeedingTimeWhenTeacherVisitedAdjusted[extraTimeNeededForStudent[startPos] - (n - 1) -(startPos + 1)]++;
@@ -154,10 +158,12 @@ int main(int argc, char* argv[])
         const int n = rand() % 100 + 1;
         cout << n << endl;
 
-        const int maxTime = rand() % 1000 + 1;
+        const int maxTime = 1 + (rand() % n); // 0 <= ti <= n according to constraints.
         for (int i = 0; i < n; i++)
         {
-            cout << ((rand() % maxTime) + 1) << " ";
+            const int time = (rand() % (maxTime + 1));
+            assert(0 <= time && time <= n);
+            cout << time << " ";
         }
         cout << endl;
 
