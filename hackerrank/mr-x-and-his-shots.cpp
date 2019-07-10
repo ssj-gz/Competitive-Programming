@@ -42,24 +42,25 @@ class RangeTracker
             for (const auto range : ranges)
             {
                 assert(range.begin >= 1);
-                m_ranges.push_back({range, id});
+                m_rangesByBegin.insert({range, id});
                 id++;
             }
         }
         int numRangesAroundX() const
         {
-            return 0;
+            return m_activeRangesByEnd.size();
         }
         void incrementX()
         {
             m_x++;
-            while (!m_rangesByBegin.empty() && m_rangesByBegin.begin()->range.begin == m_x)
+            while (!m_rangesByBegin.empty() && m_rangesByBegin.begin()->range.begin <= m_x)
             {
+                cout << " adding new active range for x: " << m_x << endl;
                 const auto newActiveRange = *(m_rangesByBegin.begin());
 
                 m_activeRangesByEnd.insert(newActiveRange);
 
-                m_rangesByBegin.erase(m_rangesByBegin.end());
+                m_rangesByBegin.erase(m_rangesByBegin.begin());
             }
             while (!m_activeRangesByEnd.empty() && m_activeRangesByEnd.begin()->range.end < m_x)
             {
@@ -77,7 +78,6 @@ class RangeTracker
             Range range;
             int id = -1;
         };
-        vector<RangeWithId> m_ranges;
         int m_x = 0;
 
 
@@ -106,8 +106,10 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
 
     int64_t numShotRangesActive = 0;
     int64_t numPlayerRangesActive = 0;
+    int numIterations = 0;
     while (shotRangeTracker.hasRangesLeft() || playerRangeTracker.hasRangesLeft())
     {
+        cout << "iteration: numIterations " << endl;
         const int64_t numShotRangesActiveAtStartOfIteration = numShotRangesActive;
         const int64_t numPlayerRangesActiveAtStartOfIteration = numPlayerRangesActive;
 
@@ -120,8 +122,14 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
         const int64_t newShotRangesActive = numShotRangesActive - numShotRangesActiveAtStartOfIteration;
         const int64_t newPlayerRangesActive = numPlayerRangesActive - numPlayerRangesActiveAtStartOfIteration;
 
-        result += newShotRangesActive * numPlayerRangesActive;
+        cout << " newShotRangesActive: " << newShotRangesActive << " newPlayerRangesActive: " << newPlayerRangesActive << endl;
+
+        if (newShotRangesActive > 0)
+            result += newShotRangesActive * numPlayerRangesActive;
+        if (newPlayerRangesActive > 0)
         result += newPlayerRangesActive * numShotRangesActiveAtStartOfIteration;
+
+        numIterations++;
     }
 
     return result;
