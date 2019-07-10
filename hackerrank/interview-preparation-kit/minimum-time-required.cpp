@@ -23,7 +23,7 @@ int64_t findMinDaysToReachGoal(const vector<int>& machineTimeToProduce, int64_t 
         return numProduced;
     };
     // Binary chop.
-    int answer = -1;
+    int64_t answer = -1;
     while (bottomDay <= topDay)
     {
         int64_t middleDay = bottomDay + ((topDay - bottomDay) / 2);
