@@ -42,6 +42,15 @@ int findNumInComponentAndMarkAll(Node* node, int componentNum)
 
 int main()
 {
+    // Very poor explanation for this one, with a "for more clarity look at the following
+    // figure", which doesn't exist XD
+    //
+    // Seemed far too easy as presented, and I was looking for the catch.  But no: there
+    // really isn't one, except that if findNumInComponentAndMarkAll is implemented as a DFS,
+    // it will probably stack overflow.  Just using a BFS fixes this. 
+    //
+    // And that's about it - absolutely no cleverness required whatsoever - the code is hopefully
+    // self-explanatory.  Really weird problem.
     int N;
     cin >> N;
 
