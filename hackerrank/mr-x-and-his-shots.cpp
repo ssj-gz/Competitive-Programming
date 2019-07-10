@@ -62,20 +62,27 @@ class RangeTracker
             assert(dbgResult == m_activeRangesByEnd.size());
             return m_activeRangesByEnd.size();
         }
+        int numActiveRangesAddedAfterIncrement() const
+        {
+            return m_numActiveRangesAddedAfterIncrement;
+        }
         void incrementX()
         {
             m_x++;
+            m_numActiveRangesAddedAfterIncrement = 0;
             while (!m_rangesByBegin.empty() && m_rangesByBegin.begin()->range.begin <= m_x)
             {
-                cout << " adding new active range for x: " << m_x << endl;
+                cout << this << " adding new active range for x: " << m_x << endl;
                 const auto newActiveRange = *(m_rangesByBegin.begin());
-
                 m_activeRangesByEnd.insert(newActiveRange);
+                
+                m_numActiveRangesAddedAfterIncrement++;
 
                 m_rangesByBegin.erase(m_rangesByBegin.begin());
             }
             while (!m_activeRangesByEnd.empty() && m_activeRangesByEnd.begin()->range.end < m_x)
             {
+                cout << this << " removing active range for x: " << m_x << endl;
                 m_activeRangesByEnd.erase(m_activeRangesByEnd.begin());
             }
 
@@ -92,6 +99,8 @@ class RangeTracker
         };
         int m_x = 0;
         vector<Range> m_dbgRange; // TODO - remove this.
+
+        int m_numActiveRangesAddedAfterIncrement = 0;
 
 
         static bool compareRangeBegins(const RangeWithId& lhs, const RangeWithId& rhs)
@@ -119,7 +128,7 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
 
     int64_t numShotRangesActive = 0;
     int64_t numPlayerRangesActive = 0;
-    int numIterations = 0;
+    int numIterations = 1;
     while (shotRangeTracker.hasRangesLeft() || playerRangeTracker.hasRangesLeft())
     {
         cout << "iteration: numIterations " << endl;
@@ -132,15 +141,16 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
         numShotRangesActive = shotRangeTracker.numRangesAroundX();
         numPlayerRangesActive = playerRangeTracker.numRangesAroundX();
 
-        const int64_t newShotRangesActive = numShotRangesActive - numShotRangesActiveAtStartOfIteration;
-        const int64_t newPlayerRangesActive = numPlayerRangesActive - numPlayerRangesActiveAtStartOfIteration;
+        //const int64_t newShotRangesActive = numShotRangesActive - numShotRangesActiveAtStartOfIteration;
+        //const int64_t newPlayerRangesActive = numPlayerRangesActive - numPlayerRangesActiveAtStartOfIteration;
+        const int64_t newShotRangesActive = shotRangeTracker.numActiveRangesAddedAfterIncrement();
+        const int64_t newPlayerRangesActive = playerRangeTracker.numActiveRangesAddedAfterIncrement();
 
         cout << " newShotRangesActive: " << newShotRangesActive << " newPlayerRangesActive: " << newPlayerRangesActive << endl;
 
-        if (newShotRangesActive > 0)
-            result += newShotRangesActive * numPlayerRangesActive;
-        if (newPlayerRangesActive > 0)
-            result += newPlayerRangesActive * numShotRangesActive;
+        result += newShotRangesActive * numPlayerRangesActive;
+        result += newPlayerRangesActive * numShotRangesActive;
+        result -= newPlayerRangesActive * newShotRangesActive;
 
         numIterations++;
     }
@@ -179,4 +189,5 @@ int main()
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(shots, players);
     cout << "solutionOptimised: " << solutionOptimised << endl;
+    assert(solutionOptimised == solutionBruteForce);
 }
