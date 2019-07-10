@@ -30,7 +30,7 @@ int64_t solveOptimised(const vector<int>& heightsOriginal)
 {
     int64_t numPaths = 0;
     vector<int> heights(heightsOriginal);
-    heights.push_back(*max_element(heightsOriginal.begin(), heightsOriginal.end() + 1));
+    heights.push_back(*max_element(heightsOriginal.begin(), heightsOriginal.end()) + 1);
 
     vector<int> heightStack;
 
@@ -41,7 +41,7 @@ int64_t solveOptimised(const vector<int>& heightsOriginal)
 
     for (const auto height : heights)
     {
-        cout << "Current stack: " << endl;
+        cout << "height: " << height << " current stack: " << endl;
         for (const auto x : heightStack)
         {
             cout << x << " ";
@@ -72,7 +72,7 @@ int64_t solveOptimised(const vector<int>& heightsOriginal)
         heightStack.push_back(height);
     }
 
-    //assert(heightStack.size() == 1);
+    assert(heightStack.size() == 1);
 
 
     return numPaths;
