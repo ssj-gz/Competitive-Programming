@@ -1,7 +1,14 @@
 // Simon St James (ssjgz) - 2019-07-10
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include <sys/time.h>
 #include <cassert>
@@ -130,6 +137,7 @@ int main(int argc, char* argv[])
         cin >> extraTimeNeededForStudent[i];
     }
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(extraTimeNeededForStudent);
     cout << "solutionBruteForce: ";
     for (const auto x : solutionBruteForce)
@@ -145,4 +153,22 @@ int main(int argc, char* argv[])
     }
     cout << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
+    const auto maxStudentsPassing = *max_element(solutionOptimised.begin(), solutionOptimised.end());
+    int bestStartingPosition = -1;
+
+    for (int startPos = 0; startPos < n; startPos++)
+    {
+        if (solutionOptimised[startPos] == maxStudentsPassing)
+        {
+            bestStartingPosition = startPos;
+            break;
+        }
+    }
+
+    // We "+ 1" as the answer is expected to be 1-relative.
+    cout << (bestStartingPosition + 1) << endl;
+
+#endif
 }
