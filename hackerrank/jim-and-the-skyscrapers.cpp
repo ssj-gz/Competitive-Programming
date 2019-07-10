@@ -20,11 +20,6 @@ int64_t findNumValidPaths(const vector<int>& heightsOriginal)
 
     stack<int> heightStack;
 
-    auto nChoose2 = [](int n)
-    {
-        return (static_cast<int64_t>(n) * (n - 1)) / 2;
-    };
-
     for (const auto height : heights)
     {
         int prevHeightPopped = -1;
@@ -34,12 +29,16 @@ int64_t findNumValidPaths(const vector<int>& heightsOriginal)
             const int heightToPop = heightStack.top();
             if (heightToPop == prevHeightPopped)
             {
+                // Cumulatively summing numOfSameHeightPoppedInARow ( * 2, to include
+                // the right-to-left "mirror" of each left-to-right path) is an online
+                // alternative to waiting to get the full length r of the run of the same
+                // heights in a row and then doing r choose 2.
+                numPaths += numOfSameHeightPoppedInARow * 2;
+
                 numOfSameHeightPoppedInARow++;
             }
             else
             {
-                // We've completed a run of the same height: update numPaths accordingly.
-                numPaths += nChoose2(numOfSameHeightPoppedInARow) * 2;
                 numOfSameHeightPoppedInARow = 1;
             }
 
@@ -47,7 +46,6 @@ int64_t findNumValidPaths(const vector<int>& heightsOriginal)
 
             heightStack.pop();
         }
-        numPaths += nChoose2(numOfSameHeightPoppedInARow) * 2;
         heightStack.push(height);
     }
 
