@@ -63,16 +63,46 @@ vector<int> solveOptimised(const vector<int>& extraTimeNeededForStudent)
     {
         numCompletedIfStartAt.push_back(numStudentsCompleted);
 
-        subtractFromBlah(extraTimeNeededForStudent[startPos] - startPos, 1);
+#if 0
+        map<int, int> dbgBlah;
+        int studentId = startPos;
+        for (int timeElapsed = 0; timeElapsed < n; timeElapsed++)
+        {
+            const int timeRequiredWhenTeacherVisits = extraTimeNeededForStudent[studentId] - timeElapsed;
+            dbgBlah[timeRequiredWhenTeacherVisits]++;
+
+            studentId = (studentId + 1) % n;
+        }
+
+        cout << "startPos: " << startPos << " extraTimeNeededForStudent[startPos]: " << extraTimeNeededForStudent[startPos] << endl;
+        cout << "blah: " << endl;
+        for (const auto& x : blah)
+        {
+            cout << "[" << x.first << "," << x.second << "] ";
+        }
+        cout << endl;
+        cout << "dbgBlah: " << endl;
+        for (const auto& x : dbgBlah)
+        {
+            cout << "[" << x.first << "," << x.second << "] ";
+        }
+        cout << endl;
+#endif
+
+        //subtractFromBlah(extraTimeNeededForStudent[startPos] - startPos, 1);
+        subtractFromBlah(-startPos + extraTimeNeededForStudent[startPos], 1);
         if (extraTimeNeededForStudent[startPos] > 0)
         {
             cout << " removing student at startPos increases numStudentsCompleted" << endl;
             numStudentsCompleted++;
         }
         const int blee = extraTimeNeededForStudent[startPos] + n - 1;
-        cout << " startPos: " << startPos << " blah[-(startPos)+1]: " << blah[-(startPos+1)] << endl;
-        numStudentsCompleted -= blah[-(startPos+1)];
-        blah[extraTimeNeededForStudent[startPos] - (n - 1) + startPos]++;
+        //cout << " startPos: " << startPos << " blah[-(startPos)+1]: " << blah[-(startPos+1)] << endl;
+        const int studentFailThreshold = -(startPos); 
+        if (blah.find(studentFailThreshold) != blah.end())
+            numStudentsCompleted -= blah[studentFailThreshold];
+        //numStudentsCompleted -= dbgBlah[0];
+        blah[extraTimeNeededForStudent[startPos] - (n ) - startPos]++;
         if (extraTimeNeededForStudent[startPos] - (n - 1) > 0)
         {
             cout << " re-adding student at startPos decreases numStudentsCompleted" << endl;
@@ -92,7 +122,7 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
 
-        const int n = rand() % 100 + 1;
+        const int n = rand() % 10 + 1;
         cout << n << endl;
 
         const int maxTime = rand() % 1000 + 1;
@@ -114,12 +144,14 @@ int main(int argc, char* argv[])
     }
 
     const auto solutionBruteForce = solveBruteForce(extraTimeNeededForStudent);
+    cout << "solutionBruteForce: ";
     for (const auto x : solutionBruteForce)
     {
         cout << x << " ";
     }
     cout << endl;
     const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
+    cout << "solutionBruteForce: ";
     for (const auto x : solutionOptimised)
     {
         cout << x << " ";
