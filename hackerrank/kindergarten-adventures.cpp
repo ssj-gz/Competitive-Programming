@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-07-10
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -139,20 +139,21 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(extraTimeNeededForStudent);
-    cout << "solutionBruteForce: ";
-    for (const auto x : solutionBruteForce)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
     const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
-    cout << "solutionOptimised: ";
-    for (const auto x : solutionOptimised)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
     assert(solutionOptimised == solutionBruteForce);
+    int bestStartingPosition = -1;
+
+    const auto maxStudentsPassing = *max_element(solutionOptimised.begin(), solutionOptimised.end());
+    for (int startPos = 0; startPos < n; startPos++)
+    {
+        if (solutionBruteForce[startPos] == maxStudentsPassing)
+        {
+            bestStartingPosition = startPos;
+            break;
+        }
+    }
+    // We "+ 1" as the answer is expected to be 1-relative.
+    cout << "solutionBruteForce: " << (bestStartingPosition + 1) << endl;
 #else
     const auto solutionOptimised = solveOptimised(extraTimeNeededForStudent);
     const auto maxStudentsPassing = *max_element(solutionOptimised.begin(), solutionOptimised.end());
