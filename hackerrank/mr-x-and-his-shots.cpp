@@ -1,3 +1,10 @@
+// Simon St James (ssjgz) - 2019-07-10
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <set>
@@ -47,21 +54,9 @@ class RangeTracker
                 m_rangesByBegin.insert({range, id});
                 id++;
             }
-            m_dbgRange = ranges;
         }
         int numRangesAroundX() const
         {
-            // TODO - remove this.
-            int dbgResult = 0;
-            for (const auto& range : m_dbgRange)
-            {
-                if (m_x < range.begin || m_x > range.end)
-                    continue;
-
-                dbgResult++;
-
-            }
-            assert(dbgResult == m_activeRangesByEnd.size());
             return m_activeRangesByEnd.size();
         }
         int numActiveRangesAddedAfterIncrement() const
@@ -74,7 +69,7 @@ class RangeTracker
             m_numActiveRangesAddedAfterIncrement = 0;
             while (!m_rangesByBegin.empty() && m_rangesByBegin.begin()->range.begin <= m_x)
             {
-                cout << this << " adding new active range for x: " << m_x << endl;
+                //cout << this << " adding new active range for x: " << m_x << endl;
                 const auto newActiveRange = *(m_rangesByBegin.begin());
                 m_activeRangesByEnd.insert(newActiveRange);
                 
@@ -84,7 +79,7 @@ class RangeTracker
             }
             while (!m_activeRangesByEnd.empty() && m_activeRangesByEnd.begin()->range.end < m_x)
             {
-                cout << this << " removing active range for x: " << m_x << endl;
+                //cout << this << " removing active range for x: " << m_x << endl;
                 m_activeRangesByEnd.erase(m_activeRangesByEnd.begin());
             }
 
@@ -100,7 +95,6 @@ class RangeTracker
             int id = -1;
         };
         int m_x = 0;
-        vector<Range> m_dbgRange; // TODO - remove this.
 
         int m_numActiveRangesAddedAfterIncrement = 0;
 
@@ -133,7 +127,7 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
     int numIterations = 1;
     while (shotRangeTracker.hasRangesLeft() || playerRangeTracker.hasRangesLeft())
     {
-        cout << "iteration: numIterations " << endl;
+        //cout << "iteration: numIterations " << endl;
         const int64_t numShotRangesActiveAtStartOfIteration = numShotRangesActive;
         const int64_t numPlayerRangesActiveAtStartOfIteration = numPlayerRangesActive;
 
@@ -148,7 +142,7 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
         const int64_t newShotRangesActive = shotRangeTracker.numActiveRangesAddedAfterIncrement();
         const int64_t newPlayerRangesActive = playerRangeTracker.numActiveRangesAddedAfterIncrement();
 
-        cout << " newShotRangesActive: " << newShotRangesActive << " newPlayerRangesActive: " << newPlayerRangesActive << endl;
+        //cout << " newShotRangesActive: " << newShotRangesActive << " newPlayerRangesActive: " << newPlayerRangesActive << endl;
 
         result += newShotRangesActive * numPlayerRangesActive;
         result += newPlayerRangesActive * numShotRangesActive;
@@ -223,9 +217,15 @@ int main(int argc, char* argv[])
     }
 
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(shots, players);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(shots, players);
     cout << "solutionOptimised: " << solutionOptimised << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = solveOptimised(shots, players);
+    cout << solutionOptimised << endl;
+#endif
+
 }
