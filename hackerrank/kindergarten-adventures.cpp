@@ -87,7 +87,7 @@ vector<int> findNumCompletedIfStartAt(const vector<int>& extraTimeNeededForStude
 
         // Update lookups/ calculations resulting from the move of
         // starting position from startPos to startPos + 1.
-        // Remove contribution of the student at startPos + 1 from numNeedingTimeWhenTeacherVisitedAdjusted.
+        // Remove contribution of the student at startPos from numNeedingTimeWhenTeacherVisitedAdjusted.
         numNeedingTimeWhenTeacherVisitedAdjusted[extraTimeNeededForStudent[startPos] - startPos]--;
         if (extraTimeNeededForStudent[startPos] > 0)
         {
