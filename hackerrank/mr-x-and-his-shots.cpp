@@ -4,6 +4,8 @@
 
 #include <cassert>
 
+#include <sys/time.h>
+
 using namespace std;
 
 struct Range
@@ -150,6 +152,7 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
 
         result += newShotRangesActive * numPlayerRangesActive;
         result += newPlayerRangesActive * numShotRangesActive;
+        // Remove overcount.
         result -= newPlayerRangesActive * newShotRangesActive;
 
         numIterations++;
@@ -158,8 +161,43 @@ int64_t solveOptimised(const vector<Range>& shots, const vector<Range>& players)
     return result;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int numShots = rand() % 100 + 1;
+        const int numPlayers = rand() % 100 + 1;
+
+        const int maxEndPoint = rand() % 5000;
+
+        auto randomRange = [maxEndPoint]()
+        {
+            int point1 = rand() % maxEndPoint + 1;
+            int point2 = rand() % maxEndPoint + 1;
+            if (point2 < point1)
+                swap(point1, point2);
+
+            return Range{ point1, point2 };
+        };
+
+        cout << numShots << " " << numPlayers << endl;
+        for (int i = 0; i < numShots; i++)
+        {
+            const auto shotRange = randomRange();
+            cout << shotRange.begin << " " << shotRange.end << endl;
+        }
+        for (int i = 0; i < numPlayers; i++)
+        {
+            const auto playerRange = randomRange();
+            cout << playerRange.begin << " " << playerRange.end << endl;
+        }
+        return 0;
+
+    }
     int numShots;
     cin >> numShots;
 
