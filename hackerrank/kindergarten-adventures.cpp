@@ -64,10 +64,10 @@ vector<int> findNumCompletedIfStartAt(const vector<int>& extraTimeNeededForStude
     //      numNeedingTimeWhenTeacherVisitedAdjusted[x - startPos] 
     //
     //    will be the number of students who need time x to finish by the time
-    //    the teacher visits them.
+    //    the teacher visits them (x can be negative).
     //
     // The min and max index for numNeedingTimeWhenTeacherVisitedAdjusted are derived
-    // from inspecting the code: we never query for an index < 2 * n, nor an index
+    // from inspecting the code: we never query for an index < -2 * n, nor an index
     // > n.
     Vec<int> numNeedingTimeWhenTeacherVisitedAdjusted(-(2 * n), n);
     int numStudentsCompleted = 0;
