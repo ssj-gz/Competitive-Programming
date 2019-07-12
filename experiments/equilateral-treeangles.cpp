@@ -46,9 +46,42 @@ int64_t solveBruteForce(const vector<Node>& nodes)
         {
             assert(distanceBetweenNodes[i][j] != -1);
             assert(distanceBetweenNodes[i][j] == distanceBetweenNodes[j][i]);
+            assert(distanceBetweenNodes[i][j] < numNodes);
         }
     }
     // TODO - all the rest of this XD
+    for (const auto& node : nodes)
+    {
+        if (!node.hasPerson)
+            continue;
+        vector<vector<const Node*>> nodesAtDistance(numNodes);
+        for (int i = 0; i < numNodes; i++)
+        {
+            nodesAtDistance[distanceBetweenNodes[node.index][i]].push_back(&(nodes[i]));
+        }
+        for (int distance = 1; distance < numNodes; distance++)
+        {
+            const auto& nd = nodesAtDistance[distance];
+
+            for (const auto node1 : nd)
+            {
+                if (!node1->hasPerson)
+                    continue;
+                for (const auto node2 : nd)
+                {
+                    if (!node2->hasPerson)
+                        continue;
+                    assert(distanceBetweenNodes[node.index][node1->index] == distance);
+                    assert(distanceBetweenNodes[node.index][node2->index] == distance);
+
+                    if (distanceBetweenNodes[node1->index][node2->index] == distance)
+                    {
+                        result++;
+                    }
+                }
+            }
+        }
+    }
 
     return result;
 }
