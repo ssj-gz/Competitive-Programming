@@ -149,7 +149,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         for (auto descendentHeightPair : infoForChildDescendentHeight)
         {
             const int descendentHeight = descendentHeightPair.first;
-            if (descendentHeight == height)
+            if (descendentHeight <= height)
                 continue;
 
 
@@ -189,11 +189,14 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         ancestors.pop_back();
     }
     cout << "numNodes: " << numNodes << endl;
-    vector<int> dbgNumAncestorsWithHeight(::numNodes, 0);
-    dbgCountHeights(currentNode, parentNode, height, dbgNumAncestorsWithHeight);
-    for (int height = 0; height < numNodes; height++)
+    vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
+    dbgCountHeights(currentNode, parentNode, height, dbgNumDescendantsWithHeight);
+    for (int h = height; h < numNodes; h++)
     {
-        assert(dbgNumAncestorsWithHeight[height] == infoForDescendentHeight[height].numWithHeight);
+        if(dbgNumDescendantsWithHeight[h] != infoForDescendentHeight[h].numWithHeight)
+        {
+            cout << " node: " << currentNode->id << " h: " << h << " dbgNumDescendantsWithHeight[h]: " << dbgNumDescendantsWithHeight[h] << " infoForDescendentHeight[h]: " << infoForDescendentHeight[h].numWithHeight << endl;
+        }
     }
 
     return infoForDescendentHeight;
