@@ -99,6 +99,9 @@ int main(int argc, char* argv[])
         cin >> hasPerson;
 
         nodes[i].hasPerson = (hasPerson == 1);
+
+        nodes[i].index = i;
+        nodes[i].id = i + 1;
     }
     assert(cin);
 
