@@ -59,18 +59,22 @@ int64_t solveBruteForce(const vector<Node>& nodes)
         {
             nodesAtDistance[distanceBetweenNodes[node.index][i]].push_back(&(nodes[i]));
         }
+        cout << "Node: " << node.id << endl;
         for (int distance = 1; distance < numNodes; distance++)
         {
+            cout << " distance: " << distance << endl;
             const auto& nd = nodesAtDistance[distance];
 
             for (const auto node1 : nd)
             {
                 if (!node1->hasPerson)
                     continue;
+                cout << "  node1: " << node.id << endl;
                 for (const auto node2 : nd)
                 {
                     if (!node2->hasPerson)
                         continue;
+                    cout << "  node2: " << node.id << endl;
                     assert(distanceBetweenNodes[node.index][node1->index] == distance);
                     assert(distanceBetweenNodes[node.index][node2->index] == distance);
 
