@@ -158,14 +158,9 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             const int triangleTopAncestorIndex = requiredHeightOfTriangleTop;
 
             cout << "height: " << height << " descendentHeight: " << descendentHeight << " triangleTopAncestorIndex: " << triangleTopAncestorIndex << " ancestors.size(): " << ancestors.size() << endl;
-            if (triangleTopAncestorIndex < 0)
-                continue;
 
-            assert(triangleTopAncestorIndex < ancestors.size());
-            assert(height - ancestors[triangleTopAncestorIndex]->dbgHeightInOptimisedDFS == descendentHeight - height);
+            assert(triangleTopAncestorIndex < static_cast<int>(ancestors.size()));
 
-            if (!ancestors[triangleTopAncestorIndex]->hasPerson)
-                continue;
 
             auto& heightInfo = infoForChildDescendentHeight[descendentHeight];
             auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
@@ -184,7 +179,11 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 #endif
 
             cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << endl;
-            numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
+            if (triangleTopAncestorIndex >= 0 && ancestors[triangleTopAncestorIndex]->hasPerson)
+            {
+                assert(height - ancestors[triangleTopAncestorIndex]->dbgHeightInOptimisedDFS == descendentHeight - height);
+                numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
+            }
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
         }
         ancestors.pop_back();
