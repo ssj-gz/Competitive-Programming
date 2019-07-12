@@ -21,7 +21,7 @@ struct Node
 
 struct HeightInfo
 {
-    int numWithHeight = -1;
+    int numWithHeight = 0;
     Node* lastUpdatedAtNode = nullptr;
 };
 
@@ -147,6 +147,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             auto& heightInfo = infoForChildDescendentHeight[descendentHeight];
             auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
 
+#if 0
             if (heightInfo.lastUpdatedAtNode != currentNode)
             {
                 numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
@@ -157,6 +158,9 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 numTriangles += nChoose2(otherHeightInfo.numWithHeight) * numTripletPermutations;
                 otherHeightInfo.lastUpdatedAtNode = currentNode;
             }
+#endif
+
+            cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << endl;
             numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
         }
