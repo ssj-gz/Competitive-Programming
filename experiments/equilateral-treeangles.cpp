@@ -150,39 +150,41 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         for (auto descendentHeightPair : infoForChildDescendentHeight)
         {
             const int descendentHeight = descendentHeightPair.first;
-            if (descendentHeight <= height)
-                continue;
-
-
-            const int requiredHeightOfTriangleTop = height - (descendentHeight - height);
-            const int triangleTopAncestorIndex = requiredHeightOfTriangleTop;
-
-            cout << "height: " << height << " descendentHeight: " << descendentHeight << " triangleTopAncestorIndex: " << triangleTopAncestorIndex << " ancestors.size(): " << ancestors.size() << endl;
-
-            assert(triangleTopAncestorIndex < static_cast<int>(ancestors.size()));
-
 
             auto& heightInfo = infoForChildDescendentHeight[descendentHeight];
             auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
 
+            if (descendentHeight > height)
+            {
+
+                const int requiredHeightOfTriangleTop = height - (descendentHeight - height);
+                const int triangleTopAncestorIndex = requiredHeightOfTriangleTop;
+
+                cout << "height: " << height << " descendentHeight: " << descendentHeight << " triangleTopAncestorIndex: " << triangleTopAncestorIndex << " ancestors.size(): " << ancestors.size() << endl;
+
+                assert(triangleTopAncestorIndex < static_cast<int>(ancestors.size()));
+
+
+
 #if 0
-            if (heightInfo.lastUpdatedAtNode != currentNode)
-            {
-                numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
-                heightInfo.lastUpdatedAtNode = currentNode;
-            }
-            if (otherHeightInfo.lastUpdatedAtNode != currentNode)
-            {
-                numTriangles += nChoose2(otherHeightInfo.numWithHeight) * numTripletPermutations;
-                otherHeightInfo.lastUpdatedAtNode = currentNode;
-            }
+                if (heightInfo.lastUpdatedAtNode != currentNode)
+                {
+                    numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
+                    heightInfo.lastUpdatedAtNode = currentNode;
+                }
+                if (otherHeightInfo.lastUpdatedAtNode != currentNode)
+                {
+                    numTriangles += nChoose2(otherHeightInfo.numWithHeight) * numTripletPermutations;
+                    otherHeightInfo.lastUpdatedAtNode = currentNode;
+                }
 #endif
 
-            cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << endl;
-            if (triangleTopAncestorIndex >= 0 && ancestors[triangleTopAncestorIndex]->hasPerson)
-            {
-                assert(height - ancestors[triangleTopAncestorIndex]->dbgHeightInOptimisedDFS == descendentHeight - height);
-                numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
+                cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << endl;
+                if (triangleTopAncestorIndex >= 0 && ancestors[triangleTopAncestorIndex]->hasPerson)
+                {
+                    assert(height - ancestors[triangleTopAncestorIndex]->dbgHeightInOptimisedDFS == descendentHeight - height);
+                    numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
+                }
             }
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
         }
