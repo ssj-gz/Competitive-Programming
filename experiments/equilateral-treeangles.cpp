@@ -100,7 +100,8 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int>& dbgNumAncestorsWithHeight)
 {
     assert(height >= 0 && height < dbgNumAncestorsWithHeight.size());
-    dbgNumAncestorsWithHeight[height]++;
+    if (currentNode->hasPerson)
+        dbgNumAncestorsWithHeight[height]++;
     cout << "dbgCountHeights currentNode: " << (currentNode->id) << endl;
     for (auto child : currentNode->neighbours)
     {
@@ -196,6 +197,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         if(dbgNumDescendantsWithHeight[h] != infoForDescendentHeight[h].numWithHeight)
         {
             cout << " node: " << currentNode->id << " h: " << h << " dbgNumDescendantsWithHeight[h]: " << dbgNumDescendantsWithHeight[h] << " infoForDescendentHeight[h]: " << infoForDescendentHeight[h].numWithHeight << endl;
+            assert(false);
         }
     }
 
