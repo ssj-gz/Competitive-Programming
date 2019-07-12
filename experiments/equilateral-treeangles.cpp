@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include <cassert>
 
@@ -16,6 +17,12 @@ struct Node
     int index = -1; // 0-relative.
 
     bool visitedInBruteForceDFS = false;
+};
+
+struct HeightInfo
+{
+    int numWithHeight = -1;
+    Node* lastUpdatedAtNode = nullptr;
 };
 
 void distDFS(const int rootNodeIndex, const Node* currentNode, const Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
@@ -49,7 +56,6 @@ int64_t solveBruteForce(const vector<Node>& nodes)
             assert(distanceBetweenNodes[i][j] < numNodes);
         }
     }
-    // TODO - all the rest of this XD
     for (const auto& node : nodes)
     {
         if (!node.hasPerson)
@@ -86,6 +92,38 @@ int64_t solveBruteForce(const vector<Node>& nodes)
             }
         }
     }
+
+    return result;
+}
+
+map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, vector<Node*>& ancestors, int64_t& numTriangles)
+{
+    map<int, HeightInfo> infoForHeight;
+
+    for (auto child : currentNode->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        // TODO - the rest of this XD
+        ancestors.push_back(currentNode);
+        solveOptimisedAux(child, currentNode, height + 1, ancestors, numTriangles);
+        ancestors.pop_back();
+    }
+
+
+    return infoForHeight;
+}
+
+int64_t solveOptimised(vector<Node>& nodes)
+{
+    int64_t result = 0;
+
+    const int numNodes = nodes.size();
+
+    Node* rootNode = &(nodes.front());
+    vector<Node*> ancestors;
+    solveOptimisedAux(rootNode, nullptr, 0, ancestors, result);
 
     return result;
 }
@@ -144,4 +182,6 @@ int main(int argc, char* argv[])
 
     const auto solutionBruteForce = solveBruteForce(nodes);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    const auto solutionOptimised = solveOptimised(nodes);
+    cout << "solutionOptimised: " << solutionOptimised << endl;
 }
