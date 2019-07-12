@@ -17,6 +17,7 @@ struct Node
     int index = -1; // 0-relative.
 
     bool visitedInBruteForceDFS = false;
+    int dbgHeightInOptimisedDFS = -1; // TODO - remove
 };
 
 struct HeightInfo
@@ -96,8 +97,28 @@ int64_t solveBruteForce(const vector<Node>& nodes)
     return result;
 }
 
+void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int>& dbgNumAncestorsWithHeight)
+{
+    assert(height >= 0 && height < dbgNumAncestorsWithHeight.size());
+    dbgNumAncestorsWithHeight[height]++;
+    cout << "dbgCountHeights currentNode: " << (currentNode->id) << endl;
+    for (auto child : currentNode->neighbours)
+    {
+        cout << "wee" << endl;
+        if (child == parentNode)
+            continue;
+        cout << " child: " << child->id << endl;
+
+        dbgCountHeights(child, currentNode, height + 1, dbgNumAncestorsWithHeight);
+    }
+}
+
+int numNodes = 0;
+ 
 map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, vector<Node*>& ancestors, int64_t& numTriangles)
 {
+    assert(currentNode->dbgHeightInOptimisedDFS == -1);
+    currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
 
     const int numTripletPermutations = 6;
@@ -140,6 +161,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 continue;
 
             assert(triangleTopAncestorIndex < ancestors.size());
+            assert(height - ancestors[triangleTopAncestorIndex]->dbgHeightInOptimisedDFS == descendentHeight - height);
 
             if (!ancestors[triangleTopAncestorIndex]->hasPerson)
                 continue;
@@ -166,6 +188,13 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         }
         ancestors.pop_back();
     }
+    cout << "numNodes: " << numNodes << endl;
+    vector<int> dbgNumAncestorsWithHeight(::numNodes, 0);
+    dbgCountHeights(currentNode, parentNode, height, dbgNumAncestorsWithHeight);
+    for (int height = 0; height < numNodes; height++)
+    {
+        assert(dbgNumAncestorsWithHeight[height] == infoForDescendentHeight[height].numWithHeight);
+    }
 
     return infoForDescendentHeight;
 }
@@ -175,6 +204,7 @@ int64_t solveOptimised(vector<Node>& nodes)
     int64_t result = 0;
 
     const int numNodes = nodes.size();
+    ::numNodes = numNodes;
 
     Node* rootNode = &(nodes.front());
     vector<Node*> ancestors;
@@ -236,7 +266,8 @@ int main(int argc, char* argv[])
     assert(cin);
 
     const auto solutionBruteForce = solveBruteForce(nodes);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(nodes);
+    cout << "solutionBruteForce: " << solutionBruteForce << endl;
     cout << "solutionOptimised: " << solutionOptimised << endl;
+    assert(solutionOptimised == solutionBruteForce);
 }
