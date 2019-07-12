@@ -98,7 +98,19 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
 map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, vector<Node*>& ancestors, int64_t& numTriangles)
 {
-    map<int, HeightInfo> infoForHeight;
+    map<int, HeightInfo> infoForDescendentHeight;
+
+    const int numTripletPermutations = 6;
+
+    if (currentNode->hasPerson)
+    {
+        infoForDescendentHeight[height].numWithHeight++;
+    }
+
+    auto nChoose2 = [](const int64_t n)
+    {
+        return (n * (n - 1)) / 2;
+    };
 
     for (auto child : currentNode->neighbours)
     {
@@ -107,12 +119,51 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
         // TODO - the rest of this XD
         ancestors.push_back(currentNode);
-        solveOptimisedAux(child, currentNode, height + 1, ancestors, numTriangles);
+        auto infoForChildDescendentHeight = solveOptimisedAux(child, currentNode, height + 1, ancestors, numTriangles);
+        if (infoForChildDescendentHeight.size() < infoForDescendentHeight.size())
+        {
+            swap(infoForDescendentHeight, infoForChildDescendentHeight);
+        }
+
+        for (auto descendentHeightPair : infoForChildDescendentHeight)
+        {
+            const int descendentHeight = descendentHeightPair.first;
+            if (descendentHeight == height)
+                continue;
+
+
+            const int requiredHeightOfTriangleTop = height - (descendentHeight - height);
+            const int triangleTopAncestorIndex = requiredHeightOfTriangleTop;
+
+            cout << "height: " << height << " descendentHeight: " << descendentHeight << " triangleTopAncestorIndex: " << triangleTopAncestorIndex << " ancestors.size(): " << ancestors.size() << endl;
+            if (triangleTopAncestorIndex < 0)
+                continue;
+
+            assert(triangleTopAncestorIndex < ancestors.size());
+
+            if (!ancestors[triangleTopAncestorIndex]->hasPerson)
+                continue;
+
+            auto& heightInfo = infoForChildDescendentHeight[descendentHeight];
+            auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
+
+            if (heightInfo.lastUpdatedAtNode != currentNode)
+            {
+                numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
+                heightInfo.lastUpdatedAtNode = currentNode;
+            }
+            if (otherHeightInfo.lastUpdatedAtNode != currentNode)
+            {
+                numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
+                heightInfo.lastUpdatedAtNode = currentNode;
+            }
+            numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
+            otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
+        }
         ancestors.pop_back();
     }
 
-
-    return infoForHeight;
+    return infoForDescendentHeight;
 }
 
 int64_t solveOptimised(vector<Node>& nodes)
