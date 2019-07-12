@@ -10,9 +10,48 @@ using namespace std;
 struct Node
 {
     vector<Node*> neighbours;
-
+    int id = -1; // 1-relative - handy for debugging.
     bool hasPerson = false;
+
+    int index = -1; // 0-relative.
+
+    bool visitedInBruteForceDFS = false;
 };
+
+void distDFS(const int rootNodeIndex, Node* currentNode, Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
+{
+    distanceBetweenNodes[rootNodeIndex][currentNode->index] = height;
+    for (auto childNode : currentNode->neighbours)
+    {
+        if (childNode == parentNode)
+            continue;
+
+        distDFS(rootNodeIndex, childNode, currentNode, height + 1, distanceBetweenNodes);
+    }
+}
+
+int64_t solveBruteForce(vector<Node>& nodes)
+{
+    int64_t result = 0;
+
+    const int numNodes = nodes.size();
+    vector<vector<int>> distanceBetweenNodes(numNodes, vector<int>(numNodes, -1));
+    for (auto& rootNode : nodes)
+    {
+        distDFS(rootNode.index, &rootNode, nullptr, 0, distanceBetweenNodes);
+    }
+    for (int i = 0; i < numNodes; i++)
+    {
+        for (int j = 0; j < numNodes; j++)
+        {
+            assert(distanceBetweenNodes[i][j] != -1);
+            assert(distanceBetweenNodes[i][j] == distanceBetweenNodes[j][i]);
+        }
+    }
+    // TODO - all the rest of this XD
+
+    return result;
+}
 
 int main(int argc, char* argv[])
 {
@@ -62,4 +101,7 @@ int main(int argc, char* argv[])
         nodes[i].hasPerson = (hasPerson == 1);
     }
     assert(cin);
+
+    const auto solutionBruteForce = solveBruteForce(nodes);
+    cout << "solutionBruteForce: " << solutionBruteForce << endl;
 }
