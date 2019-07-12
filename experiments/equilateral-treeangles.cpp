@@ -18,7 +18,7 @@ struct Node
     bool visitedInBruteForceDFS = false;
 };
 
-void distDFS(const int rootNodeIndex, Node* currentNode, Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
+void distDFS(const int rootNodeIndex, const Node* currentNode, const Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
 {
     distanceBetweenNodes[rootNodeIndex][currentNode->index] = height;
     for (auto childNode : currentNode->neighbours)
@@ -30,13 +30,13 @@ void distDFS(const int rootNodeIndex, Node* currentNode, Node* parentNode, int h
     }
 }
 
-int64_t solveBruteForce(vector<Node>& nodes)
+int64_t solveBruteForce(const vector<Node>& nodes)
 {
     int64_t result = 0;
 
     const int numNodes = nodes.size();
     vector<vector<int>> distanceBetweenNodes(numNodes, vector<int>(numNodes, -1));
-    for (auto& rootNode : nodes)
+    for (const auto& rootNode : nodes)
     {
         distDFS(rootNode.index, &rootNode, nullptr, 0, distanceBetweenNodes);
     }
