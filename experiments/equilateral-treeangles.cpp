@@ -154,8 +154,8 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             }
             if (otherHeightInfo.lastUpdatedAtNode != currentNode)
             {
-                numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
-                heightInfo.lastUpdatedAtNode = currentNode;
+                numTriangles += nChoose2(otherHeightInfo.numWithHeight) * numTripletPermutations;
+                otherHeightInfo.lastUpdatedAtNode = currentNode;
             }
             numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
