@@ -287,6 +287,6 @@ int main(int argc, char* argv[])
     const auto solutionBruteForce = solveBruteForce(nodes);
     const auto solutionOptimised = solveOptimised(nodes);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
-    cout << "solutionOptimised: " << solutionOptimised << endl;
+    cout << "solutionOptimised: " << solutionOptimised  << " (" << (solutionBruteForce / 6) << " basic triangles)"<< endl;
     assert(solutionOptimised == solutionBruteForce);
 }
