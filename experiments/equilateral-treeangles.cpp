@@ -23,6 +23,7 @@ struct Node
 struct HeightInfo
 {
     int numWithHeight = 0;
+    int numPairsWithHeightViaDifferentChildren = 0;
     Node* lastUpdatedAtNode = nullptr;
 };
 
@@ -66,27 +67,24 @@ int64_t solveBruteForce(const vector<Node>& nodes)
         {
             nodesAtDistance[distanceBetweenNodes[node.index][i]].push_back(&(nodes[i]));
         }
-        cout << "Node: " << node.id << endl;
         for (int distance = 1; distance < numNodes; distance++)
         {
-            cout << " distance: " << distance << endl;
             const auto& nd = nodesAtDistance[distance];
 
             for (const auto node1 : nd)
             {
                 if (!node1->hasPerson)
                     continue;
-                cout << "  node1: " << node.id << endl;
                 for (const auto node2 : nd)
                 {
                     if (!node2->hasPerson)
                         continue;
-                    cout << "  node2: " << node.id << endl;
                     assert(distanceBetweenNodes[node.index][node1->index] == distance);
                     assert(distanceBetweenNodes[node.index][node2->index] == distance);
 
                     if (distanceBetweenNodes[node1->index][node2->index] == distance)
                     {
+                        cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << endl;
                         result++;
                     }
                 }
@@ -134,6 +132,8 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         return (n * (n - 1)) / 2;
     };
 
+    map<int, HeightInfo> localHeightInfo;
+
     for (auto child : currentNode->neighbours)
     {
         if (child == parentNode)
@@ -157,36 +157,25 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             if (descendentHeight > height)
             {
 
-                const int requiredHeightOfTriangleTop = height - (descendentHeight - height);
-                const int triangleTopAncestorIndex = requiredHeightOfTriangleTop;
-
-                cout << "height: " << height << " descendentHeight: " << descendentHeight << " triangleTopAncestorIndex: " << triangleTopAncestorIndex << " ancestors.size(): " << ancestors.size() << endl;
-
-                assert(triangleTopAncestorIndex < static_cast<int>(ancestors.size()));
-
-
-
-#if 0
-                if (heightInfo.lastUpdatedAtNode != currentNode)
-                {
-                    numTriangles += nChoose2(heightInfo.numWithHeight) * numTripletPermutations;
-                    heightInfo.lastUpdatedAtNode = currentNode;
-                }
-                if (otherHeightInfo.lastUpdatedAtNode != currentNode)
-                {
-                    numTriangles += nChoose2(otherHeightInfo.numWithHeight) * numTripletPermutations;
-                    otherHeightInfo.lastUpdatedAtNode = currentNode;
-                }
-#endif
-
                 cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << endl;
-                if (triangleTopAncestorIndex >= 0 && ancestors[triangleTopAncestorIndex]->hasPerson)
+                // Triplets with currentNode as LCA of all pairs out of the three nodes.
+                if (heightInfo.lastUpdatedAtNode == currentNode)
                 {
-                    assert(height - ancestors[triangleTopAncestorIndex]->dbgHeightInOptimisedDFS == descendentHeight - height);
-                    numTriangles += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations; 
+                    assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
+                    numTriangles += otherHeightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * numTripletPermutations;
                 }
+                else
+                {
+                    assert(heightInfo.lastUpdatedAtNode != currentNode);
+                    numTriangles += heightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren;
+                }
+
+
+
+                localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations;
             }
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
+            otherHeightInfo.lastUpdatedAtNode = currentNode;
         }
         ancestors.pop_back();
     }
@@ -227,7 +216,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numNodes = 1 + rand() % 100;
+        const int numNodes = 1 + rand() % 10;
         cout << numNodes << endl;
 
         for (int i = 0; i < numNodes - 1; i++)
@@ -275,5 +264,5 @@ int main(int argc, char* argv[])
     const auto solutionOptimised = solveOptimised(nodes);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     cout << "solutionOptimised: " << solutionOptimised << endl;
-    assert(solutionOptimised == solutionBruteForce);
+    //assert(solutionOptimised == solutionBruteForce);
 }
