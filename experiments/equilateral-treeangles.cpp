@@ -157,30 +157,45 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             if (descendentHeight > height)
             {
 
-                cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << endl;
+                cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << " numPairsWithHeightViaDifferentChildren:" << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << endl;
                 // Triplets with currentNode as LCA of all pairs out of the three nodes.
+                int newExtraDescendentHeight = -1;
+                int knownDescendtHeight = -1;
                 if (heightInfo.lastUpdatedAtNode == currentNode)
                 {
                     assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
-                    numTriangles += otherHeightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * numTripletPermutations;
+                    newExtraDescendentHeight = otherHeightInfo.numWithHeight;
+                    knownDescendtHeight = heightInfo.numWithHeight;
+                    cout << " found threeways: " << otherHeightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << endl;
                 }
                 else
                 {
                     assert(heightInfo.lastUpdatedAtNode != currentNode);
-                    numTriangles += heightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * numTripletPermutations;
+                    newExtraDescendentHeight = heightInfo.numWithHeight;
+                    knownDescendtHeight = otherHeightInfo.numWithHeight;
+                }
+                if (newExtraDescendentHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren > 0)
+                {
+                    cout << " found threeway: adding: " << newExtraDescendentHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << endl;
+                    numTriangles += newExtraDescendentHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * numTripletPermutations;
                 }
 
 
 
+                cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
                 localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += heightInfo.numWithHeight * otherHeightInfo.numWithHeight;
-                cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << endl;
                 if (parentNode != nullptr)
                 {
                     vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
                     const int requiredNonDescendantDist = (descendentHeight - height);
                     dbgCountHeights(parentNode, currentNode, 1, dbgNumDescendantsWithHeight);
+                    const int numNewTriangles = knownDescendtHeight * newExtraDescendentHeight * dbgNumDescendantsWithHeight[requiredNonDescendantDist];
                     cout << " currentNode: " << currentNode->id << " num non-ancestors with dist: " << requiredNonDescendantDist << ": " << dbgNumDescendantsWithHeight[requiredNonDescendantDist] << endl;
-                    numTriangles += localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * dbgNumDescendantsWithHeight[requiredNonDescendantDist] * numTripletPermutations;
+                    if (numNewTriangles > 0)
+                    {
+                        cout << " found double: adding: " << numNewTriangles << endl;
+                    }
+                    numTriangles += numNewTriangles * numTripletPermutations;
                 }
             }
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
