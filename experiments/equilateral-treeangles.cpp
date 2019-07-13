@@ -100,13 +100,13 @@ void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int
     assert(height >= 0 && height < dbgNumAncestorsWithHeight.size());
     if (currentNode->hasPerson)
         dbgNumAncestorsWithHeight[height]++;
-    cout << "dbgCountHeights currentNode: " << (currentNode->id) << endl;
+    //cout << "dbgCountHeights currentNode: " << (currentNode->id) << endl;
     for (auto child : currentNode->neighbours)
     {
-        cout << "wee" << endl;
+        //cout << "wee" << endl;
         if (child == parentNode)
             continue;
-        cout << " child: " << child->id << endl;
+        //cout << " child: " << child->id << endl;
 
         dbgCountHeights(child, currentNode, height + 1, dbgNumAncestorsWithHeight);
     }
@@ -167,17 +167,20 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 else
                 {
                     assert(heightInfo.lastUpdatedAtNode != currentNode);
-                    numTriangles += heightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren;
+                    numTriangles += heightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * numTripletPermutations;
                 }
 
 
 
-                localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations;
+                localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += heightInfo.numWithHeight * otherHeightInfo.numWithHeight;
+                cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << endl;
                 if (parentNode != nullptr)
                 {
                     vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
-                    dbgCountHeights(parentNode, currentNode, 0, dbgNumDescendantsWithHeight);
-                    numTriangles += localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * dbgNumDescendantsWithHeight[descendentHeight] * numTripletPermutations;
+                    const int requiredNonDescendantDist = (descendentHeight - height);
+                    dbgCountHeights(parentNode, currentNode, 1, dbgNumDescendantsWithHeight);
+                    cout << " currentNode: " << currentNode->id << " num non-ancestors with dist: " << requiredNonDescendantDist << ": " << dbgNumDescendantsWithHeight[requiredNonDescendantDist] << endl;
+                    numTriangles += localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * dbgNumDescendantsWithHeight[requiredNonDescendantDist] * numTripletPermutations;
                 }
             }
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
