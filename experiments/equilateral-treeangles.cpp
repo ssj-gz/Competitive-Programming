@@ -283,11 +283,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         infoForDescendentHeight[height].numWithHeight++;
     }
 
-    auto nChoose2 = [](const int64_t n)
-    {
-        return (n * (n - 1)) / 2;
-    };
-
     map<int, HeightInfo> localHeightInfo;
 
     for (auto child : currentNode->neighbours)
