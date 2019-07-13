@@ -173,6 +173,12 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
 
                 localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += heightInfo.numWithHeight * otherHeightInfo.numWithHeight * numTripletPermutations;
+                if (parentNode != nullptr)
+                {
+                    vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
+                    dbgCountHeights(parentNode, currentNode, 0, dbgNumDescendantsWithHeight);
+                    numTriangles += localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren * dbgNumDescendantsWithHeight[descendentHeight] * numTripletPermutations;
+                }
             }
             otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
@@ -264,5 +270,5 @@ int main(int argc, char* argv[])
     const auto solutionOptimised = solveOptimised(nodes);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     cout << "solutionOptimised: " << solutionOptimised << endl;
-    //assert(solutionOptimised == solutionBruteForce);
+    assert(solutionOptimised == solutionBruteForce);
 }
