@@ -183,7 +183,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
 
                 cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
-                localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += heightInfo.numWithHeight * otherHeightInfo.numWithHeight;
+                localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
                 if (parentNode != nullptr)
                 {
                     vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
