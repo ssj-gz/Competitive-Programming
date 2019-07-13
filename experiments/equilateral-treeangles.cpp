@@ -8,6 +8,101 @@
 
 using namespace std;
 
+class ModNum
+{
+    public:
+        ModNum(int64_t n = 0)
+            : m_n{n}
+        {
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % modulus;
+            return *this;
+        }
+        ModNum& operator-=(const ModNum& other)
+        {
+            m_n += modulus;
+            assert(m_n >= other.m_n);
+            m_n = (m_n - other.m_n) % modulus;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % modulus;
+            return *this;
+        }
+        ModNum operator++(int)
+        {
+            m_n += 1;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+
+        static const int64_t modulus = 1'000'000'007ULL;
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
+
+ModNum quickPower(long n, int m)
+{
+    // Raise n to the m mod modulus using as few multiplications as 
+    // we can e.g. n ^ 8 ==  (((n^2)^2)^2).
+    ModNum result = 1;
+    int power = 0;
+    while (m > 0)
+    {
+        if (m & 1)
+        {
+            ModNum subResult = n;
+            for (int i = 0; i < power; i++)
+            {
+                subResult *= subResult;
+            }
+            result *= subResult;
+        }
+        m >>= 1;
+        power++;
+    }
+    return result;
+}
+
+const ModNum inverseOf2 = quickPower(2, ModNum::modulus - 2);
+
+
+
 struct Node
 {
     vector<Node*> neighbours;
