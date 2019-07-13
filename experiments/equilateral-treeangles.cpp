@@ -8,6 +8,8 @@
 
 using namespace std;
 
+const int numTripletPermutations = 6;
+
 class ModNum
 {
     public:
@@ -99,9 +101,7 @@ ModNum quickPower(long n, int m)
     return result;
 }
 
-const ModNum inverseOf2 = quickPower(2, ModNum::modulus - 2);
-
-
+const ModNum inverseOf6 = quickPower(6, ModNum::modulus - 2);
 
 struct Node
 {
@@ -179,12 +179,74 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
                     if (distanceBetweenNodes[node1->index][node2->index] == distance)
                     {
-                        cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << endl;
+                        cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << " (distance: " << distance << ")" << endl;
                         result++;
                     }
                 }
             }
         }
+    }
+
+    return result;
+}
+
+ModNum solveBruteForce2(vector<Node>& nodes)
+{
+    // XXX - this is entirely wrong - just because 3 nodes are
+    // equidistant from a "centre" node X, it does not mean
+    // they are equidistance from each other (the shortest path
+    // between them might not go through X!)
+    ModNum result = 0;
+
+    for (auto& triangleCentreNode : nodes)
+    {
+        int dist = 0;
+        for (auto& node : nodes)
+        {
+            node.visitedInBruteForceDFS = false;
+        }
+
+        vector<Node*> nodesToExplore = { &triangleCentreNode };
+        triangleCentreNode.visitedInBruteForceDFS = true;
+
+        while (!nodesToExplore.empty())
+        {
+            if (dist != 0)
+            {
+                int64_t numPersonsAtDistFromCentre = 0;
+                for (const auto node : nodesToExplore)
+                {
+                    if (node->hasPerson)
+                        numPersonsAtDistFromCentre++;
+
+                }
+                if (numPersonsAtDistFromCentre >= 3)
+                {
+                    const ModNum trianglesAtDist = (ModNum(numPersonsAtDistFromCentre) * ModNum(numPersonsAtDistFromCentre - 1) * ModNum(numPersonsAtDistFromCentre - 2)) * inverseOf6;
+                    cout << " # at dist: " << dist << " from " << triangleCentreNode.id << " = " << numPersonsAtDistFromCentre << endl;
+                    result += trianglesAtDist * numTripletPermutations;
+                }
+            }
+
+            vector<Node*> nextNodesToExplore;
+            for (auto node : nodesToExplore)
+            {
+                for (auto neighbourNode : node->neighbours)
+                {
+                    if (!neighbourNode->visitedInBruteForceDFS)
+                    {
+                        neighbourNode->visitedInBruteForceDFS = true;
+                        nextNodesToExplore.push_back(neighbourNode);
+                    }
+                }
+
+            }
+
+            nodesToExplore = nextNodesToExplore;
+            dist++;
+
+        }
+        
     }
 
     return result;
@@ -215,7 +277,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
 
-    const int numTripletPermutations = 6;
 
     if (currentNode->hasPerson)
     {
@@ -323,7 +384,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numNodes = 1 + rand() % 100;
+        const int numNodes = 1 + rand() % 10;
         cout << numNodes << endl;
 
         for (int i = 0; i < numNodes - 1; i++)
@@ -368,8 +429,10 @@ int main(int argc, char* argv[])
     assert(cin);
 
     const auto solutionBruteForce = solveBruteForce(nodes);
+    const auto solutionBruteForce2 = solveBruteForce2(nodes);
     const auto solutionOptimised = solveOptimised(nodes);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
     cout << "solutionOptimised: " << solutionOptimised  << " (" << (solutionBruteForce / 6) << " basic triangles)"<< endl;
     assert(solutionOptimised == solutionBruteForce);
 }
