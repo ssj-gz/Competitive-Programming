@@ -244,18 +244,29 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             // Triplets with currentNode as LCA of all pairs out of the three nodes.
             int newExtraDescendentHeight = -1;
             int knownDescendtHeight = -1;
-            if (heightInfo.lastUpdatedAtNode == currentNode)
+            if (heightInfo.lastUpdatedAtNode == currentNode || heightInfo.lastUpdatedAtNode == nullptr)
             {
                 assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
                 newExtraDescendentHeight = otherHeightInfo.numWithHeight;
                 knownDescendtHeight = heightInfo.numWithHeight;
                 cout << " found threeways: " << otherHeightInfo.numWithHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << endl;
+
+                //assert(heightInfo.numPairsWithHeightViaDifferentChildren == localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren);
+                otherHeightInfo.numPairsWithHeightViaDifferentChildren = heightInfo.numPairsWithHeightViaDifferentChildren;
+                //assert(otherHeightInfo.numPairsWithHeightViaDifferentChildren == localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren);
             }
             else
             {
                 assert(heightInfo.lastUpdatedAtNode != currentNode);
+                cout << " currentNode: " << currentNode->id << " otherHeightInfo.lastUpdatedAtNode: " << (otherHeightInfo.lastUpdatedAtNode == nullptr ? -1 : otherHeightInfo.lastUpdatedAtNode->id) << endl;
+                if (!(otherHeightInfo.lastUpdatedAtNode == nullptr || otherHeightInfo.lastUpdatedAtNode == currentNode))
+                {
+                    otherHeightInfo.numPairsWithHeightViaDifferentChildren = 0;
+                }
                 newExtraDescendentHeight = heightInfo.numWithHeight;
                 knownDescendtHeight = otherHeightInfo.numWithHeight;
+            cout << " localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << " otherHeightInfo.numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << endl;
+                assert(otherHeightInfo.numPairsWithHeightViaDifferentChildren == localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren);
             }
             if (newExtraDescendentHeight * localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren > 0)
             {
@@ -267,6 +278,9 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
             cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
             localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
+            otherHeightInfo.numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
+            cout << " localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren: " << localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren << " otherHeightInfo.numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << endl;
+            //assert(otherHeightInfo.numPairsWithHeightViaDifferentChildren == localHeightInfo[descendentHeight].numPairsWithHeightViaDifferentChildren);
             if (parentNode != nullptr)
             {
                 vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
@@ -290,6 +304,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     if (currentNode->hasPerson)
     {
         infoForDescendentHeight[height].numWithHeight++;
+        infoForDescendentHeight[height].lastUpdatedAtNode = currentNode;
     }
 
     return infoForDescendentHeight;
