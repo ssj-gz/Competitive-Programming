@@ -248,6 +248,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 knownDescendtHeight = heightInfo.numWithHeight;
 
                 otherHeightInfo.numPairsWithHeightViaDifferentChildren = heightInfo.numPairsWithHeightViaDifferentChildren;
+                otherHeightInfo.numWithHeight = heightInfo.numWithHeight;
             }
             else
             {
@@ -284,7 +285,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 numTriangles += numNewTriangles * numTripletPermutations;
             }
 
-            otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
+            otherHeightInfo.numWithHeight += newExtraDescendentHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
         }
         ancestors.pop_back();
