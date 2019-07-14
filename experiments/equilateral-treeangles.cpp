@@ -118,7 +118,8 @@ struct Node
 struct HeightInfo
 {
     int numWithHeight = 0;
-    int numPairsWithHeightViaDifferentChildren = 0;
+    int64_t numPairsWithHeightViaDifferentChildren = 0;
+    int64_t numTypeAAtCurrentNodeForHeight = 0;
     Node* lastUpdatedAtNode = nullptr;
 };
 
@@ -215,6 +216,8 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
 
+    map<int, int64_t> numTypeAAtCurrentNodeForHeight;
+
     for (auto child : currentNode->neighbours)
     {
         if (child == parentNode)
@@ -248,6 +251,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 knownDescendtHeight = heightInfo.numWithHeight;
 
                 otherHeightInfo.numPairsWithHeightViaDifferentChildren = heightInfo.numPairsWithHeightViaDifferentChildren;
+                otherHeightInfo.numTypeAAtCurrentNodeForHeight = heightInfo.numTypeAAtCurrentNodeForHeight;
                 otherHeightInfo.numWithHeight = heightInfo.numWithHeight;
             }
             else
@@ -257,6 +261,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 if (!(otherHeightInfo.lastUpdatedAtNode == nullptr || otherHeightInfo.lastUpdatedAtNode == currentNode))
                 {
                     otherHeightInfo.numPairsWithHeightViaDifferentChildren = 0;
+                    otherHeightInfo.numTypeAAtCurrentNodeForHeight = 0;
                 }
                 newExtraDescendentHeight = heightInfo.numWithHeight;
                 knownDescendtHeight = otherHeightInfo.numWithHeight;
@@ -283,10 +288,14 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                     cout << " found double: adding: " << numNewTriangles << endl;
                 }
                 numTriangles += numNewTriangles * numTripletPermutations;
+                numTypeAAtCurrentNodeForHeight[descendentHeight] += numNewTriangles;
+                otherHeightInfo.numTypeAAtCurrentNodeForHeight += numNewTriangles;
+                cout << " currentNode: " << currentNode << " numTypeAAtCurrentNodeForHeight: " << descendentHeight << endl;
             }
 
             otherHeightInfo.numWithHeight += newExtraDescendentHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
+            assert(numTypeAAtCurrentNodeForHeight[descendentHeight] == otherHeightInfo.numTypeAAtCurrentNodeForHeight);
         }
         ancestors.pop_back();
     }
