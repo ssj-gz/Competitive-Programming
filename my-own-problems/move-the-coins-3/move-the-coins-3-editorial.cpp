@@ -274,13 +274,15 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
             // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
-                // Adjust the heights we collected from previous node in the chain, and propagate it to
-                // light-first descendants of this node.
-                heightTracker.adjustAllHeights(1);
+                // Propagate any heights we've collected from previous nodes in the chain
+                // to the light-first descendendants of this node.
                 doLightFirstDFS(node, heightTracker, AdjustWithDepth, propagateHeights);
                 
                 // Collect heights from light-first descendants.
                 doLightFirstDFS(node, heightTracker, DoNotAdjust, collectHeights);
+
+                // Move one node along the chain - adjust the heights we collected from previous nodes in the chain.
+                heightTracker.adjustAllHeights(1);
             }
             // Now do it backwards.
             reverse(chain.begin(), chain.end());
