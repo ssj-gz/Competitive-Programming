@@ -216,8 +216,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
 
-    map<int, int64_t> numTypeAAtCurrentNodeForHeight;
-
     for (auto child : currentNode->neighbours)
     {
         if (child == parentNode)
@@ -288,14 +286,12 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                     cout << " found double: adding: " << numNewTriangles << endl;
                 }
                 numTriangles += numNewTriangles * numTripletPermutations;
-                numTypeAAtCurrentNodeForHeight[descendentHeight] += numNewTriangles;
                 otherHeightInfo.numTypeAAtCurrentNodeForHeight += numNewTriangles;
                 cout << " currentNode: " << currentNode << " numTypeAAtCurrentNodeForHeight: " << descendentHeight << endl;
             }
 
             otherHeightInfo.numWithHeight += newExtraDescendentHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
-            assert(numTypeAAtCurrentNodeForHeight[descendentHeight] == otherHeightInfo.numTypeAAtCurrentNodeForHeight);
         }
         ancestors.pop_back();
     }
