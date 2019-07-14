@@ -268,7 +268,7 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                         };
     for (auto& chain : heavyChains)
     {
-        for (auto i = 0; i < 2; i++)
+        for (auto pass = 0; pass < 2; pass++)
         {
             heightTracker.clear();
             // Crawl along chain, collecting from one node and propagating to the next.
