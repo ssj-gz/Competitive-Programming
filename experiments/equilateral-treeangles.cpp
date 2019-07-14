@@ -1,10 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include <cassert>
 
 #include <sys/time.h>
+
+#include <chrono>
+
 
 using namespace std;
 
@@ -137,6 +141,7 @@ void distDFS(const int rootNodeIndex, const Node* currentNode, const Node* paren
 
 int64_t solveBruteForce(const vector<Node>& nodes)
 {
+    cout << "Computing distance lookup table" << endl;
     int64_t result = 0;
 
     const int numNodes = nodes.size();
@@ -154,10 +159,27 @@ int64_t solveBruteForce(const vector<Node>& nodes)
             assert(distanceBetweenNodes[i][j] < numNodes);
         }
     }
+    cout << "Done computing distance lookup table" << endl;
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point lastReportedTime = std::chrono::steady_clock::now();
+
+    int numNodesProcessed = 0;
+    const int totalNodesToProcess = count_if(nodes.begin(), nodes.end(), [](const Node& node) { return node.hasPerson ;});
     for (const auto& node : nodes)
     {
         if (!node.hasPerson)
             continue;
+
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - lastReportedTime).count() == 2)
+        {
+            lastReportedTime = now;
+            const int totalSecondsElapsed = std::chrono::duration_cast<std::chrono::seconds>(now - begin).count();
+            cout << "Processed " << numNodesProcessed << " out of " << totalNodesToProcess << " in " << totalSecondsElapsed << " seconds; estimated seconds remaining: " << static_cast<float>(totalSecondsElapsed) / numNodesProcessed * (totalNodesToProcess - numNodesProcessed)  << endl; 
+
+        }
+
         vector<vector<const Node*>> nodesAtDistance(numNodes);
         for (int i = 0; i < numNodes; i++)
         {
@@ -180,12 +202,13 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
                     if (distanceBetweenNodes[node1->index][node2->index] == distance)
                     {
-                        cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << " (distance: " << distance << ")" << endl;
+                        //cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << " (distance: " << distance << ")" << endl;
                         result++;
                     }
                 }
             }
         }
+        numNodesProcessed++;
     }
 
     return result;
