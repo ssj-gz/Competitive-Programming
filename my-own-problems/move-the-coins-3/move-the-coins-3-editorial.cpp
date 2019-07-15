@@ -23,6 +23,7 @@ struct Node
     int nodeNumber = -1;
     bool hasCoin = false;
     vector<Node*> children;
+    vector<Node*> lightChildren;
     int numDescendants = 0;
 
     int grundyNumberIfRoot = 0;
@@ -64,9 +65,12 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
         iter_swap(node->children.begin(), heaviestChildIter);
         auto heavyChild = node->children.front();
         doHeavyLightDecomposition(heavyChild, true);
+        node->lightChildren.assign(node->children.begin() + 1, node->children.end());
 
         for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
+        {
             doHeavyLightDecomposition(*lightChildIter, false);
+        }
     }
 }
 
@@ -247,9 +251,9 @@ void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdju
     processNode(node, 0);
     if (node->children.size() > 1)
     {
-        for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
+        for (auto lightChild : node->lightChildren)
         {
-            doDfs(*lightChildIter, 1, heightTracker, heightTrackerAdjustment, processNode);
+            doDfs(lightChild, 1, heightTracker, heightTrackerAdjustment, processNode);
         }
     }
 }
