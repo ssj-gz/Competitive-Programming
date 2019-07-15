@@ -278,58 +278,33 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
             // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
-                // Propagate any heights we've collected from previous nodes in the chain
-                // to the light-first descendendants of this node.
-                doLightFirstDFS(node, heightTracker, AdjustWithDepth, propagateHeights);
-                
-                // Collect heights from light-first descendants.
-                doLightFirstDFS(node, heightTracker, DoNotAdjust, collectHeights);
+                if (pass == 0 )
+                {
+                    if (node->hasCoin)
+                        heightTracker.insertHeight(0);
+                    node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                }
 
-                // Move one node along the chain - adjust the heights we collected from previous nodes in the chain.
+                for (auto lightChild : node->lightChildren)
+                {
+                    doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
+                    doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
+                }
+
+                if (pass == 1)
+                {
+                    if (node->hasCoin)
+                        heightTracker.insertHeight(0);
+                    node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                }
+
+                reverse(node->lightChildren.begin(), node->lightChildren.end());
                 heightTracker.adjustAllHeights(1);
             }
             // Now do it backwards.
             reverse(chain.begin(), chain.end());
         }
     }
-    for (auto& node : nodes)
-    {
-        const bool hasLightChildren = (node.children.size() > 1);
-        if (!hasLightChildren)
-            continue;
-
-        // Update node with height info from all its light-first descendants.
-        doLightFirstDFS(&node, heightTracker, DoNotAdjust, [&node](Node* descendantNode, int depth) 
-                { 
-                    if (descendantNode->hasCoin) 
-                        node.grundyNumberIfRoot ^= depth; 
-                });
-        if (node.hasCoin)
-        {
-            // Propagate this node's coin info to light-first descendants.
-            doLightFirstDFS(&node, heightTracker, DoNotAdjust, [](Node* node, int depth) 
-                    { 
-                        node->grundyNumberIfRoot ^= depth; 
-                    });
-        }
-        // Propagate light-first descendant info to other light-first descendants.
-        // Note that this is just a "manual" version of doLightFirstDFS, and is computationally equivalent to it.
-        heightTracker.clear();
-        for (auto lightChild : node.lightChildren)
-        {
-            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
-            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
-        }
-        // ... and again, using reversed order of children.
-        heightTracker.clear();
-        reverse(node.lightChildren.begin(), node.lightChildren.end());
-        for (auto lightChild : node.lightChildren)
-        {
-            doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
-            doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
-        }
-    }
-
 }
 
 int main(int argc, char* argv[])
