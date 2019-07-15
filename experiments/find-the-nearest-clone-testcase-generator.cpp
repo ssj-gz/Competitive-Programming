@@ -331,7 +331,10 @@ int main()
 
     const int maxArmLength = 10;
     const int minArmLength = 6;
-    const int maxNodesForArms = 30'000;
+    // Not sure why, but maxNodesForArms seems to be arbitrary-ish 
+    // (but maybe around 50'000 gives good results?), but upToNumNodesForCentre
+    // should not be very big - 900'000 seems to work very badly.
+    const int maxNodesForArms = 400'000;
 
     const int desiredColour = 0;
 
@@ -349,7 +352,7 @@ int main()
         assert(numInArm >= minArmLength);
 
         vector<TestNode*> arm = treeGenerator.addNodeChain(armRoot, numInArm);
-        
+
         arms.push_back(arm);
         armRoots.push_back(armRoot);
     }
@@ -389,7 +392,8 @@ int main()
         }
     };
 
-    const int upToNumNodesForCentre = treeGenerator.numNodes() + 100'000;
+    const int upToNumNodesForCentre = min(treeGenerator.numNodes() + 100'000, 900'000);
+
     const int upToNumEdgesForCentre = 900'000;
 
     vector<TestNode*> centralNodes = armRoots;
