@@ -331,7 +331,7 @@ int main()
 
     const int maxArmLength = 10;
     const int minArmLength = 6;
-    const int maxNodesForArms = 500'000;
+    const int maxNodesForArms = 30'000;
 
     const int desiredColour = 0;
 
@@ -389,13 +389,23 @@ int main()
         }
     };
 
-    const int upToNumNodesForCentre = 900'000;
+    const int upToNumNodesForCentre = treeGenerator.numNodes() + 100'000;
     const int upToNumEdgesForCentre = 900'000;
 
     vector<TestNode*> centralNodes = armRoots;
     while (treeGenerator.numNodes() < upToNumNodesForCentre)
     {
-        centralNodes.push_back(treeGenerator.createNode(centralNodes[rand() % centralNodes.size()]));
+        bool connectToArmRoot = rand() % 2;
+        TestNode* connectTo = nullptr;
+        if (connectToArmRoot)
+        {
+            connectTo = armRoots[rand() % armRoots.size()];
+        }
+        else
+        {
+            connectTo = centralNodes[rand() % centralNodes.size()];
+        }
+        centralNodes.push_back(treeGenerator.createNode(connectTo));
     }
 
     createAdditionalConnections(centralNodes, upToNumEdgesForCentre);
@@ -411,6 +421,12 @@ int main()
     treeGenerator.printEdges();
 
 
+    set<int> distinctColoursSet;
+    while (distinctColoursSet.size() < maxColours)
+    {
+        distinctColoursSet.insert(rand() % 100'000'000);
+    }
+    vector<int> distinctColoursArray(distinctColoursSet.begin(), distinctColoursSet.end());
 
     for (const auto node : treeGenerator.nodes())
     {
@@ -419,13 +435,15 @@ int main()
             node->data.colour = 1 + rand() % maxColours;
             assert(node->data.colour != desiredColour);
         }
+        node->data.colour = distinctColoursArray[node->data.colour];
         cout << node->data.colour << " ";
     }
     cout << endl;
 
-    cout << desiredColour << endl;
+    cout << distinctColoursArray[desiredColour] << endl;
 
     cerr << "Flibble: " << arms[0][minDistanceFromArmRoot]->scrambledId << ", " << arms[1][minDistanceFromArmRoot - 1]->scrambledId << endl;
+    cerr << "# arms: " << arms.size() << endl;
 
 
 
