@@ -280,25 +280,42 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
             {
                 if (pass == 0 )
                 {
+                    // Once only (first pass chosen arbitrarily) - add this node's coin
+                    // (if any) so that it gets propagated to light descendants ...
                     if (node->hasCoin)
                         heightTracker.insertHeight(0);
+                    // ... and update its grundy number now, so that it *doesn't* include
+                    // the contributions from its light descendants.
                     node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
 
                 for (auto lightChild : node->lightChildren)
                 {
+                    // Propagate all coins found so far along the chain in this direction
+                    // to light descendants ...
                     doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
+                    // ... and collect from light descendents.
                     doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
                 }
 
                 if (pass == 1)
                 {
+                    // In pass 0, we ensured that this node's coin (if any) was propagated
+                    // to its light descendents.  Don't do it this time - wait until
+                    // we've processed this coin's light descendents before adding this
+                    // coin's node to the heightTracker!
                     if (node->hasCoin)
                         heightTracker.insertHeight(0);
+                    // In pass 0, we ensured that this node's grundy number *wasn't* updated from
+                    // its light descendents - this time, ensure that it is updated, by
+                    // waiting until we've processed this coin's light descendents before updating
+                    // its grundyNumberIfRoot.
                     node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
 
+                // Prepare for the reverse pass.
                 reverse(node->lightChildren.begin(), node->lightChildren.end());
+                // Move one node along the chain - increase all heights accordingly!
                 heightTracker.adjustAllHeights(1);
             }
             // Now do it backwards.
