@@ -330,7 +330,7 @@ int main()
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
     const int maxArmLength = 30;
-    const int minArmLength = 10;
+    const int minArmLength = 15;
     // Not sure why, but maxNodesForArms seems to be arbitrary-ish 
     // (but maybe around 50'000 gives good results?), but upToNumNodesForCentre
     // should not be very big - 900'000 seems to work very badly.
@@ -358,7 +358,7 @@ int main()
     }
     const int numArms = arms.size();
 
-    const int minDistanceFromArmRoot = 9;
+    const int minDistanceFromArmRoot = 14;
     const int restOfArmsMinDistanceFromArmRoot = minDistanceFromArmRoot + 1;
 
     assert(numArms > 2);
