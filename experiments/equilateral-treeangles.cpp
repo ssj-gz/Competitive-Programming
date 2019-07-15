@@ -1,4 +1,4 @@
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -257,7 +257,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         {
             const int descendentHeight = descendentHeightPair.first;
 
-            auto& heightInfo = infoForChildDescendentHeight[descendentHeight];
+            const auto& heightInfo = descendentHeightPair.second;
             auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
 
             assert (descendentHeight > height);
