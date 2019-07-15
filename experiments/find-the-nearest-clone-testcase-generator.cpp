@@ -414,6 +414,26 @@ int main()
 
     createAdditionalConnections(centralNodes, upToNumEdgesForCentre);
 
+    const int maxTotalNodes = 1'000'000;
+    const int maxTotalEdges = 1'000'000;
+    vector<TestNode*> armNodes;
+    for (const auto& arm : arms)
+    {
+        for (auto armNode : arm)
+        {
+            armNodes.push_back(armNode);
+        }
+    }
+
+    while (treeGenerator.numNodes() < maxTotalNodes && treeGenerator.numEdges() < maxTotalEdges)
+    {
+        const int maxInChain = min(maxTotalNodes - treeGenerator.numNodes(), maxTotalEdges - treeGenerator.numEdges());
+        const int numInChain = min(rand() % 100 + 1, maxInChain);
+        TestNode* armNode = armNodes[rand() % armNodes.size()];
+        treeGenerator.addNodeChain(armNode, numInChain);
+
+    }
+
     treeGenerator.scrambleNodeIdsAndReorder(nullptr);
     treeGenerator.scrambleEdgeOrder();
 
