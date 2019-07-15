@@ -47,6 +47,23 @@ struct TestEdge
         return nullptr;
     }
 };
+bool operator<(const unique_ptr<TestEdge>& lhs, const unique_ptr<TestEdge>& rhs)
+{
+    TestNode *lhsNode1 = lhs->nodeA;
+    TestNode *lhsNode2 = lhs->nodeA;
+    if (lhsNode2 < lhsNode1)
+        swap(lhsNode1, lhsNode2);
+
+    TestNode *rhsNode1 = rhs->nodeA;
+    TestNode *rhsNode2 = rhs->nodeA;
+    if (rhsNode2 < rhsNode1)
+        swap(rhsNode1, rhsNode2);
+
+    if (lhsNode1 != rhsNode1)
+        return lhsNode1 < rhsNode1;
+
+    return lhsNode2 < rhsNode2;
+}
 class TreeGenerator
 {
     public:
@@ -256,6 +273,43 @@ class TreeGenerator
             }
             return edges;
         }
+        void removeDuplicateEdges()
+        {
+            auto compareEdges = [](const TestEdge* lhs, const TestEdge* rhs)
+            {
+                assert(lhs);
+                assert(rhs);
+                TestNode *lhsNode1 = lhs->nodeA;
+                TestNode *lhsNode2 = lhs->nodeB;
+                if (lhsNode2 < lhsNode1)
+                    swap(lhsNode1, lhsNode2);
+
+                TestNode *rhsNode1 = rhs->nodeA;
+                TestNode *rhsNode2 = rhs->nodeB;
+                if (rhsNode2 < rhsNode1)
+                    swap(rhsNode1, rhsNode2);
+
+                if (lhsNode1 != rhsNode1)
+                    return lhsNode1 < rhsNode1;
+
+                return lhsNode2 < rhsNode2;
+            };
+            set<TestEdge*, decltype(compareEdges)> edges(compareEdges);
+
+            vector<unique_ptr<TestEdge>> uniqueEdges;
+            for (auto& edge : m_edges)
+            {
+                assert(edge.get());
+                if (edges.find(edge.get()) == edges.end())
+                {
+                    edges.insert(edge.get());
+                    uniqueEdges.push_back(std::move(edge));
+                }
+            }
+
+            swap(uniqueEdges, m_edges);
+
+        }
         void printEdges() const
         {
             for (const auto& edge : m_edges)
@@ -309,10 +363,10 @@ int main()
     arms[0][minDistanceFromArmRoot]->data.colour = desiredColour;
     arms[1][minDistanceFromArmRoot - 1]->data.colour = desiredColour;
 
-    for (int i = 1; i < numArms; i++)
+    for (int i = 2; i < numArms; i++)
     {
         const int distanceFromArmRoot = rand() % (arms[i].size() - restOfArmsMinDistanceFromArmRoot) + restOfArmsMinDistanceFromArmRoot;
-        assert(distanceFromArmRoot >= restOfArmsMinDistanceFromArmRoot && distanceFromArmRoot < arms[i].size());
+        assert(distanceFromArmRoot > minDistanceFromArmRoot && distanceFromArmRoot < arms[i].size());
         arms[i][distanceFromArmRoot]->data.colour = desiredColour;
     }
 
@@ -349,6 +403,10 @@ int main()
     treeGenerator.scrambleNodeIdsAndReorder(nullptr);
     treeGenerator.scrambleEdgeOrder();
 
+    cerr << " original numEdges: " << treeGenerator.numEdges() << endl;
+    treeGenerator.removeDuplicateEdges();
+    cerr << " after numEdges: " << treeGenerator.numEdges() << endl;
+
     cout << treeGenerator.numNodes() << " " << treeGenerator.numEdges() << endl;
     treeGenerator.printEdges();
 
@@ -359,6 +417,7 @@ int main()
         if (node->data.colour == -1)
         {
             node->data.colour = 1 + rand() % maxColours;
+            assert(node->data.colour != desiredColour);
         }
         cout << node->data.colour << " ";
     }
@@ -366,6 +425,7 @@ int main()
 
     cout << desiredColour << endl;
 
+    cerr << "Flibble: " << arms[0][minDistanceFromArmRoot]->scrambledId << ", " << arms[1][minDistanceFromArmRoot - 1]->scrambledId << endl;
 
 
 
