@@ -329,12 +329,12 @@ int main()
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    const int maxArmLength = 10;
-    const int minArmLength = 6;
+    const int maxArmLength = 30;
+    const int minArmLength = 10;
     // Not sure why, but maxNodesForArms seems to be arbitrary-ish 
     // (but maybe around 50'000 gives good results?), but upToNumNodesForCentre
     // should not be very big - 900'000 seems to work very badly.
-    const int maxNodesForArms = 400'000;
+    const int maxNodesForArms = 600'000;
 
     const int desiredColour = 0;
 
@@ -358,13 +358,13 @@ int main()
     }
     const int numArms = arms.size();
 
-    const int minDistanceFromArmRoot = 5;
+    const int minDistanceFromArmRoot = 9;
     const int restOfArmsMinDistanceFromArmRoot = minDistanceFromArmRoot + 1;
 
     assert(numArms > 2);
 
     arms[0][minDistanceFromArmRoot]->data.colour = desiredColour;
-    arms[1][minDistanceFromArmRoot - 1]->data.colour = desiredColour;
+    arms[1][minDistanceFromArmRoot - 3]->data.colour = desiredColour;
 
     for (int i = 2; i < numArms; i++)
     {
