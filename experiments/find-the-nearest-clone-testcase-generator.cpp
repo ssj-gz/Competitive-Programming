@@ -363,6 +363,7 @@ int main()
 
     assert(numArms > 2);
 
+    // These two nodes will be the closest two nodes of the desiredColour.
     arms[0][minDistanceFromArmRoot]->data.colour = desiredColour;
     arms[1][minDistanceFromArmRoot - 3]->data.colour = desiredColour;
 
@@ -373,6 +374,7 @@ int main()
         arms[i][distanceFromArmRoot]->data.colour = desiredColour;
     }
 
+    // Connect the arm roots in a ring (the "central ring").
     TestNode* previousArmRoot = armRoots.back();
     for (auto armRoot : armRoots)
     {
@@ -382,6 +384,7 @@ int main()
 
     auto createAdditionalConnections = [&treeGenerator](const vector<TestNode*>& amongstNodes, const int stopAtTotalEdges)
     {
+        // May create duplicate edges; these will be removed later on.
         while (treeGenerator.numEdges() <= stopAtTotalEdges)
         {
             const int randomNode1 = rand() % amongstNodes.size();
@@ -392,10 +395,9 @@ int main()
         }
     };
 
+    // Add some more nodes that will be joined to the central ring.
     const int upToNumNodesForCentre = min(treeGenerator.numNodes() + 100'000, 900'000);
-
     const int upToNumEdgesForCentre = 900'000;
-
     vector<TestNode*> centralNodes = armRoots;
     while (treeGenerator.numNodes() < upToNumNodesForCentre)
     {
@@ -411,10 +413,9 @@ int main()
         }
         centralNodes.push_back(treeGenerator.createNode(connectTo));
     }
-
     createAdditionalConnections(centralNodes, upToNumEdgesForCentre);
 
-    // Make "fans" originating in Arm Nodes to make up the remaining nodes/ edges.
+    // Make "fans" originating in Arm Nodes to use up the remaining nodes/ edges.
     const int maxTotalNodes = 1'000'000;
     const int maxTotalEdges = 1'000'000;
     vector<TestNode*> armNodes;
@@ -434,9 +435,27 @@ int main()
         {
             treeGenerator.createNode(armNode);
         }
-
     }
 
+    // Randomised colours for remaining nodes.  Don't add any more of desiredColour, though!
+    set<int> distinctColoursSet;
+    while (distinctColoursSet.size() < maxColours)
+    {
+        distinctColoursSet.insert(rand() % 100'000'000);
+    }
+    vector<int> distinctColoursArray(distinctColoursSet.begin(), distinctColoursSet.end());
+    random_shuffle(distinctColoursArray.begin(), distinctColoursArray.end());
+    for (const auto node : treeGenerator.nodes())
+    {
+        if (node->data.colour == -1)
+        {
+            node->data.colour = 1 + rand() % maxColours;
+            assert(node->data.colour != desiredColour);
+        }
+        node->data.colour = distinctColoursArray[node->data.colour];
+    }
+
+    // Scramble the tree and print out the testcase.
     treeGenerator.scrambleNodeIdsAndReorder(nullptr);
     treeGenerator.scrambleEdgeOrder();
 
@@ -447,31 +466,14 @@ int main()
     cout << treeGenerator.numNodes() << " " << treeGenerator.numEdges() << endl;
     treeGenerator.printEdges();
 
-
-    set<int> distinctColoursSet;
-    while (distinctColoursSet.size() < maxColours)
-    {
-        distinctColoursSet.insert(rand() % 100'000'000);
-    }
-    vector<int> distinctColoursArray(distinctColoursSet.begin(), distinctColoursSet.end());
-
+    // Output nodes colours, and desiredColour.
     for (const auto node : treeGenerator.nodes())
     {
-        if (node->data.colour == -1)
-        {
-            node->data.colour = 1 + rand() % maxColours;
-            assert(node->data.colour != desiredColour);
-        }
-        node->data.colour = distinctColoursArray[node->data.colour];
         cout << node->data.colour << " ";
     }
     cout << endl;
-
     cout << distinctColoursArray[desiredColour] << endl;
 
     cerr << "Flibble: " << arms[0][minDistanceFromArmRoot]->scrambledId << ", " << arms[1][minDistanceFromArmRoot - 1]->scrambledId << endl;
     cerr << "# arms: " << arms.size() << endl;
-
-
-
 }
