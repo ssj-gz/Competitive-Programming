@@ -314,17 +314,16 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
         }
         // Propagate light-first descendant info to other light-first descendants.
         // Note that this is just a "manual" version of doLightFirstDFS, and is computationally equivalent to it.
-        vector<Node*> lightChildren = vector<Node*>(node.children.begin() + 1, node.children.end());
         heightTracker.clear();
-        for (auto lightChild : lightChildren)
+        for (auto lightChild : node.lightChildren)
         {
             doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
             doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
         }
         // ... and again, using reversed order of children.
         heightTracker.clear();
-        reverse(lightChildren.begin(), lightChildren.end());
-        for (auto lightChild : lightChildren)
+        reverse(node.lightChildren.begin(), node.lightChildren.end());
+        for (auto lightChild : node.lightChildren)
         {
             doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
             doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
