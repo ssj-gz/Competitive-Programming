@@ -414,6 +414,7 @@ int main()
 
     createAdditionalConnections(centralNodes, upToNumEdgesForCentre);
 
+    // Make "fans" originating in Arm Nodes to make up the remaining nodes/ edges.
     const int maxTotalNodes = 1'000'000;
     const int maxTotalEdges = 1'000'000;
     vector<TestNode*> armNodes;
@@ -424,13 +425,15 @@ int main()
             armNodes.push_back(armNode);
         }
     }
-
     while (treeGenerator.numNodes() < maxTotalNodes && treeGenerator.numEdges() < maxTotalEdges)
     {
-        const int maxInChain = min(maxTotalNodes - treeGenerator.numNodes(), maxTotalEdges - treeGenerator.numEdges());
-        const int numInChain = min(rand() % 100 + 1, maxInChain);
+        const int maxInFan = min(maxTotalNodes - treeGenerator.numNodes(), maxTotalEdges - treeGenerator.numEdges());
+        const int numInFan = min(rand() % 100 + 1, maxInFan);
         TestNode* armNode = armNodes[rand() % armNodes.size()];
-        treeGenerator.addNodeChain(armNode, numInChain);
+        for (int i = 0; i < numInFan; i++)
+        {
+            treeGenerator.createNode(armNode);
+        }
 
     }
 
