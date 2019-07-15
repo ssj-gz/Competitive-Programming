@@ -245,19 +245,6 @@ void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdj
         heightTracker.adjustAllHeights(-1);
 }
 
-template <typename NodeProcessor>
-void doLightFirstDFS(Node* node, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor processNode)
-{
-    processNode(node, 0);
-    if (node->children.size() > 1)
-    {
-        for (auto lightChild : node->lightChildren)
-        {
-            doDfs(lightChild, 1, heightTracker, heightTrackerAdjustment, processNode);
-        }
-    }
-}
-
 void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
 {
     HeightTracker heightTracker;
