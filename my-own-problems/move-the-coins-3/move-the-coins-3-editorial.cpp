@@ -272,13 +272,13 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                         };
     for (auto& chain : heavyChains)
     {
-        for (auto pass = 0; pass < 2; pass++)
+        for (auto pass = 1; pass <= 2; pass++)
         {
             heightTracker.clear();
             // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
-                if (pass == 0 )
+                if (pass == 1 )
                 {
                     // Once only (first pass chosen arbitrarily) - add this node's coin
                     // (if any) so that it gets propagated to light descendants ...
@@ -298,15 +298,15 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                     doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
                 }
 
-                if (pass == 1)
+                if (pass == 2)
                 {
-                    // In pass 0, we ensured that this node's coin (if any) was propagated
+                    // In pass 1, we ensured that this node's coin (if any) was propagated
                     // to its light descendents.  Don't do it this time - wait until
                     // we've processed this coin's light descendents before adding this
                     // coin's node to the heightTracker!
                     if (node->hasCoin)
                         heightTracker.insertHeight(0);
-                    // In pass 0, we ensured that this node's grundy number *wasn't* updated from
+                    // In pass 1, we ensured that this node's grundy number *wasn't* updated from
                     // its light descendents - this time, ensure that it is updated, by
                     // waiting until we've processed this coin's light descendents before updating
                     // its grundyNumberIfRoot.
