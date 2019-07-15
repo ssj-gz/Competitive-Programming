@@ -276,10 +276,12 @@ int main()
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
     const int maxArmLength = 10;
-    const int minArmLength = 5;
+    const int minArmLength = 6;
     const int maxNodesForArms = 500'000;
 
     const int desiredColour = 0;
+
+    const int maxColours = rand() % 1'000'000;
 
     TreeGenerator treeGenerator;
 
@@ -299,17 +301,18 @@ int main()
     }
     const int numArms = arms.size();
 
-    const int minDistanceFromArmRoot = 2;
+    const int minDistanceFromArmRoot = 5;
     const int restOfArmsMinDistanceFromArmRoot = minDistanceFromArmRoot + 1;
 
     assert(numArms > 2);
 
     arms[0][minDistanceFromArmRoot]->data.colour = desiredColour;
+    arms[1][minDistanceFromArmRoot - 1]->data.colour = desiredColour;
 
     for (int i = 1; i < numArms; i++)
     {
         const int distanceFromArmRoot = rand() % (arms[i].size() - restOfArmsMinDistanceFromArmRoot) + restOfArmsMinDistanceFromArmRoot;
-        assert(distanceFromArmRoot >= 1 && distanceFromArmRoot < arms[i].size());
+        assert(distanceFromArmRoot >= restOfArmsMinDistanceFromArmRoot && distanceFromArmRoot < arms[i].size());
         arms[i][distanceFromArmRoot]->data.colour = desiredColour;
     }
 
@@ -349,10 +352,19 @@ int main()
     cout << treeGenerator.numNodes() << " " << treeGenerator.numEdges() << endl;
     treeGenerator.printEdges();
 
+
+
     for (const auto node : treeGenerator.nodes())
     {
-        cout << node->data.colour << endl;
+        if (node->data.colour == -1)
+        {
+            node->data.colour = 1 + rand() % maxColours;
+        }
+        cout << node->data.colour << " ";
     }
+    cout << endl;
+
+    cout << desiredColour << endl;
 
 
 
