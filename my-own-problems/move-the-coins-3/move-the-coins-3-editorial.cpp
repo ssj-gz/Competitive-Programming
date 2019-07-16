@@ -58,18 +58,20 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     }
     if (!node->children.empty())
     {
-        auto heaviestChildIter = max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
+        auto heavyChild = *max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
                 {
                     return lhs->numDescendants < rhs->numDescendants;
                 });
-        iter_swap(node->children.begin(), heaviestChildIter);
-        auto heavyChild = node->children.front();
         doHeavyLightDecomposition(heavyChild, true);
-        node->lightChildren.assign(node->children.begin() + 1, node->children.end());
-
-        for (auto lightChildIter = node->children.begin() + 1; lightChildIter != node->children.end(); lightChildIter++)
+        for (auto child : node->children)
         {
-            doHeavyLightDecomposition(*lightChildIter, false);
+            if (child != heavyChild)
+                node->lightChildren.push_back(child);
+        }
+
+        for (auto lightChild : node->lightChildren)
+        {
+            doHeavyLightDecomposition(lightChild, false);
         }
     }
 }
