@@ -283,21 +283,21 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                     // Propagate all coins found so far along the chain in this direction
                     // to light descendants ...
                     doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
-                    // ... and collect from light descendents.
+                    // ... and collect from light descendants.
                     doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
                 }
 
                 if (pass == 2)
                 {
                     // In pass 1, we ensured that this node's coin (if any) was propagated
-                    // to its light descendents.  Don't do it this time - wait until
-                    // we've processed this coin's light descendents before adding this
+                    // to its light descendants.  Don't do it this time - wait until
+                    // we've processed this coin's light descendants before adding this
                     // coin's node to the heightTracker!
                     if (node->hasCoin)
                         heightTracker.insertHeight(0);
                     // In pass 1, we ensured that this node's grundy number *wasn't* updated from
-                    // its light descendents - this time, ensure that it is updated, by
-                    // waiting until we've processed this coin's light descendents before updating
+                    // its light descendants - this time, ensure that it is updated, by
+                    // waiting until we've processed this coin's light descendants before updating
                     // its grundyNumberIfRoot.
                     node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
