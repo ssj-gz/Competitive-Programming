@@ -329,16 +329,18 @@ int main()
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    const int maxArmLength = 30;
+    const int maxArmLength = 25;
     const int minArmLength = 15;
     // Not sure why, but maxNodesForArms seems to be arbitrary-ish 
     // (but maybe around 50'000 gives good results?), but upToNumNodesForCentre
     // should not be very big - 900'000 seems to work very badly.
-    const int maxNodesForArms = 600'000;
+    const int maxNodesForArms = 40'000;
 
     const int desiredColour = 0;
 
     const int maxColours = rand() % 1'000'000;
+
+    int numWastedArmSpace = 0;
 
     TreeGenerator treeGenerator;
 
@@ -371,6 +373,7 @@ int main()
     {
         const int distanceFromArmRoot = rand() % (arms[i].size() - restOfArmsMinDistanceFromArmRoot) + restOfArmsMinDistanceFromArmRoot;
         assert(distanceFromArmRoot > minDistanceFromArmRoot && distanceFromArmRoot < arms[i].size());
+        numWastedArmSpace += arms[i].size() - distanceFromArmRoot - 1;
         arms[i][distanceFromArmRoot]->data.colour = desiredColour;
     }
 
@@ -396,8 +399,8 @@ int main()
     };
 
     // Add some more nodes that will be joined to the central ring.
-    const int upToNumNodesForCentre = min(treeGenerator.numNodes() + 100'000, 900'000);
-    const int upToNumEdgesForCentre = 900'000;
+    const int upToNumNodesForCentre = min(treeGenerator.numNodes() + 10'000, 90'000);
+    const int upToNumEdgesForCentre = 90'000;
     vector<TestNode*> centralNodes = armRoots;
     while (treeGenerator.numNodes() < upToNumNodesForCentre)
     {
@@ -416,8 +419,8 @@ int main()
     createAdditionalConnections(centralNodes, upToNumEdgesForCentre);
 
     // Make "fans" originating in Arm Nodes to use up the remaining nodes/ edges.
-    const int maxTotalNodes = 1'000'000;
-    const int maxTotalEdges = 1'000'000;
+    const int maxTotalNodes = 100'000;
+    const int maxTotalEdges = 100'000;
     vector<TestNode*> armNodes;
     for (const auto& arm : arms)
     {
@@ -476,4 +479,5 @@ int main()
 
     cerr << "Flibble: " << arms[0][minDistanceFromArmRoot]->scrambledId << ", " << arms[1][minDistanceFromArmRoot - 1]->scrambledId << endl;
     cerr << "# arms: " << arms.size() << endl;
+    cerr << "numWastedArmSpace: " << numWastedArmSpace << endl;
 }
