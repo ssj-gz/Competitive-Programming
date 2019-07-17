@@ -926,14 +926,14 @@ int main(int argc, char* argv[])
 
 
 #ifdef BRUTE_FORCE
-    const auto solutionBruteForce = solveBruteForce(nodes);
+    //const auto solutionBruteForce = solveBruteForce(nodes);
     const auto solutionBruteForce2 = solveBruteForce2(nodes);
     const auto solutionOptimised = solveOptimised(nodes);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    //cout << "solutionBruteForce: " << solutionBruteForce << endl;
     cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
-    cout << "solutionOptimised: " << solutionOptimised  << " (" << (solutionBruteForce / 6) << " basic triangles)"<< endl;
-    assert(solutionOptimised == solutionBruteForce);
-    assert(solutionBruteForce2 == solutionBruteForce);
+    cout << "solutionOptimised: " << endl;
+    //assert(solutionOptimised == solutionBruteForce);
+    assert(solutionOptimised == solutionBruteForce2);
 #else
     const auto solutionOptimised = solveOptimised(nodes);
     cout << solutionOptimised << endl;
