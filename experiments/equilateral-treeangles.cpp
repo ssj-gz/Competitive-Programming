@@ -1,4 +1,4 @@
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -10,6 +10,8 @@
 #include <sys/time.h>
 
 #include <chrono>
+
+#define SLOW_ANCESTOR_COUNT
 
 
 using namespace std;
@@ -357,7 +359,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
             {
                 const int requiredNonDescendantDist = (descendentHeight - node->height);
                 //cout << " node: " << node->id << " descendentHeight: " << descendentHeight << " node height: " << node->height << " requiredNonDescendantDist: " << requiredNonDescendantDist  << " num required dists: " << heightTracker.numWithHeight(requiredNonDescendantDist) << " numPairsWithHeightViaDifferentChildren: " << numPairsWithHeightViaDifferentChildren << endl;
-                const int numNewTriangles = numPairsWithHeightViaDifferentChildren * heightTracker.numWithHeight(requiredNonDescendantDist);
+                const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * heightTracker.numWithHeight(requiredNonDescendantDist);
                 numTriangles += numNewTriangles * numTripletPermutations;
             }
         }
@@ -667,9 +669,31 @@ int numNodes = 0;
 
 int coreIterations = 0;
 int numNodesFinished = 0;
+
+int dbgFindNumNonDescendentsWithHeight(Node* currentNode, Node* parent, int height, const int desiredHeight)
+{
+    if (currentNode == nullptr)
+        return 0;
+    if (height > desiredHeight)
+        return 0;
+    if (currentNode->hasPerson && height == desiredHeight)
+        return 1;
+
+    int result = 0;
+    for (auto neighbour : currentNode->neighbours)
+    {
+        if (neighbour == parent)
+            continue;
+
+        result += dbgFindNumNonDescendentsWithHeight(neighbour, currentNode, height + 1, desiredHeight);
+    }
+
+    return result;
+}
  
 map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
 {
+    //cout << " # neighbours: " << currentNode->neighbours.size() << endl;
     assert(currentNode->dbgHeightInOptimisedDFS == -1);
     currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
@@ -726,7 +750,11 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                     numTriangles += newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren * numTripletPermutations;
                 }
 
+#ifdef SLOW_ANCESTOR_COUNT
+                numTriangles += static_cast<int64_t>(knownDescendtHeight) * newExtraDescendentHeight * dbgFindNumNonDescendentsWithHeight(parentNode, currentNode, 1, (descendentHeight - currentNode->height)) * numTripletPermutations;
+#endif
                 numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
+
             }
 
             otherHeightInfo.numWithHeight += newExtraDescendentHeight;
@@ -816,7 +844,9 @@ int64_t solveOptimised(vector<Node>& nodes)
     solveOptimisedAux(rootNode, nullptr, 0, result);
     //blah(rootNode, nullptr, 0, result);
 
+#ifndef SLOW_ANCESTOR_COUNT
     completeTrianglesOfTypeA(nodes, result);
+#endif
 
     return result;
 }
@@ -833,8 +863,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const int numNodes = 1 + rand() % 50000;
-        const int numNodes = 100'000;
+        const int numNodes = 1 + rand() % 1000;
         cout << numNodes << endl;
 
         for (int i = 0; i < numNodes - 1; i++)
@@ -926,12 +955,12 @@ int main(int argc, char* argv[])
 
 
 #ifdef BRUTE_FORCE
-    //const auto solutionBruteForce = solveBruteForce(nodes);
+    const auto solutionBruteForce = solveBruteForce(nodes);
     const auto solutionBruteForce2 = solveBruteForce2(nodes);
     const auto solutionOptimised = solveOptimised(nodes);
     //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-    cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
-    cout << "solutionOptimised: " << endl;
+    //cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
+    cout << "solutionOptimised: " << solutionOptimised << endl;
     //assert(solutionOptimised == solutionBruteForce);
     assert(solutionOptimised == solutionBruteForce2);
 #else
