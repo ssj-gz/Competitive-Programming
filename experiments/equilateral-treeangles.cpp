@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-//#define SLOW_ANCESTOR_COUNT
+#define SLOW_ANCESTOR_COUNT
 
 
 using namespace std;
@@ -1085,10 +1085,12 @@ int main(int argc, char* argv[])
             TreeGenerator treeGenerator;
             TestNode* rootNode = treeGenerator.createNode();
 
-            treeGenerator.addNodeChain(rootNode, 40'000);
-            treeGenerator.addNodeChain(rootNode, 30'000);
+            treeGenerator.addNodeChain(rootNode, 20'000);
+            treeGenerator.addNodeChain(rootNode, 20'000);
+            treeGenerator.addNodeChain(rootNode, 20'000);
 
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 0.75);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes() / 2, 1.0);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes() / 2, 75);
 
             for (auto& node : treeGenerator.nodes())
             {
