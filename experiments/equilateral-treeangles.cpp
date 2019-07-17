@@ -481,7 +481,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             continue;
 
         auto infoForChildDescendentHeight = solveOptimisedAux(child, currentNode, height + 1, numTriangles);
-        if (infoForChildDescendentHeight.size() < infoForDescendentHeight.size())
+        if (infoForChildDescendentHeight.size() > infoForDescendentHeight.size())
         {
             swap(infoForDescendentHeight, infoForChildDescendentHeight);
         }
@@ -544,7 +544,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     }
 
     numNodesFinished++;
-    cout << " finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << " infoForDescendentHeight.size: " << infoForDescendentHeight.size() << endl;
+    //cout << " finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << " infoForDescendentHeight.size: " << infoForDescendentHeight.size() << endl;
     return infoForDescendentHeight;
 }
 
@@ -558,7 +558,7 @@ unique_ptr<map<int, HeightInfo>> blah(Node* currentNode, Node* parentNode, int h
             continue;
 
         unique_ptr<map<int, HeightInfo>> infoForChildDescendentHeight = blah(child, currentNode, height + 1, numTriangles);
-        if (infoForChildDescendentHeight->size() < infoForDescendentHeight->size())
+        if (infoForChildDescendentHeight->size() > infoForDescendentHeight->size())
         {
             swap(infoForDescendentHeight, infoForChildDescendentHeight);
         }
@@ -617,8 +617,8 @@ int64_t solveOptimised(vector<Node>& nodes)
 
     Node* rootNode = &(nodes.front());
     doHeavyLightDecomposition(rootNode, false);
-    //solveOptimisedAux(rootNode, nullptr, 0, result);
-    blah(rootNode, nullptr, 0, result);
+    solveOptimisedAux(rootNode, nullptr, 0, result);
+    //blah(rootNode, nullptr, 0, result);
 
     completeTrianglesOfTypeA(nodes, result);
 
