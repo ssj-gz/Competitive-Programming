@@ -318,6 +318,8 @@ int main(int argc, char* argv[])
 
     int numNodes;
     cin >> numNodes;
+    assert(1 <= numNodes && numNodes <= 100'000);
+
 
     vector<Node> nodes(numNodes);
 
@@ -327,6 +329,9 @@ int main(int argc, char* argv[])
         cin >> u;
         int v;
         cin >> v;
+
+        assert(1 <= u && u <= 100'000);
+        assert(1 <= v && v <= 100'000);
 
         // Make 0-relative.
         u--;
@@ -341,6 +346,8 @@ int main(int argc, char* argv[])
     {
         int hasPerson;
         cin >> hasPerson;
+
+        assert(hasPerson == 0 || hasPerson == 1);
 
         nodes[i].hasPerson = (hasPerson == 1);
     }

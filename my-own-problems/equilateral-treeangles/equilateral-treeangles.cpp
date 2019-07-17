@@ -1061,7 +1061,7 @@ int main(int argc, char* argv[])
             gettimeofday(&time,NULL);
             srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-            const int numNodes = 1 + rand() % 1000;
+            const int numNodes = 1 + rand() % 10'000;
             cout << numNodes << endl;
 
             for (int i = 0; i < numNodes - 1; i++)
@@ -1080,19 +1080,24 @@ int main(int argc, char* argv[])
             gettimeofday(&time,NULL);
             srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-            const int numNodes = 100'000;
+            const int numNodes = 10'000;
             TreeGenerator treeGenerator;
             TestNode* rootNode = treeGenerator.createNode();
 
-            for (int i = 0; i < 50'000; i++)
+            while (treeGenerator.numNodes() < 7'000)
             {
-                treeGenerator.createNode(rootNode);
+                TestNode *randomNode = treeGenerator.nodes()[rand() % treeGenerator.numNodes()];
+                const int numToAdd = rand() % 100 + 1;
+                for (int j = 0; j < numToAdd; j++)
+                {
+                    treeGenerator.createNode(randomNode);
+                }
             }
-            treeGenerator.addNodeChain(rootNode, 30'000);
 
 
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes() / 2, 1.0);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes() / 2, 75);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+            cout << "Here!" << treeGenerator.numNodes() << endl;
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 75);
 
             for (auto& node : treeGenerator.nodes())
             {
@@ -1142,6 +1147,7 @@ int main(int argc, char* argv[])
     }
     int numNodes;
     cin >> numNodes;
+    assert(1 <= numNodes && numNodes <= 100'000);
 
     vector<Node> nodes(numNodes);
 
@@ -1165,6 +1171,8 @@ int main(int argc, char* argv[])
         cin >> u;
         int v;
         cin >> v;
+        assert(1 <= u && u <= 100'000);
+        assert(1 <= v && v <= 100'000);
 
         // Make 0-relative.
         u--;
@@ -1177,6 +1185,8 @@ int main(int argc, char* argv[])
     {
         int hasPerson;
         cin >> hasPerson;
+
+        assert(hasPerson == 0 || hasPerson == 1);
 
         nodes[i].hasPerson = (hasPerson == 1);
 
