@@ -516,19 +516,17 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 knownDescendtHeight = otherHeightInfo.numWithHeight;
             }
 
-            if (knownDescendtHeight > 0)
+            const bool previousChildHasThisHeight = (knownDescendtHeight > 0);
+            if (previousChildHasThisHeight)
             {
                 int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendentHeight];
 
                 if (newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren > 0)
                 {
-                    //cout << " found threeway: adding: " << newExtraDescendentHeight * otherHeightInfo.numPairsWithHeightViaDifferentChildren << endl;
+                    // Found a triple where all three nodes have currentNode as their LCA.
                     numTriangles += newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren * numTripletPermutations;
                 }
 
-
-
-                //cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
                 numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
             }
 
@@ -544,7 +542,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     }
 
     numNodesFinished++;
-    //cout << " finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << " infoForDescendentHeight.size: " << infoForDescendentHeight.size() << endl;
     return infoForDescendentHeight;
 }
 
