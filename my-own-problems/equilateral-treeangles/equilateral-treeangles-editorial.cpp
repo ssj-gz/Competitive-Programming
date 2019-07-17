@@ -3,7 +3,6 @@
 #include <map>
 #include <algorithm>
 
-#define NDEBUG
 #include <cassert>
 
 using namespace std;
@@ -24,14 +23,11 @@ struct Node
     vector<Node*> lightChildren;
 };
 
-
 struct HeightInfo
 {
     int numWithHeight = 0;
     Node* lastUpdatedAtNode = nullptr;
 };
-
-vector<vector<Node*>> heavyChains;
 
 int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
 {
@@ -49,7 +45,7 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
 }
 
 // Build up heavyChains; move the heavy child of each node to the front of that node's children.
-void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
+void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge, vector<vector<Node*>>& heavyChains)
 {
     if (followedHeavyEdge)
     {
@@ -67,7 +63,7 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
                 {
                 return lhs->numDescendants < rhs->numDescendants;
                 });
-        doHeavyLightDecomposition(heavyChild, true);
+        doHeavyLightDecomposition(heavyChild, true, heavyChains);
         for (auto child : node->children)
         {
             if (child != heavyChild)
@@ -76,7 +72,7 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
 
         for (auto lightChild : node->lightChildren)
         {
-            doHeavyLightDecomposition(lightChild, false);
+            doHeavyLightDecomposition(lightChild, false, heavyChains);
         }
     }
 }
@@ -151,8 +147,11 @@ void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustmen
 }
 
 
-void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
+void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
+    vector<vector<Node*>> heavyChains;
+    doHeavyLightDecomposition(rootNode, false, heavyChains);
+
     DistTracker distTracker(nodes.size());
     auto collectDists = [&distTracker](Node* node, int depth)
     {
@@ -302,8 +301,8 @@ int64_t solveOptimised(vector<Node>& nodes)
     int64_t result = 0;
 
     Node* rootNode = &(nodes.front());
-    doHeavyLightDecomposition(rootNode, false);
     solveOptimisedAux(rootNode, result);
+    completeTrianglesOfTypeA(nodes, rootNode, result);
 
     return result;
 }
