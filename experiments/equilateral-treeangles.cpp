@@ -116,6 +116,8 @@ struct Node
     bool hasPerson = false;
     int numDescendants = -1;
 
+    map<int, int64_t> numPairsWithHeightViaDifferentChildren;
+
     vector<Node*> lightChildren;
     vector<Node*> children;
 
@@ -128,7 +130,6 @@ struct Node
 struct HeightInfo
 {
     int numWithHeight = 0;
-    int64_t numPairsWithHeightViaDifferentChildren = 0;
     Node* lastUpdatedAtNode = nullptr;
 };
 
@@ -418,30 +419,28 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 newExtraDescendentHeight = otherHeightInfo.numWithHeight;
                 knownDescendtHeight = heightInfo.numWithHeight;
 
-                otherHeightInfo.numPairsWithHeightViaDifferentChildren = heightInfo.numPairsWithHeightViaDifferentChildren;
                 otherHeightInfo.numWithHeight = heightInfo.numWithHeight;
             }
             else
             {
                 assert(heightInfo.lastUpdatedAtNode != currentNode);
                 //cout << " currentNode: " << currentNode->id << " otherHeightInfo.lastUpdatedAtNode: " << (otherHeightInfo.lastUpdatedAtNode == nullptr ? -1 : otherHeightInfo.lastUpdatedAtNode->id) << endl;
-                if (!(otherHeightInfo.lastUpdatedAtNode == nullptr || otherHeightInfo.lastUpdatedAtNode == currentNode))
-                {
-                    otherHeightInfo.numPairsWithHeightViaDifferentChildren = 0;
-                }
                 newExtraDescendentHeight = heightInfo.numWithHeight;
                 knownDescendtHeight = otherHeightInfo.numWithHeight;
             }
-            if (newExtraDescendentHeight * otherHeightInfo.numPairsWithHeightViaDifferentChildren > 0)
+
+            int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendentHeight];
+
+            if (newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren > 0)
             {
                 //cout << " found threeway: adding: " << newExtraDescendentHeight * otherHeightInfo.numPairsWithHeightViaDifferentChildren << endl;
-                numTriangles += newExtraDescendentHeight * otherHeightInfo.numPairsWithHeightViaDifferentChildren * numTripletPermutations;
+                numTriangles += newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren * numTripletPermutations;
             }
 
 
 
             //cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
-            otherHeightInfo.numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
+            numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
             if (parentNode != nullptr)
             {
                 vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
