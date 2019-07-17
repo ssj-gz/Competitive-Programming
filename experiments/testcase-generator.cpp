@@ -374,7 +374,7 @@ bool validateTestSuite(const string& testSuiteFileName)
 
 int main(int argc, char* argv[])
 {
-    enum Mode {Generate, Verify, Validate};
+    enum Mode {Generate, Verify, Validate, AppendFromStdin};
     Mode mode = Generate;
     bool appendToTestSuiteFile = false;
     string failedTestcaseFilename = "failed_test_case.txt";
@@ -385,6 +385,7 @@ int main(int argc, char* argv[])
 
     bool verifyModeFlag = false;
     bool validateModeFlag = false;
+    bool appendFromStdinFlag = false;
 
     po::options_description desc("Allowed options");
     desc.add_options()
@@ -393,6 +394,7 @@ int main(int argc, char* argv[])
         ("executable-name", po::value< string >(&executableName), "path to the executable that generates/ runs tests.  Defaults to ./a.out")
         ("verify", po::bool_switch(&verifyModeFlag), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
         ("validate", po::bool_switch(&validateModeFlag), "perform simple validation of the testsuite to check for obvious corruption")
+        ("append-testcase-from-stdin", po::bool_switch(&appendFromStdinFlag), "read a testcase input from stdin and append it and its calculcated ouptput to the testsuite")
         ("stop-after", po::value< string >(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
@@ -419,6 +421,10 @@ int main(int argc, char* argv[])
     if (validateModeFlag)
     {
         mode = Validate;
+    }
+    if (appendFromStdinFlag)
+    {
+        mode = AppendFromStdin;
     }
 
 
@@ -514,6 +520,42 @@ int main(int argc, char* argv[])
     else if (mode == Validate)
     {
         return validateTestSuite(testSuiteFileName) ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+    else if (mode == AppendFromStdin)
+    {
+        vector<string> readTestInput;
+        string testInputLine;
+        while (cin >> testInputLine)
+        {
+            readTestInput.push_back(testInputLine);
+        }
+
+        const ExecutionResult testRunResult = runTestWithInputAndGetFilteredResult(executableName, readTestInput, testResultRegexFilter, testResultRegexFilterCaptureGroup);
+        if (!testRunResult.successful())
+        {
+            writeFailingTestInputAndDie(readTestInput, failedTestcaseFilename);
+        }
+        const vector<string> testRunOutput = testRunResult.output;
+
+        ofstream testSuiteFile(testSuiteFileName, ios_base::app);
+        testSuiteFile << "Q: " << readTestInput.size() << " lines" << endl;
+        for (const auto& x : readTestInput)
+        {
+            testSuiteFile << x << endl;
+        }
+        testSuiteFile << "A: " << testRunOutput.size() << " lines" << endl;
+        for (const auto& x : testRunOutput)
+        {
+            testSuiteFile << x << endl;
+        }
+        const bool writtenOk = testSuiteFile.good();
+
+        testSuiteFile.close();
+        if (!writtenOk)
+        {
+            cerr << "Error writing to file: " << testSuiteFileName << endl;
+        }
+        return writtenOk ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     else
     {
