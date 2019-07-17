@@ -115,6 +115,8 @@ struct Node
     int id = -1; // 1-relative - handy for debugging.
     bool hasPerson = false;
     int numDescendants = -1;
+    Node* parentNode = nullptr;
+    int height = 0;
 
     map<int, int64_t> numPairsWithHeightViaDifferentChildren;
 
@@ -135,14 +137,17 @@ struct HeightInfo
 
 vector<vector<Node*>> heavyChains;
 
-int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
+int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
 {
     node->numDescendants = 1;
+    node->parentNode = parentNode;
+    node->height = height;
+
     if (parentNode)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
 
     for (auto child : node->children)
-        node->numDescendants += fixParentChildAndCountDescendants(child, node);
+        node->numDescendants += fixParentChildAndCountDescendants(child, node, height + 1);
 
     return node->numDescendants;
 }
@@ -218,8 +223,48 @@ void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdj
         heightTracker.adjustAllHeights(-1);
 }
 
-void completeTrianglesOfTypeA(vector<Node>& nodes)
+void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int>& dbgNumAncestorsWithHeight)
 {
+    assert(height >= 0 && height < dbgNumAncestorsWithHeight.size());
+    if (currentNode->hasPerson)
+        dbgNumAncestorsWithHeight[height]++;
+    //cout << "dbgCountHeights currentNode: " << (currentNode->id) << endl;
+    for (auto child : currentNode->neighbours)
+    {
+        //cout << "wee" << endl;
+        if (child == parentNode)
+            continue;
+        //cout << " child: " << child->id << endl;
+
+        dbgCountHeights(child, currentNode, height + 1, dbgNumAncestorsWithHeight);
+    }
+}
+
+void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
+{
+#ifdef BRUTE_FORCE
+    for (auto& node : nodes)
+    {
+        for (const auto& heightPair : node.numPairsWithHeightViaDifferentChildren)
+        {
+            if(node.parentNode)
+            {
+                const int descendentHeight = heightPair.first;
+                const int64_t numPairsWithHeightViaDifferentChildren = node.numPairsWithHeightViaDifferentChildren[descendentHeight];
+                vector<int> dbgNumDescendantsWithHeight(nodes.size(), 0);
+                const int requiredNonDescendantDist = (descendentHeight - node.height);
+                dbgCountHeights(node.parentNode, &node, 1, dbgNumDescendantsWithHeight);
+                const int numNewTriangles = numPairsWithHeightViaDifferentChildren * dbgNumDescendantsWithHeight[requiredNonDescendantDist];
+                //cout << " currentNode: " << currentNode->id << " num non-ancestors with dist: " << requiredNonDescendantDist << ": " << dbgNumDescendantsWithHeight[requiredNonDescendantDist] << endl;
+                if (numNewTriangles > 0)
+                {
+                    //cout << " found double: adding: " << numNewTriangles << endl;
+                }
+                numTriangles += numNewTriangles * numTripletPermutations;
+            }
+        }
+    }
+#else
     HeightTracker heightTracker;
     auto collectHeights = [&heightTracker](Node* node, int depth)
     {
@@ -273,6 +318,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes)
             reverse(chain.begin(), chain.end());
         }
     }
+#endif
 }
 
 void distDFS(const int rootNodeIndex, const Node* currentNode, const Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
@@ -362,22 +408,6 @@ int64_t solveBruteForce(const vector<Node>& nodes)
     return result;
 }
 
-void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int>& dbgNumAncestorsWithHeight)
-{
-    assert(height >= 0 && height < dbgNumAncestorsWithHeight.size());
-    if (currentNode->hasPerson)
-        dbgNumAncestorsWithHeight[height]++;
-    //cout << "dbgCountHeights currentNode: " << (currentNode->id) << endl;
-    for (auto child : currentNode->neighbours)
-    {
-        //cout << "wee" << endl;
-        if (child == parentNode)
-            continue;
-        //cout << " child: " << child->id << endl;
-
-        dbgCountHeights(child, currentNode, height + 1, dbgNumAncestorsWithHeight);
-    }
-}
 
 int numNodes = 0;
  
@@ -441,6 +471,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
             //cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
             numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
+#if 0
             if (parentNode != nullptr)
             {
                 vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
@@ -454,6 +485,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 }
                 numTriangles += numNewTriangles * numTripletPermutations;
             }
+#endif
 
             otherHeightInfo.numWithHeight += newExtraDescendentHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
@@ -480,6 +512,8 @@ int64_t solveOptimised(vector<Node>& nodes)
     Node* rootNode = &(nodes.front());
     vector<Node*> ancestors;
     solveOptimisedAux(rootNode, nullptr, 0, ancestors, result);
+
+    completeTrianglesOfTypeA(nodes, result);
 
     return result;
 }
@@ -535,6 +569,9 @@ int main(int argc, char* argv[])
         nodes[i].id = i + 1;
     }
     assert(cin);
+
+    auto rootNode = &(nodes.front());
+    fixParentChildAndCountDescendants(rootNode, nullptr, 0);
 
 #ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(nodes);
