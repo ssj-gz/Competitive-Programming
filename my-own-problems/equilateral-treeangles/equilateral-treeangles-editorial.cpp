@@ -169,9 +169,9 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
             if (descendantHeight > node->height)
             {
                 const int requiredNonDescendantDist = (descendantHeight - node->height);
-                const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist);
+                const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
                 assert(numNewTriangles >= 0);
-                numTriangles += numNewTriangles * numTripletPermutations;
+                numTriangles += numNewTriangles;
             }
         }
     };
