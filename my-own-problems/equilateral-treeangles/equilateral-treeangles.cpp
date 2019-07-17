@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-#define SLOW_ANCESTOR_COUNT
+//#define SLOW_ANCESTOR_COUNT
 
 
 using namespace std;
