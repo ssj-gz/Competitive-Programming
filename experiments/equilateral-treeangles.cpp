@@ -530,21 +530,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 //cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
                 numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
             }
-#if 0
-            if (parentNode != nullptr)
-            {
-                vector<int> dbgNumDescendantsWithHeight(::numNodes, 0);
-                const int requiredNonDescendantDist = (descendentHeight - height);
-                dbgCountHeights(parentNode, currentNode, 1, dbgNumDescendantsWithHeight);
-                const int numNewTriangles = knownDescendtHeight * newExtraDescendentHeight * dbgNumDescendantsWithHeight[requiredNonDescendantDist];
-                //cout << " currentNode: " << currentNode->id << " num non-ancestors with dist: " << requiredNonDescendantDist << ": " << dbgNumDescendantsWithHeight[requiredNonDescendantDist] << endl;
-                if (numNewTriangles > 0)
-                {
-                    //cout << " found double: adding: " << numNewTriangles << endl;
-                }
-                numTriangles += numNewTriangles * numTripletPermutations;
-            }
-#endif
 
             otherHeightInfo.numWithHeight += newExtraDescendentHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
