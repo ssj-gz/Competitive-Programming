@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-#define SLOW_ANCESTOR_COUNT
+//#define SLOW_ANCESTOR_COUNT
 
 
 using namespace std;
@@ -362,6 +362,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
                 const int requiredNonDescendantDist = (descendentHeight - node->height);
                 //cout << " node: " << node->id << " descendentHeight: " << descendentHeight << " node height: " << node->height << " requiredNonDescendantDist: " << requiredNonDescendantDist  << " num required dists: " << heightTracker.numWithHeight(requiredNonDescendantDist) << " numPairsWithHeightViaDifferentChildren: " << numPairsWithHeightViaDifferentChildren << endl;
                 const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * heightTracker.numWithHeight(requiredNonDescendantDist);
+                assert(numNewTriangles >= 0);
                 numTriangles += numNewTriangles * numTripletPermutations;
             }
         }
@@ -596,6 +597,7 @@ int64_t solveBruteForce2(vector<Node>& nodes)
     const int totalNodesToProcess = count_if(nodes.begin(), nodes.end(), [](const Node& node) { return node.hasPerson ;});
     for (auto& node : nodes)
     {
+        cout << "node: " << node.id << endl;
         if (!node.hasPerson)
             continue;
 
@@ -745,11 +747,15 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, int64_t& numTriangles)
                 if (newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren > 0)
                 {
                     // Found a triple where all three nodes have currentNode as their LCA.
-                    numTriangles += newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren * numTripletPermutations;
+                    const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * newExtraDescendentHeight * numTripletPermutations;
+                    assert(numNewTriangles >= 0);
+                    numTriangles += numNewTriangles;
                 }
 
 #ifdef SLOW_ANCESTOR_COUNT
-                numTriangles += static_cast<int64_t>(knownDescendtHeight) * newExtraDescendentHeight * dbgFindNumNonDescendentsWithHeight(currentNode->parentNode, currentNode, 1, (descendentHeight - currentNode->height)) * numTripletPermutations;
+                const int64_t numNewTriangles = static_cast<int64_t>(knownDescendtHeight) * newExtraDescendentHeight * dbgFindNumNonDescendentsWithHeight(currentNode->parentNode, currentNode, 1, (descendentHeight - currentNode->height)) * numTripletPermutations;
+                assert(numNewTriangles >= 0);
+                numTriangles += numNewTriangles;
 #endif
                 numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
 
@@ -1157,7 +1163,7 @@ int main(int argc, char* argv[])
 
             for (auto& node : treeGenerator.nodes())
             {
-                node->data.hasPerson = ((rand() % 4) != 0);
+                node->data.hasPerson = ((rand() % 8) != 0);
             }
 
             treeGenerator.scrambleNodeIdsAndReorder(nullptr);
@@ -1253,11 +1259,11 @@ int main(int argc, char* argv[])
 
 
 #ifdef BRUTE_FORCE
-    const auto solutionBruteForce = solveBruteForce(nodes);
+    ///const auto solutionBruteForce = solveBruteForce(nodes);
     const auto solutionBruteForce2 = solveBruteForce2(nodes);
     const auto solutionOptimised = solveOptimised(nodes);
     //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-    //cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
+    cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
     cout << "solutionOptimised: " << solutionOptimised << endl;
     //assert(solutionOptimised == solutionBruteForce);
     assert(solutionOptimised == solutionBruteForce2);
