@@ -1,4 +1,4 @@
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -1080,23 +1080,15 @@ int main(int argc, char* argv[])
             gettimeofday(&time,NULL);
             srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-            const int numNodes = 10'000;
+            const int numNodes = 100'000;
             TreeGenerator treeGenerator;
             TestNode* rootNode = treeGenerator.createNode();
 
-            while (treeGenerator.numNodes() < 7'000)
-            {
-                TestNode *randomNode = treeGenerator.nodes()[rand() % treeGenerator.numNodes()];
-                const int numToAdd = rand() % 100 + 1;
-                for (int j = 0; j < numToAdd; j++)
-                {
-                    treeGenerator.createNode(randomNode);
-                }
-            }
-
+            treeGenerator.addNodeChain(rootNode, 20'000);
+            treeGenerator.addNodeChain(rootNode, 20'000);
+            treeGenerator.addNodeChain(rootNode, 20'000);
 
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
-            cout << "Here!" << treeGenerator.numNodes() << endl;
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 75);
 
             for (auto& node : treeGenerator.nodes())
@@ -1117,6 +1109,7 @@ int main(int argc, char* argv[])
 
 
             return 0;
+
         }
         else if (string(argv[1]) == "--convert")
         {
