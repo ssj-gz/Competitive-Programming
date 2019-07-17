@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-#define SLOW_ANCESTOR_COUNT
+//#define SLOW_ANCESTOR_COUNT
 
 
 using namespace std;
@@ -1127,6 +1127,50 @@ int main(int argc, char* argv[])
             {
                 cout << (rand() % 2) << endl;
             }
+            return 0;
+        }
+        else if (string(argv[1]) == "--enhanced-test")
+        {
+            struct timeval time;
+            gettimeofday(&time,NULL);
+            srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+            const int numNodes = 100'000;
+            TreeGenerator treeGenerator;
+            treeGenerator.createNode();
+
+            while (treeGenerator.numNodes() < 75'000)
+            {
+                TestNode* randomNode = treeGenerator.nodes()[rand() % treeGenerator.numNodes()];
+                for (int i = 0; i < 10'000; i++)
+                {
+                    treeGenerator.createNode(randomNode);
+                }
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                TestNode* randomNode = treeGenerator.nodes()[rand() % treeGenerator.numNodes()];
+                treeGenerator.addNodeChain(randomNode, 10'000);
+            }
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 0.75);
+
+            for (auto& node : treeGenerator.nodes())
+            {
+                node->data.hasPerson = ((rand() % 4) != 0);
+            }
+
+            treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+            treeGenerator.scrambleEdgeOrder();
+
+            cout << treeGenerator.numNodes() << endl;
+            treeGenerator.printEdges();
+
+            for (auto& node : treeGenerator.nodes())
+            {
+                cout << static_cast<int>(node->data.hasPerson) << endl;
+            }
+
+
             return 0;
         }
         else if (string(argv[1]) == "--convert")
