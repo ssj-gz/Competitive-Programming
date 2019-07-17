@@ -1,4 +1,4 @@
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -292,7 +292,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
     };
     auto processNode = [&heightTracker, &numTriangles](Node* node)
     {
-        cout << " processNode node: " << node->id << endl;
+        //cout << " processNode node: " << node->id << endl;
         for (const auto& heightPair : node->numPairsWithHeightViaDifferentChildren)
         {
             const int descendentHeight = heightPair.first;
@@ -300,7 +300,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
             if (descendentHeight > node->height)
             {
                 const int requiredNonDescendantDist = (descendentHeight - node->height);
-                cout << " node: " << node->id << " descendentHeight: " << descendentHeight << " node height: " << node->height << " requiredNonDescendantDist: " << requiredNonDescendantDist  << " num required dists: " << heightTracker.numWithHeight(requiredNonDescendantDist) << " numPairsWithHeightViaDifferentChildren: " << numPairsWithHeightViaDifferentChildren << endl;
+                //cout << " node: " << node->id << " descendentHeight: " << descendentHeight << " node height: " << node->height << " requiredNonDescendantDist: " << requiredNonDescendantDist  << " num required dists: " << heightTracker.numWithHeight(requiredNonDescendantDist) << " numPairsWithHeightViaDifferentChildren: " << numPairsWithHeightViaDifferentChildren << endl;
                 const int numNewTriangles = numPairsWithHeightViaDifferentChildren * heightTracker.numWithHeight(requiredNonDescendantDist);
                 numTriangles += numNewTriangles * numTripletPermutations;
             }
@@ -564,7 +564,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numNodes = 1 + rand() % 10;
+        //const int numNodes = 1 + rand() % 50000;
+        const int numNodes = 100'000;
         cout << numNodes << endl;
 
         for (int i = 0; i < numNodes - 1; i++)
@@ -582,6 +583,7 @@ int main(int argc, char* argv[])
 
     vector<Node> nodes(numNodes);
 
+#if 0
     HeightTracker heightTracker(100);
     heightTracker.insertHeight(3);
     heightTracker.insertHeight(5);
@@ -593,6 +595,7 @@ int main(int argc, char* argv[])
     cout << " " << heightTracker.numWithHeight(13) << endl;
     cout << " " << heightTracker.numWithHeight(15) << endl;
     cout << " " << heightTracker.numWithHeight(7) << endl;
+#endif
 
     for (int i = 0; i < numNodes - 1; i++)
     {
