@@ -189,23 +189,34 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
 class HeightTracker
 {
     public:
-        HeightTracker()
+        HeightTracker(int maxHeight)
+            : m_numWithHeight(2 * maxHeight + 1, 0), 
+              m_maxHeight(maxHeight)
         {
         }
         void insertHeight(const int newHeight)
         {
+            m_numWithHeight[newHeight - m_cumulativeHeightAdjustment + m_maxHeight]++;
         };
-
+        int numWithHeight(int height) const
+        {
+            return m_numWithHeight[height - m_cumulativeHeightAdjustment + m_maxHeight];
+        }
         void adjustAllHeights(int heightDiff)
         {
-        }
-        void doPendingHeightAdjustments()
-        {
+            m_cumulativeHeightAdjustment += heightDiff;
+            assert(m_cumulativeHeightAdjustment >= 0);
         }
         void clear()
         {
+            // TODO - optimise via version number.
+            fill(m_numWithHeight.begin(), m_numWithHeight.end(), 0);
+            m_cumulativeHeightAdjustment = 0;
         }
     private:
+        int m_cumulativeHeightAdjustment = 0;
+        vector<int> m_numWithHeight;
+        int m_maxHeight = -1;
 };
 
 enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
@@ -243,7 +254,7 @@ void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int
 
 void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
 {
-#ifdef BRUTE_FORCE
+#if 0
     cout << "completeTrianglesOfTypeA" << endl;
     for (auto& node : nodes)
     {
@@ -273,14 +284,31 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
         }
     }
 #else
-    HeightTracker heightTracker;
+    HeightTracker heightTracker(nodes.size());
     auto collectHeights = [&heightTracker](Node* node, int depth)
     {
         if (node->hasPerson)
             heightTracker.insertHeight(depth);
     };
-    auto propagateHeights = [&heightTracker](Node* node, int depth)
+    auto processNode = [&heightTracker, &numTriangles](Node* node)
     {
+        cout << " processNode node: " << node->id << endl;
+        for (const auto& heightPair : node->numPairsWithHeightViaDifferentChildren)
+        {
+            const int descendentHeight = heightPair.first;
+            const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second;
+            if (descendentHeight > node->height)
+            {
+                const int requiredNonDescendantDist = (descendentHeight - node->height);
+                cout << " node: " << node->id << " descendentHeight: " << descendentHeight << " node height: " << node->height << " requiredNonDescendantDist: " << requiredNonDescendantDist  << " num required dists: " << heightTracker.numWithHeight(requiredNonDescendantDist) << " numPairsWithHeightViaDifferentChildren: " << numPairsWithHeightViaDifferentChildren << endl;
+                const int numNewTriangles = numPairsWithHeightViaDifferentChildren * heightTracker.numWithHeight(requiredNonDescendantDist);
+                numTriangles += numNewTriangles * numTripletPermutations;
+            }
+        }
+    };
+    auto propagateHeights = [&heightTracker, &processNode](Node* node, int depth)
+    {
+        processNode(node);
     };
     for (auto& chain : heavyChains)
     {
@@ -296,6 +324,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
                     // (if any) so that it gets propagated to light descendants ...
                     if (node->hasPerson)
                         heightTracker.insertHeight(0);
+                    processNode(node);
                 }
 
                 for (auto lightChild : node->lightChildren)
@@ -518,6 +547,7 @@ int64_t solveOptimised(vector<Node>& nodes)
     ::numNodes = numNodes;
 
     Node* rootNode = &(nodes.front());
+    doHeavyLightDecomposition(rootNode, false);
     vector<Node*> ancestors;
     solveOptimisedAux(rootNode, nullptr, 0, ancestors, result);
 
@@ -551,6 +581,18 @@ int main(int argc, char* argv[])
     cin >> numNodes;
 
     vector<Node> nodes(numNodes);
+
+    HeightTracker heightTracker(100);
+    heightTracker.insertHeight(3);
+    heightTracker.insertHeight(5);
+    heightTracker.adjustAllHeights(10);
+    heightTracker.insertHeight(7);
+    cout << "blee: " << endl;
+    cout << " " << heightTracker.numWithHeight(3) << endl;
+    cout << " " << heightTracker.numWithHeight(5) << endl;
+    cout << " " << heightTracker.numWithHeight(13) << endl;
+    cout << " " << heightTracker.numWithHeight(15) << endl;
+    cout << " " << heightTracker.numWithHeight(7) << endl;
 
     for (int i = 0; i < numNodes - 1; i++)
     {
