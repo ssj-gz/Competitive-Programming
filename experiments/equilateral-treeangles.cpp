@@ -464,10 +464,12 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
 
 int numNodes = 0;
+
+int coreIterations = 0;
+int numNodesFinished = 0;
  
 map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, vector<Node*>& ancestors, int64_t& numTriangles)
 {
-    cout << " finished node: " << currentNode->id << endl;
     assert(currentNode->dbgHeightInOptimisedDFS == -1);
     currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
@@ -487,6 +489,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
         for (auto descendentHeightPair : infoForChildDescendentHeight)
         {
+            coreIterations++;
             const int descendentHeight = descendentHeightPair.first;
 
             const auto& heightInfo = descendentHeightPair.second;
@@ -557,6 +560,8 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         infoForDescendentHeight[height].lastUpdatedAtNode = currentNode;
     }
 
+    numNodesFinished++;
+    cout << " finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << endl;
     return infoForDescendentHeight;
 }
 
