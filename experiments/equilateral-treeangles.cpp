@@ -243,9 +243,6 @@ void completeTrianglesOfTypeA(vector<Node>& nodes)
                     // (if any) so that it gets propagated to light descendants ...
                     if (node->hasPerson)
                         heightTracker.insertHeight(0);
-                    // ... and update its grundy number now, so that it *doesn't* include
-                    // the contributions from its light descendants.
-                    //node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
 
                 for (auto lightChild : node->lightChildren)
@@ -265,11 +262,6 @@ void completeTrianglesOfTypeA(vector<Node>& nodes)
                     // coin's node to the heightTracker!
                     if (node->hasPerson)
                         heightTracker.insertHeight(0);
-                    // In pass 1, we ensured that this node's grundy number *wasn't* updated from
-                    // its light descendants - this time, ensure that it is updated, by
-                    // waiting until we've processed this coin's light descendants before updating
-                    // its grundyNumberIfRoot.
-                    //node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
 
                 // Prepare for the reverse pass.
