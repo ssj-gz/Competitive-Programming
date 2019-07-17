@@ -1084,9 +1084,12 @@ int main(int argc, char* argv[])
             TreeGenerator treeGenerator;
             TestNode* rootNode = treeGenerator.createNode();
 
-            treeGenerator.addNodeChain(rootNode, 20'000);
-            treeGenerator.addNodeChain(rootNode, 20'000);
-            treeGenerator.addNodeChain(rootNode, 20'000);
+            for (int i = 0; i < 50'000; i++)
+            {
+                treeGenerator.createNode(rootNode);
+            }
+            treeGenerator.addNodeChain(rootNode, 30'000);
+
 
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 75);
