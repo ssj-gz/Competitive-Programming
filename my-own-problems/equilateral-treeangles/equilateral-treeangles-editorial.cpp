@@ -81,48 +81,48 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     }
 }
 
-class HeightTracker
+class DistTracker
 {
     public:
-        HeightTracker(int maxHeight)
-            : m_numWithHeight(2 * maxHeight + 1), 
-            m_maxHeight(maxHeight)
+        DistTracker(int maxDist)
+            : m_numWithDist(2 * maxDist + 1), 
+            m_maxDist(maxDist)
     {
     }
-        void insertHeight(const int newHeight)
+        void insertDist(const int newDist)
         {
-            numWithHeightValue(newHeight)++;
+            numWithDistValue(newDist)++;
         };
-        int numWithHeight(int height)
+        int numWithDist(int dist)
         {
-            return numWithHeightValue(height);
+            return numWithDistValue(dist);
         }
-        void adjustAllHeights(int heightDiff)
+        void adjustAllDists(int distDiff)
         {
-            m_cumulativeHeightAdjustment += heightDiff;
-            assert(m_cumulativeHeightAdjustment >= 0);
+            m_cumulativeDistAdjustment += distDiff;
+            assert(m_cumulativeDistAdjustment >= 0);
         }
         void clear()
         {
-            // Reset all height counts to 0 in O(1) by upping the 
+            // Reset all dist counts to 0 in O(1) by upping the 
             // m_versionNum.
-            m_cumulativeHeightAdjustment = 0;
+            m_cumulativeDistAdjustment = 0;
             m_versionNum++;
         }
     private:
-        int m_cumulativeHeightAdjustment = 0;
+        int m_cumulativeDistAdjustment = 0;
         struct VersionedValue
         {
             int versionNum = -1;
             int value = -1;
         };
-        vector<VersionedValue> m_numWithHeight;
-        int m_maxHeight = -1;
+        vector<VersionedValue> m_numWithDist;
+        int m_maxDist = -1;
         int m_versionNum = 0;
 
-        int& numWithHeightValue(int height)
+        int& numWithDistValue(int dist)
         {
-            VersionedValue& versionedValue = m_numWithHeight[height - m_cumulativeHeightAdjustment + m_maxHeight];
+            VersionedValue& versionedValue = m_numWithDist[dist - m_cumulativeDistAdjustment + m_maxDist];
             if (versionedValue.versionNum != m_versionNum)
             {
                 versionedValue.value = 0;
@@ -133,33 +133,33 @@ class HeightTracker
         }
 };
 
-enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
+enum DistTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 
 template <typename NodeProcessor>
-void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
 {
-    if (heightTrackerAdjustment == AdjustWithDepth)
-        heightTracker.adjustAllHeights(1);
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(1);
 
     processNode(node, depth);
 
     for (auto child : node->children)
-        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+        doDfs(child, depth + 1, distTracker, distTrackerAdjustment, processNode);
 
-    if (heightTrackerAdjustment == AdjustWithDepth)
-        heightTracker.adjustAllHeights(-1);
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(-1);
 }
 
 
 void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
 {
-    HeightTracker heightTracker(nodes.size());
-    auto collectHeights = [&heightTracker](Node* node, int depth)
+    DistTracker distTracker(nodes.size());
+    auto collectDists = [&distTracker](Node* node, int depth)
     {
         if (node->hasPerson)
-            heightTracker.insertHeight(depth);
+            distTracker.insertDist(depth);
     };
-    auto completeTypeATrianglesForNode = [&heightTracker, &numTriangles](Node* node)
+    auto completeTypeATrianglesForNode = [&distTracker, &numTriangles](Node* node)
     {
         // This will actually be called O(log2 n) for each node before the node's
         // Type A Triangles are completed.
@@ -170,13 +170,13 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
             if (descendentHeight > node->height)
             {
                 const int requiredNonDescendantDist = (descendentHeight - node->height);
-                const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * heightTracker.numWithHeight(requiredNonDescendantDist);
+                const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist);
                 assert(numNewTriangles >= 0);
                 numTriangles += numNewTriangles * numTripletPermutations;
             }
         }
     };
-    auto propagateHeights = [&completeTypeATrianglesForNode](Node* node, int depth)
+    auto propagateDists = [&completeTypeATrianglesForNode](Node* node, int depth)
     {
         completeTypeATrianglesForNode(node);
     };
@@ -184,7 +184,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
     {
         for (auto pass = 1; pass <= 2; pass++)
         {
-            heightTracker.clear();
+            distTracker.clear();
             // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
@@ -193,7 +193,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
                     // Once only (first pass chosen arbitrarily) - add this node's coin
                     // (if any) so that it gets propagated to light descendants ...
                     if (node->hasPerson)
-                        heightTracker.insertHeight(0);
+                        distTracker.insertDist(0);
                     // ... and also complete its Type A Triangles.
                     completeTypeATrianglesForNode(node);
                 }
@@ -202,9 +202,9 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
                 {
                     // Propagate all coins found so far along the chain in this direction
                     // to light descendants ...
-                    doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
+                    doDfs(lightChild, 1, distTracker, AdjustWithDepth, propagateDists);
                     // ... and collect from light descendants.
-                    doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
+                    doDfs(lightChild, 1, distTracker, DoNotAdjust, collectDists);
                 }
 
                 if (pass == 2)
@@ -212,15 +212,15 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
                     // In pass 1, we ensured that this node's coin (if any) was propagated
                     // to its light descendants.  Don't do it this time - wait until
                     // we've processed this coin's light descendants before adding this
-                    // coin's node to the heightTracker!
+                    // coin's node to the distTracker!
                     if (node->hasPerson)
-                        heightTracker.insertHeight(0);
+                        distTracker.insertDist(0);
                 }
 
                 // Prepare for the reverse pass.
                 reverse(node->lightChildren.begin(), node->lightChildren.end());
                 // Move one node along the chain - increase all heights accordingly!
-                heightTracker.adjustAllHeights(1);
+                distTracker.adjustAllDists(1);
             }
             // Now do it backwards.
             reverse(chain.begin(), chain.end());
