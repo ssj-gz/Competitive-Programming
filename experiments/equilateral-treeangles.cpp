@@ -190,17 +190,17 @@ class HeightTracker
 {
     public:
         HeightTracker(int maxHeight)
-            : m_numWithHeight(2 * maxHeight + 1, 0), 
+            : m_numWithHeight(2 * maxHeight + 1), 
               m_maxHeight(maxHeight)
         {
         }
         void insertHeight(const int newHeight)
         {
-            m_numWithHeight[newHeight - m_cumulativeHeightAdjustment + m_maxHeight]++;
+            numWithHeightValue(newHeight)++;
         };
-        int numWithHeight(int height) const
+        int numWithHeight(int height)
         {
-            return m_numWithHeight[height - m_cumulativeHeightAdjustment + m_maxHeight];
+            return numWithHeightValue(height);
         }
         void adjustAllHeights(int heightDiff)
         {
@@ -209,14 +209,31 @@ class HeightTracker
         }
         void clear()
         {
-            // TODO - optimise via version number.
-            fill(m_numWithHeight.begin(), m_numWithHeight.end(), 0);
             m_cumulativeHeightAdjustment = 0;
+            m_versionNum++;
         }
     private:
         int m_cumulativeHeightAdjustment = 0;
-        vector<int> m_numWithHeight;
+        struct VersionedValue
+        {
+            int versionNum = -1;
+            int value = -1;
+        };
+        vector<VersionedValue> m_numWithHeight;
         int m_maxHeight = -1;
+        int m_versionNum = 0;
+
+        int& numWithHeightValue(int height)
+        {
+            VersionedValue& versionedValue = m_numWithHeight[height - m_cumulativeHeightAdjustment + m_maxHeight];
+            if (versionedValue.versionNum != m_versionNum)
+            {
+                versionedValue.value = 0;
+                versionedValue.versionNum = m_versionNum;
+            }
+
+            return versionedValue.value;
+        }
 };
 
 enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
@@ -634,6 +651,6 @@ int main(int argc, char* argv[])
     assert(solutionOptimised == solutionBruteForce);
 #else
     const auto solutionOptimised = solveOptimised(nodes);
-    cout << "solutionOptimised: " << solutionOptimised  << " (" << (solutionOptimised / 6) << " basic triangles)"<< endl;
+    cout << solutionOptimised << endl;
 #endif
 }
