@@ -1,4 +1,4 @@
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -15,6 +15,16 @@
 using namespace std;
 
 const int numTripletPermutations = 6;
+
+constexpr auto maxHeight = 100'000;
+constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
+{
+    return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
+}
+constexpr auto log2MaxHeight = log2(maxHeight);
+
+
+
 
 class ModNum
 {
@@ -128,7 +138,35 @@ struct Node
 
     bool visitedInBruteForceDFS = false;
     int dbgHeightInOptimisedDFS = -1; // TODO - remove
+    std::array<Node*, log2MaxHeight + 1> ancestorPowerOf2Above;
 };
+
+void fillInDFSInfo(Node* node, Node* parent, vector<Node*>& ancestors)
+{
+    int powerOf2 = 1;
+    for (int exponent = 0; exponent < log2MaxHeight; exponent++)
+    {
+        if (ancestors.size() >= powerOf2)
+        {
+            node->ancestorPowerOf2Above[exponent] = ancestors[ancestors.size() - powerOf2];
+        }
+        else
+        {
+            node->ancestorPowerOf2Above[exponent] = nullptr;
+        }
+        powerOf2 *= 2;
+    }
+
+    ancestors.push_back(node);
+    for (auto neighbour : node->neighbours)
+    {
+        if (neighbour == parent)
+            continue;
+        fillInDFSInfo(neighbour, node, ancestors);
+    }
+    ancestors.pop_back();
+}
+
 
 struct HeightInfo
 {
@@ -192,9 +230,9 @@ class HeightTracker
     public:
         HeightTracker(int maxHeight)
             : m_numWithHeight(2 * maxHeight + 1), 
-              m_maxHeight(maxHeight)
-        {
-        }
+            m_maxHeight(maxHeight)
+    {
+    }
         void insertHeight(const int newHeight)
         {
             numWithHeightValue(newHeight)++;
@@ -464,6 +502,164 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 }
 
 
+Node* findKthAncestor(Node* node, int k)
+{
+    const auto originalHeight = node->height;
+    const auto originalK = k;
+    Node* ancestor = node;
+    for (int exponent = log2MaxHeight - 1; exponent >= 0; exponent--)
+    {
+        const auto powerOf2 = (1 << exponent);
+        if (k >= powerOf2) 
+        {
+            assert(ancestor->ancestorPowerOf2Above[exponent] && ancestor->ancestorPowerOf2Above[exponent]->height == ancestor->height - powerOf2);
+            ancestor = ancestor->ancestorPowerOf2Above[exponent];
+            k -= powerOf2;
+        }
+    }
+    assert(ancestor);
+    assert(ancestor->height == originalHeight - originalK);
+    return ancestor;
+}
+
+Node* findLCA(Node* node1, Node* node2)
+{
+    // Equalise node heights.
+    if (node1->height != node2->height)
+    {
+        if (node1->height > node2->height)
+        {
+            node1 = findKthAncestor(node1, node1->height - node2->height);
+        }
+        else
+        {
+            node2 = findKthAncestor(node2, node2->height - node1->height);
+        }
+    }
+    assert(node1 && node2);
+    assert(node1->height == node2->height);
+
+    // Use a binary search to find the common ancestor: since the 
+    // nodes always have the same height, if we jump both nodes up by x places
+    // and they are still not equal, then the lca is still above them: if they
+    // do become equal, the the lca is at or below them.
+    int currentNodesHeight = node1->height;
+    int minLCAHeight = 0;
+    int maxLCAHeight = currentNodesHeight;
+    bool found = false;
+    while (true)
+    {
+        const int heightDecrease = (currentNodesHeight - minLCAHeight) / 2;
+        assert(node1->height == node2->height);
+        assert(node1->height == currentNodesHeight); 
+        if (node1 != node2 && node1->parentNode == node2->parentNode && node1->parentNode)
+            return node1->parentNode;
+
+        if (heightDecrease == 0)
+        {
+            assert(node1 == node2);
+            return node1;;
+        }
+        const int nodesAncestorHeight = currentNodesHeight - heightDecrease;
+        auto node1Ancestor = findKthAncestor(node1, heightDecrease);
+        auto node2Ancestor = findKthAncestor(node2, heightDecrease);
+        assert(node1Ancestor && node2Ancestor);
+
+        if (node1Ancestor == node2Ancestor)
+        {
+            minLCAHeight = nodesAncestorHeight;
+        }
+        else
+        {
+            currentNodesHeight = nodesAncestorHeight - 1;
+            maxLCAHeight = currentNodesHeight;
+            node1 = node1Ancestor->parentNode;
+            node2 = node2Ancestor->parentNode;
+        }
+    }
+    assert(false && "Shouldn't be able to reach here!");
+    return nullptr;
+}
+
+
+int64_t solveBruteForce2(vector<Node>& nodes)
+{
+    int64_t result = 0;
+    int numNodesProcessed = 0;
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point lastReportedTime = std::chrono::steady_clock::now();
+    const int totalNodesToProcess = count_if(nodes.begin(), nodes.end(), [](const Node& node) { return node.hasPerson ;});
+    for (auto& node : nodes)
+    {
+        if (!node.hasPerson)
+            continue;
+
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - lastReportedTime).count() == 2)
+        {
+            lastReportedTime = now;
+            const int totalSecondsElapsed = std::chrono::duration_cast<std::chrono::seconds>(now - begin).count();
+            cout << "Processed " << numNodesProcessed << " out of " << totalNodesToProcess << " in " << totalSecondsElapsed << " seconds; estimated seconds remaining: " << static_cast<float>(totalSecondsElapsed) / numNodesProcessed * (totalNodesToProcess - numNodesProcessed)  << endl; 
+
+        }
+
+        for (auto& otherNode : nodes)
+        {
+            otherNode.visitedInBruteForceDFS = false;
+        }
+        int distance = 0;
+        vector<Node*> nodesToExplore = { &node };
+
+        while (!nodesToExplore.empty())
+        {
+            if (distance != 0)
+            {
+                for (const auto node1 : nodesToExplore)
+                {
+                    if (!node1->hasPerson)
+                        continue;
+                    for (const auto node2 : nodesToExplore)
+                    {
+                        if (!node2->hasPerson)
+                            continue;
+
+                        Node* lca = findLCA(node1, node2);
+                        assert(lca);
+                        const int distanceBetweenNodes = (node2->height - lca->height) + (node1->height - lca->height);
+
+                        if (distanceBetweenNodes == distance)
+                        {
+                            //cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << " (distance: " << distance << ")" << endl;
+                            result++;
+                        }
+                    }
+                }
+            }
+
+            vector<Node*> nextNodesToExplore;
+            for (const auto node1 : nodesToExplore)
+            {
+                for (auto neighbour : node1->neighbours)
+                {
+                    if (!neighbour->visitedInBruteForceDFS)
+                    {
+                        neighbour->visitedInBruteForceDFS = true;
+                        nextNodesToExplore.push_back(neighbour);
+                    }
+                }
+            }
+
+            nodesToExplore = nextNodesToExplore;
+            distance++;
+        }
+        numNodesProcessed++;
+    }
+
+    return result;
+}
+
+
 int numNodes = 0;
 
 int coreIterations = 0;
@@ -722,11 +918,16 @@ int main(int argc, char* argv[])
 
     auto rootNode = &(nodes.front());
     fixParentChildAndCountDescendants(rootNode, nullptr, 0);
+    vector<Node*> ancestors;
+    fillInDFSInfo(rootNode, nullptr, ancestors);
+
 
 #ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(nodes);
+    const auto solutionBruteForce2 = solveBruteForce2(nodes);
     const auto solutionOptimised = solveOptimised(nodes);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
     cout << "solutionOptimised: " << solutionOptimised  << " (" << (solutionBruteForce / 6) << " basic triangles)"<< endl;
     assert(solutionOptimised == solutionBruteForce);
 #else
