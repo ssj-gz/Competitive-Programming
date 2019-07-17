@@ -1,4 +1,4 @@
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -597,7 +597,6 @@ int64_t solveBruteForce2(vector<Node>& nodes)
     const int totalNodesToProcess = count_if(nodes.begin(), nodes.end(), [](const Node& node) { return node.hasPerson ;});
     for (auto& node : nodes)
     {
-        cout << "node: " << node.id << endl;
         if (!node.hasPerson)
             continue;
 
