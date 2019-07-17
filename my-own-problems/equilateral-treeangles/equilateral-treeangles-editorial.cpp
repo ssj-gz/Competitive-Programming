@@ -228,8 +228,6 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
     }
 }
 
-int numNodes = 0;
-
 map<int, HeightInfo> solveOptimisedAux(Node* currentNode, int64_t& numTriangles)
 {
     map<int, HeightInfo> infoForDescendentHeight;
@@ -302,9 +300,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, int64_t& numTriangles)
 int64_t solveOptimised(vector<Node>& nodes)
 {
     int64_t result = 0;
-
-    const int numNodes = nodes.size();
-    ::numNodes = numNodes;
 
     Node* rootNode = &(nodes.front());
     doHeavyLightDecomposition(rootNode, false);
