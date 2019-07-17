@@ -142,6 +142,7 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
     node->numDescendants = 1;
     node->parentNode = parentNode;
     node->height = height;
+    node->children = node->neighbours;
 
     if (parentNode)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
@@ -243,6 +244,7 @@ void dbgCountHeights(Node* currentNode, Node* parentNode, int height, vector<int
 void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
 {
 #ifdef BRUTE_FORCE
+    cout << "completeTrianglesOfTypeA" << endl;
     for (auto& node : nodes)
     {
         for (const auto& heightPair : node.numPairsWithHeightViaDifferentChildren)
@@ -250,7 +252,9 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
             if(node.parentNode)
             {
                 const int descendentHeight = heightPair.first;
-                const int64_t numPairsWithHeightViaDifferentChildren = node.numPairsWithHeightViaDifferentChildren[descendentHeight];
+                const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second;
+                cout << "node: " << node.id << " descendentHeight: " << descendentHeight << " node height: " << node.height << " numPairsWithHeightViaDifferentChildren: " << numPairsWithHeightViaDifferentChildren << endl;
+
                 vector<int> dbgNumDescendantsWithHeight(nodes.size(), 0);
                 const int requiredNonDescendantDist = (descendentHeight - node.height);
                 dbgCountHeights(node.parentNode, &node, 1, dbgNumDescendantsWithHeight);
@@ -261,6 +265,10 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, int64_t& numTriangles)
                     //cout << " found double: adding: " << numNewTriangles << endl;
                 }
                 numTriangles += numNewTriangles * numTripletPermutations;
+            }
+            else
+            {
+                cout << " node: " << node.id << " has no parent" << endl;
             }
         }
     }
