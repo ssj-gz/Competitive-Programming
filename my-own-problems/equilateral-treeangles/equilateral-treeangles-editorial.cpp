@@ -233,6 +233,11 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
 
     for (auto child : currentNode->children)
     {
+        // Quick C++ performance note: in C++11 onwards, capturing a returned std::map
+        // in a local variable is O(1), due to Move Semantics.  Prior to this, though,
+        // it could have been O(size of std::map), which would (silently!) lead to 
+        // asymptotically worse performance!
+        // Luckily, this code uses C++11 features so we can't accidentally fall into this trap.
         auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, numTriangles);
         if (infoForChildDescendantHeight.size() > infoForDescendantHeight.size())
         {
