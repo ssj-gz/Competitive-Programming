@@ -428,7 +428,7 @@ void distDFS(const int rootNodeIndex, const Node* currentNode, const Node* paren
 
 int64_t solveBruteForce(const vector<Node>& nodes)
 {
-    cout << "Computing distance lookup table" << endl;
+    cout << "solutionBruteForce: Computing distance lookup table" << endl;
     int64_t result = 0;
 
     const int numNodes = nodes.size();
@@ -585,6 +585,7 @@ Node* findLCA(Node* node1, Node* node2)
 int64_t solveBruteForce2(vector<Node>& nodes)
 {
     int64_t result = 0;
+
     int numNodesProcessed = 0;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point lastReportedTime = std::chrono::steady_clock::now();
@@ -610,6 +611,7 @@ int64_t solveBruteForce2(vector<Node>& nodes)
         }
         int distance = 0;
         vector<Node*> nodesToExplore = { &node };
+        node.visitedInBruteForceDFS = true;
 
         while (!nodesToExplore.empty())
         {
@@ -617,6 +619,7 @@ int64_t solveBruteForce2(vector<Node>& nodes)
             {
                 for (const auto node1 : nodesToExplore)
                 {
+                    assert(node1 != &node);
                     if (!node1->hasPerson)
                         continue;
                     for (const auto node2 : nodesToExplore)
@@ -930,6 +933,7 @@ int main(int argc, char* argv[])
     cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
     cout << "solutionOptimised: " << solutionOptimised  << " (" << (solutionBruteForce / 6) << " basic triangles)"<< endl;
     assert(solutionOptimised == solutionBruteForce);
+    assert(solutionBruteForce2 == solutionBruteForce);
 #else
     const auto solutionOptimised = solveOptimised(nodes);
     cout << solutionOptimised << endl;
