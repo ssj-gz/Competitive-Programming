@@ -7,7 +7,7 @@
 
 using namespace std;
 
-const int numTripletPermutations = 6;
+const int numTripletPermutations = 6; // i.e. == factorial(3).
 
 struct Node
 {
@@ -44,7 +44,7 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
     return node->numDescendants;
 }
 
-// Build up heavyChains; move the heavy child of each node to the front of that node's children.
+// Build up heavyChains.
 void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge, vector<vector<Node*>>& heavyChains)
 {
     if (followedHeavyEdge)
@@ -161,14 +161,14 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
     auto completeTypeATrianglesForNode = [&distTracker, &numTriangles](Node* node)
     {
         // This will actually be called O(log2 n) for each node before the node's
-        // Type A Triangles are completed.
+        // Type A Triangles are fully completed.
         for (const auto& heightPair : node->numPairsWithHeightViaDifferentChildren)
         {
-            const int descendentHeight = heightPair.first;
+            const int descendantHeight = heightPair.first;
             const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second;
-            if (descendentHeight > node->height)
+            if (descendantHeight > node->height)
             {
-                const int requiredNonDescendantDist = (descendentHeight - node->height);
+                const int requiredNonDescendantDist = (descendantHeight - node->height);
                 const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist);
                 assert(numNewTriangles >= 0);
                 numTriangles += numNewTriangles * numTripletPermutations;
@@ -193,7 +193,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
                     // (if any) so that it gets propagated to light descendants ...
                     if (node->hasPerson)
                         distTracker.insertDist(0);
-                    // ... and also complete its Type A Triangles.
+                    // ... and also (partially) complete its Type A Triangles.
                     completeTypeATrianglesForNode(node);
                 }
 
@@ -229,31 +229,33 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
 
 map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTriangles)
 {
-    map<int, HeightInfo> infoForDescendentHeight;
+    map<int, HeightInfo> infoForDescendantHeight;
 
     for (auto child : currentNode->children)
     {
-        auto infoForChildDescendentHeight = buildDescendantHeightInfo(child, numTriangles);
-        if (infoForChildDescendentHeight.size() > infoForDescendentHeight.size())
+        auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, numTriangles);
+        if (infoForChildDescendantHeight.size() > infoForDescendantHeight.size())
         {
-            swap(infoForDescendentHeight, infoForChildDescendentHeight);
+            swap(infoForDescendantHeight, infoForChildDescendantHeight);
         }
 
-        for (auto descendentHeightPair : infoForChildDescendentHeight)
+        for (auto descendantHeightPair : infoForChildDescendantHeight)
         {
-            const int descendentHeight = descendentHeightPair.first;
+            // This block of code (i.e. the body of the containing for... loop) 
+            // is executed O(n log2 n) times over the whole run.
+            const auto descendantHeight = descendantHeightPair.first;
 
-            const auto& heightInfo = descendentHeightPair.second;
-            auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
+            const auto& heightInfo = descendantHeightPair.second;
+            auto& otherHeightInfo = infoForDescendantHeight[descendantHeight];
 
-            assert (descendentHeight > currentNode->height);
+            assert (descendantHeight > currentNode->height);
 
-            int newExtraDescendentHeight = -1;
+            int newExtraDescendantHeight = -1;
             int knownDescendantHeight = -1;
             if (heightInfo.lastUpdatedAtNode == currentNode || heightInfo.lastUpdatedAtNode == nullptr)
             {
                 assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
-                newExtraDescendentHeight = otherHeightInfo.numWithHeight;
+                newExtraDescendantHeight = otherHeightInfo.numWithHeight;
                 knownDescendantHeight = heightInfo.numWithHeight;
 
                 otherHeightInfo.numWithHeight = heightInfo.numWithHeight;
@@ -261,47 +263,50 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
             else
             {
                 assert(heightInfo.lastUpdatedAtNode != currentNode);
-                newExtraDescendentHeight = heightInfo.numWithHeight;
+                newExtraDescendantHeight = heightInfo.numWithHeight;
                 knownDescendantHeight = otherHeightInfo.numWithHeight;
             }
 
-            const bool previousChildHasThisHeight = (knownDescendantHeight > 0);
+            const auto previousChildHasThisHeight = (knownDescendantHeight > 0);
             if (previousChildHasThisHeight)
             {
-                int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendentHeight];
+                int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendantHeight];
 
-                if (newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren > 0)
+                if (newExtraDescendantHeight * numPairsWithHeightViaDifferentChildren > 0)
                 {
                     // Found a triple where all three nodes have currentNode as their LCA.
-                    const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * newExtraDescendentHeight * numTripletPermutations;
+                    const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * newExtraDescendantHeight * numTripletPermutations;
                     assert(numNewTriangles >= 0);
                     numTriangles += numNewTriangles;
                 }
 
-                numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendantHeight;
+                numPairsWithHeightViaDifferentChildren += newExtraDescendantHeight * knownDescendantHeight;
 
             }
 
-            otherHeightInfo.numWithHeight += newExtraDescendentHeight;
+            otherHeightInfo.numWithHeight += newExtraDescendantHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
         }
     }
 
     if (currentNode->hasPerson)
     {
-        infoForDescendentHeight[currentNode->height].numWithHeight++;
-        infoForDescendentHeight[currentNode->height].lastUpdatedAtNode = currentNode;
+        infoForDescendantHeight[currentNode->height].numWithHeight++;
+        infoForDescendantHeight[currentNode->height].lastUpdatedAtNode = currentNode;
     }
 
-    return infoForDescendentHeight;
+    return infoForDescendantHeight;
 }
 
-int64_t solveOptimised(vector<Node>& nodes)
+int64_t findNumTriplets(vector<Node>& nodes)
 {
     int64_t result = 0;
 
-    Node* rootNode = &(nodes.front());
+    auto rootNode = &(nodes.front());
+    fixParentChildAndCountDescendants(rootNode, nullptr, 0);
+
     buildDescendantHeightInfo(rootNode, result);
+
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
     return result;
@@ -341,10 +346,6 @@ int main(int argc, char* argv[])
     }
     assert(cin);
 
-    auto rootNode = &(nodes.front());
-    fixParentChildAndCountDescendants(rootNode, nullptr, 0);
-
-
-    const auto solutionOptimised = solveOptimised(nodes);
-    cout << solutionOptimised << endl;
+    const auto numTriplets = findNumTriplets(nodes);
+    cout << numTriplets << endl;
 }
