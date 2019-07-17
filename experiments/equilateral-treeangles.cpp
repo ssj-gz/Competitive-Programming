@@ -108,11 +108,16 @@ ModNum quickPower(long n, int m)
 
 const ModNum inverseOf6 = quickPower(6, ModNum::modulus - 2);
 
+
 struct Node
 {
     vector<Node*> neighbours;
     int id = -1; // 1-relative - handy for debugging.
     bool hasPerson = false;
+    int numDescendants = -1;
+
+    vector<Node*> lightChildren;
+    vector<Node*> children;
 
     int index = -1; // 0-relative.
 
@@ -127,6 +132,156 @@ struct HeightInfo
     int64_t numTypeAAtCurrentNodeForHeight = 0;
     Node* lastUpdatedAtNode = nullptr;
 };
+
+vector<vector<Node*>> heavyChains;
+
+int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
+{
+    node->numDescendants = 1;
+    if (parentNode)
+        node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
+
+    for (auto child : node->children)
+        node->numDescendants += fixParentChildAndCountDescendants(child, node);
+
+    return node->numDescendants;
+}
+
+// Build up heavyChains; move the heavy child of each node to the front of that node's children.
+void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
+{
+    if (followedHeavyEdge)
+    {
+        // Continue this chain.
+        heavyChains.back().push_back(node);
+    }
+    else
+    {
+        // Start a new chain.
+        heavyChains.push_back({node});
+    }
+    if (!node->children.empty())
+    {
+        auto heavyChild = *max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
+                {
+                return lhs->numDescendants < rhs->numDescendants;
+                });
+        doHeavyLightDecomposition(heavyChild, true);
+        for (auto child : node->children)
+        {
+            if (child != heavyChild)
+                node->lightChildren.push_back(child);
+        }
+
+        for (auto lightChild : node->lightChildren)
+        {
+            doHeavyLightDecomposition(lightChild, false);
+        }
+    }
+}
+
+class HeightTracker
+{
+    public:
+        HeightTracker()
+        {
+        }
+        void insertHeight(const int newHeight)
+        {
+        };
+
+        void adjustAllHeights(int heightDiff)
+        {
+        }
+        void doPendingHeightAdjustments()
+        {
+        }
+        void clear()
+        {
+        }
+    private:
+};
+
+enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
+    template <typename NodeProcessor>
+void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+{
+    if (heightTrackerAdjustment == AdjustWithDepth)
+        heightTracker.adjustAllHeights(1);
+
+    processNode(node, depth);
+
+    for (auto child : node->children)
+        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+
+    if (heightTrackerAdjustment == AdjustWithDepth)
+        heightTracker.adjustAllHeights(-1);
+}
+
+void completeTrianglesOfTypeA(vector<Node>& nodes)
+{
+    HeightTracker heightTracker;
+    auto collectHeights = [&heightTracker](Node* node, int depth)
+    {
+        if (node->hasPerson)
+            heightTracker.insertHeight(depth);
+    };
+    auto propagateHeights = [&heightTracker](Node* node, int depth)
+    {
+    };
+    for (auto& chain : heavyChains)
+    {
+        for (auto pass = 1; pass <= 2; pass++)
+        {
+            heightTracker.clear();
+            // Crawl along chain, collecting from one node and propagating to the next.
+            for (auto node : chain)
+            {
+                if (pass == 1 )
+                {
+                    // Once only (first pass chosen arbitrarily) - add this node's coin
+                    // (if any) so that it gets propagated to light descendants ...
+                    if (node->hasPerson)
+                        heightTracker.insertHeight(0);
+                    // ... and update its grundy number now, so that it *doesn't* include
+                    // the contributions from its light descendants.
+                    //node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                }
+
+                for (auto lightChild : node->lightChildren)
+                {
+                    // Propagate all coins found so far along the chain in this direction
+                    // to light descendants ...
+                    doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
+                    // ... and collect from light descendants.
+                    doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
+                }
+
+                if (pass == 2)
+                {
+                    // In pass 1, we ensured that this node's coin (if any) was propagated
+                    // to its light descendants.  Don't do it this time - wait until
+                    // we've processed this coin's light descendants before adding this
+                    // coin's node to the heightTracker!
+                    if (node->hasPerson)
+                        heightTracker.insertHeight(0);
+                    // In pass 1, we ensured that this node's grundy number *wasn't* updated from
+                    // its light descendants - this time, ensure that it is updated, by
+                    // waiting until we've processed this coin's light descendants before updating
+                    // its grundyNumberIfRoot.
+                    //node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                }
+
+                // Prepare for the reverse pass.
+                reverse(node->lightChildren.begin(), node->lightChildren.end());
+                // Move one node along the chain - increase all heights accordingly!
+                heightTracker.adjustAllHeights(1);
+            }
+            // Now do it backwards.
+            reverse(chain.begin(), chain.end());
+        }
+    }
+}
 
 void distDFS(const int rootNodeIndex, const Node* currentNode, const Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
 {
