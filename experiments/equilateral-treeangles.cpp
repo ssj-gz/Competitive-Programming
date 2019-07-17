@@ -1083,22 +1083,11 @@ int main(int argc, char* argv[])
 
             const int numNodes = 100'000;
             TreeGenerator treeGenerator;
-            treeGenerator.createNode();
+            TestNode* rootNode = treeGenerator.createNode();
 
-            while (treeGenerator.numNodes() < 75'000)
-            {
-                TestNode* randomNode = treeGenerator.nodes()[rand() % treeGenerator.numNodes()];
-                const int numEdges = rand() % 10'000;
-                for (int i = 0; i < numEdges; i++)
-                {
-                    treeGenerator.createNode(randomNode);
-                }
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                TestNode* randomNode = treeGenerator.nodes()[rand() % treeGenerator.numNodes()];
-                treeGenerator.addNodeChain(randomNode, 10'000);
-            }
+            treeGenerator.addNodeChain(rootNode, 40'000);
+            treeGenerator.addNodeChain(rootNode, 30'000);
+
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 0.75);
 
             for (auto& node : treeGenerator.nodes())
