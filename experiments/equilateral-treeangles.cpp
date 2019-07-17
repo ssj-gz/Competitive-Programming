@@ -468,7 +468,7 @@ int numNodes = 0;
 int coreIterations = 0;
 int numNodesFinished = 0;
  
-map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, vector<Node*>& ancestors, int64_t& numTriangles)
+map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
 {
     assert(currentNode->dbgHeightInOptimisedDFS == -1);
     currentNode->dbgHeightInOptimisedDFS = height;
@@ -479,9 +479,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
         if (child == parentNode)
             continue;
 
-        // TODO - the rest of this XD
-        ancestors.push_back(currentNode);
-        auto infoForChildDescendentHeight = solveOptimisedAux(child, currentNode, height + 1, ancestors, numTriangles);
+        auto infoForChildDescendentHeight = solveOptimisedAux(child, currentNode, height + 1, numTriangles);
         if (infoForChildDescendentHeight.size() < infoForDescendentHeight.size())
         {
             swap(infoForDescendentHeight, infoForChildDescendentHeight);
@@ -551,7 +549,6 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             otherHeightInfo.numWithHeight += newExtraDescendentHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
         }
-        ancestors.pop_back();
     }
 
     if (currentNode->hasPerson)
@@ -561,7 +558,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     }
 
     numNodesFinished++;
-    cout << " finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << endl;
+    cout << " finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << " infoForDescendentHeight.size: " << infoForDescendentHeight.size() << endl;
     return infoForDescendentHeight;
 }
 
@@ -574,8 +571,7 @@ int64_t solveOptimised(vector<Node>& nodes)
 
     Node* rootNode = &(nodes.front());
     doHeavyLightDecomposition(rootNode, false);
-    vector<Node*> ancestors;
-    solveOptimisedAux(rootNode, nullptr, 0, ancestors, result);
+    solveOptimisedAux(rootNode, nullptr, 0, result);
 
     completeTrianglesOfTypeA(nodes, result);
 
