@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #include <cassert>
 
@@ -547,6 +548,66 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
     return infoForDescendentHeight;
 }
 
+unique_ptr<map<int, HeightInfo>> blah(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
+{
+    unique_ptr<map<int, HeightInfo>> infoForDescendentHeight = make_unique<map<int, HeightInfo>>();
+
+    for (auto child : currentNode->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        unique_ptr<map<int, HeightInfo>> infoForChildDescendentHeight = blah(child, currentNode, height + 1, numTriangles);
+        if (infoForChildDescendentHeight->size() < infoForDescendentHeight->size())
+        {
+            swap(infoForDescendentHeight, infoForChildDescendentHeight);
+        }
+
+        for (auto descendentHeightPair : *infoForChildDescendentHeight)
+        {
+            coreIterations++;
+            const int descendentHeight = descendentHeightPair.first;
+
+            const auto& heightInfo = descendentHeightPair.second;
+            auto& otherHeightInfo = (*infoForDescendentHeight)[descendentHeight];
+
+            //assert (descendentHeight > height);
+
+            // Triplets with currentNode as LCA of all pairs out of the three nodes.
+            int newExtraDescendentHeight = -1;
+            int knownDescendtHeight = -1;
+            if (heightInfo.lastUpdatedAtNode == currentNode || heightInfo.lastUpdatedAtNode == nullptr)
+            {
+                assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
+                newExtraDescendentHeight = otherHeightInfo.numWithHeight;
+                knownDescendtHeight = heightInfo.numWithHeight;
+
+                otherHeightInfo.numWithHeight = heightInfo.numWithHeight;
+            }
+            else
+            {
+                assert(heightInfo.lastUpdatedAtNode != currentNode);
+                newExtraDescendentHeight = heightInfo.numWithHeight;
+                knownDescendtHeight = otherHeightInfo.numWithHeight;
+            }
+
+
+            otherHeightInfo.numWithHeight += newExtraDescendentHeight;
+            otherHeightInfo.lastUpdatedAtNode = currentNode;
+        }
+    }
+
+    if (currentNode->hasPerson)
+    {
+        (*infoForDescendentHeight)[currentNode->id].numWithHeight++;
+        (*infoForDescendentHeight)[currentNode->id].lastUpdatedAtNode = currentNode;
+    }
+
+    numNodesFinished++;
+    cout << " blah finished node: " << currentNode->id  << " " << numNodesFinished << " / " << numNodes << " coreIterations: " << coreIterations << " infoForDescendentHeight.size: " << infoForDescendentHeight->size() << endl;
+    return infoForDescendentHeight;
+}
+
 int64_t solveOptimised(vector<Node>& nodes)
 {
     int64_t result = 0;
@@ -556,7 +617,8 @@ int64_t solveOptimised(vector<Node>& nodes)
 
     Node* rootNode = &(nodes.front());
     doHeavyLightDecomposition(rootNode, false);
-    solveOptimisedAux(rootNode, nullptr, 0, result);
+    //solveOptimisedAux(rootNode, nullptr, 0, result);
+    blah(rootNode, nullptr, 0, result);
 
     completeTrianglesOfTypeA(nodes, result);
 
