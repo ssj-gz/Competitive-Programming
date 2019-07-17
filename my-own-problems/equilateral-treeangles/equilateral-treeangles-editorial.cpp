@@ -243,6 +243,10 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
         {
             // This block of code (i.e. the body of the containing for... loop) 
             // is executed O(n log2 n) times over the whole run.
+            // It is guaranteed to be executed with descendantHeight if the current
+            // child has a descendant of descendantHeight that hasPerson and a previous child of this
+            // node also has a descendant of descendantHeight and hasPerson, but may also
+            // be executed under different circumstances.
             const auto descendantHeight = descendantHeightPair.first;
 
             const auto& heightInfo = descendantHeightPair.second;
@@ -274,12 +278,16 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
 
                 if (newExtraDescendantHeight * numPairsWithHeightViaDifferentChildren > 0)
                 {
-                    // Found a triple where all three nodes have currentNode as their LCA.
+                    // Found a triple where all three nodes have currentNode as their LCA: a "Type B" triangle.
                     const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * newExtraDescendantHeight * numTripletPermutations;
                     assert(numNewTriangles >= 0);
                     numTriangles += numNewTriangles;
                 }
 
+                // These numPairsWithHeightViaDifferentChildren would, when combined with a non-ancestor of currentNode that hasPerson and is
+                // (newExtraDescendantHeight - currentNode->height) distance away from currentNode, form a "Type A" triangle.
+                // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
+                // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightViaDifferentChildren += newExtraDescendantHeight * knownDescendantHeight;
 
             }
@@ -305,8 +313,12 @@ int64_t findNumTriplets(vector<Node>& nodes)
     auto rootNode = &(nodes.front());
     fixParentChildAndCountDescendants(rootNode, nullptr, 0);
 
+    // Fills in numPairsWithHeightViaDifferentChildren for each node, and 
+    // additionally counts all "Type B" triangles and adds them to results.
     buildDescendantHeightInfo(rootNode, result);
 
+    // Finishes off the computation of the number of "Type A" triangles
+    // that we begun in buildDescendantHeightInfo.
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
     return result;
@@ -319,7 +331,6 @@ int main(int argc, char* argv[])
     int numNodes;
     cin >> numNodes;
     assert(1 <= numNodes && numNodes <= 100'000);
-
 
     vector<Node> nodes(numNodes);
 
@@ -337,7 +348,7 @@ int main(int argc, char* argv[])
         u--;
         v--;
 
-        // More "neighbours" than "children", but we'll sort that out
+        // More "neighbours" than "children" at the moment, but we'll sort that out
         // in fixParentChildAndCountDescendants!
         nodes[u].children.push_back(&(nodes[v]));
         nodes[v].children.push_back(&(nodes[u]));
