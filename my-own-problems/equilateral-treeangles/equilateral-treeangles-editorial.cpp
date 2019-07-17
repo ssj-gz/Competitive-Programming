@@ -227,13 +227,13 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
     }
 }
 
-map<int, HeightInfo> solveOptimisedAux(Node* currentNode, int64_t& numTriangles)
+map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTriangles)
 {
     map<int, HeightInfo> infoForDescendentHeight;
 
     for (auto child : currentNode->children)
     {
-        auto infoForChildDescendentHeight = solveOptimisedAux(child, numTriangles);
+        auto infoForChildDescendentHeight = buildDescendantHeightInfo(child, numTriangles);
         if (infoForChildDescendentHeight.size() > infoForDescendentHeight.size())
         {
             swap(infoForDescendentHeight, infoForChildDescendentHeight);
@@ -301,7 +301,7 @@ int64_t solveOptimised(vector<Node>& nodes)
     int64_t result = 0;
 
     Node* rootNode = &(nodes.front());
-    solveOptimisedAux(rootNode, result);
+    buildDescendantHeightInfo(rootNode, result);
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
     return result;
