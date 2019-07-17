@@ -11,7 +11,7 @@
 
 #include <chrono>
 
-#define SLOW_ANCESTOR_COUNT
+//#define SLOW_ANCESTOR_COUNT
 
 
 using namespace std;
@@ -691,19 +691,15 @@ int dbgFindNumNonDescendentsWithHeight(Node* currentNode, Node* parent, int heig
     return result;
 }
  
-map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
+map<int, HeightInfo> solveOptimisedAux(Node* currentNode, int64_t& numTriangles)
 {
     //cout << " # neighbours: " << currentNode->neighbours.size() << endl;
     assert(currentNode->dbgHeightInOptimisedDFS == -1);
-    currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
 
-    for (auto child : currentNode->neighbours)
+    for (auto child : currentNode->children)
     {
-        if (child == parentNode)
-            continue;
-
-        auto infoForChildDescendentHeight = solveOptimisedAux(child, currentNode, height + 1, numTriangles);
+        auto infoForChildDescendentHeight = solveOptimisedAux(child, numTriangles);
         if (infoForChildDescendentHeight.size() > infoForDescendentHeight.size())
         {
             swap(infoForDescendentHeight, infoForChildDescendentHeight);
@@ -717,7 +713,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
             const auto& heightInfo = descendentHeightPair.second;
             auto& otherHeightInfo = infoForDescendentHeight[descendentHeight];
 
-            assert (descendentHeight > height);
+            assert (descendentHeight > currentNode->height);
 
             //cout << " solveOptimisedAux currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " heightInfo.numWithHeight: " << heightInfo.numWithHeight << " otherHeightInfo.numWithHeight: " << otherHeightInfo.numWithHeight << " after child: " << child->id << " numPairsWithHeightViaDifferentChildren:" << endl;
             // Triplets with currentNode as LCA of all pairs out of the three nodes.
@@ -751,7 +747,7 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 }
 
 #ifdef SLOW_ANCESTOR_COUNT
-                numTriangles += static_cast<int64_t>(knownDescendtHeight) * newExtraDescendentHeight * dbgFindNumNonDescendentsWithHeight(parentNode, currentNode, 1, (descendentHeight - currentNode->height)) * numTripletPermutations;
+                numTriangles += static_cast<int64_t>(knownDescendtHeight) * newExtraDescendentHeight * dbgFindNumNonDescendentsWithHeight(currentNode->parentNode, currentNode, 1, (descendentHeight - currentNode->height)) * numTripletPermutations;
 #endif
                 numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
 
@@ -764,8 +760,8 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
 
     if (currentNode->hasPerson)
     {
-        infoForDescendentHeight[height].numWithHeight++;
-        infoForDescendentHeight[height].lastUpdatedAtNode = currentNode;
+        infoForDescendentHeight[currentNode->height].numWithHeight++;
+        infoForDescendentHeight[currentNode->height].lastUpdatedAtNode = currentNode;
     }
 
     numNodesFinished++;
@@ -841,7 +837,7 @@ int64_t solveOptimised(vector<Node>& nodes)
 
     Node* rootNode = &(nodes.front());
     doHeavyLightDecomposition(rootNode, false);
-    solveOptimisedAux(rootNode, nullptr, 0, result);
+    solveOptimisedAux(rootNode, result);
     //blah(rootNode, nullptr, 0, result);
 
 #ifndef SLOW_ANCESTOR_COUNT
