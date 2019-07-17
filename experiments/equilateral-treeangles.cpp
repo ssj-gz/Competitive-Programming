@@ -467,6 +467,7 @@ int numNodes = 0;
  
 map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int height, vector<Node*>& ancestors, int64_t& numTriangles)
 {
+    cout << " finished node: " << currentNode->id << endl;
     assert(currentNode->dbgHeightInOptimisedDFS == -1);
     currentNode->dbgHeightInOptimisedDFS = height;
     map<int, HeightInfo> infoForDescendentHeight;
@@ -513,18 +514,21 @@ map<int, HeightInfo> solveOptimisedAux(Node* currentNode, Node* parentNode, int 
                 knownDescendtHeight = otherHeightInfo.numWithHeight;
             }
 
-            int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendentHeight];
-
-            if (newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren > 0)
+            if (knownDescendtHeight > 0)
             {
-                //cout << " found threeway: adding: " << newExtraDescendentHeight * otherHeightInfo.numPairsWithHeightViaDifferentChildren << endl;
-                numTriangles += newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren * numTripletPermutations;
+                int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendentHeight];
+
+                if (newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren > 0)
+                {
+                    //cout << " found threeway: adding: " << newExtraDescendentHeight * otherHeightInfo.numPairsWithHeightViaDifferentChildren << endl;
+                    numTriangles += newExtraDescendentHeight * numPairsWithHeightViaDifferentChildren * numTripletPermutations;
+                }
+
+
+
+                //cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
+                numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
             }
-
-
-
-            //cout << " currentNode: " << currentNode->id << " descendentHeight: " << descendentHeight << " numPairsWithHeightViaDifferentChildren: " << otherHeightInfo.numPairsWithHeightViaDifferentChildren << " newExtraDescendentHeight: " << newExtraDescendentHeight << endl;
-            numPairsWithHeightViaDifferentChildren += newExtraDescendentHeight * knownDescendtHeight;
 #if 0
             if (parentNode != nullptr)
             {
@@ -579,6 +583,8 @@ int main(int argc, char* argv[])
 
     if (argc == 2)
     {
+        if (string(argv[1]) == "--test")
+        {
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -596,6 +602,33 @@ int main(int argc, char* argv[])
             cout << (rand() % 2) << endl;
         }
         return 0;
+        }
+        else if (string(argv[1]) == "--convert")
+        {
+            int n;
+            cin >> n;
+            for (int i = 0; i < n; i++)
+            {
+                int numCoins;
+                cin >> numCoins;
+            }
+            cout << n << endl;
+            for (int i = 0; i < n - 1; i++)
+            {
+                int u, v;
+                cin >> u >> v;
+                cout << u << " " << v << endl;
+            }
+            for (int i = 0; i < n; i++)
+            {
+                cout << (rand() % 2) << endl;
+            }
+            return 0;
+        }
+        else
+        {
+            assert(false);
+        }
     }
     int numNodes;
     cin >> numNodes;
