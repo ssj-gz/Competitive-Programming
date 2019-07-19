@@ -116,11 +116,9 @@ class SegmentTree {
 
                 for (int i = left; i <= right; i++)
                 {
-                    cout << " i: " << i << " m_dbgValues[i]: " << m_dbgValues[i] << endl;
                     dbgCombinedValuesInRange = m_combineValues(dbgCombinedValuesInRange, m_dbgValues[i]);
                 }
 
-                cout << "dbgCombinedValuesInRange: " << dbgCombinedValuesInRange << " combinedValuesInRange: " << combinedValuesInRange << endl;
                 assert(dbgCombinedValuesInRange == combinedValuesInRange);
             }
 #endif
@@ -392,6 +390,7 @@ int main()
         numWithPrimeFactorOfKTracker.back().setInitialValues(vector<int>(maxRangeEnd, 0));
     }
 
+    if (false)
     {
         cout << "Testing" << endl;
         NumPrimesTracker numPrimesTracker(maxRangeEnd, combineValues, applySetValue, combineSetValue);
@@ -421,9 +420,9 @@ int main()
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((x % primesThatDivideK[primeFactorOfKIndex]) == 0)
-                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(l, r, 1);
+                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(l, r, true);
                 else
-                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(l, r, 0);
+                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(l, r, false);
             }
 
         }
