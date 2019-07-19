@@ -470,32 +470,10 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     vector<int> queryResults;
     const int maxRangeEnd = 100'000;
 
-    auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
-    {
-        return newValueToSetTo;
-    };
-
-    auto combineValues = [](const int& lhsValue, const int& rhsValue)
-    {
-        return lhsValue + rhsValue;
-    };
-
-    auto applySetValue = [](int64_t valueToSetTo, int& value)
-    {
-        value = valueToSetTo;
-    };
-
-    using NumPrimesTracker = SegmentTree<int, int64_t>;
-    vector<NumPrimesTracker> numWithPrimeFactorOfKTracker;
-    numWithPrimeFactorOfKTracker.reserve(primesThatDivideK.size());
-
     vector<SegmentTree2> dbgNumWithPrimeFactorOfKTracker;
 
     for (int i = 0; i < primesThatDivideK.size(); i++)
     {
-        numWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd, combineValues, applySetValue, combineSetValue);
-        numWithPrimeFactorOfKTracker.back().setInitialValues(vector<int>(maxRangeEnd, 0));
-
         dbgNumWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd);
     }
     for (const auto& query : queries)
@@ -506,12 +484,12 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
                 {
-                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
+                    //numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
                     dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, true);
                 }
                 else
                 {
-                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, false);
+                    //numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, false);
                     dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, false);
                 }
             }
@@ -522,16 +500,18 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
             int dbgNum = 0;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
+#if 0
                 const int numInRange = numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(query.l, query.r);
                 if (numInRange > 0)
                     num++;
+#endif
                 const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].getSumOfRange(query.l, query.r);
                 if (dbgNumInRange > 0)
                     dbgNum++;
-                cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
-                assert(numInRange == dbgNumInRange);
+                //cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
+                //assert(numInRange == dbgNumInRange);
             }
-            queryResults.push_back(num);
+            queryResults.push_back(dbgNum);
         }
         else
         {
