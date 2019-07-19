@@ -843,24 +843,28 @@ class RandomChooseableSet
     {
         for (FwdIter iter = begin; iter != end; iter++)
         {
-            add(*iter);
+            insert(*iter);
         }
+        verify();
     }
 
     void insert(TPtr toAdd)
     {
+        if (contains(toAdd))
+            return;
         const int newIndex = m_vec.size();
         m_indexFor[toAdd] = newIndex;
         m_vec.push_back(toAdd);
+        verify();
     }
     void erase(TPtr toRemove)
     {
-        if(m_indexFor.find(toRemove) == m_indexFor.end())
+        if(!contains(toRemove))
         {
             return;
         }
-        m_indexFor.erase(toRemove);
         const int oldIndex = m_indexFor[toRemove];
+        m_indexFor.erase(toRemove);
         if (m_vec.size() == 1)
         {
             m_vec.clear();
@@ -873,6 +877,7 @@ class RandomChooseableSet
             m_indexFor[moveToOldIndex] = oldIndex;
             m_vec[oldIndex] = moveToOldIndex;
         }
+        verify();
     }
     bool contains(TPtr toFind) const
     {
@@ -891,6 +896,18 @@ class RandomChooseableSet
     {
         assert(!empty());
         return m_vec[rand() % m_vec.size()];
+    }
+    void verify()
+    {
+        assert(m_indexFor.size() == m_vec.size());
+        vector<TPtr> dbg(m_vec);
+        sort(dbg.begin(), dbg.end());
+        dbg.erase(unique(dbg.begin(), dbg.end()), dbg.end());
+        assert(dbg.size() == m_vec.size());
+        for (auto& blah : m_indexFor)
+        {
+            assert(m_vec[blah.second] == blah.first);
+        }
     }
     private:
     map<TPtr, int> m_indexFor;
@@ -948,30 +965,25 @@ class TreeGenerator
         vector<TestNode*> createNodesWithRandomParentPreferringFromSet(const set<TestNode*>& preferredSet, int numNewNodes, double preferencePercent, std::function<void(TestNode* newNode, TestNode* parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)> onCreateNode)
         {
             vector<TestNode*> newNodes;
-            set<TestNode*> preferredSetCopy(preferredSet);
-            set<TestNode*> nonPreferredSet;
+            RandomChooseableSet<TestNode*> preferredSetCopy(preferredSet.begin(), preferredSet.end());
+            RandomChooseableSet<TestNode*> nonPreferredSet;
             for (auto& node : m_nodes)
             {
-                if (preferredSetCopy.find(node.get()) == preferredSetCopy.end())
+                if (!preferredSetCopy.contains(node.get()))
                 {
                     nonPreferredSet.insert(node.get());
                 }
             }
 
-            auto chooseRandomNodeFromSet = [](set<TestNode*>& nodeSet)
+            auto chooseRandomNodeFromSet = [](RandomChooseableSet<TestNode*>& nodeSet)
             {
-                const int randomIndex = rand() % nodeSet.size();
-                //cerr << "nodeSet.size(): " << nodeSet.size() << " randomIndex: " << randomIndex << endl;
-                auto nodeIter = nodeSet.begin();
-                for (int i = 0; i < randomIndex; i++)
-                {
-                    nodeIter++;
-                }
-                return *nodeIter;
+                return nodeSet.chooseRandom();
             };
 
             for (int i = 0; i < numNewNodes; )
             {
+                preferredSetCopy.verify();
+                nonPreferredSet.verify();
                 //cerr << "createNodesWithRandomParentPreferringFromSet: " << (i + 1) << " / " << numNewNodes << endl;
                 const double random = static_cast<double>(rand()) / RAND_MAX * 100;
                 TestNode* newNodeParent = nullptr;
