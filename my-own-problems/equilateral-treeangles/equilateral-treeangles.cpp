@@ -845,7 +845,6 @@ class RandomChooseableSet
         {
             insert(*iter);
         }
-        verify();
     }
 
     void insert(TPtr toAdd)
@@ -855,7 +854,6 @@ class RandomChooseableSet
         const int newIndex = m_vec.size();
         m_indexFor[toAdd] = newIndex;
         m_vec.push_back(toAdd);
-        verify();
     }
     void erase(TPtr toRemove)
     {
@@ -877,7 +875,6 @@ class RandomChooseableSet
             m_indexFor[moveToOldIndex] = oldIndex;
             m_vec[oldIndex] = moveToOldIndex;
         }
-        verify();
     }
     bool contains(TPtr toFind) const
     {
@@ -982,8 +979,6 @@ class TreeGenerator
 
             for (int i = 0; i < numNewNodes; )
             {
-                preferredSetCopy.verify();
-                nonPreferredSet.verify();
                 //cerr << "createNodesWithRandomParentPreferringFromSet: " << (i + 1) << " / " << numNewNodes << endl;
                 const double random = static_cast<double>(rand()) / RAND_MAX * 100;
                 TestNode* newNodeParent = nullptr;
