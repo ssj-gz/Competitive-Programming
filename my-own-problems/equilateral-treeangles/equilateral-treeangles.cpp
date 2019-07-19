@@ -861,6 +861,11 @@ class RandomChooseableSet
             m_vec[oldIndex] = moveToOldIndex;
         }
     }
+    bool contains(TPtr toFind) const
+    {
+        return (m_indexFor.find(toFind) != m_indexFor.end());
+    }
+
     int size() const
     {
         return m_vec.size();
@@ -1100,35 +1105,6 @@ class TreeGenerator
 
 int main(int argc, char* argv[])
 {
-    {
-        RandomChooseableSet<TestNode*> s;
-        TestNode *node1 = new TestNode;
-        node1->data.id = 1;
-        TestNode *node2 = new TestNode;
-        node2->data.id = 2;
-        TestNode *node3 = new TestNode;
-        node3->data.id = 3;
-        TestNode *node4 = new TestNode;
-        node4->data.id = 4;
-
-        s.add(node1);
-        s.add(node3);
-        s.add(node2);
-        s.remove(node3);
-        for (int i = 0; i < 10; i++)
-        {
-            cout << "i: " << i << " rand: " << s.chooseRandom()->data.id << endl;
-        }
-        s.remove(node2);
-        s.remove(node1);
-        s.add(node3);
-        s.add(node2);
-        s.add(node4);
-        for (int i = 0; i < 10; i++)
-        {
-            cout << "i2: " << i << " rand: " << s.chooseRandom()->data.id << endl;
-        }
-    }
     ios::sync_with_stdio(false);
 
     if (argc == 2)
