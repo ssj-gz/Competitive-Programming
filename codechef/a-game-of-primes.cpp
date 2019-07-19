@@ -436,15 +436,17 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
+
     if (argc == 2)
     {
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int K = rand() % 1'000'000'000ULL + 1;
-        const int Q = rand() % 100 + 1;
-        const int maxR = rand() % 1000 + 2;
+        const int K = 223092870;
+        const int Q = 100'000;
+        const int maxR = 100'000;
         const int maxX = rand() % 1'000'000'000ULL + 1;
 
         cout << K << " " << Q << endl;
