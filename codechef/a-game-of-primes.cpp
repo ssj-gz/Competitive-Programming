@@ -194,7 +194,9 @@ class SegmentTree {
                         rightChild->addPendingOperation(pendingOperatorInfo);
                     }
 
+                    cout << " original value: " << value << endl;
                     container->m_applyOperator(pendingOperatorInfo, value);
+                    cout << " pendingOperatorInfo: " << pendingOperatorInfo << " new value: " << value << endl;
 
                     hasPendingOperator = false;
                 }
@@ -330,6 +332,7 @@ class SegmentTree {
         }
 };
 
+
 int main()
 {
     const int maxRangeEnd = 100'000;
@@ -411,7 +414,6 @@ int main()
         cout << "Testing" << endl;
         NumPrimesTracker numPrimesTracker(maxRangeEnd, combineValues, applySetValue, combineSetValue);
         numPrimesTracker.setInitialValues(vector<int>(maxRangeEnd, 0));
-        numPrimesTracker.setInitialValues(vector<int>(maxRangeEnd, 5));
         numPrimesTracker.applyOperatorToAllInRange(3, 100, 11);
         numPrimesTracker.applyOperatorToAllInRange(3, 100, 13);
         numPrimesTracker.combinedValuesInRange(3, 100);
