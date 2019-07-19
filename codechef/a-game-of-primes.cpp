@@ -424,7 +424,6 @@ class SegmentTree2
         {
             if ( lazy[where] ) {
                 tree[where] = (lazy[where] == 1 ? 0 : (right - left + 1));
-                cout << " where: " << where << " lazy[where]: " << lazy[where] << " set tree[where] to " << tree[where] << " left: " << left << " right: " << right << endl;
                 if ( left != right ) {
                     lazy[(where<<1)] = lazy[where];
                     lazy[(where<<1)+1] = lazy[where];
@@ -447,7 +446,6 @@ class SegmentTree2
             range_update((where<<1), left, mid, i, j, val);
             range_update((where<<1)+1, mid+1, right, i, j, val);
             combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
-            cout << " combined children of tree[" << where << "] to " << tree[where] << endl;
         }
 
         int query(int where, int left, int right, int i, int j)
@@ -456,7 +454,6 @@ class SegmentTree2
             if ( left > right || left > j || right < i ) return 0;
             if ( left >= i && right <= j ) 
             {
-                cout << " query where: " << where << "  returning: " << tree[where] << endl;
                 return tree[where];
             }
             int mid = (left+right)>>1;
@@ -464,7 +461,6 @@ class SegmentTree2
             int ans1 = query((where<<1), left, mid, i, j);
             int ans2 = query((where<<1)+1, mid+1, right, i, j);
             combine(ans, ans1, ans2);
-            cout << " query where: " << where << "  returning: " << ans << endl;
             return ans;
         }
 
@@ -506,12 +502,10 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     {
         if (query.queryType == '!')
         {
-            cout << " Setting " << query.l << " - " << query.r << " to " << query.value << endl;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
                 {
-                    cout << " divisible by " << primesThatDivideK[primeFactorOfKIndex] << endl;
                     numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
                     dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, true);
                 }
@@ -537,7 +531,6 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
                 cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
                 assert(numInRange == dbgNumInRange);
             }
-            cout << " num: " << num << " dbgNum: " << dbgNum << endl;
             queryResults.push_back(num);
         }
         else
