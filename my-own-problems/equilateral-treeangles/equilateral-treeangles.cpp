@@ -837,13 +837,23 @@ class RandomChooseableSet
 {
     static_assert(std::is_pointer_v<TPtr>);
     public:
-    void add(TPtr toAdd)
+    RandomChooseableSet() = default;
+    template<typename FwdIter>
+    RandomChooseableSet(FwdIter begin, FwdIter end)
+    {
+        for (FwdIter iter = begin; iter != end; iter++)
+        {
+            add(*iter);
+        }
+    }
+
+    void insert(TPtr toAdd)
     {
         const int newIndex = m_vec.size();
         m_indexFor[toAdd] = newIndex;
         m_vec.push_back(toAdd);
     }
-    void remove(TPtr toRemove)
+    void erase(TPtr toRemove)
     {
         assert(m_indexFor.find(toRemove) != m_indexFor.end());
         m_indexFor.erase(toRemove);
