@@ -327,13 +327,13 @@ ExecutionResult runTestWithInputAndGetFilteredResult(const string& executableNam
         cout << "line: " << testResultLine << endl;
         if (std::regex_search(testResultLine, match, testResultRegexFilter))
         {
-            cout << " matches" << endl;
+            cout << " matches regex filter" << endl;
             assert(testResultRegexFilterCaptureGroup < match.size());
             testRunResult.output.push_back(match[testResultRegexFilterCaptureGroup]);
         }
         else
         {
-            cout << " does not match" << endl;
+            cout << " does not match regex filter; ignoring" << endl;
         }
     }
 
