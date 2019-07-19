@@ -274,10 +274,10 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int K = (rand() % 100) + 1;
-        const int Q = (rand() % 100) + 1;
-        const int maxR = (rand() % 100) + 1;
-        const int maxX = rand() % 100 + 1;
+        const int K = (rand() % 1'000'000'000ULL) + 1;
+        const int Q = (rand() % 1000) + 1;
+        const int maxR = (rand() % 1000) + 1;
+        const int maxX = rand() % 1'000'000'000ULL + 1;
 
         cout << K << " " << Q << endl;
 
@@ -404,9 +404,8 @@ int main(int argc, char* argv[])
 
     for (const auto x : solutionOptimised)
     {
-        cout << x << " ";
+        cout << x << endl;
     }
-    cout << endl;
 #endif
 
 
