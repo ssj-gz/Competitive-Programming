@@ -81,13 +81,13 @@ class SegmentTree {
             m_dbgValues = initialValues;
 #endif
         }
-        void applyOperatorToAllInRange(int left, int right, OperatorInfo operatorInfo)
+        void applyOperatorToAllInRange(int left, int right, bool setAllOn)
         {
             vector<Cell*> cells;
             collectMinCellsForRange(left, right, cells);
             for (auto cell : cells)
             {
-                cell->addPendingOperation(operatorInfo);
+                cell->addPendingOperation(setAllOn);
                 cell->servicePendingOperations();
                 if (cell->parent)
                     cell->parent->setNeedsUpdateFromChildren();
@@ -96,24 +96,8 @@ class SegmentTree {
 #ifdef VERIFY_SEGMENT_TREE
             for (int i = left; i <= right; i++)
             {
-                m_applyOperator(operatorInfo, m_dbgValues[i]);
+                m_dbgValues[i] = setAllOn;
             }
-#endif
-        }
-        void setValue(int pos, const ValueType& newValue)
-        {
-            vector<Cell*> cells;
-            collectMinCellsForRange(pos, pos, cells);
-            assert(cells.size() == 1);
-            auto cell = cells.front();
-            cell->servicePendingOperations();
-            cell->value = newValue;
-
-            if (cell->parent)
-                cell->parent->setNeedsUpdateFromChildren();
-            updateAllFromChildren();
-#ifdef VERIFY_SEGMENT_TREE
-            m_dbgValues[pos] = newValue;
 #endif
         }
         ValueType combinedValuesInRange(int left, int right)
@@ -165,23 +149,16 @@ class SegmentTree {
             Cell* leftChild = nullptr;
             Cell* rightChild = nullptr;
 
-            OperatorInfo pendingOperatorInfo{};
+            bool allOn = false;
+
+            bool pendingIsSetAllOn = false;
             bool hasPendingOperator = false;
             bool needsUpdateFromChildren = false;
 
-            void addPendingOperation(OperatorInfo operatorInfo)
+            void addPendingOperation(bool setAllOn)
             {
-                if (!hasPendingOperator)
-                {
-                    hasPendingOperator = true;
-                    pendingOperatorInfo = operatorInfo;
-                    cout << " no pending; but now: " << operatorInfo << endl;
-                }
-                else
-                {
-                    pendingOperatorInfo = container->m_combineOperators(operatorInfo, pendingOperatorInfo);
-                    cout << " pending; now: " << operatorInfo << endl;
-                }
+                hasPendingOperator = true;
+                pendingIsSetAllOn = setAllOn;
             }
 
             void servicePendingOperations()
@@ -190,13 +167,18 @@ class SegmentTree {
                 {
                     if (leftChild && rightChild)
                     {
-                        leftChild->addPendingOperation(pendingOperatorInfo);
-                        rightChild->addPendingOperation(pendingOperatorInfo);
+                        leftChild->addPendingOperation(pendingIsSetAllOn);
+                        rightChild->addPendingOperation(pendingIsSetAllOn);
                     }
 
-                    cout << " original value: " << value << endl;
-                    container->m_applyOperator(pendingOperatorInfo, value);
-                    cout << " pendingOperatorInfo: " << pendingOperatorInfo << " new value: " << value << endl;
+                    if (pendingIsSetAllOn)
+                    {
+                        value = rangeEnd - rangeBegin + 1;
+                    }
+                    else
+                    {
+                        value = 0;
+                    }
 
                     hasPendingOperator = false;
                 }
@@ -227,7 +209,7 @@ class SegmentTree {
                 leftChild->updateFromChildren();
                 rightChild->updateFromChildren();
 
-                value = container->m_combineValues(leftChild->value, rightChild->value);
+                value = leftChild->value + rightChild->value;
 
                 needsUpdateFromChildren = false;
             }
@@ -414,8 +396,9 @@ int main()
         cout << "Testing" << endl;
         NumPrimesTracker numPrimesTracker(maxRangeEnd, combineValues, applySetValue, combineSetValue);
         numPrimesTracker.setInitialValues(vector<int>(maxRangeEnd, 0));
-        numPrimesTracker.applyOperatorToAllInRange(3, 100, 11);
-        numPrimesTracker.applyOperatorToAllInRange(3, 100, 13);
+        numPrimesTracker.applyOperatorToAllInRange(3, 100, false);
+        numPrimesTracker.applyOperatorToAllInRange(3, 100, true);
+        numPrimesTracker.applyOperatorToAllInRange(5, 70, false);
         numPrimesTracker.combinedValuesInRange(3, 100);
         cout << "End Testing" << endl;
         return 0;
