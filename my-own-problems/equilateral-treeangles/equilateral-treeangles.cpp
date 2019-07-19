@@ -972,33 +972,21 @@ class TreeGenerator
                 }
             }
 
-            auto chooseRandomNodeFromSet = [](RandomChooseableSet<TestNode*>& nodeSet)
-            {
-                return nodeSet.chooseRandom();
-            };
-
             for (int i = 0; i < numNewNodes; )
             {
-                //cerr << "createNodesWithRandomParentPreferringFromSet: " << (i + 1) << " / " << numNewNodes << endl;
                 const double random = static_cast<double>(rand()) / RAND_MAX * 100;
                 TestNode* newNodeParent = nullptr;
                 bool parentWasPreferred = false;
-                //cerr << "random: " << random << " preferencePercent: " << preferencePercent << endl;
                 if (random <= preferencePercent && !preferredSetCopy.empty())
                 {
                     // Choose a random element from preferredSetCopy as a parent.
-                    //cerr << " choosing preferred" << endl;
-                    newNodeParent = chooseRandomNodeFromSet(preferredSetCopy); 
+                    newNodeParent = preferredSetCopy.chooseRandom(); 
                     parentWasPreferred = true;
-                    //cerr << "Chose leaf: " << newNodeParent->neighbours.size() << endl;
-                    //assert(newNodeParent->neighbours.size() <= 1);
                 }
                 else if (!nonPreferredSet.empty())
                 {
                     // Choose a random element from nonPreferredSet as a parent.
-                    //cerr << " choosing non-leaf" << endl;
-                    newNodeParent = chooseRandomNodeFromSet(nonPreferredSet); 
-                    //assert(newNodeParent->neighbours.size() > 1);
+                    newNodeParent = nonPreferredSet.chooseRandom(); 
                 }
                 if (newNodeParent)
                 {
