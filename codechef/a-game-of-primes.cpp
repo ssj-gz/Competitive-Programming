@@ -380,81 +380,99 @@ vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vecto
     return queryResults;
 }
 
-constexpr int MAX = 100'000;
-vector <int> tree(3*MAX, 0);
-int lazy[3*MAX];
-void combine(int &v, const int &v1, const int &v2)
+class SegmentTree2
 {
-    v = v1 + v2;
-}
-
-void build(int where, int left, int right)
-{
-    if ( left > right ) return;
-    if ( left == right ) {
-        tree[where] = 0;
-        return;
-    }
-    int mid = (left+right)>>1;
-    build((where<<1), left, mid);
-    build((where<<1)+1, mid+1, right);
-    combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
-}
-
-void push_down(int where, int left, int right)
-{
-    if ( lazy[where] ) {
-        tree[where] = (lazy[where] == 1 ? 0 : (right - left + 1));
-        cout << " where: " << where << " lazy[where]: " << lazy[where] << " set tree[where] to " << tree[where] << " left: " << left << " right: " << right << endl;
-        if ( left != right ) {
-            lazy[(where<<1)] = lazy[where];
-            lazy[(where<<1)+1] = lazy[where];
+    public:
+        SegmentTree2(int maxRangeEnd)
+            : maxRangeEnd(maxRangeEnd),
+              tree(3 * maxRangeEnd, 0),
+              lazy(3 * maxRangeEnd, 0)
+        {
+            build(1, 0, maxRangeEnd - 1);
+        };
+        void setAllInRangeA(int left, int right, bool setOn)
+        {
+            range_update(1, 0, maxRangeEnd - 1, left, right, (setOn ? 2 : 1));
         }
-        lazy[where] = 0;
-    }
-    return;
-}
+        int getSumOfRange(int left, int right)
+        {
+            return query(1, 0, maxRangeEnd - 1, left, right);
+        }
+    private:
+        int maxRangeEnd = -1;
+        vector <int> tree;
+        vector <int> lazy;
+        void combine(int &v, const int &v1, const int &v2)
+        {
+            v = v1 + v2;
+        }
 
-void range_update(int where, int left, int right ,int i, int j, int val)
-{
-    push_down(where, left, right);
-    if ( left > right || left > j || right < i ) return;
-    if ( left >= i && right <= j ) {
-        lazy[where] = val;
-        push_down(where, left, right);
-        return;
-    }
-    int mid = (left+right)>>1;
-    range_update((where<<1), left, mid, i, j, val);
-    range_update((where<<1)+1, mid+1, right, i, j, val);
-    combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
-    cout << " combined children of tree[" << where << "] to " << tree[where] << endl;
-}
+        void build(int where, int left, int right)
+        {
+            if ( left > right ) return;
+            if ( left == right ) {
+                tree[where] = 0;
+                return;
+            }
+            int mid = (left+right)>>1;
+            build((where<<1), left, mid);
+            build((where<<1)+1, mid+1, right);
+            combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
+        }
 
-int query(int where, int left, int right, int i, int j)
-{
-    push_down(where, left, right);
-    if ( left > right || left > j || right < i ) return 0;
-    if ( left >= i && right <= j ) 
-    {
-        cout << " query where: " << where << "  returning: " << tree[where] << endl;
-        return tree[where];
-    }
-    int mid = (left+right)>>1;
-    int ans = 0;
-    int ans1 = query((where<<1), left, mid, i, j);
-    int ans2 = query((where<<1)+1, mid+1, right, i, j);
-    combine(ans, ans1, ans2);
-    cout << " query where: " << where << "  returning: " << ans << endl;
-    return ans;
-}
+        void push_down(int where, int left, int right)
+        {
+            if ( lazy[where] ) {
+                tree[where] = (lazy[where] == 1 ? 0 : (right - left + 1));
+                cout << " where: " << where << " lazy[where]: " << lazy[where] << " set tree[where] to " << tree[where] << " left: " << left << " right: " << right << endl;
+                if ( left != right ) {
+                    lazy[(where<<1)] = lazy[where];
+                    lazy[(where<<1)+1] = lazy[where];
+                }
+                lazy[where] = 0;
+            }
+            return;
+        }
 
+        void range_update(int where, int left, int right ,int i, int j, int val)
+        {
+            push_down(where, left, right);
+            if ( left > right || left > j || right < i ) return;
+            if ( left >= i && right <= j ) {
+                lazy[where] = val;
+                push_down(where, left, right);
+                return;
+            }
+            int mid = (left+right)>>1;
+            range_update((where<<1), left, mid, i, j, val);
+            range_update((where<<1)+1, mid+1, right, i, j, val);
+            combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
+            cout << " combined children of tree[" << where << "] to " << tree[where] << endl;
+        }
+
+        int query(int where, int left, int right, int i, int j)
+        {
+            push_down(where, left, right);
+            if ( left > right || left > j || right < i ) return 0;
+            if ( left >= i && right <= j ) 
+            {
+                cout << " query where: " << where << "  returning: " << tree[where] << endl;
+                return tree[where];
+            }
+            int mid = (left+right)>>1;
+            int ans = 0;
+            int ans1 = query((where<<1), left, mid, i, j);
+            int ans2 = query((where<<1)+1, mid+1, right, i, j);
+            combine(ans, ans1, ans2);
+            cout << " query where: " << where << "  returning: " << ans << endl;
+            return ans;
+        }
+
+};
 vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
 {
     vector<int> queryResults;
     const int maxRangeEnd = 100'000;
-
-    build(1, 0, maxRangeEnd - 1);
 
     auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
     {
@@ -475,11 +493,14 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     vector<NumPrimesTracker> numWithPrimeFactorOfKTracker;
     numWithPrimeFactorOfKTracker.reserve(primesThatDivideK.size());
 
+    vector<SegmentTree2> dbgNumWithPrimeFactorOfKTracker;
 
     for (int i = 0; i < primesThatDivideK.size(); i++)
     {
         numWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd, combineValues, applySetValue, combineSetValue);
         numWithPrimeFactorOfKTracker.back().setInitialValues(vector<int>(maxRangeEnd, 0));
+
+        dbgNumWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd);
     }
     for (const auto& query : queries)
     {
@@ -492,12 +513,12 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
                 {
                     cout << " divisible by " << primesThatDivideK[primeFactorOfKIndex] << endl;
                     numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
-                    range_update(1, 0, maxRangeEnd - 1, query.l, query.r, 2);
+                    dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, true);
                 }
                 else
                 {
                     numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, false);
-                    range_update(1, 0, maxRangeEnd - 1, query.l, query.r, 1);
+                    dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, false);
                 }
             }
         }
@@ -510,7 +531,7 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
                 const int numInRange = numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(query.l, query.r);
                 if (numInRange > 0)
                     num++;
-                const int dbgNumInRange = ::query(1, 0, maxRangeEnd - 1, query.l, query.r);
+                const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].getSumOfRange(query.l, query.r);
                 if (dbgNumInRange > 0)
                     dbgNum++;
                 cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
@@ -531,6 +552,7 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
+#if 0
     if (true)
     {
         const int maxRangeEnd = 100'000;
@@ -585,6 +607,7 @@ int main(int argc, char* argv[])
 
         return 0;
     }
+#endif
 
     if (argc == 2)
     {
