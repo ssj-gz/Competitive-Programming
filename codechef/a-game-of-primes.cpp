@@ -1,7 +1,7 @@
 // Simon St James (ssjgz) - 2019-07-19
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
-#define VERIFY_SEGMENT_TREE
+//#define VERIFY_SEGMENT_TREE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #undef VERIFY_SEGMENT_TREE
@@ -76,6 +76,8 @@ class SegmentTree {
                     childCellIndex++;
                 }
             }
+            m_numCellRows = m_cellMatrix.size();
+
 #ifdef VERIFY_SEGMENT_TREE
             m_dbgValues.resize(maxNumber);
 #endif
@@ -229,6 +231,9 @@ class SegmentTree {
 
         vector<vector<Cell>> m_cellMatrix;
 
+        int m_numCellRows = -1;
+
+
         // Collect O(log2(end - start + 1)) cells in range-order that span the interval start-end (inclusive).
         void collectMinCellsForRange(const int start, const int end, vector<Cell*>& destCells)
         {
@@ -317,6 +322,7 @@ class SegmentTree {
                 destCells.push_back(middleCellToAdd);
             collectMinCellsForRange(powerOf2BeforeEnd, end, cellRow + 1, powerOf2 >> 1, destCells); // Right region.
             return;
+
         }
 
         void updateAllFromChildren()
@@ -374,10 +380,81 @@ vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vecto
     return queryResults;
 }
 
+constexpr int MAX = 100'000;
+vector <int> tree(3*MAX, 0);
+int lazy[3*MAX];
+void combine(int &v, const int &v1, const int &v2)
+{
+    v = v1 + v2;
+}
+
+void build(int where, int left, int right)
+{
+    if ( left > right ) return;
+    if ( left == right ) {
+        tree[where] = 0;
+        return;
+    }
+    int mid = (left+right)>>1;
+    build((where<<1), left, mid);
+    build((where<<1)+1, mid+1, right);
+    combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
+}
+
+void push_down(int where, int left, int right)
+{
+    if ( lazy[where] ) {
+        tree[where] = (lazy[where] == 1 ? 0 : (right - left + 1));
+        cout << " where: " << where << " lazy[where]: " << lazy[where] << " set tree[where] to " << tree[where] << " left: " << left << " right: " << right << endl;
+        if ( left != right ) {
+            lazy[(where<<1)] = lazy[where];
+            lazy[(where<<1)+1] = lazy[where];
+        }
+        lazy[where] = 0;
+    }
+    return;
+}
+
+void range_update(int where, int left, int right ,int i, int j, int val)
+{
+    push_down(where, left, right);
+    if ( left > right || left > j || right < i ) return;
+    if ( left >= i && right <= j ) {
+        lazy[where] = val;
+        push_down(where, left, right);
+        return;
+    }
+    int mid = (left+right)>>1;
+    range_update((where<<1), left, mid, i, j, val);
+    range_update((where<<1)+1, mid+1, right, i, j, val);
+    combine(tree[where], tree[(where<<1)], tree[(where<<1)+1]);
+    cout << " combined children of tree[" << where << "] to " << tree[where] << endl;
+}
+
+int query(int where, int left, int right, int i, int j)
+{
+    push_down(where, left, right);
+    if ( left > right || left > j || right < i ) return 0;
+    if ( left >= i && right <= j ) 
+    {
+        cout << " query where: " << where << "  returning: " << tree[where] << endl;
+        return tree[where];
+    }
+    int mid = (left+right)>>1;
+    int ans = 0;
+    int ans1 = query((where<<1), left, mid, i, j);
+    int ans2 = query((where<<1)+1, mid+1, right, i, j);
+    combine(ans, ans1, ans2);
+    cout << " query where: " << where << "  returning: " << ans << endl;
+    return ans;
+}
+
 vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
 {
     vector<int> queryResults;
     const int maxRangeEnd = 100'000;
+
+    build(1, 0, maxRangeEnd - 1);
 
     auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
     {
@@ -408,22 +485,38 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     {
         if (query.queryType == '!')
         {
+            cout << " Setting " << query.l << " - " << query.r << " to " << query.value << endl;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
+                {
+                    cout << " divisible by " << primesThatDivideK[primeFactorOfKIndex] << endl;
                     numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
+                    range_update(1, 0, maxRangeEnd - 1, query.l, query.r, 2);
+                }
                 else
+                {
                     numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, false);
+                    range_update(1, 0, maxRangeEnd - 1, query.l, query.r, 1);
+                }
             }
         }
         else if (query.queryType == '?')
         {
             int num = 0;
+            int dbgNum = 0;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
-                if (numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(query.l, query.r) > 0)
+                const int numInRange = numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(query.l, query.r);
+                if (numInRange > 0)
                     num++;
+                const int dbgNumInRange = ::query(1, 0, maxRangeEnd - 1, query.l, query.r);
+                if (dbgNumInRange > 0)
+                    dbgNum++;
+                cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
+                assert(numInRange == dbgNumInRange);
             }
+            cout << " num: " << num << " dbgNum: " << dbgNum << endl;
             queryResults.push_back(num);
         }
         else
@@ -438,16 +531,71 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
+    if (true)
+    {
+        const int maxRangeEnd = 100'000;
+        auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
+        {
+            return newValueToSetTo;
+        };
+
+        auto combineValues = [](const int& lhsValue, const int& rhsValue)
+        {
+            return lhsValue + rhsValue;
+        };
+
+        auto applySetValue = [](int64_t valueToSetTo, int& value)
+        {
+            value = valueToSetTo;
+        };
+
+        using NumPrimesTracker = SegmentTree<int, int64_t>;
+
+        NumPrimesTracker numPrimesTracker(maxRangeEnd, combineValues, applySetValue, combineSetValue);
+        numPrimesTracker.setInitialValues(vector<int>(maxRangeEnd, 0));
+        build(1, 0, maxRangeEnd - 1);
+
+
+        {
+            const int setL = 3;
+            const int setR = 100;
+            range_update(1, 0, maxRangeEnd - 1, setL, setR, 2);
+            numPrimesTracker.applyOperatorToAllInRange(setL, setR, true);
+
+            const int qL = 30;
+            const int qR = 50;
+            const int blee = ::query(1, 0, maxRangeEnd - 1, qL, qR);
+            const int blaa = numPrimesTracker.combinedValuesInRange(qL, qR);
+            cout << "Blee: " <<  blee << endl;
+            cout << "Blaa: " << blaa << endl;
+        }
+{
+            const int setL = 56;
+            const int setR = 63;
+            range_update(1, 0, maxRangeEnd - 1, setL, setR, 1);
+            numPrimesTracker.applyOperatorToAllInRange(setL, setR, false);
+
+            const int qL = 23;
+            const int qR = 80;
+            const int blee = ::query(1, 0, maxRangeEnd - 1, qL, qR);
+            const int blaa = numPrimesTracker.combinedValuesInRange(qL, qR);
+            cout << "Blee: " <<  blee << endl;
+            cout << "Blaa: " << blaa << endl;
+        }
+
+        return 0;
+    }
+
     if (argc == 2)
     {
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int K = 223092870;
-        const int Q = 100'000;
-        const int maxR = 100'000;
-        const int maxX = rand() % 1'000'000'000ULL + 1;
+        const int K = (rand() % 100) + 1;
+        const int Q = (rand() % 100) + 1;
+        const int maxR = (rand() % 100) + 1;
+        const int maxX = rand() % 100 + 1;
 
         cout << K << " " << Q << endl;
 
