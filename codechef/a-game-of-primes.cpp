@@ -548,13 +548,16 @@ int main(int argc, char* argv[])
     {
         cout << x << " ";
     }
+    cout << endl;
     const auto solutionOptimised = solveOptimised(queries, K, primesThatDivideK);
 
-    cout << " solutionOptimised: ";
+    cout << " solutionOptimised:  ";
     for (const auto x : solutionOptimised)
     {
         cout << x << " ";
     }
+    cout << endl;
+    assert(solutionOptimised == solutionBruteForce);
 
 
 }
