@@ -855,7 +855,10 @@ class RandomChooseableSet
     }
     void erase(TPtr toRemove)
     {
-        assert(m_indexFor.find(toRemove) != m_indexFor.end());
+        if(m_indexFor.find(toRemove) == m_indexFor.end())
+        {
+            return;
+        }
         m_indexFor.erase(toRemove);
         const int oldIndex = m_indexFor[toRemove];
         if (m_vec.size() == 1)
