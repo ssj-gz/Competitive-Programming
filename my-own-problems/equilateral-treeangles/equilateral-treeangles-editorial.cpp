@@ -167,13 +167,12 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
         {
             const int descendantHeight = heightPair.first;
             const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second;
-            if (descendantHeight > node->height)
-            {
-                const int requiredNonDescendantDist = (descendantHeight - node->height);
-                const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
-                assert(numNewTriangles >= 0);
-                numTriangles += numNewTriangles;
-            }
+            assert(descendantHeight > node->height);
+
+            const int requiredNonDescendantDist = (descendantHeight - node->height);
+            const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
+            assert(numNewTriangles >= 0);
+            numTriangles += numNewTriangles;
         }
     };
     auto propagateDists = [&completeTypeATrianglesForNode](Node* node, int depth)
