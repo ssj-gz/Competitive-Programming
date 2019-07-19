@@ -328,7 +328,41 @@ struct Query
 vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
 {
     const int maxRangeEnd = 100'000;
+    vector<int64_t> values(maxRangeEnd + 1, -1);
     vector<int> queryResults;
+    for (const auto& query : queries)
+    {
+        if (query.queryType == '!')
+        {
+            for (int i = query.l; i <= query.r; i++)
+            {
+                values[i] = query.value;
+            }
+        }
+        else if (query.queryType == '?')
+        {
+            int num = 0;
+            for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
+            {
+                bool hasFactor = false;
+                for (int i = query.l; i <= query.r; i++)
+                {
+                    if (values[i] == -1)
+                        continue;
+                    if ((values[i] % primesThatDivideK[primeFactorOfKIndex]) == 0)
+                    {
+                        hasFactor = true;
+                        break;
+                    }
+                }
+                if (hasFactor)
+                {
+                    num++;
+                }
+            }
+            queryResults.push_back(num);
+        }
+    }
     return queryResults;
 }
 
@@ -509,11 +543,17 @@ int main(int argc, char* argv[])
     }
 
     const auto solutionBruteForce = solveBruteForce(queries, K, primesThatDivideK);
+    cout << " solutionBruteForce: ";
+    for (const auto x : solutionBruteForce)
+    {
+        cout << x << " ";
+    }
     const auto solutionOptimised = solveOptimised(queries, K, primesThatDivideK);
 
+    cout << " solutionOptimised: ";
     for (const auto x : solutionOptimised)
     {
-        cout << x << endl;
+        cout << x << " ";
     }
 
 
