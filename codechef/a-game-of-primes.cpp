@@ -317,6 +317,80 @@ class SegmentTree {
         }
 };
 
+struct Query
+{
+    char queryType;
+    int l = -1;
+    int r = -1;
+    int value = -1;
+};
+
+vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
+{
+    const int maxRangeEnd = 100'000;
+    vector<int> queryResults;
+    return queryResults;
+}
+
+vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
+{
+    vector<int> queryResults;
+    const int maxRangeEnd = 100'000;
+
+    auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
+    {
+        return newValueToSetTo;
+    };
+
+    auto combineValues = [](const int& lhsValue, const int& rhsValue)
+    {
+        return lhsValue + rhsValue;
+    };
+
+    auto applySetValue = [](int64_t valueToSetTo, int& value)
+    {
+        value = valueToSetTo;
+    };
+
+    using NumPrimesTracker = SegmentTree<int, int64_t>;
+    vector<NumPrimesTracker> numWithPrimeFactorOfKTracker;
+    numWithPrimeFactorOfKTracker.reserve(primesThatDivideK.size());
+
+
+    for (int i = 0; i < primesThatDivideK.size(); i++)
+    {
+        numWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd, combineValues, applySetValue, combineSetValue);
+        numWithPrimeFactorOfKTracker.back().setInitialValues(vector<int>(maxRangeEnd, 0));
+    }
+    for (const auto& query : queries)
+    {
+        if (query.queryType == '!')
+        {
+            for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
+            {
+                if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
+                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
+                else
+                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, false);
+            }
+        }
+        else if (query.queryType == '?')
+        {
+            int num = 0;
+            for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
+            {
+                if (numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(query.l, query.r) > 0)
+                    num++;
+            }
+            queryResults.push_back(num);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    return queryResults;
+}
 
 int main(int argc, char* argv[])
 {
@@ -356,22 +430,6 @@ int main(int argc, char* argv[])
         }
         return 0;
     }
-    const int maxRangeEnd = 100'000;
-
-    auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
-    {
-        return newValueToSetTo;
-    };
-
-    auto combineValues = [](const int& lhsValue, const int& rhsValue)
-    {
-        return lhsValue + rhsValue;
-    };
-
-    auto applySetValue = [](int64_t valueToSetTo, int& value)
-    {
-        value = valueToSetTo;
-    };
 
     const int64_t maxXorK = 1'000'000'000ULL;
     const int sqrtMaxXorK = sqrt(maxXorK);
@@ -422,71 +480,40 @@ int main(int argc, char* argv[])
         primesThatDivideK.push_back(K);
     }
 
-    using NumPrimesTracker = SegmentTree<int, int64_t>;
-    vector<NumPrimesTracker> numWithPrimeFactorOfKTracker;
-    numWithPrimeFactorOfKTracker.reserve(primesThatDivideK.size());
-    for (int i = 0; i < primesThatDivideK.size(); i++)
-    {
-        numWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd, combineValues, applySetValue, combineSetValue);
-        numWithPrimeFactorOfKTracker.back().setInitialValues(vector<int>(maxRangeEnd, 0));
-    }
 
-    if (false)
-    {
-        cout << "Testing" << endl;
-        NumPrimesTracker numPrimesTracker(maxRangeEnd, combineValues, applySetValue, combineSetValue);
-        numPrimesTracker.setInitialValues(vector<int>(maxRangeEnd, 0));
-        numPrimesTracker.applyOperatorToAllInRange(3, 100, false);
-        numPrimesTracker.applyOperatorToAllInRange(3, 100, true);
-        numPrimesTracker.applyOperatorToAllInRange(5, 70, false);
-        numPrimesTracker.combinedValuesInRange(3, 100);
-        cout << "End Testing" << endl;
-        return 0;
-    }
+    vector<Query> queries(Q);
 
     for (int q = 0; q < Q; q++)
     {
-        char queryType;
-        cin >> queryType;
+        cin >> queries[q].queryType;
 
-        if (queryType == '!')
+        if (queries[q].queryType == '!')
         {
-            int l, r;
-            cin >> l >> r;
-            l--;
-            r--;
-            int64_t x;
-            cin >> x;
-
-            for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
-            {
-                if ((x % primesThatDivideK[primeFactorOfKIndex]) == 0)
-                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(l, r, true);
-                else
-                    numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(l, r, false);
-            }
-
+            cin >> queries[q].l;
+            cin >> queries[q].r;
+            queries[q].l--;
+            queries[q].r--;
+            cin >> queries[q].value;
         }
-        else if (queryType == '?')
+        else if (queries[q].queryType == '?')
         {
-            int l, r;
-            cin >> l >> r;
-            l--;
-            r--;
-
-            int num = 0;
-            for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
-            {
-                if (numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(l, r) > 0)
-                    num++;
-            }
-            cout << num << endl;
-
+            cin >> queries[q].l;
+            cin >> queries[q].r;
+            queries[q].l--;
+            queries[q].r--;
         }
         else
         {
             assert(false);
         }
+    }
+
+    const auto solutionBruteForce = solveBruteForce(queries, K, primesThatDivideK);
+    const auto solutionOptimised = solveOptimised(queries, K, primesThatDivideK);
+
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << endl;
     }
 
 
