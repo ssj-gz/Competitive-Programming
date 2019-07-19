@@ -1,3 +1,12 @@
+// Simon St James (ssjgz) - 2019-07-19
+#define SUBMISSION
+#define BRUTE_FORCE
+#define VERIFY_SEGMENT_TREE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#undef VERIFY_SEGMENT_TREE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -10,7 +19,6 @@
 
 
 
-#define VERIFY_SEGMENT_TREE
 
 using namespace std;
 
@@ -542,6 +550,7 @@ int main(int argc, char* argv[])
         }
     }
 
+#ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(queries, K, primesThatDivideK);
     cout << " solutionBruteForce: ";
     for (const auto x : solutionBruteForce)
@@ -558,6 +567,15 @@ int main(int argc, char* argv[])
     }
     cout << endl;
     assert(solutionOptimised == solutionBruteForce);
+#else
+    const auto solutionOptimised = solveOptimised(queries, K, primesThatDivideK);
+
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+#endif
 
 
 }
