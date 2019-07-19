@@ -3,7 +3,12 @@
 #include <functional>
 #include <cmath>
 
+
 #include <cassert>
+
+#include <sys/time.h>
+
+
 
 #define VERIFY_SEGMENT_TREE
 
@@ -313,8 +318,44 @@ class SegmentTree {
 };
 
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int K = rand() % 1'000'000'000ULL + 1;
+        const int Q = rand() % 100 + 1;
+        const int maxR = rand() % 1000 + 2;
+        const int maxX = rand() % 1'000'000'000ULL + 1;
+
+        cout << K << " " << Q << endl;
+
+        for (int q = 0; q < Q; q++)
+        {
+            if (rand() % 2 == 0)
+            {
+                cout << "! ";
+                int l = rand() % maxR + 1;
+                int r = rand() % maxR + 1;
+                if (r < l)
+                    swap(l ,r);
+                cout << l << " " << r << " " << (rand() % maxX + 1) << endl;
+            }
+            else
+            {
+                cout << "? ";
+                int l = rand() % maxR + 1;
+                int r = rand() % maxR + 1;
+                if (r < l)
+                    swap(l ,r);
+                cout << l << " " << r << endl;
+            }
+        }
+        return 0;
+    }
     const int maxRangeEnd = 100'000;
 
     auto combineSetValue = [](const int64_t& newValueToSetTo, const int64_t& earlierValueToSetTo)
