@@ -67,20 +67,13 @@ class RangeTracker
                 }
                 rangeToAddRight = max(rangeToAddRight, rangeIter->right);
 
-                //if (previousOffRange.left == -1)
-                //{
-                    //previousOffRange.left = rangeIter->right + 1;
-                //}
-                //else
+                if (rangeIter->left - 1 >= previousOffRange.left)
                 {
-                    if (rangeIter->left - 1 >= previousOffRange.left)
+                    previousOffRange.right = rangeIter->left - 1;
+                    if (previousOffRange.left >= newRange.left && previousOffRange.right <= newRange.right)
                     {
-                        previousOffRange.right = rangeIter->left - 1;
-                        if (previousOffRange.left <= previousOffRange.right && previousOffRange.left >= newRange.left && previousOffRange.right <= newRange.right)
-                        {
-                            previousOffRanges.push_back(previousOffRange);
-                            previousOffRange = {rangeIter->right + 1, -1};
-                        }
+                        previousOffRanges.push_back(previousOffRange);
+                        previousOffRange = {rangeIter->right + 1, -1};
                     }
                 }
 
