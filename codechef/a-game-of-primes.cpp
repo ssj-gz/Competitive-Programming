@@ -34,35 +34,37 @@ class RangeTracker
         {
             vector<Range> previousOffRanges;
 
-            auto rangeIter = minRange(newRange.left);
+            auto existingSegment = leftmostRangeOverlappingOrAdjacentTo(newRange.left);
             
-            int rangeToAddLeft = newRange.left;
-            int rangeToAddRight = newRange.right;
+            Range segmentToAdd = {newRange.left, newRange.right};
 
             Range previousOffRange = {newRange.left, -1};
-            if (rangeIter != m_rangesByLeft.end() && rangeIter->left <= newRange.left)
+            if (existingSegment != m_rangesByLeft.end() && existingSegment->left <= newRange.left)
             {
-                previousOffRange.left = rangeIter->right + 1;
+                previousOffRange.left = existingSegment->right + 1;
             }
 
-            while (rangeIter != m_rangesByLeft.end() && rangeIter->left <= newRange.right + 1)
+            while (existingSegment != m_rangesByLeft.end() && existingSegment->left <= newRange.right + 1)
             {
-                if (rangeIter->right >= newRange.left - 1)
+                if (existingSegment->right >= newRange.left - 1)
                 {
-                    rangeToAddLeft = min(rangeToAddLeft, rangeIter->left);
+                    segmentToAdd.left = min(segmentToAdd.left, existingSegment->left);
                 }
-                rangeToAddRight = max(rangeToAddRight, rangeIter->right);
+                segmentToAdd.right = max(segmentToAdd.right, existingSegment->right);
 
-                if (rangeIter->left - 1 >= previousOffRange.left)
+                if (existingSegment->left - 1 >= previousOffRange.left)
                 {
-                    previousOffRange.right = rangeIter->left - 1;
+                    previousOffRange.right = existingSegment->left - 1;
                     previousOffRanges.push_back(previousOffRange);
-                    previousOffRange = {rangeIter->right + 1, -1};
+                    previousOffRange = {existingSegment->right + 1, -1};
                 }
 
-                rangeIter = m_rangesByLeft.erase(rangeIter);
+                // Erase this - it has been folded into segmentToAdd.
+                existingSegment = m_rangesByLeft.erase(existingSegment);
             }
-            m_rangesByLeft.insert(Range{rangeToAddLeft, rangeToAddRight});
+
+            m_rangesByLeft.insert(segmentToAdd);
+
             if (previousOffRange.left <= newRange.right)
             {
                 previousOffRange.right = newRange.right;
@@ -98,7 +100,8 @@ class RangeTracker
         bool hasOnRangeOverlapping(const Range& rangeToSearch)
         {
             bool answer = false;
-            auto rangeIter = minRange(rangeToSearch.left);
+            auto rangeIter = leftmostRangeOverlappingOrAdjacentTo(rangeToSearch.left);
+            // This "while" loop will only iterate at most twice.
             while (rangeIter != m_rangesByLeft.end() && rangeIter->left <= rangeToSearch.right)
             {
                 if (rangeIter->left <= rangeToSearch.right && rangeIter->right >= rangeToSearch.left)
@@ -163,15 +166,15 @@ class RangeTracker
 
         set<Range, decltype(&compareRangeBegins)> m_rangesByLeft{&compareRangeBegins};
 
-        set<Range, decltype(&compareRangeBegins)>::iterator minRange(int left)
+        set<Range, decltype(&compareRangeBegins)>::iterator leftmostRangeOverlappingOrAdjacentTo(int pos)
         {
-            Range range{left, -1};
+            Range range{pos, -1};
             set<Range, decltype(&compareRangeBegins)>::iterator iter = m_rangesByLeft.lower_bound(range);
             if (iter != m_rangesByLeft.begin())
             {
                 const auto originalIter = iter;
                 iter = std::prev(iter);
-                if (iter->right < left - 1)
+                if (iter->right < pos - 1)
                 {
                     iter = originalIter;
                 }
