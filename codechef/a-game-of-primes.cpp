@@ -1,5 +1,5 @@
-// Simon St James (ssjgz) - 2019-07-19
-//#define SUBMISSION
+// Simon St James (ssjgz) - 2019-07-20
+#define SUBMISSION
 #define VERIFY_RANGE_TRACKER
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -227,8 +227,10 @@ vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vecto
     const int maxRangeEnd = 100'000;
     vector<int64_t> values(maxRangeEnd + 1, -1);
     vector<int> queryResults;
+    int numQueries = 0;
     for (const auto& query : queries)
     {
+        cout << "query: " << numQueries << " out of " << queries.size() << endl;
         if (query.queryType == '!')
         {
             for (int i = query.l; i <= query.r; i++)
@@ -260,6 +262,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vecto
             }
             queryResults.push_back(num);
         }
+        numQueries++;
     }
     return queryResults;
 }
@@ -408,7 +411,7 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    if (true)
+    if (false)
     {
         RangeTracker rangeTracker(1000);
 
