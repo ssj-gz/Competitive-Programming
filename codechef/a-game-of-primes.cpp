@@ -190,17 +190,17 @@ class RangeTracker
 #endif
 };
 
-vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
+vector<int> calcQueryResults(const vector<Query>& queries, int K, const vector<int>& primesThatDivideK)
 {
     vector<int> queryResults;
     const int maxRangeEnd = 100'000;
 
-    vector<RangeTracker> dbgNumWithPrimeFactorOfKTracker;
+    vector<RangeTracker> hasPrimeFactorOfKTracker;
 
     RangeTracker blankTracker(maxRangeEnd);
     for (int i = 0; i < primesThatDivideK.size(); i++)
     {
-        dbgNumWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd);
+        hasPrimeFactorOfKTracker.emplace_back(maxRangeEnd);
     }
     for (const auto& query : queries)
     {
@@ -213,22 +213,21 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
                 {
                     for (const auto& wasBlankSegment : previousBlankSegmentsInRange)
                     {
-                        dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setRangeToOn(wasBlankSegment);
+                        hasPrimeFactorOfKTracker[primeFactorOfKIndex].setRangeToOn(wasBlankSegment);
                     }
                 }
             }
         }
         else if (query.queryType == '?')
         {
-            int num = 0;
-            int dbgNum = 0;
+            int numSharingPrimeFactorOfKInRange = 0;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
-                const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].hasOnRangeOverlapping(query.range);
-                if (dbgNumInRange > 0)
-                    dbgNum++;
+                const bool hasPrimeFactorOfKInRange = hasPrimeFactorOfKTracker[primeFactorOfKIndex].hasOnRangeOverlapping(query.range);
+                if (hasPrimeFactorOfKInRange)
+                    numSharingPrimeFactorOfKInRange++;
             }
-            queryResults.push_back(dbgNum);
+            queryResults.push_back(numSharingPrimeFactorOfKInRange);
         }
         else
         {
@@ -242,7 +241,7 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    const int64_t maxXorK = 1'000'000'000ULL;
+    const int maxXorK = 1'000'000'000ULL;
     const int sqrtMaxXorK = sqrt(maxXorK);
 
     vector<int> primesUpToSqrtMaxXorK;
@@ -318,9 +317,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    const auto solutionOptimised = solveOptimised(queries, K, primesThatDivideK);
+    const auto queryResults = calcQueryResults(queries, K, primesThatDivideK);
 
-    for (const auto x : solutionOptimised)
+    for (const auto x : queryResults)
     {
         cout << x << endl;
     }
