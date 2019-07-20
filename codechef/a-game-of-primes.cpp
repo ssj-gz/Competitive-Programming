@@ -190,7 +190,7 @@ class RangeTracker
 #endif
 };
 
-vector<int> calcQueryResults(const vector<Query>& queries, int K, const vector<int>& primesThatDivideK)
+vector<int> calcQueryResults(const vector<Query>& queries, const vector<int>& primesThatDivideK)
 {
     vector<int> queryResults;
     const int maxRangeEnd = 100'000;
@@ -284,11 +284,10 @@ int main(int argc, char* argv[])
         }
     }
 
-    int K;
-    cin >> K;
+    auto readInt = []() { int x; cin >> x; return x; };
 
-    int Q;
-    cin >> Q;
+    int K = readInt();
+    const int Q = readInt();
 
     vector<int> primesThatDivideK;
     for (const auto prime : primesUpToSqrtMaxXorK)
@@ -317,24 +316,20 @@ int main(int argc, char* argv[])
 
     vector<Query> queries(Q);
 
-    for (int q = 0; q < Q; q++)
+    for (auto& query : queries)
     {
-        cin >> queries[q].queryType;
+        cin >> query.queryType;
 
-        if (queries[q].queryType == '!')
+        query.range.left = readInt() - 1;
+        query.range.right = readInt() - 1;
+
+        if (query.queryType == '!')
         {
-            cin >> queries[q].range.left;
-            cin >> queries[q].range.right;
-            queries[q].range.left--;
-            queries[q].range.right--;
-            cin >> queries[q].value;
+            query.value = readInt();
         }
-        else if (queries[q].queryType == '?')
+        else if (query.queryType == '?')
         {
-            cin >> queries[q].range.left;
-            cin >> queries[q].range.right;
-            queries[q].range.left--;
-            queries[q].range.right--;
+            // Do nothing.
         }
         else
         {
@@ -342,7 +337,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    const auto queryResults = calcQueryResults(queries, K, primesThatDivideK);
+    const auto queryResults = calcQueryResults(queries, primesThatDivideK);
 
     for (const auto x : queryResults)
     {
