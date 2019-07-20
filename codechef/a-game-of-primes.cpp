@@ -85,7 +85,7 @@ class RangeTracker
                 return;
 
             Range previousRange = *(m_rangesByLeft.begin());
-            assert(previousRange.left < previousRange.right);
+            assert(previousRange.left <= previousRange.right);
             auto rangeIter = m_rangesByLeft.begin();
             rangeIter = std::next(rangeIter);
 
@@ -107,12 +107,14 @@ class RangeTracker
             }
             assert(m_dbgValues == verify);
 
+#if 0
             cout << "list of ranges: " << endl;
             for (const auto& range : m_rangesByLeft)
             {
                 cout << "(" << range.left << ", " << range.right << ")" << " ";
             }
             cout << endl;
+#endif
         }
 #endif
     private:
@@ -352,6 +354,24 @@ int main(int argc, char* argv[])
         rangeTracker.setRangeToOn(Range{50, 180});
         rangeTracker.setRangeToOn(Range{60, 209});
         rangeTracker.setRangeToOn(Range{62, 215});
+
+        while (true)
+        {
+            const int maxRangeEnd = (rand() % 1000) + 1;
+            const int numQueriesForThisRangeTracker = rand() % 1000 + 1;
+
+            RangeTracker rangeTracker(maxRangeEnd);
+            for (int q = 0; q < numQueriesForThisRangeTracker; q++)
+            {
+                int left = rand() % maxRangeEnd;
+                int right = rand() % maxRangeEnd;
+                if (right < left)
+                    swap(left, right);
+                rangeTracker.setRangeToOn(Range{left, right});
+                cout << " query: " << q << " out of " << numQueriesForThisRangeTracker << " l: " << left << " r: " << right << " maxRangeEnd: " << maxRangeEnd << endl;
+            }
+
+        }
 
         return 0;
     }
