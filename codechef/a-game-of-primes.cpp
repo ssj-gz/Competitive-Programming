@@ -80,7 +80,7 @@ class RangeTracker
                 rangeIter = m_rangesByLeft.erase(rangeIter);
             }
             m_rangesByLeft.insert(Range{rangeToAddLeft, rangeToAddRight});
-            if (previousOffRange.left != -1 && previousOffRange.left <= newRange.right)
+            if (previousOffRange.left <= newRange.right)
             {
                 previousOffRange.right = newRange.right;
                 previousOffRanges.push_back(previousOffRange);
