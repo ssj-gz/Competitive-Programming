@@ -101,7 +101,7 @@ class RangeTracker
             auto tempDbgValue = m_dbgValues;
             for (const auto& previousOffRange : previousOffRanges)
             {
-                cout << " previousOffRange: " << previousOffRange.left << "," << previousOffRange.right << endl;
+                //cout << " previousOffRange: " << previousOffRange.left << "," << previousOffRange.right << endl;
                 assert(previousOffRange.left <= previousOffRange.right);
                 assert(previousOffRange.left >= newRange.left);
                 assert(previousOffRange.right <= newRange.right);
@@ -120,9 +120,34 @@ class RangeTracker
 
             return previousOffRanges;
         }
-        bool hasOnRangeOverlapping(const Range& newRange)
+        bool hasOnRangeOverlapping(const Range& rangeToSearch)
         {
-            return false;
+            bool answer = false;
+            auto rangeIter = minRange(rangeToSearch.left);
+            while (rangeIter != m_rangesByLeft.end() && rangeIter->left <= rangeToSearch.right)
+            {
+                //cout << " found range: " << rangeIter->left << ", " << rangeIter->right << endl;
+                if (rangeIter->left <= rangeToSearch.right && rangeIter->right >= rangeToSearch.left)
+                {
+                    answer = true;
+                    break;
+                }
+                rangeIter++;
+            }
+#ifdef VERIFY_RANGE_TRACKER
+            bool dbgAnswer = false;
+            for (int i = rangeToSearch.left; i <= rangeToSearch.right; i++)
+            {
+                if (m_dbgValues[i])
+                {
+                    dbgAnswer = true;
+                    break;
+                }
+            }
+            //cout << " hasOnRangeOverlapping: " << rangeToSearch.left << ", " << rangeToSearch.right << " answer: " << answer << " dbgAnswer: " << dbgAnswer << endl;
+            assert(answer == dbgAnswer);
+#endif
+            return answer;
         }
 #ifdef VERIFY_RANGE_TRACKER
         void verify()
@@ -329,8 +354,9 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     vector<int> queryResults;
     const int maxRangeEnd = 100'000;
 
-    vector<SegmentTree2> dbgNumWithPrimeFactorOfKTracker;
+    vector<RangeTracker> dbgNumWithPrimeFactorOfKTracker;
 
+    RangeTracker blankTracker(maxRangeEnd);
     for (int i = 0; i < primesThatDivideK.size(); i++)
     {
         dbgNumWithPrimeFactorOfKTracker.emplace_back(maxRangeEnd);
@@ -339,17 +365,15 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     {
         if (query.queryType == '!')
         {
+            const auto previousBlankSegmentsInRange = blankTracker.setRangeToOn(Range{query.l, query.r});
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
                 {
-                    //numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, true);
-                    dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, true);
-                }
-                else
-                {
-                    //numWithPrimeFactorOfKTracker[primeFactorOfKIndex].applyOperatorToAllInRange(query.l, query.r, false);
-                    dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setAllInRangeA(query.l, query.r, false);
+                    for (const auto& wasBlankSegment : previousBlankSegmentsInRange)
+                    {
+                        dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].setRangeToOn(wasBlankSegment);
+                    }
                 }
             }
         }
@@ -364,7 +388,7 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
                 if (numInRange > 0)
                     num++;
 #endif
-                const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].getSumOfRange(query.l, query.r);
+                const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].hasOnRangeOverlapping(Range{query.l, query.r});
                 if (dbgNumInRange > 0)
                     dbgNum++;
                 //cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
@@ -413,9 +437,18 @@ int main(int argc, char* argv[])
                 int right = rand() % maxRangeEnd;
                 if (right < left)
                     swap(left, right);
-                rangeTracker.setRangeToOn(Range{left, right});
-                cout << " query: " << q << " out of " << numQueriesForThisRangeTracker << " l: " << left << " r: " << right << " maxRangeEnd: " << maxRangeEnd << endl;
+                if ((rand() % 2) == 0)
+                {
+                    rangeTracker.setRangeToOn(Range{left, right});
+                }
+                else
+                {
+                    rangeTracker.hasOnRangeOverlapping(Range{left, right});
+                }
+
+
             }
+            cout << " performed " << numQueriesForThisRangeTracker << " queries with maxRangeEnd: " << maxRangeEnd << endl;
 
         }
 
