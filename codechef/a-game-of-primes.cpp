@@ -25,11 +25,12 @@ class RangeTracker
 {
     public:
         RangeTracker(int maxRangeEnd)
-#ifdef VERIFY_RANGE_TRACKER
-            : m_dbgValues(maxRangeEnd + 1, false)
-#endif
         {
         }
+        // Set all values in the given range newRange to true, and return a (minimal) vector of 
+        // Ranges describing the values in newRange that were false prior to this call.
+        // Complexity of any one call can be is O(maxRangeEnd x log2 maxRangeEnd), but amortised over
+        // a set of Q queries is O((q + maxRangeEnd) * log2 maxRangeEnd).
         vector<Range> setRangeToOn(const Range& newRange)
         {
             vector<Range> previousOffRanges;
@@ -70,34 +71,14 @@ class RangeTracker
                 previousOffRange.right = newRange.right;
                 previousOffRanges.push_back(previousOffRange);
             }
-#ifdef VERIFY_RANGE_TRACKER
-            const auto oldDbgValues = m_dbgValues;
-            for (int i = newRange.left; i <= newRange.right; i++)
-            {
-                m_dbgValues[i] = true;
-            }
-            auto tempDbgValue = m_dbgValues;
-            for (const auto& previousOffRange : previousOffRanges)
-            {
-                assert(previousOffRange.left <= previousOffRange.right);
-                assert(previousOffRange.left >= newRange.left);
-                assert(previousOffRange.right <= newRange.right);
-                for (int i = previousOffRange.left; i <= previousOffRange.right; i++)
-                {
-                    tempDbgValue[i] = false;
-                }
-            }
-            for (int i = 1; i < previousOffRanges.size(); i++)
-            {
-                assert(previousOffRanges[i].left > previousOffRanges[i - 1].right + 1);
-            }
-            assert(tempDbgValue == oldDbgValues);
-            verify();
-#endif
 
             return previousOffRanges;
         }
-        bool hasOnRangeOverlapping(const Range& rangeToSearch)
+        // Returns true if and only if rangeToSearch contains any elements that
+        // have been set to on via a prior call to setRangeToOn.
+        //
+        // Worst case O(log2 maxRangeEnd).
+        bool hasAnySetToOnInRange(const Range& rangeToSearch)
         {
             bool answer = false;
             auto rangeIter = leftmostRangeOverlappingOrAdjacentTo(rangeToSearch.left);
@@ -111,51 +92,8 @@ class RangeTracker
                 }
                 rangeIter++;
             }
-#ifdef VERIFY_RANGE_TRACKER
-            bool dbgAnswer = false;
-            for (int i = rangeToSearch.left; i <= rangeToSearch.right; i++)
-            {
-                if (m_dbgValues[i])
-                {
-                    dbgAnswer = true;
-                    break;
-                }
-            }
-            assert(answer == dbgAnswer);
-#endif
             return answer;
         }
-#ifdef VERIFY_RANGE_TRACKER
-        void verify()
-        {
-            if (m_rangesByLeft.empty())
-                return;
-
-            Range previousRange = *(m_rangesByLeft.begin());
-            assert(previousRange.left <= previousRange.right);
-            auto rangeIter = m_rangesByLeft.begin();
-            rangeIter = std::next(rangeIter);
-
-            for (; rangeIter != m_rangesByLeft.end(); rangeIter++)
-            {
-                assert(rangeIter->left <= rangeIter->right);
-                assert(rangeIter->left > previousRange.right + 1);
-
-                previousRange = *rangeIter;
-            }
-            
-            vector<bool> verify(m_dbgValues.size(), false);
-            for (const auto& range : m_rangesByLeft)
-            {
-                for (int i = range.left; i <= range.right; i++)
-                {
-                    verify[i] = true;
-                }
-            }
-            assert(m_dbgValues == verify);
-
-        }
-#endif
     private:
         static bool compareRangeBegins(const Range& lhs, const Range& rhs)
         {
@@ -184,10 +122,6 @@ class RangeTracker
             return iter;
 
         }
-
-#ifdef VERIFY_RANGE_TRACKER
-        vector<bool> m_dbgValues;
-#endif
 };
 
 vector<int> calcQueryResults(const vector<Query>& queries, const vector<int>& primesThatDivideK)
@@ -197,7 +131,7 @@ vector<int> calcQueryResults(const vector<Query>& queries, const vector<int>& pr
 
     vector<RangeTracker> hasPrimeFactorOfKTracker;
 
-    RangeTracker blankTracker(maxRangeEnd);
+    RangeTracker nonBlankTracker(maxRangeEnd);
     for (int i = 0; i < primesThatDivideK.size(); i++)
     {
         hasPrimeFactorOfKTracker.emplace_back(maxRangeEnd);
@@ -206,7 +140,7 @@ vector<int> calcQueryResults(const vector<Query>& queries, const vector<int>& pr
     {
         if (query.queryType == '!')
         {
-            const auto previouslyBlankSegmentsInRange = blankTracker.setRangeToOn(query.range);
+            const auto previouslyBlankSegmentsInRange = nonBlankTracker.setRangeToOn(query.range);
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
@@ -223,7 +157,7 @@ vector<int> calcQueryResults(const vector<Query>& queries, const vector<int>& pr
             int numSharingPrimeFactorOfKInRange = 0;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
-                const bool hasPrimeFactorOfKInRange = hasPrimeFactorOfKTracker[primeFactorOfKIndex].hasOnRangeOverlapping(query.range);
+                const bool hasPrimeFactorOfKInRange = hasPrimeFactorOfKTracker[primeFactorOfKIndex].hasAnySetToOnInRange(query.range);
                 if (hasPrimeFactorOfKInRange)
                     numSharingPrimeFactorOfKInRange++;
             }
@@ -246,7 +180,7 @@ int main(int argc, char* argv[])
     // It's fundamentally easy, though, although with some tricky details if you don't have
     // a RangeTracker datastructure already implemented.
     //
-    // Maintain a blankTracker which allows you to unset whether all elements in a range are blank
+    // Maintain a nonBlankTracker which allows you to unset whether all elements in a range are blank
     // or not, and returns a list of non-overlapping segments describing the elements in that 
     // range that *were* blank.  These non-overlapping segments must be set to the value x corresponding
     // to this "!" query.
