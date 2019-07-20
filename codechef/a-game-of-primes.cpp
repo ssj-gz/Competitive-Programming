@@ -110,6 +110,10 @@ class RangeTracker
                     tempDbgValue[i] = false;
                 }
             }
+            for (int i = 1; i < previousOffRanges.size(); i++)
+            {
+                assert(previousOffRanges[i].left > previousOffRanges[i - 1].right + 1);
+            }
             assert(tempDbgValue == oldDbgValues);
             verify();
 #endif
