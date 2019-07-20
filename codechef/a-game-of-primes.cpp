@@ -53,6 +53,12 @@ class RangeTracker
             int rangeToAddLeft = newRange.left;
             int rangeToAddRight = newRange.right;
 
+            Range previousOffRange = {newRange.left, -1};
+            if (rangeIter != m_rangesByLeft.end() && rangeIter->left <= newRange.left)
+            {
+                previousOffRange.left = rangeIter->right + 1;
+            }
+
             while (rangeIter != m_rangesByLeft.end() && rangeIter->left <= newRange.right + 1)
             {
                 if (rangeIter->right >= newRange.left - 1)
@@ -61,14 +67,50 @@ class RangeTracker
                 }
                 rangeToAddRight = max(rangeToAddRight, rangeIter->right);
 
+                if (previousOffRange.left == -1)
+                {
+                    previousOffRange.left = rangeIter->right + 1;
+                }
+                else
+                {
+                    if (rangeIter->left - 1 >= previousOffRange.left)
+                    {
+                        previousOffRange.right = rangeIter->left - 1;
+                        if (previousOffRange.left <= previousOffRange.right && previousOffRange.left >= newRange.left && previousOffRange.right <= newRange.right)
+                        {
+                            previousOffRanges.push_back(previousOffRange);
+                            previousOffRange = {rangeIter->right + 1, -1};
+                        }
+                    }
+                }
+
                 rangeIter = m_rangesByLeft.erase(rangeIter);
             }
             m_rangesByLeft.insert(Range{rangeToAddLeft, rangeToAddRight});
+            if (previousOffRange.left != -1 && previousOffRange.left <= newRange.right)
+            {
+                previousOffRange.right = newRange.right;
+                previousOffRanges.push_back(previousOffRange);
+            }
 #ifdef VERIFY_RANGE_TRACKER
+            const auto oldDbgValues = m_dbgValues;
             for (int i = newRange.left; i <= newRange.right; i++)
             {
                 m_dbgValues[i] = true;
             }
+            auto tempDbgValue = m_dbgValues;
+            for (const auto& previousOffRange : previousOffRanges)
+            {
+                cout << " previousOffRange: " << previousOffRange.left << "," << previousOffRange.right << endl;
+                assert(previousOffRange.left <= previousOffRange.right);
+                assert(previousOffRange.left >= newRange.left);
+                assert(previousOffRange.right <= newRange.right);
+                for (int i = previousOffRange.left; i <= previousOffRange.right; i++)
+                {
+                    tempDbgValue[i] = false;
+                }
+            }
+            assert(tempDbgValue == oldDbgValues);
             verify();
 #endif
 
