@@ -67,11 +67,11 @@ class RangeTracker
                 }
                 rangeToAddRight = max(rangeToAddRight, rangeIter->right);
 
-                if (previousOffRange.left == -1)
-                {
-                    previousOffRange.left = rangeIter->right + 1;
-                }
-                else
+                //if (previousOffRange.left == -1)
+                //{
+                    //previousOffRange.left = rangeIter->right + 1;
+                //}
+                //else
                 {
                     if (rangeIter->left - 1 >= previousOffRange.left)
                     {
