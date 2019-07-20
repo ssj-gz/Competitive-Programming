@@ -56,7 +56,7 @@ class RangeTracker
                 if (rangeIter->left - 1 >= previousOffRange.left)
                 {
                     previousOffRange.right = rangeIter->left - 1;
-                    if (previousOffRange.left >= newRange.left && previousOffRange.right <= newRange.right)
+                    if (previousOffRange.left >= newRange.left)
                     {
                         previousOffRanges.push_back(previousOffRange);
                         previousOffRange = {rangeIter->right + 1, -1};
