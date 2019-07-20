@@ -206,12 +206,12 @@ vector<int> calcQueryResults(const vector<Query>& queries, int K, const vector<i
     {
         if (query.queryType == '!')
         {
-            const auto previousBlankSegmentsInRange = blankTracker.setRangeToOn(query.range);
+            const auto previouslyBlankSegmentsInRange = blankTracker.setRangeToOn(query.range);
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
                 {
-                    for (const auto& wasBlankSegment : previousBlankSegmentsInRange)
+                    for (const auto& wasBlankSegment : previouslyBlankSegmentsInRange)
                     {
                         hasPrimeFactorOfKTracker[primeFactorOfKIndex].setRangeToOn(wasBlankSegment);
                     }
@@ -239,6 +239,31 @@ vector<int> calcQueryResults(const vector<Query>& queries, int K, const vector<i
 
 int main(int argc, char* argv[])
 {
+    // Wow - severely misjudged (or rather: misread) this one - somehow ended up missing the 
+    // part about the "!" only changing *blank* elements rather than all in range(!) and
+    // so, solving entirely the wrong problem XD
+    //
+    // It's fundamentally easy, though, although with some tricky details if you don't have
+    // a RangeTracker datastructure already implemented.
+    //
+    // Maintain a blankTracker which allows you to unset whether all elements in a range are blank
+    // or not, and returns a list of non-overlapping segments describing the elements in that 
+    // range that *were* blank.  These non-overlapping segments must be set to the value x corresponding
+    // to this "!" query.
+    //
+    // For each prime factor of K, maintain a hasPrimeFactorOfKTracker for that prime factor; for the
+    // x value for a given "!" query, find which of the prime factors of K also divide x: we need then
+    // to set the elements of hasPrimeFactorOfKTracker for that prime factor to "true" for each previously
+    // blank element.
+    //
+    // For a "?" query, we simply ask, for each prime factor of K, whether the corresponding hasPrimeFactorOfKTracker
+    // has any elements set to true for the given range.
+    //
+    // The RangeTracker simply consists of an ordered (by "left"), non-overlapping set of Ranges which are kept 
+    // updated (and minimal) by merging etc during each call to setRangeToOn - hopefully the code for 
+    // this is self-explanatory :)
+    //
+    // And that's about it!
     ios::sync_with_stdio(false);
 
     const int maxXorK = 1'000'000'000ULL;
@@ -259,7 +284,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    int64_t K;
+    int K;
     cin >> K;
 
     int Q;
