@@ -36,7 +36,8 @@ vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vecto
         {
             for (int i = query.l; i <= query.r; i++)
             {
-                values[i] = query.value;
+                if (values[i] == -1)
+                    values[i] = query.value;
             }
         }
         else if (query.queryType == '?')
