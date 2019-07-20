@@ -1,12 +1,15 @@
 // Simon St James (ssjgz) - 2019-07-19
-#define SUBMISSION
+//#define SUBMISSION
+#define VERIFY_RANGE_TRACKER
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
+#undef VERIFY_RANGE_TRACKER
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
+#include <set>
 #include <functional>
 #include <cmath>
 
@@ -23,6 +26,127 @@ struct Query
     int l = -1;
     int r = -1;
     int value = -1;
+};
+
+struct Range
+{
+    int left = -1;
+    int right = -1;
+};
+
+
+class RangeTracker
+{
+    public:
+        RangeTracker(int maxRangeEnd)
+#ifdef VERIFY_RANGE_TRACKER
+            : m_dbgValues(maxRangeEnd + 1, false)
+#endif
+        {
+        }
+        vector<Range> setRangeToOn(const Range& newRange)
+        {
+            vector<Range> previousOffRanges;
+
+            auto rangeIter = minRange(newRange.left);
+            
+            int rangeToAddLeft = newRange.left;
+            int rangeToAddRight = newRange.right;
+
+            while (rangeIter != m_rangesByLeft.end() && rangeIter->left <= newRange.right + 1)
+            {
+                if (rangeIter->right >= newRange.left - 1)
+                {
+                    rangeToAddLeft = min(rangeToAddLeft, rangeIter->left);
+                }
+                rangeToAddRight = max(rangeToAddRight, rangeIter->right);
+
+                rangeIter = m_rangesByLeft.erase(rangeIter);
+            }
+            m_rangesByLeft.insert(Range{rangeToAddLeft, rangeToAddRight});
+#ifdef VERIFY_RANGE_TRACKER
+            for (int i = newRange.left; i <= newRange.right; i++)
+            {
+                m_dbgValues[i] = true;
+            }
+            verify();
+#endif
+
+            return previousOffRanges;
+        }
+        bool hasOnRangeOverlapping(const Range& newRange)
+        {
+            return false;
+        }
+#ifdef VERIFY_RANGE_TRACKER
+        void verify()
+        {
+            if (m_rangesByLeft.empty())
+                return;
+
+            Range previousRange = *(m_rangesByLeft.begin());
+            assert(previousRange.left < previousRange.right);
+            auto rangeIter = m_rangesByLeft.begin();
+            rangeIter = std::next(rangeIter);
+
+            for (; rangeIter != m_rangesByLeft.end(); rangeIter++)
+            {
+                assert(rangeIter->left <= rangeIter->right);
+                assert(rangeIter->left > previousRange.right + 1);
+
+                previousRange = *rangeIter;
+            }
+            
+            vector<bool> verify(m_dbgValues.size(), false);
+            for (const auto& range : m_rangesByLeft)
+            {
+                for (int i = range.left; i <= range.right; i++)
+                {
+                    verify[i] = true;
+                }
+            }
+            assert(m_dbgValues == verify);
+
+            cout << "list of ranges: " << endl;
+            for (const auto& range : m_rangesByLeft)
+            {
+                cout << "(" << range.left << ", " << range.right << ")" << " ";
+            }
+            cout << endl;
+        }
+#endif
+    private:
+        static bool compareRangeBegins(const Range& lhs, const Range& rhs)
+        {
+            if (lhs.left != rhs.right)
+                return lhs.left < rhs.left;
+            return lhs.right < rhs.right;
+        }
+
+        set<Range, decltype(&compareRangeBegins)> m_rangesByLeft{&compareRangeBegins};
+
+        set<Range, decltype(&compareRangeBegins)>::iterator minRange(int left)
+        {
+            Range range{left, -1};
+            set<Range, decltype(&compareRangeBegins)>::iterator iter = m_rangesByLeft.lower_bound(range);
+            if (iter != m_rangesByLeft.begin())
+            {
+                const auto originalIter = iter;
+                iter = std::prev(iter);
+                if (iter->right < left - 1)
+                {
+                    iter = originalIter;
+                }
+            }
+
+
+            return iter;
+
+        }
+
+#ifdef VERIFY_RANGE_TRACKER
+        vector<bool> m_dbgValues;
+#endif
 };
 
 vector<int> solveBruteForce(const vector<Query>& queries, int64_t K, const vector<int>& primesThatDivideK)
@@ -211,6 +335,26 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
+
+    if (true)
+    {
+        RangeTracker rangeTracker(1000);
+
+        rangeTracker.setRangeToOn(Range{3, 5});
+        rangeTracker.setRangeToOn(Range{1, 2});
+        rangeTracker.setRangeToOn(Range{6, 10});
+        rangeTracker.setRangeToOn(Range{3, 100});
+
+        rangeTracker.setRangeToOn(Range{200, 205});
+        rangeTracker.setRangeToOn(Range{207, 207});
+        rangeTracker.setRangeToOn(Range{207, 208});
+        rangeTracker.setRangeToOn(Range{170, 209});
+        rangeTracker.setRangeToOn(Range{50, 180});
+        rangeTracker.setRangeToOn(Range{60, 209});
+        rangeTracker.setRangeToOn(Range{62, 215});
+
+        return 0;
+    }
 
 #if 0
     if (true)
