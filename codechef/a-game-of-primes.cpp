@@ -6,16 +6,7 @@
 
 #include <cassert>
 
-
 using namespace std;
-
-struct Query
-{
-    char queryType;
-    int l = -1;
-    int r = -1;
-    int value = -1;
-};
 
 struct Range
 {
@@ -23,6 +14,12 @@ struct Range
     int right = -1;
 };
 
+struct Query
+{
+    char queryType;
+    Range range = {-1, -1};
+    int value = -1;
+};
 
 class RangeTracker
 {
@@ -83,7 +80,6 @@ class RangeTracker
             auto tempDbgValue = m_dbgValues;
             for (const auto& previousOffRange : previousOffRanges)
             {
-                //cout << " previousOffRange: " << previousOffRange.left << "," << previousOffRange.right << endl;
                 assert(previousOffRange.left <= previousOffRange.right);
                 assert(previousOffRange.left >= newRange.left);
                 assert(previousOffRange.right <= newRange.right);
@@ -108,7 +104,6 @@ class RangeTracker
             auto rangeIter = minRange(rangeToSearch.left);
             while (rangeIter != m_rangesByLeft.end() && rangeIter->left <= rangeToSearch.right)
             {
-                //cout << " found range: " << rangeIter->left << ", " << rangeIter->right << endl;
                 if (rangeIter->left <= rangeToSearch.right && rangeIter->right >= rangeToSearch.left)
                 {
                     answer = true;
@@ -126,7 +121,6 @@ class RangeTracker
                     break;
                 }
             }
-            //cout << " hasOnRangeOverlapping: " << rangeToSearch.left << ", " << rangeToSearch.right << " answer: " << answer << " dbgAnswer: " << dbgAnswer << endl;
             assert(answer == dbgAnswer);
 #endif
             return answer;
@@ -160,14 +154,6 @@ class RangeTracker
             }
             assert(m_dbgValues == verify);
 
-#if 0
-            cout << "list of ranges: " << endl;
-            for (const auto& range : m_rangesByLeft)
-            {
-                cout << "(" << range.left << ", " << range.right << ")" << " ";
-            }
-            cout << endl;
-#endif
         }
 #endif
     private:
@@ -220,7 +206,7 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
     {
         if (query.queryType == '!')
         {
-            const auto previousBlankSegmentsInRange = blankTracker.setRangeToOn(Range{query.l, query.r});
+            const auto previousBlankSegmentsInRange = blankTracker.setRangeToOn(query.range);
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
                 if ((query.value % primesThatDivideK[primeFactorOfKIndex]) == 0)
@@ -238,16 +224,9 @@ vector<int> solveOptimised(const vector<Query>& queries, int64_t K, const vector
             int dbgNum = 0;
             for (int primeFactorOfKIndex = 0; primeFactorOfKIndex < primesThatDivideK.size(); primeFactorOfKIndex++)
             {
-#if 0
-                const int numInRange = numWithPrimeFactorOfKTracker[primeFactorOfKIndex].combinedValuesInRange(query.l, query.r);
-                if (numInRange > 0)
-                    num++;
-#endif
-                const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].hasOnRangeOverlapping(Range{query.l, query.r});
+                const int dbgNumInRange = dbgNumWithPrimeFactorOfKTracker[primeFactorOfKIndex].hasOnRangeOverlapping(query.range);
                 if (dbgNumInRange > 0)
                     dbgNum++;
-                //cout << "  numInRange: " << numInRange << " dbgNumInRange: " << dbgNumInRange << endl;
-                //assert(numInRange == dbgNumInRange);
             }
             queryResults.push_back(dbgNum);
         }
@@ -320,18 +299,18 @@ int main(int argc, char* argv[])
 
         if (queries[q].queryType == '!')
         {
-            cin >> queries[q].l;
-            cin >> queries[q].r;
-            queries[q].l--;
-            queries[q].r--;
+            cin >> queries[q].range.left;
+            cin >> queries[q].range.right;
+            queries[q].range.left--;
+            queries[q].range.right--;
             cin >> queries[q].value;
         }
         else if (queries[q].queryType == '?')
         {
-            cin >> queries[q].l;
-            cin >> queries[q].r;
-            queries[q].l--;
-            queries[q].r--;
+            cin >> queries[q].range.left;
+            cin >> queries[q].range.right;
+            queries[q].range.left--;
+            queries[q].range.right--;
         }
         else
         {
