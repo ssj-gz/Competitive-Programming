@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-07-21
-#define SUBMISSION
+//#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -87,23 +87,29 @@ int main(int argc, char* argv[])
         enum Status { Unknown, Yes, No };
         vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
 
-        powerOf10 = 1;
         for (int i = A.size() - 1; i >= 0; i--)
         {
 
             const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
 #ifndef SUBMISSION
-            string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
-            cout << "aMinusDigit: " << aMinusDigit << endl;
-            const int dbgAMinusDigitMod = stoi(aMinusDigit) % modulus;
-            assert(aMinusDigitMod == dbgAMinusDigitMod);
+            {
+                string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
+                cout << "aMinusDigit: " << aMinusDigit << endl;
+                int powerOf10 = 1;
+                int dbgAMinusDigitMod = 0;
+                for (const auto digit : aMinusDigit)
+                {
+                    dbgAMinusDigitMod = (dbgAMinusDigitMod * powerOf10 + (digit - '0')) % modulus;
+                    powerOf10 = (powerOf10 * 10) % modulus;
+                }
+                cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
+                assert(aMinusDigitMod == dbgAMinusDigitMod);
+            }
 #endif
-            //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
             if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
-
-
                 const int removedDigitValue = (A[i] - '0');
+
                 numOfDigitInA[removedDigitValue]--;
                 vector<int> digitsInAMinusDigit;
                 for (int digit = 0; digit <= 9; digit++)
@@ -145,10 +151,10 @@ int main(int argc, char* argv[])
                     canMakeZeroWithStartingValue[aMinusDigitMod] = No;
                 }
 
-                powerOf10 = (powerOf10 * 10) % modulus;
             }
             if (canMakeZeroWithStartingValue[aMinusDigitMod] == Yes)
                 numStartingMoves++;
+            powerOf10 = (powerOf10 * 10) % modulus;
 
         }
         cout << numStartingMoves << endl;
