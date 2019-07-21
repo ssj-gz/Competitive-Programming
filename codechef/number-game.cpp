@@ -56,7 +56,9 @@ int main(int argc, char* argv[])
         cout << strings.size() << endl;
         for (int i = 0; i < strings.size(); i++)
         {
-            cout << strings[i] << " " << ((rand() % maxMod) + 1) << endl;
+            const int mod = 800 + rand() % (maxMod - 800) + 1;
+            assert(mod <= maxMod);
+            cout << strings[i] << " " << mod << endl;
         }
         return 0;
     }
@@ -173,6 +175,7 @@ int main(int argc, char* argv[])
             {
 
                 vector<bool> processed(modulus, false);
+                vector<bool> visited(modulus, false);
                 vector<int> toProcess = { aMinusDigitMod };
 
                 int iterationNum = 0;
@@ -189,9 +192,10 @@ int main(int argc, char* argv[])
                         for (const auto digit : digitsInA)
                         {
                             const int newValue = (pTimes10 + digit) % modulus;
-                            if (!processed[newValue])
+                            if (!visited[newValue])
                             {
                                 nextToProcess.push_back(newValue);
+                                visited[newValue] = true;
                             }
                         }
                     }
