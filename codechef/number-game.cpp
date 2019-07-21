@@ -6,8 +6,34 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        const int maxSumOfStringLengths = 1'000'000;
+        const int maxMod = 1000;
+        vector<string> strings;
+        int sumOfStringLengths = 0;
+        while (sumOfStringLengths < maxSumOfStringLengths)
+        {
+            //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
+            const int stringLength = (rand() % (7) + 2);
+            string numberString;
+            for (int i = 0; i < stringLength; i++)
+            {
+                numberString.push_back('0' + rand() % 10);
+            }
+            strings.push_back(numberString);
+            sumOfStringLengths += stringLength;
+        }
+
+        cout << strings.size() << endl;
+        for (int i = 0; i < strings.size(); i++)
+        {
+            cout << strings[i] << " " << ((rand() % maxMod) + 1) << endl;
+        }
+        return 0;
+    }
     int T;
     cin >> T;
 
