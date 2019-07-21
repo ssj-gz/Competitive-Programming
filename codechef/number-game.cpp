@@ -101,12 +101,17 @@ int main(int argc, char* argv[])
             //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
             if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
+
+
+                const int removedDigitValue = (A[i] - '0');
+                numOfDigitInA[removedDigitValue]--;
                 vector<int> digitsInAMinusDigit;
                 for (int digit = 0; digit <= 9; digit++)
                 {
-                    if (A.find('0' + digit) != string::npos)
+                    if (numOfDigitInA[digit] > 0)
                         digitsInAMinusDigit.push_back('0' + digit);
                 }
+                numOfDigitInA[removedDigitValue]++;
 
                 vector<bool> processed(modulus, false);
                 vector<int> toProcess = { aMinusDigitMod };
