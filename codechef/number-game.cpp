@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
         {
             for (const auto otherValue : valuesFromRemoving1Digit)
             {
-                // Appending to startValue involves multiplying it my 10^|A.size() - 1|, which is
+                // Appending to startValue involves multiplying it by 10^|A.size() - 1|, which is
                 // powerOf10ForAppending.
                 const int newValue = (startValue * powerOf10ForAppending + otherValue) % modulus;
                 canBeReachedByAppendFrom[newValue].push_back(startValue);
