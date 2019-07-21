@@ -8,18 +8,24 @@
 
 using namespace std;
 
+template <typename T>
+T read()
+{
+    T toRead;
+    cin >> toRead;
+    assert(cin);
+    return toRead;
+}
+
 int main(int argc, char* argv[])
 {
-    int T;
-    cin >> T;
+    const int T = read<int>();
 
     for (int t = 0; t < T; t++)
     {
-        string A;
-        cin >> A;
+        const string A = read<string>();
 
-        int modulus;
-        cin >> modulus;
+        const int modulus = read<int>();
 
         vector<int> firstDigitsOfAMod = { 0 };
         vector<int> lastDigitsOfAMod = { 0 };
