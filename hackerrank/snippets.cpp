@@ -872,3 +872,37 @@ ios::sync_with_stdio(false);
 // Compile with libc++'s debug mode.
 clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEBUG=1
 
+
+// Simon St James (ssjgz) - 2019-XX-XX
+#include <iostream>
+
+#include <cassert>
+
+#include <sys/time.h>
+
+using namespace std;
+
+template <typename T>
+T read()
+{
+    T toRead;
+    cin >> toRead;
+    assert(cin);
+    return toRead;
+}
+
+int main(int argc, char* argv[])
+{
+    if (argc == 2 && string(argv[1]) == "--test")
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+        // TODO - generate randomised test.
+        return 0;
+    }
+
+}
+
+
+
