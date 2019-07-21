@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
             //cout << " startValue: " << startValue << endl;
             vector<bool> processed(modulus, false);
             vector<bool> visited(modulus, false);
-            vector<int> toProcess = { startValue };
 
+            vector<int> toProcess = { startValue };
             int iterationNum = 0;
             bool found = false;
             while (!toProcess.empty() && !found)
@@ -202,9 +202,13 @@ int main(int argc, char* argv[])
 
             if (found)
             {
-                //canAppendAndMake0StartingWith[startValue] = Yes;
+                canAppendAndMake0StartingWith[startValue] = Yes;
                 //cout << " found; adding: " << numTimesCanMakeValueByRemoving1Digit[startValue] << endl;
                 numStartingMoves += numTimesCanMakeValueByRemoving1Digit[startValue];
+            }
+            else
+            {
+                canAppendAndMake0StartingWith[startValue] = No;
             }
 
         }
