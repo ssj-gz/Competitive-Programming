@@ -1,8 +1,10 @@
 // Simon St James (ssjgz) - 2019-07-21
-//#define SUBMISSION
+#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <map>
+#include <utility>
 
 #include <cassert>
 #include <sys/time.h>
@@ -24,8 +26,8 @@ int main(int argc, char* argv[])
         int sumOfStringLengths = 0;
         while (sumOfStringLengths < maxSumOfStringLengths)
         {
-            //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
-            const int stringLength = (rand() % (7) + 2);
+            const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
+            //const int stringLength = (rand() % (7) + 2);
             vector<int> digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
             random_shuffle(digits.begin(), digits.end());
@@ -96,7 +98,7 @@ int main(int argc, char* argv[])
 #endif
 
         enum Status { Unknown, Yes, No };
-        vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
+        map<pair<int, int>, Status> canMakeZeroWithStartingValue;
 
         powerOf10 = 1;
         for (int i = A.size() - 1; i >= 0; i--)
@@ -108,10 +110,14 @@ int main(int argc, char* argv[])
 
             numOfDigitInA[removedDigitValue]--;
             vector<int> digitsInAMinusDigit;
+            int digitBitmask = 0;
             for (int digit = 0; digit <= 9; digit++)
             {
                 if (numOfDigitInA[digit] > 0)
+                {
                     digitsInAMinusDigit.push_back(digit);
+                    digitBitmask |= (1 << digit);
+                }
             }
             numOfDigitInA[removedDigitValue]++;
 #ifndef SUBMISSION
@@ -152,7 +158,7 @@ int main(int argc, char* argv[])
                 assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
             }
 #endif
-            //if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
+            if (canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] == Unknown)
             {
 
                 vector<bool> processed(modulus, false);
@@ -180,17 +186,17 @@ int main(int argc, char* argv[])
 
                 if (processed[0])
                 {
-                    assert(canMakeZeroWithStartingValue[aMinusDigitMod] != No);
-                    canMakeZeroWithStartingValue[aMinusDigitMod] = Yes;
+                    assert((canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] != No));
+                    canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] = Yes;
                 }
                 else
                 {
-                    assert(canMakeZeroWithStartingValue[aMinusDigitMod] != Yes);
-                    canMakeZeroWithStartingValue[aMinusDigitMod] = No;
+                    assert((canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] != Yes));
+                    canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] = No;
                 }
 
             }
-            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Yes)
+            if (canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] == Yes)
                 numStartingMoves++;
             powerOf10 = (powerOf10 * 10) % modulus;
 
