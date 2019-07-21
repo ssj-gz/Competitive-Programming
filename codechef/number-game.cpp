@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-07-21
-#define SUBMISSION
+//#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -26,8 +26,8 @@ int main(int argc, char* argv[])
         int sumOfStringLengths = 0;
         while (sumOfStringLengths < maxSumOfStringLengths)
         {
-            const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
-            //const int stringLength = (rand() % (7) + 2);
+            //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
+            const int stringLength = (rand() % (7) + 2);
             vector<int> digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
             random_shuffle(digits.begin(), digits.end());
@@ -41,6 +41,9 @@ int main(int argc, char* argv[])
             strings.push_back(numberString);
             sumOfStringLengths += stringLength;
         }
+
+        if (strings.size() > 10000)
+            strings.resize(10000);
 
         cout << strings.size() << endl;
         for (int i = 0; i < strings.size(); i++)
@@ -130,7 +133,7 @@ int main(int argc, char* argv[])
                 {
                     dbgAMinusDigitMod = (dbgAMinusDigitMod * 10 + (digit - '0')) % modulus;
                 }
-                cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
+                //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
                 assert(aMinusDigitMod == dbgAMinusDigitMod);
                 vector<int> dbgDigitsInAMinusDigit;
 
@@ -164,13 +167,15 @@ int main(int argc, char* argv[])
                 vector<bool> processed(modulus, false);
                 vector<int> toProcess = { aMinusDigitMod };
 
+                int iterationNum = 0;
                 while (!toProcess.empty())
                 {
                     //cout << " # toProcess: " << toProcess.size() << endl;
                     vector<int> nextToProcess;
                     for (const auto p : toProcess)
                     {
-                        processed[p] = true;
+                        if (iterationNum > 0)
+                            processed[p] = true;
                         int pTimes10 = (p * 10) % modulus;
                         for (const auto digit : digitsInAMinusDigit)
                         {
@@ -182,6 +187,7 @@ int main(int argc, char* argv[])
                         }
                     }
                     toProcess = nextToProcess;
+                    iterationNum++;
                 }
 
                 if (processed[0])
