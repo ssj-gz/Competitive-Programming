@@ -173,6 +173,7 @@ int main(int argc, char* argv[])
                 vector<int> nextToProcess;
                 for (const auto p : toProcess)
                 {
+                    //cout << " p: " << p << endl;
                     if (canAppendAndMake0StartingWith[p] == Yes)
                     {
                         found = true;
@@ -181,7 +182,7 @@ int main(int argc, char* argv[])
                     }
                     if (canAppendAndMake0StartingWith[p] == Unknown)
                     {
-                        const int pTimes10 = (p * 10) % modulus;
+                        const int pTimes10 = (p * powerOf10) % modulus;
                         processed[p] = true;
 
                         for (const auto other : valuesFromRemoving1Digit)
