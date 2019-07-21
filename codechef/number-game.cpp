@@ -12,55 +12,6 @@
 using namespace std;
 
 enum Status { Unknown, Yes, No };
-bool dfsCanReachZero(int startValue, vector<bool>& visited, vector<Status>& canMakeZeroWithStartingValue, const vector<int>& valuesFromRemoving1Digit, const int powerOf10, const int modulus, int depth = 0)
-{
-    const string indent = string(depth, ' ');
-    cout << indent << "node: " << startValue << endl;
-    if (canMakeZeroWithStartingValue[startValue] != Unknown)
-    {
-        cout << indent << " returning cached: " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No") << endl;
-        return (canMakeZeroWithStartingValue[startValue] == Yes);
-    }
-
-    visited[startValue] = true;
-
-
-    bool canMakeZero = false;
-    bool fullyExplored = true;
-    for (const auto otherValue : valuesFromRemoving1Digit)
-    {
-        const int newValue = (startValue * powerOf10 + otherValue) % modulus;
-        if (visited[newValue])
-        {
-            if (canMakeZeroWithStartingValue[newValue] == Yes)
-            {
-                canMakeZero = true;
-                break;
-            }
-            else if (canMakeZeroWithStartingValue[newValue] == No)
-            {
-            }
-            else
-            {
-                fullyExplored = false;
-            }
-        }
-        else
-        {
-            canMakeZero = canMakeZero || dfsCanReachZero(newValue, visited, canMakeZeroWithStartingValue, valuesFromRemoving1Digit, powerOf10, modulus, depth + 1);
-        }
-    }
-
-    if (canMakeZero || fullyExplored)
-    {
-        canMakeZeroWithStartingValue[startValue] = (canMakeZero ? Yes : No);
-        cout << " caching " << startValue << " as " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No")<< endl;
-    }
-    //if (!fullyExplored)
-        //visited[startValue] = false;
-
-    return canMakeZero;
-}
 
 int main(int argc, char* argv[])
 {
@@ -180,24 +131,8 @@ int main(int argc, char* argv[])
         vector<int> numTimesCanMakeValueByRemoving1Digit(modulus, 0);
         for (int i = A.size() - 1; i >= 0; i--)
         {
-
             const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
-            //cout << " i: " << i << " aMinusDigitMod: " << aMinusDigitMod << endl;
             numTimesCanMakeValueByRemoving1Digit[aMinusDigitMod]++;
-#ifndef SUBMISSION
-            {
-                string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
-                cout << "aMinusDigit: " << aMinusDigit << endl;
-                //int powerOf10 = 1;
-                int dbgAMinusDigitMod = 0;
-                for (const auto digit : aMinusDigit)
-                {
-                    dbgAMinusDigitMod = (dbgAMinusDigitMod * 10 + (digit - '0')) % modulus;
-                }
-                cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
-                assert(aMinusDigitMod == dbgAMinusDigitMod);
-            }
-#endif
             powerOf10 = (powerOf10 * 10) % modulus;
         }
         vector<int> valuesFromRemoving1Digit;
@@ -205,7 +140,6 @@ int main(int argc, char* argv[])
         {
             if (numTimesCanMakeValueByRemoving1Digit[i] > 0)
             {
-                //cout << "Blee; " << i << endl;
                 valuesFromRemoving1Digit.push_back(i);
             }
         }
@@ -213,33 +147,13 @@ int main(int argc, char* argv[])
         vector<Status> canAppendAndMake0StartingWith(modulus, Unknown);
         canAppendAndMake0StartingWith[0] = Yes;
 
-#if 0
-        vector<bool> visited(modulus, false);
-        for (const auto startValue : valuesFromRemoving1Digit)
-        {
-            cout << " startValue: " << startValue << endl;
-            if (dfsCanReachZero(startValue, visited, canAppendAndMake0StartingWith, valuesFromRemoving1Digit, powerOf10, modulus))
-            {
-                cout << " yes" << endl;
-                numStartingMoves += numTimesCanMakeValueByRemoving1Digit[startValue];
-            }
-            else
-            {
-                cout << " no" << endl;
-            }
-        }
-#endif
-
-        //cout << " powerOf10: " << powerOf10 << endl;
-
-        vector<vector<int>> blah(modulus);
+        vector<vector<int>> canBeReachedByAppendFrom(modulus);
         for (int startValue = 0; startValue < modulus; startValue++)
         {
             for (const auto otherValue : valuesFromRemoving1Digit)
             {
                 const int newValue = (startValue * powerOf10ForAppending + otherValue) % modulus;
-                blah[newValue].push_back(startValue);
-                //cout << " newValue: " << newValue << " reached from " << startValue << " by appending: " << otherValue << endl;
+                canBeReachedByAppendFrom[newValue].push_back(startValue);
             }
         }
 
@@ -251,7 +165,7 @@ int main(int argc, char* argv[])
             {
                 canAppendAndMake0StartingWith[p] = Yes;
 
-                for (const auto reachedFrom : blah[p])
+                for (const auto reachedFrom : canBeReachedByAppendFrom[p])
                 {
                     if (canAppendAndMake0StartingWith[reachedFrom] == Unknown)
                     {
@@ -277,112 +191,4 @@ int main(int argc, char* argv[])
         }
         cout << numStartingMoves << endl; 
     }
-
-
-
-
-#if 0
-        if (false)
-        {
-            //cout << "Blee: " << (firstDigitsOfAMod[i] * powerOf10) << " blah: " << firstDigitsOfAMod[i] << endl;
-            const int removedDigitValue = (A[i] - '0');
-
-            //numOfDigitInA[removedDigitValue]--;
-            //numOfDigitInA[removedDigitValue]++;
-#ifndef SUBMISSION
-            {
-                string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
-                //cout << "aMinusDigit: " << aMinusDigit << endl;
-                //int powerOf10 = 1;
-                int dbgAMinusDigitMod = 0;
-                for (const auto digit : aMinusDigit)
-                {
-                    dbgAMinusDigitMod = (dbgAMinusDigitMod * 10 + (digit - '0')) % modulus;
-                }
-                //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
-                assert(aMinusDigitMod == dbgAMinusDigitMod);
-            }
-#endif
-#if 0
-                vector<int> dbgDigitsInAMinusDigit;
-
-                for (int digit = 0; digit <= 9; digit++)
-                {
-                    if (aMinusDigit.find(digit + '0') != string::npos)
-                    {
-                        dbgDigitsInAMinusDigit.push_back(digit);
-                    }
-                }
-#endif
-#if 0
-                cout << "digitsInA: " << endl;
-                for (const auto x : digitsInA)
-                {
-                    cout << " " << x;
-                }
-                cout << endl;
-                cout << "dbgDigitsInAMinusDigit: " << endl;
-                for (const auto x : dbgDigitsInAMinusDigit)
-                {
-                    cout << " " << x;
-                }
-                cout << endl;
-#endif
-                //assert(dbgDigitsInAMinusDigit == digitsInA);
-            }
-            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
-            {
-
-                vector<bool> processed(modulus, false);
-                vector<bool> visited(modulus, false);
-                vector<int> toProcess = { aMinusDigitMod };
-
-                int iterationNum = 0;
-                while (!toProcess.empty())
-                {
-                    //cout << " # toProcess: " << toProcess.size() << endl;
-                    vector<int> nextToProcess;
-                    for (const auto p : toProcess)
-                    {
-                        const int pTimes10 = (p * 10) % modulus;
-                        if (iterationNum > 0)
-                            processed[p] = true;
-
-                        for (const auto digit : digitsInA)
-                        {
-                            const int newValue = (pTimes10 + digit) % modulus;
-                            if (!visited[newValue])
-                            {
-                                nextToProcess.push_back(newValue);
-                                visited[newValue] = true;
-                            }
-                        }
-                    }
-                    toProcess = nextToProcess;
-                    iterationNum++;
-                }
-
-                if (processed[0])
-                {
-                    assert((canMakeZeroWithStartingValue[aMinusDigitMod] != No));
-                    canMakeZeroWithStartingValue[aMinusDigitMod] = Yes;
-                }
-                else
-                {
-                    assert((canMakeZeroWithStartingValue[aMinusDigitMod] != Yes));
-                    canMakeZeroWithStartingValue[aMinusDigitMod] = No;
-                }
-
-            }
-            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Yes)
-                numStartingMoves++;
-            powerOf10 = (powerOf10 * 10) % modulus;
-
-        }
-        cout << numStartingMoves << endl;
-
-
-
-    }
-#endif
 }
