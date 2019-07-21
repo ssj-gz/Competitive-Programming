@@ -1,3 +1,5 @@
+// Simon St James (ssjgz) - 2019-07-21
+#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -16,8 +18,8 @@ int main(int argc, char* argv[])
         int sumOfStringLengths = 0;
         while (sumOfStringLengths < maxSumOfStringLengths)
         {
-            //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
-            const int stringLength = (rand() % (7) + 2);
+            const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
+            //const int stringLength = (rand() % (7) + 2);
             string numberString;
             for (int i = 0; i < stringLength; i++)
             {
@@ -42,7 +44,7 @@ int main(int argc, char* argv[])
 
         string A;
         cin >> A;
-        cout << "A: " << A << endl;
+        //cout << "A: " << A << endl;
 
         int modulus;
         cin >> modulus;
@@ -71,6 +73,7 @@ int main(int argc, char* argv[])
             powerOf10 = (powerOf10 * 10) % modulus;
         }
 
+#if 0
         for (const auto x : lastDigitsOfAMod)
         {
             cout << " lastDigitsOfAMod: " << x << endl;
@@ -79,53 +82,69 @@ int main(int argc, char* argv[])
         {
             cout << " firstDigitsOfAMod: " << x << endl;
         }
+#endif
 
+        enum Status { Unknown, Yes, No };
+        vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
 
         powerOf10 = 1;
         for (int i = A.size() - 1; i >= 0; i--)
         {
+
+            const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
+#ifndef SUBMISSION
             string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
             cout << "aMinusDigit: " << aMinusDigit << endl;
             const int dbgAMinusDigitMod = stoi(aMinusDigit) % modulus;
-
-            const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
-            cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
             assert(aMinusDigitMod == dbgAMinusDigitMod);
-
-            vector<int> digitsInAMinusDigit;
-            for (int digit = 0; digit <= 9; digit++)
+#endif
+            //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
+            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
-                if (A.find('0' + digit) != string::npos)
-                    digitsInAMinusDigit.push_back('0' + digit);
-            }
-
-            vector<bool> processed(modulus, false);
-            vector<int> toProcess = { aMinusDigitMod };
-
-            while (!toProcess.empty())
-            {
-                //cout << " # toProcess: " << toProcess.size() << endl;
-                vector<int> nextToProcess;
-                for (const auto p : toProcess)
+                vector<int> digitsInAMinusDigit;
+                for (int digit = 0; digit <= 9; digit++)
                 {
-                    processed[p] = true;
-                    int pTimes10 = (p * 10) % modulus;
-                    for (const auto digit : digitsInAMinusDigit)
+                    if (A.find('0' + digit) != string::npos)
+                        digitsInAMinusDigit.push_back('0' + digit);
+                }
+
+                vector<bool> processed(modulus, false);
+                vector<int> toProcess = { aMinusDigitMod };
+
+                while (!toProcess.empty())
+                {
+                    //cout << " # toProcess: " << toProcess.size() << endl;
+                    vector<int> nextToProcess;
+                    for (const auto p : toProcess)
                     {
-                        const int newValue = (pTimes10 + digit) % modulus;
-                        if (!processed[newValue])
+                        processed[p] = true;
+                        int pTimes10 = (p * 10) % modulus;
+                        for (const auto digit : digitsInAMinusDigit)
                         {
-                            nextToProcess.push_back(newValue);
+                            const int newValue = (pTimes10 + digit) % modulus;
+                            if (!processed[newValue])
+                            {
+                                nextToProcess.push_back(newValue);
+                            }
                         }
                     }
+                    toProcess = nextToProcess;
                 }
-                toProcess = nextToProcess;
-            }
 
-            if (processed[0])
+                if (processed[0])
+                {
+                    canMakeZeroWithStartingValue[aMinusDigitMod] = Yes;
+                }
+                else
+                {
+                    canMakeZeroWithStartingValue[aMinusDigitMod] = No;
+                }
+
+                powerOf10 = (powerOf10 * 10) % modulus;
+            }
+            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Yes)
                 numStartingMoves++;
 
-            powerOf10 = (powerOf10 * 10) % modulus;
         }
         cout << numStartingMoves << endl;
 
