@@ -24,11 +24,19 @@ int main(int argc, char* argv[])
         const int maxMod = 1000;
         vector<string> strings;
         int sumOfStringLengths = 0;
-        while (sumOfStringLengths < maxSumOfStringLengths)
+        const int T = 100;
+        for (int t = 0; t < T; t++)
         {
             //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
-            const int stringLength = (rand() % (7) + 2);
+            //const int stringLength = (rand() % (7) + 2);
+            int stringLength = (rand() % (10'000) + 2);
             vector<int> digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+            if (t == 100)
+            {
+                assert(sumOfStringLengths < maxSumOfStringLengths);
+                stringLength = maxSumOfStringLengths - sumOfStringLengths;
+            }
 
             random_shuffle(digits.begin(), digits.end());
             const int numDistinctDigitsToUse = (rand() % 10) + 1;
@@ -99,9 +107,17 @@ int main(int argc, char* argv[])
             cout << " firstDigitsOfAMod: " << x << endl;
         }
 #endif
+        vector<int> digitsInA;
+        for (int digit = 0; digit <= 9; digit++)
+        {
+            if (numOfDigitInA[digit] > 0)
+            {
+                digitsInA.push_back(digit);
+            }
+        }
 
         enum Status { Unknown, Yes, No };
-        map<pair<int, int>, Status> canMakeZeroWithStartingValue;
+        vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
 
         powerOf10 = 1;
         for (int i = A.size() - 1; i >= 0; i--)
@@ -112,16 +128,6 @@ int main(int argc, char* argv[])
             const int removedDigitValue = (A[i] - '0');
 
             //numOfDigitInA[removedDigitValue]--;
-            vector<int> digitsInAMinusDigit;
-            int digitBitmask = 0;
-            for (int digit = 0; digit <= 9; digit++)
-            {
-                if (numOfDigitInA[digit] > 0)
-                {
-                    digitsInAMinusDigit.push_back(digit);
-                    digitBitmask |= (1 << digit);
-                }
-            }
             //numOfDigitInA[removedDigitValue]++;
 #ifndef SUBMISSION
             {
@@ -147,8 +153,8 @@ int main(int argc, char* argv[])
                 }
 #endif
 #if 0
-                cout << "digitsInAMinusDigit: " << endl;
-                for (const auto x : digitsInAMinusDigit)
+                cout << "digitsInA: " << endl;
+                for (const auto x : digitsInA)
                 {
                     cout << " " << x;
                 }
@@ -160,10 +166,10 @@ int main(int argc, char* argv[])
                 }
                 cout << endl;
 #endif
-                //assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
+                //assert(dbgDigitsInAMinusDigit == digitsInA);
             }
 #endif
-            if (canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] == Unknown)
+            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
 
                 vector<bool> processed(modulus, false);
@@ -180,7 +186,7 @@ int main(int argc, char* argv[])
                         if (iterationNum > 0)
                             processed[p] = true;
 
-                        for (const auto digit : digitsInAMinusDigit)
+                        for (const auto digit : digitsInA)
                         {
                             const int newValue = (pTimes10 + digit) % modulus;
                             if (!processed[newValue])
@@ -195,17 +201,17 @@ int main(int argc, char* argv[])
 
                 if (processed[0])
                 {
-                    assert((canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] != No));
-                    canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] = Yes;
+                    assert((canMakeZeroWithStartingValue[aMinusDigitMod] != No));
+                    canMakeZeroWithStartingValue[aMinusDigitMod] = Yes;
                 }
                 else
                 {
-                    assert((canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] != Yes));
-                    canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] = No;
+                    assert((canMakeZeroWithStartingValue[aMinusDigitMod] != Yes));
+                    canMakeZeroWithStartingValue[aMinusDigitMod] = No;
                 }
 
             }
-            if (canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] == Yes)
+            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Yes)
                 numStartingMoves++;
             powerOf10 = (powerOf10 * 10) % modulus;
 
