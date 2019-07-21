@@ -119,6 +119,7 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
 
+        //cout << " t: " << t << " / " << T << endl;
         string A;
         cin >> A;
         //cout << "A: " << A << endl;
@@ -148,6 +149,11 @@ int main(int argc, char* argv[])
             lastDigitsOfAMod.push_back(value);
 
             powerOf10 = (powerOf10 * 10) % modulus;
+        }
+        int powerOf10ForAppending = 1;
+        for (int i = 0; i < A.size() - 1; i++)
+        {
+            powerOf10ForAppending = (powerOf10ForAppending * 10) % modulus;
         }
 
 #if 0
@@ -224,13 +230,16 @@ int main(int argc, char* argv[])
         }
 #endif
 
+        //cout << " powerOf10: " << powerOf10 << endl;
+
         vector<vector<int>> blah(modulus);
         for (int startValue = 0; startValue < modulus; startValue++)
         {
             for (const auto otherValue : valuesFromRemoving1Digit)
             {
-                const int newValue = (startValue * powerOf10 + otherValue) % modulus;
+                const int newValue = (startValue * powerOf10ForAppending + otherValue) % modulus;
                 blah[newValue].push_back(startValue);
+                //cout << " newValue: " << newValue << " reached from " << startValue << " by appending: " << otherValue << endl;
             }
         }
 
