@@ -104,6 +104,16 @@ int main(int argc, char* argv[])
 
             const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
             //cout << "Blee: " << (firstDigitsOfAMod[i] * powerOf10) << " blah: " << firstDigitsOfAMod[i] << endl;
+            const int removedDigitValue = (A[i] - '0');
+
+            numOfDigitInA[removedDigitValue]--;
+            vector<int> digitsInAMinusDigit;
+            for (int digit = 0; digit <= 9; digit++)
+            {
+                if (numOfDigitInA[digit] > 0)
+                    digitsInAMinusDigit.push_back(digit);
+            }
+            numOfDigitInA[removedDigitValue]++;
 #ifndef SUBMISSION
             {
                 string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
@@ -116,46 +126,34 @@ int main(int argc, char* argv[])
                 }
                 cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
                 assert(aMinusDigitMod == dbgAMinusDigitMod);
+                vector<int> dbgDigitsInAMinusDigit;
+
+                for (int digit = 0; digit <= 9; digit++)
+                {
+                    if (aMinusDigit.find(digit + '0') != string::npos)
+                    {
+                        dbgDigitsInAMinusDigit.push_back(digit);
+                    }
+                }
+#if 0
+                cout << "digitsInAMinusDigit: " << endl;
+                for (const auto x : digitsInAMinusDigit)
+                {
+                    cout << " " << x;
+                }
+                cout << endl;
+                cout << "dbgDigitsInAMinusDigit: " << endl;
+                for (const auto x : dbgDigitsInAMinusDigit)
+                {
+                    cout << " " << x;
+                }
+                cout << endl;
+#endif
+                assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
             }
 #endif
             //if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
-                const int removedDigitValue = (A[i] - '0');
-
-                numOfDigitInA[removedDigitValue]--;
-                vector<int> digitsInAMinusDigit;
-                for (int digit = 0; digit <= 9; digit++)
-                {
-                    if (numOfDigitInA[digit] > 0)
-                        digitsInAMinusDigit.push_back(digit);
-                }
-                numOfDigitInA[removedDigitValue]++;
-#ifndef SUBMISSION
-                {
-                    string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
-                    vector<int> dbgDigitsInAMinusDigit;
-                    for (int digit = 0; digit <= 9; digit++)
-                    {
-                        if (aMinusDigit.find(digit + '0') != string::npos)
-                        {
-                            dbgDigitsInAMinusDigit.push_back(digit);
-                        }
-                    }
-                    cout << "digitsInAMinusDigit: " << endl;
-                    for (const auto x : digitsInAMinusDigit)
-                    {
-                        cout << " " << x;
-                    }
-                    cout << endl;
-                    cout << "dbgDigitsInAMinusDigit: " << endl;
-                    for (const auto x : dbgDigitsInAMinusDigit)
-                    {
-                        cout << " " << x;
-                    }
-                    cout << endl;
-                    assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
-                }
-#endif
 
                 vector<bool> processed(modulus, false);
                 vector<int> toProcess = { aMinusDigitMod };
