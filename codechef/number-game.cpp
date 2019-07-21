@@ -79,8 +79,8 @@ int main(int argc, char* argv[])
         for (int t = 0; t < T; t++)
         {
             //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
-            //const int stringLength = (rand() % (7) + 2);
-            int stringLength = (rand() % (10'000) + 2);
+            int stringLength = (rand() % (30) + 2);
+            //int stringLength = (rand() % (10'000) + 2);
             vector<int> digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
             if (t == 100)
