@@ -11,6 +11,49 @@
 
 using namespace std;
 
+enum Status { Unknown, Yes, No };
+bool dfsCanReachZero(int startValue, vector<bool>& visited, vector<Status>& canMakeZeroWithStartingValue, const vector<int>& valuesFromRemoving1Digit, const int powerOf10, const int modulus, int depth = 0)
+{
+    //const string indent = string(depth, ' ');
+    //cout << indent << startValue << endl;
+    if (canMakeZeroWithStartingValue[startValue] != Unknown)
+    {
+        //cout << indent << " returning cached: " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No") << endl;
+        return (canMakeZeroWithStartingValue[startValue] == Yes);
+    }
+
+    visited[startValue] = true;
+
+    bool canMakeZero = false;
+    bool fullyExplored = true;
+    for (const auto otherValue : valuesFromRemoving1Digit)
+    {
+        const int newValue = (startValue * powerOf10 + otherValue) % modulus;
+        if (visited[newValue])
+        {
+            if (canMakeZeroWithStartingValue[newValue] == Yes)
+            {
+                canMakeZero = true;
+                break;
+            }
+            // Must be an ancestor; do nothing.
+            fullyExplored = false;
+        }
+        else
+        {
+            canMakeZero = canMakeZero || dfsCanReachZero(newValue, visited, canMakeZeroWithStartingValue, valuesFromRemoving1Digit, powerOf10, modulus, depth + 1);
+        }
+    }
+
+    if (canMakeZero || fullyExplored)
+    {
+        canMakeZeroWithStartingValue[startValue] = (canMakeZero ? Yes : No);
+        //cout << " caching " << startValue << " as " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No")<< endl;
+    }
+
+    return canMakeZero;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2)
@@ -118,8 +161,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        enum Status { Unknown, Yes, No };
-        vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
 
         powerOf10 = 1;
         vector<int> numTimesCanMakeValueByRemoving1Digit(modulus, 0);
@@ -158,59 +199,19 @@ int main(int argc, char* argv[])
         vector<Status> canAppendAndMake0StartingWith(modulus, Unknown);
         canAppendAndMake0StartingWith[0] = Yes;
 
+        vector<bool> visited(modulus, false);
         for (const auto startValue : valuesFromRemoving1Digit)
         {
             //cout << " startValue: " << startValue << endl;
-            vector<bool> processed(modulus, false);
-            vector<bool> visited(modulus, false);
-
-            vector<int> toProcess = { startValue };
-            int iterationNum = 0;
-            bool found = false;
-            while (!toProcess.empty() && !found)
+            if (dfsCanReachZero(startValue, visited, canAppendAndMake0StartingWith, valuesFromRemoving1Digit, powerOf10, modulus))
             {
-                //cout << " # toProcess: " << toProcess.size() << endl;
-                vector<int> nextToProcess;
-                for (const auto p : toProcess)
-                {
-                    //cout << " p: " << p << endl;
-                    if (canAppendAndMake0StartingWith[p] == Yes)
-                    {
-                        found = true;
-                        break;
-
-                    }
-                    if (canAppendAndMake0StartingWith[p] == Unknown)
-                    {
-                        const int pTimes10 = (p * powerOf10) % modulus;
-                        processed[p] = true;
-
-                        for (const auto other : valuesFromRemoving1Digit)
-                        {
-                            const int newValue = (pTimes10 + other) % modulus;
-                            if (!visited[newValue])
-                            {
-                                nextToProcess.push_back(newValue);
-                                visited[newValue] = true;
-                            }
-                        }
-                    }
-                }
-                toProcess = nextToProcess;
-                iterationNum++;
-            }
-
-            if (found)
-            {
-                canAppendAndMake0StartingWith[startValue] = Yes;
-                //cout << " found; adding: " << numTimesCanMakeValueByRemoving1Digit[startValue] << endl;
+                //cout << " yes" << endl;
                 numStartingMoves += numTimesCanMakeValueByRemoving1Digit[startValue];
             }
             else
             {
-                canAppendAndMake0StartingWith[startValue] = No;
+                //cout << " no" << endl;
             }
-
         }
         cout << numStartingMoves << endl;
     }
