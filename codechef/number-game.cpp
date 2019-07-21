@@ -1,5 +1,4 @@
 // Simon St James (ssjgz) - 2019-07-21
-#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -8,8 +7,6 @@
 #include <cassert>
 
 using namespace std;
-
-enum Status { Unknown, Yes, No };
 
 int main(int argc, char* argv[])
 {
@@ -27,6 +24,7 @@ int main(int argc, char* argv[])
         vector<int> firstDigitsOfAMod = { 0 };
         vector<int> lastDigitsOfAMod = { 0 };
 
+        // Build up firstDigitsOfAMod/ lastDigitsOfAMod.
         int numOfDigitInA[10] = {};
         int value = 0;
         for (const auto digit : A)
@@ -46,40 +44,16 @@ int main(int argc, char* argv[])
 
             powerOf10 = (powerOf10 * 10) % modulus;
         }
-        int powerOf10ForAppending = 1;
-        for (int i = 0; i < A.size() - 1; i++)
-        {
-            powerOf10ForAppending = (powerOf10ForAppending * 10) % modulus;
-        }
-
-#if 0
-        for (const auto x : lastDigitsOfAMod)
-        {
-            cout << " lastDigitsOfAMod: " << x << endl;
-        }
-        for (const auto x : firstDigitsOfAMod)
-        {
-            cout << " firstDigitsOfAMod: " << x << endl;
-        }
-#endif
-        vector<int> digitsInA;
-        for (int digit = 0; digit <= 9; digit++)
-        {
-            if (numOfDigitInA[digit] > 0)
-            {
-                digitsInA.push_back(digit);
-            }
-        }
-
 
         powerOf10 = 1;
         vector<int> numTimesCanMakeValueByRemoving1Digit(modulus, 0);
-        for (int i = A.size() - 1; i >= 0; i--)
+        for (int digitIndexToRemove = A.size() - 1; digitIndexToRemove >= 0; digitIndexToRemove--)
         {
-            const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
+            const int aMinusDigitMod = (firstDigitsOfAMod[digitIndexToRemove] * powerOf10 + lastDigitsOfAMod[A.size() - digitIndexToRemove - 1]) % modulus;
             numTimesCanMakeValueByRemoving1Digit[aMinusDigitMod]++;
             powerOf10 = (powerOf10 * 10) % modulus;
         }
+
         vector<int> valuesFromRemoving1Digit;
         for (int i = 0; i < modulus; i++)
         {
@@ -89,23 +63,31 @@ int main(int argc, char* argv[])
             }
         }
 
-        vector<bool> canMake0ViaAppendsStartingWith(modulus, Unknown);
-        canMake0ViaAppendsStartingWith[0] = true;
+        int powerOf10ForAppending = 1;
+        for (int i = 0; i < A.size() - 1; i++)
+        {
+            powerOf10ForAppending = (powerOf10ForAppending * 10) % modulus;
+        }
 
         vector<vector<int>> canBeReachedByAppendFrom(modulus);
         for (int startValue = 0; startValue < modulus; startValue++)
         {
             for (const auto otherValue : valuesFromRemoving1Digit)
             {
+                // Appending to startValue involves multiplying it my 10^|A.size() - 1|, which is
+                // powerOf10ForAppending.
                 const int newValue = (startValue * powerOf10ForAppending + otherValue) % modulus;
                 canBeReachedByAppendFrom[newValue].push_back(startValue);
             }
         }
 
+        // Work backwards from 0 and use canBeReachedByAppendFrom to find all numbers that
+        // can be made to reach 0 (mod modulus!) by one or more appends/ "Moves".
+        vector<bool> canMake0ViaAppendsStartingWith(modulus, false);
+        canMake0ViaAppendsStartingWith[0] = true;
         vector<bool> visited(modulus, false);
         vector<int> toProcess = { 0 };
         visited[0] = true;
-
         while (!toProcess.empty())
         {
             vector<int> nextToProcess;
@@ -125,6 +107,7 @@ int main(int argc, char* argv[])
             }
             toProcess = nextToProcess;
         }
+        // Compute final result.
         int numStartingMovesWhereWeWin = 0;
         for (const auto startValue : valuesFromRemoving1Digit)
         {
