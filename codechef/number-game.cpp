@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-07-21
-//#define SUBMISSION
+#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -87,20 +87,21 @@ int main(int argc, char* argv[])
         enum Status { Unknown, Yes, No };
         vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
 
+        powerOf10 = 1;
         for (int i = A.size() - 1; i >= 0; i--)
         {
 
             const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
+            //cout << "Blee: " << (firstDigitsOfAMod[i] * powerOf10) << " blah: " << firstDigitsOfAMod[i] << endl;
 #ifndef SUBMISSION
             {
                 string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
-                cout << "aMinusDigit: " << aMinusDigit << endl;
-                int powerOf10 = 1;
+                //cout << "aMinusDigit: " << aMinusDigit << endl;
+                //int powerOf10 = 1;
                 int dbgAMinusDigitMod = 0;
                 for (const auto digit : aMinusDigit)
                 {
-                    dbgAMinusDigitMod = (dbgAMinusDigitMod * powerOf10 + (digit - '0')) % modulus;
-                    powerOf10 = (powerOf10 * 10) % modulus;
+                    dbgAMinusDigitMod = (dbgAMinusDigitMod * 10 + (digit - '0')) % modulus;
                 }
                 cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
                 assert(aMinusDigitMod == dbgAMinusDigitMod);
