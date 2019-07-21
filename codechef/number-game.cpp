@@ -14,15 +14,16 @@ using namespace std;
 enum Status { Unknown, Yes, No };
 bool dfsCanReachZero(int startValue, vector<bool>& visited, vector<Status>& canMakeZeroWithStartingValue, const vector<int>& valuesFromRemoving1Digit, const int powerOf10, const int modulus, int depth = 0)
 {
-    //const string indent = string(depth, ' ');
-    //cout << indent << startValue << endl;
+    const string indent = string(depth, ' ');
+    cout << indent << "node: " << startValue << endl;
     if (canMakeZeroWithStartingValue[startValue] != Unknown)
     {
-        //cout << indent << " returning cached: " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No") << endl;
+        cout << indent << " returning cached: " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No") << endl;
         return (canMakeZeroWithStartingValue[startValue] == Yes);
     }
 
     visited[startValue] = true;
+
 
     bool canMakeZero = false;
     bool fullyExplored = true;
@@ -36,8 +37,13 @@ bool dfsCanReachZero(int startValue, vector<bool>& visited, vector<Status>& canM
                 canMakeZero = true;
                 break;
             }
-            // Must be an ancestor; do nothing.
-            fullyExplored = false;
+            else if (canMakeZeroWithStartingValue[newValue] == No)
+            {
+            }
+            else
+            {
+                fullyExplored = false;
+            }
         }
         else
         {
@@ -48,8 +54,10 @@ bool dfsCanReachZero(int startValue, vector<bool>& visited, vector<Status>& canM
     if (canMakeZero || fullyExplored)
     {
         canMakeZeroWithStartingValue[startValue] = (canMakeZero ? Yes : No);
-        //cout << " caching " << startValue << " as " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No")<< endl;
+        cout << " caching " << startValue << " as " << (canMakeZeroWithStartingValue[startValue] == Yes ? "Yes" : "No")<< endl;
     }
+    //if (!fullyExplored)
+        //visited[startValue] = false;
 
     return canMakeZero;
 }
@@ -202,15 +210,15 @@ int main(int argc, char* argv[])
         vector<bool> visited(modulus, false);
         for (const auto startValue : valuesFromRemoving1Digit)
         {
-            //cout << " startValue: " << startValue << endl;
+            cout << " startValue: " << startValue << endl;
             if (dfsCanReachZero(startValue, visited, canAppendAndMake0StartingWith, valuesFromRemoving1Digit, powerOf10, modulus))
             {
-                //cout << " yes" << endl;
+                cout << " yes" << endl;
                 numStartingMoves += numTimesCanMakeValueByRemoving1Digit[startValue];
             }
             else
             {
-                //cout << " no" << endl;
+                cout << " no" << endl;
             }
         }
         cout << numStartingMoves << endl;
