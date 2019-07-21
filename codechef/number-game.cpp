@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-07-21
-//#define SUBMISSION
+#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
             //cout << "Blee: " << (firstDigitsOfAMod[i] * powerOf10) << " blah: " << firstDigitsOfAMod[i] << endl;
             const int removedDigitValue = (A[i] - '0');
 
-            numOfDigitInA[removedDigitValue]--;
+            //numOfDigitInA[removedDigitValue]--;
             vector<int> digitsInAMinusDigit;
             int digitBitmask = 0;
             for (int digit = 0; digit <= 9; digit++)
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
                     digitBitmask |= (1 << digit);
                 }
             }
-            numOfDigitInA[removedDigitValue]++;
+            //numOfDigitInA[removedDigitValue]++;
 #ifndef SUBMISSION
             {
                 string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
                 }
                 //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
                 assert(aMinusDigitMod == dbgAMinusDigitMod);
+#if 0
                 vector<int> dbgDigitsInAMinusDigit;
 
                 for (int digit = 0; digit <= 9; digit++)
@@ -144,6 +145,7 @@ int main(int argc, char* argv[])
                         dbgDigitsInAMinusDigit.push_back(digit);
                     }
                 }
+#endif
 #if 0
                 cout << "digitsInAMinusDigit: " << endl;
                 for (const auto x : digitsInAMinusDigit)
@@ -158,7 +160,7 @@ int main(int argc, char* argv[])
                 }
                 cout << endl;
 #endif
-                assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
+                //assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
             }
 #endif
             if (canMakeZeroWithStartingValue[{aMinusDigitMod, digitBitmask}] == Unknown)
@@ -174,9 +176,10 @@ int main(int argc, char* argv[])
                     vector<int> nextToProcess;
                     for (const auto p : toProcess)
                     {
+                        const int pTimes10 = (p * 10) % modulus;
                         if (iterationNum > 0)
                             processed[p] = true;
-                        int pTimes10 = (p * 10) % modulus;
+
                         for (const auto digit : digitsInAMinusDigit)
                         {
                             const int newValue = (pTimes10 + digit) % modulus;
