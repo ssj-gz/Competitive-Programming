@@ -1,10 +1,11 @@
 // Simon St James (ssjgz) - 2019-07-21
-#define SUBMISSION
+//#define SUBMISSION
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 #include <cassert>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -12,18 +13,28 @@ int main(int argc, char* argv[])
 {
     if (argc == 2)
     {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+
         const int maxSumOfStringLengths = 1'000'000;
         const int maxMod = 1000;
         vector<string> strings;
         int sumOfStringLengths = 0;
         while (sumOfStringLengths < maxSumOfStringLengths)
         {
-            const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
-            //const int stringLength = (rand() % (7) + 2);
+            //const int stringLength = (rand() % (maxSumOfStringLengths - sumOfStringLengths) + 1);
+            const int stringLength = (rand() % (7) + 2);
+            vector<int> digits = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+            random_shuffle(digits.begin(), digits.end());
+            const int numDistinctDigitsToUse = (rand() % 10) + 1;
+
             string numberString;
             for (int i = 0; i < stringLength; i++)
             {
-                numberString.push_back('0' + rand() % 10);
+                numberString.push_back('0' + rand() % numDistinctDigitsToUse);
             }
             strings.push_back(numberString);
             sumOfStringLengths += stringLength;
@@ -107,7 +118,7 @@ int main(int argc, char* argv[])
                 assert(aMinusDigitMod == dbgAMinusDigitMod);
             }
 #endif
-            if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
+            //if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
                 const int removedDigitValue = (A[i] - '0');
 
@@ -116,9 +127,35 @@ int main(int argc, char* argv[])
                 for (int digit = 0; digit <= 9; digit++)
                 {
                     if (numOfDigitInA[digit] > 0)
-                        digitsInAMinusDigit.push_back('0' + digit);
+                        digitsInAMinusDigit.push_back(digit);
                 }
                 numOfDigitInA[removedDigitValue]++;
+#ifndef SUBMISSION
+                {
+                    string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
+                    vector<int> dbgDigitsInAMinusDigit;
+                    for (int digit = 0; digit <= 9; digit++)
+                    {
+                        if (aMinusDigit.find(digit + '0') != string::npos)
+                        {
+                            dbgDigitsInAMinusDigit.push_back(digit);
+                        }
+                    }
+                    cout << "digitsInAMinusDigit: " << endl;
+                    for (const auto x : digitsInAMinusDigit)
+                    {
+                        cout << " " << x;
+                    }
+                    cout << endl;
+                    cout << "dbgDigitsInAMinusDigit: " << endl;
+                    for (const auto x : dbgDigitsInAMinusDigit)
+                    {
+                        cout << " " << x;
+                    }
+                    cout << endl;
+                    assert(dbgDigitsInAMinusDigit == digitsInAMinusDigit);
+                }
+#endif
 
                 vector<bool> processed(modulus, false);
                 vector<int> toProcess = { aMinusDigitMod };
@@ -145,10 +182,12 @@ int main(int argc, char* argv[])
 
                 if (processed[0])
                 {
+                    assert(canMakeZeroWithStartingValue[aMinusDigitMod] != No);
                     canMakeZeroWithStartingValue[aMinusDigitMod] = Yes;
                 }
                 else
                 {
+                    assert(canMakeZeroWithStartingValue[aMinusDigitMod] != Yes);
                     canMakeZeroWithStartingValue[aMinusDigitMod] = No;
                 }
 
