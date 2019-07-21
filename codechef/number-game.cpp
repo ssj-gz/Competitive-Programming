@@ -122,10 +122,100 @@ int main(int argc, char* argv[])
         vector<Status> canMakeZeroWithStartingValue(modulus, Unknown);
 
         powerOf10 = 1;
+        vector<int> numTimesCanMakeValueByRemoving1Digit(modulus, 0);
         for (int i = A.size() - 1; i >= 0; i--)
         {
 
             const int aMinusDigitMod = (firstDigitsOfAMod[i] * powerOf10 + lastDigitsOfAMod[A.size() - i - 1]) % modulus;
+            //cout << " i: " << i << " aMinusDigitMod: " << aMinusDigitMod << endl;
+            numTimesCanMakeValueByRemoving1Digit[aMinusDigitMod]++;
+#ifndef SUBMISSION
+            {
+                string aMinusDigit = A.substr(0, i) + A.substr(i + 1);
+                cout << "aMinusDigit: " << aMinusDigit << endl;
+                //int powerOf10 = 1;
+                int dbgAMinusDigitMod = 0;
+                for (const auto digit : aMinusDigit)
+                {
+                    dbgAMinusDigitMod = (dbgAMinusDigitMod * 10 + (digit - '0')) % modulus;
+                }
+                cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
+                assert(aMinusDigitMod == dbgAMinusDigitMod);
+            }
+#endif
+            powerOf10 = (powerOf10 * 10) % modulus;
+        }
+        vector<int> valuesFromRemoving1Digit;
+        for (int i = 0; i < modulus; i++)
+        {
+            if (numTimesCanMakeValueByRemoving1Digit[i] > 0)
+            {
+                //cout << "Blee; " << i << endl;
+                valuesFromRemoving1Digit.push_back(i);
+            }
+        }
+
+        vector<Status> canAppendAndMake0StartingWith(modulus, Unknown);
+        canAppendAndMake0StartingWith[0] = Yes;
+
+        for (const auto startValue : valuesFromRemoving1Digit)
+        {
+            //cout << " startValue: " << startValue << endl;
+            vector<bool> processed(modulus, false);
+            vector<bool> visited(modulus, false);
+            vector<int> toProcess = { startValue };
+
+            int iterationNum = 0;
+            bool found = false;
+            while (!toProcess.empty() && !found)
+            {
+                //cout << " # toProcess: " << toProcess.size() << endl;
+                vector<int> nextToProcess;
+                for (const auto p : toProcess)
+                {
+                    if (canAppendAndMake0StartingWith[p] == Yes)
+                    {
+                        found = true;
+                        break;
+
+                    }
+                    if (canAppendAndMake0StartingWith[p] == Unknown)
+                    {
+                        const int pTimes10 = (p * 10) % modulus;
+                        processed[p] = true;
+
+                        for (const auto other : valuesFromRemoving1Digit)
+                        {
+                            const int newValue = (pTimes10 + other) % modulus;
+                            if (!visited[newValue])
+                            {
+                                nextToProcess.push_back(newValue);
+                                visited[newValue] = true;
+                            }
+                        }
+                    }
+                }
+                toProcess = nextToProcess;
+                iterationNum++;
+            }
+
+            if (found)
+            {
+                //canAppendAndMake0StartingWith[startValue] = Yes;
+                //cout << " found; adding: " << numTimesCanMakeValueByRemoving1Digit[startValue] << endl;
+                numStartingMoves += numTimesCanMakeValueByRemoving1Digit[startValue];
+            }
+
+        }
+        cout << numStartingMoves << endl;
+    }
+
+
+
+
+#if 0
+        if (false)
+        {
             //cout << "Blee: " << (firstDigitsOfAMod[i] * powerOf10) << " blah: " << firstDigitsOfAMod[i] << endl;
             const int removedDigitValue = (A[i] - '0');
 
@@ -143,6 +233,8 @@ int main(int argc, char* argv[])
                 }
                 //cout << "i: " << i << " aMinusDigitMod: " << aMinusDigitMod << " dbgAMinusDigitMod: " << dbgAMinusDigitMod << endl;
                 assert(aMinusDigitMod == dbgAMinusDigitMod);
+            }
+#endif
 #if 0
                 vector<int> dbgDigitsInAMinusDigit;
 
@@ -170,7 +262,6 @@ int main(int argc, char* argv[])
 #endif
                 //assert(dbgDigitsInAMinusDigit == digitsInA);
             }
-#endif
             if (canMakeZeroWithStartingValue[aMinusDigitMod] == Unknown)
             {
 
@@ -225,4 +316,5 @@ int main(int argc, char* argv[])
 
 
     }
+#endif
 }
