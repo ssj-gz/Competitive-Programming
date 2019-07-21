@@ -207,6 +207,7 @@ int main(int argc, char* argv[])
         vector<Status> canAppendAndMake0StartingWith(modulus, Unknown);
         canAppendAndMake0StartingWith[0] = Yes;
 
+#if 0
         vector<bool> visited(modulus, false);
         for (const auto startValue : valuesFromRemoving1Digit)
         {
@@ -221,7 +222,51 @@ int main(int argc, char* argv[])
                 cout << " no" << endl;
             }
         }
-        cout << numStartingMoves << endl;
+#endif
+
+        vector<vector<int>> blah(modulus);
+        for (int startValue = 0; startValue < modulus; startValue++)
+        {
+            for (const auto otherValue : valuesFromRemoving1Digit)
+            {
+                const int newValue = (startValue * powerOf10 + otherValue) % modulus;
+                blah[newValue].push_back(startValue);
+            }
+        }
+
+        vector<int> toProcess = { 0 };
+        while (!toProcess.empty())
+        {
+            vector<int> nextToProcess;
+            for (const auto p : toProcess)
+            {
+                canAppendAndMake0StartingWith[p] = Yes;
+
+                for (const auto reachedFrom : blah[p])
+                {
+                    if (canAppendAndMake0StartingWith[reachedFrom] == Unknown)
+                    {
+                        canAppendAndMake0StartingWith[reachedFrom] = Yes;
+                        nextToProcess.push_back(reachedFrom);
+                    }
+                }
+            }
+            toProcess = nextToProcess;
+        }
+        for (const auto startValue : valuesFromRemoving1Digit)
+        {
+            //cout << " startValue: " << startValue << endl;
+            if (canAppendAndMake0StartingWith[startValue] == Yes)
+            {
+                //cout << " yes" << endl;
+                numStartingMoves += numTimesCanMakeValueByRemoving1Digit[startValue];
+            }
+            else
+            {
+                //cout << " no" << endl;
+            }
+        }
+        cout << numStartingMoves << endl; 
     }
 
 
