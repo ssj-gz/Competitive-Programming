@@ -250,7 +250,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
             // is executed O(n log2 n) times over the whole run.
             // It is guaranteed to be executed with descendantHeight if the current
             // child has a descendant of descendantHeight that hasPerson and a previous child of this
-            // node also has a descendant of descendantHeight and hasPerson, but may also
+            // node also has a descendant of descendantHeight that hasPerson, but may also
             // be executed under different circumstances.
             const auto descendantHeight = descendantHeightPair.first;
 
@@ -323,7 +323,7 @@ int64_t findNumTriplets(vector<Node>& nodes)
     buildDescendantHeightInfo(rootNode, result);
 
     // Finishes off the computation of the number of "Type A" triangles
-    // that we begun in buildDescendantHeightInfo.
+    // that we began in buildDescendantHeightInfo.
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
     return result;
