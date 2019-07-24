@@ -71,7 +71,44 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+
+        const int numRanges = rand() % 100 + 1;
+        const int maxTime = rand() % 1000 + 2;
+        const int numQueries = rand() % 100 + 1;
+        const int maxInGroup = rand() % 20 + 1;
+
+        cout << numRanges << endl;
+        for (int i = 0; i < numRanges; i++)
+        {
+            int rangeStart = -1;
+            int rangeEnd = -1;
+            while (true)
+            {
+                rangeStart = (rand() % maxTime) + 1;
+                rangeEnd = (rand() % maxTime) + 1;
+                if (rangeStart != rangeEnd)
+                {
+                    if (rangeEnd < rangeStart)
+                        swap(rangeStart, rangeEnd);
+                    break;
+                }
+            }
+            cout << rangeStart << " " << rangeEnd << endl;
+        }
+        
+        cout << numQueries << endl;
+        for (int i = 0; i < numQueries; i++)
+        {
+            const int numInGroup = (rand() & maxInGroup) + 1;
+            cout << numInGroup << " ";
+            for (int j = 0; j < numInGroup; j++)
+            {
+                cout << ((rand() % maxTime) + 1) << " ";
+            }
+            cout << endl;
+        }
+
+
         return 0;
     }
 
@@ -82,6 +119,7 @@ int main(int argc, char* argv[])
     {
         ranges[i].start = read<int>();
         ranges[i].end = read<int>();
+        assert(ranges[i].start < ranges[i].end);
         ranges[i].rangeId = i;
     }
 
