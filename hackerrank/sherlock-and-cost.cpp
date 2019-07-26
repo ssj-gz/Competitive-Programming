@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     // Easy one if you trust intuition; a bit trickier if you want a more formal analysis :)
-    // So, intuitive part: it seems that the maximum would be obtained if each choice of a[i]
+    // So, intuitive part: it seems that the maximum would be obtained if each choice of A[i]
     // differed from the previous as much as possible: that is, where each A[i] is either
     // B[i] or 1, the two possible extremes for A[i].
     // 
