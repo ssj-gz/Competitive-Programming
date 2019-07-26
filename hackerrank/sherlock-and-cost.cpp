@@ -2,21 +2,37 @@
 #include <iostream>
 #include <vector>
 
+#include <sys/time.h>
+#include <cassert>
+
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int n = rand() % 5 + 1;
+        const int maxB = rand() % 10 + 1;
+
+        cout << 1 << endl;
+        cout << n << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout << ((rand() % maxB) + 2) << " ";
+        }
+        cout << endl;
+
+        return 0;
+
+    }
     // Easy one if you trust intuition; a bit trickier if you want a more formal analysis :)
     // So, intuitive part: it seems that the maximum would be obtained if each choice of a[i]
-    // differed from the previous as much as possible: that is, either:
-    // 
-    //   1 B[1] 1 B[3] 1 ... etc
-    //
-    // or 
-    //
-    //   B[0] 1 B[2] 1 B[4] etc
-    //
-    // whichever ends up the largest!
+    // differed from the previous as much as possible: that is, where each A[i] is either
+    // B[i] or 1, the two possible extremes for A[i].
     // 
     // Let's see if we can come up with some kind of argument for this.   Firstly, let's 
     // get some kind of recurrence relation going.
@@ -67,7 +83,18 @@ int main()
     // x can be assumed to be either 1 or B[m - 2].  Thus, we only need to maintain two values: the current best choice using
     // the first m where the last choice is 1, and the current best choice using the first me where the last choice is B[m - 1].
     // The final, simple recurrence relation is shown in the code below.
-
+    //
+    // As a sidenote, you might think that letting A[i] "alternate" between two extremes would maximise the cost e.g. that
+    // the optimal A would be of the form:
+    // 
+    //   1 B[1] 1 B[3] 1 ... etc
+    //
+    // or 
+    //
+    //   B[0] 1 B[2] 1 B[4] etc
+    //
+    //
+    // But the case where B = [5 2 2 5 2] is a counter-example to this.
     int T;
     cin >> T;
     for (int t = 0; t < T; t++)
@@ -93,7 +120,30 @@ int main()
             maxValueEndingAtBottom = newMaxValueEndingAtBottom;
         }
 
-        cout << max(maxValueEndingAtTop, maxValueEndingAtBottom) << endl;
+        const auto solution = max(maxValueEndingAtTop, maxValueEndingAtBottom);
+        auto computeCost = [](const vector<int>& a)
+        {
+            int cost = 0;
+            for (int i = 1; i < a.size(); i++)
+            {
+                cost += abs(a[i] - a[i - 1]);
+            }
+            return cost;
+        };
+
+        vector<int> sol1(N, 1);
+        for (int i = 0; i < N; i += 2)
+        {
+            sol1[i] = B[i];
+        }
+        vector<int> sol2(N, 1);
+        for (int i = 1; i < N; i += 2)
+        {
+            sol2[i] = B[i];
+        }
+        const auto solutionNaive = max(computeCost(sol1), computeCost(sol2));
+        cout << "solution: " << solution << " solutionNaive: " << solutionNaive << endl;
+        assert(solution == solutionNaive);
     }
 }
 
