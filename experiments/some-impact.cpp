@@ -76,25 +76,18 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
     if (K == 1)
         return M == N;
 
-    int64_t powerOfK = 1;
-    while (numeric_limits<int64_t>::max() / powerOfK >= K && M >= powerOfK)
-    {
-        powerOfK *= K;
-        //cout << "powerOfK: " << powerOfK << endl;
-    }
-    assert(powerOfK >= 0);
-
     int num1DigitsInBaseK = 0;
-    while (powerOfK >= 1)
+    while (M > 0)
     {
-        const int digit = M / powerOfK;
+        const int digit = M % K;
+        //cout << " digit: " << digit << endl;
         if (digit != 0 && digit != 1)
             return false;
         if (digit == 1)
             num1DigitsInBaseK++;
 
-        M -= digit * powerOfK;
-        powerOfK /= K;
+        M -= digit;
+        M /= K;
     }
 
     return (num1DigitsInBaseK == N);
