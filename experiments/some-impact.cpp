@@ -86,6 +86,50 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
     if (K == 1)
         return M == N;
 
+    if (K == 2)
+    {
+        string impactSites;
+        while (M > 0)
+        {
+            if ((M % 2) == 0)
+            {
+                impactSites.push_back('0');
+            }
+            else
+            {
+                impactSites.push_back('1');
+                N--;
+            }
+            M >>= 1;
+        }
+        //cout << impactSites << endl;
+        if (N == 0)
+            return true;
+        if (N < 0)
+            return false;
+        while (true)
+        {
+            bool rejiggered = false;
+            for (int i = 1; i < impactSites.size() - 1 && N > 0; i++)
+            {
+                //cout << " i: " << i << " N: " << N << " impactSites: " << impactSites << endl;
+                if (impactSites[i] <= '0' && impactSites[i + 1] > impactSites[i])
+                {
+                    impactSites[i] = '2';
+                    impactSites[i + 1]--;
+                    N--;
+                    //cout << "  rejiggered impactSites to: " << impactSites << endl;
+                    rejiggered = true;
+                }
+
+            }
+            if (N  == 0 || !rejiggered)
+                break;
+        }
+        return (N == 0);
+    }
+   
+
     int distFromX0 = 0;
     while (M > 0)
     {
@@ -133,8 +177,9 @@ int main(int argc, char* argv[])
         while (true)
         {
             const int N = rand() % 10 + 1;
-            const int K = rand() % 20 + 3;
-            const int64_t maxM = rand() % 1'000'000'000 + 1;
+            //const int K = rand() % 20 + 2;
+            const int K = 2;
+            const int64_t maxM = rand() % 1'000'000 + 1;
             const int X0 = rand() % 200 - 100;
 
             if (rand() % 4 == 0)
