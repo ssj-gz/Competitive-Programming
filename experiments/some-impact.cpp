@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-XX-XX
+// Simon St James (ssjgz) - 2019-08-02
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -37,7 +37,7 @@ void solveBruteForce(int N, const int K, int64_t M, int distFromX0, vector<int>&
         cout << endl;
         return;
     }
-    if (N == 0)
+    if (N <= 0)
         return;
 
     if (M < 0)
@@ -55,6 +55,16 @@ void solveBruteForce(int N, const int K, int64_t M, int distFromX0, vector<int>&
     distsOfImpactFromX0SoFar.push_back(distFromX0);
     solveBruteForce(N - 1, K, M - powerOfK, distFromX0 + 1, distsOfImpactFromX0SoFar, hasSolution);
     distsOfImpactFromX0SoFar.pop_back();
+
+    if (distFromX0 > 0)
+    {
+        // Use this dist, and -dist.
+        distsOfImpactFromX0SoFar.push_back(distFromX0);
+        distsOfImpactFromX0SoFar.push_back(-distFromX0);
+        solveBruteForce(N - 2, K, M - 2 * powerOfK, distFromX0 + 1, distsOfImpactFromX0SoFar, hasSolution);
+        distsOfImpactFromX0SoFar.pop_back();
+        distsOfImpactFromX0SoFar.pop_back();
+    }
 
     // Don't use this dist.
     solveBruteForce(N, K, M, distFromX0 + 1, distsOfImpactFromX0SoFar, hasSolution);
@@ -76,21 +86,41 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
     if (K == 1)
         return M == N;
 
-    int num1DigitsInBaseK = 0;
+    int distFromX0 = 0;
     while (M > 0)
     {
         const int digit = M % K;
-        //cout << " digit: " << digit << endl;
-        if (digit != 0 && digit != 1)
+        //cout << " M: " << M << " K: " << K << " digit: " << digit << " N: " << N << endl;
+        if (digit == 0)
+        {
+            // Do nothing.
+        }
+        else if (digit == 1)
+        {
+            N--;
+        }
+        else if (digit == 2)
+        {
+            // Impacts can occur to the left or the right
+            // of X0, so we can have up to *two* with the 
+            // same contribution, as long as distFromX0 > 0.
+            if (distFromX0 == 0)
+                return false;
+            N -= 2;
+        }
+        else
+        {
+            //cout << " returning false" << endl;
             return false;
-        if (digit == 1)
-            num1DigitsInBaseK++;
+        }
+
 
         M -= digit;
         M /= K;
+        distFromX0++;
     }
 
-    return (num1DigitsInBaseK == N);
+    return (N == 0);
 }
 int main(int argc, char* argv[])
 {
@@ -117,6 +147,8 @@ int main(int argc, char* argv[])
                 {
                     powersOfK.push_back(powerOfK);
                     possibleImpactSites.push_back(impactSite);
+                    if (impactSite > 0)
+                        possibleImpactSites.push_back(-impactSite);
 
                     powerOfK = powerOfK * K;
                     impactSite++;
@@ -129,7 +161,7 @@ int main(int argc, char* argv[])
                 int64_t M = 0;
                 for (int i = 0; i < N; i++)
                 {
-                    M += powersOfK[possibleImpactSites[i]];
+                    M += powersOfK[abs(possibleImpactSites[i])];
                 }
 
                 cout << 1 << endl;
@@ -141,6 +173,7 @@ int main(int argc, char* argv[])
                 const auto M = maxM;
                 cout << 1 << endl;
                 cout << N << " " << K << " " << M << " " << X0 << endl;
+                break;
             }
         }
 
