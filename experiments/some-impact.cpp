@@ -7,11 +7,8 @@
 #endif
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -23,71 +20,18 @@ T read()
     assert(cin);
     return toRead;
 }
-void solveBruteForce(int N, const int K, int64_t M, int distFromX0, vector<int>& distsOfImpactFromX0SoFar, bool& hasSolution)
-{
-    //cout << "solveBruteForce: N: " << N << " K: " << K << " M: " << M << " distFromX0: " << distFromX0 <<endl;
-    if (N == 0 && M == 0)
-    {
-        hasSolution = true;
-        cout << "Found solution: " << endl;
-        for (const auto x : distsOfImpactFromX0SoFar)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-        return;
-    }
-    if (N <= 0)
-        return;
-
-    if (M < 0)
-        return;
-
-    int64_t powerOfK = 1;
-    for (int i = 0; i < distFromX0; i++)
-    {
-        powerOfK *= K;
-        if (powerOfK > M)
-            return;
-    }
-
-    // Use this dist.
-    distsOfImpactFromX0SoFar.push_back(distFromX0);
-    solveBruteForce(N - 1, K, M - powerOfK, distFromX0 + 1, distsOfImpactFromX0SoFar, hasSolution);
-    distsOfImpactFromX0SoFar.pop_back();
-
-    if (distFromX0 > 0)
-    {
-        // Use this dist, and -dist.
-        distsOfImpactFromX0SoFar.push_back(distFromX0);
-        distsOfImpactFromX0SoFar.push_back(-distFromX0);
-        solveBruteForce(N - 2, K, M - 2 * powerOfK, distFromX0 + 1, distsOfImpactFromX0SoFar, hasSolution);
-        distsOfImpactFromX0SoFar.pop_back();
-        distsOfImpactFromX0SoFar.pop_back();
-    }
-
-    // Don't use this dist.
-    solveBruteForce(N, K, M, distFromX0 + 1, distsOfImpactFromX0SoFar, hasSolution);
-}
-
-bool solveBruteForce(int N, int K, int64_t M, int64_t X0)
-{
-    bool hasSolution = false;
-    vector<int> distsOfImpactFromX0SoFar;
-
-    solveBruteForce(N, K, M, 0, distsOfImpactFromX0SoFar, hasSolution);
-
-    return hasSolution;
-}
 
 
-bool solveOptimised(int N, int K, int64_t M, int64_t X0)
+bool canFindImpactSites(int N, int K, int64_t M, int64_t X0)
 {
     if (K == 1)
         return M == N;
 
     if (K == 2)
     {
+        // Special case for K == 2.
+        // First, obtain the representation of M is a binary string
+        // (LSB first).
         string impactSites;
         while (M > 0)
         {
@@ -102,39 +46,58 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
             }
             M >>= 1;
         }
-        //cout << impactSites << endl;
         if (N == 0)
             return true;
         if (N < 0)
+        {
+            // We require more impacts that we have.
             return false;
+        }
+        // We have impacts to make up!  Note that 2 ** k == 2 * (2 ** k - 1):
+        // that is, we can, in the "binary" representation of M (which is LSB-first,
+        // remember), replace the substring "01" with "20" or "02" with "10"
+        // and still have the same "value" - it's no longer a *binary* string,
+        // precisely, but imagine that the value of the string is still
+        //
+        //   d0 * (2 ** 0) + d1 * (2 ** 1) + ... + dl * (2 ** l)
+        //
+        // where now di can be 0, 1 or 2.  NOTE: these replacements must not make the
+        // leftmost digit, which represents the number of impacts at X0, equal to 2.
+        //
+        // Note that either of the two replacements described above increases the
+        // number of impacts by 1.  Keep making this replacement until either
+        // we cannot do so any more, or we have made up the remaining impacts.
         while (true)
         {
-            bool rejiggered = false;
+            bool increasedNumImpacts = false;
             for (int i = 1; i < impactSites.size() - 1 && N > 0; i++)
             {
-                //cout << " i: " << i << " N: " << N << " impactSites: " << impactSites << endl;
-                if (impactSites[i] <= '0' && impactSites[i + 1] > impactSites[i])
+                if (impactSites[i] == '0' && impactSites[i + 1] > impactSites[i])
                 {
                     impactSites[i] = '2';
                     impactSites[i + 1]--;
                     N--;
-                    //cout << "  rejiggered impactSites to: " << impactSites << endl;
-                    rejiggered = true;
+                    increasedNumImpacts = true;
                 }
-
             }
-            if (N  == 0 || !rejiggered)
+            if (N  == 0 || !increasedNumImpacts)
                 break;
         }
         return (N == 0);
     }
    
 
+    // General K > 3 case.  Break M into (unique) representation
+    //
+    //   dl * (K ** l) + d_l-1 * (K ** (l - 1)) + ... + d0 * (K ** 0)
+    //
+    // No digit is allowed to be greater than 2.  A digit other than
+    // A0 is allowed to be 2.  A0, representing the number of impacts
+    // at X0, can only be 0 or 1.
     int distFromX0 = 0;
     while (M > 0)
     {
         const int digit = M % K;
-        //cout << " M: " << M << " K: " << K << " digit: " << digit << " N: " << N << endl;
         if (digit == 0)
         {
             // Do nothing.
@@ -154,7 +117,6 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
         }
         else
         {
-            //cout << " returning false" << endl;
             return false;
         }
 
@@ -166,65 +128,9 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
 
     return (N == 0);
 }
+
 int main(int argc, char* argv[])
 {
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        while (true)
-        {
-            const int N = rand() % 10 + 1;
-            //const int K = rand() % 20 + 2;
-            const int K = 2;
-            const int64_t maxM = rand() % 1'000'000 + 1;
-            const int X0 = rand() % 200 - 100;
-
-            if (rand() % 4 == 0)
-            {
-                vector<int> possibleImpactSites;
-                int impactSite = 0;
-                int64_t powerOfK = 1;
-                vector<int> powersOfK;
-                while( powerOfK <= maxM)
-                {
-                    powersOfK.push_back(powerOfK);
-                    possibleImpactSites.push_back(impactSite);
-                    if (impactSite > 0)
-                        possibleImpactSites.push_back(-impactSite);
-
-                    powerOfK = powerOfK * K;
-                    impactSite++;
-                }
-                if (possibleImpactSites.size() < N)
-                    continue;
-
-                random_shuffle(possibleImpactSites.begin(), possibleImpactSites.end());
-
-                int64_t M = 0;
-                for (int i = 0; i < N; i++)
-                {
-                    M += powersOfK[abs(possibleImpactSites[i])];
-                }
-
-                cout << 1 << endl;
-                cout << N << " " << K << " " << M << " " << X0 << endl;
-                break;
-            }
-            else
-            {
-                const auto M = maxM;
-                cout << 1 << endl;
-                cout << N << " " << K << " " << M << " " << X0 << endl;
-                break;
-            }
-        }
-
-        return 0;
-    }
-
     const int T = read<int>();
     for (int t = 0; t < T; t++)
     {
@@ -233,17 +139,8 @@ int main(int argc, char* argv[])
         const int64_t M = read<int64_t>();
         const int64_t X0 = read<int64_t>();
 
-#ifdef BRUTE_FORCE
-        const auto hasSolutionBruteForce = solveBruteForce(N, K, M, X0);
-        cout << "solution brute force: " << (hasSolutionBruteForce ? "yes" : "no") << endl;
-        const auto hasSolutionOptimised = solveOptimised(N, K, M, X0);
-        cout << "solution Optimised: " << (hasSolutionOptimised ? "yes" : "no") << endl;
-
-        assert(hasSolutionBruteForce == hasSolutionOptimised);
-#else
-        const auto hasSolutionOptimised = solveOptimised(N, K, M, X0);
-        cout << (hasSolutionOptimised ? "yes" : "no") << endl;
-#endif
+        const auto hasImpactSites = canFindImpactSites(N, K, M, X0);
+        cout << (hasImpactSites ? "yes" : "no") << endl;
     }
 }
 
