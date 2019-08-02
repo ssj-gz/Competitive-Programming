@@ -47,9 +47,9 @@ void solveBruteForce(int N, const int K, int64_t M, int distFromX0, vector<int>&
     for (int i = 0; i < distFromX0; i++)
     {
         powerOfK *= K;
+        if (powerOfK > M)
+            return;
     }
-    if (powerOfK > M)
-        return;
 
     // Use this dist.
     distsOfImpactFromX0SoFar.push_back(distFromX0);
@@ -77,10 +77,12 @@ bool solveOptimised(int N, int K, int64_t M, int64_t X0)
         return M == N;
 
     int64_t powerOfK = 1;
-    while (powerOfK * K <= M)
+    while (numeric_limits<int64_t>::max() / powerOfK >= K && M >= powerOfK)
     {
         powerOfK *= K;
+        //cout << "powerOfK: " << powerOfK << endl;
     }
+    assert(powerOfK >= 0);
 
     int num1DigitsInBaseK = 0;
     while (powerOfK >= 1)
@@ -160,12 +162,17 @@ int main(int argc, char* argv[])
         const int64_t M = read<int64_t>();
         const int64_t X0 = read<int64_t>();
 
+#ifdef BRUTE_FORCE
         const auto hasSolutionBruteForce = solveBruteForce(N, K, M, X0);
         cout << "solution brute force: " << (hasSolutionBruteForce ? "yes" : "no") << endl;
         const auto hasSolutionOptimised = solveOptimised(N, K, M, X0);
         cout << "solution Optimised: " << (hasSolutionOptimised ? "yes" : "no") << endl;
 
         assert(hasSolutionBruteForce == hasSolutionOptimised);
+#else
+        const auto hasSolutionOptimised = solveOptimised(N, K, M, X0);
+        cout << (hasSolutionOptimised ? "yes" : "no") << endl;
+#endif
     }
 }
 
