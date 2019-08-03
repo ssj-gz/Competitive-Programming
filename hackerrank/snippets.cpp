@@ -874,6 +874,12 @@ clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEB
 
 
 // Simon St James (ssjgz) - 2019-XX-XX
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 
 #include <cassert>
@@ -891,6 +897,25 @@ T read()
     return toRead;
 }
 
+#if 0
+SolutionType solveBruteForce()
+{
+    SolutionType result;
+    
+    return result;
+}
+#endif
+
+#if 0
+SolutionType solveOptimised()
+{
+    SolutionType result;
+    
+    return result;
+}
+#endif
+
+
 int main(int argc, char* argv[])
 {
     if (argc == 2 && string(argv[1]) == "--test")
@@ -901,6 +926,24 @@ int main(int argc, char* argv[])
         // TODO - generate randomised test.
         return 0;
     }
+    
+    // TODO - read in testcase.
+    
+#if BRUTE_FORCE
+#if 0
+    const auto solutionBruteForce = solveBruteForce();
+    cout << "solutionBruteForce: " << solutionBruteForce << endl;
+#endif
+#if 0
+    const auto solutionOptimised = solveOptimised();
+    cout << "solutionOptimised: " << solutionOptimised << endl;
+    
+    assert(solutionOptimised == solutionBruteForce);
+#endif
+#else
+    const auto solutionOptimised = solveOptimised();
+    cout << solutionOptimised << endl;
+#endif
 
 }
 
