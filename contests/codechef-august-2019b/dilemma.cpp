@@ -59,6 +59,11 @@ bool solveBruteForce(const string& cardsState)
     }
     return false;
 }
+bool solveOptimised(const string& cardsState)
+{
+    const int numFaceUp = std::count(cardsState.begin(), cardsState.end(), '1');
+    return ((numFaceUp % 2) == 1);
+}
 
 int main(int argc, char* argv[])
 {
@@ -85,18 +90,10 @@ int main(int argc, char* argv[])
 
         const auto solutionBruteForce = solveBruteForce(cardsState);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "WIN" : "LOSE") << endl;
+        const auto solutionOptimised = solveOptimised(cardsState);
+        cout << "solutionOptimised: " << (solutionOptimised ? "WIN" : "LOSE") << endl;
+        assert(solutionOptimised == solutionBruteForce);
 
-        const int numOn = std::count(cardsState.begin(), cardsState.end(), '1');
-        const int numOff = std::count(cardsState.begin(), cardsState.end(), '0');
-        if (!solutionBruteForce)
-        {
-            cout << "sausage: " << cardsState << " numOn: " << numOn << " numOff: " << numOff << endl;
-            assert(numOn % 2 == 0);
-        }
-        else
-        {
-            assert(numOn % 2 == 1);
-        }
     }
 }
 
