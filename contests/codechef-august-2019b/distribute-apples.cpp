@@ -105,7 +105,10 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        const int64_t K = rand() % 1000;
+        const int64_t N = (rand() % 1000) * K;
+        cout << 1 << endl;
+        cout << N << " " << K << endl;
         return 0;
     }
 
