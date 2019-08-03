@@ -150,6 +150,8 @@ int64_t solveOptimised(const vector<int>& a)
 
 int main(int argc, char* argv[])
 {
+    ios::sync_with_stdio(false);
+
     if (argc == 2 && string(argv[1]) == "--test")
     {
         struct timeval time;
