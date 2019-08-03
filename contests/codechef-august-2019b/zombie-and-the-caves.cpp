@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-08-03
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -235,13 +235,17 @@ int main(int argc, char* argv[])
         {
             health = read<int64_t>();
         }
-
+#ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(radiationPower, zombieHealth);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "YES" : "NO") << endl;
         const auto solutionOptimised = solveOptimised(radiationPower, zombieHealth);
         cout << "solutionOptimised: " << (solutionOptimised ? "YES" : "NO") << endl;
 
-        //assert(solutionOptimised == solutionBruteForce);
+        assert(solutionOptimised == solutionBruteForce);
+#else
+        const auto solutionOptimised = solveOptimised(radiationPower, zombieHealth);
+        cout << (solutionOptimised ? "YES" : "NO") << endl;
+#endif
     }
 }
 
