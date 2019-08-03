@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-XX-XX
+// Simon St James (ssjgz) - 2019-08-03
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -109,7 +109,9 @@ int64_t solveOptimised(const vector<int>& a)
         int64_t amountToAdd = 0;
         if (currentXorSumInfo.lastOccurrence != -1)
         {
+            // Add amount from previous occurrence.
             amountToAdd += (k - currentXorSumInfo.lastOccurrence - 1);
+            // Add amounts from all occurrences before the previous occurence (all numOccurrences - 1 of them!).
             amountToAdd += currentXorSumInfo.cumulativeSumAtLastOccurrence + (k - currentXorSumInfo.lastOccurrence) * (currentXorSumInfo.numOccurrences - 1);
         }
         // Update currentXorSumInfo.
@@ -162,7 +164,7 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < N; i++)
         {
-            cout << ((rand() % maxA) + 1) << " ";
+            cout << maxA << " ";
         }
 
         return 0;
