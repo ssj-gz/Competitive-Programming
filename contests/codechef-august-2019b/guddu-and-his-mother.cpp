@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-XX-XX
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 
@@ -56,6 +62,40 @@ int64_t solveBruteForce(const vector<int>& a)
     return result;
 }
 
+int64_t solveOptimised(const vector<int>& a)
+{
+    const int n = a.size();
+    int64_t result = 0;
+
+    vector<int> xorSumUpTo;
+    int xorSum = 0;
+    for (const auto& x : a)
+    {
+        xorSum ^= x;
+        xorSumUpTo.push_back(xorSum);
+    }
+
+    for (int k = 0; k < n; k++)
+    {
+        //cout << "k: " << k << " xorSumUpTo: " << xorSumUpTo[k] << endl;
+        int64_t dbgAmountToAdd = 0;
+        for (int i = 0; i < k; i++)
+        {
+            if (xorSumUpTo[i] == xorSumUpTo[k])
+            {
+                dbgAmountToAdd += (k - i - 1);
+            }
+        }
+        if (xorSumUpTo[k] == 0)
+            dbgAmountToAdd += k;
+
+        result += dbgAmountToAdd;
+    }
+
+
+    return result;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2 && string(argv[1]) == "--test")
@@ -88,24 +128,16 @@ int main(int argc, char* argv[])
         {
             x = read<int>();
         }
-#if 0
-        for (int j = 0; j < N; j++)
-        {
-            int leftXor = 0;
-            for (int i = 0; i < j; i++)
-            {
-                leftXor = leftXor ^ a[i];
-            }
-            int rightXor = 0;
-            for (int i = j; i < N; i++)
-            {
-                rightXor = rightXor ^ a[i];
-            }
-            cout << "j: " << j << " leftXor: " << leftXor << " rightXor: " << rightXor << endl;
-        }
-#endif
+#ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(a);
         cout << " solutionBruteForce: " << solutionBruteForce << endl;
+        const auto solutionOptimised = solveOptimised(a);
+        cout << " solutionOptimised: " << solutionOptimised << endl;
+        assert(solutionOptimised == solutionBruteForce);
+#else
+        const auto solutionOptimised = solveOptimised(a);
+        cout << solutionOptimised << endl;
+#endif
     }
 }
 
