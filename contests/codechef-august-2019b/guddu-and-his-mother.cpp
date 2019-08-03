@@ -171,10 +171,10 @@ int main(int argc, char* argv[])
     }
 
     const int T = read<int>();
-    const int N = read<int>();
 
     for (int t = 0; t < T; t++)
     {
+        const int N = read<int>();
         vector<int> a(N);
         for (auto& x : a)
         {
