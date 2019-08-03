@@ -100,18 +100,33 @@ int64_t solveOptimised(const vector<int>& a)
     for (int k = 0; k < n; k++)
     {
         xorSum ^= a[k];
+
+        auto& currentXorSumInfo = infoForXorSum[xorSum];
+
         assert(xorSum <= maxXorSum);
         int64_t amountToAdd = 0;
-        if (infoForXorSum[xorSum].lastOccurrence != -1)
+        if (currentXorSumInfo.lastOccurrence != -1)
         {
-            amountToAdd += k - infoForXorSum[xorSum].lastOccurrence - 1;
+            amountToAdd += (k - currentXorSumInfo.lastOccurrence - 1);
+            amountToAdd += currentXorSumInfo.cumulativeSumAtLastOccurrence + (k - currentXorSumInfo.lastOccurrence) * (currentXorSumInfo.numOccurrences - 1);
         }
         if (xorSum == 0)
         {
             amountToAdd += k;
         }
-        infoForXorSum[xorSum].lastOccurrence = k;
-        infoForXorSum[xorSum].numOccurrences++;
+        if (currentXorSumInfo.lastOccurrence == -1)
+        {
+            currentXorSumInfo.cumulativeSumAtLastOccurrence = 0;
+        }
+        else
+        {
+            //currentXorSumInfo.cumulativeSumAtLastOccurrence = currentXorSumInfo.cumulativeSumAtLastOccurrence + (k - currentXorSumInfo.lastOccurrence) * (currentXorSumInfo.numOccurrences - 1);
+            currentXorSumInfo.cumulativeSumAtLastOccurrence = amountToAdd;
+            if (xorSum == 0)
+                currentXorSumInfo.cumulativeSumAtLastOccurrence -= k;
+        }
+        currentXorSumInfo.lastOccurrence = k;
+        currentXorSumInfo.numOccurrences++;
 
         //cout << "k: " << k << " dbgXorSumUpTo: " << dbgXorSumUpTo[k] << endl;
         int64_t dbgAmountToAdd = 0;
@@ -126,6 +141,7 @@ int64_t solveOptimised(const vector<int>& a)
             dbgAmountToAdd += k;
 
         cout << "xorSum: " << xorSum << " amountToAdd: " << amountToAdd << " dbgAmountToAdd: " << dbgAmountToAdd << endl;
+        assert(dbgAmountToAdd == amountToAdd);
         result += dbgAmountToAdd;
     }
 
