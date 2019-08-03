@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <algorithm>
 
 #include <cassert>
 
@@ -66,6 +67,14 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+        const int numCards = rand() % 13 + 1;
+        string cardsState;
+        for (int i = 0; i < numCards; i++)
+        {
+            cardsState.push_back('0' + rand() % 2);
+        }
+        cout << 1 << endl;
+        cout << cardsState << endl;
         return 0;
     }
 
@@ -76,6 +85,18 @@ int main(int argc, char* argv[])
 
         const auto solutionBruteForce = solveBruteForce(cardsState);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "WIN" : "LOSE") << endl;
+
+        const int numOn = std::count(cardsState.begin(), cardsState.end(), '1');
+        const int numOff = std::count(cardsState.begin(), cardsState.end(), '0');
+        if (!solutionBruteForce)
+        {
+            cout << "sausage: " << cardsState << " numOn: " << numOn << " numOff: " << numOff << endl;
+            assert(numOn % 2 == 0);
+        }
+        else
+        {
+            assert(numOn % 2 == 1);
+        }
     }
 }
 
