@@ -86,16 +86,33 @@ int64_t solveOptimised(const vector<int>& a)
     vector<XorSumInfo> infoForXorSum(maxXorSum + 1);
 
     vector<int> dbgXorSumUpTo;
-    int xorSum = 0;
-    for (int i = 0; i < n; i++)
     {
-        xorSum ^= a[i];
-        assert(xorSum <= maxXorSum);
-        dbgXorSumUpTo.push_back(xorSum);
+        int xorSum = 0;
+        for (int i = 0; i < n; i++)
+        {
+            xorSum ^= a[i];
+            assert(xorSum <= maxXorSum);
+            dbgXorSumUpTo.push_back(xorSum);
+        }
     }
 
+    int xorSum = 0;
     for (int k = 0; k < n; k++)
     {
+        xorSum ^= a[k];
+        assert(xorSum <= maxXorSum);
+        int64_t amountToAdd = 0;
+        if (infoForXorSum[xorSum].lastOccurrence != -1)
+        {
+            amountToAdd += k - infoForXorSum[xorSum].lastOccurrence - 1;
+        }
+        if (xorSum == 0)
+        {
+            amountToAdd += k;
+        }
+        infoForXorSum[xorSum].lastOccurrence = k;
+        infoForXorSum[xorSum].numOccurrences++;
+
         //cout << "k: " << k << " dbgXorSumUpTo: " << dbgXorSumUpTo[k] << endl;
         int64_t dbgAmountToAdd = 0;
         for (int i = 0; i < k; i++)
@@ -108,6 +125,7 @@ int64_t solveOptimised(const vector<int>& a)
         if (dbgXorSumUpTo[k] == 0)
             dbgAmountToAdd += k;
 
+        cout << "xorSum: " << xorSum << " amountToAdd: " << amountToAdd << " dbgAmountToAdd: " << dbgAmountToAdd << endl;
         result += dbgAmountToAdd;
     }
 
