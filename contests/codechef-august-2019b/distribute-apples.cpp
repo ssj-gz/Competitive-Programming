@@ -77,6 +77,7 @@ bool solveBruteForce(int64_t N, int64_t K)
 bool solveOptimised(int64_t numApples, int64_t numBoxes)
 {
     assert((numApples % numBoxes) == 0);
+    assert(numApples >= numBoxes);
     // After all apples are packed by Candidate1, each box
     // will have the same number (numApples / numBoxes) of
     // apples in it.
@@ -105,8 +106,8 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int64_t K = rand() % 1000;
-        const int64_t N = (rand() % 1000) * K;
+        const int64_t K = rand() % 1000 + 1;
+        const int64_t N = ((rand() % 1000) + 1) * K;
         cout << 1 << endl;
         cout << N << " " << K << endl;
         return 0;
