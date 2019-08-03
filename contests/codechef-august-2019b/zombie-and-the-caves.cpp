@@ -166,7 +166,23 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        const int numCaves = rand() % 10 + 1;
+        const int maxHealth = rand() % 100 + 1;
+        const int maxRadiationPower = rand() % 100 + 1;
+
+        cout << 1 << endl;
+        cout << numCaves << endl;
+
+        for (int i = 0; i < numCaves; i++)
+        {
+            cout << ((rand() % maxRadiationPower) + 1) << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < numCaves; i++)
+        {
+            cout << ((rand() % maxHealth) + 1) << " ";
+        }
+        cout << endl;
         return 0;
     }
 
