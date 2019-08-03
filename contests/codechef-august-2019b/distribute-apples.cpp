@@ -74,6 +74,30 @@ bool solveBruteForce(int64_t N, int64_t K)
     return boxesEqual;
 }
 
+bool solveOptimised(int64_t numApples, int64_t numBoxes)
+{
+    assert((numApples % numBoxes) == 0);
+    // After all apples are packed by Candidate1, each box
+    // will have the same number (numApples / numBoxes) of
+    // apples in it.
+    //
+    // For candidate 2, things are a little trickier.
+    //
+    if ((numApples / numBoxes) % numBoxes == 0)
+    {
+        // Have an equal number of apples in each box - in fact,
+        // numApples / numBoxes of them, just like Candidate1!
+        return true;
+    }
+    else
+    {
+        // Have an unequal number of apples in each box - must
+        // differ from Candidate1, all of whose boxes contain
+        // the same number of apples.
+        return false;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 2 && string(argv[1]) == "--test")
@@ -93,6 +117,10 @@ int main(int argc, char* argv[])
 
         const auto solutionBruteForce = solveBruteForce(N, K);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "NO" : "YES") << endl;
+        const auto solutionOptimised = solveOptimised(N, K);
+        cout << "solutionOptimised: " << (solutionOptimised ? "NO" : "YES") << endl;
+
+        assert(solutionOptimised == solutionBruteForce);
     }
 }
 
