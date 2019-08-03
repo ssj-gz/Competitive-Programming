@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-08-03
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <set>
@@ -88,11 +94,16 @@ int main(int argc, char* argv[])
     {
         const string cardsState = read<string>();
 
+#ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(cardsState);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "WIN" : "LOSE") << endl;
         const auto solutionOptimised = solveOptimised(cardsState);
         cout << "solutionOptimised: " << (solutionOptimised ? "WIN" : "LOSE") << endl;
         assert(solutionOptimised == solutionBruteForce);
+#else
+        const auto solutionOptimised = solveOptimised(cardsState);
+        cout << (solutionOptimised ? "WIN" : "LOSE") << endl;
+#endif
 
     }
 }
