@@ -50,8 +50,19 @@ bool solveBruteForce(int64_t N, int64_t K)
         numApplesRemaining -= K;
     }
 
+    cout << "N: " << N << " K: " << K << endl;
+    cout << "numInBoxEmployee1: " << endl;
+    for (const auto x : numInBoxEmployee1)
+    {
+        cout << x << " ";
+    }
+    cout << endl << "numInBoxEmployee2: " << endl;
+    for (const auto x : numInBoxEmployee2)
+    {
+        cout << x << " ";
+    }
     bool boxesEqual = true;
-    for (int64_t i = 0; i < N; i++)
+    for (int64_t i = 0; i < K; i++)
     {
         if (numInBoxEmployee1[i] != numInBoxEmployee2[i])
         {
