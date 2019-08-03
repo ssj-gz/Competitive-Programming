@@ -33,13 +33,26 @@ bool solveBruteForce(const vector<int64_t>& radiationPower, const vector<int64_t
             radiationLevel[j]++;
         }
     }
+    cout << "radiationLevel: " << endl;
+    for (auto x : radiationLevel)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+
     vector<int64_t> zombieHealthPermutation = zombieHealth;
     do
     {
+        cout << "zombieHealthPermutation: " << endl;
+        for (auto x : zombieHealthPermutation)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
         int numZombiesKilled = 0;
         for(int i = 0; i < numCaves; i++)
         {
-            if (radiationLevel[i] == zombieHealth[i])
+            if (radiationLevel[i] == zombieHealthPermutation[i])
             {
                 numZombiesKilled++;
             }
