@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-08-03
+//#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -65,6 +71,93 @@ bool solveBruteForce(const vector<int64_t>& radiationPower, const vector<int64_t
     } while (zombieHealthPermutation != zombieHealth);
     return false;
 }
+bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealth)
+{
+    const int numCaves = radiationPower.size();
+    vector<int64_t> radiationLevel(numCaves, 0);
+    {
+        // Rightwards.
+        vector<int64_t> changeToAmountToAdd(numCaves, 0);
+
+        for (int i = 0; i < numCaves; i++)
+        {
+            assert(radiationPower[i] > 0);
+            changeToAmountToAdd[i]++;
+            const int rangeRightEnd = i + radiationPower[i] + 1;
+            if (rangeRightEnd < numCaves)
+                changeToAmountToAdd[rangeRightEnd]--;
+        }
+
+        int64_t amountToAdd = 0;
+        for (int i = 0; i < numCaves; i++)
+        {
+            amountToAdd += changeToAmountToAdd[i];
+            radiationLevel[i] += amountToAdd;
+        }
+    }
+    {
+        // Leftwards.
+        vector<int64_t> changeToAmountToAdd(numCaves, 0);
+
+        for (int i = 0; i < numCaves; i++)
+        {
+            assert(radiationPower[i] > 0);
+            if (i - 1 >= 0)
+            changeToAmountToAdd[i - 1]++;
+            const int rangeEndLeft = i - radiationPower[i] - 1;
+            if (rangeEndLeft >= 0)
+                changeToAmountToAdd[rangeEndLeft]--;
+        }
+
+        int64_t amountToAdd = 0;
+        for (int i = numCaves - 1; i >= 0; i--)
+        {
+            amountToAdd += changeToAmountToAdd[i];
+            radiationLevel[i] += amountToAdd;
+        }
+    }
+#ifdef BRUTE_FORCE
+    {
+        vector<int64_t> dbgRadiationLevel(numCaves, 0);
+        for (int i = 0; i < numCaves; i++)
+        {
+            const int radiationRange = radiationPower[i];
+            const int radiationRangeLeft = max(0, i - radiationRange);
+            const int radiationRangeRight = min(numCaves - 1, i + radiationRange);
+
+            for (int j = radiationRangeLeft; j <= radiationRangeRight; j++)
+            {
+                dbgRadiationLevel[j]++;
+            }
+        }
+        cout << "radiationLevel: " << endl;
+        for (auto x : radiationLevel)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        cout << "dbgRadiationLevel: " << endl;
+        for (auto x : dbgRadiationLevel)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        assert(dbgRadiationLevel == radiationLevel);
+    }
+#endif
+    auto sort = [](const vector<int64_t>& toSort)
+    {
+        vector<int64_t> sorted = toSort;
+        std::sort(sorted.begin(), sorted.end());
+
+        return sorted;
+    };
+
+    const auto radiationLevelsSorted = sort(radiationLevel);
+    const auto zombieHealthsSorted = sort(zombieHealth);
+
+    return (radiationLevelsSorted == zombieHealthsSorted);
+}
 
 int main(int argc, char* argv[])
 {
@@ -94,6 +187,10 @@ int main(int argc, char* argv[])
 
         const auto solutionBruteForce = solveBruteForce(radiationPower, zombieHealth);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "YES" : "NO") << endl;
+        const auto solutionOptimised = solveOptimised(radiationPower, zombieHealth);
+        cout << "solutionOptimised: " << (solutionOptimised ? "YES" : "NO") << endl;
+
+        //assert(solutionOptimised == solutionBruteForce);
     }
 }
 
