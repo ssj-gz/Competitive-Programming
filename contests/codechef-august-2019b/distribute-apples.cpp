@@ -23,7 +23,7 @@ bool solveBruteForce(int64_t N, int64_t K)
     vector<int64_t> numInBoxEmployee1(K);
     vector<int64_t> numInBoxEmployee2(K);
 
-    int64_t numApplesRemaining = K;
+    int64_t numApplesRemaining = N;
 
     while (numApplesRemaining > 0)
     {
