@@ -49,12 +49,14 @@ bool solveBruteForce(const vector<int64_t>& radiationPower, const vector<int64_t
     vector<int64_t> zombieHealthPermutation = zombieHealth;
     do
     {
+#if 0
         cout << "zombieHealthPermutation: " << endl;
         for (auto x : zombieHealthPermutation)
         {
             cout << x << " ";
         }
         cout << endl;
+#endif
         int numZombiesKilled = 0;
         for(int i = 0; i < numCaves; i++)
         {
@@ -173,16 +175,49 @@ int main(int argc, char* argv[])
         cout << 1 << endl;
         cout << numCaves << endl;
 
+        vector<int64_t> radiationPower;
         for (int i = 0; i < numCaves; i++)
         {
-            cout << ((rand() % maxRadiationPower) + 1) << " ";
+            radiationPower.push_back((rand() % maxRadiationPower) + 1);
         }
-        cout << endl;
-        for (int i = 0; i < numCaves; i++)
+        for (const auto& x : radiationPower)
         {
-            cout << ((rand() % maxHealth) + 1) << " ";
+            cout << x << " ";
         }
         cout << endl;
+
+
+        const bool generateYES = ((rand() % 4) == 0);
+        if (generateYES)
+        {
+            vector<int64_t> radiationLevel(numCaves, 0);
+            for (int i = 0; i < numCaves; i++)
+            {
+                const int radiationRange = radiationPower[i];
+                const int radiationRangeLeft = max(0, i - radiationRange);
+                const int radiationRangeRight = min(numCaves - 1, i + radiationRange);
+
+                for (int j = radiationRangeLeft; j <= radiationRangeRight; j++)
+                {
+                    radiationLevel[j]++;
+                }
+            }
+            auto zombieHealth = radiationLevel;
+            random_shuffle(zombieHealth.begin(), zombieHealth.end());
+            for (const auto& x : zombieHealth)
+            {
+                cout << x << " ";
+            }
+            cout << endl;
+        }
+        else
+        {
+            for (int i = 0; i < numCaves; i++)
+            {
+                cout << ((rand() % maxHealth) + 1) << " ";
+            }
+            cout << endl;
+        }
         return 0;
     }
 
