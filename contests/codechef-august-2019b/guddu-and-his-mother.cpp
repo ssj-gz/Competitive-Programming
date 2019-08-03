@@ -85,6 +85,7 @@ int64_t solveOptimised(const vector<int>& a)
 
     vector<XorSumInfo> infoForXorSum(maxXorSum + 1);
 
+#ifdef BRUTE_FORCE
     vector<int> dbgXorSumUpTo;
     {
         int xorSum = 0;
@@ -95,6 +96,7 @@ int64_t solveOptimised(const vector<int>& a)
             dbgXorSumUpTo.push_back(xorSum);
         }
     }
+#endif
 
     int xorSum = 0;
     for (int k = 0; k < n; k++)
@@ -128,7 +130,7 @@ int64_t solveOptimised(const vector<int>& a)
         currentXorSumInfo.lastOccurrence = k;
         currentXorSumInfo.numOccurrences++;
 
-        //cout << "k: " << k << " dbgXorSumUpTo: " << dbgXorSumUpTo[k] << endl;
+#ifdef BRUTE_FORCE
         int64_t dbgAmountToAdd = 0;
         for (int i = 0; i < k; i++)
         {
@@ -142,7 +144,9 @@ int64_t solveOptimised(const vector<int>& a)
 
         cout << "xorSum: " << xorSum << " amountToAdd: " << amountToAdd << " dbgAmountToAdd: " << dbgAmountToAdd << endl;
         assert(dbgAmountToAdd == amountToAdd);
-        result += dbgAmountToAdd;
+#endif
+
+        result += amountToAdd;
     }
 
 
