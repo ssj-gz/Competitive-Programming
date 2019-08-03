@@ -1,8 +1,6 @@
 // Simon St James (ssjgz) - 2019-08-03
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -24,55 +22,6 @@ T read()
     return toRead;
 }
 
-bool solveBruteForce(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealth)
-{
-    const int numCaves = radiationPower.size();
-    vector<int64_t> radiationLevel(numCaves, 0);
-    for (int i = 0; i < numCaves; i++)
-    {
-        const int radiationRange = radiationPower[i];
-        const int radiationRangeLeft = max(0, i - radiationRange);
-        const int radiationRangeRight = min(numCaves - 1, i + radiationRange);
-
-        for (int j = radiationRangeLeft; j <= radiationRangeRight; j++)
-        {
-            radiationLevel[j]++;
-        }
-    }
-    cout << "radiationLevel: " << endl;
-    for (auto x : radiationLevel)
-    {
-        cout << x << " ";
-    }
-    cout << endl;
-
-    vector<int64_t> zombieHealthPermutation = zombieHealth;
-    do
-    {
-#if 0
-        cout << "zombieHealthPermutation: " << endl;
-        for (auto x : zombieHealthPermutation)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-#endif
-        int numZombiesKilled = 0;
-        for(int i = 0; i < numCaves; i++)
-        {
-            if (radiationLevel[i] == zombieHealthPermutation[i])
-            {
-                numZombiesKilled++;
-            }
-        }
-        if (numZombiesKilled == numCaves)
-        {
-            return true;
-        }
-        std::next_permutation(zombieHealthPermutation.begin(), zombieHealthPermutation.end());
-    } while (zombieHealthPermutation != zombieHealth);
-    return false;
-}
 bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealth)
 {
     const int numCaves = radiationPower.size();
@@ -118,36 +67,8 @@ bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>
             radiationLevel[i] += amountToAdd;
         }
     }
-#ifdef BRUTE_FORCE
-    {
-        vector<int64_t> dbgRadiationLevel(numCaves, 0);
-        for (int i = 0; i < numCaves; i++)
-        {
-            const int radiationRange = radiationPower[i];
-            const int radiationRangeLeft = max(0, i - radiationRange);
-            const int radiationRangeRight = min(numCaves - 1, i + radiationRange);
 
-            for (int j = radiationRangeLeft; j <= radiationRangeRight; j++)
-            {
-                dbgRadiationLevel[j]++;
-            }
-        }
-        cout << "radiationLevel: " << endl;
-        for (auto x : radiationLevel)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-        cout << "dbgRadiationLevel: " << endl;
-        for (auto x : dbgRadiationLevel)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-        assert(dbgRadiationLevel == radiationLevel);
-    }
-#endif
-    auto sort = [](const vector<int64_t>& toSort)
+    auto sorted = [](const vector<int64_t>& toSort)
     {
         vector<int64_t> sorted = toSort;
         std::sort(sorted.begin(), sorted.end());
@@ -155,8 +76,8 @@ bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>
         return sorted;
     };
 
-    const auto radiationLevelsSorted = sort(radiationLevel);
-    const auto zombieHealthsSorted = sort(zombieHealth);
+    const auto radiationLevelsSorted = sorted(radiationLevel);
+    const auto zombieHealthsSorted = sorted(zombieHealth);
 
     return (radiationLevelsSorted == zombieHealthsSorted);
 }
@@ -235,17 +156,8 @@ int main(int argc, char* argv[])
         {
             health = read<int64_t>();
         }
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(radiationPower, zombieHealth);
-        cout << "solutionBruteForce: " << (solutionBruteForce ? "YES" : "NO") << endl;
-        const auto solutionOptimised = solveOptimised(radiationPower, zombieHealth);
-        cout << "solutionOptimised: " << (solutionOptimised ? "YES" : "NO") << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#else
         const auto solutionOptimised = solveOptimised(radiationPower, zombieHealth);
         cout << (solutionOptimised ? "YES" : "NO") << endl;
-#endif
     }
 }
 
