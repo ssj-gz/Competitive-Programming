@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -70,7 +70,7 @@ int64_t solveOptimised(const vector<int>& a)
     struct XorSumInfo
     {
         int lastOccurrence = -1;
-        int64_t cumulativeSumAtLastOccurrence = -1;
+        int64_t cumulativeSumAtLastOccurrence = 0;
         int64_t numOccurrences = 0;
     };
     int64_t result = 0;
@@ -112,23 +112,16 @@ int64_t solveOptimised(const vector<int>& a)
             amountToAdd += (k - currentXorSumInfo.lastOccurrence - 1);
             amountToAdd += currentXorSumInfo.cumulativeSumAtLastOccurrence + (k - currentXorSumInfo.lastOccurrence) * (currentXorSumInfo.numOccurrences - 1);
         }
-        if (xorSum == 0)
-        {
-            amountToAdd += k;
-        }
-        if (currentXorSumInfo.lastOccurrence == -1)
-        {
-            currentXorSumInfo.cumulativeSumAtLastOccurrence = 0;
-        }
-        else
-        {
-            //currentXorSumInfo.cumulativeSumAtLastOccurrence = currentXorSumInfo.cumulativeSumAtLastOccurrence + (k - currentXorSumInfo.lastOccurrence) * (currentXorSumInfo.numOccurrences - 1);
-            currentXorSumInfo.cumulativeSumAtLastOccurrence = amountToAdd;
-            if (xorSum == 0)
-                currentXorSumInfo.cumulativeSumAtLastOccurrence -= k;
-        }
+        // Update currentXorSumInfo.
+        currentXorSumInfo.cumulativeSumAtLastOccurrence = amountToAdd;
         currentXorSumInfo.lastOccurrence = k;
         currentXorSumInfo.numOccurrences++;
+
+        if (xorSum == 0)
+        {
+            // Account for the "empty" left set, which has xorSum == 0.
+            amountToAdd += k;
+        }
 
 #ifdef BRUTE_FORCE
         int64_t dbgAmountToAdd = 0;
