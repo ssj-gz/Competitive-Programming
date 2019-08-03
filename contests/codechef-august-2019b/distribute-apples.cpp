@@ -1,4 +1,10 @@
 // Simon St James (ssjgz) - 2019-08-03
+#define SUBMISSION
+#define BRUTE_FORCE
+#ifdef SUBMISSION
+#undef BRUTE_FORCE
+#define NDEBUG
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -119,12 +125,17 @@ int main(int argc, char* argv[])
         const int64_t N = read<int64_t>();
         const int64_t K = read<int64_t>();
 
+#ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(N, K);
         cout << "solutionBruteForce: " << (solutionBruteForce ? "NO" : "YES") << endl;
         const auto solutionOptimised = solveOptimised(N, K);
         cout << "solutionOptimised: " << (solutionOptimised ? "NO" : "YES") << endl;
 
         assert(solutionOptimised == solutionBruteForce);
+#else
+        const auto solutionOptimised = solveOptimised(N, K);
+        cout << (solutionOptimised ? "NO" : "YES") << endl;
+#endif
     }
 }
 
