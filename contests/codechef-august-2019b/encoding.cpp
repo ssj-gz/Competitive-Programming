@@ -6,6 +6,7 @@
 #define NDEBUG
 #endif
 #include <iostream>
+#include <vector>
 
 #include <cassert>
 
@@ -27,7 +28,7 @@ const int64_t Mod = 1'000'000'007ULL;
 class ModNum
 {
     public:
-        ModNum(int64_t n)
+        ModNum(int64_t n = 0)
             : m_n{n}
         {
             assert(n >= 0);
@@ -140,6 +141,78 @@ ModNum solveBruteForce(const string& L, const string& R)
 
 ModNum solveOptimised(const string& L, const string& R)
 {
+    const int numDigits = 10;
+    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(numDigits));
+    for (int i = 0; i < numDigits; i++)
+    {
+        sumOfFForNumDigitsBeginningWith[0][i] = 0;
+        sumOfFForNumDigitsBeginningWith[1][i] = i;
+    }
+
+    ModNum prevPowerOf10 = 1;
+    ModNum powerOf10 = 10;
+    for (int numberLength = 2; numberLength < 100; numberLength++)
+    {
+        for (int newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
+        {
+            ModNum blah;
+            ModNum numWithPrevFrontDigit = prevPowerOf10;
+            for (int prevFrontDigit = 0; prevFrontDigit <= 9; prevFrontDigit++)
+            {
+                if (prevFrontDigit != newFrontDigit)
+                {
+                    blah += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
+                }
+                else
+                {
+                    blah += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit] - prevFrontDigit * prevPowerOf10 * numWithPrevFrontDigit;
+                }
+            }
+            sumOfFForNumDigitsBeginningWith[numberLength][newFrontDigit] = blah;
+
+        }
+
+        prevPowerOf10 = powerOf10;
+        powerOf10 *= 10;
+    }
+
+    {
+        vector<vector<ModNum>> dbgSumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(numDigits));
+        string current = "0";
+        const int maxLen = 8;
+
+        while (current.size() < maxLen)
+        {
+            dbgSumOfFForNumDigitsBeginningWith[current.size()][current[0] - '0'] += calcF(current);
+            int index = current.size() - 1;
+            while (index >= 0 && current[index] == '9')
+            {
+                current[index] = '0';
+                index--;
+            }
+            if (index == -1)
+            {
+                current = '1' + current;
+            }
+            else
+            {
+                current[index]++;
+            }
+        }
+
+        for (int len = 1; len < maxLen; len++)
+        {
+            for (int frontDigit = 0; frontDigit <= 9; frontDigit++)
+            {
+                cout << " len: " << len << " frontDigit: " << frontDigit << " sumOfFForNumDigitsBeginningWith: " << sumOfFForNumDigitsBeginningWith[len][frontDigit] << " dbgSumOfFForNumDigitsBeginningWith: " << dbgSumOfFForNumDigitsBeginningWith[len][frontDigit] << endl;
+                if (frontDigit != 0)
+                {
+                    assert(sumOfFForNumDigitsBeginningWith[len][frontDigit] == dbgSumOfFForNumDigitsBeginningWith[len][frontDigit]);
+                }
+            }
+        }
+    }
+
     ModNum result = 0;
     string current = L;
 
