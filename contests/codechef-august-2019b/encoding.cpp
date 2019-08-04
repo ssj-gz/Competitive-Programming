@@ -159,13 +159,12 @@ ModNum solveOptimised(const string& L, const string& R)
             ModNum numWithPrevFrontDigit = prevPowerOf10;
             for (int prevFrontDigit = 0; prevFrontDigit <= 9; prevFrontDigit++)
             {
-                if (prevFrontDigit != newFrontDigit)
+                sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
+                if (prevFrontDigit == newFrontDigit)
                 {
-                    sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
-                }
-                else
-                {
-                    sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit] - prevFrontDigit * prevPowerOf10 * numWithPrevFrontDigit;
+                    // Remove the contributions from numbers beginning with prevFrontDigit in the numbers of length (numberLength - 1) -
+                    // they are wrong, as we have prepended another copy of prevFrontDigit to the front of the number.
+                    sumForLenBeginningWithThisDigit -= prevFrontDigit * prevPowerOf10 * numWithPrevFrontDigit;
                 }
             }
 
