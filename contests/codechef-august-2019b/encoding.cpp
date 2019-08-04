@@ -155,20 +155,19 @@ ModNum solveOptimised(const string& L, const string& R)
     {
         for (int newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
         {
-            ModNum blah;
+            ModNum& sumForLenBeginningWithThisDigit = sumOfFForNumDigitsBeginningWith[numberLength][newFrontDigit];
             ModNum numWithPrevFrontDigit = prevPowerOf10;
             for (int prevFrontDigit = 0; prevFrontDigit <= 9; prevFrontDigit++)
             {
                 if (prevFrontDigit != newFrontDigit)
                 {
-                    blah += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
+                    sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
                 }
                 else
                 {
-                    blah += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit] - prevFrontDigit * prevPowerOf10 * numWithPrevFrontDigit;
+                    sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit] - prevFrontDigit * prevPowerOf10 * numWithPrevFrontDigit;
                 }
             }
-            sumOfFForNumDigitsBeginningWith[numberLength][newFrontDigit] = blah;
 
         }
 
