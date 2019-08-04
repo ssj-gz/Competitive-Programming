@@ -930,7 +930,7 @@ int main(int argc, char* argv[])
     
     // TODO - read in testcase.
     
-#if BRUTE_FORCE
+#ifdef BRUTE_FORCE
 #if 0
     const auto solutionBruteForce = solveBruteForce();
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
