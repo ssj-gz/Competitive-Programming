@@ -13,7 +13,7 @@
 
 using namespace std;
 
-template <typename T>
+    template <typename T>
 T read()
 {
     T toRead;
@@ -24,37 +24,98 @@ T read()
 
 const int64_t Mod = 1'000'000'007ULL;
 
-int64_t calcF(const string& s)
+class ModNum
 {
-    int64_t result = 0;
+    public:
+        ModNum(int64_t n)
+            : m_n{n}
+        {
+            assert(n >= 0);
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator-=(const ModNum& other)
+        {
+            m_n = (Mod + m_n - other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % Mod;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
 
-    int64_t powerOf10 = 1;
-    int64_t toAdd = 0;
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
+
+
+ModNum calcF(const string& s)
+{
+    ModNum result = 0;
+
+    ModNum powerOf10 = 1;
+    ModNum toAdd = 0;
     for (int i = s.size() - 1; i >= 0; i--)
     {
         if (i + 1 < s.size() && s[i] != s[i + 1])
         {
-            result = (result + toAdd) % Mod;
-            toAdd = 0;
+            result += toAdd;
         }
 
-        toAdd = (powerOf10 * (s[i] - '0')) % Mod;;
-        powerOf10 = (powerOf10 * 10) % Mod;
+        toAdd = powerOf10 * (s[i] - '0');
+        powerOf10 *= 10;
     }
-    result = (result + toAdd) % Mod;
+    result += toAdd;
 
     return result;
 }
 
-int64_t solveBruteForce(const string& L, const string& R)
+ModNum solveBruteForce(const string& L, const string& R)
 {
-    int64_t result = 0;
+    ModNum result = 0;
     string current = L;
 
     while (true)
     {
         //cout << " current: " << current << endl;
-        result = (result + calcF(current)) % Mod;
+        result = calcF(current);
         if (current == R)
             break;
 
@@ -77,15 +138,15 @@ int64_t solveBruteForce(const string& L, const string& R)
     return result;
 }
 
-int64_t solveOptimised(const string& L, const string& R)
+ModNum solveOptimised(const string& L, const string& R)
 {
-    int64_t result = 0;
+    ModNum result = 0;
     string current = L;
 
     while (true)
     {
         //cout << " current: " << current << endl;
-        result = (result + calcF(current)) % Mod;
+        result += calcF(current);
         if (current == R)
             break;
 
