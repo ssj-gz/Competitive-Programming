@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -22,6 +22,8 @@ T read()
     return toRead;
 }
 
+const int64_t Mod = 1'000'000'007ULL;
+
 int64_t calcF(const string& s)
 {
     int64_t result = 0;
@@ -36,8 +38,8 @@ int64_t calcF(const string& s)
             toAdd = 0;
         }
 
-        toAdd = powerOf10 * (s[i] - '0');
-        powerOf10 = powerOf10 * 10;
+        toAdd = (powerOf10 * (s[i] - '0')) % Mod;;
+        powerOf10 = (powerOf10 * 10) % Mod;
     }
     result += toAdd;
 
@@ -52,7 +54,7 @@ int64_t solveBruteForce(const string& L, const string& R)
     while (true)
     {
         //cout << " current: " << current << endl;
-        result += calcF(current);
+        result = (result + calcF(current)) % Mod;
         if (current == R)
             break;
 
@@ -75,14 +77,37 @@ int64_t solveBruteForce(const string& L, const string& R)
     return result;
 }
 
-#if 0
-int64_t solveOptimised()
+int64_t solveOptimised(const string& L, const string& R)
 {
     int64_t result = 0;
+    string current = L;
+
+    while (true)
+    {
+        //cout << " current: " << current << endl;
+        result = (result + calcF(current)) % Mod;
+        if (current == R)
+            break;
+
+        int index = current.size() - 1;
+        while (index >= 0 && current[index] == '9')
+        {
+            current[index] = '0';
+            index--;
+        }
+        if (index == -1)
+        {
+            current = '1' + current;
+        }
+        else
+        {
+            current[index]++;
+        }
+    }
 
     return result;
+
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -93,7 +118,14 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        const int maxValue = rand() % 100'000'000;
+        int L = rand() % maxValue + 1;
+        int R = rand() % maxValue + 1;
+        if (R < L)
+            swap(L, R);
+        cout << 1 << endl;
+        cout << to_string(L).size() << " " << L << endl;
+        cout << to_string(R).size() << " " << R << endl;
         return 0;
     }
 
@@ -111,14 +143,14 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(L, R);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(L, R);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(L, R);
         cout << solutionOptimised << endl;
 #endif
     }
