@@ -30,7 +30,7 @@ bool canFindImpactSites(int N, int K, int64_t M, int64_t X0)
     if (K == 2)
     {
         // Special case for K == 2.
-        // First, obtain the representation of M is a binary string
+        // First, obtain the representation of M as a binary string
         // (LSB first).
         string impactSites;
         while (M > 0)
@@ -50,7 +50,7 @@ bool canFindImpactSites(int N, int K, int64_t M, int64_t X0)
             return true;
         if (N < 0)
         {
-            // We require more impacts that we have.
+            // This requires more impacts than we are allowed to use.
             return false;
         }
         // We have impacts to make up!  Note that 2 ** k == 2 * (2 ** k - 1):
@@ -61,8 +61,8 @@ bool canFindImpactSites(int N, int K, int64_t M, int64_t X0)
         //
         //   d0 * (2 ** 0) + d1 * (2 ** 1) + ... + dl * (2 ** l)
         //
-        // where now di can be 0, 1 or 2.  NOTE: these replacements must not make the
-        // leftmost digit, which represents the number of impacts at X0, equal to 2.
+        // where now di can be 0, 1 or 2 (for i != 0).  NOTE: these replacements must not make the
+        // leftmost digit, d0, which represents the number of impacts at X0, equal to 2.
         //
         // Note that either of the two replacements described above increases the
         // number of impacts by 1.  Keep making this replacement until either
