@@ -28,20 +28,20 @@ int64_t calcF(const string& s)
 {
     int64_t result = 0;
 
-    int powerOf10 = 1;
+    int64_t powerOf10 = 1;
     int64_t toAdd = 0;
     for (int i = s.size() - 1; i >= 0; i--)
     {
         if (i + 1 < s.size() && s[i] != s[i + 1])
         {
-            result += toAdd;
+            result = (result + toAdd) % Mod;
             toAdd = 0;
         }
 
         toAdd = (powerOf10 * (s[i] - '0')) % Mod;;
         powerOf10 = (powerOf10 * 10) % Mod;
     }
-    result += toAdd;
+    result = (result + toAdd) % Mod;
 
     return result;
 }
