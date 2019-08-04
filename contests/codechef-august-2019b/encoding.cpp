@@ -141,7 +141,7 @@ ModNum solveBruteForce(const string& L, const string& R)
 
 vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
 {
-    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(10));
+    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
     for (int digit = 0; digit <= 9; digit++)
     {
         sumOfFForNumDigitsBeginningWith[0][digit] = 0;
@@ -150,7 +150,7 @@ vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
 
     ModNum prevPowerOf10 = 1;
     ModNum powerOf10 = 10;
-    for (int numberLength = 2; numberLength < 100; numberLength++)
+    for (int numberLength = 2; numberLength < maxNumberLength; numberLength++)
     {
         for (int newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
         {
