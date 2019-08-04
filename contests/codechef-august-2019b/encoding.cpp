@@ -139,14 +139,13 @@ ModNum solveBruteForce(const string& L, const string& R)
     return result;
 }
 
-ModNum solveOptimised(const string& L, const string& R)
+vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
 {
-    const int numDigits = 10;
-    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(numDigits));
-    for (int i = 0; i < numDigits; i++)
+    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(10));
+    for (int digit = 0; digit <= 9; digit++)
     {
-        sumOfFForNumDigitsBeginningWith[0][i] = 0;
-        sumOfFForNumDigitsBeginningWith[1][i] = i;
+        sumOfFForNumDigitsBeginningWith[0][digit] = 0;
+        sumOfFForNumDigitsBeginningWith[1][digit] = digit;
     }
 
     ModNum prevPowerOf10 = 1;
@@ -174,8 +173,9 @@ ModNum solveOptimised(const string& L, const string& R)
         powerOf10 *= 10;
     }
 
+#ifdef BRUTE_FORCE
     {
-        vector<vector<ModNum>> dbgSumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(numDigits));
+        vector<vector<ModNum>> dbgSumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(10));
         string current = "0";
         const int maxLen = 8;
 
@@ -210,7 +210,15 @@ ModNum solveOptimised(const string& L, const string& R)
             }
         }
     }
+#endif
 
+    return sumOfFForNumDigitsBeginningWith;
+
+}
+
+ModNum solveOptimised(const string& L, const string& R)
+{
+    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith = computeMainLookupTable(10);
     ModNum result = 0;
     string current = L;
 
