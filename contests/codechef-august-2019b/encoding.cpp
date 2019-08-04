@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-XX-XX
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -116,7 +116,7 @@ ModNum solveBruteForce(const string& L, const string& R)
     while (true)
     {
         //cout << " current: " << current << endl;
-        result = calcF(current);
+        result += calcF(current);
         if (current == R)
             break;
 
