@@ -69,8 +69,8 @@ int64_t solveOptimised(const vector<int>& a)
 
     struct XorSumInfo
     {
-        int lastOccurrence = -1;
-        int64_t cumulativeSumAtLastOccurrence = 0;
+        int lastOccurrencePos = -1;
+        int64_t amountAddedAtLastOccurrence = 0;
         int64_t numOccurrences = 0;
     };
     int64_t result = 0;
@@ -107,16 +107,16 @@ int64_t solveOptimised(const vector<int>& a)
 
         assert(xorSum <= maxXorSum);
         int64_t amountToAdd = 0;
-        if (currentXorSumInfo.lastOccurrence != -1)
+        if (currentXorSumInfo.lastOccurrencePos != -1)
         {
             // Add amount from previous occurrence.
-            amountToAdd += (k - currentXorSumInfo.lastOccurrence - 1);
+            amountToAdd += (k - currentXorSumInfo.lastOccurrencePos - 1);
             // Add amounts from all occurrences before the previous occurence (all numOccurrences - 1 of them!).
-            amountToAdd += currentXorSumInfo.cumulativeSumAtLastOccurrence + (k - currentXorSumInfo.lastOccurrence) * (currentXorSumInfo.numOccurrences - 1);
+            amountToAdd += currentXorSumInfo.amountAddedAtLastOccurrence + (k - currentXorSumInfo.lastOccurrencePos) * (currentXorSumInfo.numOccurrences - 1);
         }
         // Update currentXorSumInfo.
-        currentXorSumInfo.cumulativeSumAtLastOccurrence = amountToAdd;
-        currentXorSumInfo.lastOccurrence = k;
+        currentXorSumInfo.amountAddedAtLastOccurrence = amountToAdd;
+        currentXorSumInfo.lastOccurrencePos = k;
         currentXorSumInfo.numOccurrences++;
 
         if (xorSum == 0)
