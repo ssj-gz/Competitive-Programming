@@ -279,12 +279,13 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int maxNumDigits = rand() % 9 + 1;
+        const int maxNumDigits = 100'000;
 
         auto generateRandomNumber = [&maxNumDigits]()
         {
             string numberAsString;
-            const int originalNumDigits = (rand() % maxNumDigits) + 1;
+            //const int originalNumDigits = (rand() % maxNumDigits) + 1;
+            const int originalNumDigits = 100'000;
             int numDigits = originalNumDigits;
 
             // First digit (must not be 0).
@@ -301,18 +302,28 @@ int main(int argc, char* argv[])
             assert(numberAsString.size() == originalNumDigits);
             assert(numberAsString[0] != '0');
 
-            return stoll(numberAsString);
+            return numberAsString;
 
         };
 
 
-        auto L = generateRandomNumber();
-        auto R = generateRandomNumber();
-        if (R < L)
-            swap(L, R);
-        cout << 1 << endl;
-        cout << to_string(L).size() << " " << L << endl;
-        cout << to_string(R).size() << " " << R << endl;
+        cout << 10 << endl;
+        for (int i = 0; i < 10; i++)
+        {
+            auto L = generateRandomNumber();
+            auto R = generateRandomNumber();
+            if (L.size() > R.size())
+                swap(L, R);
+            else if (L.size() == R.size())
+            {
+                if (L > R)
+                    swap(L, R);
+            }
+            cout << L.size() << " " << L << endl;
+            cout << R.size() << " " << R << endl;
+        }
+
+
         return 0;
     }
 
@@ -325,7 +336,6 @@ int main(int argc, char* argv[])
         const string L = read<string>();
         read<int>();
         const string R = read<string>();
-
 
 #ifdef BRUTE_FORCE
 #if 1
