@@ -173,7 +173,7 @@ vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
         powerOf10 *= 10;
     }
 
-#ifdef BRUTE_FORCE
+#if 0
     {
         vector<vector<ModNum>> dbgSumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(10));
         string current = "0";
@@ -216,34 +216,19 @@ vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
 
 }
 
+ModNum sumOfFUpTo(const string& R)
+{
+    ModNum result = solveBruteForce("0", R);
+    return result;
+}
+
+
 ModNum solveOptimised(const string& L, const string& R)
 {
     vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith = computeMainLookupTable(10);
-    ModNum result = 0;
-    string current = L;
+    ModNum result =  sumOfFUpTo(R) - sumOfFUpTo(L) + calcF(L);
 
-    while (true)
-    {
-        //cout << " current: " << current << endl;
-        result += calcF(current);
-        if (current == R)
-            break;
-
-        int index = current.size() - 1;
-        while (index >= 0 && current[index] == '9')
-        {
-            current[index] = '0';
-            index--;
-        }
-        if (index == -1)
-        {
-            current = '1' + current;
-        }
-        else
-        {
-            current[index]++;
-        }
-    }
+    
 
     return result;
 
