@@ -139,9 +139,11 @@ ModNum solveBruteForce(const string& L, const string& R)
     return result;
 }
 
-vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
+const int maxNumberLength = 100'000;
+vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
+
+vector<vector<ModNum>> computeMainLookupTable()
 {
-    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
     for (int digit = 0; digit <= 9; digit++)
     {
         sumOfFForNumDigitsBeginningWith[0][digit] = 0;
@@ -216,6 +218,7 @@ vector<vector<ModNum>> computeMainLookupTable(int maxNumberLength)
 
 }
 
+
 ModNum sumOfFUpTo(const string& R)
 {
     ModNum result = solveBruteForce("0", R);
@@ -225,13 +228,9 @@ ModNum sumOfFUpTo(const string& R)
 
 ModNum solveOptimised(const string& L, const string& R)
 {
-    vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith = computeMainLookupTable(10);
     ModNum result =  sumOfFUpTo(R) - sumOfFUpTo(L) + calcF(L);
 
-    
-
     return result;
-
 }
 
 
@@ -253,6 +252,8 @@ int main(int argc, char* argv[])
         cout << to_string(R).size() << " " << R << endl;
         return 0;
     }
+
+    computeMainLookupTable();
 
     const int T = read<int>();
     for (int t = 0; t < T; t++)
