@@ -152,7 +152,7 @@ vector<vector<ModNum>> computeMainLookupTable()
 
     ModNum prevPowerOf10 = 1;
     ModNum powerOf10 = 10;
-    for (int numberLength = 2; numberLength < maxNumberLength; numberLength++)
+    for (int numberLength = 2; numberLength <= maxNumberLength; numberLength++)
     {
         for (int newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
         {
