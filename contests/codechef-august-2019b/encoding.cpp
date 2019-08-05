@@ -105,7 +105,7 @@ ModNum calcF(const string& number)
     return result;
 }
 
-vector<vector<ModNum>> computeMainLookupTables()
+void computeMainLookupTables()
 {
     for (int digit = 0; digit <= 9; digit++)
     {
@@ -146,7 +146,6 @@ vector<vector<ModNum>> computeMainLookupTables()
         powerOf10 = powerOf10 * 10;
     }
 
-    return sumOfFForNumDigitsBeginningWith;
 }
 
 
