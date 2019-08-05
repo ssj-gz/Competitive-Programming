@@ -14,7 +14,7 @@
 
 using namespace std;
 
-    template <typename T>
+template <typename T>
 T read()
 {
     T toRead;
@@ -85,25 +85,28 @@ bool operator==(const ModNum& lhs, const ModNum& rhs)
     return lhs.value() == rhs.value();
 }
 
+const int maxNumberLength = 100'000;
+vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
+vector<ModNum> tenToThePowerOf(maxNumberLength + 1);
 
-
-ModNum calcF(const string& s)
+ModNum calcF(const string& number)
 {
+    const int numDigits = number.size();
     ModNum result = 0;
 
-    ModNum powerOf10 = 1;
-    ModNum toAdd = 0;
-    for (int i = s.size() - 1; i >= 0; i--)
+    int previousDigit = -1;
+    for (int index = 0; index < numDigits; index++)
     {
-        if (i + 1 < s.size() && s[i] != s[i + 1])
+        const int digitInNumber = number[index] - '0';
+
+        if (digitInNumber != previousDigit)
         {
-            result += toAdd;
+            result += digitInNumber *  tenToThePowerOf[numDigits - index - 1];
         }
 
-        toAdd = powerOf10 * (s[i] - '0');
-        powerOf10 *= 10;
+
+        previousDigit = digitInNumber;
     }
-    result += toAdd;
 
     return result;
 }
@@ -138,10 +141,6 @@ ModNum solveBruteForce(const string& L, const string& R)
 
     return result;
 }
-
-const int maxNumberLength = 100'000;
-vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
-vector<ModNum> tenToThePowerOf(maxNumberLength + 1);
 
 vector<vector<ModNum>> computeMainLookupTable()
 {
