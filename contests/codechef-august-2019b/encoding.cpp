@@ -176,10 +176,10 @@ ModNum sumOfFUpTo(const string& number)
             {
                 // The contribution to the result from having this digit in this position
                 // is wrong as this digit is equal to the previous digit; remove the contribution.
-                // (Similar logic as in computeMainLookupTable).
+                // (Similar logic as in computeMainLookupTables()).
                 const ModNum valueOfThisDigit = digit * tenToThePowerOf[numDigits - index - 1];
-                const auto correctForThisDigit = valueOfThisDigit * numOccurencesWithThisDigit;
-                result -= correctForThisDigit;
+                const auto correctionForThisDigit = valueOfThisDigit * numOccurencesWithThisDigit;
+                result -= correctionForThisDigit;
             }
         }
         const bool digitIsSameAsPrevious = (previousDigitInNumber == digitInNumber);
