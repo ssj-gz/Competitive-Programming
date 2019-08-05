@@ -182,8 +182,7 @@ ModNum sumOfFUpTo(const string& number)
                 result -= correctionForThisDigit;
             }
         }
-        const bool digitIsSameAsPrevious = (previousDigitInNumber == digitInNumber);
-        if (!digitIsSameAsPrevious)
+        if (digitInNumber != previousDigitInNumber)
         {
             // Update sumToLeft.
             sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
