@@ -226,18 +226,25 @@ ModNum sumOfFUpTo(const string& number)
 
     vector<ModNum> tenToThePowerOf;
     ModNum powerOf10 = 1;
+    ModNum sumToLeft = 0;
     for (int i = 0; i <= numDigits; i++)
     {
         tenToThePowerOf.push_back(powerOf10);
         powerOf10 = powerOf10 * 10;
     }
 
-    for (int digit = 0; digit < number[0] - '0'; digit++)
+    for (int index = 0; index < numDigits; index++)
     {
-        result += sumOfFForNumDigitsBeginningWith[numDigits][digit];
+        for (int digit = 0; digit < number[index] - '0'; digit++)
+        {
+            result += sumOfFForNumDigitsBeginningWith[numDigits][digit];
+        }
+        if (numDigits - index - 1 >= 0)
+            sumToLeft += (number[index] - '0') * tenToThePowerOf[numDigits - index - 1];
+        cout << "index: " << index << " result: " << result << " sumToLeft: " << sumToLeft << endl;
     }
 
-    result += (number[0] - '0') * tenToThePowerOf[numDigits - 1];
+    result += sumToLeft;
 
     return result;
 }
