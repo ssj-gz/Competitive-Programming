@@ -165,11 +165,11 @@ ModNum sumOfFUpTo(const string& number)
         const int digitInNumber = number[index] - '0';
         for (int digit = 0; digit < digitInNumber; digit++)
         {
-            const ModNum numOccurencesWithThisDigit = tenToThePowerOf[numDigits - index - 1];
             // Contribution from this index and rightwards having this digit.
             result += sumOfFForNumDigitsBeginningWith[numDigits - index][digit];
 
             // Contribution from previous indices from having this digit.
+            const ModNum numOccurencesWithThisDigit = tenToThePowerOf[numDigits - index - 1];
             result += sumToLeft * numOccurencesWithThisDigit;
 
             if (digit == previousDigitInNumber)
