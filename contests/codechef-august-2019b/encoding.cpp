@@ -221,11 +221,12 @@ vector<vector<ModNum>> computeMainLookupTable()
 
 ModNum sumOfFUpTo(const string& number)
 {
+    const int numDigits = number.size();
     ModNum result = 0;
 
     vector<ModNum> tenToThePowerOf;
     ModNum powerOf10 = 1;
-    for (int i = 0; i <= number.size(); i++)
+    for (int i = 0; i <= numDigits; i++)
     {
         tenToThePowerOf.push_back(powerOf10);
         powerOf10 = powerOf10 * 10;
@@ -233,10 +234,10 @@ ModNum sumOfFUpTo(const string& number)
 
     for (int digit = 0; digit < number[0] - '0'; digit++)
     {
-        result += sumOfFForNumDigitsBeginningWith[number.size()][digit];
+        result += sumOfFForNumDigitsBeginningWith[numDigits][digit];
     }
 
-    result += (number[0] - '0') * tenToThePowerOf[number.size() - 1];
+    result += (number[0] - '0') * tenToThePowerOf[numDigits - 1];
 
     return result;
 }
