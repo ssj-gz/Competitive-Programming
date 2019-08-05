@@ -1,8 +1,6 @@
 // Simon St James (ssjgz) - 2019-08-03
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -10,8 +8,6 @@
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -24,46 +20,7 @@ T read()
     return toRead;
 }
 
-int64_t solveBruteForce(const vector<int>& a)
-{
-    const int N = a.size();
-    int64_t result = 0;
-
-    for (int i = 0; i < N; i++)
-    {
-        for (int j = i + 1; j < N; j++)
-        {
-            for (int k = j; k < N; k++)
-            {
-                int leftXor = 0;
-                for (int m = i; m < j; m++)
-                {
-                    leftXor = leftXor ^ a[m];
-                }
-                int rightXor = 0;
-                for (int m = j; m <= k; m++)
-                {
-                    rightXor = rightXor ^ a[m];
-                }
-                int iTokXor = 0;
-                for (int m = i; m <= k; m++)
-                {
-                    iTokXor = iTokXor ^ a[m];
-                }
-                assert((iTokXor == 0) == (leftXor == rightXor));
-                if (leftXor == rightXor)
-                {
-                    //cout << " found one: i: " << i << " j: " << j << " k: " << k << " leftXor: " << leftXor << " rightXor: " << rightXor << " iTokXor: " << iTokXor << endl;
-                    result++;
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-int64_t solveOptimised(const vector<int>& a)
+int64_t findNumTriples(const vector<int>& a)
 {
     const int n = a.size();
 
@@ -85,7 +42,7 @@ int64_t solveOptimised(const vector<int>& a)
 
     vector<XorSumInfo> infoForXorSum(maxXorSum + 1);
 
-#ifdef BRUTE_FORCE
+#ifdef DEBUG_VERIFY
     vector<int> dbgXorSumUpTo;
     {
         int xorSum = 0;
@@ -125,7 +82,7 @@ int64_t solveOptimised(const vector<int>& a)
             amountToAdd += k;
         }
 
-#ifdef BRUTE_FORCE
+#ifdef DEBUG_VERIFY
         int64_t dbgAmountToAdd = 0;
         for (int i = 0; i < k; i++)
         {
@@ -152,26 +109,6 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int N = rand() % 200 + 1;
-        const int maxA = rand() % 10000 + 1;
-
-        cout << 1 << endl;
-        cout << N << endl;
-
-        for (int i = 0; i < N; i++)
-        {
-            cout << maxA << " ";
-        }
-
-        return 0;
-    }
-
     const int T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -182,16 +119,8 @@ int main(int argc, char* argv[])
         {
             x = read<int>();
         }
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(a);
-        cout << " solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionOptimised = solveOptimised(a);
-        cout << " solutionOptimised: " << solutionOptimised << endl;
-        assert(solutionOptimised == solutionBruteForce);
-#else
-        const auto solutionOptimised = solveOptimised(a);
-        cout << solutionOptimised << endl;
-#endif
+        const auto numTriples = findNumTriples(a);
+        cout << numTriples << endl;
     }
 }
 
