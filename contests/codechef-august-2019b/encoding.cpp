@@ -235,12 +235,13 @@ ModNum sumOfFUpTo(const string& number)
 
     for (int index = 0; index < numDigits; index++)
     {
-        for (int digit = 0; digit < number[index] - '0'; digit++)
+        const int digitInNumber = number[index] - '0';
+        for (int digit = 0; digit < digitInNumber; digit++)
         {
             result += sumOfFForNumDigitsBeginningWith[numDigits][digit];
         }
         if (numDigits - index - 1 >= 0)
-            sumToLeft += (number[index] - '0') * tenToThePowerOf[numDigits - index - 1];
+            sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
         cout << "index: " << index << " result: " << result << " sumToLeft: " << sumToLeft << endl;
     }
 
