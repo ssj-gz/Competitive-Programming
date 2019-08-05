@@ -141,6 +141,7 @@ ModNum solveBruteForce(const string& L, const string& R)
 
 const int maxNumberLength = 100'000;
 vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
+vector<ModNum> tenToThePowerOf(maxNumberLength + 1);
 
 vector<vector<ModNum>> computeMainLookupTable()
 {
@@ -175,44 +176,12 @@ vector<vector<ModNum>> computeMainLookupTable()
         powerOf10 *= 10;
     }
 
-#if 0
+    powerOf10 = 1;
+    for (int i = 0; i <= maxNumberLength; i++)
     {
-        vector<vector<ModNum>> dbgSumOfFForNumDigitsBeginningWith(100'000, vector<ModNum>(10));
-        string current = "0";
-        const int maxLen = 8;
-
-        while (current.size() < maxLen)
-        {
-            dbgSumOfFForNumDigitsBeginningWith[current.size()][current[0] - '0'] += calcF(current);
-            int index = current.size() - 1;
-            while (index >= 0 && current[index] == '9')
-            {
-                current[index] = '0';
-                index--;
-            }
-            if (index == -1)
-            {
-                current = '1' + current;
-            }
-            else
-            {
-                current[index]++;
-            }
-        }
-
-        for (int len = 1; len < maxLen; len++)
-        {
-            for (int frontDigit = 0; frontDigit <= 9; frontDigit++)
-            {
-                cout << " len: " << len << " frontDigit: " << frontDigit << " sumOfFForNumDigitsBeginningWith: " << sumOfFForNumDigitsBeginningWith[len][frontDigit] << " dbgSumOfFForNumDigitsBeginningWith: " << dbgSumOfFForNumDigitsBeginningWith[len][frontDigit] << endl;
-                if (frontDigit != 0)
-                {
-                    assert(sumOfFForNumDigitsBeginningWith[len][frontDigit] == dbgSumOfFForNumDigitsBeginningWith[len][frontDigit]);
-                }
-            }
-        }
+        tenToThePowerOf[i] = powerOf10;
+        powerOf10 = powerOf10 * 10;
     }
-#endif
 
     return sumOfFForNumDigitsBeginningWith;
 
@@ -224,14 +193,7 @@ ModNum sumOfFUpTo(const string& number)
     const int numDigits = number.size();
     ModNum result = 0;
 
-    vector<ModNum> tenToThePowerOf;
-    ModNum powerOf10 = 1;
     ModNum sumToLeft = 0;
-    for (int i = 0; i <= numDigits; i++)
-    {
-        tenToThePowerOf.push_back(powerOf10);
-        powerOf10 = powerOf10 * 10;
-    }
 
     int previousDigitInNumber = -1;
     for (int index = 0; index < numDigits; index++)
