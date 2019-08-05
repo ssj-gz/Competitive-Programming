@@ -1,16 +1,12 @@
 // Simon St James (ssjgz) - 2019-08-05
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 
 #include <cassert>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -80,11 +76,6 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
-bool operator==(const ModNum& lhs, const ModNum& rhs)
-{
-    return lhs.value() == rhs.value();
-}
-
 const int maxNumberLength = 100'000;
 vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
 vector<ModNum> tenToThePowerOf(maxNumberLength + 1);
@@ -142,7 +133,7 @@ ModNum solveBruteForce(const string& L, const string& R)
     return result;
 }
 
-vector<vector<ModNum>> computeMainLookupTable()
+vector<vector<ModNum>> computeMainLookupTables()
 {
     for (int digit = 0; digit <= 9; digit++)
     {
@@ -247,59 +238,8 @@ ModNum solveOptimised(const string& L, const string& R)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int maxNumDigits = rand() % 7 + 1;
 
-        auto generateRandomNumber = [&maxNumDigits]()
-        {
-            string numberAsString;
-            const int originalNumDigits = (rand() % maxNumDigits) + 1;
-            int numDigits = originalNumDigits;
-
-            // First digit (must not be 0).
-            numberAsString = static_cast<char>('0' + ((rand() % 9) + 1)) + string("");
-            numDigits--;
-
-            while (numDigits > 0)
-            {
-                numberAsString = numberAsString + static_cast<char>('0' + (rand() % 10));
-
-                numDigits--;
-            }
-
-            assert(numberAsString.size() == originalNumDigits);
-            assert(numberAsString[0] != '0');
-
-            return numberAsString;
-
-        };
-
-
-        cout << 10 << endl;
-        for (int i = 0; i < 10; i++)
-        {
-            auto L = generateRandomNumber();
-            auto R = generateRandomNumber();
-            if (L.size() > R.size())
-                swap(L, R);
-            else if (L.size() == R.size())
-            {
-                if (L > R)
-                    swap(L, R);
-            }
-            cout << L.size() << " " << L << endl;
-            cout << R.size() << " " << R << endl;
-        }
-
-
-        return 0;
-    }
-
-    computeMainLookupTable();
+    computeMainLookupTables();
 
     const int T = read<int>();
     for (int t = 0; t < T; t++)
@@ -309,21 +249,8 @@ int main(int argc, char* argv[])
         read<int>();
         const string R = read<string>();
 
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(L, R);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
-        const auto solutionOptimised = solveOptimised(L, R);
-        cout << "solutionOptimised: " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
         const auto solutionOptimised = solveOptimised(L, R);
         cout << solutionOptimised << endl;
-#endif
     }
 
 }
