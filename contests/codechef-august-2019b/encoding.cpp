@@ -252,13 +252,12 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int maxNumDigits = 100'000;
+        const int maxNumDigits = rand() % 7 + 1;
 
         auto generateRandomNumber = [&maxNumDigits]()
         {
             string numberAsString;
-            //const int originalNumDigits = (rand() % maxNumDigits) + 1;
-            const int originalNumDigits = 100'000;
+            const int originalNumDigits = (rand() % maxNumDigits) + 1;
             int numDigits = originalNumDigits;
 
             // First digit (must not be 0).
