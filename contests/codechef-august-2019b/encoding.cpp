@@ -233,6 +233,7 @@ ModNum sumOfFUpTo(const string& number)
         powerOf10 = powerOf10 * 10;
     }
 
+    int previousDigitInNumber = -1;
     for (int index = 0; index < numDigits; index++)
     {
         assert(numDigits - index - 1 >= 0);
@@ -246,10 +247,12 @@ ModNum sumOfFUpTo(const string& number)
             cout << " adding " << blah << endl;
             result += sumToLeft * tenToThePowerOf[numDigits - index - 1];
         }
-        const bool digitIsSameAsPrevious = (index > 0 && number[index] == number[index - 1]);
+        const bool digitIsSameAsPrevious = (previousDigitInNumber == digitInNumber);
         if (!digitIsSameAsPrevious)
             sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
         cout << "index: " << index << " result: " << result << " sumToLeft: " << sumToLeft << endl;
+
+        previousDigitInNumber = digitInNumber;
     }
 
     result += sumToLeft;
