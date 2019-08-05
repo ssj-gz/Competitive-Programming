@@ -77,6 +77,10 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
 }
 
 const int maxNumberLength = 100'000;
+// Lookup arrays, populated by computeMainLookupTables().
+//
+//   - sumOfFForNumDigitsBeginningWith[l][d] = sum [ number such that len(number) == l and number begins with d ] { f(number) }.
+//   - tenToThePowerOf - just as you'd expect ;)
 vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
 vector<ModNum> tenToThePowerOf(maxNumberLength + 1);
 
@@ -95,39 +99,7 @@ ModNum calcF(const string& number)
             result += digitInNumber *  tenToThePowerOf[numDigits - index - 1];
         }
 
-
         previousDigit = digitInNumber;
-    }
-
-    return result;
-}
-
-ModNum solveBruteForce(const string& L, const string& R)
-{
-    ModNum result = 0;
-    string current = L;
-
-    while (true)
-    {
-        //cout << " current: " << current << endl;
-        result += calcF(current);
-        if (current == R)
-            break;
-
-        int index = current.size() - 1;
-        while (index >= 0 && current[index] == '9')
-        {
-            current[index] = '0';
-            index--;
-        }
-        if (index == -1)
-        {
-            current = '1' + current;
-        }
-        else
-        {
-            current[index]++;
-        }
     }
 
     return result;
@@ -175,7 +147,6 @@ vector<vector<ModNum>> computeMainLookupTables()
     }
 
     return sumOfFForNumDigitsBeginningWith;
-
 }
 
 
@@ -226,8 +197,7 @@ ModNum sumOfFUpTo(const string& number)
     return result;
 }
 
-
-ModNum solveOptimised(const string& L, const string& R)
+ModNum calcSumOfFInRange(const string& L, const string& R)
 {
     ModNum result =  sumOfFUpTo(R) - sumOfFUpTo(L) + calcF(L);
 
@@ -249,8 +219,8 @@ int main(int argc, char* argv[])
         read<int>();
         const string R = read<string>();
 
-        const auto solutionOptimised = solveOptimised(L, R);
-        cout << solutionOptimised << endl;
+        const auto sumOfFInRange = calcSumOfFInRange(L, R);
+        cout << sumOfFInRange << endl;
     }
 
 }
