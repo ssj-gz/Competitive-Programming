@@ -89,17 +89,17 @@ ModNum calcF(const string& number)
     const int numDigits = number.size();
     ModNum result = 0;
 
-    int previousDigit = -1;
+    int previousDigitInNumber = -1;
     for (int index = 0; index < numDigits; index++)
     {
         const int digitInNumber = number[index] - '0';
 
-        if (digitInNumber != previousDigit)
+        if (digitInNumber != previousDigitInNumber)
         {
             result += digitInNumber *  tenToThePowerOf[numDigits - index - 1];
         }
 
-        previousDigit = digitInNumber;
+        previousDigitInNumber = digitInNumber;
     }
 
     return result;
@@ -107,6 +107,7 @@ ModNum calcF(const string& number)
 
 void computeMainLookupTables()
 {
+    // Compute sumOfFForNumDigitsBeginningWith.
     for (int digit = 0; digit <= 9; digit++)
     {
         sumOfFForNumDigitsBeginningWith[0][digit] = 0;
@@ -139,6 +140,7 @@ void computeMainLookupTables()
         powerOf10 *= 10;
     }
 
+    // Compute tenToThePowerOf.
     powerOf10 = 1;
     for (int i = 0; i <= maxNumberLength; i++)
     {
@@ -177,7 +179,7 @@ ModNum sumOfFUpTo(const string& number)
                 // is wrong as this digit is equal to the previous digit; remove the contribution.
                 // (Similar logic as in computeMainLookupTables()).
                 const ModNum valueOfThisDigit = digit * tenToThePowerOf[numDigits - index - 1];
-                const auto correctionForThisDigit = valueOfThisDigit * numOccurencesWithThisDigit;
+                const ModNum correctionForThisDigit = valueOfThisDigit * numOccurencesWithThisDigit;
                 result -= correctionForThisDigit;
             }
         }
