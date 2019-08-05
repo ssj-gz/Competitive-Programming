@@ -300,7 +300,7 @@ int main(int argc, char* argv[])
 
             while (numDigits > 0)
             {
-                numberAsString = static_cast<char>('0' + (rand() % 10)) + numberAsString;
+                numberAsString = numberAsString + static_cast<char>('0' + (rand() % 10));
 
                 numDigits--;
             }
