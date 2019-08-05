@@ -286,9 +286,35 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int maxValue = rand() % 100'000'000;
-        int L = rand() % maxValue + 1;
-        int R = rand() % maxValue + 1;
+        const int maxNumDigits = rand() % 9 + 1;
+
+        auto generateRandomNumber = [&maxNumDigits]()
+        {
+            string numberAsString;
+            const int originalNumDigits = (rand() % maxNumDigits) + 1;
+            int numDigits = originalNumDigits;
+
+            // First digit (must not be 0).
+            numberAsString = static_cast<char>('0' + ((rand() % 9) + 1)) + string("");
+            numDigits--;
+
+            while (numDigits > 0)
+            {
+                numberAsString = static_cast<char>('0' + (rand() % 10)) + numberAsString;
+
+                numDigits--;
+            }
+
+            assert(numberAsString.size() == originalNumDigits);
+            assert(numberAsString[0] != '0');
+
+            return stoll(numberAsString);
+
+        };
+
+
+        auto L = generateRandomNumber();
+        auto R = generateRandomNumber();
         if (R < L)
             swap(L, R);
         cout << 1 << endl;
