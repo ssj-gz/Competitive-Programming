@@ -241,18 +241,25 @@ ModNum sumOfFUpTo(const string& number)
         const int digitInNumber = number[index] - '0';
         for (int digit = 0; digit < digitInNumber; digit++)
         {
+            const ModNum numOccurencesWithThisDigit = tenToThePowerOf[numDigits - index - 1];
             result += sumOfFForNumDigitsBeginningWith[numDigits - index][digit];
 
-            result += sumToLeft * tenToThePowerOf[numDigits - index - 1];
+            result += sumToLeft * numOccurencesWithThisDigit;
             if (digit == previousDigitInNumber)
             {
-                const auto blah = digit * tenToThePowerOf[numDigits - index - 1] * tenToThePowerOf[numDigits - index - 1];
-                result -= blah;
+                // The contribution to the result from having this digit in this position
+                // is wrong as this digit is equal to the previous digit; remove the contribution.
+                const ModNum valueOfThisDigit = digit * tenToThePowerOf[numDigits - index - 1];
+                const auto correctForThisDigit = valueOfThisDigit * numOccurencesWithThisDigit;
+                result -= correctForThisDigit;
             }
         }
         const bool digitIsSameAsPrevious = (previousDigitInNumber == digitInNumber);
         if (!digitIsSameAsPrevious)
+        {
+            // Update sumToLeft.
             sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
+        }
 
         previousDigitInNumber = digitInNumber;
     }
