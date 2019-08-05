@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -243,23 +243,16 @@ ModNum sumOfFUpTo(const string& number)
         {
             result += sumOfFForNumDigitsBeginningWith[numDigits - index][digit];
 
-            const auto blah = sumToLeft * tenToThePowerOf[numDigits - index - 1];
-            cout << " adding " << blah << endl;
             result += sumToLeft * tenToThePowerOf[numDigits - index - 1];
             if (digit == previousDigitInNumber)
             {
-#if 1
-                cout << " digit: " << digit << " previousDigitInNumber: " << previousDigitInNumber << " numDigits: " << numDigits << " index: " << index << endl;
                 const auto blah = digit * tenToThePowerOf[numDigits - index - 1] * tenToThePowerOf[numDigits - index - 1];
-                cout << " subtracting " << blah << endl;
                 result -= blah;
-#endif
             }
         }
         const bool digitIsSameAsPrevious = (previousDigitInNumber == digitInNumber);
         if (!digitIsSameAsPrevious)
             sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
-        cout << "index: " << index << " result: " << result << " sumToLeft: " << sumToLeft << endl;
 
         previousDigitInNumber = digitInNumber;
     }
