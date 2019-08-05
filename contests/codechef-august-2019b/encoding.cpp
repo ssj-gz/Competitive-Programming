@@ -157,15 +157,16 @@ vector<vector<ModNum>> computeMainLookupTable()
         for (int newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
         {
             ModNum& sumForLenBeginningWithThisDigit = sumOfFForNumDigitsBeginningWith[numberLength][newFrontDigit];
-            ModNum numWithPrevFrontDigit = prevPowerOf10;
+            ModNum numOccurrencesWithPrevFrontDigit = prevPowerOf10;
             for (int prevFrontDigit = 0; prevFrontDigit <= 9; prevFrontDigit++)
             {
-                sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
+                sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numOccurrencesWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
                 if (prevFrontDigit == newFrontDigit)
                 {
                     // Remove the contributions from numbers beginning with prevFrontDigit in the numbers of length (numberLength - 1) -
                     // they are wrong, as we have prepended another copy of prevFrontDigit to the front of the number.
-                    sumForLenBeginningWithThisDigit -= prevFrontDigit * prevPowerOf10 * numWithPrevFrontDigit;
+                    ModNum valueOfThisDigit = prevFrontDigit * prevPowerOf10;
+                    sumForLenBeginningWithThisDigit -= valueOfThisDigit * numOccurrencesWithPrevFrontDigit;
                 }
             }
 
@@ -203,13 +204,17 @@ ModNum sumOfFUpTo(const string& number)
         for (int digit = 0; digit < digitInNumber; digit++)
         {
             const ModNum numOccurencesWithThisDigit = tenToThePowerOf[numDigits - index - 1];
+            // Contribution from this index and rightwards having this digit.
             result += sumOfFForNumDigitsBeginningWith[numDigits - index][digit];
 
+            // Contribution from previous indices from having this digit.
             result += sumToLeft * numOccurencesWithThisDigit;
+
             if (digit == previousDigitInNumber)
             {
                 // The contribution to the result from having this digit in this position
                 // is wrong as this digit is equal to the previous digit; remove the contribution.
+                // (Similar logic as in computeMainLookupTable).
                 const ModNum valueOfThisDigit = digit * tenToThePowerOf[numDigits - index - 1];
                 const auto correctForThisDigit = valueOfThisDigit * numOccurencesWithThisDigit;
                 result -= correctForThisDigit;
