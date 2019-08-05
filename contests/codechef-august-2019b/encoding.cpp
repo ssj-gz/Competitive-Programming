@@ -246,7 +246,9 @@ ModNum sumOfFUpTo(const string& number)
             cout << " adding " << blah << endl;
             result += sumToLeft * tenToThePowerOf[numDigits - index - 1];
         }
-        sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
+        const bool digitIsSameAsPrevious = (index > 0 && number[index] == number[index - 1]);
+        if (!digitIsSameAsPrevious)
+            sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
         cout << "index: " << index << " result: " << result << " sumToLeft: " << sumToLeft << endl;
     }
 
