@@ -1,9 +1,9 @@
 // Simon St James (ssjgz) - 2019-08-06
 
-// O(N^3) solution - no chance of getting AC, but let's check correctness
+// O(N^2) solution - no chance of getting AC, but let's check correctness
 // and scrounge up some points at least :)
 
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -224,7 +224,8 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         const int maxN = 100;
-        const int N = rand() % maxN + 1;
+        //const int N = rand() % maxN + 1;
+        const int N = 1000;
 
         vector<int> P = {1, 2, 3};
         random_shuffle(P.begin(), P.end());
