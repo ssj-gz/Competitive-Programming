@@ -170,11 +170,12 @@ void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, 
         {
             result += segmentTree.numInRange(leftId, rightId);
         }
-        else if (P[1] < P[2] && P[1] < P[3])
+        else if (P[1] < P[0] && P[1] < P[2])
         {
+            cout << "gleep: " << endl;
             result += segmentTree.numInRange(0, leftId);
         }
-        else if (P[1] > P[2] && P[1] > P[3])
+        else if (P[1] > P[0] && P[1] > P[2])
         {
             result += segmentTree.numInRange(rightId, segmentTree.size());
         }
