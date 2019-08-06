@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <algorithm>
 
 #include <cassert>
 
@@ -105,7 +106,39 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+
+        const int maxN = 10;
+        const int N = rand() % maxN + 1;
+
+        vector<int> P = {1, 2, 3};
+        random_shuffle(P.begin(), P.end());
+
+        cout << 1 << endl;
+        cout << N << endl;
+
+        cout << P[0] << " " << P[1] << " " << P[2] << endl;
+
+        vector<int> nodeIds;
+        for (int i = 1; i <= N; i++)
+        {
+            nodeIds.push_back(i);
+        }
+        random_shuffle(nodeIds.begin(), nodeIds.end());
+
+        vector<int> usedNodeIds = { nodeIds.back() };
+        nodeIds.pop_back();
+
+        for (int i = 0; i < N - 1; i++)
+        {
+            const int newNodeId = nodeIds.back();
+            const int oldNodeId = usedNodeIds[rand() % usedNodeIds.size()];
+
+            cout << newNodeId << " " << oldNodeId << endl;
+
+            usedNodeIds.push_back(newNodeId);
+            nodeIds.pop_back();
+        }
+
         return 0;
     }
 
