@@ -3,7 +3,7 @@
 // O(N^3) solution - no chance of getting AC, but let's check correctness
 // and scrounge up some points at least :)
 
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -20,7 +20,7 @@
 
 using namespace std;
 
-template <typename T>
+    template <typename T>
 T read()
 {
     T toRead;
@@ -42,8 +42,8 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
 
     auto havePOrdering = [&P](Node* node1, Node* node2, int pIndex1, int pIndex2) -> bool
     {
-       return (((node1->id < node2->id) && (P[pIndex1] < P[pIndex2])) ||
-               ((node1->id > node2->id) && (P[pIndex1] > P[pIndex2])));
+        return (((node1->id < node2->id) && (P[pIndex1] < P[pIndex2])) ||
+                ((node1->id > node2->id) && (P[pIndex1] > P[pIndex2])));
     };
 
     if (havePOrdering(startNode, currentNode, 0, 2))
@@ -71,13 +71,12 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
             continue;
         solutionBruteForceAux(startNode, child, currentNode, P, nodesSoFar, result);
     }
-    
+
     if (currentNode != startNode)
         nodesSoFar.pop_back();
 }
 
 
-#if 1
 int64_t solveBruteForce(vector<Node>& nodes, const array<int, 3>& P)
 {
     int64_t result = 0;
@@ -90,16 +89,128 @@ int64_t solveBruteForce(vector<Node>& nodes, const array<int, 3>& P)
 
     return result;
 }
-#endif
 
-#if 1
+// Typical SegmentTree - you can find similar implementations all over the place :)
+class SegmentTree
+{
+    public:
+        SegmentTree(int numElements)
+            : m_numElements{numElements},
+            m_elements(numElements)
+            {
+            }
+        int total() const
+        {
+            return m_total;
+        }
+        int size() const
+        {
+            return m_numElements;
+        }
+        // Find the number in the given range (inclusive) in O(log2(numElements)).
+        int numInRange(int start, int end) const
+        {
+            start++; // Make 1-relative.  start and end are inclusive.
+            end++;
+            auto sum = 0;
+            auto elements = m_elements.data();
+            while(end > 0)
+            {
+                sum += elements[end];
+                end -= (end & (end*-1));
+            }
+            start--;
+            while(start > 0)
+            {
+                sum -= elements[start];
+                start -= (start & (start*-1));
+            }
+            return sum;
+        }
+
+        // Add "value" to the current value at pos in O(log2(numElements)).
+        void addValueAt(int value, int pos)
+        {
+            const auto n = m_numElements;
+            auto elements = m_elements.data();
+            pos++; // Make 1-relative.
+            while(pos <= n)
+            {
+                elements[pos] += value;
+                pos += (pos & (pos * -1));
+            }
+
+            m_total += value;
+        }
+
+    private:
+        int m_numElements;
+        int m_total = 0;
+        vector<int> m_elements;
+};
+
+void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, SegmentTree& segmentTree, int64_t& result)
+{
+
+    //cout << "startNode: " << startNode->id << " currentNode: " << currentNode->id << endl;
+
+    auto havePOrdering = [&P](Node* node1, Node* node2, int pIndex1, int pIndex2) -> bool
+    {
+        return (((node1->id < node2->id) && (P[pIndex1] < P[pIndex2])) ||
+                ((node1->id > node2->id) && (P[pIndex1] > P[pIndex2])));
+    };
+
+    if (havePOrdering(startNode, currentNode, 0, 2))
+    {
+        //cout << " have POrdering" << endl;
+        const int leftId = min(startNode->id, currentNode->id);
+        const int rightId = max(startNode->id, currentNode->id);
+        if ((P[0] < P[1] && P[1] < P[2]) ||
+                (P[0] > P[1] && P[1] > P[2]))
+        {
+            result += segmentTree.numInRange(leftId, rightId);
+        }
+        else if (P[1] < P[2] && P[1] < P[3])
+        {
+            result += segmentTree.numInRange(0, leftId);
+        }
+        else if (P[1] > P[2] && P[1] > P[3])
+        {
+            result += segmentTree.numInRange(rightId, segmentTree.size());
+        }
+
+
+    }
+
+
+    if (currentNode != startNode)
+        segmentTree.addValueAt(1, currentNode->id);
+
+    for (auto child : currentNode->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+        solutionOptimisedAux(startNode, child, currentNode, P, segmentTree, result);
+    }
+
+    if (currentNode != startNode)
+        segmentTree.addValueAt(-1, currentNode->id);
+}
+
+
 int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 {
-    int64_t result = solveBruteForce(nodes, P);
+    int64_t result = 0;
+
+    for (auto& node : nodes)
+    {
+        SegmentTree segmentTree(nodes.size() + 1);
+        solutionOptimisedAux(&node, &node, nullptr, P, segmentTree, result);
+    }
 
     return result;
+
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -172,16 +283,12 @@ int main(int argc, char* argv[])
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
 #ifdef BRUTE_FORCE
-#if 1
         const auto solutionBruteForce = solveBruteForce(nodes, P);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(nodes, P);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
         const auto solutionOptimised = solveOptimised(nodes, P);
         cout << solutionOptimised << endl;
