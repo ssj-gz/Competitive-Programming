@@ -95,8 +95,9 @@ class SegmentTree
 {
     public:
         SegmentTree(int numElements)
-            : m_numElements{numElements},
-            m_elements(numElements)
+            : m_size{numElements},
+              m_numElements{2 * numElements},
+              m_elements(m_numElements + 1)
             {
             }
         int total() const
@@ -105,7 +106,7 @@ class SegmentTree
         }
         int size() const
         {
-            return m_numElements;
+            return m_size;
         }
         // Find the number in the given range (inclusive) in O(log2(numElements)).
         int numInRange(int start, int end) const
@@ -137,6 +138,7 @@ class SegmentTree
             while(pos <= n)
             {
                 elements[pos] += value;
+                assert(elements[pos] >= 0);
                 pos += (pos & (pos * -1));
             }
 
@@ -144,9 +146,11 @@ class SegmentTree
         }
 
     private:
+        int m_size;
         int m_numElements;
         int m_total = 0;
         vector<int> m_elements;
+
 };
 
 void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, SegmentTree& segmentTree, int64_t& result)
@@ -172,17 +176,13 @@ void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, 
         }
         else if (P[1] < P[0] && P[1] < P[2])
         {
-            cout << "gleep: " << endl;
             result += segmentTree.numInRange(0, leftId);
         }
         else if (P[1] > P[0] && P[1] > P[2])
         {
             result += segmentTree.numInRange(rightId, segmentTree.size());
         }
-
-
     }
-
 
     if (currentNode != startNode)
         segmentTree.addValueAt(1, currentNode->id);
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxN = 10;
+        const int maxN = 100;
         const int N = rand() % maxN + 1;
 
         vector<int> P = {1, 2, 3};
