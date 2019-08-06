@@ -1,5 +1,9 @@
-// Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+// Simon St James (ssjgz) - 2019-08-06
+
+// O(N^3) solution - no chance of getting AC, but let's check correctness
+// and scrounge up some points at least :)
+
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -34,7 +38,7 @@ struct Node
 void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, vector<Node*> nodesSoFar, int64_t& result)
 {
 
-    cout << "startNode: " << startNode->id << " currentNode: " << currentNode->id << endl;
+    //cout << "startNode: " << startNode->id << " currentNode: " << currentNode->id << endl;
 
     auto havePOrdering = [&P](Node* node1, Node* node2, int pIndex1, int pIndex2) -> bool
     {
@@ -44,13 +48,13 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
 
     if (havePOrdering(startNode, currentNode, 0, 2))
     {
-        cout << " have POrdering" << endl;
+        //cout << " have POrdering" << endl;
         for (auto nodeinPath : nodesSoFar)
         {
-            cout << "  nodeinPath: " << nodeinPath->id << endl;
+            //cout << "  nodeinPath: " << nodeinPath->id << endl;
             if (havePOrdering(startNode, nodeinPath, 0, 1) && havePOrdering(nodeinPath, currentNode, 1, 2))
             {
-                cout << "Found! (" << startNode->id << ", " << nodeinPath->id << ", " << currentNode->id << ")" << endl;
+                //cout << "Found! (" << startNode->id << ", " << nodeinPath->id << ", " << currentNode->id << ")" << endl;
                 result++;
             }
         }
@@ -88,10 +92,10 @@ int64_t solveBruteForce(vector<Node>& nodes, const array<int, 3>& P)
 }
 #endif
 
-#if 0
-int64_t solveOptimised()
+#if 1
+int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 {
-    int64_t result;
+    int64_t result = solveBruteForce(nodes, P);
 
     return result;
 }
@@ -179,7 +183,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(nodes, P);
         cout << solutionOptimised << endl;
 #endif
     }
