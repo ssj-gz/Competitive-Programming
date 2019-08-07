@@ -476,7 +476,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         {
             //cout << "Forward pass" << endl;
             a1Tracker.reset();
-            a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
         }
         {
@@ -486,7 +485,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             }
             //cout << "Backward pass" << endl;
             a1Tracker.reset();
-            a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
         }
         {
@@ -501,13 +499,11 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         {
             //cout << "Forward pass P forward" << endl;
             a1Tracker.reset();
-            a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
         }
         {
             //cout << "Forward pass P backward" << endl;
             a1Tracker.reset();
-            a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, reversedP);
         }
         {
@@ -517,13 +513,11 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             }
             //cout << "Backward pass P forward" << endl;
             a1Tracker.reset();
-            a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
         }
         {
             //cout << "Backward pass P backward" << endl;
             a1Tracker.reset();
-            a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, reversedP);
         }
         {
@@ -653,7 +647,7 @@ int main(int argc, char* argv[])
         //const auto solutionOptimised = solveOptimised(nodes, P);
         const auto solutionOptimised2 = solveOptimised2(nodes, P);
         //cout << "solutionOptimised: " << solutionOptimised << " solutionOptimised2: " << solutionOptimised2 << endl;
-        //cout << "solutionOptimised2: " << solutionOptimised2 << endl;
+        ////cout << "solutionOptimised2: " << solutionOptimised2 << endl;
         cout << solutionOptimised2 << endl;
         //assert(solutionOptimised == solutionOptimised2);
 
