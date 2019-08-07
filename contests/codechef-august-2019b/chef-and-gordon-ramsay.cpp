@@ -396,22 +396,18 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
     const bool isMonotic = (isA2LessThanA1 != isA2LessThanA3);
 
     // What if we are a2?
-    const auto initialNumGreaterThan = nodeTracker.numToRightOf(currentNode->id);
-    const auto initialNumLessThan = nodeTracker.total() - initialNumGreaterThan;
     int64_t descendantsGreaterThanSoFar = 0;
     int64_t descendantsLessThanSoFar = 0;
 
-    //cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
-
+    int childIndex = 0;
     for (Node* childNode : currentNode->children)
     {
 
         solveOptimisedAuxLCAIsA2(childNode, nodeTracker, P, result);
         const int numGreater = nodeTracker.numToRightOf(currentNode->id);
         const int numLess = nodeTracker.total() - numGreater;
-        const auto numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
-        const auto numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
-        //cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
+        const auto numOfThisChildGreaterThan = currentNode->numGreaterThanForChild[childIndex];
+        const auto numOfThisChildLessThan = currentNode->numLessThanForChild[childIndex];
 
         //cout << " isA2LessThanA1: " << isA2LessThanA1 << " isA2LessThanA3: " << isA2LessThanA3 << endl;
 
@@ -434,10 +430,9 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
 
         descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
         descendantsLessThanSoFar += numOfThisChildLessThan;
-    }
 
-    // What if we are a1 or a3?
-    nodeTracker.addValueAt(1, currentNode->id);
+        childIndex++;
+    }
 }
 
 void solveOptimisedAuxLCAIsA1(Node* currentNode, const Triple& P, int64_t& result)
