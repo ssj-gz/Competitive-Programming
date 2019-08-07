@@ -254,16 +254,18 @@ int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 
 void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
 {
+    const bool isA2LessThanA1 = (P[1] < P[0]);
+    const bool isA2LessThanA3 = (P[1] < P[2]);
 
     cout << "visiting node: " << currentNode->id << endl;
     // What if we are a3?
-    const auto numA2WithA1 = a2WithA1Tracker.numToLeftOf(currentNode->id);
+    const auto numA2WithA1 =  isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
     cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
 
     // What if we are a2?
-    const auto numA1 = a1Tracker.numToRightOf(currentNode->id);
+    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
     cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
     cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
     a2WithA1Tracker.addValueAt(numA1, currentNode->id);
@@ -290,9 +292,14 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
 
 void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
 {
+    const bool isA2LessThanA1 = (P[1] < P[0]);
+    const bool isA2LessThanA3 = (P[1] < P[2]);
+
     // What if we are a2?
     const auto initialNumGreaterThan = nodeTracker.numToRightOf(currentNode->id);
+    const auto initialNumLessThan = nodeTracker.numToLeftOf(currentNode->id);
     int64_t descendantsGreaterThanSoFar = 0;
+    int64_t descendantsLessThanSoFar = 0;
 
     cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
 
@@ -303,11 +310,16 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
 
         solveOptimisedAuxLCAIsA2(childNode, currentNode, nodeTracker, P, result);
         const auto numOfThisChildGreaterThan = (nodeTracker.numToRightOf(currentNode->id) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
+        const auto numOfThisChildLessThan = (nodeTracker.numToLeftOf(currentNode->id) - initialNumLessThan) - descendantsLessThanSoFar;
         cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << " adding: " <<  (numOfThisChildGreaterThan * descendantsGreaterThanSoFar) << " to result" << endl;
 
-        result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
+        if (isA2LessThanA3)
+            result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
+        else
+            result += numOfThisChildLessThan * descendantsLessThanSoFar;
 
         descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
+        descendantsLessThanSoFar += numOfThisChildLessThan;
     }
 
     // What if we are a1 or a3?
@@ -316,15 +328,18 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
 
 void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
 {
+    const bool isA2LessThanA1 = (P[1] < P[0]);
+    const bool isA2LessThanA3 = (P[1] < P[2]);
+
     // What if we are a1?
     a1Tracker.addValueAt(1, currentNode->id);
 
     // What if we are a2? 
-    const auto numA1 = a1Tracker.numToRightOf(currentNode->id);
+    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
     a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     // What if we are a3?
-    const auto numA2WithA1 = a2WithA1Tracker.numToLeftOf(currentNode->id);
+    const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
     cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
@@ -348,6 +363,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     int64_t result = 0;
     auto rootNode = &(nodes.front());
     const Triple P = { Parray[0], Parray[1], Parray[2] };
+    const Triple reversedP = { Parray[2], Parray[1], Parray[0] };
 
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
 
@@ -381,6 +397,37 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
         }
     }
+    else
+    {
+        {
+            cout << "Forward pass P forward" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        }
+        {
+            cout << "Forward pass P backward" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
+        }
+        {
+            for (auto& node : nodes)
+            {
+                reverse(node.neighbours.begin(), node.neighbours.end());
+            }
+            cout << "Backward pass P forward" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        }
+        {
+            cout << "Backward pass P backward" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
+        }
+    }
     return result;
 }
 
@@ -402,7 +449,7 @@ int main(int argc, char* argv[])
         random_shuffle(P.begin(), P.end());
 #endif
         // TODO - remove this!
-        const int blah = rand() % 2;
+        const int blah = rand() % 4;
         vector<int> P;
         switch (blah)
         {
