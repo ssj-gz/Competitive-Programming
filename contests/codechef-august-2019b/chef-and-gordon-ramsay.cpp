@@ -44,19 +44,19 @@ struct Node
     vector<Node*> children;
     int id = -1;
 
-    vector<int64_t> numLessThanForChild;
-    vector<int64_t> numGreaterThanForChild;
+    vector<int> numLessThanForChild;
+    vector<int> numGreaterThanForChild;
 
-    int64_t numLessThanWhenVisitedOriginalOrder = -1;
-    int64_t numLessThanWhenVisitedReversedOrder = -1;
-    int64_t numGreaterThanWhenVisitedOriginalOrder = -1;
-    int64_t numGreaterThanWhenVisitedReversedOrder = -1;
+    int numLessThanWhenVisitedOriginalOrder = -1;
+    int numLessThanWhenVisitedReversedOrder = -1;
+    int numGreaterThanWhenVisitedOriginalOrder = -1;
+    int numGreaterThanWhenVisitedReversedOrder = -1;
 
-    int64_t numDescendentsLessThan = 0;
-    int64_t numDescendentsGreaterThan = 0;
+    int numDescendentsLessThan = 0;
+    int numDescendentsGreaterThan = 0;
 
-    int64_t numAncestorsLessThan = 0;
-    int64_t numAncestorsGreaterThan = 0;
+    int numAncestorsLessThan = 0;
+    int numAncestorsGreaterThan = 0;
 };
 
 void fixParentChild(Node* node, Node* parent)
@@ -173,11 +173,11 @@ class SegmentTree
             return m_size;
         }
         // Find the number in the given range (inclusive) in O(log2(numElements)).
-        int64_t numInRange(int start, int end) const
+        int numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
-            int64_t sum = 0;
+            int sum = 0;
             auto elements = m_elements.data();
             while(end > 0)
             {
@@ -192,12 +192,12 @@ class SegmentTree
             }
             return sum;
         }
-        int64_t numToRightOf(int pos)
+        int numToRightOf(int pos)
         {
             return total() - numToLeftOf(pos);
             //return numInRange(pos + 1, size());
         }
-        int64_t numToLeftOf(int pos)
+        int numToLeftOf(int pos)
         {
             return numInRange(0, pos - 1);
         }
@@ -289,15 +289,14 @@ int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 void fillInLookupsPass1of2(Node* currentNode, SegmentTree& nodeTracker)
 {
     //cout << "entering node: " << currentNode->id << endl;
-    const int64_t numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
-    const int64_t numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
-
-
-    nodeTracker.addValueAt(1, currentNode->id);
-    //cout << " registered node: " << currentNode->id << endl;
+    const int numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
+    const int numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
 
     currentNode->numLessThanWhenVisitedOriginalOrder = numLessThanInitial;
     currentNode->numGreaterThanWhenVisitedOriginalOrder = numGreaterThanInitial;
+
+    nodeTracker.addValueAt(1, currentNode->id);
+    //cout << " registered node: " << currentNode->id << endl;
 
     //cout << " currentNode: " << currentNode->id << " numLessThanWhenVisitedOriginalOrder: " << currentNode->numLessThanWhenVisitedOriginalOrder << " numGreaterThanWhenVisitedOriginalOrder: " << currentNode->numGreaterThanWhenVisitedOriginalOrder << endl;
 
@@ -307,13 +306,13 @@ void fillInLookupsPass1of2(Node* currentNode, SegmentTree& nodeTracker)
     {
         fillInLookupsPass1of2(child, nodeTracker);
 
-        const int64_t numLessThanAfterChild = nodeTracker.numToLeftOf(currentNode->id);
-        const int64_t numGreaterThanAfterChild = nodeTracker.total() - numLessThanAfterChild - 1;
+        const int numLessThanAfterChild = nodeTracker.numToLeftOf(currentNode->id);
+        const int numGreaterThanAfterChild = nodeTracker.total() - numLessThanAfterChild - 1;
 
         //cout << " currentNode: " << currentNode->id << " numLessThanAfterChild " << child->id << " = " << numLessThanAfterChild << " numLessThanInitial: " << numLessThanInitial << " adding to numDescendendentsLessThan: " << (numLessThanAfterChild - numLessThanInitial) << endl;
 
-        const int64_t numLessThanViaChild = numLessThanAfterChild - numLessThanInitial - currentNode->numDescendentsLessThan;
-        const int64_t numGreaterThanViaChild = numGreaterThanAfterChild - numGreaterThanInitial - currentNode->numDescendentsGreaterThan;
+        const int numLessThanViaChild = numLessThanAfterChild - numLessThanInitial - currentNode->numDescendentsLessThan;
+        const int numGreaterThanViaChild = numGreaterThanAfterChild - numGreaterThanInitial - currentNode->numDescendentsGreaterThan;
 
         currentNode->numLessThanForChild.push_back(numLessThanViaChild);
         currentNode->numGreaterThanForChild.push_back(numGreaterThanViaChild);
@@ -326,8 +325,8 @@ void fillInLookupsPass1of2(Node* currentNode, SegmentTree& nodeTracker)
 
 void fillInLookupsPass2of2(Node* currentNode, const int numNodes, SegmentTree& nodeTracker)
 {
-    const int64_t numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
-    const int64_t numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
+    const int numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
+    const int numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
 
     nodeTracker.addValueAt(1, currentNode->id);
 
@@ -396,8 +395,8 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P, int64_t& resul
     const bool isMonotic = (isA2LessThanA1 != isA2LessThanA3);
 
     // What if we are a2?
-    int64_t descendantsGreaterThanSoFar = 0;
-    int64_t descendantsLessThanSoFar = 0;
+    int descendantsGreaterThanSoFar = 0;
+    int descendantsLessThanSoFar = 0;
 
     int childIndex = 0;
     for (Node* childNode : currentNode->children)
@@ -412,18 +411,18 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P, int64_t& resul
         if (isA2LessThanA1 && isA2LessThanA3)
         {
             //cout << " glarp" << endl;
-            result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
+            result += static_cast<int64_t>(numOfThisChildGreaterThan) * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && !isA2LessThanA3)
         {
             //cout << " glorp" << endl;
-            result += numOfThisChildLessThan * descendantsLessThanSoFar;
+            result += static_cast<int64_t>(numOfThisChildLessThan) * descendantsLessThanSoFar;
         }
         else 
         {
             //cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildLessThan * descendantsGreaterThanSoFar) << " to result" << endl;
-            result += numOfThisChildLessThan * descendantsGreaterThanSoFar;
-            result += numOfThisChildGreaterThan * descendantsLessThanSoFar;
+            result += static_cast<int64_t>(numOfThisChildLessThan) * descendantsGreaterThanSoFar;
+            result += static_cast<int64_t>(numOfThisChildGreaterThan) * descendantsLessThanSoFar;
         }
 
         descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
@@ -439,10 +438,10 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, const Triple& P, int64_t& resul
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
     // What if we are A2?
-    const int64_t numAncestors = (isA2LessThanA1 ? currentNode->numAncestorsGreaterThan : currentNode->numAncestorsLessThan);
-    const int64_t numDescendents = (isA2LessThanA3 ? currentNode->numDescendentsGreaterThan : currentNode->numDescendentsLessThan);
+    const int numAncestors = (isA2LessThanA1 ? currentNode->numAncestorsGreaterThan : currentNode->numAncestorsLessThan);
+    const int numDescendents = (isA2LessThanA3 ? currentNode->numDescendentsGreaterThan : currentNode->numDescendentsLessThan);
 
-    result += numAncestors * numDescendents;
+    result += static_cast<int>(numAncestors) * numDescendents;
 
     for (Node* childNode : currentNode->children)
     {
