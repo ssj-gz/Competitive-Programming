@@ -3,7 +3,7 @@
 // O(N^2) solution - no chance of getting AC, but let's check correctness
 // and scrounge up some points at least :)
 
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -35,7 +35,29 @@ struct Node
     int id = -1;
 };
 
-void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, vector<Node*> nodesSoFar, int64_t& result)
+class Triple
+{
+    public:
+        Triple(int a1, int a2, int a3)
+            : m_elements{{a1, a2, a3}}
+        {
+        }
+        int operator[](int i) const
+        {
+            return m_elements[i];
+        }
+    private:
+        std::array<int, 3> m_elements;
+};
+
+ostream& operator<<(ostream& os, const Triple& triple)
+{
+    cout << "(" << triple[0] << ", " << triple[1] << ", " << triple[2] << ")";
+    return os;
+}
+
+
+void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, vector<Node*> nodesSoFar, vector<Triple>& result)
 {
 
     //cout << "startNode: " << startNode->id << " currentNode: " << currentNode->id << endl;
@@ -55,7 +77,7 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
             if (havePOrdering(startNode, nodeinPath, 0, 1) && havePOrdering(nodeinPath, currentNode, 1, 2))
             {
                 //cout << "Found! (" << startNode->id << ", " << nodeinPath->id << ", " << currentNode->id << ")" << endl;
-                result++;
+                result.emplace_back(startNode->id, nodeinPath->id, currentNode->id);
             }
         }
 
@@ -77,9 +99,9 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
 }
 
 
-int64_t solveBruteForce(vector<Node>& nodes, const array<int, 3>& P)
+vector<Triple> solveBruteForce(vector<Node>& nodes, const array<int, 3>& P)
 {
-    int64_t result = 0;
+    vector<Triple> result;
 
     for (auto& node : nodes)
     {
@@ -223,9 +245,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxN = 100;
-        //const int N = rand() % maxN + 1;
-        const int N = 1000;
+        const int maxN = 1000;
+        const int N = rand() % maxN + 1;
 
         vector<int> P = {1, 2, 3};
         random_shuffle(P.begin(), P.end());
@@ -285,7 +306,7 @@ int main(int argc, char* argv[])
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
 #ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(nodes, P);
+        const auto solutionBruteForce = solveBruteForce(nodes, P).size();
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
         const auto solutionOptimised = solveOptimised(nodes, P);
         cout << "solutionOptimised: " << solutionOptimised << endl;
