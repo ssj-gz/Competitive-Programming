@@ -313,9 +313,9 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
         const auto numOfThisChildLessThan = (nodeTracker.numToLeftOf(currentNode->id) - initialNumLessThan) - descendantsLessThanSoFar;
         cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << " adding: " <<  (numOfThisChildGreaterThan * descendantsGreaterThanSoFar) << " to result" << endl;
 
-        if (isA2LessThanA3)
+        if (isA2LessThanA3 && isA2LessThanA3)
             result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
-        else
+        else if (!isA2LessThanA3 && !isA2LessThanA3)
             result += numOfThisChildLessThan * descendantsLessThanSoFar;
 
         descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
