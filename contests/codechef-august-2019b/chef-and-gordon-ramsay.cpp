@@ -279,7 +279,8 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
     const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
     //cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
     //cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
-    a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+    if (numA1 != 0)
+        a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     for (Node* childNode : currentNode->neighbours)
     {
@@ -294,7 +295,8 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
     //cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
 
     // What if we are a2, and have finished this node? We are not an a2 any more.
-    a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
+    if (numA1 != 0)
+        a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
 
 
 
@@ -365,7 +367,8 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& 
 
     // What if we are a2? 
     const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) - 1 : a1Tracker.numToLeftOf(currentNode->id);
-    a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+    if (numA1 != 0)
+        a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     // What if we are a3?
     const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id) - numA1;
@@ -381,7 +384,8 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& 
     }
 
     // What if we are a2, and have finished this node? We are not an a2 any more.
-    a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
+    if (numA1 != 0)
+        a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
 
     // What if we are a1, and have finished this node? We are not an a1 any more.
     a1Tracker.addValueAt(-1, currentNode->id);
