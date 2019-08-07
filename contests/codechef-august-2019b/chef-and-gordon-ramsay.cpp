@@ -17,11 +17,24 @@
 
 using namespace std;
 
+#define gc getchar_unlocked
+
+void scan_integer( int &x )
+{
+    int c = gc();
+    x = 0;
+    for( ; ((c<48 || c>57) && c != '-'); c = gc() );
+    for( ;c>47 && c<58; c = gc() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
+}
+
+
     template <typename T>
 T read()
 {
     T toRead;
-    cin >> toRead;
+    scan_integer(toRead);
     assert(cin);
     return toRead;
 }
@@ -124,8 +137,8 @@ class SegmentTree
     public:
         SegmentTree(int numElements)
             : m_size{numElements},
-              m_numElements{2 * numElements},
-              m_elements(m_numElements + 1)
+            m_numElements{2 * numElements},
+            m_elements(m_numElements + 1)
             {
             }
         int total() const
@@ -551,7 +564,6 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
         const int N = read<int>();
-        cout << "t: " << t << " N: " << N << endl;
 
         vector<Node> nodes(N);
         for (int i = 0; i < N; i++)
