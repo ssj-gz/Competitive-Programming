@@ -43,8 +43,15 @@ struct Node
 {
     vector<Node*> children;
     int id = -1;
-
 };
+
+struct NodeInfo
+{
+    int numDescendentsLessThan = 0;
+    int numDescendentsGreaterThan = 0;
+};
+
+vector<NodeInfo> nodeInfo;
 
 void fixParentChild(Node* node, Node* parent)
 {
@@ -287,6 +294,8 @@ SegmentTree nodeTracker;
 int64_t result = 0;
 
 
+
+
 void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, const Triple& P)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
@@ -329,10 +338,10 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
-    const bool isMonotic = (isA2LessThanA1 != isA2LessThanA3);
+    const int nodeId = currentNode->id;
 
     // What if we are a2?
-    const auto initialNumGreaterThan = nodeTracker.numToRightOf(currentNode->id);
+    const auto initialNumGreaterThan = nodeTracker.numToRightOf(nodeId);
     const auto initialNumLessThan = nodeTracker.total() - initialNumGreaterThan;
     int descendantsGreaterThanSoFar = 0;
     int descendantsLessThanSoFar = 0;
@@ -343,7 +352,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
     {
 
         solveOptimisedAuxLCAIsA2(childNode, P);
-        const int numGreater = nodeTracker.numToRightOf(currentNode->id);
+        const int numGreater = nodeTracker.numToRightOf(nodeId);
         const int numLess = nodeTracker.total() - numGreater;
         const int numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const int numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
@@ -372,8 +381,11 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
         descendantsLessThanSoFar += numOfThisChildLessThan;
     }
 
+    nodeInfo[nodeId].numDescendentsLessThan = descendantsLessThanSoFar;
+    nodeInfo[nodeId].numDescendentsGreaterThan = descendantsGreaterThanSoFar;
+
     // What if we are a1 or a3?
-    nodeTracker.addValueAt(1, currentNode->id);
+    nodeTracker.addValueAt(1, nodeId);
 }
 
 void solveOptimisedAuxLCAIsA1(Node* currentNode, const Triple& P)
@@ -424,6 +436,8 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     a1Tracker = SegmentTree(nodes.size() + 1);
     a2WithA1Tracker = SegmentTree(nodes.size() + 1);
     nodeTracker = SegmentTree(nodes.size() + 1);
+    nodeInfo.clear();
+    nodeInfo.resize(nodes.size() + 1);
 
     if (!isPMonotonic)
     {
