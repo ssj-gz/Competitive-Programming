@@ -311,17 +311,25 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, const Triple& P)
 
     //cout << "visiting node: " << currentNode->id << endl;
     // What if we are a3?
-    const auto numA2WithA1 =  isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
+    //const auto numA2WithA1 =  isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
     //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     //cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
-    result += numA2WithA1;
+    //result += numA2WithA1;
 
     // What if we are a2?
     const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
     //cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
     //cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
-    if (numA1 != 0)
-        a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+    //if (numA1 != 0)
+        //a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+    if (isA2LessThanA3)
+    {
+        result += static_cast<int64_t>(numA1) * nodeInfo[currentNode->id].numDescendentsGreaterThan;
+    }
+    else
+    {
+        result += static_cast<int64_t>(numA1) * nodeInfo[currentNode->id].numDescendentsLessThan;
+    }
 
     for (Node* childNode : currentNode->children)
     {
@@ -333,8 +341,8 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, const Triple& P)
     //cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
 
     // What if we are a2, and have finished this node? We are not an a2 any more.
-    if (numA1 != 0)
-        a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
+    //if (numA1 != 0)
+        //a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
 
 
 
