@@ -44,6 +44,19 @@ struct Node
     vector<Node*> children;
     int id = -1;
 
+    vector<int64_t> numLessThanForChild;
+    vector<int64_t> numGreaterThanForChild;
+
+    int64_t numLessThanWhenVisitedOriginalOrder = -1;
+    int64_t numLessThanWhenVisitedReversedOrder = -1;
+    int64_t numGreaterThanWhenVisitedOriginalOrder = -1;
+    int64_t numGreaterThanWhenVisitedReversedOrder = -1;
+
+    int64_t numDescendentsLessThan = 0;
+    int64_t numDescendentsGreaterThan = 0;
+
+    int64_t numAncestorsLessThan = 0;
+    int64_t numAncestorsGreaterThan = 0;
 };
 
 void fixParentChild(Node* node, Node* parent)
@@ -273,6 +286,67 @@ int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 
 }
 
+void fillInLookupsPass1of2(Node* currentNode, SegmentTree& nodeTracker)
+{
+    //cout << "entering node: " << currentNode->id << endl;
+    const int64_t numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
+    const int64_t numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
+
+
+    nodeTracker.addValueAt(1, currentNode->id);
+    //cout << " registered node: " << currentNode->id << endl;
+
+    currentNode->numLessThanWhenVisitedOriginalOrder = numLessThanInitial;
+    currentNode->numGreaterThanWhenVisitedOriginalOrder = numGreaterThanInitial;
+
+    //cout << " currentNode: " << currentNode->id << " numLessThanWhenVisitedOriginalOrder: " << currentNode->numLessThanWhenVisitedOriginalOrder << " numGreaterThanWhenVisitedOriginalOrder: " << currentNode->numGreaterThanWhenVisitedOriginalOrder << endl;
+
+    for (auto child : currentNode->children)
+    {
+        fillInLookupsPass1of2(child, nodeTracker);
+
+        const int64_t numLessThanAfterChild = nodeTracker.numToLeftOf(currentNode->id);
+        const int64_t numGreaterThanAfterChild = nodeTracker.total() - numLessThanAfterChild - 1;
+
+        //cout << " currentNode: " << currentNode->id << " numLessThanAfterChild " << child->id << " = " << numLessThanAfterChild << " numLessThanInitial: " << numLessThanInitial << " adding to numDescendendentsLessThan: " << (numLessThanAfterChild - numLessThanInitial) << endl;
+
+        const int64_t numLessThanViaChild = numLessThanAfterChild - numLessThanInitial - currentNode->numDescendentsLessThan;
+        const int64_t numGreaterThanViaChild = numGreaterThanAfterChild - numGreaterThanInitial - currentNode->numDescendentsGreaterThan;
+
+        currentNode->numLessThanForChild.push_back(numLessThanViaChild);
+        currentNode->numGreaterThanForChild.push_back(numGreaterThanViaChild);
+
+        currentNode->numDescendentsLessThan += numLessThanViaChild;
+        currentNode->numDescendentsGreaterThan += numGreaterThanViaChild;
+
+    }
+}
+
+void fillInLookupsPass2of2(Node* currentNode, SegmentTree& nodeTracker)
+{
+    const int64_t numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
+    const int64_t numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
+
+    nodeTracker.addValueAt(1, currentNode->id);
+
+    currentNode->numLessThanWhenVisitedReversedOrder = numLessThanInitial;
+    currentNode->numGreaterThanWhenVisitedReversedOrder = numGreaterThanInitial;
+
+    //cout << " currentNode: " << currentNode->id << " numLessThanWhenVisitedReversedOrder: " << currentNode->numLessThanWhenVisitedReversedOrder << " numGreaterThanWhenVisitedReversedOrder: " << currentNode->numGreaterThanWhenVisitedReversedOrder << endl;
+
+    for (int childIndex = currentNode->children.size() - 1; childIndex >=0; childIndex-- )
+    {
+        fillInLookupsPass2of2(currentNode->children[childIndex], nodeTracker);
+    }
+
+    //cout << " currentNode: " << currentNode->id << " numDescendendentsLessThan: " << numDescendendentsLessThan << endl;
+
+    currentNode->numAncestorsLessThan = currentNode->numDescendentsLessThan + currentNode->numLessThanWhenVisitedOriginalOrder + currentNode->numLessThanWhenVisitedReversedOrder - (currentNode->id - 1);
+
+    //cout << " node: " << currentNode->id << " numAncestorsLessThan: " << currentNode->numAncestorsLessThan << endl;
+
+}
+
 void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
@@ -404,6 +478,14 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     const Triple reversedP = { Parray[2], Parray[1], Parray[0] };
 
     fixParentChild(rootNode, nullptr);
+    {
+        SegmentTree nodeTracker(nodes.size() + 1);
+        fillInLookupsPass1of2(rootNode, nodeTracker);
+    }
+    {
+        SegmentTree nodeTracker(nodes.size() + 1);
+        fillInLookupsPass2of2(rootNode, nodeTracker);
+    }
 
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
 
