@@ -49,6 +49,14 @@ struct NodeInfo
 {
     int numDescendentsLessThan = 0;
     int numDescendentsGreaterThan = 0;
+    int numLessThanOnInitialVisitWithOriginalOrder = 0;
+    int numGreaterThanOnInitialVisitWithOriginalOrder = 0;
+    //int dummyFieldC = 0;
+    //int dummyFieldD = 0;
+    //int dummyFieldE = 0;
+    //int dummyFieldF = 0;
+    //int dummyFieldG = 0;
+    //int dummyFieldH = 0;
 };
 
 vector<NodeInfo> nodeInfo;
@@ -348,12 +356,15 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
 
     //cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
 
+    // What if we are a1 or a3?
+    nodeTracker.addValueAt(1, nodeId);
+
     for (Node* childNode : currentNode->children)
     {
 
         solveOptimisedAuxLCAIsA2(childNode, P);
-        const int numGreater = nodeTracker.numToRightOf(nodeId);
-        const int numLess = nodeTracker.total() - numGreater;
+        const int numLess = nodeTracker.numToLeftOf(nodeId);
+        const int numGreater = nodeTracker.total() - numLess - 1;
         const int numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const int numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
         //cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
@@ -383,9 +394,9 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
 
     nodeInfo[nodeId].numDescendentsLessThan = descendantsLessThanSoFar;
     nodeInfo[nodeId].numDescendentsGreaterThan = descendantsGreaterThanSoFar;
+    nodeInfo[nodeId].numLessThanOnInitialVisitWithOriginalOrder = initialNumLessThan;
+    nodeInfo[nodeId].numGreaterThanOnInitialVisitWithOriginalOrder = initialNumGreaterThan;
 
-    // What if we are a1 or a3?
-    nodeTracker.addValueAt(1, nodeId);
 }
 
 void solveOptimisedAuxLCAIsA1(Node* currentNode, const Triple& P)
@@ -439,6 +450,9 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     nodeInfo.clear();
     nodeInfo.resize(nodes.size() + 1);
 
+    nodeTracker.reset();
+    solveOptimisedAuxLCAIsA2(rootNode, P);
+
     if (!isPMonotonic)
     {
         {
@@ -456,11 +470,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             a1Tracker.reset();
             a2WithA1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
-        }
-        {
-            //cout << " a2 is LCA" << endl;
-            nodeTracker.reset();
-            solveOptimisedAuxLCAIsA2(rootNode, P);
         }
         {
             //cout << " a1 is LCA" << endl;
@@ -510,10 +519,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             a1Tracker.reset();
             a2WithA1Tracker.reset();
             solveOptimisedAuxLCAIsA1(rootNode, reversedP);
-        }
-        {
-            nodeTracker.reset();
-            solveOptimisedAuxLCAIsA2(rootNode, P);
         }
     }
     return result;
