@@ -340,32 +340,38 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     int64_t result = 0;
     auto rootNode = &(nodes.front());
     const Triple P = { Parray[0], Parray[1], Parray[2] };
+
+    const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
+
+    if (!isPMonotonic)
     {
-        cout << "Forward pass" << endl;
-        SegmentTree a1Tracker(nodes.size() + 1);
-        SegmentTree a2WithA1Tracker(nodes.size() + 1);
-        solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
-    }
-    {
-        for (auto& node : nodes)
         {
-            reverse(node.neighbours.begin(), node.neighbours.end());
+            cout << "Forward pass" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
         }
-        cout << "Backward pass" << endl;
-        SegmentTree a1Tracker(nodes.size() + 1);
-        SegmentTree a2WithA1Tracker(nodes.size() + 1);
-        solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
-    }
-    {
-        cout << " a2 is LCA" << endl;
-        SegmentTree nodeTracker(nodes.size() + 1);
-        solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
-    }
-    {
-        cout << " a1 is LCA" << endl;
-        SegmentTree a1Tracker(nodes.size() + 1);
-        SegmentTree a2WithA1Tracker(nodes.size() + 1);
-        solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        {
+            for (auto& node : nodes)
+            {
+                reverse(node.neighbours.begin(), node.neighbours.end());
+            }
+            cout << "Backward pass" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        }
+        {
+            cout << " a2 is LCA" << endl;
+            SegmentTree nodeTracker(nodes.size() + 1);
+            solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
+        }
+        {
+            cout << " a1 is LCA" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        }
     }
     return result;
 }
@@ -388,7 +394,23 @@ int main(int argc, char* argv[])
         random_shuffle(P.begin(), P.end());
 #endif
         // TODO - remove this!
-        vector<int> P = {3, 1, 2};
+        const int blah = rand() % 4;
+        vector<int> P;
+        switch (blah)
+        {
+            case 0:
+                P = {2, 1, 3};
+                break;
+            case 1:
+                P = {3, 1, 2};
+                break;
+            case 2:
+                P = {1, 3, 2};
+                break;
+            case 3:
+                P = {2, 3, 1};
+                break;
+        }
 
         cout << 1 << endl;
         cout << N << endl;
