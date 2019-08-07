@@ -319,8 +319,10 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
             continue;
 
         solveOptimisedAuxLCAIsA2(childNode, currentNode, nodeTracker, P, result);
-        const auto numOfThisChildGreaterThan = (nodeTracker.numToRightOf(currentNode->id) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
-        const auto numOfThisChildLessThan = (nodeTracker.numToLeftOf(currentNode->id) - initialNumLessThan) - descendantsLessThanSoFar;
+        const int numGreater = nodeTracker.numToRightOf(currentNode->id);
+        const int numLess = nodeTracker.total() - numGreater;
+        const auto numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
+        const auto numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
         //cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
 
         //cout << " isA2LessThanA1: " << isA2LessThanA1 << " isA2LessThanA3: " << isA2LessThanA3 << endl;
