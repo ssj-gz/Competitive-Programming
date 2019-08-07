@@ -1,8 +1,5 @@
 // Simon St James (ssjgz) - 2019-08-06
 
-// O(N^2) solution - no chance of getting AC, but let's check correctness
-// and scrounge up some points at least :)
-
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -488,57 +485,63 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxN = 100;
-        const int N = rand() % maxN + 1;
+        const int T = 20;
+        cout << T << endl;
+
+        for (int t = 0; t < T; t++)
+        {
+            const int maxN = 100'000;
+            //const int N = rand() % maxN + 1;
+            const int N = 100'000;
 
 #if 1
-        vector<int> P = {1, 2, 3};
-        random_shuffle(P.begin(), P.end());
+            vector<int> P = {1, 2, 3};
+            random_shuffle(P.begin(), P.end());
 #else
-        // TODO - remove this!
-        const int blah = rand() % 4;
-        vector<int> P;
-        switch (blah)
-        {
-            case 0:
-                P = {2, 1, 3};
-                break;
-            case 1:
-                P = {3, 1, 2};
-                break;
-            case 2:
-                P = {1, 3, 2};
-                break;
-            case 3:
-                P = {2, 3, 1};
-                break;
-        }
+            // TODO - remove this!
+            const int blah = rand() % 4;
+            vector<int> P;
+            switch (blah)
+            {
+                case 0:
+                    P = {2, 1, 3};
+                    break;
+                case 1:
+                    P = {3, 1, 2};
+                    break;
+                case 2:
+                    P = {1, 3, 2};
+                    break;
+                case 3:
+                    P = {2, 3, 1};
+                    break;
+            }
 #endif
 
-        cout << 1 << endl;
-        cout << N << endl;
+            cout << N << endl;
 
-        cout << P[0] << " " << P[1] << " " << P[2] << endl;
+            cout << P[0] << " " << P[1] << " " << P[2] << endl;
 
-        vector<int> nodeIds;
-        for (int i = 1; i <= N; i++)
-        {
-            nodeIds.push_back(i);
-        }
-        random_shuffle(nodeIds.begin(), nodeIds.end());
+            vector<int> nodeIds;
+            for (int i = 1; i <= N; i++)
+            {
+                nodeIds.push_back(i);
+            }
+            random_shuffle(nodeIds.begin(), nodeIds.end());
 
-        vector<int> usedNodeIds = { nodeIds.back() };
-        nodeIds.pop_back();
-
-        for (int i = 0; i < N - 1; i++)
-        {
-            const int newNodeId = nodeIds.back();
-            const int oldNodeId = usedNodeIds[rand() % usedNodeIds.size()];
-
-            cout << newNodeId << " " << oldNodeId << endl;
-
-            usedNodeIds.push_back(newNodeId);
+            vector<int> usedNodeIds = { nodeIds.back() };
             nodeIds.pop_back();
+
+            for (int i = 0; i < N - 1; i++)
+            {
+                const int newNodeId = nodeIds.back();
+                const int oldNodeId = usedNodeIds[rand() % usedNodeIds.size()];
+
+                cout << newNodeId << " " << oldNodeId << endl;
+
+                usedNodeIds.push_back(newNodeId);
+                nodeIds.pop_back();
+            }
         }
 
         return 0;
@@ -548,6 +551,7 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
         const int N = read<int>();
+        cout << "t: " << t << " N: " << N << endl;
 
         vector<Node> nodes(N);
         for (int i = 0; i < N; i++)
@@ -580,7 +584,7 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised(nodes, P);
+        const auto solutionOptimised = solveOptimised2(nodes, P);
         cout << solutionOptimised << endl;
 #endif
     }
