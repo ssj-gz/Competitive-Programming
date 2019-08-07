@@ -311,12 +311,34 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
         solveOptimisedAuxLCAIsA2(childNode, currentNode, nodeTracker, P, result);
         const auto numOfThisChildGreaterThan = (nodeTracker.numToRightOf(currentNode->id) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const auto numOfThisChildLessThan = (nodeTracker.numToLeftOf(currentNode->id) - initialNumLessThan) - descendantsLessThanSoFar;
-        cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << " adding: " <<  (numOfThisChildGreaterThan * descendantsGreaterThanSoFar) << " to result" << endl;
+        cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
 
-        if (isA2LessThanA3 && isA2LessThanA3)
+        cout << " isA2LessThanA1: " << isA2LessThanA1 << " isA2LessThanA3: " << isA2LessThanA3 << endl;
+
+        if (isA2LessThanA1 && isA2LessThanA3)
+        {
+            cout << " glarp" << endl;
             result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
-        else if (!isA2LessThanA3 && !isA2LessThanA3)
+        }
+        else if (!isA2LessThanA1 && !isA2LessThanA3)
+        {
+            cout << " glorp" << endl;
             result += numOfThisChildLessThan * descendantsLessThanSoFar;
+        }
+        else if (isA2LessThanA1 && !isA2LessThanA3)
+        {
+            cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildLessThan * descendantsGreaterThanSoFar) << " to result" << endl;
+            result += numOfThisChildLessThan * descendantsGreaterThanSoFar;
+        }
+        else if (!isA2LessThanA1 && isA2LessThanA3)
+        {
+            cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildGreaterThan * descendantsLessThanSoFar) << " to result" << endl;
+            result += numOfThisChildGreaterThan * descendantsLessThanSoFar;
+        }
+        else
+        {
+            assert(false);
+        }
 
         descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
         descendantsLessThanSoFar += numOfThisChildLessThan;
@@ -439,6 +461,19 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
         }
+        {
+            cout << " a2 is LCA forward" << endl;
+            SegmentTree nodeTracker(nodes.size() + 1);
+            solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
+        }{
+            for (auto& node : nodes)
+            {
+                reverse(node.neighbours.begin(), node.neighbours.end());
+            }
+            cout << " a2 is LCA backward" << endl;
+            SegmentTree nodeTracker(nodes.size() + 1);
+            solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
+        }
     }
     return result;
 }
@@ -456,10 +491,10 @@ int main(int argc, char* argv[])
         const int maxN = 100;
         const int N = rand() % maxN + 1;
 
-#if 0
+#if 1
         vector<int> P = {1, 2, 3};
         random_shuffle(P.begin(), P.end());
-#endif
+#else
         // TODO - remove this!
         const int blah = rand() % 4;
         vector<int> P;
@@ -478,6 +513,7 @@ int main(int argc, char* argv[])
                 P = {2, 3, 1};
                 break;
         }
+#endif
 
         cout << 1 << endl;
         cout << N << endl;
