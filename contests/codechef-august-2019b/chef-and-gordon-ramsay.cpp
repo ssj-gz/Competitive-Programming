@@ -85,7 +85,7 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
             //cout << "  nodeinPath: " << nodeinPath->id << endl;
             if (havePOrdering(startNode, nodeinPath, 0, 1) && havePOrdering(nodeinPath, currentNode, 1, 2))
             {
-                //cout << "Found! (" << startNode->id << ", " << nodeinPath->id << ", " << currentNode->id << ")" << endl;
+                cout << "Found! (" << startNode->id << ", " << nodeinPath->id << ", " << currentNode->id << ")" << endl;
                 result.emplace_back(startNode->id, nodeinPath->id, currentNode->id);
             }
         }
@@ -140,11 +140,11 @@ class SegmentTree
             return m_size;
         }
         // Find the number in the given range (inclusive) in O(log2(numElements)).
-        int numInRange(int start, int end) const
+        int64_t numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
-            auto sum = 0;
+            int64_t sum = 0;
             auto elements = m_elements.data();
             while(end > 0)
             {
@@ -244,6 +244,61 @@ int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 
 }
 
+void solveOptimisedAux2(Node* currentNode, Node* parentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
+{
+
+    cout << "visiting node: " << currentNode->id << endl;
+    // What if we are a3?
+    const auto numA2WithA1 = a2WithA1Tracker.numInRange(0, currentNode->id - 1);
+    cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
+    result += numA2WithA1;
+
+    for (Node* childNode : currentNode->neighbours)
+    {
+        if (childNode == parentNode)
+            continue;
+
+        solveOptimisedAux2(childNode, currentNode, a1Tracker, a2WithA1Tracker, P, result);
+    }
+
+    // What if we are a1?
+    a1Tracker.addValueAt(1, currentNode->id);
+    cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
+
+
+    // What if we are a2?
+    const auto numA1 = a1Tracker.numInRange(currentNode->id + 1, a1Tracker.size());
+    cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
+    cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
+    a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+
+    cout << "finished node: " << currentNode->id << endl;
+}
+
+int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
+{
+    int64_t result = 0;
+    auto rootNode = &(nodes.front());
+    const Triple P = { Parray[0], Parray[1], Parray[2] };
+    {
+        cout << "Forward pass" << endl;
+        SegmentTree a1Tracker(nodes.size() + 1);
+        SegmentTree a2WithA1Tracker(nodes.size() + 1);
+        solveOptimisedAux2(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+    }
+    {
+        for (auto& node : nodes)
+        {
+            reverse(node.neighbours.begin(), node.neighbours.end());
+        }
+        cout << "Backward pass" << endl;
+        SegmentTree a1Tracker(nodes.size() + 1);
+        SegmentTree a2WithA1Tracker(nodes.size() + 1);
+        solveOptimisedAux2(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+    }
+    return result;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -311,13 +366,16 @@ int main(int argc, char* argv[])
             const int u = read<int>() - 1;
             const int v = read<int>() - 1;
 
+            cout << " nodes: " << (u + 1) << " and " << (v + 1) << " are neighbours" << endl;
+
             nodes[u].neighbours.push_back(&(nodes[v]));
             nodes[v].neighbours.push_back(&(nodes[u]));
+
         }
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(nodes, P).size();
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionOptimised = solveOptimised(nodes, P);
+        const auto solutionOptimised = solveOptimised2(nodes, P);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
