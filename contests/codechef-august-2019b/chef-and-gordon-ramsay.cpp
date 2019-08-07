@@ -244,7 +244,7 @@ int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
 
 }
 
-void solveOptimisedAux2(Node* currentNode, Node* parentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
+void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
 {
 
     cout << "visiting node: " << currentNode->id << endl;
@@ -258,7 +258,7 @@ void solveOptimisedAux2(Node* currentNode, Node* parentNode, SegmentTree& a1Trac
         if (childNode == parentNode)
             continue;
 
-        solveOptimisedAux2(childNode, currentNode, a1Tracker, a2WithA1Tracker, P, result);
+        solveOptimisedAuxLCANoneOfA1A2A3(childNode, currentNode, a1Tracker, a2WithA1Tracker, P, result);
     }
 
     // What if we are a1?
@@ -284,7 +284,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         cout << "Forward pass" << endl;
         SegmentTree a1Tracker(nodes.size() + 1);
         SegmentTree a2WithA1Tracker(nodes.size() + 1);
-        solveOptimisedAux2(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
     }
     {
         for (auto& node : nodes)
@@ -294,7 +294,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         cout << "Backward pass" << endl;
         SegmentTree a1Tracker(nodes.size() + 1);
         SegmentTree a2WithA1Tracker(nodes.size() + 1);
-        solveOptimisedAux2(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
     }
     return result;
 }
