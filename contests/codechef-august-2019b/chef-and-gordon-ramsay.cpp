@@ -427,6 +427,18 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
         }
+        {
+            cout << " a1 is LCA P forward" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+        }
+        {
+            cout << " a1 is LCA P backward" << endl;
+            SegmentTree a1Tracker(nodes.size() + 1);
+            SegmentTree a2WithA1Tracker(nodes.size() + 1);
+            solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
+        }
     }
     return result;
 }
