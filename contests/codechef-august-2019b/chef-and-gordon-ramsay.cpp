@@ -251,7 +251,14 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
     // What if we are a3?
     const auto numA2WithA1 = a2WithA1Tracker.numInRange(0, currentNode->id - 1);
     cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
+    cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
+
+    // What if we are a2?
+    const auto numA1 = a1Tracker.numInRange(currentNode->id + 1, a1Tracker.size());
+    cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
+    cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
+    a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     for (Node* childNode : currentNode->neighbours)
     {
@@ -265,12 +272,10 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
     a1Tracker.addValueAt(1, currentNode->id);
     cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
 
+    // What if we are a2, and have finished this node? We are not an a2 any more.
+    a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
 
-    // What if we are a2?
-    const auto numA1 = a1Tracker.numInRange(currentNode->id + 1, a1Tracker.size());
-    cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
-    cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
-    a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+
 
     cout << "finished node: " << currentNode->id << endl;
 }
