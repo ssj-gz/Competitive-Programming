@@ -305,6 +305,8 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
+    const bool isMonotic = (isA2LessThanA1 != isA2LessThanA3);
+
     // What if we are a2?
     const auto initialNumGreaterThan = nodeTracker.numToRightOf(currentNode->id);
     const auto initialNumLessThan = nodeTracker.numToLeftOf(currentNode->id);
@@ -337,19 +339,11 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
             //cout << " glorp" << endl;
             result += numOfThisChildLessThan * descendantsLessThanSoFar;
         }
-        else if (isA2LessThanA1 && !isA2LessThanA3)
+        else 
         {
             //cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildLessThan * descendantsGreaterThanSoFar) << " to result" << endl;
             result += numOfThisChildLessThan * descendantsGreaterThanSoFar;
-        }
-        else if (!isA2LessThanA1 && isA2LessThanA3)
-        {
-            //cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildGreaterThan * descendantsLessThanSoFar) << " to result" << endl;
             result += numOfThisChildGreaterThan * descendantsLessThanSoFar;
-        }
-        else
-        {
-            assert(false);
         }
 
         descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
@@ -475,14 +469,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         }
         {
             //cout << " a2 is LCA forward" << endl;
-            SegmentTree nodeTracker(nodes.size() + 1);
-            solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
-        }{
-            for (auto& node : nodes)
-            {
-                reverse(node.neighbours.begin(), node.neighbours.end());
-            }
-            //cout << " a2 is LCA backward" << endl;
             SegmentTree nodeTracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
         }
