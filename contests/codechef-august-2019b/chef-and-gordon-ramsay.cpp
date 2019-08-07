@@ -3,7 +3,7 @@
 // O(N^2) solution - no chance of getting AC, but let's check correctness
 // and scrounge up some points at least :)
 
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -257,17 +257,17 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
-    cout << "visiting node: " << currentNode->id << endl;
+    //cout << "visiting node: " << currentNode->id << endl;
     // What if we are a3?
     const auto numA2WithA1 =  isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
-    cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
-    cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
+    //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
+    //cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
 
     // What if we are a2?
     const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
-    cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
-    cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
+    //cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
+    //cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
     a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     for (Node* childNode : currentNode->neighbours)
@@ -280,14 +280,14 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
 
     // What if we are a1?
     a1Tracker.addValueAt(1, currentNode->id);
-    cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
+    //cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
 
     // What if we are a2, and have finished this node? We are not an a2 any more.
     a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
 
 
 
-    cout << "finished node: " << currentNode->id << endl;
+    //cout << "finished node: " << currentNode->id << endl;
 }
 
 void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
@@ -301,7 +301,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
     int64_t descendantsGreaterThanSoFar = 0;
     int64_t descendantsLessThanSoFar = 0;
 
-    cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
+    //cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
 
     for (Node* childNode : currentNode->neighbours)
     {
@@ -311,28 +311,28 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
         solveOptimisedAuxLCAIsA2(childNode, currentNode, nodeTracker, P, result);
         const auto numOfThisChildGreaterThan = (nodeTracker.numToRightOf(currentNode->id) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const auto numOfThisChildLessThan = (nodeTracker.numToLeftOf(currentNode->id) - initialNumLessThan) - descendantsLessThanSoFar;
-        cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
+        //cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
 
-        cout << " isA2LessThanA1: " << isA2LessThanA1 << " isA2LessThanA3: " << isA2LessThanA3 << endl;
+        //cout << " isA2LessThanA1: " << isA2LessThanA1 << " isA2LessThanA3: " << isA2LessThanA3 << endl;
 
         if (isA2LessThanA1 && isA2LessThanA3)
         {
-            cout << " glarp" << endl;
+            //cout << " glarp" << endl;
             result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && !isA2LessThanA3)
         {
-            cout << " glorp" << endl;
+            //cout << " glorp" << endl;
             result += numOfThisChildLessThan * descendantsLessThanSoFar;
         }
         else if (isA2LessThanA1 && !isA2LessThanA3)
         {
-            cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildLessThan * descendantsGreaterThanSoFar) << " to result" << endl;
+            //cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildLessThan * descendantsGreaterThanSoFar) << " to result" << endl;
             result += numOfThisChildLessThan * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && isA2LessThanA3)
         {
-            cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildGreaterThan * descendantsLessThanSoFar) << " to result" << endl;
+            //cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildGreaterThan * descendantsLessThanSoFar) << " to result" << endl;
             result += numOfThisChildGreaterThan * descendantsLessThanSoFar;
         }
         else
@@ -362,8 +362,8 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& 
 
     // What if we are a3?
     const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
-    cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
-    cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
+    //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
+    //cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
 
     for (Node* childNode : currentNode->neighbours)
@@ -392,7 +392,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     if (!isPMonotonic)
     {
         {
-            cout << "Forward pass" << endl;
+            //cout << "Forward pass" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
@@ -402,18 +402,18 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             {
                 reverse(node.neighbours.begin(), node.neighbours.end());
             }
-            cout << "Backward pass" << endl;
+            //cout << "Backward pass" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
         }
         {
-            cout << " a2 is LCA" << endl;
+            //cout << " a2 is LCA" << endl;
             SegmentTree nodeTracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
         }
         {
-            cout << " a1 is LCA" << endl;
+            //cout << " a1 is LCA" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
@@ -422,13 +422,13 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     else
     {
         {
-            cout << "Forward pass P forward" << endl;
+            //cout << "Forward pass P forward" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
         }
         {
-            cout << "Forward pass P backward" << endl;
+            //cout << "Forward pass P backward" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
@@ -438,31 +438,31 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             {
                 reverse(node.neighbours.begin(), node.neighbours.end());
             }
-            cout << "Backward pass P forward" << endl;
+            //cout << "Backward pass P forward" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
         }
         {
-            cout << "Backward pass P backward" << endl;
+            //cout << "Backward pass P backward" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
         }
         {
-            cout << " a1 is LCA P forward" << endl;
+            //cout << " a1 is LCA P forward" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
         }
         {
-            cout << " a1 is LCA P backward" << endl;
+            //cout << " a1 is LCA P backward" << endl;
             SegmentTree a1Tracker(nodes.size() + 1);
             SegmentTree a2WithA1Tracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, reversedP, result);
         }
         {
-            cout << " a2 is LCA forward" << endl;
+            //cout << " a2 is LCA forward" << endl;
             SegmentTree nodeTracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
         }{
@@ -470,7 +470,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             {
                 reverse(node.neighbours.begin(), node.neighbours.end());
             }
-            cout << " a2 is LCA backward" << endl;
+            //cout << " a2 is LCA backward" << endl;
             SegmentTree nodeTracker(nodes.size() + 1);
             solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
         }
@@ -566,7 +566,7 @@ int main(int argc, char* argv[])
             const int u = read<int>() - 1;
             const int v = read<int>() - 1;
 
-            cout << " nodes: " << (u + 1) << " and " << (v + 1) << " are neighbours" << endl;
+            //cout << " nodes: " << (u + 1) << " and " << (v + 1) << " are neighbours" << endl;
 
             nodes[u].neighbours.push_back(&(nodes[v]));
             nodes[v].neighbours.push_back(&(nodes[u]));
