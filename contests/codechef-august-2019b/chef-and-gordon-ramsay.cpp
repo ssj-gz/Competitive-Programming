@@ -388,7 +388,7 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, SegmentTree& a1Tracker,
     //cout << "finished node: " << currentNode->id << endl;
 }
 
-void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
+void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -403,9 +403,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
     for (Node* childNode : currentNode->children)
     {
 
-        solveOptimisedAuxLCAIsA2(childNode, nodeTracker, P, result);
-        const int numGreater = nodeTracker.numToRightOf(currentNode->id);
-        const int numLess = nodeTracker.total() - numGreater;
+        solveOptimisedAuxLCAIsA2(childNode, P, result);
         const auto numOfThisChildGreaterThan = currentNode->numGreaterThanForChild[childIndex];
         const auto numOfThisChildLessThan = currentNode->numLessThanForChild[childIndex];
 
@@ -494,8 +492,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         }
         {
             //cout << " a2 is LCA" << endl;
-            SegmentTree nodeTracker(nodes.size() + 1);
-            solveOptimisedAuxLCAIsA2(rootNode, nodeTracker, P, result);
+            solveOptimisedAuxLCAIsA2(rootNode, P, result);
         }
         {
             //cout << " a1 is LCA" << endl;
@@ -542,8 +539,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         }
         {
             //cout << " a2 is LCA forward" << endl;
-            SegmentTree nodeTracker(nodes.size() + 1);
-            solveOptimisedAuxLCAIsA2(rootNode, nodeTracker, P, result);
+            solveOptimisedAuxLCAIsA2(rootNode, P, result);
         }
     }
     return result;
