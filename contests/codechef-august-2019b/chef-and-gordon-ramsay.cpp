@@ -41,23 +41,17 @@ T read()
 
 struct Node
 {
-    vector<Node*> neighbours;
     vector<Node*> children;
-
     int id = -1;
 
 };
 
 void fixParentChild(Node* node, Node* parent)
 {
-    for (auto child : node->neighbours)
-    {
-        if (child != parent)
-        {
-            node->children.push_back(child);
-            fixParentChild(child, node);
-        }
-    }
+    if (parent)
+        node->children.erase(find(node->children.begin(), node->children.end(), parent));
+    for (auto child : node->children)
+        fixParentChild(child, node);
 }
 
 
@@ -122,7 +116,7 @@ void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode,
     if (currentNode != startNode)
         nodesSoFar.push_back(currentNode);
 
-    for (auto child : currentNode->neighbours)
+    for (auto child : currentNode->children)
     {
         if (child == parentNode)
             continue;
@@ -253,7 +247,7 @@ void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, 
     if (currentNode != startNode)
         segmentTree.addValueAt(1, currentNode->id);
 
-    for (auto child : currentNode->neighbours)
+    for (auto child : currentNode->children)
     {
         if (child == parentNode)
             continue;
@@ -590,8 +584,8 @@ int main(int argc, char* argv[])
 
             //cout << " nodes: " << (u + 1) << " and " << (v + 1) << " are neighbours" << endl;
 
-            nodes[u].neighbours.push_back(&(nodes[v]));
-            nodes[v].neighbours.push_back(&(nodes[u]));
+            nodes[u].children.push_back(&(nodes[v]));
+            nodes[v].children.push_back(&(nodes[u]));
 
         }
 #ifdef BRUTE_FORCE
