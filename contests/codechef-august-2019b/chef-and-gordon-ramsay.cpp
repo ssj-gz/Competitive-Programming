@@ -159,6 +159,14 @@ class SegmentTree
             }
             return sum;
         }
+        int64_t numToRightOf(int pos)
+        {
+            return numInRange(pos + 1, size());
+        }
+        int64_t numToLeftOf(int pos)
+        {
+            return numInRange(0, pos - 1);
+        }
 
         // Add "value" to the current value at pos in O(log2(numElements)).
         void addValueAt(int value, int pos)
@@ -249,13 +257,13 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
 
     cout << "visiting node: " << currentNode->id << endl;
     // What if we are a3?
-    const auto numA2WithA1 = a2WithA1Tracker.numInRange(0, currentNode->id - 1);
+    const auto numA2WithA1 = a2WithA1Tracker.numToLeftOf(currentNode->id);
     cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
 
     // What if we are a2?
-    const auto numA1 = a1Tracker.numInRange(currentNode->id + 1, a1Tracker.size());
+    const auto numA1 = a1Tracker.numToRightOf(currentNode->id);
     cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
     cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
     a2WithA1Tracker.addValueAt(numA1, currentNode->id);
@@ -283,7 +291,7 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
 void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
 {
     // What if we are a2?
-    const auto initialNumGreaterThan = nodeTracker.numInRange(currentNode->id + 1, nodeTracker.size());
+    const auto initialNumGreaterThan = nodeTracker.numToRightOf(currentNode->id);
     int64_t descendantsGreaterThanSoFar = 0;
 
     cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
@@ -294,7 +302,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
             continue;
 
         solveOptimisedAuxLCAIsA2(childNode, currentNode, nodeTracker, P, result);
-        const auto numOfThisChildGreaterThan = (nodeTracker.numInRange(currentNode->id + 1, nodeTracker.size()) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
+        const auto numOfThisChildGreaterThan = (nodeTracker.numToRightOf(currentNode->id) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << " adding: " <<  (numOfThisChildGreaterThan * descendantsGreaterThanSoFar) << " to result" << endl;
 
         result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
@@ -312,11 +320,11 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& 
     a1Tracker.addValueAt(1, currentNode->id);
 
     // What if we are a2? 
-    const auto numA1 = a1Tracker.numInRange(currentNode->id + 1, a1Tracker.size());
+    const auto numA1 = a1Tracker.numToRightOf(currentNode->id);
     a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     // What if we are a3?
-    const auto numA2WithA1 = a2WithA1Tracker.numInRange(0, currentNode->id - 1);
+    const auto numA2WithA1 = a2WithA1Tracker.numToLeftOf(currentNode->id);
     cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
@@ -386,7 +394,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxN = 10;
+        const int maxN = 100;
         const int N = rand() % maxN + 1;
 
 #if 0
@@ -394,7 +402,7 @@ int main(int argc, char* argv[])
         random_shuffle(P.begin(), P.end());
 #endif
         // TODO - remove this!
-        const int blah = rand() % 4;
+        const int blah = rand() % 2;
         vector<int> P;
         switch (blah)
         {
