@@ -280,6 +280,32 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, Node* parentNode, Segme
     cout << "finished node: " << currentNode->id << endl;
 }
 
+void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
+{
+    // What if we are a2?
+    const auto initialNumGreaterThan = nodeTracker.numInRange(currentNode->id + 1, nodeTracker.size());
+    int64_t descendantsGreaterThanSoFar = 0;
+
+    cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
+
+    for (Node* childNode : currentNode->neighbours)
+    {
+        if (childNode == parentNode)
+            continue;
+
+        solveOptimisedAuxLCAIsA2(childNode, currentNode, nodeTracker, P, result);
+        const auto numOfThisChildGreaterThan = (nodeTracker.numInRange(currentNode->id + 1, nodeTracker.size()) - initialNumGreaterThan) - descendantsGreaterThanSoFar;
+        cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << " adding: " <<  (numOfThisChildGreaterThan * descendantsGreaterThanSoFar) << " to result" << endl;
+
+        result += numOfThisChildGreaterThan * descendantsGreaterThanSoFar;
+
+        descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
+    }
+
+    // What if we are a1 or a3?
+    nodeTracker.addValueAt(1, currentNode->id);
+}
+
 int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 {
     int64_t result = 0;
@@ -300,6 +326,11 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         SegmentTree a1Tracker(nodes.size() + 1);
         SegmentTree a2WithA1Tracker(nodes.size() + 1);
         solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+    }
+    {
+        cout << " a2 is LCA" << endl;
+        SegmentTree nodeTracker(nodes.size() + 1);
+        solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
     }
     return result;
 }
