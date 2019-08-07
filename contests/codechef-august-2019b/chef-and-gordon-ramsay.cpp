@@ -322,7 +322,7 @@ void fillInLookupsPass1of2(Node* currentNode, SegmentTree& nodeTracker)
     }
 }
 
-void fillInLookupsPass2of2(Node* currentNode, SegmentTree& nodeTracker)
+void fillInLookupsPass2of2(Node* currentNode, const int numNodes, SegmentTree& nodeTracker)
 {
     const int64_t numLessThanInitial = nodeTracker.numToLeftOf(currentNode->id);
     const int64_t numGreaterThanInitial = nodeTracker.total() - numLessThanInitial;
@@ -336,14 +336,16 @@ void fillInLookupsPass2of2(Node* currentNode, SegmentTree& nodeTracker)
 
     for (int childIndex = currentNode->children.size() - 1; childIndex >=0; childIndex-- )
     {
-        fillInLookupsPass2of2(currentNode->children[childIndex], nodeTracker);
+        fillInLookupsPass2of2(currentNode->children[childIndex], numNodes, nodeTracker);
     }
 
     //cout << " currentNode: " << currentNode->id << " numDescendendentsLessThan: " << numDescendendentsLessThan << endl;
 
     currentNode->numAncestorsLessThan = currentNode->numDescendentsLessThan + currentNode->numLessThanWhenVisitedOriginalOrder + currentNode->numLessThanWhenVisitedReversedOrder - (currentNode->id - 1);
+    currentNode->numAncestorsGreaterThan = currentNode->numDescendentsGreaterThan + currentNode->numGreaterThanWhenVisitedOriginalOrder + currentNode->numGreaterThanWhenVisitedReversedOrder - (numNodes - currentNode->id);
 
-    //cout << " node: " << currentNode->id << " numAncestorsLessThan: " << currentNode->numAncestorsLessThan << endl;
+    cout << " node: " << currentNode->id << " numAncestorsLessThan: " << currentNode->numAncestorsLessThan << endl;
+    cout << " node: " << currentNode->id << " numAncestorsGreaterThan: " << currentNode->numAncestorsGreaterThan << endl;
 
 }
 
@@ -484,7 +486,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     }
     {
         SegmentTree nodeTracker(nodes.size() + 1);
-        fillInLookupsPass2of2(rootNode, nodeTracker);
+        fillInLookupsPass2of2(rootNode, nodes.size(), nodeTracker);
     }
 
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
