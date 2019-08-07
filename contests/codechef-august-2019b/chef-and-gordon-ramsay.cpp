@@ -306,6 +306,35 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
     nodeTracker.addValueAt(1, currentNode->id);
 }
 
+void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& a1Tracker, SegmentTree& a2WithA1Tracker, const Triple& P, int64_t& result)
+{
+    // What if we are a1?
+    a1Tracker.addValueAt(1, currentNode->id);
+
+    // What if we are a2? 
+    const auto numA1 = a1Tracker.numInRange(currentNode->id + 1, a1Tracker.size());
+    a2WithA1Tracker.addValueAt(numA1, currentNode->id);
+
+    // What if we are a3?
+    const auto numA2WithA1 = a2WithA1Tracker.numInRange(0, currentNode->id - 1);
+    cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
+    cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
+    result += numA2WithA1;
+
+    for (Node* childNode : currentNode->neighbours)
+    {
+        if (childNode == parentNode)
+            continue;
+        solveOptimisedAuxLCAIsA1(childNode, currentNode, a1Tracker, a2WithA1Tracker, P, result);
+    }
+
+    // What if we are a2, and have finished this node? We are not an a2 any more.
+    a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
+
+    // What if we are a1, and have finished this node? We are not an a1 any more.
+    a1Tracker.addValueAt(-1, currentNode->id);
+}
+
 int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 {
     int64_t result = 0;
@@ -332,6 +361,12 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         SegmentTree nodeTracker(nodes.size() + 1);
         solveOptimisedAuxLCAIsA2(rootNode, nullptr, nodeTracker, P, result);
     }
+    {
+        cout << " a1 is LCA" << endl;
+        SegmentTree a1Tracker(nodes.size() + 1);
+        SegmentTree a2WithA1Tracker(nodes.size() + 1);
+        solveOptimisedAuxLCAIsA1(rootNode, nullptr, a1Tracker, a2WithA1Tracker, P, result);
+    }
     return result;
 }
 
@@ -345,11 +380,15 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int maxN = 1000;
+        const int maxN = 10;
         const int N = rand() % maxN + 1;
 
+#if 0
         vector<int> P = {1, 2, 3};
         random_shuffle(P.begin(), P.end());
+#endif
+        // TODO - remove this!
+        vector<int> P = {3, 1, 2};
 
         cout << 1 << endl;
         cout << N << endl;
