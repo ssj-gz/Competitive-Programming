@@ -56,6 +56,15 @@ ostream& operator<<(ostream& os, const Triple& triple)
     return os;
 }
 
+bool operator<(const Triple& lhs, const Triple& rhs)
+{
+    if (lhs[0] != rhs[0])
+        return lhs[0] < rhs[0];
+    if (lhs[1] != rhs[1])
+        return lhs[1] < rhs[1];
+    return lhs[2] < rhs[2];
+}
+
 
 void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, vector<Node*> nodesSoFar, vector<Triple>& result)
 {
