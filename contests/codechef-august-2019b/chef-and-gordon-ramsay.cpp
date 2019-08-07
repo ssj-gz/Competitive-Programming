@@ -186,11 +186,11 @@ class SegmentTree
             return m_size;
         }
         // Find the number in the given range (inclusive) in O(log2(numElements)).
-        int numInRange(int start, int end) const
+        int64_t numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
-            int sum = 0;
+            int64_t sum = 0;
             auto elements = m_elements.data();
             while(end > 0)
             {
@@ -205,12 +205,12 @@ class SegmentTree
             }
             return sum;
         }
-        int numToRightOf(int pos)
+        int64_t numToRightOf(int pos)
         {
             return total() - numToLeftOf(pos);
             //return numInRange(pos + 1, size());
         }
-        int numToLeftOf(int pos)
+        int64_t numToLeftOf(int pos)
         {
             return numInRange(0, pos - 1);
         }
@@ -241,7 +241,7 @@ class SegmentTree
         int m_size;
         int m_numElements;
         int m_total = 0;
-        vector<int> m_elements;
+        vector<int64_t> m_elements;
 
 };
 
@@ -423,7 +423,7 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, const Triple& P)
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
     // What if we are a3?
-    const int numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
+    const int64_t numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
 
     // What if we are a2? 
     const int numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
@@ -553,14 +553,13 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int T = 20;
+        const int T = 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
-            const int maxN = 100'000;
-            //const int N = rand() % maxN + 1;
-            const int N = 100'000;
+            const int maxN = 1000;
+            const int N = rand() % maxN + 1;
 
 #if 1
             vector<int> P = {1, 2, 3};
@@ -651,8 +650,13 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised2(nodes, P);
-        cout << solutionOptimised << endl;
+        //const auto solutionOptimised = solveOptimised(nodes, P);
+        const auto solutionOptimised2 = solveOptimised2(nodes, P);
+        //cout << "solutionOptimised: " << solutionOptimised << " solutionOptimised2: " << solutionOptimised2 << endl;
+        //cout << "solutionOptimised2: " << solutionOptimised2 << endl;
+        cout << solutionOptimised2 << endl;
+        //assert(solutionOptimised == solutionOptimised2);
+
 #endif
     }
 
