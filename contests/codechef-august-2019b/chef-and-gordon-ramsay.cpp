@@ -344,8 +344,8 @@ void fillInLookupsPass2of2(Node* currentNode, const int numNodes, SegmentTree& n
     currentNode->numAncestorsLessThan = currentNode->numDescendentsLessThan + currentNode->numLessThanWhenVisitedOriginalOrder + currentNode->numLessThanWhenVisitedReversedOrder - (currentNode->id - 1);
     currentNode->numAncestorsGreaterThan = currentNode->numDescendentsGreaterThan + currentNode->numGreaterThanWhenVisitedOriginalOrder + currentNode->numGreaterThanWhenVisitedReversedOrder - (numNodes - currentNode->id);
 
-    cout << " node: " << currentNode->id << " numAncestorsLessThan: " << currentNode->numAncestorsLessThan << endl;
-    cout << " node: " << currentNode->id << " numAncestorsGreaterThan: " << currentNode->numAncestorsGreaterThan << endl;
+    //cout << " node: " << currentNode->id << " numAncestorsLessThan: " << currentNode->numAncestorsLessThan << endl;
+    //cout << " node: " << currentNode->id << " numAncestorsGreaterThan: " << currentNode->numAncestorsGreaterThan << endl;
 
 }
 
@@ -447,12 +447,9 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, SegmentTree& a1Tracker, Segment
     const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
 
     // What if we are a2? 
-    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
+    const auto numA1 = isA2LessThanA1 ? currentNode->numAncestorsGreaterThan : currentNode->numAncestorsLessThan;
     if (numA1 != 0)
         a2WithA1Tracker.addValueAt(numA1, currentNode->id);
-
-    // What if we are a1?
-    a1Tracker.addValueAt(1, currentNode->id);
 
 
     //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
@@ -468,8 +465,6 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, SegmentTree& a1Tracker, Segment
     if (numA1 != 0)
         a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
 
-    // What if we are a1, and have finished this node? We are not an a1 any more.
-    a1Tracker.addValueAt(-1, currentNode->id);
 }
 
 int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
