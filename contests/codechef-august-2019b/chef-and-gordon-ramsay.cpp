@@ -309,7 +309,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, Node* parentNode, SegmentTree& 
 
     // What if we are a2?
     const auto initialNumGreaterThan = nodeTracker.numToRightOf(currentNode->id);
-    const auto initialNumLessThan = nodeTracker.numToLeftOf(currentNode->id);
+    const auto initialNumLessThan = nodeTracker.total() - initialNumGreaterThan;
     int64_t descendantsGreaterThanSoFar = 0;
     int64_t descendantsLessThanSoFar = 0;
 
