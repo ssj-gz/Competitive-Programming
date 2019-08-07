@@ -301,6 +301,8 @@ void fillInLookupsPass1of2(Node* currentNode, SegmentTree& nodeTracker)
 
     //cout << " currentNode: " << currentNode->id << " numLessThanWhenVisitedOriginalOrder: " << currentNode->numLessThanWhenVisitedOriginalOrder << " numGreaterThanWhenVisitedOriginalOrder: " << currentNode->numGreaterThanWhenVisitedOriginalOrder << endl;
 
+    currentNode->numLessThanForChild.reserve(currentNode->children.size());
+    currentNode->numGreaterThanForChild.reserve(currentNode->children.size());
     for (auto child : currentNode->children)
     {
         fillInLookupsPass1of2(child, nodeTracker);
