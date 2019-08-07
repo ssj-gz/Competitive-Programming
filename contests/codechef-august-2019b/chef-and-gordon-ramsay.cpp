@@ -15,6 +15,16 @@
 
 #include <sys/time.h>
 
+#include <sys/resource.h>
+
+
+void enlargeStack () {
+    struct rlimit lim;
+    getrlimit(RLIMIT_STACK, &lim);
+    lim.rlim_cur = lim.rlim_max;
+    setrlimit(RLIMIT_STACK, &lim);
+}
+
 using namespace std;
 
 #define gc getchar_unlocked
@@ -536,6 +546,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
+    enlargeStack();
     if (argc == 2 && string(argv[1]) == "--test")
     {
         struct timeval time;
