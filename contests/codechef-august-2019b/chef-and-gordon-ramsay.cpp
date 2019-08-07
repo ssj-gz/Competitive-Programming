@@ -171,7 +171,8 @@ class SegmentTree
         }
         int64_t numToRightOf(int pos)
         {
-            return numInRange(pos + 1, size());
+            return total() - numToLeftOf(pos);
+            //return numInRange(pos + 1, size());
         }
         int64_t numToLeftOf(int pos)
         {
@@ -363,11 +364,11 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& 
     a1Tracker.addValueAt(1, currentNode->id);
 
     // What if we are a2? 
-    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
+    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) - 1 : a1Tracker.numToLeftOf(currentNode->id);
     a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
     // What if we are a3?
-    const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
+    const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id) - numA1;
     //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     //cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
