@@ -362,16 +362,18 @@ void solveOptimisedAuxLCAIsA1(Node* currentNode, Node* parentNode, SegmentTree& 
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
-    // What if we are a1?
-    a1Tracker.addValueAt(1, currentNode->id);
+    // What if we are a3?
+    const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
 
     // What if we are a2? 
-    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) - 1 : a1Tracker.numToLeftOf(currentNode->id);
+    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
     if (numA1 != 0)
         a2WithA1Tracker.addValueAt(numA1, currentNode->id);
 
-    // What if we are a3?
-    const auto numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id) - numA1;
+    // What if we are a1?
+    a1Tracker.addValueAt(1, currentNode->id);
+
+
     //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
     //cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
     result += numA2WithA1;
