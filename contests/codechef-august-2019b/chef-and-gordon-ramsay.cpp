@@ -18,17 +18,11 @@
 #include <sys/resource.h>
 
 
-void enlargeStack () {
-    struct rlimit lim;
-    getrlimit(RLIMIT_STACK, &lim);
-    lim.rlim_cur = lim.rlim_max;
-    setrlimit(RLIMIT_STACK, &lim);
-}
-
 using namespace std;
 
 #define gc getchar_unlocked
 
+// Lots of input to read, so use ultra-fast reader.
 void scan_integer( int &x )
 {
     int c = gc();
@@ -66,93 +60,6 @@ void fixParentChild(Node* node, Node* parent)
         node->children.erase(find(node->children.begin(), node->children.end(), parent));
     for (auto child : node->children)
         fixParentChild(child, node);
-}
-
-
-class Triple
-{
-    public:
-        Triple(int a1, int a2, int a3)
-            : m_elements{{a1, a2, a3}}
-        {
-        }
-        int operator[](int i) const
-        {
-            return m_elements[i];
-        }
-    private:
-        std::array<int, 3> m_elements;
-};
-
-ostream& operator<<(ostream& os, const Triple& triple)
-{
-    cout << "(" << triple[0] << ", " << triple[1] << ", " << triple[2] << ")";
-    return os;
-}
-
-bool operator<(const Triple& lhs, const Triple& rhs)
-{
-    if (lhs[0] != rhs[0])
-        return lhs[0] < rhs[0];
-    if (lhs[1] != rhs[1])
-        return lhs[1] < rhs[1];
-    return lhs[2] < rhs[2];
-}
-
-
-void solutionBruteForceAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, vector<Node*> nodesSoFar, vector<Triple>& result)
-{
-
-    //cout << "startNode: " << startNode->id << " currentNode: " << currentNode->id << endl;
-
-    auto havePOrdering = [&P](Node* node1, Node* node2, int pIndex1, int pIndex2) -> bool
-    {
-        return (((node1->id < node2->id) && (P[pIndex1] < P[pIndex2])) ||
-                ((node1->id > node2->id) && (P[pIndex1] > P[pIndex2])));
-    };
-
-    if (havePOrdering(startNode, currentNode, 0, 2))
-    {
-        //cout << " have POrdering" << endl;
-        for (auto nodeinPath : nodesSoFar)
-        {
-            //cout << "  nodeinPath: " << nodeinPath->id << endl;
-            if (havePOrdering(startNode, nodeinPath, 0, 1) && havePOrdering(nodeinPath, currentNode, 1, 2))
-            {
-                cout << "Found! (" << startNode->id << ", " << nodeinPath->id << ", " << currentNode->id << ")" << endl;
-                result.emplace_back(startNode->id, nodeinPath->id, currentNode->id);
-            }
-        }
-
-    }
-
-
-    if (currentNode != startNode)
-        nodesSoFar.push_back(currentNode);
-
-    for (auto child : currentNode->children)
-    {
-        if (child == parentNode)
-            continue;
-        solutionBruteForceAux(startNode, child, currentNode, P, nodesSoFar, result);
-    }
-
-    if (currentNode != startNode)
-        nodesSoFar.pop_back();
-}
-
-
-vector<Triple> solveBruteForce(vector<Node>& nodes, const array<int, 3>& P)
-{
-    vector<Triple> result;
-
-    for (auto& node : nodes)
-    {
-        vector<Node*> nodesSoFar;
-        solutionBruteForceAux(&node, &node, nullptr, P, nodesSoFar, result);
-    }
-
-    return result;
 }
 
 // Typical SegmentTree - you can find similar implementations all over the place :)
@@ -219,72 +126,14 @@ class SegmentTree
 
             m_total += value;
         }
-        void reset()
-        {
-            m_elements.clear();
-            m_elements.resize(m_numElements + 1);
-            m_total = 0;
-        }
-
     private:
         int m_size;
         int m_numElements;
         int m_total = 0;
         vector<int64_t> m_elements;
-
 };
 
-void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, const array<int, 3>& P, SegmentTree& segmentTree, int64_t& result)
-{
-
-    //cout << "startNode: " << startNode->id << " currentNode: " << currentNode->id << endl;
-
-    auto havePOrdering = [&P](Node* node1, Node* node2, int pIndex1, int pIndex2) -> bool
-    {
-        return (((node1->id < node2->id) && (P[pIndex1] < P[pIndex2])) ||
-                ((node1->id > node2->id) && (P[pIndex1] > P[pIndex2])));
-    };
-
-    if (havePOrdering(startNode, currentNode, 0, 2))
-    {
-        //cout << " have POrdering" << endl;
-        const int leftId = min(startNode->id, currentNode->id);
-        const int rightId = max(startNode->id, currentNode->id);
-        if ((P[0] < P[1] && P[1] < P[2]) ||
-                (P[0] > P[1] && P[1] > P[2]))
-        {
-            result += segmentTree.numInRange(leftId, rightId);
-        }
-        else if (P[1] < P[0] && P[1] < P[2])
-        {
-            result += segmentTree.numInRange(0, leftId);
-        }
-        else if (P[1] > P[0] && P[1] > P[2])
-        {
-            result += segmentTree.numInRange(rightId, segmentTree.size());
-        }
-    }
-
-    if (currentNode != startNode)
-        segmentTree.addValueAt(1, currentNode->id);
-
-    for (auto child : currentNode->children)
-    {
-        if (child == parentNode)
-            continue;
-        solutionOptimisedAux(startNode, child, currentNode, P, segmentTree, result);
-    }
-
-    if (currentNode != startNode)
-        segmentTree.addValueAt(-1, currentNode->id);
-}
-
-
-SegmentTree nodeTracker;
-
-int64_t result = 0;
-
-void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const Triple& P)
+void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const std::array<int, 3>& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -315,7 +164,7 @@ void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const Triple& P
 
 }
 
-void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
+void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const std::array<int, 3>& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -336,7 +185,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
     for (Node* childNode : currentNode->children)
     {
 
-        solveOptimisedAuxLCAIsA2(childNode, P);
+        solveOptimisedAuxLCAIsA2(childNode, nodeTracker, P, result);
         const int numLess = nodeTracker.numToLeftOf(nodeId);
         const int numGreater = nodeTracker.total() - numLess - 1;
         const int numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
@@ -376,28 +225,27 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
 
 int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 {
-    result = 0;
+    int64_t result = 0;
     auto rootNode = &(nodes.front());
-    const Triple P = { Parray[0], Parray[1], Parray[2] };
-    const Triple reversedP = { Parray[2], Parray[1], Parray[0] };
+    const std::array<int, 3> P = { Parray[0], Parray[1], Parray[2] };
+    const std::array<int, 3> reversedP = { Parray[2], Parray[1], Parray[0] };
 
     fixParentChild(rootNode, nullptr);
 
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
 
-    nodeTracker = SegmentTree(nodes.size() + 1);
 
-    nodeTracker.reset();
-    solveOptimisedAuxLCAIsA2(rootNode, P);
+    SegmentTree nodeTracker(nodes.size() + 1);
+    solveOptimisedAuxLCAIsA2(rootNode, nodeTracker, P, result);
 
     if (!isPMonotonic)
     {
-        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P);
+        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P, result);
     }
     else
     {
-        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P);
-        solveOptimisedAuxLCANoneOfA1A2A3(nodes, reversedP);
+        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P, result);
+        solveOptimisedAuxLCANoneOfA1A2A3(nodes, reversedP, result);
     }
     return result;
 }
@@ -406,7 +254,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    enlargeStack();
     if (argc == 2 && string(argv[1]) == "--test")
     {
         struct timeval time;
