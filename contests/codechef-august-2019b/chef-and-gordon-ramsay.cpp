@@ -1,5 +1,4 @@
 // Simon St James (ssjgz) - 2019-08-06
-
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -47,6 +46,8 @@ struct Node
     int numDescendentsLessThan = 0;
     int numDescendentsGreaterThan = 0;
 };
+
+using Triple = std::array<int, 3>;
 
 void fixParentChild(Node* node, Node* parent)
 {
@@ -126,7 +127,7 @@ class SegmentTree
         vector<int> m_elements;
 };
 
-void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const std::array<int, 3>& P, int64_t& result)
+void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const Triple& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -157,7 +158,7 @@ void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const std::arra
 
 }
 
-void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const std::array<int, 3>& P, int64_t& result)
+void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -205,12 +206,11 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
 }
 
 
-int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
+int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
 {
     int64_t result = 0;
     auto rootNode = &(nodes.front());
-    const std::array<int, 3> P = { Parray[0], Parray[1], Parray[2] };
-    const std::array<int, 3> reversedP = { Parray[2], Parray[1], Parray[0] };
+    const Triple& reversedP = { P[2], P[1], P[0] };
 
     fixParentChild(rootNode, nullptr);
 
@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
             nodes[i].id = i + 1;
         }
 
-        array<int, 3> P;
+        Triple P;
         for (auto& p : P)
         {
             p = read<int>();
