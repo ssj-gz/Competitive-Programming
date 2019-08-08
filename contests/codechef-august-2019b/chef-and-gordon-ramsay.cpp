@@ -1,8 +1,6 @@
 // Simon St James (ssjgz) - 2019-08-06
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -261,21 +259,9 @@ int main(int argc, char* argv[])
             nodes[v].children.push_back(&(nodes[u]));
 
         }
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(nodes, P).size();
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionOptimised = solveOptimised2(nodes, P);
-        cout << "solutionOptimised: " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#else
         const auto solutionOptimised2 = solveOptimised2(nodes, P);
         cout << solutionOptimised2 << endl;
-
-#endif
     }
-
-
 }
 
 
