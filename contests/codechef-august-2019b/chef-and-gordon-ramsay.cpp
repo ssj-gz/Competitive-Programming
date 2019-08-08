@@ -353,7 +353,7 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, int numNodes, const Tri
     }
 
     // What if we are a1?
-    a1Tracker.addValueAt(1, currentNode->id);
+    //a1Tracker.addValueAt(1, currentNode->id);
     //cout << " added 1 to a1Tracker at pos: " << currentNode->id << endl;
 
     // What if we are a2, and have finished this node? We are not an a2 any more.
