@@ -10,22 +10,18 @@
 
 #include <cassert>
 
-
 using namespace std;
-
-#define gc getchar_unlocked
 
 // Lots of input to read, so use ultra-fast reader.
 void scan_integer( int &x )
 {
-    int c = gc();
+    int c = getchar_unlocked();
     x = 0;
-    for( ; ((c<48 || c>57) && c != '-'); c = gc() );
-    for( ;c>47 && c<58; c = gc() ) {
+    for( ; ((c<48 || c>57) && c != '-'); c = getchar_unlocked() );
+    for( ;c>47 && c<58; c = getchar_unlocked() ) {
         x = (x << 1) + (x << 3) + c - 48;
     }
 }
-
 
 template <typename T>
 T read()
@@ -150,7 +146,6 @@ void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const Triple& P
         }
 
     }
-
 }
 
 void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
@@ -200,7 +195,6 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
     currentNode->numDescendentsGreaterThan = descendantsGreaterThanSoFar;
 }
 
-
 int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
 {
     int64_t result = 0;
@@ -224,7 +218,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
     }
     return result;
 }
-
 
 int main(int argc, char* argv[])
 {
