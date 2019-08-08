@@ -165,21 +165,21 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
 
     const int nodeId = currentNode->id;
 
-    // What if we are a2?
-    const auto initialNumGreaterThan = nodeTracker.numToRightOf(nodeId);
-    const auto initialNumLessThan = nodeTracker.total() - initialNumGreaterThan;
-    int descendantsGreaterThanSoFar = 0;
-    int descendantsLessThanSoFar = 0;
-
     // What if we are a1 or a3?
     nodeTracker.addValueAt(1, nodeId);
+
+    // What if we are a2?
+    const auto initialNumGreaterThan = nodeTracker.numToRightOf(nodeId);
+    const auto initialNumLessThan = nodeTracker.numToLeftOf(nodeId);;
+    int descendantsGreaterThanSoFar = 0;
+    int descendantsLessThanSoFar = 0;
 
     for (Node* childNode : currentNode->children)
     {
 
         solveOptimisedAuxLCAIsA2(childNode, nodeTracker, P, result);
         const int numLess = nodeTracker.numToLeftOf(nodeId);
-        const int numGreater = nodeTracker.total() - numLess - 1;
+        const int numGreater = nodeTracker.numToRightOf(nodeId);
         const int numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const int numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
 
@@ -214,12 +214,10 @@ int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
 
     fixParentChild(rootNode, nullptr);
 
-    const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
-
-
     SegmentTree nodeTracker(nodes.size() + 1);
     solveOptimisedAuxLCAIsA2(rootNode, nodeTracker, P, result);
 
+    const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
     if (!isPMonotonic)
     {
         solveOptimisedAuxLCANoneOfA1A2A3(nodes, P, result);
@@ -258,8 +256,6 @@ int main(int argc, char* argv[])
         {
             const int u = read<int>() - 1;
             const int v = read<int>() - 1;
-
-            //cout << " nodes: " << (u + 1) << " and " << (v + 1) << " are neighbours" << endl;
 
             nodes[u].children.push_back(&(nodes[v]));
             nodes[v].children.push_back(&(nodes[u]));
