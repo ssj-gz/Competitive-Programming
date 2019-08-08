@@ -170,25 +170,25 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
         solveOptimisedAuxLCAIsA2(childNode, nodeTracker, P, result);
         const int numLess = nodeTracker.numToLeftOf(nodeId);
         const int numGreater = nodeTracker.numToRightOf(nodeId);
-        const int numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
-        const int numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
+        const int numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
+        const int numLessThanViaThisChild = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
 
         if (isA2LessThanA1 && isA2LessThanA3)
         {
-            result += static_cast<int64_t>(numOfThisChildGreaterThan) * descendantsGreaterThanSoFar;
+            result += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && !isA2LessThanA3)
         {
-            result += static_cast<int64_t>(numOfThisChildLessThan) * descendantsLessThanSoFar;
+            result += static_cast<int64_t>(numLessThanViaThisChild) * descendantsLessThanSoFar;
         }
         else 
         {
-            result += static_cast<int64_t>(numOfThisChildLessThan) * descendantsGreaterThanSoFar;
-            result += static_cast<int64_t>(numOfThisChildGreaterThan) * descendantsLessThanSoFar;
+            result += static_cast<int64_t>(numLessThanViaThisChild) * descendantsGreaterThanSoFar;
+            result += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsLessThanSoFar;
         }
 
-        descendantsGreaterThanSoFar += numOfThisChildGreaterThan;
-        descendantsLessThanSoFar += numOfThisChildLessThan;
+        descendantsGreaterThanSoFar += numGreaterThanViaThisChild;
+        descendantsLessThanSoFar += numLessThanViaThisChild;
     }
 
     currentNode->numDescendentsLessThan = descendantsLessThanSoFar;
