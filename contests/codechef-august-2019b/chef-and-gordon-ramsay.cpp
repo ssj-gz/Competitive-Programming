@@ -314,7 +314,7 @@ int64_t result = 0;
 
 
 
-void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, const Triple& P)
+void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, int numNodes, const Triple& P)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -327,7 +327,13 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, const Triple& P)
     //result += numA2WithA1;
 
     // What if we are a2?
-    const auto numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
+    const auto totalNumNodesGreaterThan = (numNodes - currentNode->id);
+    const auto totalNonDescendentNodesGreaterThan = totalNumNodesGreaterThan - nodeInfo[currentNode->id].numDescendentsGreaterThan;
+
+    const auto totalNumNodesLessThan = currentNode->id - 1;
+    const auto totalNonDescendentNodesLessThan = totalNumNodesLessThan - nodeInfo[currentNode->id].numDescendentsLessThan;
+
+    const auto numA1 = isA2LessThanA1 ? totalNonDescendentNodesGreaterThan : totalNonDescendentNodesLessThan;
     //cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
     //cout << " added " << numA1 << " to a2WithA1Tracker at pos: " << currentNode->id << endl;
     //if (numA1 != 0)
@@ -343,7 +349,7 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, const Triple& P)
 
     for (Node* childNode : currentNode->children)
     {
-        solveOptimisedAuxLCANoneOfA1A2A3(childNode, P);
+        solveOptimisedAuxLCANoneOfA1A2A3(childNode, numNodes, P);
     }
 
     // What if we are a1?
@@ -476,8 +482,9 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
         {
             //cout << "Forward pass" << endl;
             a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nodes.size(), P);
         }
+#if 0
         {
             for (auto& node : nodes)
             {
@@ -493,19 +500,21 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             a2WithA1Tracker.reset();
             solveOptimisedAuxLCAIsA1(rootNode, P);
         }
+#endif
     }
     else
     {
         {
             //cout << "Forward pass P forward" << endl;
             a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nodes.size(), P);
         }
         {
             //cout << "Forward pass P backward" << endl;
             a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, reversedP);
+            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, nodes.size(), reversedP);
         }
+#if 0
         {
             for (auto& node : nodes)
             {
@@ -520,6 +529,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             a1Tracker.reset();
             solveOptimisedAuxLCANoneOfA1A2A3(rootNode, reversedP);
         }
+
         {
             //cout << " a1 is LCA P forward" << endl;
             a1Tracker.reset();
@@ -532,6 +542,7 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
             a2WithA1Tracker.reset();
             solveOptimisedAuxLCAIsA1(rootNode, reversedP);
         }
+#endif
     }
     return result;
 }
