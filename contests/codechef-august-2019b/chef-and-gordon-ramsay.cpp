@@ -76,11 +76,11 @@ class SegmentTree
             return m_size;
         }
         // Find the number in the given range (inclusive) in O(log2(numElements)).
-        int64_t numInRange(int start, int end) const
+        int numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
-            int64_t sum = 0;
+            int sum = 0;
             auto elements = m_elements.data();
             while(end > 0)
             {
@@ -95,10 +95,9 @@ class SegmentTree
             }
             return sum;
         }
-        int64_t numToRightOf(int pos)
+        int numToRightOf(int pos)
         {
-            return total() - numToLeftOf(pos);
-            //return numInRange(pos + 1, size());
+            return numInRange(pos + 1, size());
         }
         int64_t numToLeftOf(int pos)
         {
@@ -124,7 +123,7 @@ class SegmentTree
         int m_size;
         int m_numElements;
         int m_total = 0;
-        vector<int64_t> m_elements;
+        vector<int> m_elements;
 };
 
 void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const std::array<int, 3>& P, int64_t& result)
