@@ -13,10 +13,6 @@
 
 #include <cassert>
 
-#include <sys/time.h>
-
-#include <sys/resource.h>
-
 
 using namespace std;
 
@@ -50,8 +46,6 @@ struct Node
 
     int numDescendentsLessThan = 0;
     int numDescendentsGreaterThan = 0;
-    int numLessThanOnInitialVisitWithOriginalOrder = 0;
-    int numGreaterThanOnInitialVisitWithOriginalOrder = 0;
 };
 
 void fixParentChild(Node* node, Node* parent)
@@ -177,8 +171,6 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
     int descendantsGreaterThanSoFar = 0;
     int descendantsLessThanSoFar = 0;
 
-    //cout << " at node: " << currentNode->id << " initialNumGreaterThan: " << initialNumGreaterThan << endl;
-
     // What if we are a1 or a3?
     nodeTracker.addValueAt(1, nodeId);
 
@@ -190,23 +182,17 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
         const int numGreater = nodeTracker.total() - numLess - 1;
         const int numOfThisChildGreaterThan = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const int numOfThisChildLessThan = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
-        //cout << "  at node: " << currentNode << " explored child: " << childNode->id << " numOfThisChildGreaterThan: " << numOfThisChildGreaterThan << " descendantsGreaterThanSoFar: " << descendantsGreaterThanSoFar << "  numOfThisChildLessThan: " << numOfThisChildLessThan << " descendantsLessThanSoFar: "<< descendantsLessThanSoFar << endl;
-
-        //cout << " isA2LessThanA1: " << isA2LessThanA1 << " isA2LessThanA3: " << isA2LessThanA3 << endl;
 
         if (isA2LessThanA1 && isA2LessThanA3)
         {
-            //cout << " glarp" << endl;
             result += static_cast<int64_t>(numOfThisChildGreaterThan) * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && !isA2LessThanA3)
         {
-            //cout << " glorp" << endl;
             result += static_cast<int64_t>(numOfThisChildLessThan) * descendantsLessThanSoFar;
         }
         else 
         {
-            //cout << " lca is a2 node: " << currentNode->id << " adding " << (numOfThisChildLessThan * descendantsGreaterThanSoFar) << " to result" << endl;
             result += static_cast<int64_t>(numOfThisChildLessThan) * descendantsGreaterThanSoFar;
             result += static_cast<int64_t>(numOfThisChildGreaterThan) * descendantsLessThanSoFar;
         }
@@ -217,9 +203,6 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
 
     currentNode->numDescendentsLessThan = descendantsLessThanSoFar;
     currentNode->numDescendentsGreaterThan = descendantsGreaterThanSoFar;
-    currentNode->numLessThanOnInitialVisitWithOriginalOrder = initialNumLessThan;
-    currentNode->numGreaterThanOnInitialVisitWithOriginalOrder = initialNumGreaterThan;
-
 }
 
 
@@ -254,72 +237,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            const int maxN = 1000;
-            const int N = rand() % maxN + 1;
-
-#if 1
-            vector<int> P = {1, 2, 3};
-            random_shuffle(P.begin(), P.end());
-#else
-            // TODO - remove this!
-            const int blah = rand() % 4;
-            vector<int> P;
-            switch (blah)
-            {
-                case 0:
-                    P = {2, 1, 3};
-                    break;
-                case 1:
-                    P = {3, 1, 2};
-                    break;
-                case 2:
-                    P = {1, 3, 2};
-                    break;
-                case 3:
-                    P = {2, 3, 1};
-                    break;
-            }
-#endif
-
-            cout << N << endl;
-
-            cout << P[0] << " " << P[1] << " " << P[2] << endl;
-
-            vector<int> nodeIds;
-            for (int i = 1; i <= N; i++)
-            {
-                nodeIds.push_back(i);
-            }
-            random_shuffle(nodeIds.begin(), nodeIds.end());
-
-            vector<int> usedNodeIds = { nodeIds.back() };
-            nodeIds.pop_back();
-
-            for (int i = 0; i < N - 1; i++)
-            {
-                const int newNodeId = nodeIds.back();
-                const int oldNodeId = usedNodeIds[rand() % usedNodeIds.size()];
-
-                cout << newNodeId << " " << oldNodeId << endl;
-
-                usedNodeIds.push_back(newNodeId);
-                nodeIds.pop_back();
-            }
-        }
-
-        return 0;
-    }
 
     const int T = read<int>();
     for (int t = 0; t < T; t++)
