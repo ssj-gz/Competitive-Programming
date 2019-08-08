@@ -206,14 +206,10 @@ int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
     SegmentTree nodeTracker(nodes.size() + 1);
     solveOptimisedAuxLCAIsA2(rootNode, nodeTracker, P, result);
 
+    solveOptimisedAuxLCANoneOfA1A2A3(nodes, P, result);
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
-    if (!isPMonotonic)
+    if (isPMonotonic)
     {
-        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P, result);
-    }
-    else
-    {
-        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P, result);
         solveOptimisedAuxLCANoneOfA1A2A3(nodes, reversedP, result);
     }
     return result;
