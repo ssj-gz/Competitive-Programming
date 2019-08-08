@@ -70,33 +70,9 @@ class SegmentTree
         {
             return m_total;
         }
-        int size() const
-        {
-            return m_size;
-        }
-        // Find the number in the given range (inclusive) in O(log2(numElements)).
-        int numInRange(int start, int end) const
-        {
-            start++; // Make 1-relative.  start and end are inclusive.
-            end++;
-            int sum = 0;
-            auto elements = m_elements.data();
-            while(end > 0)
-            {
-                sum += elements[end];
-                end -= (end & (end*-1));
-            }
-            start--;
-            while(start > 0)
-            {
-                sum -= elements[start];
-                start -= (start & (start*-1));
-            }
-            return sum;
-        }
         int numToRightOf(int pos)
         {
-            return numInRange(pos + 1, size());
+            return numInRange(pos + 1, m_size);
         }
         int64_t numToLeftOf(int pos)
         {
@@ -123,6 +99,27 @@ class SegmentTree
         int m_numElements;
         int m_total = 0;
         vector<int> m_elements;
+
+        // Find the number in the given range (inclusive) in O(log2(numElements)).
+        int numInRange(int start, int end) const
+        {
+            start++; // Make 1-relative.  start and end are inclusive.
+            end++;
+            int sum = 0;
+            auto elements = m_elements.data();
+            while(end > 0)
+            {
+                sum += elements[end];
+                end -= (end & (end*-1));
+            }
+            start--;
+            while(start > 0)
+            {
+                sum -= elements[start];
+                start -= (start & (start*-1));
+            }
+            return sum;
+        }
 };
 
 void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const Triple& P, int64_t& result)
