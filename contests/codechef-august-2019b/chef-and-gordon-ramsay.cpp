@@ -40,7 +40,7 @@ void scan_integer( int &x )
 }
 
 
-    template <typename T>
+template <typename T>
 T read()
 {
     T toRead;
@@ -53,23 +53,12 @@ struct Node
 {
     vector<Node*> children;
     int id = -1;
-};
 
-struct NodeInfo
-{
     int numDescendentsLessThan = 0;
     int numDescendentsGreaterThan = 0;
     int numLessThanOnInitialVisitWithOriginalOrder = 0;
     int numGreaterThanOnInitialVisitWithOriginalOrder = 0;
-    //int dummyFieldC = 0;
-    //int dummyFieldD = 0;
-    //int dummyFieldE = 0;
-    //int dummyFieldF = 0;
-    //int dummyFieldG = 0;
-    //int dummyFieldH = 0;
 };
-
-vector<NodeInfo> nodeInfo;
 
 void fixParentChild(Node* node, Node* parent)
 {
@@ -328,10 +317,10 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, int numNodes, const Tri
 
     // What if we are a2?
     const auto totalNumNodesGreaterThan = (numNodes - currentNode->id);
-    const auto totalNonDescendentNodesGreaterThan = totalNumNodesGreaterThan - nodeInfo[currentNode->id].numDescendentsGreaterThan;
+    const auto totalNonDescendentNodesGreaterThan = totalNumNodesGreaterThan - currentNode->numDescendentsGreaterThan;
 
     const auto totalNumNodesLessThan = currentNode->id - 1;
-    const auto totalNonDescendentNodesLessThan = totalNumNodesLessThan - nodeInfo[currentNode->id].numDescendentsLessThan;
+    const auto totalNonDescendentNodesLessThan = totalNumNodesLessThan - currentNode->numDescendentsLessThan;
 
     const auto numA1 = isA2LessThanA1 ? totalNonDescendentNodesGreaterThan : totalNonDescendentNodesLessThan;
     //cout << " numA1 for a2 " << currentNode->id << " = " << numA1 << endl;
@@ -340,11 +329,11 @@ void solveOptimisedAuxLCANoneOfA1A2A3(Node* currentNode, int numNodes, const Tri
         //a2WithA1Tracker.addValueAt(numA1, currentNode->id);
     if (isA2LessThanA3)
     {
-        result += static_cast<int64_t>(numA1) * nodeInfo[currentNode->id].numDescendentsGreaterThan;
+        result += static_cast<int64_t>(numA1) * currentNode->numDescendentsGreaterThan;
     }
     else
     {
-        result += static_cast<int64_t>(numA1) * nodeInfo[currentNode->id].numDescendentsLessThan;
+        result += static_cast<int64_t>(numA1) * currentNode->numDescendentsLessThan;
     }
 
     for (Node* childNode : currentNode->children)
@@ -416,10 +405,10 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
         descendantsLessThanSoFar += numOfThisChildLessThan;
     }
 
-    nodeInfo[nodeId].numDescendentsLessThan = descendantsLessThanSoFar;
-    nodeInfo[nodeId].numDescendentsGreaterThan = descendantsGreaterThanSoFar;
-    nodeInfo[nodeId].numLessThanOnInitialVisitWithOriginalOrder = initialNumLessThan;
-    nodeInfo[nodeId].numGreaterThanOnInitialVisitWithOriginalOrder = initialNumGreaterThan;
+    currentNode->numDescendentsLessThan = descendantsLessThanSoFar;
+    currentNode->numDescendentsGreaterThan = descendantsGreaterThanSoFar;
+    currentNode->numLessThanOnInitialVisitWithOriginalOrder = initialNumLessThan;
+    currentNode->numGreaterThanOnInitialVisitWithOriginalOrder = initialNumGreaterThan;
 
 }
 
@@ -471,8 +460,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
     a1Tracker = SegmentTree(nodes.size() + 1);
     a2WithA1Tracker = SegmentTree(nodes.size() + 1);
     nodeTracker = SegmentTree(nodes.size() + 1);
-    nodeInfo.clear();
-    nodeInfo.resize(nodes.size() + 1);
 
     nodeTracker.reset();
     solveOptimisedAuxLCAIsA2(rootNode, P);
