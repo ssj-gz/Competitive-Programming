@@ -280,8 +280,6 @@ void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, 
 }
 
 
-SegmentTree a1Tracker;
-SegmentTree a2WithA1Tracker;
 SegmentTree nodeTracker;
 
 int64_t result = 0;
@@ -387,8 +385,6 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
 
-    a1Tracker = SegmentTree(nodes.size() + 1);
-    a2WithA1Tracker = SegmentTree(nodes.size() + 1);
     nodeTracker = SegmentTree(nodes.size() + 1);
 
     nodeTracker.reset();
@@ -514,12 +510,8 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        //const auto solutionOptimised = solveOptimised(nodes, P);
         const auto solutionOptimised2 = solveOptimised2(nodes, P);
-        //cout << "solutionOptimised: " << solutionOptimised << " solutionOptimised2: " << solutionOptimised2 << endl;
-        ////cout << "solutionOptimised2: " << solutionOptimised2 << endl;
         cout << solutionOptimised2 << endl;
-        //assert(solutionOptimised == solutionOptimised2);
 
 #endif
     }
