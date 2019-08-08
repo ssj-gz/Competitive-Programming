@@ -280,28 +280,11 @@ void solutionOptimisedAux(Node* startNode, Node* currentNode, Node* parentNode, 
 }
 
 
-int64_t solveOptimised(vector<Node>& nodes, const array<int, 3>& P)
-{
-    int64_t result = 0;
-
-    for (auto& node : nodes)
-    {
-        SegmentTree segmentTree(nodes.size() + 1);
-        solutionOptimisedAux(&node, &node, nullptr, P, segmentTree, result);
-    }
-
-    return result;
-
-}
-
 SegmentTree a1Tracker;
 SegmentTree a2WithA1Tracker;
 SegmentTree nodeTracker;
 
 int64_t result = 0;
-
-
-
 
 void solveOptimisedAuxLCANoneOfA1A2A3(const vector<Node>& nodes, const Triple& P)
 {
@@ -392,39 +375,6 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, const Triple& P)
 
 }
 
-void solveOptimisedAuxLCAIsA1(Node* currentNode, const Triple& P)
-{
-    const bool isA2LessThanA1 = (P[1] < P[0]);
-    const bool isA2LessThanA3 = (P[1] < P[2]);
-
-    // What if we are a3?
-    const int64_t numA2WithA1 = isA2LessThanA3 ? a2WithA1Tracker.numToLeftOf(currentNode->id) : a2WithA1Tracker.numToRightOf(currentNode->id);
-
-    // What if we are a2? 
-    const int numA1 = isA2LessThanA1 ? a1Tracker.numToRightOf(currentNode->id) : a1Tracker.numToLeftOf(currentNode->id);
-    if (numA1 != 0)
-        a2WithA1Tracker.addValueAt(numA1, currentNode->id);
-
-    // What if we are a1?
-    a1Tracker.addValueAt(1, currentNode->id);
-
-
-    //cout << " numA2WithA1 for a3 " << currentNode->id << " = " << numA2WithA1 << endl;
-    //cout << "** added " << numA2WithA1 << " to result for a3 = " << currentNode->id << endl;
-    result += numA2WithA1;
-
-    for (Node* childNode : currentNode->children)
-    {
-        solveOptimisedAuxLCAIsA1(childNode, P);
-    }
-
-    // What if we are a2, and have finished this node? We are not an a2 any more.
-    if (numA1 != 0)
-        a2WithA1Tracker.addValueAt(-numA1, currentNode->id);
-
-    // What if we are a1, and have finished this node? We are not an a1 any more.
-    a1Tracker.addValueAt(-1, currentNode->id);
-}
 
 int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 {
@@ -446,70 +396,12 @@ int64_t solveOptimised2(vector<Node>& nodes, const array<int, 3>& Parray)
 
     if (!isPMonotonic)
     {
-        {
-            //cout << "Forward pass" << endl;
-            a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(nodes, P);
-        }
-#if 0
-        {
-            for (auto& node : nodes)
-            {
-                reverse(node.children.begin(), node.children.end());
-            }
-            //cout << "Backward pass" << endl;
-            a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
-        }
-        {
-            //cout << " a1 is LCA" << endl;
-            a1Tracker.reset();
-            a2WithA1Tracker.reset();
-            solveOptimisedAuxLCAIsA1(rootNode, P);
-        }
-#endif
+        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P);
     }
     else
     {
-        {
-            //cout << "Forward pass P forward" << endl;
-            a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(nodes, P);
-        }
-        {
-            //cout << "Forward pass P backward" << endl;
-            a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(nodes, reversedP);
-        }
-#if 0
-        {
-            for (auto& node : nodes)
-            {
-                reverse(node.children.begin(), node.children.end());
-            }
-            //cout << "Backward pass P forward" << endl;
-            a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, P);
-        }
-        {
-            //cout << "Backward pass P backward" << endl;
-            a1Tracker.reset();
-            solveOptimisedAuxLCANoneOfA1A2A3(rootNode, reversedP);
-        }
-
-        {
-            //cout << " a1 is LCA P forward" << endl;
-            a1Tracker.reset();
-            a2WithA1Tracker.reset();
-            solveOptimisedAuxLCAIsA1(rootNode, P);
-        }
-        {
-            //cout << " a1 is LCA P backward" << endl;
-            a1Tracker.reset();
-            a2WithA1Tracker.reset();
-            solveOptimisedAuxLCAIsA1(rootNode, reversedP);
-        }
-#endif
+        solveOptimisedAuxLCANoneOfA1A2A3(nodes, P);
+        solveOptimisedAuxLCANoneOfA1A2A3(nodes, reversedP);
     }
     return result;
 }
