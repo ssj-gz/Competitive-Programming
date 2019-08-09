@@ -22,7 +22,7 @@ T read()
     return toRead;
 }
 
-bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealth)
+vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
 {
     const int numCaves = radiationPower.size();
     vector<int64_t> radiationLevel(numCaves, 0);
@@ -67,6 +67,12 @@ bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>
             radiationLevel[i] += amountToAdd;
         }
     }
+    return radiationLevel;
+}
+
+bool calcCanKillAllZombies(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealth)
+{
+    const auto radiationLevels = calcRadiationLevels(radiationPower);
 
     auto sorted = [](const vector<int64_t>& toSort)
     {
@@ -76,7 +82,7 @@ bool solveOptimised(const vector<int64_t>& radiationPower, const vector<int64_t>
         return sorted;
     };
 
-    const auto radiationLevelsSorted = sorted(radiationLevel);
+    const auto radiationLevelsSorted = sorted(radiationLevels);
     const auto zombieHealthsSorted = sorted(zombieHealth);
 
     return (radiationLevelsSorted == zombieHealthsSorted);
@@ -158,8 +164,8 @@ int main(int argc, char* argv[])
         {
             health = read<int64_t>();
         }
-        const auto solutionOptimised = solveOptimised(radiationPower, zombieHealth);
-        cout << (solutionOptimised ? "YES" : "NO") << endl;
+        const auto canKillAllZombies = calcCanKillAllZombies(radiationPower, zombieHealth);
+        cout << (canKillAllZombies ? "YES" : "NO") << endl;
     }
 }
 
