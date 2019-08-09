@@ -1,16 +1,11 @@
 // Simon St James (ssjgz) - 2018-02-28
-#define BRUTE_FORCE
-//#define SUBMISSION
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <cassert>
 #include <sys/time.h>
 
+//#define VERY_VERBOSE
 
 using namespace std;
 
@@ -32,6 +27,10 @@ string reversed(const string& s)
 
 string bruteForce(const string& s)
 {
+    // Warning: this is O(2 ** N x N), so will explode only strings larger than twenty characters, say!
+    // There's no way it can deal with |S| = 1'000 as in the original problem, so it is useful for
+    // teaching only!
+    //
     // Basic approach: find all subsequences of s, and for each one, treat it
     // as if it is reverse(A).
     //
@@ -71,14 +70,18 @@ string bruteForce(const string& s)
         }
         numCandidateRevATested++;
 
+#ifdef VERY_VERBOSE
         cout << "trying with reverse(A) = " << revA << " and possible shuffle(A) = " << shuffleA << endl;
+#endif
         if (sorted(revA) == sorted(shuffleA))
         {
             const string A = reversed(revA);
+            cout << endl;
             cout << "Found a solution: " << A << endl;
             cout << "Pick " << shuffleA << " as shuffle(A), a permutation of " << A << endl;
-            cout << "Merge as follows: " << endl;
-            cout << "reverse(A): ";
+            cout << "reverse(A) is " << revA << endl << endl;
+            cout << "Merge as follows: " << endl << endl;
+            cout << " reverse(A): ";
             for (int i = 0; i < putLetterInRevA.size(); i++)
             {
                 if (putLetterInRevA[i])
@@ -87,7 +90,7 @@ string bruteForce(const string& s)
                     cout << " ";
             }
             cout << endl;
-            cout << "shuffle(A): ";
+            cout << " shuffle(A): ";
             for (int i = 0; i < putLetterInRevA.size(); i++)
             {
                 if (putLetterInRevA[i])
@@ -96,6 +99,8 @@ string bruteForce(const string& s)
                     cout << s[i];
             }
             cout << endl;
+            cout << "             " << string(s.size(), '=') << endl;
+            cout << "             " << s << ", the original string S " << endl << endl;
             if (best.empty() || A < best)
             {
                 cout << " ** " << A << " is the new best solution so far!" << endl;
@@ -104,7 +109,9 @@ string bruteForce(const string& s)
         }
         else
         {
+#ifdef VERY_VERBOSE
             cout << "The candidate solution A = " << reversed(revA) << " will not work, as the letters in S - reversed(A) ( = " << shuffleA << ") are not a permutation of A" << endl;
+#endif
         }
     }
     cout << "The best found was " << best << ".  We tried " << numCandidateRevATested << " candidates for reverse(A) i.e. " << numCandidateRevATested << " subsequences of S" << endl;
@@ -113,13 +120,16 @@ string bruteForce(const string& s)
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2)
+    if (argc == 2 && string(argv[1]) == "--test")
     {
+        // Generate a small random testcase - no more than twenty letters,
+        // as this is about the most our brute force generator can
+        // comfortably deal with!
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numLettersInA = rand() % 10'000 + 1;
+        const int numLettersInA = rand() % 10 + 1;
         const int maxLetter = rand() % numLetters + 1;
         string A;
         for (int i = 0; i < numLettersInA; i++)
@@ -136,8 +146,6 @@ int main(int argc, char* argv[])
     cin >> s;
 
 
-#ifdef BRUTE_FORCE
     const auto resultBruteForce = bruteForce(s);
     cout << "resultBruteForce: " << resultBruteForce << endl;
-#endif
 }
