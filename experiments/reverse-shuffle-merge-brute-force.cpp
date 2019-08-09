@@ -25,6 +25,49 @@ string reversed(const string& s)
     return reversedS;
 }
 
+bool isSubsequence(const string& AOriginal, const string& S)
+{
+    string A = AOriginal;
+    int index = 0;
+    string subsequence;
+    string notSubsequence;
+
+    string subsequenceNoSpaces;
+    for (const auto letter : S)
+    {
+        if (!A.empty() && letter == A[0])
+        {
+            subsequence.push_back(letter);
+            subsequenceNoSpaces.push_back(letter);
+            notSubsequence.push_back(' ');
+            A.erase(A.begin());
+        }
+        else
+        {
+            notSubsequence.push_back(letter);
+            subsequence.push_back(' ');
+        }
+        index++;
+
+        if (A.empty())
+            break;
+    }
+
+    if (A.empty())
+    {
+        cout << "subsequence:     " << subsequence << endl;
+        cout << "not subsequence: " << notSubsequence << endl;
+        cout << "                 " << string(S.size(), '=') << endl;
+        cout << "                 " << S << endl;
+        cout << endl;
+
+        cout << "(reversed subsequence: " << reversed(subsequenceNoSpaces) << ")" << endl;
+        return true;
+    }
+
+    return false;
+}
+
 string bruteForce(const string& s)
 {
     // Warning: this is O(2 ** |s| x |s|), so will explode only strings larger than twenty characters, say!
@@ -142,8 +185,15 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+#if 0
+    cout << isSubsequence(reversed("aaaaaabaaceededecbdb"), "bdabaceadaedaaaeaecdeadababdbeaeeacacaba") << endl;
+    cout << isSubsequence(reversed("aaaaababaaceededecbd"), "bdabaceadaedaaaeaecdeadababdbeaeeacacaba") << endl;
+    return 0;
+#endif
+
     string s;
     cin >> s;
+
 
 
     const auto resultBruteForce = bruteForce(s);
