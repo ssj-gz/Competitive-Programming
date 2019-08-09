@@ -75,7 +75,27 @@ string bruteForce(const string& s)
         if (sorted(revA) == sorted(shuffleA))
         {
             const string A = reversed(revA);
-            cout << "found a solution: " << A << endl;
+            cout << "Found a solution: " << A << endl;
+            cout << "Pick " << shuffleA << " as shuffle(A), a permutation of " << A << endl;
+            cout << "Merge as follows: " << endl;
+            cout << "reverse(A): ";
+            for (int i = 0; i < putLetterInRevA.size(); i++)
+            {
+                if (putLetterInRevA[i])
+                    cout << s[i];
+                else
+                    cout << " ";
+            }
+            cout << endl;
+            cout << "shuffle(A): ";
+            for (int i = 0; i < putLetterInRevA.size(); i++)
+            {
+                if (putLetterInRevA[i])
+                    cout << " ";
+                else
+                    cout << s[i];
+            }
+            cout << endl;
             if (best.empty() || A < best)
             {
                 cout << " ** " << A << " is the new best solution so far!" << endl;
