@@ -597,29 +597,6 @@ bool operator<(const GameState& lhs, const GameState& rhs)
     return lhs.bPrime < rhs.bPrime;
 }
 
-int grundyBlah(int grundyNumberAtNextState, int numLettersUntilNextState)
-{
-    cout << "grundyBlah: grundyNumberAtNextState: " << grundyNumberAtNextState << " numLettersUntilNextState: " << numLettersUntilNextState << endl;
-    if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 1))
-    {
-        return 0;
-    }
-    if (grundyNumberAtNextState > 0 && ((numLettersUntilNextState % 2) == 0))
-    {
-        return 1;
-    }
-    if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 1))
-    {
-        return 1;
-    }
-    if (grundyNumberAtNextState == 0 && ((numLettersUntilNextState % 2) == 0))
-    {
-        return 0;
-    }
-    assert(false);
-    return -1;
-}
-
 struct SuffixTreeInfo
 {
     int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
