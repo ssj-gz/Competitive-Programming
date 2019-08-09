@@ -588,15 +588,6 @@ class GameState
         }
 };
 
-bool operator<(const GameState& lhs, const GameState& rhs)
-{
-    if (lhs.aPrime != rhs.aPrime)
-    {
-        return lhs.aPrime < rhs.aPrime;
-    }
-    return lhs.bPrime < rhs.bPrime;
-}
-
 struct SuffixTreeInfo
 {
     int maxGrundy = 1; // Doesn't have to precise - we just want a good upper-bound.
