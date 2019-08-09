@@ -154,8 +154,20 @@ class StopAfter
             {
                 std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
                 const auto numSecondsRunFor = std::chrono::duration_cast<std::chrono::seconds>(now - m_testcaseGenerationBeginTime).count();
-                cout << "numSecondsRunFor: " << numSecondsRunFor << endl;
                 return numSecondsRunFor >= m_value;
+            }
+        }
+        string progressString() const
+        {
+            if (m_type == NumIterations)
+            {
+                return "Generated " + to_string(m_numTestcasesGenerated) + " of " + to_string(m_value) + " testcases";
+            }
+            else
+            {
+                std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+                const auto numSecondsRunFor = std::chrono::duration_cast<std::chrono::seconds>(now - m_testcaseGenerationBeginTime).count();
+                return "Run for " + to_string(numSecondsRunFor) + " of " + to_string(m_value) + " seconds (" + to_string(m_value - numSecondsRunFor) + " seconds remaining)";
             }
         }
         void notifyGenerationStarted()
@@ -490,6 +502,8 @@ int main(int argc, char* argv[])
                 testSuiteFile << x << endl;
             }
             stopAfter.notifyTestcaseGenerated();
+
+            cout << stopAfter.progressString() << endl;
         }
         testSuiteFile.close();
     }
