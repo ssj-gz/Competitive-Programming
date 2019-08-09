@@ -28,17 +28,14 @@ string reversed(const string& s)
 bool isSubsequence(const string& AOriginal, const string& S)
 {
     string A = AOriginal;
-    int index = 0;
     string subsequence;
     string notSubsequence;
 
-    string subsequenceNoSpaces;
     for (const auto letter : S)
     {
         if (!A.empty() && letter == A[0])
         {
             subsequence.push_back(letter);
-            subsequenceNoSpaces.push_back(letter);
             notSubsequence.push_back(' ');
             A.erase(A.begin());
         }
@@ -47,11 +44,19 @@ bool isSubsequence(const string& AOriginal, const string& S)
             notSubsequence.push_back(letter);
             subsequence.push_back(' ');
         }
-        index++;
 
         if (A.empty())
             break;
     }
+
+    auto spacesRemoved = [](string s)
+    {
+        while (s.find(' ') != string::npos)
+        {
+            s.erase(s.find(' '), 1);
+        }
+        return s;
+    };
 
     if (A.empty())
     {
@@ -61,7 +66,10 @@ bool isSubsequence(const string& AOriginal, const string& S)
         cout << "                 " << S << endl;
         cout << endl;
 
-        cout << "(reversed subsequence: " << reversed(subsequenceNoSpaces) << ")" << endl;
+        cout << "(reversed subsequence:  " << spacesRemoved(reversed(subsequence)) << ")" << endl;
+
+        cout << "sorted subsequence:     " << sorted(spacesRemoved(subsequence)) << endl;
+        cout << "sorted not subsequence: " << sorted(spacesRemoved(notSubsequence)) << endl;
         return true;
     }
 
@@ -186,8 +194,9 @@ int main(int argc, char* argv[])
     }
 
 #if 0
-    cout << isSubsequence(reversed("aaaaaabaaceededecbdb"), "bdabaceadaedaaaeaecdeadababdbeaeeacacaba") << endl;
-    cout << isSubsequence(reversed("aaaaababaaceededecbd"), "bdabaceadaedaaaeaecdeadababdbeaeeacacaba") << endl;
+    isSubsequence(reversed("aaaaaabaaceededecbdb"), "bdabaceadaedaaaeaecdeadababdbeaeeacacaba");
+    cout << endl;
+    isSubsequence(reversed("aaaaaabaaceaeaaadead"), "bdabaceadaedaaaeaecdeadababdbeaeeacacaba");
     return 0;
 #endif
 
