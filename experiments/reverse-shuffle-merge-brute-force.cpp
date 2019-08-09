@@ -27,7 +27,7 @@ string reversed(const string& s)
 
 string bruteForce(const string& s)
 {
-    // Warning: this is O(2 ** N x N), so will explode only strings larger than twenty characters, say!
+    // Warning: this is O(2 ** |s| x |s|), so will explode only strings larger than twenty characters, say!
     // There's no way it can deal with |S| = 1'000 as in the original problem, so it is useful for
     // teaching only!
     //
