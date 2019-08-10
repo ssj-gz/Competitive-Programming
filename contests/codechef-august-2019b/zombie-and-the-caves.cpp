@@ -26,19 +26,27 @@ vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
     for (int i = 0; i < numCaves; i++)
     {
         assert(radiationPower[i] > 0);
-        const int afterRangeEnd = i + radiationPower[i] + 1;
-        if (afterRangeEnd < numCaves)
-            changeToAmountToAdd[afterRangeEnd]--;
-        const int rangeBegin = max<int>(0, i - radiationPower[i]);
-        changeToAmountToAdd[rangeBegin]++;
+        // Notify the Sweeper that a range has just begun, so it needs
+        // to add an extra 1 to each cell it encounters in its travel from
+        // left to right  until further notice.
+        // If the range begins to the left of the 0th pos, treat the 0th
+        // pos as the beginning of the range.
+        const int radiationRangeBeginPos = max<int>(0, i - radiationPower[i]);
+        changeToAmountToAdd[radiationRangeBeginPos]++;
+        // Notify the Sweeper that a range finished, so it no longer has to add
+        // the extra 1 to each cell it encounters.
+        const int afterRadiationRangeEndPos = i + radiationPower[i] + 1;
+        if (afterRadiationRangeEndPos < numCaves)
+            changeToAmountToAdd[afterRadiationRangeEndPos]--;
 
     }
 
+    // Sweep from left to right, obeying the "breadcrumbs" left in the code above.
     int64_t amountToAdd = 0;
-    for (int i = 0; i < numCaves; i++)
+    for (int pos = 0; pos < numCaves; pos++)
     {
-        amountToAdd += changeToAmountToAdd[i];
-        radiationLevel[i] += amountToAdd;
+        amountToAdd += changeToAmountToAdd[pos];
+        radiationLevel[pos] += amountToAdd;
     }
     return radiationLevel;
 }
@@ -55,6 +63,8 @@ bool calcCanKillAllZombies(const vector<int64_t>& radiationPower, const vector<i
         return sorted;
     };
 
+    // Well-known result: two arrays are anagrams/ permutations of each other
+    // if and only if their sorted versions are equal.
     const auto radiationLevelsSorted = sorted(radiationLevels);
     const auto zombieHealthsSorted = sorted(zombieHealth);
 
@@ -63,6 +73,15 @@ bool calcCanKillAllZombies(const vector<int64_t>& radiationPower, const vector<i
 
 int main(int argc, char* argv[])
 {
+    // Very easy one - the only potentially tricky part is computing the Radiation Levels, 
+    // but there are a bunch of easy ways to deal with this: one way would be to use the
+    // well-known "sweep from left to right, counting how many ranges the current position
+    // is enclosed by" which takes O(N x log2N).  We can actually do better, though (O(N))
+    // as the width of the ranges is at most N - hopefully the code in calcRadiationLevels
+    // is reasonably self-explanatory :)
+    //
+    // Having computed the Radiation Levels, checking if all Zombies can be killed is trivial;
+    // again, hopefully the code in calcCanKillAllZombies is self-explanatory :)
     ios::sync_with_stdio(false);
 
     const int T = read<int>();
