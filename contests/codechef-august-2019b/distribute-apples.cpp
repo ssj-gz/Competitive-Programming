@@ -24,21 +24,21 @@ bool calcCanBoxContentsDiffer(int64_t numApples, int64_t numBoxes)
     // will have the same number (numApples / numBoxes) of
     // apples in it.
     //
-    // For candidate 2, things are a little trickier: after the first
-    // minute, one of the boxes will have K (= numBoxes) apples in it; the remaining
-    // K - 1 will not i.e. boxes have different amounts in them (assuming K > 1).
+    // For Candidate 2, things are a little trickier: after the first
+    // minute, one of the boxes will have numBoxes apples in it; the remaining
+    // (numBoxes - 1) will not i.e. boxes have different amounts in them (assuming numBoxes > 1).
     // 
-    // After the second minute, two boxes will each have K apples in them; the
-    // remaining K - 2 will not - still uneven.
+    // After the second minute, two boxes will each have numBoxes apples in them; the
+    // remaining (numBoxes - 2) will not - still uneven.
     //
-    // After K minutes, all boxes will have the same number - K - of apples in them.
+    // After numBoxes minutes, all boxes will have the same number - "numBoxes" - of apples in them.
     //
-    // In general, every K minutes we package K x K apples and end up with an 
+    // In general, then, every numBoxes minutes Candidate 2 packages (numBoxes x numBoxes) apples and end up with an 
     // equal number of apples in each box.  Thus, the boxes all contain
-    // an equal number of apples if and only if we have packaged a multiple of K x K
+    // an equal number of apples if and only if we have packaged a multiple of (numBoxes x numBoxes)
     // apples.
     //
-    // Thus, if numApples is not a multiple of numBoxes x numBoxes, then we will have an
+    // Thus, if numApples is not a multiple of numBoxes x numBoxes, then Candidate 2 will package an
     // uneven number of apples in the boxes and, since Candidate 1 packages them evenly,
     // Candidate 2's results are different from Candidate 1.
     //
@@ -52,15 +52,15 @@ bool calcCanBoxContentsDiffer(int64_t numApples, int64_t numBoxes)
     // numApples is *not* divisible by numBoxes x numBoxes.
     if ((numApples / numBoxes) % numBoxes == 0) // Calculating numBoxes x numBoxes will likely overflow, so be a bit smarter :)
     {
-        // Have an equal number of apples in each box - in fact,
-        // numApples / numBoxes of them, just like Candidate1!
+        // Candidate 2 packages an equal number of apples in each box - in fact,
+        // numApples / numBoxes of them, just like Candidate 1!
         // Box contents cannot differ.
         return false;
     }
     else
     {
-        // Have an unequal number of apples in each box - must
-        // differ from Candidate1, all of whose boxes contain
+        // Candidate 2 packages an unequal number of apples in each box - must
+        // differ from Candidate 1, all of whose boxes contain
         // the same number of apples.
         return true;
     }
@@ -68,7 +68,9 @@ bool calcCanBoxContentsDiffer(int64_t numApples, int64_t numBoxes)
 
 int main(int argc, char* argv[])
 {
-    // Easy - see calcCanBoxContentsDiffer for full details.
+    // Easy - see calcCanBoxContentsDiffer for full details.  The only potentially
+    // tricky bit is avoiding overflow when deciding if numApples is divisible by
+    // (numBoxes x numBoxes), but this is easily dealt with :)
     const int T = read<int>();
     for (int t = 0; t < T; t++)
     {
