@@ -20,46 +20,25 @@ vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
 {
     const int numCaves = radiationPower.size();
     vector<int64_t> radiationLevel(numCaves, 0);
+
+    vector<int64_t> changeToAmountToAdd(numCaves, 0);
+
+    for (int i = 0; i < numCaves; i++)
     {
-        // Rightwards.
-        vector<int64_t> changeToAmountToAdd(numCaves, 0);
+        assert(radiationPower[i] > 0);
+        const int afterRangeEnd = i + radiationPower[i] + 1;
+        if (afterRangeEnd < numCaves)
+            changeToAmountToAdd[afterRangeEnd]--;
+        const int rangeBegin = max<int>(0, i - radiationPower[i]);
+        changeToAmountToAdd[rangeBegin]++;
 
-        for (int i = 0; i < numCaves; i++)
-        {
-            assert(radiationPower[i] > 0);
-            changeToAmountToAdd[i]++;
-            const int rangeRightEnd = i + radiationPower[i] + 1;
-            if (rangeRightEnd < numCaves)
-                changeToAmountToAdd[rangeRightEnd]--;
-        }
-
-        int64_t amountToAdd = 0;
-        for (int i = 0; i < numCaves; i++)
-        {
-            amountToAdd += changeToAmountToAdd[i];
-            radiationLevel[i] += amountToAdd;
-        }
     }
+
+    int64_t amountToAdd = 0;
+    for (int i = 0; i < numCaves; i++)
     {
-        // Leftwards.
-        vector<int64_t> changeToAmountToAdd(numCaves, 0);
-
-        for (int i = 0; i < numCaves; i++)
-        {
-            assert(radiationPower[i] > 0);
-            if (i - 1 >= 0)
-            changeToAmountToAdd[i - 1]++;
-            const int rangeEndLeft = i - radiationPower[i] - 1;
-            if (rangeEndLeft >= 0)
-                changeToAmountToAdd[rangeEndLeft]--;
-        }
-
-        int64_t amountToAdd = 0;
-        for (int i = numCaves - 1; i >= 0; i--)
-        {
-            amountToAdd += changeToAmountToAdd[i];
-            radiationLevel[i] += amountToAdd;
-        }
+        amountToAdd += changeToAmountToAdd[i];
+        radiationLevel[i] += amountToAdd;
     }
     return radiationLevel;
 }
