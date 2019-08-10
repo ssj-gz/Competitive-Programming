@@ -17,6 +17,7 @@ T read()
 
 int main(int argc, char* argv[])
 {
+    // Completely trivial - just follow the instructions XD
     const int T = read<int>();
     for (int t = 0; t < T; t++)
     {
