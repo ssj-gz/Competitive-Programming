@@ -76,23 +76,24 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
-const int maxNumberLength = 100'000;
+constexpr auto maxNumberLength = 100'000;
 // Lookup arrays, populated by computeMainLookupTables().
 //
 //   - sumOfFForNumDigitsBeginningWith[l][d] = sum [ number such that len(number) == l and number begins with d ] { f(number) }.
 //   - tenToThePowerOf - just as you'd expect ;)
+//
 vector<vector<ModNum>> sumOfFForNumDigitsBeginningWith(maxNumberLength + 1, vector<ModNum>(10));
 vector<ModNum> tenToThePowerOf(maxNumberLength + 1);
 
 ModNum calcF(const string& number)
 {
-    const int numDigits = number.size();
+    const auto numDigits = number.size();
     ModNum result = 0;
 
-    int previousDigitInNumber = -1;
-    for (int index = 0; index < numDigits; index++)
+    auto previousDigitInNumber = -1;
+    for (auto index = 0; index < numDigits; index++)
     {
-        const int digitInNumber = number[index] - '0';
+        const auto digitInNumber = number[index] - '0';
 
         if (digitInNumber != previousDigitInNumber)
         {
@@ -108,7 +109,7 @@ ModNum calcF(const string& number)
 void computeMainLookupTables()
 {
     // Compute sumOfFForNumDigitsBeginningWith.
-    for (int digit = 0; digit <= 9; digit++)
+    for (auto digit = 0; digit <= 9; digit++)
     {
         sumOfFForNumDigitsBeginningWith[0][digit] = 0;
         sumOfFForNumDigitsBeginningWith[1][digit] = digit;
@@ -116,13 +117,13 @@ void computeMainLookupTables()
 
     ModNum prevPowerOf10 = 1;
     ModNum powerOf10 = 10;
-    for (int numberLength = 2; numberLength <= maxNumberLength; numberLength++)
+    for (auto numberLength = 2; numberLength <= maxNumberLength; numberLength++)
     {
-        for (int newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
+        for (auto newFrontDigit = 0; newFrontDigit <= 9; newFrontDigit++)
         {
             ModNum& sumForLenBeginningWithThisDigit = sumOfFForNumDigitsBeginningWith[numberLength][newFrontDigit];
             ModNum numOccurrencesWithPrevFrontDigit = prevPowerOf10;
-            for (int prevFrontDigit = 0; prevFrontDigit <= 9; prevFrontDigit++)
+            for (auto prevFrontDigit = 0; prevFrontDigit <= 9; prevFrontDigit++)
             {
                 sumForLenBeginningWithThisDigit += newFrontDigit * powerOf10 * numOccurrencesWithPrevFrontDigit + sumOfFForNumDigitsBeginningWith[numberLength - 1][prevFrontDigit];
                 if (prevFrontDigit == newFrontDigit)
@@ -142,7 +143,7 @@ void computeMainLookupTables()
 
     // Compute tenToThePowerOf.
     powerOf10 = 1;
-    for (int i = 0; i <= maxNumberLength; i++)
+    for (auto i = 0; i <= maxNumberLength; i++)
     {
         tenToThePowerOf[i] = powerOf10;
         powerOf10 = powerOf10 * 10;
@@ -150,28 +151,26 @@ void computeMainLookupTables()
 
 }
 
-
 ModNum sumOfFUpTo(const string& number)
 {
-    const int numDigits = number.size();
     ModNum result = 0;
+    ModNum fSumToLeft = 0;
 
-    ModNum sumToLeft = 0;
-
-    int previousDigitInNumber = -1;
-    for (int index = 0; index < numDigits; index++)
+    const auto numDigits = number.size();
+    auto previousDigitInNumber = -1;
+    for (auto index = 0; index < numDigits; index++)
     {
         assert(numDigits - index - 1 >= 0);
 
-        const int digitInNumber = number[index] - '0';
-        for (int digit = 0; digit < digitInNumber; digit++)
+        const auto digitInNumber = number[index] - '0';
+        for (auto digit = 0; digit < digitInNumber; digit++)
         {
             // Contribution from this index and rightwards having this digit.
             result += sumOfFForNumDigitsBeginningWith[numDigits - index][digit];
 
             // Contribution from previous indices from having this digit.
             const ModNum numOccurencesWithThisDigit = tenToThePowerOf[numDigits - index - 1];
-            result += sumToLeft * numOccurencesWithThisDigit;
+            result += fSumToLeft * numOccurencesWithThisDigit;
 
             if (digit == previousDigitInNumber)
             {
@@ -185,14 +184,14 @@ ModNum sumOfFUpTo(const string& number)
         }
         if (digitInNumber != previousDigitInNumber)
         {
-            // Update sumToLeft.
-            sumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
+            // Update fSumToLeft.
+            fSumToLeft += digitInNumber * tenToThePowerOf[numDigits - index - 1];
         }
 
         previousDigitInNumber = digitInNumber;
     }
 
-    result += sumToLeft;
+    result += fSumToLeft;
 
     return result;
 }
@@ -204,25 +203,23 @@ ModNum calcSumOfFInRange(const string& L, const string& R)
     return result;
 }
 
-
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
     computeMainLookupTables();
 
-    const int T = read<int>();
+    const auto T = read<int>();
     for (int t = 0; t < T; t++)
     {
         read<int>(); // NL - we don't need this, so just read and discard it.
-        const string L = read<string>();
+        const auto L = read<string>();
         read<int>(); // NR - we don't need this, so just read and discard it.
-        const string R = read<string>();
+        const auto R = read<string>();
 
         const auto sumOfFInRange = calcSumOfFInRange(L, R);
         cout << sumOfFInRange << endl;
     }
 
 }
-
 
