@@ -199,7 +199,7 @@ ModNum sumOfFUpTo(const string& number)
 
 ModNum calcSumOfFInRange(const string& L, const string& R)
 {
-    ModNum result =  sumOfFUpTo(R) - sumOfFUpTo(L) + calcF(L);
+    ModNum result = sumOfFUpTo(R) - sumOfFUpTo(L) + calcF(L);
 
     return result;
 }
@@ -214,9 +214,9 @@ int main(int argc, char* argv[])
     const int T = read<int>();
     for (int t = 0; t < T; t++)
     {
-        read<int>();
+        read<int>(); // NL - we don't need this, so just read and discard it.
         const string L = read<string>();
-        read<int>();
+        read<int>(); // NR - we don't need this, so just read and discard it.
         const string R = read<string>();
 
         const auto sumOfFInRange = calcSumOfFInRange(L, R);
