@@ -32,31 +32,18 @@ int64_t findNumTriples(const vector<int>& a)
     };
     int64_t result = 0;
 
-    const int maxElement = *std::max_element(a.begin(), a.end());
-    int powerOf2 = 1;
+    const auto maxElement = *std::max_element(a.begin(), a.end());
+    auto powerOf2 = 1;
     while (powerOf2 <= maxElement)
     {
         powerOf2 <<= 1;
     }
-    const int maxXorSum = powerOf2 - 1;
+    const auto maxXorSum = powerOf2 - 1;
 
     vector<XorSumInfo> infoForXorSum(maxXorSum + 1);
 
-#ifdef DEBUG_VERIFY
-    vector<int> dbgXorSumUpTo;
-    {
-        int xorSum = 0;
-        for (int i = 0; i < n; i++)
-        {
-            xorSum ^= a[i];
-            assert(xorSum <= maxXorSum);
-            dbgXorSumUpTo.push_back(xorSum);
-        }
-    }
-#endif
-
-    int xorSum = 0;
-    for (int k = 0; k < n; k++)
+    auto xorSum = 0;
+    for (auto k = 0; k < n; k++)
     {
         xorSum ^= a[k];
 
@@ -82,22 +69,6 @@ int64_t findNumTriples(const vector<int>& a)
             amountToAdd += k;
         }
 
-#ifdef DEBUG_VERIFY
-        int64_t dbgAmountToAdd = 0;
-        for (int i = 0; i < k; i++)
-        {
-            if (dbgXorSumUpTo[i] == dbgXorSumUpTo[k])
-            {
-                dbgAmountToAdd += (k - i - 1);
-            }
-        }
-        if (dbgXorSumUpTo[k] == 0)
-            dbgAmountToAdd += k;
-
-        cout << "xorSum: " << xorSum << " amountToAdd: " << amountToAdd << " dbgAmountToAdd: " << dbgAmountToAdd << endl;
-        assert(dbgAmountToAdd == amountToAdd);
-#endif
-
         result += amountToAdd;
     }
 
@@ -109,11 +80,11 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    const int T = read<int>();
+    const auto T = read<int>();
 
-    for (int t = 0; t < T; t++)
+    for (auto t = 0; t < T; t++)
     {
-        const int N = read<int>();
+        const auto N = read<int>();
         vector<int> a(N);
         for (auto& x : a)
         {
