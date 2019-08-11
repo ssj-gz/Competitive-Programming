@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
     //
     // Define
     //
-    //    xorSum[l, r] = a[l] ^ a[l + 1] ^ ... ^ a[r];
+    //    xorSum[l, r] = a[l] ^ a[l + 1] ^ ... ^ a[r]
     //
     // Then we asked to count the number of triples (i, j, k) with 
     // 0 <= i < j <= k < n such that:
@@ -103,6 +103,7 @@ int main(int argc, char* argv[])
     //    xorSum[i, j - 1] ^ xorSum[j, k] = xorSum[j, k] ^ xorSum[j, k] = 0
     //
     // i.e.
+    //
     //    xorSum[i, k] = 0
     //
     // That is:
@@ -115,24 +116,74 @@ int main(int argc, char* argv[])
     // of the N values of k, and we are still ignoring j altogether.
     //
     // However, let's assume that we have i and k such that xorSum[i, k] == 0.
-    // The problem stipulates that j > i, but let's look at j = i anyway, and
-    // consider xorSum[i, j - 1] ^ xorSum[j, k] (== xorSum[i, k] == 0, by assumption).
+    // For p = 0, 1, ... k - i, let LeftXor(p) = xorSum[i, i - 1 + p] and RightXor(p) = xorSum[i + p, k].
     //
-    // Then xorSum[i, j - 1] is 0, as it is an "empty range".  xorSum[j, k] = xorSum[i, k] = 0.
-    // That is, for j = i, xorSum[i, j - 1] = xorSum[k, j].
+    // For p = 0, LeftXor(p) = xorSum[i, i - 1 + p]  = xorSum[i, i - 1] is 0, as [i, i - 1] is an "empty range".  
+    // RightXor(p) = xorSum[i + p, k] = xorSum[i, k] also equals 0.  That is, for p == 0, LeftXor(p) ==
+    // RightXor(p).
     //
-    // Now let's increase j by 1, to i + 1.  Then the range [i, j - 1] is no longer empty; it 
-    // now includes a[i].  The range [j, k] now has one less element in it: the a[i] has been
-    // dropped off the front.  Thus changing j from i to i + 1, we change xorSum[i, j - 1] from
-    // its previous value (0) to a[i] i.e. its previous value ^ a[i], and, by virtue of the fact 
-    // that a[i] ^ a[i] == 0, we've changed xorSum[j, k] from its previous value to its previous value ^ a[i].
-    // So after increasing j, we *still* have a[i, j - 1] == a[j, k].  Very interesting :)
+    // Now let's increase p by 1 to p == 1.  Then the range [i, i - 1 + p] = [i, i] is no longer empty; it 
+    // now includes a[i].  Thus LeftXor(1) = LeftXor(0) ^ a[i].  
+    // The range [i + p, k] == [i + 1, k] now has one less element in it compared to
+    // [i, k]: the a[i] has been dropped off the front.  Thus, by virtue of the fact that a[i] ^ a[i] == 0, 
+    // RightXor(1) = RightXor(0) ^ a[i].  That is, for p == 1, we *still* have LeftXor(p) == RightXor(p).
+    // Very interesting :)
     //
-    // Let's increase j by one more, so now j = i + 2.  Compared to j = i + 2, the range [i, j - 1] now
-    // incorporates a[2], so the value of xorSum[i, j - 1] changes from its previous value to its 
-    // previous value ^ a[2].  Similarly, the range [j, k] now loses a[2] and so again, using the fact
-    // that a[2] ^ a[2] == 0, the value of xorSum[j, k] changes from its previous value to its previous
-    // value ^ a[2].  So, once again, xorSum[i, j - 1] == xorSum[j, k]!
+    // Let's increase p by 1 again, to p == 2.  Then the range [i, i - 1 + p] == [i, i - 1 + 2] = [i, i + 1]
+    // now includes a[2], so LeftXor(2) = LeftXor(1) ^ a[i].  Similarly, the range [i + p, k] == [i + 2, k]
+    // no longer includes a[2], so RightXor(2) = RightXor(1) ^ a[2], and again, LeftXor(p) = RightXor(p)!
+    //
+    // In general, then, it's hopefully obvious that for p >= 1, LeftXor(p) = LeftXor(p - 1) ^ a[p - 1] and RightXor(p) = 
+    // RightXor(p - 1) ^ a[p - 1].  Since LeftXor(0) == RightXor(0), we can see by induction that LeftXor(p) = RightXor(p)
+    // for all p = 0, 1, ... k - i.
+    //
+    // Therefore, if xorSum[i, k] == 0:
+    //
+    //    LeftXor(0) == RightXor(0) => xorSum[i, i - 1] == xorSum[i, k]
+    //    LeftXor(1) == RightXor(1) => xorSum[i, i] == xorSum[i + 1, k]
+    //    LeftXor(2) == RightXor(2) => xorSum[i, i + 1] == xorSum[i + 2, k]
+    //      ....
+    //    LeftXor(k - i) == RightXor(k - i) => xorSum[i, i - 1 + k - i] == xorSum[i + k - i, k]
+    //
+    // Alternatively:
+    //
+    //    xorSum[i, j - 1] == xorSum[j, k] for j = i
+    //    xorSum[i, j - 1] == xorSum[j, k] for j = i + 1
+    //    xorSum[i, j - 1] == xorSum[j, k] for j = i + 2
+    //      ....
+    //    xorSum[i, j - 1] == xorSum[j, k] for j = k - i
+    //
+    // That is, for the (k - i) values j = i + 1, j = i + 2, ... j = k - i, we have that
+    // i < j <= k and xorSum[i, j - 1] == xorSum[j, k] (recall that j == i is not allowed); that is:
+    //
+    // Theorem 1
+    //
+    // For every pair i, k, i < k, such that xorSum[i, k] == 0, we can add (k - i) triples
+    // to the total.
+    //
+    // Proof omitted; all the work above serves as a sketch proof.
+    //
+    // What next? If xorSum[i, k] == 0, then xorSum[0, i - 1] ^ xorSum[i, k] == xorSum[0, i - 1] i.e.
+    // xorSum[0, k] == xorSum[0, i - 1] i.e. 
+    //
+    // Lemma 2
+    //
+    // xorSum[i, k] == 0 if and only if xorSum[0, i - 1] == xorSum[0, k].
+    //
+    // Therefore:
+    //
+    // Theorem 3
+    //
+    // For every pair l and k such that xorSum[0, l] == xorSum[0, k], we can add (k - (l + 1)) = (k - l - 1)
+    // to the number of triples.
+    //
+    // Proof is immediate from combining Theorem 1 and Lemma 2.
+    //
+    // Thus, to solve the problem, we should maintain, for each k, an array containing xorSum[0, k].
+    // We should then, for each l < k such that xorSum[0, l] == xorSum[0, k], add (k - l - 1) to the 
+    // total number of triples.
+    //
+    // Unfortunately, there can still be O(N) such l's for each of the N k's.  Can we do better?
 
     ios::sync_with_stdio(false);
 
