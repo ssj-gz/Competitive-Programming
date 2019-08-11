@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     // For p = 0, 1, ... k - i, let LeftXor(p) = xorSum[i, i - 1 + p] and RightXor(p) = xorSum[i + p, k].
     //
     // For p = 0, LeftXor(p) = xorSum[i, i - 1 + p]  = xorSum[i, i - 1] is 0, as [i, i - 1] is an "empty range".  
-    // RightXor(p) = xorSum[i + p, k] = xorSum[i, k] also equals 0.  That is, for p == 0, LeftXor(p) ==
+    // RightXor(p) = xorSum[i + p, k] = xorSum[i, k] also equals 0, from assumption.  That is, for p == 0, LeftXor(p) ==
     // RightXor(p).
     //
     // Now let's increase p by 1 to p == 1.  Then the range [i, i - 1 + p] = [i, i] is no longer empty; it 
@@ -130,11 +130,11 @@ int main(int argc, char* argv[])
     // Very interesting :)
     //
     // Let's increase p by 1 again, to p == 2.  Then the range [i, i - 1 + p] == [i, i - 1 + 2] = [i, i + 1]
-    // now includes a[2], so LeftXor(2) = LeftXor(1) ^ a[i].  Similarly, the range [i + p, k] == [i + 2, k]
-    // no longer includes a[2], so RightXor(2) = RightXor(1) ^ a[2], and again, LeftXor(p) = RightXor(p)!
+    // now includes a[i + 1], so LeftXor(2) = LeftXor(1) ^ a[i + 1].  Similarly, the range [i + p, k] == [i + 2, k]
+    // no longer includes a[i + 1], so RightXor(2) = RightXor(1) ^ a[i + 1], and again, LeftXor(p) = RightXor(p)!
     //
-    // In general, then, it's hopefully obvious that for p >= 1, LeftXor(p) = LeftXor(p - 1) ^ a[p - 1] and RightXor(p) = 
-    // RightXor(p - 1) ^ a[p - 1].  Since LeftXor(0) == RightXor(0), we can see by induction that LeftXor(p) = RightXor(p)
+    // In general, then, it's hopefully obvious that for p >= 1, LeftXor(p) = LeftXor(p - 1) ^ a[i + p - 1] and RightXor(p) = 
+    // RightXor(p - 1) ^ a[i + p - 1].  Since LeftXor(0) == RightXor(0), we can see by induction that LeftXor(p) = RightXor(p)
     // for all p = 0, 1, ... k - i.
     //
     // Therefore, if xorSum[i, k] == 0:
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     //      ....
     //    LeftXor(k - i) == RightXor(k - i) => xorSum[i, i - 1 + k - i] == xorSum[i + k - i, k]
     //
-    // Alternatively:
+    // Or, written a different way:
     //
     //    xorSum[i, j - 1] == xorSum[j, k] for j = i
     //    xorSum[i, j - 1] == xorSum[j, k] for j = i + 1
@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
     //
     // Proof is immediate from combining Theorem 1 and Lemma 2.
     //
-    // Thus, to solve the problem, we should maintain, for each k, an array containing xorSum[0, k].
+    // Thus, to solve the problem, we should maintain, for each k, an array of values of xorSum[0, k].
     // We should then, for each l < k such that xorSum[0, l] == xorSum[0, k], add (k - l - 1) to the 
     // total number of triples.
     //
