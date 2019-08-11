@@ -180,33 +180,38 @@ int main(int argc, char* argv[])
     //
     // Proof is immediate from combining Theorem 1 and Lemma 2.
     //
-    // Thus to solve the problem we need to compute, for each k = 0, 1 ... n - 1:
+    // Let numTriplesEndingAt[k] = sum [l < k and xorSum(0, l) == xorSum(0, k)] { k - l - 1 }
     //
-    //     sum [l < k and xorSum(0, l) == xorSum(0, k)] { k - l - 1 }
+    // Thus to solve the problem we need to compute, for each k = 0, 1 ... n - 1, numTriplesEndingAt[k].
     //
     // Unfortunately, there can still be O(N) such l's for each of the N k's.  Can we do better? Let X be the value of xorSum[0, k].
     // Assume k is the mth element with xorSum[0, k] == X i.e. the set of l < k with xorSum[0, l] == xorSum[0, k] = {X1, X2, ... , Xm = k},
-    // X1 < X2 < ... < Xm.  Let's go back in time and assume that we calculated the desired sum for k = X_(m-1) i.e. that we know 
-    // the answer to
+    // X1 < X2 < ... < Xm.  Let's go back in time and assume that we calculated numTriplesEndingAt for k = X_(m-1) i.e. that we know 
+    // the answer to numTriplesEndingAt[X_(m-1)].
     //
-    //     sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 }          (1)
     //
-    // Can we use this to compute the new sum
+    // Can we use this to compute the new sum, numTriplesEndingAt[X_m]?
     //
-    //     sum [i = 1 to m - 1] { X_m - X_i - 1 }              (2)
+    // We can re-write numTriplesEndingAt[X_(m-1)], using the definitions of the X_i's, as:
+    //
+    //     numTriplesEndingAt[X_(m-1)] = sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 }
+    //
+    // Similarly, 
+    //
+    //     numTriplesEndingAt[X_m] = sum [i = 1 to m - 1] { X_m - X_i - 1 }
     //
     // ?
     //
-    // We can re-write (1) as
+    // We can re-write this as:
     //
     //     sum [i = 1 to m - 1] { X_m - X_i - 1 }  = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_m - X_i - 1}
     //                                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { Xm - X_(m_1) + X_(m-1) - X_i - 1}
     //                                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 } + (m - 2) * (Xm - X_(m-1))
-    //                                             = X_m - X_(m-1) - 1 + (m - 2) * (Xm - X_(m-1)) + [ Equation (1) goes here! ]
+    //                                             = X_m - X_(m-1) - 1 + (m - 2) * (Xm - X_(m-1)) + numTriplesEndingAt[X_(m-1)]
     //
-    // where m - 2 is the number of elements l < k such that xorSum[0, l] == xorSum[0, k], less one.
+    // Note that m - 2 is the number of elements l < k such that xorSum[0, l] == xorSum[0, k], less one.
     //
-    // Thus, with a little bit of book-keeping, we can use the value we computed for K = X_(m-1) to compute the value for K = X_m in O(1).
+    // Thus, with a little bit of book-keeping, we can use the value we computed for numTriplesEndingAt[X_(m-1)] to compute the value of numTriplesEndingAt[X_m] in O(1).
     //
     // In the code, currentXorSumInfo keeps track of all the pertinent stuff.
     //
