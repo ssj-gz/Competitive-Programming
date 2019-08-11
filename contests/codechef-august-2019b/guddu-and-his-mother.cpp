@@ -72,7 +72,8 @@ int64_t findNumTriples(const vector<int>& a)
 
         if (xorSum == 0)
         {
-            // Account for the "empty" left set, which has xorSum == 0.
+            // Account for the "empty" left set, which has xorSum == 0; i.e. the case where "i" = 0, [0, i - 1]
+            // is empty.
             amountToAdd += k;
         }
 
@@ -174,17 +175,44 @@ int main(int argc, char* argv[])
     //
     // Theorem 3
     //
-    // For every pair l and k such that xorSum[0, l] == xorSum[0, k], we can add (k - (l + 1)) = (k - l - 1)
+    // For every pair l and k such that l < k and xorSum[0, l] == xorSum[0, k], we can add (k - (l + 1)) = (k - l - 1)
     // to the number of triples.
     //
     // Proof is immediate from combining Theorem 1 and Lemma 2.
     //
-    // Thus, to solve the problem, we should maintain, for each k, an array of values of xorSum[0, k].
-    // We should then, for each l < k such that xorSum[0, l] == xorSum[0, k], add (k - l - 1) to the 
-    // total number of triples.
+    // Thus to solve the problem we need to compute, for each k = 0, 1 ... n - 1:
     //
-    // Unfortunately, there can still be O(N) such l's for each of the N k's.  Can we do better?
-
+    //     sum [l < k and xorSum(0, l) == xorSum(0, k)] { k - l - 1 }
+    //
+    // Unfortunately, there can still be O(N) such l's for each of the N k's.  Can we do better? Let X be the value of xorSum[0, k].
+    // Assume k is the mth element with xorSum[0, k] == X i.e. the set of l < k with xorSum[0, l] == xorSum[0, k] = {X1, X2, ... , Xm = k},
+    // X1 < X2 < ... < Xm.  Let's go back in time and assume that we calculated the desired sum for k = X_(m-1) i.e. that we know 
+    // the answer to
+    //
+    //     sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 }          (1)
+    //
+    // Can we use this to compute the new sum
+    //
+    //     sum [i = 1 to m - 1] { X_m - X_i - 1 }              (2)
+    //
+    // ?
+    //
+    // We can re-write (1) as
+    //
+    //     sum [i = 1 to m - 1] { X_m - X_i - 1 }  = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_m - X_i - 1}
+    //                                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { Xm - X_(m_1) + X_(m-1) - X_i - 1}
+    //                                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 } + (m - 2) * (Xm - X_(m-1))
+    //                                             = X_m - X_(m-1) - 1 + (m - 2) * (Xm - X_(m-1)) + [ Equation (1) goes here! ]
+    //
+    // where m - 2 is the number of elements l < k such that xorSum[0, l] == xorSum[0, k], less one.
+    //
+    // Thus, with a little bit of book-keeping, we can use the value we computed for K = X_(m-1) to compute the value for K = X_m in O(1).
+    //
+    // In the code, currentXorSumInfo keeps track of all the pertinent stuff.
+    //
+    // And that's about it! One implementation detail, though - there's /an edge case occurring when xorSum[0, k] == 0 - our currentXorSumInfo
+    // doesn't contain information about the "empty range", which also has xorSum equal to 0 (this corresponds to i = 0).  So we need
+    // to consider the case xorSum[i, k] == 0, i == 0 case separately - just add k - i == k, as per Theorem 2.  And that really is it!
     ios::sync_with_stdio(false);
 
     const auto T = read<int>();
