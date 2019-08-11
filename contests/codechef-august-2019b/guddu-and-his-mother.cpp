@@ -20,6 +20,19 @@ T read()
     return toRead;
 }
 
+int findMaxXorSum(const vector<int>& a)
+{
+    const auto maxElement = *std::max_element(a.begin(), a.end());
+    auto maxPowerOf2 = 1;
+    while (maxPowerOf2 <= maxElement)
+    {
+        maxPowerOf2 <<= 1;
+    }
+    const auto maxXorSum = maxPowerOf2 - 1;
+
+    return maxXorSum;
+}
+
 int64_t findNumTriples(const vector<int>& a)
 {
     const int n = a.size();
@@ -30,16 +43,10 @@ int64_t findNumTriples(const vector<int>& a)
         int64_t amountAddedAtLastOccurrence = 0;
         int64_t numOccurrences = 0;
     };
+
     int64_t result = 0;
 
-    const auto maxElement = *std::max_element(a.begin(), a.end());
-    auto powerOf2 = 1;
-    while (powerOf2 <= maxElement)
-    {
-        powerOf2 <<= 1;
-    }
-    const auto maxXorSum = powerOf2 - 1;
-
+    const auto maxXorSum = findMaxXorSum(a);
     vector<XorSumInfo> infoForXorSum(maxXorSum + 1);
 
     auto xorSum = 0;
