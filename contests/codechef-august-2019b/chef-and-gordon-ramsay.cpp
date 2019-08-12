@@ -123,7 +123,7 @@ void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
-    const int numNodes = nodes.size();
+    const auto numNodes = nodes.size();
 
     for (const Node& a2 : nodes)
     {
@@ -153,7 +153,7 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const T
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
-    const int nodeId = currentNode->id;
+    const auto nodeId = currentNode->id;
 
     // What if we are a1 or a3?
     nodeTracker.addValueAt(1, nodeId);
@@ -161,17 +161,17 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const T
     // What if we are a2?
     const auto initialNumGreaterThan = nodeTracker.numToRightOf(nodeId);
     const auto initialNumLessThan = nodeTracker.numToLeftOf(nodeId);;
-    int descendantsGreaterThanSoFar = 0;
-    int descendantsLessThanSoFar = 0;
+    auto descendantsGreaterThanSoFar = 0;
+    auto descendantsLessThanSoFar = 0;
 
     for (Node* childNode : currentNode->children)
     {
 
         addTriplesWhereLCAIsA2(childNode, nodeTracker, P, result);
-        const int numLess = nodeTracker.numToLeftOf(nodeId);
-        const int numGreater = nodeTracker.numToRightOf(nodeId);
-        const int numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
-        const int numLessThanViaThisChild = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
+        const auto numLess = nodeTracker.numToLeftOf(nodeId);
+        const auto numGreater = nodeTracker.numToRightOf(nodeId);
+        const auto numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
+        const auto numLessThanViaThisChild = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
 
         if (isA2LessThanA1 && isA2LessThanA3)
         {
@@ -299,13 +299,13 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
 
 
-    const int T = read<int>();
-    for (int t = 0; t < T; t++)
+    const auto T = read<int>();
+    for (auto t = 0; t < T; t++)
     {
-        const int N = read<int>();
+        const auto N = read<int>();
 
         vector<Node> nodes(N);
-        for (int i = 0; i < N; i++)
+        for (auto i = 0; i < N; i++)
         {
             nodes[i].id = i + 1;
         }
@@ -316,10 +316,10 @@ int main(int argc, char* argv[])
             p = read<int>();
         }
 
-        for (int i = 0; i < N - 1; i++)
+        for (auto i = 0; i < N - 1; i++)
         {
-            const int u = read<int>() - 1;
-            const int v = read<int>() - 1;
+            const auto u = read<int>() - 1;
+            const auto v = read<int>() - 1;
 
             nodes[u].children.push_back(&(nodes[v]));
             nodes[v].children.push_back(&(nodes[u]));
