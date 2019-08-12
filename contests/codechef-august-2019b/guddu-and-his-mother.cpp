@@ -109,76 +109,74 @@ int main(int argc, char* argv[])
     //
     // That is:
     //
-    //    if xorSum[i, j - 1] = xorSum[j, k], then xorSum[i, k] == 0
+    // Lemma 1
+    //
+    // If xorSum[i, j - 1] = xorSum[j, k], then xorSum[i, k] == 0
+    //
+    // Proof
+    //
+    // As above ;)
+    // 
+    // QED
     //
     // This helps to restrict our search somewhat: for each k, we can restrict
     // the i's we consider to just those for which xorSum[i, k] == 0.  This doesn't
     // seem to help that much, though, as there can still be O(N) of these for each
     // of the N values of k, and we are still ignoring j altogether.
     //
-    // However, let's assume that we have i and k such that xorSum[i, k] == 0.
-    // For p = 0, 1, ... k - i, let LeftXor(p) = xorSum[i, i - 1 + p] and RightXor(p) = xorSum[i + p, k].
+    // Assume we have i < k such that xorSum[i, k] == 0: Is there an easy way of determining the required j's? 
+    // For i <= j <= k, xorSum[i, k] = xorSum[i, j - 1] ^ xorSum[j, k], by definition of xorSum.
+    // But xorSum[i, k] == 0 by assumption, and a well-known property of xor is that A ^ B == 0 <=> A == B.
+    // Thus: 
+    // 
+    // Lemma 2 
+    // 
+    // For any j, i <= j <= k, xorSum[i, k] == 0 => xorSum[i, j - 1] == xorSum[j, k].
     //
-    // For p = 0, LeftXor(p) = xorSum[i, i - 1 + p]  = xorSum[i, i - 1] is 0, as [i, i - 1] is an "empty range".  
-    // RightXor(p) = xorSum[i + p, k] = xorSum[i, k] also equals 0, from assumption.  That is, for p == 0, LeftXor(p) ==
-    // RightXor(p).
+    // Proof
     //
-    // Now let's increase p by 1 to p == 1.  Then the range [i, i - 1 + p] = [i, i] is no longer empty; it 
-    // now includes a[i].  Thus LeftXor(1) = LeftXor(0) ^ a[i].  
-    // The range [i + p, k] == [i + 1, k] now has one less element in it compared to
-    // [i, k]: the a[i] has been dropped off the front.  Thus, by virtue of the fact that a[i] ^ a[i] == 0, 
-    // RightXor(1) = RightXor(0) ^ a[i].  That is, for p == 1, we *still* have LeftXor(p) == RightXor(p).
-    // Very interesting :)
+    // As above ;)
+    // 
+    // QED
     //
-    // Let's increase p by 1 again, to p == 2.  Then the range [i, i - 1 + p] == [i, i - 1 + 2] = [i, i + 1]
-    // now includes a[i + 1], so LeftXor(2) = LeftXor(1) ^ a[i + 1].  Similarly, the range [i + p, k] == [i + 2, k]
-    // no longer includes a[i + 1], so RightXor(2) = RightXor(1) ^ a[i + 1], and again, LeftXor(p) = RightXor(p)!
+    // We're interested in j such that i < j <= k, and there are (k - i) such values of j, so:
     //
-    // In general, then, it's hopefully obvious that for p >= 1, LeftXor(p) = LeftXor(p - 1) ^ a[i + p - 1] and RightXor(p) = 
-    // RightXor(p - 1) ^ a[i + p - 1].  Since LeftXor(0) == RightXor(0), we can see by induction that LeftXor(p) = RightXor(p)
-    // for all p = 0, 1, ... k - i.
-    //
-    // Therefore, if xorSum[i, k] == 0:
-    //
-    //    LeftXor(0) == RightXor(0) => xorSum[i, i - 1] == xorSum[i, k]
-    //    LeftXor(1) == RightXor(1) => xorSum[i, i] == xorSum[i + 1, k]
-    //    LeftXor(2) == RightXor(2) => xorSum[i, i + 1] == xorSum[i + 2, k]
-    //      ....
-    //    LeftXor(k - i) == RightXor(k - i) => xorSum[i, i - 1 + k - i] == xorSum[i + k - i, k]
-    //
-    // Or, written a different way:
-    //
-    //    xorSum[i, j - 1] == xorSum[j, k] for j = i
-    //    xorSum[i, j - 1] == xorSum[j, k] for j = i + 1
-    //    xorSum[i, j - 1] == xorSum[j, k] for j = i + 2
-    //      ....
-    //    xorSum[i, j - 1] == xorSum[j, k] for j = k - i
-    //
-    // That is, for the (k - i) values j = i + 1, j = i + 2, ... j = k - i, we have that
-    // i < j <= k and xorSum[i, j - 1] == xorSum[j, k] (recall that j == i is not allowed); that is:
-    //
-    // Theorem 1
+    // Corollary 
     //
     // For every pair i, k, i < k, such that xorSum[i, k] == 0, we can add (k - i) triples
     // to the total.
     //
-    // Proof omitted; all the work above serves as a sketch proof.
+    // Proof
+    //
+    // As above ;)
+    // 
+    // QED
     //
     // What next? If xorSum[i, k] == 0, then xorSum[0, i - 1] ^ xorSum[i, k] == xorSum[0, i - 1] i.e.
     // xorSum[0, k] == xorSum[0, i - 1] i.e. 
     //
-    // Lemma 2
+    // Lemma 3
     //
     // xorSum[i, k] == 0 if and only if xorSum[0, i - 1] == xorSum[0, k].
     //
+    // Proof
+    //
+    // As above ;)
+    // 
+    // QED
+    //
     // Therefore:
     //
-    // Theorem 3
+    // Theorem 1
     //
     // For every pair l and k such that l < k and xorSum[0, l] == xorSum[0, k], we can add (k - (l + 1)) = (k - l - 1)
     // to the number of triples.
     //
-    // Proof is immediate from combining Theorem 1 and Lemma 2.
+    // Proof
+    //
+    // As above ;)
+    // 
+    // QED
     //
     // Let numTriplesEndingAt[k] = sum [l < k and xorSum(0, l) == xorSum(0, k)] { k - l - 1 }
     //
@@ -188,7 +186,6 @@ int main(int argc, char* argv[])
     // Assume k is the mth element with xorSum[0, k] == X i.e. the set of l < k with xorSum[0, l] == xorSum[0, k] = {X1, X2, ... , Xm = k},
     // X1 < X2 < ... < Xm.  Let's go back in time and assume that we calculated numTriplesEndingAt for k = X_(m-1) i.e. that we know 
     // the answer to numTriplesEndingAt[X_(m-1)].
-    //
     //
     // Can we use this to compute the new sum, numTriplesEndingAt[X_m]?
     //
@@ -200,14 +197,13 @@ int main(int argc, char* argv[])
     //
     //     numTriplesEndingAt[X_m] = sum [i = 1 to m - 1] { X_m - X_i - 1 }
     //
-    // ?
-    //
     // We can re-write this as:
     //
-    //     sum [i = 1 to m - 1] { X_m - X_i - 1 }  = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_m - X_i - 1}
-    //                                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { Xm - X_(m_1) + X_(m-1) - X_i - 1}
-    //                                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 } + (m - 2) * (Xm - X_(m-1))
-    //                                             = X_m - X_(m-1) - 1 + (m - 2) * (Xm - X_(m-1)) + numTriplesEndingAt[X_(m-1)]
+    //     numTriplesEndingAt[X_m] = sum [i = 1 to m - 1] { X_m - X_i - 1 }
+    //                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_m - X_i - 1}
+    //                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { Xm - X_(m_1) + X_(m-1) - X_i - 1}
+    //                             = X_m - X_(m-1) - 1 + sum [i = 1 to m - 2] { X_(m-1) - X_i - 1 } + (m - 2) * (Xm - X_(m-1))
+    //                             = X_m - X_(m-1) - 1 + (m - 2) * (Xm - X_(m-1)) + numTriplesEndingAt[X_(m-1)]
     //
     // Note that m - 2 is the number of elements l < k such that xorSum[0, l] == xorSum[0, k], less one.
     //
