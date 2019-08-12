@@ -40,7 +40,7 @@ int64_t findNumTriples(const vector<int>& a)
     struct XorSumInfo
     {
         int lastOccurrencePos = -1;
-        int64_t amountAddedAtLastOccurrence = 0;
+        int64_t numTriplesEndingAtPreviousOccurrence = 0;
         int64_t numOccurrences = 0;
     };
 
@@ -57,16 +57,16 @@ int64_t findNumTriples(const vector<int>& a)
         auto& currentXorSumInfo = infoForXorSum[xorSum];
 
         assert(xorSum <= maxXorSum);
-        int64_t amountToAdd = 0;
+        int64_t numTriplesEndingAtK = 0;
         if (currentXorSumInfo.lastOccurrencePos != -1)
         {
             // Add amount from previous occurrence.
-            amountToAdd += (k - currentXorSumInfo.lastOccurrencePos - 1);
+            numTriplesEndingAtK += (k - currentXorSumInfo.lastOccurrencePos - 1);
             // Add amounts from all occurrences before the previous occurence (all numOccurrences - 1 of them!).
-            amountToAdd += currentXorSumInfo.amountAddedAtLastOccurrence + (k - currentXorSumInfo.lastOccurrencePos) * (currentXorSumInfo.numOccurrences - 1);
+            numTriplesEndingAtK += currentXorSumInfo.numTriplesEndingAtPreviousOccurrence + (k - currentXorSumInfo.lastOccurrencePos) * (currentXorSumInfo.numOccurrences - 1);
         }
         // Update currentXorSumInfo.
-        currentXorSumInfo.amountAddedAtLastOccurrence = amountToAdd;
+        currentXorSumInfo.numTriplesEndingAtPreviousOccurrence = numTriplesEndingAtK;
         currentXorSumInfo.lastOccurrencePos = k;
         currentXorSumInfo.numOccurrences++;
 
@@ -74,10 +74,10 @@ int64_t findNumTriples(const vector<int>& a)
         {
             // Account for the "empty" left set, which has xorSum == 0; i.e. the case where "i" = 0, [0, i - 1]
             // is empty.
-            amountToAdd += k;
+            numTriplesEndingAtK += k;
         }
 
-        result += amountToAdd;
+        result += numTriplesEndingAtK;
     }
 
 
