@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
     // Say that a triple (a1, a2, a3) is a "path-triple" if a2 lies on the
     // shortest path between a1 and a3.
     //
-    // Give P = (p1, p2, p3), say that (a1, a2, a3) ~ P if and only if
+    // Given P = (p1, p2, p3), say that (a1, a2, a3) ~ P if and only if
     // for each 1 <= i, j <= 3, pi < pj => ai < aj.
     //
     // Say that P = (p1, p2, p3) is monotic if P is one of {(1, 2, 3), (3, 2, 1)};
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
     // vertices have degree 2 - how can we find the number of non-monotonic path-triples
     // on this tree?
     //
-    // We can easily see how we might calculate the number of monotonic path-triples: for each
+    // We can easily see how we might calculate the number of *monotonic* path-triples: for each
     // vertex v, just set a2 = v and compute the number of a1's to the "left" of a2 on the line
     // that are less than a2 and the number of a3's to the right of a2 on the line with a3 > a2
     // (for P = (1, 2, 3) - P = (3, 2, 1) is similar).  But for monotonic P, the situation looks
@@ -261,16 +261,16 @@ int main(int argc, char* argv[])
     // That is, the requirement that a1 < a3 poses no extra difficulty: precisely one of (a1, a2, a3) or
     // (a3, a2, a1) will ~ P!
     //
-    // So for monotonic P, we have the following:
+    // So for non-monotonic P, we have the following:
     //
     // Lemma 1
     //
     // Let P be monotonic.  Let S be a set of triples with the following property: for any triple (a1, a2, a3),
-    // precisely one of (a1, a2, a3) and (a3, a2, a1) is in S.  Then is P is a monotonic hill, the number
+    // precisely one of (a1, a2, a3) and (a3, a2, a1) is in S.  Then is P is a non-monotonic hill, the number
     // of path-triples (a1, a2, a3) in T such that (a1, a2, a3) ~ P is simply the number of triples (a1, a2, a3)
-    // in S such that (a1, a2, a3) is a path-triple and a1 > a2 and a3 > a2 (if P is a monotonic valley) or
+    // in S such that (a1, a2, a3) is a path-triple and a1 > a2 and a3 > a2 (if P is a non-monotonic valley) or
     // the number of triples (a1, a2, a3) in S such that (a1, a2, a3) is a path-triple and a1 < a2 and a3 < a2 
-    // (if P is a monotonic hill)
+    // (if P is a non-monotonic hill)
     //
     // Proof 
     // 
@@ -278,8 +278,8 @@ int main(int argc, char* argv[])
     //
     // QED
     //
-    // The partitioning of triples into S assures that we don't "overcount" for monotonic P by counting the contributions
-    // of both (a1, a2, a3) and its "reverse" path-triple (a3, a2, a1); as it happens, this
+    // The partitioning of triples into S assures that we don't "overcount" for non-monotonic P by counting the contributions
+    // of both (a1, a2, a3) and its "reverse" path-triple (a3, a2, a1); we'll see, this
     // partitioning falls out quite naturally with little effort required, so poses no additional burden.
     //
     // Ok, we're ready to start describing how to actually solve the problem, now!
