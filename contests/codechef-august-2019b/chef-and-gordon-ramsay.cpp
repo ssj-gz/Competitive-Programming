@@ -217,7 +217,87 @@ int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
 
 int main(int argc, char* argv[])
 {
+    // Ouch - tough one that took me an embarrassingly long time to
+    // figure out XD.  Quite straightforward once you know how, though :)
+    //
+    // Let's start with a few definitions.
+    //
+    // Say that a triple (a1, a2, a3) is a "path-triple" if a2 lies on the
+    // shortest path between a1 and a3.
+    //
+    // Give P = (p1, p2, p3), say that (a1, a2, a3) ~ P if and only if
+    // for each 1 <= i, j <= 3, pi < pj => ai < aj.
+    //
+    // Say that P = (p1, p2, p3) is monotic if P is one of {(1, 2, 3), (3, 2, 1)};
+    // else it is non-monotonic.
+    //
+    // Further split the non-monotonic as follows: say that P is a non-monotonic valley
+    // if P is one of {(1, 3, 2), (2, 3, 1)}.  Say that P is a non-monotonic hill if P
+    // is one of {(2, 1, 3), (3, 1, 2)}.
+    //
+    // We say that a path-triple (a1, a2, a3) is monotonic if (a1, a2, a3) ~ some monotonic
+    // P, with similar definitions for (a1, a2, a3) being non-monotonic (and a hill, a valley, etc).
+    //
+    // The first problem I ran into was as follows: given a simple example of a Tree - 
+    // a simple "line" of vertices, where the "endpoints" have degree 1 and all other
+    // vertices have degree 2 - how can we find the number of non-monotonic path-triples
+    // on this tree?
+    //
+    // We can easily see how we might calculate the number of monotonic path-triples: for each
+    // vertex v, just set a2 = v and compute the number of a1's to the "left" of a2 on the line
+    // that are less than a2 and the number of a3's to the right of a2 on the line with a3 > a2
+    // (for P = (1, 2, 3) - P = (3, 2, 1) is similar).  But for monotonic P, the situation looks
+    // more complex: if P = (2, 1, 3), say, then counting the number of a1's to the left of a2
+    // with a1 > a2 and the a3's to the right of a2 with a3 > a2 appears to be of no help,
+    // as we require further that a1 < a3.
+    //
+    // This had me stumped for an embarrassingly long time before I finally realised: this doesn't matter
+    // at all! If we've found a path-triple (a1, a2, a3) with a1 > a2 and a3 > a2, then precisely one 
+    // of the following holds:
+    //
+    //   i) a1 < a3, in which case (a1, a2, a3) ~ P; *or*
+    //   ii) a3 > a1, in which case (a3, a2, a1) is a path-triple and (a3, a2, a1) ~ P.
+    //
+    // That is, the requirement that a1 < a3 poses no extra difficulty: precisely one of (a1, a2, a3) or
+    // (a3, a2, a1) will ~ P!
+    //
+    // So for monotonic P, we have the following:
+    //
+    // Lemma 1
+    //
+    // Let P be monotonic.  Let S be a set of triples with the following property: for any triple (a1, a2, a3),
+    // precisely one of (a1, a2, a3) and (a3, a2, a1) is in S.  Then is P is a monotonic hill, the number
+    // of path-triples (a1, a2, a3) in T such that (a1, a2, a3) ~ P is simply the number of triples (a1, a2, a3)
+    // in S such that (a1, a2, a3) is a path-triple and a1 > a2 and a3 > a2 (if P is a monotonic valley) or
+    // the number of triples (a1, a2, a3) in S such that (a1, a2, a3) is a path-triple and a1 < a2 and a3 < a2 
+    // (if P is a monotonic hill)
+    //
+    // Proof 
+    // 
+    // Follows from the above.
+    //
+    // QED
+    //
+    // The partitioning of triples into S assures that we don't "overcount" for monotonic P by counting the contributions
+    // of both (a1, a2, a3) and its "reverse" path-triple (a3, a2, a1); as it happens, this
+    // partitioning falls out quite naturally with little effort required, so poses no additional burden.
+    //
+    // Ok, we're ready to start describing how to actually solve the problem, now!
+    //
+    // Pick any node as a "root" node - I always pick node "1", but any will do - and perform a DFS.  It now makes sense
+    // to say that a node u is a "descendent" of a node v or a node u' is an ancestor of node v' using the
+    // well-known definitions of these terms. Here's another lemma:
+    //
+    // Lemma 2
+    //
+    // Given any path-triple (a1, a2, a3), at least one of a1 and a3 is a descendent of a2.
+    //
+    // Proof
+    //
+    // Left as an exercise for the reader ;)
+
     ios::sync_with_stdio(false);
+
 
     const int T = read<int>();
     for (int t = 0; t < T; t++)
