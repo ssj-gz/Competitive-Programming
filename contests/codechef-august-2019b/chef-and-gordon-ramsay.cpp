@@ -118,7 +118,7 @@ class SegmentTree
         }
 };
 
-void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64_t& result)
+void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64_t& numTriples)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -138,17 +138,17 @@ void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64
 
         if (isA2LessThanA3)
         {
-            result += static_cast<int64_t>(numA1) * a2.numDescendentsGreaterThan;
+            numTriples += static_cast<int64_t>(numA1) * a2.numDescendentsGreaterThan;
         }
         else
         {
-            result += static_cast<int64_t>(numA1) * a2.numDescendentsLessThan;
+            numTriples += static_cast<int64_t>(numA1) * a2.numDescendentsLessThan;
         }
 
     }
 }
 
-void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
+void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& numTriples)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -167,7 +167,7 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const T
     for (Node* childNode : currentNode->children)
     {
 
-        addTriplesWhereLCAIsA2(childNode, nodeTracker, P, result);
+        addTriplesWhereLCAIsA2(childNode, nodeTracker, P, numTriples);
         const auto numLess = nodeTracker.numToLeftOf(nodeId);
         const auto numGreater = nodeTracker.numToRightOf(nodeId);
         const auto numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
@@ -175,16 +175,16 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const T
 
         if (isA2LessThanA1 && isA2LessThanA3)
         {
-            result += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsGreaterThanSoFar;
+            numTriples += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && !isA2LessThanA3)
         {
-            result += static_cast<int64_t>(numLessThanViaThisChild) * descendantsLessThanSoFar;
+            numTriples += static_cast<int64_t>(numLessThanViaThisChild) * descendantsLessThanSoFar;
         }
         else 
         {
-            result += static_cast<int64_t>(numLessThanViaThisChild) * descendantsGreaterThanSoFar;
-            result += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsLessThanSoFar;
+            numTriples += static_cast<int64_t>(numLessThanViaThisChild) * descendantsGreaterThanSoFar;
+            numTriples += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsLessThanSoFar;
         }
 
         descendantsGreaterThanSoFar += numGreaterThanViaThisChild;
@@ -195,24 +195,24 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const T
     currentNode->numDescendentsGreaterThan = descendantsGreaterThanSoFar;
 }
 
-int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
+int64_t calcNumTriples(vector<Node>& nodes, const Triple& P)
 {
-    int64_t result = 0;
+    int64_t numTriples = 0;
     auto rootNode = &(nodes.front());
 
     fixParentChild(rootNode, nullptr);
 
     SegmentTree nodeTracker(nodes.size() + 1);
-    addTriplesWhereLCAIsA2(rootNode, nodeTracker, P, result);
+    addTriplesWhereLCAIsA2(rootNode, nodeTracker, P, numTriples);
 
-    addTriplesWhereLCAIsNotA2(nodes, P, result);
+    addTriplesWhereLCAIsNotA2(nodes, P, numTriples);
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
     if (isPMonotonic)
     {
         const Triple& reversedP = { { P[2], P[1], P[0] } };
-        addTriplesWhereLCAIsNotA2(nodes, reversedP, result);
+        addTriplesWhereLCAIsNotA2(nodes, reversedP, numTriples);
     }
-    return result;
+    return numTriples;
 }
 
 int main(int argc, char* argv[])
@@ -325,8 +325,8 @@ int main(int argc, char* argv[])
             nodes[v].children.push_back(&(nodes[u]));
 
         }
-        const auto solutionOptimised2 = solveOptimised2(nodes, P);
-        cout << solutionOptimised2 << endl;
+        const auto numTriples = calcNumTriples(nodes, P);
+        cout << numTriples << endl;
     }
 }
 
