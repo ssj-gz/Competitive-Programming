@@ -118,7 +118,7 @@ class SegmentTree
         }
 };
 
-void solveOptimisedAuxLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64_t& result)
+void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -148,7 +148,7 @@ void solveOptimisedAuxLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int
     }
 }
 
-void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
+void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& result)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -167,7 +167,7 @@ void solveOptimisedAuxLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const
     for (Node* childNode : currentNode->children)
     {
 
-        solveOptimisedAuxLCAIsA2(childNode, nodeTracker, P, result);
+        addTriplesWhereLCAIsA2(childNode, nodeTracker, P, result);
         const int numLess = nodeTracker.numToLeftOf(nodeId);
         const int numGreater = nodeTracker.numToRightOf(nodeId);
         const int numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
@@ -199,18 +199,18 @@ int64_t solveOptimised2(vector<Node>& nodes, const Triple& P)
 {
     int64_t result = 0;
     auto rootNode = &(nodes.front());
-    const Triple& reversedP = { P[2], P[1], P[0] };
 
     fixParentChild(rootNode, nullptr);
 
     SegmentTree nodeTracker(nodes.size() + 1);
-    solveOptimisedAuxLCAIsA2(rootNode, nodeTracker, P, result);
+    addTriplesWhereLCAIsA2(rootNode, nodeTracker, P, result);
 
-    solveOptimisedAuxLCAIsNotA2(nodes, P, result);
+    addTriplesWhereLCAIsNotA2(nodes, P, result);
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
     if (isPMonotonic)
     {
-        solveOptimisedAuxLCAIsNotA2(nodes, reversedP, result);
+        const Triple& reversedP = { { P[2], P[1], P[0] } };
+        addTriplesWhereLCAIsNotA2(nodes, reversedP, result);
     }
     return result;
 }
