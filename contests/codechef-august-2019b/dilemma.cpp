@@ -90,11 +90,11 @@ int main(int argc, char* argv[])
     //
     // Initial (sub-)game state (B_M == 1):
     //
-    //    B_0 B_1 B_2 ... B_(M-1) B_M B_(M+1) ... B_N
+    //    B_1 B_2 ... B_(M-1) B_M B_(M+1) ... B_N
     //
     // Remove B_M; flip B_(M-1) and B_(M+1) ("~" denotes bitwise negation i.e. ~0 == 1; ~1 == 0):
     //
-    //    B_0 B_1 B_2 ... ~B_(M-1)    ~B_(M+1) ... B_N
+    //    B_1 B_2 ... ~B_(M-1)    ~B_(M+1) ... B_N
     //    |      sub-game 1      |    |  sub-game 2  |
     //
     // If M == 1 or M == N, we have instead:
@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
     //
     // and
     //
-    //    B_0 B_1 B_2 ... ~B_(M-1)    
+    //    B_1 B_2 ... ~B_(M-1)    
     //    |      sub-game 1      |   | sub-game 2 (empty) |
     //
     // respectively.  We treat an empty subgame as trivially winnable because - well, it's already been
-    // won and there are no cards in it :)
+    // won as there are no cards in it :)
     //
     // Note that in all cases, the "blank" obtained by removing B_M acts as a "break" that stops any
     // move in sub-game 1 interfering with sub-game 2 (and vice versa) so sub-games 1 and 2 are
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     // and this game obviously cannot be won - there's no moves remaining, so we cannot remove
     // the remaining card.
     //
-    // Let B_0 B_1 ... B_N (N > 1) be the initial game state with an even number of the B_i's facing up.
+    // Let B_1 ... B_N (N > 1) be the initial game state with an even number of the B_i's facing up.
     //
     // Let M be the index of *any* card facing upwards i.e. B_M = 1.
     //
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
     //    ~B_(M+1) B_(M+2) ... B_N
     //
     // Now, the number of cards facing up in B_(M+1) B_(M+2) ... B_N must be odd (as the number of cards
-    // in B_M B_(M+1) B_(M+2) ... B_N was assumed to be even (remember, M == 1 here).   Thus, in the
+    // in B_M B_(M+1) B_(M+2) ... B_N was assumed to be even (remember, M == 1 here)).   Thus, in the
     // sub-game 2, which flips B_(M+1) from 0 to 1 or vice versa, the number of cards facing up must 
     // then be even i.e. sub-game 2 == ~B_(M+1) B_(M+2) ... B_N has an even number of cards facing up.
     // Thus, by induction hypothesis, sub-game 2 cannot be won, and so by the Lemma making the move M == 1
@@ -175,9 +175,9 @@ int main(int argc, char* argv[])
     //    ~B_(M+1) B_(M+2) ... B_N
     //
     // Now, the number of cards facing up in B_1 B_2 ... B_(M-1) plus the number of cards facing up in
-    // B_(M+1) B_(M+2) ... B_(M-1) must have been odd (as the number of cards in 
+    // B_(M+1) B_(M+2) ... B_N must have been odd (as the number of cards in 
     // B_1 B_2 ... B_(M-1) B_M B_(M+1) ... B_N is even, by assumption), so the number of cards facing up in
-    // B_1 B_2 ... ~B_(M-1) plus the number of cards facing up in ~B_(M+1) B_(M+2) ... B_(M-1) must also 
+    // B_1 B_2 ... ~B_(M-1) plus the number of cards facing up in ~B_(M+1) B_(M+2) ... B_N must also 
     // be even (we've flipped a card in the left sub-game *and* flipped a card in the right sub-game, which
     // "cancel out").  Thus, at least one of sub-game 1 and sub-game 2 must have an *even* number of cards
     // facing up (they can't both be odd, as an odd number plus any other odd number is always even).
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     // consists of a single card, and that card is facing up.  Removing it clears all remaining cards
     // and wins the game.
     //
-    // Assume N > 1, and that an odd number of B_1 B_2 ... B_N i.e. an odd number of the B_i's are 1.
+    // Assume N > 1, and that an odd number of B_1 B_2 ... B_N are 1 i.e. an odd number of the B_i's are 1.
     // Then at least one of the B_i's is 1.
     //
     // Let M be the smallest index such that B_M is 1 (there is at least one such M as mentioned above).
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
     // as we flip B_(M+1) over.  By induction hypothesis and the Lemma, this move is a winning move.
     //
     // If M == N, then similarly we get two sub-games - sub-game 2 to the right is trivially winnable, and
-    // so, using  the same logic, is sub-game 1 == B_1 B_2 ... ~B_(M-1), so this is also a winning move for
+    // so, using the same logic as the M == 1 case, is sub-game 1 == B_1 B_2 ... ~B_(M-1), so this is also a winning move for
     // the same reason.
     //
     // If 1 < M < N (the sole remaining case), then we split into two subgames - sub-game 1 to the left of M:
