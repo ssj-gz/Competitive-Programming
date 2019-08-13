@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-08-08
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -52,26 +52,25 @@ void fixParentChild(Node* node, Node* parent)
 }
 
 // Typical SegmentTree - you can find similar implementations all over the place :)
-class SegmentTree
+class NodeIdTracker
 {
     public:
-        SegmentTree() = default;
-        SegmentTree(int numElements)
-            : m_size{numElements},
-            m_numElements{2 * numElements},
+        NodeIdTracker() = default;
+        NodeIdTracker(int maxId)
+            : m_maxId{maxId},
+            m_numElements{2 * maxId},
             m_elements(m_numElements + 1)
             {
             }
         int numIdsGreaterThan(int nodeId)
         {
-            return numInRange(nodeId + 1, m_size);
+            return numInRange(nodeId + 1, m_maxId);
         }
         int64_t numIdsLessThan(int nodeId)
         {
             return numInRange(0, nodeId - 1);
         }
 
-        // Add "value" to the current value at pos in O(log2(numElements)).
         void registerNodeId(int nodeId)
         {
             const auto n = m_numElements;
@@ -85,11 +84,11 @@ class SegmentTree
             }
         }
     private:
-        int m_size;
+        int m_maxId;
         int m_numElements;
         vector<int> m_elements;
 
-        // Find the number in the given range (inclusive) in O(log2(numElements)).
+        // Find the number in the given range (inclusive) in O(log2(maxId)).
         int numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
@@ -128,21 +127,14 @@ void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64
         const auto totalNumNodesLessThan = a2.id - 1;
         const auto numNonDescendentNodesLessThan = totalNumNodesLessThan - a2.numDescendentsLessThan;
 
-        const auto numA1 = isA2LessThanA1 ? numNonDescendentNodesGreaterThan : numNonDescendentNodesLessThan;
+        const int64_t numA1 = isA2LessThanA1 ? numNonDescendentNodesGreaterThan : numNonDescendentNodesLessThan;
+        const int64_t numA3 = isA2LessThanA3 ? a2.numDescendentsGreaterThan : a2.numDescendentsLessThan;
 
-        if (isA2LessThanA3)
-        {
-            numTriples += static_cast<int64_t>(numA1) * a2.numDescendentsGreaterThan;
-        }
-        else
-        {
-            numTriples += static_cast<int64_t>(numA1) * a2.numDescendentsLessThan;
-        }
-
+        numTriples += numA1 * numA3;
     }
 }
 
-void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const Triple& P, int64_t& numTriples)
+void addTriplesWhereLCAIsA2(Node* currentNode, NodeIdTracker& nodeIdTracker, const Triple& P, int64_t& numTriples)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -212,7 +204,7 @@ int64_t calcNumTriples(vector<Node>& nodes, const Triple& P)
     // Count triples where both a3 and a1 are descendents of a2.
     // We make two passes, reversing the order of children between
     // pass 1 and pass 2.
-    SegmentTree nodeIdTracker(nodes.size() + 1);
+    NodeIdTracker nodeIdTracker(nodes.size() + 1);
     addTriplesWhereLCAIsA2(rootNode, nodeIdTracker, P, numTriples);
     for (auto& node : nodes)
     {
@@ -388,7 +380,4 @@ int main(int argc, char* argv[])
         cout << numTriples << endl;
     }
 }
-
-
-
 
