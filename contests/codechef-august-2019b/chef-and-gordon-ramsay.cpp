@@ -141,7 +141,7 @@ void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64
     }
 }
 
-void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const Triple& P, int64_t& numTriples)
+void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const Triple& P, int64_t& numTriples)
 {
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
@@ -149,20 +149,20 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeTracker, const T
     const auto nodeId = currentNode->id;
 
     // What if we are a1 or a3?
-    nodeTracker.addValueAt(1, nodeId);
+    nodeIdTracker.addValueAt(1, nodeId);
 
     // What if we are a2?
-    const auto initialNumGreaterThan = nodeTracker.numToRightOf(nodeId);
-    const auto initialNumLessThan = nodeTracker.numToLeftOf(nodeId);;
+    const auto initialNumGreaterThan = nodeIdTracker.numToRightOf(nodeId);
+    const auto initialNumLessThan = nodeIdTracker.numToLeftOf(nodeId);;
     auto descendantsGreaterThanSoFar = 0;
     auto descendantsLessThanSoFar = 0;
 
     for (Node* childNode : currentNode->children)
     {
 
-        addTriplesWhereLCAIsA2(childNode, nodeTracker, P, numTriples);
-        const auto numLess = nodeTracker.numToLeftOf(nodeId);
-        const auto numGreater = nodeTracker.numToRightOf(nodeId);
+        addTriplesWhereLCAIsA2(childNode, nodeIdTracker, P, numTriples);
+        const auto numLess = nodeIdTracker.numToLeftOf(nodeId);
+        const auto numGreater = nodeIdTracker.numToRightOf(nodeId);
         const auto numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const auto numLessThanViaThisChild = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
 
@@ -195,8 +195,8 @@ int64_t calcNumTriples(vector<Node>& nodes, const Triple& P)
 
     fixParentChild(rootNode, nullptr);
 
-    SegmentTree nodeTracker(nodes.size() + 1);
-    addTriplesWhereLCAIsA2(rootNode, nodeTracker, P, numTriples);
+    SegmentTree nodeIdTracker(nodes.size() + 1);
+    addTriplesWhereLCAIsA2(rootNode, nodeIdTracker, P, numTriples);
 
     addTriplesWhereLCAIsNotA2(nodes, P, numTriples);
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
