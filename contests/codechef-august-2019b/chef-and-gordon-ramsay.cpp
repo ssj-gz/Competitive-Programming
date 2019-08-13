@@ -252,8 +252,8 @@ int main(int argc, char* argv[])
     // Say that P = (p1, p2, p3) is monotic if P is one of {(1, 2, 3), (3, 2, 1)};
     // else it is non-monotonic.
     //
-    // Further split the non-monotonic as follows: say that P is a non-monotonic valley
-    // if P is one of {(1, 3, 2), (2, 3, 1)}.  Say that P is a non-monotonic hill if P
+    // Further split the non-monotonic as follows: say that P is a non-monotonic hill
+    // if P is one of {(1, 3, 2), (2, 3, 1)}.  Say that P is a non-monotonic valley if P
     // is one of {(2, 1, 3), (3, 1, 2)}.
     //
     // We say that a path-triple (a1, a2, a3) is monotonic if (a1, a2, a3) ~ some monotonic
@@ -266,8 +266,8 @@ int main(int argc, char* argv[])
     //
     // We can easily see how we might calculate the number of *monotonic* path-triples: for each
     // vertex v, just set a2 = v and compute the number of a1's to the "left" of a2 on the line
-    // that are less than a2 and the number of a3's to the right of a2 on the line with a3 > a2
-    // (for P = (1, 2, 3) - P = (3, 2, 1) is similar).  But for monotonic P, the situation looks
+    // that are less than a2 and the number of a3's to the "right" of a2 on the line with a3 > a2
+    // (for P = (1, 2, 3) - the case for P = (3, 2, 1) is similar).  But for monotonic P, the situation looks
     // more complex: if P = (2, 1, 3), say, then counting the number of a1's to the left of a2
     // with a1 > a2 and the a3's to the right of a2 with a3 > a2 appears to be of no help,
     // as we require further that a1 < a3.
@@ -288,11 +288,10 @@ int main(int argc, char* argv[])
     // Lemma 1
     //
     // Let P be non-monotonic.  
-    // Then if P is a non-monotonic hill, the number of
-    // of path-triples (a1, a2, a3) in T such that (a1, a2, a3) ~ P is simply the number of triples path-triples (a1, a2, a3)
-    // a1 > a2 and a3 > a2 (if P is a non-monotonic valley) *divided by 2*; similarly, if P is a non-monotonic valley, 
-    // the number of path-triples (a1, a2, a3) (a1, a2, a3) ~ P is simply the number of path-triples with a1 < a2 and a3 < a2, 
-    // again divided by 2.
+    // Then if P is a non-monotonic valley, the number of of path-triples (a1, a2, a3) in T such that (a1, a2, a3) ~ P 
+    // is simply the number of triples path-triples (a1, a2, a3) a1 > a2 and a3 > a2 *divided by 2*; similarly, if P 
+    // is a non-monotonic hill, the number of path-triples (a1, a2, a3) (a1, a2, a3) ~ P is simply the number of 
+    // path-triples with a1 < a2 and a3 < a2, again divided by 2.
     //
     // Proof 
     // 
@@ -330,15 +329,15 @@ int main(int argc, char* argv[])
     // a3? It's hopefully clear that it is:
     //
     //   sum [ i = 1, ... m, j = 1, ... m, i != j ] { the number of descendents a1 of a2 reached
-    //                                                via child c_i with a1 < a2 *
+    //                                                via child c_i with a1 < a2 times by
     //                                                the number of descendents a3 of a2 reached
-    //                                                via child c_j with a3 < a2 }
+    //                                                via child c_j with a3 > a2 }
     //
     // This would be quadratic in the number of children of a2, but there are well-known more-efficient
     // ways of doing this - hopefully the code addTriplesWhereLCAIsA2(...) is clear.  Note that
     // addTriplesWhereLCAIsA2(...) is run *twice*, with the second pass iterating over the children
-    // in the reverse order.  For non-monotonic P, this will count the same path-triples twice,
-    // so we'll need to remember to divide by 2!
+    // in the reverse order - this is necessary for finding all triples in the case where P is monotonic.  
+    // For non-monotonic P, this will count the same path-triples twice, so we'll need to remember to divide by 2!
     //
     // addTriplesWhereLCAIsA2(...) computes, for each a2, the number of descendent nodes with ids less than
     // that of a2 and the number of descendent nodes with ids greater than that of a2 using a segment
@@ -346,14 +345,17 @@ int main(int argc, char* argv[])
     // use by addTriplesWhereLCAIsNotA2(...).
     //
     // How about case ii) i.e. how can we count all path-triples with a3 a descendent of a2 but
-    // a1 *not* a descendent of a2? Let P = (1, 2, 3).  It's hopefully obvious that for a given a2,
-    // the number of such path-triples is the number of nodes a1 which have id less than a2 and 
+    // a1 *not* a descendent of a2? Let P = (1, 2, 3), again for the purposes of exposition.  It's hopefully obvious 
+    // that for a given a2, the number of such path-triples ~ P is the number of nodes a1 which have id less than a2 and 
     // which are *not* descendents of a2 times by the number of nodes a3 which have id greater than 
     // a2 and which *are* descendents of a2.  How can we compute the number of nodes with id less/ greater than
     // that of a2 which are *not* descendents of a2? This is easy: addTriplesWhereLCAIsA2 already found
     // the number of lesser/ greater nodes that are descendents of a2, and it's easy to compute the total number
-    // of nodes in the same graph whose id is lesser/ greater than that of a2, so the calculation is simple:
-    // see number
+    // of nodes in the graph whose id is lesser/ greater than that of a2, so the calculation is simple:
+    // see numNonDescendentNodesGreaterThan/ numNonDescendentNodesLessThan. addTriplesWhereLCAIsNotA2 handles all this.
+    // Again, it needs to be run twice due to our insistence that a3 is a descendent of a1, this time with 
+    // P reversed between the passes.  Once again, this will overcount non-monotonic triples by a factor of exactly 2,
+    // so we'll need to remember to divide by 2 at the end :)
     ios::sync_with_stdio(false);
 
     const auto T = read<int>();
