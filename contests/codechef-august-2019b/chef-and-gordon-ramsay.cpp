@@ -62,10 +62,6 @@ class SegmentTree
             m_elements(m_numElements + 1)
             {
             }
-        int total() const
-        {
-            return m_total;
-        }
         int numToRightOf(int pos)
         {
             return numInRange(pos + 1, m_size);
@@ -87,13 +83,10 @@ class SegmentTree
                 assert(elements[pos] >= 0);
                 pos += (pos & (pos * -1));
             }
-
-            m_total += value;
         }
     private:
         int m_size;
         int m_numElements;
-        int m_total = 0;
         vector<int> m_elements;
 
         // Find the number in the given range (inclusive) in O(log2(numElements)).
