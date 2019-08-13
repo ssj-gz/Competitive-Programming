@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-08-08
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -174,10 +174,19 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const
         {
             numTriples += static_cast<int64_t>(numLessThanViaThisChild) * descendantsLessThanSoFar;
         }
-        else 
+        else if (isA2LessThanA1 && !isA2LessThanA3)
         {
-            numTriples += static_cast<int64_t>(numLessThanViaThisChild) * descendantsGreaterThanSoFar;
-            numTriples += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsLessThanSoFar;
+            // P = (3, 2, 1)
+            numTriples += static_cast<int64_t>(descendantsGreaterThanSoFar) * numLessThanViaThisChild;
+        }
+        else if (!isA2LessThanA1 && isA2LessThanA3)
+        {
+            // P = (1, 2, 3)
+            numTriples += static_cast<int64_t>(descendantsLessThanSoFar) * numGreaterThanViaThisChild;
+        }
+        else
+        {
+            assert(false);
         }
 
         descendantsGreaterThanSoFar += numGreaterThanViaThisChild;
@@ -197,13 +206,21 @@ int64_t calcNumTriples(vector<Node>& nodes, const Triple& P)
 
     SegmentTree nodeIdTracker(nodes.size() + 1);
     addTriplesWhereLCAIsA2(rootNode, nodeIdTracker, P, numTriples);
+    for (auto& node : nodes)
+    {
+        reverse(node.children.begin(), node.children.end());
+    }
+    addTriplesWhereLCAIsA2(rootNode, nodeIdTracker, P, numTriples);
 
     addTriplesWhereLCAIsNotA2(nodes, P, numTriples);
+    const Triple& reversedP = { { P[2], P[1], P[0] } };
+    addTriplesWhereLCAIsNotA2(nodes, reversedP, numTriples);
+
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
-    if (isPMonotonic)
+    //cout << " isPMonotonic: " << isPMonotonic << " numTriples: " << numTriples << endl;
+    if (!isPMonotonic)
     {
-        const Triple& reversedP = { { P[2], P[1], P[0] } };
-        addTriplesWhereLCAIsNotA2(nodes, reversedP, numTriples);
+        numTriples /= 2;
     }
     return numTriples;
 }
@@ -332,7 +349,6 @@ int main(int argc, char* argv[])
 
 
     ios::sync_with_stdio(false);
-
 
     const auto T = read<int>();
     for (auto t = 0; t < T; t++)
