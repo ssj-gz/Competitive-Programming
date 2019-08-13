@@ -62,24 +62,24 @@ class SegmentTree
             m_elements(m_numElements + 1)
             {
             }
-        int numToRightOf(int pos)
+        int numIdsGreaterThan(int nodeId)
         {
-            return numInRange(pos + 1, m_size);
+            return numInRange(nodeId + 1, m_size);
         }
-        int64_t numToLeftOf(int pos)
+        int64_t numIdsLessThan(int nodeId)
         {
-            return numInRange(0, pos - 1);
+            return numInRange(0, nodeId - 1);
         }
 
         // Add "value" to the current value at pos in O(log2(numElements)).
-        void addValueAt(int value, int pos)
+        void registerNodeId(int nodeId)
         {
             const auto n = m_numElements;
             auto elements = m_elements.data();
-            pos++; // Make 1-relative.
+            int pos = nodeId + 1; // Make 1-relative.
             while(pos <= n)
             {
-                elements[pos] += value;
+                elements[pos]++;
                 assert(elements[pos] >= 0);
                 pos += (pos & (pos * -1));
             }
@@ -149,11 +149,11 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const
     const auto nodeId = currentNode->id;
 
     // What if we are a1 or a3?
-    nodeIdTracker.addValueAt(1, nodeId);
+    nodeIdTracker.registerNodeId(nodeId);
 
     // What if we are a2?
-    const auto initialNumGreaterThan = nodeIdTracker.numToRightOf(nodeId);
-    const auto initialNumLessThan = nodeIdTracker.numToLeftOf(nodeId);;
+    const auto initialNumGreaterThan = nodeIdTracker.numIdsGreaterThan(nodeId);
+    const auto initialNumLessThan = nodeIdTracker.numIdsLessThan(nodeId);;
     auto descendantsGreaterThanSoFar = 0;
     auto descendantsLessThanSoFar = 0;
 
@@ -161,8 +161,8 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const
     {
 
         addTriplesWhereLCAIsA2(childNode, nodeIdTracker, P, numTriples);
-        const auto numLess = nodeIdTracker.numToLeftOf(nodeId);
-        const auto numGreater = nodeIdTracker.numToRightOf(nodeId);
+        const auto numLess = nodeIdTracker.numIdsLessThan(nodeId);
+        const auto numGreater = nodeIdTracker.numIdsGreaterThan(nodeId);
         const auto numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
         const auto numLessThanViaThisChild = (numLess - initialNumLessThan) - descendantsLessThanSoFar;
 
@@ -288,10 +288,47 @@ int main(int argc, char* argv[])
     // Proof
     //
     // Left as an exercise for the reader ;)
+    //
+    // The definition of S in Lemma 1 tells us that we want to find some way of classifying path-triples (a1, a2, a3)
+    // so that we don't count *both* (a1, a2, a3) *and* (a3, a2, a1).  A partial way of doing this would be to
+    // insist that a3 is always a descendent of a2.  Then there are two cases:
+    //
+    //    i) a1 is also a descendent of a2.
+    //    ii) a1 is not also a descendent of a2.
+    //
+    // In case ii), it's hopefully clear that if (a1, a2, a3) satisfies "a3 is a descendent of a2 but a1 is not", then
+    // the reverse path (a3, a2, a1) does not, giving us a way of forming our S.
+    //
+    // Case i) is a little more complex: here, both a3 and a1 are descendents of a2.  Since a2 is on the path between
+    // a1 and a3, a2 must be the Least Common Ancestor (LCA) of both a1 and a3.  How do we ensure we don't count
+    // both of (a1, a2, a3) and (a3, a2, a1)? 
+    //
+    // Let childReachedDescendentVia(v, descendentOfv) be the first node (which wille be a child of v) encountered
+    // on the shortest path from v to its descendent node, descendentOfv.  Then, since LCA(a1, a3) == 2, it follows
+    // that childReachedDescendentVia(a2, a1) != childReachedDescendentVia(a2, a3) (i.e. since a2 is the LCA of
+    // a1 and a3, it must reach a1 and a3 via different children).  Thus, if we label the children of a2
+    // as c_1, c_2, ... c_m where m is the number of children of a2 and let c_i = childReachedDescendentVia(a2, a1)
+    // and c_j = childReachedDescendentVia(a2, a3), insisting that c_i < c_j ensures that if we count (a1, a2, a3),
+    // we do not also count (a3, a2, a1).  Note that saying "c_i < c_j" is equivalent to the much-more-comprehensible
+    // "in a DFS, a1 is visited before a3"!
+    //
+    // To re-cap:
+    //
+    // * For non-monotic P:
+    //    * We want to count all path-triples (a1, a2, a3) ~ P, but if we count a (a1, a2, a3),
+    //      we do *not* want to also count (a3, a2, a1) - if we did, we'd overcount.
+    //        * We can get partway to this just by insisting that in such an (a1, a2, a3), a3 is a descendent of a2.   This
+    //          works for all path-triples (a1, a2, a3) where a3 is a descendent of a2, but a1 is not a descendent of a2.
+    //        * This leaves the case where both a3 and a1 are descendents of a2.  In this case, we simply insist that
+    //          in a DFS, a1 in such a triple is visited before a3.
+    //
+    // So: for non-monotonic P, from Lemma 1, we can compute the number of triples 
+
 
     // TODO - the rest of this - split into "a3 is descendent of a2; a1 is not (addTriplesWhereLCAIsNotA2)" vs 
     // "a3 and a1 are both descendents of a2 (addTriplesWhereLCAIsA2)"; describe approach for both; justify
     // why it works etc.
+    //
 
 
     ios::sync_with_stdio(false);
