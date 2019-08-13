@@ -113,6 +113,7 @@ class SegmentTree
 
 void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64_t& numTriples)
 {
+    // Assumes that a3 is a descendent of a2, but a1 is not a descendent of a2.
     const bool isA2LessThanA1 = (P[1] < P[0]);
     const bool isA2LessThanA3 = (P[1] < P[2]);
 
@@ -122,12 +123,12 @@ void addTriplesWhereLCAIsNotA2(const vector<Node>& nodes, const Triple& P, int64
     {
 
         const auto totalNumNodesGreaterThan = (numNodes - a2.id);
-        const auto totalNonDescendentNodesGreaterThan = totalNumNodesGreaterThan - a2.numDescendentsGreaterThan;
+        const auto numNonDescendentNodesGreaterThan = totalNumNodesGreaterThan - a2.numDescendentsGreaterThan;
 
         const auto totalNumNodesLessThan = a2.id - 1;
-        const auto totalNonDescendentNodesLessThan = totalNumNodesLessThan - a2.numDescendentsLessThan;
+        const auto numNonDescendentNodesLessThan = totalNumNodesLessThan - a2.numDescendentsLessThan;
 
-        const auto numA1 = isA2LessThanA1 ? totalNonDescendentNodesGreaterThan : totalNonDescendentNodesLessThan;
+        const auto numA1 = isA2LessThanA1 ? numNonDescendentNodesGreaterThan : numNonDescendentNodesLessThan;
 
         if (isA2LessThanA3)
         {
@@ -148,19 +149,21 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const
 
     const auto nodeId = currentNode->id;
 
-    // What if we are a1 or a3?
+    // What if we are a1 or a3? Register ourselves so that our ancestor a2's can count us among the
+    // number of nodes less/ greater than a2.
     nodeIdTracker.registerNodeId(nodeId);
 
     // What if we are a2?
     const auto initialNumGreaterThan = nodeIdTracker.numIdsGreaterThan(nodeId);
-    const auto initialNumLessThan = nodeIdTracker.numIdsLessThan(nodeId);;
+    const auto initialNumLessThan = nodeIdTracker.numIdsLessThan(nodeId);
     auto descendantsGreaterThanSoFar = 0;
     auto descendantsLessThanSoFar = 0;
 
     for (Node* childNode : currentNode->children)
     {
-
+        // Recurse, so that our descendents will register themselves in the nodeIdTracker.
         addTriplesWhereLCAIsA2(childNode, nodeIdTracker, P, numTriples);
+
         const auto numLess = nodeIdTracker.numIdsLessThan(nodeId);
         const auto numGreater = nodeIdTracker.numIdsGreaterThan(nodeId);
         const auto numGreaterThanViaThisChild = (numGreater - initialNumGreaterThan) - descendantsGreaterThanSoFar;
@@ -168,10 +171,12 @@ void addTriplesWhereLCAIsA2(Node* currentNode, SegmentTree& nodeIdTracker, const
 
         if (isA2LessThanA1 && isA2LessThanA3)
         {
+            // Non-monotonic valley i.e. (2, 1, 3) or (3, 1, 2)
             numTriples += static_cast<int64_t>(numGreaterThanViaThisChild) * descendantsGreaterThanSoFar;
         }
         else if (!isA2LessThanA1 && !isA2LessThanA3)
         {
+            // Non-monotonic hill i.e. (2, 3, 1) or (1, 3, 2)
             numTriples += static_cast<int64_t>(numLessThanViaThisChild) * descendantsLessThanSoFar;
         }
         else if (isA2LessThanA1 && !isA2LessThanA3)
@@ -204,6 +209,9 @@ int64_t calcNumTriples(vector<Node>& nodes, const Triple& P)
 
     fixParentChild(rootNode, nullptr);
 
+    // Count triples where both a3 and a1 are descendents of a2.
+    // We make two passes, reversing the order of children between
+    // pass 1 and pass 2.
     SegmentTree nodeIdTracker(nodes.size() + 1);
     addTriplesWhereLCAIsA2(rootNode, nodeIdTracker, P, numTriples);
     for (auto& node : nodes)
@@ -212,14 +220,17 @@ int64_t calcNumTriples(vector<Node>& nodes, const Triple& P)
     }
     addTriplesWhereLCAIsA2(rootNode, nodeIdTracker, P, numTriples);
 
+    // Count triples where a3 is a descendent of a2 but a1 is not.
+    // Two passes are made here: the second reverses the order of P.
     addTriplesWhereLCAIsNotA2(nodes, P, numTriples);
     const Triple& reversedP = { { P[2], P[1], P[0] } };
     addTriplesWhereLCAIsNotA2(nodes, reversedP, numTriples);
 
     const bool isPMonotonic = (P[2] > P[1] && P[1] > P[0]) || (P[2] < P[1] && P[1] < P[0]);
-    //cout << " isPMonotonic: " << isPMonotonic << " numTriples: " << numTriples << endl;
     if (!isPMonotonic)
     {
+        // Recall from e.g. Lemma 1 that we will have *over* counted non-monotonic triples
+        // by a factor of exactly 2: adjust for this.
         numTriples /= 2;
     }
     return numTriples;
@@ -269,28 +280,25 @@ int main(int argc, char* argv[])
     //   ii) a3 > a1, in which case (a3, a2, a1) is a path-triple and (a3, a2, a1) ~ P.
     //
     // That is, the requirement that a1 < a3 poses no extra difficulty: precisely one of (a1, a2, a3) or
-    // (a3, a2, a1) will ~ P!
+    // (a3, a2, a1) will ~ P! Note though that if we count both path-triples (a1, a2, a3) *and* (a3, a2, a1),
+    // then we will count the same path-triple *twice*, so we'll need to divide by 2 at the end.
     //
     // So for non-monotonic P, we have the following:
     //
     // Lemma 1
     //
-    // Let P be monotonic.  Let S be a set of triples with the following property: for any triple (a1, a2, a3),
-    // precisely one of (a1, a2, a3) and (a3, a2, a1) is in S.  Then is P is a non-monotonic hill, the number
-    // of path-triples (a1, a2, a3) in T such that (a1, a2, a3) ~ P is simply the number of triples (a1, a2, a3)
-    // in S such that (a1, a2, a3) is a path-triple and a1 > a2 and a3 > a2 (if P is a non-monotonic valley) or
-    // the number of triples (a1, a2, a3) in S such that (a1, a2, a3) is a path-triple and a1 < a2 and a3 < a2 
-    // (if P is a non-monotonic hill)
+    // Let P be non-monotonic.  
+    // Then if P is a non-monotonic hill, the number of
+    // of path-triples (a1, a2, a3) in T such that (a1, a2, a3) ~ P is simply the number of triples path-triples (a1, a2, a3)
+    // a1 > a2 and a3 > a2 (if P is a non-monotonic valley) *divided by 2*; similarly, if P is a non-monotonic valley, 
+    // the number of path-triples (a1, a2, a3) (a1, a2, a3) ~ P is simply the number of path-triples with a1 < a2 and a3 < a2, 
+    // again divided by 2.
     //
     // Proof 
     // 
     // Follows from the above.
     //
     // QED
-    //
-    // The partitioning of triples into S assures that we don't "overcount" for non-monotonic P by counting the contributions
-    // of both (a1, a2, a3) and its "reverse" path-triple (a3, a2, a1); we'll see, this
-    // partitioning falls out quite naturally with little effort required, so poses no additional burden.
     //
     // Ok, we're ready to start describing how to actually solve the problem, now!
     //
@@ -306,48 +314,46 @@ int main(int argc, char* argv[])
     //
     // Left as an exercise for the reader ;)
     //
-    // The definition of S in Lemma 1 tells us that we want to find some way of classifying path-triples (a1, a2, a3)
-    // so that we don't count *both* (a1, a2, a3) *and* (a3, a2, a1).  A partial way of doing this would be to
-    // insist that a3 is always a descendent of a2.  Then there are two cases:
+    // Lets insist for now that a3 is always a descendent of a2.  Then we have two cases:
     //
     //    i) a1 is also a descendent of a2.
     //    ii) a1 is not also a descendent of a2.
     //
-    // In case ii), it's hopefully clear that if (a1, a2, a3) satisfies "a3 is a descendent of a2 but a1 is not", then
-    // the reverse path (a3, a2, a1) does not, giving us a way of forming our S.
+    // How can we count all the path-triples (a1, a2, a3) ~ P satisfying case i) i.e. that
+    // a1 and a3 are both descendents of a2? Well, in this case, since a2 is on the path
+    // from a1 and a3, a2 must be the Least Common Ancestor (LCA) of a1 and a3.
+    // This means, additionally, that the path from a2 to a1 and the path from a2 to a3
+    // go through different *children* of a2.  Let c_1, c_2, ... c_m be the children of 
+    // a2.  Let P = (1, 2, 3), for the purposes of exposition.
     //
-    // Case i) is a little more complex: here, both a3 and a1 are descendents of a2.  Since a2 is on the path between
-    // a1 and a3, a2 must be the Least Common Ancestor (LCA) of both a1 and a3.  How do we ensure we don't count
-    // both of (a1, a2, a3) and (a3, a2, a1)? 
+    // How can we find all path-triples (a1, a2, a3) ~ P where a2 is the LCA of both a1 and
+    // a3? It's hopefully clear that it is:
     //
-    // Let childReachedDescendentVia(v, descendentOfv) be the first node (which wille be a child of v) encountered
-    // on the shortest path from v to its descendent node, descendentOfv.  Then, since LCA(a1, a3) == 2, it follows
-    // that childReachedDescendentVia(a2, a1) != childReachedDescendentVia(a2, a3) (i.e. since a2 is the LCA of
-    // a1 and a3, it must reach a1 and a3 via different children).  Thus, if we label the children of a2
-    // as c_1, c_2, ... c_m where m is the number of children of a2 and let c_i = childReachedDescendentVia(a2, a1)
-    // and c_j = childReachedDescendentVia(a2, a3), insisting that c_i < c_j ensures that if we count (a1, a2, a3),
-    // we do not also count (a3, a2, a1).  Note that saying "c_i < c_j" is equivalent to the much-more-comprehensible
-    // "in a DFS, a1 is visited before a3"!
+    //   sum [ i = 1, ... m, j = 1, ... m, i != j ] { the number of descendents a1 of a2 reached
+    //                                                via child c_i with a1 < a2 *
+    //                                                the number of descendents a3 of a2 reached
+    //                                                via child c_j with a3 < a2 }
     //
-    // To re-cap:
+    // This would be quadratic in the number of children of a2, but there are well-known more-efficient
+    // ways of doing this - hopefully the code addTriplesWhereLCAIsA2(...) is clear.  Note that
+    // addTriplesWhereLCAIsA2(...) is run *twice*, with the second pass iterating over the children
+    // in the reverse order.  For non-monotonic P, this will count the same path-triples twice,
+    // so we'll need to remember to divide by 2!
     //
-    // * For non-monotic P:
-    //    * We want to count all path-triples (a1, a2, a3) ~ P, but if we count a (a1, a2, a3),
-    //      we do *not* want to also count (a3, a2, a1) - if we did, we'd overcount.
-    //        * We can get partway to this just by insisting that in such an (a1, a2, a3), a3 is a descendent of a2.   This
-    //          works for all path-triples (a1, a2, a3) where a3 is a descendent of a2, but a1 is not a descendent of a2.
-    //        * This leaves the case where both a3 and a1 are descendents of a2.  In this case, we simply insist that
-    //          in a DFS, a1 in such a triple is visited before a3.
+    // addTriplesWhereLCAIsA2(...) computes, for each a2, the number of descendent nodes with ids less than
+    // that of a2 and the number of descendent nodes with ids greater than that of a2 using a segment
+    // tree (nodeIdTracker) - it's hopefully clear how this works.  The results are stored for later
+    // use by addTriplesWhereLCAIsNotA2(...).
     //
-    // So: for non-monotonic P, from Lemma 1, we can compute the number of triples 
-
-
-    // TODO - the rest of this - split into "a3 is descendent of a2; a1 is not (addTriplesWhereLCAIsNotA2)" vs 
-    // "a3 and a1 are both descendents of a2 (addTriplesWhereLCAIsA2)"; describe approach for both; justify
-    // why it works etc.
-    //
-
-
+    // How about case ii) i.e. how can we count all path-triples with a3 a descendent of a2 but
+    // a1 *not* a descendent of a2? Let P = (1, 2, 3).  It's hopefully obvious that for a given a2,
+    // the number of such path-triples is the number of nodes a1 which have id less than a2 and 
+    // which are *not* descendents of a2 times by the number of nodes a3 which have id greater than 
+    // a2 and which *are* descendents of a2.  How can we compute the number of nodes with id less/ greater than
+    // that of a2 which are *not* descendents of a2? This is easy: addTriplesWhereLCAIsA2 already found
+    // the number of lesser/ greater nodes that are descendents of a2, and it's easy to compute the total number
+    // of nodes in the same graph whose id is lesser/ greater than that of a2, so the calculation is simple:
+    // see number
     ios::sync_with_stdio(false);
 
     const auto T = read<int>();
