@@ -296,6 +296,11 @@ int main(int argc, char* argv[])
     //
     // Left as an exercise for the reader ;)
 
+    // TODO - the rest of this - split into "a3 is descendent of a2; a1 is not (addTriplesWhereLCAIsNotA2)" vs 
+    // "a3 and a1 are both descendents of a2 (addTriplesWhereLCAIsA2)"; describe approach for both; justify
+    // why it works etc.
+
+
     ios::sync_with_stdio(false);
 
 
