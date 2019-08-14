@@ -371,16 +371,18 @@ bool validateTestSuite(const string& testSuiteFileName)
 {
     ifstream testSuiteFile(testSuiteFileName);
     TestCaseReader testCaseReader(testSuiteFile);
+    int numTestcases = 0;
     while (testCaseReader.hasNext())
     {
         testCaseReader.next();
+        numTestcases++;
     }
     if (testCaseReader.hasError())
     {
         cerr << "Validation error: " << testCaseReader.errorMessage() << endl;
         return false;
     }
-    cout << "Validation successful!" << endl;
+    cout << "Validation successful - " << numTestcases << " testcases validated as OK!" << endl;
     return true;
 }
 
