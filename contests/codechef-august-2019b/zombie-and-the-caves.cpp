@@ -51,24 +51,45 @@ vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
     return radiationLevel;
 }
 
-bool calcCanKillAllZombies(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealth)
+bool calcCanKillAllZombies(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealths)
 {
     const auto radiationLevels = calcRadiationLevels(radiationPower);
 
-    auto sorted = [](const vector<int64_t>& toSort)
+
+    const auto maxRadiationLevel = *max_element(radiationLevels.begin(), radiationLevels.end());
+    const auto maxZombieHealth = *max_element(zombieHealths.begin(), zombieHealths.end());
+
+    // The radiation level for a cave can have at most radiationPower.size() caves contributing
+    // "1" to it.
+    assert(maxRadiationLevel<= radiationPower.size());
+
+    if (maxZombieHealth > maxRadiationLevel)
     {
-        vector<int64_t> sorted = toSort;
-        std::sort(sorted.begin(), sorted.end());
+        // Zombie healths and Radiation Levels cannot be permutations of each other.
+        return false;
+    }
 
-        return sorted;
-    };
+    // The maximum zombie health and maximum radiation level are both O(N),
+    // so we can easily form the two vectors below.
+    assert(maxZombieHealth <= radiationPower.size());
 
-    // Well-known result: two arrays are anagrams/ permutations of each other
-    // if and only if their sorted versions are equal.
-    const auto radiationLevelsSorted = sorted(radiationLevels);
-    const auto zombieHealthsSorted = sorted(zombieHealth);
+    vector<int> numCavesWithRadiationLevel(maxRadiationLevel + 1);
+    for (const auto radiationLevel : radiationLevels)
+    {
+        numCavesWithRadiationLevel[radiationLevel]++;
+    }
 
-    return (radiationLevelsSorted == zombieHealthsSorted);
+    vector<int> numZombiesWithHealth(maxZombieHealth + 1);
+    for (const auto zombieHealth : zombieHealths)
+    {
+        numZombiesWithHealth[zombieHealth]++;
+    }
+
+    // Zombie healths are a permutation of radiation levels if and only if
+    // the two "histogram" vectors are identical.  We could also have
+    // compared the sorted versions of Zombie Health and Radiation Levels,
+    // but that would be O(N log2 N) whereas the current way is O(N).
+    return (numCavesWithRadiationLevel == numZombiesWithHealth);
 }
 
 int main(int argc, char* argv[])
@@ -82,6 +103,8 @@ int main(int argc, char* argv[])
     //
     // Having computed the Radiation Levels, checking if all Zombies can be killed is trivial;
     // again, hopefully the code in calcCanKillAllZombies is self-explanatory :)
+    //
+    // Space: O(N).  Time: O(N).
     ios::sync_with_stdio(false);
 
     const int T = read<int>();
@@ -93,12 +116,12 @@ int main(int argc, char* argv[])
         {
             power = read<int64_t>();
         }
-        vector<int64_t> zombieHealth(numCaves);
-        for (auto& health : zombieHealth)
+        vector<int64_t> zombieHealths(numCaves);
+        for (auto& health : zombieHealths)
         {
             health = read<int64_t>();
         }
-        const auto canKillAllZombies = calcCanKillAllZombies(radiationPower, zombieHealth);
+        const auto canKillAllZombies = calcCanKillAllZombies(radiationPower, zombieHealths);
         cout << (canKillAllZombies ? "YES" : "NO") << endl;
     }
 }
