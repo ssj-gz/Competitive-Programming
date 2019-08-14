@@ -7,21 +7,32 @@
 
 using namespace std;
 
-template <typename T>
-T read()
+#define gc getchar_unlocked
+
+void scan_integer( int &x )
 {
-    T toRead;
-    cin >> toRead;
-    assert(cin);
+    int c = gc();
+    x = 0;
+    for( ; ((c<48 || c>57) && c != '-'); c = gc() );
+    for( ;c>47 && c<58; c = gc() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
+}
+
+
+int readInt()
+{
+    int toRead;
+    scan_integer(toRead);
     return toRead;
 }
 
-vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
+vector<int> calcRadiationLevels(const vector<int>& radiationPower)
 {
     const int numCaves = radiationPower.size();
-    vector<int64_t> radiationLevel(numCaves, 0);
+    vector<int> radiationLevel(numCaves, 0);
 
-    vector<int64_t> changeToAmountToAdd(numCaves, 0);
+    vector<int> changeToAmountToAdd(numCaves, 0);
 
     for (int i = 0; i < numCaves; i++)
     {
@@ -42,7 +53,7 @@ vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
     }
 
     // Sweep from left to right, obeying the "breadcrumbs" left in the code above.
-    int64_t amountToAdd = 0;
+    int amountToAdd = 0;
     for (int pos = 0; pos < numCaves; pos++)
     {
         amountToAdd += changeToAmountToAdd[pos];
@@ -51,10 +62,9 @@ vector<int64_t> calcRadiationLevels(const vector<int64_t>& radiationPower)
     return radiationLevel;
 }
 
-bool calcCanKillAllZombies(const vector<int64_t>& radiationPower, const vector<int64_t>& zombieHealths)
+bool calcCanKillAllZombies(const vector<int>& radiationPower, const vector<int>& zombieHealths)
 {
     const auto radiationLevels = calcRadiationLevels(radiationPower);
-
 
     const auto maxRadiationLevel = *max_element(radiationLevels.begin(), radiationLevels.end());
     const auto maxZombieHealth = *max_element(zombieHealths.begin(), zombieHealths.end());
@@ -107,19 +117,19 @@ int main(int argc, char* argv[])
     // Space: O(N).  Time: O(N).
     ios::sync_with_stdio(false);
 
-    const int T = read<int>();
+    const int T = readInt();
     for (int t = 0; t < T; t++)
     {
-        const int numCaves = read<int>();
-        vector<int64_t> radiationPower(numCaves);
+        const int numCaves = readInt();
+        vector<int> radiationPower(numCaves);
         for (auto& power : radiationPower)
         {
-            power = read<int64_t>();
+            power = readInt();
         }
-        vector<int64_t> zombieHealths(numCaves);
+        vector<int> zombieHealths(numCaves);
         for (auto& health : zombieHealths)
         {
-            health = read<int64_t>();
+            health = readInt();
         }
         const auto canKillAllZombies = calcCanKillAllZombies(radiationPower, zombieHealths);
         cout << (canKillAllZombies ? "YES" : "NO") << endl;
