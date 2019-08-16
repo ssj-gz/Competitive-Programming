@@ -31,10 +31,7 @@ struct CostInfo
 struct Node
 {
     vector<Node*> neighbours;
-
     int cost = 0;
-
-    int specialNodeIndex = -1;
 
     vector<vector<CostInfo>> generatableCostsOnPathToSpecialNode;
 };
@@ -172,9 +169,9 @@ void buildLookupTables(vector<Node>& nodes, const vector<Node*>& specialNodes)
         node.generatableCostsOnPathToSpecialNode.resize(specialNodes.size());
     }
 
-    for (auto specialNode : specialNodes)
+    for (int specialNodeIndex = 0; specialNodeIndex < specialNodes.size(); specialNodeIndex++)
     {
-        doDfsFromSpecialNode(specialNode, nullptr, specialNode->specialNodeIndex);
+        doDfsFromSpecialNode(specialNodes[specialNodeIndex], nullptr, specialNodeIndex);
     }
 }
 
@@ -206,7 +203,6 @@ int main(int argc, char* argv[])
     for (int i = 0; i < numSpecialNodes; i++)
     {
         specialNodes.push_back(&(nodes[read<int>() - 1]));
-        specialNodes.back()->specialNodeIndex = i;
     }
 
     buildLookupTables(nodes, specialNodes);
