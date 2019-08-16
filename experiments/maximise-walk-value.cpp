@@ -41,16 +41,16 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
     auto& generatableCostsOnPathToSpecialNode = currentNode->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
     if (parent)
     {
-        // We can generate precisely the set of costs that our parent did, just by not including our cost in the subset.
+        // We can generate precisely the set of costs that our parent coud, just by not including our cost in the subset ...
         generatableCostsOnPathToSpecialNode = parent->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
         assert(generatableCostsOnPathToSpecialNode.size() == maxCost + 1);
         // ... but we can also generate "cost from source special node to parent" + "currentNode->cost", by
         // including currentNode in the subset!
-        for (int i = maxCost; i >= currentNode->cost; i--)
+        for (int costGeneratedByParent = maxCost - currentNode->cost; costGeneratedByParent >= 0; costGeneratedByParent--)
         {
-            if (generatableCostsOnPathToSpecialNode[i - currentNode->cost].canBeGenerated)
+            if (generatableCostsOnPathToSpecialNode[costGeneratedByParent].canBeGenerated)
             {
-                generatableCostsOnPathToSpecialNode[i].canBeGenerated = true;
+                generatableCostsOnPathToSpecialNode[costGeneratedByParent + currentNode->cost].canBeGenerated = true;
             }
         }
     }
