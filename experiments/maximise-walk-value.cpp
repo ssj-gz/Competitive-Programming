@@ -20,7 +20,7 @@ T read()
     return toRead;
 }
 
-const auto maxCost = 1000;
+const auto maxCostSum = 1000;
 
 struct CostInfo
 {
@@ -33,27 +33,27 @@ struct Node
     vector<Node*> neighbours;
     int cost = 0;
 
-    // generatableCostsOnPathToSpecialNode[specialNodeIndex][cost].canBeGenerated is true
+    // costSumsOnPathToSpecialNode[specialNodeIndex][cost].canBeGenerated is true
     // if and only if the path from specialNodes[specialNodeIndex] to this node
     // has a cost subset summing to "cost".
-    vector<vector<CostInfo>> generatableCostsOnPathToSpecialNode;
+    vector<vector<CostInfo>> costSumsOnPathToSpecialNode;
 };
 
 void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpecialNodeId)
 {
-    auto& generatableCostsOnPathToSpecialNode = currentNode->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
+    auto& costSumsOnPathToSpecialNode = currentNode->costSumsOnPathToSpecialNode[sourceSpecialNodeId];
     if (parent)
     {
         // We can generate precisely the set of costs that our parent could, just by not including our cost in the subset ...
-        generatableCostsOnPathToSpecialNode = parent->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
-        assert(generatableCostsOnPathToSpecialNode.size() == maxCost + 1);
+        costSumsOnPathToSpecialNode = parent->costSumsOnPathToSpecialNode[sourceSpecialNodeId];
+        assert(costSumsOnPathToSpecialNode.size() == maxCostSum + 1);
         // ... but we can also generate "cost from source special node to parent" + "currentNode->cost", by
         // including currentNode in the subset!
-        for (int costGeneratedByParent = maxCost - currentNode->cost; costGeneratedByParent >= 0; costGeneratedByParent--)
+        for (int costGeneratedByParent = maxCostSum - currentNode->cost; costGeneratedByParent >= 0; costGeneratedByParent--)
         {
-            if (generatableCostsOnPathToSpecialNode[costGeneratedByParent].canBeGenerated)
+            if (costSumsOnPathToSpecialNode[costGeneratedByParent].canBeGenerated)
             {
-                generatableCostsOnPathToSpecialNode[costGeneratedByParent + currentNode->cost].canBeGenerated = true;
+                costSumsOnPathToSpecialNode[costGeneratedByParent + currentNode->cost].canBeGenerated = true;
             }
         }
     }
@@ -61,17 +61,17 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
     {
         // The only ones we can generate are 0 (by not including currentNode) and currentNode->cost
         // (by including currentNode!)
-        generatableCostsOnPathToSpecialNode.resize(maxCost + 1);
-        generatableCostsOnPathToSpecialNode[0].canBeGenerated = true;
-        generatableCostsOnPathToSpecialNode[currentNode->cost].canBeGenerated = true;
+        costSumsOnPathToSpecialNode.resize(maxCostSum + 1);
+        costSumsOnPathToSpecialNode[0].canBeGenerated = true;
+        costSumsOnPathToSpecialNode[currentNode->cost].canBeGenerated = true;
     }
 
     // Update nextLowestGeneratableCost for our CostInfo.
     int nextLowestGeneratableCost = -1;
-    for (int cost = 0; cost <= maxCost; cost++)
+    for (int cost = 0; cost <= maxCostSum; cost++)
     {
-        generatableCostsOnPathToSpecialNode[cost].nextLowestGeneratableCost = nextLowestGeneratableCost;
-        if (generatableCostsOnPathToSpecialNode[cost].canBeGenerated)
+        costSumsOnPathToSpecialNode[cost].nextLowestGeneratableCost = nextLowestGeneratableCost;
+        if (costSumsOnPathToSpecialNode[cost].canBeGenerated)
             nextLowestGeneratableCost = cost;
     }
 
@@ -171,8 +171,8 @@ int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const 
     // Just find the best PVValue over all possible pivots - there are at most 10 of them.
     for (int specialNodeIndex = 0; specialNodeIndex < specialNodes.size(); specialNodeIndex++)
     {
-        const auto resultWithThisPivot = findBestPVValueFromTwoCostInfos(sourceNode->generatableCostsOnPathToSpecialNode[specialNodeIndex], 
-                                                                         destNode->generatableCostsOnPathToSpecialNode[specialNodeIndex],
+        const auto resultWithThisPivot = findBestPVValueFromTwoCostInfos(sourceNode->costSumsOnPathToSpecialNode[specialNodeIndex], 
+                                                                         destNode->costSumsOnPathToSpecialNode[specialNodeIndex],
                                                                          costLimit);
 
         updatePVValue(result, resultWithThisPivot);
@@ -180,12 +180,12 @@ int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const 
     return result.maxSumForMinDiff;
 }
 
-// Construct generatableCostsOnPathToSpecialNode[0 ... specialNodes.size() - 1][0 ... maxCost] for all nodes.
+// Construct costSumsOnPathToSpecialNode[0 ... specialNodes.size() - 1][0 ... maxCostSum] for all nodes.
 void buildLookupTable(vector<Node>& nodes, const vector<Node*>& specialNodes)
 {
     for (auto& node : nodes)
     {
-        node.generatableCostsOnPathToSpecialNode.resize(specialNodes.size());
+        node.costSumsOnPathToSpecialNode.resize(specialNodes.size());
     }
 
     for (int specialNodeIndex = 0; specialNodeIndex < specialNodes.size(); specialNodeIndex++)
@@ -229,9 +229,9 @@ int main(int argc, char* argv[])
     {
         const Node* sourceNode = &(nodes[read<int>() - 1]);
         const Node* destNode = &(nodes[read<int>() - 1]);
-        const int maxCost = read<int>();
+        const int costLimit = read<int>();
 
-        const auto bestPVValueForQuery = findBestPVValueForQuery(sourceNode, destNode, maxCost, specialNodes);
+        const auto bestPVValueForQuery = findBestPVValueForQuery(sourceNode, destNode, costLimit, specialNodes);
         cout << bestPVValueForQuery << endl;
     }
     assert(cin);
