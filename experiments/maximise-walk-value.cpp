@@ -306,7 +306,45 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        const int numNodes = rand() % 100 + 1;
+        const int numSpecialNodes = rand() % numNodes + 1;
+        const int numQueries = rand() % 100 + 1;
+
+        const int maxCostPerNode = rand() % 100 + 1;
+        const int maxCostInQuery = rand() % 1000 + 1;
+
+        cout << numNodes << " " << numSpecialNodes << " " << numQueries << endl;
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            cout << ((rand() % (i + 1)) + 1) << " ";
+        }
+        cout << endl;
+
+        vector<int> nodeIds;
+        for (int i = 0; i < numNodes; i++)
+        {
+            nodeIds.push_back(i + 1);
+            cout << ((rand() % maxCostPerNode)) << " ";
+        }
+        cout << endl;
+
+        random_shuffle(nodeIds.begin(), nodeIds.end());
+
+        for (int i = 0; i < numSpecialNodes; i++)
+        {
+            cout << (nodeIds[i] + 1) << " ";
+        }
+        cout << endl;
+
+        for (int i = 0; i < numQueries; i++)
+        {
+            const int nodeId1 = (rand() % numNodes) + 1;
+            const int nodeId2 = (rand() % numNodes) + 1;
+            const int costLimit = rand() % maxCostInQuery;
+
+            cout << nodeId1 << " " << nodeId2 << " " << costLimit << endl; 
+        }
+
         return 0;
     }
 
