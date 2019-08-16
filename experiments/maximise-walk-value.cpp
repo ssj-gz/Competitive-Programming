@@ -33,6 +33,9 @@ struct Node
     vector<Node*> neighbours;
     int cost = 0;
 
+    // generatableCostsOnPathToSpecialNode[specialNodeIndex][cost].canBeGenerated is true
+    // if and only if the path from specialNodes[specialNodeIndex] to this node
+    // has a cost subset summing to "cost".
     vector<vector<CostInfo>> generatableCostsOnPathToSpecialNode;
 };
 
@@ -41,7 +44,7 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
     auto& generatableCostsOnPathToSpecialNode = currentNode->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
     if (parent)
     {
-        // We can generate precisely the set of costs that our parent coud, just by not including our cost in the subset ...
+        // We can generate precisely the set of costs that our parent could, just by not including our cost in the subset ...
         generatableCostsOnPathToSpecialNode = parent->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
         assert(generatableCostsOnPathToSpecialNode.size() == maxCost + 1);
         // ... but we can also generate "cost from source special node to parent" + "currentNode->cost", by
@@ -88,6 +91,8 @@ struct PVValue
     int maxSumForMinDiff = -1;
 };
 
+// Replace currentPVValue with newPVValue if the latter is "better" 
+// than the former.
 void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
 {
     if (currentPVValue.minDiff < newPVValue.minDiff)
@@ -103,7 +108,7 @@ void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
     }
 }
 
-PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& costInfo2, const int costLimit)
+PVValue findBestPVValueFromTwoCostInfos(const vector<CostInfo>& costInfo1, const vector<CostInfo>& costInfo2, const int costLimit)
 {
     PVValue result;
 
@@ -127,22 +132,34 @@ PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& c
 
     int costIn1 = findLargestGeneratableCost(costInfo1);
 
+    // For each costIn1, nextCostIn2AtLeastCostIn1 will be the smallest
+    // generatable cost in costInfo2 that is >= costInfo1, or equal to
+    // nextCostIn2LessThanCostIn1 if there is no such cost in costInfo2.
     int nextCostIn2AtLeastCostIn1 = findLargestGeneratableCost(costInfo2);
+    // For each costIn1, nextCostIn2LessThanCostIn1 will be the largest
+    // generatable cost in costInfo2 that is < costInfo1, or equal to
+    // nextCostIn2AtLeastCostIn1 if there is no such cost.
     int nextCostIn2LessThanCostIn1 = findLargestGeneratableCost(costInfo2);
 
+    // Iterate over all generatable costIn1.
     while (costIn1 != -1)
     {
+        // Update nextCostIn2LessThanCostIn1 and nextCostIn2AtLeastCostIn1 so that they
+        // maintain the invariants described above.
+        //
         while (nextCostIn2LessThanCostIn1 != -1 && nextCostIn2LessThanCostIn1 >= costIn1)
             nextCostIn2LessThanCostIn1 = costInfo2[nextCostIn2LessThanCostIn1].nextLowestGeneratableCost;
         while (nextCostIn2AtLeastCostIn1 != -1 && costInfo2[nextCostIn2AtLeastCostIn1].nextLowestGeneratableCost != -1 && costInfo2[nextCostIn2AtLeastCostIn1].nextLowestGeneratableCost >= costIn1)
             nextCostIn2AtLeastCostIn1 = costInfo2[nextCostIn2AtLeastCostIn1].nextLowestGeneratableCost;
 
+        // By construction, nextLowestGeneratableCost and nextCostIn2AtLeastCostIn1 are the two
+        // generatable costs in costInfo2 that are closest to costIn1, so will provide the
+        // minimum difference from costIn1.
         incorporateNewCostPair(costIn1, nextCostIn2LessThanCostIn1);
         incorporateNewCostPair(costIn1, nextCostIn2AtLeastCostIn1);
 
         costIn1 = costInfo1[costIn1].nextLowestGeneratableCost;
     }
-    
 
     return result;
 }
@@ -151,18 +168,20 @@ int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const 
 {
     PVValue result;
 
+    // Just find the best PVValue over all possible pivots - there are at most 10 of them.
     for (int specialNodeIndex = 0; specialNodeIndex < specialNodes.size(); specialNodeIndex++)
     {
-        const auto resultWithThisPivot = findPVValue(sourceNode->generatableCostsOnPathToSpecialNode[specialNodeIndex], 
-                                                     destNode->generatableCostsOnPathToSpecialNode[specialNodeIndex],
-                                                     costLimit);
+        const auto resultWithThisPivot = findBestPVValueFromTwoCostInfos(sourceNode->generatableCostsOnPathToSpecialNode[specialNodeIndex], 
+                                                                         destNode->generatableCostsOnPathToSpecialNode[specialNodeIndex],
+                                                                         costLimit);
 
         updatePVValue(result, resultWithThisPivot);
     }
     return result.maxSumForMinDiff;
 }
 
-void buildLookupTables(vector<Node>& nodes, const vector<Node*>& specialNodes)
+// Construct generatableCostsOnPathToSpecialNode[0 ... specialNodes.size() - 1][0 ... maxCost] for all nodes.
+void buildLookupTable(vector<Node>& nodes, const vector<Node*>& specialNodes)
 {
     for (auto& node : nodes)
     {
@@ -199,22 +218,21 @@ int main(int argc, char* argv[])
     }
 
     vector<Node*> specialNodes;
-
     for (int i = 0; i < numSpecialNodes; i++)
     {
         specialNodes.push_back(&(nodes[read<int>() - 1]));
     }
 
-    buildLookupTables(nodes, specialNodes);
+    buildLookupTable(nodes, specialNodes);
 
     for (int q = 0; q < numQueries; q++)
     {
-        Node* sourceNode = &(nodes[read<int>() - 1]);
-        Node* destNode = &(nodes[read<int>() - 1]);
-        int maxCost = read<int>();
+        const Node* sourceNode = &(nodes[read<int>() - 1]);
+        const Node* destNode = &(nodes[read<int>() - 1]);
+        const int maxCost = read<int>();
 
-        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, specialNodes);
-        cout << queryResultOptimised << endl;
+        const auto bestPVValueForQuery = findBestPVValueForQuery(sourceNode, destNode, maxCost, specialNodes);
+        cout << bestPVValueForQuery << endl;
     }
     assert(cin);
 }
