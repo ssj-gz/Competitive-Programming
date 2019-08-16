@@ -98,22 +98,22 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
 
 struct PVValue
 {
-    int minX = numeric_limits<int>::max();
-    int valueWithMinX = -1;
+    int minDiff = numeric_limits<int>::max();
+    int maxSumForMinDiff = -1;
 };
 
 void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
 {
-    if (currentPVValue.minX < newPVValue.minX)
+    if (currentPVValue.minDiff < newPVValue.minDiff)
         return;
-    if (currentPVValue.minX > newPVValue.minX)
+    if (currentPVValue.minDiff > newPVValue.minDiff)
     {
         currentPVValue = newPVValue;
     }
     else
     {
-        assert(currentPVValue.minX == newPVValue.minX);
-        currentPVValue.valueWithMinX = max(currentPVValue.valueWithMinX, newPVValue.valueWithMinX);
+        assert(currentPVValue.minDiff == newPVValue.minDiff);
+        currentPVValue.maxSumForMinDiff = max(currentPVValue.maxSumForMinDiff, newPVValue.maxSumForMinDiff);
     }
 }
 
@@ -175,7 +175,7 @@ int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const 
 
         updatePVValue(result, resultWithThisPivot);
     }
-    return result.valueWithMinX;
+    return result.maxSumForMinDiff;
 }
 
 void buildLookupTables(vector<Node>& nodes, const vector<Node*>& specialNodes)
@@ -293,7 +293,7 @@ int solveQueryBruteForce(const Node* sourceNode, const Node* destNode, const int
         }
     }
 
-    return result.valueWithMinX;
+    return result.maxSumForMinDiff;
 }
 
 int main(int argc, char* argv[])
