@@ -46,7 +46,8 @@ struct Node
 
 void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpecialNodeId)
 {
-    //cout << "doDfsFromSpecialNode: currentNode: " << currentNode->id << " sourceSpecialNodeId: " << sourceSpecialNodeId << endl;
+    cout << "doDfsFromSpecialNode: currentNode: " << currentNode->id << " sourceSpecialNodeId: " << sourceSpecialNodeId << " generatableCostsOnPathToSpecialNode.size(): " << currentNode->generatableCostsOnPathToSpecialNode.size() << endl;
+    assert(sourceSpecialNodeId < currentNode->generatableCostsOnPathToSpecialNode.size());
     auto& generatableCostsOnPathToSpecialNode = currentNode->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
     if (parent)
     {
@@ -164,13 +165,14 @@ PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& c
     return result;
 }
 
-int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const int costLimit, const int numSpecialNodes)
+int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const int costLimit, const vector<Node*>& specialNodes)
 {
     //cout << " query: sourceNode: " << sourceNode->id << " destNode: " << destNode->id << " costLimit: " << costLimit << endl;
     PVValue result;
 
-    for (int specialNodeIndex = 0; specialNodeIndex < numSpecialNodes; specialNodeIndex++)
+    for (int specialNodeIndex = 0; specialNodeIndex < specialNodes.size(); specialNodeIndex++)
     {
+        //cout << " query: sourceNode: " << sourceNode->id << " destNode: " << destNode->id << " costLimit: " << costLimit << " specialNode: " << specialNodes[specialNodeIndex]->id  << endl;
         const auto resultWithThisPivot = findPVValue(sourceNode->generatableCostsOnPathToSpecialNode[specialNodeIndex], 
                                                      destNode->generatableCostsOnPathToSpecialNode[specialNodeIndex],
                                                      costLimit);
@@ -309,6 +311,7 @@ int main(int argc, char* argv[])
         const int numNodes = rand() % 100 + 1;
         const int numSpecialNodes = rand() % numNodes + 1;
         const int numQueries = rand() % 100 + 1;
+        //const int numQueries = 1;
 
         const int maxCostPerNode = rand() % 100 + 1;
         const int maxCostInQuery = rand() % 1000 + 1;
@@ -332,7 +335,7 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < numSpecialNodes; i++)
         {
-            cout << (nodeIds[i] + 1) << " ";
+            cout << (nodeIds[i]) << " ";
         }
         cout << endl;
 
@@ -365,12 +368,13 @@ int main(int argc, char* argv[])
         nodes[v].neighbours.push_back(&(nodes[i + 1]));
         nodes[i + 1].neighbours.push_back(&(nodes[v]));
 
-        //cout << "edge between: " << nodes[i + 1].id << " and " << nodes[v].id << endl;
+        cout << "edge between: " << nodes[i + 1].id << " and " << nodes[v].id << endl;
     }
 
     for (int i = 0; i < numNodes; i++)
     {
         nodes[i].cost = read<int>();
+        cout << "node cost: " << nodes[i].cost << endl;
     }
 
     vector<Node*> specialNodes;
@@ -379,6 +383,7 @@ int main(int argc, char* argv[])
     {
         specialNodes.push_back(&(nodes[read<int>() - 1]));
         specialNodes.back()->specialNodeIndex = i;
+        cout << " special node: " << specialNodes.back()->id << endl;
     }
 
     buildLookupTables(nodes, specialNodes);
@@ -387,17 +392,18 @@ int main(int argc, char* argv[])
     {
         Node* sourceNode = &(nodes[read<int>() - 1]);
         Node* destNode = &(nodes[read<int>() - 1]);
-        int maxCost = read<int>() - 1;
+        int maxCost = read<int>();
+        assert(cin);
 
 #ifdef BRUTE_FORCE
-        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, numSpecialNodes);
+        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, specialNodes);
         cout << "queryResultOptimised: " << queryResultOptimised << endl;
         const auto queryResultBruteForce = solveQueryBruteForce(sourceNode, destNode, maxCost, specialNodes);
         cout << "queryResultBruteForce: " << queryResultBruteForce << endl;
 
         assert(queryResultOptimised == queryResultBruteForce);
 #else
-        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, numSpecialNodes);
+        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, specialNodes);
         cout << queryResultOptimised << endl;
 #endif
     }
