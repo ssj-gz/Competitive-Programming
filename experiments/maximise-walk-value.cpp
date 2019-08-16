@@ -108,6 +108,19 @@ struct PVValue
     int valueWithMinX = -1;
 };
 
+void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
+{
+    if (currentPVValue.minX != -1 && newPVValue.minX > currentPVValue.minX)
+        return;
+    if (currentPVValue.minX == -1 || currentPVValue.minX > newPVValue.minX)
+    {
+        currentPVValue.minX = newPVValue.minX;
+        currentPVValue.valueWithMinX = -1;
+    }
+    assert(currentPVValue.minX == newPVValue.minX);
+    currentPVValue.valueWithMinX = max(currentPVValue.valueWithMinX, newPVValue.valueWithMinX);
+}
+
 PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& costInfo2, const int costLimit)
 {
     PVValue result;
@@ -125,18 +138,8 @@ PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& c
 
     auto incorporateNewCostPair = [&result](const int costIn1, const int costIn2)
     {
-        const int newDifference = abs(costIn1 - costIn2);
-        assert(newDifference >= 0);
-        if (result.minX == -1 || result.minX > newDifference)
-        {
-            result.minX = newDifference;
-            result.valueWithMinX = -1;
-        }
-        if (newDifference == result.minX)
-        {
-            const int newSum = costIn1 + costIn2;
-            result.valueWithMinX = max(result.valueWithMinX, newSum);
-        }
+        PVValue newPVValue = { abs(costIn1 - costIn2), costIn1 + costIn2 };
+        updatePVValue(result, newPVValue);
     };
 
     int costIn1 = findLargestGeneratableCost(costInfo1);
@@ -167,26 +170,13 @@ int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const 
     //cout << " query: sourceNode: " << sourceNode->id << " destNode: " << destNode->id << " costLimit: " << costLimit << endl;
     PVValue result;
 
-    auto incorporateNewPVValue = [&result](const PVValue& newPVValue)
-    {
-        if (result.minX == -1 || result.minX > newPVValue.minX)
-        {
-            result.minX = newPVValue.minX;
-            result.valueWithMinX = -1;
-        }
-        if (newPVValue.minX == result.minX)
-        {
-            result.valueWithMinX = max(result.valueWithMinX, newPVValue.valueWithMinX);
-        }
-    };
-
     for (int specialNodeIndex = 0; specialNodeIndex < numSpecialNodes; specialNodeIndex++)
     {
         const auto resultWithThisPivot = findPVValue(sourceNode->generatableCostsOnPathToSpecialNode[specialNodeIndex], 
                                                      destNode->generatableCostsOnPathToSpecialNode[specialNodeIndex],
                                                      costLimit);
 
-        incorporateNewPVValue(resultWithThisPivot);
+        updatePVValue(result, resultWithThisPivot);
     }
     return result.valueWithMinX;
 }
