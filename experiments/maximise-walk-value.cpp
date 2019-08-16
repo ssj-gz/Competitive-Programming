@@ -60,18 +60,11 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
     {
         generatableCostsOnPathToSpecialNode = parent->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
         assert(generatableCostsOnPathToSpecialNode.size() == maxCost + 1);
-        for (int i = 0; i <= maxCost; i++)
+        for (int i = maxCost; i >= currentNode->cost; i--)
         {
-            if (generatableCostsOnPathToSpecialNode[i].canBeGenerated)
+            if (generatableCostsOnPathToSpecialNode[i - currentNode->cost].canBeGenerated)
             {
-                if (i + currentNode->cost <= maxCost)
-                {
-                    generatableCostsOnPathToSpecialNode[i + currentNode->cost].canBeGenerated = true;
-                }
-                else
-                {
-                    break;
-                }
+                generatableCostsOnPathToSpecialNode[i].canBeGenerated = true;
             }
         }
     }
@@ -80,6 +73,14 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
         generatableCostsOnPathToSpecialNode.resize(maxCost + 1);
         generatableCostsOnPathToSpecialNode[0].canBeGenerated = true;
         generatableCostsOnPathToSpecialNode[currentNode->cost].canBeGenerated = true;
+    }
+
+    cout << "currentNode: " << currentNode->id << endl;
+    cout << "Generatable costs from sourceSpecialNodeId: " << sourceSpecialNodeId << endl;
+    for (int cost = 0; cost <= maxCost; cost++)
+    {
+        if (generatableCostsOnPathToSpecialNode[cost].canBeGenerated)
+            cout << " " << cost << endl;
     }
 
     int nextLowestGeneratableCost = -1;
@@ -147,6 +148,7 @@ PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& c
             nextCostIn2LessThanCostIn1 = costInfo2[nextCostIn2LessThanCostIn1].nextLowestGeneratableCost;
         while (nextCostIn2AtLeastCostIn1 != -1 && costInfo2[nextCostIn2AtLeastCostIn1].nextLowestGeneratableCost != -1 && costInfo2[nextCostIn2AtLeastCostIn1].nextLowestGeneratableCost >= costIn1)
             nextCostIn2AtLeastCostIn1 = costInfo2[nextCostIn2AtLeastCostIn1].nextLowestGeneratableCost;
+        cout << " costIn1: " << costIn1 << " nextCostIn2LessThanCostIn1: " << nextCostIn2LessThanCostIn1 << " nextCostIn2AtLeastCostIn1: " << nextCostIn2AtLeastCostIn1 << endl;
 
         incorporateNewCostPair(costIn1, nextCostIn2LessThanCostIn1);
         incorporateNewCostPair(costIn1, nextCostIn2AtLeastCostIn1);
@@ -160,6 +162,7 @@ PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& c
 
 int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const int costLimit, const int numSpecialNodes)
 {
+    cout << " query: sourceNode: " << sourceNode->id << " destNode: " << destNode->id << " costLimit: " << costLimit << endl;
     PVValue result;
 
     auto incorporateNewPVValue = [&result](const PVValue& newPVValue)
