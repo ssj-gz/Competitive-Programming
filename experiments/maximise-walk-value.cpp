@@ -108,13 +108,13 @@ void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
     }
 }
 
-PVValue findBestPVValueFromTwoCostInfos(const vector<CostInfo>& costInfo1, const vector<CostInfo>& costInfo2, const int costLimit)
+PVValue findBestPVValueFromTwoCostInfos(const vector<CostInfo>& costInfo1, const vector<CostInfo>& costInfo2, const int costSumLimit)
 {
     PVValue result;
 
-    auto findLargestGeneratableCost = [costLimit](const vector<CostInfo>& costInfo)
+    auto findLargestGeneratableCost = [costSumLimit](const vector<CostInfo>& costInfo)
     {
-        int largestCost = costLimit;
+        int largestCost = costSumLimit;
         if (!costInfo[largestCost].canBeGenerated)
             largestCost = costInfo[largestCost].nextLowestGeneratableCost;
 
@@ -164,7 +164,7 @@ PVValue findBestPVValueFromTwoCostInfos(const vector<CostInfo>& costInfo1, const
     return result;
 }
 
-int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const int costLimit, const vector<Node*>& specialNodes)
+int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const int queryCostSumLimit, const vector<Node*>& specialNodes)
 {
     PVValue result;
 
@@ -173,7 +173,7 @@ int findBestPVValueForQuery(const Node* sourceNode, const Node* destNode, const 
     {
         const auto resultWithThisPivot = findBestPVValueFromTwoCostInfos(sourceNode->costSumsOnPathToSpecialNode[specialNodeIndex], 
                                                                          destNode->costSumsOnPathToSpecialNode[specialNodeIndex],
-                                                                         costLimit);
+                                                                         queryCostSumLimit);
 
         updatePVValue(result, resultWithThisPivot);
     }
@@ -229,9 +229,9 @@ int main(int argc, char* argv[])
     {
         const Node* sourceNode = &(nodes[read<int>() - 1]);
         const Node* destNode = &(nodes[read<int>() - 1]);
-        const int costLimit = read<int>();
+        const int queryCostSumLimit = read<int>();
 
-        const auto bestPVValueForQuery = findBestPVValueForQuery(sourceNode, destNode, costLimit, specialNodes);
+        const auto bestPVValueForQuery = findBestPVValueForQuery(sourceNode, destNode, queryCostSumLimit, specialNodes);
         cout << bestPVValueForQuery << endl;
     }
     assert(cin);
