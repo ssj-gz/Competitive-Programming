@@ -7,6 +7,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include <cassert>
 
@@ -22,15 +23,6 @@ T read()
     assert(cin);
     return toRead;
 }
-
-#if 1
-vector<int64_t> solveBruteForce()
-{
-    vector<int64_t> result;
-
-    return result;
-}
-#endif
 
 const auto maxCost = 1000;
 
@@ -115,12 +107,15 @@ void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
         currentPVValue = newPVValue;
         return;
     }
+    if (currentPVValue.minX < newPVValue.minX)
+        return;
     if (currentPVValue.minX > newPVValue.minX)
     {
         currentPVValue = newPVValue;
     }
     else
     {
+        assert(currentPVValue.minX == newPVValue.minX);
         currentPVValue.valueWithMinX = max(currentPVValue.valueWithMinX, newPVValue.valueWithMinX);
     }
 }
@@ -206,13 +201,100 @@ void buildLookupTables(vector<Node>& nodes, const vector<Node*>& specialNodes)
     }
 }
 
-vector<int64_t> solveOptimised()
+void findWeightListAlongPathAux(const Node* currentNode, const Node* parent, const Node* pathEnd, vector<int>& weightListSoFar, vector<int>& answer)
 {
-    vector<int64_t> result;
+    weightListSoFar.push_back(currentNode->cost);
+    if (currentNode == pathEnd)
+        answer = weightListSoFar;
+
+    for (auto child : currentNode->neighbours)
+    {
+        if (child == parent)
+            continue;
+
+        findWeightListAlongPathAux(child, currentNode, pathEnd, weightListSoFar, answer);
+    }
+
+    weightListSoFar.pop_back();
+}
+
+vector<int> findCostsGeneratableFromList(const vector<int>& costList)
+{
+    vector<bool> useCost(costList.size(), false);
+
+    vector<int> results;
+
+    while (true)
+    {
+        int cost = 0;
+        for (int i = 0; i < costList.size(); i++)
+        {
+            if (useCost[i])
+                cost += costList[i];
+        }
+        results.push_back(cost);
+
+        int index = 0;
+        while (index < costList.size() && useCost[index] == true)
+        {
+            useCost[index] = false;
+            index++;
+        }
+        if (index == costList.size())
+            break;
+        useCost[index] = true;
+    }
+
+    sort(results.begin(), results.end());
+    results.erase(unique(results.begin(), results.end()), results.end());
+
+    return results;
+}
+
+vector<int> findWeightListAlongPath(const Node* pathBegin, const Node* pathEnd)
+{
+    vector<int> result;
+    vector<int> weightListSoFar;
+
+    findWeightListAlongPathAux(pathBegin, nullptr, pathEnd, weightListSoFar, result);
 
     return result;
 }
 
+
+int solveQueryBruteForce(const Node* sourceNode, const Node* destNode, const int costLimit, const vector<Node*>& specialNodes)
+{
+    PVValue result;
+    for (auto specialNode : specialNodes)
+    {
+        const auto weightSumsGeneratedSourceToSpecial = findCostsGeneratableFromList(findWeightListAlongPath(sourceNode, specialNode)); 
+        const auto weightSumsGeneratedSpecialToDest = findCostsGeneratableFromList(findWeightListAlongPath(specialNode, destNode)); 
+
+        cout << "weightSumsGeneratedSourceToSpecial: " << endl;
+        for (const auto x : weightSumsGeneratedSourceToSpecial)
+            cout << x << " ";
+        cout << endl;
+        cout << "weightSumsGeneratedSpecialToDest: " << endl;
+        for (const auto x : weightSumsGeneratedSpecialToDest)
+            cout << x << " ";
+        cout << endl;
+
+        for (const auto cost1 : weightSumsGeneratedSourceToSpecial)
+        {
+            if (cost1 > costLimit)
+                continue;
+            for (const auto cost2 : weightSumsGeneratedSpecialToDest)
+            {
+                if (cost2 > costLimit)
+                    continue;
+                PVValue newPVValue = { abs(cost1 - cost2), cost1 + cost2 };
+                updatePVValue(result, newPVValue);
+            }
+        }
+    }
+
+    return result.valueWithMinX;
+}
 
 int main(int argc, char* argv[])
 {
@@ -267,7 +349,12 @@ int main(int argc, char* argv[])
         Node* destNode = &(nodes[read<int>() - 1]);
         int maxCost = read<int>() - 1;
 
-        cout << findBestPVValueForQuery(sourceNode, destNode, maxCost, numSpecialNodes) << endl;
+        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, numSpecialNodes);
+        cout << "queryResultOptimised: " << queryResultOptimised << endl;
+        const auto queryResultBruteForce = solveQueryBruteForce(sourceNode, destNode, maxCost, specialNodes);
+        cout << "queryResultBruteForce: " << queryResultBruteForce << endl;
+
+        assert(queryResultOptimised == queryResultBruteForce);
     }
 
 #ifdef BRUTE_FORCE
