@@ -23,7 +23,7 @@ T read()
     return toRead;
 }
 
-#if 0
+#if 1
 vector<int64_t> solveBruteForce()
 {
     vector<int64_t> result;
@@ -110,15 +110,19 @@ struct PVValue
 
 void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
 {
-    if (currentPVValue.minX != -1 && newPVValue.minX > currentPVValue.minX)
-        return;
-    if (currentPVValue.minX == -1 || currentPVValue.minX > newPVValue.minX)
+    if (currentPVValue.minX == -1)
     {
-        currentPVValue.minX = newPVValue.minX;
-        currentPVValue.valueWithMinX = -1;
+        currentPVValue = newPVValue;
+        return;
     }
-    assert(currentPVValue.minX == newPVValue.minX);
-    currentPVValue.valueWithMinX = max(currentPVValue.valueWithMinX, newPVValue.valueWithMinX);
+    if (currentPVValue.minX > newPVValue.minX)
+    {
+        currentPVValue = newPVValue;
+    }
+    else
+    {
+        currentPVValue.valueWithMinX = max(currentPVValue.valueWithMinX, newPVValue.valueWithMinX);
+    }
 }
 
 PVValue findPVValue(const vector<CostInfo>& costInfo1, const vector<CostInfo>& costInfo2, const int costLimit)
