@@ -196,6 +196,17 @@ void buildLookupTable(vector<Node>& nodes, const vector<Node*>& specialNodes)
 
 int main(int argc, char* argv[])
 {
+    // Ugh - won't bother documenting what I've done here, as it turns out there's a far
+    // better way than the approach I've used:
+    //
+    //  - we can always generate a subset-sum with cost 0 in the path from source-to-pivot.
+    //  - we can always generate a subset-sum with cost 0 in the path from pivot-to-dest.
+    //
+    // Therefore, the best PVValue will always have minDiff == 0.  Therefore, it suffices
+    // to find the largest subset-cost that can be generated in *both* the path from
+    // source-to-pivot *and* in pivot-to-dest and output twice that.
+    //
+    // Sigh.
     ios::sync_with_stdio(false);
 
     const int numNodes = read<int>();
