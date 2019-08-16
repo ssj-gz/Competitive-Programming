@@ -1,5 +1,5 @@
-// Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+// Simon St James (ssjgz) - 2019-08-16
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -191,6 +191,7 @@ void buildLookupTables(vector<Node>& nodes, const vector<Node*>& specialNodes)
     {
         doDfsFromSpecialNode(specialNode, nullptr, specialNode->specialNodeIndex);
     }
+#ifndef NDEBUG
     for (auto& node : nodes)
     {
         assert(node.generatableCostsOnPathToSpecialNode.size() == specialNodes.size());
@@ -199,6 +200,7 @@ void buildLookupTables(vector<Node>& nodes, const vector<Node*>& specialNodes)
             assert(node.generatableCostsOnPathToSpecialNode[i].size() == maxCost + 1);
         }
     }
+#endif
 }
 
 void findWeightListAlongPathAux(const Node* currentNode, const Node* parent, const Node* pathEnd, vector<int>& weightListSoFar, vector<int>& answer)
@@ -349,30 +351,18 @@ int main(int argc, char* argv[])
         Node* destNode = &(nodes[read<int>() - 1]);
         int maxCost = read<int>() - 1;
 
+#ifdef BRUTE_FORCE
         const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, numSpecialNodes);
         cout << "queryResultOptimised: " << queryResultOptimised << endl;
         const auto queryResultBruteForce = solveQueryBruteForce(sourceNode, destNode, maxCost, specialNodes);
         cout << "queryResultBruteForce: " << queryResultBruteForce << endl;
 
         assert(queryResultOptimised == queryResultBruteForce);
-    }
-
-#ifdef BRUTE_FORCE
-#if 0
-    const auto solutionBruteForce = solveBruteForce();
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 0
-    const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised: " << solutionOptimised << endl;
-
-    assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
-    const auto solutionOptimised = solveOptimised();
-    cout << solutionOptimised << endl;
+        const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, numSpecialNodes);
+        cout << queryResultOptimised << endl;
 #endif
-
+    }
 }
 
 
