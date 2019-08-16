@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 #include <cassert>
 
@@ -46,7 +47,7 @@ struct Node
 
 void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpecialNodeId)
 {
-    cout << "doDfsFromSpecialNode: currentNode: " << currentNode->id << " sourceSpecialNodeId: " << sourceSpecialNodeId << " generatableCostsOnPathToSpecialNode.size(): " << currentNode->generatableCostsOnPathToSpecialNode.size() << endl;
+    //cout << "doDfsFromSpecialNode: currentNode: " << currentNode->id << " sourceSpecialNodeId: " << sourceSpecialNodeId << " generatableCostsOnPathToSpecialNode.size(): " << currentNode->generatableCostsOnPathToSpecialNode.size() << endl;
     assert(sourceSpecialNodeId < currentNode->generatableCostsOnPathToSpecialNode.size());
     auto& generatableCostsOnPathToSpecialNode = currentNode->generatableCostsOnPathToSpecialNode[sourceSpecialNodeId];
     if (parent)
@@ -97,17 +98,12 @@ void doDfsFromSpecialNode(Node* currentNode, Node* parent, const int sourceSpeci
 
 struct PVValue
 {
-    int minX = -1;
+    int minX = numeric_limits<int>::max();
     int valueWithMinX = -1;
 };
 
 void updatePVValue(PVValue& currentPVValue, const PVValue& newPVValue)
 {
-    if (currentPVValue.minX == -1)
-    {
-        currentPVValue = newPVValue;
-        return;
-    }
     if (currentPVValue.minX < newPVValue.minX)
         return;
     if (currentPVValue.minX > newPVValue.minX)
@@ -308,10 +304,9 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int numNodes = rand() % 100 + 1;
-        const int numSpecialNodes = rand() % numNodes + 1;
-        const int numQueries = rand() % 100 + 1;
-        //const int numQueries = 1;
+        const int numNodes = rand() % 1000 + 1;
+        const int numSpecialNodes = rand() % (min(numNodes, 10)) + 1;
+        const int numQueries = rand() % 1000 + 1;
 
         const int maxCostPerNode = rand() % 100 + 1;
         const int maxCostInQuery = rand() % 1000 + 1;
@@ -368,13 +363,13 @@ int main(int argc, char* argv[])
         nodes[v].neighbours.push_back(&(nodes[i + 1]));
         nodes[i + 1].neighbours.push_back(&(nodes[v]));
 
-        cout << "edge between: " << nodes[i + 1].id << " and " << nodes[v].id << endl;
+        //cout << "edge between: " << nodes[i + 1].id << " and " << nodes[v].id << endl;
     }
 
     for (int i = 0; i < numNodes; i++)
     {
         nodes[i].cost = read<int>();
-        cout << "node cost: " << nodes[i].cost << endl;
+        //cout << "node cost: " << nodes[i].cost << endl;
     }
 
     vector<Node*> specialNodes;
@@ -383,7 +378,7 @@ int main(int argc, char* argv[])
     {
         specialNodes.push_back(&(nodes[read<int>() - 1]));
         specialNodes.back()->specialNodeIndex = i;
-        cout << " special node: " << specialNodes.back()->id << endl;
+        //cout << " special node: " << specialNodes.back()->id << endl;
     }
 
     buildLookupTables(nodes, specialNodes);
@@ -399,7 +394,7 @@ int main(int argc, char* argv[])
         const auto queryResultOptimised = findBestPVValueForQuery(sourceNode, destNode, maxCost, specialNodes);
         cout << "queryResultOptimised: " << queryResultOptimised << endl;
         const auto queryResultBruteForce = solveQueryBruteForce(sourceNode, destNode, maxCost, specialNodes);
-        cout << "queryResultBruteForce: " << queryResultBruteForce << endl;
+        cout << "solutionBruteForce: " << queryResultBruteForce << endl;
 
         assert(queryResultOptimised == queryResultBruteForce);
 #else
