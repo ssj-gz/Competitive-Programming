@@ -872,6 +872,7 @@ ios::sync_with_stdio(false);
 // Compile with libc++'s debug mode.
 clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEBUG=1
 
+// Begin code template
 
 // Simon St James (ssjgz) - 2019-XX-XX
 //#define SUBMISSION
@@ -881,6 +882,7 @@ clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEB
 #define NDEBUG
 #endif
 #include <iostream>
+#include <vector>
 
 #include <cassert>
 
@@ -930,6 +932,7 @@ int main(int argc, char* argv[])
     
     // TODO - read in testcase.
     
+    assert(cin);
 #ifdef BRUTE_FORCE
 #if 0
     const auto solutionBruteForce = solveBruteForce();
@@ -947,6 +950,8 @@ int main(int argc, char* argv[])
 #endif
 
 }
+
+// End code template
 
 // Begin fast integer input.
 #define gc getchar_unlocked
