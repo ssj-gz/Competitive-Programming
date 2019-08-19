@@ -276,8 +276,8 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                 knownDescendantHeight = otherHeightInfo.numWithHeight;
             }
 
-            const auto previousChildHasThisHeight = (knownDescendantHeight > 0);
-            if (previousChildHasThisHeight)
+            const auto earlierChildHasThisHeight = (knownDescendantHeight > 0);
+            if (earlierChildHasThisHeight)
             {
                 int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendantHeight];
 
