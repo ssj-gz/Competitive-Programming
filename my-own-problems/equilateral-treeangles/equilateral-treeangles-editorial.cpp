@@ -254,24 +254,24 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
             // be executed under different circumstances.
             const auto descendantHeight = descendantHeightPair.first;
 
-            const auto& heightInfo = descendantHeightPair.second;
-            auto& otherHeightInfo = infoForDescendantHeight[descendantHeight];
+            const auto& transientHeightInfo = descendantHeightPair.second;
+            auto& heightInfoForNode = infoForDescendantHeight[descendantHeight];
 
             assert (descendantHeight > currentNode->height);
 
             int newExtraDescendantHeight = -1;
             int knownDescendantHeight = -1;
-            if (heightInfo.lastUpdatedAtNode == currentNode || heightInfo.lastUpdatedAtNode == nullptr)
+            if (transientHeightInfo.lastUpdatedAtNode == currentNode || transientHeightInfo.lastUpdatedAtNode == nullptr)
             {
-                assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
-                newExtraDescendantHeight = otherHeightInfo.numWithHeight;
-                knownDescendantHeight = heightInfo.numWithHeight;
+                assert(heightInfoForNode.lastUpdatedAtNode != currentNode);
+                newExtraDescendantHeight = heightInfoForNode.numWithHeight;
+                knownDescendantHeight = transientHeightInfo.numWithHeight;
             }
             else
             {
-                assert(heightInfo.lastUpdatedAtNode != currentNode);
-                newExtraDescendantHeight = heightInfo.numWithHeight;
-                knownDescendantHeight = otherHeightInfo.numWithHeight;
+                assert(transientHeightInfo.lastUpdatedAtNode != currentNode);
+                newExtraDescendantHeight = transientHeightInfo.numWithHeight;
+                knownDescendantHeight = heightInfoForNode.numWithHeight;
             }
 
             const auto earlierChildHasThisHeight = (knownDescendantHeight > 0);
@@ -295,8 +295,8 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
 
             }
 
-            otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
-            otherHeightInfo.lastUpdatedAtNode = currentNode;
+            heightInfoForNode.numWithHeight += transientHeightInfo.numWithHeight;
+            heightInfoForNode.lastUpdatedAtNode = currentNode;
         }
     }
 
