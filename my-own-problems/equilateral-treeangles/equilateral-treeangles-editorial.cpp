@@ -266,8 +266,6 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                 assert(otherHeightInfo.lastUpdatedAtNode != currentNode);
                 newExtraDescendantHeight = otherHeightInfo.numWithHeight;
                 knownDescendantHeight = heightInfo.numWithHeight;
-
-                otherHeightInfo.numWithHeight = heightInfo.numWithHeight;
             }
             else
             {
@@ -297,7 +295,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
 
             }
 
-            otherHeightInfo.numWithHeight += newExtraDescendantHeight;
+            otherHeightInfo.numWithHeight += heightInfo.numWithHeight;
             otherHeightInfo.lastUpdatedAtNode = currentNode;
         }
     }
