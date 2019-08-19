@@ -259,39 +259,39 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
 
             assert (descendantHeight > currentNode->height);
 
-            int newExtraDescendantHeight = -1;
-            int knownDescendantHeight = -1;
+            int numUnprocessedDescendantsWithHeight = -1;
+            int numKnownDescendantsWithHeight = -1;
             if (transientHeightInfo.lastUpdatedAtNode == currentNode || transientHeightInfo.lastUpdatedAtNode == nullptr)
             {
                 assert(heightInfoForNode.lastUpdatedAtNode != currentNode);
-                newExtraDescendantHeight = heightInfoForNode.numWithHeight;
-                knownDescendantHeight = transientHeightInfo.numWithHeight;
+                numUnprocessedDescendantsWithHeight = heightInfoForNode.numWithHeight;
+                numKnownDescendantsWithHeight = transientHeightInfo.numWithHeight;
             }
             else
             {
                 assert(transientHeightInfo.lastUpdatedAtNode != currentNode);
-                newExtraDescendantHeight = transientHeightInfo.numWithHeight;
-                knownDescendantHeight = heightInfoForNode.numWithHeight;
+                numUnprocessedDescendantsWithHeight = transientHeightInfo.numWithHeight;
+                numKnownDescendantsWithHeight = heightInfoForNode.numWithHeight;
             }
 
-            const auto earlierChildHasThisHeight = (knownDescendantHeight > 0);
+            const auto earlierChildHasThisHeight = (numKnownDescendantsWithHeight > 0);
             if (earlierChildHasThisHeight)
             {
                 int64_t& numPairsWithHeightViaDifferentChildren = currentNode->numPairsWithHeightViaDifferentChildren[descendantHeight];
 
-                if (newExtraDescendantHeight * numPairsWithHeightViaDifferentChildren > 0)
+                if (numUnprocessedDescendantsWithHeight * numPairsWithHeightViaDifferentChildren > 0)
                 {
                     // Found a triple where all three nodes have currentNode as their LCA: a "Type B" triangle.
-                    const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * newExtraDescendantHeight * numTripletPermutations;
+                    const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * numUnprocessedDescendantsWithHeight * numTripletPermutations;
                     assert(numNewTriangles >= 0);
                     numTriangles += numNewTriangles;
                 }
 
                 // These numPairsWithHeightViaDifferentChildren would, when combined with a non-ancestor of currentNode that hasPerson and is
-                // (newExtraDescendantHeight - currentNode->height) distance away from currentNode, form a "Type A" triangle.
+                // (descendantHeight - currentNode->height) distance away from currentNode, form a "Type A" triangle.
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
-                numPairsWithHeightViaDifferentChildren += newExtraDescendantHeight * knownDescendantHeight;
+                numPairsWithHeightViaDifferentChildren += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
 
             }
 
