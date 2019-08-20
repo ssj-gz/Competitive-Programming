@@ -886,7 +886,7 @@ clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEB
 
 #include <cassert>
 
-#include <sys/time.h>
+#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -932,7 +932,6 @@ int main(int argc, char* argv[])
     
     // TODO - read in testcase.
     
-    assert(cin);
 #ifdef BRUTE_FORCE
 #if 0
     const auto solutionBruteForce = solveBruteForce();
@@ -949,6 +948,7 @@ int main(int argc, char* argv[])
     cout << solutionOptimised << endl;
 #endif
 
+    assert(cin);
 }
 
 // End code template
