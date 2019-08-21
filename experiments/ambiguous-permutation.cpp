@@ -32,31 +32,6 @@ bool isAmbiguous(const vector<int>& a)
 
 int main(int argc, char* argv[])
 {
-    if (false)
-    {
-        const int N = 7;
-        vector<int> a(N);
-        for (int i = 0; i < N; i++)
-        {
-            a[i] = (i + 1);
-        }
-        const auto originalA = a;
-        do
-        {
-            if (isAmbiguous(a))
-            {
-                cout << "Ambiguous a: " << endl;
-                for (const auto x : a)
-                {
-                    cout << x << " ";
-                }
-                cout << endl;
-
-            }
-            next_permutation(a.begin(), a.end());
-        } while (a != originalA);
-        return 0;
-    }
     if (argc == 2)
     {
         struct timeval time;
@@ -81,7 +56,6 @@ int main(int argc, char* argv[])
 
             if (generateAmbiguous)
             {
-                cerr << "generating ambiguous" << endl;
                 numAmbiguous++;
                 vector<pair<int, int>> swaps;
                 for (int i = 0; i < N; i++)
@@ -105,7 +79,6 @@ int main(int argc, char* argv[])
             }
             else
             {
-                cerr << "generating not ambiguous" << endl;
                 numNotAmbiguous++;
                 while (isAmbiguous(a))
                 {
