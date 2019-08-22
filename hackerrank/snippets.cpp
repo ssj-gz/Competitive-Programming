@@ -869,6 +869,10 @@ ios::sync_with_stdio(false);
 // Generate and execute testcases until assertion is triggered. 
 // while true; do ./a.out --test | tee last-testcase.txt | ./a.out ; if [ "$?" -ne "0" ]; then break; fi; done | grep Result
 
+// Generate testsuite-name.txt using ./a.out - assumes you've been using code-template.cpp.
+// ../experiments/testcase-generator testsuite-name.txt --stop-after=1000 --testcase-gen-regex-filter="solutionBruteForce: (.*)" --testcase-gen-regex-filter-capture-group=1
+
+
 // Compile with libc++'s debug mode.
 clang++ -std=c++17 -stdlib=libc++  <c++ file.cpp>  -Wall  -g3 -O3  -D_LIBCPP_DEBUG=1
 
