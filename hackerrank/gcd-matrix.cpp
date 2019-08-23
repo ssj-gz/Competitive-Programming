@@ -371,7 +371,7 @@ int main(int argc, char** argv)
         cin >> b[i];
     }
 
-    // Compute list of primesUpToMaxValue, using Sieve of Erastophenes.
+    // Compute list of primesUpToMaxValue, using Sieve of Eratosthenes.
     const auto maxValue = max(*max_element(a.begin(), a.end()), *max_element(b.begin(), b.end()));
     vector<bool> primeSieve(maxValue + 1, true);
     for (int factor = 2; factor <= maxValue; factor++)

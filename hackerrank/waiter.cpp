@@ -12,7 +12,7 @@ int main()
     // A trivially easy 75 points(!) - just do, naively, what the Problem requests of us.
     // Constraits are small enough that we don't need any clever optimisations.
 
-    // Compute primes up to maximum possible value using Sieve of Erastophenes.
+    // Compute primes up to maximum possible value using Sieve of Eratosthenes.
     vector<int> primesUpToMaxValue;
     const int maxValue = 50'000; // From the "Constraints" for the problem.
     vector<bool> primeSieve(maxValue + 1, true);

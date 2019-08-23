@@ -19,7 +19,7 @@ int main()
 
     const auto maxHeight = 1'000'000;
 
-    // Use modified Sieve of Erastophenes to find the sum of prime powers for all values up to maxHeight.
+    // Use modified Sieve of Eratosthenes to find the sum of prime powers for all values up to maxHeight.
     vector<bool> isPrime(maxHeight + 1, true);
     vector<int> sumOfPrimePowers(maxHeight + 1);
     for (int factor = 2; factor <= maxHeight; factor++)

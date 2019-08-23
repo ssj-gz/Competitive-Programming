@@ -19,7 +19,7 @@ int main()
     const int rootMaxN = sqrt(2'000'000'000UL);
     vector<bool> isPrime(rootMaxN + 1, true);
 
-    // Sieve of Erastophenes.
+    // Sieve of Eratosthenes.
     vector<int> primesUpToRootMaxN;
     for (int factor = 2; factor <= rootMaxN; factor++)
     {

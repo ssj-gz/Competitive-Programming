@@ -47,7 +47,7 @@ int main()
     minDownToZeroLookup[0] = 0;
 
     // Compute list of factors for all N =  1 ... maxN using Sieve of 
-    // Erastophenes.
+    // Eratosthenes.
     // We only care about the factors <= sqrt(N), as the
     // others are just "mirrors" of these (i.e. if F is a factor of
     // N and F > sqrt(N), then N / F is a factor of N and is <= sqrt(N)).
