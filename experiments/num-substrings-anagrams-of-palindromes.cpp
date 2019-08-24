@@ -24,7 +24,6 @@ T read()
     return toRead;
 }
 
-#if 1
 int64_t solveBruteForce(const string& s)
 {
     int64_t result = 0;
@@ -55,13 +54,43 @@ int64_t solveBruteForce(const string& s)
     
     return result;
 }
-#endif
 
-#if 1
 int64_t solveOptimised(const string& s)
 {
+    // Let the "bit value" of a letter a, b, c ... be defined as
+    //
+    //   2 ** (distance of letter from 'a')
+    //
+    // i.e. 
+    //
+    //  bit_value(a) == 2 ** 0 = 1
+    //  bit_value(b) == 2 ** 1 = 2
+    //  bit_value(x) == 2 ** 2 = 4
+    //
+    // etc.
+    //
+    // Let the "xor sum" of a substring
+    //
+    //   a_i a_(i+1) ... a_j 
+    //
+    // be defined as 
+    //
+    //   xorSum (a_i a_(i+1) ... a_j) = (2 ** bit_value(a_i)) ^ (2 ** bit_value(a_(i+1))) ^ ... ^ (2 ** bit_value(a_j))
+    //
+    // Then a substring s will be a palindrome if and only if the binary representation
+    // of xorSum(s) has *at most* one bit set.
+    //
+    // Let prefixXorSum(k) = xorSum(a1 a2 ... a_k); then note that
+    //
+    //   xorSum(a_i a_(i+1) ... a_k) = prefixXorSum(i - 1) ^ prefixXorSum(k)
+    //
+    // Thus, to find the number of palindromic-substrings ending at a_k, we need to calculate prefixXorSum(k)
+    // and then find the number of i's such that prefixXorSum(i) ^ prefixXorSum(k) has at most one bit set
+    // i.e. the number of i's such that prefixXorSum(i) ^ prefixXorSum(k) is either 0, or a power of 2.
+    // This is pretty easy.
     int64_t result = 0;
 
+    // We can probably use a large (2 ** 26 * sizeof(int) ~ 256MB) lookup table instead of a std::map, here.
     map<uint32_t, int> numPrefixesWithXorSum;
     numPrefixesWithXorSum[0] = 1; // Empty prefix.
 
@@ -82,7 +111,6 @@ int64_t solveOptimised(const string& s)
     
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -108,23 +136,18 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    // TODO - read in testcase.
     const int T = read<int>();
     
     for (int t = 0; t < T; t++)
     {
         const string s = read<string>();
 #ifdef BRUTE_FORCE
-#if 1
         const auto solutionBruteForce = solveBruteForce(s);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
         const auto solutionOptimised = solveOptimised(s);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
         const auto solutionOptimised = solveOptimised(s);
         cout << solutionOptimised << endl;
