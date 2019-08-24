@@ -10,8 +10,6 @@
 
 #include <cassert>
 
-#include <sys/time.h>
-
 using namespace std;
 
 template <typename T>
@@ -64,86 +62,14 @@ bool solveBruteForce(const string& cardsState)
     return false;
 }
 
-bool calcCanChefWin(const string& cardsStateOriginal)
+bool calcCanChefWin(const string& cardsState)
 {
-    string cardState = cardsStateOriginal;
-    const char removedCard = '.';
-    while (true)
-    {
-        cout << "Current card state: " << cardState << endl; 
-        vector<int> positionsOfOddFaceUp;
-        int numFaceUpSeen = 0;
-        for (int i = 0; i < cardState.size(); i++)
-        {
-            if (cardState[i] == removedCard)
-            {
-                // New sub-game - reset count.
-                numFaceUpSeen = 0;
-            }
-            if (cardState[i] == '1')
-            {
-                numFaceUpSeen++;
-                if ((numFaceUpSeen % 2) == 1)
-                {
-                    positionsOfOddFaceUp.push_back(i);
-                }
-            }
-        }
-        if (positionsOfOddFaceUp.empty())
-        {
-            const auto numCards = std::count_if(cardState.begin(), cardState.end(), [](const auto card) { return card != removedCard; });
-            if (numCards > 0)
-                return false;
-            else
-                return true;
-        }
-        const int moveToMake = positionsOfOddFaceUp[rand() % positionsOfOddFaceUp.size()];
-        cout << "Choosing card:     " << string(moveToMake + 1, ' ') << "^" << endl;
-        cout << "moveToMake: " << moveToMake << endl;
-        cardState[moveToMake] = removedCard;
-        if (moveToMake != 0 && cardState[moveToMake - 1] != removedCard)
-        {
-            cardState[moveToMake - 1] = '0' + ('1' - cardState[moveToMake - 1]);
-        }
-        if (moveToMake != cardState.size() - 1 && cardState[moveToMake + 1] != removedCard)
-        {
-            cardState[moveToMake + 1] = '0' + ('1' - cardState[moveToMake + 1]);
-        }
-    }
+    const auto numFaceUp = std::count(cardsState.begin(), cardsState.end(), '1');
+    return ((numFaceUp % 2) == 1);
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2 && argv[1] == string("--test"))
-    {
-        // Generate a set up cards with an odd number facing up.
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int numCards = rand() % 20 + 1;
-        int numFaceUp = rand() % numCards;
-        if (numFaceUp % 2 == 0)
-        {
-            if (numFaceUp != 0)
-                numFaceUp--;
-            else
-                numFaceUp++;
-        }
-        string cards;
-        for (int i = 0; i < numCards; i++)
-        {
-            if (i < numFaceUp)
-                cards.push_back('1');
-            else
-                cards.push_back('0');
-        }
-        random_shuffle(cards.begin(), cards.end());
-        cout << 1 << endl;
-        cout << cards << endl;
-        return 0;
-
-    }
     // Very easy solution, though quite tricky to "logic" your way to it - 
     // in the end, I didn't bother and just used the brute force solution (solveBruteForce)
     // with a random testcase generator and pattern-matched my way to a solution :)
@@ -324,7 +250,7 @@ int main(int argc, char* argv[])
         const string cardsState = read<string>();
 
         const auto canChefWin = calcCanChefWin(cardsState);
-        cout << "status:" << (canChefWin ? "WIN" : "LOSE") << endl;
+        cout << (canChefWin ? "WIN" : "LOSE") << endl;
     }
 }
 
