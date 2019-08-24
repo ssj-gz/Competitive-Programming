@@ -67,6 +67,7 @@ bool solveBruteForce(const string& cardsState)
 bool calcCanChefWin(const string& cardsStateOriginal)
 {
     string cardState = cardsStateOriginal;
+    const char removedCard = '.';
     while (true)
     {
         cout << "Current card state: " << cardState << endl; 
@@ -74,6 +75,11 @@ bool calcCanChefWin(const string& cardsStateOriginal)
         int numFaceUpSeen = 0;
         for (int i = 0; i < cardState.size(); i++)
         {
+            if (cardState[i] == removedCard)
+            {
+                // New sub-game - reset count.
+                numFaceUpSeen = 0;
+            }
             if (cardState[i] == '1')
             {
                 numFaceUpSeen++;
@@ -85,8 +91,8 @@ bool calcCanChefWin(const string& cardsStateOriginal)
         }
         if (positionsOfOddFaceUp.empty())
         {
-            const auto numFaceUp = std::count(cardState.begin(), cardState.end(), '1');
-            if (numFaceUp > 0)
+            const auto numCards = std::count_if(cardState.begin(), cardState.end(), [](const auto card) { return card != removedCard; });
+            if (numCards > 0)
                 return false;
             else
                 return true;
@@ -94,12 +100,12 @@ bool calcCanChefWin(const string& cardsStateOriginal)
         const int moveToMake = positionsOfOddFaceUp[rand() % positionsOfOddFaceUp.size()];
         cout << "Choosing card:     " << string(moveToMake + 1, ' ') << "^" << endl;
         cout << "moveToMake: " << moveToMake << endl;
-        cardState[moveToMake] = '.';
-        if (moveToMake != 0 && cardState[moveToMake - 1] != '.')
+        cardState[moveToMake] = removedCard;
+        if (moveToMake != 0 && cardState[moveToMake - 1] != removedCard)
         {
             cardState[moveToMake - 1] = '0' + ('1' - cardState[moveToMake - 1]);
         }
-        if (moveToMake != cardState.size() - 1 && cardState[moveToMake + 1] != '.')
+        if (moveToMake != cardState.size() - 1 && cardState[moveToMake + 1] != removedCard)
         {
             cardState[moveToMake + 1] = '0' + ('1' - cardState[moveToMake + 1]);
         }
@@ -318,7 +324,7 @@ int main(int argc, char* argv[])
         const string cardsState = read<string>();
 
         const auto canChefWin = calcCanChefWin(cardsState);
-        cout << (canChefWin ? "WIN" : "LOSE") << endl;
+        cout << "status:" << (canChefWin ? "WIN" : "LOSE") << endl;
     }
 }
 
