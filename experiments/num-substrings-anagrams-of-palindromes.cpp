@@ -1,5 +1,5 @@
-// Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+// Simon St James (ssjgz) - 2019-08-24
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -65,7 +65,7 @@ int64_t solveOptimised(const string& s)
     //
     //  bit_value(a) == 2 ** 0 = 1
     //  bit_value(b) == 2 ** 1 = 2
-    //  bit_value(x) == 2 ** 2 = 4
+    //  bit_value(c) == 2 ** 2 = 4
     //
     // etc.
     //
@@ -75,7 +75,7 @@ int64_t solveOptimised(const string& s)
     //
     // be defined as 
     //
-    //   xorSum (a_i a_(i+1) ... a_j) = (2 ** bit_value(a_i)) ^ (2 ** bit_value(a_(i+1))) ^ ... ^ (2 ** bit_value(a_j))
+    //   xorSum (a_i a_(i+1) ... a_j) = bit_value(a_i) ^ bit_value(a_(i+1)) ^ ... ^ bit_value(a_j)
     //
     // Then a substring s will be a palindrome if and only if the binary representation
     // of xorSum(s) has *at most* one bit set.
@@ -90,7 +90,8 @@ int64_t solveOptimised(const string& s)
     // This is pretty easy.
     int64_t result = 0;
 
-    // We can probably use a large (2 ** 26 * sizeof(int) ~ 256MB) lookup table instead of a std::map, here.
+    // We can probably use a large (2 ** 26 * sizeof(int) ~ 256MB) lookup table instead of a std::map, here,
+    // giving us asymptotically better runtime performance at the expense of memory usage.
     map<uint32_t, int> numPrefixesWithXorSum;
     numPrefixesWithXorSum[0] = 1; // Empty prefix.
 
@@ -100,10 +101,10 @@ int64_t solveOptimised(const string& s)
         const int letterIndex = s[i] - 'a';
         prefixXorSum = prefixXorSum ^ (1 << letterIndex); 
 
-        result += numPrefixesWithXorSum[prefixXorSum];
+        result += numPrefixesWithXorSum[prefixXorSum]; // Num substrings ending at k with xorSum == 0.
         for (int i = 0; i < 26; i++)
         {
-            result += numPrefixesWithXorSum[prefixXorSum ^ (1 << i)];
+            result += numPrefixesWithXorSum[prefixXorSum ^ (1 << i)]; // Num substrings ending at k with the ith bit of their xorSum set.
         }
 
         numPrefixesWithXorSum[prefixXorSum]++;
@@ -122,7 +123,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 100 + 1;
+        const int N = rand() % 1'000 + 1;
         const int maxLetter = rand() % 26 + 1;
 
         cout << 1 << endl;
