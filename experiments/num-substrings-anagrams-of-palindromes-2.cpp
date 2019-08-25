@@ -295,18 +295,6 @@ int64_t solveBruteForce(const string& s)
     return result;
 }
 
-uint32_t xorSum(const string& s)
-{
-    uint32_t xorSum = 0;
-    for (const auto letter : s)
-    {
-        xorSum = xorSum ^ (1 << (letter - 'a'));
-    }
-    return xorSum;
-}
-
-string currentString;
-
 struct XorSumRangeQuery
 {
     int startIndex = -1;
@@ -427,7 +415,6 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
         const string s = read<string>();
-        currentString = s;
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(s);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
