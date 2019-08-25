@@ -63,21 +63,11 @@ class SuffixTree
         }
         struct Substring
         {
-            Substring()
-                : Substring(-1, -1)
-            {
-            }
             Substring(int startIndex, int endIndex)
                 : startIndex(startIndex), endIndex(endIndex)
             {
             }
-            int length(int fullStringLength) const
-            {
-                const auto adjustedEndIndex = (endIndex == openTransitionEnd ? fullStringLength - 1: endIndex - 1);
-                const auto length = adjustedEndIndex - startIndex + 2;
-                assert(length >= 0);
-                return length;
-            }
+
             int startIndex = -1;
             int endIndex = -1;
         };
