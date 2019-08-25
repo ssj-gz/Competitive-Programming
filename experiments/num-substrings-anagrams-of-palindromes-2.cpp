@@ -881,8 +881,7 @@ int64_t solveOptimised(const string& s)
     vector<vector<Query*>> queriesEndingAtIndex(s.size());
     for (auto& query : queries)
     {
-        if (query.startIndex != 0)
-            queriesBeginningAtIndex[query.startIndex - 1].push_back(&query);
+        queriesBeginningAtIndex[query.startIndex].push_back(&query);
         queriesEndingAtIndex[query.endIndex].push_back(&query);
     }
 
