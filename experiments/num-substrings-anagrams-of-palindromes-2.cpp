@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-08-25
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -339,24 +339,24 @@ struct XorSumRangeQuery
     int answerForQuery = 0;
 };
 
-void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
+void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t substringXorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
 {
     for (const auto& transition : state->transitions)
     {
-        uint32_t newXorSum = xorSumSoFar;
-        newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex]);
+        uint32_t newSubstringXorSum = substringXorSumSoFar;
+        newSubstringXorSum = newSubstringXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex]);
 
-        uint32_t queryBaseXor = xorSumSoFar;
+        uint32_t queryBaseXor = substringXorSumSoFar;
         if (transition.substringFollowed.startIndex > 0)
         {
-            newXorSum = newXorSum ^ prefixXorSumLookup[transition.substringFollowed.startIndex - 1];
+            newSubstringXorSum = newSubstringXorSum ^ prefixXorSumLookup[transition.substringFollowed.startIndex - 1];
             queryBaseXor = queryBaseXor ^ prefixXorSumLookup[transition.substringFollowed.startIndex - 1];
         }
 
         queries.push_back({transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, queryBaseXor});
 
         // Recurse via this transition.
-        buildXorSumRangeQueries(transition.nextState, newXorSum, prefixXorSumLookup, queries);
+        buildXorSumRangeQueries(transition.nextState, newSubstringXorSum, prefixXorSumLookup, queries);
     }
 
 }
@@ -396,6 +396,9 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
     std::map<uint32_t, int> numPrefixesWithXorSum;
     numPrefixesWithXorSum[0] = 1; // Empty prefix.
 
+    // Sweep from left to right, preparing queries that start at the current index;
+    // updating numPrefixesWithXorSum; and finally answering queries that end at the
+    // current index.
     for (int i = 0; i < s.size(); i++)
     {
         for (auto startQuery : queriesBeginningAtIndex[i])
