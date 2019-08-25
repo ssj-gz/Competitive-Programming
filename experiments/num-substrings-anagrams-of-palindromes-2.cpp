@@ -895,6 +895,10 @@ int64_t solveOptimised(const string& s)
     {
         for (auto startQuery : queriesBeginningAtIndex[i])
         {
+            if (i != 0)
+            {
+                startQuery->baseXor = startQuery->baseXor ^ prefixXorSumLookup[i - 1];
+            }
             startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor];
             for (int i = 0; i < 26; i++)
             {
@@ -914,13 +918,13 @@ int64_t solveOptimised(const string& s)
                 endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ (1 << i)];
             }
             cout<< " i: " << i << " endQuery: baseXor: " << endQuery->baseXor << " startIndex: " << endQuery->startIndex << " endIndex: " << endQuery->endIndex << " answerForQuery: " << endQuery->answerForQuery << " dbgAnswerForQuery: " << endQuery->dbgAnswerForQuery << " originalAnswerForQuery: " << originalAnswerForQuery << endl;
-            //assert(endQuery->answerForQuery == endQuery->dbgAnswerForQuery);
+            assert(endQuery->answerForQuery == endQuery->dbgAnswerForQuery);
         }
     }
 
     for (const auto& query : queries)
     {
-        result += query.dbgAnswerForQuery;
+        result += query.answerForQuery;
     }
 
     return result;
