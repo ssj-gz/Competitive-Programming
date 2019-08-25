@@ -274,19 +274,19 @@ int64_t solveBruteForce(const string& s)
                     numLettersWithOddOccurrence++;
             }
             const string substring = s.substr(i, j - i + 1);
-            cout << "substring: " << substring << endl;
+            //cout << "substring: " << substring << endl;
             if (numLettersWithOddOccurrence == 0 || numLettersWithOddOccurrence == 1)
             {
-                cout << "Palindromic: " << substring << endl;
+                //cout << "Palindromic: " << substring << endl;
                 if (seenSubstrings.find(substring) == seenSubstrings.end())
                 {
                     result++;
-                    cout << " new: " << result << " " << substring << endl;
+                    //cout << " new: " << result << " " << substring << endl;
                     seenSubstrings.insert(substring);
                 }
                 else
                 {
-                    cout << " already seen" << endl;
+                    //cout << " already seen" << endl;
                 }
             }
         }
@@ -436,8 +436,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const int N = rand() % 100'000;
-        const int N =  100'000;
+        const int N = rand() % 1000 + 1;
+        //const int N =  100'000;
         const int maxLetter = rand() % alphabetSize + 1;
 
         cout << 1 << endl;
@@ -457,14 +457,14 @@ int main(int argc, char* argv[])
     {
         const string s = read<string>();
 #ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(s);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        //const auto solutionBruteForce = solveBruteForce(s);
+        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
         const auto solutionBruteForce2 = solveBruteForce2(s);
         cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
         const auto solutionOptimised = findDistinctAnagramPalindromeSubstrings(s);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
+        //assert(solutionOptimised == solutionBruteForce);
         assert(solutionOptimised == solutionBruteForce2);
 #else
         cout << findDistinctAnagramPalindromeSubstrings(s) << endl;
