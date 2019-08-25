@@ -799,7 +799,7 @@ uint32_t xorSum(const string& s)
 
 string currentString;
 
-void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar)
+void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup)
 {
     cout << "state: " << Cursor(state, currentString).dbgStringFollowed() << " xorSumSoFar: " << xorSumSoFar << " check: " << xorSum(Cursor(state, currentString).dbgStringFollowed()) << endl;
     assert(xorSum(Cursor(state, currentString).dbgStringFollowed()) == xorSumSoFar);
@@ -808,11 +808,20 @@ void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar)
     {
         cout << " transition: " << transition.substringFollowed.startIndex << " - " << transition.substringFollowed.endIndex << endl;
         uint32_t newXorSum = xorSumSoFar;
+#if 0
         for (int i = transition.substringFollowed.startIndex - 1; i <= transition.substringFollowed.endIndex - 1; i++)
         {
             newXorSum = newXorSum ^ (1 << (currentString[i] - 'a'));
         }
-        doDfs(transition.nextState, newXorSum);
+#else
+        newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex - 1]);
+        if (transition.substringFollowed.startIndex - 2 >= 0)
+        {
+            newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.startIndex - 2]);
+        }
+        cout << " newXorSum: " << newXorSum << endl;
+#endif
+        doDfs(transition.nextState, newXorSum, prefixXorSumLookup);
     }
 
 }
@@ -824,7 +833,17 @@ int64_t solveOptimised(const string& s)
     suffixTree.appendString(s);
     suffixTree.finalise();
 
-    doDfs(suffixTree.rootState(), 0);
+    vector<int> prefixXorSumLookup;
+    uint32_t prefixXorSum = 0;
+    for (const auto letter : s)
+    {
+        prefixXorSum = prefixXorSum ^ (1 << (letter - 'a'));
+        prefixXorSumLookup.push_back(prefixXorSum);
+
+        cout << " prefixXorSumLookup: " << prefixXorSumLookup.back() << endl;
+    }
+
+    doDfs(suffixTree.rootState(), 0, prefixXorSumLookup);
 
     return result;
 }
