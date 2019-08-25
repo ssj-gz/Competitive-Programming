@@ -96,9 +96,9 @@ int64_t solveOptimised(const string& s)
     numPrefixesWithXorSum[0] = 1; // Empty prefix.
 
     uint32_t prefixXorSum = 0;
-    for (int i = 0; i < s.size(); i++)
+    for (int k = 0; k < s.size(); k++)
     {
-        const int letterIndex = s[i] - 'a';
+        const int letterIndex = s[k] - 'a';
         prefixXorSum = prefixXorSum ^ (1 << letterIndex); 
 
         result += numPrefixesWithXorSum[prefixXorSum]; // Num substrings ending at k with xorSum == 0.
