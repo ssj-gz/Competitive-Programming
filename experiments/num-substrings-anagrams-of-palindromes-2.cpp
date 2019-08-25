@@ -248,7 +248,7 @@ T read()
     return toRead;
 }
 
-// Encodes the query: "how many k, startIndex <= k <= endIndex, have
+// Represents the query: "how many k, startIndex <= k <= endIndex, have
 // at most 1 bit set in the binary representation of prefixXorSumLookup[k] ^ baseXor?"
 struct XorSumRangeQuery
 {
