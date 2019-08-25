@@ -86,17 +86,10 @@ class SuffixTree
             Transition(State *nextState, const Substring& substringFollowed, const string& currentString)
                 : nextState(nextState), substringFollowed(substringFollowed)
             {
-                if (substringFollowed.startIndex >= 1)
-                    firstLetter = currentString[substringFollowed.startIndex - 1];
-            }
-            int substringLength(int fullStringLength) const
-            {
-                return substringFollowed.length(fullStringLength);
             }
 
             State *nextState = nullptr;
             Substring substringFollowed;
-            char firstLetter;
         };
         struct State
         {
