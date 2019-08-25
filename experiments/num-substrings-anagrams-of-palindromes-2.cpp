@@ -339,38 +339,6 @@ struct XorSumRangeQuery
     int answerForQuery = 0;
 };
 
-template<typename T>
-class QuickClearVector
-{
-    public:
-        QuickClearVector(int numElements)
-            : m_versionedElements(numElements)
-        {
-        };
-        T& operator[](int index)
-        {
-            auto& versionedElement = m_versionedElements[index];
-            if (versionedElement.versionNumber != m_versionNumber)
-            {
-                versionedElement.value = T();
-                versionedElement.versionNumber = m_versionNumber;
-            }
-            return versionedElement.value;
-        };
-        void clear()
-        {
-            m_versionNumber++;
-        }
-    private:
-        int m_versionNumber = 0;
-        struct VersionedValue
-        {
-            int versionNumber = -1;
-            T value;
-        };
-        vector<VersionedValue> m_versionedElements;
-};
-
 void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t substringXorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
 {
     for (const auto& transition : state->transitions)
@@ -425,7 +393,7 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
         queriesEndingAtIndex[query.endIndex].push_back(&query);
     }
 
-    static QuickClearVector<int> numPrefixesWithXorSum(1 << (alphabetSize + 1));
+    map<uint32_t, int> numPrefixesWithXorSum;
 
     numPrefixesWithXorSum.clear();
     numPrefixesWithXorSum[0] = 1; // Empty prefix.
