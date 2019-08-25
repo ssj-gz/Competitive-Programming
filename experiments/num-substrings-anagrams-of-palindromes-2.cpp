@@ -389,7 +389,7 @@ uint32_t xorSum(const string& s)
 
 string currentString;
 
-struct Query
+struct XorSumRangeQuery
 {
     int startIndex = -1;
     int endIndex = -1;
@@ -399,7 +399,7 @@ struct Query
     int answerForQuery = 0;
 };
 
-void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<Query>& queries)
+void buildXorSumRangeQueries(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
 {
     for (const auto& transition : state->transitions)
     {
@@ -410,7 +410,7 @@ void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<i
             newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.startIndex - 2]);
         }
         queries.push_back({transition.substringFollowed.startIndex - 1, transition.substringFollowed.endIndex - 1, xorSumSoFar});
-        doDfs(transition.nextState, newXorSum, prefixXorSumLookup, queries);
+        buildXorSumRangeQueries(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
 
 }
@@ -430,11 +430,11 @@ int64_t solveOptimised(const string& s)
         prefixXorSumLookup.push_back(prefixXorSum);
     }
 
-    vector<Query> queries;
-    doDfs(suffixTree.rootState(), 0, prefixXorSumLookup, queries);
+    vector<XorSumRangeQuery> queries;
+    buildXorSumRangeQueries(suffixTree.rootState(), 0, prefixXorSumLookup, queries);
 
-    vector<vector<Query*>> queriesBeginningAtIndex(s.size());
-    vector<vector<Query*>> queriesEndingAtIndex(s.size());
+    vector<vector<XorSumRangeQuery*>> queriesBeginningAtIndex(s.size());
+    vector<vector<XorSumRangeQuery*>> queriesEndingAtIndex(s.size());
     for (auto& query : queries)
     {
         queriesBeginningAtIndex[query.startIndex].push_back(&query);
