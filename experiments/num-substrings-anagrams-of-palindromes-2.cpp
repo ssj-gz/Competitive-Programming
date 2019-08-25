@@ -329,6 +329,12 @@ void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t xorSumSoFar, con
 
 int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
 {
+    vector<int> valuesWithAtMost1BitSet = { 0 };
+    for (int bit = 0; bit < alphabetSize; bit++)
+    {
+        valuesWithAtMost1BitSet.push_back(1 << bit);
+    }
+
     int64_t result = 0;
     SuffixTree suffixTree;
     suffixTree.appendString(s);
@@ -360,10 +366,9 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
     {
         for (auto startQuery : queriesBeginningAtIndex[i])
         {
-            startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor];
-            for (int i = 0; i < alphabetSize; i++)
+            for (const auto atMost1BitSet : valuesWithAtMost1BitSet)
             {
-                startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor ^ (1 << i)];
+                startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor ^ atMost1BitSet];
             }
         }
 
@@ -371,10 +376,9 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
 
         for (auto endQuery : queriesEndingAtIndex[i])
         {
-            endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor];
-            for (int i = 0; i < alphabetSize; i++)
+            for (const auto atMost1BitSet : valuesWithAtMost1BitSet)
             {
-                endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ (1 << i)];
+                endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ atMost1BitSet];
             }
         }
     }
