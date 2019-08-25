@@ -320,12 +320,14 @@ void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t xorSumSoFar, con
         }
 
         queries.push_back({transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, queryBaseXor});
+
+        // Recurse via this transition.
         buildXorSumRangeQueries(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
 
 }
 
-int64_t solveOptimised(const string& s)
+int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
 {
     int64_t result = 0;
     SuffixTree suffixTree;
@@ -418,13 +420,12 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(s);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionOptimised = solveOptimised(s);
+        const auto solutionOptimised = findDistinctAnagramPalindromeSubstrings(s);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised(s);
-        cout << solutionOptimised << endl;
+        cout << findDistinctAnagramPalindromeSubstrings(s) << endl;
 #endif
     }
 
