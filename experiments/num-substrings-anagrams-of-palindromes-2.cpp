@@ -805,6 +805,9 @@ struct Query
     int endIndex = -1;
 
     uint32_t baseXor = 0;
+
+    int answerForQuery = 0;
+    int dbgAnswerForQuery = 0;
 };
 
 void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<Query>& queries)
@@ -855,7 +858,7 @@ int64_t solveOptimised(const string& s)
     vector<Query> queries;
     doDfs(suffixTree.rootState(), 0, prefixXorSumLookup, queries);
 
-    for (const auto& query : queries)
+    for (auto& query : queries)
     {
         for (int r = query.startIndex; r <= query.endIndex; r++)
         {
@@ -863,13 +866,20 @@ int64_t solveOptimised(const string& s)
             const auto blah = query.baseXor ^ xorSum(substring);
 
             if (blah == 0)
-                result++;
+            {
+                query.dbgAnswerForQuery++;
+            }
             for (int i = 0; i < 26; i++)
             {
                 if (blah == (1 << i))
-                    result++;
+                    query.dbgAnswerForQuery++;
             }
         }
+    }
+
+    for (const auto& query : queries)
+    {
+        result += query.dbgAnswerForQuery;
     }
 
     return result;
