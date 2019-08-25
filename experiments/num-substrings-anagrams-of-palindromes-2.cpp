@@ -28,7 +28,7 @@ struct StateData
  * for online construction of suffix trees.
  * @author Simon St James, Jan 2017.
  */
-class SuffixTreeBuilder
+class SuffixTree
 {
     public:
         struct State;
@@ -80,7 +80,7 @@ class SuffixTreeBuilder
             StateData data;
         };
     public:
-        SuffixTreeBuilder()
+        SuffixTree()
         {
             m_states.reserve(1'000'000);
 
@@ -97,17 +97,7 @@ class SuffixTreeBuilder
             m_s = m_root;
             m_k = 1;
         }
-        SuffixTreeBuilder(const SuffixTreeBuilder& other) = delete;
-        void appendLetter(char letter)
-        {
-            m_currentString += letter;
-            const auto updateResult = update(m_s, m_k, m_currentString.size());
-            m_s = updateResult.first;
-            m_k = updateResult.second;
-            const auto canonizeResult = canonize(m_s, m_k, m_currentString.size());
-            m_s = canonizeResult.first;
-            m_k = canonizeResult.second;
-        }
+        SuffixTree(const SuffixTree& other) = delete;
         void appendString(const string& stringToAppend)
         {
             for (auto letter : stringToAppend)
@@ -115,80 +105,11 @@ class SuffixTreeBuilder
                 appendLetter(letter);
             }
         }
-        int numStates() const
-        {
-            return m_states.size();
-        }
         void finalise()
         {
             finaliseAux(m_root, nullptr);
         }
 
-        void finaliseAux(State* state, Transition* transitionFromParent)
-        {
-            if (!state->suffixLink)
-            {
-                assert(state->transitions.empty());
-                // Change the Substring end.
-                assert(transitionFromParent->substringFollowed.endIndex == openTransitionEnd);
-                transitionFromParent->substringFollowed.endIndex = m_currentString.size(); // 1-relative.
-            }
-            else
-            {
-                for (auto& transition : state->transitions)
-                {
-                    finaliseAux(transition.nextState, &transition);
-                }
-            }
-        }
-
-        void makeFinalStatesExplicitAndMarkThemAsFinal()
-        {
-            // Trick described in Ukkonen's paper.
-            const char unusedLetter = '{';
-            appendLetter(unusedLetter);
-
-            // Remove the unused letter again!
-            for (auto& state : m_states)
-            {
-                for (auto transitionIter = state.transitions.begin(); transitionIter != state.transitions.end(); )
-                {
-                    const Transition& transition = *transitionIter;
-                    if (transition.substringFollowed.startIndex < 1)
-                    {
-                        transitionIter++;
-                        continue;
-                    }
-                    const auto realEndIndex = (transition.substringFollowed.endIndex == openTransitionEnd ? static_cast<int>(m_currentString.size() - 1) : transition.substringFollowed.endIndex - 1);
-                    const char lastCharInTransition = m_currentString[realEndIndex];
-                    bool needToRemoveTransition = false;
-                    if (lastCharInTransition == unusedLetter)
-                    {
-                        const bool transitionConsistsSolelyOfUnusedChar = (transition.substringFollowed.length(m_currentString.size()) == 1);
-                        if (transitionConsistsSolelyOfUnusedChar)
-                        {
-                            needToRemoveTransition = true;
-                            state.isFinal = true;
-                        }
-                        else
-                        {
-                            transition.nextState->isFinal = true;
-                        }
-                    }
-
-                    if (needToRemoveTransition)
-                        transitionIter = state.transitions.erase(transitionIter);
-                    else
-                        transitionIter++;
-                }
-            }
-            for (auto& state : m_states)
-            {
-                //cout << "state: " << &state << " wordLength: " << state.data.wordLength << endl;
-            }
-
-            m_currentString.pop_back(); // Remove the unusedLetter we just added.
-        }
         State* rootState() const
         {
             return m_root;
@@ -206,6 +127,17 @@ class SuffixTreeBuilder
         // "Persistent" versions of s & k from Algorithm 2 in Ukkonen's paper!
         State *m_s; 
         int m_k;
+
+        void appendLetter(char letter)
+        {
+            m_currentString += letter;
+            const auto updateResult = update(m_s, m_k, m_currentString.size());
+            m_s = updateResult.first;
+            m_k = updateResult.second;
+            const auto canonizeResult = canonize(m_s, m_k, m_currentString.size());
+            m_s = canonizeResult.first;
+            m_k = canonizeResult.second;
+        }
 
         std::pair<State*, int> update(State* s, int k, int i)
         {
@@ -296,6 +228,21 @@ class SuffixTreeBuilder
             }
             return {s, k};
         }
+        void finaliseAux(State* state, Transition* transitionFromParent)
+        {
+            for (auto& state : m_states)
+            {
+                for (auto& transition : state.transitions)
+                {
+                    if (transition.substringFollowed.endIndex == openTransitionEnd)
+                        transition.substringFollowed.endIndex = m_currentString.size();
+
+                    transition.substringFollowed.startIndex--;
+                    transition.substringFollowed.endIndex--;
+                }
+            }
+        }
+
         State *createNewState(State* parent = nullptr)
         {
             m_states.push_back(State());
@@ -399,17 +346,17 @@ struct XorSumRangeQuery
     int answerForQuery = 0;
 };
 
-void buildXorSumRangeQueries(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
+void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
 {
     for (const auto& transition : state->transitions)
     {
         uint32_t newXorSum = xorSumSoFar;
-        newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex - 1]);
-        if (transition.substringFollowed.startIndex - 2 >= 0)
+        newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex]);
+        if (transition.substringFollowed.startIndex - 1 >= 0)
         {
-            newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.startIndex - 2]);
+            newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.startIndex - 1]);
         }
-        queries.push_back({transition.substringFollowed.startIndex - 1, transition.substringFollowed.endIndex - 1, xorSumSoFar});
+        queries.push_back({transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, xorSumSoFar});
         buildXorSumRangeQueries(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
 
@@ -418,7 +365,7 @@ void buildXorSumRangeQueries(SuffixTreeBuilder::State* state, uint32_t xorSumSoF
 int64_t solveOptimised(const string& s)
 {
     int64_t result = 0;
-    SuffixTreeBuilder suffixTree;
+    SuffixTree suffixTree;
     suffixTree.appendString(s);
     suffixTree.finalise();
 
