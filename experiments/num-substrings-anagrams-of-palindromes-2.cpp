@@ -863,6 +863,7 @@ int64_t solveOptimised(const string& s)
         for (int r = query.startIndex; r <= query.endIndex; r++)
         {
             const auto substring = s.substr(query.startIndex, r - query.startIndex + 1);
+            cout << "l: " << query.startIndex << " r: " << r << " baseXor: " << query.baseXor << " substring: " << substring << " prefix: " << s.substr(0, r + 1) << " xorSum prefix: " << xorSum(s.substr(0, r + 1)) << " xorSum substr: " << xorSum(substring) << endl;
             const auto blah = query.baseXor ^ xorSum(substring);
 
             if (blah == 0)
