@@ -799,7 +799,15 @@ uint32_t xorSum(const string& s)
 
 string currentString;
 
-void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup)
+struct Query
+{
+    int startIndex = -1;
+    int endIndex = -1;
+
+    uint32_t baseXor = 0;
+};
+
+void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<Query>& queries)
 {
     cout << "state: " << Cursor(state, currentString).dbgStringFollowed() << " xorSumSoFar: " << xorSumSoFar << " check: " << xorSum(Cursor(state, currentString).dbgStringFollowed()) << endl;
     assert(xorSum(Cursor(state, currentString).dbgStringFollowed()) == xorSumSoFar);
@@ -821,7 +829,8 @@ void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<i
         }
         cout << " newXorSum: " << newXorSum << endl;
 #endif
-        doDfs(transition.nextState, newXorSum, prefixXorSumLookup);
+        queries.push_back({transition.substringFollowed.startIndex - 1, transition.substringFollowed.endIndex - 1, xorSumSoFar});
+        doDfs(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
 
 }
@@ -843,7 +852,25 @@ int64_t solveOptimised(const string& s)
         cout << " prefixXorSumLookup: " << prefixXorSumLookup.back() << endl;
     }
 
-    doDfs(suffixTree.rootState(), 0, prefixXorSumLookup);
+    vector<Query> queries;
+    doDfs(suffixTree.rootState(), 0, prefixXorSumLookup, queries);
+
+    for (const auto& query : queries)
+    {
+        for (int r = query.startIndex; r <= query.endIndex; r++)
+        {
+            const auto substring = s.substr(query.startIndex, r - query.startIndex + 1);
+            const auto blah = query.baseXor ^ xorSum(substring);
+
+            if (blah == 0)
+                result++;
+            for (int i = 0; i < 26; i++)
+            {
+                if (blah == (1 << i))
+                    result++;
+            }
+        }
+    }
 
     return result;
 }
@@ -884,7 +911,7 @@ int main(int argc, char* argv[])
         const auto solutionOptimised = solveOptimised(s);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
-//        assert(solutionOptimised == solutionBruteForce);
+        assert(solutionOptimised == solutionBruteForce);
 #else
         const auto solutionOptimised = solveOptimised(s);
         cout << solutionOptimised << endl;
