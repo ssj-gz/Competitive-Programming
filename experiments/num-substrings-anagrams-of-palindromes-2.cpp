@@ -28,7 +28,6 @@ static const int alphabetSize = 26;
 class SuffixTree
 {
     public:
-    public:
         SuffixTree()
         {
             m_states.reserve(1'000'000);
@@ -55,7 +54,20 @@ class SuffixTree
         }
         void finalise()
         {
-            finaliseAux(m_root, nullptr);
+            // Set the correct value for transitions whose ends are openTransitionEnd, and make
+            // startIndex/ endIndex 0-relative.
+            for (auto& state : m_states)
+            {
+                for (auto& transition : state.transitions)
+                {
+                    if (transition.substringFollowed.endIndex == openTransitionEnd)
+                        transition.substringFollowed.endIndex = m_currentString.size();
+
+                    transition.substringFollowed.startIndex--;
+                    transition.substringFollowed.endIndex--;
+                }
+            }
+
         }
 
         struct State;
@@ -201,20 +213,6 @@ class SuffixTree
             }
             return {s, k};
         }
-        void finaliseAux(State* state, Transition* transitionFromParent)
-        {
-            for (auto& state : m_states)
-            {
-                for (auto& transition : state.transitions)
-                {
-                    if (transition.substringFollowed.endIndex == openTransitionEnd)
-                        transition.substringFollowed.endIndex = m_currentString.size();
-
-                    transition.substringFollowed.startIndex--;
-                    transition.substringFollowed.endIndex--;
-                }
-            }
-        }
 
         State *createNewState(State* parent = nullptr)
         {
@@ -223,6 +221,7 @@ class SuffixTree
             newState->parent = parent;
             return newState;
         }
+
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
         {
             for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
@@ -237,6 +236,7 @@ class SuffixTree
                 assert(false);
             return state->transitions.end();
         };
+
         int t(int i)
         {
             // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
