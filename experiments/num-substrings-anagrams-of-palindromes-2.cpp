@@ -766,14 +766,15 @@ int64_t solveBruteForce(const string& s)
                 if ((letterHistogram[letterIndex] % 2) == 1)
                     numLettersWithOddOccurrence++;
             }
+            const string substring = s.substr(i, j - i + 1);
+            cout << "substring: " << substring << endl;
             if (numLettersWithOddOccurrence == 0 || numLettersWithOddOccurrence == 1)
             {
-                const string substring = s.substr(i, j - i + 1);
                 cout << "Palindromic: " << substring << endl;
                 if (seenSubstrings.find(substring) == seenSubstrings.end())
                 {
                     result++;
-                    cout << " new: " << result << endl;
+                    cout << " new: " << result << " " << substring << endl;
                     seenSubstrings.insert(substring);
                 }
                 else
@@ -812,7 +813,7 @@ struct Query
 void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<Query>& queries)
 {
     //cout << "state: " << Cursor(state, currentString).dbgStringFollowed() << " xorSumSoFar: " << xorSumSoFar << " check: " << xorSum(Cursor(state, currentString).dbgStringFollowed()) << endl;
-    assert(xorSum(Cursor(state, currentString).dbgStringFollowed()) == xorSumSoFar);
+    //assert(xorSum(Cursor(state, currentString).dbgStringFollowed()) == xorSumSoFar);
 
     for (const auto& transition : state->transitions)
     {
@@ -902,7 +903,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 100 + 1;
+        //const int N = rand() % 100'000;
+        const int N =  100'000;
         const int maxLetter = rand() % 26 + 1;
 
         cout << 1 << endl;
