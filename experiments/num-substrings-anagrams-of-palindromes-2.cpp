@@ -877,6 +877,45 @@ int64_t solveOptimised(const string& s)
         }
     }
 
+    vector<vector<Query*>> queriesBeginningAtIndex(s.size());
+    vector<vector<Query*>> queriesEndingAtIndex(s.size());
+    for (auto& query : queries)
+    {
+        if (query.startIndex != 0)
+            queriesBeginningAtIndex[query.startIndex - 1].push_back(&query);
+        queriesEndingAtIndex[query.endIndex].push_back(&query);
+    }
+
+    std::map<uint32_t, int> numPrefixesWithXorSum;
+    numPrefixesWithXorSum[0] = 1; // Empty prefix.
+
+    for (int i = 0; i < s.size(); i++)
+    {
+        for (auto startQuery : queriesBeginningAtIndex[i])
+        {
+            startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor];
+            for (int i = 0; i < 26; i++)
+            {
+                startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor ^ (1 << i)];
+            }
+        }
+
+
+        numPrefixesWithXorSum[prefixXorSumLookup[i]]++;
+
+        for (auto endQuery : queriesEndingAtIndex[i])
+        {
+            const int originalAnswerForQuery = endQuery->answerForQuery;
+            endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor];
+            for (int i = 0; i < 26; i++)
+            {
+                endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ (1 << i)];
+            }
+            cout<< " i: " << i << " endQuery: baseXor: " << endQuery->baseXor << " startIndex: " << endQuery->startIndex << " endIndex: " << endQuery->endIndex << " answerForQuery: " << endQuery->answerForQuery << " dbgAnswerForQuery: " << endQuery->dbgAnswerForQuery << " originalAnswerForQuery: " << originalAnswerForQuery << endl;
+            //assert(endQuery->answerForQuery == endQuery->dbgAnswerForQuery);
+        }
+    }
+
     for (const auto& query : queries)
     {
         result += query.dbgAnswerForQuery;
