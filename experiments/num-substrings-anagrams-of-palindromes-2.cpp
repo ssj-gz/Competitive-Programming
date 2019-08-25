@@ -1,19 +1,14 @@
 // Simon St James (ssjgz) - 2019-08-25
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
 #include <map>
-#include <set>
 #include <limits>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -253,80 +248,6 @@ T read()
     return toRead;
 }
 
-int64_t solveBruteForce(const string& s)
-{
-    int64_t result = 0;
-    set<string> seenSubstrings;
-
-    for (int i = 0; i < s.size(); i++)
-    {
-        for (int j = i; j < s.size(); j++)
-        {
-            int letterHistogram[alphabetSize] = {};
-            for (int k = i; k <= j; k++)
-            {
-                letterHistogram[s[k] - 'a']++;
-            }
-            int numLettersWithOddOccurrence = 0;
-            for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
-            {
-                if ((letterHistogram[letterIndex] % 2) == 1)
-                    numLettersWithOddOccurrence++;
-            }
-            const string substring = s.substr(i, j - i + 1);
-            //cout << "substring: " << substring << endl;
-            if (numLettersWithOddOccurrence == 0 || numLettersWithOddOccurrence == 1)
-            {
-                //cout << "Palindromic: " << substring << endl;
-                if (seenSubstrings.find(substring) == seenSubstrings.end())
-                {
-                    result++;
-                    //cout << " new: " << result << " " << substring << endl;
-                    seenSubstrings.insert(substring);
-                }
-                else
-                {
-                    //cout << " already seen" << endl;
-                }
-            }
-        }
-    }
-    
-    return result;
-}
-
-int64_t solveBruteForce2(const string& s)
-{
-    int64_t result = 0;
-    set<string> seenSubstrings;
-
-    for (int i = 0; i < s.size(); i++)
-    {
-        int letterHistogram[alphabetSize] = {};
-        for (int j = i; j < s.size(); j++)
-        {
-            letterHistogram[s[j] - 'a']++;
-            int numLettersWithOddOccurrence = 0;
-            for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
-            {
-                if ((letterHistogram[letterIndex] % 2) == 1)
-                    numLettersWithOddOccurrence++;
-            }
-            if (numLettersWithOddOccurrence == 0 || numLettersWithOddOccurrence == 1)
-            {
-                const string substring = s.substr(i, j - i + 1);
-                if (seenSubstrings.find(substring) == seenSubstrings.end())
-                {
-                    result++;
-                    seenSubstrings.insert(substring);
-                }
-            }
-        }
-    }
-    
-    return result;
-}
-
 // Encodes the query: "how many k, startIndex <= k <= endIndex, have
 // at most 1 bit set in the binary representation of prefixXorSumLookup[k] ^ baseXor?"
 struct XorSumRangeQuery
@@ -434,50 +355,13 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        // Generate random test.
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        //const int N = rand() % 1000 + 1;
-        const int N =  100'000;
-
-        const int T = 10;
-
-        cout << T << endl;
-        for (int t = 0; t < T; t++)
-        {
-            const int maxLetter = rand() % alphabetSize + 1;
-            for (int i = 0; i < N; i++)
-            {
-                cout << static_cast<char>('a' + rand() % maxLetter);
-            }
-            cout << endl;
-        }
-
-        return 0;
-    }
     
     const int T = read<int>();
 
     for (int t = 0; t < T; t++)
     {
         const string s = read<string>();
-#ifdef BRUTE_FORCE
-        //const auto solutionBruteForce = solveBruteForce(s);
-        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionBruteForce2 = solveBruteForce2(s);
-        cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
-        const auto solutionOptimised = findDistinctAnagramPalindromeSubstrings(s);
-        cout << "solutionOptimised: " << solutionOptimised << endl;
-
-        //assert(solutionOptimised == solutionBruteForce);
-        assert(solutionOptimised == solutionBruteForce2);
-#else
         cout << findDistinctAnagramPalindromeSubstrings(s) << endl;
-#endif
     }
 
     assert(cin);
