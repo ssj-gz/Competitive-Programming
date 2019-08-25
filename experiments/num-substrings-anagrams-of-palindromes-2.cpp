@@ -17,11 +17,6 @@
 
 using namespace std;
 
-struct StateData
-{
-    int wordLength = -1;
-};
-
 /**
  * Simple implementation of Ukkonen's algorithm:
  *  https://en.wikipedia.org/wiki/Ukkonen's_algorithm
@@ -74,10 +69,6 @@ class SuffixTree
             vector<Transition> transitions;
             State* suffixLink = nullptr;
             State* parent = nullptr;
-            int index = -1;
-            bool isFinal = false;
-
-            StateData data;
         };
     public:
         SuffixTree()
@@ -85,7 +76,6 @@ class SuffixTree
             m_states.reserve(1'000'000);
 
             m_root = createNewState();
-            m_root->data.wordLength = 0;
             m_auxiliaryState = createNewState();
 
             for (int i = 0; i < alphabetSize; i++)
@@ -186,7 +176,6 @@ class SuffixTree
                 {
                     s->transitions.erase(tkTransitionIter);
                     auto r = createNewState(s);
-                    r->data.wordLength = s->data.wordLength + p - k + 1;
                     s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), m_currentString));
                     r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
                     sPrime->parent = r;
@@ -248,7 +237,6 @@ class SuffixTree
             m_states.push_back(State());
             State *newState = &(m_states.back());
             newState->parent = parent;
-            newState->index = m_states.size() - 1;
             return newState;
         }
         decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true)
