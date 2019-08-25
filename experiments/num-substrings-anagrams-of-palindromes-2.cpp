@@ -17,6 +17,8 @@
 
 using namespace std;
 
+static const int alphabetSize = 26;
+
 /**
  * Simple implementation of Ukkonen's algorithm:
  *  https://en.wikipedia.org/wiki/Ukkonen's_algorithm
@@ -88,7 +90,6 @@ class SuffixTree
             State* parent = nullptr;
         };
     private:
-        static const int alphabetSize = 26;
         static const int openTransitionEnd = numeric_limits<int>::max();
 
         string m_currentString;
@@ -261,14 +262,13 @@ int64_t solveBruteForce(const string& s)
     {
         for (int j = i; j < s.size(); j++)
         {
-            const int numLetters = 26;
-            int letterHistogram[numLetters] = {};
+            int letterHistogram[alphabetSize] = {};
             for (int k = i; k <= j; k++)
             {
                 letterHistogram[s[k] - 'a']++;
             }
             int numLettersWithOddOccurrence = 0;
-            for (int letterIndex = 0; letterIndex < numLetters; letterIndex++)
+            for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
             {
                 if ((letterHistogram[letterIndex] % 2) == 1)
                     numLettersWithOddOccurrence++;
@@ -371,7 +371,7 @@ int64_t solveOptimised(const string& s)
                 startQuery->baseXor = startQuery->baseXor ^ prefixXorSumLookup[i - 1];
             }
             startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor];
-            for (int i = 0; i < 26; i++)
+            for (int i = 0; i < alphabetSize; i++)
             {
                 startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor ^ (1 << i)];
             }
@@ -382,7 +382,7 @@ int64_t solveOptimised(const string& s)
         for (auto endQuery : queriesEndingAtIndex[i])
         {
             endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor];
-            for (int i = 0; i < 26; i++)
+            for (int i = 0; i < alphabetSize; i++)
             {
                 endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ (1 << i)];
             }
@@ -409,7 +409,7 @@ int main(int argc, char* argv[])
 
         //const int N = rand() % 100'000;
         const int N =  100'000;
-        const int maxLetter = rand() % 26 + 1;
+        const int maxLetter = rand() % alphabetSize + 1;
 
         cout << 1 << endl;
         //cout << N << endl;
