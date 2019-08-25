@@ -832,6 +832,7 @@ void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<i
         }
         cout << " newXorSum: " << newXorSum << endl;
 #endif
+        cout << " adding query for state: " << Cursor(state, currentString).dbgStringFollowed() << " baseXor: " << xorSumSoFar << " start: " << transition.substringFollowed.startIndex - 1 << " end: " << transition.substringFollowed.endIndex - 1 << endl; 
         queries.push_back({transition.substringFollowed.startIndex - 1, transition.substringFollowed.endIndex - 1, xorSumSoFar});
         doDfs(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
@@ -864,7 +865,8 @@ int64_t solveOptimised(const string& s)
         {
             const auto substring = s.substr(query.startIndex, r - query.startIndex + 1);
             cout << "l: " << query.startIndex << " r: " << r << " baseXor: " << query.baseXor << " substring: " << substring << " prefix: " << s.substr(0, r + 1) << " xorSum prefix: " << xorSum(s.substr(0, r + 1)) << " xorSum substr: " << xorSum(substring) << endl;
-            const auto blah = query.baseXor ^ xorSum(substring);
+            cout << "xorSum(substring) ^ query.baseXor: " << (xorSum(substring) ^ query.baseXor) << " prefixXorSumLookup[r]: " << prefixXorSumLookup[r] << endl;
+            const auto blah = xorSum(substring) ^ query.baseXor;
 
             if (blah == 0)
             {
