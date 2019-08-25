@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-08-24
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <limits>
 
 #include <cassert>
@@ -716,6 +717,7 @@ T read()
 int64_t solveBruteForce(const string& s)
 {
     int64_t result = 0;
+    set<string> seenSubstrings;
 
     for (int i = 0; i < s.size(); i++)
     {
@@ -735,8 +737,18 @@ int64_t solveBruteForce(const string& s)
             }
             if (numLettersWithOddOccurrence == 0 || numLettersWithOddOccurrence == 1)
             {
-                cout << "Palindromic: " << s.substr(i, j - i + 1) << endl;
-                result++;
+                const string substring = s.substr(i, j - i + 1);
+                cout << "Palindromic: " << substring << endl;
+                if (seenSubstrings.find(substring) == seenSubstrings.end())
+                {
+                    result++;
+                    cout << " new: " << result << endl;
+                    seenSubstrings.insert(substring);
+                }
+                else
+                {
+                    cout << " already seen" << endl;
+                }
             }
         }
     }
