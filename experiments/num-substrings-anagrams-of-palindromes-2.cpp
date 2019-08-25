@@ -26,7 +26,41 @@ using namespace std;
 class SuffixTree
 {
     public:
+    public:
+        SuffixTree()
+        {
+            m_states.reserve(1'000'000);
+
+            m_root = createNewState();
+            m_auxiliaryState = createNewState();
+
+            for (int i = 0; i < alphabetSize; i++)
+            {
+                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
+            }
+            m_root->suffixLink = m_auxiliaryState;
+
+            m_s = m_root;
+            m_k = 1;
+        }
+        SuffixTree(const SuffixTree& other) = delete;
+        void appendString(const string& stringToAppend)
+        {
+            for (auto letter : stringToAppend)
+            {
+                appendLetter(letter);
+            }
+        }
+        void finalise()
+        {
+            finaliseAux(m_root, nullptr);
+        }
+
         struct State;
+        State* rootState() const
+        {
+            return m_root;
+        }
         struct Substring
         {
             Substring()
@@ -70,40 +104,6 @@ class SuffixTree
             State* suffixLink = nullptr;
             State* parent = nullptr;
         };
-    public:
-        SuffixTree()
-        {
-            m_states.reserve(1'000'000);
-
-            m_root = createNewState();
-            m_auxiliaryState = createNewState();
-
-            for (int i = 0; i < alphabetSize; i++)
-            {
-                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
-            }
-            m_root->suffixLink = m_auxiliaryState;
-
-            m_s = m_root;
-            m_k = 1;
-        }
-        SuffixTree(const SuffixTree& other) = delete;
-        void appendString(const string& stringToAppend)
-        {
-            for (auto letter : stringToAppend)
-            {
-                appendLetter(letter);
-            }
-        }
-        void finalise()
-        {
-            finaliseAux(m_root, nullptr);
-        }
-
-        State* rootState() const
-        {
-            return m_root;
-        }
     private:
         static const int alphabetSize = 26;
         static const int openTransitionEnd = numeric_limits<int>::max();
