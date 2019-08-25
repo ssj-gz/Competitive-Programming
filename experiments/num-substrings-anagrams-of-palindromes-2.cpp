@@ -17,7 +17,7 @@
 
 using namespace std;
 
-static const int alphabetSize = 26;
+constexpr int alphabetSize = 26;
 
 /**
  * Simple implementation of Ukkonen's algorithm:
