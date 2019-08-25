@@ -30,7 +30,7 @@ struct StateData
  */
 class SuffixTreeBuilder
 {
-    private:
+    public:
         struct State;
         struct Substring
         {
@@ -401,7 +401,7 @@ class SuffixTreeBuilder
                 }
                 bool canMoveUp()
                 {
-                    return (m_state != m_root || m_transition);
+                    return (m_state->parent != nullptr || m_transition);
                 }
                 char moveUp()
                 {
@@ -423,6 +423,7 @@ class SuffixTreeBuilder
                     else
                     {
                         Transition* transitionFromParent = findTransitionFromParent();
+                        assert(transitionFromParent);
                         m_state = m_state->parent;
                         m_transition = transitionFromParent;
                         m_posInTransition = transitionFromParent->substringLength(m_string->size()) - 1;
@@ -528,12 +529,9 @@ class SuffixTreeBuilder
                     m_state = m_transition->nextState;
                     movedToExplicitState();
                 } 
-            private:
-                Cursor(State* state, const string& str, State* root)
-                    : m_state{state}, 
-                    m_string{&str},
-                    m_root{root},
-                    m_isValid{true}
+                Cursor(State* state, const string& str)
+                    : m_state{state},
+                      m_string(&str) 
                 {
                 }
 
@@ -562,6 +560,8 @@ class SuffixTreeBuilder
                     if (!state)
                         state = m_state;
                     Transition* transitionFromParent = nullptr;
+                    if (!state->parent)
+                        return nullptr;
                     for (Transition& transition : state->parent->transitions)
                     {
                         if (transition.nextState == state)
@@ -582,9 +582,17 @@ class SuffixTreeBuilder
                 State *m_root = nullptr;
                 bool m_isValid = false;
         };
+        State* rootState() const
+        {
+            return m_root;
+        }
         Cursor rootCursor() const
         {
-            return Cursor(m_root, m_currentString, m_root);
+            return Cursor(m_root, m_currentString);
+        }
+        const string& currentString() const
+        {
+            return m_currentString;
         }
         static Cursor invalidCursor()
         {
@@ -779,12 +787,44 @@ int64_t solveBruteForce(const string& s)
     return result;
 }
 
+uint32_t xorSum(const string& s)
+{
+    uint32_t xorSum = 0;
+    for (const auto letter : s)
+    {
+        xorSum = xorSum ^ (1 << (letter - 'a'));
+    }
+    return xorSum;
+}
+
+string currentString;
+
+void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar)
+{
+    cout << "state: " << Cursor(state, currentString).dbgStringFollowed() << " xorSumSoFar: " << xorSumSoFar << " check: " << xorSum(Cursor(state, currentString).dbgStringFollowed()) << endl;
+    assert(xorSum(Cursor(state, currentString).dbgStringFollowed()) == xorSumSoFar);
+
+    for (const auto& transition : state->transitions)
+    {
+        cout << " transition: " << transition.substringFollowed.startIndex << " - " << transition.substringFollowed.endIndex << endl;
+        uint32_t newXorSum = xorSumSoFar;
+        for (int i = transition.substringFollowed.startIndex - 1; i <= transition.substringFollowed.endIndex - 1; i++)
+        {
+            newXorSum = newXorSum ^ (1 << (currentString[i] - 'a'));
+        }
+        doDfs(transition.nextState, newXorSum);
+    }
+
+}
+
 int64_t solveOptimised(const string& s)
 {
     int64_t result = 0;
     SuffixTreeBuilder suffixTree;
     suffixTree.appendString(s);
     suffixTree.finalise();
+
+    doDfs(suffixTree.rootState(), 0);
 
     return result;
 }
@@ -818,6 +858,7 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
         const string s = read<string>();
+        currentString = s;
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(s);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
