@@ -1,5 +1,5 @@
-// Simon St James (ssjgz) - 2019-08-24
-#define SUBMISSION
+// Simon St James (ssjgz) - 2019-08-25
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -295,6 +295,40 @@ int64_t solveBruteForce(const string& s)
     return result;
 }
 
+int64_t solveBruteForce2(const string& s)
+{
+    int64_t result = 0;
+    set<string> seenSubstrings;
+
+    for (int i = 0; i < s.size(); i++)
+    {
+        int letterHistogram[alphabetSize] = {};
+        for (int j = i; j < s.size(); j++)
+        {
+            letterHistogram[s[j] - 'a']++;
+            int numLettersWithOddOccurrence = 0;
+            for (int letterIndex = 0; letterIndex < alphabetSize; letterIndex++)
+            {
+                if ((letterHistogram[letterIndex] % 2) == 1)
+                    numLettersWithOddOccurrence++;
+            }
+            if (numLettersWithOddOccurrence == 0 || numLettersWithOddOccurrence == 1)
+            {
+                const string substring = s.substr(i, j - i + 1);
+                if (seenSubstrings.find(substring) == seenSubstrings.end())
+                {
+                    result++;
+                    seenSubstrings.insert(substring);
+                }
+            }
+        }
+    }
+    
+    return result;
+}
+
+// Encodes the query: "how many k, startIndex <= k <= endIndex, have
+// at most 1 bit set in the binary representation of prefixXorSumLookup[k] ^ baseXor?"
 struct XorSumRangeQuery
 {
     int startIndex = -1;
@@ -397,6 +431,7 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     if (argc == 2 && string(argv[1]) == "--test")
     {
+        // Generate random test.
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -424,10 +459,13 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(s);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        const auto solutionBruteForce2 = solveBruteForce2(s);
+        cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
         const auto solutionOptimised = findDistinctAnagramPalindromeSubstrings(s);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
+        assert(solutionOptimised == solutionBruteForce2);
 #else
         cout << findDistinctAnagramPalindromeSubstrings(s) << endl;
 #endif
