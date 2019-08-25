@@ -807,7 +807,6 @@ struct Query
     uint32_t baseXor = 0;
 
     int answerForQuery = 0;
-    int dbgAnswerForQuery = 0;
 };
 
 void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<int>& prefixXorSumLookup, vector<Query>& queries)
@@ -817,22 +816,12 @@ void doDfs(SuffixTreeBuilder::State* state, uint32_t xorSumSoFar, const vector<i
 
     for (const auto& transition : state->transitions)
     {
-        //cout << " transition: " << transition.substringFollowed.startIndex << " - " << transition.substringFollowed.endIndex << endl;
         uint32_t newXorSum = xorSumSoFar;
-#if 0
-        for (int i = transition.substringFollowed.startIndex - 1; i <= transition.substringFollowed.endIndex - 1; i++)
-        {
-            newXorSum = newXorSum ^ (1 << (currentString[i] - 'a'));
-        }
-#else
         newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex - 1]);
         if (transition.substringFollowed.startIndex - 2 >= 0)
         {
             newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.startIndex - 2]);
         }
-        //cout << " newXorSum: " << newXorSum << endl;
-#endif
-        //cout << " adding query for state: " << Cursor(state, currentString).dbgStringFollowed() << " baseXor: " << xorSumSoFar << " start: " << transition.substringFollowed.startIndex - 1 << " end: " << transition.substringFollowed.endIndex - 1 << endl; 
         queries.push_back({transition.substringFollowed.startIndex - 1, transition.substringFollowed.endIndex - 1, xorSumSoFar});
         doDfs(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
@@ -852,33 +841,10 @@ int64_t solveOptimised(const string& s)
     {
         prefixXorSum = prefixXorSum ^ (1 << (letter - 'a'));
         prefixXorSumLookup.push_back(prefixXorSum);
-
-        //cout << " prefixXorSumLookup: " << prefixXorSumLookup.back() << endl;
     }
 
     vector<Query> queries;
     doDfs(suffixTree.rootState(), 0, prefixXorSumLookup, queries);
-
-    for (auto& query : queries)
-    {
-        for (int r = query.startIndex; r <= query.endIndex; r++)
-        {
-            const auto substring = s.substr(query.startIndex, r - query.startIndex + 1);
-            //cout << "l: " << query.startIndex << " r: " << r << " baseXor: " << query.baseXor << " substring: " << substring << " prefix: " << s.substr(0, r + 1) << " xorSum prefix: " << xorSum(s.substr(0, r + 1)) << " xorSum substr: " << xorSum(substring) << endl;
-            //cout << "xorSum(substring) ^ query.baseXor: " << (xorSum(substring) ^ query.baseXor) << " prefixXorSumLookup[r]: " << prefixXorSumLookup[r] << endl;
-            const auto blah = xorSum(substring) ^ query.baseXor;
-
-            if (blah == 0)
-            {
-                query.dbgAnswerForQuery++;
-            }
-            for (int i = 0; i < 26; i++)
-            {
-                if (blah == (1 << i))
-                    query.dbgAnswerForQuery++;
-            }
-        }
-    }
 
     vector<vector<Query*>> queriesBeginningAtIndex(s.size());
     vector<vector<Query*>> queriesEndingAtIndex(s.size());
@@ -906,19 +872,15 @@ int64_t solveOptimised(const string& s)
             }
         }
 
-
         numPrefixesWithXorSum[prefixXorSumLookup[i]]++;
 
         for (auto endQuery : queriesEndingAtIndex[i])
         {
-            const int originalAnswerForQuery = endQuery->answerForQuery;
             endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor];
             for (int i = 0; i < 26; i++)
             {
                 endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ (1 << i)];
             }
-            //cout<< " i: " << i << " endQuery: baseXor: " << endQuery->baseXor << " startIndex: " << endQuery->startIndex << " endIndex: " << endQuery->endIndex << " answerForQuery: " << endQuery->answerForQuery << " dbgAnswerForQuery: " << endQuery->dbgAnswerForQuery << " originalAnswerForQuery: " << originalAnswerForQuery << endl;
-            assert(endQuery->answerForQuery == endQuery->dbgAnswerForQuery);
         }
     }
 
