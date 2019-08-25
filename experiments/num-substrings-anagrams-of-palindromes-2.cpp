@@ -339,6 +339,38 @@ struct XorSumRangeQuery
     int answerForQuery = 0;
 };
 
+template<typename T>
+class QuickClearVector
+{
+    public:
+        QuickClearVector(int numElements)
+            : m_versionedElements(numElements)
+        {
+        };
+        T& operator[](int index)
+        {
+            auto& versionedElement = m_versionedElements[index];
+            if (versionedElement.versionNumber != m_versionNumber)
+            {
+                versionedElement.value = T();
+                versionedElement.versionNumber = m_versionNumber;
+            }
+            return versionedElement.value;
+        };
+        void clear()
+        {
+            m_versionNumber++;
+        }
+    private:
+        int m_versionNumber = 0;
+        struct VersionedValue
+        {
+            int versionNumber = -1;
+            T value;
+        };
+        vector<VersionedValue> m_versionedElements;
+};
+
 void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t substringXorSumSoFar, const vector<int>& prefixXorSumLookup, vector<XorSumRangeQuery>& queries)
 {
     for (const auto& transition : state->transitions)
@@ -393,7 +425,9 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
         queriesEndingAtIndex[query.endIndex].push_back(&query);
     }
 
-    std::map<uint32_t, int> numPrefixesWithXorSum;
+    static QuickClearVector<int> numPrefixesWithXorSum(1 << (alphabetSize + 1));
+
+    numPrefixesWithXorSum.clear();
     numPrefixesWithXorSum[0] = 1; // Empty prefix.
 
     // Sweep from left to right, preparing queries that start at the current index;
@@ -439,23 +473,27 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 1000 + 1;
-        //const int N =  100'000;
-        const int maxLetter = rand() % alphabetSize + 1;
+        //const int N = rand() % 1000 + 1;
+        const int N =  100'000;
 
-        cout << 1 << endl;
-        //cout << N << endl;
-        for (int i = 0; i < N; i++)
+        const int T = 10;
+
+        cout << T << endl;
+        for (int t = 0; t < T; t++)
         {
-            cout << static_cast<char>('a' + rand() % maxLetter);
+            const int maxLetter = rand() % alphabetSize + 1;
+            for (int i = 0; i < N; i++)
+            {
+                cout << static_cast<char>('a' + rand() % maxLetter);
+            }
+            cout << endl;
         }
-        cout << endl;
 
         return 0;
     }
     
     const int T = read<int>();
-    
+
     for (int t = 0; t < T; t++)
     {
         const string s = read<string>();
