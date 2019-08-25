@@ -311,11 +311,15 @@ void buildXorSumRangeQueries(SuffixTree::State* state, uint32_t xorSumSoFar, con
     {
         uint32_t newXorSum = xorSumSoFar;
         newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.endIndex]);
-        if (transition.substringFollowed.startIndex - 1 >= 0)
+
+        uint32_t queryBaseXor = xorSumSoFar;
+        if (transition.substringFollowed.startIndex > 0)
         {
-            newXorSum = newXorSum ^ (prefixXorSumLookup[transition.substringFollowed.startIndex - 1]);
+            newXorSum = newXorSum ^ prefixXorSumLookup[transition.substringFollowed.startIndex - 1];
+            queryBaseXor = queryBaseXor ^ prefixXorSumLookup[transition.substringFollowed.startIndex - 1];
         }
-        queries.push_back({transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, xorSumSoFar});
+
+        queries.push_back({transition.substringFollowed.startIndex, transition.substringFollowed.endIndex, queryBaseXor});
         buildXorSumRangeQueries(transition.nextState, newXorSum, prefixXorSumLookup, queries);
     }
 
@@ -354,10 +358,6 @@ int64_t solveOptimised(const string& s)
     {
         for (auto startQuery : queriesBeginningAtIndex[i])
         {
-            if (i != 0)
-            {
-                startQuery->baseXor = startQuery->baseXor ^ prefixXorSumLookup[i - 1];
-            }
             startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor];
             for (int i = 0; i < alphabetSize; i++)
             {
