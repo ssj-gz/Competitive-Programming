@@ -328,7 +328,11 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
         {
             for (const auto atMost1BitSet : valuesWithAtMost1BitSet)
             {
-                startQuery->answerForQuery -= numPrefixesWithXorSum[startQuery->baseXor ^ atMost1BitSet];
+                const auto numPrefixesIter = numPrefixesWithXorSum.find(startQuery->baseXor ^ atMost1BitSet);
+                if (numPrefixesIter != numPrefixesWithXorSum.end())
+                {
+                    startQuery->answerForQuery -= numPrefixesIter->second;
+                }
             }
         }
 
@@ -338,7 +342,11 @@ int64_t findDistinctAnagramPalindromeSubstrings(const string& s)
         {
             for (const auto atMost1BitSet : valuesWithAtMost1BitSet)
             {
-                endQuery->answerForQuery += numPrefixesWithXorSum[endQuery->baseXor ^ atMost1BitSet];
+                const auto numPrefixesIter = numPrefixesWithXorSum.find(endQuery->baseXor ^ atMost1BitSet);
+                if (numPrefixesIter != numPrefixesWithXorSum.end())
+                {
+                    endQuery->answerForQuery += numPrefixesIter->second;
+                }
             }
         }
     }
