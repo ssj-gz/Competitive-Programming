@@ -25,7 +25,9 @@ bool isRainbow(const vector<int>& originalA)
     }
 
     vector<int> withAdjacentDupesRemoved = originalA;
-    withAdjacentDupesRemoved.erase(std::unique(withAdjacentDupesRemoved.begin(), withAdjacentDupesRemoved.end()), withAdjacentDupesRemoved.end());
+    withAdjacentDupesRemoved.erase(std::unique(withAdjacentDupesRemoved.begin(), 
+                                               withAdjacentDupesRemoved.end()), 
+                                   withAdjacentDupesRemoved.end());
 
     if (withAdjacentDupesRemoved != vector<int>({1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1}))
     {
