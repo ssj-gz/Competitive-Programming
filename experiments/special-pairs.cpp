@@ -68,13 +68,6 @@ int64_t solveOptimised(const vector<int>& a)
 {
     set<int> blah(a.begin(), a.end());
 
-    cout << "blah: " << endl;
-    for (const auto x : blah)
-    {
-        cout << asBinary(x) << endl;
-    }
-    cout << endl;
-
     vector<int> numWithBit(maxNumBitsInA + 1, 0);
     
     int64_t result = a.size() * a.size();
@@ -82,6 +75,13 @@ int64_t solveOptimised(const vector<int>& a)
     for (int bitNum = maxNumBitsInA; bitNum >= 0; bitNum--)
     {
         cout << "bitNum: " << bitNum << endl;
+        cout << " blah: " << endl;
+        for (const auto x : blah)
+        {
+            cout << " " << asBinary(x) << endl;
+        }
+        cout << endl;
+
         int numNew = 0;
         while (!blah.empty() && *std::prev(blah.end()) >= (1 << bitNum))
         {
