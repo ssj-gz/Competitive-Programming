@@ -1,6 +1,6 @@
-// Simon St James (ssjgz) - 2019-XX-XX
+// Simon St James (ssjgz) - 2019-08-27
 // https://www.codechef.com/problems/PALINXOR
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -230,8 +230,8 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(s);
+        cout << calcXorThing(solutionOptimised) << endl;
 #endif
     }
 
