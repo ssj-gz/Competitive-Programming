@@ -72,6 +72,11 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
 
 
 template <typename T>
@@ -83,7 +88,6 @@ T read()
     return toRead;
 }
 
-#if 1
 vector<ModNum> solveBruteForce(const string& s)
 {
     vector<ModNum> result(s.size());
@@ -97,18 +101,18 @@ vector<ModNum> solveBruteForce(const string& s)
             if (useCharacter[i])
                 subsequence.push_back(s[i]);
         }
-        cout << "subsequence: " << subsequence << endl;
+        //cout << "subsequence: " << subsequence << endl;
         if (subsequence.size() % 2 == 1)
         {
             if (subsequence == string(subsequence.rbegin(), subsequence.rend()))
             {
                 int halfPalindromeLength = subsequence.size() / 2 + 1;
-                cout << "s: " << s << " subsequence: " << subsequence << " halfPalindromeLength: " << halfPalindromeLength << endl;
+                //cout << "s: " << s << " subsequence: " << subsequence << " halfPalindromeLength: " << halfPalindromeLength << endl;
                 int centre = 0;
                 while (true)
                 {
                     assert(centre < useCharacter.size());
-                    cout << "centre: " << centre << " useCharacter: " << useCharacter[centre] << endl;
+                    //cout << "centre: " << centre << " useCharacter: " << useCharacter[centre] << endl;
                     if (useCharacter[centre])
                     {
                         halfPalindromeLength--;
@@ -136,7 +140,6 @@ vector<ModNum> solveBruteForce(const string& s)
     
     return result;
 }
-#endif
 
 int64_t calcXorThing(const vector<ModNum>& array)
 {
@@ -149,14 +152,36 @@ int64_t calcXorThing(const vector<ModNum>& array)
     return result;
 }
 
-#if 0
-SolutionType solveOptimised()
+vector<ModNum> solveOptimised(const string& s)
 {
-    SolutionType result;
+    vector<ModNum> result;
+    const int n = s.size();
+
+    vector<vector<ModNum>> P(n + 1, vector<ModNum>(n + 1, 0));
+
+    for (int prefixLength = 1; prefixLength <= n; prefixLength++)
+    {
+        for (int suffixLength = 1; suffixLength <= n && prefixLength + suffixLength <= n; suffixLength++)
+        {
+            P[prefixLength][suffixLength] += P[prefixLength - 1][suffixLength] +
+                                             P[prefixLength][suffixLength - 1] -
+                                             P[prefixLength -1][suffixLength - 1];
+            if (s[prefixLength - 1] == s[n - suffixLength])
+            {
+                P[prefixLength][suffixLength] += 1 + P[prefixLength -1][suffixLength - 1];
+            }
+
+        }
+    }
+
+    for (int prefixLength = 0; prefixLength < n; prefixLength++)
+    {
+        const int suffixLength = n - 1 - prefixLength;
+        result.push_back(P[prefixLength][suffixLength]);
+    }
     
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -167,7 +192,15 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        cout << 1 << endl;
+        const int N = rand() % 20 + 1;
+        const int maxLetter = rand() % 26 + 1;
+        string s;
+        for (int i = 0; i < N; i++)
+        {
+            s.push_back(static_cast<char>('a' + rand() % maxLetter));
+        }
+        cout << s << endl;
         return 0;
     }
     
@@ -186,12 +219,16 @@ int main(int argc, char* argv[])
         }
         cout << "(" << calcXorThing(solutionBruteForce) << ")";
         cout << endl;
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised: " << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(s);
+        cout << "solutionOptimised: ";
+        for (const auto x : solutionOptimised)
+        {
+            cout << x << " ";
+        }
+        cout << "(" << calcXorThing(solutionOptimised) << ")";
+        cout << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
-#endif
+        //assert(solutionOptimised == solutionBruteForce);
 #else
         const auto solutionOptimised = solveOptimised();
         cout << solutionOptimised << endl;
