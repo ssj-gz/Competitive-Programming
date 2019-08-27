@@ -172,17 +172,19 @@ vector<ModNum> findNumCentredAroundEachPos(const string& s)
             const auto firstLetterOfSuffix = s[n - suffixLength];
             if (lastLetterOfPrefix == firstLetterOfSuffix)
             {
-                numWithPrefixAndSuffixLength[prefixLength][suffixLength] += 1 + // Match consisting of just firstLetterOfSuffix and lastLetterOfPrefix
-                                                                            numWithPrefixAndSuffixLength[prefixLength -1][suffixLength - 1]; // Remainders of matches.
+                numWithPrefixAndSuffixLength[prefixLength][suffixLength] += 
+                    1 + // Match consisting of just firstLetterOfSuffix and lastLetterOfPrefix.
+                    numWithPrefixAndSuffixLength[prefixLength -1][suffixLength - 1]; // All other matches that match firstLetterOfSuffix and lastLetterOfPrefix.
             }
 
         }
     }
 
+    // Now that we have numWithPrefixAndSuffixLength, we can calculate numCentredAroundPos.
     for (int prefixLength = 0; prefixLength < n; prefixLength++)
     {
         const int suffixLength = n - 1 - prefixLength;
-        numCentredAroundPos.push_back(1 + // Matches where subsequence from both prefix and suffix are empty.
+        numCentredAroundPos.push_back(1 + // Matches where both subsequence from prefix and suffix are empty.
                                       numWithPrefixAndSuffixLength[prefixLength][suffixLength] // All other subsequences centred around current element.
                                       );
     }
