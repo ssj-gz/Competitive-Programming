@@ -87,9 +87,14 @@ vector<ModNum> findNumCentredAroundEachPos(const string& s)
 {
     const int n = s.size();
 
-    // NB: numWithPrefixAndSuffixLength does *not* consider palindromes where the subsequences 
-    // we choose from prefix and suffix are both empty.
     vector<vector<ModNum>> numWithPrefixAndSuffixLength(n + 1, vector<ModNum>(n + 1, 0));
+    for (int length = 0; length <= n; length++)
+    {
+        // With empty prefix/ suffix, there is exactly one match: both subsequences of 
+        // prefix and suffix are empty.
+        numWithPrefixAndSuffixLength[0][length] = 1;
+        numWithPrefixAndSuffixLength[length][0] = 1;
+    }
 
     for (int prefixLength = 1; prefixLength <= n; prefixLength++)
     {
@@ -103,8 +108,7 @@ vector<ModNum> findNumCentredAroundEachPos(const string& s)
             if (lastLetterOfPrefix == firstLetterOfSuffix)
             {
                 numWithPrefixAndSuffixLength[prefixLength][suffixLength] += 
-                    1 + // Match consisting of just firstLetterOfSuffix and lastLetterOfPrefix.
-                    numWithPrefixAndSuffixLength[prefixLength -1][suffixLength - 1]; // All other matches that match firstLetterOfSuffix and lastLetterOfPrefix.
+                    numWithPrefixAndSuffixLength[prefixLength -1][suffixLength - 1]; // Every match can have lastLetterOfPrefix,firstLetterOfSuffix inserted in the middle.
             }
 
         }
@@ -116,8 +120,7 @@ vector<ModNum> findNumCentredAroundEachPos(const string& s)
     {
         const int suffixLength = n - 1 - prefixLength;
         const int posBetweenPrefixAndSuffix = prefixLength;
-        numCentredAroundPos[posBetweenPrefixAndSuffix] = 1 + // Matches where both subsequences from prefix and suffix are empty.
-                                      numWithPrefixAndSuffixLength[prefixLength][suffixLength]; // All other subsequences centred around current pos.
+        numCentredAroundPos[posBetweenPrefixAndSuffix] = numWithPrefixAndSuffixLength[prefixLength][suffixLength];
     }
     
     return numCentredAroundPos;
