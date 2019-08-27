@@ -141,34 +141,39 @@ vector<ModNum> solveBruteForce(const string& s)
     return result;
 }
 
-int64_t calcXorThing(const vector<ModNum>& array)
+int64_t calcXorThing(const vector<ModNum>& numCentredAroundPos)
 {
 
     int64_t result = 0;
-    for (int i = 0; i < array.size(); i++)
+    for (int i = 0; i < numCentredAroundPos.size(); i++)
     {
-        result = result ^ (array[i] * (i + 1)).value();
+        result = result ^ (numCentredAroundPos[i] * (i + 1)).value();
     }
     return result;
 }
 
-vector<ModNum> solveOptimised(const string& s)
+vector<ModNum> findNumCentredAroundEachPos(const string& s)
 {
-    vector<ModNum> result;
+    vector<ModNum> numCentredAroundPos;
     const int n = s.size();
 
-    vector<vector<ModNum>> P(n + 1, vector<ModNum>(n + 1, 0));
+    // NB: numWithPrefixAndSuffixLength does *not* consider palindromes where the subsequences 
+    // we choose from prefix and suffix are both empty.
+    vector<vector<ModNum>> numWithPrefixAndSuffixLength(n + 1, vector<ModNum>(n + 1, 0));
 
     for (int prefixLength = 1; prefixLength <= n; prefixLength++)
     {
         for (int suffixLength = 1; suffixLength <= n && prefixLength + suffixLength <= n; suffixLength++)
         {
-            P[prefixLength][suffixLength] += P[prefixLength - 1][suffixLength] +
-                                             P[prefixLength][suffixLength - 1] -
-                                             P[prefixLength -1][suffixLength - 1];
-            if (s[prefixLength - 1] == s[n - suffixLength])
+            numWithPrefixAndSuffixLength[prefixLength][suffixLength] += numWithPrefixAndSuffixLength[prefixLength - 1][suffixLength] +
+                                                                        numWithPrefixAndSuffixLength[prefixLength][suffixLength - 1] -
+                                                                        numWithPrefixAndSuffixLength[prefixLength -1][suffixLength - 1];
+            const auto lastLetterOfPrefix = s[prefixLength - 1];
+            const auto firstLetterOfSuffix = s[n - suffixLength];
+            if (lastLetterOfPrefix == firstLetterOfSuffix)
             {
-                P[prefixLength][suffixLength] += 1 + P[prefixLength -1][suffixLength - 1];
+                numWithPrefixAndSuffixLength[prefixLength][suffixLength] += 1 + // Match consisting of just firstLetterOfSuffix and lastLetterOfPrefix
+                                                                            numWithPrefixAndSuffixLength[prefixLength -1][suffixLength - 1]; // Remainders of matches.
             }
 
         }
@@ -177,10 +182,12 @@ vector<ModNum> solveOptimised(const string& s)
     for (int prefixLength = 0; prefixLength < n; prefixLength++)
     {
         const int suffixLength = n - 1 - prefixLength;
-        result.push_back(1 + P[prefixLength][suffixLength]);
+        numCentredAroundPos.push_back(1 + // Matches where subsequence from both prefix and suffix are empty.
+                                      numWithPrefixAndSuffixLength[prefixLength][suffixLength] // All other subsequences centred around current element.
+                                      );
     }
     
-    return result;
+    return numCentredAroundPos;
 }
 
 
@@ -223,7 +230,7 @@ int main(int argc, char* argv[])
         }
         cout << "(" << calcXorThing(solutionBruteForce) << ")";
         cout << endl;
-        const auto solutionOptimised = solveOptimised(s);
+        const auto solutionOptimised = findNumCentredAroundEachPos(s);
         cout << "solutionOptimised: ";
         for (const auto x : solutionOptimised)
         {
@@ -234,8 +241,8 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised(s);
-        cout << calcXorThing(solutionOptimised) << endl;
+        const auto numCentredAroundPos = findNumCentredAroundEachPos(s);
+        cout << calcXorThing(numCentredAroundPos) << endl;
 #endif
     }
 
