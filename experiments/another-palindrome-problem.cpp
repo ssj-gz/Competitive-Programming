@@ -93,7 +93,7 @@ vector<ModNum> findNumCentredAroundEachPos(const string& s)
 
     for (int prefixLength = 1; prefixLength <= n; prefixLength++)
     {
-        for (int suffixLength = 1; suffixLength <= n && prefixLength + suffixLength <= n; suffixLength++)
+        for (int suffixLength = 1; prefixLength + suffixLength <= n; suffixLength++)
         {
             numWithPrefixAndSuffixLength[prefixLength][suffixLength] += numWithPrefixAndSuffixLength[prefixLength - 1][suffixLength] +
                                                                         numWithPrefixAndSuffixLength[prefixLength][suffixLength - 1] -
