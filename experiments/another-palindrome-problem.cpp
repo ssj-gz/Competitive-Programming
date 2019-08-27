@@ -1,5 +1,7 @@
 // Simon St James (ssjgz) - 2019-08-27
-// https://www.codechef.com/problems/PALINXOR
+//
+// Solution for: "Another Palindrome Problem" - https://www.codechef.com/problems/PALINXOR
+//
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -109,18 +111,17 @@ vector<ModNum> findNumCentredAroundEachPos(const string& s)
     }
 
     // Now that we have numWithPrefixAndSuffixLength, we can calculate numCentredAroundPos for each of the n positions.
-    vector<ModNum> numCentredAroundPos;
+    vector<ModNum> numCentredAroundPos(n);
     for (int prefixLength = 0; prefixLength < n; prefixLength++)
     {
         const int suffixLength = n - 1 - prefixLength;
-        numCentredAroundPos.push_back(1 + // Matches where both subsequence from prefix and suffix are empty.
-                                      numWithPrefixAndSuffixLength[prefixLength][suffixLength] // All other subsequences centred around current element.
-                                      );
+        const int posBetweenPrefixAndSuffix = prefixLength;
+        numCentredAroundPos[posBetweenPrefixAndSuffix] = 1 + // Matches where both subsequences from prefix and suffix are empty.
+                                      numWithPrefixAndSuffixLength[prefixLength][suffixLength]; // All other subsequences centred around current pos.
     }
     
     return numCentredAroundPos;
 }
-
 
 int main(int argc, char* argv[])
 {
