@@ -10,12 +10,22 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <set>
+#include <algorithm>
 
 #include <cassert>
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
+
+constexpr int maxAValue = 1'000'000;
+constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
+{
+            return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
+}
+constexpr int maxNumBitsInA = log2(maxAValue);
+
 
 template <typename T>
 T read()
@@ -42,14 +52,49 @@ int64_t solveBruteForce(const vector<int>& a)
     return result;
 }
 
-#if 0
-SolutionType solveOptimised()
+string asBinary(int value)
 {
-    SolutionType result;
+    string asBinary;
+    while (asBinary.size() < maxNumBitsInA)
+    {
+        asBinary.push_back(static_cast<char>('0' + (value & 1)));
+        value >>= 1;
+    }
+    reverse(asBinary.begin(), asBinary.end());
+    return asBinary;
+};
+
+int64_t solveOptimised(const vector<int>& a)
+{
+    set<int> blah(a.begin(), a.end());
+
+    vector<int> numWithBit(maxNumBitsInA + 1, 0);
     
+    int64_t result = a.size() * a.size();
+
+    for (int bitNum = maxNumBitsInA; bitNum >= 0; bitNum--)
+    {
+        int numNew = 0;
+        while (!blah.empty() && *std::prev(blah.end()) >= (1 << bitNum))
+        {
+            const int toRemove = *std::prev(blah.end());
+            const string toRemoveAsBinary = asBinary(toRemove);
+
+            for (int bitNum = maxNumBitsInA; bitNum >= 0; bitNum--)
+            {
+                if (toRemoveAsBinary[maxNumBitsInA - bitNum] == '1')
+                {
+                    numWithBit[bitNum]++;
+                }
+            }
+            blah.erase(std::prev(blah.end()));
+            numNew++;
+        }
+        result -= numNew * numWithBit[bitNum];
+    }
+     
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -71,6 +116,9 @@ int main(int argc, char* argv[])
         cout << endl;
         return 0;
     }
+
+    cout << "maxNumBitsInA: " << maxNumBitsInA << endl;
+    cout << "asBinary(1027): " << asBinary(1027) << endl;
     
     const int T = read<int>();
 
@@ -86,12 +134,10 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(a);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#if 0
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(a);
         cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
         const auto solutionOptimised = solveOptimised();
         cout << solutionOptimised << endl;
