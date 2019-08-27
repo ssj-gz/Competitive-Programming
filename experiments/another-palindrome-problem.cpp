@@ -177,7 +177,7 @@ vector<ModNum> solveOptimised(const string& s)
     for (int prefixLength = 0; prefixLength < n; prefixLength++)
     {
         const int suffixLength = n - 1 - prefixLength;
-        result.push_back(P[prefixLength][suffixLength]);
+        result.push_back(1 + P[prefixLength][suffixLength]);
     }
     
     return result;
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
         cout << "(" << calcXorThing(solutionOptimised) << ")";
         cout << endl;
 
-        //assert(solutionOptimised == solutionBruteForce);
+        assert(solutionOptimised == solutionBruteForce);
 #else
         const auto solutionOptimised = solveOptimised();
         cout << solutionOptimised << endl;
