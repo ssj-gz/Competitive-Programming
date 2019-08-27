@@ -62,17 +62,6 @@ ModNum operator*(const ModNum& lhs, const ModNum& rhs)
     return result;
 }
 
-ostream& operator<<(ostream& os, const ModNum& toPrint)
-{
-    os << toPrint.value();
-    return os;
-}
-
-bool operator==(const ModNum& lhs, const ModNum& rhs)
-{
-    return lhs.value() == rhs.value();
-}
-
 template <typename T>
 T read()
 {
