@@ -60,7 +60,15 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        cout << 1 << endl;
+        const int N = rand() % 1000 + 1;
+        const int maxA = rand() % 1'000'000 + 1;
+        cout << N << endl;
+        for (int i = 0; i < N; i++)
+        {
+            cout << (rand() % maxA) << " ";
+        }
+        cout << endl;
         return 0;
     }
     
