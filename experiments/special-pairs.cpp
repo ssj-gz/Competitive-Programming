@@ -68,28 +68,39 @@ int64_t solveOptimised(const vector<int>& a)
 {
     set<int> blah(a.begin(), a.end());
 
+    cout << "blah: " << endl;
+    for (const auto x : blah)
+    {
+        cout << asBinary(x) << endl;
+    }
+    cout << endl;
+
     vector<int> numWithBit(maxNumBitsInA + 1, 0);
     
     int64_t result = a.size() * a.size();
 
     for (int bitNum = maxNumBitsInA; bitNum >= 0; bitNum--)
     {
+        cout << "bitNum: " << bitNum << endl;
         int numNew = 0;
         while (!blah.empty() && *std::prev(blah.end()) >= (1 << bitNum))
         {
             const int toRemove = *std::prev(blah.end());
             const string toRemoveAsBinary = asBinary(toRemove);
+            cout << " toRemoveAsBinary: " << toRemoveAsBinary << endl;
 
-            for (int bitNum = maxNumBitsInA; bitNum >= 0; bitNum--)
+            for (int bitNum = maxNumBitsInA - 1; bitNum >= 0; bitNum--)
             {
-                if (toRemoveAsBinary[maxNumBitsInA - bitNum] == '1')
+                if (toRemoveAsBinary[maxNumBitsInA - 1 - bitNum] == '1')
                 {
+                    cout << "  bitNum: " << bitNum << " is set" << endl;
                     numWithBit[bitNum]++;
                 }
             }
             blah.erase(std::prev(blah.end()));
             numNew++;
         }
+        cout << "bitNum: " << bitNum << " numNew: " << numNew << " numWithBit: " << numWithBit[bitNum] << endl;
         result -= numNew * numWithBit[bitNum];
     }
      
