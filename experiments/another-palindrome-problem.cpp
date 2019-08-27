@@ -192,15 +192,19 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        cout << 1 << endl;
-        const int N = rand() % 20 + 1;
-        const int maxLetter = rand() % 26 + 1;
-        string s;
-        for (int i = 0; i < N; i++)
+        const int T = 44;
+        cout << T << endl;
+        for (int t = 0; t < T; t++)
         {
-            s.push_back(static_cast<char>('a' + rand() % maxLetter));
+            const int N = 3000;
+            const int maxLetter = rand() % 26 + 1;
+            string s;
+            for (int i = 0; i < N; i++)
+            {
+                s.push_back(static_cast<char>('a' + rand() % maxLetter));
+            }
+            cout << s << endl;
         }
-        cout << s << endl;
         return 0;
     }
     
