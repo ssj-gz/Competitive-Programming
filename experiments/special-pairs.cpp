@@ -2,7 +2,7 @@
 //
 // Solution for "Special Pairs" - https://www.hackerearth.com/practice/algorithms/dynamic-programming/bit-masking/practice-problems/algorithm/special-pairs-7/
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -52,7 +52,7 @@ int64_t solveBruteForce(const vector<int>& a)
     return result;
 }
 
-string asBinary(int value)
+string asBinary(int64_t value)
 {
     string asBinary;
     while (asBinary.size() < maxNumBitsInA)
@@ -66,44 +66,40 @@ string asBinary(int value)
 
 int64_t solveOptimised(const vector<int>& a)
 {
-    set<int> blah(a.begin(), a.end());
-
-    vector<int> numWithBit(maxNumBitsInA + 1, 0);
-    
-    int64_t result = a.size() * a.size();
-
-    for (int bitNum = maxNumBitsInA; bitNum >= 0; bitNum--)
+    struct Blah
     {
-        cout << "bitNum: " << bitNum << endl;
-        cout << " blah: " << endl;
-        for (const auto x : blah)
+        vector<int> blee;
+    };
+    vector<Blah> blah(2048);
+    for (const auto aElement : a)
+    {
+        //cout << " gleep: " << asBinary(((static_cast<int64_t>(1) << 11) - 1) << 10) << endl;
+        const int bucket = (aElement & (((static_cast<int64_t>(1) << 11) - 1) << 10)) >> 10;
+        //cout << "aElement: " << aElement << " asBinary: " << asBinary(aElement) << " bucket: " << bucket << " asBinary: " << asBinary(bucket) << endl;
+        const int remainder = aElement & ((1 << 11) - 1);
+        assert(0 <= bucket && bucket < blah.size());
+        assert(0 <= remainder && remainder < 2048);
+        blah[bucket].blee.push_back(remainder);
+    }
+    int64_t result = 0;
+    for (int i = 0; i < blah.size(); i++)
+    {
+        for (int j = 0; j < blah.size(); j++)
         {
-            cout << " " << asBinary(x) << endl;
-        }
-        cout << endl;
-
-        int numNew = 0;
-        while (!blah.empty() && *std::prev(blah.end()) >= (1 << bitNum))
-        {
-            const int toRemove = *std::prev(blah.end());
-            const string toRemoveAsBinary = asBinary(toRemove);
-            cout << " toRemoveAsBinary: " << toRemoveAsBinary << endl;
-
-            for (int bitNum = maxNumBitsInA - 1; bitNum >= 0; bitNum--)
+            if ((i & j) == 0)
             {
-                if (toRemoveAsBinary[maxNumBitsInA - 1 - bitNum] == '1')
+                for (const auto blee1 : blah[i].blee)
                 {
-                    cout << "  bitNum: " << bitNum << " is set" << endl;
-                    numWithBit[bitNum]++;
+                for (const auto blee2 : blah[j].blee)
+                {
+                    if ((blee1 & blee2) == 0)
+                        result++;
+                }
                 }
             }
-            blah.erase(std::prev(blah.end()));
-            numNew++;
         }
-        cout << "bitNum: " << bitNum << " numNew: " << numNew << " numWithBit: " << numWithBit[bitNum] << endl;
-        result -= numNew * numWithBit[bitNum];
+
     }
-     
     return result;
 }
 
@@ -117,7 +113,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         cout << 1 << endl;
-        const int N = rand() % 1000 + 1;
+        //const int N = rand() % 100'000 + 1;
+        const int N = 100'000;
         const int maxA = rand() % 1'000'000 + 1;
         cout << N << endl;
         for (int i = 0; i < N; i++)
@@ -128,8 +125,23 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+#if 0
     cout << "maxNumBitsInA: " << maxNumBitsInA << endl;
     cout << "asBinary(1027): " << asBinary(1027) << endl;
+
+    for (int i = 0; i < 2048; i++)
+    {
+        int numForI = 0;
+        for (int j = 0; j < 2048; j++)
+        {
+            if ((i & j) == 0)
+            {
+                numForI++;
+            }
+        }
+        cout << "i: " << i << " numForI: " << numForI << endl;
+    }
+#endif
     
     const int T = read<int>();
 
@@ -150,7 +162,7 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(a);
         cout << solutionOptimised << endl;
 #endif
     }
