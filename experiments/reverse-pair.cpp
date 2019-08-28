@@ -76,8 +76,6 @@ class SegmentTree
 
 };
 
-
-#if 1
 int64_t solveBruteForce(const vector<int>& nums)
 {
     int64_t result = 0;
@@ -94,9 +92,7 @@ int64_t solveBruteForce(const vector<int>& nums)
 
     return result;
 }
-#endif
 
-#if 1
 int64_t solveOptimised(const vector<int>& nums)
 {
     int64_t result = 0;
@@ -139,29 +135,20 @@ int64_t solveOptimised(const vector<int>& nums)
 
     for (const auto valueAndIndex : numsAndIndicesDecreasing)
     {
-        cout << "valueAndIndex: " << valueAndIndex.value << "," << valueAndIndex.index << endl;
-        if (!twiceValuesAndIndicesIncreasing.empty())
-        {
-            cout << " back: twiceValue: " << twiceValuesAndIndicesIncreasing.back().twiceValue << endl;
-        }
         while (!twiceValuesAndIndicesIncreasing.empty() && twiceValuesAndIndicesIncreasing.back().twiceValue >= valueAndIndex.value)
         {
-            cout << "while: #" << twiceValuesAndIndicesIncreasing.size() << endl;
-            const int index = twiceValuesAndIndicesIncreasing.back().index;
-            cout << " numInRange[0-" << index << "]: " << segmentTree.numInRange(0, twiceValuesAndIndicesIncreasing.back().index) << endl;
+            // Everything we've added so far has been precisely the numbers > twiceValuesAndIndicesIncreasing.back().value -
+            // now we can find the contribution for j == twiceValuesAndIndicesIncreasing.back().index.
             result += segmentTree.numInRange(0, twiceValuesAndIndicesIncreasing.back().index - 1);
             twiceValuesAndIndicesIncreasing.pop_back();
             
         }
 
-        cout << " added something at index: " << valueAndIndex.index << endl;
         segmentTree.addValueAt(valueAndIndex.index, 1);
     }
-    cout << "end of while" << endl;
 
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -173,8 +160,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 100 + 1;
-        const int maxA = rand() % 1000 + 1;
+        const int N = rand() % 10'000 + 1;
+        const int maxA = rand() % 1'000'000 + 1;
 
         cout << N << endl;
         for (int i = 0; i < N; i++)
@@ -198,7 +185,7 @@ int main(int argc, char* argv[])
     const auto solutionBruteForce = solveBruteForce(nums);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
     const auto solutionOptimised = solveOptimised(nums);
-    cout << "solutionOptimised: " << solutionOptimised << endl;
+    cout << "solutionOptimised:  " << solutionOptimised << endl;
 
     assert(solutionOptimised == solutionBruteForce);
 #else
