@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 #endif
 #if 0
     const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised: " << solutionOptimised << endl;
+    cout << "solutionOptimised:  " << solutionOptimised << endl;
     
     assert(solutionOptimised == solutionBruteForce);
 #endif
