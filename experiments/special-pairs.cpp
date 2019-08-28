@@ -66,19 +66,20 @@ string asBinary(int64_t value)
 
 int64_t solveOptimised(const vector<int>& a)
 {
-    struct Blah
-    {
-        vector<int> blee;
-        vector<int> glarp;
-    };
     const int halfBinaryMax = 2048;
-    vector<Blah> blah(halfBinaryMax);
-    for (auto& ble : blah)
+    struct Bucket
     {
-        ble.glarp.resize(halfBinaryMax);
+        vector<int> secondHalvesOfAInBucket;
+        vector<int> numSecondHalvesOfAThatGiveZeroWhenAndedWith;
+    };
+    vector<Bucket> buckets(halfBinaryMax);
+    for (auto& ble : buckets)
+    {
+        ble.numSecondHalvesOfAThatGiveZeroWhenAndedWith.resize(halfBinaryMax);
     }
 
-    vector<vector<int>> nose(halfBinaryMax);
+    // The values are between 0 and halfBinaryMax.
+    vector<vector<int>> valuesThatGiveZeroWhenAndedWith(halfBinaryMax);
 
     for (int i = 0; i < halfBinaryMax; i++)
     {
@@ -86,7 +87,7 @@ int64_t solveOptimised(const vector<int>& a)
         {
             if ((i & j) == 0)
             {
-                nose[i].push_back(j);
+                valuesThatGiveZeroWhenAndedWith[i].push_back(j);
             }
         }
 
@@ -94,35 +95,32 @@ int64_t solveOptimised(const vector<int>& a)
 
     for (const auto aElement : a)
     {
-        //cout << " gleep: " << asBinary(((static_cast<int64_t>(1) << 11) - 1) << 10) << endl;
         const int bucket = (aElement & (((static_cast<int64_t>(1) << 11) - 1) << 10)) >> 10;
-        //cout << "aElement: " << aElement << " asBinary: " << asBinary(aElement) << " bucket: " << bucket << " asBinary: " << asBinary(bucket) << endl;
-        const int remainder = aElement & ((1 << 11) - 1);
-        assert(0 <= bucket && bucket < blah.size());
-        assert(0 <= remainder && remainder < halfBinaryMax);
-        blah[bucket].blee.push_back(remainder);
-        for (const auto x : nose[remainder])
+        const int secondHalfOfA = aElement & ((1 << 11) - 1);
+        assert(0 <= bucket && bucket < buckets.size());
+        assert(0 <= secondHalfOfA && secondHalfOfA < halfBinaryMax);
+        buckets[bucket].secondHalvesOfAInBucket.push_back(secondHalfOfA);
+        for (const auto x : valuesThatGiveZeroWhenAndedWith[secondHalfOfA])
         {
-            blah[bucket].glarp[x]++;
+            buckets[bucket].numSecondHalvesOfAThatGiveZeroWhenAndedWith[x]++;
         }
     }
 
     int64_t result = 0;
-    for (int i = 0; i < blah.size(); i++)
+    for (int i = 0; i < buckets.size(); i++)
     {
-        for (int j = 0; j < blah.size(); j++)
+        for (int j = 0; j < buckets.size(); j++)
         {
             if ((i & j) == 0)
             {
-                for (const auto blee1 : blah[i].blee)
+                for (const auto secondHalfOfA : buckets[i].secondHalvesOfAInBucket)
                 {
-                    result += blah[j].glarp[blee1];
+                    result += buckets[j].numSecondHalvesOfAThatGiveZeroWhenAndedWith[secondHalfOfA];
                 }
             }
         }
 
     }
-
 
     return result;
 }
