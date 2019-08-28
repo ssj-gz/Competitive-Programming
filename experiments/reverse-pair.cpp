@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2019-XX-XX
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -160,7 +160,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 10'000 + 1;
+        //const int N = rand() % 10'000 + 1;
+        const int N = rand() % 100'000 + 1;
         const int maxA = rand() % 1'000'000 + 1;
 
         cout << N << endl;
@@ -189,7 +190,7 @@ int main(int argc, char* argv[])
 
     assert(solutionOptimised == solutionBruteForce);
 #else
-    const auto solutionOptimised = solveOptimised();
+    const auto solutionOptimised = solveOptimised(nums);
     cout << solutionOptimised << endl;
 #endif
 
