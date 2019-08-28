@@ -7,6 +7,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include <cassert>
 
@@ -95,10 +96,68 @@ int64_t solveBruteForce(const vector<int>& nums)
 }
 #endif
 
-#if 0
-int64_t solveOptimised()
+#if 1
+int64_t solveOptimised(const vector<int>& nums)
 {
-    int64_t result;
+    int64_t result = 0;
+    const int n = nums.size();
+    SegmentTree segmentTree(n + 1);
+
+    struct ValueAndIndex
+    {
+        int value = -1;
+        int index = -1;
+    };
+    vector<ValueAndIndex> numsAndIndicesDecreasing;
+    for (int i = 0; i < n; i++)
+    {
+        numsAndIndicesDecreasing.push_back({nums[i], i});
+    }
+    sort(numsAndIndicesDecreasing.begin(), numsAndIndicesDecreasing.end(), [](const auto& lhs, const auto& rhs) 
+            {
+                if (lhs.value != rhs.value)
+                    return lhs.value > rhs.value;
+                return lhs.index < rhs.index;
+            });
+
+    struct TwiceValueAndIndex
+    {
+        int twiceValue = -1;
+        int index = -1;
+    };
+    vector<TwiceValueAndIndex> twiceValuesAndIndicesIncreasing;
+    for (int i = 0; i < n; i++)
+    {
+        twiceValuesAndIndicesIncreasing.push_back({2 * nums[i], i});
+    }
+    sort(twiceValuesAndIndicesIncreasing.begin(), twiceValuesAndIndicesIncreasing.end(), [](const auto& lhs, const auto& rhs) 
+            {
+                if (lhs.twiceValue != rhs.twiceValue)
+                    return lhs.twiceValue < rhs.twiceValue;
+                return lhs.index < rhs.index;
+            });
+
+    for (const auto valueAndIndex : numsAndIndicesDecreasing)
+    {
+        cout << "valueAndIndex: " << valueAndIndex.value << "," << valueAndIndex.index << endl;
+        if (!twiceValuesAndIndicesIncreasing.empty())
+        {
+            cout << " back: twiceValue: " << twiceValuesAndIndicesIncreasing.back().twiceValue << endl;
+        }
+        while (!twiceValuesAndIndicesIncreasing.empty() && twiceValuesAndIndicesIncreasing.back().twiceValue >= valueAndIndex.value)
+        {
+            cout << "while: #" << twiceValuesAndIndicesIncreasing.size() << endl;
+            const int index = twiceValuesAndIndicesIncreasing.back().index;
+            cout << " numInRange[0-" << index << "]: " << segmentTree.numInRange(0, twiceValuesAndIndicesIncreasing.back().index) << endl;
+            result += segmentTree.numInRange(0, twiceValuesAndIndicesIncreasing.back().index - 1);
+            twiceValuesAndIndicesIncreasing.pop_back();
+            
+        }
+
+        cout << " added something at index: " << valueAndIndex.index << endl;
+        segmentTree.addValueAt(valueAndIndex.index, 1);
+    }
+    cout << "end of while" << endl;
 
     return result;
 }
@@ -113,7 +172,16 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+
+        const int N = rand() % 100 + 1;
+        const int maxA = rand() % 1000 + 1;
+
+        cout << N << endl;
+        for (int i = 0; i < N; i++)
+        {
+            cout << ((rand() % maxA)) << " " << endl;
+        }
+
         return 0;
     }
 
@@ -127,16 +195,12 @@ int main(int argc, char* argv[])
 
 
 #ifdef BRUTE_FORCE
-#if 1
     const auto solutionBruteForce = solveBruteForce(nums);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 0
-    const auto solutionOptimised = solveOptimised();
+    const auto solutionOptimised = solveOptimised(nums);
     cout << "solutionOptimised: " << solutionOptimised << endl;
 
     assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
     const auto solutionOptimised = solveOptimised();
     cout << solutionOptimised << endl;
