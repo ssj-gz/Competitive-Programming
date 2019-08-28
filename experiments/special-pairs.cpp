@@ -141,7 +141,6 @@ int main(int argc, char* argv[])
 
         const int T = 10;
         cout << T << endl;
-        //const int N = rand() % 10'000 + 1;
         for (int t = 0; t < T; t++)
         {
             const int N = 100'000;
@@ -156,24 +155,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-#if 0
-    cout << "maxNumBitsInA: " << maxNumBitsInA << endl;
-    cout << "asBinary(1027): " << asBinary(1027) << endl;
-
-    for (int i = 0; i < 2048; i++)
-    {
-        int numForI = 0;
-        for (int j = 0; j < 2048; j++)
-        {
-            if ((i & j) == 0)
-            {
-                numForI++;
-            }
-        }
-        cout << "i: " << i << " numForI: " << numForI << endl;
-    }
-#endif
-    
     const int T = read<int>();
 
     for (int t = 0; t < T; t++)
