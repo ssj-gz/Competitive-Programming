@@ -69,8 +69,29 @@ int64_t solveOptimised(const vector<int>& a)
     struct Blah
     {
         vector<int> blee;
+        vector<int> glarp;
     };
-    vector<Blah> blah(2048);
+    const int halfBinaryMax = 2048;
+    vector<Blah> blah(halfBinaryMax);
+    for (auto& ble : blah)
+    {
+        ble.glarp.resize(halfBinaryMax);
+    }
+
+    vector<vector<int>> nose(halfBinaryMax);
+
+    for (int i = 0; i < halfBinaryMax; i++)
+    {
+        for (int j = 0; j < halfBinaryMax; j++)
+        {
+            if ((i & j) == 0)
+            {
+                nose[i].push_back(j);
+            }
+        }
+
+    }
+
     for (const auto aElement : a)
     {
         //cout << " gleep: " << asBinary(((static_cast<int64_t>(1) << 11) - 1) << 10) << endl;
@@ -78,9 +99,14 @@ int64_t solveOptimised(const vector<int>& a)
         //cout << "aElement: " << aElement << " asBinary: " << asBinary(aElement) << " bucket: " << bucket << " asBinary: " << asBinary(bucket) << endl;
         const int remainder = aElement & ((1 << 11) - 1);
         assert(0 <= bucket && bucket < blah.size());
-        assert(0 <= remainder && remainder < 2048);
+        assert(0 <= remainder && remainder < halfBinaryMax);
         blah[bucket].blee.push_back(remainder);
+        for (const auto x : nose[remainder])
+        {
+            blah[bucket].glarp[x]++;
+        }
     }
+
     int64_t result = 0;
     for (int i = 0; i < blah.size(); i++)
     {
@@ -90,16 +116,14 @@ int64_t solveOptimised(const vector<int>& a)
             {
                 for (const auto blee1 : blah[i].blee)
                 {
-                for (const auto blee2 : blah[j].blee)
-                {
-                    if ((blee1 & blee2) == 0)
-                        result++;
-                }
+                    result += blah[j].glarp[blee1];
                 }
             }
         }
 
     }
+
+
     return result;
 }
 
@@ -112,16 +136,21 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        cout << 1 << endl;
-        //const int N = rand() % 100'000 + 1;
-        const int N = 100'000;
-        const int maxA = rand() % 1'000'000 + 1;
-        cout << N << endl;
-        for (int i = 0; i < N; i++)
+
+        const int T = 10;
+        cout << T << endl;
+        //const int N = rand() % 10'000 + 1;
+        for (int t = 0; t < T; t++)
         {
-            cout << (rand() % maxA) << " ";
+            const int N = 100'000;
+            const int maxA = rand() % 1'000'000 + 1;
+            cout << N << endl;
+            for (int i = 0; i < N; i++)
+            {
+                cout << (rand() % maxA) << " ";
+            }
+            cout << endl;
         }
-        cout << endl;
         return 0;
     }
 
