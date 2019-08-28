@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-XX-XX
+// Simon St James (ssjgz) - 2019-08-28
 //
 // Solution for "Special Pairs" - https://www.hackerearth.com/practice/algorithms/dynamic-programming/bit-masking/practice-problems/algorithm/special-pairs-7/
 //
@@ -66,19 +66,21 @@ string asBinary(int64_t value)
 
 int64_t solveOptimised(const vector<int>& a)
 {
-    const int halfBinaryMax = 2048;
+    assert(maxNumBitsInA % 2 == 0);
+    const int halfBinaryNumBits = maxNumBitsInA / 2;
+    const int halfBinaryMax = 1 << (halfBinaryNumBits + 1);
     struct Bucket
     {
+        Bucket()
+            : numSecondHalvesOfAThatGiveZeroWhenAndedWith(halfBinaryMax)
+        {
+        }
         vector<int> secondHalvesOfAInBucket;
         vector<int> numSecondHalvesOfAThatGiveZeroWhenAndedWith;
     };
     vector<Bucket> buckets(halfBinaryMax);
-    for (auto& ble : buckets)
-    {
-        ble.numSecondHalvesOfAThatGiveZeroWhenAndedWith.resize(halfBinaryMax);
-    }
 
-    // The values are between 0 and halfBinaryMax.
+    // The "values" are between 0 and halfBinaryMax.
     vector<vector<int>> valuesThatGiveZeroWhenAndedWith(halfBinaryMax);
 
     for (int i = 0; i < halfBinaryMax; i++)
@@ -95,8 +97,8 @@ int64_t solveOptimised(const vector<int>& a)
 
     for (const auto aElement : a)
     {
-        const int bucket = (aElement & (((static_cast<int64_t>(1) << 11) - 1) << 10)) >> 10;
-        const int secondHalfOfA = aElement & ((1 << 11) - 1);
+        const int bucket = (aElement & (((static_cast<int64_t>(1) << (halfBinaryNumBits + 1)) - 1) << halfBinaryNumBits)) >> halfBinaryNumBits;
+        const int secondHalfOfA = aElement & ((1 << (halfBinaryNumBits + 1)) - 1);
         assert(0 <= bucket && bucket < buckets.size());
         assert(0 <= secondHalfOfA && secondHalfOfA < halfBinaryMax);
         buckets[bucket].secondHalvesOfAInBucket.push_back(secondHalfOfA);
@@ -113,6 +115,8 @@ int64_t solveOptimised(const vector<int>& a)
         {
             if ((i & j) == 0)
             {
+                // The first halves of any pair of elements of a from bucket[i] and bucket[j] will
+                // "and" to 0 - what about the second halves?
                 for (const auto secondHalfOfA : buckets[i].secondHalvesOfAInBucket)
                 {
                     result += buckets[j].numSecondHalvesOfAThatGiveZeroWhenAndedWith[secondHalfOfA];
