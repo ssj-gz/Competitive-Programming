@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     //
     // So, what this means is that in our original recurrence relation, we don't have to range over all x <= 1 <= B[m - 2]; instead
     // x can be assumed to be either 1 or B[m - 2].  Thus, we only need to maintain two values: the current best choice using
-    // the first m where the last choice is 1, and the current best choice using the first me where the last choice is B[m - 1].
+    // the first m where the last choice is 1, and the current best choice using the first m where the last choice is B[m - 1].
     // The final, simple recurrence relation is shown in the code below.
     //
     // As a sidenote, you might think that letting A[i] "alternate" between two extremes would maximise the cost e.g. that
@@ -89,9 +89,9 @@ int main(int argc, char* argv[])
         for (int i = 1; i < N; i++)
         {
             const int64_t newMaxValueEndingAtTop = max(maxValueEndingAtBottom + abs(B[i] - 1),
-                                                 maxValueEndingAtTop + abs(B[i] - B[i - 1]));
+                                                       maxValueEndingAtTop + abs(B[i] - B[i - 1]));
             const int64_t newMaxValueEndingAtBottom = max(maxValueEndingAtBottom + abs(1 - 1),
-                                                 maxValueEndingAtTop + abs(1 - B[i - 1]));
+                                                          maxValueEndingAtTop + abs(1 - B[i - 1]));
 
             maxValueEndingAtTop = newMaxValueEndingAtTop;
             maxValueEndingAtBottom = newMaxValueEndingAtBottom;
