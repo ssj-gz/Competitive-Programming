@@ -50,7 +50,8 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        cout << 1 << endl;
+        cout << ((rand() % 1000) + 1) << " " << ((rand() % 1000) + 1) << endl;
         return 0;
     }
     
