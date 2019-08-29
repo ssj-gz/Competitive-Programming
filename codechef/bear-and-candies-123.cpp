@@ -59,22 +59,28 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
-        int maxCandiesLimark = read<int>();
-        int maxCandiesBob = read<int>();
+        const int maxCandiesLimark = read<int>();
+        const int maxCandiesBob = read<int>();
 
         int numCandiesToEat = 1;
+
+        int numCandiesEatenByLimark = 0;
+        int numCandiesEatenByBob = 0;
 
         bool bobIsWinner = true;
         while (true)
         {
-            maxCandiesLimark -= numCandiesToEat;
-            if (maxCandiesLimark < 0)
+            numCandiesEatenByLimark += numCandiesToEat;
+            if (numCandiesEatenByLimark > maxCandiesLimark)
+            {
+                bobIsWinner = true;
                 break;
+            }
 
             numCandiesToEat++;
-            
-            maxCandiesBob -= numCandiesToEat;
-            if (maxCandiesBob < 0)
+
+            numCandiesEatenByBob += numCandiesToEat;
+            if (numCandiesEatenByBob > maxCandiesBob)
             {
                 bobIsWinner = false;
                 break;
