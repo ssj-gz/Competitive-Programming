@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
         cout << N << endl;
         for (int i = 0; i < N; i++)
         {
-            cout << ((rand() % maxA)) << " " << endl;
+            cout << ((rand() % maxA)) << " ";
         }
 
         return 0;
