@@ -6,7 +6,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -139,11 +139,11 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int T = 10;
+        const int T = 1;
         cout << T << endl;
         for (int t = 0; t < T; t++)
         {
-            const int N = 100'000;
+            const int N = rand() % 10'000 + 1;
             const int maxA = rand() % 1'000'000 + 1;
             cout << N << endl;
             for (int i = 0; i < N; i++)
@@ -164,6 +164,39 @@ int main(int argc, char* argv[])
         for (auto& aElement : a)
         {
             aElement = read<int>();
+        }
+
+        const int MAXN = 1048576;
+        vector<int> numOfAMatchingOnBits(MAXN + 1);
+        for (int i = 0; i <= MAXN; i++)
+        {
+            for (const auto aElement : a)
+            {
+                if ((aElement & i) == i)
+                    numOfAMatchingOnBits[i]++;
+            }
+        }
+
+        vector<int> numOfAWithValue(MAXN + 1);
+        for (const auto aElement : a)
+        {
+            numOfAWithValue[aElement]++;
+        }
+
+        for (int j = 0; (1<<j) < MAXN; j++) 
+        {
+            for (int i = 0; i < MAXN; i++)
+            { 
+                if ((i & (1<<j)) == 0) {
+                    numOfAWithValue[i] += numOfAWithValue[i+(1<<j)];
+                }
+            }
+        }
+
+        for (int i = 0; i < maxAValue; i++)
+        {
+            cout << "i: " << i << " numOfAWithValue: " << numOfAWithValue[i] << " numOfAMatchingOnBits: " << numOfAMatchingOnBits[i] << endl;
+            assert(numOfAWithValue[i] == numOfAMatchingOnBits[i]);
         }
 
 #ifdef BRUTE_FORCE
