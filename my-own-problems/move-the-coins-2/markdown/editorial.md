@@ -27,7 +27,7 @@ This pseudocode runs in $O(N)$, so the naive approach to solving this problem wo
 
 It's fairly easy to see an efficient way of getting a part-way solution: for $q_i=(u_i,v_i)$, $T(q_i)$ is formed by first severing $u_i$ from its parent, then re-parenting $u_i$ to $v_i$.  We can quite easily get the grundy number for the tree formed by just doing the first (severing) operation: for a vertex $v$, define $\textit{descendants(v)}$ to be the set of vertices explored from $v$ during a DFS starting at vertex $1$ i.e. it's the subtree rooted at $v$ in $T$, if we say that $T$  is rooted at vertex $1$.
 
-Severing $v$ would remove the *contributions* of all descendants of $v$ which $\textit{hasCoin}$ to $\textit{originalTreeGrundyNumber}$.  We can very easily calculate this $\textit{grundyContribForSubtree}$ for all $v$ in just $O(N)$ - see *findGrundyContribsForNodes* in the Editorial code.  Note that, to remove the contribution $x$ from a xor'd sum $xorSum$, we merely calculate $xorSum \wedge x$ - a consequence of the fact that $(a \wedge b \wedge c) \wedge b=a \wedge c$.
+Severing $v$ would remove the *contributions* of all descendants of $v$ which $\textit{hasCoin}$ to $\textit{originalTreeGrundyNumber}$.  We can very easily calculate this $\textit{grundyContribForSubtree}$ for all $v$ in just $O(N)$ - see *findGrundyContribsForNodes* in the Editorial code.  Note that, to remove the contribution $x$ from a xor'd sum $\textit{xorSum}$, we merely calculate $\textit{xorSum} \wedge x$ - a consequence of the fact that $(a \wedge b \wedge c) \wedge b=a \wedge c$.
 
 The grundy number for $T(q_i)$ then, is 
 
