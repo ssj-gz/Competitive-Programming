@@ -17,10 +17,10 @@ sum [i in Bob_win] { 2^i }
 
 Since the result can be very large, please output it mod 1'000'000'007.
 
-Approach
-========
+Approach (Sketch)
+=================
 
-The problem is ostensibly a Game Theory problem, but as hinted, the Game Theory part is very elementary: the game is simply Nim in disguise, with each Counter c corresponding to a pile of size dist(c, R), where dist(c, R) is the minimum distance between the node containing c and the node R.  Just as with Nim, the winner can be computed via taking the xor sum over all c of dist(c, R): if this is 0, Alice loses; else Bob wins.  Obviously, doing this for each node R would give a O(N^2) solution, so that won't do! The real problem is to compute this more efficiently.
+The problem is ostensibly a Game Theory problem, but as hinted, the Game Theory part is very elementary: the game is simply Nim in disguise, with each Counter c corresponding to a pile of size dist(c, R), where dist(c, R) is the minimum distance between the node containing c and the node R.  Just as with Nim, the winner can be computed via taking the xor sum over all c of dist(c, R): if this is 0, Alice loses; else Bob wins.  Obviously, doing this for each node R would give a O(N^2) solution, so that won't do! The "real" problem is to compute this more efficiently.
 
 Note first that it's easily shown that the full value c(v) is not required; instead, just the *parity* of c(v) is important.  Thus, we say that node v *hasCounter* if and only if the original c(v) is odd.
 
@@ -33,7 +33,7 @@ Write a "DistTracker" data structure, with the following operations:
 - adjustAllDists(dd) - add dd to each distance in the list of distances.
 - reset() - empty the list of distances.
 
-A naive DistTracker will have at least some of these operations taking O(N), but it is possible to implement every operation so that it takes O(log_2 N).
+A naive DistTracker will have at least some of these operations taking O(N), but it is possible, using some observations about binary properties of Xor, to implement every operation so that it takes O(log_2 N).
 
 We can then use our DistTracker, in conjunction with Centroid Decomposition, to answer the query:
 
@@ -45,6 +45,10 @@ With this done, outputting the result of Bob's sum is trivial.
 
 Status
 ======
+
+The problem would probably be at least Hard on Hackerrank, but I think perhaps it's on the Easy side of Medium, here, particularly if you are already comfortable with Centroid Decomposition.
+
+It would not be suitable for a Lunchtime or Cook-off, IMO, but should be fine for a Long.
 
 [X] Problem description (markdown and LaTeX, plus explanatory diagrams and examples; ready for approval)
 [X] Test-Plan, Testcase generator, and Testcases (ready for approval)
