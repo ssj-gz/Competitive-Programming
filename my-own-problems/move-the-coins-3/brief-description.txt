@@ -1,0 +1,52 @@
+Brief(-ish!) Description
+=================
+Bob and Alice are playing a game with Counters on a Tree T, which has N nodes numbered from 1 to N (1 <= N <= 100'000).  For a node R (1 <= R <= N), define game(T, R) as the game with the following rules:
+
+1) A copy of T is taken, and for each node v of T, we ensure that there are precisely c(v) Counters on v.
+2) Bob and Alice now take turns to make a move, with Alice making the first move.
+3) A move consists of taking a counter (c, say) from some node other than R and moving it to a different node.  Let v_c be the node that c is currently on; then c can be moved to any node, other than v_c, on the shortest path between nodes v_c and R.
+4) If a player cannot make a move on their turn (because all the Counters are on node R), then the game ends and the other player wins.
+
+Let winner(game(T, R)) be whichever of Bob or Alice wins the game(T, R), assuming both play perfectly.
+
+Bob knows some elementary Game Theory, so is able to very quickly predict who will win game(T, R) for a given R.  Unimpressed, Alice gives him a harder task: she challenges him to find winner(game(T, R)) for *all of* R = 1, 2, ... , n.
+
+Can you help Bob figure out the answer? More formally, if Bob_win is the set of R such that winner(game(T, R)) == Bob, then you must calculate the value of 
+
+sum [i in Bob_win] { 2^i }
+
+Since the result can be very large, please output it mod 1'000'000'007.
+
+Approach
+========
+
+The problem is ostensibly a Game Theory problem, but as hinted, the Game Theory part is very elementary: the game is simply Nim in disguise, with each Counter c corresponding to a pile of size dist(c, R), where dist(c, R) is the minimum distance between the node containing c and the node R.  Just as with Nim, the winner can be computed via taking the xor sum over all c of dist(c, R): if this is 0, Alice loses; else Bob wins.  Obviously, doing this for each node R would give a O(N^2) solution, so that won't do! The real problem is to compute this more efficiently.
+
+Note first that it's easily shown that the full value c(v) is not required; instead, just the *parity* of c(v) is important.  Thus, we say that node v *hasCounter* if and only if the original c(v) is odd.
+
+The solution then consists of doing the following:
+
+Write a "DistTracker" data structure, with the following operations:
+
+- insertDist(d) - adds d to the list of distances.
+- grundyNumber() - compute the xor sum of the list of distances.
+- adjustAllDists(dd) - add dd to each distance in the list of distances.
+- reset() - empty the list of distances.
+
+A naive DistTracker will have at least some of these operations taking O(N), but it is possible to implement every operation so that it takes O(log_2 N).
+
+We can then use our DistTracker, in conjunction with Centroid Decomposition, to answer the query:
+
+- For each possible R, find the xor sum of the distance from R of all vertices v for which v hasCounter
+
+in a total of O(n log2N log2N)
+
+With this done, outputting the result of Bob's sum is trivial.
+
+Status
+======
+
+[X] Problem description (markdown and LaTeX, plus explanatory diagrams and examples; ready for approval)
+[X] Test-Plan, Testcase generator, and Testcases (ready for approval)
+[X] Editorial code solution (readable, well-documented code; ready for approval)
+[ ] Editorial write-up
