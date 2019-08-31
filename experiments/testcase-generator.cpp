@@ -349,6 +349,16 @@ ExecutionResult runTestWithInputAndGetFilteredResult(const string& executableNam
         }
     }
 
+    if (testRunResult.output.empty())
+    {
+        cerr << "No output from executable - this is an error!" << endl;
+        if (!originalTestRunOutput.empty())
+        {
+            cerr << "NB: the original unfiltered output was not empty, so this may be a problem with your regex." << endl;
+        }
+        testRunResult.status = -1;
+    }
+
     return testRunResult;
 }
 
