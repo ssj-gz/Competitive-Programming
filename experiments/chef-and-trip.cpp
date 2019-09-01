@@ -1,4 +1,7 @@
-// Simon St James (ssjgz) - 2019-XX-XX
+// Simon St James (ssjgz) - 2019-09-01
+//
+// Solution to: https://www.codechef.com/problems/TRIP2/
+//
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -241,7 +244,7 @@ int main(int argc, char* argv[])
         {
             auto a = solutionOptimised.second;
             assert(unique(a.begin(), a.end()) == a.end());
-#if 0
+#if 1
             for (const auto x : a)
             {
                 cout << x << " ";
