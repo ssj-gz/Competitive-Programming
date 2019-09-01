@@ -42,6 +42,8 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
     {
         if (a[i] != -1 && i - posOfLastDecided > 1)
         {
+            // A decided value, preceded by undecideds; figure out how/ if we can fill in the block of
+            // undecides since the last decided.
             auto nextDistinct = [&K](int value)
             {
                 int newValue = value + 1;
@@ -55,7 +57,8 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
 
             if (K == 2)
             {
-                if (a[i] != 0 && a[posOfLastDecided] != 0) // Don't use this logic for the prefix and suffix - they can always be satisfied!
+                const bool undecidedsAreSuffixOrPrefix = (a[i] == 0 || a[posOfLastDecided] == 0);
+                if (!undecidedsAreSuffixOrPrefix) // Don't use this logic for prefixes and suffixes - they can always be satisfied!
                 {
                     const bool decidedAreDifferent = (a[i] != a[posOfLastDecided]);
                     const bool distanceIsOdd = (i - posOfLastDecided + 1) % 2 == 1;
@@ -77,7 +80,7 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
             int numAdjustments = 0;
             while (a[posOfLastDecided] == a[posOfLastDecided + 1] || a[i - 1] == a[i])
             {
-                // This block will run at most twice.
+                // This block of code inside the "while" will execute at most twice.
                 for (int j = posOfLastDecided + 1; j < i; j++)
                 {
                     a[j] = nextDistinct(a[j]);
