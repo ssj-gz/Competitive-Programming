@@ -27,12 +27,16 @@ echo "DIR: ${DIR}"
 cppfilenamebasename=$(basename "${cppfilename}" .cpp)
 executablename="${cppfilenamebasename}-generator"
 
-if [ bruteforce ]; then
-    bruteforceargs1='--testcase-gen-regex-filter=solutionBruteForce: (.*)' 
-    bruteforceargs2='--testcase-gen-regex-filter-capture-group=1'
-    
+clang++ -std=c++14 -stdlib=libc++ "${cppfilename}" -Wall -O3 -g3 -D_LIBCPP_DEBUG=1 -o "${executablename}"
+
+if [ $? -ne 0 ]; then
+    exit 1
 fi
 
-clang++ -std=c++14 -stdlib=libc++ "${cppfilename}" -Wall -O3 -g3 -D_LIBCPP_DEBUG=1 -o "${executablename}" && \
-    ${DIR}/testcase-generator "${cppfilenamebasename}-testsuite.txt" --stop-after=${stopafter} --executable-name="./${executablename}" "$(echo "${bruteforceargs1}")" ${bruteforceargs2}
+
+if [ ${bruteforce} == "true" ]; then
+    ${DIR}/testcase-generator "${cppfilenamebasename}-testsuite.txt" --stop-after=${stopafter} --executable-name="./${executablename}" --testcase-gen-regex-filter="solutionBruteForce: (.*)" --testcase-gen-regex-filter-capture-group=1
+else
+    ${DIR}/testcase-generator "${cppfilenamebasename}-testsuite.txt" --stop-after=${stopafter} --executable-name="./${executablename}"
+fi
 
