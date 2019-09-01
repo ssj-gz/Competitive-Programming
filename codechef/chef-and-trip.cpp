@@ -55,7 +55,7 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
 
             if (K == 2)
             {
-                if (a[i] != 0 && a[posOfLastDecided] != 0) // Don't use this logic for first/ last decided!
+                if (a[i] != 0 && a[posOfLastDecided] != 0) // Don't use this logic for the prefix and suffix - they can always be satisfied!
                 {
                     const bool decidedAreDifferent = (a[i] != a[posOfLastDecided]);
                     const bool distanceIsOdd = (i - posOfLastDecided + 1) % 2 == 1;
@@ -132,6 +132,7 @@ int main(int argc, char* argv[])
             cout << endl;
 
         }
+        
     }
 
     assert(cin);
