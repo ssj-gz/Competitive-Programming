@@ -413,17 +413,17 @@ int main(int argc, char* argv[])
 
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("help", "produce help message")
-        ("testsuite-filename", po::value< string >()->required(), "testsuite filename")
-        ("executable-name", po::value< string >(&executableName), "path to the executable that generates/ runs tests.  Defaults to ./a.out")
+        ("help,h", "produce help message")
+        ("testsuite-filename,f", po::value< string >()->required(), "testsuite filename")
+        ("executable-name,e", po::value< string >(&executableName), "path to the executable that generates/ runs tests.  Defaults to ./a.out")
         ("verify", po::bool_switch(&verifyModeFlag), "verify the executable against the given testsuite inputs and outputs, instead of generating new test cases")
         ("validate", po::bool_switch(&validateModeFlag), "perform simple validation of the testsuite to check for obvious corruption")
         ("append-testcase-from-stdin", po::bool_switch(&appendFromStdinFlag), "read a testcase input from stdin and append it and its calculcated ouptput to the testsuite")
-        ("stop-after", po::value< string >(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
+        ("stop-after,s", po::value< string >(), "when to stop - either a number of testcases, or <X>s to stop after X seconds")
         ("append", po::bool_switch(&appendToTestSuiteFile), "append to the testsuite file file instead of overwriting it")
         ("failing-testcase-filename", po::value<string>(&failedTestcaseFilename), "filename to output failed test inputs to")
-        ("testcase-gen-regex-filter", po::value<string>(&testResultRegexFilterPattern), "when generating expected testcase output, pass all resulting output through this regex")
-        ("testcase-gen-regex-filter-capture-group", po::value<int>(&testResultRegexFilterCaptureGroup), "Used in conjunction with --testcase-gen-regex-filter - each line of output is passed through the regex, then replaced with the contents of the given capture group")
+        ("testcase-gen-regex-filter,r", po::value<string>(&testResultRegexFilterPattern), "when generating expected testcase output, pass all resulting output through this regex")
+        ("testcase-gen-regex-filter-capture-group,g", po::value<int>(&testResultRegexFilterCaptureGroup), "Used in conjunction with --testcase-gen-regex-filter - each line of output is passed through the regex, then replaced with the contents of the given capture group")
         ;
     po::positional_options_description p;
     p.add("testsuite-filename", -1);
