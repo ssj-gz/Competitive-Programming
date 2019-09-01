@@ -29,8 +29,6 @@ Result NoSolution = { false, vector<int>() };
 
 Result findSolution(int N, int K, const vector<int>& aOriginal)
 {
-    std::pair<bool, vector<int>> result = { false, vector<int>() };
-
     vector<int> a(aOriginal);
     // Add "sentinel" values at the beginning and end to simplify
     // code slightly.
