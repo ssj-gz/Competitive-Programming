@@ -1,4 +1,7 @@
 // Simon St James (ssjgz) - 2019-XX-XX
+// 
+// Solution to: TODO - problem link here!
+//
 //#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -51,26 +54,38 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
+        //const int T = rand() % 100 + 1;
+        const int T = 1;
+
+        for (int t = 0; t < T; t++)
+        {
+        }
+
         return 0;
     }
     
     // TODO - read in testcase.
-    
+    const auto T = read<int>();
+
+    for (int t = 0; t < T; t++)
+    {
+
 #ifdef BRUTE_FORCE
 #if 0
-    const auto solutionBruteForce = solveBruteForce();
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        const auto solutionBruteForce = solveBruteForce();
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 0
-    const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised:  " << solutionOptimised << endl;
-    
-    assert(solutionOptimised == solutionBruteForce);
+        const auto solutionOptimised = solveOptimised();
+        cout << "solutionOptimised:  " << solutionOptimised << endl;
+
+        assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-    const auto solutionOptimised = solveOptimised();
-    cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised();
+        cout << solutionOptimised << endl;
 #endif
+    }
 
     assert(cin);
 }
