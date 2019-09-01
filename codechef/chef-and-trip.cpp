@@ -19,11 +19,21 @@ T read()
     return toRead;
 }
 
-std::pair<bool, vector<int>> solveOptimised(int N, int K, const vector<int>& aOriginal)
+struct Result
+{
+    bool hasSolution = false;
+    vector<int> solution;
+};
+
+Result NoSolution = { false, vector<int>() };
+
+Result findSolution(int N, int K, const vector<int>& aOriginal)
 {
     std::pair<bool, vector<int>> result = { false, vector<int>() };
 
     vector<int> a(aOriginal);
+    // Add "sentinel" values at the beginning and end to simplify
+    // code slightly.
     a.insert(a.begin(), 0);
     a.insert(a.end(), 0);
 
@@ -32,7 +42,6 @@ std::pair<bool, vector<int>> solveOptimised(int N, int K, const vector<int>& aOr
     {
         if (a[i] != -1 && i - posOfLastDecided > 1)
         {
-
             auto nextDistinct = [&K](int value)
             {
                 int newValue = value + 1;
@@ -44,27 +53,28 @@ std::pair<bool, vector<int>> solveOptimised(int N, int K, const vector<int>& aOr
                 return newValue;
             };
 
-
             if (K == 2)
             {
-                if (a[i] != 0 && a[posOfLastDecided] != 0)
+                if (a[i] != 0 && a[posOfLastDecided] != 0) // Don't use this logic for first/ last decided!
                 {
                     const bool decidedAreDifferent = (a[i] != a[posOfLastDecided]);
                     const bool distanceIsOdd = (i - posOfLastDecided + 1) % 2 == 1;
                     if (decidedAreDifferent && distanceIsOdd)
-                        return { false, vector<int>() };
+                        return NoSolution;
                     if (!decidedAreDifferent && !distanceIsOdd)
-                        return { false, vector<int>() };
+                        return NoSolution;
                 }
             }
             // We know we can succeed - let's just figure out what to use to fill in the gaps!
-            int firstNewDecided = 1;
+            int newDecided = 1; // Arbitrary  - we'll be adjusting all new decided later if they don't work out!
             for (int j = posOfLastDecided + 1; j < i; j++)
             {
-                a[j] = firstNewDecided;
-                firstNewDecided = nextDistinct(firstNewDecided);
+                assert(a[j] == -1);
+                a[j] = newDecided;
+                newDecided = nextDistinct(newDecided);
             }
-            int dbgNumAdjustments = 0;
+            // Adjust if necessary.
+            int numAdjustments = 0;
             while (a[posOfLastDecided] == a[posOfLastDecided + 1] || a[i - 1] == a[i])
             {
                 // This block will run at most twice.
@@ -72,9 +82,9 @@ std::pair<bool, vector<int>> solveOptimised(int N, int K, const vector<int>& aOr
                 {
                     a[j] = nextDistinct(a[j]);
                 }
-                dbgNumAdjustments++;
+                numAdjustments++;
             }
-            assert(dbgNumAdjustments <= 2);
+            assert(numAdjustments <= 2);
             assert(a[posOfLastDecided + 1] != a[posOfLastDecided]);
             assert(a[i - 1] != a[i]);
         }
@@ -83,6 +93,7 @@ std::pair<bool, vector<int>> solveOptimised(int N, int K, const vector<int>& aOr
             posOfLastDecided = i;
     }
 
+    // Remove sentinels.
     a.pop_back();
     a.erase(a.begin());
     
@@ -92,6 +103,7 @@ std::pair<bool, vector<int>> solveOptimised(int N, int K, const vector<int>& aOr
 
 int main(int argc, char* argv[])
 {
+    // Pretty easy - hopefully the code speaks for itself :)
     ios::sync_with_stdio(false);
     
     const int T = read<int>();
@@ -107,15 +119,15 @@ int main(int argc, char* argv[])
             a[i] = read<int>();
         }
 
-        const auto solutionOptimised = solveOptimised(N, K, a);
-        cout << (solutionOptimised.first ? "YES" : "NO") << endl;
-        if (solutionOptimised.first)
+        const auto result = findSolution(N, K, a);
+        cout << (result.hasSolution ? "YES" : "NO") << endl;
+        if (result.hasSolution)
         {
-            auto a = solutionOptimised.second;
-            assert(unique(a.begin(), a.end()) == a.end());
-            for (const auto x : a)
+            auto solution = result.solution;
+            assert(unique(solution.begin(), solution.end()) == solution.end());
+            for (const auto a : solution)
             {
-                cout << x << " ";
+                cout << a << " ";
             }
             cout << endl;
 
