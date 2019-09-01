@@ -25,7 +25,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "DIR: ${DIR}"
 
 cppfilenamebasename=$(basename "${cppfilename}" .cpp)
-executablename="${cppfilenamebasename}-testsuite-generator"
+executablename="${cppfilenamebasename}-generator"
 
 if [ bruteforce ]; then
     bruteforceargs1='--testcase-gen-regex-filter=solutionBruteForce: (.*)' 
