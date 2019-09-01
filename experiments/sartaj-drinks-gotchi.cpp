@@ -40,7 +40,6 @@ void solutionBruteForceAux(const int N, const int P, const vector<int64_t>& a, i
         solutionBruteForceAux(N, P, a, index + 1, cupNum + 1, minCostSoFar + (cupNum + 1) * a[index], best);
 }
 
-#if 1
 int64_t solveBruteForce(int N, int P, const vector<int64_t>& a)
 {
     int64_t result = numeric_limits<int64_t>::max();
@@ -49,9 +48,7 @@ int64_t solveBruteForce(int N, int P, const vector<int64_t>& a)
     
     return result;
 }
-#endif
 
-#if 1
 int64_t solveOptimised(int N, int P, const vector<int64_t>& a)
 {
     vector<vector<int64_t>> minWithFirstNInPCups(N + 1, vector<int64_t>(P + 1, numeric_limits<int64_t>::max()));
@@ -72,19 +69,14 @@ int64_t solveOptimised(int N, int P, const vector<int64_t>& a)
             const auto addNewAToNewCup = (i >= j && (j > 1 || i == 1) ? minWithFirstNInPCups[i - 1][j - 1] + (j * a[i - 1]) : numeric_limits<int64_t>::max());
             const auto addNewAToOldCup = (i - 1 >= j ? minWithFirstNInPCups[i - 1][j] + (j * a[i - 1]) : numeric_limits<int64_t>::max());
 
-            cout << "i: " << i << " j: " << j << " addNewAToOldCup: " << addNewAToOldCup << " addNewAToNewCup: " << addNewAToNewCup << endl;
-
 
             minWithFirstNInPCups[i][j] = min(addNewAToNewCup, addNewAToOldCup);
 
-            cout << " set minWithFirstNInPCups[" << i << "][" << j << "] to " << minWithFirstNInPCups[i][j] << endl;
         }
     }
 
     return minWithFirstNInPCups[N][P];
 }
-#endif
-
 
 int main(int argc, char* argv[])
 {
