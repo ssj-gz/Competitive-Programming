@@ -39,15 +39,15 @@ int main(int argc, char* argv[])
         }
 
         bool fair = true;
-        for (int index1 = 0; index1 < numChildren; index1++)
+        for (int childIndex1 = 0; childIndex1 < numChildren; childIndex1++)
         {
-            for (int index2 = 0; index2 < numChildren; index2++)
+            for (int childIndex2 = 0; childIndex2 < numChildren; childIndex2++)
             {
-                if (ages[index1] < ages[index2] && !(moneyGiven[index1] < moneyGiven[index2]))
+                if (ages[childIndex1] < ages[childIndex2] && !(moneyGiven[childIndex1] < moneyGiven[childIndex2]))
                 {
                     fair = false;
                 }
-                if (ages[index1] == ages[index2] && !(moneyGiven[index1] == moneyGiven[index2]))
+                if (ages[childIndex1] == ages[childIndex2] && !(moneyGiven[childIndex1] == moneyGiven[childIndex2]))
                 {
                     fair = false;
                 }
