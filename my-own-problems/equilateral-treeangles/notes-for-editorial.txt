@@ -1,0 +1,3 @@
+Whenever I find a triple, I always add 6 to the total.  How do I know I'm not overcounting?
+
+Maybe show initial solution using light-first DFS, and ask why it works, what it's complexity is, and how to prove the latter.
