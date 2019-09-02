@@ -8,8 +8,6 @@
 
 #include <cassert>
 
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-
 using namespace std;
 
 template <typename T>
@@ -24,34 +22,10 @@ T read()
 
 int main(int argc, char* argv[])
 {
+    // Very simple - just do what the question says.
+    // The array will shrink by (at worst) a factor of 2
+    // each iteration, so no need for any cleverness :)
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            const int N = rand() % 100'000;
-            //const int K = rand() % 100'000;
-            const int K = 2;
-
-            cout << N << " " << K << endl;
-            for (int i = 0; i < N; i++)
-            {
-                cout << (rand() % 100001) << " ";
-            }
-            cout << endl;
-
-        }
-
-        return 0;
-    }
     
     const auto T = read<int>();
 
@@ -66,13 +40,13 @@ int main(int argc, char* argv[])
             aElement = read<int64_t>();
         }
 
-        vector<int64_t> b = a;
+        vector<int64_t> b = a; // Deal with the case where N < K.
         while (a.size() >= K)
         {
-            b.clear();
-
-            // It's more efficient to reverse the array and pop_back()
+            // Create the new b.
+            // It's more efficient to reverse the array "a" and pop_back()
             // than to leave it the right way and pop from the front.
+            b.clear();
             reverse(a.begin(), a.end());
             while (a.size() >= K)
             {
@@ -96,8 +70,6 @@ int main(int argc, char* argv[])
             cout << x << " ";
         }
         cout << endl;
-
-
     }
 
     assert(cin);
