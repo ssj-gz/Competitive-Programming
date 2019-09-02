@@ -41,7 +41,7 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
         if (a[i] != -1 && i - posOfLastDecided > 1)
         {
             // A decided value, preceded by undecideds; figure out how/ if we can fill in the block of
-            // undecides since the last decided.
+            // undecideds since the last decided.
             auto nextDistinct = [&K](int value)
             {
                 int newValue = value + 1;
