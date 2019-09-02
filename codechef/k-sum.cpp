@@ -3,8 +3,8 @@
 // Solution to: https://www.codechef.com/problems/ALC002
 //
 #include <iostream>
-#include <vector>
-#include <algorithm>
+#include <deque>
+#include <numeric>
 
 #include <cassert>
 
@@ -34,34 +34,29 @@ int main(int argc, char* argv[])
         const int N = read<int>();
         const int K = read<int>();
 
-        vector<int64_t> a(N);
+        deque<int64_t> a(N); // Deque's implement fast removal of prefixes.
         for (auto& aElement : a)
         {
             aElement = read<int64_t>();
         }
 
-        vector<int64_t> b = a; // Deal with the case where N < K.
+        deque<int64_t> b = a; // Deal with the case where N < K.
         while (a.size() >= K)
         {
             // Create the new b.
-            // It's more efficient to reverse the array "a" and pop_back()
-            // than to leave it the right way and pop from the front.
             b.clear();
-            reverse(a.begin(), a.end());
             while (a.size() >= K)
             {
-                int64_t sum = 0;
-                for (int i = 0; i < K; i++)
-                {
-                    sum += a.back();
-                    a.pop_back();
-                }
-                b.push_back(sum);
+                // Remove blocks of size K from the front of a, and 
+                // append their sums to b.
+                const int64_t sumOfKBlock = std::accumulate(a.begin(), a.begin() + K, static_cast<int64_t>(0));
+                a.erase(a.begin(), a.begin() + K);
+                b.push_back(sumOfKBlock);
             }
-            // Unreverse, and copy the remaining into b.
-            reverse(a.begin(), a.end());
+            // Copy the remaining elements of a into b.
             b.insert(b.end(), a.begin(), a.end());
 
+            // Prepare for the next iteration.
             a = b;
         }
 
