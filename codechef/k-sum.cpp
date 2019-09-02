@@ -40,11 +40,10 @@ int main(int argc, char* argv[])
             aElement = read<int64_t>();
         }
 
-        deque<int64_t> b = a; // Deal with the case where N < K.
         while (a.size() >= K)
         {
             // Create the new b.
-            b.clear();
+            deque<int64_t> b;
             while (a.size() >= K)
             {
                 // Remove blocks of size K from the front of a, and 
@@ -56,11 +55,12 @@ int main(int argc, char* argv[])
             // Copy the remaining elements of a into b.
             b.insert(b.end(), a.begin(), a.end());
 
-            // Prepare for the next iteration.
+            // Prepare for the next iteration, if there is one, or to print
+            // out the final result otherwise.
             a = b;
         }
 
-        for (const auto x : b)
+        for (const auto x : a)
         {
             cout << x << " ";
         }
