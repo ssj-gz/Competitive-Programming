@@ -1,17 +1,9 @@
 // Simon St James (ssjgz) - 2019-08-03
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h>
 
 using namespace std;
 
@@ -24,67 +16,7 @@ T read()
     return toRead;
 }
 
-bool solveBruteForce(int64_t N, int64_t K)
-{
-    cout << "N: " << N << " K: " << K << endl;
-    vector<int64_t> numInBoxCandidate1(K);
-    vector<int64_t> numInBoxCandidate2(K);
-
-    int64_t numApplesRemaining = N;
-
-    int minutesElapsed = 0;
-    while (numApplesRemaining > 0)
-    {
-        // Candidate1
-        for (int i = 0; i < K; i++)
-        {
-            numInBoxCandidate1[i]++;
-        }
-        // Candidate2
-        {
-            const int64_t minInBox = *std::min_element(numInBoxCandidate2.begin(), numInBoxCandidate2.end());
-            vector<int64_t> indicesWithMinInBox;
-            for (int64_t i = 0; i < K; i++)
-            {
-                if (numInBoxCandidate2[i] == minInBox)
-                {
-                    indicesWithMinInBox.push_back(i);
-                }
-            }
-            const int64_t randIndexWithMinInBox = indicesWithMinInBox[rand() % indicesWithMinInBox.size()];
-            numInBoxCandidate2[randIndexWithMinInBox] += K;
-        }
-
-        minutesElapsed++;
-        numApplesRemaining -= K;
-        cout << "minutesElapsed: " << minutesElapsed << " numApplesRemaining: " << numApplesRemaining << endl;
-        cout << " numInBoxCandidate1: " << endl;
-        for (const auto x : numInBoxCandidate1)
-        {
-            cout << x << " ";
-        }
-        cout << endl << " numInBoxCandidate2: " << endl;
-        for (const auto x : numInBoxCandidate2)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-    }
-
-    bool boxesEqual = true;
-    for (int64_t i = 0; i < K; i++)
-    {
-        if (numInBoxCandidate1[i] != numInBoxCandidate2[i])
-        {
-            //cout << " found difference at index " << i << " - numInBoxCandidate1: " << numInBoxCandidate1[i] << " numInBoxCandidate2: " << numInBoxCandidate2[i] << endl;
-            boxesEqual = false;
-        }
-    }
-
-    return boxesEqual;
-}
-
-bool solveOptimised(int64_t numApples, int64_t numBoxes)
+bool calcCanBoxContentsDiffer(int64_t numApples, int64_t numBoxes)
 {
     assert((numApples % numBoxes) == 0);
     assert(numApples >= numBoxes);
@@ -92,54 +24,61 @@ bool solveOptimised(int64_t numApples, int64_t numBoxes)
     // will have the same number (numApples / numBoxes) of
     // apples in it.
     //
-    // For candidate 2, things are a little trickier.
+    // For Candidate 2, things are a little trickier: after the first
+    // minute, one of the boxes will have numBoxes apples in it; the remaining
+    // (numBoxes - 1) will not i.e. boxes have different amounts in them (assuming numBoxes > 1).
+    // 
+    // After the second minute, two boxes will each have numBoxes apples in them; the
+    // remaining (numBoxes - 2) will not - still uneven.
     //
-    if ((numApples / numBoxes) % numBoxes == 0)
+    // After numBoxes minutes, all boxes will have the same number - "numBoxes" - of apples in them.
+    //
+    // In general, then, every numBoxes minutes Candidate 2 packages (numBoxes x numBoxes) apples and end up with an 
+    // equal number of apples in each box.  Thus, the boxes all contain
+    // an equal number of apples if and only if we have packaged a multiple of (numBoxes x numBoxes)
+    // apples.
+    //
+    // Thus, if numApples is not a multiple of numBoxes x numBoxes, then Candidate 2 will package an
+    // uneven number of apples in the boxes and, since Candidate 1 packages them evenly,
+    // Candidate 2's results are different from Candidate 1.
+    //
+    // If numApples *is* a multiple of numBoxes x numBoxes, then each box will have
+    //
+    //   numApples / (numBoxes x numBoxes) * numBoxes = numApples / numBoxes 
+    //
+    // apples in them - the same as Candidate 1! 
+    // 
+    // That is - Candidate 1 and Candidate 2 end up with different results if and only if
+    // numApples is *not* divisible by numBoxes x numBoxes.
+    if ((numApples / numBoxes) % numBoxes == 0) // Calculating numBoxes x numBoxes will likely overflow, so be a bit smarter :)
     {
-        // Have an equal number of apples in each box - in fact,
-        // numApples / numBoxes of them, just like Candidate1!
-        return true;
+        // Candidate 2 packages an equal number of apples in each box - in fact,
+        // numApples / numBoxes of them, just like Candidate 1!
+        // Box contents cannot differ.
+        return false;
     }
     else
     {
-        // Have an unequal number of apples in each box - must
-        // differ from Candidate1, all of whose boxes contain
+        // Candidate 2 packages an unequal number of apples in each box - must
+        // differ from Candidate 1, all of whose boxes contain
         // the same number of apples.
-        return false;
+        return true;
     }
 }
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int64_t K = rand() % 1000 + 1;
-        const int64_t N = ((rand() % 1000) + 1) * K;
-        cout << 1 << endl;
-        cout << N << " " << K << endl;
-        return 0;
-    }
-
+    // Easy - see calcCanBoxContentsDiffer for full details.  The only potentially
+    // tricky bit is avoiding overflow when deciding if numApples is divisible by
+    // (numBoxes x numBoxes), but this is easily dealt with :)
     const int T = read<int>();
     for (int t = 0; t < T; t++)
     {
         const int64_t N = read<int64_t>();
         const int64_t K = read<int64_t>();
 
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(N, K);
-        cout << "Can box contents differ? " << (solutionBruteForce ? "NO" : "YES") << endl;
-        const auto solutionOptimised = solveOptimised(N, K);
-        //cout << "solutionOptimised: " << (solutionOptimised ? "NO" : "YES") << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#else
-        const auto solutionOptimised = solveOptimised(N, K);
-        cout << (solutionOptimised ? "NO" : "YES") << endl;
-#endif
+        const auto canBoxContentsDiffer = calcCanBoxContentsDiffer(N, K);
+        cout << (canBoxContentsDiffer ? "YES" : "NO") << endl;
     }
 }
 
