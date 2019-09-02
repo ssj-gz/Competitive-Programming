@@ -1072,3 +1072,31 @@ ostream& operator<<(ostream& os, const BigNum& toPrint)
 }
 
 // End BigNum class.
+
+// Begin "asBinary".
+
+string asBinary(int64_t n)
+{
+    string asBinary;
+    if (n == 0)
+        return "0";
+    while (n > 0)
+    {
+        if ((n & 1) == 1)
+        {
+            asBinary.push_back('1');
+        }
+        else
+        {
+            asBinary.push_back('0');
+        }
+
+        n >>= 1;
+    }
+
+    reverse(asBinary.begin(), asBinary.end());
+
+    return asBinary;
+}
+
+// End "asBinary".
