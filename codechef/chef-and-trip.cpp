@@ -32,8 +32,9 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
     vector<int> a(aOriginal);
     // Add "sentinel" values at the beginning and end to simplify
     // code slightly.
-    a.insert(a.begin(), 0);
-    a.insert(a.end(), 0);
+    const int sentinelValue = -2;
+    a.insert(a.begin(), sentinelValue);
+    a.insert(a.end(), sentinelValue);
 
     int posOfLastDecided = 0;
     for (int i = 1; i < a.size(); i++)
@@ -55,7 +56,7 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
 
             if (K == 2)
             {
-                const bool undecidedsAreSuffixOrPrefix = (a[i] == 0 || a[posOfLastDecided] == 0);
+                const bool undecidedsAreSuffixOrPrefix = (a[i] == sentinelValue || a[posOfLastDecided] == sentinelValue);
                 if (!undecidedsAreSuffixOrPrefix) // Don't use this logic for prefixes and suffixes - they can always be satisfied!
                 {
                     const bool decidedAreDifferent = (a[i] != a[posOfLastDecided]);
@@ -125,12 +126,12 @@ int main(int argc, char* argv[])
         if (result.hasSolution)
         {
             auto solution = result.solution;
-            assert(unique(solution.begin(), solution.end()) == solution.end());
             for (const auto a : solution)
             {
                 cout << a << " ";
             }
             cout << endl;
+            assert(unique(solution.begin(), solution.end()) == solution.end());
 
         }
         
