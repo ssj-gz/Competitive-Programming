@@ -32,12 +32,12 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
     vector<int> a(aOriginal);
     // Add "sentinel" values at the beginning and end to simplify
     // code slightly.
-    const int sentinelValue = -2;
+    const auto sentinelValue = -2;
     a.insert(a.begin(), sentinelValue);
     a.insert(a.end(), sentinelValue);
 
-    int posOfLastDecided = 0;
-    for (int i = 1; i < a.size(); i++)
+    auto posOfLastDecided = 0;
+    for (auto i = 1; i < a.size(); i++)
     {
         if (a[i] != -1 && i - posOfLastDecided > 1)
         {
@@ -45,7 +45,7 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
             // undecideds since the last decided.
             auto nextDistinct = [&K](int value)
             {
-                int newValue = value + 1;
+                auto newValue = value + 1;
                 if (newValue == K + 1)
                     newValue = 1;
                 assert(1 <= newValue && newValue <= K);
@@ -68,19 +68,19 @@ Result findSolution(int N, int K, const vector<int>& aOriginal)
                 }
             }
             // We know we can succeed - let's just figure out what to use to fill in the gaps!
-            int newDecided = 1; // Arbitrary  - we'll be adjusting all new decided later if they don't work out!
-            for (int j = posOfLastDecided + 1; j < i; j++)
+            auto newDecided = 1; // Arbitrary  - we'll be adjusting all new decided later if they don't work out!
+            for (auto j = posOfLastDecided + 1; j < i; j++)
             {
                 assert(a[j] == -1);
                 a[j] = newDecided;
                 newDecided = nextDistinct(newDecided);
             }
             // Adjust if necessary.
-            int numAdjustments = 0;
+            auto numAdjustments = 0;
             while (a[posOfLastDecided] == a[posOfLastDecided + 1] || a[i - 1] == a[i])
             {
                 // This block of code inside the "while" will execute at most twice.
-                for (int j = posOfLastDecided + 1; j < i; j++)
+                for (auto j = posOfLastDecided + 1; j < i; j++)
                 {
                     a[j] = nextDistinct(a[j]);
                 }
@@ -108,17 +108,17 @@ int main(int argc, char* argv[])
     // Pretty easy - hopefully the code speaks for itself :)
     ios::sync_with_stdio(false);
     
-    const int T = read<int>();
-    for (int t = 0; t < T; t++)
+    const auto T = read<int>();
+    for (auto t = 0; t < T; t++)
     {
-        const int N = read<int>();
-        const int K = read<int>();
+        const auto N = read<int>();
+        const auto K = read<int>();
 
         vector<int> a(N);
 
-        for (int i = 0; i < N; i++)
+        for (auto& aElement : a)
         {
-            a[i] = read<int>();
+            aElement = read<int>();
         }
 
         const auto result = findSolution(N, K, a);
