@@ -2,18 +2,10 @@
 // 
 // Solution to: https://www.codechef.com/problems/DESTCELL
 //
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -28,27 +20,27 @@ T read()
 
 int main(int argc, char* argv[])
 {
+    // Very easy one - just basically do what it says and simulate the
+    // two Hero's Journeys (tee-hee), jumping each block of K "resting steps" in one go.
+    // The only tricky part is the asymptotic analysis, but this is fairly
+    // well-known: to initialise the Cells takes O(N x M).  Then
+    // K = 0 takes ~N x M steps; K = 1 takes ~(N x M) / 2 steps; 
+    // K = 2 takes ~(N x M) / 3 steps i.e. enacting a Hero's Journey takes:
+    //
+    //   ~(N x M)/1 + (N x M)/2 + (N x M)/3 + ...
+    //   ~(N x M) * (1/1 + 1/2 + 1/3 + ...)
+    //   ~(N x M) * ln(N x M)
+    //
+    // steps, using the well-known fact that the Harmonic Series over x terms
+    // sums to approx ln x.
+    //
+    // Clearing the Cells would be O(N x M) naively (too slow) so we just
+    // track the cells that have been destroyed and un-destroy precisely
+    // these, so the cost of restoring the Cells for each K is amortised into
+    // the cost of destroying the Cells for each K.
+
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 2;
-
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            cout << (1000 - rand() % 10) << " " << (1000 - rand() % 10) << endl;
-        }
-
-        return 0;
-    }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -106,6 +98,7 @@ int main(int argc, char* argv[])
                     const auto& cellToDestroy = hero2VisitedCells[cellNum];
                     if (!isCellDestroyed[cellToDestroy.rowNum][cellToDestroy.colNum])
                     {
+                        // Don't count a Cell destroyed by both Heroes twice!
                         destroyedCells.push_back(cellToDestroy);
                     }
                     cellNum += (k + 1);
