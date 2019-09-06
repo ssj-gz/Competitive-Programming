@@ -52,17 +52,22 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
 
     for (const auto query : queries)
     {
+        cout << "query: " << query << endl;
         int64_t queryResult = 0;
         for (int i = 0; i < n; i++)
         {
-            int64_t subarrayGcd = a[i];
             for (int j = i; j < n; j++)
             {
-                subarrayGcd = gcd(subarrayGcd, a[j]);
-            }
-            if ((query % subarrayGcd) == 0)
-            {
-                queryResult++;
+                int64_t subarrayGcd = a[i];
+                for (int k = i; k <= j; k++)
+                {
+                    subarrayGcd = gcd(subarrayGcd, a[k]);
+                }
+                cout << "i: " << i << " j: " << j << " gcd[i,j] = " << subarrayGcd << endl;
+                if ((query % subarrayGcd) == 0)
+                {
+                    queryResult++;
+                }
             }
         }
         results.push_back(queryResult);
