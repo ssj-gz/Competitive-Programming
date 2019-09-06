@@ -14,6 +14,7 @@
 #include <set>
 #include <cmath>
 #include <limits>
+#include <algorithm>
 
 #include <cassert>
 
