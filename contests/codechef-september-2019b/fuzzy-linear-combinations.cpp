@@ -107,7 +107,7 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
 
     for (const auto query : queries)
     {
-        cout << "query: " << query << endl;
+        //cout << "query: " << query << endl;
         int64_t queryResult = 0;
         for (int i = 0; i < n; i++)
         {
@@ -118,7 +118,7 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
                 {
                     subarrayGcd = gcd(subarrayGcd, a[k]);
                 }
-                cout << "i: " << i << " j: " << j << " gcd[i,j] = " << subarrayGcd << endl;
+                //cout << "i: " << i << " j: " << j << " gcd[i,j] = " << subarrayGcd << endl;
                 if ((query % subarrayGcd) == 0)
                 {
                     queryResult++;
@@ -225,6 +225,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     vector<int64_t> results;
     for (const auto query : queries)
     {
+        cout << " query: " << query << " result: " << numForK[query] << endl;
         results.push_back(numForK[query]);
     }
     return results;
@@ -241,14 +242,14 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
-        const int N = rand() % 100 + 1;
-        const int maxA = rand() % 1000 + 1;
+        const int N = rand() % 10 + 1;
+        const int maxA = rand() % 5000 + 1;
 
         cout << N << endl;
 
         for (int i = 0; i < N; i++)
         {
-            cout << ((rand() % 1000 + 1)) << " ";
+            cout << ((rand() % maxA + 1)) << " ";
         }
         cout << endl;
 
@@ -257,7 +258,7 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < Q; i++)
         {
-            cout << ((rand() % (20 * maxA))) << " ";
+            cout << ((rand() % (20 * maxA)) + 1) << " ";
         }
         cout << endl;
 
@@ -280,15 +281,12 @@ int main(int argc, char* argv[])
     }
 
 #ifdef BRUTE_FORCE
-#if 1
     const auto solutionBruteForce = solveBruteForce(a, queries);
-    cout << "solution for query: " << endl;
+    cout << "blah: " << endl;
     for (const auto& x : solutionBruteForce)
     {
         cout << "solutionBruteForce: " << x << endl;
     }
-#endif
-#if 1
     const auto solutionOptimised = solveOptimised(a, queries);
     cout << "solutionOptimised:  " << endl;
     for (const auto& x : solutionOptimised)
@@ -297,7 +295,6 @@ int main(int argc, char* argv[])
     }
 
     assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
     const auto solutionOptimised = solveOptimised();
     cout << solutionOptimised << endl;
