@@ -237,8 +237,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
         struct GcdRange
         {
-            int left = numeric_limits<int>::max();
-            int right = -1;
+            int left = 0;
+            int right = numeric_limits<int>::max();
         };
         map<int64_t, GcdRange> rangeForGcd;
         for (const auto gcd : decreasingFactors)
@@ -246,9 +246,10 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             auto& rangeForThisGcd = rangeForGcd[gcd];
             auto& posInfoForThisGcd = factorPosInfos[gcd];
             int posOfLastGcd = -1;
-            cout << "i: " << i << " gcd: " << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
+            cout << "i: " << i << " gcd: " << gcd << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
             if (posInfoForThisGcd.lastPosAdded == -1)
             {
+                posOfLastGcd = i - 1;
             }
             else
             {
@@ -263,12 +264,11 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 }
             }
 #if 1
-            int j = i;
+            int j = i - 1;
             for (; j >= 0; j--)
             {
-                if ((a[i] % gcd) != 0)
+                if ((a[j] % gcd) != 0)
                 {
-                    j++;
                     break;
                 }
             }
@@ -276,13 +276,20 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
             assert(j == posOfLastGcd);
             rangeForThisGcd.right = min(rangeForThisGcd.right, i);
-            rangeForThisGcd.left = posOfLastGcd;
-            numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
+            rangeForThisGcd.left = posOfLastGcd + 1;
+            cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
+            if (rangeForThisGcd.right >= 0)
+            {
+                numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
+            }
             for (const auto factorOfGcd : factorsOfA[i])
             {
                 if (factorOfGcd < gcd && ((gcd % factorOfGcd) == 0))
                 {
-                    rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, posOfLastGcd - 1);
+                    //if (rangeForThisGcd.left != -1)
+                    {
+                        rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, rangeForThisGcd.left - 1);
+                    }
                 }
             }
         }
@@ -290,9 +297,9 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             blah[factor] += dbgNumSequencesWithGcd[factor];
             cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
+            assert(dbgNumSequencesWithGcd[factor] == numSequencesWithGcd[factor]);
         }
 #endif
-        previousFactors = factorsOfA[i];
         for (const auto factor : factorsOfA[i])
         {
             bool factorAdded = true;
@@ -306,9 +313,11 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             }
             if (factorAdded)
             {
+                cout << "i: " << i << " added factor: " << factor << endl;
                 factorPosInfos[factor].lastPosAdded = i;
             }
         }
+        previousFactors = factorsOfA[i];
     }
     for (int factor = 1; factor <= maxK; factor++)
     {
