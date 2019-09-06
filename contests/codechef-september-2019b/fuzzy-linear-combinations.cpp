@@ -204,11 +204,20 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
 
     vector<vector<int64_t>> factorsOfA(n);
+    map<int64_t, vector<int64_t>> factorsLookup;
     //vector<int64_t> allFactors;
     for (int i = 0; i < n; i++)
     {
-        factorsOfA[i] = factors(a[i], primesUpToRootMaxN, maxK);
-        sort(factorsOfA[i].begin(), factorsOfA[i].end());
+        if (factorsLookup.find(a[i]) == factorsLookup.end())
+        {
+            factorsOfA[i] = factors(a[i], primesUpToRootMaxN, maxK);
+            sort(factorsOfA[i].begin(), factorsOfA[i].end());
+            factorsLookup[a[i]] = factorsOfA[i];
+        }
+        else
+        {
+            factorsOfA[i] = factorsLookup[a[i]];
+        }
         //allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
     }
     //cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
