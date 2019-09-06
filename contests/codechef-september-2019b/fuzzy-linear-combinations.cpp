@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -31,9 +31,9 @@ T read()
     return toRead;
 }
 
-int64_t gcd(int64_t u, int64_t v)
+uint64_t gcd(uint64_t u, uint64_t v)
 {
-    int64_t shift = 0;
+    uint64_t shift = 0;
 
     /* GCD(0,v) == v; GCD(u,0) == u, GCD(0,0) == 0 */
     if (u == 0) return v;
@@ -62,7 +62,7 @@ int64_t gcd(int64_t u, int64_t v)
            swapping is just pointer movement, and the subtraction
            can be done in-place. */
         if (u > v) {
-            int64_t t = v; v = u; u = t; // Swap u and v.
+            uint64_t t = v; v = u; u = t; // Swap u and v.
         }
 
         v -= u; // Here v >= u.
@@ -110,8 +110,8 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
             factor *= primeToPower;
         }
         //cout << " factor: " << factor << endl;
-        if (factor <= maxFactor)
-            factors.push_back(factor);
+        //if (factor <= maxFactor)
+        factors.push_back(factor);
 
         int index = 0;
         while (index < powerOfPrime.size() && powerOfPrime[index] == primeFactorisation[index].second)
@@ -257,7 +257,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             auto& rangeForThisGcd = rangeForGcd[gcd];
             auto& posInfoForThisGcd = factorPosInfos[gcd];
             int posOfLastGcd = -1;
-            //cout << "i: " << i << " gcd: " << gcd << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
+            cout << "i: " << i << " gcd: " << gcd << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
             if (posInfoForThisGcd.lastPosAdded == -1)
             {
                 posOfLastGcd = i - 1;
@@ -288,7 +288,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 #endif
             rangeForThisGcd.right = min(rangeForThisGcd.right, i);
             rangeForThisGcd.left = posOfLastGcd + 1;
-            //cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
+            cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
             if (rangeForThisGcd.right >= 0)
             {
                 numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
@@ -306,7 +306,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
 #ifdef BRUTE_FORCE
         int gcdForSubsequence = a[i];
-        map<int64_t, int> dbgNumSequencesWithGcd;
+        map<int64_t, int64_t> dbgNumSequencesWithGcd;
         for (int j = i; j >= 0; j--)
         {
             gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
@@ -315,6 +315,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
         for (const auto factor : factorsOfA[i])
         {
+            cout << " factor: " << factor << " dbgNumSequencesWithGcd[factor]: " << dbgNumSequencesWithGcd[factor] << " numSequencesWithGcd[factor]: " << numSequencesWithGcd[factor] << endl;
             assert(dbgNumSequencesWithGcd[factor] == numSequencesWithGcd[factor]);
         }
 #endif
@@ -374,8 +375,9 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 100;
-        const int maxA = rand() % 1000 + 1;
+        //const int N = rand() % 100'000;
+        const int N = 10;
+        const int maxA = rand() % 1'000'000'000ULL + 1;
 
         cout << N << endl;
 
@@ -385,12 +387,13 @@ int main(int argc, char* argv[])
         }
         cout << endl;
 
-        const int Q = rand() % 1000 + 1;
+        //const int Q = rand() % 1000 + 1;
+        const int Q = 100'000;
         cout << Q << endl;
 
         for (int i = 0; i < Q; i++)
         {
-            cout << ((rand() % (20 * maxA)) + 1) << " ";
+            cout << ((rand() % 1'000'000) + 1) << " ";
         }
         cout << endl;
 
@@ -428,7 +431,7 @@ int main(int argc, char* argv[])
 
     assert(solutionOptimised == solutionBruteForce);
 #else
-    const auto solutionOptimised = solveBruteForce(a, queries);
+    const auto solutionOptimised = solveOptimised(a, queries);
     for (const auto& x : solutionOptimised)
     {
         cout << x << endl;
