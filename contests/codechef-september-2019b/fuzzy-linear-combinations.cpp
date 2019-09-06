@@ -96,7 +96,25 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
+        const int N = rand() % 100 + 1;
+        const int maxA = rand() % 1000 + 1;
 
+        cout << N << endl;
+
+        for (int i = 0; i < N; i++)
+        {
+            cout << ((rand() % 1000 + 1)) << " ";
+        }
+        cout << endl;
+
+        const int Q = rand() % 100 + 1;
+        cout << Q << endl;
+
+        for (int i = 0; i < Q; i++)
+        {
+            cout << ((rand() % (20 * maxA))) << " ";
+        }
+        cout << endl;
 
         return 0;
     }
@@ -119,10 +137,10 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
 #if 1
     const auto solutionBruteForce = solveBruteForce(a, queries);
-    cout << "solutionBruteForce: " << endl;
+    cout << "solution for query: " << endl;
     for (const auto& x : solutionBruteForce)
     {
-        cout << x << endl;
+        cout << "solutionBruteForce: " << x << endl;
     }
 #endif
 #if 0
