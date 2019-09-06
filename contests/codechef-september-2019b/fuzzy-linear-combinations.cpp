@@ -113,13 +113,10 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
         int64_t queryResult = 0;
         for (int i = 0; i < n; i++)
         {
+            int64_t subarrayGcd = a[i];
             for (int j = i; j < n; j++)
             {
-                int64_t subarrayGcd = a[i];
-                for (int k = i; k <= j; k++)
-                {
-                    subarrayGcd = gcd(subarrayGcd, a[k]);
-                }
+                subarrayGcd = gcd(subarrayGcd, a[j]);
                 //cout << "i: " << i << " j: " << j << " gcd[i,j] = " << subarrayGcd << endl;
                 if ((query % subarrayGcd) == 0)
                 {
@@ -351,9 +348,9 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 10 + 1;
-        //const int maxA = rand() % 5000 + 1;
-        const int maxA = 15 + 1;
+        const int N = rand() % 100 + 1;
+        const int maxA = rand() % 5000 + 1;
+        //const int maxA = 15 + 1;
 
         cout << N << endl;
 
