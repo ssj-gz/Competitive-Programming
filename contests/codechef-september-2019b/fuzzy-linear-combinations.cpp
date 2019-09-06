@@ -81,6 +81,7 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
     vector<std::pair<int64_t, int64_t>> primeFactorisation;
     for (const auto prime : primesUpToRootMaxN)
     {
+        const auto oldNumber = number;
         int numOfPrime = 0;
         while (number % prime == 0)
         {
@@ -91,6 +92,8 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
         {
             primeFactorisation.push_back({prime, numOfPrime});
         }
+        if (prime * prime > oldNumber)
+            break;
     }
     if (number > 1)
         primeFactorisation.push_back({number, 1});
@@ -368,6 +371,23 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
 int main(int argc, char* argv[])
 {
+#if 0
+    map<int64_t, int64_t> blah;
+    for (int i = 0; i < 1'000'000; i++)
+    {
+        blah[i]++;
+    }
+    for (int i = 0; i < 1'000'000; i++)
+    {
+        blah[i] += i + rand() % 30;
+    }
+    int64_t nose = 0;
+    for (int i = 0; i < 1'000'000; i++)
+    {
+        nose += blah[i];
+    }
+    return 0;
+#endif
     ios::sync_with_stdio(false);
     if (argc == 2 && string(argv[1]) == "--test")
     {
@@ -375,8 +395,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const int N = rand() % 100'000;
-        const int N = 10;
+        const int N = rand() % 1000 + 1;
+        //const int N = 10;
         const int maxA = rand() % 1'000'000'000ULL + 1;
 
         cout << N << endl;
