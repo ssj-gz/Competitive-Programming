@@ -188,24 +188,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     for (int i = 0; i < n; i++)
     {
         cout << "i: " << i << " a[i]: " << a[i] << endl;
-#if 0
-        const int numFactorsOfA = factorsOfA[i].size();
-        vector<int64_t> numSequencesWithMinGcdOfFactor(numFactorsOfA);
-        for (int factorOfAIndex = 0; factorOfAIndex < numFactorsOfA; factorOfAIndex++)
-        {
-            const int64_t factor = factorsOfA[i][factorOfAIndex];
-            numSequencesWithMinGcdOfFactor[factorOfAIndex] += num;
-            for (int j = factorOfAIndex + 1; j < numFactorsOfA; j++)
-            {
-                if (factorsOfA[i][j] % factor == 0)
-                {
-                    numSequencesWithMinGcdOfFactor[j] -= num;
-                }
-            }
-
-            numForK[factor] += numSequencesWithMinGcdOfFactor[factorOfAIndex];
-        }
-#else
         map<int64_t, int> dbgNumSequencesWithGcd;
         map<int64_t, int> numSequencesWithGcd;
         int gcdForSubsequence = a[i];
@@ -296,7 +278,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
             assert(dbgNumSequencesWithGcd[factor] == numSequencesWithGcd[factor]);
         }
-#endif
         for (const auto factor : factorsOfA[i])
         {
             bool factorAdded = true;
