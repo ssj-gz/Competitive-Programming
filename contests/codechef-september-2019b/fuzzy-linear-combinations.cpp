@@ -276,7 +276,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 }
             }
         }
-        
+
         assert(is_sorted(factorsOfA[i].begin(), factorsOfA[i].end()));
         vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
         struct GcdRange
@@ -333,7 +333,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             {
                 if (factorOfGcd < gcd 
                         //&& ((gcd % factorOfGcd) == 0)
-                        )
+                   )
                 {
                     //if (rangeForThisGcd.left != -1)
                     {
@@ -365,23 +365,42 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 blah[factor] += numSequencesWithGcd[factor];
             //cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
         }
-        for (const auto factor : factorsOfA[i])
         {
-            bool factorAdded = true;
-            for (const auto previousFactor : previousFactors)
+            const auto& factors = factorsOfA[i];
+            auto factorIter = factors.begin();
+            auto previousFactorIter = previousFactors.begin();
+            while (factorIter != factors.end())
             {
-                if (factor == previousFactor)
+                while (previousFactorIter != previousFactors.end() && *previousFactorIter < *factorIter)
                 {
-                    factorAdded = false;
-                    break;
+                    previousFactorIter++;
+                }
+                if (previousFactorIter == previousFactors.end())
+                {
+                    factorPosInfos[*factorIter].lastPosAdded = i;
+                    factorIter++;
+                    continue;
+                }
+                else
+                {
+                    while (factorIter != factors.end() && *factorIter < *previousFactorIter)
+                    {
+                        factorPosInfos[*factorIter].lastPosAdded = i;
+                        factorIter++;
+                    }
+                    if (factorIter != factors.end())
+                    {
+                        if (*factorIter == *previousFactorIter)
+                        {
+                            factorIter++;
+                            previousFactorIter++;
+                            continue;
+                        }
+                    }
                 }
             }
-            if (factorAdded)
-            {
-                //cout << "i: " << i << " added factor: " << factor << endl;
-                factorPosInfos[factor].lastPosAdded = i;
-            }
         }
+
         previousFactors = factorsOfA[i];
     }
     for (int factor = 1; factor <= maxK; factor++)
