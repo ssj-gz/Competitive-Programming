@@ -179,7 +179,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     vector<int64_t> numForK(maxK + 1);
 
-    map<int64_t, int>  blah;
+    map<int64_t, int64_t>  blah;
     set<int64_t> currentFactors;
     vector<int64_t> previousFactors;
     struct FactorPosInfo
@@ -192,7 +192,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     for (int i = 0; i < n; i++)
     {
         //cout << "i: " << i << " a[i]: " << a[i] << endl;
-        map<int64_t, int> numSequencesWithGcd;
+        map<int64_t, int64_t> numSequencesWithGcd;
         for (const auto previousFactor : previousFactors)
         {
             bool previousFactorDropped = true;
