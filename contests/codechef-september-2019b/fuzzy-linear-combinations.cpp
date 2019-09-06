@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <map>
 #include <cmath>
 
 #include <cassert>
@@ -134,7 +135,6 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
 #if 1
 vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& queries)
 {
-    vector<int64_t> results;
     const int n = a.size();
 
     const int rootMaxN = sqrt(1'000'000'000UL);
@@ -168,7 +168,61 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         factorsOfA[i] = factors(a[i], primesUpToRootMaxN);
     }
 
+    const int maxK = 1'000'000;
+    vector<int64_t> numForK(maxK + 1);
 
+    for (int i = 0; i < n; i++)
+    {
+#if 0
+        const int numFactorsOfA = factorsOfA[i].size();
+        vector<int64_t> numSequencesWithMinGcdOfFactor(numFactorsOfA);
+        for (int factorOfAIndex = 0; factorOfAIndex < numFactorsOfA; factorOfAIndex++)
+        {
+            const int64_t factor = factorsOfA[i][factorOfAIndex];
+            numSequencesWithMinGcdOfFactor[factorOfAIndex] += num;
+            for (int j = factorOfAIndex + 1; j < numFactorsOfA; j++)
+            {
+                if (factorsOfA[i][j] % factor == 0)
+                {
+                    numSequencesWithMinGcdOfFactor[j] -= num;
+                }
+            }
+
+            numForK[factor] += numSequencesWithMinGcdOfFactor[factorOfAIndex];
+        }
+#else
+        map<int64_t, int> numSequencesWithGcd;
+        int gcdForSubsequence = a[i];
+        for (int j = i; j >= 0; j--)
+        {
+            gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
+            numSequencesWithGcd[gcdForSubsequence]++;
+        }
+        map<int64_t, int>  blah;
+        for (const auto factor : factorsOfA[i])
+        {
+            blah[factor] += numSequencesWithGcd[factor];
+            for (const auto greaterFactor : factorsOfA[i])
+            {
+                if (greaterFactor > factor && ((greaterFactor % factor) == 0))
+                {
+                    blah[greaterFactor] -= blah[factor];
+                }
+            }
+            for (int k = factor; k <= maxK; k += factor)
+            {
+                numForK[k] += blah[factor];
+            }
+        }
+#endif
+    }
+
+
+    vector<int64_t> results;
+    for (const auto query : queries)
+    {
+        results.push_back(numForK[query]);
+    }
     return results;
 }
 #endif
@@ -233,7 +287,7 @@ int main(int argc, char* argv[])
 #if 1
     const auto solutionOptimised = solveOptimised(a, queries);
     cout << "solutionOptimised:  " << endl;
-    for (const auto& x : solutionBruteForce)
+    for (const auto& x : solutionOptimised)
     {
         cout << x << endl;
     }
