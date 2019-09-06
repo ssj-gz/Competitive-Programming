@@ -172,6 +172,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     const int maxK = 1'000'000;
     vector<int64_t> numForK(maxK + 1);
 
+    map<int64_t, int>  blah;
     for (int i = 0; i < n; i++)
     {
         cout << "i: " << i << " a[i]: " << a[i] << endl;
@@ -201,24 +202,21 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             numSequencesWithGcd[gcdForSubsequence]++;
             cout << " # with gcd: " << gcdForSubsequence << " - " << numSequencesWithGcd[gcdForSubsequence] << endl;
         }
-        map<int64_t, int>  blah;
         for (const auto factor : factorsOfA[i])
         {
             blah[factor] += numSequencesWithGcd[factor];
-            for (const auto greaterFactor : factorsOfA[i])
-            {
-                if (greaterFactor > factor && ((greaterFactor % factor) == 0))
-                {
-                    //blah[greaterFactor] -= blah[factor];
-                }
-            }
-            cout << " factor: " << factor << " blah: " << blah[factor] << endl;
+        }
+#endif
+    }
+    for (int factor = 1; factor <= maxK; factor++)
+    {
+        if (blah.find(factor) != blah.end())
+        {
             for (int k = factor; k <= maxK; k += factor)
             {
                 numForK[k] += blah[factor];
             }
         }
-#endif
     }
 
 
