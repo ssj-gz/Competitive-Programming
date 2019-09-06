@@ -240,22 +240,43 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     {
         //cout << "i: " << i << " a[i]: " << a[i] << endl;
         map<int64_t, int64_t> numSequencesWithGcd;
-        for (const auto previousFactor : previousFactors)
+
         {
-            bool previousFactorDropped = true;
-            for (const auto factor : factorsOfA[i])
+            auto previousFactorIter = previousFactors.begin();
+            const auto& factors = factorsOfA[i];
+            auto factorIter = factors.begin();
+            while (previousFactorIter != previousFactors.end())
             {
-                if (factor == previousFactor)
+                while (factorIter != factors.end() && *factorIter < *previousFactorIter)
                 {
-                    previousFactorDropped = false;
-                    break;
+                    factorIter++;
+                }
+                if (factorIter == factors.end())
+                {
+                    factorPosInfos[*previousFactorIter].lastPosRemoved = i;
+                    previousFactorIter++;
+                    continue;
+                }
+                else
+                {
+                    while (previousFactorIter != previousFactors.end() && *previousFactorIter < *factorIter)
+                    {
+                        factorPosInfos[*previousFactorIter].lastPosRemoved = i;
+                        previousFactorIter++;
+                    }
+                    if (previousFactorIter != previousFactors.end())
+                    {
+                        if (*previousFactorIter == *factorIter)
+                        {
+                            previousFactorIter++;
+                            factorIter++;
+                            continue;
+                        }
+                    }
                 }
             }
-            if (previousFactorDropped)
-            {
-                factorPosInfos[previousFactor].lastPosRemoved = i;
-            }
         }
+        
         assert(is_sorted(factorsOfA[i].begin(), factorsOfA[i].end()));
         vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
         struct GcdRange
