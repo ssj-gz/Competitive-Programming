@@ -209,13 +209,14 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             numForK[factor] += numSequencesWithMinGcdOfFactor[factorOfAIndex];
         }
 #else
+        map<int64_t, int> dbgNumSequencesWithGcd;
         map<int64_t, int> numSequencesWithGcd;
         int gcdForSubsequence = a[i];
         for (int j = i; j >= 0; j--)
         {
             gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
-            numSequencesWithGcd[gcdForSubsequence]++;
-            cout << " # with gcd: " << gcdForSubsequence << " - " << numSequencesWithGcd[gcdForSubsequence] << endl;
+            dbgNumSequencesWithGcd[gcdForSubsequence]++;
+            cout << " # with gcd: " << gcdForSubsequence << " - " << dbgNumSequencesWithGcd[gcdForSubsequence] << endl;
         }
         for (const auto previousFactor : previousFactors)
         {
@@ -233,6 +234,65 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 factorPosInfos[previousFactor].lastPosRemoved = i;
             }
         }
+        vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
+        struct GcdRange
+        {
+            int left = numeric_limits<int>::max();
+            int right = -1;
+        };
+        map<int64_t, GcdRange> rangeForGcd;
+        for (const auto gcd : decreasingFactors)
+        {
+            auto& rangeForThisGcd = rangeForGcd[gcd];
+            auto& posInfoForThisGcd = factorPosInfos[gcd];
+            int posOfLastGcd = -1;
+            cout << "i: " << i << " gcd: " << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
+            if (posInfoForThisGcd.lastPosAdded == -1)
+            {
+            }
+            else
+            {
+                if (posInfoForThisGcd.lastPosAdded > posInfoForThisGcd.lastPosRemoved)
+                {
+                    posOfLastGcd = posInfoForThisGcd.lastPosAdded - 1;
+                }
+                else
+                {
+                    //posOfLastGcd = posInfoForThisGcd.lastPosRemoved;
+                    posOfLastGcd = i - 1;
+                }
+            }
+#if 1
+            int j = i;
+            for (; j >= 0; j--)
+            {
+                if ((a[i] % gcd) != 0)
+                {
+                    j++;
+                    break;
+                }
+            }
+#endif
+            cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
+            assert(j == posOfLastGcd);
+            rangeForThisGcd.right = min(rangeForThisGcd.right, i);
+            rangeForThisGcd.left = posOfLastGcd;
+            numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
+            for (const auto factorOfGcd : factorsOfA[i])
+            {
+                if (factorOfGcd < gcd && ((gcd % factorOfGcd) == 0))
+                {
+                    rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, posOfLastGcd - 1);
+                }
+            }
+        }
+        for (const auto factor : factorsOfA[i])
+        {
+            blah[factor] += dbgNumSequencesWithGcd[factor];
+            cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
+        }
+#endif
+        previousFactors = factorsOfA[i];
         for (const auto factor : factorsOfA[i])
         {
             bool factorAdded = true;
@@ -249,48 +309,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 factorPosInfos[factor].lastPosAdded = i;
             }
         }
-        vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
-        struct GcdRange
-        {
-            int left = numeric_limits<int>::max();
-            int right = -1;
-        };
-        map<int64_t, GcdRange> rangeForGcd;
-        for (const auto gcd : decreasingFactors)
-        {
-            auto& rangeForThisGcd = rangeForGcd[gcd];
-            auto& posInfoForThisGcd = factorPosInfos[gcd];
-            int posOfLastGcd = -1;
-            if (posInfoForThisGcd.lastPosAdded == -1)
-            {
-            }
-            else
-            {
-                if (posInfoForThisGcd.lastPosAdded > posInfoForThisGcd.lastPosRemoved)
-                {
-                    posOfLastGcd = posInfoForThisGcd.lastPosAdded - 1;
-                }
-                else
-                {
-                    posOfLastGcd = posInfoForThisGcd.lastPosRemoved;
-                }
-            }
-            rangeForThisGcd.right = min(rangeForThisGcd.right, i);
-            rangeForThisGcd.left = posOfLastGcd;
-            for (const auto factorOfGcd : factorsOfA[i])
-            {
-                if (factorOfGcd < gcd && ((gcd % factorOfGcd) == 0))
-                {
-                    rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, posOfLastGcd - 1);
-                }
-            }
-        }
-        for (const auto factor : factorsOfA[i])
-        {
-            blah[factor] += numSequencesWithGcd[factor];
-        }
-#endif
-        previousFactors = factorsOfA[i];
     }
     for (int factor = 1; factor <= maxK; factor++)
     {
@@ -325,7 +343,8 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         const int N = rand() % 10 + 1;
-        const int maxA = rand() % 5000 + 1;
+        //const int maxA = rand() % 5000 + 1;
+        const int maxA = 15 + 1;
 
         cout << N << endl;
 
