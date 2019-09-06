@@ -11,7 +11,9 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <cmath>
+#include <limits>
 
 #include <cassert>
 
@@ -163,16 +165,29 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     }
 
     vector<vector<int64_t>> factorsOfA(n);
+    vector<int64_t> allFactors;
     for (int i = 0; i < n; i++)
     {
         factorsOfA[i] = factors(a[i], primesUpToRootMaxN);
+        allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
     }
     cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
+    sort(allFactors.begin(), allFactors.end());
+    allFactors.erase(unique(allFactors.begin(), allFactors.end()), allFactors.end());
 
     const int maxK = 1'000'000;
     vector<int64_t> numForK(maxK + 1);
 
     map<int64_t, int>  blah;
+    set<int64_t> currentFactors;
+    vector<int64_t> previousFactors;
+    struct FactorPosInfo
+    {
+        int lastPosAdded = -1;
+        int lastPosRemoved = -1;
+    };
+    map<int64_t, FactorPosInfo> factorPosInfos;
+
     for (int i = 0; i < n; i++)
     {
         cout << "i: " << i << " a[i]: " << a[i] << endl;
@@ -202,11 +217,80 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             numSequencesWithGcd[gcdForSubsequence]++;
             cout << " # with gcd: " << gcdForSubsequence << " - " << numSequencesWithGcd[gcdForSubsequence] << endl;
         }
+        for (const auto previousFactor : previousFactors)
+        {
+            bool previousFactorDropped = true;
+            for (const auto factor : factorsOfA[i])
+            {
+                if (factor == previousFactor)
+                {
+                    previousFactorDropped = false;
+                    break;
+                }
+            }
+            if (previousFactorDropped)
+            {
+                factorPosInfos[previousFactor].lastPosRemoved = i;
+            }
+        }
+        for (const auto factor : factorsOfA[i])
+        {
+            bool factorAdded = true;
+            for (const auto previousFactor : previousFactors)
+            {
+                if (factor == previousFactor)
+                {
+                    factorAdded = false;
+                    break;
+                }
+            }
+            if (factorAdded)
+            {
+                factorPosInfos[factor].lastPosAdded = i;
+            }
+        }
+        vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
+        struct GcdRange
+        {
+            int left = numeric_limits<int>::max();
+            int right = -1;
+        };
+        map<int64_t, GcdRange> rangeForGcd;
+        for (const auto gcd : decreasingFactors)
+        {
+            auto& rangeForThisGcd = rangeForGcd[gcd];
+            auto& posInfoForThisGcd = factorPosInfos[gcd];
+            int posOfLastGcd = -1;
+            if (posInfoForThisGcd.lastPosAdded == -1)
+            {
+            }
+            else
+            {
+                if (posInfoForThisGcd.lastPosAdded > posInfoForThisGcd.lastPosRemoved)
+                {
+                    posOfLastGcd = posInfoForThisGcd.lastPosAdded - 1;
+                }
+                else
+                {
+                    posOfLastGcd = posInfoForThisGcd.lastPosRemoved;
+                }
+            }
+            rangeForThisGcd.right = min(rangeForThisGcd.right, i);
+            rangeForThisGcd.left = posOfLastGcd;
+            for (const auto factorOfGcd : factorsOfA[i])
+            {
+                if (factorOfGcd < gcd && ((gcd % factorOfGcd) == 0))
+                {
+                    rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, posOfLastGcd - 1);
+                }
+            }
+        }
         for (const auto factor : factorsOfA[i])
         {
             blah[factor] += numSequencesWithGcd[factor];
         }
 #endif
+        previousFactors = factorsOfA[i];
     }
     for (int factor = 1; factor <= maxK; factor++)
     {
@@ -239,7 +323,7 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+
         const int N = rand() % 10 + 1;
         const int maxA = rand() % 5000 + 1;
 
