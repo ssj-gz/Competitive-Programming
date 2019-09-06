@@ -167,12 +167,14 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     {
         factorsOfA[i] = factors(a[i], primesUpToRootMaxN);
     }
+    cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
 
     const int maxK = 1'000'000;
     vector<int64_t> numForK(maxK + 1);
 
     for (int i = 0; i < n; i++)
     {
+        cout << "i: " << i << " a[i]: " << a[i] << endl;
 #if 0
         const int numFactorsOfA = factorsOfA[i].size();
         vector<int64_t> numSequencesWithMinGcdOfFactor(numFactorsOfA);
@@ -197,6 +199,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
             numSequencesWithGcd[gcdForSubsequence]++;
+            cout << " # with gcd: " << gcdForSubsequence << " - " << numSequencesWithGcd[gcdForSubsequence] << endl;
         }
         map<int64_t, int>  blah;
         for (const auto factor : factorsOfA[i])
@@ -206,9 +209,10 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             {
                 if (greaterFactor > factor && ((greaterFactor % factor) == 0))
                 {
-                    blah[greaterFactor] -= blah[factor];
+                    //blah[greaterFactor] -= blah[factor];
                 }
             }
+            cout << " factor: " << factor << " blah: " << blah[factor] << endl;
             for (int k = factor; k <= maxK; k += factor)
             {
                 numForK[k] += blah[factor];
