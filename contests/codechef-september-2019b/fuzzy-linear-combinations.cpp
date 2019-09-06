@@ -47,7 +47,7 @@ int gcd(int a, int b)
     return b;
 }
 
-vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN)
+vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const int64_t maxFactor)
 {
     //cout << "number: " << number << endl;
     vector<std::pair<int64_t, int64_t>> primeFactorisation;
@@ -82,7 +82,8 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN)
             factor *= primeToPower;
         }
         //cout << " factor: " << factor << endl;
-        factors.push_back(factor);
+        if (factor <= maxFactor)
+            factors.push_back(factor);
 
         int index = 0;
         while (index < powerOfPrime.size() && powerOfPrime[index] == primeFactorisation[index].second)
@@ -161,18 +162,20 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
+    const int maxK = 1'000'000;
+
     vector<vector<int64_t>> factorsOfA(n);
-    vector<int64_t> allFactors;
+    //vector<int64_t> allFactors;
     for (int i = 0; i < n; i++)
     {
-        factorsOfA[i] = factors(a[i], primesUpToRootMaxN);
-        allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
+        factorsOfA[i] = factors(a[i], primesUpToRootMaxN, maxK);
+        sort(factorsOfA[i].begin(), factorsOfA[i].end());
+        //allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
     }
     //cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
-    sort(allFactors.begin(), allFactors.end());
-    allFactors.erase(unique(allFactors.begin(), allFactors.end()), allFactors.end());
+    //sort(allFactors.begin(), allFactors.end());
+    //allFactors.erase(unique(allFactors.begin(), allFactors.end()), allFactors.end());
 
-    const int maxK = 1'000'000;
     vector<int64_t> numForK(maxK + 1);
 
     map<int64_t, int>  blah;
@@ -205,6 +208,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 factorPosInfos[previousFactor].lastPosRemoved = i;
             }
         }
+        assert(is_sorted(factorsOfA[i].begin(), factorsOfA[i].end()));
         vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
         struct GcdRange
         {
