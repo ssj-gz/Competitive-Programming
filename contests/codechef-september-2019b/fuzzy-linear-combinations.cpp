@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -257,7 +257,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             auto& rangeForThisGcd = rangeForGcd[gcd];
             auto& posInfoForThisGcd = factorPosInfos[gcd];
             int posOfLastGcd = -1;
-            cout << "i: " << i << " gcd: " << gcd << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
+            //cout << "i: " << i << " gcd: " << gcd << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
             if (posInfoForThisGcd.lastPosAdded == -1)
             {
                 posOfLastGcd = i - 1;
@@ -283,12 +283,12 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     break;
                 }
             }
-            cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
+            //cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
             assert(j == posOfLastGcd);
 #endif
             rangeForThisGcd.right = min(rangeForThisGcd.right, i);
             rangeForThisGcd.left = posOfLastGcd + 1;
-            cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
+            //cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
             if (rangeForThisGcd.right >= 0)
             {
                 numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
