@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -255,6 +255,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             int right = numeric_limits<int>::max();
         };
         map<int64_t, GcdRange> rangeForGcd;
+        int maxRightForLowerGcd = i;
         for (const auto gcd : decreasingFactors)
         {
             auto& rangeForThisGcd = rangeForGcd[gcd];
@@ -277,6 +278,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     posOfLastGcd = i - 1;
                 }
             }
+            rangeForThisGcd.right = min(rangeForThisGcd.right, maxRightForLowerGcd);
 #ifdef BRUTE_FORCE
             int j = i - 1;
             for (; j >= 0; j--)
@@ -291,11 +293,12 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 #endif
             rangeForThisGcd.right = min(rangeForThisGcd.right, i);
             rangeForThisGcd.left = posOfLastGcd + 1;
-            cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
+            //cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
             if (rangeForThisGcd.right >= 0 && rangeForThisGcd.right >= rangeForThisGcd.left)
             {
                 numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
             }
+#if 0
             for (const auto factorOfGcd : factorsOfA[i])
             {
                 if (factorOfGcd < gcd 
@@ -304,10 +307,12 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 {
                     //if (rangeForThisGcd.left != -1)
                     {
-                        rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, rangeForThisGcd.left - 1);
+                        //rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, rangeForThisGcd.left - 1);
                     }
                 }
             }
+#endif
+            maxRightForLowerGcd = min(maxRightForLowerGcd, rangeForThisGcd.left - 1);
         }
 #ifdef BRUTE_FORCE
         int gcdForSubsequence = a[i];
