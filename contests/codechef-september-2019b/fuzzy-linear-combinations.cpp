@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -286,19 +286,21 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     break;
                 }
             }
-            //cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
+            cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
             assert(j == posOfLastGcd);
 #endif
             rangeForThisGcd.right = min(rangeForThisGcd.right, i);
             rangeForThisGcd.left = posOfLastGcd + 1;
-            //cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
-            if (rangeForThisGcd.right >= 0)
+            cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
+            if (rangeForThisGcd.right >= 0 && rangeForThisGcd.right >= rangeForThisGcd.left)
             {
                 numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
             }
             for (const auto factorOfGcd : factorsOfA[i])
             {
-                if (factorOfGcd < gcd && ((gcd % factorOfGcd) == 0))
+                if (factorOfGcd < gcd 
+                        //&& ((gcd % factorOfGcd) == 0)
+                        )
                 {
                     //if (rangeForThisGcd.left != -1)
                     {
@@ -393,7 +395,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 1000 + 1;
+        const int N = rand() % 200 + 1;
         //const int N = 10;
         const int maxA = rand() % 1'000'000'000ULL + 1;
 
@@ -434,17 +436,22 @@ int main(int argc, char* argv[])
     }
 
 #ifdef BRUTE_FORCE
+    queries.clear();
+    for (int k = 1; k <= maxK; k++)
+    {
+        queries.push_back(k);
+    }
     const auto solutionBruteForce = solveBruteForce(a, queries);
     cout << "blah: " << endl;
     for (const auto& x : solutionBruteForce)
     {
-        cout << "solutionBruteForce: " << x << endl;
+        //cout << "solutionBruteForce: " << x << endl;
     }
     const auto solutionOptimised = solveOptimised(a, queries);
     cout << "solutionOptimised:  " << endl;
     for (const auto& x : solutionOptimised)
     {
-        cout << x << endl;
+        //cout << x << endl;
     }
 
     assert(solutionOptimised == solutionBruteForce);
