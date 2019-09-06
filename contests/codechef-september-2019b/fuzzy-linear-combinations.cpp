@@ -400,7 +400,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 200 + 1;
+        //const int N = rand() % 200 + 1;
+        const int N = 100'000;
         //const int N = 10;
         const int maxA = rand() % 1'000'000'000ULL + 1;
 
@@ -408,7 +409,14 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < N; i++)
         {
-            cout << ((rand() % maxA + 1)) << " ";
+            if (rand() % 4 == 0)
+            {
+                cout << ((rand() % maxA + 1)) << " ";
+            }
+            else
+            {
+                cout << 479001600 << " ";
+            }
         }
         cout << endl;
 
