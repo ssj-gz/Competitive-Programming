@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 #include <cassert>
 
@@ -41,6 +42,59 @@ int gcd(int a, int b)
         b = nextB;
     }
     return b;
+}
+
+vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN)
+{
+    cout << "number: " << number << endl;
+    vector<std::pair<int64_t, int64_t>> primeFactorisation;
+    for (const auto prime : primesUpToRootMaxN)
+    {
+        int numOfPrime = 0;
+        while (number % prime == 0)
+        {
+            numOfPrime++;
+            number = number / prime;
+        }
+        if (numOfPrime > 0)
+        {
+            primeFactorisation.push_back({prime, numOfPrime});
+        }
+    }
+    if (number > 1)
+        primeFactorisation.push_back({number, 1});
+
+    vector<int64_t> factors;
+    vector<int> powerOfPrime(primeFactorisation.size(), 0);
+    while (true)
+    {
+        int64_t factor = 1;
+        for (int i = 0; i < powerOfPrime.size(); i++)
+        {
+            int64_t primeToPower = 1;
+            for (int exponent = 0; exponent < powerOfPrime[i]; exponent++)
+            {
+                primeToPower = primeToPower * primeFactorisation[i].first;
+            }
+            factor *= primeToPower;
+        }
+        cout << " factor: " << factor << endl;
+        factors.push_back(factor);
+
+        int index = 0;
+        while (index < powerOfPrime.size() && powerOfPrime[index] == primeFactorisation[index].second)
+        {
+            powerOfPrime[index] = 0;
+            index++;
+        }
+
+        if (index == powerOfPrime.size())
+            break;
+
+        powerOfPrime[index]++;
+    }
+
+    return factors;
 }
 
 
@@ -77,12 +131,45 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
 }
 #endif
 
-#if 0
-int64_t solveOptimised()
+#if 1
+vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& queries)
 {
-    int64_t result;
+    vector<int64_t> results;
+    const int n = a.size();
 
-    return result;
+    const int rootMaxN = sqrt(1'000'000'000UL);
+    vector<bool> isPrime(rootMaxN + 1, true);
+
+    // Sieve of Eratosthenes.
+    vector<int> primesUpToRootMaxN;
+    for (int factor = 2; factor <= rootMaxN; factor++)
+    {
+        const bool isFactorPrime = isPrime[factor];
+        if (isFactorPrime)
+        {
+            primesUpToRootMaxN.push_back(factor);
+        }
+        for (int multiple = factor * 2; multiple <= rootMaxN; multiple += factor)
+        {
+            if (!isPrime[multiple] && !isFactorPrime)
+            {
+                // This multiple has already been marked, and since factor is not prime,
+                // all subsequent multiples will already have been marked (by any of the
+                // prime factors of factor!), so we can stop here.
+                break;
+            }
+            isPrime[multiple] = false;
+        }
+    }
+
+    vector<vector<int64_t>> factorsOfA(n);
+    for (int i = 0; i < n; i++)
+    {
+        factorsOfA[i] = factors(a[i], primesUpToRootMaxN);
+    }
+
+
+    return results;
 }
 #endif
 
@@ -143,9 +230,13 @@ int main(int argc, char* argv[])
         cout << "solutionBruteForce: " << x << endl;
     }
 #endif
-#if 0
-    const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+    const auto solutionOptimised = solveOptimised(a, queries);
+    cout << "solutionOptimised:  " << endl;
+    for (const auto& x : solutionBruteForce)
+    {
+        cout << x << endl;
+    }
 
     assert(solutionOptimised == solutionBruteForce);
 #endif
