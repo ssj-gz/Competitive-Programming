@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -47,6 +47,8 @@ int gcd(int a, int b)
     }
     return b;
 }
+
+const int maxK = 1'000'000;
 
 vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const int64_t maxFactor)
 {
@@ -108,25 +110,34 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
 {
     vector<int64_t> results;
     const int n = a.size();
+    vector<int64_t> numWithGcd(maxK + 1);
+
+    for (int i = 0; i < n; i++)
+    {
+        int64_t subarrayGcd = a[i];
+        for (int j = i; j < n; j++)
+        {
+            subarrayGcd = gcd(subarrayGcd, a[j]);
+            if (subarrayGcd < numWithGcd.size())
+            {
+                numWithGcd[subarrayGcd]++;
+            }
+        }
+    }
+
+
+    vector<int64_t> numForK(maxK + 1);
+    for (int factor = 1; factor <= maxK; factor++)
+    {
+        for (int k = factor; k <= maxK; k += factor)
+        {
+            numForK[k] += numWithGcd[factor];
+        }
+    }
 
     for (const auto query : queries)
     {
-        //cout << "query: " << query << endl;
-        int64_t queryResult = 0;
-        for (int i = 0; i < n; i++)
-        {
-            int64_t subarrayGcd = a[i];
-            for (int j = i; j < n; j++)
-            {
-                subarrayGcd = gcd(subarrayGcd, a[j]);
-                //cout << "i: " << i << " j: " << j << " gcd[i,j] = " << subarrayGcd << endl;
-                if ((query % subarrayGcd) == 0)
-                {
-                    queryResult++;
-                }
-            }
-        }
-        results.push_back(queryResult);
+        results.push_back(numForK[query]);
     }
 
     return results;
@@ -163,7 +174,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-    const int maxK = 1'000'000;
 
     vector<vector<int64_t>> factorsOfA(n);
     //vector<int64_t> allFactors;
@@ -339,8 +349,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 100'000;
-        const int maxA = 10000;
+        const int N = rand() % 100;
+        const int maxA = rand() % 1000 + 1;
 
         cout << N << endl;
 
@@ -350,7 +360,7 @@ int main(int argc, char* argv[])
         }
         cout << endl;
 
-        const int Q = 100'000;
+        const int Q = rand() % 1000 + 1;
         cout << Q << endl;
 
         for (int i = 0; i < Q; i++)
