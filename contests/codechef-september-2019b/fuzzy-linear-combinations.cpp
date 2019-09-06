@@ -31,6 +31,9 @@ T read()
     return toRead;
 }
 
+int64_t totalAdded = 0;
+int64_t totalRemoved = 0;
+
 uint64_t gcd(uint64_t u, uint64_t v)
 {
     uint64_t shift = 0;
@@ -235,11 +238,11 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         int lastPosRemoved = -1;
     };
     map<int64_t, FactorPosInfo> factorPosInfos;
+    vector<int64_t> numSequencesWithGcd(maxK + 1);
 
     for (int i = 0; i < n; i++)
     {
         //cout << "i: " << i << " a[i]: " << a[i] << endl;
-        map<int64_t, int64_t> numSequencesWithGcd;
 
         {
             auto previousFactorIter = previousFactors.begin();
@@ -255,6 +258,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 {
                     factorPosInfos[*previousFactorIter].lastPosRemoved = i;
                     previousFactorIter++;
+                    totalRemoved++;
                     continue;
                 }
                 else
@@ -262,6 +266,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     while (previousFactorIter != previousFactors.end() && *previousFactorIter < *factorIter)
                     {
                         factorPosInfos[*previousFactorIter].lastPosRemoved = i;
+                        totalRemoved++;
                         previousFactorIter++;
                     }
                     if (previousFactorIter != previousFactors.end())
@@ -326,7 +331,10 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             //cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
             if (rangeForThisGcd.right >= 0 && rangeForThisGcd.right >= rangeForThisGcd.left)
             {
-                numSequencesWithGcd[gcd] = rangeForThisGcd.right - rangeForThisGcd.left + 1;
+                if (gcd < numSequencesWithGcd.size())
+                {
+                    numSequencesWithGcd[gcd] += rangeForThisGcd.right - rangeForThisGcd.left + 1;
+                }
             }
 #if 0
             for (const auto factorOfGcd : factorsOfA[i])
@@ -361,8 +369,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 #endif
         for (const auto factor : factorsOfA[i])
         {
-            if (factor < blah.size())
-                blah[factor] += numSequencesWithGcd[factor];
+            //if (factor < blah.size())
+                //blah[factor] += numSequencesWithGcd[factor];
             //cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
         }
         {
@@ -378,6 +386,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 if (previousFactorIter == previousFactors.end())
                 {
                     factorPosInfos[*factorIter].lastPosAdded = i;
+                    totalAdded++;
                     factorIter++;
                     continue;
                 }
@@ -386,6 +395,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     while (factorIter != factors.end() && *factorIter < *previousFactorIter)
                     {
                         factorPosInfos[*factorIter].lastPosAdded = i;
+                    totalAdded++;
                         factorIter++;
                     }
                     if (factorIter != factors.end())
@@ -407,7 +417,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     {
         for (int k = factor; k <= maxK; k += factor)
         {
-            numForK[k] += blah[factor];
+            numForK[k] += numSequencesWithGcd[factor];
         }
     }
 
@@ -427,11 +437,11 @@ int main(int argc, char* argv[])
 {
 #if 0
     map<int64_t, int64_t> blah;
-    for (int i = 0; i < 1'000'000; i++)
+    for (int i = 0; i < 15'000'000; i++)
     {
         blah[i]++;
     }
-    for (int i = 0; i < 1'000'000; i++)
+    for (int i = 0; i < 15'000'000; i++)
     {
         blah[i] += i + rand() % 30;
     }
@@ -524,6 +534,9 @@ int main(int argc, char* argv[])
         cout << x << endl;
     }
 #endif
+
+    //cout << "totalAdded: " << totalAdded << endl;
+    //cout << "totalRemoved: " << totalRemoved << endl;
 
     assert(cin);
 }
