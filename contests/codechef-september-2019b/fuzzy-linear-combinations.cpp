@@ -188,15 +188,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     for (int i = 0; i < n; i++)
     {
         cout << "i: " << i << " a[i]: " << a[i] << endl;
-        map<int64_t, int> dbgNumSequencesWithGcd;
         map<int64_t, int> numSequencesWithGcd;
-        int gcdForSubsequence = a[i];
-        for (int j = i; j >= 0; j--)
-        {
-            gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
-            dbgNumSequencesWithGcd[gcdForSubsequence]++;
-            cout << " # with gcd: " << gcdForSubsequence << " - " << dbgNumSequencesWithGcd[gcdForSubsequence] << endl;
-        }
         for (const auto previousFactor : previousFactors)
         {
             bool previousFactorDropped = true;
@@ -242,7 +234,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     posOfLastGcd = i - 1;
                 }
             }
-#if 1
+#ifdef BRUTE_FORCE
             int j = i - 1;
             for (; j >= 0; j--)
             {
@@ -251,9 +243,9 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                     break;
                 }
             }
-#endif
             cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
             assert(j == posOfLastGcd);
+#endif
             rangeForThisGcd.right = min(rangeForThisGcd.right, i);
             rangeForThisGcd.left = posOfLastGcd + 1;
             cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
@@ -272,11 +264,24 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 }
             }
         }
+#ifdef BRUTE_FORCE
+        int gcdForSubsequence = a[i];
+        map<int64_t, int> dbgNumSequencesWithGcd;
+        for (int j = i; j >= 0; j--)
+        {
+            gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
+            dbgNumSequencesWithGcd[gcdForSubsequence]++;
+            cout << " # with gcd: " << gcdForSubsequence << " - " << dbgNumSequencesWithGcd[gcdForSubsequence] << endl;
+        }
+        for (const auto factor : factorsOfA[i])
+        {
+            assert(dbgNumSequencesWithGcd[factor] == numSequencesWithGcd[factor]);
+        }
+#endif
         for (const auto factor : factorsOfA[i])
         {
             blah[factor] += dbgNumSequencesWithGcd[factor];
             cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
-            assert(dbgNumSequencesWithGcd[factor] == numSequencesWithGcd[factor]);
         }
         for (const auto factor : factorsOfA[i])
         {
