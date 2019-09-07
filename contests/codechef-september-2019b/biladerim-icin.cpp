@@ -30,15 +30,22 @@ T read()
 #if 1
 int64_t solveBruteForce()
 {
+    // Looks like minimum of f will be < 0 if (a - 1) * (c - 1) < b * b.
     int64_t result = 0;
-    const int A = 5;
-    const int B = 3;
-    const int C = 10;
+    const int A = 51;
+    const int B = 10;
+    const int C = 3;
+
+    cout << "(A - 1) * (C - 1): " << (A - 1) * (C - 1) << endl;
+    cout << "B * B: " << (B * B) << endl;
+
+    cout << "sausage: " << (double)(C - 1) - (double)(B) * B / ((A - 1)) << endl; 
 
     auto f = [A, B, C](double x, double y)
     {
-        return (A - 1) * x * x + 2 * B * x * y + (C - 1) * y * y;
+        return ((double)A - 1) * x * x + 2 * (double)B * x * y + ((double)C - 1) * y * y;
     };
+    cout << "bleep: " << f(-100, -8.333335) << endl;
 
     struct Blah
     {
