@@ -88,7 +88,7 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
         {
             break;
         }
-        if (prime > 1000)
+        if (prime > 1000 && number > 1'000'000)
         {
             break;
         }
@@ -218,6 +218,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
+    map<int64_t, int64_t> dbgFactorCount;
     for (int i = 0; i < n; i++)
     {
         if (factorsLookup.find(a[i]) == factorsLookup.end())
@@ -232,8 +233,18 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         for (const auto factor : factorsOfA[i])
         {
             positionsWithFactorDecreasing[factor].push_back(i);
+            totalAdded++;
+            dbgFactorCount[factor]++;
         }
     }
+
+    cout << "positionsWithFactorDecreasing.size: " << positionsWithFactorDecreasing.size() << endl;
+    for (const auto& blah : dbgFactorCount)
+    {
+        cout << " factor: " << blah.first << " # times: " << blah.second << endl;
+    }
+
+    return vector<int64_t>();
 
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
@@ -398,7 +409,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    //cout << "totalAdded: " << totalAdded << endl;
+    cout << "totalAdded: " << totalAdded << endl;
     //cout << "totalRemoved: " << totalRemoved << endl;
 
     assert(cin);
