@@ -234,6 +234,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
+    map<int64_t, vector<int>> positionsWithFactor;
     //vector<int64_t> allFactors;
     for (int i = 0; i < n; i++)
     {
@@ -248,6 +249,10 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             factorsOfA[i] = factorsLookup[a[i]];
         }
         //allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
+        for (const auto factor : factorsOfA[i])
+        {
+            positionsWithFactor[factor].push_back(i);
+        }
     }
     //cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
     //sort(allFactors.begin(), allFactors.end());
@@ -266,6 +271,50 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     map<int64_t, FactorPosInfo> factorPosInfos;
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
+    vector<int> maxRightForLowerGcd(n);
+    for (int i = 0; i < n; i++)
+    {
+        maxRightForLowerGcd[i] = i;
+    }
+
+    vector<int> decreasingFactors;
+    for (const auto factorAndPositions : positionsWithFactor)
+    {
+        decreasingFactors.push_back(factorAndPositions.first);
+    }
+    reverse(decreasingFactors.begin(), decreasingFactors.end());
+
+    for (const auto gcd : decreasingFactors)
+    {
+        const auto& positions = positionsWithFactor[gcd];
+
+        int runLengthWithGcd = 1;
+        int previousPosition = -1;
+        for (const auto position : positions)
+        {
+            if (previousPosition != -1 && position == previousPosition + 1)
+            {
+                runLengthWithGcd++;
+            }
+            else
+            {
+                runLengthWithGcd = 1;
+            }
+
+            int gcdRangeLeft = position - runLengthWithGcd - 1;
+            int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
+
+            if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
+            {
+                numSequencesWithGcd[gcd] += gcdRangeRight - gcdRangeLeft + 1;
+            }
+
+            maxRightForLowerGcd[position] = min(maxRightForLowerGcd[position], gcdRangeLeft - 1);
+
+        }
+    }
+
+#if 0
     for (int i = 0; i < n; i++)
     {
         //cout << "i: " << i << " a[i]: " << a[i] << endl;
@@ -439,6 +488,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
         previousFactors = factorsOfA[i];
     }
+#endif
     for (int factor = 1; factor <= maxK; factor++)
     {
         for (int k = factor; k <= maxK; k += factor)
