@@ -188,6 +188,12 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     const int rootMaxN = sqrt(1'000'000'000UL);
     vector<char> isPrime(1'000'000 + 1, true);
 
+    struct FactorAndPos
+    {
+        int64_t factor = -1;
+        int pos = -1;
+    };
+
     // Sieve of Eratosthenes.
     vector<int> primesUpToRootMaxN;
     for (int64_t factor = 2; factor <= 1'000'000; factor++)
@@ -215,6 +221,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
+    vector<FactorAndPos> factorAndPos;
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
@@ -230,19 +237,40 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             factorsOfA[i] = factorsLookup[a[i]];
         }
+        int gcdWithPrev = -1;
+        if (i > 0)
+        {
+            gcdWithPrev = gcd(a[i], a[i - 1]);
+        }
         for (const auto factor : factorsOfA[i])
         {
-            positionsWithFactorDecreasing[factor].push_back(i);
-            totalAdded++;
-            dbgFactorCount[factor]++;
+            factorAndPos.push_back({factor, i});
+            //if (factor > maxK && gcdWithPrev != -1 && ((gcdWithPrev % factor) != 0))
+                //continue;
+            //if (factor > maxK)
+            {
+                //auto& blee = positionsWithFactorDecreasing[factor];
+            //positionsWithFactorDecreasing[factor].push_back(i);
+            //totalAdded++;
+            //dbgFactorCount[factor]++;
+            }
         }
     }
 
+    sort(factorAndPos.begin(), factorAndPos.end(), [](const auto& lhs, const auto& rhs)
+            {
+                if (lhs.factor != rhs.factor)
+                return lhs.factor > rhs.factor;
+                return lhs.pos < rhs.pos;
+            });
+
+#if 0
     cout << "positionsWithFactorDecreasing.size: " << positionsWithFactorDecreasing.size() << endl;
     for (const auto& blah : dbgFactorCount)
     {
         cout << " factor: " << blah.first << " # times: " << blah.second << endl;
     }
+#endif
 
     return vector<int64_t>();
 
@@ -409,7 +437,7 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    cout << "totalAdded: " << totalAdded << endl;
+//    cout << "totalAdded: " << totalAdded << endl;
     //cout << "totalRemoved: " << totalRemoved << endl;
 
     assert(cin);
