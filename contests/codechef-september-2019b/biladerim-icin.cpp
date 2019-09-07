@@ -202,7 +202,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
     {
-        for (int64_t A = 1; A <= maxA && !finished; A++)
+        for (int64_t A = 2; A <= maxA && !finished; A++)
         {
             //cout << "B: " << B << " A: " << A << endl;
             int64_t C = (B * B) / A;
