@@ -26,6 +26,65 @@ T read()
     assert(cin);
     return toRead;
 }
+
+const int64_t Mod = 1'000'000'007ULL;
+
+class ModNum
+{
+    public:
+        ModNum(int64_t n = 0)
+            : m_n{n}
+        {
+            assert(n >= 0);
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator-=(const ModNum& other)
+        {
+            m_n = (Mod + m_n - other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % Mod;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
+
 struct Blah
 {
     Blah(double x, double y, double z)
