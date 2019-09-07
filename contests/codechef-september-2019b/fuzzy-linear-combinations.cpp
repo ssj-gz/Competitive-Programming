@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -235,15 +235,23 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     for (int i = 0; i < n; i++)
     {
-        if (factorsLookup.find(a[i]) == factorsLookup.end())
+        //cout << "i: " << i << endl;
+        const int64_t toFactorise = (i > 0 ? gcd(a[i], a[i-1]) : a[i]);
+        factorsOfA[i] = factors(toFactorise, primesUpToRootMaxN, isPrime);
+        if (factorsOfA[i].back() != a[i])
         {
-            factorsOfA[i] = factors(a[i], primesUpToRootMaxN, isPrime);
-            factorsLookup[a[i]] = factorsOfA[i];
+            maxRightForLowerGcd[i] = i - 1;
+        }
+#if 0
+        if (factorsLookup.find(toFactorise) == factorsLookup.end())
+        {
+            factorsLookup[toFactorise] = factorsOfA[i];
         }
         else
         {
-            factorsOfA[i] = factorsLookup[a[i]];
+            factorsOfA[i] = factorsLookup[toFactorise];
         }
+#endif
         int gcdWithPrev = -1;
         if (i > 0)
         {
@@ -253,8 +261,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         for (const auto factor : factorsOfA[i])
         {
             //factorAndPos.push_back({factor, i});
-            //cout << " factor: " << factor << endl;
-#if 1
+            //cout << " factor: " << factor << " i: " << i << endl;
+#if 0
             bool divisibleByGcwWithPrev = false;
             bool addPrevPos = false;
             if (factor > maxK && gcdWithPrev != -1)
@@ -269,12 +277,13 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 else
                     addPrevPos = true;
             }
-            auto& blee = positionsWithFactorDecreasing[factor];
             if (addPrevPos)
-                blee.push_back(i - 1);
-            blee.push_back(i);
+                factorAndPos.push_back({factor, i - 1});
+            factorAndPos.push_back({factor, i});
 #else
             auto& blee = positionsWithFactorDecreasing[factor];
+            if (i > 0)
+                blee.push_back(i - 1);
             blee.push_back(i);
 #endif
             //positionsWithFactorDecreasing[factor].push_back(i);
@@ -282,6 +291,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             //dbgFactorCount[factor]++;
         }
     }
+
+    //cout << "factorAndPos.size(): " << factorAndPos.size() << endl;
 
     sort(factorAndPos.begin(), factorAndPos.end(), [](const auto& lhs, const auto& rhs)
             {
@@ -314,6 +325,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         const auto& gcd = gcdAndPositions.first;
         auto& positions = gcdAndPositions.second;
         positions.erase(unique(positions.begin(), positions.end()), positions.end());
+        assert(is_sorted(positions.begin(), positions.end()));
 
         //cout << " gcd: " << gcd << " positions: " << endl;
         //for (const auto x : positions)
@@ -350,6 +362,26 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             previousPosition = position;
         }
     }
+
+    vector<int64_t> dbgNumSequencesWithGcd(maxK + 1);
+    for (int i = 0; i < n; i++)
+    {
+        int64_t gcdOfSubsequence = a[i];
+        for (int j = i; j >= 0; j--)
+        {
+            gcdOfSubsequence = gcd(gcdOfSubsequence, a[j]);
+            if (gcdOfSubsequence < dbgNumSequencesWithGcd.size())
+            {
+                dbgNumSequencesWithGcd[gcdOfSubsequence]++;
+            }
+        }
+    }
+    for (int i = 0; i < maxK + 1; i++)
+    {
+        cout << " i: " << i << " numSequencesWithGcd: " << numSequencesWithGcd[i] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[i] << endl;
+        assert(numSequencesWithGcd[i] == dbgNumSequencesWithGcd[i]);
+    }
+
 
     vector<int64_t> numForK(maxK + 1);
     for (int factor = 1; factor <= maxK; factor++)
@@ -398,20 +430,22 @@ int main(int argc, char* argv[])
         //const int N = rand() % 200 + 1;
         const int N = 5;
         //const int N = 10;
-        const int maxA = rand() % 1'000'000'000ULL + 1;
+        int maxA = rand() % 1'000'000'000ULL + 1;
+        if (rand() % 3 == 0)
+            maxA = rand() % 1000 + 1;
 
         cout << N << endl;
 
         for (int i = 0; i < N; i++)
         {
-            if (rand() % 2 == 0)
+            //if (rand() % 2 == 0)
             {
                 cout << ((rand() % maxA + 1)) << " ";
             }
-            else
-            {
-                cout << 479001600 << " ";
-            }
+            //else
+            //{
+                //cout << 479001600 << " ";
+            //}
         }
         cout << endl;
 
@@ -451,10 +485,10 @@ int main(int argc, char* argv[])
         queries.push_back(k);
     }
     const auto solutionBruteForce = solveBruteForce(a, queries);
-    cout << "blah: " << endl;
+    cout << "solveBruteForce: " << endl;
     for (const auto& x : solutionBruteForce)
     {
-        //cout << "solutionBruteForce: " << x << endl;
+        //cout << x << endl;
     }
     const auto solutionOptimised = solveOptimised(a, queries);
     cout << "solutionOptimised:  " << endl;
