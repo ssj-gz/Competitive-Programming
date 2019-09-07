@@ -78,12 +78,20 @@ uint64_t gcd(uint64_t u, uint64_t v)
 
 const int maxK = 1'000'000;
 
-vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const int64_t maxFactor)
+vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const vector<bool>& isPrime)
 {
     //cout << "number: " << number << endl;
     vector<std::pair<int64_t, int64_t>> primeFactorisation;
     for (const auto prime : primesUpToRootMaxN)
     {
+        if (number < isPrime.size() && isPrime[number])
+        {
+            break;
+        }
+        if (prime > 1000)
+        {
+            break;
+        }
         const auto oldNumber = number;
         int numOfPrime = 0;
         while (number % prime == 0)
@@ -212,7 +220,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     {
         if (factorsLookup.find(a[i]) == factorsLookup.end())
         {
-            factorsOfA[i] = factors(a[i], primesUpToRootMaxN, maxK);
+            factorsOfA[i] = factors(a[i], primesUpToRootMaxN, isPrime);
             factorsLookup[a[i]] = factorsOfA[i];
         }
         else
