@@ -6,7 +6,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -186,13 +186,15 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     const int n = a.size();
 
     const int rootMaxN = sqrt(1'000'000'000UL);
-    vector<bool> isPrime(rootMaxN + 1, true);
+    vector<bool> isPrime(1'000'000 + 1, true);
 
     // Sieve of Eratosthenes.
     vector<int> primesUpToRootMaxN;
     for (int factor = 2; factor <= 1'000'000; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
+        assert(factor < isPrime.size());
+        //cout << "isPrime.size(): " << isPrime.size() << " factor: " << factor << endl;
         if (isFactorPrime)
         {
             if (factor <= rootMaxN)
