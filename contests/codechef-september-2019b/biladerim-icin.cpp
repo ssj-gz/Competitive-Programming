@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -50,11 +50,29 @@ ostream& operator<<(ostream& os, const Blah& blah)
     return os;
 }
 
+
 #if 1
-int64_t solveBruteForce()
+int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 {
     // Looks like minimum of f will be < 0 if (a - 1) * (c - 1) < b * b.
     int64_t result = 0;
+
+    for (int64_t B = 1; B <= maxB; B++)
+    {
+        for (int64_t A = 1; A <= maxA; A++)
+        {
+            for (int64_t C = 1; C <= maxC; C++)
+            {
+                if ((A - 1) * (C - 1) > B * B)
+                {
+//                    cout << " interesting triple: (" << A << ", " << B << ", " << C << ")" << endl;
+                    result++;
+                }
+
+            }
+        }
+    }
+#if 0
     while (true)
     {
         const int A = rand() % 20 + 1;
@@ -63,6 +81,7 @@ int64_t solveBruteForce()
 
 
         const bool isSaddle = (A - 1) * (C - 1) <= B * B;
+        cout << "A: " << A << " B: " << B << " C: " << C << endl;
         cout << "(A - 1) * (C - 1): " << (A - 1) * (C - 1) << endl;
         cout << "B * B: " << (B * B) << endl;
         cout << "isSaddle: " << isSaddle << endl;
@@ -114,14 +133,16 @@ int64_t solveBruteForce()
         }
 #endif
     }
+#endif
     
     return result;
 }
 #endif
 
-#if 0
-int64_t solveOptimised()
+#if 1
+int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
+    return solveBruteForce(maxA, maxB, maxC);
     int64_t result = 0;
     
     return result;
@@ -154,9 +175,12 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
 
+        const int64_t maxA = read<int64_t>();
+        const int64_t maxB = read<int64_t>();
+        const int64_t maxC = read<int64_t>();
 #ifdef BRUTE_FORCE
 #if 1
-        const auto solutionBruteForce = solveBruteForce();
+        const auto solutionBruteForce = solveBruteForce(maxA, maxB, maxC);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 0
@@ -166,7 +190,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC);
         cout << solutionOptimised << endl;
 #endif
     }
