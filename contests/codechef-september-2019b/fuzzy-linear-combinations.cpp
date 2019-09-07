@@ -311,6 +311,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             //blee.push_back(i);
             auto& blee = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
             //auto& blee = positionsWithFactorDecreasing[factor];
+            if (addPrevPos)
+                blee.push_back(i - 1);
             blee.push_back(i);
             //dbgFactorCount[factor]++;
 #else
