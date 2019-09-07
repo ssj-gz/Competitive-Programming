@@ -301,8 +301,9 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 runLengthWithGcd = 1;
             }
 
-            int gcdRangeLeft = position - runLengthWithGcd - 1;
+            int gcdRangeLeft = position - runLengthWithGcd + 1;
             int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
+            //cout << "gcd: " << gcd << " position: " << position << " previousPosition: " << previousPosition << " runLengthWithGcd: " << runLengthWithGcd << " gcdRangeLeft: " << gcdRangeLeft << " gcdRangeRight: " << gcdRangeRight << endl;
 
             if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
             {
@@ -311,6 +312,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
             maxRightForLowerGcd[position] = min(maxRightForLowerGcd[position], gcdRangeLeft - 1);
 
+            previousPosition = position;
         }
     }
 
