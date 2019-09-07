@@ -189,7 +189,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             primesUpToRootMaxN.push_back(factor);
         }
-        for (int multiple = factor * 2; multiple <= rootMaxN; multiple += factor)
+        for (int multiple = factor * factor; multiple <= rootMaxN; multiple += factor)
         {
             if (!isPrime[multiple] && !isFactorPrime)
             {
