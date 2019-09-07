@@ -185,12 +185,15 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     // Sieve of Eratosthenes.
     vector<int> primesUpToRootMaxN;
+    int bloo = 0;
     for (int factor = 2; factor <= rootMaxN; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
         if (isFactorPrime)
         {
             primesUpToRootMaxN.push_back(factor);
+            if (factor <= 8000)
+                bloo++;
         }
         for (int multiple = factor * 2; multiple <= rootMaxN; multiple += factor)
         {
@@ -204,8 +207,36 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             isPrime[multiple] = false;
         }
     }
+    cout << bloo << endl;
+
+#if 0
+    int64_t P = 1'000'000'000ULL;
+    for (int t = 0; t < 100'000; t++)
+    {
+        while (factors(P, primesUpToRootMaxN, maxK).size() != 2)
+        {
+            P--;
+        }
+        cout << P << " ";
+        P--;
+    }
+    cout << endl;
+
+    exit(0);
+#endif
+#if 1
+    cout << "thing" << endl;
+    int64_t bleep = 0;
+    for (int i = 1; i < n; i++)
+    {
+        bleep += gcd(a[i], a[i-1]);
+    }
+    cout << bleep << endl;
+    exit(0);
+#endif
 
 
+    cout << "Factorising" << endl;
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
     //vector<int64_t> allFactors;
@@ -223,6 +254,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
         //allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
     }
+    cout << "Finished Factorising" << endl;
     //cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
     //sort(allFactors.begin(), allFactors.end());
     //allFactors.erase(unique(allFactors.begin(), allFactors.end()), allFactors.end());
