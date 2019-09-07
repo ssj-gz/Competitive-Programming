@@ -136,7 +136,6 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
 }
 
 
-#if 1
 vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& queries)
 {
     vector<int64_t> results;
@@ -173,9 +172,7 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
 
     return results;
 }
-#endif
 
-#if 1
 vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& queries)
 {
     const int n = a.size();
@@ -205,70 +202,26 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-#if 0
-    int64_t P = 1'000'000'000ULL;
-    for (int t = 0; t < 100'000; t++)
-    {
-        while (factors(P, primesUpToRootMaxN, maxK).size() != 2)
-        {
-            P--;
-        }
-        cout << P << " ";
-        P--;
-    }
-    cout << endl;
-
-    exit(0);
-#endif
-#if 0
-    cout << "thing" << endl;
-    int64_t bleep = 0;
-    for (int i = 1; i < n; i++)
-    {
-        bleep += gcd(a[i], a[i-1]);
-    }
-    cout << bleep << endl;
-    exit(0);
-#endif
-
-
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
-    //vector<int64_t> allFactors;
     for (int i = 0; i < n; i++)
     {
         if (factorsLookup.find(a[i]) == factorsLookup.end())
         {
             factorsOfA[i] = factors(a[i], primesUpToRootMaxN, maxK);
-            sort(factorsOfA[i].begin(), factorsOfA[i].end());
             factorsLookup[a[i]] = factorsOfA[i];
         }
         else
         {
             factorsOfA[i] = factorsLookup[a[i]];
         }
-        //allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
         for (const auto factor : factorsOfA[i])
         {
             positionsWithFactorDecreasing[factor].push_back(i);
         }
     }
-    //cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
-    //sort(allFactors.begin(), allFactors.end());
-    //allFactors.erase(unique(allFactors.begin(), allFactors.end()), allFactors.end());
 
-    vector<int64_t> numForK(maxK + 1);
-
-    vector<int64_t>  blah(maxK + 1);
-    set<int64_t> currentFactors;
-    vector<int64_t> previousFactors;
-    struct FactorPosInfo
-    {
-        int lastPosAdded = -1;
-        int lastPosRemoved = -1;
-    };
-    map<int64_t, FactorPosInfo> factorPosInfos;
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
     vector<int> maxRightForLowerGcd(n);
@@ -312,181 +265,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-#if 0
-    for (int i = 0; i < n; i++)
-    {
-        //cout << "i: " << i << " a[i]: " << a[i] << endl;
-
-        {
-            auto previousFactorIter = previousFactors.begin();
-            const auto& factors = factorsOfA[i];
-            auto factorIter = factors.begin();
-            while (previousFactorIter != previousFactors.end())
-            {
-                while (factorIter != factors.end() && *factorIter < *previousFactorIter)
-                {
-                    factorIter++;
-                }
-                if (factorIter == factors.end())
-                {
-                    factorPosInfos[*previousFactorIter].lastPosRemoved = i;
-                    previousFactorIter++;
-                    totalRemoved++;
-                    continue;
-                }
-                else
-                {
-                    while (previousFactorIter != previousFactors.end() && *previousFactorIter < *factorIter)
-                    {
-                        factorPosInfos[*previousFactorIter].lastPosRemoved = i;
-                        totalRemoved++;
-                        previousFactorIter++;
-                    }
-                    if (previousFactorIter != previousFactors.end())
-                    {
-                        if (*previousFactorIter == *factorIter)
-                        {
-                            previousFactorIter++;
-                            factorIter++;
-                            continue;
-                        }
-                    }
-                }
-            }
-        }
-
-        assert(is_sorted(factorsOfA[i].begin(), factorsOfA[i].end()));
-        vector<int64_t> decreasingFactors = vector<int64_t>(factorsOfA[i].rbegin(), factorsOfA[i].rend());
-        struct GcdRange
-        {
-            int left = 0;
-            int right = numeric_limits<int>::max();
-        };
-        map<int64_t, GcdRange> rangeForGcd;
-        int maxRightForLowerGcd = i;
-        for (const auto gcd : decreasingFactors)
-        {
-            auto& rangeForThisGcd = rangeForGcd[gcd];
-            auto& posInfoForThisGcd = factorPosInfos[gcd];
-            int posOfLastGcd = -1;
-            //cout << "i: " << i << " gcd: " << gcd << " posInfoForThisGcd.lastPosRemoved:" << posInfoForThisGcd.lastPosRemoved << " posInfoForThisGcd.lastPosAdded: " << posInfoForThisGcd.lastPosAdded << endl;
-            if (posInfoForThisGcd.lastPosAdded == -1)
-            {
-                posOfLastGcd = i - 1;
-            }
-            else
-            {
-                if (posInfoForThisGcd.lastPosAdded > posInfoForThisGcd.lastPosRemoved)
-                {
-                    posOfLastGcd = posInfoForThisGcd.lastPosAdded - 1;
-                }
-                else
-                {
-                    //posOfLastGcd = posInfoForThisGcd.lastPosRemoved;
-                    posOfLastGcd = i - 1;
-                }
-            }
-            rangeForThisGcd.right = min(rangeForThisGcd.right, maxRightForLowerGcd);
-#ifdef BRUTE_FORCE
-            int j = i - 1;
-            for (; j >= 0; j--)
-            {
-                if ((a[j] % gcd) != 0)
-                {
-                    break;
-                }
-            }
-            cout << "i: " << i << " gcd: " << gcd << " j: " << j << " posOfLastGcd: " << posOfLastGcd << endl;
-            assert(j == posOfLastGcd);
-#endif
-            rangeForThisGcd.right = min(rangeForThisGcd.right, i);
-            rangeForThisGcd.left = posOfLastGcd + 1;
-            //cout << "i: " << i << " gcd: " << gcd << " rangeForThisGcd: " << rangeForThisGcd.left << ", " << rangeForThisGcd.right << endl;
-            if (rangeForThisGcd.right >= 0 && rangeForThisGcd.right >= rangeForThisGcd.left)
-            {
-                if (gcd < numSequencesWithGcd.size())
-                {
-                    numSequencesWithGcd[gcd] += rangeForThisGcd.right - rangeForThisGcd.left + 1;
-                }
-            }
-#if 0
-            for (const auto factorOfGcd : factorsOfA[i])
-            {
-                if (factorOfGcd < gcd 
-                        //&& ((gcd % factorOfGcd) == 0)
-                   )
-                {
-                    //if (rangeForThisGcd.left != -1)
-                    {
-                        //rangeForGcd[factorOfGcd].right = min(rangeForGcd[factorOfGcd].right, rangeForThisGcd.left - 1);
-                    }
-                }
-            }
-#endif
-            maxRightForLowerGcd = min(maxRightForLowerGcd, rangeForThisGcd.left - 1);
-        }
-#ifdef BRUTE_FORCE
-        int gcdForSubsequence = a[i];
-        map<int64_t, int64_t> dbgNumSequencesWithGcd;
-        for (int j = i; j >= 0; j--)
-        {
-            gcdForSubsequence = gcd(gcdForSubsequence, a[j]);
-            dbgNumSequencesWithGcd[gcdForSubsequence]++;
-            cout << " # with gcd: " << gcdForSubsequence << " - " << dbgNumSequencesWithGcd[gcdForSubsequence] << endl;
-        }
-        for (const auto factor : factorsOfA[i])
-        {
-            cout << " factor: " << factor << " dbgNumSequencesWithGcd[factor]: " << dbgNumSequencesWithGcd[factor] << " numSequencesWithGcd[factor]: " << numSequencesWithGcd[factor] << endl;
-            assert(dbgNumSequencesWithGcd[factor] == numSequencesWithGcd[factor]);
-        }
-#endif
-        for (const auto factor : factorsOfA[i])
-        {
-            //if (factor < blah.size())
-                //blah[factor] += numSequencesWithGcd[factor];
-            //cout << " factor:"  << factor << " numSequencesWithGcd: " << numSequencesWithGcd[factor] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[factor] << endl;
-        }
-        {
-            const auto& factors = factorsOfA[i];
-            auto factorIter = factors.begin();
-            auto previousFactorIter = previousFactors.begin();
-            while (factorIter != factors.end())
-            {
-                while (previousFactorIter != previousFactors.end() && *previousFactorIter < *factorIter)
-                {
-                    previousFactorIter++;
-                }
-                if (previousFactorIter == previousFactors.end())
-                {
-                    factorPosInfos[*factorIter].lastPosAdded = i;
-                    totalAdded++;
-                    factorIter++;
-                    continue;
-                }
-                else
-                {
-                    while (factorIter != factors.end() && *factorIter < *previousFactorIter)
-                    {
-                        factorPosInfos[*factorIter].lastPosAdded = i;
-                    totalAdded++;
-                        factorIter++;
-                    }
-                    if (factorIter != factors.end())
-                    {
-                        if (*factorIter == *previousFactorIter)
-                        {
-                            factorIter++;
-                            previousFactorIter++;
-                            continue;
-                        }
-                    }
-                }
-            }
-        }
-
-        previousFactors = factorsOfA[i];
-    }
-#endif
+    vector<int64_t> numForK(maxK + 1);
     for (int factor = 1; factor <= maxK; factor++)
     {
         for (int k = factor; k <= maxK; k += factor)
@@ -495,16 +274,13 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-
     vector<int64_t> results;
     for (const auto query : queries)
     {
-        //cout << " query: " << query << " result: " << numForK[query] << endl;
         results.push_back(numForK[query]);
     }
     return results;
 }
-#endif
 
 
 int main(int argc, char* argv[])
