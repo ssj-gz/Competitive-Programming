@@ -20,35 +20,9 @@
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
-#if 0
-template<typename Key, typename Value>
-class Thing
-{
-    public:
-        class iterator
-        {
-            public:
-                std::pair<Key&, Value&> operator*()
-                {
-
-                }
-            private:
-                iterator(map<Key, Value>& map)
-                    : m_map(map)
-                {
-                }
-                map<Key, Value>* m_map;
-
-
-        };
-    private:
-        map<Key, Value> m_map;
-};
-#endif
-
 using namespace std;
 
-    template <typename T>
+template <typename T>
 T read()
 {
     T toRead;
@@ -56,9 +30,6 @@ T read()
     assert(cin);
     return toRead;
 }
-
-int64_t totalAdded = 0;
-int64_t totalRemoved = 0;
 
 uint64_t gcd(uint64_t u, uint64_t v)
 {
@@ -101,12 +72,10 @@ uint64_t gcd(uint64_t u, uint64_t v)
     return u << shift;
 }
 
-
 const int maxK = 1'000'000;
 
 vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const vector<char>& isPrime)
 {
-    //cout << "number: " << number << endl;
     vector<std::pair<int64_t, int64_t>> primeFactorisation;
     for (const auto prime : primesUpToRootMaxN)
     {
@@ -114,12 +83,6 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
         {
             break;
         }
-#if 0
-        if (prime > 1000 && number > 1'000'000)
-        {
-            break;
-        }
-#endif
         const auto oldNumber = number;
         int numOfPrime = 0;
         while (number % prime == 0)
@@ -135,8 +98,14 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
             break;
     }
     if (number > 1)
+    {
+        // If we ever exit the loop above with number != 1, number must
+        // be prime.
         primeFactorisation.push_back({number, 1});
+    }
 
+    // Combine the powers of primes in prime factorisation to produce all factors,
+    // each once and only once.
     vector<int64_t> factors;
     vector<int> powerOfPrime(primeFactorisation.size(), 0);
     while (true)
@@ -151,8 +120,6 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
             }
             factor *= primeToPower;
         }
-        //cout << " factor: " << factor << endl;
-        //if (factor <= maxFactor)
         factors.push_back(factor);
 
         int index = 0;
@@ -191,7 +158,6 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& a, const vector<int>& que
         }
     }
 
-
     vector<int64_t> numForK(maxK + 1);
     for (int factor = 1; factor <= maxK; factor++)
     {
@@ -222,13 +188,13 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         int pos = -1;
     };
 
-    // Sieve of Eratosthenes.
+    // Sieve of Eratosthenes.  To help with factorising numbers, compute a lookup table for
+    // primes up to 1'000'000, but store a list of primes for only up to rootMaxN.
     vector<int> primesUpToRootMaxN;
     for (int64_t factor = 2; factor <= 1'000'000; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
         assert(factor < isPrime.size());
-        //cout << "isPrime.size(): " << isPrime.size() << " factor: " << factor << endl;
         if (isFactorPrime)
         {
             if (factor <= rootMaxN)
@@ -249,12 +215,12 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-    vector<FactorAndPos> factorAndPos;
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
+    // Micro-optimisation; for small factors, store list of positions in a vector-of-vectors;
+    // else, a map of vectors.
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
     vector<vector<int>> positionsWithFactorSmall(maxK + 1);
-    map<int64_t, int64_t> dbgFactorCount;
 
     vector<int> maxRightForLowerGcd(n);
     for (int i = 0; i < n; i++)
@@ -264,7 +230,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     for (int i = 0; i < n; i++)
     {
-        //cout << "i: " << i << endl;
         if (factorsLookup.find(a[i]) == factorsLookup.end())
         {
             factorsOfA[i] = factors(a[i], primesUpToRootMaxN, isPrime);
@@ -279,12 +244,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             gcdWithPrev = gcd(a[i], a[i - 1]);
         }
-        //cout << "a[i]: " << a[i] << " factors: " << endl;
         for (const auto factor : factorsOfA[i])
         {
-            //factorAndPos.push_back({factor, i});
-            //cout << " factor: " << factor << " i: " << i << endl;
-#if 1
             bool divisibleByGcwWithPrev = false;
             bool addPrevPos = false;
             if (factor > maxK && gcdWithPrev != -1)
@@ -300,67 +261,17 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 }
 
             }
-#if 0
+            auto& positionsForFactor = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
             if (addPrevPos)
-                factorAndPos.push_back({factor, i - 1});
-            factorAndPos.push_back({factor, i});
-#endif
-            //auto& blee = positionsWithFactorDecreasing[factor];
-            //if (addPrevPos)
-                //blee.push_back(i - 1);
-            //blee.push_back(i);
-            auto& blee = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
-            //auto& blee = positionsWithFactorDecreasing[factor];
-            if (addPrevPos)
-                blee.push_back(i - 1);
-            blee.push_back(i);
-            //dbgFactorCount[factor]++;
-#else
-            auto& blee = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
-            //auto& blee = positionsWithFactorDecreasing[factor];
-            blee.push_back(i);
-            //dbgFactorCount[factor]++;
-            totalAdded++;
-#endif
-            //positionsWithFactorDecreasing[factor].push_back(i);
-            //totalAdded++;
+                positionsForFactor.push_back(i - 1);
+            positionsForFactor.push_back(i);
         }
     }
 
-    //cout << "factorAndPos.size(): " << factorAndPos.size() << endl;
-
-    sort(factorAndPos.begin(), factorAndPos.end(), [](const auto& lhs, const auto& rhs)
-            {
-            if (lhs.factor != rhs.factor)
-            return lhs.factor > rhs.factor;
-            return lhs.pos < rhs.pos;
-            });
-
-#if 0
-    cout << "positionsWithFactorDecreasing.size: " << positionsWithFactorDecreasing.size() << endl;
-    int64_t numGreaterThanMaxK = 0;
-    int64_t numGreaterThan10M = 0;
-    for (const auto& blah : dbgFactorCount)
-    {
-        cout << " factor: " << blah.first << " # times: " << blah.second << endl;
-        if (blah.first > maxK)
-        {
-            numGreaterThanMaxK += blah.second;
-        }
-        if (blah.first > 10'000'000)
-        {
-            numGreaterThan10M += blah.second;
-        }
-    }
-    cout << "numGreaterThanMaxK: " << numGreaterThanMaxK << endl;
-    cout << "numGreaterThan10M: " << numGreaterThan10M << endl;
-    cout << "totalAdded: " << totalAdded << endl;
-#endif
-
-    //return vector<int64_t>();
 
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
+    // Combine the small and large factors into one so that we can easily iterate over it.
     vector<std::pair<int64_t, vector<int>>> positionsWithFactorDecreasingCombined;
     for (auto& gcdAndPositions : positionsWithFactorDecreasing)
     {
@@ -379,15 +290,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     {
         const auto& gcd = gcdAndPositions.first;
         auto& positions = gcdAndPositions.second;
+        // Might have accidentally added a copy of a position (addPrevPos) - remove if so.
         positions.erase(unique(positions.begin(), positions.end()), positions.end());
-        assert(is_sorted(positions.begin(), positions.end()));
-
-        //cout << " gcd: " << gcd << " positions: " << endl;
-        for (const auto x : positions)
-        {
-            //cout << " " << x;
-        }
-        //cout << endl;
 
         int runLengthWithGcd = 1;
         int previousPosition = -1;
@@ -402,10 +306,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 runLengthWithGcd = 1;
             }
 
-            int gcdRangeLeft = position - runLengthWithGcd + 1;
-            int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
-
-            //cout << " position: " << position << " runLengthWithGcd: " << runLengthWithGcd << " gcdRangeLeft: " << gcdRangeLeft << " gcdRangeRight: " << gcdRangeRight << endl;
+            const int gcdRangeLeft = position - runLengthWithGcd + 1;
+            const int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
 
             if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
             {
@@ -581,8 +483,6 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    //    cout << "totalAdded: " << totalAdded << endl;
-    //cout << "totalRemoved: " << totalRemoved << endl;
 
     assert(cin);
 }
