@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
