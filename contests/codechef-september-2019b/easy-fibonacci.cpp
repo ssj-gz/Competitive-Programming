@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
     {
         const int64_t N = read<int64_t>(); 
 
+#if 0
         int64_t fn_2 = 0;
         int64_t fn_1 = 1;
         cout << (fn_2 % 10) << endl;
@@ -52,7 +53,30 @@ int main(int argc, char* argv[])
             fn_2_mod10 = fn_1_mod10;
             fn_1_mod10 = fn_mod10;
         }
+#endif
+        vector<int> a(N);
+        for (int i = 0; i < N; i++)
+        {
+            a[i] = i;
+        }
+
+        while (a.size() > 1)
+        {
+            vector<int> b;
+            for (int i = 1; i < a.size(); i += 2)
+            {
+                b.push_back(a[i]);
+            }
+            a = b;
+            cout << "new A:" << endl;
+            for (const auto x : a)
+            {
+                cout << " " << x;
+            }
+            cout << endl;
+        }
     }
+
 
     assert(cin);
 }
