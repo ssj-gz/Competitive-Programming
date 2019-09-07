@@ -226,6 +226,13 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     map<int64_t, vector<int64_t>> factorsLookup;
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
     map<int64_t, int64_t> dbgFactorCount;
+
+    vector<int> maxRightForLowerGcd(n);
+    for (int i = 0; i < n; i++)
+    {
+        maxRightForLowerGcd[i] = i;
+    }
+
     for (int i = 0; i < n; i++)
     {
         if (factorsLookup.find(a[i]) == factorsLookup.end())
@@ -242,18 +249,37 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             gcdWithPrev = gcd(a[i], a[i - 1]);
         }
+        //cout << "a[i]: " << a[i] << " factors: " << endl;
         for (const auto factor : factorsOfA[i])
         {
-            factorAndPos.push_back({factor, i});
-            //if (factor > maxK && gcdWithPrev != -1 && ((gcdWithPrev % factor) != 0))
-                //continue;
-            //if (factor > maxK)
+            //factorAndPos.push_back({factor, i});
+            //cout << " factor: " << factor << endl;
+#if 1
+            bool divisibleByGcwWithPrev = false;
+            bool addPrevPos = false;
+            if (factor > maxK && gcdWithPrev != -1)
             {
-                //auto& blee = positionsWithFactorDecreasing[factor];
+                divisibleByGcwWithPrev = ((gcdWithPrev % factor) == 0);
+                if (!divisibleByGcwWithPrev)
+                {
+                    //cout << "skipping factor: " << factor << " for i: " << i << " a[i]: " << a[i] << " gcdWithPrev: " << gcdWithPrev << endl;
+                    maxRightForLowerGcd[i] = i - 1;
+                    continue;
+                }
+                else
+                    addPrevPos = true;
+            }
+            auto& blee = positionsWithFactorDecreasing[factor];
+            if (addPrevPos)
+                blee.push_back(i - 1);
+            blee.push_back(i);
+#else
+            auto& blee = positionsWithFactorDecreasing[factor];
+            blee.push_back(i);
+#endif
             //positionsWithFactorDecreasing[factor].push_back(i);
             //totalAdded++;
             //dbgFactorCount[factor]++;
-            }
         }
     }
 
@@ -266,26 +292,34 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
 #if 0
     cout << "positionsWithFactorDecreasing.size: " << positionsWithFactorDecreasing.size() << endl;
+    int64_t numGreaterThanMaxK = 0;
     for (const auto& blah : dbgFactorCount)
     {
         cout << " factor: " << blah.first << " # times: " << blah.second << endl;
+        if (blah.first > maxK)
+        {
+            numGreaterThanMaxK += blah.second;
+        }
     }
+    cout << "numGreaterThanMaxK: " << numGreaterThanMaxK << endl;
 #endif
 
-    return vector<int64_t>();
+    //return vector<int64_t>();
 
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
-    vector<int> maxRightForLowerGcd(n);
-    for (int i = 0; i < n; i++)
-    {
-        maxRightForLowerGcd[i] = i;
-    }
 
-    for (const auto gcdAndPositions : positionsWithFactorDecreasing)
+    for (auto& gcdAndPositions : positionsWithFactorDecreasing)
     {
         const auto& gcd = gcdAndPositions.first;
-        const auto& positions = gcdAndPositions.second;
+        auto& positions = gcdAndPositions.second;
+        positions.erase(unique(positions.begin(), positions.end()), positions.end());
+
+        //cout << " gcd: " << gcd << " positions: " << endl;
+        //for (const auto x : positions)
+        //{
+            //cout << " 
+        //}
 
         int runLengthWithGcd = 1;
         int previousPosition = -1;
@@ -362,7 +396,7 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         //const int N = rand() % 200 + 1;
-        const int N = 100'000;
+        const int N = 5;
         //const int N = 10;
         const int maxA = rand() % 1'000'000'000ULL + 1;
 
@@ -370,7 +404,7 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < N; i++)
         {
-            if (rand() % 4 == 0)
+            if (rand() % 2 == 0)
             {
                 cout << ((rand() % maxA + 1)) << " ";
             }
@@ -382,7 +416,8 @@ int main(int argc, char* argv[])
         cout << endl;
 
         //const int Q = rand() % 1000 + 1;
-        const int Q = 100'000;
+        //const int Q = 100'000;
+        const int Q = 1;
         cout << Q << endl;
 
         for (int i = 0; i < Q; i++)
