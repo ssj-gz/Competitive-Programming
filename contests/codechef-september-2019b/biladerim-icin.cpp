@@ -198,44 +198,58 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
-    int64_t result = 0;
-    for (int64_t B = 1; B <= maxB; B++)
+    ModNum result = 0;
+    bool finished = false;
+    for (int64_t B = 1; B <= maxB && !finished; B++)
     {
-        for (int64_t A = 1; A <= maxA; A++)
+        for (int64_t A = 1; A <= maxA && !finished; A++)
         {
-            cout << "B: " << B << " A: " << A << endl;
+            //cout << "B: " << B << " A: " << A << endl;
             int64_t C = (B * B) / A;
 
             auto isValidC = [&A, &B, maxC](const int C)
             {
-                cout <<  "  isValidC? A: " << A << " B: " << B << " C: " << C << " B * B: " << B * B << " (A - 1) * (C - 1): " << ((A - 1) * (C - 1)) << endl;
+                //cout <<  "  isValidC? A: " << A << " B: " << B << " C: " << C << " B * B: " << B * B << " (A - 1) * (C - 1): " << ((A - 1) * (C - 1)) << endl;
                 return C >= 1 && C <= maxC && ((A - 1) * (C - 1) > B * B);
             };
 
-            cout << " choosing initial C = " << C << " isValidC: " << isValidC(C) << endl;
+            //cout << " choosing initial C = " << C << " isValidC: " << isValidC(C) << endl;
 
             while (isValidC(C - 1))
             {
-                cout << " too high; decrementing" << endl;
+                //cout << " too high; decrementing" << endl;
                 C--;
             }
             while (C < maxC && !isValidC(C))
             {
-                cout << " too low; incrementing" << endl;
+                //cout << " too low; incrementing" << endl;
                 C++;
             }
             if (!isValidC(C))
             {
-                cout << " Could not find C for A: " << A << " B: " << B << endl;
+                //cout << " Could not find C for A: " << A << " B: " << B << endl;
                 continue;
             }
-            cout << "Found valid C: " << C << endl;
-            result += (maxC - C) + 1;
+            //cout << "Found valid C: " << C << endl;
+            if (C == 2)
+            {
+                // Done - all remaining A's paired with all possible C's will do.
+                //cout << "Found C == 2 for A: " << A << " B: " << B << " -  done" << endl;
+                //cout << "result so far: " << result << " maxA - A: " << (maxA - A) << " maxC: " << maxC << endl;
+                result += ModNum(maxA - A + 1) * ModNum(maxC - 1);
+                //finished = true;
+                //assert(false);
+                break;
+            }
+            else
+            {
+                result += maxC - C + 1;
+            }
 
         }
     }
     
-    return result;
+    return result.value();
 }
 
 
