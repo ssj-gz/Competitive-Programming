@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -51,7 +51,6 @@ ostream& operator<<(ostream& os, const Blah& blah)
 }
 
 
-#if 1
 int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 {
     // Looks like minimum of f will be < 0 if (a - 1) * (c - 1) < b * b.
@@ -137,9 +136,7 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
     
     return result;
 }
-#endif
 
-#if 1
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
     return solveBruteForce(maxA, maxB, maxC);
@@ -147,7 +144,6 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
     
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -183,8 +179,8 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(maxA, maxB, maxC);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
