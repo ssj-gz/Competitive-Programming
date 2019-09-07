@@ -307,7 +307,10 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
             if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
             {
-                numSequencesWithGcd[gcd] += gcdRangeRight - gcdRangeLeft + 1;
+                if (gcd < numSequencesWithGcd.size())
+                {
+                    numSequencesWithGcd[gcd] += gcdRangeRight - gcdRangeLeft + 1;
+                }
             }
 
             maxRightForLowerGcd[position] = min(maxRightForLowerGcd[position], gcdRangeLeft - 1);
