@@ -234,7 +234,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
-    map<int64_t, vector<int>> positionsWithFactor;
+    map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
     //vector<int64_t> allFactors;
     for (int i = 0; i < n; i++)
     {
@@ -251,7 +251,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         //allFactors.insert(allFactors.end(), factorsOfA[i].begin(), factorsOfA[i].end());
         for (const auto factor : factorsOfA[i])
         {
-            positionsWithFactor[factor].push_back(i);
+            positionsWithFactorDecreasing[factor].push_back(i);
         }
     }
     //cout << "#primesUpToRootMaxN: " << primesUpToRootMaxN.size() << endl;
@@ -277,16 +277,10 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         maxRightForLowerGcd[i] = i;
     }
 
-    vector<int> decreasingFactors;
-    for (const auto factorAndPositions : positionsWithFactor)
+    for (const auto gcdAndPositions : positionsWithFactorDecreasing)
     {
-        decreasingFactors.push_back(factorAndPositions.first);
-    }
-    reverse(decreasingFactors.begin(), decreasingFactors.end());
-
-    for (const auto gcd : decreasingFactors)
-    {
-        const auto& positions = positionsWithFactor[gcd];
+        const auto& gcd = gcdAndPositions.first;
+        const auto& positions = gcdAndPositions.second;
 
         int runLengthWithGcd = 1;
         int previousPosition = -1;
@@ -303,7 +297,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
             int gcdRangeLeft = position - runLengthWithGcd + 1;
             int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
-            //cout << "gcd: " << gcd << " position: " << position << " previousPosition: " << previousPosition << " runLengthWithGcd: " << runLengthWithGcd << " gcdRangeLeft: " << gcdRangeLeft << " gcdRangeRight: " << gcdRangeRight << endl;
 
             if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
             {
