@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/FUZZYLIN
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -22,7 +22,7 @@
 
 using namespace std;
 
-template <typename T>
+    template <typename T>
 T read()
 {
     T toRead;
@@ -236,22 +236,15 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     for (int i = 0; i < n; i++)
     {
         //cout << "i: " << i << endl;
-        const int64_t toFactorise = (i > 0 ? gcd(a[i], a[i-1]) : a[i]);
-        factorsOfA[i] = factors(toFactorise, primesUpToRootMaxN, isPrime);
-        if (factorsOfA[i].back() != a[i])
+        if (factorsLookup.find(a[i]) == factorsLookup.end())
         {
-            maxRightForLowerGcd[i] = i - 1;
-        }
-#if 0
-        if (factorsLookup.find(toFactorise) == factorsLookup.end())
-        {
-            factorsLookup[toFactorise] = factorsOfA[i];
+            factorsOfA[i] = factors(a[i], primesUpToRootMaxN, isPrime);
+            factorsLookup[a[i]] = factorsOfA[i];
         }
         else
         {
-            factorsOfA[i] = factorsLookup[toFactorise];
+            factorsOfA[i] = factorsLookup[a[i]];
         }
-#endif
         int gcdWithPrev = -1;
         if (i > 0)
         {
@@ -262,12 +255,17 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             //factorAndPos.push_back({factor, i});
             //cout << " factor: " << factor << " i: " << i << endl;
-#if 0
+#if 1
             bool divisibleByGcwWithPrev = false;
             bool addPrevPos = false;
             if (factor > maxK && gcdWithPrev != -1)
             {
                 divisibleByGcwWithPrev = ((gcdWithPrev % factor) == 0);
+                if (factor > gcdWithPrev)
+                {
+                    maxRightForLowerGcd[i] = i - 1;
+                    continue;
+                }
                 if (!divisibleByGcwWithPrev)
                 {
                     //cout << "skipping factor: " << factor << " for i: " << i << " a[i]: " << a[i] << " gcdWithPrev: " << gcdWithPrev << endl;
@@ -277,13 +275,17 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 else
                     addPrevPos = true;
             }
+#if 0
             if (addPrevPos)
                 factorAndPos.push_back({factor, i - 1});
             factorAndPos.push_back({factor, i});
+#endif
+            auto& blee = positionsWithFactorDecreasing[factor];
+            if (addPrevPos)
+                blee.push_back(i - 1);
+            blee.push_back(i);
 #else
             auto& blee = positionsWithFactorDecreasing[factor];
-            if (i > 0)
-                blee.push_back(i - 1);
             blee.push_back(i);
 #endif
             //positionsWithFactorDecreasing[factor].push_back(i);
@@ -296,9 +298,9 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     sort(factorAndPos.begin(), factorAndPos.end(), [](const auto& lhs, const auto& rhs)
             {
-                if (lhs.factor != rhs.factor)
-                return lhs.factor > rhs.factor;
-                return lhs.pos < rhs.pos;
+            if (lhs.factor != rhs.factor)
+            return lhs.factor > rhs.factor;
+            return lhs.pos < rhs.pos;
             });
 
 #if 0
@@ -330,7 +332,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         //cout << " gcd: " << gcd << " positions: " << endl;
         //for (const auto x : positions)
         //{
-            //cout << " 
+        //cout << " 
         //}
 
         int runLengthWithGcd = 1;
@@ -363,29 +365,11 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-    vector<int64_t> dbgNumSequencesWithGcd(maxK + 1);
-    for (int i = 0; i < n; i++)
-    {
-        int64_t gcdOfSubsequence = a[i];
-        for (int j = i; j >= 0; j--)
-        {
-            gcdOfSubsequence = gcd(gcdOfSubsequence, a[j]);
-            if (gcdOfSubsequence < dbgNumSequencesWithGcd.size())
-            {
-                dbgNumSequencesWithGcd[gcdOfSubsequence]++;
-            }
-        }
-    }
-    for (int i = 0; i < maxK + 1; i++)
-    {
-        cout << " i: " << i << " numSequencesWithGcd: " << numSequencesWithGcd[i] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[i] << endl;
-        assert(numSequencesWithGcd[i] == dbgNumSequencesWithGcd[i]);
-    }
-
-
     vector<int64_t> numForK(maxK + 1);
     for (int factor = 1; factor <= maxK; factor++)
     {
+        if (numSequencesWithGcd[factor] == 0)
+            continue;
         for (int k = factor; k <= maxK; k += factor)
         {
             numForK[k] += numSequencesWithGcd[factor];
@@ -427,8 +411,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const int N = rand() % 200 + 1;
-        const int N = 5;
+        const int N = rand() % 200 + 1;
+        //const int N = 5;
         //const int N = 10;
         int maxA = rand() % 1'000'000'000ULL + 1;
         if (rand() % 3 == 0)
@@ -438,14 +422,14 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < N; i++)
         {
-            //if (rand() % 2 == 0)
+            if (rand() % 4 == 0)
             {
                 cout << ((rand() % maxA + 1)) << " ";
             }
-            //else
-            //{
-                //cout << 479001600 << " ";
-            //}
+            else
+            {
+                cout << 479001600 << " ";
+            }
         }
         cout << endl;
 
@@ -485,10 +469,10 @@ int main(int argc, char* argv[])
         queries.push_back(k);
     }
     const auto solutionBruteForce = solveBruteForce(a, queries);
-    cout << "solveBruteForce: " << endl;
+    cout << "blah: " << endl;
     for (const auto& x : solutionBruteForce)
     {
-        //cout << x << endl;
+        //cout << "solutionBruteForce: " << x << endl;
     }
     const auto solutionOptimised = solveOptimised(a, queries);
     cout << "solutionOptimised:  " << endl;
@@ -506,8 +490,10 @@ int main(int argc, char* argv[])
     }
 #endif
 
-//    cout << "totalAdded: " << totalAdded << endl;
+    //    cout << "totalAdded: " << totalAdded << endl;
     //cout << "totalRemoved: " << totalRemoved << endl;
 
     assert(cin);
 }
+
+
