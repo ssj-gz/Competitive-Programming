@@ -78,7 +78,7 @@ uint64_t gcd(uint64_t u, uint64_t v)
 
 const int maxK = 1'000'000;
 
-vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const vector<bool>& isPrime)
+vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, const vector<char>& isPrime)
 {
     //cout << "number: " << number << endl;
     vector<std::pair<int64_t, int64_t>> primeFactorisation;
@@ -186,11 +186,11 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     const int n = a.size();
 
     const int rootMaxN = sqrt(1'000'000'000UL);
-    vector<bool> isPrime(1'000'000 + 1, true);
+    vector<char> isPrime(1'000'000 + 1, true);
 
     // Sieve of Eratosthenes.
     vector<int> primesUpToRootMaxN;
-    for (int factor = 2; factor <= 1'000'000; factor++)
+    for (int64_t factor = 2; factor <= 1'000'000; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
         assert(factor < isPrime.size());
@@ -202,7 +202,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 primesUpToRootMaxN.push_back(factor);
             }
         }
-        for (int multiple = factor * factor; multiple <= rootMaxN; multiple += factor)
+        for (int64_t multiple = factor * factor; multiple < isPrime.size(); multiple += factor)
         {
             if (!isPrime[multiple] && !isFactorPrime)
             {
