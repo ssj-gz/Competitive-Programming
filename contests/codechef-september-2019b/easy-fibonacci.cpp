@@ -18,68 +18,29 @@ T read()
     return toRead;
 }
 
-int solveBruteForce(int64_t N)
-{
-    int64_t fn_2_mod10 = 0;
-    int64_t fn_1_mod10 = 1;
-
-    vector<int> a;
-    a.push_back(fn_2_mod10);
-    a.push_back(fn_1_mod10);
-    for (int i = 0; i < N - 2; i++)
-    {
-        //cout << "fn: " <<  fn << " mod 10: " << (fn % 10) << endl;
-        int64_t fn_mod10 = (fn_2_mod10 + fn_1_mod10) % 10;
-        a.push_back(fn_mod10);
-
-        fn_2_mod10 = fn_1_mod10;
-        fn_1_mod10 = fn_mod10;
-    }
-
-    while (a.size() > 1)
-    {
-        vector<int> b;
-        for (int i = 1; i < a.size(); i += 2)
-        {
-            b.push_back(a[i]);
-        }
-        a = b;
-        cout << "new A:" << endl;
-        for (const auto x : a)
-        {
-            cout << " " << x;
-        }
-        cout << endl;
-    }
-    return a.front();
-}
-
-
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
     vector<int> fibonacciMod10Cycle;
 
-    int64_t fn_2_mod10 = 0;
-    int64_t fn_1_mod10 = 1;
-    fibonacciMod10Cycle.push_back(fn_2_mod10);
-    fibonacciMod10Cycle.push_back(fn_1_mod10);
+    int64_t fn_minus_2_mod10 = 0;
+    int64_t fn_minus_1_mod10 = 1;
+    fibonacciMod10Cycle.push_back(fn_minus_2_mod10);
+    fibonacciMod10Cycle.push_back(fn_minus_1_mod10);
 
     int i = 0;
     while (true)
     {
-        //cout << "fn: " <<  fn << " mod 10: " << (fn % 10) << endl;
-        int64_t fn_mod10 = (fn_2_mod10 + fn_1_mod10) % 10;
+        int64_t fn_mod10 = (fn_minus_2_mod10 + fn_minus_1_mod10) % 10;
         fibonacciMod10Cycle.push_back(fn_mod10);
-        //cout << "n: " << (i + 2) << " fn_mod10: " << fn_mod10 << endl;
 
+        fn_minus_2_mod10 = fn_minus_1_mod10;
+        fn_minus_1_mod10 = fn_mod10;
 
-        fn_2_mod10 = fn_1_mod10;
-        fn_1_mod10 = fn_mod10;
-
-        if (fn_2_mod10 == 0 && fn_1_mod10 == 1)
+        if (fn_minus_2_mod10 == 0 && fn_minus_1_mod10 == 1)
         {
+            // Everything will repeat from here on in.
             fibonacciMod10Cycle.pop_back();
             fibonacciMod10Cycle.pop_back();
             break;
@@ -93,11 +54,6 @@ int main(int argc, char* argv[])
     {
         const int64_t N = read<int64_t>(); 
 
-        //cout << "fibonacciMod10Cycle: " << endl;
-        //for (int i = 0; i < fibonacciMod10Cycle.size(); i++)
-        //{
-            //cout << " N: " << (i + 1) << " f: " << fibonacciMod10Cycle[i] << endl;
-        //}
         int64_t largestPowerOf2 = 1;
         while (largestPowerOf2 <= N)
         {
@@ -106,12 +62,8 @@ int main(int argc, char* argv[])
         largestPowerOf2 >>= 1;
         const int64_t fibonacciIndex = (largestPowerOf2 - 1);
 
-        //const auto solutionBruteForce = solveBruteForce(N);
-        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        //cout << "solutionOptimised: " << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
         cout << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
     }
-
 
     assert(cin);
 }
