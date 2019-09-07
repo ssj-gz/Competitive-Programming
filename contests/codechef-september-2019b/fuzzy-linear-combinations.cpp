@@ -284,14 +284,13 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             //factorAndPos.push_back({factor, i});
             //cout << " factor: " << factor << " i: " << i << endl;
-#if 0
+#if 1
             bool divisibleByGcwWithPrev = false;
             bool addPrevPos = false;
             if (factor > maxK && gcdWithPrev != -1)
             {
                 if (factor > gcdWithPrev)
                 {
-                    //cout << "Adjusted maxRightForLowerGcd for " << i << endl;
                     maxRightForLowerGcd[i] = i - 1;
                     continue;
                 }
@@ -306,10 +305,14 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 factorAndPos.push_back({factor, i - 1});
             factorAndPos.push_back({factor, i});
 #endif
-            auto& blee = positionsWithFactorDecreasing[factor];
-            if (addPrevPos)
-                blee.push_back(i - 1);
+            //auto& blee = positionsWithFactorDecreasing[factor];
+            //if (addPrevPos)
+                //blee.push_back(i - 1);
+            //blee.push_back(i);
+            auto& blee = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
+            //auto& blee = positionsWithFactorDecreasing[factor];
             blee.push_back(i);
+            //dbgFactorCount[factor]++;
 #else
             auto& blee = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
             //auto& blee = positionsWithFactorDecreasing[factor];
