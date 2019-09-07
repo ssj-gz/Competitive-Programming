@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         //cout << "fn: " <<  fn << " mod 10: " << (fn % 10) << endl;
         int64_t fn_mod10 = (fn_2_mod10 + fn_1_mod10) % 10;
         fibonacciMod10Cycle.push_back(fn_mod10);
-        cout << "n: " << (i + 2) << " fn_mod10: " << fn_mod10 << endl;
+        //cout << "n: " << (i + 2) << " fn_mod10: " << fn_mod10 << endl;
 
 
         fn_2_mod10 = fn_1_mod10;
@@ -93,11 +93,11 @@ int main(int argc, char* argv[])
     {
         const int64_t N = read<int64_t>(); 
 
-        cout << "fibonacciMod10Cycle: " << endl;
-        for (int i = 0; i < fibonacciMod10Cycle.size(); i++)
-        {
-            cout << " N: " << (i + 1) << " f: " << fibonacciMod10Cycle[i] << endl;
-        }
+        //cout << "fibonacciMod10Cycle: " << endl;
+        //for (int i = 0; i < fibonacciMod10Cycle.size(); i++)
+        //{
+            //cout << " N: " << (i + 1) << " f: " << fibonacciMod10Cycle[i] << endl;
+        //}
         int64_t largestPowerOf2 = 1;
         while (largestPowerOf2 <= N)
         {
@@ -106,9 +106,10 @@ int main(int argc, char* argv[])
         largestPowerOf2 >>= 1;
         const int64_t fibonacciIndex = (largestPowerOf2 - 1);
 
-        const auto solutionBruteForce = solveBruteForce(N);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        cout << "solutionOptimised: " << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
+        //const auto solutionBruteForce = solveBruteForce(N);
+        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        //cout << "solutionOptimised: " << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
+        cout << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
     }
 
 
