@@ -182,12 +182,15 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     // Sieve of Eratosthenes.
     vector<int> primesUpToRootMaxN;
-    for (int factor = 2; factor <= rootMaxN; factor++)
+    for (int factor = 2; factor <= 1'000'000; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
         if (isFactorPrime)
         {
-            primesUpToRootMaxN.push_back(factor);
+            if (factor <= rootMaxN)
+            {
+                primesUpToRootMaxN.push_back(factor);
+            }
         }
         for (int multiple = factor * factor; multiple <= rootMaxN; multiple += factor)
         {
