@@ -20,6 +20,32 @@
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
+#if 0
+template<typename Key, typename Value>
+class Thing
+{
+    public:
+        class iterator
+        {
+            public:
+                std::pair<Key&, Value&> operator*()
+                {
+
+                }
+            private:
+                iterator(map<Key, Value>& map)
+                    : m_map(map)
+                {
+                }
+                map<Key, Value>* m_map;
+
+
+        };
+    private:
+        map<Key, Value> m_map;
+};
+#endif
+
 using namespace std;
 
     template <typename T>
@@ -225,6 +251,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
+    vector<vector<int>> positionsWithFactorSmall(maxK + 1);
     map<int64_t, int64_t> dbgFactorCount;
 
     vector<int> maxRightForLowerGcd(n);
@@ -255,7 +282,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             //factorAndPos.push_back({factor, i});
             //cout << " factor: " << factor << " i: " << i << endl;
-#if 1
+#if 0
             bool divisibleByGcwWithPrev = false;
             bool addPrevPos = false;
             if (factor > maxK && gcdWithPrev != -1)
@@ -282,12 +309,14 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 blee.push_back(i - 1);
             blee.push_back(i);
 #else
-            auto& blee = positionsWithFactorDecreasing[factor];
+            auto& blee = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
+            //auto& blee = positionsWithFactorDecreasing[factor];
             blee.push_back(i);
+            //dbgFactorCount[factor]++;
+            totalAdded++;
 #endif
             //positionsWithFactorDecreasing[factor].push_back(i);
             //totalAdded++;
-            //dbgFactorCount[factor]++;
         }
     }
 
@@ -303,6 +332,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 #if 0
     cout << "positionsWithFactorDecreasing.size: " << positionsWithFactorDecreasing.size() << endl;
     int64_t numGreaterThanMaxK = 0;
+    int64_t numGreaterThan10M = 0;
     for (const auto& blah : dbgFactorCount)
     {
         cout << " factor: " << blah.first << " # times: " << blah.second << endl;
@@ -310,16 +340,35 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         {
             numGreaterThanMaxK += blah.second;
         }
+        if (blah.first > 10'000'000)
+        {
+            numGreaterThan10M += blah.second;
+        }
     }
     cout << "numGreaterThanMaxK: " << numGreaterThanMaxK << endl;
+    cout << "numGreaterThan10M: " << numGreaterThan10M << endl;
+    cout << "totalAdded: " << totalAdded << endl;
 #endif
 
     //return vector<int64_t>();
 
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
-
+    vector<std::pair<int64_t, vector<int>>> positionsWithFactorDecreasingCombined;
     for (auto& gcdAndPositions : positionsWithFactorDecreasing)
+    {
+        positionsWithFactorDecreasingCombined.push_back({gcdAndPositions.first, gcdAndPositions.second});
+    }
+    for (int i = maxK; i >= 1; i--)
+    {
+        if (!positionsWithFactorSmall[i].empty())
+        {
+            positionsWithFactorDecreasingCombined.push_back({i, positionsWithFactorSmall[i]});
+        }
+    }
+
+
+    for (auto& gcdAndPositions : positionsWithFactorDecreasingCombined)
     {
         const auto& gcd = gcdAndPositions.first;
         auto& positions = gcdAndPositions.second;
@@ -365,7 +414,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-#if BRUTE_FORCE
+#ifdef BRUTE_FORCE
     vector<int64_t> dbgNumSequencesWithGcd(maxK + 1);
     for (int i = 0; i < n; i++)
     {
