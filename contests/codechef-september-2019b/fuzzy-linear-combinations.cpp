@@ -260,20 +260,17 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             bool addPrevPos = false;
             if (factor > maxK && gcdWithPrev != -1)
             {
-                divisibleByGcwWithPrev = ((gcdWithPrev % factor) == 0);
                 if (factor > gcdWithPrev)
                 {
+                    //cout << "Adjusted maxRightForLowerGcd for " << i << endl;
                     maxRightForLowerGcd[i] = i - 1;
                     continue;
                 }
-                if (!divisibleByGcwWithPrev)
+                if ((gcdWithPrev % factor) == 0)
                 {
-                    //cout << "skipping factor: " << factor << " for i: " << i << " a[i]: " << a[i] << " gcdWithPrev: " << gcdWithPrev << endl;
-                    maxRightForLowerGcd[i] = i - 1;
-                    continue;
-                }
-                else
                     addPrevPos = true;
+                }
+
             }
 #if 0
             if (addPrevPos)
@@ -330,10 +327,11 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         assert(is_sorted(positions.begin(), positions.end()));
 
         //cout << " gcd: " << gcd << " positions: " << endl;
-        //for (const auto x : positions)
-        //{
-        //cout << " 
-        //}
+        for (const auto x : positions)
+        {
+            //cout << " " << x;
+        }
+        //cout << endl;
 
         int runLengthWithGcd = 1;
         int previousPosition = -1;
@@ -351,6 +349,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             int gcdRangeLeft = position - runLengthWithGcd + 1;
             int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
 
+            //cout << " position: " << position << " runLengthWithGcd: " << runLengthWithGcd << " gcdRangeLeft: " << gcdRangeLeft << " gcdRangeRight: " << gcdRangeRight << endl;
+
             if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
             {
                 if (gcd < numSequencesWithGcd.size())
@@ -364,6 +364,33 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             previousPosition = position;
         }
     }
+
+#if BRUTE_FORCE
+    vector<int64_t> dbgNumSequencesWithGcd(maxK + 1);
+    for (int i = 0; i < n; i++)
+    {
+        int64_t gcdOfSubsequence = a[i];
+        for (int j = i; j >= 0; j--)
+        {
+            gcdOfSubsequence = gcd(gcdOfSubsequence, a[j]);
+            if (gcdOfSubsequence < dbgNumSequencesWithGcd.size())
+            {
+                dbgNumSequencesWithGcd[gcdOfSubsequence]++;
+            }
+        }
+    }
+
+    for (int i = 0; i < maxK + 1; i++)
+    {
+        //cout << " i: " << i << " numSequencesWithGcd: " << numSequencesWithGcd[i] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[i];
+        if (numSequencesWithGcd[i] != dbgNumSequencesWithGcd[i])
+        {
+            //cout << " **DIFFERENT** ";
+        }
+        //cout << endl;
+    }
+#endif
+
 
     vector<int64_t> numForK(maxK + 1);
     for (int factor = 1; factor <= maxK; factor++)
