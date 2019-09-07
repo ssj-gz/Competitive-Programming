@@ -268,7 +268,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
     // Combine the small and large factors into one so that we can easily iterate over it.
@@ -284,7 +283,6 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             positionsWithFactorDecreasingCombined.push_back({i, positionsWithFactorSmall[i]});
         }
     }
-
 
     for (auto& gcdAndPositions : positionsWithFactorDecreasingCombined)
     {
@@ -323,41 +321,14 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         }
     }
 
-#ifdef BRUTE_FORCE
-    vector<int64_t> dbgNumSequencesWithGcd(maxK + 1);
-    for (int i = 0; i < n; i++)
-    {
-        int64_t gcdOfSubsequence = a[i];
-        for (int j = i; j >= 0; j--)
-        {
-            gcdOfSubsequence = gcd(gcdOfSubsequence, a[j]);
-            if (gcdOfSubsequence < dbgNumSequencesWithGcd.size())
-            {
-                dbgNumSequencesWithGcd[gcdOfSubsequence]++;
-            }
-        }
-    }
-
-    for (int i = 0; i < maxK + 1; i++)
-    {
-        //cout << " i: " << i << " numSequencesWithGcd: " << numSequencesWithGcd[i] << " dbgNumSequencesWithGcd: " << dbgNumSequencesWithGcd[i];
-        if (numSequencesWithGcd[i] != dbgNumSequencesWithGcd[i])
-        {
-            //cout << " **DIFFERENT** ";
-        }
-        //cout << endl;
-    }
-#endif
-
-
     vector<int64_t> numForK(maxK + 1);
-    for (int factor = 1; factor <= maxK; factor++)
+    for (int gcd = 1; gcd <= maxK; gcd++)
     {
-        if (numSequencesWithGcd[factor] == 0)
+        if (numSequencesWithGcd[gcd] == 0)
             continue;
-        for (int k = factor; k <= maxK; k += factor)
+        for (int k = gcd; k <= maxK; k += gcd)
         {
-            numForK[k] += numSequencesWithGcd[factor];
+            numForK[k] += numSequencesWithGcd[gcd];
         }
     }
 
