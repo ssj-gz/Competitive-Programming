@@ -114,10 +114,12 @@ vector<int64_t> factors(int64_t number, const vector<int>& primesUpToRootMaxN, c
         {
             break;
         }
+#if 0
         if (prime > 1000 && number > 1'000'000)
         {
             break;
         }
+#endif
         const auto oldNumber = number;
         int numOfPrime = 0;
         while (number % prime == 0)
@@ -490,9 +492,17 @@ int main(int argc, char* argv[])
         const int N = rand() % 200 + 1;
         //const int N = 5;
         //const int N = 10;
-        int maxA = rand() % 1'000'000'000ULL + 1;
+        int64_t maxA = rand() % 1'000'000'000ULL + 1;
+        int64_t minA = maxA - rand() % 10000;
+        if (minA < 1)
+            minA = 1;
+
         if (rand() % 3 == 0)
+        {
             maxA = rand() % 1000 + 1;
+            minA = 1;
+        }
+        assert(minA < maxA);
 
         cout << N << endl;
 
@@ -500,7 +510,7 @@ int main(int argc, char* argv[])
         {
             if (rand() % 4 == 0)
             {
-                cout << ((rand() % maxA + 1)) << " ";
+                cout << minA + (rand() % (maxA - minA)) << " ";
             }
             else
             {
