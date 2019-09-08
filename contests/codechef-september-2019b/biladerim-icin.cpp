@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-//#define SUBMISSION
+#define SUBMISSION
 //#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -145,7 +145,7 @@ struct LookupForB
 
 vector<LookupForB> computeLookups(int64_t maxB)
 {
-    cout << "computeLookups: " << endl;
+    //cout << "computeLookups: " << endl;
     vector<LookupForB> lookup(maxB + 1);
 
 
@@ -349,28 +349,28 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<LookupForB>& lookup)
 {
-    cout << "maxA: " << maxA << " maxB: " << maxB << " maxC: " << maxC << endl;
+    //cout << "maxA: " << maxA << " maxB: " << maxB << " maxC: " << maxC << endl;
     ModNum result = 0;
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
     {
         auto& lookupForB = lookup[B];
 
-        cout << "B: " << B << endl;
+        //cout << "B: " << B << endl;
         for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
         {
             const auto C = lookupForB.cForA[A].C;
             if (C >= 1 && C <= maxC)
             {
-                cout << " C: " << C << " maxC + 1: " << (maxC + 1) << endl;
+                //cout << " C: " << C << " maxC + 1: " << (maxC + 1) << endl;
                 const ModNum amountToAdd = ModNum(maxC + 1) - ModNum(C);
-                cout << " added " << amountToAdd << " for A: " << A << " C: " << C << endl;
+                //cout << " added " << amountToAdd << " for A: " << A << " C: " << C << endl;
                 result += amountToAdd;
             }
         }
-        cout << " result after first block: " << result << endl;
+        //cout << " result after first block: " << result << endl;
         int64_t previousA = lookupForB.cForA.back().A;
-        cout << " previousA: " << previousA << endl;
+        //cout << " previousA: " << previousA << endl;
         for (const auto& x : lookupForB.repetitionsOfC)
         {
             const auto C = x.C;
@@ -380,28 +380,28 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 if (x.finalA <= maxA)
                 {
                     const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
-                    cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
+                    //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
                     result += amountToAdd;
                 }
                 else
                 {
                     const int64_t truncatedReps = maxA - previousA;
-                    cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
+                    //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
                     //assert(truncatedReps >= 0);
                     if (truncatedReps > 0)
                     {
                         const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
-                        cout << " adding: " << amountToAdd << endl;
+                        //cout << " adding: " << amountToAdd << endl;
                         result += amountToAdd;
                     }
                     break;
                 }
             }
             previousA = x.finalA;
-            cout << " updated previousA: " << previousA << endl;
+            //cout << " updated previousA: " << previousA << endl;
         }
 
-        cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
+        //cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
         if (lastProcessedA < maxA)
         {
