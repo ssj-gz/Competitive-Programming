@@ -122,6 +122,90 @@ int64_t divCeiling(int64_t x, int64_t y)
     }
 }
 
+struct CForA
+{
+    int64_t A = -1;
+    int64_t C = -1;
+};
+
+struct RepetitionOfC
+{
+    int64_t C = -1;
+    int64_t numReps = -1;
+    int64_t finalA = -1;
+};
+
+struct LookupForB
+{
+    vector<CForA> cForA;
+    vector<RepetitionOfC> repetitionsOfA;
+};
+
+vector<LookupForB> computeLookups(int64_t maxB)
+{
+    vector<LookupForB> lookup(maxB + 1);
+
+    for (int B = 2; B <= maxB; B++)
+    {
+        const int64_t maxA = B * B + 1;
+        const int64_t sqrtMaxA = sqrt(maxA);
+        cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
+        vector<int> csBrute(maxA + 1);
+        for (int A = 2; A <= maxA; A++)
+        {
+            const int C = divCeiling(B * B + 1, A - 1);
+            csBrute[A] = C;
+        }
+        vector<int> csOpt(maxA + 1);
+        for (int A = 2; A <= sqrtMaxA; A++)
+        {
+            const int C = divCeiling(B * B + 1, A - 1);
+            csOpt[A] = C;
+        }
+        const int finalC = csOpt[sqrtMaxA];
+        cout << "finalC: " << finalC << endl;
+
+
+        vector<int> diffs;
+        int prev = -1;
+        diffs.push_back(1);
+        diffs.push_back(1);
+        for (int i = sqrtMaxA - 1; i >= 0; i--)
+        {
+            diffs.push_back(csOpt[i] - csOpt[i + 1]);
+        }
+        for (int i = 0; i < diffs.size(); i++)
+        {
+            cout << "i: " << i << " diff: " << diffs[i] << endl;
+        }
+
+        int currentC = finalC;
+        int numReps = 0;
+        int diffIndex = 0;
+        for (int A = sqrtMaxA + 1; A <= maxA; A++)
+        {
+            if (numReps == 0)
+            {
+                cout << "A: " << A << " numReps = 0; taking diff from diffs[" << (diffIndex) << "] = " << diffs[diffIndex] << endl;
+                numReps = diffs[diffIndex];
+                diffIndex++;
+                currentC--;
+            }
+
+            csOpt[A] = currentC;
+            numReps--;
+        }
+
+        for (int i = 0; i <= maxA; i++)
+        {
+            cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
+        }
+        assert(csBrute == csOpt);
+    }
+
+    return lookup;
+};
+
 int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 {
     // Looks like minimum of f will be < 0 if (a - 1) * (c - 1) < b * b.
@@ -205,67 +289,11 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
     }
 #endif
 
-    {
-        const int B = 1610;
-        const int maxA = B * B + 1;
-        const int sqrtMaxA = sqrt(maxA);
-        cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
-        vector<int> csBrute(maxA + 1);
-        for (int A = 2; A <= maxA; A++)
-        {
-            const int C = divCeiling(B * B + 1, A - 1);
-            csBrute[A] = C;
-        }
-        vector<int> csOpt(maxA + 1);
-        for (int A = 2; A <= sqrtMaxA; A++)
-        {
-            const int C = divCeiling(B * B + 1, A - 1);
-            csOpt[A] = C;
-        }
-        const int finalC = csOpt[sqrtMaxA];
-        cout << "finalC: " << finalC << endl;
-
-
-        vector<int> diffs;
-        int prev = -1;
-        diffs.push_back(1);
-        diffs.push_back(1);
-        for (int i = sqrtMaxA - 1; i >= 0; i--)
-        {
-            diffs.push_back(csOpt[i] - csOpt[i + 1]);
-        }
-        for (int i = 0; i < diffs.size(); i++)
-        {
-            cout << "i: " << i << " diff: " << diffs[i] << endl;
-        }
-
-        int currentC = finalC;
-        int numReps = 0;
-        int diffIndex = 0;
-        for (int A = sqrtMaxA + 1; A <= maxA; A++)
-        {
-            if (numReps == 0)
-            {
-                cout << "A: " << A << " numReps = 0; taking diff from diffs[" << (diffIndex) << "] = " << diffs[diffIndex] << endl;
-                numReps = diffs[diffIndex];
-                diffIndex++;
-                currentC--;
-            }
-
-            csOpt[A] = currentC;
-            numReps--;
-        }
-
-        for (int i = 0; i <= maxA; i++)
-        {
-            cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
-        }
-        assert(csBrute == csOpt);
-    }
 
     
     return result;
 }
+
 
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
