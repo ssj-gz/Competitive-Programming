@@ -145,7 +145,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 {
     vector<LookupForB> lookup(maxB + 1);
 
-    for (int B = 2; B <= maxB; B++)
+    for (int B = 3; B <= maxB; B++)
     {
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
@@ -153,36 +153,31 @@ vector<LookupForB> computeLookups(int64_t maxB)
         lookupForB.cForA.resize(sqrtMaxA + 1);
         cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
         vector<int> csBrute(maxA + 1);
+        csBrute[0] = -1;
+        csBrute[1] = -1;
         for (int A = 2; A <= maxA; A++)
         {
             const int C = divCeiling(B * B + 1, A - 1);
             csBrute[A] = C;
         }
-        vector<int> csOpt(maxA + 1);
         for (int A = 2; A <= sqrtMaxA; A++)
         {
             const int C = divCeiling(B * B + 1, A - 1);
-            csOpt[A] = C;
             lookupForB.cForA[A].A = A;
             lookupForB.cForA[A].C = C;
         }
         const int64_t finalC = lookupForB.cForA.back().C;
         cout << "finalC: " << finalC << endl;
 
-        vector<int64_t> diffs;
-        diffs.push_back(1);
-        diffs.push_back(1);
-        for (int i = sqrtMaxA - 1; i >= 0; i--)
-        {
-            diffs.push_back(csOpt[i] - csOpt[i + 1]);
-        }
-        for (int i = 0; i < diffs.size(); i++)
-        {
-            cout << "i: " << i << " diff: " << diffs[i] << endl;
-        }
-
         int64_t cRepeated = finalC;
         int64_t aAfterCRepeats = sqrtMaxA + 1;
+#if 0
+        lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+        cRepeated--;
+        aAfterCRepeats++;
+#endif
+        cRepeated--;
+        aAfterCRepeats++;
         lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
         cRepeated--;
         aAfterCRepeats++;
@@ -196,22 +191,21 @@ vector<LookupForB> computeLookups(int64_t maxB)
             aAfterCRepeats++;
         }
 
-        int currentC = finalC;
-        int numReps = 0;
-        int diffIndex = 0;
-        for (int A = sqrtMaxA + 1; A <= maxA; A++)
+        vector<int> csOpt;
+        for (const auto x : lookupForB.cForA)
         {
-            if (numReps == 0)
-            {
-                cout << "A: " << A << " numReps = 0; taking diff from diffs[" << (diffIndex) << "] = " << diffs[diffIndex] << endl;
-                numReps = diffs[diffIndex];
-                diffIndex++;
-                currentC--;
-            }
-
-            csOpt[A] = currentC;
-            numReps--;
+            csOpt.push_back(x.C);
         }
+        for (const auto x : lookupForB.repetitionsOfC)
+        {
+            cout << " C: " << x.C << " numReps: " << x.numReps << endl;
+            for (int i = 1; i <= x.numReps; i++)
+            {
+                csOpt.push_back(x.C);
+            }
+        }
+
+
 
         for (int i = 0; i <= maxA; i++)
         {
@@ -315,6 +309,7 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
+    const auto& lookupForB = computeLookups(maxB);
     ModNum result = 0;
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
