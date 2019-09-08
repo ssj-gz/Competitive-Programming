@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
 //#define SUBMISSION
-#define VERIFY_LOOKUPS
+//#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -151,7 +151,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
     for (int B = 1; B <= maxB; B++)
     {
-        cout << "B: " << B << endl;
+        //cout << "B: " << B << endl;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
         //cout << "sqrtMaxA: " << sqrtMaxA << endl;
@@ -270,7 +270,7 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
             {
                 if ((A - 1) * (C - 1) > B * B)
                 {
-//                    cout << " interesting triple: (" << A << ", " << B << ", " << C << ")" << endl;
+                    //cout << " interesting triple: (" << A << ", " << B << ", " << C << ")" << endl;
                     result++;
                 }
 
@@ -399,6 +399,13 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             }
             previousA = x.finalA;
             cout << " updated previousA: " << previousA << endl;
+        }
+
+        cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
+        const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
+        if (lastProcessedA < maxA)
+        {
+            result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
         }
 
     }
