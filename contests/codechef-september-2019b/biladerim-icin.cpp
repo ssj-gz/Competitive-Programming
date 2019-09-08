@@ -320,7 +320,7 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
-    const auto& lookupForB = computeLookups(maxB);
+    //const auto& lookupForB = computeLookups(maxB);
     ModNum result = 0;
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
@@ -433,7 +433,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            cout << ((rand() % 10) + 1) << " " << ((rand() % 10) + 1) << " " << ((rand() % 10) + 1) << endl;
+            cout << ((rand() % 300) + 1) << " " << ((rand() % 100) + 1) << " " << ((rand() % 300) + 1) << endl;
         }
 
         return 0;
