@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -143,16 +143,19 @@ struct LookupForB
 
 vector<LookupForB> computeLookups(int64_t maxB)
 {
+    cout << "computeLookups: " << endl;
     vector<LookupForB> lookup(maxB + 1);
 
     for (int B = 3; B <= maxB; B++)
     {
+        //cout << "B: " << B << endl;
         //B = 20;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
         auto& lookupForB = lookup[B];
         lookupForB.cForA.resize(sqrtMaxA + 1);
-        cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
+        //cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
+#ifdef BRUTE_FORCE
         vector<int> csBrute(maxA + 1);
         csBrute[0] = -1;
         csBrute[1] = -1;
@@ -161,15 +164,16 @@ vector<LookupForB> computeLookups(int64_t maxB)
             const int C = divCeiling(B * B + 1, A - 1);
             csBrute[A] = C;
         }
+#endif
         for (int A = 2; A <= sqrtMaxA; A++)
         {
             const int C = divCeiling(B * B + 1, A - 1);
             lookupForB.cForA[A].A = A;
             lookupForB.cForA[A].C = C;
-            cout << "A: " << A << " cForA: " << C << endl;
+            //cout << "A: " << A << " cForA: " << C << endl;
         }
         const int64_t finalC = lookupForB.cForA.back().C;
-        cout << "finalC: " << finalC << endl;
+        //cout << "finalC: " << finalC << endl;
 
         int64_t cRepeated = finalC;
         int64_t aAfterCRepeats = sqrtMaxA;
@@ -187,15 +191,18 @@ vector<LookupForB> computeLookups(int64_t maxB)
         cRepeated--;
         for (int i = sqrtMaxA - 1; i >= 2; i--)
         {
-            cout << " i: " << i << " aAfterCRepeats:"  << aAfterCRepeats << endl;
+            //cout << " i: " << i << " aAfterCRepeats:"  << aAfterCRepeats << endl;
             const int64_t numRepetitions = lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C;
-            cout << "numRepetitions: " << numRepetitions << endl;
+            //cout << "numRepetitions: " << numRepetitions << endl;
             assert(numRepetitions >= 1);
             aAfterCRepeats += numRepetitions;
             lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
             cRepeated--;
         }
 
+
+
+#ifdef BRUTE_FORCE
         vector<int> csOpt;
         for (const auto x : lookupForB.cForA)
         {
@@ -204,24 +211,23 @@ vector<LookupForB> computeLookups(int64_t maxB)
         int dbgA = sqrtMaxA;
         for (const auto x : lookupForB.repetitionsOfC)
         {
-            cout << " C: " << x.C << " numReps: " << x.numReps << endl;
+            //cout << " C: " << x.C << " numReps: " << x.numReps << endl;
             for (int64_t i = 1; i <= x.numReps; i++)
             {
                 csOpt.push_back(x.C);
             }
             dbgA += x.numReps;
-            cout << " dbgA: " << dbgA << " x.aAfterCRepeats: " << x.finalA << endl;
+            //cout << " dbgA: " << dbgA << " x.aAfterCRepeats: " << x.finalA << endl;
             assert(dbgA == x.finalA);
         }
         assert(dbgA == maxA);
 
-
-
         for (int i = 0; i <= maxA; i++)
         {
-            cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
+            //cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
         }
         assert(csBrute == csOpt);
+#endif
         //break;
     }
 
@@ -320,7 +326,6 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
-    //const auto& lookupForB = computeLookups(maxB);
     ModNum result = 0;
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
@@ -439,6 +444,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     
+    const auto& lookupForB = computeLookups(5000);
     // TODO - read in testcase.
     const auto T = read<int>();
 
