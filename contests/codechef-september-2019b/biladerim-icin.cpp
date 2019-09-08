@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-#define SUBMISSION
+//#define SUBMISSION
 //#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -14,6 +14,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include <cassert>
 
@@ -127,7 +128,7 @@ int64_t divCeiling(int64_t x, int64_t y)
 struct CForA
 {
     int64_t A = -1;
-    int64_t C = -1;
+    int64_t C = std::numeric_limits<int64_t>::max();
 };
 
 struct RepetitionOfC
@@ -151,7 +152,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
     for (int B = 1; B <= maxB; B++)
     {
-        //cout << "B: " << B << endl;
+        cout << "B: " << B << endl;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
         //cout << "sqrtMaxA: " << sqrtMaxA << endl;
@@ -162,7 +163,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
         {
             lookupForB.cForA.resize(1);
             lookupForB.cForA[0].A = 0;
-            lookupForB.repetitionsOfC.push_back({-1, 1, 1});
+            lookupForB.repetitionsOfC.push_back({std::numeric_limits<int64_t>::max(), 1, 1});
             lookupForB.repetitionsOfC.push_back({3, 1, 2});
         }
         else if (B == 2)
@@ -217,16 +218,16 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
 
 #ifdef VERIFY_LOOKUPS
-        vector<int> csBrute(maxA + 1);
-        csBrute[0] = -1;
-        csBrute[1] = -1;
+        vector<int64_t> csBrute(maxA + 1);
+        csBrute[0] = numeric_limits<int64_t>::max();
+        csBrute[1] = numeric_limits<int64_t>::max();
         for (int A = 2; A <= maxA; A++)
         {
-            const int C = divCeiling(B * B + 1, A - 1) + 1;
+            const int64_t C = divCeiling(B * B + 1, A - 1) + 1;
             assert((C - 1) * (A - 1) >= B *B + 1);
             csBrute[A] = C;
         }
-        vector<int> csOpt;
+        vector<int64_t> csOpt;
         for (const auto x : lookupForB.cForA)
         {
             csOpt.push_back(x.C);
@@ -245,7 +246,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
         }
         assert(dbgA == maxA);
 
-        for (int i = 0; i <= maxA; i++)
+        for (int64_t i = 0; i <= maxA; i++)
         {
        //     cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
         }
