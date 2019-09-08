@@ -110,6 +110,17 @@ ostream& operator<<(ostream& os, const Blah& blah)
     return os;
 }
 
+int64_t divCeiling(int64_t x, int64_t y)
+{
+    if ((x % y) == 0)
+    {
+        return x / y;
+    }
+    else
+    {
+        return x / y + 1;
+    }
+}
 
 int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 {
@@ -193,21 +204,69 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 #endif
     }
 #endif
+
+    {
+        const int B = 1610;
+        const int maxA = B * B + 1;
+        const int sqrtMaxA = sqrt(maxA);
+        cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
+        vector<int> csBrute(maxA + 1);
+        for (int A = 2; A <= maxA; A++)
+        {
+            const int C = divCeiling(B * B + 1, A - 1);
+            csBrute[A] = C;
+        }
+        vector<int> csOpt(maxA + 1);
+        for (int A = 2; A <= sqrtMaxA; A++)
+        {
+            const int C = divCeiling(B * B + 1, A - 1);
+            csOpt[A] = C;
+        }
+        const int finalC = csOpt[sqrtMaxA];
+        cout << "finalC: " << finalC << endl;
+
+
+        vector<int> diffs;
+        int prev = -1;
+        diffs.push_back(1);
+        diffs.push_back(1);
+        for (int i = sqrtMaxA - 1; i >= 0; i--)
+        {
+            diffs.push_back(csOpt[i] - csOpt[i + 1]);
+        }
+        for (int i = 0; i < diffs.size(); i++)
+        {
+            cout << "i: " << i << " diff: " << diffs[i] << endl;
+        }
+
+        int currentC = finalC;
+        int numReps = 0;
+        int diffIndex = 0;
+        for (int A = sqrtMaxA + 1; A <= maxA; A++)
+        {
+            if (numReps == 0)
+            {
+                cout << "A: " << A << " numReps = 0; taking diff from diffs[" << (diffIndex) << "] = " << diffs[diffIndex] << endl;
+                numReps = diffs[diffIndex];
+                diffIndex++;
+                currentC--;
+            }
+
+            csOpt[A] = currentC;
+            numReps--;
+        }
+
+        for (int i = 0; i <= maxA; i++)
+        {
+            cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
+        }
+        assert(csBrute == csOpt);
+    }
+
     
     return result;
 }
 
-int64_t divCeiling(int64_t x, int64_t y)
-{
-    if ((x % y) == 0)
-    {
-        return x / y;
-    }
-    else
-    {
-        return x / y + 1;
-    }
-}
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 {
@@ -323,7 +382,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            cout << ((rand() % 100) + 1) << " " << ((rand() % 100) + 1) << " " << ((rand() % 100) + 1) << endl;
+            cout << ((rand() % 10) + 1) << " " << ((rand() % 10) + 1) << " " << ((rand() % 10) + 1) << endl;
         }
 
         return 0;
