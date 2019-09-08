@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-#define SUBMISSION
+//#define SUBMISSION
 //#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -266,12 +266,14 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
     {
         for (int64_t A = 1; A <= maxA; A++)
         {
+            if ((A % 100) == 0)
+                cout << "B: " << B << " A: " << A << endl;
             for (int64_t C = 1; C <= maxC; C++)
             {
                 if ((A - 1) * (C - 1) > B * B)
                 {
                     //cout << " interesting triple: (" << A << ", " << B << ", " << C << ")" << endl;
-                    result++;
+                    result = (result + 1) % Mod;
                 }
 
             }
