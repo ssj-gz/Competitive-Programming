@@ -147,6 +147,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
     for (int B = 3; B <= maxB; B++)
     {
+        //B = 10;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
         auto& lookupForB = lookup[B];
@@ -165,6 +166,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
             const int C = divCeiling(B * B + 1, A - 1);
             lookupForB.cForA[A].A = A;
             lookupForB.cForA[A].C = C;
+            cout << "A: " << A << " cForA: " << C << endl;
         }
         const int64_t finalC = lookupForB.cForA.back().C;
         cout << "finalC: " << finalC << endl;
@@ -184,11 +186,15 @@ vector<LookupForB> computeLookups(int64_t maxB)
         lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
         cRepeated--;
         aAfterCRepeats++;
-        for (int i = sqrtMaxA - 1; i >= 0; i--)
+        for (int i = sqrtMaxA - 1; i >= 2; i--)
         {
-            lookupForB.repetitionsOfC.push_back({cRepeated, lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C, aAfterCRepeats});
+            cout << " i: " << i << " aAfterCRepeats:"  << aAfterCRepeats << endl;
+            const int64_t numRepetitions = lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C;
+            cout << "numRepetitions: " << numRepetitions << endl;
+            assert(numRepetitions >= 1);
+            lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
             cRepeated--;
-            aAfterCRepeats++;
+            aAfterCRepeats += numRepetitions;
         }
 
         vector<int> csOpt;
@@ -196,13 +202,17 @@ vector<LookupForB> computeLookups(int64_t maxB)
         {
             csOpt.push_back(x.C);
         }
+        int dbgA = sqrtMaxA + 1;
         for (const auto x : lookupForB.repetitionsOfC)
         {
             cout << " C: " << x.C << " numReps: " << x.numReps << endl;
-            for (int i = 1; i <= x.numReps; i++)
+            for (int64_t i = 1; i <= x.numReps; i++)
             {
                 csOpt.push_back(x.C);
             }
+            dbgA += x.numReps;
+            cout << " dbgA: " << dbgA << " x.aAfterCRepeats: " << x.finalA << endl;
+            //assert(dbgA == x.finalA);
         }
 
 
@@ -212,6 +222,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
             cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
         }
         assert(csBrute == csOpt);
+        //break;
     }
 
     return lookup;
