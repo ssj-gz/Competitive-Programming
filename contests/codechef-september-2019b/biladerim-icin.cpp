@@ -436,16 +436,38 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    const auto& lookups = computeLookups(5000);
     // TODO - read in testcase.
     const auto T = read<int>();
 
+    struct Query
+    {
+        int64_t maxA;
+        int64_t maxB;
+        int64_t maxC;
+    };
+
+    vector<Query> queries;
+
+    int64_t largestMaxB = 0;
+
+
     for (int t = 0; t < T; t++)
     {
+        queries.push_back({read<int64_t>(), read<int64_t>(), read<int64_t>()});
+        largestMaxB = max(largestMaxB, queries.back().maxB);
+    }
 
-        const int64_t maxA = read<int64_t>();
-        const int64_t maxB = read<int64_t>();
-        const int64_t maxC = read<int64_t>();
+    const auto& lookups = computeLookups(largestMaxB);
+
+    for (int t = 0; t < T; t++)
+    {
+        const int64_t maxA = queries[t].maxA;
+        const int64_t maxB = queries[t].maxB;
+        const int64_t maxC = queries[t].maxC;
+
+        //const int64_t maxA = read<int64_t>();
+        //const int64_t maxB = read<int64_t>();
+        //const int64_t maxC = read<int64_t>();
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(maxA, maxB, maxC);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
