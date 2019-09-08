@@ -147,7 +147,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
     for (int B = 3; B <= maxB; B++)
     {
-        //B = 10;
+        //B = 20;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
         auto& lookupForB = lookup[B];
@@ -172,7 +172,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
         cout << "finalC: " << finalC << endl;
 
         int64_t cRepeated = finalC;
-        int64_t aAfterCRepeats = sqrtMaxA + 1;
+        int64_t aAfterCRepeats = sqrtMaxA;
 #if 0
         lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
         cRepeated--;
@@ -185,16 +185,15 @@ vector<LookupForB> computeLookups(int64_t maxB)
         aAfterCRepeats++;
         lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
         cRepeated--;
-        aAfterCRepeats++;
         for (int i = sqrtMaxA - 1; i >= 2; i--)
         {
             cout << " i: " << i << " aAfterCRepeats:"  << aAfterCRepeats << endl;
             const int64_t numRepetitions = lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C;
             cout << "numRepetitions: " << numRepetitions << endl;
             assert(numRepetitions >= 1);
+            aAfterCRepeats += numRepetitions;
             lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
             cRepeated--;
-            aAfterCRepeats += numRepetitions;
         }
 
         vector<int> csOpt;
@@ -202,7 +201,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
         {
             csOpt.push_back(x.C);
         }
-        int dbgA = sqrtMaxA + 1;
+        int dbgA = sqrtMaxA;
         for (const auto x : lookupForB.repetitionsOfC)
         {
             cout << " C: " << x.C << " numReps: " << x.numReps << endl;
@@ -212,8 +211,9 @@ vector<LookupForB> computeLookups(int64_t maxB)
             }
             dbgA += x.numReps;
             cout << " dbgA: " << dbgA << " x.aAfterCRepeats: " << x.finalA << endl;
-            //assert(dbgA == x.finalA);
+            assert(dbgA == x.finalA);
         }
+        assert(dbgA == maxA);
 
 
 
