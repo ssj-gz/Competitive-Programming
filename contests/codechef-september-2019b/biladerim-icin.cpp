@@ -235,18 +235,6 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
 
             //cout << " choosing initial C = " << C << " isValidC: " << isValidC(C) << endl;
 
-            while (isValidC(C - 1))
-            {
-                assert(false);
-                //cout << " too high; decrementing" << endl;
-                C--;
-            }
-            while (C < maxC && !isValidC(C))
-            {
-                assert(false);
-                //cout << " too low; incrementing" << endl;
-                C++;
-            }
             if (!isValidC(C))
             {
                 //cout << " Could not find C for A: " << A << " B: " << B << endl;
