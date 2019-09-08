@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
 //#define SUBMISSION
-//#define VERIFY_LOOKUPS
+#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -148,48 +148,84 @@ vector<LookupForB> computeLookups(int64_t maxB)
     cout << "computeLookups: " << endl;
     vector<LookupForB> lookup(maxB + 1);
 
-    for (int B = 3; B <= maxB; B++)
+
+    for (int B = 1; B <= maxB; B++)
     {
-        //cout << "B: " << B << endl;
-        //B = 20;
+        cout << "B: " << B << endl;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
-        auto& lookupForB = lookup[B];
-        lookupForB.cForA.resize(sqrtMaxA + 1);
-        //cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
-        for (int A = 2; A <= sqrtMaxA; A++)
+        cout << "sqrtMaxA: " << sqrtMaxA << endl;
         {
-            const int C = divCeiling(B * B + 1, A - 1);
-            lookupForB.cForA[A].A = A;
-            lookupForB.cForA[A].C = C;
-            //cout << "A: " << A << " cForA: " << C << endl;
+            // TODO - remove
+            vector<int> csBrute(maxA + 1);
+            csBrute[0] = -1;
+            csBrute[1] = -1;
+            for (int A = 2; A <= maxA; A++)
+            {
+                const int C = divCeiling(B * B + 1, A - 1);
+                csBrute[A] = C;
+            }
+            for (int i = 0; i < csBrute.size(); i++)
+            {
+                cout << "i: " << i << " csBrute: " << csBrute[i] << endl;
+            }
         }
-        const int64_t finalC = lookupForB.cForA.back().C;
-        //cout << "finalC: " << finalC << endl;
-
-        int64_t cRepeated = finalC;
-        int64_t aAfterCRepeats = sqrtMaxA;
-#if 0
-        lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
-        cRepeated--;
-        aAfterCRepeats++;
-#endif
-        cRepeated--;
-        aAfterCRepeats++;
-        lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
-        cRepeated--;
-        aAfterCRepeats++;
-        lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
-        cRepeated--;
-        for (int i = sqrtMaxA - 1; i >= 2; i--)
+        //cout << "B: " << B << endl;
+        //B = 20;
+        auto& lookupForB = lookup[B];
+        if (B == 1)
         {
-            //cout << " i: " << i << " aAfterCRepeats:"  << aAfterCRepeats << endl;
-            const int64_t numRepetitions = lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C;
-            //cout << "numRepetitions: " << numRepetitions << endl;
-            assert(numRepetitions >= 1);
-            aAfterCRepeats += numRepetitions;
-            lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
+            lookupForB.cForA.resize(2);
+            lookupForB.cForA[1].A = 1;
+            lookupForB.repetitionsOfC.push_back({2, 1, 2});
+        }
+        else if (B == 2)
+        {
+            lookupForB.cForA.resize(sqrtMaxA + 1);
+            lookupForB.cForA[2].A = 2;
+            lookupForB.cForA[2].C = 5;
+            lookupForB.repetitionsOfC.push_back({3, 1, 3});
+            lookupForB.repetitionsOfC.push_back({2, 2, 5});
+        }
+        else
+        {
+            const int64_t sqrtMaxA = sqrt(maxA);
+            lookupForB.cForA.resize(sqrtMaxA + 1);
+            //cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
+            for (int A = 2; A <= sqrtMaxA; A++)
+            {
+                const int C = divCeiling(B * B + 1, A - 1);
+                lookupForB.cForA[A].A = A;
+                lookupForB.cForA[A].C = C;
+                //cout << "A: " << A << " cForA: " << C << endl;
+            }
+            const int64_t finalC = lookupForB.cForA.back().C;
+            //cout << "finalC: " << finalC << endl;
+
+            int64_t cRepeated = finalC;
+            int64_t aAfterCRepeats = sqrtMaxA;
+#if 0
+            lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
             cRepeated--;
+            aAfterCRepeats++;
+#endif
+            cRepeated--;
+            aAfterCRepeats++;
+            lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+            cRepeated--;
+            aAfterCRepeats++;
+            lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+            cRepeated--;
+            for (int i = sqrtMaxA - 1; i >= 2; i--)
+            {
+                //cout << " i: " << i << " aAfterCRepeats:"  << aAfterCRepeats << endl;
+                const int64_t numRepetitions = lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C;
+                //cout << "numRepetitions: " << numRepetitions << endl;
+                assert(numRepetitions >= 1);
+                aAfterCRepeats += numRepetitions;
+                lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
+                cRepeated--;
+            }
         }
 
 
@@ -224,7 +260,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
         for (int i = 0; i <= maxA; i++)
         {
-            //cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
+            cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
         }
         assert(csBrute == csOpt);
 #endif
@@ -232,7 +268,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
     }
 
     return lookup;
-};
+}
 
 int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 {
