@@ -324,7 +324,7 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 
 
-int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC)
+int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<LookupForB>& lookup)
 {
     ModNum result = 0;
     bool finished = false;
@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    const auto& lookupForB = computeLookups(5000);
+    const auto& lookups = computeLookups(5000);
     // TODO - read in testcase.
     const auto T = read<int>();
 
@@ -455,18 +455,14 @@ int main(int argc, char* argv[])
         const int64_t maxB = read<int64_t>();
         const int64_t maxC = read<int64_t>();
 #ifdef BRUTE_FORCE
-#if 1
         const auto solutionBruteForce = solveBruteForce(maxA, maxB, maxC);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
-        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC);
+        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC, lookups);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
-        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC);
+        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC, lookups);
         cout << solutionOptimised << endl;
 #endif
     }
