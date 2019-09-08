@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
 //#define SUBMISSION
-//#define VERIFY_LOOKUPS
+#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -160,17 +160,18 @@ vector<LookupForB> computeLookups(int64_t maxB)
         auto& lookupForB = lookup[B];
         if (B == 1)
         {
-            lookupForB.cForA.resize(2);
-            lookupForB.cForA[1].A = 1;
-            lookupForB.repetitionsOfC.push_back({2, 1, 2});
+            lookupForB.cForA.resize(1);
+            lookupForB.cForA[0].A = 0;
+            lookupForB.repetitionsOfC.push_back({-1, 1, 1});
+            lookupForB.repetitionsOfC.push_back({3, 1, 2});
         }
         else if (B == 2)
         {
             lookupForB.cForA.resize(sqrtMaxA + 1);
             lookupForB.cForA[2].A = 2;
-            lookupForB.cForA[2].C = 5;
-            lookupForB.repetitionsOfC.push_back({3, 1, 3});
-            lookupForB.repetitionsOfC.push_back({2, 2, 5});
+            lookupForB.cForA[2].C = 6;
+            lookupForB.repetitionsOfC.push_back({4, 1, 3});
+            lookupForB.repetitionsOfC.push_back({3, 2, 5});
         }
         else
         {
@@ -179,7 +180,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
             //cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
             for (int A = 2; A <= sqrtMaxA; A++)
             {
-                const int C = divCeiling(B * B + 1, A - 1);
+                const int C = divCeiling(B * B + 1, A - 1) + 1;
                 lookupForB.cForA[A].A = A;
                 lookupForB.cForA[A].C = C;
                 //cout << "A: " << A << " cForA: " << C << endl;
@@ -221,7 +222,8 @@ vector<LookupForB> computeLookups(int64_t maxB)
         csBrute[1] = -1;
         for (int A = 2; A <= maxA; A++)
         {
-            const int C = divCeiling(B * B + 1, A - 1);
+            const int C = divCeiling(B * B + 1, A - 1) + 1;
+            assert((C - 1) * (A - 1) >= B *B + 1);
             csBrute[A] = C;
         }
         vector<int> csOpt;
@@ -229,7 +231,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
         {
             csOpt.push_back(x.C);
         }
-        int dbgA = sqrtMaxA;
+        int dbgA = lookupForB.cForA.back().A;
         for (const auto x : lookupForB.repetitionsOfC)
         {
             //cout << " C: " << x.C << " numReps: " << x.numReps << endl;
@@ -245,7 +247,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
         for (int i = 0; i <= maxA; i++)
         {
-            //cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
+       //     cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
         }
         assert(csBrute == csOpt);
 #endif
@@ -347,6 +349,7 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<LookupForB>& lookup)
 {
+    cout << "maxA: " << maxA << " maxB: " << maxB << " maxC: " << maxC << endl;
     ModNum result = 0;
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
@@ -371,29 +374,31 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         for (const auto& x : lookupForB.repetitionsOfC)
         {
             const auto C = x.C;
-            if (C > maxC || C < 1)
-                continue;
-            if (x.finalA <= maxA)
+            if (C >= 1 && C <= maxC)
             {
-                const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
-                cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
-                result += amountToAdd;
-            }
-            else
-            {
-                const int64_t truncatedReps = maxA - previousA;
-                cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
-                //assert(truncatedReps >= 0);
-                if (truncatedReps > 0)
+
+                if (x.finalA <= maxA)
                 {
-                    const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
-                    cout << " adding: " << amountToAdd << endl;
+                    const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
+                    cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
                     result += amountToAdd;
                 }
-                break;
+                else
+                {
+                    const int64_t truncatedReps = maxA - previousA;
+                    cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
+                    //assert(truncatedReps >= 0);
+                    if (truncatedReps > 0)
+                    {
+                        const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
+                        cout << " adding: " << amountToAdd << endl;
+                        result += amountToAdd;
+                    }
+                    break;
+                }
             }
             previousA = x.finalA;
-            cout << " previousA: " << previousA << endl;
+            cout << " updated previousA: " << previousA << endl;
         }
 
     }
