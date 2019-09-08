@@ -138,7 +138,7 @@ struct RepetitionOfC
 struct LookupForB
 {
     vector<CForA> cForA;
-    vector<RepetitionOfC> repetitionsOfA;
+    vector<RepetitionOfC> repetitionsOfC;
 };
 
 vector<LookupForB> computeLookups(int64_t maxB)
@@ -149,6 +149,8 @@ vector<LookupForB> computeLookups(int64_t maxB)
     {
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
+        auto& lookupForB = lookup[B];
+        lookupForB.cForA.resize(sqrtMaxA + 1);
         cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
         vector<int> csBrute(maxA + 1);
         for (int A = 2; A <= maxA; A++)
@@ -161,13 +163,13 @@ vector<LookupForB> computeLookups(int64_t maxB)
         {
             const int C = divCeiling(B * B + 1, A - 1);
             csOpt[A] = C;
+            lookupForB.cForA[A].A = A;
+            lookupForB.cForA[A].C = C;
         }
-        const int finalC = csOpt[sqrtMaxA];
+        const int64_t finalC = lookupForB.cForA.back().C;
         cout << "finalC: " << finalC << endl;
 
-
-        vector<int> diffs;
-        int prev = -1;
+        vector<int64_t> diffs;
         diffs.push_back(1);
         diffs.push_back(1);
         for (int i = sqrtMaxA - 1; i >= 0; i--)
@@ -177,6 +179,21 @@ vector<LookupForB> computeLookups(int64_t maxB)
         for (int i = 0; i < diffs.size(); i++)
         {
             cout << "i: " << i << " diff: " << diffs[i] << endl;
+        }
+
+        int64_t cRepeated = finalC;
+        int64_t aAfterCRepeats = sqrtMaxA + 1;
+        lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+        cRepeated--;
+        aAfterCRepeats++;
+        lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+        cRepeated--;
+        aAfterCRepeats++;
+        for (int i = sqrtMaxA - 1; i >= 0; i--)
+        {
+            lookupForB.repetitionsOfC.push_back({cRepeated, lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C, aAfterCRepeats});
+            cRepeated--;
+            aAfterCRepeats++;
         }
 
         int currentC = finalC;
