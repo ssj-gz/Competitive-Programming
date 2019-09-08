@@ -2,10 +2,12 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-#define SUBMISSION
+//#define SUBMISSION
+//#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
+#undef VERIFY_LOOKUPS
 //#define NDEBUG
 #endif
 #include <iostream>
@@ -155,16 +157,6 @@ vector<LookupForB> computeLookups(int64_t maxB)
         auto& lookupForB = lookup[B];
         lookupForB.cForA.resize(sqrtMaxA + 1);
         //cout << "B: " << B << " maxA: " << maxA << " sqrt(maxA): " << sqrtMaxA << endl;
-#ifdef BRUTE_FORCE
-        vector<int> csBrute(maxA + 1);
-        csBrute[0] = -1;
-        csBrute[1] = -1;
-        for (int A = 2; A <= maxA; A++)
-        {
-            const int C = divCeiling(B * B + 1, A - 1);
-            csBrute[A] = C;
-        }
-#endif
         for (int A = 2; A <= sqrtMaxA; A++)
         {
             const int C = divCeiling(B * B + 1, A - 1);
@@ -202,7 +194,15 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
 
 
-#ifdef BRUTE_FORCE
+#ifdef VERIFY_LOOKUPS
+        vector<int> csBrute(maxA + 1);
+        csBrute[0] = -1;
+        csBrute[1] = -1;
+        for (int A = 2; A <= maxA; A++)
+        {
+            const int C = divCeiling(B * B + 1, A - 1);
+            csBrute[A] = C;
+        }
         vector<int> csOpt;
         for (const auto x : lookupForB.cForA)
         {
@@ -330,91 +330,50 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
     bool finished = false;
     for (int64_t B = 1; B <= maxB && !finished; B++)
     {
-        //B = 899;
-        int64_t lastC = -1;
-        vector<int64_t> diffsBetweenCs;
-        vector<int64_t> lengthsOfRunsOfCs;
-        int64_t currentCRunLength = 1;
+        auto& lookupForB = lookup[B];
 
-        for (int64_t A = 2; A <= maxA && !finished; A++)
+        cout << "B: " << B << endl;
+        for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size(), maxA); A++)
         {
-            //cout << "B: " << B << " A: " << A << endl;
-            //int64_t C = ((B * B) + 1) / (A - 1);
-            int64_t C = divCeiling(B * B + 1, A - 1) + 1;
-
-            auto isValidC = [&A, &B, maxC](const int C)
+            const auto C = lookupForB.cForA[A].C;
+            if (C >= 1 && C <= maxC)
             {
-                //cout <<  "  isValidC? A: " << A << " B: " << B << " C: " << C << " B * B: " << B * B << " (A - 1) * (C - 1): " << ((A - 1) * (C - 1)) << endl;
-                return C >= 1 && C <= maxC && ((A - 1) * (C - 1) > B * B);
-            };
-
-            //cout << " choosing initial C = " << C << " isValidC: " << isValidC(C) << endl;
-
-            if (!isValidC(C))
-            {
-                //cout << " Could not find C for A: " << A << " B: " << B << endl;
-                continue;
+                cout << " C: " << C << " maxC + 1: " << (maxC + 1) << endl;
+                const ModNum amountToAdd = ModNum(maxC + 1) - ModNum(C);
+                cout << " added " << amountToAdd << " for A: " << A << " C: " << C << endl;
+                result += amountToAdd;
             }
-            //cout << "Found valid C: " << C << endl;
-            if (A - 1 >= sqrt(B * B + 1))
+        }
+        cout << " result after first block: " << result << endl;
+        int64_t previousA = lookupForB.cForA.back().A;
+        cout << " previousA: " << previousA << endl;
+        for (const auto& x : lookupForB.repetitionsOfC)
+        {
+            const auto C = x.C;
+            if (C > maxC || C < 1)
+                continue;
+            if (x.finalA <= maxA)
             {
-                if (C == lastC)
-                {
-                    currentCRunLength++;
-                }
-                else
-                {
-                    lengthsOfRunsOfCs.push_back(currentCRunLength);
-                    currentCRunLength = 1;
-                }
+                const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
+                cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
+                result += amountToAdd;
             }
             else
             {
-                if (lastC != -1)
+                const int64_t truncatedReps = maxA - previousA;
+                cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
+                //assert(truncatedReps >= 0);
+                if (truncatedReps > 0)
                 {
-                    diffsBetweenCs.push_back(abs(C - lastC));
-                    if (diffsBetweenCs.back() == 0)
-                    {
-                        //cout << "Whoo: A: " << A << " B: " << B << endl;
-                    }
+                    const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
+                    cout << " adding: " << amountToAdd << endl;
+                    result += amountToAdd;
                 }
+                break;
             }
-            //if (C == 2)
-            {
-                // Done - all remaining A's paired with all possible C's will do.
-                //cout << "Found C == 2 for A: " << A << " B: " << B << " -  done" << endl;
-                //cout << "result so far: " << result << " maxA - A: " << (maxA - A) << " maxC: " << maxC << endl;
-                //result += ModNum(maxA - A + 1) * ModNum(maxC - 1);
-                //finished = true;
-                //assert(false);
-                //break;
-            }
-            //else
-            {
-                result += maxC - C + 1;
-            }
-            
-            lastC = C;
-
+            previousA = x.finalA;
+            cout << " previousA: " << previousA << endl;
         }
-
-        //cout << "B:" << B << endl;
-        //cout << " diffsBetweenCs:" << endl;
-        for (const auto x : diffsBetweenCs)
-        {
-            //cout << x << " ";
-        }
-        //cout << endl;
-        reverse(lengthsOfRunsOfCs.begin(), lengthsOfRunsOfCs.end());
-        //cout << " lengthsOfRunsOfCs:" << endl;
-        for (const auto x : lengthsOfRunsOfCs)
-        {
-            //cout << x << " ";
-        }
-        //cout << endl;
-        //break;
-
-
 
     }
     
