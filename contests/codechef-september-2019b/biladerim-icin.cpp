@@ -359,6 +359,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         auto& lookupForB = lookup[B];
 
         //cout << "B: " << B << endl;
+        ModNum dbgToAddFromFirstPhase;
         for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
         {
             const auto C = lookupForB.cForA[A].C;
@@ -367,10 +368,11 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 //cout << " C: " << C << " maxC + 1: " << (maxC + 1) << endl;
                 const ModNum amountToAdd = ModNum(maxC + 1) - ModNum(C);
                 //cout << " added " << amountToAdd << " for A: " << A << " C: " << C << endl;
-                result += amountToAdd;
+                dbgToAddFromFirstPhase += amountToAdd;
             }
         }
         //cout << " result after first block: " << result << endl;
+        ModNum dbgToAddFromSecondPhase;
         int64_t previousA = lookupForB.cForA.back().A;
         //cout << " previousA: " << previousA << endl;
         for (const auto& x : lookupForB.repetitionsOfC)
@@ -383,7 +385,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 {
                     const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
                     //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
-                    result += amountToAdd;
+                    dbgToAddFromSecondPhase += amountToAdd;
                 }
                 else
                 {
@@ -394,14 +396,16 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                     {
                         const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
                         //cout << " adding: " << amountToAdd << endl;
-                        result += amountToAdd;
+                        dbgToAddFromSecondPhase += amountToAdd;
                     }
                     break;
                 }
             }
             previousA = x.finalA;
             //cout << " updated previousA: " << previousA << endl;
+
         }
+        result += dbgToAddFromFirstPhase + dbgToAddFromSecondPhase;
 
         //cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
