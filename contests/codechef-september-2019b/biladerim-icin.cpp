@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
 //#define SUBMISSION
-#define VERIFY_LOOKUPS
+//#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -154,22 +154,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
         cout << "B: " << B << endl;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
-        cout << "sqrtMaxA: " << sqrtMaxA << endl;
-        {
-            // TODO - remove
-            vector<int> csBrute(maxA + 1);
-            csBrute[0] = -1;
-            csBrute[1] = -1;
-            for (int A = 2; A <= maxA; A++)
-            {
-                const int C = divCeiling(B * B + 1, A - 1);
-                csBrute[A] = C;
-            }
-            for (int i = 0; i < csBrute.size(); i++)
-            {
-                cout << "i: " << i << " csBrute: " << csBrute[i] << endl;
-            }
-        }
+        //cout << "sqrtMaxA: " << sqrtMaxA << endl;
         //cout << "B: " << B << endl;
         //B = 20;
         auto& lookupForB = lookup[B];
@@ -260,7 +245,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
         for (int i = 0; i <= maxA; i++)
         {
-            cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
+            //cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
         }
         assert(csBrute == csOpt);
 #endif
@@ -369,7 +354,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         auto& lookupForB = lookup[B];
 
         cout << "B: " << B << endl;
-        for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size(), maxA); A++)
+        for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
         {
             const auto C = lookupForB.cForA[A].C;
             if (C >= 1 && C <= maxC)
