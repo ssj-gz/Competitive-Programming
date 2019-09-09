@@ -152,7 +152,7 @@ vector<LookupForB> computeLookups(int64_t maxB)
 
     for (int B = 1; B <= maxB; B++)
     {
-        cout << "B: " << B << endl;
+        //cout << "B: " << B << endl;
         const int64_t maxA = B * B + 1;
         const int64_t sqrtMaxA = sqrt(maxA);
         //cout << "sqrtMaxA: " << sqrtMaxA << endl;
@@ -361,50 +361,54 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
         //cout << "B: " << B << endl;
         ModNum dbgToAddFromFirstPhase;
-        for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
         {
-            const auto C = lookupForB.cForA[A].C;
-            if (C >= 1 && C <= maxC)
+            for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
             {
-                //cout << " C: " << C << " maxC + 1: " << (maxC + 1) << endl;
-                const ModNum amountToAdd = ModNum(maxC + 1) - ModNum(C);
-                //cout << " added " << amountToAdd << " for A: " << A << " C: " << C << endl;
-                dbgToAddFromFirstPhase += amountToAdd;
+                const auto C = lookupForB.cForA[A].C;
+                if (C >= 1 && C <= maxC)
+                {
+                    //cout << " C: " << C << " maxC + 1: " << (maxC + 1) << endl;
+                    const ModNum amountToAdd = ModNum(maxC + 1) - ModNum(C);
+                    //cout << " added " << amountToAdd << " for A: " << A << " C: " << C << endl;
+                    dbgToAddFromFirstPhase += amountToAdd;
+                }
             }
         }
         //cout << " result after first block: " << result << endl;
         ModNum dbgToAddFromSecondPhase;
-        int64_t previousA = lookupForB.cForA.back().A;
-        //cout << " previousA: " << previousA << endl;
-        for (const auto& x : lookupForB.repetitionsOfC)
         {
-            const auto C = x.C;
-            if (C >= 1 && C <= maxC)
+            int64_t previousA = lookupForB.cForA.back().A;
+            //cout << " previousA: " << previousA << endl;
+            for (const auto& x : lookupForB.repetitionsOfC)
             {
+                const auto C = x.C;
+                if (C >= 1 && C <= maxC)
+                {
 
-                if (x.finalA <= maxA)
-                {
-                    const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
-                    //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
-                    dbgToAddFromSecondPhase += amountToAdd;
-                }
-                else
-                {
-                    const int64_t truncatedReps = maxA - previousA;
-                    //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
-                    //assert(truncatedReps >= 0);
-                    if (truncatedReps > 0)
+                    if (x.finalA <= maxA)
                     {
-                        const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
-                        //cout << " adding: " << amountToAdd << endl;
+                        const ModNum amountToAdd = (ModNum(maxC + 1) - C) * x.numReps;
+                        //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " adding: " << amountToAdd << endl;
                         dbgToAddFromSecondPhase += amountToAdd;
                     }
-                    break;
+                    else
+                    {
+                        const int64_t truncatedReps = maxA - previousA;
+                        //cout << " found " << x.numReps << " repetitions of C: " << C << " ending at A: " << x.finalA << " which is greater than maxA: " << maxA << "  truncated to reps: " << truncatedReps << endl;
+                        //assert(truncatedReps >= 0);
+                        if (truncatedReps > 0)
+                        {
+                            const ModNum amountToAdd = (ModNum(maxC + 1) - ModNum(C)) * truncatedReps;
+                            //cout << " adding: " << amountToAdd << endl;
+                            dbgToAddFromSecondPhase += amountToAdd;
+                        }
+                        break;
+                    }
                 }
-            }
-            previousA = x.finalA;
-            //cout << " updated previousA: " << previousA << endl;
+                previousA = x.finalA;
+                //cout << " updated previousA: " << previousA << endl;
 
+            }
         }
         result += dbgToAddFromFirstPhase + dbgToAddFromSecondPhase;
 
