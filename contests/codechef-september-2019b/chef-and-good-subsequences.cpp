@@ -117,7 +117,7 @@ vector<int> getPrimesUpTo8000()
     return primesUpTo8000;
 }
 
-ModNum solveBruteForce(int N, int K, const vector<int>& a, vector<int>& numForEachChoices)
+ModNum solveBruteForce(int N, int K, const vector<int>& a)
 {
     ModNum result;
 
@@ -136,8 +136,6 @@ ModNum solveBruteForce(int N, int K, const vector<int>& a, vector<int>& numForEa
         if (isGood)
         {
             result = result + 1;
-            assert(subset.size() < numForEachChoices.size());
-            numForEachChoices[subset.size()]++;
         }
 
         int index = 0;
@@ -181,7 +179,7 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
     }
     const int numDistinctElements = distinctPrimeOccurrences.size(); 
 
-#if 1
+#if 0
     for (const auto x : distinctPrimeOccurrences)
     {
         cout << " prime: " << x.prime << " occurs " << x.numOccurrences << " times" << endl;
@@ -194,22 +192,22 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
         dp[i][0] = 1;
     }
 
-    vector<int> numForEachChoices(K + 1);
-    solveBruteForce(N, K, aOriginal, numForEachChoices);
+    //vector<int> numForEachChoices(K + 1);
+    //solveBruteForce(N, K, aOriginal, numForEachChoices);
     for (int i = 1; i <= numDistinctElements; i++)
     {
         for (int j = 1; j <= i; j++)
         {
             assert(i - 1 >= 0);
             dp[i][j] += dp[i - 1][j]; // Don't choose this number.
-            cout << " i: " << i << " j: " << j << " dp[i - 1][j]: " << dp[i - 1][j] << endl;
+            //cout << " i: " << i << " j: " << j << " dp[i - 1][j]: " << dp[i - 1][j] << endl;
             assert(j - 1 >= 0 && j - 1 <= i - 1);
 
             // Do choose *one* from this bunch of same numbers.
-            cout << " i: " << i << " j: " << j << " dp[i - 1][j - 1]: " << dp[i - 1][j - 1] << endl;
+            //cout << " i: " << i << " j: " << j << " dp[i - 1][j - 1]: " << dp[i - 1][j - 1] << endl;
             dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[i - 1].numOccurrences);
 
-            cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
+            //cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
     }
 
@@ -274,8 +272,7 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
 #if 1
-    vector<int> dummy(K + 1);
-    const auto solutionBruteForce = solveBruteForce(N, K, a, dummy);
+    const auto solutionBruteForce = solveBruteForce(N, K, a);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 1
@@ -285,7 +282,7 @@ int main(int argc, char* argv[])
     assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-    const auto solutionOptimised = solveOptimised();
+    const auto solutionOptimised = solveOptimised(N, K, a);
     cout << solutionOptimised << endl;
 #endif
 
