@@ -241,18 +241,20 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<LookupForB>& lookup)
 {
     ModNum result = 0;
-    bool finished = false;
-    for (int64_t B = 1; B <= maxB && !finished; B++)
+    for (int64_t B = 1; B <= maxB; B++)
     {
         auto& lookupForB = lookup[B];
 
         const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
         {
+            const auto& cForALookup = lookupForB.cForA;
+
+
             int beginIndex = -1;
             int endIndex = -1;
             for (int64_t A = 2; A <= maxIndex; A++)
             {
-                if (lookupForB.cForA[A].C <= maxC && beginIndex == -1)
+                if (cForALookup[A].C <= maxC && beginIndex == -1)
                 {
                     beginIndex = A;
                 }
@@ -265,46 +267,48 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
                 result += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
-                result -= lookupForB.cForA[endIndex].cumulativeC;
+                result -= cForALookup[endIndex].cumulativeC;
                 if (beginIndex > 0)
                 {
-                    result += lookupForB.cForA[beginIndex - 1].cumulativeC;
+                    result += cForALookup[beginIndex - 1].cumulativeC;
                 }
             }
         }
 
         {
+            const auto& repetitionOfCLookup = lookupForB.repetitionsOfC;
+
             int beginIndex = -1;
             int endIndex = -1;
 
-            for (int i = 0; i < lookupForB.repetitionsOfC.size(); i++)
+            for (int i = 0; i < repetitionOfCLookup.size(); i++)
             {
-                if (lookupForB.repetitionsOfC[i].C <= maxC && beginIndex == -1)
+                if (repetitionOfCLookup[i].C <= maxC && beginIndex == -1)
                 {
                     beginIndex = i;
                 }
-                if (lookupForB.repetitionsOfC[i].finalA <= maxA)
+                if (repetitionOfCLookup[i].finalA <= maxA)
                 {
                     endIndex = i;
                 }
             }
-            if (endIndex != -1 && lookupForB.repetitionsOfC[endIndex].finalA < maxA && endIndex + 1 < lookupForB.repetitionsOfC.size())
+            if (endIndex != -1 && repetitionOfCLookup[endIndex].finalA < maxA && endIndex + 1 < repetitionOfCLookup.size())
                 endIndex++;
 
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
-                const int64_t numAsInRange = (lookupForB.repetitionsOfC[endIndex].finalA - (lookupForB.repetitionsOfC[beginIndex].finalA - lookupForB.repetitionsOfC[beginIndex].numReps));
-                result += ModNum(maxC + 1) * numAsInRange - lookupForB.repetitionsOfC[endIndex].cumulativeCTimesReps;
+                const int64_t numAsInRange = (repetitionOfCLookup[endIndex].finalA - (repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps));
+                result += ModNum(maxC + 1) * numAsInRange - repetitionOfCLookup[endIndex].cumulativeCTimesReps;
                 if (beginIndex > 0)
                 {
-                    result += lookupForB.repetitionsOfC[beginIndex - 1].cumulativeCTimesReps;
+                    result += repetitionOfCLookup[beginIndex - 1].cumulativeCTimesReps;
                 }
-                if (lookupForB.repetitionsOfC[endIndex].finalA > maxA)
+                if (repetitionOfCLookup[endIndex].finalA > maxA)
                 {
-                    const int64_t numAOverCounted = lookupForB.repetitionsOfC[endIndex].finalA - maxA;
+                    const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
                     assert(numAOverCounted >= 0);
                     // Remove overcount.
-                    result -= (ModNum(maxC + 1) - lookupForB.repetitionsOfC[endIndex].C) * numAOverCounted;
+                    result -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].C) * numAOverCounted;
                 }
             }
         }
