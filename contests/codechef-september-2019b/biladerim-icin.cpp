@@ -143,6 +143,7 @@ struct RepetitionOfC
     int64_t C = -1;
     int64_t numReps = -1;
     int64_t finalA = -1;
+    ModNum cumulativeC;
 };
 
 struct LookupForB
@@ -228,6 +229,14 @@ vector<LookupForB> computeLookups(int64_t maxB)
             {
                 cumulativeCForA += lookupForB.cForA[A].C;
                 lookupForB.cForA[A].cumulativeC = cumulativeCForA;
+            }
+        }
+        {
+            ModNum cumulativeCTimesReps;
+            for (auto& x : lookupForB.repetitionsOfC)
+            {
+                cumulativeCTimesReps += ModNum(x.C) * x.numReps;
+                x.cumulativeC = cumulativeCTimesReps;
             }
         }
 
@@ -471,7 +480,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
             for (int i = 0; i < lookupForB.repetitionsOfC.size(); i++)
             {
-                //cout << " i:" << i << " repetitionsOfC finalA:" << lookupForB.repetitionsOfC[i].finalA << " repetitionsOfC C: " << lookupForB.repetitionsOfC[i].C << endl;
+                //cout << " i:" << i << " repetitionsOfC C:" << lookupForB.repetitionsOfC[i].C << " repetitionsOfC finalA:" << lookupForB.repetitionsOfC[i].finalA << " repetitionsOfC C: " << lookupForB.repetitionsOfC[i].numReps << " cumulativeC: " << lookupForB.repetitionsOfC[i].cumulativeC << endl;
                 if (lookupForB.repetitionsOfC[i].C <= maxC && beginIndex == -1)
                 {
                     beginIndex = i;
@@ -489,28 +498,22 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
                 //cout << " finalA at endIndex: " << lookupForB.repetitionsOfC[endIndex].finalA << endl;
-                for (int K = beginIndex; K <= endIndex; K++)
+                const int64_t numAsInRange = (lookupForB.repetitionsOfC[endIndex].finalA - (lookupForB.repetitionsOfC[beginIndex].finalA - lookupForB.repetitionsOfC[beginIndex].numReps));
+                //cout << "numAsInRange: " << numAsInRange << endl;
+                toAddFromSecondPhase += ModNum(maxC + 1) * numAsInRange - lookupForB.repetitionsOfC[endIndex].cumulativeC;
+                if (beginIndex > 0)
                 {
-                    if (lookupForB.repetitionsOfC[K].finalA <= maxA)
-                    {
-                        toAddFromSecondPhase += (ModNum(maxC + 1) - lookupForB.repetitionsOfC[K].C) * lookupForB.repetitionsOfC[K].numReps;
-                    }
-                    else
-                    {
-                        const int64_t numRemainingA = maxA - (lookupForB.repetitionsOfC[K].finalA - lookupForB.repetitionsOfC[K].numReps);
-                        //cout << " numRemainingA: " << numRemainingA << endl;
-                        assert(numRemainingA > 0);
-                        toAddFromSecondPhase += (ModNum(maxC + 1) - lookupForB.repetitionsOfC[K].C) * numRemainingA;
-                    }
+                    toAddFromSecondPhase += lookupForB.repetitionsOfC[beginIndex - 1].cumulativeC;
                 }
-                //if (lookupForB.repetitionsOfC[endIndex].finalA != maxA && endIndex + 1 < lookupForB.repetitionsOfC.size())
-                //{
-                    //assert(endIndex + 1 < lookupForB.repetitionsOfC.size());
-                    //const int64_t numRemainingA = maxA - (lookupForB.repetitionsOfC[endIndex + 1].finalA - lookupForB.repetitionsOfC[endIndex + 1].numReps);
-                    //cout << " numRemainingA: " << numRemainingA << endl;
-                    //assert(numRemainingA > 0);
-                    //toAddFromSecondPhase += (ModNum(maxC + 1) - lookupForB.repetitionsOfC[endIndex + 1].C) * numRemainingA;
-                //}
+                if (lookupForB.repetitionsOfC[endIndex].finalA > maxA)
+                {
+                    const int64_t numAOverCounted = lookupForB.repetitionsOfC[endIndex].finalA - maxA;
+                    assert(numAOverCounted >= 0);
+                    //cout << "numAOverCounted: " << numAOverCounted << endl;
+                    // Remove overcount.
+                    toAddFromSecondPhase -= (ModNum(maxC + 1) - lookupForB.repetitionsOfC[endIndex].C) * numAOverCounted;
+                    //toAddFromSecondPhase += lookupForB.repetitionsOfC[endIndex].C * overcount;
+                }
             }
             //cout << "toAddFromSecondPhase: " << toAddFromSecondPhase << " dbgToAddFromSecondPhase: " << dbgToAddFromSecondPhase << endl;
             assert(toAddFromSecondPhase == dbgToAddFromSecondPhase);
