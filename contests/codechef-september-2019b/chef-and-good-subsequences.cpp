@@ -83,9 +83,36 @@ T read()
     return toRead;
 }
 
-ModNum solveBruteForce()
+ModNum solveBruteForce(int N, int K, const vector<int>& a)
 {
     ModNum result;
+
+    vector<bool> useElement(N, false);
+
+    while (true)
+    {
+        vector<int> subset;
+        for (int i = 0; i < N; i++)
+        {
+            if (useElement[i])
+                subset.push_back(a[i]);
+        }
+        sort(subset.begin(), subset.end());
+        const auto isGood = (unique(subset.begin(), subset.end()) == subset.end());
+        if (isGood)
+            result = result + 1;
+
+        int index = 0;
+        while (index < N && useElement[index])
+        {
+            useElement[index] = false;
+            index++;
+        }
+        if (index == N)
+            break;
+
+        useElement[index] = true;
+    }
     
     return result;
 }
@@ -141,38 +168,35 @@ int main(int argc, char* argv[])
 
 
         // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-
-        for (int t = 0; t < T; t++)
-        {
-        }
 
         return 0;
     }
-    
-    // TODO - read in testcase.
-    const auto T = read<int>();
 
-    for (int t = 0; t < T; t++)
+
+    const int N = read<int>();
+    const int K = read<int>();
+
+    vector<int> a(N);
+    for (auto& aElement : a)
     {
+        aElement = read<int>();
+    }
 
 #ifdef BRUTE_FORCE
-#if 0
-        const auto solutionBruteForce = solveBruteForce();
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+#if 1
+    const auto solutionBruteForce = solveBruteForce(N, K, a);
+    cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised();
+    cout << "solutionOptimised:  " << solutionOptimised << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
+    assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised();
+    cout << solutionOptimised << endl;
 #endif
-    }
 
     assert(cin);
 }
