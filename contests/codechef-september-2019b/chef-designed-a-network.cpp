@@ -102,12 +102,19 @@ int solveBruteForce(int64_t N, int64_t M)
     // For M == 2 * N, we have a cycle through all vertice and a self-loop through
     // each vertex.
 
+    if ((N % 2) == 0)
+    {
+        return (M - 2 * N - 1) / (N / 2) + 4;
+    }
+    else
+    {
+        const int blah = (M - 2 * N - 1) / N;
+        const int blah2 = (M - 2 * N - 1) % N;
+        const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
+        return wee;
+        
+    }
 
-
-    
-    bool result = false;
-    
-    return result;
 }
 #endif
 
@@ -148,6 +155,7 @@ int main(int argc, char* argv[])
         cout << "N: " << N << " M: " << M << " blah: " << blah << endl;
     }
 #endif
+#if 0
     const int N = 13;
     vector<int> nodeDegree(N);
     for (int i = 0; i < N; i++)
@@ -190,8 +198,8 @@ int main(int argc, char* argv[])
     }
 
     return 0; // TODO - remove this.
+#endif
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
