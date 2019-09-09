@@ -66,8 +66,9 @@ int solveBruteForce(int64_t N, int64_t M)
         }
         sort(nodeIndicesByDegree.begin(), nodeIndicesByDegree.end(), [&nodeDegree](const auto nodeIndex1, const auto nodeIndex2)
                 {
-                if (nodeDegree[nodeIndex1] < nodeDegree[nodeIndex2])
-                return true;
+                //cout << "nodeDegree.size(): " << nodeDegree.size() << " nodeIndex1: " << nodeIndex1 << " nodeIndex2: " << nodeIndex2 << endl;
+                if (nodeDegree[nodeIndex1] != nodeDegree[nodeIndex2])
+                return nodeDegree[nodeIndex1] < nodeDegree[nodeIndex2];
                 return nodeIndex1 < nodeIndex2;
                 });
 
@@ -292,6 +293,20 @@ int main(int argc, char* argv[])
     }
 
     return 0; // TODO - remove this.
+#endif
+#if 1
+    for (int N = 1; N <= 100; N++)
+    {
+        for (int M = 0; M <= 100; M++)
+        {
+            const int solutionOptimised = solveOptimised(N, M);
+            const int solutionBruteForce = solveBruteForce(N, M);
+            cout << "N: " << N << " M: " << M << " solutionOptimised: " << solutionOptimised << " solutionBruteForce: " << solutionBruteForce << endl;
+            assert(solutionBruteForce == solutionOptimised);
+        }
+
+    }
+    return 0;
 #endif
     
     const auto T = read<int>();
