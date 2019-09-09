@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/GDSUB
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -194,10 +194,12 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
 
     //vector<int> numForEachChoices(K + 1);
     //solveBruteForce(N, K, aOriginal, numForEachChoices);
+    int64_t blah = 0;
     for (int i = 1; i <= numDistinctElements; i++)
     {
         for (int j = 1; j <= i; j++)
         {
+            blah++;
             assert(i - 1 >= 0);
             dp[i][j] += dp[i - 1][j]; // Don't choose this number.
             //cout << " i: " << i << " j: " << j << " dp[i - 1][j]: " << dp[i - 1][j] << endl;
@@ -210,6 +212,8 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
             //cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
     }
+    //cout << "numDistinctElements: " << numDistinctElements << endl;
+    //cout << "blah: " << blah << endl;
 
     ModNum result;
 
@@ -242,16 +246,23 @@ int main(int argc, char* argv[])
 #endif
 
         const auto primesUpTo8000 = getPrimesUpTo8000();
-        const int N = rand() % 20 + 1;
-        const int K = rand() % (2 * N) + 1;
+        int N = 100'000;
+        const int K = primesUpTo8000.size();
         //const int maxPrimeIndex = (rand() % (primesUpTo8000.size() - 1) + 1);
-        const int maxPrimeIndex = 9;
+        //const int maxPrimeIndex = 9;
 
 
         cout << N << " " << K << endl;
-        for (int i = 0; i < N; i++)
+
+        for (int i = 0; i < primesUpTo8000.size(); i++)
         {
-            cout << primesUpTo8000[rand() % maxPrimeIndex] << " ";
+            cout << primesUpTo8000[i] << " ";
+            N--;
+        }
+        while (N > 0)
+        {
+            cout << primesUpTo8000[rand() % primesUpTo8000.size()] << " ";
+            N--;
         }
         cout << endl;
 
