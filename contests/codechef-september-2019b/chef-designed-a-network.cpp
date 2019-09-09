@@ -30,6 +30,93 @@ T read()
 #if 1
 int solveBruteForce(int64_t N, int64_t M)
 {
+    if (M < N - 1)
+        return -1;
+    if (N == 1)
+    {
+        if (M == 1)
+            return 1;
+        if (M == 0)
+            return 0;
+        return -1;
+    }
+    if (M > ((N + 1) * N) / 2)
+        return -1;
+    vector<int> nodeDegree(N);
+    vector<bool> nodeHasSelfLoop(N, false);
+    // Join in line.
+    nodeDegree[0] = 1;
+    nodeDegree[1] = 1;
+    for (int i = 2; i < N; i++)
+    {
+        nodeDegree[i] = 2;
+    }
+    for (int i = N; i <= M; i++)
+    {
+        cout << "i: " << i << " node degrees: " << endl;
+        for (const auto x : nodeDegree)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        vector<int> nodeIndicesByDegree;
+        for (int i = 0; i < N; i++)
+        {
+            nodeIndicesByDegree.push_back(i);
+        }
+        sort(nodeIndicesByDegree.begin(), nodeIndicesByDegree.end(), [&nodeDegree](const auto nodeIndex1, const auto nodeIndex2)
+                {
+                if (nodeDegree[nodeIndex1] < nodeDegree[nodeIndex2])
+                return true;
+                return nodeIndex1 < nodeIndex2;
+                });
+
+        bool addedSelfLoop = false;
+        for (int i = 0; i < N; i++)
+        {
+            const int nodeIndex = nodeIndicesByDegree[i];
+            if (!nodeHasSelfLoop[nodeIndex])
+            {
+                nodeHasSelfLoop[nodeIndex] = true;
+                nodeDegree[nodeIndex]++;
+                addedSelfLoop = true;
+                break;
+            }
+        }
+        if (!addedSelfLoop)
+        {
+            nodeDegree[nodeIndicesByDegree[0]]++;
+            nodeDegree[nodeIndicesByDegree[1]]++;
+        }
+        const int maxNodeDegree = *max_element(nodeDegree.begin(), nodeDegree.end());
+        cout << "N: " << N << " M: " << M << " i: " << i << " maxNodeDegree: " << maxNodeDegree << endl;
+
+#if 0
+        if ((N % 2) == 0)
+        {
+            assert(maxNodeDegree == (M - 2 * N - 1) / (N / 2) + 4);
+        }
+        else
+        {
+            const int blah = (M - 2 * N - 1) / N;
+            const int blah2 = (M - 2 * N - 1) % N;
+            cout << "blah: " << blah << " blah2: " << blah << endl;
+            const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
+            cout << "wee: " << wee << endl;;
+            assert(wee == maxNodeDegree);
+
+        }
+#endif
+    }
+    const int maxNodeDegree = *max_element(nodeDegree.begin(), nodeDegree.end());
+    return maxNodeDegree;
+
+}
+#endif
+
+#if 1
+int solveOptimised(int64_t N, int64_t M)
+{
     // TODO - make sure we're dealing with N == 1 and 2.  Also M == 0.
     if (M == 0 && N == 1)
     {
@@ -78,6 +165,21 @@ int solveBruteForce(int64_t N, int64_t M)
             return 1;
         }
     }
+    if (M == N + 1)
+    {
+        // Line through all vertices, then self-loops through the two vertices that have degree 1 -
+        // max degree then is two.
+        if (N > 2)
+        {
+            return 2;
+        }
+        if (N == 2)
+        {
+            // M = 3.  Join vertices, then self-loop from each vertex to itself.
+            return 2;
+        }
+
+    }
     if (M > N && M <= 2 * N)
     {
         // For N > 2, a cycle through all vertices, then a self-loop from each vertex to iself
@@ -112,18 +214,10 @@ int solveBruteForce(int64_t N, int64_t M)
         const int blah2 = (M - 2 * N - 1) % N;
         const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
         return wee;
-        
+
     }
 
-}
-#endif
 
-#if 0
-bool solveOptimised()
-{
-    bool result = false;
-    
-    return result;
 }
 #endif
 
@@ -212,8 +306,8 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(N, M);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(N , M);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
