@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/CHEFK1
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
 
     return 0; // TODO - remove this.
 #endif
-#if 1
+#if 0
     for (int N = 1; N <= 100; N++)
     {
         for (int M = 0; M <= 100; M++)
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(N, M);
         cout << solutionOptimised << endl;
 #endif
     }
