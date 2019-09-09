@@ -182,8 +182,8 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
         return 0;
     }
 
-#if 0
-    for (const auto x : primeOccurrencesInfo)
+#if 1
+    for (const auto x : distinctPrimeOccurrences)
     {
         cout << " prime: " << x.prime << " occurs " << x.numOccurrences << " times" << endl;
     }
@@ -197,14 +197,16 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
 
     for (int i = 1; i <= numDistinctElements; i++)
     {
-        for (int j = 0; j <= K; j++)
+        for (int j = 1; j <= i; j++)
         {
             assert(i - 1 >= 0);
             dp[i][j] += dp[i - 1][j]; // Don't choose this number.
-            if (j - 1 >= 0 && j <= i)
+            cout << " i: " << i << " j: " << j << " dp[i - 1][j]: " << dp[i - 1][j] << endl;
+            if (j - 1 >= 0 && j - 1 <= i - 1)
             {
                 // Do choose *one* from this bunch of same numbers.
-                dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[j].numOccurrences);
+                cout << " i: " << i << " j: " << j << " dp[i - 1][j - 1]: " << dp[i - 1][j - 1] << endl;
+                dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[j - 1].numOccurrences);
             }
             cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
