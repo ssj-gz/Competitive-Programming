@@ -3,12 +3,10 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
 #define SUBMISSION
-//#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#undef VERIFY_LOOKUPS
-//#define NDEBUG
+#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -81,12 +79,6 @@ ModNum operator*(const ModNum& lhs, const ModNum& rhs)
     result *= rhs;
     return result;
 }
-
-bool operator==(const ModNum& lhs, const ModNum& rhs)
-{
-    return lhs.value() == rhs.value();
-}
-
 
 ostream& operator<<(ostream& os, const ModNum& toPrint)
 {
@@ -239,45 +231,6 @@ vector<LookupForB> computeLookups(int64_t maxB)
                 x.cumulativeC = cumulativeCTimesReps;
             }
         }
-
-
-
-#ifdef VERIFY_LOOKUPS
-        vector<int64_t> csBrute(maxA + 1);
-        csBrute[0] = numeric_limits<int64_t>::max();
-        csBrute[1] = numeric_limits<int64_t>::max();
-        for (int A = 2; A <= maxA; A++)
-        {
-            const int64_t C = divCeiling(B * B + 1, A - 1) + 1;
-            assert((C - 1) * (A - 1) >= B *B + 1);
-            csBrute[A] = C;
-        }
-        vector<int64_t> csOpt;
-        for (const auto x : lookupForB.cForA)
-        {
-            csOpt.push_back(x.C);
-        }
-        int dbgA = lookupForB.cForA.back().A;
-        for (const auto x : lookupForB.repetitionsOfC)
-        {
-            //cout << " C: " << x.C << " numReps: " << x.numReps << endl;
-            for (int64_t i = 1; i <= x.numReps; i++)
-            {
-                csOpt.push_back(x.C);
-            }
-            dbgA += x.numReps;
-            //cout << " dbgA: " << dbgA << " x.aAfterCRepeats: " << x.finalA << endl;
-            assert(dbgA == x.finalA);
-        }
-        assert(dbgA == maxA);
-
-        for (int64_t i = 0; i <= maxA; i++)
-        {
-       //     cout << "i: " << i << " csBrute: " << csBrute[i] << " csOpt: " << csOpt[i] << endl;
-        }
-        assert(csBrute == csOpt);
-#endif
-        //break;
     }
 
     return lookup;
@@ -298,77 +251,12 @@ int64_t solveBruteForce(int64_t maxA, int64_t maxB, int64_t maxC)
             {
                 if ((A - 1) * (C - 1) > B * B)
                 {
-                    //cout << " interesting triple: (" << A << ", " << B << ", " << C << ")" << endl;
                     result = (result + 1) % Mod;
                 }
 
             }
         }
     }
-#if 0
-    while (true)
-    {
-        const int A = rand() % 20 + 1;
-        const int B = rand() % 20 + 1;
-        const int C = rand() % 20 + 1;
-
-
-        const bool isSaddle = (A - 1) * (C - 1) <= B * B;
-        cout << "A: " << A << " B: " << B << " C: " << C << endl;
-        cout << "(A - 1) * (C - 1): " << (A - 1) * (C - 1) << endl;
-        cout << "B * B: " << (B * B) << endl;
-        cout << "isSaddle: " << isSaddle << endl;
-
-        //cout << "sausage: " << (double)(C - 1) - (double)(B) * B / ((A - 1)) << endl; 
-
-        auto f = [A, B, C](double x, double y)
-        {
-            return ((double)A - 1) * x * x + 2 * (double)B * x * y + ((double)C - 1) * y * y;
-        };
-        //cout << "bleep: " << f(-100, -8.333335) << endl;
-
-        //vector<Blah> blahs;
-
-        Blah minBlah = {0, 0, 3000};
-
-        const double range = 10;
-        for (double x = -range; x <= range; x += 0.01)
-        {
-            for (double y = -range; y <= range; y += 0.01)
-            {
-                //blahs.push_back({x, y, f(x, y)});
-                if (Blah(x, y, f(x,y)) < minBlah)
-                {
-                    minBlah = Blah(x, y, f(x,y));
-                }
-            }
-        }
-        cout << "minBlah: " << minBlah << endl;
-
-        const bool isMinNegative = (minBlah.z < -0.01);
-        cout << "minBlah negative: " << isMinNegative << "  isSaddle: " << isSaddle << endl;
-        assert(isMinNegative == isSaddle);
-#if 0
-        sort(blahs.begin(), blahs.end(), [](const auto lhs, const auto rhs)
-                {
-                if (lhs.z != rhs.z)
-                return lhs.z < rhs.z;
-                if (lhs.x != rhs.x)
-                return lhs.x < rhs.x;
-                return lhs.y < rhs.y;
-                });
-#endif
-
-#if 0
-        for (const auto blah : blahs)
-        {
-            cout << "z: " << blah.z << " x: " << blah.x << " y: " << blah.y << endl;
-        }
-#endif
-    }
-#endif
-
-
     
     return result;
 }
@@ -383,9 +271,8 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
     {
         auto& lookupForB = lookup[B];
 
-        ModNum toAddFromFirstPhase;
+        const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
         {
-            const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
             int beginIndex = -1;
             int endIndex = -1;
             for (int64_t A = 2; A <= maxIndex; A++)
@@ -402,19 +289,16 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
-                toAddFromFirstPhase += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
-                toAddFromFirstPhase -= lookupForB.cForA[endIndex].cumulativeC;
+                result += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
+                result -= lookupForB.cForA[endIndex].cumulativeC;
                 if (beginIndex > 0)
                 {
-                    toAddFromFirstPhase += lookupForB.cForA[beginIndex - 1].cumulativeC;
+                    result += lookupForB.cForA[beginIndex - 1].cumulativeC;
                 }
             }
-
         }
-        ModNum toAddFromSecondPhase;
-        {
-            int64_t previousA = lookupForB.cForA.back().A;
 
+        {
             int beginIndex = -1;
             int endIndex = -1;
 
@@ -435,26 +319,21 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
                 const int64_t numAsInRange = (lookupForB.repetitionsOfC[endIndex].finalA - (lookupForB.repetitionsOfC[beginIndex].finalA - lookupForB.repetitionsOfC[beginIndex].numReps));
-                toAddFromSecondPhase += ModNum(maxC + 1) * numAsInRange - lookupForB.repetitionsOfC[endIndex].cumulativeC;
+                result += ModNum(maxC + 1) * numAsInRange - lookupForB.repetitionsOfC[endIndex].cumulativeC;
                 if (beginIndex > 0)
                 {
-                    toAddFromSecondPhase += lookupForB.repetitionsOfC[beginIndex - 1].cumulativeC;
+                    result += lookupForB.repetitionsOfC[beginIndex - 1].cumulativeC;
                 }
                 if (lookupForB.repetitionsOfC[endIndex].finalA > maxA)
                 {
                     const int64_t numAOverCounted = lookupForB.repetitionsOfC[endIndex].finalA - maxA;
                     assert(numAOverCounted >= 0);
                     // Remove overcount.
-                    toAddFromSecondPhase -= (ModNum(maxC + 1) - lookupForB.repetitionsOfC[endIndex].C) * numAOverCounted;
+                    result -= (ModNum(maxC + 1) - lookupForB.repetitionsOfC[endIndex].C) * numAOverCounted;
                 }
             }
-            //cout << "toAddFromSecondPhase: " << toAddFromSecondPhase << " dbgToAddFromSecondPhase: " << dbgToAddFromSecondPhase << endl;
-            //assert(toAddFromSecondPhase == dbgToAddFromSecondPhase);
-
         }
-        result += toAddFromFirstPhase + toAddFromSecondPhase;
 
-        //cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
         if (lastProcessedA < maxA)
         {
