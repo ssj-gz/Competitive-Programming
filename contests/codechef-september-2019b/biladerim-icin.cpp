@@ -82,6 +82,12 @@ ModNum operator*(const ModNum& lhs, const ModNum& rhs)
     return result;
 }
 
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
+
 ostream& operator<<(ostream& os, const ModNum& toPrint)
 {
     os << toPrint.value();
@@ -373,6 +379,33 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                     dbgToAddFromFirstPhase += amountToAdd;
                 }
             }
+            ModNum toAddFromFirstPhase;
+            const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
+            int beginIndex = -1;
+            int endIndex = -1;
+            for (int64_t A = 2; A <= maxIndex; A++)
+            {
+                if (lookupForB.cForA[A].C <= maxC && beginIndex == -1)
+                {
+                    beginIndex = A;
+                }
+                if (A <= maxA)
+                {
+                    endIndex = A;
+                }
+            }
+
+            if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
+            {
+
+                for (int K = beginIndex; K <= endIndex; K++)
+                {
+                    assert(K <= maxA && lookupForB.cForA[K].C <= maxC);
+                    toAddFromFirstPhase += ModNum(maxC + 1) - lookupForB.cForA[K].C;
+                }
+            }
+            assert(toAddFromFirstPhase == dbgToAddFromFirstPhase);
+
         }
         //cout << " result after first block: " << result << endl;
         ModNum dbgToAddFromSecondPhase;
