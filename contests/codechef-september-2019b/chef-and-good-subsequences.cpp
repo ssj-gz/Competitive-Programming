@@ -117,7 +117,7 @@ vector<int> getPrimesUpTo8000()
     return primesUpTo8000;
 }
 
-ModNum solveBruteForce(int N, int K, const vector<int>& a)
+ModNum solveBruteForce(int N, int K, const vector<int>& a, vector<int>& numForEachChoices)
 {
     ModNum result;
 
@@ -134,7 +134,11 @@ ModNum solveBruteForce(int N, int K, const vector<int>& a)
         sort(subset.begin(), subset.end());
         const auto isGood = subset.size() <= K && (unique(subset.begin(), subset.end()) == subset.end());
         if (isGood)
+        {
             result = result + 1;
+            assert(subset.size() < numForEachChoices.size());
+            numForEachChoices[subset.size()]++;
+        }
 
         int index = 0;
         while (index < N && useElement[index])
@@ -177,11 +181,6 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
     }
     const int numDistinctElements = distinctPrimeOccurrences.size(); 
 
-    if (K > numDistinctElements)
-    {
-        return 0;
-    }
-
 #if 1
     for (const auto x : distinctPrimeOccurrences)
     {
@@ -189,12 +188,14 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
     }
 #endif
 
-    vector<vector<ModNum>> dp(numDistinctElements + 1, vector<ModNum>(K + 1, 0));
+    vector<vector<ModNum>> dp(numDistinctElements + 1, vector<ModNum>(numDistinctElements + 1, 0));
     for (int i = 0; i <= numDistinctElements; i++)
     {
         dp[i][0] = 1;
     }
 
+    vector<int> numForEachChoices(K + 1);
+    solveBruteForce(N, K, aOriginal, numForEachChoices);
     for (int i = 1; i <= numDistinctElements; i++)
     {
         for (int j = 1; j <= i; j++)
@@ -202,20 +203,22 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
             assert(i - 1 >= 0);
             dp[i][j] += dp[i - 1][j]; // Don't choose this number.
             cout << " i: " << i << " j: " << j << " dp[i - 1][j]: " << dp[i - 1][j] << endl;
-            if (j - 1 >= 0 && j - 1 <= i - 1)
-            {
-                // Do choose *one* from this bunch of same numbers.
-                cout << " i: " << i << " j: " << j << " dp[i - 1][j - 1]: " << dp[i - 1][j - 1] << endl;
-                dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[j - 1].numOccurrences);
-            }
+            assert(j - 1 >= 0 && j - 1 <= i - 1);
+
+            // Do choose *one* from this bunch of same numbers.
+            cout << " i: " << i << " j: " << j << " dp[i - 1][j - 1]: " << dp[i - 1][j - 1] << endl;
+            dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[i - 1].numOccurrences);
+
             cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
     }
 
     ModNum result;
 
-    for (int j = 0; j <= K; j++)
+    for (int j = 0; j <= min(K, numDistinctElements); j++)
     {
+        //cout << "j: " << j << " numForEachChoices: " << numForEachChoices[j] << " dp:" << dp[numDistinctElements][j] << endl;
+        //assert(numForEachChoices[j] == dp[numDistinctElements][j]);
         result += dp[numDistinctElements][j];
     }
     
@@ -271,7 +274,8 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
 #if 1
-    const auto solutionBruteForce = solveBruteForce(N, K, a);
+    vector<int> dummy(K + 1);
+    const auto solutionBruteForce = solveBruteForce(N, K, a, dummy);
     cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 1
