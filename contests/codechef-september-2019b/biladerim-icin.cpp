@@ -431,6 +431,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         }
         //cout << " result after first block: " << result << endl;
         ModNum dbgToAddFromSecondPhase;
+        ModNum toAddFromSecondPhase;
         {
             int64_t previousA = lookupForB.cForA.back().A;
             //cout << " previousA: " << previousA << endl;
@@ -464,8 +465,58 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 //cout << " updated previousA: " << previousA << endl;
 
             }
+
+            int beginIndex = -1;
+            int endIndex = -1;
+
+            for (int i = 0; i < lookupForB.repetitionsOfC.size(); i++)
+            {
+                //cout << " i:" << i << " repetitionsOfC finalA:" << lookupForB.repetitionsOfC[i].finalA << " repetitionsOfC C: " << lookupForB.repetitionsOfC[i].C << endl;
+                if (lookupForB.repetitionsOfC[i].C <= maxC && beginIndex == -1)
+                {
+                    beginIndex = i;
+                }
+                if (lookupForB.repetitionsOfC[i].finalA <= maxA)
+                {
+                    endIndex = i;
+                }
+            }
+            if (endIndex != -1 && lookupForB.repetitionsOfC[endIndex].finalA < maxA && endIndex + 1 < lookupForB.repetitionsOfC.size())
+                endIndex++;
+
+
+            //cout << "phase 2: beginIndex: " << beginIndex << " endIndex: " << endIndex << " maxC: " << maxC << " maxA: " << maxA << endl;
+            if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
+            {
+                //cout << " finalA at endIndex: " << lookupForB.repetitionsOfC[endIndex].finalA << endl;
+                for (int K = beginIndex; K <= endIndex; K++)
+                {
+                    if (lookupForB.repetitionsOfC[K].finalA <= maxA)
+                    {
+                        toAddFromSecondPhase += (ModNum(maxC + 1) - lookupForB.repetitionsOfC[K].C) * lookupForB.repetitionsOfC[K].numReps;
+                    }
+                    else
+                    {
+                        const int64_t numRemainingA = maxA - (lookupForB.repetitionsOfC[K].finalA - lookupForB.repetitionsOfC[K].numReps);
+                        //cout << " numRemainingA: " << numRemainingA << endl;
+                        assert(numRemainingA > 0);
+                        toAddFromSecondPhase += (ModNum(maxC + 1) - lookupForB.repetitionsOfC[K].C) * numRemainingA;
+                    }
+                }
+                //if (lookupForB.repetitionsOfC[endIndex].finalA != maxA && endIndex + 1 < lookupForB.repetitionsOfC.size())
+                //{
+                    //assert(endIndex + 1 < lookupForB.repetitionsOfC.size());
+                    //const int64_t numRemainingA = maxA - (lookupForB.repetitionsOfC[endIndex + 1].finalA - lookupForB.repetitionsOfC[endIndex + 1].numReps);
+                    //cout << " numRemainingA: " << numRemainingA << endl;
+                    //assert(numRemainingA > 0);
+                    //toAddFromSecondPhase += (ModNum(maxC + 1) - lookupForB.repetitionsOfC[endIndex + 1].C) * numRemainingA;
+                //}
+            }
+            //cout << "toAddFromSecondPhase: " << toAddFromSecondPhase << " dbgToAddFromSecondPhase: " << dbgToAddFromSecondPhase << endl;
+            assert(toAddFromSecondPhase == dbgToAddFromSecondPhase);
+
         }
-        result += toAddFromFirstPhase + dbgToAddFromSecondPhase;
+        result += toAddFromFirstPhase + toAddFromSecondPhase;
 
         //cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
