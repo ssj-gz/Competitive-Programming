@@ -2,19 +2,11 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/CHEFK1
 //
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -27,9 +19,9 @@ T read()
     return toRead;
 }
 
-#if 1
 int solveBruteForce(int64_t N, int64_t M)
 {
+    // Leaving this "brute force" solution here as a reference, as it's good documentation :)
     if (M < N - 1)
         return -1;
     if (N == 1)
@@ -44,13 +36,15 @@ int solveBruteForce(int64_t N, int64_t M)
         return -1;
     vector<int> nodeDegree(N);
     vector<bool> nodeHasSelfLoop(N, false);
-    // Join in line.
+    // Join all vertices in a line, consuming N - 1 vertices.
     nodeDegree[0] = 1;
     nodeDegree[1] = 1;
     for (int i = 2; i < N; i++)
     {
         nodeDegree[i] = 2;
     }
+    // Remaining vertices - add self-loop to minimum vertex when we can; else
+    // add pair between the two vertices with lowest degree.
     for (int i = N; i <= M; i++)
     {
         cout << "i: " << i << " node degrees: " << endl;
@@ -66,9 +60,8 @@ int solveBruteForce(int64_t N, int64_t M)
         }
         sort(nodeIndicesByDegree.begin(), nodeIndicesByDegree.end(), [&nodeDegree](const auto nodeIndex1, const auto nodeIndex2)
                 {
-                //cout << "nodeDegree.size(): " << nodeDegree.size() << " nodeIndex1: " << nodeIndex1 << " nodeIndex2: " << nodeIndex2 << endl;
                 if (nodeDegree[nodeIndex1] != nodeDegree[nodeIndex2])
-                return nodeDegree[nodeIndex1] < nodeDegree[nodeIndex2];
+                    return nodeDegree[nodeIndex1] < nodeDegree[nodeIndex2];
                 return nodeIndex1 < nodeIndex2;
                 });
 
@@ -86,39 +79,20 @@ int solveBruteForce(int64_t N, int64_t M)
         }
         if (!addedSelfLoop)
         {
+            // Connect two lowest-degree vertices.
             nodeDegree[nodeIndicesByDegree[0]]++;
             nodeDegree[nodeIndicesByDegree[1]]++;
         }
         const int maxNodeDegree = *max_element(nodeDegree.begin(), nodeDegree.end());
         cout << "N: " << N << " M: " << M << " i: " << i << " maxNodeDegree: " << maxNodeDegree << endl;
 
-#if 0
-        if ((N % 2) == 0)
-        {
-            assert(maxNodeDegree == (M - 2 * N - 1) / (N / 2) + 4);
-        }
-        else
-        {
-            const int blah = (M - 2 * N - 1) / N;
-            const int blah2 = (M - 2 * N - 1) % N;
-            cout << "blah: " << blah << " blah2: " << blah << endl;
-            const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
-            cout << "wee: " << wee << endl;;
-            assert(wee == maxNodeDegree);
-
-        }
-#endif
     }
     const int maxNodeDegree = *max_element(nodeDegree.begin(), nodeDegree.end());
     return maxNodeDegree;
-
 }
-#endif
 
-#if 1
 int solveOptimised(int64_t N, int64_t M)
 {
-    // TODO - make sure we're dealing with N == 1 and 2.  Also M == 0.
     if (M == 0 && N == 1)
     {
         // Graph consisting of just the one node with no edges presumably
@@ -203,8 +177,9 @@ int solveOptimised(int64_t N, int64_t M)
     }
     // M > 2 * N.
     // For M == 2 * N, we have a cycle through all vertice and a self-loop through
-    // each vertex.
-
+    // each vertex. The strategy from here on in is just to connect the pair of 
+    // vertices which have the smallest degrees until we're done.
+    // It can be shown that we can fast-forward through the process using the formulae below.
     if ((N % 2) == 0)
     {
         return (M - 2 * N - 1) / (N / 2) + 4;
@@ -215,100 +190,12 @@ int solveOptimised(int64_t N, int64_t M)
         const int blah2 = (M - 2 * N - 1) % N;
         const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
         return wee;
-
     }
-
-
 }
-#endif
-
 
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-
-        for (int t = 0; t < T; t++)
-        {
-        }
-
-        return 0;
-    }
-
-#if 0
-    const int N = 4;
-    for (int M = 2 * N + 1; M <= ((N + 1) * N) / 2; M++)
-    {
-        const int blah = ((M - (2 * N + 1)) / (N / 2)) + 4;
-        cout << "N: " << N << " M: " << M << " blah: " << blah << endl;
-    }
-#endif
-#if 0
-    const int N = 13;
-    vector<int> nodeDegree(N);
-    for (int i = 0; i < N; i++)
-    {
-        nodeDegree[i] = 3;
-    }
-    for (int M = 2 * N + 1; M <= ((N + 1) * N) / 2; M++)
-    {
-        vector<int> nodeIndicesByDegree;
-        for (int i = 0; i < N; i++)
-        {
-            nodeIndicesByDegree.push_back(i);
-        }
-        sort(nodeIndicesByDegree.begin(), nodeIndicesByDegree.end(), [&nodeDegree](const auto nodeIndex1, const auto nodeIndex2)
-                {
-                    if (nodeDegree[nodeIndex1] < nodeDegree[nodeIndex2])
-                        return true;
-                    return nodeIndex1 < nodeIndex2;
-                });
-
-        nodeDegree[nodeIndicesByDegree[0]]++;
-        nodeDegree[nodeIndicesByDegree[1]]++;
-        const int maxNodeDegree = *max_element(nodeDegree.begin(), nodeDegree.end());
-        cout << "N: " << N << " M: " << M << " maxNodeDegree: " << maxNodeDegree << endl;
-
-        if ((N % 2) == 0)
-        {
-            assert(maxNodeDegree == (M - 2 * N - 1) / (N / 2) + 4);
-        }
-        else
-        {
-            const int blah = (M - 2 * N - 1) / N;
-            const int blah2 = (M - 2 * N - 1) % N;
-            cout << "blah: " << blah << " blah2: " << blah << endl;
-            const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
-            cout << "wee: " << wee << endl;;
-            assert(wee == maxNodeDegree);
-            
-        }
-    }
-
-    return 0; // TODO - remove this.
-#endif
-#if 0
-    for (int N = 1; N <= 100; N++)
-    {
-        for (int M = 0; M <= 100; M++)
-        {
-            const int solutionOptimised = solveOptimised(N, M);
-            const int solutionBruteForce = solveBruteForce(N, M);
-            cout << "N: " << N << " M: " << M << " solutionOptimised: " << solutionOptimised << " solutionBruteForce: " << solutionBruteForce << endl;
-            assert(solutionBruteForce == solutionOptimised);
-        }
-
-    }
-    return 0;
-#endif
-    
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -316,21 +203,8 @@ int main(int argc, char* argv[])
         const auto N = read<int64_t>();
         const auto M = read<int64_t>();
 
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(N, M);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
-        const auto solutionOptimised = solveOptimised(N , M);
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
         const auto solutionOptimised = solveOptimised(N, M);
         cout << solutionOptimised << endl;
-#endif
     }
 
     assert(cin);
