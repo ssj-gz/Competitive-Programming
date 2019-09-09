@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/CHEFINSQ
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -136,7 +136,7 @@ int64_t solveOptimised(int N, int K, const vector<int>& aOriginal)
         K--;
         numOfKthElementInSubset++;
     }
-    cout << "kthElement: " << kthElement << " numOfKthElement: " << numOfKthElement << " numOfKthElementInSubset: " << numOfKthElementInSubset << endl;
+    //cout << "kthElement: " << kthElement << " numOfKthElement: " << numOfKthElement << " numOfKthElementInSubset: " << numOfKthElementInSubset << endl;
     
     return nCrLookup[numOfKthElement][numOfKthElementInSubset];
 }
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(N, K, a);
         cout << solutionOptimised << endl;
 #endif
     }
