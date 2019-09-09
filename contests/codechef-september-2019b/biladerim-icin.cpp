@@ -388,6 +388,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         ModNum dbgToAddFromFirstPhase;
         ModNum toAddFromFirstPhase;
         {
+#if 0
             for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
             {
                 const auto C = lookupForB.cForA[A].C;
@@ -399,6 +400,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                     dbgToAddFromFirstPhase += amountToAdd;
                 }
             }
+#endif
             const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
             int dbgBeginIndex = -1;
             int dbgEndIndex = -1;
@@ -435,15 +437,16 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 }
             }
             //cout << "toAddFromFirstPhase: " << toAddFromFirstPhase << " dbgToAddFromFirstPhase: " << dbgToAddFromFirstPhase << endl;
-            assert(toAddFromFirstPhase == dbgToAddFromFirstPhase);
+            //assert(toAddFromFirstPhase == dbgToAddFromFirstPhase);
 
         }
         //cout << " result after first block: " << result << endl;
-        ModNum dbgToAddFromSecondPhase;
+        //ModNum dbgToAddFromSecondPhase;
         ModNum toAddFromSecondPhase;
         {
             int64_t previousA = lookupForB.cForA.back().A;
             //cout << " previousA: " << previousA << endl;
+#if 0
             for (const auto& x : lookupForB.repetitionsOfC)
             {
                 const auto C = x.C;
@@ -474,6 +477,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 //cout << " updated previousA: " << previousA << endl;
 
             }
+#endif
 
             int beginIndex = -1;
             int endIndex = -1;
@@ -516,7 +520,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 }
             }
             //cout << "toAddFromSecondPhase: " << toAddFromSecondPhase << " dbgToAddFromSecondPhase: " << dbgToAddFromSecondPhase << endl;
-            assert(toAddFromSecondPhase == dbgToAddFromSecondPhase);
+            //assert(toAddFromSecondPhase == dbgToAddFromSecondPhase);
 
         }
         result += toAddFromFirstPhase + toAddFromSecondPhase;
