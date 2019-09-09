@@ -391,20 +391,23 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 }
             }
             const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
-            int beginIndex = -1;
-            int endIndex = -1;
+            int dbgBeginIndex = -1;
+            int dbgEndIndex = -1;
             for (int64_t A = 2; A <= maxIndex; A++)
             {
-                if (lookupForB.cForA[A].C <= maxC && beginIndex == -1)
+                if (lookupForB.cForA[A].C <= maxC && dbgBeginIndex == -1)
                 {
-                    beginIndex = A;
+                    dbgBeginIndex = A;
                 }
                 if (A <= maxA)
                 {
-                    endIndex = A;
+                    dbgEndIndex = A;
                 }
             }
 
+
+            int beginIndex = dbgBeginIndex;
+            int endIndex = dbgEndIndex;
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
                 toAddFromFirstPhase += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
