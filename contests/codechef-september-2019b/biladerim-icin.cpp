@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/LAPD
 //
-//#define SUBMISSION
+#define SUBMISSION
 //#define VERIFY_LOOKUPS
 #define BRUTE_FORCE
 #ifdef SUBMISSION
@@ -135,6 +135,7 @@ struct CForA
 {
     int64_t A = -1;
     int64_t C = std::numeric_limits<int64_t>::max();
+    ModNum cumulativeC;
 };
 
 struct RepetitionOfC
@@ -218,6 +219,15 @@ vector<LookupForB> computeLookups(int64_t maxB)
                 aAfterCRepeats += numRepetitions;
                 lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
                 cRepeated--;
+            }
+        }
+
+        {
+            ModNum cumulativeCForA;
+            for (int A = 2; A <= sqrtMaxA; A++)
+            {
+                cumulativeCForA += lookupForB.cForA[A].C;
+                lookupForB.cForA[A].cumulativeC = cumulativeCForA;
             }
         }
 
@@ -397,13 +407,22 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
-
-                for (int K = beginIndex; K <= endIndex; K++)
+                toAddFromFirstPhase += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
+                toAddFromFirstPhase -= lookupForB.cForA[endIndex].cumulativeC;
+                if (beginIndex > 0)
                 {
-                    assert(K <= maxA && lookupForB.cForA[K].C <= maxC);
-                    toAddFromFirstPhase += ModNum(maxC + 1) - lookupForB.cForA[K].C;
+                    toAddFromFirstPhase += lookupForB.cForA[beginIndex - 1].cumulativeC;
+                }
+
+                //cout << "beginIndex: " << beginIndex << " endIndex: " << endIndex << " maxC: " << maxC << endl;
+                for (int K = max(beginIndex - 1, 0); K <= endIndex; K++)
+                {
+                    //assert(K <= maxA && lookupForB.cForA[K].C <= maxC);
+                    //toAddFromFirstPhase += ModNum(maxC + 1) - lookupForB.cForA[K].C;
+                    //cout << " K: " << K << " C: " << lookupForB.cForA[K].C << " cumulativeC: " << lookupForB.cForA[K].cumulativeC << endl;
                 }
             }
+            //cout << "toAddFromFirstPhase: " << toAddFromFirstPhase << " dbgToAddFromFirstPhase: " << dbgToAddFromFirstPhase << endl;
             assert(toAddFromFirstPhase == dbgToAddFromFirstPhase);
 
         }
