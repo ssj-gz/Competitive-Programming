@@ -367,6 +367,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
         //cout << "B: " << B << endl;
         ModNum dbgToAddFromFirstPhase;
+        ModNum toAddFromFirstPhase;
         {
             for (int64_t A = 2; A <= min<int64_t>(lookupForB.cForA.size() - 1, maxA); A++)
             {
@@ -379,7 +380,6 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                     dbgToAddFromFirstPhase += amountToAdd;
                 }
             }
-            ModNum toAddFromFirstPhase;
             const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
             int beginIndex = -1;
             int endIndex = -1;
@@ -443,7 +443,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
             }
         }
-        result += dbgToAddFromFirstPhase + dbgToAddFromSecondPhase;
+        result += toAddFromFirstPhase + dbgToAddFromSecondPhase;
 
         //cout << "last processed A: " << lookupForB.repetitionsOfC.back().finalA << " maxA: " << maxA << endl;
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
