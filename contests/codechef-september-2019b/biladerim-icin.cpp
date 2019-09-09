@@ -86,31 +86,6 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
-
-struct Blah
-{
-    Blah(double x, double y, double z)
-        : x(x), y(y), z(z)
-    {
-    }
-    double x, y;
-    double z;
-};
-
-bool operator<(const Blah& lhs, const Blah& rhs)
-{
-    if (lhs.z != rhs.z)
-        return lhs.z < rhs.z;
-    if (lhs.x != rhs.x)
-        return lhs.x < rhs.x;
-    return lhs.y < rhs.y;
-}
-ostream& operator<<(ostream& os, const Blah& blah)
-{
-    os << "z: " << blah.z << " x: " << blah.x << " y: " << blah.y << endl;
-    return os;
-}
-
 int64_t divCeiling(int64_t x, int64_t y)
 {
     if ((x % y) == 0)
@@ -135,7 +110,7 @@ struct RepetitionOfC
     int64_t C = -1;
     int64_t numReps = -1;
     int64_t finalA = -1;
-    ModNum cumulativeC;
+    ModNum cumulativeCTimesReps;
 };
 
 struct LookupForB
@@ -225,10 +200,10 @@ vector<LookupForB> computeLookups(int64_t maxB)
         }
         {
             ModNum cumulativeCTimesReps;
-            for (auto& x : lookupForB.repetitionsOfC)
+            for (auto& repetitionOfC : lookupForB.repetitionsOfC)
             {
-                cumulativeCTimesReps += ModNum(x.C) * x.numReps;
-                x.cumulativeC = cumulativeCTimesReps;
+                cumulativeCTimesReps += ModNum(repetitionOfC.C) * repetitionOfC.numReps;
+                repetitionOfC.cumulativeCTimesReps = cumulativeCTimesReps;
             }
         }
     }
@@ -319,10 +294,10 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
                 const int64_t numAsInRange = (lookupForB.repetitionsOfC[endIndex].finalA - (lookupForB.repetitionsOfC[beginIndex].finalA - lookupForB.repetitionsOfC[beginIndex].numReps));
-                result += ModNum(maxC + 1) * numAsInRange - lookupForB.repetitionsOfC[endIndex].cumulativeC;
+                result += ModNum(maxC + 1) * numAsInRange - lookupForB.repetitionsOfC[endIndex].cumulativeCTimesReps;
                 if (beginIndex > 0)
                 {
-                    result += lookupForB.repetitionsOfC[beginIndex - 1].cumulativeC;
+                    result += lookupForB.repetitionsOfC[beginIndex - 1].cumulativeCTimesReps;
                 }
                 if (lookupForB.repetitionsOfC[endIndex].finalA > maxA)
                 {
