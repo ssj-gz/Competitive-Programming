@@ -151,7 +151,7 @@ ModNum solveBruteForce(int N, int K, const vector<int>& a)
     return result;
 }
 
-ModNum solveOptimised(int N, int K, const vector<int>& aOriginal)
+ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
 {
     auto a = aOriginal;
     sort(a.begin(), a.end());
@@ -194,12 +194,13 @@ ModNum solveOptimised(int N, int K, const vector<int>& aOriginal)
         dp[i][0] = 1;
     }
 
-    for (int i = 1; i < N; i++)
+    for (int i = 1; i <= N; i++)
     {
-        for (int j = 0; j < primeOccurrencesInfo.size(); i++)
+        for (int j = 0; j <= K; j++)
         {
+            assert(i - 1 >= 0);
             dp[i][j] += dp[i - 1][j];
-            if (i - 1 > 0 && j - 1 > 0 && j <= i)
+            if (j - 1 >= 0 && j <= i)
             {
                 dp[i][j] += dp[i - 1][j - 1];
             }
