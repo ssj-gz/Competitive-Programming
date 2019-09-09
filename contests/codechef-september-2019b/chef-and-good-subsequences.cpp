@@ -160,7 +160,7 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
         int prime = -1;
         int numOccurrences = 0;
     };
-    vector<PrimeInfo> primeOccurrencesInfo;
+    vector<PrimeInfo> distinctPrimeOccurrences;
 
     int prevPrime = -1;
     while (!a.empty())
@@ -168,15 +168,16 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
         const int prime = a.back();
         if (prime != prevPrime)
         {
-            primeOccurrencesInfo.push_back({prime, 0});
+            distinctPrimeOccurrences.push_back({prime, 0});
         }
-        primeOccurrencesInfo.back().numOccurrences++;
+        distinctPrimeOccurrences.back().numOccurrences++;
 
         a.pop_back();
         prevPrime = prime;
     }
+    const int numDistinctElements = distinctPrimeOccurrences.size(); 
 
-    if (K > primeOccurrencesInfo.size())
+    if (K > numDistinctElements)
     {
         return 0;
     }
@@ -188,21 +189,22 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
     }
 #endif
 
-    vector<vector<ModNum>> dp(N + 1, vector<ModNum>(K + 1, 0));
-    for (int i = 0; i < N; i++)
+    vector<vector<ModNum>> dp(numDistinctElements + 1, vector<ModNum>(K + 1, 0));
+    for (int i = 0; i <= numDistinctElements; i++)
     {
         dp[i][0] = 1;
     }
 
-    for (int i = 1; i <= N; i++)
+    for (int i = 1; i <= numDistinctElements; i++)
     {
         for (int j = 0; j <= K; j++)
         {
             assert(i - 1 >= 0);
-            dp[i][j] += dp[i - 1][j];
+            dp[i][j] += dp[i - 1][j]; // Don't choose this number.
             if (j - 1 >= 0 && j <= i)
             {
-                dp[i][j] += dp[i - 1][j - 1];
+                // Do choose *one* from this bunch of same numbers.
+                dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[j].numOccurrences);
             }
             cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
@@ -212,7 +214,7 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
 
     for (int j = 0; j <= K; j++)
     {
-        result += dp[N][j];
+        result += dp[numDistinctElements][j];
     }
     
     
