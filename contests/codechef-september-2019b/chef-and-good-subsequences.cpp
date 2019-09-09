@@ -132,7 +132,7 @@ ModNum solveBruteForce(int N, int K, const vector<int>& a)
                 subset.push_back(a[i]);
         }
         sort(subset.begin(), subset.end());
-        const auto isGood = (unique(subset.begin(), subset.end()) == subset.end());
+        const auto isGood = subset.size() <= K && (unique(subset.begin(), subset.end()) == subset.end());
         if (isGood)
             result = result + 1;
 
@@ -153,11 +153,6 @@ ModNum solveBruteForce(int N, int K, const vector<int>& a)
 
 ModNum solveOptimised(int N, int K, const vector<int>& aOriginal)
 {
-    const auto numPrimesUpTo8000 = getPrimesUpTo8000().size();
-    if (K > N || K > numPrimesUpTo8000)
-    {
-        return 0;
-    }
     auto a = aOriginal;
     sort(a.begin(), a.end());
     struct PrimeInfo
@@ -208,6 +203,7 @@ ModNum solveOptimised(int N, int K, const vector<int>& aOriginal)
             {
                 dp[i][j] += dp[i - 1][j - 1];
             }
+            cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
     }
 
