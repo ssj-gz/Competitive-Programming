@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
                     }
 
                 }
-                if (hatefulPairs.size() != (N * (N - 1)) / 2)
+                if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
                     break;
                 cerr << "Generated degenerate testcase; retrying" << endl;
             }
