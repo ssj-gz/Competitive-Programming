@@ -49,6 +49,22 @@ struct Subset
     }
     vector<int> group1; 
     vector<int> group2;
+    set<HatefulPair> generatedHatefulPairs() const
+    {
+        set<HatefulPair> generatedHatefulPairs;
+        addToHatefulPairs(generatedHatefulPairs);
+        return generatedHatefulPairs;
+    }
+    void addToHatefulPairs(set<HatefulPair>& hatefulPairs) const
+    {
+        for (const auto group1Person : group1)
+        {
+            for (const auto group2Person : group2)
+            {
+                hatefulPairs.insert({group1Person, group2Person});
+            }
+        }
+    }
 
 };
 
@@ -105,14 +121,7 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
                     group2.push_back(i);
             }
 
-            set<HatefulPair> hatefulPairsForSubset;
-            for (const auto group1Person : group1)
-            {
-                for (const auto group2Person : group2)
-                {
-                    hatefulPairsForSubset.insert({group1Person, group2Person});
-                }
-            }
+            const set<HatefulPair> hatefulPairsForSubset = Subset(group1, group2).generatedHatefulPairs();
             bool conflicts = false;
             for (const auto& hatefulPairForSubset : hatefulPairsForSubset)
             {
@@ -170,13 +179,7 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
             }
             for (const auto& subset : subsets)
             {
-                for (const auto group1Person : subset.group1)
-                {
-                    for (const auto group2Person : subset.group2)
-                    {
-                        generatedHatefulPairs.insert({group1Person, group2Person});
-                    }
-                }
+                subset.addToHatefulPairs(generatedHatefulPairs);
             }
             assert(subsets.size() == numToChoose);
             if (generatedHatefulPairs == hatefulPairs)
@@ -346,13 +349,7 @@ int main(int argc, char* argv[])
                             group2.push_back(j);
                     }
 
-                    for (const auto group1Person : group1)
-                    {
-                        for (const auto group2Person : group2)
-                        {
-                            hatefulPairs.insert({group1Person, group2Person});
-                        }
-                    }
+                    Subset(group1, group2).addToHatefulPairs(hatefulPairs);
 
                 }
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
