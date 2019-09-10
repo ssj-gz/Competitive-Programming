@@ -314,7 +314,7 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
                         //cout << " numInRun: " << numInRun << endl;
                         if (subsetString[i] == '0')
                         {
-                            for (int j = i; j >= i - numInRun / 2; j--)
+                            for (int j = i; j >= i - numInRun / 2 + 1; j--)
                             {
                                 subsetString[j] = '1';
                             }
@@ -393,7 +393,7 @@ void verifySolution(const set<HatefulPair>& hatefulPairs, const vector<string>& 
 
         Subset(group1, group2).addToHatefulPairs(generatedHatefulPairs);
     }
-#if 0
+#if 1
     cout << "Expected HatefulPairs: " << endl;
     for (const auto& hatefulPair : hatefulPairs)
     {
@@ -429,6 +429,7 @@ int main(int argc, char* argv[])
             {
                 hatefulPairs.clear();
                 N = rand() % 100'000 + 1;
+                //N = rand() % 10 + 1;
                 cerr << "N: " << N << endl;
 #if 0
                 const int numSets = rand() % 5 + 1;
@@ -542,7 +543,7 @@ int main(int argc, char* argv[])
     {
         cout << subsetString << endl;
     }
-    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
+//    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 
     assert(cin);
