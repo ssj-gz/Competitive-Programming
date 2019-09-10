@@ -2,6 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
+// This submission is for Subtask #1 only!
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
