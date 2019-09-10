@@ -283,7 +283,7 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
         if (N == 1)
             return {-1, vector<string>()};
         int64_t minMoves = 1;
-        while ((1 << (minMoves)) <= M - 1)
+        while ((1 << (minMoves)) <= N - 1)
         {
             minMoves++;
         }
@@ -424,11 +424,12 @@ int main(int argc, char* argv[])
         if (generateYes)
         {
             set<HatefulPair> hatefulPairs;
-            int N = -1;
+            int64_t N = -1;
             while (true)
             {
                 hatefulPairs.clear();
-                N = rand() % 1000 + 1;
+                N = rand() % 100'000 + 1;
+                cerr << "N: " << N << endl;
 #if 0
                 const int numSets = rand() % 5 + 1;
                 for (int i = 0; i < numSets; i++)
@@ -448,12 +449,16 @@ int main(int argc, char* argv[])
 
                 }
 #endif
-                for (int i = 0; i < N; i++)
+                if ((N * (N - 1)) / 2 <= 100'000)
                 {
-                    for (int j = i + 1; j < N; j++)
+                    for (int i = 0; i < N; i++)
                     {
-                        hatefulPairs.insert({i, j});
+                        for (int j = i + 1; j < N; j++)
+                        {
+                            hatefulPairs.insert({i, j});
+                        }
                     }
+
                 }
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
                 //if (!hatefulPairs.empty())
@@ -537,7 +542,7 @@ int main(int argc, char* argv[])
     {
         cout << subsetString << endl;
     }
-    //verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
+    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 
     assert(cin);
