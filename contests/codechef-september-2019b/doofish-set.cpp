@@ -377,7 +377,7 @@ void verifySolution(const set<HatefulPair>& hatefulPairs, const vector<string>& 
     {
         vector<int> group1;
         vector<int> group2;
-        cout << "adding from substring: " << subsetString << endl;
+        //cout << "adding from substring: " << subsetString << endl;
         for (int i = 0; i < subsetString.size(); i++)
         {
             if (subsetString[i] == '1')
@@ -393,6 +393,7 @@ void verifySolution(const set<HatefulPair>& hatefulPairs, const vector<string>& 
 
         Subset(group1, group2).addToHatefulPairs(generatedHatefulPairs);
     }
+#if 0
     cout << "Expected HatefulPairs: " << endl;
     for (const auto& hatefulPair : hatefulPairs)
     {
@@ -403,6 +404,7 @@ void verifySolution(const set<HatefulPair>& hatefulPairs, const vector<string>& 
     {
         cout << " " << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
     }
+#endif
     assert(generatedHatefulPairs == hatefulPairs);
 
 }
@@ -426,7 +428,7 @@ int main(int argc, char* argv[])
             while (true)
             {
                 hatefulPairs.clear();
-                N = rand() % 27 + 1;
+                N = rand() % 1000 + 1;
 #if 0
                 const int numSets = rand() % 5 + 1;
                 for (int i = 0; i < numSets; i++)
