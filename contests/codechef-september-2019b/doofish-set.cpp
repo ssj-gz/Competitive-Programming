@@ -245,11 +245,11 @@ int main(int argc, char* argv[])
                     }
                 }
 
-                cout << N << " " << hatefulPairs.size() << endl;
-                for (const auto& hatefulPair : hatefulPairs)
-                {
-                    cout << (hatefulPair.person1 + 1) << " " << (hatefulPair.person2 + 1) << endl;
-                }
+            }
+            cout << N << " " << hatefulPairs.size() << endl;
+            for (const auto& hatefulPair : hatefulPairs)
+            {
+                cout << (hatefulPair.person1 + 1) << " " << (hatefulPair.person2 + 1) << endl;
             }
 
         }
