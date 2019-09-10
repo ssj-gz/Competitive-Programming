@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+
         const bool generateYes = ((rand() % 4) == 0);
         const int N = rand() % 20 + 1;
 
@@ -232,9 +232,9 @@ int main(int argc, char* argv[])
                 for (int j = 0; j < N; j++)
                 {
                     if (rand() % 2 == 0)
-                        group1.push_back(i);
+                        group1.push_back(j);
                     else
-                        group2.push_back(i);
+                        group2.push_back(j);
                 }
 
                 for (const auto group1Person : group1)
