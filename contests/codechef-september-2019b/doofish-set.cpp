@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <set>
 
 #include <cassert>
 
@@ -26,9 +27,30 @@ T read()
     return toRead;
 }
 
-#if 1
-int solveBruteForce(const int N, const int M, const vector<pair<int, int>>& hatefulPairs)
+struct HatefulPair
 {
+    HatefulPair(int person1, int person2)
+    {
+        if (person2 < person1)
+            swap(person1, person2);
+        this->person1 = person1;
+        this->person2 = person2;
+    }
+    int person1 = -1;
+    int person2 = -1;
+};
+
+bool operator<(const HatefulPair& lhs, const HatefulPair& rhs)
+{
+    if (lhs.person1 != lhs.person2)
+        return lhs.person1 < rhs.person1;
+    return lhs.person2 < rhs.person2;
+}
+
+#if 1
+int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
+{
+    set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
     int result = 0;
     
     return result;
@@ -62,11 +84,12 @@ int main(int argc, char* argv[])
     const int N = read<int>();
     const int M = read<int>();
 
-    vector<pair<int, int>> hatefulPairs(M);
-    for (auto& pair : hatefulPairs)
+    vector<HatefulPair> hatefulPairs;
+    for (int i = 0; i < M; i++)
     {
-        pair.first = read<int>();
-        pair.second = read<int>();
+        const int person1 = read<int>();
+        const int person2 = read<int>();
+        hatefulPairs.push_back({person1, person2});
     }
 
 #ifdef BRUTE_FORCE
