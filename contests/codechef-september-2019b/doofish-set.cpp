@@ -278,7 +278,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const bool generateYes = ((rand() % 4) == 0);
+        //const bool generateYes = ((rand() % 4) == 0);
+        const bool generateYes = true;
 
         if (generateYes)
         {
@@ -286,8 +287,10 @@ int main(int argc, char* argv[])
             int N = -1;
             while (true)
             {
-                N = rand() % 20 + 1;
+                hatefulPairs.clear();
+                N = rand() % 16 + 1;
                 const int numSets = rand() % 5 + 1;
+                cerr << " Should be solvable in <= " << numSets << " moves" << endl;
                 for (int i = 0; i < numSets; i++)
                 {
                     vector<int> group1;
