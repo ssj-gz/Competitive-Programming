@@ -2,11 +2,11 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -61,6 +61,7 @@ struct Subset
         {
             for (const auto group2Person : group2)
             {
+                //cout << "blee: " << group1Person << ", " << group2Person << endl;
                 hatefulPairs.insert({group1Person, group2Person});
             }
         }
@@ -268,6 +269,7 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
     // Only deals with Subtask 1, so far.
     if (M == (N * (N - 1)) / 2)
     {
+        cout << "Whoo!" << endl;
         int64_t minMoves = 1;
         while ((1 << (minMoves)) <= M - 1)
         {
@@ -279,7 +281,49 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
         }
         else
         {
-            return {minMoves, vector<string>()};
+            std::pair<int, vector<string>> result;
+            result.first = minMoves;
+            vector<string> subsetStrings;
+            string subsetString = string(N / 2, '0') + string(N - N / 2, '1');
+            cout << "subsetString: " << subsetString << endl;
+            subsetStrings.push_back(subsetString);
+            minMoves--;
+
+            while (minMoves > 0)
+            {
+                cout << "Starting subsetString: " << subsetString << endl;
+                int beginningOfRun = 0;
+                for (int i = 0; i < N; i++)
+                {
+                    cout << "i: " << i << " beginningOfRun: " << beginningOfRun << endl;
+                    if (i == N - 1 || subsetString[i + 1] != subsetString[i])
+                    {
+                        const int numInRun = i + 1 - beginningOfRun;
+                        cout << " numInRun: " << numInRun << endl;
+                        if (subsetString[i] == '0')
+                        {
+                            for (int j = i; j >= i - numInRun / 2; j--)
+                            {
+                                subsetString[j] = '1';
+                            }
+                        }
+                        else
+                        {
+                            for (int j = i - numInRun / 2; j >= beginningOfRun; j--)
+                            {
+                                subsetString[j] = '0';
+                            }
+                        }
+
+                        subsetStrings.push_back(subsetString);
+                        beginningOfRun = i + 1;
+                    }
+                }
+                cout << "new subsetString: " << subsetString << endl;
+                minMoves--;
+            }
+
+            return {minMoves, subsetStrings};
         }
     }
     else
@@ -314,6 +358,43 @@ int64_t calcMinMoves(int64_t n)
     return minMoves;
 };
 
+void verifySolution(const set<HatefulPair>& hatefulPairs, const vector<string>& subsetStrings)
+{
+    set<HatefulPair> generatedHatefulPairs;
+    for (const auto& subsetString : subsetStrings)
+    {
+        vector<int> group1;
+        vector<int> group2;
+        cout << "adding from substring: " << subsetString << endl;
+        for (int i = 0; i < subsetString.size(); i++)
+        {
+            if (subsetString[i] == '1')
+            {
+                group1.push_back(i);
+            }
+            else
+            {
+                group2.push_back(i);
+            }
+        }
+        assert(group1.size() + group2.size() == subsetString.size());
+
+        Subset(group1, group2).addToHatefulPairs(generatedHatefulPairs);
+    }
+    cout << "Expected HatefulPairs: " << endl;
+    for (const auto& hatefulPair : hatefulPairs)
+    {
+        cout << " " << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
+    }
+    cout << "Actual HatefulPairs: " << endl;
+    for (const auto& hatefulPair : generatedHatefulPairs)
+    {
+        cout << " " << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
+    }
+    assert(generatedHatefulPairs == hatefulPairs);
+
+}
+
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
@@ -333,9 +414,8 @@ int main(int argc, char* argv[])
             while (true)
             {
                 hatefulPairs.clear();
-                N = rand() % 10 + 1;
+                N = rand() % 19 + 1;
                 const int numSets = rand() % 5 + 1;
-                cerr << " Should be solvable in <= " << numSets << " moves" << endl;
                 for (int i = 0; i < numSets; i++)
                 {
                     vector<int> group1;
@@ -353,8 +433,13 @@ int main(int argc, char* argv[])
 
                 }
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
-                if (!hatefulPairs.empty())
+                //if (!hatefulPairs.empty())
+                    //break;
+                if (hatefulPairs.size() == (N * (N - 1))/ 2)
+                {
+                    cerr << " Should be solvable in <= " << numSets << " moves" << endl;
                     break;
+                }
                 cerr << "Generated degenerate testcase; retrying" << endl;
             }
             cout << N << " " << hatefulPairs.size() << endl;
@@ -425,6 +510,7 @@ int main(int argc, char* argv[])
 #else
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
     cout << solutionOptimised.first << endl;
+    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 
     assert(cin);
