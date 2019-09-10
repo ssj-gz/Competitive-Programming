@@ -269,7 +269,7 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
     // Only deals with Subtask 1, so far.
     if (M == (N * (N - 1)) / 2)
     {
-        cout << "Whoo!" << endl;
+        //cout << "Whoo!" << endl;
         int64_t minMoves = 1;
         while ((1 << (minMoves)) <= M - 1)
         {
@@ -283,23 +283,23 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
         {
             std::pair<int, vector<string>> result;
             result.first = minMoves;
-            vector<string> subsetStrings;
+            vector<string>& subsetStrings = result.second;
             string subsetString = string(N / 2, '0') + string(N - N / 2, '1');
-            cout << "subsetString: " << subsetString << endl;
+            //cout << "subsetString: " << subsetString << endl;
             subsetStrings.push_back(subsetString);
             minMoves--;
 
             while (minMoves > 0)
             {
-                cout << "Starting subsetString: " << subsetString << endl;
+                //cout << "Starting subsetString: " << subsetString << endl;
                 int beginningOfRun = 0;
                 for (int i = 0; i < N; i++)
                 {
-                    cout << "i: " << i << " beginningOfRun: " << beginningOfRun << endl;
+                    //cout << "i: " << i << " beginningOfRun: " << beginningOfRun << endl;
                     if (i == N - 1 || subsetString[i + 1] != subsetString[i])
                     {
                         const int numInRun = i + 1 - beginningOfRun;
-                        cout << " numInRun: " << numInRun << endl;
+                        //cout << " numInRun: " << numInRun << endl;
                         if (subsetString[i] == '0')
                         {
                             for (int j = i; j >= i - numInRun / 2; j--)
@@ -315,15 +315,15 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
                             }
                         }
 
-                        subsetStrings.push_back(subsetString);
                         beginningOfRun = i + 1;
                     }
                 }
-                cout << "new subsetString: " << subsetString << endl;
+                //cout << "new subsetString: " << subsetString << endl;
+                subsetStrings.push_back(subsetString);
                 minMoves--;
             }
 
-            return {minMoves, subsetStrings};
+            return result;
         }
     }
     else
@@ -519,7 +519,11 @@ int main(int argc, char* argv[])
 #else
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
     cout << solutionOptimised.first << endl;
-    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
+    for (const auto& subsetString : solutionOptimised.second)
+    {
+        cout << subsetString << endl;
+    }
+    //verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 
     assert(cin);
