@@ -267,10 +267,21 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
 
 std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
 {
+    for (const auto& hatefulPair : hatefulPairsList)
+    {
+        if (hatefulPair.person1 < 0 || hatefulPair.person1 > N - 1)
+            return {-1, vector<string>()};
+        if (hatefulPair.person2 < 0 || hatefulPair.person2 > N - 1)
+            return {-1, vector<string>()};
+        if (hatefulPair.person1 == hatefulPair.person2)
+            return {-1, vector<string>()};
+    }
     // Only deals with Subtask 1, so far.
     if (M == (N * (N - 1)) / 2)
     {
         //cout << "Whoo!" << endl;
+        if (N == 1)
+            return {-1, vector<string>()};
         int64_t minMoves = 1;
         while ((1 << (minMoves)) <= M - 1)
         {
