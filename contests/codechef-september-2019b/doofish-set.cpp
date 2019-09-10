@@ -40,6 +40,17 @@ struct HatefulPair
     int person2 = -1;
 };
 
+struct Subset
+{
+    Subset(const vector<int>& group1, const vector<int>& group2)
+        : group1(group1), group2(group2)
+    {
+    }
+    vector<int> group1; 
+    vector<int> group2;
+
+};
+
 bool operator<(const HatefulPair& lhs, const HatefulPair& rhs)
 {
     if (lhs.person1 != lhs.person2)
@@ -51,8 +62,77 @@ bool operator<(const HatefulPair& lhs, const HatefulPair& rhs)
 int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
-    int result = 0;
+
+    vector<bool> includeInSubset(N, false);
+    vector<Subset> usefulSubsets;
+    while (true)
+    {
+        vector<int> group1;
+        vector<int> group2;
+
+        for (int i = 0; i < N; i++)
+        {
+            if (includeInSubset[i])
+                group1.push_back(i);
+            else
+                group2.push_back(i);
+        }
+
+        set<HatefulPair> hatefulPairsForSubset;
+        for (const auto group1Person : group1)
+        {
+            for (const auto group2Person : group2)
+            {
+                hatefulPairsForSubset.insert({group1Person, group2Person});
+            }
+        }
+        bool conflicts = false;
+        for (const auto& hatefulPairForSubset : hatefulPairsForSubset)
+        {
+            if (hatefulPairs.find(hatefulPairForSubset) == hatefulPairs.end())
+            {
+                conflicts = true;
+                break;
+            }
+        }
+        bool isUseful = false;
+        for (const auto& hatefulPair : hatefulPairs)
+        {
+            if (hatefulPairsForSubset.find(hatefulPair) != hatefulPairsForSubset.end())
+            {
+                isUseful = true;
+            }
+        }
+        if (!conflicts && isUseful)
+        {
+            usefulSubsets.push_back({group1, group2});
+            cout << "Found a useful subset: " << endl;
+            cout << "{";
+            for (const auto x : group1)
+            {
+                cout << (x + 1) << " ";
+            }
+            cout << "}  {";
+            for (const auto x : group2)
+            {
+                cout << (x + 1) << " ";
+            }
+            cout << "}" << endl;
+        }
+
+        int index = 0;
+        while (index < N && includeInSubset[index])
+        {
+            includeInSubset[index] = false;
+            index++;
+        }
+        if (index == N)
+            break;
+
+        includeInSubset[index] = true;
+    }
     
+    int result = 0;
     return result;
 }
 #endif
@@ -87,8 +167,8 @@ int main(int argc, char* argv[])
     vector<HatefulPair> hatefulPairs;
     for (int i = 0; i < M; i++)
     {
-        const int person1 = read<int>();
-        const int person2 = read<int>();
+        const int person1 = read<int>() - 1;
+        const int person2 = read<int>() - 1;
         hatefulPairs.push_back({person1, person2});
     }
 
