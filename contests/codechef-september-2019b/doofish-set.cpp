@@ -53,86 +53,147 @@ struct Subset
 
 bool operator<(const HatefulPair& lhs, const HatefulPair& rhs)
 {
-    if (lhs.person1 != lhs.person2)
+    if (lhs.person1 != rhs.person1)
         return lhs.person1 < rhs.person1;
     return lhs.person2 < rhs.person2;
+}
+bool operator==(const HatefulPair& lhs, const HatefulPair& rhs)
+{
+    return (lhs.person1 == rhs.person1) && (lhs.person2 == rhs.person2);
+}
+
+ostream& operator<<(ostream& os, const Subset& subset)
+{
+    cout << "{";
+    for (const auto x : subset.group1)
+    {
+        cout << (x + 1) << " ";
+    }
+    cout << "}  {";
+    for (const auto x : subset.group2)
+    {
+        cout << (x + 1) << " ";
+    }
+    cout << "}";
+    return os;
 }
 
 #if 1
 int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
+    cout << "hatefulPairs: " << endl;
+    for (const auto& hatefulPair : hatefulPairs)
+    {
+        cout << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
+    }
 
-    vector<bool> includeInSubset(N, false);
     vector<Subset> usefulSubsets;
+    {
+        vector<bool> includeInSubset(N, false);
+        while (true)
+        {
+            vector<int> group1;
+            vector<int> group2;
+
+            for (int i = 0; i < N; i++)
+            {
+                if (includeInSubset[i])
+                    group1.push_back(i);
+                else
+                    group2.push_back(i);
+            }
+
+            set<HatefulPair> hatefulPairsForSubset;
+            for (const auto group1Person : group1)
+            {
+                for (const auto group2Person : group2)
+                {
+                    hatefulPairsForSubset.insert({group1Person, group2Person});
+                }
+            }
+            bool conflicts = false;
+            for (const auto& hatefulPairForSubset : hatefulPairsForSubset)
+            {
+                if (hatefulPairs.find(hatefulPairForSubset) == hatefulPairs.end())
+                {
+                    conflicts = true;
+                    break;
+                }
+            }
+            bool isUseful = false;
+            for (const auto& hatefulPair : hatefulPairs)
+            {
+                if (hatefulPairsForSubset.find(hatefulPair) != hatefulPairsForSubset.end())
+                {
+                    isUseful = true;
+                }
+            }
+            if (!conflicts && isUseful)
+            {
+                usefulSubsets.push_back({group1, group2});
+                cout << "Found a useful subset: " << endl;
+                cout << Subset(group1, group2) << endl;
+            }
+
+            int index = 0;
+            while (index < N && includeInSubset[index])
+            {
+                includeInSubset[index] = false;
+                index++;
+            }
+            if (index == N)
+                break;
+
+            includeInSubset[index] = true;
+        }
+    }
+    vector<bool> includeSubset(usefulSubsets.size(), false);
+    int result = -1;
     while (true)
     {
-        vector<int> group1;
-        vector<int> group2;
+        set<HatefulPair> generatedHatefulPairs;
+        vector<Subset> subsets;
+        for (int i = 0; i < usefulSubsets.size(); i++)
+        {
+            if (includeSubset[i])
+            {
+                const auto& subset = usefulSubsets[i];
+                subsets.push_back(subset);
+                for (const auto group1Person : subset.group1)
+                {
+                    for (const auto group2Person : subset.group2)
+                    {
+                        generatedHatefulPairs.insert({group1Person, group2Person});
+                    }
+                }
+            }
+        }
+        if (generatedHatefulPairs == hatefulPairs)
+        {
+            if (result == -1 || subsets.size() < result)
+            {
+                cout << "New best: " << subsets.size() << endl;
+                for (const auto& subset : subsets)
+                {
+                    cout << " " << subset << endl;
+                }
+                result = subsets.size();
+            }
 
-        for (int i = 0; i < N; i++)
-        {
-            if (includeInSubset[i])
-                group1.push_back(i);
-            else
-                group2.push_back(i);
         }
-
-        set<HatefulPair> hatefulPairsForSubset;
-        for (const auto group1Person : group1)
-        {
-            for (const auto group2Person : group2)
-            {
-                hatefulPairsForSubset.insert({group1Person, group2Person});
-            }
-        }
-        bool conflicts = false;
-        for (const auto& hatefulPairForSubset : hatefulPairsForSubset)
-        {
-            if (hatefulPairs.find(hatefulPairForSubset) == hatefulPairs.end())
-            {
-                conflicts = true;
-                break;
-            }
-        }
-        bool isUseful = false;
-        for (const auto& hatefulPair : hatefulPairs)
-        {
-            if (hatefulPairsForSubset.find(hatefulPair) != hatefulPairsForSubset.end())
-            {
-                isUseful = true;
-            }
-        }
-        if (!conflicts && isUseful)
-        {
-            usefulSubsets.push_back({group1, group2});
-            cout << "Found a useful subset: " << endl;
-            cout << "{";
-            for (const auto x : group1)
-            {
-                cout << (x + 1) << " ";
-            }
-            cout << "}  {";
-            for (const auto x : group2)
-            {
-                cout << (x + 1) << " ";
-            }
-            cout << "}" << endl;
-        }
-
         int index = 0;
-        while (index < N && includeInSubset[index])
+        while (index < usefulSubsets.size() && includeSubset[index])
         {
-            includeInSubset[index] = false;
+            includeSubset[index] = false;
             index++;
         }
-        if (index == N)
+        if (index == usefulSubsets.size())
             break;
 
-        includeInSubset[index] = true;
+        includeSubset[index] = true;
     }
     
-    int result = 0;
     return result;
 }
 #endif
