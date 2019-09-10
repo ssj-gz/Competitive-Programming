@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <limits>
 
 #include <cassert>
 
@@ -79,7 +80,7 @@ ostream& operator<<(ostream& os, const Subset& subset)
 }
 
 #if 1
-int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
+std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
     cout << "hatefulPairs: " << endl;
@@ -255,19 +256,60 @@ int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hateful
         }
 #endif
     
-    return result;
+    return {result, vector<string>()};
 }
 #endif
 
-#if 0
-int solveOptimised()
+std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
 {
-    int result;
-    
-    return result;
+    // Only deals with Subtask 1, so far.
+    if (M == (N * (N - 1)) / 2)
+    {
+        int64_t minMoves = 1;
+        while ((1 << (minMoves)) <= M - 1)
+        {
+            minMoves++;
+        }
+        if (minMoves * N > 10'000'000)
+        {
+            return {-1, vector<string>()};
+        }
+        else
+        {
+            return {minMoves, vector<string>()};
+        }
+    }
+    else
+    {
+        return {-1, vector<string>()};
+    }
 }
-#endif
 
+
+const int maxThing = 1'000'000;
+vector<int64_t> blahLookup(maxThing + 1, -1);
+
+int64_t calcMinMoves(int64_t n)
+{
+    blahLookup[1] = 0;
+    blahLookup[0] = 0;
+
+    if (blahLookup[n] != -1)
+    {
+        return blahLookup[n];
+    }
+
+    int64_t minMoves = std::numeric_limits<int64_t>::max();
+    for (int i = 1; i <= n - 1; i++)
+    {
+        const int64_t num = 1 + max(calcMinMoves(i), calcMinMoves(n - i));
+        minMoves = min(minMoves, num);
+    }
+
+    blahLookup[n] = minMoves;
+    //cout << "calcMinMoves: " << n << " result: " << minMoves << endl;
+    return minMoves;
+};
 
 int main(int argc, char* argv[])
 {
@@ -288,7 +330,7 @@ int main(int argc, char* argv[])
             while (true)
             {
                 hatefulPairs.clear();
-                N = rand() % 16 + 1;
+                N = rand() % 10 + 1;
                 const int numSets = rand() % 5 + 1;
                 cerr << " Should be solvable in <= " << numSets << " moves" << endl;
                 for (int i = 0; i < numSets; i++)
@@ -313,7 +355,8 @@ int main(int argc, char* argv[])
                     }
 
                 }
-                if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
+                //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
+                if (!hatefulPairs.empty())
                     break;
                 cerr << "Generated degenerate testcase; retrying" << endl;
             }
@@ -344,6 +387,22 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+#if 0
+    for (int64_t blee = 2; blee <= 100'000; blee++)
+    {
+        const int64_t minMovesBlee = calcMinMoves(blee);
+        //cout << "minMoves: " << blee << " = " << minMovesBlee << endl;
+        int64_t exponent = 1;
+        while ((1 << (exponent)) <= blee - 1)
+        {
+            exponent++;
+        }
+
+        cout << "blee: " << blee << " minMovesBlee: " << minMovesBlee << " exponent: " << exponent << endl;
+    }
+    return 0;
+#endif
+
     const int N = read<int>();
     const int M = read<int>();
 
@@ -358,17 +417,17 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
 #if 1
     const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
-    cout << "solutionBruteForce: " << solutionBruteForce << endl;
+    cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
 #endif
 #if 0
-    const auto solutionOptimised = solveOptimised();
+    const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
     cout << "solutionOptimised:  " << solutionOptimised << endl;
 
     assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-    const auto solutionOptimised = solveOptimised();
-    cout << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
+    cout << solutionOptimised.first << endl;
 #endif
 
     assert(cin);
