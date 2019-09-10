@@ -218,33 +218,40 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
         const bool generateYes = ((rand() % 4) == 0);
-        const int N = rand() % 20 + 1;
 
         if (generateYes)
         {
-            const int numSets = rand() % 10 + 1;
             set<HatefulPair> hatefulPairs;
-            for (int i = 0; i < numSets; i++)
+            int N = -1;
+            while (true)
             {
-                vector<int> group1;
-                vector<int> group2;
-
-                for (int j = 0; j < N; j++)
+                N = rand() % 20 + 1;
+                const int numSets = rand() % 10 + 1;
+                for (int i = 0; i < numSets; i++)
                 {
-                    if (rand() % 2 == 0)
-                        group1.push_back(j);
-                    else
-                        group2.push_back(j);
-                }
+                    vector<int> group1;
+                    vector<int> group2;
 
-                for (const auto group1Person : group1)
-                {
-                    for (const auto group2Person : group2)
+                    for (int j = 0; j < N; j++)
                     {
-                        hatefulPairs.insert({group1Person, group2Person});
+                        if (rand() % 2 == 0)
+                            group1.push_back(j);
+                        else
+                            group2.push_back(j);
                     }
-                }
 
+                    for (const auto group1Person : group1)
+                    {
+                        for (const auto group2Person : group2)
+                        {
+                            hatefulPairs.insert({group1Person, group2Person});
+                        }
+                    }
+
+                }
+                if (hatefulPairs.size() != (N * (N - 1)) / 2)
+                    break;
+                cerr << "Generated degenerate testcase; retrying" << endl;
             }
             cout << N << " " << hatefulPairs.size() << endl;
             for (const auto& hatefulPair : hatefulPairs)
@@ -255,6 +262,7 @@ int main(int argc, char* argv[])
         }
         else
         {
+            const int N = rand() % 20 + 1;
             const int numPairsEstimate = rand() % 100 + 1;
             set<HatefulPair> hatefulPairs;
             for (int i = 0; i < numPairsEstimate; i++)
