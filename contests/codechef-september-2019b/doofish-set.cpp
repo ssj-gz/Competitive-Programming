@@ -414,7 +414,8 @@ int main(int argc, char* argv[])
             while (true)
             {
                 hatefulPairs.clear();
-                N = rand() % 19 + 1;
+                N = rand() % 27 + 1;
+#if 0
                 const int numSets = rand() % 5 + 1;
                 for (int i = 0; i < numSets; i++)
                 {
@@ -432,12 +433,20 @@ int main(int argc, char* argv[])
                     Subset(group1, group2).addToHatefulPairs(hatefulPairs);
 
                 }
+#endif
+                for (int i = 0; i < N; i++)
+                {
+                    for (int j = i + 1; j < N; j++)
+                    {
+                        hatefulPairs.insert({i, j});
+                    }
+                }
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
                 //if (!hatefulPairs.empty())
-                    //break;
+                //break;
                 if (hatefulPairs.size() == (N * (N - 1))/ 2)
                 {
-                    cerr << " Should be solvable in <= " << numSets << " moves" << endl;
+                    //cerr << " Should be solvable in <= " << numSets << " moves" << endl;
                     break;
                 }
                 cerr << "Generated degenerate testcase; retrying" << endl;
