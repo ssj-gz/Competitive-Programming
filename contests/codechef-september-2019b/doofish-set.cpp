@@ -150,8 +150,79 @@ int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hateful
     }
     vector<bool> includeSubset(usefulSubsets.size(), false);
     int result = -1;
-    while (true)
+
+    for (int numToChoose = 1; numToChoose <= usefulSubsets.size() && result == -1; numToChoose++)
     {
+        cout << "numToChoose: " << numToChoose << " usefulSubsets.size(): " << usefulSubsets.size() << endl;
+        vector<int> choices(numToChoose);
+        for (int i = 0; i < numToChoose; i++)
+        {
+            choices[i] = i;
+        }
+        while (true)
+        {
+            set<HatefulPair> generatedHatefulPairs;
+            vector<Subset> subsets;
+            for (int i = 0; i < numToChoose; i++)
+            {
+                subsets.push_back(usefulSubsets[choices[i]]);
+            }
+            for (const auto& subset : subsets)
+            {
+                for (const auto group1Person : subset.group1)
+                {
+                    for (const auto group2Person : subset.group2)
+                    {
+                        generatedHatefulPairs.insert({group1Person, group2Person});
+                    }
+                }
+            }
+            assert(subsets.size() == numToChoose);
+            if (generatedHatefulPairs == hatefulPairs)
+            {
+                cout << "Found: " << subsets.size() << endl;
+                for (const auto& subset : subsets)
+                {
+                    cout << " " << subset << endl;
+                }
+                result = subsets.size();
+                break;
+
+            }
+
+            //string chosen(usefulSubsets.size(), '.');
+            //for (int i = 0; i < numToChoose; i++)
+            //{
+            //chosen[choices[i]] = 'X';
+            //}
+            //cout << "chosen: " << endl;
+            //cout << " " << chosen << endl;
+
+#if 0
+            for (int index = 0; index < numToChoose; index++)
+            {
+                cout << " index: " << index << " choice: " << choices[index] << " usefulSubsets.size: " << usefulSubsets.size() << " blah: "  << (usefulSubsets.size() - 1 - (numToChoose - 1 - index)) << endl;
+            }
+#endif
+
+            int index = numToChoose - 1;
+            while (index >= 0 && choices[index] == usefulSubsets.size() - 1 - (numToChoose - 1 - index))
+            {
+                index--;
+            }
+            if (index < 0)
+                break;
+            int nextChoice = choices[index] + 1;
+            for (int i = index; i < numToChoose; i++)
+            {
+                choices[i] = nextChoice;
+                nextChoice++;
+            }
+
+        }
+    }
+#if 0
+        for (int numToChoose
         set<HatefulPair> generatedHatefulPairs;
         vector<Subset> subsets;
         for (int i = 0; i < usefulSubsets.size(); i++)
@@ -182,17 +253,7 @@ int solveBruteForce(const int N, const int M, const vector<HatefulPair>& hateful
             }
 
         }
-        int index = 0;
-        while (index < usefulSubsets.size() && includeSubset[index])
-        {
-            includeSubset[index] = false;
-            index++;
-        }
-        if (index == usefulSubsets.size())
-            break;
-
-        includeSubset[index] = true;
-    }
+#endif
     
     return result;
 }
@@ -226,7 +287,7 @@ int main(int argc, char* argv[])
             while (true)
             {
                 N = rand() % 20 + 1;
-                const int numSets = rand() % 10 + 1;
+                const int numSets = rand() % 5 + 1;
                 for (int i = 0; i < numSets; i++)
                 {
                     vector<int> group1;
