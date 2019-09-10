@@ -217,6 +217,56 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
+        const bool generateYes = ((rand() % 4) == 0);
+        const int N = rand() % 20 + 1;
+
+        if (generateYes)
+        {
+            const int numSets = rand() % 10 + 1;
+            set<HatefulPair> hatefulPairs;
+            for (int i = 0; i < numSets; i++)
+            {
+                vector<int> group1;
+                vector<int> group2;
+
+                for (int j = 0; j < N; j++)
+                {
+                    if (rand() % 2 == 0)
+                        group1.push_back(i);
+                    else
+                        group2.push_back(i);
+                }
+
+                for (const auto group1Person : group1)
+                {
+                    for (const auto group2Person : group2)
+                    {
+                        hatefulPairs.insert({group1Person, group2Person});
+                    }
+                }
+
+                cout << N << " " << hatefulPairs.size() << endl;
+                for (const auto& hatefulPair : hatefulPairs)
+                {
+                    cout << (hatefulPair.person1 + 1) << " " << (hatefulPair.person2 + 1) << endl;
+                }
+            }
+
+        }
+        else
+        {
+            const int numPairsEstimate = rand() % 100 + 1;
+            set<HatefulPair> hatefulPairs;
+            for (int i = 0; i < numPairsEstimate; i++)
+            {
+                hatefulPairs.insert({rand() % N + 1, rand() % N + 1});
+            }
+            cout << N << " " << hatefulPairs.size() << endl;
+            for (const auto& hatefulPair : hatefulPairs)
+            {
+                cout << hatefulPair.person1 << " " << hatefulPair.person2 << endl;
+            }
+        }
 
 
         return 0;
