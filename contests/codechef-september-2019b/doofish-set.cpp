@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
 // This submission is for Subtask #1 only!
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <map>
 #include <limits>
 
 #include <cassert>
@@ -102,9 +103,21 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
     cout << "hatefulPairs: " << endl;
+    vector<vector<int>> hatedBy(N);
     for (const auto& hatefulPair : hatefulPairs)
     {
         cout << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
+        hatedBy[hatefulPair.person1].push_back(hatefulPair.person2);
+        hatedBy[hatefulPair.person2].push_back(hatefulPair.person1);
+    }
+    for (int i = 0; i < N; i++)
+    {
+        cout << "Person " << i << " hates: " << endl;
+        for (const auto x : hatedBy[i])
+        {
+            cout << " " << x;
+        }
+        cout << endl;
     }
 
     vector<Subset> usefulSubsets;
@@ -160,6 +173,16 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
             includeInSubset[index] = true;
         }
     }
+
+    sort(usefulSubsets.begin(), usefulSubsets.end(), [](const auto& lhs, const auto& rhs)
+            {
+                if (lhs.group1.size() * lhs.group2.size() != rhs.group1.size() * rhs.group2.size())
+                    return (lhs.group1.size() * lhs.group2.size() > rhs.group1.size() * rhs.group2.size());
+                if (lhs.group1 != rhs.group1)
+                    return lhs.group1 < rhs.group1;
+                return lhs.group2 < rhs.group2;
+            });
+
     vector<bool> includeSubset(usefulSubsets.size(), false);
     int result = -1;
 
@@ -428,28 +451,70 @@ int main(int argc, char* argv[])
             while (true)
             {
                 hatefulPairs.clear();
-                N = rand() % 100'000 + 1;
-                //N = rand() % 10 + 1;
+                //N = rand() % 100'000 + 1;
+                //N = rand() % 15 + 1;
+                N = 100;
                 cerr << "N: " << N << endl;
-#if 0
-                const int numSets = rand() % 5 + 1;
+#if 1
+                const int numSets = rand() % 5 + 2;
+                cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
                 {
+                    const int numInGroup1 = rand() % N;
+                    vector<int> allNumbers;
+                    for (int i = 0; i < N; i++)
+                    {
+                        allNumbers.push_back(i);
+                    }
+                    random_shuffle(allNumbers.begin(), allNumbers.end());
+
                     vector<int> group1;
                     vector<int> group2;
 
                     for (int j = 0; j < N; j++)
                     {
-                        if (rand() % 2 == 0)
-                            group1.push_back(j);
-                        else
+                        if (j >= numInGroup1)
+                        {
                             group2.push_back(j);
+                        }
+                        else
+                        {
+                            group1.push_back(j);
+                        }
                     }
 
                     Subset(group1, group2).addToHatefulPairs(hatefulPairs);
-
                 }
-#endif
+
+                vector<vector<int>> hatedBy(N);
+                for (const auto& hatefulPair : hatefulPairs)
+                {
+                    //cerr << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
+                    hatedBy[hatefulPair.person1].push_back(hatefulPair.person2);
+                    hatedBy[hatefulPair.person2].push_back(hatefulPair.person1);
+                }
+                map<int, int> hateHistogram;
+                for (int i = 0; i < N; i++)
+                {
+                    hateHistogram[hatedBy[i].size()]++;
+                }
+                for (const auto& blah : hateHistogram)
+                {
+                    cerr << blah.second << " people hate " << blah.first << " people" << endl;
+                }
+                for (int i = 0; i < N; i++)
+                {
+                    cerr << "Person " << i << " hates " << hatedBy[i].size() << " people:"  << endl;
+                    for (const auto x : hatedBy[i])
+                    {
+                        cerr << " " << x;
+                    }
+                    cerr << endl;
+                }
+
+                //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
+                    //break;
+#if 0
                 if ((N * (N - 1)) / 2 <= 100'000)
                 {
                     for (int i = 0; i < N; i++)
@@ -461,16 +526,36 @@ int main(int argc, char* argv[])
                     }
 
                 }
+#endif
+                //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1))/ 4)
+                if (!hatefulPairs.empty() && hatefulPairs.size() < 5 * N)
+                {
+                    cerr << "done: N: " << N << " M: " << hatefulPairs.size() << endl;
+                    break;
+                }
+#else
+                hatefulPairs.clear();
+                for (int i = 0; i <= 3; i++)
+                {
+                    for (int j = 0; j < N; j++)
+                    {
+                        if (i != j)
+                            hatefulPairs.insert({i, j});
+                    }
+                }
+                break;
+#endif
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1)) / 2 - 10)
                 //if (!hatefulPairs.empty())
                 //break;
-                if (hatefulPairs.size() == (N * (N - 1))/ 2)
-                {
-                    //cerr << " Should be solvable in <= " << numSets << " moves" << endl;
-                    break;
-                }
+                //if (hatefulPairs.size() == (N * (N - 1))/ 2)
+                //{
+                //cerr << " Should be solvable in <= " << numSets << " moves" << endl;
+                //break;
+                //}
                 cerr << "Generated degenerate testcase; retrying" << endl;
             }
+            //assert(N > 0);
             cout << N << " " << hatefulPairs.size() << endl;
             for (const auto& hatefulPair : hatefulPairs)
             {
