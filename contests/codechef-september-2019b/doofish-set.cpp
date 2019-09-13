@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
 // This submission is for Subtask #1 only!
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -288,6 +288,106 @@ std::pair<int, vector<string>> solveUltraBruteForce(const int N, const int M, co
 }
 #endif
 
+std::pair<int, vector<string>> solveBruteForce(const vector<HatefulPair>& hatefulPairsList)
+{
+    if (hatefulPairsList.empty())
+    {
+        return {0, vector<string>()};
+    }
+    set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
+
+    vector<int> people;
+    for (const auto& pair : hatefulPairs)
+    {
+        people.push_back(pair.person1);
+        people.push_back(pair.person2);
+    }
+    sort(people.begin(), people.end());
+    people.erase(unique(people.begin(), people.end()), people.end());
+
+    std::pair<int, vector<string>> result = { std::numeric_limits<int>::max(), vector<string>()};
+    vector<bool> putPersonInGroup1(people.size(), false);
+    while (true)
+    {
+        vector<int> group1;
+        vector<int> group2;
+        for (int i = 0; i < people.size(); i++)
+        {
+            if (putPersonInGroup1[i])
+                group1.push_back(i);
+            else
+                group2.push_back(i);
+        }
+        Subset subset(group1, group2);
+        bool validSubset = true;
+        for (const auto& generatedHatefulPair : subset.generatedHatefulPairs())
+        {
+            if (hatefulPairs.find(generatedHatefulPair) == hatefulPairs.end())
+            {
+                validSubset = false;
+                break;
+            }
+        }
+        if (group1.empty() || group2.empty())
+        {
+            validSubset = false;
+        }
+        if (validSubset)
+        {
+            vector<HatefulPair> hatefulPairsGroup1;
+            {
+                for (const auto& hatefulPair : hatefulPairs)
+                {
+                    if (find(group1.begin(), group1.end(), hatefulPair.person1) != group1.end() && 
+                            find(group1.begin(), group1.end(), hatefulPair.person2) != group1.end() )
+                    {
+                        hatefulPairsGroup1.push_back(hatefulPair);
+                    }
+                }
+            }
+            vector<HatefulPair> hatefulPairsGroup2;
+            {
+                for (const auto& hatefulPair : hatefulPairs)
+                {
+                    if (find(group2.begin(), group2.end(), hatefulPair.person1) != group2.end() && 
+                            find(group2.begin(), group2.end(), hatefulPair.person2) != group2.end() )
+                    {
+                        hatefulPairsGroup2.push_back(hatefulPair);
+                    }
+                }
+            }
+            const auto solutionGroup1 = solveBruteForce(hatefulPairsGroup1);
+            const auto solutionGroup2 = solveBruteForce(hatefulPairsGroup2);
+            if (solutionGroup1.first != -1 && solutionGroup1.first != -1)
+            {
+                result.first = min(result.first, 1 + max(solutionGroup1.first, solutionGroup2.first));
+            }
+        }
+        int index = 0;
+        while (index < putPersonInGroup1.size() && putPersonInGroup1[index])
+        {
+            putPersonInGroup1[index] = false;
+            index++;
+        }
+        if (index == putPersonInGroup1.size())
+            break;
+
+        putPersonInGroup1[index] = true;
+        
+    };
+
+    if (result.first == numeric_limits<int>::max())
+        result.first = -1;
+
+    return result;
+};
+
+std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
+{
+    std::pair<int, vector<string>> result = solveBruteForce(hatefulPairsList);;
+    return result;
+}
+
 std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
 {
     for (const auto& hatefulPair : hatefulPairsList)
@@ -441,8 +541,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const bool generateYes = ((rand() % 4) == 0);
-        const bool generateYes = true;
+        const bool generateYes = ((rand() % 4) == 0);
+        //const bool generateYes = true;
 
         if (generateYes)
         {
@@ -452,11 +552,11 @@ int main(int argc, char* argv[])
             {
                 hatefulPairs.clear();
                 //N = rand() % 100'000 + 1;
-                N = rand() % 40 + 1;
+                N = rand() % 10 + 1;
                 //N = 7;
                 cerr << "N: " << N << endl;
 #if 1
-#if 0
+#if 1
                 const int numSets = rand() % 5 + 2;
                 cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
@@ -486,6 +586,7 @@ int main(int argc, char* argv[])
 
                     Subset(group1, group2).addToHatefulPairs(hatefulPairs);
                 }
+                break;
 #endif
                 //Subset({0, 1, 2}, {3, 4, 5, 6}).addToHatefulPairs(hatefulPairs);
                 //Subset({2,3 }, {0, 1, 4, 5, 6}).addToHatefulPairs(hatefulPairs);
@@ -494,6 +595,7 @@ int main(int argc, char* argv[])
                 //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
                     //break;
 #if 1
+#if 0
                 if ((N * (N - 1)) / 2 <= 100'000)
                 {
                     for (int i = 0; i < N; i++)
@@ -506,6 +608,7 @@ int main(int argc, char* argv[])
 
                 }
                 break;
+#endif
 #endif
                 vector<vector<int>> hatedBy(N);
                 for (const auto& hatefulPair : hatefulPairs)
@@ -533,11 +636,13 @@ int main(int argc, char* argv[])
                     cerr << endl;
                 }
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1))/ 4)
+#if 0
                 if (!hatefulPairs.empty() && hatefulPairs.size() < 5 * N)
                 {
                     cerr << "done: N: " << N << " M: " << hatefulPairs.size() << endl;
                     break;
                 }
+#endif
 #else
                 hatefulPairs.clear();
                 for (int i = 0; i <= 3; i++)
@@ -558,7 +663,7 @@ int main(int argc, char* argv[])
                 //cerr << " Should be solvable in <= " << numSets << " moves" << endl;
                 //break;
                 //}
-                cerr << "Generated degenerate testcase; retrying" << endl;
+                //cerr << "Generated degenerate testcase; retrying" << endl;
             }
             //assert(N > 0);
             cout << N << " " << hatefulPairs.size() << endl;
@@ -619,6 +724,9 @@ int main(int argc, char* argv[])
 #if 1
     const auto solutionUltraBruteForce = solveUltraBruteForce(N, M, hatefulPairs);
     cout << "solutionUltraBruteForce: " << solutionUltraBruteForce.first << endl;
+
+    const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
+    cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
 #endif
 #if 0
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
