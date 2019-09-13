@@ -358,9 +358,17 @@ std::pair<int, vector<string>> solveBruteForce(const vector<HatefulPair>& hatefu
             }
             const auto solutionGroup1 = solveBruteForce(hatefulPairsGroup1);
             const auto solutionGroup2 = solveBruteForce(hatefulPairsGroup2);
-            if (solutionGroup1.first != -1 && solutionGroup1.first != -1)
+            if (solutionGroup1.first != -1 && solutionGroup2.first != -1)
             {
-                result.first = min(result.first, 1 + max(solutionGroup1.first, solutionGroup2.first));
+                cout << " found solution with subset: " << subset  << endl;
+                //const int toAdd = (hatefulPairsGroup1.empty() ^ hatefulPairsGroup2.empty()) ? 0 : 1;
+                const int toAdd = ((solutionGroup1.first == 0 && solutionGroup2.first == 0) ||
+                    (hatefulPairsGroup1.size() == (group1.size() * (group1.size() - 1) / 2)) ||
+                    (hatefulPairsGroup2.size() == (group2.size() * (group2.size() - 1) / 2))) ? 1 : 0;
+                                    
+                //const int toAdd = 1;
+                cout << " solutionGroup1: " << solutionGroup1.first << " solutionGroup2: " << solutionGroup2.first << " toAdd: " << toAdd << endl;
+                result.first = min(result.first, toAdd + max(solutionGroup1.first, solutionGroup2.first));
             }
         }
         int index = 0;
@@ -541,8 +549,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const bool generateYes = ((rand() % 4) == 0);
-        //const bool generateYes = true;
+        //const bool generateYes = ((rand() % 4) == 0);
+        const bool generateYes = true;
 
         if (generateYes)
         {
@@ -556,7 +564,7 @@ int main(int argc, char* argv[])
                 //N = 7;
                 cerr << "N: " << N << endl;
 #if 1
-#if 1
+#if 0
                 const int numSets = rand() % 5 + 2;
                 cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
@@ -595,8 +603,8 @@ int main(int argc, char* argv[])
                 //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
                     //break;
 #if 1
-#if 0
-                if ((N * (N - 1)) / 2 <= 100'000)
+#if 1
+                //if ((N * (N - 1)) / 2 <= 100'000)
                 {
                     for (int i = 0; i < N; i++)
                     {
@@ -607,6 +615,7 @@ int main(int argc, char* argv[])
                     }
 
                 }
+                cerr << "Blah!" << endl;
                 break;
 #endif
 #endif
@@ -727,6 +736,7 @@ int main(int argc, char* argv[])
 
     const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
     cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
+    assert(solutionBruteForce == solutionUltraBruteForce);
 #endif
 #if 0
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
