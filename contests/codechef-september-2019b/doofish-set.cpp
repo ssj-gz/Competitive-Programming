@@ -99,7 +99,7 @@ ostream& operator<<(ostream& os, const Subset& subset)
 }
 
 #if 1
-std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
+std::pair<int, vector<string>> solveUltraBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
     cout << "hatefulPairs: " << endl;
@@ -617,8 +617,8 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
 #if 1
-    const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
-    cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
+    const auto solutionUltraBruteForce = solveUltraBruteForce(N, M, hatefulPairs);
+    cout << "solutionUltraBruteForce: " << solutionUltraBruteForce.first << endl;
 #endif
 #if 0
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
