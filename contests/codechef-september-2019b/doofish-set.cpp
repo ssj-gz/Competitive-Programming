@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
 // This submission is for Subtask #1 only!
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -452,10 +452,11 @@ int main(int argc, char* argv[])
             {
                 hatefulPairs.clear();
                 //N = rand() % 100'000 + 1;
-                //N = rand() % 15 + 1;
-                N = 100;
+                N = rand() % 40 + 1;
+                //N = 7;
                 cerr << "N: " << N << endl;
 #if 1
+#if 0
                 const int numSets = rand() % 5 + 2;
                 cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
@@ -485,7 +486,27 @@ int main(int argc, char* argv[])
 
                     Subset(group1, group2).addToHatefulPairs(hatefulPairs);
                 }
+#endif
+                //Subset({0, 1, 2}, {3, 4, 5, 6}).addToHatefulPairs(hatefulPairs);
+                //Subset({2,3 }, {0, 1, 4, 5, 6}).addToHatefulPairs(hatefulPairs);
 
+
+                //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
+                    //break;
+#if 1
+                if ((N * (N - 1)) / 2 <= 100'000)
+                {
+                    for (int i = 0; i < N; i++)
+                    {
+                        for (int j = i + 1; j < N; j++)
+                        {
+                            hatefulPairs.insert({i, j});
+                        }
+                    }
+
+                }
+                break;
+#endif
                 vector<vector<int>> hatedBy(N);
                 for (const auto& hatefulPair : hatefulPairs)
                 {
@@ -511,22 +532,6 @@ int main(int argc, char* argv[])
                     }
                     cerr << endl;
                 }
-
-                //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
-                    //break;
-#if 0
-                if ((N * (N - 1)) / 2 <= 100'000)
-                {
-                    for (int i = 0; i < N; i++)
-                    {
-                        for (int j = i + 1; j < N; j++)
-                        {
-                            hatefulPairs.insert({i, j});
-                        }
-                    }
-
-                }
-#endif
                 //if (!hatefulPairs.empty() && hatefulPairs.size() < (N * (N - 1))/ 4)
                 if (!hatefulPairs.empty() && hatefulPairs.size() < 5 * N)
                 {
