@@ -538,6 +538,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy, &indent](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup)
     {
+        cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2");
         assert(destSubsetGroup != Unknown);
         assert(!allPeople.empty());
         vector<int> toProcess = { initialPerson };
@@ -552,9 +553,10 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
             for (const auto& toProcess : toProcess)
             {
-                vector<int> toErase;
+                cout << indent << "  processing: " << toProcess << endl;
                 for (const auto& remainingPerson : remainingPeople)
                 {
+                    cout << indent << "   comparing with remainingPerson: " << remainingPerson << endl;
                     if (find(hatedBy[toProcess].begin(), hatedBy[toProcess].end(), remainingPerson) == hatedBy[toProcess].end())
                     {
                         if (forcedGroupForPerson[remainingPerson] != Unknown)
@@ -564,12 +566,11 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                             return false;
                         }
                         destSubset.push_back(remainingPerson);
-                        toErase.push_back(remainingPerson);
                         nextToProcess.push_back(remainingPerson);
                         forcedGroupForPerson[remainingPerson] = destSubsetGroup;
                     }
                 }
-                for (const auto person : toErase)
+                for (const auto person : nextToProcess)
                 {
                     remainingPeople.erase(person);
                 }
@@ -632,12 +633,15 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     for (const auto remainingPerson : remainingPeople)
     {
+        assert(forcedGroupForPerson[remainingPerson] == Unknown);
         for (const auto personInGroup1 : forcedGroup1)
         {
+            cout << indent << " verifying forcedGroup1: " << personInGroup1 << " should hate " << remainingPerson << endl;
             assert(hatefulPairs.find({personInGroup1, remainingPerson}) != hatefulPairs.end());
         }
         for (const auto personInGroup2 : forcedGroup2)
         {
+            cout << indent << " verifying forcedGroup2: " << personInGroup2 << " should hate " << remainingPerson << endl;
             assert(hatefulPairs.find({personInGroup2, remainingPerson}) != hatefulPairs.end());
         }
         auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + "   ");
