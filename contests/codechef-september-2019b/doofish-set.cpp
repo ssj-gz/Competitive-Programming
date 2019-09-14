@@ -537,6 +537,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                         if (forcedGroupForPerson[remainingPerson] != Unknown)
                         {
                             // Conflict - can't be a solution.
+                            cout << "Got a clash for " << remainingPerson << " via " << toProcess << endl;
                             return false;
                         }
                         destSubset.push_back(remainingPerson);
@@ -551,6 +552,31 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         }
         return true;
     };
+
+    HatefulPair mostPromising = {-1, -1};
+    int64_t mostPromisingValue = -1;
+    for (const auto& hatefulPair : hatefulPairs)
+    {
+        // Heuristic - we can really pick any pair as the "most promising",
+        // but I suspect this way is a little more efficient.
+        const int notHatedByPerson1 = N - hatedBy[hatefulPair.person1].size();
+        const int notHatedByPerson2 = N - hatedBy[hatefulPair.person2].size();
+        const int64_t value = notHatedByPerson1 * notHatedByPerson2 + notHatedByPerson1 + notHatedByPerson2;
+        if (value > mostPromisingValue)
+        {
+            mostPromisingValue =  value;
+            mostPromising = hatefulPair;
+        }
+    }
+
+    vector<int> forcedGroup1;
+    fillWithPeopleForcedSameSubset(people, forcedGroup1, mostPromising.person1, Group1);
+    vector<int> forcedGroup2;
+    if (!fillWithPeopleForcedSameSubset(people, forcedGroup2, mostPromising.person2, Group2))
+    {
+        return NoSolution;
+    }
+
 
     return NoSolution;
 }
