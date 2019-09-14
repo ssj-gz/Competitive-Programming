@@ -4,9 +4,11 @@
 //
 // Giving up XD
 #define SUBMISSION
+#define VERIFY_STUFF
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
+#undef VERIFY_STUFF
 //#define NDEBUG
 #endif
 #include <iostream>
@@ -21,6 +23,8 @@
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
+
+int numExperiments = 0;
 
 template <typename T>
 T read()
@@ -555,12 +559,13 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         // TODO - optimise this!
         for (const auto person : people)
         {
-            if (find(forcedGroup1.begin(), forcedGroup1.end(), person) != forcedGroup1.end() ||
+            if (find(forcedGroup1.begin(), forcedGroup1.end(), person) != forcedGroup1.end() || // TODO - we can probably get away without this!
                 find(forcedGroup2.begin(), forcedGroup2.end(), person) != forcedGroup2.end())
             {
                 continue;
             }
             //cout << indent << "  working out where to place unassigned person: " << person << endl;
+#ifdef VERIFY_STUFF
             assert(forcedGroupForPerson[person] == Unknown);
             for (const auto personInGroup1 : forcedGroup1)
             {
@@ -572,6 +577,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 //cout << indent << " verifying forcedGroup2: " << personInGroup2 << " should hate " << person << endl;
                 assert(hatefulPairs.find({personInGroup2, person}) != hatefulPairs.end());
             }
+#endif
 #if 0
             auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + "   ");
             auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2, indent + "   ");
@@ -596,19 +602,23 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 #endif
             int resultIfPutIn1 = -1;
             {
+                numExperiments++;
                 vector<int> forcedGroup1Copy = forcedGroup1;
                 vector<HatefulPair> hatefulPairsForcedGroup1Copy = hatefulPairsForcedGroup1;
                 auto forcedGroupForPersonCopy = forcedGroupForPerson;
                 fillWithPeopleForcedSameSubset(people, forcedGroup1Copy, person, Group1, hatefulPairsForcedGroup1Copy, forcedGroupForPersonCopy);
                 resultIfPutIn1 = solveOptimisedAux(forcedGroup1Copy.size(), hatefulPairsForcedGroup1Copy, indent + "   ").first;
+                cout << indent << " Experiment 1 with " << forcedGroup1Copy.size() << " elements and " << hatefulPairsForcedGroup1Copy.size() << " pairs: " << resultIfPutIn1 << endl;
             }
             int resultIfPutIn2 = -1;
             {
+                numExperiments++;
                 vector<int> forcedGroup2Copy = forcedGroup2;
                 vector<HatefulPair> hatefulPairsForcedGroup2Copy = hatefulPairsForcedGroup2;
                 auto forcedGroupForPersonCopy = forcedGroupForPerson;
                 fillWithPeopleForcedSameSubset(people, forcedGroup2Copy, person, Group2, hatefulPairsForcedGroup2Copy, forcedGroupForPersonCopy);
                 resultIfPutIn2 = solveOptimisedAux(forcedGroup2Copy.size(), hatefulPairsForcedGroup2Copy, indent + "   ").first;
+                cout << indent << " Experiment 2 with " << forcedGroup2Copy.size() << " elements and " << hatefulPairsForcedGroup2Copy.size() << " pairs: " << resultIfPutIn2 << endl;
             }
 
             //cout << indent << "resultIfPutIn1: " << resultIfPutIn1 << " resultIfPutIn2: " << resultIfPutIn2 << endl;
@@ -637,6 +647,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         }
     }
 
+#ifdef VERIFY_STUFF
     for (const auto personGroup1 : forcedGroup1)
     {
         for (const auto personGroup2 : forcedGroup2)
@@ -644,6 +655,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             assert(hatefulPairs.find({personGroup1, personGroup2}) != hatefulPairs.end());
         }
     }
+#endif
 
 
     auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + "   ");
@@ -1064,6 +1076,8 @@ int main(int argc, char* argv[])
 #endif
     verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
+    cout << numExperiments << endl;
+
 
     assert(cin);
 }
