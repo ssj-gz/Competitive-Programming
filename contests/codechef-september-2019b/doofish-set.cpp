@@ -100,7 +100,7 @@ ostream& operator<<(ostream& os, const Subset& subset)
 }
 
 #if 1
-std::pair<int, vector<string>> solveUltraBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
+std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
     cout << "hatefulPairs: " << endl;
@@ -289,117 +289,6 @@ std::pair<int, vector<string>> solveUltraBruteForce(const int N, const int M, co
 }
 #endif
 
-std::pair<int, vector<string>> solveBruteForce(const vector<HatefulPair>& hatefulPairsList)
-{
-    // XXX - this is hopefully broken - use solveUltraBruteForce instead!
-    if (hatefulPairsList.empty())
-    {
-        return {0, vector<string>()};
-    }
-    set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
-
-    vector<int> people;
-    for (const auto& pair : hatefulPairs)
-    {
-        people.push_back(pair.person1);
-        people.push_back(pair.person2);
-    }
-    sort(people.begin(), people.end());
-    people.erase(unique(people.begin(), people.end()), people.end());
-
-    std::pair<int, vector<string>> result = { std::numeric_limits<int>::max(), vector<string>()};
-    vector<bool> putPersonInGroup1(people.size(), false);
-    while (true)
-    {
-        vector<int> group1;
-        vector<int> group2;
-        for (int i = 0; i < people.size(); i++)
-        {
-            if (putPersonInGroup1[i])
-                group1.push_back(i);
-            else
-                group2.push_back(i);
-        }
-        Subset subset(group1, group2);
-        bool validSubset = true;
-        for (const auto& generatedHatefulPair : subset.generatedHatefulPairs())
-        {
-            if (hatefulPairs.find(generatedHatefulPair) == hatefulPairs.end())
-            {
-                validSubset = false;
-                break;
-            }
-        }
-        if (group1.empty() || group2.empty())
-        {
-            validSubset = false;
-        }
-        if (validSubset)
-        {
-            vector<HatefulPair> hatefulPairsGroup1;
-            {
-                for (const auto& hatefulPair : hatefulPairs)
-                {
-                    if (find(group1.begin(), group1.end(), hatefulPair.person1) != group1.end() && 
-                            find(group1.begin(), group1.end(), hatefulPair.person2) != group1.end() )
-                    {
-                        hatefulPairsGroup1.push_back(hatefulPair);
-                    }
-                }
-            }
-            vector<HatefulPair> hatefulPairsGroup2;
-            {
-                for (const auto& hatefulPair : hatefulPairs)
-                {
-                    if (find(group2.begin(), group2.end(), hatefulPair.person1) != group2.end() && 
-                            find(group2.begin(), group2.end(), hatefulPair.person2) != group2.end() )
-                    {
-                        hatefulPairsGroup2.push_back(hatefulPair);
-                    }
-                }
-            }
-            const auto solutionGroup1 = solveBruteForce(hatefulPairsGroup1);
-            const auto solutionGroup2 = solveBruteForce(hatefulPairsGroup2);
-            if (solutionGroup1.first != -1 && solutionGroup2.first != -1)
-            {
-                cout << " found solution with subset: " << subset  << endl;
-                //const int toAdd = (hatefulPairsGroup1.empty() ^ hatefulPairsGroup2.empty()) ? 0 : 1;
-                //const int toAdd = ((solutionGroup1.first == 0 && solutionGroup2.first == 0) ||
-                    //(hatefulPairsGroup1.size() == (group1.size() * (group1.size() - 1) / 2)) ||
-                    //(hatefulPairsGroup2.size() == (group2.size() * (group2.size() - 1) / 2))) ? 1 : 0;
-                const int toAdd = ((solutionGroup1.first <= 1 && solutionGroup2.first <= 1) ||
-                    (hatefulPairsGroup1.size() == (group1.size() * (group1.size() - 1) / 2)) ||
-                    (hatefulPairsGroup2.size() == (group2.size() * (group2.size() - 1) / 2))) ? 1 : 0;
-                                    
-                //const int toAdd = 1;
-                cout << " solutionGroup1: " << solutionGroup1.first << " solutionGroup2: " << solutionGroup2.first << " toAdd: " << toAdd << endl;
-                result.first = min(result.first, toAdd + max(solutionGroup1.first, solutionGroup2.first));
-            }
-        }
-        int index = 0;
-        while (index < putPersonInGroup1.size() && putPersonInGroup1[index])
-        {
-            putPersonInGroup1[index] = false;
-            index++;
-        }
-        if (index == putPersonInGroup1.size())
-            break;
-
-        putPersonInGroup1[index] = true;
-        
-    };
-
-    if (result.first == numeric_limits<int>::max())
-        result.first = -1;
-
-    return result;
-};
-
-std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const vector<HatefulPair>& hatefulPairsList)
-{
-    std::pair<int, vector<string>> result = solveBruteForce(hatefulPairsList);;
-    return result;
-}
 
 const std::pair<int, vector<string>> NoSolutionStr = {-1, vector<string>()};
 const std::pair<int, vector<Subset>> NoSolution= {-1, vector<Subset>()};
@@ -407,7 +296,7 @@ const std::pair<int, vector<Subset>> NoSolution= {-1, vector<Subset>()};
 std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList, string indent)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
-    //cout << indent + "solveOptimisedAux - N: " << N << endl;
+    cout << indent + "solveOptimisedAux - N: " << N << endl;
 
     if (hatefulPairsList.empty())
     {
@@ -439,7 +328,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     if (people.size() != N)
     {
-        //cout << indent << "N was " << N << " but matches only generate " << people.size() << endl;
+        cout << indent << "N was " << N << " but matches only generate " << people.size() << endl;
         return NoSolution;
     }
 
@@ -448,6 +337,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     {
         // Mainly implemented for Subtask #1, though will doubtless pop up
         // in other subtasks.
+        cout << "Special case" << endl;
         if (N == 1)
             return NoSolution;
         int64_t minMoves = 1;
@@ -531,18 +421,18 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         forcedGroupForPerson[person] = Unknown;
     }
 
-    map<int, vector<int>> hatedBy;
+    map<int, set<int>> hatedBy;
     for (const auto& hatefulPair : hatefulPairs)
     {
         //cout << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
-        hatedBy[hatefulPair.person1].push_back(hatefulPair.person2);
-        hatedBy[hatefulPair.person2].push_back(hatefulPair.person1);
+        hatedBy[hatefulPair.person1].insert(hatefulPair.person2);
+        hatedBy[hatefulPair.person2].insert(hatefulPair.person1);
     }
 
-    auto fillWithPeopleForcedSameSubset = [&hatedBy, &indent, &hatefulPairs](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup, std::map<int, Group>& forcedGroupForPerson)
+    auto fillWithPeopleForcedSameSubset = [&hatedBy, &indent, &hatefulPairs, N](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup, std::map<int, Group>& forcedGroupForPerson)
     {
         // TODO - optimise this!
-        //cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2") << endl;
+        cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2") << endl;
         assert(destSubsetGroup != Unknown);
         assert(!allPeople.empty());
         vector<int> toProcess = { initialPerson };
@@ -565,13 +455,13 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
             for (const auto& toProcess : toProcess)
             {
-                //cout << indent << "  processing: " << toProcess << endl;
+                //cout << indent << "  processing: " << toProcess << " N: " << N << " #hatedBy: " << hatedBy[toProcess].size() << " destSubset size: " << destSubset.size() << endl;
                 for (const auto& remainingPerson : allPeople)
                 {
                     if (find(destSubset.begin(), destSubset.end(), remainingPerson) != destSubset.end())
                         continue;
                     //cout << indent << "   comparing with remainingPerson: " << remainingPerson << endl;
-                    if (find(hatedBy[toProcess].begin(), hatedBy[toProcess].end(), remainingPerson) == hatedBy[toProcess].end())
+                    if (hatedBy[toProcess].find(remainingPerson) == hatedBy[toProcess].end())
                     {
                         if (forcedGroupForPerson[remainingPerson] != Unknown)
                         {
@@ -680,6 +570,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 //cout << indent << " verifying forcedGroup2: " << personInGroup2 << " should hate " << person << endl;
                 assert(hatefulPairs.find({personInGroup2, person}) != hatefulPairs.end());
             }
+#if 0
             auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + "   ");
             auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2, indent + "   ");
             if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
@@ -688,6 +579,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 //cout << indent << "One of the subsets failed while adding remaining people" << endl;
                 return NoSolution;
             }
+#endif
 #if 0
             cout << indent << " forcedGroup1 result " << resultForceGroup1.first << endl;
             for (const auto x : forcedGroup1)
@@ -909,7 +801,7 @@ void verifySolution(const set<HatefulPair>& hatefulPairs, const vector<string>& 
 
         Subset(group1, group2).addToHatefulPairs(generatedHatefulPairs);
     }
-#if 1
+#if 0
     cout << "Expected HatefulPairs: " << endl;
     for (const auto& hatefulPair : hatefulPairs)
     {
@@ -945,13 +837,13 @@ int main(int argc, char* argv[])
             {
                 hatefulPairs.clear();
                 //N = rand() % 100'000 + 1;
-                N = rand() % 10 + 2;
+                N = rand() % 1000 + 2;
                 //N = 7;
                 //cerr << "N: " << N << endl;
 #if 1
 #if 1
-                const int numSets = rand() % 8 + 1;
-                cerr << "numSets: " << numSets << endl;
+                const int numSets = rand() % 50 + 1;
+                //cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
                 {
                     const int numInGroup1 = (rand() % (N - 1)) + 1;
@@ -1135,8 +1027,8 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
 #if 1
-    const auto solutionUltraBruteForce = solveUltraBruteForce(N, M, hatefulPairs);
-    cout << "solutionUltraBruteForce: " << solutionUltraBruteForce.first << endl;
+    const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
+    cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
 
     //const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
     //cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
@@ -1146,22 +1038,26 @@ int main(int argc, char* argv[])
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
     cout << "solutionOptimised:  " << solutionOptimised.first << endl;
 
+#if 1
     for (const auto x : solutionOptimised.second)
     {
         cout << " " << x << endl;
     }
+#endif
 
-    assert(solutionOptimised.first == solutionUltraBruteForce.first);
+    assert(solutionOptimised.first == solutionBruteForce.first);
     verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 #else
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
     cout << solutionOptimised.first << endl;
+#if 0
     for (const auto& subsetString : solutionOptimised.second)
     {
         cout << subsetString << endl;
     }
-//    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
+#endif
+    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 
     assert(cin);
