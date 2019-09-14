@@ -290,6 +290,7 @@ std::pair<int, vector<string>> solveUltraBruteForce(const int N, const int M, co
 
 std::pair<int, vector<string>> solveBruteForce(const vector<HatefulPair>& hatefulPairsList)
 {
+    // XXX - this is hopefully broken - use solveUltraBruteForce instead!
     if (hatefulPairsList.empty())
     {
         return {0, vector<string>()};
@@ -362,7 +363,10 @@ std::pair<int, vector<string>> solveBruteForce(const vector<HatefulPair>& hatefu
             {
                 cout << " found solution with subset: " << subset  << endl;
                 //const int toAdd = (hatefulPairsGroup1.empty() ^ hatefulPairsGroup2.empty()) ? 0 : 1;
-                const int toAdd = ((solutionGroup1.first == 0 && solutionGroup2.first == 0) ||
+                //const int toAdd = ((solutionGroup1.first == 0 && solutionGroup2.first == 0) ||
+                    //(hatefulPairsGroup1.size() == (group1.size() * (group1.size() - 1) / 2)) ||
+                    //(hatefulPairsGroup2.size() == (group2.size() * (group2.size() - 1) / 2))) ? 1 : 0;
+                const int toAdd = ((solutionGroup1.first <= 1 && solutionGroup2.first <= 1) ||
                     (hatefulPairsGroup1.size() == (group1.size() * (group1.size() - 1) / 2)) ||
                     (hatefulPairsGroup2.size() == (group2.size() * (group2.size() - 1) / 2))) ? 1 : 0;
                                     
@@ -396,16 +400,18 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
     return result;
 }
 
+const std::pair<int, vector<string>> NoSolution = {-1, vector<string>()};
+
 std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
 {
     for (const auto& hatefulPair : hatefulPairsList)
     {
         if (hatefulPair.person1 < 0 || hatefulPair.person1 > N - 1)
-            return {-1, vector<string>()};
+            return NoSolution;
         if (hatefulPair.person2 < 0 || hatefulPair.person2 > N - 1)
-            return {-1, vector<string>()};
+            return NoSolution;
         if (hatefulPair.person1 == hatefulPair.person2)
-            return {-1, vector<string>()};
+            return NoSolution;
     }
     // Only deals with Subtask 1, so far.
     if (M == (N * (N - 1)) / 2)
@@ -471,7 +477,7 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
     }
     else
     {
-        return {-1, vector<string>()};
+        return NoSolution;
     }
 }
 
@@ -562,7 +568,7 @@ int main(int argc, char* argv[])
                 //N = rand() % 100'000 + 1;
                 N = rand() % 10 + 1;
                 //N = 7;
-                cerr << "N: " << N << endl;
+                //cerr << "N: " << N << endl;
 #if 1
 #if 0
                 const int numSets = rand() % 5 + 2;
@@ -596,8 +602,23 @@ int main(int argc, char* argv[])
                 }
                 break;
 #endif
-                //Subset({0, 1, 2}, {3, 4, 5, 6}).addToHatefulPairs(hatefulPairs);
-                //Subset({2,3 }, {0, 1, 4, 5, 6}).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1, 2, 3}, {4, 5, 6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1}, {2, 3, 4, 5, 6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1,2, 3, 4, 5}, {6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1,2, 3, 4, 5, 6}, {7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1, 2, 3}, {4, 5, 6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1, 2, 3, 4, 5, 6, 7}, {8,9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1, 2, 3, 4, 5, 6, 7, 8}, {9,10,11 }).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1, 2, 3, 4, 5, 6, 7, 8, 9} ,{10,11}).addToHatefulPairs(hatefulPairs);
+                Subset({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10} ,{11}).addToHatefulPairs(hatefulPairs);
+                N = 0;
+                for (const auto& x : hatefulPairs)
+                {
+                    cerr << "HatefulPair person2: " << x.person2 << endl;
+                    N = max<int>(N, x.person2 + 1);
+                }
+                cerr << "N: " << N << endl;
+                break;
 
 
                 //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
