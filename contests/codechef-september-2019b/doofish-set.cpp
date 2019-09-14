@@ -2,8 +2,8 @@
 // 
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
-// This submission is for Subtask #1 only!
-//#define SUBMISSION
+// Giving up XD
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -14,6 +14,7 @@
 #include <set>
 #include <map>
 #include <limits>
+#include <algorithm>
 
 #include <cassert>
 
@@ -406,18 +407,18 @@ const std::pair<int, vector<Subset>> NoSolution= {-1, vector<Subset>()};
 std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList, string indent)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
-    cout << indent + "solveOptimisedAux - N: " << N << endl;
+    //cout << indent + "solveOptimisedAux - N: " << N << endl;
 
     if (hatefulPairsList.empty())
     {
-        cout << indent << " no hateful pairs" << endl;
+        //cout << indent << " no hateful pairs" << endl;
         return {0, vector<Subset>()};
     }
 
     vector<int> people;
     for (const auto& pair : hatefulPairs)
     {
-        cout << indent << " hatefulPair: (" << pair.person1 << ", " << pair.person2 << ")" << endl;
+        //cout << indent << " hatefulPair: (" << pair.person1 << ", " << pair.person2 << ")" << endl;
         people.push_back(pair.person1);
         people.push_back(pair.person2);
     }
@@ -426,17 +427,19 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     //cout << "people size after sort: " << people.size() << endl;
     people.erase(unique(people.begin(), people.end()), people.end());
     //cout << "people size after unique: " << people.size() << endl;
+#if 0
     cout << indent << " people: " << endl << indent << " ";
     for (const auto x : people)
     {
         cout << " " << x;
     }
     cout << endl;
+#endif
 
 
     if (people.size() != N)
     {
-        cout << indent << "N was " << N << " but matches only generate " << people.size() << endl;
+        //cout << indent << "N was " << N << " but matches only generate " << people.size() << endl;
         return NoSolution;
     }
 
@@ -539,7 +542,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy, &indent, &hatefulPairs](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup)
     {
         // TODO - optimise this!
-        cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2") << endl;
+        //cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2") << endl;
         assert(destSubsetGroup != Unknown);
         assert(!allPeople.empty());
         vector<int> toProcess = { initialPerson };
@@ -549,7 +552,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         {
             if (hatefulPairs.find({person, initialPerson}) != hatefulPairs.end())
             {
-                cout << indent << "      adding hateful pair: (" << person << ", " << initialPerson << ")" << endl;
+                //cout << indent << "      adding hateful pair: (" << person << ", " << initialPerson << ")" << endl;
                 destHatefulPairsForGroup.push_back({person, initialPerson});
             }
         }
@@ -562,26 +565,26 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
             for (const auto& toProcess : toProcess)
             {
-                cout << indent << "  processing: " << toProcess << endl;
+                //cout << indent << "  processing: " << toProcess << endl;
                 for (const auto& remainingPerson : allPeople)
                 {
                     if (find(destSubset.begin(), destSubset.end(), remainingPerson) != destSubset.end())
                         continue;
-                    cout << indent << "   comparing with remainingPerson: " << remainingPerson << endl;
+                    //cout << indent << "   comparing with remainingPerson: " << remainingPerson << endl;
                     if (find(hatedBy[toProcess].begin(), hatedBy[toProcess].end(), remainingPerson) == hatedBy[toProcess].end())
                     {
                         if (forcedGroupForPerson[remainingPerson] != Unknown)
                         {
                             // Conflict - can't be a solution.
-                            cout << indent << "Got a clash for " << remainingPerson << " via " << toProcess << endl;
+                            //cout << indent << "Got a clash for " << remainingPerson << " via " << toProcess << endl;
                             return false;
                         }
-                        cout << indent << "     adding " << remainingPerson << endl;
+                        //cout << indent << "     adding " << remainingPerson << endl;
                         for (const auto person : destSubset)
                         {
                             if (hatefulPairs.find({person, remainingPerson}) != hatefulPairs.end())
                             {
-                                cout << indent << "      adding hateful pair: (" << person << ", " << remainingPerson << ")" << endl;
+                                //cout << indent << "      adding hateful pair: (" << person << ", " << remainingPerson << ")" << endl;
                                 destHatefulPairsForGroup.push_back({person, remainingPerson});
                             }
                         }
@@ -665,16 +668,16 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             {
                 continue;
             }
-            cout << indent << "  working out where to place unassigned person: " << person << endl;
+            //cout << indent << "  working out where to place unassigned person: " << person << endl;
             assert(forcedGroupForPerson[person] == Unknown);
             for (const auto personInGroup1 : forcedGroup1)
             {
-                cout << indent << " verifying forcedGroup1: " << personInGroup1 << " should hate " << person << endl;
+                //cout << indent << " verifying forcedGroup1: " << personInGroup1 << " should hate " << person << endl;
                 assert(hatefulPairs.find({personInGroup1, person}) != hatefulPairs.end());
             }
             for (const auto personInGroup2 : forcedGroup2)
             {
-                cout << indent << " verifying forcedGroup2: " << personInGroup2 << " should hate " << person << endl;
+                //cout << indent << " verifying forcedGroup2: " << personInGroup2 << " should hate " << person << endl;
                 assert(hatefulPairs.find({personInGroup2, person}) != hatefulPairs.end());
             }
             auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + "   ");
@@ -682,9 +685,10 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
             {
 
-                cout << indent << "One of the subsets failed while adding remaining people" << endl;
+                //cout << indent << "One of the subsets failed while adding remaining people" << endl;
                 return NoSolution;
             }
+#if 0
             cout << indent << " forcedGroup1 result " << resultForceGroup1.first << endl;
             for (const auto x : forcedGroup1)
             {
@@ -695,6 +699,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             {
                 cout << indent << "  " << x << endl;
             }
+#endif
 
             if (resultForceGroup1.first < resultForceGroup2.first)
             {
@@ -734,9 +739,10 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2, indent + "   ");
     if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
     {
-        cout << indent << "One of the subsets failed" << endl;
+        //cout << indent << "One of the subsets failed" << endl;
         return NoSolution;
     }
+#if 0
     cout << indent << " forcedGroup1 result (final) " << resultForceGroup1.first << endl;
     for (const auto x : forcedGroup1)
     {
@@ -747,6 +753,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     {
         cout << indent << "  " << x << endl;
     }
+#endif
     int addOne = 1;
 #if 0
     if (resultForceGroup1.first == 0 && resultForceGroup2.first != 0)
