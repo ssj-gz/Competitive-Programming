@@ -532,6 +532,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy, &indent](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup)
     {
         assert(destSubsetGroup != Unknown);
+        assert(!allPeople.empty());
         vector<int> toProcess = { initialPerson };
         set<int> remainingPeople = set<int>(allPeople.begin(), allPeople.end());
 
@@ -544,6 +545,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
             for (const auto& toProcess : toProcess)
             {
+                vector<int> toErase;
                 for (const auto& remainingPerson : remainingPeople)
                 {
                     if (find(hatedBy[toProcess].begin(), hatedBy[toProcess].end(), remainingPerson) == hatedBy[toProcess].end())
@@ -555,10 +557,14 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                             return false;
                         }
                         destSubset.push_back(remainingPerson);
-                        remainingPeople.erase(remainingPerson);
+                        toErase.push_back(remainingPerson);
                         nextToProcess.push_back(remainingPerson);
                         forcedGroupForPerson[remainingPerson] = destSubsetGroup;
                     }
+                }
+                for (const auto person : toErase)
+                {
+                    remainingPeople.erase(person);
                 }
             }
 
@@ -766,8 +772,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const bool generateYes = ((rand() % 4) == 0);
-        //const bool generateYes = true;
+        //const bool generateYes = ((rand() % 4) == 0);
+        const bool generateYes = true;
 
         if (generateYes)
         {
@@ -782,7 +788,7 @@ int main(int argc, char* argv[])
                 //cerr << "N: " << N << endl;
 #if 1
 #if 1
-                const int numSets = rand() % 5 + 2;
+                const int numSets = rand() % 5 + 1;
                 cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
                 {
