@@ -300,7 +300,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     if (hatefulPairsList.empty())
     {
-        //cout << indent << " no hateful pairs" << endl;
+        cout << indent << " no hateful pairs" << endl;
         return {0, vector<Subset>()};
     }
 
@@ -337,7 +337,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     {
         // Mainly implemented for Subtask #1, though will doubtless pop up
         // in other subtasks.
-        cout << "Special case" << endl;
+        cout << indent << "Special case" << endl;
         if (N == 1)
             return NoSolution;
         int64_t minMoves = 1;
@@ -428,6 +428,8 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         hatedBy[hatefulPair.person1].insert(hatefulPair.person2);
         hatedBy[hatefulPair.person2].insert(hatefulPair.person1);
     }
+
+    cout << indent << " built hatemap" << endl;
 
     auto fillWithPeopleForcedSameSubset = [&hatedBy, &indent, &hatefulPairs, N](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup, std::map<int, Group>& forcedGroupForPerson)
     {
@@ -837,16 +839,19 @@ int main(int argc, char* argv[])
             {
                 hatefulPairs.clear();
                 //N = rand() % 100'000 + 1;
-                N = rand() % 1000 + 2;
+                //N = rand() % 1000 + 2;
+                N = 1000;
                 //N = 7;
                 //cerr << "N: " << N << endl;
 #if 1
 #if 1
                 const int numSets = rand() % 50 + 1;
+                //const int numSets = 10;
                 //cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
                 {
                     const int numInGroup1 = (rand() % (N - 1)) + 1;
+                    //const int numInGroup1 = 30;
                     //cerr << "N: " << N << " numInGroup1: " << numInGroup1 << endl;
                     assert(numInGroup1 > 0 && numInGroup1 < N);
                     vector<int> allNumbers;
