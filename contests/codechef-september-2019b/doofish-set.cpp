@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
 // This submission is for Subtask #1 only!
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -403,13 +403,15 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
 const std::pair<int, vector<string>> NoSolutionStr = {-1, vector<string>()};
 const std::pair<int, vector<Subset>> NoSolution= {-1, vector<Subset>()};
 
-std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList)
+std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList, string indent)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
+    cout << indent + "solveOptimisedAux - N: " << N << endl;
 
     vector<int> people;
     for (const auto& pair : hatefulPairs)
     {
+        cout << indent << " hatefulPair: (" << pair.person1 << ", " << pair.person2 << ")" << endl;
         people.push_back(pair.person1);
         people.push_back(pair.person2);
     }
@@ -417,7 +419,10 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     people.erase(unique(people.begin(), people.end()), people.end());
 
     if (people.size() != N)
+    {
+        cout << indent << "N was " << N << " but matches only generate " << people.size() << endl;
         return NoSolution;
+    }
 
     const int M = hatefulPairsList.size();
     if (M == (N * (N - 1)) / 2)
@@ -515,7 +520,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         hatedBy[hatefulPair.person2].push_back(hatefulPair.person1);
     }
 
-    auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup)
+    auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy, &indent](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup)
     {
         assert(destSubsetGroup != Unknown);
         vector<int> toProcess = { initialPerson };
@@ -537,7 +542,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                         if (forcedGroupForPerson[remainingPerson] != Unknown)
                         {
                             // Conflict - can't be a solution.
-                            cout << "Got a clash for " << remainingPerson << " via " << toProcess << endl;
+                            cout << indent << "Got a clash for " << remainingPerson << " via " << toProcess << endl;
                             return false;
                         }
                         destSubset.push_back(remainingPerson);
@@ -605,10 +610,14 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     for (const auto remainingPerson : remainingPeople)
     {
-        auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1);
-        auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2);
+        auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + " ");
+        auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2, indent + " ");
         if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
+        {
+
+            cout << indent << "One of the subsets failed while adding remaining people" << endl;
             return NoSolution;
+        }
 
         if (resultForceGroup1.first < resultForceGroup2.first)
         {
@@ -630,10 +639,13 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
 
 
-    auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1);
-    auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2);
+    auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1, indent + " ");
+    auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2, indent + " ");
     if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
+    {
+        cout << indent << "One of the subsets failed" << endl;
         return NoSolution;
+    }
 
     const int64_t smallest = 1 + max(resultForceGroup1.first, resultForceGroup2.first);
     std::pair<int, vector<Subset>> result = {smallest, vector<Subset>()};
@@ -652,7 +664,7 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
         if (hatefulPair.person1 == hatefulPair.person2)
             return NoSolutionStr;
     }
-    const auto resultingSubsets = solveOptimisedAux(N, hatefulPairsList);
+    const auto resultingSubsets = solveOptimisedAux(N, hatefulPairsList, "");
     std::pair<int, vector<string>> result = {resultingSubsets.first, vector<string>()};
     for (const auto& subset : resultingSubsets.second)
     {
@@ -760,7 +772,7 @@ int main(int argc, char* argv[])
                 //N = 7;
                 //cerr << "N: " << N << endl;
 #if 1
-#if 0
+#if 1
                 const int numSets = rand() % 5 + 2;
                 cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
@@ -792,6 +804,7 @@ int main(int argc, char* argv[])
                 }
                 break;
 #endif
+#if 0
                 Subset({0, 1, 2, 3}, {4, 5, 6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
                 Subset({0, 1}, {2, 3, 4, 5, 6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
                 Subset({0, 1,2, 3, 4, 5}, {6, 7, 8,9,10,11 }).addToHatefulPairs(hatefulPairs);
@@ -813,8 +826,9 @@ int main(int argc, char* argv[])
 
                 //if (!hatefulPairs.empty() && hateHistogram.size() != 2)
                     //break;
+#endif
 #if 1
-#if 1
+#if 0
                 //if ((N * (N - 1)) / 2 <= 100'000)
                 {
                     for (int i = 0; i < N; i++)
