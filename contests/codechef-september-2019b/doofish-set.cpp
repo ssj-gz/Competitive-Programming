@@ -3,7 +3,7 @@
 // Solution to: https://www.codechef.com/SEPT19B/problems/DOOFST
 //
 // This submission is for Subtask #1 only!
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -493,12 +493,64 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 }
 
                 subsets.push_back({group1, group2});
-                cout << " subset from string: " << subsetString << " = " << Subset(group1, group2) << endl;
+                //cout << " subset from string: " << subsetString << " = " << Subset(group1, group2) << endl;
             }
 
             return result;
         }
     }
+
+    enum Group { Unknown, Group1, Group2 };
+    std::map<int, Group> forcedGroupForPerson;
+    for (const auto person : people)
+    {
+        forcedGroupForPerson[person] = Unknown;
+    }
+
+    map<int, vector<int>> hatedBy;
+    for (const auto& hatefulPair : hatefulPairs)
+    {
+        //cout << hatefulPair.person1 << ", " << hatefulPair.person2 << endl;
+        hatedBy[hatefulPair.person1].push_back(hatefulPair.person2);
+        hatedBy[hatefulPair.person2].push_back(hatefulPair.person1);
+    }
+
+    auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup)
+    {
+        assert(destSubsetGroup != Unknown);
+        vector<int> toProcess = { initialPerson };
+        set<int> remainingPeople = set<int>(allPeople.begin(), allPeople.end());
+
+        destSubset.push_back(initialPerson);
+        remainingPeople.erase(initialPerson);
+
+        while (!toProcess.empty())
+        {
+            vector<int> nextToProcess;
+
+            for (const auto& toProcess : toProcess)
+            {
+                for (const auto& remainingPerson : remainingPeople)
+                {
+                    if (find(hatedBy[toProcess].begin(), hatedBy[toProcess].end(), remainingPerson) == hatedBy[toProcess].end())
+                    {
+                        if (forcedGroupForPerson[remainingPerson] != Unknown)
+                        {
+                            // Conflict - can't be a solution.
+                            return false;
+                        }
+                        destSubset.push_back(remainingPerson);
+                        remainingPeople.erase(remainingPerson);
+                        nextToProcess.push_back(remainingPerson);
+                        forcedGroupForPerson[remainingPerson] = destSubsetGroup;
+                    }
+                }
+            }
+
+            toProcess = nextToProcess;
+        }
+        return true;
+    };
 
     return NoSolution;
 }
