@@ -539,12 +539,20 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy, &indent, &hatefulPairs](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup)
     {
         // TODO - optimise this!
-        cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2");
+        cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2") << endl;
         assert(destSubsetGroup != Unknown);
         assert(!allPeople.empty());
         vector<int> toProcess = { initialPerson };
         //set<int> remainingPeople = set<int>(allPeople.begin(), allPeople.end());
 
+        for (const auto person : destSubset)
+        {
+            if (hatefulPairs.find({person, initialPerson}) != hatefulPairs.end())
+            {
+                cout << indent << "      adding hateful pair: (" << person << ", " << initialPerson << ")" << endl;
+                destHatefulPairsForGroup.push_back({person, initialPerson});
+            }
+        }
         destSubset.push_back(initialPerson);
         //remainingPeople.erase(initialPerson);
 
@@ -568,10 +576,12 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                             cout << indent << "Got a clash for " << remainingPerson << " via " << toProcess << endl;
                             return false;
                         }
+                        cout << indent << "     adding " << remainingPerson << endl;
                         for (const auto person : destSubset)
                         {
                             if (hatefulPairs.find({person, remainingPerson}) != hatefulPairs.end())
                             {
+                                cout << indent << "      adding hateful pair: (" << person << ", " << remainingPerson << ")" << endl;
                                 destHatefulPairsForGroup.push_back({person, remainingPerson});
                             }
                         }
@@ -582,7 +592,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 }
                 //for (const auto person : nextToProcess)
                 //{
-                    //remainingPeople.erase(person);
+                //remainingPeople.erase(person);
                 //}
             }
 
@@ -616,6 +626,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     {
         return NoSolution;
     }
+#if 0
     set<int> remainingPeople = set<int>(people.begin(), people.end());
     for (const auto person : forcedGroup1)
     {
@@ -625,6 +636,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     {
         remainingPeople.erase(person);
     }
+#endif
     // All remaining people are hated by all people in forcedGroup1 and all people in forcedGroup2.
 #if 0
     for (const auto& hatefulPair : hatefulPairs)
@@ -643,7 +655,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     }
 #endif
 
-    while (true)
+    while (forcedGroup1.size() + forcedGroup2.size() < N)
     {
         // TODO - optimise this!
         for (const auto person : people)
@@ -653,6 +665,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             {
                 continue;
             }
+            cout << indent << "  working out where to place unassigned person: " << person << endl;
             assert(forcedGroupForPerson[person] == Unknown);
             for (const auto personInGroup1 : forcedGroup1)
             {
@@ -864,16 +877,18 @@ int main(int argc, char* argv[])
             {
                 hatefulPairs.clear();
                 //N = rand() % 100'000 + 1;
-                N = rand() % 10 + 1;
+                N = rand() % 10 + 2;
                 //N = 7;
                 //cerr << "N: " << N << endl;
 #if 1
 #if 1
-                const int numSets = rand() % 5 + 1;
+                const int numSets = rand() % 8 + 1;
                 cerr << "numSets: " << numSets << endl;
                 for (int i = 0; i < numSets; i++)
                 {
-                    const int numInGroup1 = rand() % N;
+                    const int numInGroup1 = (rand() % (N - 1)) + 1;
+                    //cerr << "N: " << N << " numInGroup1: " << numInGroup1 << endl;
+                    assert(numInGroup1 > 0 && numInGroup1 < N);
                     vector<int> allNumbers;
                     for (int i = 0; i < N; i++)
                     {
@@ -894,10 +909,6 @@ int main(int argc, char* argv[])
                         {
                             group1.push_back(j);
                         }
-                    }
-                    if (group1.empty() || group2.empty())
-                    {
-                        i--;
                     }
 
                     Subset(group1, group2).addToHatefulPairs(hatefulPairs);
