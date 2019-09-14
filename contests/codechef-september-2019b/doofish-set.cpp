@@ -405,6 +405,11 @@ const std::pair<int, vector<Subset>> NoSolution= {-1, vector<Subset>()};
 
 std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList, string indent)
 {
+    if (hatefulPairsList.empty())
+    {
+        return {0, vector<Subset>()};
+    }
+
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
     cout << indent + "solveOptimisedAux - N: " << N << endl;
 
@@ -415,8 +420,12 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         people.push_back(pair.person1);
         people.push_back(pair.person2);
     }
+    cout << "people size before sort: " << people.size() << endl;
     sort(people.begin(), people.end());
+    cout << "people size after sort: " << people.size() << endl;
     people.erase(unique(people.begin(), people.end()), people.end());
+    cout << "people size after unique: " << people.size() << endl;
+
 
     if (people.size() != N)
     {
@@ -757,8 +766,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        //const bool generateYes = ((rand() % 4) == 0);
-        const bool generateYes = true;
+        const bool generateYes = ((rand() % 4) == 0);
+        //const bool generateYes = true;
 
         if (generateYes)
         {
