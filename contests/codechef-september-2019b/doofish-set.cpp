@@ -402,21 +402,27 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
 
 const std::pair<int, vector<string>> NoSolution = {-1, vector<string>()};
 
-std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
+std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList)
 {
-    for (const auto& hatefulPair : hatefulPairsList)
+    set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
+
+    vector<int> people;
+    for (const auto& pair : hatefulPairs)
     {
-        if (hatefulPair.person1 < 0 || hatefulPair.person1 > N - 1)
-            return NoSolution;
-        if (hatefulPair.person2 < 0 || hatefulPair.person2 > N - 1)
-            return NoSolution;
-        if (hatefulPair.person1 == hatefulPair.person2)
-            return NoSolution;
+        people.push_back(pair.person1);
+        people.push_back(pair.person2);
     }
-    // Only deals with Subtask 1, so far.
+    sort(people.begin(), people.end());
+    people.erase(unique(people.begin(), people.end()), people.end());
+
+    if (people.size() != N)
+        return NoSolution;
+
+    const int M = hatefulPairsList.size();
     if (M == (N * (N - 1)) / 2)
     {
-        //cout << "Whoo!" << endl;
+        // Mainly implemented for Subtask #1, though will doubtless pop up
+        // in other subtasks.
         if (N == 1)
             return {-1, vector<string>()};
         int64_t minMoves = 1;
@@ -434,21 +440,17 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
             result.first = minMoves;
             vector<string>& subsetStrings = result.second;
             string subsetString = string(N / 2, '0') + string(N - N / 2, '1');
-            //cout << "subsetString: " << subsetString << endl;
             subsetStrings.push_back(subsetString);
             minMoves--;
 
             while (minMoves > 0)
             {
-                //cout << "Starting subsetString: " << subsetString << endl;
                 int beginningOfRun = 0;
                 for (int i = 0; i < N; i++)
                 {
-                    //cout << "i: " << i << " beginningOfRun: " << beginningOfRun << endl;
                     if (i == N - 1 || subsetString[i + 1] != subsetString[i])
                     {
                         const int numInRun = i + 1 - beginningOfRun;
-                        //cout << " numInRun: " << numInRun << endl;
                         if (subsetString[i] == '0')
                         {
                             for (int j = i; j >= i - numInRun / 2 + 1; j--)
@@ -467,7 +469,6 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
                         beginningOfRun = i + 1;
                     }
                 }
-                //cout << "new subsetString: " << subsetString << endl;
                 subsetStrings.push_back(subsetString);
                 minMoves--;
             }
@@ -475,10 +476,22 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
             return result;
         }
     }
-    else
+
+    return NoSolution;
+}
+
+std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
+{
+    for (const auto& hatefulPair : hatefulPairsList)
     {
-        return NoSolution;
+        if (hatefulPair.person1 < 0 || hatefulPair.person1 > N - 1)
+            return NoSolution;
+        if (hatefulPair.person2 < 0 || hatefulPair.person2 > N - 1)
+            return NoSolution;
+        if (hatefulPair.person1 == hatefulPair.person2)
+            return NoSolution;
     }
+    return solveOptimisedAux(N, hatefulPairsList);
 }
 
 
@@ -755,15 +768,16 @@ int main(int argc, char* argv[])
     const auto solutionUltraBruteForce = solveUltraBruteForce(N, M, hatefulPairs);
     cout << "solutionUltraBruteForce: " << solutionUltraBruteForce.first << endl;
 
-    const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
-    cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
-    assert(solutionBruteForce == solutionUltraBruteForce);
+    //const auto solutionBruteForce = solveBruteForce(N, M, hatefulPairs);
+    //cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
+    //assert(solutionBruteForce == solutionUltraBruteForce);
 #endif
-#if 0
+#if 1
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
-    cout << "solutionOptimised:  " << solutionOptimised << endl;
+    cout << "solutionOptimised:  " << solutionOptimised.first << endl;
 
-    assert(solutionOptimised == solutionBruteForce);
+    assert(solutionOptimised.first == solutionUltraBruteForce.first);
+    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 #else
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
