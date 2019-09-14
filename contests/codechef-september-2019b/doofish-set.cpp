@@ -603,9 +603,33 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             hatefulPairsForcedGroup2.push_back(hatefulPair);
         }
     }
+
     for (const auto remainingPerson : remainingPeople)
     {
+        auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1);
+        auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2);
+        if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
+            return NoSolution;
+
+        if (resultForceGroup1.first < resultForceGroup2.first)
+        {
+            for (const auto personGroup1 : forcedGroup1)
+            {
+                hatefulPairsForcedGroup1.push_back({personGroup1, remainingPerson});
+            }
+            forcedGroup1.push_back(remainingPerson);
+        }
+        else
+        {
+            for (const auto personGroup2 : forcedGroup2)
+            {
+                hatefulPairsForcedGroup2.push_back({personGroup2, remainingPerson});
+            }
+            forcedGroup2.push_back(remainingPerson);
+        }
     }
+
+
 
 
     return NoSolution;
@@ -924,7 +948,7 @@ int main(int argc, char* argv[])
     cout << "solutionOptimised:  " << solutionOptimised.first << endl;
 
     assert(solutionOptimised.first == solutionUltraBruteForce.first);
-    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
+    //verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 #else
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
