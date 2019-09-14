@@ -759,6 +759,50 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     const int64_t smallest = addOne + max(resultForceGroup1.first, resultForceGroup2.first);
     std::pair<int, vector<Subset>> result = {smallest, vector<Subset>()};
 
+    vector<int> firstGroup1;
+    for (const auto person1 : forcedGroup1)
+    {
+        firstGroup1.push_back(person1);
+    }
+    vector<int> firstGroup2;
+    for (const auto person2 : forcedGroup2)
+    {
+        firstGroup2.push_back(person2);
+    }
+
+    result.second.push_back({firstGroup1, firstGroup2});
+
+    if (resultForceGroup1.second.empty())
+        resultForceGroup1.second.push_back({forcedGroup1, {}});
+    if (resultForceGroup2.second.empty())
+        resultForceGroup2.second.push_back({forcedGroup2, {}});
+    for (int i = 0; i < smallest - 1; i++)
+    {
+        const auto& subset1 = resultForceGroup1.second[i % resultForceGroup1.second.size()];
+        const auto& subset2 = resultForceGroup2.second[i % resultForceGroup2.second.size()];
+
+        vector<int> group1;
+        for (const auto p : subset1.group1)
+        {
+            group1.push_back(p);
+        }
+        for (const auto p : subset2.group1)
+        {
+            group1.push_back(p);
+        }
+        vector<int> group2;
+        for (const auto p : subset1.group2)
+        {
+            group2.push_back(p);
+        }
+        for (const auto p : subset2.group2)
+        {
+            group2.push_back(p);
+        }
+        result.second.push_back({group1, group2});
+
+    }
+
     return result;
 }
 
@@ -1078,8 +1122,13 @@ int main(int argc, char* argv[])
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
     cout << "solutionOptimised:  " << solutionOptimised.first << endl;
 
+    for (const auto x : solutionOptimised.second)
+    {
+        cout << " " << x << endl;
+    }
+
     assert(solutionOptimised.first == solutionUltraBruteForce.first);
-    //verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
+    verifySolution(set<HatefulPair>(hatefulPairs.begin(), hatefulPairs.end()), solutionOptimised.second);
 #endif
 #else
     const auto solutionOptimised = solveOptimised(N, M, hatefulPairs);
