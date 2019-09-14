@@ -539,7 +539,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         hatedBy[hatefulPair.person2].push_back(hatefulPair.person1);
     }
 
-    auto fillWithPeopleForcedSameSubset = [&forcedGroupForPerson, &hatedBy, &indent, &hatefulPairs](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup)
+    auto fillWithPeopleForcedSameSubset = [&hatedBy, &indent, &hatefulPairs](const vector<int>& allPeople, vector<int>& destSubset, int initialPerson, const Group destSubsetGroup, vector<HatefulPair>& destHatefulPairsForGroup, std::map<int, Group>& forcedGroupForPerson)
     {
         // TODO - optimise this!
         //cout << indent << " fillWithPeopleForcedSameSubset group: " << (destSubsetGroup == Group1 ? "1" : "2") << endl;
@@ -622,10 +622,10 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     vector<int> forcedGroup1;
     vector<HatefulPair> hatefulPairsForcedGroup1;
-    fillWithPeopleForcedSameSubset(people, forcedGroup1, mostPromising.person1, Group1, hatefulPairsForcedGroup1);
+    fillWithPeopleForcedSameSubset(people, forcedGroup1, mostPromising.person1, Group1, hatefulPairsForcedGroup1, forcedGroupForPerson);
     vector<int> forcedGroup2;
     vector<HatefulPair> hatefulPairsForcedGroup2;
-    if (!fillWithPeopleForcedSameSubset(people, forcedGroup2, mostPromising.person2, Group2, hatefulPairsForcedGroup2))
+    if (!fillWithPeopleForcedSameSubset(people, forcedGroup2, mostPromising.person2, Group2, hatefulPairsForcedGroup2, forcedGroupForPerson))
     {
         return NoSolution;
     }
@@ -700,10 +700,27 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 cout << indent << "  " << x << endl;
             }
 #endif
-
-            if (resultForceGroup1.first < resultForceGroup2.first)
+            int resultIfPutIn1 = -1;
             {
-                fillWithPeopleForcedSameSubset(people, forcedGroup1, person, Group1, hatefulPairsForcedGroup1);
+                vector<int> forcedGroup1Copy = forcedGroup1;
+                vector<HatefulPair> hatefulPairsForcedGroup1Copy = hatefulPairsForcedGroup1;
+                auto forcedGroupForPersonCopy = forcedGroupForPerson;
+                fillWithPeopleForcedSameSubset(people, forcedGroup1Copy, person, Group1, hatefulPairsForcedGroup1Copy, forcedGroupForPersonCopy);
+                resultIfPutIn1 = solveOptimisedAux(forcedGroup1Copy.size(), hatefulPairsForcedGroup1Copy, indent + "   ").first;
+            }
+            int resultIfPutIn2 = -1;
+            {
+                vector<int> forcedGroup2Copy = forcedGroup2;
+                vector<HatefulPair> hatefulPairsForcedGroup2Copy = hatefulPairsForcedGroup2;
+                auto forcedGroupForPersonCopy = forcedGroupForPerson;
+                fillWithPeopleForcedSameSubset(people, forcedGroup2Copy, person, Group2, hatefulPairsForcedGroup2Copy, forcedGroupForPersonCopy);
+                resultIfPutIn2 = solveOptimisedAux(forcedGroup2Copy.size(), hatefulPairsForcedGroup2Copy, indent + "   ").first;
+            }
+
+            //cout << indent << "resultIfPutIn1: " << resultIfPutIn1 << " resultIfPutIn2: " << resultIfPutIn2 << endl;
+            if (resultIfPutIn1 < resultIfPutIn2)
+            {
+                fillWithPeopleForcedSameSubset(people, forcedGroup1, person, Group1, hatefulPairsForcedGroup1, forcedGroupForPerson);
 #if 0
                 for (const auto personGroup1 : forcedGroup1)
                 {
@@ -714,7 +731,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
             }
             else
             {
-                fillWithPeopleForcedSameSubset(people, forcedGroup2, person, Group2, hatefulPairsForcedGroup2);
+                fillWithPeopleForcedSameSubset(people, forcedGroup2, person, Group2, hatefulPairsForcedGroup2, forcedGroupForPerson);
 #if 0
                 for (const auto personGroup2 : forcedGroup2)
                 {
