@@ -400,9 +400,10 @@ std::pair<int, vector<string>> solveBruteForce(const int N, const int M, const v
     return result;
 }
 
-const std::pair<int, vector<string>> NoSolution = {-1, vector<string>()};
+const std::pair<int, vector<string>> NoSolutionStr = {-1, vector<string>()};
+const std::pair<int, vector<Subset>> NoSolution= {-1, vector<Subset>()};
 
-std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList)
+std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<HatefulPair>& hatefulPairsList)
 {
     set<HatefulPair> hatefulPairs(hatefulPairsList.begin(), hatefulPairsList.end());
 
@@ -424,7 +425,7 @@ std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<H
         // Mainly implemented for Subtask #1, though will doubtless pop up
         // in other subtasks.
         if (N == 1)
-            return {-1, vector<string>()};
+            return NoSolution;
         int64_t minMoves = 1;
         while ((1 << (minMoves)) <= N - 1)
         {
@@ -432,13 +433,13 @@ std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<H
         }
         if (minMoves * N > 10'000'000)
         {
-            return {-1, vector<string>()};
+            return NoSolution;
         }
         else
         {
-            std::pair<int, vector<string>> result;
+            std::pair<int, vector<Subset>> result;
             result.first = minMoves;
-            vector<string>& subsetStrings = result.second;
+            vector<string> subsetStrings;
             string subsetString = string(N / 2, '0') + string(N - N / 2, '1');
             subsetStrings.push_back(subsetString);
             minMoves--;
@@ -473,7 +474,7 @@ std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<H
                 minMoves--;
             }
             
-            vector<Subset> subsets;
+            vector<Subset>& subsets = result.second;
 
             for (const auto& subsetString : subsetStrings)
             {
@@ -492,6 +493,7 @@ std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<H
                 }
 
                 subsets.push_back({group1, group2});
+                cout << " subset from string: " << subsetString << " = " << Subset(group1, group2) << endl;
             }
 
             return result;
@@ -506,13 +508,29 @@ std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, 
     for (const auto& hatefulPair : hatefulPairsList)
     {
         if (hatefulPair.person1 < 0 || hatefulPair.person1 > N - 1)
-            return NoSolution;
+            return NoSolutionStr;
         if (hatefulPair.person2 < 0 || hatefulPair.person2 > N - 1)
-            return NoSolution;
+            return NoSolutionStr;
         if (hatefulPair.person1 == hatefulPair.person2)
-            return NoSolution;
+            return NoSolutionStr;
     }
-    return solveOptimisedAux(N, hatefulPairsList);
+    const auto resultingSubsets = solveOptimisedAux(N, hatefulPairsList);
+    std::pair<int, vector<string>> result = {resultingSubsets.first, vector<string>()};
+    for (const auto& subset : resultingSubsets.second)
+    {
+        string subsetAsString(N, 'X');
+        for (const auto personInGroup1 : subset.group1)
+        {
+            subsetAsString[personInGroup1] = '0';
+        }
+        for (const auto personInGroup2 : subset.group2)
+        {
+            subsetAsString[personInGroup2] = '1';
+        }
+        result.second.push_back(subsetAsString);
+    }
+
+    return result;
 }
 
 
