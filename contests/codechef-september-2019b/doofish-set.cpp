@@ -472,6 +472,27 @@ std::pair<int, vector<string>> solveOptimisedAux(const int64_t N, const vector<H
                 subsetStrings.push_back(subsetString);
                 minMoves--;
             }
+            
+            vector<Subset> subsets;
+
+            for (const auto& subsetString : subsetStrings)
+            {
+                vector<int> group1;
+                vector<int> group2;
+                for (int i = 0; i < N; i++)
+                {
+                    if (subsetString[i] == '1')
+                    {
+                        group1.push_back(people[i]);
+                    }
+                    else
+                    {
+                        group2.push_back(people[i]);
+                    }
+                }
+
+                subsets.push_back({group1, group2});
+            }
 
             return result;
         }
