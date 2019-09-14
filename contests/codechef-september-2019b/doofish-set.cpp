@@ -576,6 +576,36 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
     {
         return NoSolution;
     }
+    set<int> remainingPeople = set<int>(people.begin(), people.end());
+    for (const auto person : forcedGroup1)
+    {
+        remainingPeople.erase(person);
+    }
+    for (const auto person : forcedGroup2)
+    {
+        remainingPeople.erase(person);
+    }
+    // All remaining people are hated by all people in forcedGroup1 and all people in forcedGroup2.
+    std::pair<int, vector<Subset>> result = {numeric_limits<int>::max(), vector<Subset>()};
+    vector<HatefulPair> hatefulPairsForcedGroup1;
+    for (const auto& hatefulPair : hatefulPairs)
+    {
+        if (forcedGroupForPerson[hatefulPair.person1] == Group1 && forcedGroupForPerson[hatefulPair.person2] == Group1 )
+        {
+            hatefulPairsForcedGroup1.push_back(hatefulPair);
+        }
+    }
+    vector<HatefulPair> hatefulPairsForcedGroup2;
+    for (const auto& hatefulPair : hatefulPairs)
+    {
+        if (forcedGroupForPerson[hatefulPair.person1] == Group2 && forcedGroupForPerson[hatefulPair.person2] == Group2 )
+        {
+            hatefulPairsForcedGroup2.push_back(hatefulPair);
+        }
+    }
+    for (const auto remainingPerson : remainingPeople)
+    {
+    }
 
 
     return NoSolution;
