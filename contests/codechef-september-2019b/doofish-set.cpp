@@ -473,7 +473,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
                 subsetStrings.push_back(subsetString);
                 minMoves--;
             }
-            
+
             vector<Subset>& subsets = result.second;
 
             for (const auto& subsetString : subsetStrings)
@@ -586,7 +586,6 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
         remainingPeople.erase(person);
     }
     // All remaining people are hated by all people in forcedGroup1 and all people in forcedGroup2.
-    std::pair<int, vector<Subset>> result = {numeric_limits<int>::max(), vector<Subset>()};
     vector<HatefulPair> hatefulPairsForcedGroup1;
     for (const auto& hatefulPair : hatefulPairs)
     {
@@ -631,8 +630,15 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
 
 
+    auto resultForceGroup1 = solveOptimisedAux(forcedGroup1.size(), hatefulPairsForcedGroup1);
+    auto resultForceGroup2 = solveOptimisedAux(forcedGroup2.size(), hatefulPairsForcedGroup2);
+    if (resultForceGroup1.first == -1 || resultForceGroup2.first == -1)
+        return NoSolution;
 
-    return NoSolution;
+    const int64_t smallest = 1 + max(resultForceGroup1.first, resultForceGroup2.first);
+    std::pair<int, vector<Subset>> result = {smallest, vector<Subset>()};
+
+    return result;
 }
 
 std::pair<int, vector<string>> solveOptimised(const int64_t N, const int64_t M, const vector<HatefulPair>& hatefulPairsList)
