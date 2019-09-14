@@ -556,6 +556,7 @@ std::pair<int, vector<Subset>> solveOptimisedAux(const int64_t N, const vector<H
 
     while (forcedGroup1.size() + forcedGroup2.size() < N)
     {
+        cout << indent << " still: " << (N - forcedGroup1.size() + forcedGroup2.size()) << " people remaining!" << endl;
         // TODO - optimise this!
         for (const auto person : people)
         {
@@ -856,7 +857,7 @@ int main(int argc, char* argv[])
                 //N = 7;
                 //cerr << "N: " << N << endl;
 #if 1
-#if 1
+#if 0
                 const int numSets = rand() % 50 + 1;
                 //const int numSets = 10;
                 //cerr << "numSets: " << numSets << endl;
@@ -916,10 +917,10 @@ int main(int argc, char* argv[])
                     //break;
 #endif
 #if 1
-#if 0
+#if 1
                 //if ((N * (N - 1)) / 2 <= 100'000)
                 {
-                    for (int i = 0; i < N; i++)
+                    for (int i = 0; i < N / 10; i++)
                     {
                         for (int j = i + 1; j < N; j++)
                         {
