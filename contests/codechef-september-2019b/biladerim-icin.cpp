@@ -248,16 +248,22 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 }
             }
             if (endIndex != -1 && repetitionOfCLookup[endIndex].finalA < maxA && endIndex + 1 < repetitionOfCLookup.size())
+            {
+                // Now endIndex is the index such that *either*
+                //  i) it is the index with finalA == maxA.
+                //  ii) it is the first index with finalA > maxA if there is no such finalA == maxA (the "overcount" case; see below).
                 endIndex++;
+            }
 
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
                 const int64_t numAsInRange = (repetitionOfCLookup[endIndex].finalA - (repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps));
-                result += ModNum(maxC + 1) * numAsInRange - repetitionOfCLookup[endIndex].cumulativeCTimesReps;
+                ModNum sumOfCTimesRepsInRange = repetitionOfCLookup[endIndex].cumulativeCTimesReps;
                 if (beginIndex > 0)
                 {
-                    result += repetitionOfCLookup[beginIndex - 1].cumulativeCTimesReps;
+                    sumOfCTimesRepsInRange -= repetitionOfCLookup[beginIndex - 1].cumulativeCTimesReps;
                 }
+                result += ModNum(maxC + 1) * numAsInRange - sumOfCTimesRepsInRange;
                 if (repetitionOfCLookup[endIndex].finalA > maxA)
                 {
                     const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
@@ -271,6 +277,8 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
         if (lastProcessedA < maxA)
         {
+            // There are A such that finalA < A <= maxA; incorporate them into the results - each such
+            // A is satisfied by all C.
             result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
         }
 
