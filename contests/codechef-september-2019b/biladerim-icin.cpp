@@ -268,7 +268,7 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 {
                     const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
                     assert(numAOverCounted >= 0);
-                    // Remove overcount.
+                    // Overcounted the contribution of C >= repetitionOfCLookup[endIndex].C by numAOverCounted times - correct for this.
                     result -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].C) * numAOverCounted;
                 }
             }
