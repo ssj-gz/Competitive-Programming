@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
             largestPowerOf2 <<= 1;
         }
         largestPowerOf2 >>= 1;
-        const int64_t fibonacciIndex = (largestPowerOf2 - 1);
+        const int64_t fibonacciIndex = (largestPowerOf2 - 1); // Make 0-relative.
 
         cout << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
     }
