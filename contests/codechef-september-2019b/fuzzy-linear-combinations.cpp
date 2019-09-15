@@ -226,47 +226,28 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         maxRightForLowerGcd[i] = i;
     }
 
+    vector<int64_t> numSequencesWithGcd(maxK + 1, 0);
+
     for (int i = 0; i < n; i++)
     {
-        if (factorsLookup.find(a[i]) == factorsLookup.end())
-        {
-            factorsOfA[i] = factors(a[i], primesUpToRootMaxN, isPrime);
-            factorsLookup[a[i]] = factorsOfA[i];
-        }
-        else
-        {
-            factorsOfA[i] = factorsLookup[a[i]];
-        }
-        int gcdWithPrev = -1;
-        if (i > 0)
-        {
-            gcdWithPrev = gcd(a[i], a[i - 1]);
-        }
-        for (const auto factor : factorsOfA[i])
-        {
-            bool divisibleByGcwWithPrev = false;
-            bool addPrevPos = false;
-            if (factor > maxK && gcdWithPrev != -1)
+            const auto gcdWithPrev = (i >= 1) ? gcd(a[i], a[i - 1]) : 1;
+            if (gcdWithPrev != a[i])
             {
-                if (factor > gcdWithPrev)
+                if (a[i] <= maxK)
                 {
-                    maxRightForLowerGcd[i] = i - 1;
-                    continue;
+                    numSequencesWithGcd[a[i]]++;
                 }
-                if ((gcdWithPrev % factor) == 0)
-                {
-                    addPrevPos = true;
-                }
-
+                maxRightForLowerGcd[i] = i - 1;
             }
-            auto& positionsForFactor = positionsWithFactorDecreasing[factor];
-            if (addPrevPos)
-                positionsForFactor.push_back(i - 1);
-            positionsForFactor.push_back(i);
-        }
+            for (const auto factor : factors(gcdWithPrev, primesUpToRootMaxN, isPrime))
+            {
+                auto& positionsForFactor = positionsWithFactorDecreasing[factor];
+                if (i >= 1)
+                    positionsForFactor.push_back(i - 1);
+                positionsForFactor.push_back(i);
+            }
     }
 
-    vector<int64_t> numSequencesWithGcd(maxK + 1);
 
 
     for (auto& gcdAndPositions : positionsWithFactorDecreasing)
@@ -275,11 +256,16 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
         auto& positions = gcdAndPositions.second;
         // Might have accidentally added a copy of a position (addPrevPos) - remove if so.
         positions.erase(unique(positions.begin(), positions.end()), positions.end());
+#ifdef BRUTE_FORCE
+        assert(set<int>(positions.begin(), positions.end()).size() == positions.size());
+#endif
+        //cout << " factor: " << gcd << endl;
 
         int runLengthWithGcd = 1;
         int previousPosition = -1;
         for (const auto position : positions)
         {
+            //cout << "  position: " << position << endl;
             if (previousPosition != -1 && position == previousPosition + 1)
             {
                 runLengthWithGcd++;
@@ -291,6 +277,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
             const int gcdRangeLeft = position - runLengthWithGcd + 1;
             const int gcdRangeRight = min(position, maxRightForLowerGcd[position]);
+            //cout << " gcdRangeLeft: " << gcdRangeLeft << " gcdRangeRight: " << gcdRangeRight << endl;
 
             if (gcdRangeRight >= 0 && gcdRangeRight >= gcdRangeLeft)
             {
@@ -305,6 +292,13 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
             previousPosition = position;
         }
     }
+
+#if 0
+    for (int i = 1; i < 1000; i++)
+    {
+        cout << "i: " << i << " numSequencesWithGcd: " << numSequencesWithGcd[i] << endl;
+    }
+#endif
 
     vector<int64_t> numForK(maxK + 1);
     for (int gcd = 1; gcd <= maxK; gcd++)
@@ -352,8 +346,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 200 + 1;
-        //const int N = 5;
+        //const int N = rand() % 200 + 1;
+        const int N = 5;
         //const int N = 10;
         int64_t maxA = rand() % 1'000'000'000ULL + 1;
         int64_t minA = maxA - rand() % 10000;
@@ -429,6 +423,15 @@ int main(int argc, char* argv[])
     {
         //cout << x << endl;
     }
+#if 0
+    for (int i = 0; i <= maxK; i++)
+    {
+        cout << "i: " << (i + 1) << " solutionBruteForce: " << solutionBruteForce[i] << " solutionOptimised: " << solutionOptimised[i];
+        if (solutionOptimised[i] != solutionBruteForce[i])
+            cout << " ** DIFFERENT ** " << (solutionOptimised[i] - solutionBruteForce[i]);
+        cout << endl;
+    }
+#endif
 
     assert(solutionOptimised == solutionBruteForce);
 #else
