@@ -161,29 +161,29 @@ int solveOptimised(int64_t N, int64_t M)
         if (N == 2)
         {
             // M == 3 is the only possibility.
-            if (M == 3)
-            {
-                // Line connecting them, plus self-loop for each vertex.
-                return 2;
-            }
+            assert(M == 3);
+            // Line connecting them, plus self-loop for each vertex.
+            return 2;
 
         }
     }
     // M > 2 * N.
+    assert(M > 2 * N);
     // For M == 2 * N, we have a cycle through all vertice and a self-loop through
     // each vertex. The strategy from here on in is just to connect the pair of 
     // vertices which have the smallest degrees until we're done.
     // It can be shown that we can fast-forward through the process using the formulae below.
+    const auto initialHighestVertexDegree = 4; // M == 2 * N + 1 has a vertex of degree 4, and it just gets worse from there!
     if ((N % 2) == 0)
     {
-        return (M - 2 * N - 1) / (N / 2) + 4;
+        const auto numCompleteLayerings = (M - (2 * N + 1)) / (N / 2);
+        return numCompleteLayerings + initialHighestVertexDegree;
     }
     else
     {
-        const int blah = (M - 2 * N - 1) / N;
-        const int blah2 = (M - 2 * N - 1) % N;
-        const int wee = (4 + 2 * blah + ((blah2 >= (N - 1) / 2) ? 1 : 0));
-        return wee;
+        const auto numCompleteDoubleLayerings = (M - 2 * N - 1) / N;
+        const auto progressThroughLastLayering = (M - 2 * N - 1) % N;
+        return (initialHighestVertexDegree + 2 * numCompleteDoubleLayerings + ((progressThroughLastLayering >= (N - 1) / 2) ? 1 : 0));
     }
 }
 
