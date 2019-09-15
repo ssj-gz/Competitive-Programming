@@ -201,9 +201,33 @@ struct Query
 };
 
 
-vector<int64_t> solveOptimised(const vector<Query>& queries, const vector<LookupForB>& lookup)
+vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>& lookup)
 {
     vector<int64_t> answerForQueries;
+
+    vector<Query*> queriesByIncreasingMaxA;
+    for (auto& query : queries)
+    {
+        queriesByIncreasingMaxA.push_back(&query);
+    }
+    sort(queriesByIncreasingMaxA.begin(), queriesByIncreasingMaxA.end(), [](const auto& queryLhs, const auto& queryRhs)
+            {
+                if (queryLhs->maxA != queryRhs->maxA)
+                    return queryLhs->maxA < queryRhs->maxA;
+                return queryLhs < queryRhs;
+            });
+    vector<Query*> queriesByDecreasingMaxC;
+    for (auto& query : queries)
+    {
+        queriesByDecreasingMaxC.push_back(&query);
+    }
+    sort(queriesByDecreasingMaxC.begin(), queriesByDecreasingMaxC.end(), [](const auto& queryLhs, const auto& queryRhs)
+            {
+                if (queryLhs->maxC != queryRhs->maxC)
+                    return queryLhs->maxC > queryRhs->maxC;
+                return queryLhs < queryRhs;
+            });
+
     for (const auto& query : queries)
     {
         const auto maxA = query.maxA;
