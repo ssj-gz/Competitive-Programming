@@ -129,7 +129,8 @@ int findMinHighestVertexDegree(int64_t N, int64_t M)
     {
         if (N >= 2)
         {
-            // For N > 2, a cycle through all vertices.  At least one will have degree 2.
+            // For N > 2, a line through all vertices, then a self-loop through a vertex with degree 1.  At least one will have degree 2.
+            // None will have degree 3.
             // For N == 2, connect the pair and add a self-loop from one to itself.
             // Exactly one will have degree 2.
             return 2;
@@ -147,9 +148,9 @@ int findMinHighestVertexDegree(int64_t N, int64_t M)
         assert(N >= 2);
         return 2;
     }
-    if (M > N && M <= 2 * N)
+    if (M > N + 1 && M <= 2 * N)
     {
-        // For N > 2, a cycle through all vertices, then a self-loop from each vertex to iself
+        // For N > 2, a cycle through all vertices, then a self-loop from each vertex to itself
         // until M is exhausted.  At least one self-loop will be required; this will have
         // degree 3.  Vertices without self-loops will have degree 2.
         if (N > 2)
