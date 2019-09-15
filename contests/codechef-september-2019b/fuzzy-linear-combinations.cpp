@@ -345,45 +345,68 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+        const int rootMaxN = sqrt(1'000'000'000UL);
+        vector<char> isPrime(1'000'000 + 1, true);
 
-        //const int N = rand() % 200 + 1;
-        const int N = 5;
-        //const int N = 10;
-        int64_t maxA = rand() % 1'000'000'000ULL + 1;
-        int64_t minA = maxA - rand() % 10000;
-        if (minA < 1)
-            minA = 1;
-
-        if (rand() % 3 == 0)
+        // Sieve of Eratosthenes.  To help with factorising numbers, compute a lookup table for
+        // primes up to 1'000'000, but store a list of primes for only up to rootMaxN.
+        vector<int> primesUpToRootMaxN;
+        for (int64_t factor = 2; factor <= 1'000'000; factor++)
         {
-            maxA = rand() % 1000 + 1;
-            minA = 1;
+            const bool isFactorPrime = isPrime[factor];
+            assert(factor < isPrime.size());
+            if (isFactorPrime)
+            {
+                if (factor <= rootMaxN)
+                {
+                    primesUpToRootMaxN.push_back(factor);
+                }
+            }
+            for (int64_t multiple = factor * factor; multiple < isPrime.size(); multiple += factor)
+            {
+                if (!isPrime[multiple] && !isFactorPrime)
+                {
+                    // This multiple has already been marked, and since factor is not prime,
+                    // all subsequent multiples will already have been marked (by any of the
+                    // prime factors of factor!), so we can stop here.
+                    break;
+                }
+                isPrime[multiple] = false;
+            }
         }
-        assert(minA < maxA);
+
+        const int N = 100'000;
+        int64_t maxA = 1'000'000'000ULL;
+        vector<int> largePrimes;
+        int64_t current = maxA;
+        for (int i = 0; i < N / 2; i++)
+        {
+            while (factors(current, primesUpToRootMaxN, isPrime).size() != 2)
+            {
+                current--;
+            }
+            largePrimes.push_back(current);
+            cerr << " Found prime: " << current << endl;
+            current--;
+        }
 
         cout << N << endl;
-
-        for (int i = 0; i < N; i++)
+        for (int i = 0; i < largePrimes.size(); i++)
         {
-            if (rand() % 4 == 0)
-            {
-                cout << minA + (rand() % (maxA - minA)) << " ";
-            }
-            else
-            {
-                cout << 479001600 << " ";
-            }
+            cout << largePrimes[i] << " "<< largePrimes[i] << " ";
         }
         cout << endl;
 
+
         //const int Q = rand() % 1000 + 1;
         //const int Q = 100'000;
-        const int Q = 1;
+        const int Q = largePrimes.size() * 2;
         cout << Q << endl;
 
-        for (int i = 0; i < Q; i++)
+        for (int i = 0; i < largePrimes.size(); i++)
         {
-            cout << ((rand() % 1'000'000) + 1) << " ";
+            cout << largePrimes[i] << endl;
+            cout << largePrimes[i] << endl;
         }
         cout << endl;
 
