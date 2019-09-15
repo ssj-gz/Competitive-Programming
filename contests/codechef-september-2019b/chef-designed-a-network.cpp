@@ -91,7 +91,7 @@ int solveBruteForce(int64_t N, int64_t M)
     return maxNodeDegree;
 }
 
-int solveOptimised(int64_t N, int64_t M)
+int findMinHighestVertexDegree(int64_t N, int64_t M)
 {
     if (M == 0 && N == 1)
     {
@@ -144,10 +144,8 @@ int solveOptimised(int64_t N, int64_t M)
     {
         // Line through all vertices, then self-loops through the two vertices that have degree 1 -
         // max degree then is two.
-        if (N > 2)
-        {
-            return 2;
-        }
+        assert(N >= 2);
+        return 2;
     }
     if (M > N && M <= 2 * N)
     {
@@ -197,8 +195,7 @@ int main(int argc, char* argv[])
         const auto N = read<int64_t>();
         const auto M = read<int64_t>();
 
-        const auto solutionOptimised = solveOptimised(N, M);
-        cout << solutionOptimised << endl;
+        cout << findMinHighestVertexDegree(N, M) << endl;
     }
 
     assert(cin);
