@@ -308,6 +308,9 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
             }
 
             {
+                deque<Query*> pendingQueriesRepetitionCIncreasingMaxA(queriesByIncreasingMaxA.begin(), queriesByIncreasingMaxA.end());
+                deque<Query*> pendingQueriesRepetitionCDecreasingMaxC(queriesByDecreasingMaxC.begin(), queriesByDecreasingMaxC.end());
+
                 const auto& repetitionOfCLookup = lookupForB.repetitionsOfC;
 
                 int beginIndex = -1;
@@ -315,6 +318,18 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
 
                 for (int i = 0; i < repetitionOfCLookup.size(); i++)
                 {
+                    while (!pendingQueriesRepetitionCDecreasingMaxC.empty() && pendingQueriesRepetitionCDecreasingMaxC.front()->maxC >= repetitionOfCLookup[i].C)
+                    {
+                        //cout << " set beginIndexInRepetitionC for query: " << pendingQueriesRepetitionCDecreasingMaxC.front() << " to " << A << endl;
+                        pendingQueriesRepetitionCDecreasingMaxC.front()->beginIndexInRepetitionOfC = i;
+                        pendingQueriesRepetitionCDecreasingMaxC.pop_front();
+                    }
+                    while (!pendingQueriesRepetitionCIncreasingMaxA.empty() && pendingQueriesRepetitionCIncreasingMaxA.front()->maxA < repetitionOfCLookup[i].finalA)
+                    {
+                        //cout << " set endIndexInRepetitionC for query: " << pendingQueriesRepetitionCIncreasingMaxA.front() << " to " << (A - 1) << endl;
+                        pendingQueriesRepetitionCIncreasingMaxA.front()->endIndexInRepetitionOfC = i - 1;
+                        pendingQueriesRepetitionCIncreasingMaxA.pop_front();
+                    }
                     if (repetitionOfCLookup[i].C <= maxC && beginIndex == -1)
                     {
                         beginIndex = i;
@@ -324,8 +339,31 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
                         endIndex = i;
                     }
                 }
+                while (!pendingQueriesRepetitionCIncreasingMaxA.empty())
+                {
+                    if (repetitionOfCLookup.back().finalA <= pendingQueriesRepetitionCIncreasingMaxA.front()->maxA)
+                    {
+                        pendingQueriesRepetitionCIncreasingMaxA.front()->endIndexInRepetitionOfC = repetitionOfCLookup.size() - 1;
+                        //cout << " set endIndexInRepetitionC for query: " << pendingQueriesRepetitionCIncreasingMaxA.front() << " to " << maxIndex << endl;
+                    }
+                    pendingQueriesRepetitionCIncreasingMaxA.pop_front();
+                }
+                for (auto query : queriesByIncreasingMaxA)
+                {
+                    int& endIndexForQuery = query->endIndexInRepetitionOfC;
+                    if (endIndexForQuery != -1 && endIndexForQuery + 1 < repetitionOfCLookup.size() && repetitionOfCLookup[endIndexForQuery].finalA < query->maxA)
+                    {
+                        endIndexForQuery++;
+                        //cout << " set endIndexInRepetitionC for query: " << pendingQueriesRepetitionCIncreasingMaxA.front() << " to " << maxIndex << endl;
+                    }
+                    //pendingQueriesRepetitionCIncreasingMaxA.pop_front();
+                }
                 if (endIndex != -1 && repetitionOfCLookup[endIndex].finalA < maxA && endIndex + 1 < repetitionOfCLookup.size())
                     endIndex++;
+
+                //cout << "query: " << &query << " beginIndex: " << beginIndex << " endIndex: " << endIndex << " opt beginIndex: " << query.beginIndexInRepetitionOfC << " opt endIndex: " << query.endIndexInRepetitionOfC << endl;
+                assert(beginIndex == query.beginIndexInRepetitionOfC);
+                assert(endIndex == query.endIndexInRepetitionOfC);
 
                 if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
                 {
