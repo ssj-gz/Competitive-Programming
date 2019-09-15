@@ -187,90 +187,112 @@ vector<LookupForB> computeLookups(int64_t maxB)
     return lookup;
 }
 
-int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<LookupForB>& lookup)
+struct Query
 {
-    ModNum result = 0;
-    for (int64_t B = 1; B <= maxB; B++)
+    int64_t maxA;
+    int64_t maxB;
+    int64_t maxC;
+
+    int beginIndexInCForA = -1;
+    int endIndexInCForA = -1;
+
+    int beginIndexInRepetitionOfC = -1;
+    int endIndexInRepetitionOfC = -1;
+};
+
+
+vector<int64_t> solveOptimised(const vector<Query>& queries, const vector<LookupForB>& lookup)
+{
+    vector<int64_t> answerForQueries;
+    for (const auto& query : queries)
     {
-        auto& lookupForB = lookup[B];
-
-        const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
+        const auto maxA = query.maxA;
+        const auto maxB = query.maxB;
+        const auto maxC = query.maxC;
+        
+        ModNum result = 0;
+        for (int64_t B = 1; B <= maxB; B++)
         {
-            const auto& cForALookup = lookupForB.cForA;
+            auto& lookupForB = lookup[B];
 
-
-            int beginIndex = -1;
-            int endIndex = -1;
-            for (int64_t A = 2; A <= maxIndex; A++)
+            const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
             {
-                if (cForALookup[A].C <= maxC && beginIndex == -1)
+                const auto& cForALookup = lookupForB.cForA;
+
+                int beginIndex = -1;
+                int endIndex = -1;
+                for (int64_t A = 2; A <= maxIndex; A++)
                 {
-                    beginIndex = A;
+                    if (cForALookup[A].C <= maxC && beginIndex == -1)
+                    {
+                        beginIndex = A;
+                    }
+                    if (A <= maxA)
+                    {
+                        endIndex = A;
+                    }
                 }
-                if (A <= maxA)
+
+                if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
                 {
-                    endIndex = A;
+                    result += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
+                    result -= cForALookup[endIndex].cumulativeC;
+                    if (beginIndex > 0)
+                    {
+                        result += cForALookup[beginIndex - 1].cumulativeC;
+                    }
                 }
             }
 
-            if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
-                result += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
-                result -= cForALookup[endIndex].cumulativeC;
-                if (beginIndex > 0)
+                const auto& repetitionOfCLookup = lookupForB.repetitionsOfC;
+
+                int beginIndex = -1;
+                int endIndex = -1;
+
+                for (int i = 0; i < repetitionOfCLookup.size(); i++)
                 {
-                    result += cForALookup[beginIndex - 1].cumulativeC;
+                    if (repetitionOfCLookup[i].C <= maxC && beginIndex == -1)
+                    {
+                        beginIndex = i;
+                    }
+                    if (repetitionOfCLookup[i].finalA <= maxA)
+                    {
+                        endIndex = i;
+                    }
+                }
+                if (endIndex != -1 && repetitionOfCLookup[endIndex].finalA < maxA && endIndex + 1 < repetitionOfCLookup.size())
+                    endIndex++;
+
+                if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
+                {
+                    const int64_t numAsInRange = (repetitionOfCLookup[endIndex].finalA - (repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps));
+                    result += ModNum(maxC + 1) * numAsInRange - repetitionOfCLookup[endIndex].cumulativeCTimesReps;
+                    if (beginIndex > 0)
+                    {
+                        result += repetitionOfCLookup[beginIndex - 1].cumulativeCTimesReps;
+                    }
+                    if (repetitionOfCLookup[endIndex].finalA > maxA)
+                    {
+                        const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
+                        assert(numAOverCounted >= 0);
+                        // Remove overcount.
+                        result -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].C) * numAOverCounted;
+                    }
                 }
             }
+
+            const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
+            if (lastProcessedA < maxA)
+            {
+                result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
+            }
+
         }
-
-        {
-            const auto& repetitionOfCLookup = lookupForB.repetitionsOfC;
-
-            int beginIndex = -1;
-            int endIndex = -1;
-
-            for (int i = 0; i < repetitionOfCLookup.size(); i++)
-            {
-                if (repetitionOfCLookup[i].C <= maxC && beginIndex == -1)
-                {
-                    beginIndex = i;
-                }
-                if (repetitionOfCLookup[i].finalA <= maxA)
-                {
-                    endIndex = i;
-                }
-            }
-            if (endIndex != -1 && repetitionOfCLookup[endIndex].finalA < maxA && endIndex + 1 < repetitionOfCLookup.size())
-                endIndex++;
-
-            if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
-            {
-                const int64_t numAsInRange = (repetitionOfCLookup[endIndex].finalA - (repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps));
-                result += ModNum(maxC + 1) * numAsInRange - repetitionOfCLookup[endIndex].cumulativeCTimesReps;
-                if (beginIndex > 0)
-                {
-                    result += repetitionOfCLookup[beginIndex - 1].cumulativeCTimesReps;
-                }
-                if (repetitionOfCLookup[endIndex].finalA > maxA)
-                {
-                    const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
-                    assert(numAOverCounted >= 0);
-                    // Remove overcount.
-                    result -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].C) * numAOverCounted;
-                }
-            }
-        }
-
-        const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
-        if (lastProcessedA < maxA)
-        {
-            result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
-        }
-
+        answerForQueries.push_back(result.value());
     }
     
-    return result.value();
+    return answerForQueries;
 }
 
 
@@ -279,13 +301,6 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
-
-    struct Query
-    {
-        int64_t maxA;
-        int64_t maxB;
-        int64_t maxC;
-    };
 
     vector<Query> queries;
 
@@ -298,14 +313,10 @@ int main(int argc, char* argv[])
 
     const auto& lookups = computeLookups(largestMaxB);
 
-    for (int t = 0; t < T; t++)
+    const auto solutionsForQueries = solveOptimised(queries, lookups);
+    for (const auto& solution : solutionsForQueries)
     {
-        const int64_t maxA = queries[t].maxA;
-        const int64_t maxB = queries[t].maxB;
-        const int64_t maxC = queries[t].maxC;
-
-        const auto solutionOptimised = solveOptimised(maxA, maxB, maxC, lookups);
-        cout << solutionOptimised << endl;
+        cout << solution << endl;
     }
 
     assert(cin);
