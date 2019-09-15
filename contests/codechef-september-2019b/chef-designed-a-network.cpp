@@ -181,8 +181,8 @@ int solveOptimised(int64_t N, int64_t M)
     }
     else
     {
-        const auto numCompleteDoubleLayerings = (M - 2 * N - 1) / N;
-        const auto progressThroughLastLayering = (M - 2 * N - 1) % N;
+        const auto numCompleteDoubleLayerings = (M - (2 * N + 1)) / N;
+        const auto progressThroughLastLayering = (M - (2 * N + 1)) % N;
         return (initialHighestVertexDegree + 2 * numCompleteDoubleLayerings + ((progressThroughLastLayering >= (N - 1) / 2) ? 1 : 0));
     }
 }
