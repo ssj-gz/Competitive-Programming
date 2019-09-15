@@ -47,14 +47,13 @@ int solveBruteForce(int64_t N, int64_t M)
     // add pair between the two vertices with lowest degree.
     for (int i = N; i <= M; i++)
     {
-#if 0
-        cout << "i: " << i << " node degrees: " << endl;
+        cout << "Placing next edge; current node degrees: " << endl;
         for (const auto x : nodeDegree)
         {
             cout << x << " ";
         }
         cout << endl;
-#endif
+
         vector<int> nodeIndicesByDegree;
         for (int i = 0; i < N; i++)
         {
@@ -76,6 +75,7 @@ int solveBruteForce(int64_t N, int64_t M)
                 nodeHasSelfLoop[nodeIndex] = true;
                 nodeDegree[nodeIndex]++;
                 addedSelfLoop = true;
+                cout << " added a self-loop to node: " << (nodeIndex + 1) << endl;
                 break;
             }
         }
@@ -84,6 +84,7 @@ int solveBruteForce(int64_t N, int64_t M)
             // Connect two lowest-degree vertices.
             nodeDegree[nodeIndicesByDegree[0]]++;
             nodeDegree[nodeIndicesByDegree[1]]++;
+            cout << " added an edge between nodes: " << (nodeIndicesByDegree[0] + 1) << " and " << (nodeIndicesByDegree[1] + 1) << endl;
         }
         const int maxNodeDegree = *max_element(nodeDegree.begin(), nodeDegree.end());
         cout << "N: " << N << " edges placed: " << i << " maxNodeDegree: " << maxNodeDegree << endl;
