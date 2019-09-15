@@ -199,6 +199,9 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             const auto& cForALookup = lookupForB.cForA;
 
 
+            // NB: since cForALookup is in increasing order of A and non-increasing order
+            // of C, we could find beginIndex and endIndex in O(log2 maxA).
+            // Can't be bothered, though :)
             int beginIndex = -1;
             int endIndex = -1;
             for (int64_t A = 2; A <= maxIndex; A++)
@@ -230,6 +233,9 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             int beginIndex = -1;
             int endIndex = -1;
 
+            // NB: since repetitionsOfC is in increasing order of A and non-increasing order
+            // of C, we could find beginIndex and endIndex in O(log2 maxA).
+            // Can't be bothered, though :)
             for (int i = 0; i < repetitionOfCLookup.size(); i++)
             {
                 if (repetitionOfCLookup[i].C <= maxC && beginIndex == -1)
