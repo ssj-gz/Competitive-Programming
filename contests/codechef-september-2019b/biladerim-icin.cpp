@@ -92,13 +92,13 @@ int64_t divCeiling(int64_t x, int64_t y)
 
 struct CForA
 {
-    int64_t C = std::numeric_limits<int64_t>::max();
+    int64_t c = std::numeric_limits<int64_t>::max();
     ModNum cumulativeC;
 };
 
 struct RepetitionOfC
 {
-    int64_t C = -1;
+    int64_t c = -1;
     int64_t numReps = -1;
     int64_t finalA = -1;
     ModNum cumulativeCTimesReps;
@@ -114,50 +114,54 @@ vector<LookupForB> computeLookups(int64_t maxB)
 {
     vector<LookupForB> lookup(maxB + 1);
 
-    for (int B = 1; B <= maxB; B++)
+    for (int b = 1; b <= maxB; b++)
     {
-        const int64_t maxA = B * B + 1;
-        const int64_t sqrtMaxA = sqrt(maxA);
-        auto& lookupForB = lookup[B];
-        if (B == 1)
+        const int64_t alwaysValidA = b * b + 1; // (alwaysValidA - 1) * (c - 2) > b * b for all c >= 1.
+        const int64_t sqrtAlwaysValidA = sqrt(alwaysValidA); // The value "sqrtAlwaysValidA" is ~= b.
+        auto& lookupForB = lookup[b];
+        if (b == 1)
         {
-            // Ugly - special case for B == 1.
+            // Ugly - special case for b == 1.
             lookupForB.cForA.resize(1);
             lookupForB.repetitionsOfC.push_back({std::numeric_limits<int64_t>::max(), 1, 1});
             lookupForB.repetitionsOfC.push_back({3, 1, 2});
         }
-        else if (B == 2)
+        else if (b == 2)
         {
-            // Ugly - special case for B == 2.
-            lookupForB.cForA.resize(sqrtMaxA + 1);
-            lookupForB.cForA[2].C = 6;
+            // Ugly - special case for b == 2.
+            lookupForB.cForA.resize(sqrtAlwaysValidA + 1);
+            lookupForB.cForA[2].c = 6;
             lookupForB.repetitionsOfC.push_back({4, 1, 3});
             lookupForB.repetitionsOfC.push_back({3, 2, 5});
         }
         else
         {
-            lookupForB.cForA.resize(sqrtMaxA + 1);
-            for (int A = 2; A <= sqrtMaxA; A++)
+            // Compute cForA.
+            lookupForB.cForA.resize(sqrtAlwaysValidA + 1);
+            for (int a = 2; a <= sqrtAlwaysValidA; a++)
             {
-                const int C = divCeiling(B * B + 1, A - 1) + 1;
-                lookupForB.cForA[A].C = C;
+                const int c = divCeiling(b * b + 1, a - 1) + 1;
+                lookupForB.cForA[a].c = c;
             }
-            const int64_t finalC = lookupForB.cForA.back().C;
+            const int64_t finalC = lookupForB.cForA.back().c;
 
             int64_t cRepeated = finalC;
-            int64_t aAfterCRepeats = sqrtMaxA;
+            int64_t aAfterCRepeats = sqrtAlwaysValidA;
 
-            // This is a bit of a bodge - not sure why it's needed, to be honest XD
-            cRepeated--;
-            aAfterCRepeats++;
-            lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
-            cRepeated--;
-            aAfterCRepeats++;
-            lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
-            cRepeated--;
-            for (int i = sqrtMaxA - 1; i >= 2; i--)
             {
-                const int64_t numRepetitions = lookupForB.cForA[i].C - lookupForB.cForA[i + 1].C;
+                // This is a bit of a bodge - not sure why it's needed, to be honest XD
+                cRepeated--;
+                aAfterCRepeats++;
+                lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+                cRepeated--;
+                aAfterCRepeats++;
+                lookupForB.repetitionsOfC.push_back({cRepeated, 1, aAfterCRepeats});
+                cRepeated--;
+            }
+            // Use the "symmetry" to compute repetitionsOfC using cForA.
+            for (int i = sqrtAlwaysValidA - 1; i >= 2; i--)
+            {
+                const int64_t numRepetitions = lookupForB.cForA[i].c - lookupForB.cForA[i + 1].c;
                 assert(numRepetitions >= 1);
                 aAfterCRepeats += numRepetitions;
                 lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
@@ -168,17 +172,17 @@ vector<LookupForB> computeLookups(int64_t maxB)
         // Calculate cumulativeC/ cumulativeCTimesReps for cForA/ repetitionsOfC.
         {
             ModNum cumulativeCForA;
-            for (int A = 2; A <= sqrtMaxA; A++)
+            for (int a = 2; a <= sqrtAlwaysValidA; a++)
             {
-                cumulativeCForA += lookupForB.cForA[A].C;
-                lookupForB.cForA[A].cumulativeC = cumulativeCForA;
+                cumulativeCForA += lookupForB.cForA[a].c;
+                lookupForB.cForA[a].cumulativeC = cumulativeCForA;
             }
         }
         {
             ModNum cumulativeCTimesReps;
             for (auto& repetitionOfC : lookupForB.repetitionsOfC)
             {
-                cumulativeCTimesReps += ModNum(repetitionOfC.C) * repetitionOfC.numReps;
+                cumulativeCTimesReps += ModNum(repetitionOfC.c) * repetitionOfC.numReps;
                 repetitionOfC.cumulativeCTimesReps = cumulativeCTimesReps;
             }
         }
@@ -190,29 +194,29 @@ vector<LookupForB> computeLookups(int64_t maxB)
 int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<LookupForB>& lookup)
 {
     ModNum result = 0;
-    for (int64_t B = 1; B <= maxB; B++)
+    for (int64_t b = 1; b <= maxB; b++)
     {
-        auto& lookupForB = lookup[B];
+        auto& lookupForB = lookup[b];
 
         const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
         {
             const auto& cForALookup = lookupForB.cForA;
 
 
-            // NB: since cForALookup is in increasing order of A and non-increasing order
-            // of C, we could find beginIndex and endIndex in O(log2 maxA).
+            // NB: since cForALookup is in increasing order of a and non-increasing order
+            // of c, we could find beginIndex and endIndex in O(log2 maxA).
             // Can't be bothered, though :)
             int beginIndex = -1;
             int endIndex = -1;
-            for (int64_t A = 2; A <= maxIndex; A++)
+            for (int64_t a = 2; a <= maxIndex; a++)
             {
-                if (cForALookup[A].C <= maxC && beginIndex == -1)
+                if (cForALookup[a].c <= maxC && beginIndex == -1)
                 {
-                    beginIndex = A;
+                    beginIndex = a;
                 }
-                if (A <= maxA)
+                if (a <= maxA)
                 {
-                    endIndex = A;
+                    endIndex = a;
                 }
             }
 
@@ -233,12 +237,12 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             int beginIndex = -1;
             int endIndex = -1;
 
-            // NB: since repetitionsOfC is in increasing order of A and non-increasing order
-            // of C, we could find beginIndex and endIndex in O(log2 maxA).
+            // NB: since repetitionsOfC is in increasing order of a and non-increasing order
+            // of c, we could find beginIndex and endIndex in O(log2 maxA).
             // Can't be bothered, though :)
             for (int i = 0; i < repetitionOfCLookup.size(); i++)
             {
-                if (repetitionOfCLookup[i].C <= maxC && beginIndex == -1)
+                if (repetitionOfCLookup[i].c <= maxC && beginIndex == -1)
                 {
                     beginIndex = i;
                 }
@@ -268,8 +272,8 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
                 {
                     const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
                     assert(numAOverCounted >= 0);
-                    // Overcounted the contribution of C >= repetitionOfCLookup[endIndex].C by numAOverCounted times - correct for this.
-                    result -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].C) * numAOverCounted;
+                    // Overcounted the contribution of c >= repetitionOfCLookup[endIndex].c by numAOverCounted times - correct for this.
+                    result -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].c) * numAOverCounted;
                 }
             }
         }
@@ -277,8 +281,8 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
         const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
         if (lastProcessedA < maxA)
         {
-            // There are A such that finalA < A <= maxA; incorporate them into the results - each such
-            // A is satisfied by all C.
+            // There exist a such that finalA < a <= maxA; incorporate them into the results - each such
+            // a is satisfied by all c.
             result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
         }
 
@@ -290,6 +294,37 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
 int main(int argc, char* argv[])
 {
+    //   X: 31 Y: 1 divCeiling(X, Y):  31 
+    //   X: 31 Y: 2 divCeiling(X, Y):  16 (31 - 16 = 15)
+    //   X: 31 Y: 3 divCeiling(X, Y):  11 (16 - 11 = 5)
+    //   X: 31 Y: 4 divCeiling(X, Y):  8  (11 - 8  = 3)
+    //   X: 31 Y: 5 divCeiling(X, Y):  7  (8 - 7   = 1)   ┐ 
+    //   X: 31 Y: 6 divCeiling(X, Y):  6  (7 - 6   = 1)   ┘ sqrt(X) is someone around here.
+    //   X: 31 Y: 7 divCeiling(X, Y):  5  ] 1 repetitions
+    //   X: 31 Y: 8 divCeiling(X, Y):  4  ┐
+    //   X: 31 Y: 9 divCeiling(X, Y):  4  ├ 3 repetitions
+    //   X: 31 Y: 10 divCeiling(X, Y): 4  ┘
+    //   X: 31 Y: 11 divCeiling(X, Y): 3  ┐
+    //   X: 31 Y: 12 divCeiling(X, Y): 3  │
+    //   X: 31 Y: 13 divCeiling(X, Y): 3  ├ 5 repetitions
+    //   X: 31 Y: 14 divCeiling(X, Y): 3  │
+    //   X: 31 Y: 15 divCeiling(X, Y): 3  ┘
+    //   X: 31 Y: 16 divCeiling(X, Y): 2  ┐
+    //   X: 31 Y: 17 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 18 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 19 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 20 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 21 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 22 divCeiling(X, Y): 2  ├ 15 repetitions
+    //   X: 31 Y: 23 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 24 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 25 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 26 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 27 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 28 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 29 divCeiling(X, Y): 2  │
+    //   X: 31 Y: 30 divCeiling(X, Y): 2  ┘
+    //   X: 31 Y: 31 divCeiling(X, Y): 1
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
