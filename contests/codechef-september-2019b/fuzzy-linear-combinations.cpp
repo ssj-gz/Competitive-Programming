@@ -217,10 +217,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     vector<vector<int64_t>> factorsOfA(n);
     map<int64_t, vector<int64_t>> factorsLookup;
-    // Micro-optimisation; for small factors, store list of positions in a vector-of-vectors;
-    // else, a map of vectors.
+
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
-    vector<vector<int>> positionsWithFactorSmall(maxK + 1);
 
     vector<int> maxRightForLowerGcd(n);
     for (int i = 0; i < n; i++)
@@ -261,7 +259,7 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
                 }
 
             }
-            auto& positionsForFactor = (factor < positionsWithFactorSmall.size()) ? positionsWithFactorSmall[factor] :  positionsWithFactorDecreasing[factor];
+            auto& positionsForFactor = positionsWithFactorDecreasing[factor];
             if (addPrevPos)
                 positionsForFactor.push_back(i - 1);
             positionsForFactor.push_back(i);
@@ -270,21 +268,8 @@ vector<int64_t> solveOptimised(const vector<int64_t>& a, const vector<int>& quer
 
     vector<int64_t> numSequencesWithGcd(maxK + 1);
 
-    // Combine the small and large factors into one so that we can easily iterate over it.
-    vector<std::pair<int64_t, vector<int>>> positionsWithFactorDecreasingCombined;
-    for (auto& gcdAndPositions : positionsWithFactorDecreasing)
-    {
-        positionsWithFactorDecreasingCombined.push_back({gcdAndPositions.first, gcdAndPositions.second});
-    }
-    for (int i = maxK; i >= 1; i--)
-    {
-        if (!positionsWithFactorSmall[i].empty())
-        {
-            positionsWithFactorDecreasingCombined.push_back({i, positionsWithFactorSmall[i]});
-        }
-    }
 
-    for (auto& gcdAndPositions : positionsWithFactorDecreasingCombined)
+    for (auto& gcdAndPositions : positionsWithFactorDecreasing)
     {
         const auto& gcd = gcdAndPositions.first;
         auto& positions = gcdAndPositions.second;
