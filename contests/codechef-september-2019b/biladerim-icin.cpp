@@ -200,7 +200,7 @@ struct Query
     int beginIndexInRepetitionOfC = -1;
     int endIndexInRepetitionOfC = -1;
 
-    int64_t answer = -1;
+    ModNum answer;
 };
 
 template <typename Comparator>
@@ -386,12 +386,58 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
             const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
             if (lastProcessedA < maxA)
             {
+                // In repetitionsOfC part, we didn't consider the values of A, finalA < A <= maxA - count them now.
                 result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
             }
 
             for (auto& query : queries)
             {
                 //cout << " set: beginIndexInRepetitionOfC for query: " << &query << " to -1" << endl;
+                ModNum& answer = query.answer;
+                {
+                    // CForA.
+                    const auto& cForALookup = lookupForB.cForA;
+                    const auto beginIndex = query.beginIndexInCForA;
+                    const auto endIndex = query.endIndexInCForA;
+                    if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
+                    {
+                        answer += ModNum(maxC + 1) * (endIndex - beginIndex + 1);
+                        answer -= cForALookup[endIndex].cumulativeC;
+                        if (beginIndex > 0)
+                        {
+                            answer += cForALookup[beginIndex - 1].cumulativeC;
+                        }
+                    }
+                }
+                {
+                    // Repetition of C.
+                    const auto& repetitionOfCLookup = lookupForB.repetitionsOfC;
+                    const auto beginIndex = query.beginIndexInRepetitionOfC;
+                    const auto endIndex = query.endIndexInRepetitionOfC;
+                    if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
+                    {
+                        const int64_t numAsInRange = (repetitionOfCLookup[endIndex].finalA - (repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps));
+                        answer += ModNum(maxC + 1) * numAsInRange - repetitionOfCLookup[endIndex].cumulativeCTimesReps;
+                        if (beginIndex > 0)
+                        {
+                            answer += repetitionOfCLookup[beginIndex - 1].cumulativeCTimesReps;
+                        }
+                        if (repetitionOfCLookup[endIndex].finalA > maxA)
+                        {
+                            const int64_t numAOverCounted = repetitionOfCLookup[endIndex].finalA - maxA;
+                            assert(numAOverCounted >= 0);
+                            // Remove overcount.
+                            answer -= (ModNum(maxC + 1) - repetitionOfCLookup[endIndex].C) * numAOverCounted;
+                        }
+                    }
+                    const int64_t lastProcessedA = lookupForB.repetitionsOfC.back().finalA;
+                    if (lastProcessedA < query.maxA)
+                    {
+                        // In repetitionsOfC part, we didn't consider the values of A, finalA < A <= maxA - count them now.
+                        answer += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
+                    }
+                }
+
                 query.beginIndexInRepetitionOfC = -1;
                 query.endIndexInRepetitionOfC = -1;
                 query.beginIndexInCForA = -1;
@@ -400,6 +446,10 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
         }
         answerForQueries.push_back(result.value());
 
+    }
+    for (int i = 0; i < queries.size(); i++)
+    {
+        cout << "query: " << &(queries[i]) << " answer: " << queries[i].answer << " result: " << answerForQueries[i] << endl;
     }
     
     return answerForQueries;
