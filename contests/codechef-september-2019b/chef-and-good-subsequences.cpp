@@ -163,7 +163,7 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
         int prime = -1;
         int numOccurrences = 0;
     };
-    vector<PrimeInfo> distinctPrimeOccurrences;
+    vector<PrimeInfo> distinctElementInfo;
 
     int prevPrime = -1;
     while (!a.empty())
@@ -171,60 +171,43 @@ ModNum solveOptimised(const int N, const int K, const vector<int>& aOriginal)
         const int prime = a.back();
         if (prime != prevPrime)
         {
-            distinctPrimeOccurrences.push_back({prime, 0});
+            distinctElementInfo.push_back({prime, 0});
         }
-        distinctPrimeOccurrences.back().numOccurrences++;
+        distinctElementInfo.back().numOccurrences++;
 
         a.pop_back();
         prevPrime = prime;
     }
-    const int numDistinctElements = distinctPrimeOccurrences.size(); 
+    const int numDistinctElements = distinctElementInfo.size(); 
 
-#if 0
-    for (const auto x : distinctPrimeOccurrences)
-    {
-        cout << " prime: " << x.prime << " occurs " << x.numOccurrences << " times" << endl;
-    }
-#endif
-
-    vector<vector<ModNum>> dp(numDistinctElements + 1, vector<ModNum>(numDistinctElements + 1, 0));
+    vector<vector<ModNum>> numWaysToChooseFromFirstDistinct(numDistinctElements + 1, vector<ModNum>(numDistinctElements + 1, 0));
     for (int i = 0; i <= numDistinctElements; i++)
     {
-        dp[i][0] = 1;
+        numWaysToChooseFromFirstDistinct[i][0] = 1;
     }
 
-    //vector<int> numForEachChoices(K + 1);
-    //solveBruteForce(N, K, aOriginal, numForEachChoices);
-    int64_t blah = 0;
-    for (int i = 1; i <= numDistinctElements; i++)
+    for (int firstNumDistinctElements = 1; firstNumDistinctElements <= numDistinctElements; firstNumDistinctElements++)
     {
-        for (int j = 1; j <= i; j++)
+        for (int numChosen = 1; numChosen <= firstNumDistinctElements; numChosen++)
         {
-            blah++;
-            assert(i - 1 >= 0);
-            dp[i][j] += dp[i - 1][j]; // Don't choose this number.
-            //cout << " i: " << i << " j: " << j << " dp[i - 1][j]: " << dp[i - 1][j] << endl;
-            assert(j - 1 >= 0 && j - 1 <= i - 1);
+            assert(firstNumDistinctElements - 1 >= 0);
+            numWaysToChooseFromFirstDistinct[firstNumDistinctElements][numChosen] += numWaysToChooseFromFirstDistinct[firstNumDistinctElements - 1][numChosen]; // Don't choose this number.
 
             // Do choose *one* from this bunch of same numbers.
-            //cout << " i: " << i << " j: " << j << " dp[i - 1][j - 1]: " << dp[i - 1][j - 1] << endl;
-            dp[i][j] += dp[i - 1][j - 1] * (distinctPrimeOccurrences[i - 1].numOccurrences);
+            assert(numChosen - 1 >= 0 && numChosen - 1 <= firstNumDistinctElements - 1);
+            const auto numOfThisDistinctElement = (distinctElementInfo[firstNumDistinctElements - 1].numOccurrences);
+            numWaysToChooseFromFirstDistinct[firstNumDistinctElements][numChosen] += 
+                numWaysToChooseFromFirstDistinct[firstNumDistinctElements - 1][numChosen - 1] * numOfThisDistinctElement;
 
-            //cout << "i: " << i << " j: " << j << " dp: " << dp[i][j] << endl;
         }
     }
-    //cout << "numDistinctElements: " << numDistinctElements << endl;
-    //cout << "blah: " << blah << endl;
 
     ModNum result;
 
-    for (int j = 0; j <= min(K, numDistinctElements); j++)
+    for (int numChosen = 0; numChosen <= min(K, numDistinctElements); numChosen++)
     {
-        //cout << "j: " << j << " numForEachChoices: " << numForEachChoices[j] << " dp:" << dp[numDistinctElements][j] << endl;
-        //assert(numForEachChoices[j] == dp[numDistinctElements][j]);
-        result += dp[numDistinctElements][j];
+        result += numWaysToChooseFromFirstDistinct[numDistinctElements][numChosen];
     }
-    
     
     return result;
 }
