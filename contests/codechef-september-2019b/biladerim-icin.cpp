@@ -4,6 +4,7 @@
 //
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -198,6 +199,20 @@ struct Query
 
     int beginIndexInRepetitionOfC = -1;
     int endIndexInRepetitionOfC = -1;
+
+    int64_t answer = -1;
+};
+
+template <typename Comparator>
+vector<Query*> getQueriesSortedBy(vector<Query>& queries, Comparator comparator)
+{
+    vector<Query*> sortedQueries;
+    for (auto& query : queries)
+    {
+        sortedQueries.push_back(&query);
+    }
+    sort(sortedQueries.begin(), sortedQueries.end(), comparator);
+    return sortedQueries;
 };
 
 
@@ -205,23 +220,13 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
 {
     vector<int64_t> answerForQueries;
 
-    vector<Query*> queriesByIncreasingMaxA;
-    for (auto& query : queries)
-    {
-        queriesByIncreasingMaxA.push_back(&query);
-    }
-    sort(queriesByIncreasingMaxA.begin(), queriesByIncreasingMaxA.end(), [](const auto& queryLhs, const auto& queryRhs)
+    const vector<Query*> queriesByIncreasingMaxA = getQueriesSortedBy(queries, [](const auto& queryLhs, const auto& queryRhs)
             {
                 if (queryLhs->maxA != queryRhs->maxA)
                     return queryLhs->maxA < queryRhs->maxA;
                 return queryLhs < queryRhs;
             });
-    vector<Query*> queriesByDecreasingMaxC;
-    for (auto& query : queries)
-    {
-        queriesByDecreasingMaxC.push_back(&query);
-    }
-    sort(queriesByDecreasingMaxC.begin(), queriesByDecreasingMaxC.end(), [](const auto& queryLhs, const auto& queryRhs)
+    const vector<Query*> queriesByDecreasingMaxC = getQueriesSortedBy(queries, [](const auto& queryLhs, const auto& queryRhs)
             {
                 if (queryLhs->maxC != queryRhs->maxC)
                     return queryLhs->maxC > queryRhs->maxC;
@@ -237,6 +242,9 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
         ModNum result = 0;
         for (int64_t B = 1; B <= maxB; B++)
         {
+            //cout << "B: " << B << endl;
+            deque<Query*> pendingQueriesCForAIncreasingMaxA(queriesByIncreasingMaxA.begin(), queriesByIncreasingMaxA.end());
+            deque<Query*> pendingQueriesCForADecreasingMaxC(queriesByDecreasingMaxC.begin(), queriesByDecreasingMaxC.end());
             auto& lookupForB = lookup[B];
 
             const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
@@ -247,15 +255,45 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
                 int endIndex = -1;
                 for (int64_t A = 2; A <= maxIndex; A++)
                 {
+                    while (!pendingQueriesCForADecreasingMaxC.empty() && pendingQueriesCForADecreasingMaxC.front()->maxC >= cForALookup[A].C)
+                    {
+                        //cout << " set beginIndexInCForA for query: " << pendingQueriesCForADecreasingMaxC.front() << " to " << A << endl;
+                        pendingQueriesCForADecreasingMaxC.front()->beginIndexInCForA = A;
+                        pendingQueriesCForADecreasingMaxC.pop_front();
+                    }
+                    while (!pendingQueriesCForAIncreasingMaxA.empty() && pendingQueriesCForAIncreasingMaxA.front()->maxA < A)
+                    {
+                        //cout << " set endIndexInCForA for query: " << pendingQueriesCForAIncreasingMaxA.front() << " to " << (A - 1) << endl;
+                        pendingQueriesCForAIncreasingMaxA.front()->endIndexInCForA = A - 1;
+                        pendingQueriesCForAIncreasingMaxA.pop_front();
+                    }
                     if (cForALookup[A].C <= maxC && beginIndex == -1)
                     {
+                        //cout << " set beginIndex to " << A << endl;
                         beginIndex = A;
                     }
                     if (A <= maxA)
                     {
+                        //cout << " set endIndex: A = " << A << endl;
                         endIndex = A;
                     }
                 }
+                if (maxIndex >= 2)
+                {
+                    while (!pendingQueriesCForAIncreasingMaxA.empty())
+                    {
+                        if (maxIndex <= pendingQueriesCForAIncreasingMaxA.front()->maxA)
+                        {
+                            pendingQueriesCForAIncreasingMaxA.front()->endIndexInCForA = maxIndex;
+                            //cout << " set endIndexInCForA for query: " << pendingQueriesCForAIncreasingMaxA.front() << " to " << maxIndex << endl;
+                            pendingQueriesCForAIncreasingMaxA.pop_front();
+                        }
+                    }
+                }
+
+                //cout << "query: " << &query << " beginIndex: " << beginIndex << " endIndex: " << endIndex << " opt beginIndex: " << query.beginIndexInCForA << " opt endIndex: " << query.endIndexInCForA << endl;
+                assert(beginIndex == query.beginIndexInCForA);
+                assert(endIndex == query.endIndexInCForA);
 
                 if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
                 {
@@ -312,8 +350,17 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
                 result += (ModNum(maxA) - lastProcessedA) * (maxC - 1);
             }
 
+            for (auto& query : queries)
+            {
+                //cout << " set: beginIndexInRepetitionOfC for query: " << &query << " to -1" << endl;
+                query.beginIndexInRepetitionOfC = -1;
+                query.endIndexInRepetitionOfC = -1;
+                query.beginIndexInCForA = -1;
+                query.endIndexInCForA = -1;
+            }
         }
         answerForQueries.push_back(result.value());
+
     }
     
     return answerForQueries;
