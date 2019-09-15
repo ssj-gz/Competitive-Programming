@@ -167,6 +167,7 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
 
     // For each factor (in decreasing order), store the list of positions p (increasing order!) of numbers in a
     // such factor divides a[p].
+    // Actually, we don't store *all* positions - we only store them if factor divides both a[p] and a[p - 1].
     map<int64_t, vector<int>, std::greater<>> positionsWithFactorDecreasing;
 
     vector<int> maxRightForLowerGcd(n);
@@ -182,6 +183,9 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
         const auto gcdWithPrev = (i >= 1) ? gcd(a[i], a[i - 1]) : 1;
         if (gcdWithPrev != a[i])
         {
+            // We won't be storing this a[i] for use in the "Compute numSequencesWithGcd[gcd] ..."
+            // block below; update numSequencesWithGcd[a[i]] and maxRightForLowerGcd now else
+            // they won't be updated at all.
             if (a[i] <= maxK)
             {
                 numSequencesWithGcd[a[i]]++;
@@ -197,6 +201,8 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
         }
     }
 
+    // Compute numSequencesWithGcd[gcd] for each gcd (a factor of one of the a[i]'s which
+    // was also a factor of a[i-1]) we stored.
     for (auto& gcdAndPositions : positionsWithFactorDecreasing)
     {
         const auto& gcd = gcdAndPositions.first;
@@ -217,7 +223,7 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
                 runLengthWithGcd = 1;
             }
 
-            // For each l, gcdRangeLeft <= l <= gcdRangeRight, gcd(l, position) == gcd.
+            // The range [gcdRangeLeft, gcdRangeRight] is precisely the range such that gcdRangeLeft <= l <= gcdRangeRight if and only if gcd(l, position) == gcd.
             const auto gcdRangeLeft = position - runLengthWithGcd + 1;
             const auto gcdRangeRight = min(position, maxRightForLowerGcd[position]);
 
@@ -235,6 +241,8 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
         }
     }
 
+    // Compute final numForK: for each gcd, add the numSequencesWithGcd[gcd] to all 
+    // K for which gcd divides K.
     vector<int64_t> numForK(maxK + 1);
     for (int gcd = 1; gcd <= maxK; gcd++)
     {
