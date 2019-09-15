@@ -243,12 +243,13 @@ vector<int64_t> solveOptimised(vector<Query>& queries, const vector<LookupForB>&
         for (int64_t B = 1; B <= maxB; B++)
         {
             //cout << "B: " << B << endl;
-            deque<Query*> pendingQueriesCForAIncreasingMaxA(queriesByIncreasingMaxA.begin(), queriesByIncreasingMaxA.end());
-            deque<Query*> pendingQueriesCForADecreasingMaxC(queriesByDecreasingMaxC.begin(), queriesByDecreasingMaxC.end());
             auto& lookupForB = lookup[B];
 
             const int maxIndex = min<int64_t>(lookupForB.cForA.size() - 1, maxA);
             {
+                deque<Query*> pendingQueriesCForAIncreasingMaxA(queriesByIncreasingMaxA.begin(), queriesByIncreasingMaxA.end());
+                deque<Query*> pendingQueriesCForADecreasingMaxC(queriesByDecreasingMaxC.begin(), queriesByDecreasingMaxC.end());
+
                 const auto& cForALookup = lookupForB.cForA;
 
                 int beginIndex = -1;
