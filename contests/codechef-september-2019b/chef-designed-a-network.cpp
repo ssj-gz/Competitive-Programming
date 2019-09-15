@@ -148,12 +148,6 @@ int solveOptimised(int64_t N, int64_t M)
         {
             return 2;
         }
-        if (N == 2)
-        {
-            // M = 3.  Join vertices, then self-loop from each vertex to itself.
-            return 2;
-        }
-
     }
     if (M > N && M <= 2 * N)
     {
