@@ -197,8 +197,6 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
         }
     }
 
-
-
     for (auto& gcdAndPositions : positionsWithFactorDecreasing)
     {
         const auto& gcd = gcdAndPositions.first;
@@ -210,7 +208,6 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
         auto previousPosition = -1;
         for (const auto position : positions)
         {
-            //cout << "  position: " << position << endl;
             if (previousPosition != -1 && position == previousPosition + 1)
             {
                 runLengthWithGcd++;
@@ -220,6 +217,7 @@ vector<int64_t> calcResultsForQueries(const vector<int64_t>& a, const vector<int
                 runLengthWithGcd = 1;
             }
 
+            // For each l, gcdRangeLeft <= l <= gcdRangeRight, gcd(l, position) == gcd.
             const auto gcdRangeLeft = position - runLengthWithGcd + 1;
             const auto gcdRangeRight = min(position, maxRightForLowerGcd[position]);
 
