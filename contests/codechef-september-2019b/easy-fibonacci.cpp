@@ -24,21 +24,21 @@ int main(int argc, char* argv[])
 
     vector<int> fibonacciMod10Cycle;
 
-    int64_t fn_minus_2_mod10 = 0;
-    int64_t fn_minus_1_mod10 = 1;
-    fibonacciMod10Cycle.push_back(fn_minus_2_mod10);
-    fibonacciMod10Cycle.push_back(fn_minus_1_mod10);
+    int64_t fnPrevPrevMod10 = 0;
+    int64_t fnPrevMod10 = 1;
+    fibonacciMod10Cycle.push_back(fnPrevPrevMod10);
+    fibonacciMod10Cycle.push_back(fnPrevMod10);
 
     int i = 0;
     while (true)
     {
-        int64_t fn_mod10 = (fn_minus_2_mod10 + fn_minus_1_mod10) % 10;
+        int64_t fn_mod10 = (fnPrevPrevMod10 + fnPrevMod10) % 10;
         fibonacciMod10Cycle.push_back(fn_mod10);
 
-        fn_minus_2_mod10 = fn_minus_1_mod10;
-        fn_minus_1_mod10 = fn_mod10;
+        fnPrevPrevMod10 = fnPrevMod10;
+        fnPrevMod10 = fn_mod10;
 
-        if (fn_minus_2_mod10 == 0 && fn_minus_1_mod10 == 1)
+        if (fnPrevPrevMod10 == 0 && fnPrevMod10 == 1)
         {
             // Everything will repeat from here on in.
             fibonacciMod10Cycle.pop_back();
