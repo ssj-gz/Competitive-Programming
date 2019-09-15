@@ -195,6 +195,22 @@ int solveOptimised(int64_t N, int64_t M)
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2)
+    {
+        for (int N = 1; N <= 100; N++)
+        {
+            for (int M = 0; M <= 100; M++)
+            {
+                cout << "Q: 2 lines" << endl;
+                cout << 1 << endl;
+                cout << N << " " << M << endl;
+                cout << "A: 1 lines" << endl;
+                cout << solveOptimised(N, M) << endl;
+            }
+        }
+        return 0;
+
+    }
     ios::sync_with_stdio(false);
     const auto T = read<int>();
 
