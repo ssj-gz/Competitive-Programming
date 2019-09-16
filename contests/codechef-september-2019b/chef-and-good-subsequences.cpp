@@ -68,25 +68,25 @@ ModNum findNumGoodSubsequences(const int N, const int K, const vector<int>& aOri
 {
     auto a = aOriginal;
     sort(a.begin(), a.end());
-    struct PrimeInfo
+    struct DistinctElementInfo
     {
-        int prime = -1;
+        int element = -1;
         int numOccurrences = 0;
     };
-    vector<PrimeInfo> distinctElementInfo;
+    vector<DistinctElementInfo> distinctElementInfo;
 
-    int prevPrime = -1;
+    int prevElement = -1;
     while (!a.empty())
     {
-        const int prime = a.back();
-        if (prime != prevPrime)
+        const int element = a.back();
+        if (element != prevElement)
         {
-            distinctElementInfo.push_back({prime, 0});
+            distinctElementInfo.push_back({element, 0});
         }
         distinctElementInfo.back().numOccurrences++;
 
         a.pop_back();
-        prevPrime = prime;
+        prevElement = element;
     }
     const int numDistinctElements = distinctElementInfo.size(); 
 
