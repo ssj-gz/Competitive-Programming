@@ -88,6 +88,7 @@ ModNum findNumGoodSubsequences(const int N, const int K, const vector<int>& aOri
         a.pop_back();
         prevElement = element;
     }
+    // The number numDistinctElements <= 1007, the number of distinct primes <= 8000.
     const int numDistinctElements = distinctElementInfo.size(); 
 
     // numWaysToChooseFromFirstDistinct[i][j] is the number of ways of choosing j elements from the first i groups of 
@@ -104,9 +105,10 @@ ModNum findNumGoodSubsequences(const int N, const int K, const vector<int>& aOri
         for (int numChosen = 1; numChosen <= firstNumDistinctElements; numChosen++)
         {
             assert(firstNumDistinctElements - 1 >= 0);
-            numWaysToChooseFromFirstDistinct[firstNumDistinctElements][numChosen] += numWaysToChooseFromFirstDistinct[firstNumDistinctElements - 1][numChosen]; // Don't choose this number.
+            // Don't choose any elements from this group of same elements.
+            numWaysToChooseFromFirstDistinct[firstNumDistinctElements][numChosen] += numWaysToChooseFromFirstDistinct[firstNumDistinctElements - 1][numChosen]; 
 
-            // Do choose *one* from this bunch of same numbers.
+            // Do choose *one* element from this group of same elements.
             assert(numChosen - 1 >= 0 && numChosen - 1 <= firstNumDistinctElements - 1);
             const auto numOfThisDistinctElement = (distinctElementInfo[firstNumDistinctElements - 1].numOccurrences);
             numWaysToChooseFromFirstDistinct[firstNumDistinctElements][numChosen] += 
@@ -116,7 +118,6 @@ ModNum findNumGoodSubsequences(const int N, const int K, const vector<int>& aOri
     }
 
     ModNum numGoodSubsequences;
-
     for (int numChosen = 0; numChosen <= min(K, numDistinctElements); numChosen++)
     {
         numGoodSubsequences += numWaysToChooseFromFirstDistinct[numDistinctElements][numChosen];
@@ -127,6 +128,17 @@ ModNum findNumGoodSubsequences(const int N, const int K, const vector<int>& aOri
 
 int main(int argc, char* argv[])
 {
+    // Pretty easy one - since there are only 1007 primes up to 8000, our array A must
+    // have the same elements duplicated many times over.
+    //
+    // If we group the elements of A into disjoint groups of a duplicated element, then a 
+    // subset of A that contains no duplicates can be formed simply by choosing 
+    // *at most one* element from each of these groups of duplicates.
+    //
+    // Hopefully the recurrence relation is clear - see numWaysToChooseFromFirstDistinct.
+    //
+    // Computing all values of numWaysToChooseFromFirstDistinct is O(numDistinctElements x numDistinctElements),
+    // so ~1'000'000 operations - nice and tractable :)
     ios::sync_with_stdio(false);
 
     const int N = read<int>();
