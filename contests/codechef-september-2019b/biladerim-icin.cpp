@@ -325,6 +325,8 @@ int main(int argc, char* argv[])
     //   X: 31 Y: 29 divCeiling(X, Y): 2  │
     //   X: 31 Y: 30 divCeiling(X, Y): 2  ┘
     //   X: 31 Y: 31 divCeiling(X, Y): 1
+    //
+    //      Diagram showing symmetry of divCeiling(X, Y)
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
