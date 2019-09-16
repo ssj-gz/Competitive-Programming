@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
     //  N: 9 edges placed: 20 maxNodeDegree: 4 │
     //  N: 9 edges placed: 21 maxNodeDegree: 4 │
     //  N: 9 edges placed: 22 maxNodeDegree: 4 │  
-    //  N: 9 edges placed: 23 maxNodeDegree: 5 ├  N edges added -a double-layer
+    //  N: 9 edges placed: 23 maxNodeDegree: 5 ├  N edges added - a "double-layer"
     //  N: 9 edges placed: 24 maxNodeDegree: 5 │
     //  N: 9 edges placed: 25 maxNodeDegree: 5 │
     //  N: 9 edges placed: 26 maxNodeDegree: 5 │
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
     //  N: 9 edges placed: 29 maxNodeDegree: 6 │
     //  N: 9 edges placed: 30 maxNodeDegree: 6 │
     //  N: 9 edges placed: 31 maxNodeDegree: 6 │
-    //  N: 9 edges placed: 32 maxNodeDegree: 7 ├  N edges added -a double-layer
+    //  N: 9 edges placed: 32 maxNodeDegree: 7 ├  N edges added - a "double-layer"
     //  N: 9 edges placed: 33 maxNodeDegree: 7 │
     //  N: 9 edges placed: 34 maxNodeDegree: 7 │
     //  N: 9 edges placed: 35 maxNodeDegree: 7 │
