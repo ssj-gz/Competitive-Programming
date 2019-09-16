@@ -240,28 +240,29 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
             // NB: since repetitionsOfC is in increasing order of a and non-increasing order
             // of c, we could find beginIndex and endIndex in O(log2 maxA).
             // Can't be bothered, though :)
+            //
+            if (maxA >= repetitionOfCLookup.back().finalA)
+            {
+                // maxA is >= than all finalA's.  If this is not the case, then we need to find the index of the first finalA which
+                // is strictly larger than maxA, which is done in the loop below, and then deal with the resulting overcounting.
+                endIndex = repetitionOfCLookup.size() - 1;
+            }
             for (int i = 0; i < repetitionOfCLookup.size(); i++)
             {
                 if (repetitionOfCLookup[i].c <= maxC && beginIndex == -1)
                 {
                     beginIndex = i;
                 }
-                if (repetitionOfCLookup[i].finalA <= maxA)
+                if (i > 0 && repetitionOfCLookup[i].finalA > maxA && repetitionOfCLookup[i - 1].finalA <= maxA)
                 {
                     endIndex = i;
                 }
             }
-            if (endIndex != -1 && repetitionOfCLookup[endIndex].finalA < maxA && endIndex + 1 < repetitionOfCLookup.size())
-            {
-                // Now endIndex is the index such that *either*
-                //  i) it is the index with finalA == maxA.
-                //  ii) it is the first index with finalA > maxA if there is no such finalA == maxA (the "overcount" case; see below).
-                endIndex++;
-            }
 
             if (beginIndex != -1 && endIndex != -1 && endIndex >= beginIndex)
             {
-                const int64_t numAsInRange = (repetitionOfCLookup[endIndex].finalA - (repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps));
+                const int64_t AAtBeginningOfRange = repetitionOfCLookup[beginIndex].finalA - repetitionOfCLookup[beginIndex].numReps;
+                const int64_t numAsInRange = repetitionOfCLookup[endIndex].finalA - AAtBeginningOfRange;
                 ModNum sumOfCTimesRepsInRange = repetitionOfCLookup[endIndex].cumulativeCTimesReps;
                 if (beginIndex > 0)
                 {
