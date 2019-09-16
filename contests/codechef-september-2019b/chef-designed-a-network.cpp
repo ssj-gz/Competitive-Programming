@@ -19,9 +19,11 @@ T read()
     return toRead;
 }
 
-int solveBruteForce(int64_t N, int64_t M)
+int solveBruteForceIsh(int64_t N, int64_t M)
 {
     // Leaving this "brute force" solution here as a reference, as it's good documentation :)
+    // It's not really "brute force" as it uses our analysis of how to build the optimal
+    // graph, but it's still handy for debugging/ learning from, etc.
     if (M < N - 1)
         return -1;
     if (N == 1)
