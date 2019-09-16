@@ -99,8 +99,9 @@ struct CForA
 struct RepetitionOfC
 {
     int64_t c = -1;
-    int64_t numReps = -1;
-    int64_t finalA = -1;
+    int64_t numReps = -1; // The number of a's with minSatisfyingC for a == c. // TODO - think of a term for this equation - minSatisfyingC, for example.
+    int64_t finalA = -1;  // The last value of a with minSatisfyingC for a == c.
+    int64_t firstA = -1;  // The first value of a with minSatisfyingC for a == c.
     ModNum cumulativeCTimesReps;
 };
 
@@ -140,8 +141,8 @@ vector<LookupForB> computeLookups(int64_t maxB)
             lookupForB.cForA.resize(sqrtAlwaysValidA + 1);
             for (int a = 2; a <= sqrtAlwaysValidA; a++)
             {
-                const int c = divCeiling(b * b + 1, a - 1) + 1;
-                lookupForB.cForA[a].c = c;
+                const int minSatisfyingC = divCeiling(b * b + 1, a - 1) + 1;
+                lookupForB.cForA[a].c = minSatisfyingC;
             }
             const int64_t finalC = lookupForB.cForA.back().c;
 
@@ -163,8 +164,10 @@ vector<LookupForB> computeLookups(int64_t maxB)
             {
                 const int64_t numRepetitions = lookupForB.cForA[i].c - lookupForB.cForA[i + 1].c;
                 assert(numRepetitions >= 1);
+                const int64_t firstA = aAfterCRepeats;
                 aAfterCRepeats += numRepetitions;
-                lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, aAfterCRepeats});
+                const int64_t finalA = aAfterCRepeats;
+                lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, finalA, firstA});
                 cRepeated--;
             }
         }
@@ -295,6 +298,10 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
 int main(int argc, char* argv[])
 {
+    // Let minSatisfyingC for a be the smallest c such that (a - 1) * (c - 1) >= b * b + 1.
+    // Then minSatisfyingC = divCeiling(b * b + 1, a - 1) + 1;
+
+
     //   X: 31 Y: 1 divCeiling(X, Y):  31 
     //   X: 31 Y: 2 divCeiling(X, Y):  16 (31 - 16 = 15)
     //   X: 31 Y: 3 divCeiling(X, Y):  11 (16 - 11 = 5)
