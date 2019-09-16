@@ -101,7 +101,6 @@ struct RepetitionOfC
     int64_t c = -1;
     int64_t numReps = -1; // The number of a's with minSatisfyingC for a == c. // TODO - think of a term for this equation - minSatisfyingC, for example.
     int64_t finalA = -1;  // The last value of a with minSatisfyingC for a == c.
-    int64_t firstA = -1;  // The first value of a with minSatisfyingC for a == c.
     ModNum cumulativeCTimesReps;
 };
 
@@ -164,10 +163,9 @@ vector<LookupForB> computeLookups(int64_t maxB)
             {
                 const int64_t numRepetitions = lookupForB.cForA[i].c - lookupForB.cForA[i + 1].c;
                 assert(numRepetitions >= 1);
-                const int64_t firstA = aAfterCRepeats;
                 aAfterCRepeats += numRepetitions;
                 const int64_t finalA = aAfterCRepeats;
-                lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, finalA, firstA});
+                lookupForB.repetitionsOfC.push_back({cRepeated, numRepetitions, finalA});
                 cRepeated--;
             }
         }
@@ -299,7 +297,8 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 int main(int argc, char* argv[])
 {
     // Let minSatisfyingC for a be the smallest c such that (a - 1) * (c - 1) >= b * b + 1.
-    // Then minSatisfyingC = divCeiling(b * b + 1, a - 1) + 1;
+    // Then minSatisfyingC = divCeiling(b * b + 1, a - 1) + 1.  Throughout the code, 
+    // this is usually just referred to as "c for a", or cForA.
 
 
     //   X: 31 Y: 1 divCeiling(X, Y):  31 
