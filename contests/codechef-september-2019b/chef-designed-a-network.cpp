@@ -193,6 +193,48 @@ int findMinHighestVertexDegree(int64_t N, int64_t M)
 
 int main(int argc, char* argv[])
 {
+    // Not even going to attempt to prove this, but basically we just need to be "greedy"
+    // when forming our graph and for each new edge that needs placing, just make the
+    // choice that keeps the maximum node degree minimal - generally by either placing
+    // a self-loop, if we have any left, or by connecting the two nodes of lowest degree.
+    //
+    // In more detail:
+    //
+    // For M < N - 1, there is no way to connect the all computers, so this will be -1
+    // (well-known result about # edges in a connected tree on N nodes).
+    // 
+    // For M == N - 1, we must connect all N nodes in a "chain", with all but two nodes
+    // having degree 2 (the two "loose ends" that both have degree 1).
+    //
+    // For adding the M == Nth edge, it seems intuitive that we'd connect the two "loose ends"
+    // to make a cycle, with all nodes now having degree 2.  Let's go with that, for now (foreshadowing!)
+    //
+    // For M == N + 1, it seems we have no choice but to add a self-loop to some random edge (we're
+    // being greedy, remember; adding an edge between two nodes would increase the degree of two
+    // nodes instead of just one from a self-loop).  Since all vertices had degree 2, our
+    // new max node degree, after adding a self-loop, is 3 ...
+    //
+    // ... and we've made a mistake: it's actually possible to get M = N + 1 with with max degree of 2:
+    // connect all nodes with the first N - 1 edges; then add self-loops to each of the two "loose ends"
+    // which had degree 1, leaving all nodes with degree 2.  I only included this mistake as it's one
+    // I blundered into myself XD
+    //
+    // So actually, our algorithm so far looks like this:
+    //
+    //    For M up to N - 1 - just work towards chaining all N nodes together
+    //    For M == N - add a self-loop to one of the two loose ends
+    //    For M == N + 1 - add a self-loop to the remaining two loose end
+    //
+    // For the next N - 2 edges, we use one of our remaining N - 2 self-loops until we get to 
+    // M == (N + 1) + (N - 2) == 2 * N - 1.
+    //
+    // At this point, every node has a self-loop, and all but two nodes have degree 3 - the two "loose
+    // end" nodes from the chain, which still have degree 2.  Continuing our greediness, for edge
+    // 2 * N we connect them, so every node now has degree 3.
+
+    // TODO - explain adding remaining values in layers - different for odd N vs even N.  Use these
+    // diagrams:
+
     //  <snip>
     //  N: 6 edges placed: 12 maxNodeDegree: 3 <-- M == 2 * N - all nodes have degree 3.
     //  N: 6 edges placed: 13 maxNodeDegree: 4 ┐
