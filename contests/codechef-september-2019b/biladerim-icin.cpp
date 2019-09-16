@@ -296,9 +296,39 @@ int64_t solveOptimised(int64_t maxA, int64_t maxB, int64_t maxC, const vector<Lo
 
 int main(int argc, char* argv[])
 {
+    // TODO - write main overview! Some notes are below.
+    //
+    // A bit of calculus/ analysis (from http://personal.maths.surrey.ac.uk/st/S.Zelik/teach/calculus/max_min_2var.pdf)
+    // shows that:
+    //
+    //  i) f(x,y) = (a - 1) * x * x + 2 * b * x * y + (c - 1) * y * y has one stationery point, at (0, 0).
+    //  ii) f(0, 0) = 0
+    //  iii) if the stationery point at (0, 0) is not a saddle point, then it is a minimum
+    //  iv) Ergo, f(x, y) > 0 for all x != 0, y != 0 if and only if (0, 0) is not a saddle point.
+    //
+    //             ∂  ∂ 
+    //  Let f_xy = ── ── f(x, y)
+    //             dx dy
+    //
+    //  v) If f_xy(0, 0) < 0 , then (0, 0) is a saddle point.
+    //  vi) If f_xy(0, 0) == 0, then indeterminate, *but* seems to be saddle point still.
+    //
+    // Calculating f_xy and insisting that f_xy > 0 gives:
+    //
+    //    f_xy > 0 <=> (a - 1) * (c - 1) > b * b <=> (a - 1) * (c - 1) >= b * b + 1
+    //
+    // i.e. a * x * x + 2 * b * x * y + c * y * y > 0 for all x != 0, y != 0 if and only if (a - 1) * (c - 1) >= b * b + 1.
+    //
+    // So basic approach then is to iterate over all b = 1, 2, ... maxB, then a = 1, 2, ... maxA, and find the c's for
+    // which (a - 1) * (c - 1) >= b * b + 1 for this a and b.
+
     // Let minSatisfyingC for a be the smallest c such that (a - 1) * (c - 1) >= b * b + 1.
     // Then minSatisfyingC = divCeiling(b * b + 1, a - 1) + 1.  Throughout the code, 
-    // this is usually just referred to as "c for a", or cForA.
+    // this is usually just referred to as "c for a", or cForA.  Then for a and b, all c: minSatisfyingC <= c <= maxC need to 
+    // be counted.
+    // Now, maxA can be large, and maxA * maxB too big to handle.  But it seems that, for a >= some small value, minSatisfyingC starts
+    // repeating i.e. minSatisfyingC stays the same for a run of multiple consecutive a's, and the size of these runs gets 
+    // larger and larger and is also predictable.  Use this example to illustrate:
 
 
     //   X: 31 Y: 1 divCeiling(X, Y):  31 
@@ -334,6 +364,8 @@ int main(int argc, char* argv[])
     //   X: 31 Y: 31 divCeiling(X, Y): 1
     //
     //      Diagram showing symmetry of divCeiling(X, Y)
+    //
+    // We can use this to calculate the contributions for large blocks of a at a time.
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
