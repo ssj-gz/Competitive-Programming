@@ -34,7 +34,7 @@ void buildnCrLookup()
     }
     for (auto n = 1; n <= maxN; n++)
     {
-        for (auto k = 1; k < maxN; k++)
+        for (auto k = 1; k <= maxN; k++)
         {
             assert(nCrLookup[n - 1][k - 1] != -1);
             assert(nCrLookup[n - 1][k] != -1);
@@ -55,11 +55,11 @@ int64_t findNumInterestingSubsequences(int N, int K, const vector<int>& aOrigina
     sort(a.begin(), a.end());
     const auto kthElement = a[K - 1];
     const auto totalNumOfKthElement = count(a.begin(), a.end(), kthElement);
-    auto numOfKthElementInSubset = 1;
-    K--;
-    while (K - 1 >= 0 && a[K - 1] == kthElement)
+    auto numOfKthElementInSubset = 0;
+    int i = K - 1;
+    while (i >= 0 && a[i] == kthElement)
     {
-        K--;
+        i--;
         numOfKthElementInSubset++;
     }
     
