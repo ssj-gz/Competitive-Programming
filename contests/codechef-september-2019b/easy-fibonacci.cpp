@@ -4,7 +4,6 @@
 //
 #include <iostream>
 #include <vector>
-#include <cmath>
 
 #include <cassert>
 
@@ -21,85 +20,6 @@ T read()
 
 int main(int argc, char* argv[])
 {
-
-    if (argc == 2)
-    {
-#if 1
-        // Compute fibonacciMod10Cycle.
-        vector<int> fibonacciMod10Cycle;
-        int64_t fnPrevPrevMod10 = 0;
-        int64_t fnPrevMod10 = 1;
-        fibonacciMod10Cycle.push_back(fnPrevPrevMod10);
-        fibonacciMod10Cycle.push_back(fnPrevMod10);
-        while (true)
-        {
-            int64_t fn_mod10 = (fnPrevPrevMod10 + fnPrevMod10) % 10;
-            fibonacciMod10Cycle.push_back(fn_mod10);
-
-            fnPrevPrevMod10 = fnPrevMod10;
-            fnPrevMod10 = fn_mod10;
-
-            if (fnPrevPrevMod10 == 0 && fnPrevMod10 == 1)
-            {
-                // Everything will repeat from here on in.
-                fibonacciMod10Cycle.pop_back();
-                fibonacciMod10Cycle.pop_back();
-                break;
-            }
-        }
-        int64_t powerOf10 = 1;
-        for (int i = 0; i < 18; i++)
-        {
-            powerOf10 *= 10;
-        }
-        for (int i = 0; i < 10'000; i++)
-        {
-
-            uint64_t N = 0;
-#if 0
-            for (uint64_t j = 0; j < 60; j++)
-            {
-                if (rand() % 2 == 0)
-                    N = N + (uint64_t(1) << j);
-            }
-            if (i <= 60)
-            {
-                N = static_cast<uint64_t>(1) << i;
-            }
-            else if (rand() % 3 == 0)
-            {
-                N = rand() % 10'000'000'000ULL + 1;
-            }
-            else if (rand() % 2 == 0)
-            {
-                N = rand() % 10'000 + 1;
-            }
-#endif
-            N = rand() % 100 + 1;
-                    
-            cout << "Q: 2 lines" << endl;
-            cout << 1 << endl;
-            cout << N << endl;
-            cout << "A: 1 lines" << endl;
-
-            int64_t largestPowerOf2 = 1;
-            while (largestPowerOf2 <= N)
-            {
-                largestPowerOf2 <<= 1;
-            }
-            largestPowerOf2 >>= 1;
-            const int64_t fibonacciIndex = (largestPowerOf2 - 1); // Make 0-relative.
-            assert(largestPowerOf2 == (long)pow(2, (int)log2(N) ));
-
-            cout << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
-        }
-        return 0;
-#endif
-        int64_t blah = (int64_t)(1) << 59;
-        cout << blah - 1 << endl;
-        return 0;
-
-    }
     // As the name suggests, pretty easy :)
     //
     // Let's deal with the Fibonacci part, first.
@@ -189,7 +109,6 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
         const int64_t N = read<int64_t>(); 
-        //cout << "N: " << N << endl;
 
         int64_t largestPowerOf2 = 1;
         while (largestPowerOf2 <= N)
@@ -197,7 +116,6 @@ int main(int argc, char* argv[])
             largestPowerOf2 <<= 1;
         }
         largestPowerOf2 >>= 1;
-        //cout << "largestPowerOf2: " << largestPowerOf2 << endl;
         const int64_t fibonacciIndex = (largestPowerOf2 - 1); // Make 0-relative.
 
         cout << fibonacciMod10Cycle[fibonacciIndex % fibonacciMod10Cycle.size()] << endl;
