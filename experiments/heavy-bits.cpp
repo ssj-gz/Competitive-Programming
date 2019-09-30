@@ -133,6 +133,11 @@ ostream& operator<<(ostream& os, const ModNum& toPrint)
     return os;
 }
 
+bool operator==(const ModNum& lhs, const ModNum& rhs)
+{
+    return lhs.value() == rhs.value();
+}
+
 template <typename T>
 T read()
 {
@@ -179,9 +184,34 @@ ModNum solveBruteForce(const string& s)
     return result;
 }
 
-ModNum solveOptimised()
+void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num1sSoFar, const int num0sSoFar, ModNum& result)
+{
+    // TODO - optimise all this - we should be able to process a transition in O(1)!
+    for (const auto& transition : state->transitions)
+    {
+        auto nextState = transition.nextState;
+        auto nextNum0sSoFar = num0sSoFar;
+        auto nextNum1sSoFar = num1sSoFar;
+        for (int index = transition.substringFollowed.startIndex; index <= transition.substringFollowed.endIndex; index++)
+        {
+            if (B[index] == '0')
+                nextNum0sSoFar++;
+            if (B[index] == '1')
+                nextNum1sSoFar++;
+
+            result += max(nextNum0sSoFar, nextNum1sSoFar);
+        }
+        solveOptimisedAux(nextState, B, nextNum1sSoFar, nextNum0sSoFar, result);
+    }
+}
+
+ModNum solveOptimised(const string& B)
 {
     ModNum result;
+
+    SuffixTree suffixTree(B);
+
+    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, result);
 
     return result;
 }
@@ -224,8 +254,8 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(s);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(s);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
@@ -261,6 +291,7 @@ SuffixTree::SuffixTree(const string& s)
     {
         appendLetter(letter);
     }
+    finalise();
 }
 
 void SuffixTree::finalise()
@@ -411,5 +442,5 @@ decltype(SuffixTree::State::transitions.begin()) SuffixTree::findTransitionIter(
 int SuffixTree::t(int i)
 {
     // Ukkonen's algorithm uses 1-indexed strings throughout and alphabet throughout; adjust for this.
-    return m_currentString[i - 1] - 'a' + 1;
+    return m_currentString[i - 1] - '0' + 1;
 }
