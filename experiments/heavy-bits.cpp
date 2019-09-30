@@ -47,7 +47,7 @@ class SuffixTree
         };
         struct Transition
         {
-            Transition(State *nextState, const Substring& substringFollowed, const string& currentString)
+            Transition(State *nextState, const Substring& substringFollowed)
                 : nextState(nextState), substringFollowed(substringFollowed)
             {
             }
@@ -64,7 +64,6 @@ class SuffixTree
     private:
         static const int openTransitionEnd = numeric_limits<int>::max();
 
-        void appendString(const string& stringToAppend);
         void finalise();
 
         string m_currentString;
@@ -200,7 +199,7 @@ int main(int argc, char* argv[])
 
 SuffixTree::SuffixTree(const string& s)
 {
-    // Size of a suffix tree representing s cannot exceed 2 x |S| - 1, but we have two auxilliary states, so account for them.
+    // Size of a suffix tree representing s cannot exceed 2 x |s| - 1, but we have two auxilliary states, so account for them.
     m_states.reserve(s.size() * 2 + 1); 
 
     m_root = createNewState();
@@ -208,17 +207,15 @@ SuffixTree::SuffixTree(const string& s)
 
     for (int i = 0; i < alphabetSize; i++)
     {
-        m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
+        m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1))));
     }
     m_root->suffixLink = m_auxiliaryState;
 
     m_s = m_root;
     m_k = 1;
-}
 
-void SuffixTree::appendString(const string& stringToAppend)
-{
-    for (auto letter : stringToAppend)
+
+    for (auto letter : s)
     {
         appendLetter(letter);
     }
@@ -239,13 +236,13 @@ void SuffixTree::finalise()
             transition.substringFollowed.endIndex--;
         }
     }
-
 }
 
 SuffixTree::State* SuffixTree::rootState() const
 {
     return m_root;
 }
+
 void SuffixTree::appendLetter(char letter)
 {
     m_currentString += letter;
@@ -266,7 +263,7 @@ std::pair<SuffixTree::State*, int> SuffixTree::update(State* s, int k, int i)
     while (!isEndPoint)
     {
         auto rPrime = createNewState(r);
-        r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd), m_currentString));
+        r->transitions.push_back(Transition(rPrime, Substring(i, openTransitionEnd)));
         if (oldr != m_root)
         {
             oldr->suffixLink = r;
@@ -304,8 +301,8 @@ pair<bool, SuffixTree::State*> SuffixTree::testAndSplit(State* s, int k, int p, 
         {
             s->transitions.erase(tkTransitionIter);
             auto r = createNewState(s);
-            s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k), m_currentString));
-            r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime), m_currentString));
+            s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k)));
+            r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime)));
             sPrime->parent = r;
             return {false, r};
         }
