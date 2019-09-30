@@ -88,6 +88,51 @@ class SuffixTree
         int t(int i);
 };
 
+const int64_t Mod = 1'000'000'007ULL;
+
+class ModNum
+{
+    public:
+        ModNum(int64_t n = 0)
+            : m_n{n}
+        {
+            assert(n >= 0);
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % Mod;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
 template <typename T>
 T read()
 {
@@ -112,9 +157,9 @@ int weight(const string& binaryString)
     return max(num0s, num1s);
 }
 
-int64_t solveBruteForce(const string& s)
+ModNum solveBruteForce(const string& s)
 {
-    int64_t result = 0;
+    ModNum result = 0;
     set<string> distinctSubstrings;
     for (int startPos = 0; startPos < s.size(); startPos++)
     {
@@ -134,15 +179,12 @@ int64_t solveBruteForce(const string& s)
     return result;
 }
 
-#if 0
-SolutionType solveOptimised()
+ModNum solveOptimised()
 {
-    SolutionType result;
+    ModNum result;
 
     return result;
 }
-#endif
-
 
 int main(int argc, char* argv[])
 {
