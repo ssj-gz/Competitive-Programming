@@ -30,53 +30,14 @@ constexpr auto alphabetSize = 2; // 0 and 1.
 class SuffixTree
 {
     public:
-        SuffixTree()
-        {
-            m_states.reserve(1'000'000);
-
-            m_root = createNewState();
-            m_auxiliaryState = createNewState();
-
-            for (int i = 0; i < alphabetSize; i++)
-            {
-                m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
-            }
-            m_root->suffixLink = m_auxiliaryState;
-
-            m_s = m_root;
-            m_k = 1;
-        }
+        SuffixTree(const string& s);
         SuffixTree(const SuffixTree& other) = delete;
-        void appendString(const string& stringToAppend)
-        {
-            for (auto letter : stringToAppend)
-            {
-                appendLetter(letter);
-            }
-        }
-        void finalise()
-        {
-            // Set the correct value for transitions whose ends are openTransitionEnd, and make
-            // startIndex/ endIndex 0-relative.
-            for (auto& state : m_states)
-            {
-                for (auto& transition : state.transitions)
-                {
-                    if (transition.substringFollowed.endIndex == openTransitionEnd)
-                        transition.substringFollowed.endIndex = m_currentString.size();
-
-                    transition.substringFollowed.startIndex--;
-                    transition.substringFollowed.endIndex--;
-                }
-            }
-
-        }
+    private:
+        void appendString(const string& stringToAppend);
+        void finalise();
 
         struct State;
-        State* rootState() const
-        {
-            return m_root;
-        }
+        State* rootState() const;
         struct Substring
         {
             Substring(int startIndex, int endIndex)
@@ -353,4 +314,53 @@ int main(int argc, char* argv[])
     }
 
     assert(cin);
+}
+
+SuffixTree::SuffixTree(const string& s)
+{
+    // Size of a suffix tree representing s cannot exceed 2 x |S| - 1, but we have two auxilliary states, so account for them.
+    m_states.reserve(s.size() * 2 + 1); 
+
+    m_root = createNewState();
+    m_auxiliaryState = createNewState();
+
+    for (int i = 0; i < alphabetSize; i++)
+    {
+        m_auxiliaryState->transitions.push_back(Transition(m_root, Substring(-(i + 1), -(i + 1)), m_currentString));
+    }
+    m_root->suffixLink = m_auxiliaryState;
+
+    m_s = m_root;
+    m_k = 1;
+}
+
+void SuffixTree::appendString(const string& stringToAppend)
+{
+    for (auto letter : stringToAppend)
+    {
+        appendLetter(letter);
+    }
+}
+
+void SuffixTree::finalise()
+{
+    // Set the correct value for transitions whose ends are openTransitionEnd, and make
+    // startIndex/ endIndex 0-relative.
+    for (auto& state : m_states)
+    {
+        for (auto& transition : state.transitions)
+        {
+            if (transition.substringFollowed.endIndex == openTransitionEnd)
+                transition.substringFollowed.endIndex = m_currentString.size();
+
+            transition.substringFollowed.startIndex--;
+            transition.substringFollowed.endIndex--;
+        }
+    }
+
+}
+
+SuffixTree::State* SuffixTree::rootState() const
+{
+    return m_root;
 }
