@@ -171,7 +171,7 @@ ModNum solveBruteForce(const string& s)
         for (int length = 1; startPos + length <= s.size(); length++)
         {
             const string substring = s.substr(startPos, length);
-            cout << "substring: " << substring << endl;
+            //cout << "substring: " << substring << endl;
             distinctSubstrings.insert(substring);
         }
     }
