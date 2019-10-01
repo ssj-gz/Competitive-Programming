@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
         // TODO - generate randomised test.
         //const int T = rand() % 100 + 1;
         const int T = 1;
+        cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
