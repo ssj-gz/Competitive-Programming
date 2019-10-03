@@ -187,13 +187,13 @@ struct Query
     bool subtractFromResult = false;
 };
 
-void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefix, vector<vector<Query>>& queriesForIndex)
+void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefixLen, vector<vector<Query>>& queriesForIndex)
 {
     // TODO - optimise all this - we should be able to process a transition in O(1)!
     for (const auto& transition : state->transitions)
     {
         auto nextState = transition.nextState;
-        const auto num0sInSubstring = num0sInPrefix[transition.substringFollowed.endIndex + 1] - num0sInPrefix[transition.substringFollowed.startIndex];
+        const auto num0sInSubstring = num0sInPrefixLen[transition.substringFollowed.endIndex + 1] - num0sInPrefixLen[transition.substringFollowed.startIndex];
         const auto num1sInSubstring = transition.substringFollowed.endIndex - transition.substringFollowed.startIndex + 1 - num0sInSubstring;
         const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
@@ -203,7 +203,7 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         {
             queriesForIndex[transition.substringFollowed.endIndex + 1].push_back({nextNum0sSoFar, nextNum1sSoFar, true});
         }
-        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, num0sInPrefix, queriesForIndex);
+        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, num0sInPrefixLen, queriesForIndex);
     }
 }
 
@@ -212,20 +212,20 @@ int64_t solveOptimised(const string& B)
     int64_t result = 0;
     const int N = B.size();
 
-    vector<int> num0sInPrefix;
+    vector<int> num0sInPrefixLen;
     int num0sSoFar = 0;
-    num0sInPrefix.push_back(num0sSoFar);
+    num0sInPrefixLen.push_back(num0sSoFar);
     for (const auto bit : B)
     {
         if (bit == '0')
             num0sSoFar++;
-        num0sInPrefix.push_back(num0sSoFar);
+        num0sInPrefixLen.push_back(num0sSoFar);
     }
 
     SuffixTree suffixTree(B);
 
     vector<vector<Query>> queriesForIndex(N);
-    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefix, queriesForIndex);
+    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefixLen, queriesForIndex);
 
     constexpr auto NeverBalanced = -2;
 
@@ -268,8 +268,8 @@ int64_t solveOptimised(const string& B)
         }
         else
         {
-            auto num0sInRange = num0sInPrefix[nextBalanceIndex + 1];
-            num0sInRange -= num0sInPrefix[index];
+            auto num0sInRange = num0sInPrefixLen[nextBalanceIndex + 1];
+            num0sInRange -= num0sInPrefixLen[index];
             if (bit == '0')
             {
                 sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
@@ -344,8 +344,8 @@ int64_t solveOptimised(const string& B)
             else
             {
 
-                auto num0sInRange = num0sInPrefix[balanceIndex + 1];
-                num0sInRange -= num0sInPrefix[index];
+                auto num0sInRange = num0sInPrefixLen[balanceIndex + 1];
+                num0sInRange -= num0sInPrefixLen[index];
                 const auto rangeLen = balanceIndex + 1 - index;
                 assert(query.num0sSoFar != query.num1sSoFar);
                 if (query.num0sSoFar > query.num1sSoFar)
