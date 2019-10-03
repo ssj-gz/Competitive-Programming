@@ -27,11 +27,11 @@ template<typename T>
 class Vec
 {
     public:
-        Vec(int minIndex, int maxIndex)
+        Vec(int minIndex, int maxIndex, int initialValue)
             : m_minIndex(minIndex),
             m_maxIndex(maxIndex),
             m_numElements(maxIndex - minIndex + 1),
-            m_vector(m_numElements)
+            m_vector(m_numElements, initialValue)
     {
 
     }
@@ -241,7 +241,7 @@ int64_t solveOptimised(const string& B)
     vector<vector<Query>> queriesForIndex(B.size());
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefix, queriesForIndex);
 
-    Vec<int> nextIndexWithSuffixBalance(-B.size(), +B.size());
+    Vec<int> nextIndexWithSuffixBalance(-B.size(), +B.size(), -1);
 
     int num0sInSuffix = 0;
     int num1sInSuffix = 0;
@@ -257,7 +257,39 @@ int64_t solveOptimised(const string& B)
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
         for (const auto& query : queriesForIndex[index])
         {
+            //cout << "index: " << index << " query.num0sSoFar: " << query.num0sSoFar << " query.num1sSoFar: " << query.num1sSoFar << endl;
             result += (query.subtractFromResult ? -1 : 1) * sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
+            int dbgBalanceIndex = index - 1;
+            {
+                int num0s = query.num0sSoFar;
+                int num1s = query.num1sSoFar;
+                while (num0s != num1s && dbgBalanceIndex + 1 < B.size())
+                {
+                    dbgBalanceIndex++;
+                    if (B[dbgBalanceIndex] == '0')
+                        num0s++;
+                    if (B[dbgBalanceIndex] == '1')
+                        num1s++;
+                }
+            }
+            if (dbgBalanceIndex == B.size() - 1)
+            {
+                dbgBalanceIndex = -1;
+            }
+            // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
+            int balanceIndex = index - 1;
+            if (query.num0sSoFar != query.num1sSoFar)
+            {
+                const auto prefixBalance = query.num0sSoFar - query.num1sSoFar;
+                const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
+                //cout << "prefixBalance: " << prefixBalance << " currentSuffixBalance: " << currentSuffixBalance << " desiredSuffixBalance: " << desiredSuffixBalance << endl;
+                if (nextIndexWithSuffixBalance[desiredSuffixBalance] != -1)
+                    balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
+                else
+                    balanceIndex = -1;
+            }
+            //cout << "balanceIndex: " << balanceIndex << " dbgBalanceIndex: " << dbgBalanceIndex << endl;
+            assert(balanceIndex == dbgBalanceIndex);
         }
     }
 
