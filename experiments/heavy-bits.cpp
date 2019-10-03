@@ -260,17 +260,6 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto num1sInSubstring = transition.substringFollowed.endIndex - transition.substringFollowed.startIndex + 1 - num0sInSubstring;
         const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
-        auto dbgNextNum0sSoFar = num0sSoFar;
-        auto dbgNextNum1sSoFar = num1sSoFar;
-        for (int index = transition.substringFollowed.startIndex; index <= transition.substringFollowed.endIndex; index++)
-        {
-            if (B[index] == '0')
-                dbgNextNum0sSoFar++;
-            if (B[index] == '1')
-                dbgNextNum1sSoFar++;
-        }
-        assert(nextNum0sSoFar == dbgNextNum0sSoFar);
-        assert(nextNum1sSoFar == dbgNextNum1sSoFar);
 
         result += sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
         if (transition.substringFollowed.endIndex + 1 < B.size())
