@@ -259,31 +259,6 @@ int64_t solveOptimised(const string& B)
             sumOf1sStartingAt[i] = suffixLength + sumOf1sStartingAt[i + 1];
             sumOf0sStartingAt[i] = sumOf0sStartingAt[i + 1];
         }
-
-        {
-            int dbgSumOf0sStartingAt = 0;
-            int num0s = 0;
-            for (int dbg = i; dbg < N; dbg++)
-            {
-                if (B[dbg] == '0')
-                    num0s++;
-                dbgSumOf0sStartingAt += num0s;
-            }
-            cout << "i: " << i << " dbgSumOf0sStartingAt: " << dbgSumOf0sStartingAt << " sumOf0sStartingAt: " << sumOf0sStartingAt[i] << endl;
-            assert(dbgSumOf0sStartingAt == sumOf0sStartingAt[i]);
-        }
-        {
-            int dbgSumOf1sStartingAt = 0;
-            int num1s = 0;
-            for (int dbg = i; dbg < N; dbg++)
-            {
-                if (B[dbg] == '1')
-                    num1s++;
-                dbgSumOf1sStartingAt += num1s;
-            }
-            cout << "i: " << i << " dbgSumOf1sStartingAt: " << dbgSumOf1sStartingAt << " sumOf1sStartingAt: " << sumOf1sStartingAt[i] << endl;
-            assert(dbgSumOf1sStartingAt == sumOf1sStartingAt[i]);
-        }
     }
 
     int num0sInSuffix = 0;
