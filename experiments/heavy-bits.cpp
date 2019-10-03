@@ -289,13 +289,6 @@ int64_t solveOptimised(const string& B)
             //cout << "balanceIndex: " << balanceIndex << " dbgBalanceIndex: " << dbgBalanceIndex << endl;
             assert(balanceIndex == dbgBalanceIndex);
 
-            auto sumOfRange = [](int64_t l, int64_t r)
-            {
-                int64_t sum = (r * (r + 1)) / 2;
-                if (l >= 1)
-                    sum -= ((l - 1) * ((l - 1) + 1)) / 2;
-                return sum;
-            };
             int64_t queryResult = 0;
 
             if (balanceIndex == -2)
@@ -304,10 +297,6 @@ int64_t solveOptimised(const string& B)
                 if (prefixBalance > 0)
                 {
                     // More 0's than 1's in the prefix.
-
-                    queryResult = sumOfRange(query.num0sSoFar, query.num0sSoFar + num0sInSuffix);
-                    //assert(queryResult == dbgQueryResult);
-
                 }
                 else
                 {
