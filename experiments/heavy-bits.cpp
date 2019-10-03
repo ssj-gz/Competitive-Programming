@@ -297,16 +297,30 @@ int64_t solveOptimised(const string& B)
                 if (bit == '0')
                 {
                     sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
-                    sumOfWeightStartingAt[index] -= sumOf0sStartingAt[balanceIndex];
+                    sumOfWeightStartingAt[index] -= sumOf0sStartingAt[balanceIndex + 1];
                 }
                 else
                 {
                     sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
-                    sumOfWeightStartingAt[index] -= sumOf1sStartingAt[balanceIndex];
+                    sumOfWeightStartingAt[index] -= sumOf1sStartingAt[balanceIndex + 1];
                 }
                 assert((balanceIndex - index + 1) % 2 == 0);
-                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex] * (balanceIndex - index + 1) / 2;
+                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex + 1] * (balanceIndex - index + 1) / 2;
 
+            }
+            {
+                int64_t debugSumOfWeightStartingAt = 0;
+                int num0s = 0;
+                int num1s = 0;
+                for (int i = index; i < N; i++)
+                {
+                    if (B[i] == '0')
+                        num0s++;
+                    if (B[i] == '1')
+                        num1s++;
+                    debugSumOfWeightStartingAt += max(num0s, num1s);
+                }
+                cout << "debugSumOfWeightStartingAt: " << debugSumOfWeightStartingAt << " sumOfWeightStartingAt: " << sumOfWeightStartingAt[index] << endl;
             }
 
             nextIndexWithSuffixBalance[currentSuffixBalance] = index;
