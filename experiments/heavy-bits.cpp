@@ -258,8 +258,10 @@ int64_t solveOptimised(const string& B)
         for (const auto& query : queriesForIndex[index])
         {
             //cout << "index: " << index << " query.num0sSoFar: " << query.num0sSoFar << " query.num1sSoFar: " << query.num1sSoFar << endl;
-            result += (query.subtractFromResult ? -1 : 1) * sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
+            const auto dbgQueryResult = sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
+            const auto prefixBalance = query.num0sSoFar - query.num1sSoFar;
             int dbgBalanceIndex = index - 1;
+            if (prefixBalance != 0)
             {
                 int num0s = query.num0sSoFar;
                 int num1s = query.num1sSoFar;
@@ -271,25 +273,49 @@ int64_t solveOptimised(const string& B)
                     if (B[dbgBalanceIndex] == '1')
                         num1s++;
                 }
-            }
-            if (dbgBalanceIndex == B.size() - 1)
-            {
-                dbgBalanceIndex = -1;
+                if (dbgBalanceIndex == B.size() - 1)
+                {
+                    dbgBalanceIndex = -2;
+                }
             }
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
             int balanceIndex = index - 1;
-            if (query.num0sSoFar != query.num1sSoFar)
+            if (prefixBalance != 0)
             {
-                const auto prefixBalance = query.num0sSoFar - query.num1sSoFar;
                 const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
                 //cout << "prefixBalance: " << prefixBalance << " currentSuffixBalance: " << currentSuffixBalance << " desiredSuffixBalance: " << desiredSuffixBalance << endl;
-                if (nextIndexWithSuffixBalance[desiredSuffixBalance] != -1)
-                    balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
-                else
-                    balanceIndex = -1;
+                balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             }
             //cout << "balanceIndex: " << balanceIndex << " dbgBalanceIndex: " << dbgBalanceIndex << endl;
             assert(balanceIndex == dbgBalanceIndex);
+
+            auto sumOfRange = [](int64_t l, int64_t r)
+            {
+                int64_t sum = (r * (r + 1)) / 2;
+                if (l >= 1)
+                    sum -= ((l - 1) * ((l - 1) + 1)) / 2;
+                return sum;
+            };
+            int64_t queryResult = 0;
+
+            if (balanceIndex == -2)
+            {
+                assert(prefixBalance != 0);
+                if (prefixBalance > 0)
+                {
+                    // More 0's than 1's in the prefix.
+
+                    queryResult = sumOfRange(query.num0sSoFar, query.num0sSoFar + num0sInSuffix);
+                    //assert(queryResult == dbgQueryResult);
+
+                }
+                else
+                {
+                    // More 1's than 1's in the prefix.
+                }
+            }
+
+            result += (query.subtractFromResult ? -1 : 1) * dbgQueryResult;
         }
     }
 
