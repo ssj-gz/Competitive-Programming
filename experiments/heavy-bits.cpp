@@ -340,28 +340,12 @@ int64_t solveOptimised(const string& B)
                 if (prefixBalance > 0)
                 {
                     // More 0's than 1's in the prefix.
-                    int num0s = query.num0sSoFar;
-                    for (int i = index; i < N; i++)
-                    {
-                        if (B[i] == '0')
-                            num0s++;
-                        queryResult += num0s;
-                    }
-                    assert(queryResult == dbgQueryResult);
-                    cout << " queryResult: " << queryResult << " sumOf0sStartingAt: " << sumOf0sStartingAt[index] << " index: " << index << endl;
-                    assert(sumOf0sStartingAt[index] + (N - index) * query.num0sSoFar == queryResult);
+                    queryResult += sumOf0sStartingAt[index] + (N - index) * query.num0sSoFar ;
                 }
                 else
                 {
-                    // More 1's than 1's in the prefix.
-                    int num1s = query.num1sSoFar;
-                    for (int i = index; i < N; i++)
-                    {
-                        if (B[i] == '1')
-                            num1s++;
-                        queryResult += num1s;
-                    }
-                    assert(sumOf1sStartingAt[index] + (N - index) * query.num1sSoFar == queryResult);
+                    // More 1's than 0's in the prefix.
+                    queryResult += sumOf1sStartingAt[index] + (N - index) * query.num1sSoFar ;
                 }
                 assert(queryResult == dbgQueryResult);
             }
