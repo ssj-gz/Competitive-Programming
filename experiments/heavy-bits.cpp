@@ -225,6 +225,7 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
 int64_t solveOptimised(const string& B)
 {
     int64_t result = 0;
+    const int N = B.size();
 
     vector<int> num0sInPrefix;
     int num0sSoFar = 0;
@@ -238,14 +239,14 @@ int64_t solveOptimised(const string& B)
 
     SuffixTree suffixTree(B);
 
-    vector<vector<Query>> queriesForIndex(B.size());
+    vector<vector<Query>> queriesForIndex(N);
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefix, queriesForIndex);
 
-    Vec<int> nextIndexWithSuffixBalance(-B.size(), +B.size(), -1);
+    Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
 
     int num0sInSuffix = 0;
     int num1sInSuffix = 0;
-    for (int index = B.size() - 1; index >= 0; index--)
+    for (int index = N - 1; index >= 0; index--)
     {
         const char bit = B[index];
         assert(bit == '0' || bit == '1');
@@ -265,7 +266,7 @@ int64_t solveOptimised(const string& B)
             {
                 int num0s = query.num0sSoFar;
                 int num1s = query.num1sSoFar;
-                while (num0s != num1s && dbgBalanceIndex + 1 < B.size())
+                while (num0s != num1s && dbgBalanceIndex + 1 < N)
                 {
                     dbgBalanceIndex++;
                     if (B[dbgBalanceIndex] == '0')
@@ -273,7 +274,7 @@ int64_t solveOptimised(const string& B)
                     if (B[dbgBalanceIndex] == '1')
                         num1s++;
                 }
-                if (dbgBalanceIndex == B.size() - 1)
+                if (dbgBalanceIndex == N - 1)
                 {
                     dbgBalanceIndex = -2;
                 }
@@ -298,7 +299,7 @@ int64_t solveOptimised(const string& B)
                 {
                     // More 0's than 1's in the prefix.
                     int num0s = query.num0sSoFar;
-                    for (int i = index; i < B.size(); i++)
+                    for (int i = index; i < N; i++)
                     {
                         if (B[i] == '0')
                             num0s++;
@@ -310,7 +311,7 @@ int64_t solveOptimised(const string& B)
                 {
                     // More 1's than 1's in the prefix.
                     int num1s = query.num1sSoFar;
-                    for (int i = index; i < B.size(); i++)
+                    for (int i = index; i < N; i++)
                     {
                         if (B[i] == '1')
                             num1s++;
