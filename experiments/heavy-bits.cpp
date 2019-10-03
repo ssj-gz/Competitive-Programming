@@ -244,6 +244,31 @@ int64_t solveOptimised(const string& B)
 
     Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
 
+    vector<int64_t> sumOf0sStartingAt(N + 1, 0);
+    for (int i = N - 1; i >= 0; i--)
+    {
+        const auto suffixLength = N - i;
+        if (B[i] == '0')
+        {
+            sumOf0sStartingAt[i] = suffixLength + sumOf0sStartingAt[i + 1];
+        }
+        else
+        {
+            sumOf0sStartingAt[i] = sumOf0sStartingAt[i + 1];
+        }
+
+        int dbgSumOf0sStartingAt = 0;
+        int num0s = 0;
+        for (int dbg = i; dbg < N; dbg++)
+        {
+            if (B[dbg] == '0')
+                num0s++;
+            dbgSumOf0sStartingAt += num0s;
+        }
+        cout << "i: " << i << " dbgSumOf0sStartingAt: " << dbgSumOf0sStartingAt << " sumOf0sStartingAt: " << sumOf0sStartingAt[i] << endl;
+        assert(dbgSumOf0sStartingAt == sumOf0sStartingAt[i]);
+    }
+
     int num0sInSuffix = 0;
     int num1sInSuffix = 0;
     for (int index = N - 1; index >= 0; index--)
@@ -306,6 +331,8 @@ int64_t solveOptimised(const string& B)
                         queryResult += num0s;
                     }
                     assert(queryResult == dbgQueryResult);
+                    cout << " queryResult: " << queryResult << " sumOf0sStartingAt: " << sumOf0sStartingAt[index] << " index: " << index << endl;
+                    assert(sumOf0sStartingAt[index] + (N - index) * query.num0sSoFar == queryResult);
                 }
                 else
                 {
