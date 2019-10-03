@@ -413,6 +413,47 @@ int64_t solveOptimised(const string& B)
                 }
                 assert(queryResult == dbgQueryResult);
             }
+            else if (prefixBalance == 0)
+            {
+                queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.num1sSoFar) * (N - (balanceIndex + 1));
+                assert(queryResult == dbgQueryResult);
+            }
+            else
+            {
+
+                //cout << "index: " << index << " balanceIndex: " << balanceIndex << " bit: " << bit << endl;
+                auto num0sInRange = num0sInPrefix[balanceIndex + 1];
+                num0sInRange -= num0sInPrefix[index];
+                const auto rangeLen = balanceIndex + 1 - index;
+                //cout << " num0sInPrefix[balanceIndex + 1]: " << num0sInPrefix[balanceIndex + 1] << endl;
+                //cout << " num0sInPrefix[index]: " << num0sInPrefix[index] << endl;
+                if (query.num0sSoFar > query.num1sSoFar)
+                {
+                    queryResult = sumOf0sStartingAt[index];
+                    queryResult -= sumOf0sStartingAt[balanceIndex + 1];
+                    const auto suffixLen = N - (balanceIndex + 1);
+                    //cout << " suffixLen: " << suffixLen << endl;
+                    queryResult -= num0sInRange * suffixLen;
+                    queryResult += rangeLen * query.num0sSoFar;
+                    //cout << " sumOf0sStartingAt[index]: " << sumOf0sStartingAt[index] << " sumOf0sStartingAt[balanceIndex + 1]: " << sumOf0sStartingAt[balanceIndex + 1] << " num0sInRange: " << num0sInRange << endl;
+                }
+                else
+                {
+                    auto num1sInRange = rangeLen - num0sInRange;
+                    //cout << "index: " << index << " balanceIndex: " << balanceIndex << " bit: " << bit << endl;
+                    queryResult = sumOf1sStartingAt[index];
+                    queryResult -= sumOf1sStartingAt[balanceIndex + 1];
+                    const auto suffixLen = N - (balanceIndex + 1);
+                    queryResult -= num1sInRange * suffixLen;
+                    queryResult += rangeLen * query.num1sSoFar;
+                    //cout << " sumOf1sStartingAt[index]: " << sumOf1sStartingAt[index] << " sumOf1sStartingAt[balanceIndex + 1]: " << sumOf1sStartingAt[balanceIndex + 1] << " num1sInRange: " << num1sInRange << endl;
+                }
+                assert(queryResult >= 0);
+                //cout << " Some up to balance point: " << sumOfWeightStartingAt[index] << endl;
+                assert((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) % 2 == 0);
+                queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.num0sSoFar + query.num1sSoFar) * (N - (balanceIndex + 1));
+
+            }
 
             result += (query.subtractFromResult ? -1 : 1) * dbgQueryResult;
         }
