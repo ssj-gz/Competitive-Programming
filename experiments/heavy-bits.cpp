@@ -279,9 +279,9 @@ int64_t solveOptimised(const string& B)
             if (bit == '1')
                 num1sInSuffix++;
             const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
-            const auto balanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1;
+            const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - currentSuffixBalance is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
 
-            if (balanceIndex == NeverBalanced)
+            if (nextBalanceIndex == NeverBalanced)
             {
                 if (bit == '0')
                     sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
@@ -290,26 +290,26 @@ int64_t solveOptimised(const string& B)
             }
             else
             {
-                auto num0sInRange = num0sInPrefix[balanceIndex + 1];
+                auto num0sInRange = num0sInPrefix[nextBalanceIndex + 1];
                 num0sInRange -= num0sInPrefix[index];
                 if (bit == '0')
                 {
                     sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
-                    sumOfWeightStartingAt[index] -= sumOf0sStartingAt[balanceIndex + 1];
-                    const auto suffixLen = N - (balanceIndex + 1);
+                    sumOfWeightStartingAt[index] -= sumOf0sStartingAt[nextBalanceIndex + 1];
+                    const auto suffixLen = N - (nextBalanceIndex + 1);
                     sumOfWeightStartingAt[index] -= num0sInRange * suffixLen;
                 }
                 else
                 {
-                    auto num1sInRange = (balanceIndex - index + 1) - num0sInRange;
+                    auto num1sInRange = (nextBalanceIndex - index + 1) - num0sInRange;
                     sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
-                    sumOfWeightStartingAt[index] -= sumOf1sStartingAt[balanceIndex + 1];
-                    const auto suffixLen = N - (balanceIndex + 1);
+                    sumOfWeightStartingAt[index] -= sumOf1sStartingAt[nextBalanceIndex + 1];
+                    const auto suffixLen = N - (nextBalanceIndex + 1);
                     sumOfWeightStartingAt[index] -= num1sInRange * suffixLen;
                 }
                 assert(sumOfWeightStartingAt[index] >= 0);
-                assert((balanceIndex - index + 1) % 2 == 0);
-                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2) * (N - (balanceIndex + 1));
+                assert((nextBalanceIndex - index + 1) % 2 == 0);
+                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[nextBalanceIndex + 1] + ((nextBalanceIndex - index + 1) / 2) * (N - (nextBalanceIndex + 1));
 
             }
 #ifdef VERIFY_RESULTS
@@ -348,6 +348,8 @@ int64_t solveOptimised(const string& B)
             num1sInSuffix++;
         const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
+        
+
         for (const auto& query : queriesForIndex[index])
         {
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
