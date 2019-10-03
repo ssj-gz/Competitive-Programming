@@ -205,28 +205,34 @@ int64_t sumOfBlah(int num0sSoFar, int num1sSoFar, int beginIndex, const string& 
     return result;
 }
 
-void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, ModNum& result)
+void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, ModNum& result, const vector<int>& num0sInPrefix)
 {
     // TODO - optimise all this - we should be able to process a transition in O(1)!
     for (const auto& transition : state->transitions)
     {
         auto nextState = transition.nextState;
-        auto nextNum0sSoFar = num0sSoFar;
-        auto nextNum1sSoFar = num1sSoFar;
+        const auto num0sInSubstring = num0sInPrefix[transition.substringFollowed.endIndex + 1] - num0sInPrefix[transition.substringFollowed.startIndex];
+        const auto num1sInSubstring = transition.substringFollowed.endIndex - transition.substringFollowed.startIndex + 1 - num0sInSubstring;
+        const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
+        const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
+        auto dbgNextNum0sSoFar = num0sSoFar;
+        auto dbgNextNum1sSoFar = num1sSoFar;
         for (int index = transition.substringFollowed.startIndex; index <= transition.substringFollowed.endIndex; index++)
         {
             if (B[index] == '0')
-                nextNum0sSoFar++;
+                dbgNextNum0sSoFar++;
             if (B[index] == '1')
-                nextNum1sSoFar++;
+                dbgNextNum1sSoFar++;
         }
+        assert(nextNum0sSoFar == dbgNextNum0sSoFar);
+        assert(nextNum1sSoFar == dbgNextNum1sSoFar);
 
         result += sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
         if (transition.substringFollowed.endIndex + 1 < B.size())
         {
             result -= sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
         }
-        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, result);
+        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, result, num0sInPrefix);
     }
 }
 
@@ -234,9 +240,19 @@ ModNum solveOptimised(const string& B)
 {
     ModNum result;
 
+    vector<int> num0sInPrefix;
+    int num0sSoFar = 0;
+    num0sInPrefix.push_back(num0sSoFar);
+    for (const auto bit : B)
+    {
+        if (bit == '0')
+            num0sSoFar++;
+        num0sInPrefix.push_back(num0sSoFar);
+    }
+
     SuffixTree suffixTree(B);
 
-    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, result);
+    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, result, num0sInPrefix);
 
     return result;
 }
