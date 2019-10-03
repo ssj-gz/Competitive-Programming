@@ -261,6 +261,7 @@ int64_t solveOptimised(const string& B)
     }
 
     vector<int64_t> sumOfWeightStartingAt(N + 1, 0);
+    auto previousSuffixBalance = 0;
     {
         Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
         int num0sInSuffix = 0;
@@ -274,7 +275,42 @@ int64_t solveOptimised(const string& B)
             if (bit == '1')
                 num1sInSuffix++;
             const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
+            int balanceIndex = -1;
+            if (bit == '0')
+            {
+                balanceIndex = nextIndexWithSuffixBalance[previousSuffixBalance + 1] - 1;
+            }
+            if (bit == '1')
+            {
+                balanceIndex = nextIndexWithSuffixBalance[previousSuffixBalance - 1] - 1;
+            }
+            if (balanceIndex == -2)
+            {
+                if (bit == '0')
+                    sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
+                else
+                    sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
+            }
+            else
+            {
+                cout << "index: " << index << " balanceIndex: " << balanceIndex << endl;
+                if (bit == '0')
+                {
+                    sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
+                    sumOfWeightStartingAt[index] -= sumOf0sStartingAt[balanceIndex];
+                }
+                else
+                {
+                    sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
+                    sumOfWeightStartingAt[index] -= sumOf1sStartingAt[balanceIndex];
+                }
+                assert((balanceIndex - index + 1) % 2 == 0);
+                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex] * (balanceIndex - index + 1) / 2;
+
+            }
+
             nextIndexWithSuffixBalance[currentSuffixBalance] = index;
+            previousSuffixBalance = currentSuffixBalance;
         }
     }
 
