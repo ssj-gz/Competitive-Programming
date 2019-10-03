@@ -297,11 +297,27 @@ int64_t solveOptimised(const string& B)
                 if (prefixBalance > 0)
                 {
                     // More 0's than 1's in the prefix.
+                    int num0s = query.num0sSoFar;
+                    for (int i = index; i < B.size(); i++)
+                    {
+                        if (B[i] == '0')
+                            num0s++;
+                        queryResult += num0s;
+                    }
+                    assert(queryResult == dbgQueryResult);
                 }
                 else
                 {
                     // More 1's than 1's in the prefix.
+                    int num1s = query.num1sSoFar;
+                    for (int i = index; i < B.size(); i++)
+                    {
+                        if (B[i] == '1')
+                            num1s++;
+                        queryResult += num1s;
+                    }
                 }
+                assert(queryResult == dbgQueryResult);
             }
 
             result += (query.subtractFromResult ? -1 : 1) * dbgQueryResult;
