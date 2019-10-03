@@ -242,7 +242,6 @@ int64_t solveOptimised(const string& B)
     vector<vector<Query>> queriesForIndex(N);
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefix, queriesForIndex);
 
-    Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
 
     vector<int64_t> sumOf0sStartingAt(N + 1, 0);
     vector<int64_t> sumOf1sStartingAt(N + 1, 0);
@@ -261,6 +260,26 @@ int64_t solveOptimised(const string& B)
         }
     }
 
+    vector<int64_t> sumOfWeightStartingAt(N + 1, 0);
+    {
+        Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
+        int num0sInSuffix = 0;
+        int num1sInSuffix = 0;
+        for (int index = N - 1; index >= 0; index--)
+        {
+            const char bit = B[index];
+            assert(bit == '0' || bit == '1');
+            if (bit == '0')
+                num0sInSuffix++;
+            if (bit == '1')
+                num1sInSuffix++;
+            const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
+            nextIndexWithSuffixBalance[currentSuffixBalance] = index;
+        }
+    }
+
+
+    Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
     int num0sInSuffix = 0;
     int num1sInSuffix = 0;
     for (int index = N - 1; index >= 0; index--)
