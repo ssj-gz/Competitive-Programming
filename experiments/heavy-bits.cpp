@@ -279,15 +279,8 @@ int64_t solveOptimised(const string& B)
             if (bit == '1')
                 num1sInSuffix++;
             const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
-            int balanceIndex = -1;
-            if (bit == '0')
-            {
-                balanceIndex = nextIndexWithSuffixBalance[previousSuffixBalance + 1] - 1;
-            }
-            if (bit == '1')
-            {
-                balanceIndex = nextIndexWithSuffixBalance[previousSuffixBalance - 1] - 1;
-            }
+            const auto balanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1;
+
             if (balanceIndex == NeverBalanced)
             {
                 if (bit == '0')
