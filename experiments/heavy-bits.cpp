@@ -454,11 +454,11 @@ int64_t solveOptimised(const string& B)
                 assert((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) % 2 == 0);
                 queryResult += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) / 2) * (N - (balanceIndex + 1));
                 cout << " queryResult: " << queryResult << " dbgQueryResult: " << dbgQueryResult << endl;
-                assert(queryResult == dbgQueryResult);
 
             }
+            assert(queryResult == dbgQueryResult);
 
-            result += (query.subtractFromResult ? -1 : 1) * dbgQueryResult;
+            result += (query.subtractFromResult ? -1 : 1) * queryResult;
         }
     }
 
