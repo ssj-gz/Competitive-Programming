@@ -268,12 +268,12 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
 
-        result += sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
+        //result += sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
         queriesForIndex[transition.substringFollowed.startIndex].push_back({num0sSoFar, num1sSoFar, false});
         if (transition.substringFollowed.endIndex + 1 < B.size())
         {
-            result -= sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
-            queriesForIndex[transition.substringFollowed.startIndex].push_back({nextNum0sSoFar, nextNum1sSoFar, true});
+            //result -= sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
+            queriesForIndex[transition.substringFollowed.endIndex + 1].push_back({nextNum0sSoFar, nextNum1sSoFar, true});
         }
         solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, result, num0sInPrefix, queriesForIndex);
     }
@@ -303,11 +303,11 @@ ModNum solveOptimised(const string& B)
         for (const auto& query : queriesForIndex[startIndex])
         {
             const auto blah = sumOfBlah(query.num0sSoFar, query.num1sSoFar, startIndex, B);
-#if 0
+#if 1
             if (query.subtractFromResult)
                 result -= blah;
             else
-                result = blah;
+                result += blah;
 #endif
         }
     }
