@@ -427,6 +427,7 @@ int64_t solveOptimised(const string& B)
                 const auto rangeLen = balanceIndex + 1 - index;
                 //cout << " num0sInPrefix[balanceIndex + 1]: " << num0sInPrefix[balanceIndex + 1] << endl;
                 //cout << " num0sInPrefix[index]: " << num0sInPrefix[index] << endl;
+                assert(query.num0sSoFar != query.num1sSoFar);
                 if (query.num0sSoFar > query.num1sSoFar)
                 {
                     queryResult = sumOf0sStartingAt[index];
@@ -451,7 +452,9 @@ int64_t solveOptimised(const string& B)
                 assert(queryResult >= 0);
                 //cout << " Some up to balance point: " << sumOfWeightStartingAt[index] << endl;
                 assert((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) % 2 == 0);
-                queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.num0sSoFar + query.num1sSoFar) * (N - (balanceIndex + 1));
+                queryResult += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) / 2) * (N - (balanceIndex + 1));
+                cout << " queryResult: " << queryResult << " dbgQueryResult: " << dbgQueryResult << endl;
+                assert(queryResult == dbgQueryResult);
 
             }
 
