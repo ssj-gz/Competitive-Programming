@@ -241,11 +241,23 @@ int64_t solveOptimised(const string& B)
     vector<vector<Query>> queriesForIndex(B.size());
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefix, queriesForIndex);
 
-    for (int startIndex = B.size() - 1; startIndex >= 0; startIndex--)
+    Vec<int> nextIndexWithSuffixBalance(-B.size(), +B.size());
+
+    int num0sInSuffix = 0;
+    int num1sInSuffix = 0;
+    for (int index = B.size() - 1; index >= 0; index--)
     {
-        for (const auto& query : queriesForIndex[startIndex])
+        const char bit = B[index];
+        assert(bit == '0' || bit == '1');
+        if (bit == '0')
+            num0sInSuffix++;
+        if (bit == '1')
+            num1sInSuffix++;
+        const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
+        nextIndexWithSuffixBalance[currentSuffixBalance] = index;
+        for (const auto& query : queriesForIndex[index])
         {
-            result += (query.subtractFromResult ? -1 : 1) * sumOfBlah(query.num0sSoFar, query.num1sSoFar, startIndex, B);
+            result += (query.subtractFromResult ? -1 : 1) * sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
         }
     }
 
