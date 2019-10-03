@@ -2,7 +2,7 @@
 // 
 // Solution to: TODO - Heavy Bits link
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #define VERIFY_RESULTS
 #ifdef SUBMISSION
@@ -515,7 +515,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(s);
         cout << solutionOptimised << endl;
 #endif
     }
