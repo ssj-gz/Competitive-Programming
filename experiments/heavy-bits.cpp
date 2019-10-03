@@ -293,19 +293,34 @@ int64_t solveOptimised(const string& B)
             }
             else
             {
-                cout << "index: " << index << " balanceIndex: " << balanceIndex << endl;
+                cout << "index: " << index << " balanceIndex: " << balanceIndex << " bit: " << bit << endl;
+                auto num0sInRange = num0sInPrefix[balanceIndex + 1];
+                num0sInRange -= num0sInPrefix[index];
+                cout << " num0sInPrefix[balanceIndex + 1]: " << num0sInPrefix[balanceIndex + 1] << endl;
+                cout << " num0sInPrefix[index]: " << num0sInPrefix[index] << endl;
                 if (bit == '0')
                 {
                     sumOfWeightStartingAt[index] = sumOf0sStartingAt[index];
                     sumOfWeightStartingAt[index] -= sumOf0sStartingAt[balanceIndex + 1];
+                    const auto suffixLen = N - (balanceIndex + 1);
+                    cout << " suffixLen: " << suffixLen << endl;
+                    sumOfWeightStartingAt[index] -= num0sInRange * suffixLen;
+                    cout << " sumOf0sStartingAt[index]: " << sumOf0sStartingAt[index] << " sumOf0sStartingAt[balanceIndex + 1]: " << sumOf0sStartingAt[balanceIndex + 1] << " num0sInRange: " << num0sInRange << endl;
                 }
                 else
                 {
+                    auto num1sInRange = (balanceIndex - index + 1) - num0sInRange;
+                    cout << "index: " << index << " balanceIndex: " << balanceIndex << " bit: " << bit << endl;
                     sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
                     sumOfWeightStartingAt[index] -= sumOf1sStartingAt[balanceIndex + 1];
+                    const auto suffixLen = N - (balanceIndex + 1);
+                    sumOfWeightStartingAt[index] -= num1sInRange * suffixLen;
+                    cout << " sumOf1sStartingAt[index]: " << sumOf1sStartingAt[index] << " sumOf1sStartingAt[balanceIndex + 1]: " << sumOf1sStartingAt[balanceIndex + 1] << " num1sInRange: " << num1sInRange << endl;
                 }
+                assert(sumOfWeightStartingAt[index] >= 0);
+                cout << " Some up to balance point: " << sumOfWeightStartingAt[index] << endl;
                 assert((balanceIndex - index + 1) % 2 == 0);
-                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex + 1] * (balanceIndex - index + 1) / 2;
+                sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2) * (N - (balanceIndex + 1));
 
             }
             {
@@ -318,9 +333,12 @@ int64_t solveOptimised(const string& B)
                         num0s++;
                     if (B[i] == '1')
                         num1s++;
+                    cout << "   i: " << i << " num0s: " << num0s << " num1s: " << num1s << endl;
                     debugSumOfWeightStartingAt += max(num0s, num1s);
                 }
+                cout << " index: " << index << " balanceIndex: " << balanceIndex << endl;
                 cout << "debugSumOfWeightStartingAt: " << debugSumOfWeightStartingAt << " sumOfWeightStartingAt: " << sumOfWeightStartingAt[index] << endl;
+                assert(debugSumOfWeightStartingAt == sumOfWeightStartingAt[index]);
             }
 
             nextIndexWithSuffixBalance[currentSuffixBalance] = index;
