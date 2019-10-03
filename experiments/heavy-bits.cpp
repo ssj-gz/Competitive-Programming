@@ -21,6 +21,51 @@ using namespace std;
 
 
 /**
+ * Simple vector-ish data structure that allows negative indices.
+ */
+template<typename T>
+class Vec
+{
+    public:
+        Vec(int minIndex, int maxIndex)
+            : m_minIndex(minIndex),
+            m_maxIndex(maxIndex),
+            m_numElements(maxIndex - minIndex + 1),
+            m_vector(m_numElements)
+    {
+
+    }
+        int minIndex() const
+        {
+            return m_minIndex;
+        }
+        int maxIndex() const
+        {
+            return m_maxIndex;
+        }
+        T& operator[](int index)
+        {
+            assert(index >= m_minIndex);
+            assert(index <= m_maxIndex);
+            assert(index - m_minIndex < m_vector.size());
+            return m_vector[index - m_minIndex];
+        }
+        const T& operator[](int index) const
+        {
+            assert(index >= m_minIndex);
+            assert(index <= m_maxIndex);
+            assert(index - m_minIndex < m_vector.size());
+            return m_vector[index - m_minIndex];
+        }
+    private:
+        int m_minIndex = -1;
+        int m_maxIndex = -1;
+        int m_numElements = -1;
+        vector<T> m_vector;
+};
+
+
+/**
  * Simple implementation of Ukkonen's algorithm:
  *  https://en.wikipedia.org/wiki/Ukkonen's_algorithm
  * for online construction of suffix trees.
