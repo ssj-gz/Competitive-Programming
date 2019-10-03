@@ -327,6 +327,7 @@ int64_t solveOptimised(const string& B)
                 sumOfWeightStartingAt[index] += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2) * (N - (balanceIndex + 1));
 
             }
+#ifdef VERIFY_RESULTS
             {
                 int64_t debugSumOfWeightStartingAt = 0;
                 int num0s = 0;
@@ -344,6 +345,7 @@ int64_t solveOptimised(const string& B)
                 //cout << "debugSumOfWeightStartingAt: " << debugSumOfWeightStartingAt << " sumOfWeightStartingAt: " << sumOfWeightStartingAt[index] << endl;
                 assert(debugSumOfWeightStartingAt == sumOfWeightStartingAt[index]);
             }
+#endif
 
             nextIndexWithSuffixBalance[currentSuffixBalance] = index;
             previousSuffixBalance = currentSuffixBalance;
@@ -376,31 +378,6 @@ int64_t solveOptimised(const string& B)
                 //cout << "prefixBalance: " << prefixBalance << " currentSuffixBalance: " << currentSuffixBalance << " desiredSuffixBalance: " << desiredSuffixBalance << endl;
                 balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             }
-            //cout << "balanceIndex: " << balanceIndex << " dbgBalanceIndex: " << dbgBalanceIndex << endl;
-#ifdef VERIFY_RESULTS
-            const auto dbgQueryResult = sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
-            {
-                int dbgBalanceIndex = index - 1;
-                if (prefixBalance != 0)
-                {
-                    int num0s = query.num0sSoFar;
-                    int num1s = query.num1sSoFar;
-                    while (num0s != num1s && dbgBalanceIndex + 1 < N)
-                    {
-                        dbgBalanceIndex++;
-                        if (B[dbgBalanceIndex] == '0')
-                            num0s++;
-                        if (B[dbgBalanceIndex] == '1')
-                            num1s++;
-                    }
-                    if (dbgBalanceIndex == N - 1)
-                    {
-                        dbgBalanceIndex = NeverBalanced;
-                    }
-                }
-                assert(balanceIndex == dbgBalanceIndex);
-            }
-#endif
 
             int64_t queryResult = 0;
 
@@ -417,12 +394,10 @@ int64_t solveOptimised(const string& B)
                     // More 1's than 0's in the prefix.
                     queryResult += sumOf1sStartingAt[index] + (N - index) * query.num1sSoFar ;
                 }
-                assert(queryResult == dbgQueryResult);
             }
             else if (prefixBalance == 0)
             {
                 queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.num1sSoFar) * (N - (balanceIndex + 1));
-                assert(queryResult == dbgQueryResult);
             }
             else
             {
@@ -462,7 +437,31 @@ int64_t solveOptimised(const string& B)
                 //cout << " queryResult: " << queryResult << " dbgQueryResult: " << dbgQueryResult << endl;
 
             }
+#ifdef VERIFY_RESULTS
+            const auto dbgQueryResult = sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
+            {
+                int dbgBalanceIndex = index - 1;
+                if (prefixBalance != 0)
+                {
+                    int num0s = query.num0sSoFar;
+                    int num1s = query.num1sSoFar;
+                    while (num0s != num1s && dbgBalanceIndex + 1 < N)
+                    {
+                        dbgBalanceIndex++;
+                        if (B[dbgBalanceIndex] == '0')
+                            num0s++;
+                        if (B[dbgBalanceIndex] == '1')
+                            num1s++;
+                    }
+                    if (dbgBalanceIndex == N - 1)
+                    {
+                        dbgBalanceIndex = NeverBalanced;
+                    }
+                }
+                assert(balanceIndex == dbgBalanceIndex);
+            }
             assert(queryResult == dbgQueryResult);
+#endif
 
             result += (query.subtractFromResult ? -1 : 1) * queryResult;
         }
