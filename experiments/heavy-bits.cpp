@@ -4,8 +4,10 @@
 //
 //#define SUBMISSION
 #define BRUTE_FORCE
+#define VERIFY_RESULTS
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
+#undef VERIFY_RESULTS
 #define NDEBUG
 #endif
 #include <iostream>
@@ -365,27 +367,8 @@ int64_t solveOptimised(const string& B)
         for (const auto& query : queriesForIndex[index])
         {
             //cout << "index: " << index << " query.num0sSoFar: " << query.num0sSoFar << " query.num1sSoFar: " << query.num1sSoFar << endl;
-            const auto dbgQueryResult = sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
-            const auto prefixBalance = query.num0sSoFar - query.num1sSoFar;
-            int dbgBalanceIndex = index - 1;
-            if (prefixBalance != 0)
-            {
-                int num0s = query.num0sSoFar;
-                int num1s = query.num1sSoFar;
-                while (num0s != num1s && dbgBalanceIndex + 1 < N)
-                {
-                    dbgBalanceIndex++;
-                    if (B[dbgBalanceIndex] == '0')
-                        num0s++;
-                    if (B[dbgBalanceIndex] == '1')
-                        num1s++;
-                }
-                if (dbgBalanceIndex == N - 1)
-                {
-                    dbgBalanceIndex = NeverBalanced;
-                }
-            }
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
+            const auto prefixBalance = query.num0sSoFar - query.num1sSoFar;
             int balanceIndex = index - 1;
             if (prefixBalance != 0)
             {
@@ -394,7 +377,30 @@ int64_t solveOptimised(const string& B)
                 balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             }
             //cout << "balanceIndex: " << balanceIndex << " dbgBalanceIndex: " << dbgBalanceIndex << endl;
-            assert(balanceIndex == dbgBalanceIndex);
+#ifdef VERIFY_RESULTS
+            const auto dbgQueryResult = sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
+            {
+                int dbgBalanceIndex = index - 1;
+                if (prefixBalance != 0)
+                {
+                    int num0s = query.num0sSoFar;
+                    int num1s = query.num1sSoFar;
+                    while (num0s != num1s && dbgBalanceIndex + 1 < N)
+                    {
+                        dbgBalanceIndex++;
+                        if (B[dbgBalanceIndex] == '0')
+                            num0s++;
+                        if (B[dbgBalanceIndex] == '1')
+                            num1s++;
+                    }
+                    if (dbgBalanceIndex == N - 1)
+                    {
+                        dbgBalanceIndex = NeverBalanced;
+                    }
+                }
+                assert(balanceIndex == dbgBalanceIndex);
+            }
+#endif
 
             int64_t queryResult = 0;
 
