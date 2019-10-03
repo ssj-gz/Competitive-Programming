@@ -250,7 +250,14 @@ int64_t sumOfBlah(int num0sSoFar, int num1sSoFar, int beginIndex, const string& 
     return result;
 }
 
-void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, ModNum& result, const vector<int>& num0sInPrefix)
+struct Query
+{
+    int num0sSoFar = -1;
+    int num1sSoFar = -1;
+    bool subtractFromResult = false;
+};
+
+void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, ModNum& result, const vector<int>& num0sInPrefix, vector<vector<Query>>& queriesForIndex)
 {
     // TODO - optimise all this - we should be able to process a transition in O(1)!
     for (const auto& transition : state->transitions)
@@ -262,11 +269,13 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
 
         result += sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
+        queriesForIndex[transition.substringFollowed.startIndex].push_back({num0sSoFar, num1sSoFar, false});
         if (transition.substringFollowed.endIndex + 1 < B.size())
         {
             result -= sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
+            queriesForIndex[transition.substringFollowed.startIndex].push_back({nextNum0sSoFar, nextNum1sSoFar, true});
         }
-        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, result, num0sInPrefix);
+        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, result, num0sInPrefix, queriesForIndex);
     }
 }
 
@@ -286,7 +295,22 @@ ModNum solveOptimised(const string& B)
 
     SuffixTree suffixTree(B);
 
-    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, result, num0sInPrefix);
+    vector<vector<Query>> queriesForIndex(B.size());
+    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, result, num0sInPrefix, queriesForIndex);
+
+    for (int startIndex = B.size() - 1; startIndex >= 0; startIndex--)
+    {
+        for (const auto& query : queriesForIndex[startIndex])
+        {
+            const auto blah = sumOfBlah(query.num0sSoFar, query.num1sSoFar, startIndex, B);
+#if 0
+            if (query.subtractFromResult)
+                result -= blah;
+            else
+                result = blah;
+#endif
+        }
+    }
 
     return result;
 }
