@@ -213,31 +213,19 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num1
         auto nextState = transition.nextState;
         auto nextNum0sSoFar = num0sSoFar;
         auto nextNum1sSoFar = num1sSoFar;
-        auto dbgNewAmount = 0;
         for (int index = transition.substringFollowed.startIndex; index <= transition.substringFollowed.endIndex; index++)
         {
             if (B[index] == '0')
                 nextNum0sSoFar++;
             if (B[index] == '1')
                 nextNum1sSoFar++;
-
-            dbgNewAmount += max(nextNum0sSoFar, nextNum1sSoFar);
         }
-        auto newAmount = 0;
-        auto toAdd = sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
-        auto toSubtract = 0;
+
+        result += sumOfBlah(num0sSoFar, num1sSoFar, transition.substringFollowed.startIndex, B);
         if (transition.substringFollowed.endIndex + 1 < B.size())
         {
-            //cout << "subtracting" << endl;
-            toSubtract = sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
+            result -= sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
         }
-        //cout << "num0sSoFar: " << num0sSoFar << " num1sSoFar: " << num1sSoFar << " nextNum0sSoFar: " << nextNum0sSoFar << " nextNum1sSoFar: " << nextNum1sSoFar << " startIndex: " << transition.substringFollowed.startIndex << " endIndex: " << transition.substringFollowed.endIndex << endl;
-        //cout << " toAdd: " << toAdd << " toSubtract: " << toSubtract << endl;
-        assert(toAdd >= toSubtract);
-        newAmount = toAdd - toSubtract;
-        //cout << "newAmount: " << newAmount << " dbgNewAmount: " << dbgNewAmount <<  endl;
-        assert(newAmount == dbgNewAmount);
-        result += newAmount;
         solveOptimisedAux(nextState, B, nextNum1sSoFar, nextNum0sSoFar, result);
     }
 }
