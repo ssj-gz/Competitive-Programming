@@ -205,7 +205,7 @@ int64_t sumOfBlah(int num0sSoFar, int num1sSoFar, int beginIndex, const string& 
     return result;
 }
 
-void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num1sSoFar, const int num0sSoFar, ModNum& result)
+void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, ModNum& result)
 {
     // TODO - optimise all this - we should be able to process a transition in O(1)!
     for (const auto& transition : state->transitions)
@@ -226,7 +226,7 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num1
         {
             result -= sumOfBlah(nextNum0sSoFar, nextNum1sSoFar, transition.substringFollowed.endIndex + 1, B);
         }
-        solveOptimisedAux(nextState, B, nextNum1sSoFar, nextNum0sSoFar, result);
+        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, result);
     }
 }
 
