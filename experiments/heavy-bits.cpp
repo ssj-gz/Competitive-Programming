@@ -244,50 +244,12 @@ int64_t solveOptimised(const string& B)
     vector<vector<Query>> queriesForIndex(N);
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefix, queriesForIndex);
 
-
-    vector<int64_t> sumOf0sStartingAt(N + 1, 0);
-    vector<int64_t> sumOf1sStartingAt(N + 1, 0);
-    for (int i = N - 1; i >= 0; i--)
-    {
-        const auto suffixLength = N - i;
-        if (B[i] == '0')
-        {
-            sumOf0sStartingAt[i] = suffixLength + sumOf0sStartingAt[i + 1];
-            sumOf1sStartingAt[i] = sumOf1sStartingAt[i + 1];
-        }
-        else
-        {
-            sumOf1sStartingAt[i] = suffixLength + sumOf1sStartingAt[i + 1];
-            sumOf0sStartingAt[i] = sumOf0sStartingAt[i + 1];
-        }
-    }
-
     constexpr auto NeverBalanced = -2;
-
-#if 0
-    auto previousSuffixBalance = 0;
-    {
-        Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
-        int num0sInSuffix = 0;
-        int num1sInSuffix = 0;
-        for (int index = N - 1; index >= 0; index--)
-        {
-            const char bit = B[index];
-            assert(bit == '0' || bit == '1');
-            if (bit == '0')
-                num0sInSuffix++;
-            if (bit == '1')
-                num1sInSuffix++;
-            const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
-            nextIndexWithSuffixBalance[currentSuffixBalance] = index;
-            previousSuffixBalance = currentSuffixBalance;
-        }
-    }
-#endif
-
 
     Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
     vector<int64_t> sumOfWeightStartingAt(N + 1, 0);
+    vector<int64_t> sumOf0sStartingAt(N + 1, 0);
+    vector<int64_t> sumOf1sStartingAt(N + 1, 0);
     int num0sInSuffix = 0;
     int num1sInSuffix = 0;
     for (int index = N - 1; index >= 0; index--)
@@ -299,6 +261,18 @@ int64_t solveOptimised(const string& B)
         if (bit == '1')
             num1sInSuffix++;
         const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
+
+        const auto suffixLength = N - index;
+        if (bit == '0')
+        {
+            sumOf0sStartingAt[index] = suffixLength + sumOf0sStartingAt[index + 1];
+            sumOf1sStartingAt[index] = sumOf1sStartingAt[index + 1];
+        }
+        else
+        {
+            sumOf1sStartingAt[index] = suffixLength + sumOf1sStartingAt[index + 1];
+            sumOf0sStartingAt[index] = sumOf0sStartingAt[index + 1];
+        }
 
         const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - nextBalanceIndex is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
 
