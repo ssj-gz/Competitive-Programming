@@ -182,8 +182,8 @@ int64_t sumOfBlah(int num0sSoFar, int num1sSoFar, int beginIndex, const string& 
 
 struct Query
 {
-    int num0sSoFar = -1;
-    int num1sSoFar = -1;
+    int num0sInPrefix = -1;
+    int num1sInPrefix = -1;
     bool subtractFromResult = false;
 };
 
@@ -313,7 +313,7 @@ int64_t solveOptimised(const string& B)
         for (const auto& query : queriesForIndex[index])
         {
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
-            const auto prefixBalance = query.num0sSoFar - query.num1sSoFar;
+            const auto prefixBalance = query.num0sInPrefix - query.num1sInPrefix;
             int balanceIndex = index - 1;
             if (prefixBalance != 0)
             {
@@ -329,17 +329,17 @@ int64_t solveOptimised(const string& B)
                 if (prefixBalance > 0)
                 {
                     // More 0's than 1's in the prefix.
-                    queryResult += sumOf0sStartingAt[index] + (N - index) * query.num0sSoFar ;
+                    queryResult += sumOf0sStartingAt[index] + (N - index) * query.num0sInPrefix ;
                 }
                 else
                 {
                     // More 1's than 0's in the prefix.
-                    queryResult += sumOf1sStartingAt[index] + (N - index) * query.num1sSoFar ;
+                    queryResult += sumOf1sStartingAt[index] + (N - index) * query.num1sInPrefix ;
                 }
             }
             else if (prefixBalance == 0)
             {
-                queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.num1sSoFar) * (N - (balanceIndex + 1));
+                queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.num1sInPrefix) * (N - (balanceIndex + 1));
             }
             else
             {
@@ -347,14 +347,14 @@ int64_t solveOptimised(const string& B)
                 auto num0sInRange = num0sInPrefixLen[balanceIndex + 1];
                 num0sInRange -= num0sInPrefixLen[index];
                 const auto rangeLen = balanceIndex + 1 - index;
-                assert(query.num0sSoFar != query.num1sSoFar);
+                assert(query.num0sInPrefix != query.num1sInPrefix);
                 const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
-                if (query.num0sSoFar > query.num1sSoFar)
+                if (query.num0sInPrefix > query.num1sInPrefix)
                 {
                     queryResult = sumOf0sStartingAt[index];
                     queryResult -= sumOf0sStartingAt[balanceIndex + 1];
                     queryResult -= num0sInRange * afterBalanceSuffixLen;
-                    queryResult += rangeLen * query.num0sSoFar;
+                    queryResult += rangeLen * query.num0sInPrefix;
                 }
                 else
                 {
@@ -362,21 +362,21 @@ int64_t solveOptimised(const string& B)
                     queryResult = sumOf1sStartingAt[index];
                     queryResult -= sumOf1sStartingAt[balanceIndex + 1];
                     queryResult -= num1sInRange * afterBalanceSuffixLen;
-                    queryResult += rangeLen * query.num1sSoFar;
+                    queryResult += rangeLen * query.num1sInPrefix;
                 }
                 assert(queryResult >= 0);
-                assert((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) % 2 == 0);
-                queryResult += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + query.num0sSoFar + query.num1sSoFar) / 2) * (N - (balanceIndex + 1));
+                assert((balanceIndex - index + 1 + query.num0sInPrefix + query.num1sInPrefix) % 2 == 0);
+                queryResult += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + query.num0sInPrefix + query.num1sInPrefix) / 2) * (N - (balanceIndex + 1));
 
             }
 #ifdef VERIFY_RESULTS
-            const auto dbgQueryResult = sumOfBlah(query.num0sSoFar, query.num1sSoFar, index, B);
+            const auto dbgQueryResult = sumOfBlah(query.num0sInPrefix, query.num1sInPrefix, index, B);
             {
                 int dbgBalanceIndex = index - 1;
                 if (prefixBalance != 0)
                 {
-                    int num0s = query.num0sSoFar;
-                    int num1s = query.num1sSoFar;
+                    int num0s = query.num0sInPrefix;
+                    int num1s = query.num1sInPrefix;
                     while (num0s != num1s && dbgBalanceIndex + 1 < N)
                     {
                         dbgBalanceIndex++;
