@@ -319,20 +319,13 @@ int64_t solveOptimised(const string& B)
                 const auto rangeLen = balanceIndex + 1 - index;
                 assert(query.numbsInPrefix[0] != query.numbsInPrefix[1]);
                 const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
-                if (query.numbsInPrefix[0] > query.numbsInPrefix[1])
-                {
-                    queryResult = sumOfbsStartingAt[0][index];
-                    queryResult -= sumOfbsStartingAt[0][balanceIndex + 1];
-                    queryResult -= numbsInRange[0] * afterBalanceSuffixLen;
-                    queryResult += rangeLen * query.numbsInPrefix[0];
-                }
-                else
-                {
-                    queryResult = sumOfbsStartingAt[1][index];
-                    queryResult -= sumOfbsStartingAt[1][balanceIndex + 1];
-                    queryResult -= numbsInRange[1] * afterBalanceSuffixLen;
-                    queryResult += rangeLen * query.numbsInPrefix[1];
-                }
+                const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
+
+                queryResult = sumOfbsStartingAt[mostPopulousPrefixBit][index];
+                queryResult -= sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
+                queryResult -= numbsInRange[mostPopulousPrefixBit] * afterBalanceSuffixLen;
+                queryResult += rangeLen * query.numbsInPrefix[mostPopulousPrefixBit];
+
                 assert(queryResult >= 0);
                 assert((balanceIndex - index + 1 + query.numbsInPrefix[0] + query.numbsInPrefix[1]) % 2 == 0);
                 queryResult += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + query.numbsInPrefix[0] + query.numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
