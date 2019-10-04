@@ -249,45 +249,6 @@ int64_t solveOptimised(const string& B)
         sumOfbsStartingAt[bitValue][index] = suffixLength + sumOfbsStartingAt[bitValue][index + 1];
         sumOfbsStartingAt[1 - bitValue][index] = sumOfbsStartingAt[1 - bitValue][index + 1];
 
-        const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - nextBalanceIndex is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
-
-        if (nextBalanceIndex == NeverBalanced)
-        {
-            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
-        }
-        else
-        {
-            const int numbsInRange[2] = { numbsInPrefixLen[0][nextBalanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][nextBalanceIndex + 1] - numbsInPrefixLen[1][index] };
-
-            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
-            sumOfWeightStartingAt[index] -= sumOfbsStartingAt[bitValue][nextBalanceIndex + 1];
-            const auto suffixLen = N - (nextBalanceIndex + 1);
-            sumOfWeightStartingAt[index] -= numbsInRange[bitValue] * suffixLen;
-
-            assert(sumOfWeightStartingAt[index] >= 0);
-            assert((nextBalanceIndex - index + 1) % 2 == 0);
-            sumOfWeightStartingAt[index] += sumOfWeightStartingAt[nextBalanceIndex + 1] + ((nextBalanceIndex - index + 1) / 2) * (N - (nextBalanceIndex + 1));
-
-        }
-#ifdef VERIFY_RESULTS
-        {
-            int64_t debugSumOfWeightStartingAt = 0;
-            int num0s = 0;
-            int num1s = 0;
-            for (int i = index; i < N; i++)
-            {
-                if (B[i] == '0')
-                    num0s++;
-                if (B[i] == '1')
-                    num1s++;
-                debugSumOfWeightStartingAt += max(num0s, num1s);
-            }
-            assert(debugSumOfWeightStartingAt == sumOfWeightStartingAt[index]);
-        }
-#endif
-
-        nextIndexWithSuffixBalance[currentSuffixBalance] = index;
-
         auto blah = [&](const int numbsInPrefix[2], const int index)
         {
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
@@ -329,6 +290,46 @@ int64_t solveOptimised(const string& B)
                 return result;
             }
         };
+
+        const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - nextBalanceIndex is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
+
+        if (nextBalanceIndex == NeverBalanced)
+        {
+            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
+        }
+        else
+        {
+            const int numbsInRange[2] = { numbsInPrefixLen[0][nextBalanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][nextBalanceIndex + 1] - numbsInPrefixLen[1][index] };
+
+            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
+            sumOfWeightStartingAt[index] -= sumOfbsStartingAt[bitValue][nextBalanceIndex + 1];
+            const auto suffixLen = N - (nextBalanceIndex + 1);
+            sumOfWeightStartingAt[index] -= numbsInRange[bitValue] * suffixLen;
+
+            assert(sumOfWeightStartingAt[index] >= 0);
+            assert((nextBalanceIndex - index + 1) % 2 == 0);
+            sumOfWeightStartingAt[index] += sumOfWeightStartingAt[nextBalanceIndex + 1] + ((nextBalanceIndex - index + 1) / 2) * (N - (nextBalanceIndex + 1));
+
+        }
+#ifdef VERIFY_RESULTS
+        {
+            int64_t debugSumOfWeightStartingAt = 0;
+            int num0s = 0;
+            int num1s = 0;
+            for (int i = index; i < N; i++)
+            {
+                if (B[i] == '0')
+                    num0s++;
+                if (B[i] == '1')
+                    num1s++;
+                debugSumOfWeightStartingAt += max(num0s, num1s);
+            }
+            assert(debugSumOfWeightStartingAt == sumOfWeightStartingAt[index]);
+        }
+#endif
+
+        nextIndexWithSuffixBalance[currentSuffixBalance] = index;
+
 
 
         for (const auto& query : queriesForIndex[index])
