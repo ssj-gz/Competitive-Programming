@@ -258,9 +258,7 @@ int64_t solveOptimised(const string& B)
         else
         {
             const auto rangeLength = nextBalanceIndex - index + 1;
-            int numbsInRange[2] = { numbsInPrefixLen[0][nextBalanceIndex + 1], 0 };
-            numbsInRange[0] -= numbsInPrefixLen[0][index];
-            numbsInRange[1] = rangeLength - numbsInRange[0];
+            const int numbsInRange[2] = { numbsInPrefixLen[0][nextBalanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][nextBalanceIndex + 1] - numbsInPrefixLen[1][index] };
 
             sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
             sumOfWeightStartingAt[index] -= sumOfbsStartingAt[bitValue][nextBalanceIndex + 1];
