@@ -8,7 +8,7 @@
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #undef VERIFY_RESULTS
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -288,10 +288,51 @@ int64_t solveOptimised(const string& B)
 
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
 
+        auto blah = [&](const int numbsInPrefix[2], const int index)
+        {
+            const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
+            // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
+            int balanceIndex = index - 1;
+            if (prefixBalance != 0)
+            {
+                const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
+                balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
+            }
+            if (balanceIndex == NeverBalanced)
+            {
+                assert(prefixBalance != 0);
+                const auto mostPopulousBit = (prefixBalance > 0 ? 0 : 1);
+                return sumOfbsStartingAt[mostPopulousBit][index] + (N - index) * numbsInPrefix[mostPopulousBit] ;
+            }
+            else if (prefixBalance == 0)
+            {
+                return sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + numbsInPrefix[1]) * (N - (balanceIndex + 1));
+            }
+            else
+            {
+
+                const int numbsInRange[2] = { numbsInPrefixLen[0][balanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][balanceIndex + 1] - numbsInPrefixLen[1][index] };
+                const auto rangeLen = balanceIndex + 1 - index;
+                assert(numbsInPrefix[0] != numbsInPrefix[1]);
+                const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
+                const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
+
+                int64_t result = 0;
+                result = sumOfbsStartingAt[mostPopulousPrefixBit][index] - sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
+                result -= numbsInRange[mostPopulousPrefixBit] * afterBalanceSuffixLen;
+                result += rangeLen * numbsInPrefix[mostPopulousPrefixBit];
+
+                assert(result >= 0);
+                assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
+                result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
+                
+                return result;
+            }
+        };
+
 
         for (const auto& query : queriesForIndex[index])
         {
-            // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
             const auto prefixBalance = query.numbsInPrefix[0] - query.numbsInPrefix[1];
             int balanceIndex = index - 1;
             if (prefixBalance != 0)
@@ -300,37 +341,8 @@ int64_t solveOptimised(const string& B)
                 balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             }
 
-            int64_t queryResult = 0;
+            const auto queryResult = blah(query.numbsInPrefix, index);
 
-            if (balanceIndex == NeverBalanced)
-            {
-                assert(prefixBalance != 0);
-                const auto mostPopulousBit = (prefixBalance > 0 ? 0 : 1);
-                queryResult += sumOfbsStartingAt[mostPopulousBit][index] + (N - index) * query.numbsInPrefix[mostPopulousBit] ;
-            }
-            else if (prefixBalance == 0)
-            {
-                queryResult += sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + query.numbsInPrefix[1]) * (N - (balanceIndex + 1));
-            }
-            else
-            {
-
-                const int numbsInRange[2] = { numbsInPrefixLen[0][balanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][balanceIndex + 1] - numbsInPrefixLen[1][index] };
-                const auto rangeLen = balanceIndex + 1 - index;
-                assert(query.numbsInPrefix[0] != query.numbsInPrefix[1]);
-                const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
-                const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
-
-                queryResult = sumOfbsStartingAt[mostPopulousPrefixBit][index];
-                queryResult -= sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
-                queryResult -= numbsInRange[mostPopulousPrefixBit] * afterBalanceSuffixLen;
-                queryResult += rangeLen * query.numbsInPrefix[mostPopulousPrefixBit];
-
-                assert(queryResult >= 0);
-                assert((balanceIndex - index + 1 + query.numbsInPrefix[0] + query.numbsInPrefix[1]) % 2 == 0);
-                queryResult += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + query.numbsInPrefix[0] + query.numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
-
-            }
 #ifdef VERIFY_RESULTS
             const auto dbgQueryResult = sumOfBlah(query.numbsInPrefix[0], query.numbsInPrefix[1], index, B);
             {
