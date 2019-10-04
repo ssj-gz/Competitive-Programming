@@ -35,6 +35,7 @@ int64_t solveBruteForce(int64_t N, int K)
     {
         powerOf10 *= 10;
     }
+    int lastValid = 0;
     for (int i = 0; i <= powerOf10 - 1; i++)
     {
         if (i % K == 0)
@@ -46,6 +47,16 @@ int64_t solveBruteForce(int64_t N, int K)
             {
                 cout << "i: " << i << endl;
                 result++;
+                const auto diffFromLast = (i - lastValid) / 7;
+                cout << " diff from last: " << diffFromLast << " i: " << i << endl;
+
+                if (diffFromLast > 19)
+                {
+                    cout << "i: " << i << " lastValid: " << lastValid << endl;
+                }
+
+                assert(diffFromLast <= 19);
+                lastValid = i;
             }
         }
 
