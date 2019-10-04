@@ -315,8 +315,7 @@ int64_t solveOptimised(const string& B)
             else
             {
 
-                auto num0sInRange = numbsInPrefixLen[0][balanceIndex + 1];
-                num0sInRange -= numbsInPrefixLen[0][index];
+                const int numbsInRange[2] = { numbsInPrefixLen[0][balanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][balanceIndex + 1] - numbsInPrefixLen[1][index] };
                 const auto rangeLen = balanceIndex + 1 - index;
                 assert(query.numbsInPrefix[0] != query.numbsInPrefix[1]);
                 const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
@@ -324,15 +323,14 @@ int64_t solveOptimised(const string& B)
                 {
                     queryResult = sumOfbsStartingAt[0][index];
                     queryResult -= sumOfbsStartingAt[0][balanceIndex + 1];
-                    queryResult -= num0sInRange * afterBalanceSuffixLen;
+                    queryResult -= numbsInRange[0] * afterBalanceSuffixLen;
                     queryResult += rangeLen * query.numbsInPrefix[0];
                 }
                 else
                 {
-                    auto num1sInRange = rangeLen - num0sInRange;
                     queryResult = sumOfbsStartingAt[1][index];
                     queryResult -= sumOfbsStartingAt[1][balanceIndex + 1];
-                    queryResult -= num1sInRange * afterBalanceSuffixLen;
+                    queryResult -= numbsInRange[1] * afterBalanceSuffixLen;
                     queryResult += rangeLen * query.numbsInPrefix[1];
                 }
                 assert(queryResult >= 0);
