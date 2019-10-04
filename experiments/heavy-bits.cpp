@@ -550,15 +550,15 @@ pair<bool, SuffixTree::State*> SuffixTree::testAndSplit(State* s, int k, int p, 
     assert(s);
     if (k <= p)
     {
-        const auto tkTransitionIter = findTransition(s, t(k));
-        auto sPrime = tkTransitionIter->nextState;
-        auto kPrime = tkTransitionIter->substringFollowed.startIndex;
-        auto pPrime = tkTransitionIter->substringFollowed.endIndex;
+        const auto tkTransition = findTransition(s, t(k));
+        auto sPrime = tkTransition->nextState;
+        auto kPrime = tkTransition->substringFollowed.startIndex;
+        auto pPrime = tkTransition->substringFollowed.endIndex;
         if (letterIndex == t(kPrime + p - k + 1))
             return {true, s};
         else
         {
-            s->transitions.erase(tkTransitionIter);
+            s->transitions.erase(tkTransition);
             auto r = createNewState(s);
             s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k)));
             r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime)));
@@ -582,20 +582,20 @@ std::pair<SuffixTree::State*, int> SuffixTree::canonize(State* s, int k, int p)
         return {s, k};
     else
     {
-        auto tkTransitionIter = findTransition(s, t(k));
-        auto sPrime = tkTransitionIter->nextState;
-        auto kPrime = tkTransitionIter->substringFollowed.startIndex;
-        auto pPrime = tkTransitionIter->substringFollowed.endIndex;
+        auto tkTransition = findTransition(s, t(k));
+        auto sPrime = tkTransition->nextState;
+        auto kPrime = tkTransition->substringFollowed.startIndex;
+        auto pPrime = tkTransition->substringFollowed.endIndex;
         while (pPrime - kPrime <= p - k)
         {
             k = k + pPrime - kPrime + 1;
             s = sPrime;
             if (k <= p)
             {
-                tkTransitionIter = findTransition(s, t(k));
-                sPrime = tkTransitionIter->nextState;
-                kPrime = tkTransitionIter->substringFollowed.startIndex;
-                pPrime = tkTransitionIter->substringFollowed.endIndex;
+                tkTransition = findTransition(s, t(k));
+                sPrime = tkTransition->nextState;
+                kPrime = tkTransition->substringFollowed.startIndex;
+                pPrime = tkTransition->substringFollowed.endIndex;
             }
         }
     }
