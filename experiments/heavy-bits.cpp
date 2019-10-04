@@ -211,20 +211,21 @@ int64_t solveOptimised(const string& B)
     int64_t result = 0;
     const int N = B.size();
 
-    vector<int> num0sInPrefixLen;
-    int num0sSoFar = 0;
-    num0sInPrefixLen.push_back(num0sSoFar);
+    vector<int> numbsInPrefixLen[2];
+    int numbsSoFar[2] = { 0, 0 };
+    numbsInPrefixLen[0].push_back(numbsSoFar[0]);
+    numbsInPrefixLen[1].push_back(numbsSoFar[1]);
     for (const auto bit : B)
     {
-        if (bit == '0')
-            num0sSoFar++;
-        num0sInPrefixLen.push_back(num0sSoFar);
+        numbsSoFar[bit - '0']++;
+        numbsInPrefixLen[0].push_back(numbsSoFar[0]);
+        numbsInPrefixLen[1].push_back(numbsSoFar[1]);
     }
 
     SuffixTree suffixTree(B);
 
     vector<vector<Query>> queriesForIndex(N);
-    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, num0sInPrefixLen, queriesForIndex);
+    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, numbsInPrefixLen[0], queriesForIndex);
 
     constexpr auto NeverBalanced = -2;
 
@@ -257,8 +258,8 @@ int64_t solveOptimised(const string& B)
         else
         {
             const auto rangeLength = nextBalanceIndex - index + 1;
-            int numbsInRange[2] = { num0sInPrefixLen[nextBalanceIndex + 1], 0 };
-            numbsInRange[0] -= num0sInPrefixLen[index];
+            int numbsInRange[2] = { numbsInPrefixLen[0][nextBalanceIndex + 1], 0 };
+            numbsInRange[0] -= numbsInPrefixLen[0][index];
             numbsInRange[1] = rangeLength - numbsInRange[0];
 
             sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
@@ -317,8 +318,8 @@ int64_t solveOptimised(const string& B)
             else
             {
 
-                auto num0sInRange = num0sInPrefixLen[balanceIndex + 1];
-                num0sInRange -= num0sInPrefixLen[index];
+                auto num0sInRange = numbsInPrefixLen[0][balanceIndex + 1];
+                num0sInRange -= numbsInPrefixLen[0][index];
                 const auto rangeLen = balanceIndex + 1 - index;
                 assert(query.numbsInPrefix[0] != query.numbsInPrefix[1]);
                 const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
