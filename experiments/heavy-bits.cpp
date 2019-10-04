@@ -257,23 +257,16 @@ int64_t solveOptimised(const string& B)
         }
         else
         {
-            auto num0sInRange = num0sInPrefixLen[nextBalanceIndex + 1];
-            num0sInRange -= num0sInPrefixLen[index];
-            if (bit == '0')
-            {
-                sumOfWeightStartingAt[index] = sumOfbsStartingAt[0][index];
-                sumOfWeightStartingAt[index] -= sumOfbsStartingAt[0][nextBalanceIndex + 1];
-                const auto suffixLen = N - (nextBalanceIndex + 1);
-                sumOfWeightStartingAt[index] -= num0sInRange * suffixLen;
-            }
-            else
-            {
-                auto num1sInRange = (nextBalanceIndex - index + 1) - num0sInRange;
-                sumOfWeightStartingAt[index] = sumOfbsStartingAt[1][index];
-                sumOfWeightStartingAt[index] -= sumOfbsStartingAt[1][nextBalanceIndex + 1];
-                const auto suffixLen = N - (nextBalanceIndex + 1);
-                sumOfWeightStartingAt[index] -= num1sInRange * suffixLen;
-            }
+            const auto rangeLength = nextBalanceIndex - index + 1;
+            int numbsInRange[2] = { num0sInPrefixLen[nextBalanceIndex + 1], 0 };
+            numbsInRange[0] -= num0sInPrefixLen[index];
+            numbsInRange[1] = rangeLength - numbsInRange[0];
+
+            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
+            sumOfWeightStartingAt[index] -= sumOfbsStartingAt[bitValue][nextBalanceIndex + 1];
+            const auto suffixLen = N - (nextBalanceIndex + 1);
+            sumOfWeightStartingAt[index] -= numbsInRange[bitValue] * suffixLen;
+
             assert(sumOfWeightStartingAt[index] >= 0);
             assert((nextBalanceIndex - index + 1) % 2 == 0);
             sumOfWeightStartingAt[index] += sumOfWeightStartingAt[nextBalanceIndex + 1] + ((nextBalanceIndex - index + 1) / 2) * (N - (nextBalanceIndex + 1));
