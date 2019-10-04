@@ -114,7 +114,7 @@ class SuffixTree
 
         State *createNewState(State* parent = nullptr);
 
-        decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true);
+        vector<Transition>::iterator findTransitionIter(State* state, int letterIndex, bool assertFound = true);
         int t(int i);
 };
 
@@ -610,7 +610,7 @@ SuffixTree::State *SuffixTree::createNewState(State* parent)
     return newState;
 }
 
-decltype(SuffixTree::State::transitions.begin()) SuffixTree::findTransitionIter(State* state, int letterIndex, bool assertFound)
+vector<SuffixTree::Transition>::iterator SuffixTree::findTransitionIter(State* state, int letterIndex, bool assertFound)
 {
     for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
     {
