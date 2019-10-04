@@ -307,16 +307,8 @@ int64_t solveOptimised(const string& B)
             if (balanceIndex == NeverBalanced)
             {
                 assert(prefixBalance != 0);
-                if (prefixBalance > 0)
-                {
-                    // More 0's than 1's in the prefix.
-                    queryResult += sumOfbsStartingAt[0][index] + (N - index) * query.numbsInPrefix[0] ;
-                }
-                else
-                {
-                    // More 1's than 0's in the prefix.
-                    queryResult += sumOfbsStartingAt[1][index] + (N - index) * query.numbsInPrefix[1] ;
-                }
+                const auto mostPopulousBit = (prefixBalance > 0 ? 0 : 1);
+                queryResult += sumOfbsStartingAt[mostPopulousBit][index] + (N - index) * query.numbsInPrefix[mostPopulousBit] ;
             }
             else if (prefixBalance == 0)
             {
