@@ -232,17 +232,16 @@ int64_t solveOptimised(const string& B)
     Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
     vector<int64_t> sumOfWeightStartingAt(N + 1, 0);
     vector<int64_t> sumOfbsStartingAt[2] = {vector<int64_t>(N + 1, 0), vector<int64_t>(N + 1, 0)};
-    int num0sInSuffix = 0;
-    int num1sInSuffix = 0;
+    int numbsInSuffix[2] = {0, 0};
     for (int index = N - 1; index >= 0; index--)
     {
         const char bit = B[index];
         assert(bit == '0' || bit == '1');
         if (bit == '0')
-            num0sInSuffix++;
+            numbsInSuffix[0]++;
         if (bit == '1')
-            num1sInSuffix++;
-        const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
+            numbsInSuffix[1]++;
+        const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
 
         const auto suffixLength = N - index;
         if (bit == '0')
