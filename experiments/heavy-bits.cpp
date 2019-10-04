@@ -253,10 +253,7 @@ int64_t solveOptimised(const string& B)
 
         if (nextBalanceIndex == NeverBalanced)
         {
-            if (bit == '0')
-                sumOfWeightStartingAt[index] = sumOfbsStartingAt[0][index];
-            else
-                sumOfWeightStartingAt[index] = sumOfbsStartingAt[1][index];
+            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
         }
         else
         {
