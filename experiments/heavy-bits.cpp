@@ -232,7 +232,6 @@ int64_t solveOptimised(const string& B)
     Vec<int> nextIndexWithSuffixBalance(-N, +N, -1);
     vector<int64_t> sumOfWeightStartingAt(N + 1, 0);
     vector<int64_t> sumOfbsStartingAt[2] = {vector<int64_t>(N + 1, 0), vector<int64_t>(N + 1, 0)};
-    vector<int64_t> sumOf1sStartingAt(N + 1, 0);
     int num0sInSuffix = 0;
     int num1sInSuffix = 0;
     for (int index = N - 1; index >= 0; index--)
@@ -249,11 +248,11 @@ int64_t solveOptimised(const string& B)
         if (bit == '0')
         {
             sumOfbsStartingAt[0][index] = suffixLength + sumOfbsStartingAt[0][index + 1];
-            sumOf1sStartingAt[index] = sumOf1sStartingAt[index + 1];
+            sumOfbsStartingAt[1][index] = sumOfbsStartingAt[1][index + 1];
         }
         else
         {
-            sumOf1sStartingAt[index] = suffixLength + sumOf1sStartingAt[index + 1];
+            sumOfbsStartingAt[1][index] = suffixLength + sumOfbsStartingAt[1][index + 1];
             sumOfbsStartingAt[0][index] = sumOfbsStartingAt[0][index + 1];
         }
 
@@ -264,7 +263,7 @@ int64_t solveOptimised(const string& B)
             if (bit == '0')
                 sumOfWeightStartingAt[index] = sumOfbsStartingAt[0][index];
             else
-                sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
+                sumOfWeightStartingAt[index] = sumOfbsStartingAt[1][index];
         }
         else
         {
@@ -280,8 +279,8 @@ int64_t solveOptimised(const string& B)
             else
             {
                 auto num1sInRange = (nextBalanceIndex - index + 1) - num0sInRange;
-                sumOfWeightStartingAt[index] = sumOf1sStartingAt[index];
-                sumOfWeightStartingAt[index] -= sumOf1sStartingAt[nextBalanceIndex + 1];
+                sumOfWeightStartingAt[index] = sumOfbsStartingAt[1][index];
+                sumOfWeightStartingAt[index] -= sumOfbsStartingAt[1][nextBalanceIndex + 1];
                 const auto suffixLen = N - (nextBalanceIndex + 1);
                 sumOfWeightStartingAt[index] -= num1sInRange * suffixLen;
             }
@@ -334,7 +333,7 @@ int64_t solveOptimised(const string& B)
                 else
                 {
                     // More 1's than 0's in the prefix.
-                    queryResult += sumOf1sStartingAt[index] + (N - index) * query.num1sInPrefix ;
+                    queryResult += sumOfbsStartingAt[1][index] + (N - index) * query.num1sInPrefix ;
                 }
             }
             else if (prefixBalance == 0)
@@ -359,8 +358,8 @@ int64_t solveOptimised(const string& B)
                 else
                 {
                     auto num1sInRange = rangeLen - num0sInRange;
-                    queryResult = sumOf1sStartingAt[index];
-                    queryResult -= sumOf1sStartingAt[balanceIndex + 1];
+                    queryResult = sumOfbsStartingAt[1][index];
+                    queryResult -= sumOfbsStartingAt[1][balanceIndex + 1];
                     queryResult -= num1sInRange * afterBalanceSuffixLen;
                     queryResult += rangeLen * query.num1sInPrefix;
                 }
