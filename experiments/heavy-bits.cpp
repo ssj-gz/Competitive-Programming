@@ -114,7 +114,7 @@ class SuffixTree
 
         State *createNewState(State* parent = nullptr);
 
-        decltype(State::transitions.begin()) findTransition(State* state, int letterIndex, bool assertFound = true);
+        decltype(State::transitions.begin()) findTransitionIter(State* state, int letterIndex, bool assertFound = true);
         int t(int i);
 };
 
@@ -550,15 +550,15 @@ pair<bool, SuffixTree::State*> SuffixTree::testAndSplit(State* s, int k, int p, 
     assert(s);
     if (k <= p)
     {
-        const auto tkTransition = findTransition(s, t(k));
-        auto sPrime = tkTransition->nextState;
-        auto kPrime = tkTransition->substringFollowed.startIndex;
-        auto pPrime = tkTransition->substringFollowed.endIndex;
+        const auto tkTransitionIter = findTransitionIter(s, t(k));
+        auto sPrime = tkTransitionIter->nextState;
+        auto kPrime = tkTransitionIter->substringFollowed.startIndex;
+        auto pPrime = tkTransitionIter->substringFollowed.endIndex;
         if (letterIndex == t(kPrime + p - k + 1))
             return {true, s};
         else
         {
-            s->transitions.erase(tkTransition);
+            s->transitions.erase(tkTransitionIter);
             auto r = createNewState(s);
             s->transitions.push_back(Transition(r, Substring(kPrime, kPrime + p - k)));
             r->transitions.push_back(Transition(sPrime, Substring(kPrime + p - k + 1, pPrime)));
@@ -568,7 +568,7 @@ pair<bool, SuffixTree::State*> SuffixTree::testAndSplit(State* s, int k, int p, 
     }
     else
     {
-        auto tTransitionIter = findTransition(s, letterIndex, false);
+        auto tTransitionIter = findTransitionIter(s, letterIndex, false);
         if (tTransitionIter == s->transitions.end())
             return {false, s};
         else
@@ -582,20 +582,20 @@ std::pair<SuffixTree::State*, int> SuffixTree::canonize(State* s, int k, int p)
         return {s, k};
     else
     {
-        auto tkTransition = findTransition(s, t(k));
-        auto sPrime = tkTransition->nextState;
-        auto kPrime = tkTransition->substringFollowed.startIndex;
-        auto pPrime = tkTransition->substringFollowed.endIndex;
+        auto tkTransitionIter = findTransitionIter(s, t(k));
+        auto sPrime = tkTransitionIter->nextState;
+        auto kPrime = tkTransitionIter->substringFollowed.startIndex;
+        auto pPrime = tkTransitionIter->substringFollowed.endIndex;
         while (pPrime - kPrime <= p - k)
         {
             k = k + pPrime - kPrime + 1;
             s = sPrime;
             if (k <= p)
             {
-                tkTransition = findTransition(s, t(k));
-                sPrime = tkTransition->nextState;
-                kPrime = tkTransition->substringFollowed.startIndex;
-                pPrime = tkTransition->substringFollowed.endIndex;
+                tkTransitionIter = findTransitionIter(s, t(k));
+                sPrime = tkTransitionIter->nextState;
+                kPrime = tkTransitionIter->substringFollowed.startIndex;
+                pPrime = tkTransitionIter->substringFollowed.endIndex;
             }
         }
     }
@@ -610,7 +610,7 @@ SuffixTree::State *SuffixTree::createNewState(State* parent)
     return newState;
 }
 
-decltype(SuffixTree::State::transitions.begin()) SuffixTree::findTransition(State* state, int letterIndex, bool assertFound)
+decltype(SuffixTree::State::transitions.begin()) SuffixTree::findTransitionIter(State* state, int letterIndex, bool assertFound)
 {
     for (auto transitionIter = state->transitions.begin(); transitionIter != state->transitions.end(); transitionIter++)
     {
