@@ -236,6 +236,7 @@ int64_t solveOptimised(const string& B)
     for (int index = N - 1; index >= 0; index--)
     {
         const char bit = B[index];
+        const int bitValue = bit - '0';
         assert(bit == '0' || bit == '1');
         if (bit == '0')
             numbsInSuffix[0]++;
@@ -244,16 +245,9 @@ int64_t solveOptimised(const string& B)
         const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
 
         const auto suffixLength = N - index;
-        if (bit == '0')
-        {
-            sumOfbsStartingAt[0][index] = suffixLength + sumOfbsStartingAt[0][index + 1];
-            sumOfbsStartingAt[1][index] = sumOfbsStartingAt[1][index + 1];
-        }
-        else
-        {
-            sumOfbsStartingAt[1][index] = suffixLength + sumOfbsStartingAt[1][index + 1];
-            sumOfbsStartingAt[0][index] = sumOfbsStartingAt[0][index + 1];
-        }
+
+        sumOfbsStartingAt[bitValue][index] = suffixLength + sumOfbsStartingAt[bitValue][index + 1];
+        sumOfbsStartingAt[1 - bitValue][index] = sumOfbsStartingAt[1 - bitValue][index + 1];
 
         const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - nextBalanceIndex is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
 
