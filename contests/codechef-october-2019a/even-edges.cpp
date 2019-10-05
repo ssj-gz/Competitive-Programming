@@ -30,6 +30,7 @@ struct Node
 {
     vector<Node*> neighbours;
     int subgraphNum = -1;
+    int colour = -1;
 };
 
 bool isValidPartitioning(const vector<Node>& nodes)
@@ -99,8 +100,11 @@ std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
     return {-1, vector<int>()};
 }
 
-std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes)
+std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes, const int numEdges)
 {
+    if (numEdges % 2 == 0)
+        return {1, vector<int>()};
+
     bool hasOddDegree = false;
     for (const auto& node : nodes)
     {
@@ -110,11 +114,40 @@ std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes)
             break;
         }
     }
-    if (!hasOddDegree)
+    if (hasOddDegree)
     {
-        return {1, vector<int>(nodes.size(), 1)};
+        return {2, vector<int>()};
     }
-    return {2, vector<int>() };
+
+    vector<Node*> toExplore = { &(nodes.front()) };
+    int colour = 0;
+    nodes.front().colour = colour;
+    bool isBipartite = true;
+    while (!toExplore.empty())
+    {
+        colour = 1 - colour;
+        vector<Node*> nextToExplore;
+        for (auto& node : toExplore)
+        {
+            for (auto neighbour : node->neighbours)
+            {
+                if (neighbour->colour != -1 && neighbour->colour != colour)
+                {
+                    isBipartite = false;
+                }
+                if (neighbour->colour == -1)
+                    nextToExplore.push_back(neighbour);
+                neighbour->colour = colour;
+            }
+        }
+
+        toExplore = nextToExplore;
+    }
+
+    if (isBipartite)
+        return {2, vector<int>()};
+    
+    return {3, vector<int>()};
 }
 
 
@@ -182,15 +215,15 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(nodes);
         cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
         //assert(solutionBruteForce.first == 1 || solutionBruteForce.first == 2);
-        assert(M <= 3 || solutionBruteForce.first <= 2);
+        assert(solutionBruteForce.first <= 3);
         for (const auto blah : solutionBruteForce.second)
         {
             cout << blah << " ";
         }
         cout << endl;
 
-#if 0
-        const auto solutionOptimised = solveOptimised(nodes);
+#if 1
+        const auto solutionOptimised = solveOptimised(nodes, M);
         cout << "solutionOptimised:  " << solutionOptimised.first << endl;
 
         assert(solutionOptimised.first == solutionBruteForce.first);
