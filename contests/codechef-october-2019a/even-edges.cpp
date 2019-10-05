@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int N = rand() % 10 + 1;
+            const int N = (rand() % 20) + 2;
             vector<pair<int, int>> allEdges;
             for (int i = 1; i <= N; i++)
             {
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
                     allEdges.push_back({i, j});
                 }
             }
-            const int M = rand() % allEdges.size() + 1;
+            const int M = (rand() % allEdges.size()) + 1;
 
             cout << N << " " << M << endl;
 
@@ -156,6 +156,7 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(nodes);
         cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
+        assert(solutionBruteForce.first == 1 || solutionBruteForce.first == 2);
 #if 0
         const auto solutionOptimised = solveOptimised();
         cout << "solutionOptimised:  " << solutionOptimised << endl;
