@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/EVEDG
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -230,8 +230,8 @@ int main(int argc, char* argv[])
 #endif
 
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(nodes, M);
+        cout << solutionOptimised.first << endl;
 #endif
     }
 
