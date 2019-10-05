@@ -119,34 +119,6 @@ std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes, const int numEdg
         return {2, vector<int>()};
     }
 
-    vector<Node*> toExplore = { &(nodes.front()) };
-    int colour = 0;
-    nodes.front().colour = colour;
-    bool isBipartite = true;
-    while (!toExplore.empty())
-    {
-        colour = 1 - colour;
-        vector<Node*> nextToExplore;
-        for (auto& node : toExplore)
-        {
-            for (auto neighbour : node->neighbours)
-            {
-                if (neighbour->colour != -1 && neighbour->colour != colour)
-                {
-                    isBipartite = false;
-                }
-                if (neighbour->colour == -1)
-                    nextToExplore.push_back(neighbour);
-                neighbour->colour = colour;
-            }
-        }
-
-        toExplore = nextToExplore;
-    }
-
-    if (isBipartite)
-        return {2, vector<int>()};
-    
     return {3, vector<int>()};
 }
 
