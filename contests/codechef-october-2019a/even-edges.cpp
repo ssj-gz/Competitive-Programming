@@ -84,14 +84,24 @@ std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
     return {-1, vector<int>()};
 }
 
-#if 0
-int solveOptimised()
+std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes)
 {
-    int result = 0;
-    
-    return result;
+    bool hasOddDegree = false;
+    for (const auto& node : nodes)
+    {
+        if (node.neighbours.size() % 2 == 1)
+        {
+            hasOddDegree = true;
+            break;
+        }
+    }
+    if (!hasOddDegree)
+    {
+        return {1, vector<int>(nodes.size(), 1)};
+    }
+    return {2, vector<int>() };
 }
-#endif
+
 
 
 int main(int argc, char* argv[])
@@ -157,12 +167,12 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(nodes);
         cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
         assert(solutionBruteForce.first == 1 || solutionBruteForce.first == 2);
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
-#endif
+        const auto solutionOptimised = solveOptimised(nodes);
+        cout << "solutionOptimised:  " << solutionOptimised.first << endl;
+
+        assert(solutionOptimised.first == solutionBruteForce.first);
+
 #else
         const auto solutionOptimised = solveOptimised();
         cout << solutionOptimised << endl;
