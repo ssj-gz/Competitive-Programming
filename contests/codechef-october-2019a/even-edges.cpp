@@ -26,19 +26,68 @@ T read()
     return toRead;
 }
 
-#if 0
-SolutionType solveBruteForce()
+struct Node
 {
-    SolutionType result;
-    
-    return result;
+    vector<Node*> neighbours;
+    int subgraphNum = -1;
+};
+
+bool isValidPartitioning(const vector<Node>& nodes)
+{
+    for (const auto& node : nodes)
+    {
+        int nodeDegree = 0;
+        for (const auto neighbour : node.neighbours)
+        {
+            if (neighbour->subgraphNum == node.subgraphNum)
+            {
+                nodeDegree++;
+            }
+        }
+        if ((nodeDegree % 2) == 1)
+            return false;
+    }
+    return true;
 }
-#endif
+
+std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
+{
+    const int N = nodes.size();
+
+    int numsubGraphs = 1;
+    while (true)
+    {
+        vector<int> subgraphForNode(N, 0);
+        while (true)
+        {
+            for (int i = 0; i < N; i++)
+            {
+                nodes[i].subgraphNum = subgraphForNode[i];
+            }
+            if (isValidPartitioning(nodes))
+                return {numsubGraphs, subgraphForNode};
+
+            int index = 0;
+            while(index < N && subgraphForNode[index] == (numsubGraphs - 1))
+            {
+                subgraphForNode[index] = 0;
+                index++;
+            }
+            if (index == N)
+                break;
+            subgraphForNode[index]++;
+        }
+
+        numsubGraphs++;
+    }
+    
+    return {-1, vector<int>()};
+}
 
 #if 0
-SolutionType solveOptimised()
+int solveOptimised()
 {
-    SolutionType result;
+    int result = 0;
     
     return result;
 }
@@ -70,12 +119,23 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
+        const int N = read<int>();
+        vector<Node> nodes(N);
+
+        const int M = read<int>();
+
+        for (int i = 0; i < M; i++)
+        {
+            const int u = read<int>() - 1;
+            const int v = read<int>() - 1;
+
+            nodes[u].neighbours.push_back(&(nodes[v]));
+            nodes[v].neighbours.push_back(&(nodes[u]));
+        }
 
 #ifdef BRUTE_FORCE
-#if 0
-        const auto solutionBruteForce = solveBruteForce();
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
+        const auto solutionBruteForce = solveBruteForce(nodes);
+        cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
 #if 0
         const auto solutionOptimised = solveOptimised();
         cout << "solutionOptimised:  " << solutionOptimised << endl;
