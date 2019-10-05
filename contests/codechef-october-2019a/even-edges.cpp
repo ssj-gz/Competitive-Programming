@@ -109,6 +109,26 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = rand() % 10 + 1;
+            vector<pair<int, int>> allEdges;
+            for (int i = 1; i <= N; i++)
+            {
+                for (int j = i + 1; j <= N; j++)
+                {
+                    allEdges.push_back({i, j});
+                }
+            }
+            const int M = rand() % allEdges.size() + 1;
+
+            cout << N << " " << M << endl;
+
+            random_shuffle(allEdges.begin(), allEdges.end());
+
+            for (int i = 0; i < M; i++)
+            {
+                cout << allEdges[i].first << " " << allEdges[i].second << endl;
+
+            }
         }
 
         return 0;
