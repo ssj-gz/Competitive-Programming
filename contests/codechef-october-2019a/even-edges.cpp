@@ -34,19 +34,33 @@ struct Node
 
 bool isValidPartitioning(const vector<Node>& nodes)
 {
+    int numSubgraphs = -1;
     for (const auto& node : nodes)
     {
-        int nodeDegree = 0;
+        if (node.subgraphNum + 1 > numSubgraphs)
+        {
+            numSubgraphs = node.subgraphNum + 1;
+        }
+    }
+    vector<int> twiceNumEdgesInSubgraph(numSubgraphs, 0);
+    for (const auto& node : nodes)
+    {
         for (const auto neighbour : node.neighbours)
         {
             if (neighbour->subgraphNum == node.subgraphNum)
             {
-                nodeDegree++;
+                twiceNumEdgesInSubgraph[node.subgraphNum]++;
             }
         }
-        if ((nodeDegree % 2) == 1)
+    }
+    for (const auto twiceNumEdges : twiceNumEdgesInSubgraph)
+    {
+        const auto numEdges = twiceNumEdges / 2;
+        if ((numEdges % 2) == 1)
             return false;
     }
+
+
     return true;
 }
 
@@ -79,6 +93,7 @@ std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
         }
 
         numsubGraphs++;
+        cout << " Trying numsubGraphs: " << numsubGraphs << endl;
     }
     
     return {-1, vector<int>()};
@@ -166,12 +181,20 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(nodes);
         cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
-        assert(solutionBruteForce.first == 1 || solutionBruteForce.first == 2);
+        //assert(solutionBruteForce.first == 1 || solutionBruteForce.first == 2);
+        assert(M <= 3 || solutionBruteForce.first <= 2);
+        for (const auto blah : solutionBruteForce.second)
+        {
+            cout << blah << " ";
+        }
+        cout << endl;
 
+#if 0
         const auto solutionOptimised = solveOptimised(nodes);
         cout << "solutionOptimised:  " << solutionOptimised.first << endl;
 
         assert(solutionOptimised.first == solutionBruteForce.first);
+#endif
 
 #else
         const auto solutionOptimised = solveOptimised();
