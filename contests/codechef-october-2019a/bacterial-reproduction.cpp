@@ -192,6 +192,34 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
 {
     ancestors.push_back(node);
 
+    for (const auto& queryEvent : node->queryEvents)
+    {
+        const int timeDepthDiff = node->depth - queryEvent.time;
+        for (const auto& ancestor : ancestors)
+        {
+            for (const auto& ancestorAddEvent : ancestor->addEvents)
+            {
+                const auto ancestorAddDepthTimeDiff = ancestor->depth - ancestorAddEvent.time;
+                const bool isLeaf = node->children.empty();
+                if (isLeaf)
+                {
+                    if (ancestorAddDepthTimeDiff >= timeDepthDiff)
+                    {
+                        queryEvent.originalQuery->queryAnswer += ancestorAddEvent.numBacteriaToAdd;
+
+                    }
+                }
+                else
+                {
+                    if (ancestorAddDepthTimeDiff == timeDepthDiff)
+                    {
+                        queryEvent.originalQuery->queryAnswer = ancestorAddEvent.numBacteriaToAdd;
+                    }
+                }
+            }
+        }
+    }
+
     for (auto child : node->children)
     {
         solutionOptimisedAux(child, ancestors);
@@ -202,7 +230,6 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
 
 vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
 {
-    vector<int64_t> result;
     
     for (auto& node : nodes)
     {
@@ -224,6 +251,16 @@ vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
 
     vector<Node*> ancestors;
     solutionOptimisedAux(&(nodes.front()), ancestors);
+
+    vector<int64_t> result;
+    for (const auto& query : queries)
+    {
+        if (!query.isAddBacteria)
+        {
+            assert(query.queryAnswer != -1);
+            result.push_back(query.queryAnswer);
+        }
+    }
     
     return result;
 }
