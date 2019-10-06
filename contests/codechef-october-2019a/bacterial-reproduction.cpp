@@ -42,16 +42,19 @@ class SegmentTree
         {
             return m_maxPos;
         }
+#if 0
         int numAtAndToRightOf(int position)
         {
             assert(m_minPos <= position && position <= m_maxPos);
-            return numInRange(position + m_minPos, m_maxPos);
+            return numInRange(position - m_minPos, m_maxPos);
         }
+#endif
         // Find the number in the given range (inclusive) in O(log2(maxId)).
         int64_t numInRange(int start, int end) const
         {
-            start += m_minPos;
-            end += m_minPos;
+            cout << " numInRange: start " << start << " end: " << end << endl;
+            start -= m_minPos;
+            end -= m_minPos;
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
             int64_t sum = 0;
@@ -67,6 +70,7 @@ class SegmentTree
                 sum -= elements[start];
                 start -= (start & (start*-1));
             }
+            cout << "  answer: " << sum << endl;
             return sum;
         }
 #if 0
@@ -78,12 +82,14 @@ class SegmentTree
 
         void addValueAt(int position, int64_t toAdd)
         {
+            cout << " addValueAt: position: " << position << " toAdd: " << toAdd << " minPos: " << m_minPos << " maxPos: " << m_maxPos << endl;
             assert(m_minPos <= position && position <= m_maxPos);
             const auto n = m_numElements;
             auto elements = m_elements.data();
-            int pos = position + m_minPos + 1; // Make 1-relative.
+            int pos = position - m_minPos + 1; // Make 1-relative.
             while(pos <= n)
             {
+                cout << " pos: " << pos << " n: " << n << endl;
                 elements[pos] += toAdd;
                 assert(elements[pos] >= 0);
                 pos += (pos & (pos * -1));
@@ -205,6 +211,7 @@ vector<int64_t> solveBruteForce(vector<Node>& nodes, const vector<Query>& querie
 void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& segmentTree)
 {
     ancestors.push_back(node);
+    cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
     for (const auto& addEvent : node->addEvents)
     {
         const int timeDepthDiff = node->depth - addEvent.time;
@@ -215,6 +222,7 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
         const int timeDepthDiff = node->depth - queryEvent.time;
         const bool isLeaf = node->children.empty();
         queryEvent.originalQuery->queryAnswer = 0;
+        cout << " isLeaf: " << isLeaf << endl;
         if (isLeaf)
         {
             queryEvent.originalQuery->queryAnswer = segmentTree.numInRange(timeDepthDiff, segmentTree.maxPos());
@@ -230,20 +238,22 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
     for (const auto& queryEvent : node->queryEvents)
     {
         const int timeDepthDiff = node->depth - queryEvent.time;
+        cout << " debug timeDepthDiff: " << timeDepthDiff << endl;
         //cout << " query event: time: " << queryEvent.time << " timeDepthDiff: " << timeDepthDiff << endl;
         queryEvent.originalQuery->dbgQueryAnswer = 0;
         for (const auto& ancestor : ancestors)
         {
-            //cout << "  ancestor: " << ancestor->nodeId << endl;
+            cout << "  ancestor: " << ancestor->nodeId << endl;
             for (const auto& ancestorAddEvent : ancestor->addEvents)
             {
                 const auto ancestorAddDepthTimeDiff = ancestor->depth - ancestorAddEvent.time;
-                //cout << " ancestor add event: time: " << ancestorAddEvent.time << " ancestorAddDepthTimeDiff: " << ancestorAddDepthTimeDiff << " numBacteriaToAdd: " << ancestorAddEvent.numBacteriaToAdd << endl;
+                cout << " ancestor add event: time: " << ancestorAddEvent.time << " ancestorAddDepthTimeDiff: " << ancestorAddDepthTimeDiff << " numBacteriaToAdd: " << ancestorAddEvent.numBacteriaToAdd << endl;
                 const bool isLeaf = node->children.empty();
                 if (isLeaf)
                 {
                     if (ancestorAddDepthTimeDiff >= timeDepthDiff)
                     {
+                        cout << "  adding " << ancestorAddEvent.numBacteriaToAdd << " for timeDepthDiff: " << timeDepthDiff << endl;
                         queryEvent.originalQuery->dbgQueryAnswer += ancestorAddEvent.numBacteriaToAdd;
 
                     }
@@ -256,9 +266,9 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
                     }
                 }
             }
-            cout << " queryEvent answer: " << queryEvent.originalQuery->queryAnswer << " dbgQueryAnswer: " << queryEvent.originalQuery->dbgQueryAnswer << endl;
-            assert(queryEvent.originalQuery->queryAnswer == queryEvent.originalQuery->dbgQueryAnswer);
         }
+        cout << " queryEvent answer: " << queryEvent.originalQuery->queryAnswer << " dbgQueryAnswer: " << queryEvent.originalQuery->dbgQueryAnswer << endl;
+        assert(queryEvent.originalQuery->queryAnswer == queryEvent.originalQuery->dbgQueryAnswer);
     }
 
     for (auto child : node->children)
@@ -267,6 +277,12 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
     }
 
     ancestors.pop_back();
+    cout << " popping node: " << node->nodeId << endl;
+    for (const auto& addEvent : node->addEvents)
+    {
+        const int timeDepthDiff = node->depth - addEvent.time;
+        segmentTree.addValueAt(timeDepthDiff, -addEvent.numBacteriaToAdd);
+    }
 }
 
 vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
