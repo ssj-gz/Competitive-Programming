@@ -188,7 +188,6 @@ struct Query
 
 void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefixLen, vector<vector<Query>>& queriesForIndex)
 {
-    // TODO - optimise all this - we should be able to process a transition in O(1)!
     for (const auto& transition : state->transitions)
     {
         auto nextState = transition.nextState;
