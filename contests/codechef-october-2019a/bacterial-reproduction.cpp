@@ -157,19 +157,19 @@ void fixParentAndChild(Node* node, int depth, Node* parent)
 
 void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
 {
-    // Add the timeDepthDiff & amount added for the AddEvents associated with this node.
+    // Add the timeDepthDiff & amount added for the AddBacteriaEvents associated with this node.
     // NB: we are treating node as its own "ancestor" for simplicity :)
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
         ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, addBacteriaEvent.numBacteriaToAdd);
     }
-    // Process the "?" queries for this node.
+    // Process the CountBacteria queries for this node.
     for (const auto& countBacteriaEvent : node->countBacteriaEvents)
     {
         // An add event of x bacteria at an ancestor node ancestorNode at time t and depth d will
-        // end up at exactly node if and only if d - t == node->depth - countBacteriaEvent.time.
-        // Such an add event will end up at exactly node x or overshoot x if and only if
+        // end up at exactly node at time countBacteriaEvent.time if and only if d - t == node->depth - countBacteriaEvent.time.
+        // Such an add event will end up at exactly node x *or* overshoot x at time countBacteriaEvent.time if and only if
         // d - t >= node->depth - countBacteriaEvent.time (which is what we want for leaf nodes).
         const int timeDepthDiff = node->depth - countBacteriaEvent.time;
         const bool isLeaf = node->children.empty();
@@ -190,7 +190,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         processTree(child, ancestorAddEventTimeDepthDiffs);
     }
 
-    // Pop the AddEvents we added when we first encountered this node.
+    // Pop the AddBacteriaEvents we added when we first encountered this node.
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
