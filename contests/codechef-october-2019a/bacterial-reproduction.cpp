@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/BACREP
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -52,7 +52,7 @@ class SegmentTree
         // Find the number in the given range (inclusive) in O(log2(maxId)).
         int64_t numInRange(int start, int end) const
         {
-            cout << " numInRange: start " << start << " end: " << end << endl;
+            //cout << " numInRange: start " << start << " end: " << end << endl;
             start -= m_minPos;
             end -= m_minPos;
             start++; // Make 1-relative.  start and end are inclusive.
@@ -70,7 +70,7 @@ class SegmentTree
                 sum -= elements[start];
                 start -= (start & (start*-1));
             }
-            cout << "  answer: " << sum << endl;
+            //cout << "  answer: " << sum << endl;
             return sum;
         }
 #if 0
@@ -82,14 +82,14 @@ class SegmentTree
 
         void addValueAt(int position, int64_t toAdd)
         {
-            cout << " addValueAt: position: " << position << " toAdd: " << toAdd << " minPos: " << m_minPos << " maxPos: " << m_maxPos << endl;
+            //cout << " addValueAt: position: " << position << " toAdd: " << toAdd << " minPos: " << m_minPos << " maxPos: " << m_maxPos << endl;
             assert(m_minPos <= position && position <= m_maxPos);
             const auto n = m_numElements;
             auto elements = m_elements.data();
             int pos = position - m_minPos + 1; // Make 1-relative.
             while(pos <= n)
             {
-                cout << " pos: " << pos << " n: " << n << endl;
+                //cout << " pos: " << pos << " n: " << n << endl;
                 elements[pos] += toAdd;
                 assert(elements[pos] >= 0);
                 pos += (pos & (pos * -1));
@@ -210,8 +210,8 @@ vector<int64_t> solveBruteForce(vector<Node>& nodes, const vector<Query>& querie
 
 void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& segmentTree)
 {
-    ancestors.push_back(node);
-    cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
+    //ancestors.push_back(node);
+    //cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
     for (const auto& addEvent : node->addEvents)
     {
         const int timeDepthDiff = node->depth - addEvent.time;
@@ -222,7 +222,7 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
         const int timeDepthDiff = node->depth - queryEvent.time;
         const bool isLeaf = node->children.empty();
         queryEvent.originalQuery->queryAnswer = 0;
-        cout << " isLeaf: " << isLeaf << endl;
+        //cout << " isLeaf: " << isLeaf << endl;
         if (isLeaf)
         {
             queryEvent.originalQuery->queryAnswer = segmentTree.numInRange(timeDepthDiff, segmentTree.maxPos());
@@ -278,8 +278,8 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
         solutionOptimisedAux(child, ancestors, segmentTree);
     }
 
-    ancestors.pop_back();
-    cout << " popping node: " << node->nodeId << endl;
+    //ancestors.pop_back();
+    //cout << " popping node: " << node->nodeId << endl;
     for (const auto& addEvent : node->addEvents)
     {
         const int timeDepthDiff = node->depth - addEvent.time;
@@ -424,8 +424,11 @@ int main(int argc, char* argv[])
 
     assert(solutionOptimised == solutionBruteForce);
 #else
-    const auto solutionOptimised = solveOptimised();
-    cout << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised(nodes, queries);
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << endl;
+    }
 #endif
 
     assert(cin);
