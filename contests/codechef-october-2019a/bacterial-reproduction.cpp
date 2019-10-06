@@ -27,44 +27,46 @@ T read()
 }
 
 // Typical SegmentTree - you can find similar implementations all over the place :)
-class NodeIdTracker
+class SegmentTree
 {
     public:
-        NodeIdTracker() = default;
-        NodeIdTracker(int maxId)
-            : m_maxId{maxId},
-            m_numElements{2 * maxId},
+        SegmentTree() = default;
+        SegmentTree(int maxPos)
+            : m_maxPos{maxPos},
+            m_numElements{2 * maxPos},
             m_elements(m_numElements + 1)
             {
             }
-        int numIdsGreaterThan(int nodeId)
+        int numAtAndToRightOf(int position)
         {
-            return numInRange(nodeId + 1, m_maxId);
+            return numInRange(position, m_maxPos);
         }
+#if 0
         int64_t numIdsLessThan(int nodeId)
         {
             return numInRange(0, nodeId - 1);
         }
+#endif
 
-        void registerNodeId(int nodeId, int64_t blop)
+        void addValueAt(int index, int64_t toAdd)
         {
             const auto n = m_numElements;
             auto elements = m_elements.data();
-            int pos = nodeId + 1; // Make 1-relative.
+            int pos = index + 1; // Make 1-relative.
             while(pos <= n)
             {
-                elements[pos] += blop;
+                elements[pos] += toAdd;
                 assert(elements[pos] >= 0);
                 pos += (pos & (pos * -1));
             }
         }
     private:
-        int m_maxId;
+        int m_maxPos;
         int m_numElements;
         vector<int64_t> m_elements;
 
         // Find the number in the given range (inclusive) in O(log2(maxId)).
-        int numInRange(int start, int end) const
+        int64_t numInRange(int start, int end) const
         {
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
@@ -319,24 +321,6 @@ int main(int argc, char* argv[])
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-#if 0
-    const int maxID = 500'000;
-    NodeIdTracker nodeIdTracker(maxID);
-    int64_t sum = 0;
-    for (int i = 0; i < 500'000; i++)
-    {
-
-        nodeIdTracker.registerNodeId(rand() % maxID, rand() % 1000);
-        const int blah = rand() % maxID;
-        const auto blee = nodeIdTracker.numIdsLessThan(blah);
-        const auto bloo = nodeIdTracker.numIdsGreaterThan(rand() % maxID);
-        sum += blee + bloo;
-        //cout << "i: " << i << " blah: " << blah << " blee: " << blee << endl;
-
-    }
-    cout << "Done!" << sum << endl;
-    return 0;
-#endif
     const int N = read<int>();
     const int Q = read<int>();
 
