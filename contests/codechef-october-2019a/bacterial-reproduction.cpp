@@ -314,8 +314,8 @@ vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
     {
         if (!query.isAddBacteria)
         {
-            assert(query.dbgQueryAnswer != -1);
-            result.push_back(query.dbgQueryAnswer);
+            assert(query.queryAnswer != -1);
+            result.push_back(query.queryAnswer);
         }
     }
     
