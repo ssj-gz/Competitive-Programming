@@ -36,12 +36,14 @@ vector<int> solveBruteForce(const vector<int>& aOriginal, int64_t K)
         nextA[i % N] = a[i % N] ^ a[N - (i % N) - 1];
 
         a = nextA;
+#if 0
         cout << "After " << (i + 1) << " operations, a is now: " << endl;
         for (const auto x : a)
         {
             cout << x << " ";
         }
         cout << endl;
+#endif
     }
 
     
@@ -80,19 +82,25 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
         const int T = 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
+            const int N = rand() % 100 + 1;
+            const int K = rand() % 100 + 1;
+            cout << N << " " << K << endl;
+
+            for (int i = 0; i < N; i++)
+            {
+                cout << ((rand() % 1000) + 1) << " ";
+            }
+            cout << endl;
         }
 
         return 0;
     }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -106,7 +114,7 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(a, K);
-        cout << "solutionBruteForce: " << endl;
+        cout << "solutionBruteForce: ";
         for (const auto x : solutionBruteForce)
         {
             cout << x << " ";
@@ -114,7 +122,7 @@ int main(int argc, char* argv[])
         cout << endl;
 #if 1
         const auto solutionOptimised = solveOptimised(a, K);
-        cout << "solutionOptimised:  " << endl;
+        cout << "solutionOptimised:  ";
         for (const auto x : solutionOptimised)
         {
             cout << x << " ";
