@@ -243,6 +243,7 @@ int64_t solveOptimised(const string& B)
             numbsInSuffix[0]++;
         if (bit == '1')
             numbsInSuffix[1]++;
+        //cout << " num0sInSuffix: " << numbsInSuffix[0] << " num1sInSuffix: " << numbsInSuffix[1] << endl;
         const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
 
         const auto suffixLength = N - index;
@@ -252,17 +253,36 @@ int64_t solveOptimised(const string& B)
 
         auto blah = [&](const int numbsInPrefix[2], const int index) -> int64_t
         {
-            //if (index == N)
-                //return 1;
+            //cout << " blah index: " << index << endl;
+            if (index == N)
+                return 1;
+#if 1
+            auto num0sInSuffix = numbsInPrefixLen[0][N];
+            if (index >= 0)
+                num0sInSuffix -= numbsInPrefixLen[0][index];
+            auto num1sInSuffix = numbsInPrefixLen[1][N];
+            if (index  >= 0)
+                num1sInSuffix -= numbsInPrefixLen[1][index];
+            auto flopple = numbsInPrefixLen[0][N] - numbsInPrefixLen[1][N];
+            if (index >= 0)
+                flopple -= numbsInPrefixLen[0][index] - numbsInPrefixLen[1][index];
+            //cout << "flopple for index: " << index << " = " << flopple << endl;
+            //cout << " blah num0sInSuffix: " << num0sInSuffix << " num1sInSuffix: " << num1sInSuffix << endl;
+            const auto currentSuffixBalance = flopple;
+#endif
+
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
             int balanceIndex = index - 1;
             //if (prefixBalance != 0)
             {
                 const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
+                //cout << "prefixBalance: " << prefixBalance << " desiredSuffixBalance: " << desiredSuffixBalance << " currentSuffixBalance: " << currentSuffixBalance << endl;
                 balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             }
             //cout << " balanceIndex: " << balanceIndex << endl;
+            //if (balanceIndex != NeverBalanced)
+                //cout << " string: " << B.substr(index, (balanceIndex - index + 1)) << endl;
             if (balanceIndex == NeverBalanced)
             {
                 //assert(prefixBalance != 0);
@@ -288,7 +308,7 @@ int64_t solveOptimised(const string& B)
                 result += rangeLen * numbsInPrefix[mostPopulousPrefixBit];
 
                 assert(result >= 0);
-                assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
+                //assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0); // TODO - reinstate this.
                 result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
                           //sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1) / 2) * (N - (balanceIndex + 1));
                 
@@ -297,10 +317,18 @@ int64_t solveOptimised(const string& B)
         };
 
         int dummy[2] = {0, 0};
+        //cout << "bitValue: " << bitValue << endl;
         dummy[bitValue] = 1;
-        //const auto dbgBlah = blah(dummy, index + 1);
+        //cout << " about to blah" << endl;
+        auto dbgBlah = blah(dummy, index + 1);
+        if (index + 1 != N)
+        {
+            dbgBlah++;
+        }
+        //cout << " finished blah" << endl;
 
 #if 1
+        //cout << " looking for currentSuffixBalance: " << currentSuffixBalance << endl;
         const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - nextBalanceIndex is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
         //cout << " nextBalanceIndex: " << nextBalanceIndex << endl;
 
@@ -323,7 +351,7 @@ int64_t solveOptimised(const string& B)
 
         }
         //cout << "dbgBlah: " << dbgBlah << " sumOfWeightStartingAt[index]: " << sumOfWeightStartingAt[index] << endl;
-        //assert(dbgBlah == sumOfWeightStartingAt[index]);
+        assert(dbgBlah == sumOfWeightStartingAt[index]);
 #endif
 #ifdef VERIFY_RESULTS
         {
@@ -406,7 +434,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int N = rand() % 1'000'000 + 1;
+            const int N = rand() % 100 + 1;
             cout << N << endl;
             for (int i = 0; i < N; i++)
             {
