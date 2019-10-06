@@ -153,13 +153,14 @@ void fixParentAndChild(Node* node, int depth, Node* parent)
     }
 }
 
-void processTree(Node* node, SegmentTree& segmentTree)
+void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
 {
     // Add the timeDepthDiff & amount added for the AddEvents associated with this node.
+    // NB: we are treating node as its own "ancestor" for simplicity :)
     for (const auto& addEvent : node->addEvents)
     {
         const int timeDepthDiff = node->depth - addEvent.time;
-        segmentTree.addValueAt(timeDepthDiff, addEvent.numBacteriaToAdd);
+        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, addEvent.numBacteriaToAdd);
     }
     // Process the "?" queries for this node.
     for (const auto& queryEvent : node->queryEvents)
@@ -169,25 +170,25 @@ void processTree(Node* node, SegmentTree& segmentTree)
         queryEvent.originalQuery->queryAnswer = 0;
         if (isLeaf)
         {
-            queryEvent.originalQuery->queryAnswer = segmentTree.numInRange(timeDepthDiff, segmentTree.maxPos());
+            queryEvent.originalQuery->queryAnswer = ancestorAddEventTimeDepthDiffs.numInRange(timeDepthDiff, ancestorAddEventTimeDepthDiffs.maxPos());
         }
         else
         {
-            queryEvent.originalQuery->queryAnswer = segmentTree.numInRange(timeDepthDiff, timeDepthDiff);
+            queryEvent.originalQuery->queryAnswer = ancestorAddEventTimeDepthDiffs.numInRange(timeDepthDiff, timeDepthDiff);
         }
 
     }
 
     for (auto child : node->children)
     {
-        processTree(child, segmentTree);
+        processTree(child, ancestorAddEventTimeDepthDiffs);
     }
 
     // Pop the AddEvents we added when we first encountered this node.
     for (const auto& addEvent : node->addEvents)
     {
         const int timeDepthDiff = node->depth - addEvent.time;
-        segmentTree.addValueAt(timeDepthDiff, -addEvent.numBacteriaToAdd);
+        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, -addEvent.numBacteriaToAdd);
     }
 }
 
@@ -214,8 +215,8 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         }
     }
 
-    SegmentTree segmentTree(-queries.size(), +queries.size());
-    processTree(&(nodes.front()), segmentTree);
+    SegmentTree ancestorAddEventTimeDepthDiffs(-queries.size(), +queries.size());
+    processTree(&(nodes.front()), ancestorAddEventTimeDepthDiffs);
 
     vector<int64_t> result;
     for (const auto& query : queries)
