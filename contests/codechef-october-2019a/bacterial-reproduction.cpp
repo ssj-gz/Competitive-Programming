@@ -85,6 +85,20 @@ class NodeIdTracker
         }
 };
 
+struct Query;
+struct AddEvent
+{
+    Query* originalQuery = nullptr;
+    int time = -1;
+    int64_t numBacteriaToAdd = -1;
+};
+
+struct QueryEvent
+{
+    Query* originalQuery = nullptr;
+    int time = -1;
+};
+
 struct Node
 {
     vector<Node*> neighbours;
@@ -94,6 +108,9 @@ struct Node
 
     int64_t numBacteriaAtSecondBegin = -1;
     int64_t numBacteriaAtSecondEnd = -1;
+
+    vector<AddEvent> addEvents;
+    vector<QueryEvent> queryEvents;
 };
 
 struct Query
@@ -101,6 +118,8 @@ struct Query
     bool isAddBacteria = false;
     int64_t numBacteriaToAdd = -1;
     int nodeId = -1;
+
+    int64_t queryAnswer = -1;
 };
 
 void fixParentAndChild(Node* node, Node* parent)
@@ -167,14 +186,25 @@ vector<int64_t> solveBruteForce(vector<Node>& nodes, const vector<Query>& querie
     return result;
 }
 
-#if 0
-vector<int64_t> solveOptimised()
+vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
 {
     vector<int64_t> result;
+
+    for (int time = 0; time < queries.size(); time++)
+    {
+        auto node = &(nodes[queries[time].nodeId - 1]);
+        if (queries[time].isAddBacteria)
+        {
+            node->addEvents.push_back({&(queries[time]), time, queries[time].numBacteriaToAdd});
+        }
+        else
+        {
+            node->queryEvents.push_back({&(queries[time]), time});
+        }
+    }
     
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
