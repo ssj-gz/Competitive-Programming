@@ -2,18 +2,10 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/MSV
 //
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -26,25 +18,6 @@ T read()
     cin >> toRead;
     assert(cin);
     return toRead;
-}
-
-int solveBruteForce(const vector<int>& a)
-{
-    int maxStarValue = 0;
-    for (int i = 0; i < a.size(); i++)
-    {
-        int starValue = 0;
-        for (int j = 0; j < i; j++)
-        {
-            if ((a[j] % a[i]) == 0)
-            {
-                starValue++;
-            }
-        }
-        maxStarValue = max(maxStarValue, starValue);
-    }
-    
-    return maxStarValue;
 }
 
 vector<int> computeFactors(int number, const vector<int>& primesUpToMaxA)
@@ -107,17 +80,19 @@ vector<int> computeFactors(int number, const vector<int>& primesUpToMaxA)
     return factors;
 }
 
-
-int solveOptimised(const vector<int>& a, const vector<int>& primesUpToMaxA)
+int findMaxStarValue(const vector<int>& a, const vector<int>& primesUpToMaxA)
 {
     vector<int> numWithFactor(maxA + 1, 0);
 
     int maxStarValue = 0;
     for (int i = 0; i < a.size(); i++)
     {
+        // A previous a[j] is divisible by a[i] if and only if a[j] has a[i] as
+        // a factor.
         const auto starValue = numWithFactor[a[i]];
         maxStarValue = max(maxStarValue, starValue);
 
+        // Update count of factors of a's seen.
         const auto factors = computeFactors(a[i], primesUpToMaxA);
         for (const auto factor : factors)
         {
@@ -128,33 +103,9 @@ int solveOptimised(const vector<int>& a, const vector<int>& primesUpToMaxA)
     return maxStarValue;
 }
 
-
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int T = 10;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            const int N = 100'000;
-            const int maxA = 1'000'000;
-
-            cout << N << endl;
-            for (int i = 0; i < N; i++)
-            {
-                cout << ((rand() % maxA) + 1) << " ";
-            }
-            cout << endl;
-        }
-
-        return 0;
-    }
 
     const int maxA = 1'000'000;
 
@@ -183,19 +134,6 @@ int main(int argc, char* argv[])
         }
     }
 
-
-#if 0
-
-    vector<vector<int>> factorsOf(maxA + 1);
-    for (int factor = 1; factor <= maxA; factor++)
-    {
-        for (int multiple = factor; multiple <= maxA; multiple += factor)
-        {
-            factorsOf[multiple].push_back(factor);
-        }
-    }
-#endif
-
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -205,17 +143,8 @@ int main(int argc, char* argv[])
         for (auto& x : a)
             x = read<int>();
 
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(a);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionOptimised = solveOptimised(a, primesUpToMaxA);
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#else
-        const auto solutionOptimised = solveOptimised(a, primesUpToMaxA);
-        cout << solutionOptimised << endl;
-#endif
+        const auto maxStarValue = findMaxStarValue(a, primesUpToMaxA);
+        cout << maxStarValue << endl;
     }
 
     assert(cin);
