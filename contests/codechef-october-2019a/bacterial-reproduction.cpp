@@ -3,7 +3,6 @@
 // Solution to: https://www.codechef.com/OCT19A/problems/BACREP
 //
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #define NDEBUG
@@ -12,8 +11,6 @@
 #include <vector>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -33,6 +30,13 @@ void scan_char( char &x )
     int c = getchar_unlocked();
     for( ; (c != '+' && c != '?'); c = getchar_unlocked() );
     x = c;
+}
+
+char readChar()
+{
+    char toRead;
+    scan_char(toRead);
+    return toRead;
 }
 
 int readInt()
@@ -234,49 +238,6 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        //const int N = rand() % 100 + 1;
-        const int N = 500'000;
-        //const int Q = rand() % 1000 + 1;
-        //const int Q = N * 10;
-        const int Q = 500'000;
-
-        cout << N << " " << Q << endl;
-
-        for (int edge = 0; edge < N - 1; edge++)
-        {
-            cout << (edge + 2) << " " << (rand() % (edge + 1)) + 1 << endl;
-        }
-
-        for (int i = 0; i < N; i++)
-        {
-            cout << ((rand() % 1000)) << " ";
-        }
-        cout << endl;
-
-        for (int i = 0; i < Q; i++)
-        {
-            const bool isAddBacteria = rand() % 2;
-            const int nodeId = (rand() % N) + 1;
-            if (isAddBacteria)
-            {
-                cout << "+ " << nodeId << " " << (rand() % 1000) << endl;
-            }
-            else
-            {
-                cout << "? " << nodeId << endl;
-            }
-        }
-
-        return 0;
-    }
-    struct timeval time;
-    gettimeofday(&time,NULL);
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
     const int N = readInt();
     const int Q = readInt();
@@ -301,8 +262,7 @@ int main(int argc, char* argv[])
     vector<Query> queries(Q);
     for (int i = 0; i < Q; i++)
     {
-        char queryType;
-        scan_char(queryType);
+        const auto queryType = readChar();
         const int nodeId = readInt();
 
         queries[i].nodeId = nodeId;
