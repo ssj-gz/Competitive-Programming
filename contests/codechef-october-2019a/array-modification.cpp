@@ -3,9 +3,7 @@
 // Solution to: https://www.codechef.com/OCT19A/problems/MARM
 //
 #define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
 #endif
 #include <iostream>
@@ -24,7 +22,7 @@ T read()
     return toRead;
 }
 
-vector<int> solveBruteForce(const vector<int>& aOriginal, int64_t K)
+vector<int> findStateAfterKOpsBruteForce(const vector<int>& aOriginal, int64_t K)
 {
     const int N = aOriginal.size();
     vector<int> a(aOriginal);
@@ -44,10 +42,15 @@ vector<int> findStateAfterKOps(const vector<int>& aOriginal, int64_t K)
     const int N = aOriginal.size();
 
     const bool kWasGreaterThanOrEqualToN = (K >= N);
+    // The state resets back to the original state every N * 3 operations, with a 
+    // minor difference for the case where N is odd and and we perform at least N 
+    // operations.
     K = K % (N * 3);
-    auto result = solveBruteForce(aOriginal, K);
+    // K has been reduced to < N, and we can easily compute the result of < N operations :)
+    auto result = findStateAfterKOpsBruteForce(aOriginal, K);
     if ((N % 2) == 1 && kWasGreaterThanOrEqualToN)
     {
+        // The middle element will have been xor'd with itself, making it 0 forever.
         result[N / 2] = 0;
     }
 
