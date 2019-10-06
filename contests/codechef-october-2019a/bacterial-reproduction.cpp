@@ -234,6 +234,7 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
 
     }
 
+#if 0
     //cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
     for (const auto& queryEvent : node->queryEvents)
     {
@@ -270,6 +271,7 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors, SegmentTree& seg
         cout << " queryEvent answer: " << queryEvent.originalQuery->queryAnswer << " dbgQueryAnswer: " << queryEvent.originalQuery->dbgQueryAnswer << endl;
         assert(queryEvent.originalQuery->queryAnswer == queryEvent.originalQuery->dbgQueryAnswer);
     }
+#endif
 
     for (auto child : node->children)
     {
