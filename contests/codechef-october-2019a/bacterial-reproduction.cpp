@@ -333,9 +333,11 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int N = rand() % 100 + 1;
+        //const int N = rand() % 100 + 1;
+        const int N = 500'000;
         //const int Q = rand() % 1000 + 1;
-        const int Q = N * 10;
+        //const int Q = N * 10;
+        const int Q = 500'000;
 
         cout << N << " " << Q << endl;
 
