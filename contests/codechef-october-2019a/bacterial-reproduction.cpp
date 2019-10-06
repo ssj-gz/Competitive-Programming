@@ -17,11 +17,28 @@
 
 using namespace std;
 
-template <typename T>
-T read()
+// Lots of input to read, so use ultra-fast reader.
+void scan_integer( int &x )
 {
-    T toRead;
-    cin >> toRead;
+    int c = getchar_unlocked();
+    x = 0;
+    for( ; ((c<48 || c>57) && c != '-'); c = getchar_unlocked() );
+    for( ;c>47 && c<58; c = getchar_unlocked() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
+}
+
+void scan_char( char &x )
+{
+    int c = getchar_unlocked();
+    for( ; (c != '+' && c != '?'); c = getchar_unlocked() );
+    x = c;
+}
+
+int readInt()
+{
+    int toRead;
+    scan_integer(toRead);
     assert(cin);
     return toRead;
 }
@@ -372,15 +389,15 @@ int main(int argc, char* argv[])
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    const int N = read<int>();
-    const int Q = read<int>();
+    const int N = readInt();
+    const int Q = readInt();
 
     vector<Node> nodes(N);
 
     for (int i = 0; i < N - 1; i++)
     {
-        const int x = read<int>() - 1;
-        const int y = read<int>() - 1;
+        const int x = readInt() - 1;
+        const int y = readInt() - 1;
 
         nodes[x].neighbours.push_back(&(nodes[y]));
         nodes[y].neighbours.push_back(&(nodes[x]));
@@ -389,22 +406,23 @@ int main(int argc, char* argv[])
     for (int i = 0; i < N; i++)
     {
         nodes[i].nodeId = i + 1;
-        nodes[i].initialBacteria = read<int64_t>();
+        nodes[i].initialBacteria = readInt();
     }
 
     vector<Query> queries(Q);
 
     for (int i = 0; i < Q; i++)
     {
-        const char queryType = read<char>();
-        const int nodeId = read<int>();
+        char queryType;
+        scan_char(queryType);
+        const int nodeId = readInt();
 
         queries[i].nodeId = nodeId;
 
         if (queryType == '+')
         {
             queries[i].isAddBacteria = true;
-            queries[i].numBacteriaToAdd = read<int64_t>();
+            queries[i].numBacteriaToAdd = readInt();
         }
     }
 
