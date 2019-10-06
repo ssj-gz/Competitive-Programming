@@ -280,6 +280,7 @@ int64_t solveOptimised(const string& B)
 
                 assert(result >= 0);
                 assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
+                // TODO - replace "balanceIndex - index + 1" with rangeLen and "(N - (balanceIndex + 1))" with afterBalanceSuffixLen?
                 result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
                 
                 return result;
