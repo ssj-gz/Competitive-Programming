@@ -103,6 +103,7 @@ struct Node
 {
     vector<Node*> neighbours;
     vector<Node*> children;
+    int depth = -1;
     int64_t initialBacteria = -1;
     int nodeId = -1;
 
@@ -122,14 +123,15 @@ struct Query
     int64_t queryAnswer = -1;
 };
 
-void fixParentAndChild(Node* node, Node* parent)
+void fixParentAndChild(Node* node, int depth, Node* parent)
 {
+    node->depth = depth;
     for (auto child : node->neighbours)
     {
         if (child == parent)
             continue;
         node->children.push_back(child);
-        fixParentAndChild(child, node);
+        fixParentAndChild(child, depth + 1, node);
     }
 }
 
@@ -186,9 +188,26 @@ vector<int64_t> solveBruteForce(vector<Node>& nodes, const vector<Query>& querie
     return result;
 }
 
+void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
+{
+    ancestors.push_back(node);
+
+    for (auto child : node->children)
+    {
+        solutionOptimisedAux(child, ancestors);
+    }
+
+    ancestors.pop_back();
+}
+
 vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
 {
     vector<int64_t> result;
+    
+    for (auto& node : nodes)
+    {
+        node.addEvents.push_back({nullptr, -1, node.initialBacteria});
+    }
 
     for (int time = 0; time < queries.size(); time++)
     {
@@ -202,6 +221,9 @@ vector<int64_t> solveOptimised(vector<Node>& nodes, vector<Query>& queries)
             node->queryEvents.push_back({&(queries[time]), time});
         }
     }
+
+    vector<Node*> ancestors;
+    solutionOptimisedAux(&(nodes.front()), ancestors);
     
     return result;
 }
@@ -305,7 +327,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    fixParentAndChild(&(nodes.front()), nullptr);
+    fixParentAndChild(&(nodes.front()), 0, nullptr);
 
 #ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(nodes, queries);
