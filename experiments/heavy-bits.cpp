@@ -255,7 +255,7 @@ int64_t solveOptimised(const string& B)
         {
             //cout << " blah index: " << index << endl;
             if (index == N)
-                return 1;
+                return 0;
 #if 1
             auto num0sInSuffix = numbsInPrefixLen[0][N];
             if (index >= 0)
@@ -316,43 +316,10 @@ int64_t solveOptimised(const string& B)
             }
         };
 
-        int dummy[2] = {0, 0};
-        //cout << "bitValue: " << bitValue << endl;
-        dummy[bitValue] = 1;
-        //cout << " about to blah" << endl;
-        auto dbgBlah = blah(dummy, index + 1);
-        if (index + 1 != N)
-        {
-            dbgBlah++;
-        }
-        //cout << " finished blah" << endl;
+        int numOfbsInFakePrefix[2] = {0, 0};
+        numOfbsInFakePrefix[bitValue] = 1;
+        sumOfWeightStartingAt[index] = blah(numOfbsInFakePrefix, index + 1) + 1; // "+1" for the contribution of just the 1-char prefix, on its own.
 
-#if 1
-        //cout << " looking for currentSuffixBalance: " << currentSuffixBalance << endl;
-        const auto nextBalanceIndex = nextIndexWithSuffixBalance[currentSuffixBalance] - 1; // i.e. - nextBalanceIndex is the next index strictly greater than "index" such that s[index, currentSuffixBalance] is balanced.
-        //cout << " nextBalanceIndex: " << nextBalanceIndex << endl;
-
-        if (nextBalanceIndex == NeverBalanced)
-        {
-            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
-        }
-        else
-        {
-            const int numbsInRange[2] = { numbsInPrefixLen[0][nextBalanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][nextBalanceIndex + 1] - numbsInPrefixLen[1][index] };
-
-            sumOfWeightStartingAt[index] = sumOfbsStartingAt[bitValue][index];
-            sumOfWeightStartingAt[index] -= sumOfbsStartingAt[bitValue][nextBalanceIndex + 1];
-            const auto suffixLen = N - (nextBalanceIndex + 1);
-            sumOfWeightStartingAt[index] -= numbsInRange[bitValue] * suffixLen;
-
-            assert(sumOfWeightStartingAt[index] >= 0);
-            assert((nextBalanceIndex - index + 1) % 2 == 0);
-            sumOfWeightStartingAt[index] += sumOfWeightStartingAt[nextBalanceIndex + 1] + ((nextBalanceIndex - index + 1) / 2) * (N - (nextBalanceIndex + 1));
-
-        }
-        //cout << "dbgBlah: " << dbgBlah << " sumOfWeightStartingAt[index]: " << sumOfWeightStartingAt[index] << endl;
-        assert(dbgBlah == sumOfWeightStartingAt[index]);
-#endif
 #ifdef VERIFY_RESULTS
         {
             int64_t debugSumOfWeightStartingAt = 0;
@@ -372,43 +339,12 @@ int64_t solveOptimised(const string& B)
 
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
 
-
-
         for (const auto& query : queriesForIndex[index])
         {
-            const auto prefixBalance = query.numbsInPrefix[0] - query.numbsInPrefix[1];
-            int balanceIndex = index - 1;
-            if (prefixBalance != 0)
-            {
-                const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
-                balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
-            }
-
             const auto queryResult = blah(query.numbsInPrefix, index);
 
 #ifdef VERIFY_RESULTS
             const auto dbgQueryResult = sumOfBlah(query.numbsInPrefix[0], query.numbsInPrefix[1], index, B);
-            {
-                int dbgBalanceIndex = index - 1;
-                if (prefixBalance != 0)
-                {
-                    int num0s = query.numbsInPrefix[0];
-                    int num1s = query.numbsInPrefix[1];
-                    while (num0s != num1s && dbgBalanceIndex + 1 < N)
-                    {
-                        dbgBalanceIndex++;
-                        if (B[dbgBalanceIndex] == '0')
-                            num0s++;
-                        if (B[dbgBalanceIndex] == '1')
-                            num1s++;
-                    }
-                    if (dbgBalanceIndex == N - 1)
-                    {
-                        dbgBalanceIndex = NeverBalanced;
-                    }
-                }
-                assert(balanceIndex == dbgBalanceIndex);
-            }
             assert(queryResult == dbgQueryResult);
 #endif
 
