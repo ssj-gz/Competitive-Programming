@@ -185,7 +185,35 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
+        const int N = rand() % 100 + 1;
+        const int Q = rand() % 1000 + 1;
+
+        cout << N << " " << Q << endl;
+
+        for (int edge = 0; edge < N - 1; edge++)
+        {
+            cout << (edge + 2) << " " << (rand() % (edge + 1)) + 1 << endl;
+        }
+
+        for (int i = 0; i < N; i++)
+        {
+            cout << ((rand() % 1000)) << " ";
+        }
+        cout << endl;
+
+        for (int i = 0; i < Q; i++)
+        {
+            const bool isAddBacteria = rand() % 2;
+            const int nodeId = (rand() % N) + 1;
+            if (isAddBacteria)
+            {
+                cout << "+ " << nodeId << " " << (rand() % 1000) << endl;
+            }
+            else
+            {
+                cout << "? " << nodeId << endl;
+            }
+        }
 
         return 0;
     }
