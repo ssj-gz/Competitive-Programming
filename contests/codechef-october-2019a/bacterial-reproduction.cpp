@@ -201,6 +201,7 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
             {
                 const auto ancestorAddDepthTimeDiff = ancestor->depth - ancestorAddEvent.time;
                 const bool isLeaf = node->children.empty();
+                queryEvent.originalQuery->queryAnswer = 0;
                 if (isLeaf)
                 {
                     if (ancestorAddDepthTimeDiff >= timeDepthDiff)
@@ -373,10 +374,14 @@ int main(int argc, char* argv[])
     {
         cout << x << endl;
     }
-#if 0
-    const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised:  " << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised(nodes, queries);
+    cout << "solutionOptimised:  " << endl;
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << endl;
+    }
 
+#if 0
     assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
