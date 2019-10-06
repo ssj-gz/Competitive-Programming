@@ -250,20 +250,11 @@ int64_t solveOptimised(const string& B)
             //cout << " blah index: " << index << endl;
             if (index == N)
                 return 0;
-#if 1
-            auto num0sInSuffix = numbsInPrefixLen[0][N];
-            if (index >= 0)
-                num0sInSuffix -= numbsInPrefixLen[0][index];
-            auto num1sInSuffix = numbsInPrefixLen[1][N];
-            if (index  >= 0)
-                num1sInSuffix -= numbsInPrefixLen[1][index];
-            auto flopple = numbsInPrefixLen[0][N] - numbsInPrefixLen[1][N];
-            if (index >= 0)
-                flopple -= numbsInPrefixLen[0][index] - numbsInPrefixLen[1][index];
-            //cout << "flopple for index: " << index << " = " << flopple << endl;
-            //cout << " blah num0sInSuffix: " << num0sInSuffix << " num1sInSuffix: " << num1sInSuffix << endl;
-            const auto currentSuffixBalance = flopple;
-#endif
+            
+            auto num0sInSuffix = numbsInPrefixLen[0][N] - numbsInPrefixLen[0][index];
+            auto num1sInSuffix = numbsInPrefixLen[1][N] - numbsInPrefixLen[1][index];
+
+            const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
 
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
@@ -281,7 +272,6 @@ int64_t solveOptimised(const string& B)
             }
             else
             {
-
                 const int numbsInRange[2] = { numbsInPrefixLen[0][balanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][balanceIndex + 1] - numbsInPrefixLen[1][index] };
                 const auto rangeLen = balanceIndex + 1 - index;
                 assert(numbsInPrefix[0] != numbsInPrefix[1]);
@@ -296,7 +286,6 @@ int64_t solveOptimised(const string& B)
                 assert(result >= 0);
                 assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
                 result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
-                          //sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1) / 2) * (N - (balanceIndex + 1));
                 
                 return result;
             }
