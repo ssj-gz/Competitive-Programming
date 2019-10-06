@@ -28,10 +28,7 @@ vector<int> findStateAfterKOpsBruteForce(const vector<int>& aOriginal, int64_t K
     vector<int> a(aOriginal);
     for (int64_t i = 0; i <= K - 1; i++)
     {
-        vector<int> nextA(a);
-        nextA[i % N] = a[i % N] ^ a[N - (i % N) - 1];
-
-        a = nextA;
+        a[i % N] = a[i % N] ^ a[N - (i % N) - 1];
     }
     
     return a;
