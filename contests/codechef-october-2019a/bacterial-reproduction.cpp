@@ -122,7 +122,6 @@ struct Node
     vector<Node*> children;
     int depth = -1;
     int64_t initialBacteria = -1;
-    int nodeId = -1;
 
     int64_t numBacteriaAtSecondBegin = -1;
     int64_t numBacteriaAtSecondEnd = -1;
@@ -282,8 +281,8 @@ int main(int argc, char* argv[])
     const int N = readInt();
     const int Q = readInt();
 
+    // Read and store graph.
     vector<Node> nodes(N);
-
     for (int i = 0; i < N - 1; i++)
     {
         const int x = readInt() - 1;
@@ -295,12 +294,11 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < N; i++)
     {
-        nodes[i].nodeId = i + 1;
         nodes[i].initialBacteria = readInt();
     }
 
+    // Read and store queries.
     vector<Query> queries(Q);
-
     for (int i = 0; i < Q; i++)
     {
         char queryType;
