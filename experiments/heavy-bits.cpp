@@ -235,8 +235,7 @@ int64_t solveOptimised(const string& B)
     int numbsInSuffix[2] = {0, 0};
     for (int index = N - 1; index >= 0; index--)
     {
-        const char bit = B[index];
-        const int bitValue = bit - '0';
+        const int bitValue = B[index] - '0';
 
         const auto suffixLength = N - index;
 
@@ -308,8 +307,6 @@ int64_t solveOptimised(const string& B)
             assert(debugSumOfWeightStartingAt == sumOfWeightStartingAt[index]);
         }
 #endif
-
-        assert(bit == '0' || bit == '1');
         numbsInSuffix[bitValue]++;
         const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
@@ -338,14 +335,12 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
         const int T = 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
-            const int N = rand() % 100 + 1;
+            const int N = rand() % 1'000'000 + 1;
             cout << N << endl;
             for (int i = 0; i < N; i++)
             {
@@ -357,7 +352,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
