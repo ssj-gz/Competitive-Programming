@@ -192,16 +192,20 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
 {
     ancestors.push_back(node);
 
+    cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
     for (const auto& queryEvent : node->queryEvents)
     {
         const int timeDepthDiff = node->depth - queryEvent.time;
+        cout << " query event: time: " << queryEvent.time << " timeDepthDiff: " << timeDepthDiff << endl;
+        queryEvent.originalQuery->queryAnswer = 0;
         for (const auto& ancestor : ancestors)
         {
+            cout << "  ancestor: " << ancestor->nodeId << endl;
             for (const auto& ancestorAddEvent : ancestor->addEvents)
             {
                 const auto ancestorAddDepthTimeDiff = ancestor->depth - ancestorAddEvent.time;
+                cout << " ancestor add event: time: " << ancestorAddEvent.time << " ancestorAddDepthTimeDiff: " << ancestorAddDepthTimeDiff << " numBacteriaToAdd: " << ancestorAddEvent.numBacteriaToAdd << endl;
                 const bool isLeaf = node->children.empty();
-                queryEvent.originalQuery->queryAnswer = 0;
                 if (isLeaf)
                 {
                     if (ancestorAddDepthTimeDiff >= timeDepthDiff)
@@ -214,10 +218,11 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
                 {
                     if (ancestorAddDepthTimeDiff == timeDepthDiff)
                     {
-                        queryEvent.originalQuery->queryAnswer = ancestorAddEvent.numBacteriaToAdd;
+                        queryEvent.originalQuery->queryAnswer += ancestorAddEvent.numBacteriaToAdd;
                     }
                 }
             }
+            cout << " queryEvent answer: " << queryEvent.originalQuery->queryAnswer << endl;
         }
     }
 
