@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/MSV
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
 
         assert(solutionOptimised == solutionBruteForce);
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(a, primesUpToMaxA);
         cout << solutionOptimised << endl;
 #endif
     }
