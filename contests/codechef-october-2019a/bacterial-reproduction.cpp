@@ -116,7 +116,7 @@ struct AddEvent
     int64_t numBacteriaToAdd = -1;
 };
 
-struct QueryEvent
+struct CountBacteriaEvent
 {
     Query* originalQuery = nullptr;
     int time = -1;
@@ -129,11 +129,8 @@ struct Node
     int depth = -1;
     int64_t initialBacteria = -1;
 
-    int64_t numBacteriaAtSecondBegin = -1;
-    int64_t numBacteriaAtSecondEnd = -1;
-
     vector<AddEvent> addEvents;
-    vector<QueryEvent> queryEvents;
+    vector<CountBacteriaEvent> countBacteriaEvents;
 };
 
 struct Query
@@ -142,7 +139,7 @@ struct Query
     int64_t numBacteriaToAdd = -1;
     int nodeId = -1;
 
-    int64_t queryAnswer = -1;
+    int64_t countBacteriaAnswer = -1;
 };
 
 void fixParentAndChild(Node* node, int depth, Node* parent)
@@ -167,22 +164,22 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, addEvent.numBacteriaToAdd);
     }
     // Process the "?" queries for this node.
-    for (const auto& queryEvent : node->queryEvents)
+    for (const auto& countBacteriaEvent : node->countBacteriaEvents)
     {
         // An add event of x bacteria at an ancestor node ancestorNode at time t and depth d will
-        // end up at exactly node if and only if d - t == node->depth - queryEvent.time.
+        // end up at exactly node if and only if d - t == node->depth - countBacteriaEvent.time.
         // Such an add event will end up at exactly node x or overshoot x if and only if
-        // d - t >= node->depth - queryEvent.time (which is what we want for leaf nodes).
-        const int timeDepthDiff = node->depth - queryEvent.time;
+        // d - t >= node->depth - countBacteriaEvent.time (which is what we want for leaf nodes).
+        const int timeDepthDiff = node->depth - countBacteriaEvent.time;
         const bool isLeaf = node->children.empty();
-        queryEvent.originalQuery->queryAnswer = 0;
+        countBacteriaEvent.originalQuery->countBacteriaAnswer = 0;
         if (isLeaf)
         {
-            queryEvent.originalQuery->queryAnswer = ancestorAddEventTimeDepthDiffs.numAtOrToRightOf(timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numAtOrToRightOf(timeDepthDiff);
         }
         else
         {
-            queryEvent.originalQuery->queryAnswer = ancestorAddEventTimeDepthDiffs.numInRange(timeDepthDiff, timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numInRange(timeDepthDiff, timeDepthDiff);
         }
 
     }
@@ -209,7 +206,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         node.addEvents.push_back({nullptr, -1, node.initialBacteria});
     }
 
-    // Record the AddEvents ('+') and QueryEvents ('?') associated with a node on that node.
+    // Record the AddEvents ('+') and CountBacteriaEvents ('?') associated with a node on that node.
     for (int time = 0; time < queries.size(); time++)
     {
         auto node = &(nodes[queries[time].nodeId - 1]);
@@ -219,7 +216,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         }
         else
         {
-            node->queryEvents.push_back({&(queries[time]), time});
+            node->countBacteriaEvents.push_back({&(queries[time]), time});
         }
     }
 
@@ -231,8 +228,8 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     {
         if (!query.isAddBacteria)
         {
-            assert(query.queryAnswer != -1);
-            result.push_back(query.queryAnswer);
+            assert(query.countBacteriaAnswer != -1);
+            result.push_back(query.countBacteriaAnswer);
         }
     }
     
