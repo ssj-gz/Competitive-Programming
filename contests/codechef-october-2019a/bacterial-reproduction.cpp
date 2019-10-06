@@ -283,7 +283,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         const int N = rand() % 100 + 1;
-        const int Q = rand() % 1000 + 1;
+        //const int Q = rand() % 1000 + 1;
+        const int Q = N * 10;
 
         cout << N << " " << Q << endl;
 
@@ -376,7 +377,7 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
     const auto solutionBruteForce = solveBruteForce(nodes, queries);
-    cout << "solutionBruteForce: " << endl;
+    cout << "solutionBruteForce- " << endl;
     for (const auto x : solutionBruteForce)
     {
         cout << "solutionBruteForce: " << x << endl;
