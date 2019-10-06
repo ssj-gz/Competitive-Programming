@@ -56,6 +56,7 @@ class SegmentTree
         SegmentTree(int minPos, int maxPos)
             : m_minPos{minPos},
               m_maxPos{maxPos},
+              m_directValues(maxPos - minPos + 1),
               m_numElements{2 * (maxPos - minPos + 1)},
               m_elements(m_numElements + 1)
         {
@@ -91,9 +92,11 @@ class SegmentTree
         void addValueAt(int position, int64_t toAdd)
         {
             assert(m_minPos <= position && position <= m_maxPos);
+            position -= m_minPos;
+            m_directValues[position] += toAdd;
             const auto n = m_numElements;
             auto elements = m_elements.data();
-            int pos = position - m_minPos + 1; // Make 1-relative.
+            int pos = position + 1; // Make 1-relative.
             while(pos <= n)
             {
                 elements[pos] += toAdd;
@@ -101,9 +104,15 @@ class SegmentTree
                 pos += (pos & (pos * -1));
             }
         }
+        int64_t numAt(int position)
+        {
+            assert(m_minPos <= position && position <= m_maxPos);
+            return m_directValues[position - m_minPos];
+        }
     private:
         int m_minPos;
         int m_maxPos;
+        vector<int64_t> m_directValues;
         int m_numElements;
         vector<int64_t> m_elements;
 };
@@ -180,7 +189,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         }
         else
         {
-            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numInRange(timeDepthDiff, timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numAt(timeDepthDiff);
         }
 
     }
