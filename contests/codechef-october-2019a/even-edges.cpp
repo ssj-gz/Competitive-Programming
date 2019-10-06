@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
             nodes[i].subgraphNum = solutionOptimised.second[i];
         }
         cout << solutionOptimised.first << endl;
-#if 0
+#if 1
         for (const auto x : solutionOptimised.second)
         {
             cout << x << " ";
