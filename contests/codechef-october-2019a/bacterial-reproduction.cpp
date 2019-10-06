@@ -169,6 +169,10 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
     // Process the "?" queries for this node.
     for (const auto& queryEvent : node->queryEvents)
     {
+        // An add event of x bacteria at an ancestor node ancestorNode at time t and depth d will
+        // end up at exactly node if and only if d - t == node->depth - queryEvent.time.
+        // Such an add event will end up at exactly node x or overshoot x if and only if
+        // d - t >= node->depth - queryEvent.time (which is what we want for leaf nodes).
         const int timeDepthDiff = node->depth - queryEvent.time;
         const bool isLeaf = node->children.empty();
         queryEvent.originalQuery->queryAnswer = 0;
