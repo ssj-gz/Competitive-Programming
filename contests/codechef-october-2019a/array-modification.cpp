@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/MARM
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -132,8 +132,12 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(a, K);
+        for (const auto x : solutionOptimised)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
 #endif
     }
 
