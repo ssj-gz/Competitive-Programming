@@ -1,6 +1,6 @@
-// Simon St James (ssjgz) - 2019-XX-XX
+// Simon St James (ssjgz) - 2019-10-06
 // 
-// Solution to: TODO - problem link here!
+// Solution to: https://www.codechef.com/OCT19A/problems/BACREP
 //
 //#define SUBMISSION
 #define BRUTE_FORCE
@@ -68,7 +68,7 @@ class NodeIdTracker
         {
             start++; // Make 1-relative.  start and end are inclusive.
             end++;
-            int sum = 0;
+            int64_t sum = 0;
             auto elements = m_elements.data();
             while(end > 0)
             {
@@ -85,20 +85,92 @@ class NodeIdTracker
         }
 };
 
-
-#if 0
-SolutionType solveBruteForce()
+struct Node
 {
-    SolutionType result;
+    vector<Node*> neighbours;
+    vector<Node*> children;
+    int64_t initialBacteria = -1;
+    int nodeId = -1;
+
+    int64_t numBacteriaAtSecondBegin = -1;
+    int64_t numBacteriaAtSecondEnd = -1;
+};
+
+struct Query
+{
+    bool isAddBacteria = false;
+    int64_t numBacteriaToAdd = -1;
+    int nodeId = -1;
+};
+
+void fixParentAndChild(Node* node, Node* parent)
+{
+    for (auto child : node->neighbours)
+    {
+        if (child == parent)
+            continue;
+        node->children.push_back(child);
+        fixParentAndChild(child, node);
+    }
+}
+
+vector<int64_t> solveBruteForce(vector<Node>& nodes, const vector<Query>& queries)
+{
+    vector<int64_t> result;
+
+    for (auto& node : nodes)
+    {
+        node.numBacteriaAtSecondEnd = node.initialBacteria;
+    }
+
+    for (int i = 0; i < queries.size(); i++)
+    {
+        // Update existing.
+        for (auto& node : nodes)
+        {
+            node.numBacteriaAtSecondBegin = node.numBacteriaAtSecondEnd;
+            if (!node.children.empty())
+                node.numBacteriaAtSecondEnd = 0;
+        }
+        for (auto& node : nodes)
+        {
+            if (node.children.empty())
+                continue;
+            for (auto child : node.children)
+            {
+                child->numBacteriaAtSecondEnd += node.numBacteriaAtSecondBegin;
+            }
+
+        }
+        
+
+        // Add new.
+        if (queries[i].isAddBacteria)
+        {
+            nodes[queries[i].nodeId - 1].numBacteriaAtSecondEnd += queries[i].numBacteriaToAdd;
+        }
+
+        // Process "how many" query.
+        if (!queries[i].isAddBacteria)
+        {
+            result.push_back(nodes[queries[i].nodeId - 1].numBacteriaAtSecondEnd);
+        }
+
+        cout << "Num bacteria at end of second:" << endl;
+        for (const auto& node : nodes)
+        {
+            cout << " " << node.numBacteriaAtSecondEnd;
+        }
+        cout << endl;
+    }
     
     return result;
 }
-#endif
 
 #if 0
-SolutionType solveOptimised()
+vector<int64_t> solveOptimised()
 {
-    SolutionType result;
+    vector<int64_t> result;
     
     return result;
 }
@@ -114,13 +186,6 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-        }
 
         return 0;
     }
@@ -128,6 +193,7 @@ int main(int argc, char* argv[])
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
+#if 0
     const int maxID = 500'000;
     NodeIdTracker nodeIdTracker(maxID);
     int64_t sum = 0;
@@ -144,30 +210,62 @@ int main(int argc, char* argv[])
     }
     cout << "Done!" << sum << endl;
     return 0;
+#endif
+    const int N = read<int>();
+    const int Q = read<int>();
 
+    vector<Node> nodes(N);
 
-    // TODO - read in testcase.
-    const auto T = read<int>();
-
-    for (int t = 0; t < T; t++)
+    for (int i = 0; i < N - 1; i++)
     {
+        const int x = read<int>() - 1;
+        const int y = read<int>() - 1;
+
+        nodes[x].neighbours.push_back(&(nodes[y]));
+        nodes[y].neighbours.push_back(&(nodes[x]));
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+        nodes[i].nodeId = i + 1;
+        nodes[i].initialBacteria = read<int64_t>();
+    }
+
+    vector<Query> queries(Q);
+
+    for (int i = 0; i < Q; i++)
+    {
+        const char queryType = read<char>();
+        const int nodeId = read<int>();
+
+        queries[i].nodeId = nodeId;
+
+        if (queryType == '+')
+        {
+            queries[i].isAddBacteria = true;
+            queries[i].numBacteriaToAdd = read<int64_t>();
+        }
+    }
+
+    fixParentAndChild(&(nodes.front()), nullptr);
 
 #ifdef BRUTE_FORCE
+    const auto solutionBruteForce = solveBruteForce(nodes, queries);
+    cout << "solutionBruteForce: " << endl;
+    for (const auto x : solutionBruteForce)
+    {
+        cout << x << endl;
+    }
 #if 0
-        const auto solutionBruteForce = solveBruteForce();
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised();
+    cout << "solutionOptimised:  " << solutionOptimised << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
+    assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised();
+    cout << solutionOptimised << endl;
 #endif
-    }
 
     assert(cin);
 }
