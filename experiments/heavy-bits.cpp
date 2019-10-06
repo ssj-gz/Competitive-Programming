@@ -257,14 +257,14 @@ int64_t solveOptimised(const string& B)
             {
                 return sumOfWeightStartingAt[index] + numbsInPrefix[0] * (N - index);
             }
+            const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
             int balanceIndex = index - 1;
             const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
             balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             if (balanceIndex == NeverBalanced)
             {
-                const auto mostPopulousBit = (prefixBalance > 0 ? 0 : 1);
-                return sumOfbsStartingAt[mostPopulousBit][index] + (N - index) * numbsInPrefix[mostPopulousBit] ;
+                return sumOfbsStartingAt[mostPopulousPrefixBit][index] + (N - index) * numbsInPrefix[mostPopulousPrefixBit] ;
             }
             else
             {
@@ -272,7 +272,6 @@ int64_t solveOptimised(const string& B)
                 const auto rangeLen = balanceIndex + 1 - index;
                 assert(numbsInPrefix[0] != numbsInPrefix[1]);
                 const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
-                const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
 
                 int64_t result = 0;
                 result = sumOfbsStartingAt[mostPopulousPrefixBit][index] - sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
