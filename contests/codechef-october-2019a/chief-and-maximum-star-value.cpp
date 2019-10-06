@@ -137,13 +137,13 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int T = 1;
+        const int T = 10;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
-            const int N = rand() % 1000 + 1;
-            const int maxA = rand() % 1'000'000 + 1;
+            const int N = 100'000;
+            const int maxA = 1'000'000;
 
             cout << N << endl;
             for (int i = 0; i < N; i++)
