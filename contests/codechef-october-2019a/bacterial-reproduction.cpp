@@ -177,12 +177,14 @@ vector<int64_t> solveBruteForce(vector<Node>& nodes, const vector<Query>& querie
             result.push_back(nodes[queries[i].nodeId - 1].numBacteriaAtSecondEnd);
         }
 
+#if 0
         cout << "Num bacteria at end of second:" << endl;
         for (const auto& node : nodes)
         {
             cout << " " << node.numBacteriaAtSecondEnd;
         }
         cout << endl;
+#endif
     }
     
     return result;
@@ -192,19 +194,19 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
 {
     ancestors.push_back(node);
 
-    cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
+    //cout << "Node: " << node->nodeId << " depth: " << node->depth << endl;
     for (const auto& queryEvent : node->queryEvents)
     {
         const int timeDepthDiff = node->depth - queryEvent.time;
-        cout << " query event: time: " << queryEvent.time << " timeDepthDiff: " << timeDepthDiff << endl;
+        //cout << " query event: time: " << queryEvent.time << " timeDepthDiff: " << timeDepthDiff << endl;
         queryEvent.originalQuery->queryAnswer = 0;
         for (const auto& ancestor : ancestors)
         {
-            cout << "  ancestor: " << ancestor->nodeId << endl;
+            //cout << "  ancestor: " << ancestor->nodeId << endl;
             for (const auto& ancestorAddEvent : ancestor->addEvents)
             {
                 const auto ancestorAddDepthTimeDiff = ancestor->depth - ancestorAddEvent.time;
-                cout << " ancestor add event: time: " << ancestorAddEvent.time << " ancestorAddDepthTimeDiff: " << ancestorAddDepthTimeDiff << " numBacteriaToAdd: " << ancestorAddEvent.numBacteriaToAdd << endl;
+                //cout << " ancestor add event: time: " << ancestorAddEvent.time << " ancestorAddDepthTimeDiff: " << ancestorAddDepthTimeDiff << " numBacteriaToAdd: " << ancestorAddEvent.numBacteriaToAdd << endl;
                 const bool isLeaf = node->children.empty();
                 if (isLeaf)
                 {
@@ -222,7 +224,7 @@ void solutionOptimisedAux(Node* node, vector<Node*>& ancestors)
                     }
                 }
             }
-            cout << " queryEvent answer: " << queryEvent.originalQuery->queryAnswer << endl;
+            //cout << " queryEvent answer: " << queryEvent.originalQuery->queryAnswer << endl;
         }
     }
 
@@ -377,7 +379,7 @@ int main(int argc, char* argv[])
     cout << "solutionBruteForce: " << endl;
     for (const auto x : solutionBruteForce)
     {
-        cout << x << endl;
+        cout << "solutionBruteForce: " << x << endl;
     }
     const auto solutionOptimised = solveOptimised(nodes, queries);
     cout << "solutionOptimised:  " << endl;
@@ -386,9 +388,7 @@ int main(int argc, char* argv[])
         cout << x << endl;
     }
 
-#if 0
     assert(solutionOptimised == solutionBruteForce);
-#endif
 #else
     const auto solutionOptimised = solveOptimised();
     cout << solutionOptimised << endl;
