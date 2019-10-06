@@ -109,7 +109,7 @@ class SegmentTree
 };
 
 struct Query;
-struct AddEvent
+struct AddBacteriaEvent
 {
     Query* originalQuery = nullptr;
     int time = -1;
@@ -129,7 +129,7 @@ struct Node
     int depth = -1;
     int64_t initialBacteria = -1;
 
-    vector<AddEvent> addEvents;
+    vector<AddBacteriaEvent> addBacteriaEvents;
     vector<CountBacteriaEvent> countBacteriaEvents;
 };
 
@@ -158,10 +158,10 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
 {
     // Add the timeDepthDiff & amount added for the AddEvents associated with this node.
     // NB: we are treating node as its own "ancestor" for simplicity :)
-    for (const auto& addEvent : node->addEvents)
+    for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
-        const int timeDepthDiff = node->depth - addEvent.time;
-        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, addEvent.numBacteriaToAdd);
+        const int timeDepthDiff = node->depth - addBacteriaEvent.time;
+        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, addBacteriaEvent.numBacteriaToAdd);
     }
     // Process the "?" queries for this node.
     for (const auto& countBacteriaEvent : node->countBacteriaEvents)
@@ -190,10 +190,10 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
     }
 
     // Pop the AddEvents we added when we first encountered this node.
-    for (const auto& addEvent : node->addEvents)
+    for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
-        const int timeDepthDiff = node->depth - addEvent.time;
-        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, -addEvent.numBacteriaToAdd);
+        const int timeDepthDiff = node->depth - addBacteriaEvent.time;
+        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, -addBacteriaEvent.numBacteriaToAdd);
     }
 }
 
@@ -203,7 +203,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     // (simplifies the code).
     for (auto& node : nodes)
     {
-        node.addEvents.push_back({nullptr, -1, node.initialBacteria});
+        node.addBacteriaEvents.push_back({nullptr, -1, node.initialBacteria});
     }
 
     // Record the AddEvents ('+') and CountBacteriaEvents ('?') associated with a node on that node.
@@ -212,7 +212,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         auto node = &(nodes[queries[time].nodeId - 1]);
         if (queries[time].isAddBacteria)
         {
-            node->addEvents.push_back({&(queries[time]), time, queries[time].numBacteriaToAdd});
+            node->addBacteriaEvents.push_back({&(queries[time]), time, queries[time].numBacteriaToAdd});
         }
         else
         {
