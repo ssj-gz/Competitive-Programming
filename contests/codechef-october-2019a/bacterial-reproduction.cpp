@@ -109,6 +109,7 @@ class SegmentTree
 };
 
 struct Query;
+enum class QueryType { Unknown, AddBacteria, CountBacteria };
 struct AddBacteriaEvent
 {
     Query* originalQuery = nullptr;
@@ -135,7 +136,7 @@ struct Node
 
 struct Query
 {
-    bool isAddBacteria = false;
+    QueryType queryType = QueryType::Unknown;
     int64_t numBacteriaToAdd = -1;
     int nodeId = -1;
 
@@ -210,7 +211,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     for (int time = 0; time < queries.size(); time++)
     {
         auto node = &(nodes[queries[time].nodeId - 1]);
-        if (queries[time].isAddBacteria)
+        if (queries[time].queryType == QueryType::AddBacteria)
         {
             node->addBacteriaEvents.push_back({&(queries[time]), time, queries[time].numBacteriaToAdd});
         }
@@ -226,7 +227,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     vector<int64_t> result;
     for (const auto& query : queries)
     {
-        if (!query.isAddBacteria)
+        if (query.queryType == QueryType::CountBacteria)
         {
             assert(query.countBacteriaAnswer != -1);
             result.push_back(query.countBacteriaAnswer);
@@ -271,8 +272,12 @@ int main(int argc, char* argv[])
 
         if (queryType == '+')
         {
-            queries[i].isAddBacteria = true;
+            queries[i].queryType = QueryType::AddBacteria;
             queries[i].numBacteriaToAdd = readInt();
+        }
+        else
+        {
+            queries[i].queryType = QueryType::CountBacteria;
         }
     }
 
