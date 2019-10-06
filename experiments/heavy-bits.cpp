@@ -253,6 +253,10 @@ int64_t solveOptimised(const string& B)
             const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
 
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
+            if (prefixBalance == 0)
+            {
+                return sumOfWeightStartingAt[index] + numbsInPrefix[0] * (N - index);
+            }
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
             int balanceIndex = index - 1;
             const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
@@ -261,10 +265,6 @@ int64_t solveOptimised(const string& B)
             {
                 const auto mostPopulousBit = (prefixBalance > 0 ? 0 : 1);
                 return sumOfbsStartingAt[mostPopulousBit][index] + (N - index) * numbsInPrefix[mostPopulousBit] ;
-            }
-            else if (prefixBalance == 0)
-            {
-                return sumOfWeightStartingAt[balanceIndex + 1] + ((balanceIndex - index + 1) / 2 + numbsInPrefix[1]) * (N - (balanceIndex + 1));
             }
             else
             {
