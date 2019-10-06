@@ -36,20 +36,40 @@ vector<int> solveBruteForce(const vector<int>& aOriginal, int64_t K)
         nextA[i % N] = a[i % N] ^ a[N - (i % N) - 1];
 
         a = nextA;
+        cout << "After " << (i + 1) << " operations, a is now: " << endl;
+        for (const auto x : a)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
     }
 
     
     return a;
 }
 
-#if 0
-SolutionType solveOptimised()
+vector<int> solveOptimised(const vector<int>& aOriginal, int64_t K)
 {
-    SolutionType result;
-    
-    return result;
+    const int N = aOriginal.size();
+
+    if ((N % 2) == 0)
+    {
+        K = K % (N * 3);
+        return solveBruteForce(aOriginal, K);
+    }
+    else
+    {
+        const bool kWasGreaterThanOrEqualToN = (K >= N);
+        K = K % (N * 3);
+        auto result = solveBruteForce(aOriginal, K);
+        if (kWasGreaterThanOrEqualToN)
+        {
+            result[N / 2] = 0;
+        }
+
+        return result;
+    }
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -92,9 +112,14 @@ int main(int argc, char* argv[])
             cout << x << " ";
         }
         cout << endl;
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+        const auto solutionOptimised = solveOptimised(a, K);
+        cout << "solutionOptimised:  " << endl;
+        for (const auto x : solutionOptimised)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
 
         assert(solutionOptimised == solutionBruteForce);
 #endif
