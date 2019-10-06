@@ -238,13 +238,7 @@ int64_t solveOptimised(const string& B)
         //cout << " index: " << index << endl;
         const char bit = B[index];
         const int bitValue = bit - '0';
-        assert(bit == '0' || bit == '1');
-        if (bit == '0')
-            numbsInSuffix[0]++;
-        if (bit == '1')
-            numbsInSuffix[1]++;
         //cout << " num0sInSuffix: " << numbsInSuffix[0] << " num1sInSuffix: " << numbsInSuffix[1] << endl;
-        const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
 
         const auto suffixLength = N - index;
 
@@ -274,18 +268,10 @@ int64_t solveOptimised(const string& B)
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
             int balanceIndex = index - 1;
-            //if (prefixBalance != 0)
-            {
-                const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
-                //cout << "prefixBalance: " << prefixBalance << " desiredSuffixBalance: " << desiredSuffixBalance << " currentSuffixBalance: " << currentSuffixBalance << endl;
-                balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
-            }
-            //cout << " balanceIndex: " << balanceIndex << endl;
-            //if (balanceIndex != NeverBalanced)
-                //cout << " string: " << B.substr(index, (balanceIndex - index + 1)) << endl;
+            const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
+            balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             if (balanceIndex == NeverBalanced)
             {
-                //assert(prefixBalance != 0);
                 const auto mostPopulousBit = (prefixBalance > 0 ? 0 : 1);
                 return sumOfbsStartingAt[mostPopulousBit][index] + (N - index) * numbsInPrefix[mostPopulousBit] ;
             }
@@ -308,7 +294,7 @@ int64_t solveOptimised(const string& B)
                 result += rangeLen * numbsInPrefix[mostPopulousPrefixBit];
 
                 assert(result >= 0);
-                //assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0); // TODO - reinstate this.
+                assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
                 result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
                           //sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1) / 2) * (N - (balanceIndex + 1));
                 
@@ -337,6 +323,12 @@ int64_t solveOptimised(const string& B)
         }
 #endif
 
+        assert(bit == '0' || bit == '1');
+        if (bit == '0')
+            numbsInSuffix[0]++;
+        if (bit == '1')
+            numbsInSuffix[1]++;
+        const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
 
         for (const auto& query : queriesForIndex[index])
