@@ -19,7 +19,7 @@ void scan_integer( int &x )
 {
     int c = getchar_unlocked();
     x = 0;
-    for( ; ((c<48 || c>57) && c != '-'); c = getchar_unlocked() );
+    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
     for( ;c>47 && c<58; c = getchar_unlocked() ) {
         x = (x << 1) + (x << 3) + c - 48;
     }
@@ -48,6 +48,7 @@ int readInt()
 }
 
 // Typical SegmentTree - you can find similar implementations all over the place :)
+// This one has been modified to accept negative indices/ positions.
 class SegmentTree
 {
     public:
@@ -57,33 +58,34 @@ class SegmentTree
               m_maxPos{maxPos},
               m_numElements{2 * (maxPos - minPos + 1)},
               m_elements(m_numElements + 1)
-            {
-            }
-        int maxPos()
         {
-            return m_maxPos;
         }
         // Find the number in the given range (inclusive) in O(log2(maxId)).
-        int64_t numInRange(int start, int end) const
+        int64_t numInRange(int startPosition, int endPosition) const
         {
-            start -= m_minPos;
-            end -= m_minPos;
-            start++; // Make 1-relative.  start and end are inclusive.
-            end++;
+            startPosition -= m_minPos;
+            endPosition -= m_minPos;
+            startPosition++; // Make 1-relative.  startPosition and endPosition are inclusive.
+            endPosition++;
             int64_t sum = 0;
             auto elements = m_elements.data();
-            while(end > 0)
+            while(endPosition > 0)
             {
-                sum += elements[end];
-                end -= (end & (end*-1));
+                sum += elements[endPosition];
+                endPosition -= (endPosition & (endPosition*-1));
             }
-            start--;
-            while(start > 0)
+            startPosition--;
+            while(startPosition > 0)
             {
-                sum -= elements[start];
-                start -= (start & (start*-1));
+                sum -= elements[startPosition];
+                startPosition -= (startPosition & (startPosition*-1));
             }
             return sum;
+        }
+        // Find the number in the range [position, maxPos].
+        int64_t numAtOrToRightOf(int position)
+        {
+            return numInRange(position, m_maxPos);
         }
 
         void addValueAt(int position, int64_t toAdd)
@@ -140,7 +142,6 @@ struct Query
     int64_t numBacteriaToAdd = -1;
     int nodeId = -1;
 
-    int64_t dbgQueryAnswer = -1;
     int64_t queryAnswer = -1;
 };
 
@@ -173,7 +174,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         queryEvent.originalQuery->queryAnswer = 0;
         if (isLeaf)
         {
-            queryEvent.originalQuery->queryAnswer = ancestorAddEventTimeDepthDiffs.numInRange(timeDepthDiff, ancestorAddEventTimeDepthDiffs.maxPos());
+            queryEvent.originalQuery->queryAnswer = ancestorAddEventTimeDepthDiffs.numAtOrToRightOf(timeDepthDiff);
         }
         else
         {
