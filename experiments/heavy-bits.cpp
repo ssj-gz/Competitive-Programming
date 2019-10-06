@@ -245,17 +245,18 @@ int64_t solveOptimised(const string& B)
         {
             if (index == N)
                 return 0;
-            
-            auto num0sInSuffix = numbsInPrefixLen[0][N] - numbsInPrefixLen[0][index];
-            auto num1sInSuffix = numbsInPrefixLen[1][N] - numbsInPrefixLen[1][index];
-
-            const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
 
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
             if (prefixBalance == 0)
             {
                 return sumOfWeightStartingAt[index] + numbsInPrefix[0] * (N - index);
             }
+            
+            auto num0sInSuffix = numbsInPrefixLen[0][N] - numbsInPrefixLen[0][index];
+            auto num1sInSuffix = numbsInPrefixLen[1][N] - numbsInPrefixLen[1][index];
+
+            const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
+
             const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
             const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
             // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
