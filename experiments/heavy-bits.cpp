@@ -235,10 +235,8 @@ int64_t solveOptimised(const string& B)
     int numbsInSuffix[2] = {0, 0};
     for (int index = N - 1; index >= 0; index--)
     {
-        //cout << " index: " << index << endl;
         const char bit = B[index];
         const int bitValue = bit - '0';
-        //cout << " num0sInSuffix: " << numbsInSuffix[0] << " num1sInSuffix: " << numbsInSuffix[1] << endl;
 
         const auto suffixLength = N - index;
 
@@ -247,7 +245,6 @@ int64_t solveOptimised(const string& B)
 
         auto blah = [&](const int numbsInPrefix[2], const int index) -> int64_t
         {
-            //cout << " blah index: " << index << endl;
             if (index == N)
                 return 0;
             
@@ -313,10 +310,7 @@ int64_t solveOptimised(const string& B)
 #endif
 
         assert(bit == '0' || bit == '1');
-        if (bit == '0')
-            numbsInSuffix[0]++;
-        if (bit == '1')
-            numbsInSuffix[1]++;
+        numbsInSuffix[bitValue]++;
         const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
         nextIndexWithSuffixBalance[currentSuffixBalance] = index;
 
