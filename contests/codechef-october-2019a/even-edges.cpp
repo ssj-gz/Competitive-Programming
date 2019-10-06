@@ -6,10 +6,11 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include <cassert>
 
@@ -31,6 +32,8 @@ struct Node
     vector<Node*> neighbours;
     int subgraphNum = -1;
     int colour = -1;
+
+    int id = -1;
 };
 
 bool isValidPartitioning(const vector<Node>& nodes)
@@ -102,27 +105,31 @@ std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
 
 std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes, const int numEdges)
 {
+    vector<int> subgraphForNode(nodes.size(), 1);
     if (numEdges % 2 == 0)
-        return {1, vector<int>()};
+        return {1, subgraphForNode};
 
-    bool hasOddDegree = false;
     for (const auto& node : nodes)
     {
         if (node.neighbours.size() % 2 == 1)
         {
-            hasOddDegree = true;
+            subgraphForNode[node.id] = 2;
+            return {2, subgraphForNode};
+        }
+    }
+
+    for (const auto& node : nodes)
+    {
+        if (!node.neighbours.empty())
+        {
+            subgraphForNode[node.id] = 3;
+            subgraphForNode[node.neighbours.front()->id] = 2;
             break;
         }
     }
-    if (hasOddDegree)
-    {
-        return {2, vector<int>()};
-    }
 
-    return {3, vector<int>()};
+    return {3, subgraphForNode};
 }
-
-
 
 int main(int argc, char* argv[])
 {
@@ -132,8 +139,6 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
         const int T = 1;
         cout << T << endl;
 
@@ -164,7 +169,6 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -182,6 +186,10 @@ int main(int argc, char* argv[])
             nodes[u].neighbours.push_back(&(nodes[v]));
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
+        for (int i = 0; i < N; i++)
+        {
+            nodes[i].id = i;
+        }
 
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(nodes);
@@ -197,13 +205,38 @@ int main(int argc, char* argv[])
 #if 1
         const auto solutionOptimised = solveOptimised(nodes, M);
         cout << "solutionOptimised:  " << solutionOptimised.first << endl;
+        for (int i = 0; i < N; i++)
+        {
+            nodes[i].subgraphNum = solutionOptimised.second[i];
+        }
+#if 0
+        for (const auto x : solutionOptimised.second)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+#endif
 
+
+        assert(isValidPartitioning(nodes));
         assert(solutionOptimised.first == solutionBruteForce.first);
 #endif
 
 #else
         const auto solutionOptimised = solveOptimised(nodes, M);
+        for (int i = 0; i < N; i++)
+        {
+            nodes[i].subgraphNum = solutionOptimised.second[i];
+        }
         cout << solutionOptimised.first << endl;
+#if 0
+        for (const auto x : solutionOptimised.second)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+#endif
+        assert(isValidPartitioning(nodes));
 #endif
     }
 
