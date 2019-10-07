@@ -92,39 +92,40 @@ bool isConnected(vector<Node>& nodes, int stateNum)
 
 int solveBruteForce(vector<Node>& state1Nodes, vector<Node>& state2Nodes, vector<Edge>& edges)
 {
-    for (int numToChoose = state1Nodes.size() - 1; numToChoose <= edges.size(); numToChoose++)
+    const int minPossibleNumRoadsToOpen = state1Nodes.size() - 1; // For a graph with N vertices, need at least N - 1 edges to make it connected.
+    for (int numRoadsToOpen = minPossibleNumRoadsToOpen; numRoadsToOpen <= edges.size(); numRoadsToOpen++)
     {
-        vector<int> choices(numToChoose);
-        for (int i = 0; i < numToChoose; i++)
+        vector<int> roadsToOpen(numRoadsToOpen);
+        for (int choiceIndex = 0; choiceIndex < numRoadsToOpen; choiceIndex++)
         {
-            choices[i] = i;
+            roadsToOpen[choiceIndex] = choiceIndex;
         }
         while (true)
         {
-            // Test this set of choices.
+            // Test this set of roadsToOpen.
             for (auto& edge : edges)
                 edge.isOpen = false;
 
-            for (auto choice : choices)
+            for (auto edgeIdToOpen : roadsToOpen)
             {
-                edges[choice].isOpen = true;
+                edges[edgeIdToOpen].isOpen = true;
             }
 
             if (isConnected(state1Nodes, 0) && isConnected(state2Nodes, 1))
-                return numToChoose;
+                return numRoadsToOpen;
 
-            // Next choices.
-            int index = numToChoose - 1;
-            while (index >= 0 && choices[index] == edges.size() - 1 - (numToChoose - 1 - index))
+            // Next choice of numRoadsToOpen roads to open.
+            int index = numRoadsToOpen - 1;
+            while (index >= 0 && roadsToOpen[index] == edges.size() - 1 - (numRoadsToOpen - 1 - index))
             {
                 index--;
             }
             if (index < 0)
                 break;
-            int nextChoice = choices[index] + 1;
-            for (int i = index; i < numToChoose; i++)
+            int nextChoice = roadsToOpen[index] + 1;
+            for (int i = index; i < numRoadsToOpen; i++)
             {
-                choices[i] = nextChoice;
+                roadsToOpen[i] = nextChoice;
                 nextChoice++;
             }
 
