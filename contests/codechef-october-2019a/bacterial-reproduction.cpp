@@ -121,7 +121,6 @@ struct Query;
 enum class QueryType { Unknown, AddBacteria, CountBacteria };
 struct AddBacteriaEvent
 {
-    Query* originalQuery = nullptr;
     int time = -1;
     int64_t numBacteriaToAdd = -1;
 };
@@ -213,7 +212,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     // (simplifies the code).
     for (auto& node : nodes)
     {
-        node.addBacteriaEvents.push_back({nullptr, -1, node.initialBacteria});
+        node.addBacteriaEvents.push_back({-1, node.initialBacteria});
     }
 
     // Record the AddEvents ('+') and CountBacteriaEvents ('?') associated with a node on that node.
@@ -222,7 +221,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         auto node = &(nodes[queries[time].nodeId - 1]);
         if (queries[time].queryType == QueryType::AddBacteria)
         {
-            node->addBacteriaEvents.push_back({&(queries[time]), time, queries[time].numBacteriaToAdd});
+            node->addBacteriaEvents.push_back({time, queries[time].numBacteriaToAdd});
         }
         else
         {
