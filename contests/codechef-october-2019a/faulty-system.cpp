@@ -92,7 +92,7 @@ bool isConnected(vector<Node>& nodes, int stateNum)
 
 int solveBruteForce(vector<Node>& state1Nodes, vector<Node>& state2Nodes, vector<Edge>& edges)
 {
-    for (int numToChoose = 1; numToChoose <= edges.size(); numToChoose++)
+    for (int numToChoose = state1Nodes.size() - 1; numToChoose <= edges.size(); numToChoose++)
     {
         vector<int> choices(numToChoose);
         for (int i = 0; i < numToChoose; i++)
