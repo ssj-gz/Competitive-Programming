@@ -78,6 +78,8 @@ bool isConnected(vector<Node>& nodes, int stateNum)
                 }
             }
         }
+
+        toExplore = nextToExplore;
     }
 
     for (auto& node : nodes)
