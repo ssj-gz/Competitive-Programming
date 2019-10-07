@@ -205,7 +205,8 @@ int main(int argc, char* argv[])
         }
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(state1Nodes, state2Nodes, edges);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        cout << solutionBruteForce << endl;
 #if 0
         const auto solutionOptimised = solveOptimised();
         cout << "solutionOptimised:  " << solutionOptimised << endl;
