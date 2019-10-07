@@ -110,7 +110,7 @@ int solveBruteForce(vector<Node>& state1Nodes, vector<Node>& state2Nodes, vector
                 edges[choice].isOpen = true;
             }
 
-            if (isConnected(state1Nodes, 0) && isConnected(state2Nodes, 0))
+            if (isConnected(state1Nodes, 0) && isConnected(state2Nodes, 1))
                 return numToChoose;
 
             // Next choices.
