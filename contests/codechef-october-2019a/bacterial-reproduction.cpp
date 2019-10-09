@@ -145,10 +145,10 @@ struct Node
 struct Query
 {
     QueryType queryType = QueryType::Unknown;
-    int64_t numBacteriaToAdd = -1;
     int nodeId = -1;
 
-    int64_t countBacteriaAnswer = -1;
+    int64_t numBacteriaToAdd = -1;     // Only used when queryType is AddBacteria.
+    int64_t countBacteriaAnswer = -1;  // Only used when queryType is CountBacteria.
 };
 
 void fixParentAndChild(Node* node, int depth, Node* parent)
@@ -165,8 +165,9 @@ void fixParentAndChild(Node* node, int depth, Node* parent)
 
 void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
 {
-    // Add the timeDepthDiff & amount added for the AddBacteriaEvents associated with this node.
-    // NB: we are treating node as its own "ancestor" for simplicity :)
+    // Add the timeDepthDiff & amount added for the AddBacteriaEvents associated with this node, for
+    // use by our descendents.
+    // NB: we are treating node as its own "ancestor" (and its own "descendent"!) for simplicity :)
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
@@ -175,7 +176,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
     // Process the CountBacteria queries for this node.
     for (const auto& countBacteriaEvent : node->countBacteriaEvents)
     {
-        // An add event of x bacteria at an ancestor node ancestorNode at time t and depth d will
+        // An Add Event of x bacteria at an ancestor node ancestorNode at time t and depth d will
         // end up at exactly node at time countBacteriaEvent.time if and only if d - t == node->depth - countBacteriaEvent.time.
         // Such an add event will end up at exactly node x *or* overshoot x at time countBacteriaEvent.time if and only if
         // d - t >= node->depth - countBacteriaEvent.time (which is what we want for leaf nodes).
@@ -209,13 +210,15 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
 vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
 {
     // Treat all bacteria originally in a node as an add event occurring at time -1
-    // (simplifies the code).
+    // (simplifies the code).  This will lead to up to O(N) extra additions to the 
+    // SegmentTree.  We can easily avoid these extra additions at the cost of special-casing
+    // the initialBacteria in a couple of places in the code.
     for (auto& node : nodes)
     {
         node.addBacteriaEvents.push_back({-1, node.initialBacteria});
     }
 
-    // Record the AddEvents ('+') and CountBacteriaEvents ('?') associated with a node on that node.
+    // Record the AddEvents ('+') and CountBacteriaEvents ('?') associated with a node, on that node.
     for (int time = 0; time < queries.size(); time++)
     {
         auto node = &(nodes[queries[time].nodeId - 1]);
@@ -232,17 +235,18 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     SegmentTree ancestorAddEventTimeDepthDiffs(-queries.size(), +queries.size());
     processTree(&(nodes.front()), ancestorAddEventTimeDepthDiffs);
 
-    vector<int64_t> result;
+    // Collect the actual results of the "?" queries.
+    vector<int64_t> countBacteriaQueryResults;
     for (const auto& query : queries)
     {
         if (query.queryType == QueryType::CountBacteria)
         {
             assert(query.countBacteriaAnswer != -1);
-            result.push_back(query.countBacteriaAnswer);
+            countBacteriaQueryResults.push_back(query.countBacteriaAnswer);
         }
     }
     
-    return result;
+    return countBacteriaQueryResults;
 }
 
 
@@ -263,7 +267,6 @@ int main(int argc, char* argv[])
         nodes[x].neighbours.push_back(&(nodes[y]));
         nodes[y].neighbours.push_back(&(nodes[x]));
     }
-
     for (int i = 0; i < N; i++)
     {
         nodes[i].initialBacteria = readInt();
@@ -289,12 +292,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    // Process the queries ...
     fixParentAndChild(&(nodes.front()), 0, nullptr);
+    const auto countBacteriaQueryResults = processQueries(nodes, queries);
 
-    const auto queryResults = processQueries(nodes, queries);
-    for (const auto x : queryResults)
+    // ... and print the results!
+    for (const auto countBacteriaQueryResult : countBacteriaQueryResults)
     {
-        cout << x << endl;
+        cout << countBacteriaQueryResult << endl;
     }
 
     assert(cin);
