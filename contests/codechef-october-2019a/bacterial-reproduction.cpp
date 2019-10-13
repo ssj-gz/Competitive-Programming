@@ -273,6 +273,63 @@ int main(int argc, char* argv[])
     // In many problems, interfering with the order of the Events might upset the Chronology: i.e. we might (incorrectly) Count
     // bacteria at time t that won't even be Added until a time *after* t! - but in this particular Problem it can be shown
     // that this cannot happen, so processing the queries in a different order does not affect the result.
+    //
+    // LONGER EXPLANATION
+    //
+    // Firstly, as mentioned in the so-called Quick Explanation, we classify each query as either a "Add Event" ("+", AddBacteriaEvent)
+    // or a "Count Event" ("?", CountBacteriaEvent).  Each event has a *time* at which it occurs (derived from its position in
+    // the list of queries) and a *node* which it affects.  We'll ignore the bacterial initially present in each node (initialBacteria)
+    // until right at the end as they'd just complicate matters, otherwise.
+    //
+    // Secondly, we can track the contributions of a given Add Event ae whcih adds ae.numBacteriaToAdd bacteria to node ae.node at time 
+    // ae.t independently from all the other globs of bacteria, whether said globs were there at the start of the simulation or
+    // were added by an add event.  To see this, observe the following figure showing the evolution of the system from the beginning
+    // of second ae.to to the end of second ae.t + 1.  The number in each node denotes the number of bacteria in that node.
+    //
+    //
+    //        (A)
+    //         |
+    //      v (B)          Beginning of time ae.t.
+    //       / | \
+    //    (C1)(C2)(C3)
+    //
+    //        (Z)
+    //         |
+    //      v (A)          Some short time through time ae.t, after reproduction step occurs.
+    //       / | \
+    //    (B) (B)(B)
+    //
+    //        (Z)
+    //         |
+    //     v (A+X)         Some short time later still through time ae.t, after we add X = ae.numBacteriaToAdd to
+    //       / | \         node v = ae.node.
+    //     (B)(B)(B)
+    //
+    //        (Y)
+    //         |
+    //      v (Z)           
+    //       / | \         End of time ae.t + 1, after a further reproduction step.
+    //  (A+X)(A+X)(A+X)
+    //
+    // We see that even though the reproduction rules consider only the total bacteria for a node, we can still "separate out" the
+    // contributions of the ae.numBacteriaToAdd to the nodes at the simulation progresses.  In fact, it's hopefully easy to see that:
+    //
+    //    At the end of time t (t >= ae.t), the Add Event ae contributes ae.numBacteriaToAdd to the bacteria count for precisely the
+    //    set of nodes such that either:
+    //
+    //       i) v is a non-leaf and v is a descendent of ae.node and depth(ae.node) + (t - ae.t) == depth(v); or
+    //       ii) v is a leaf and v is a descendent of ae.node and depth(ae.node) + (t - ae.t) >= depth(v).
+    //
+    // Now, the point of the question is to answer the "Count Event" queries ce i.e. counting the bacteria at node ce.node at the
+    // end of the second ce.t.  Inverting the rule about contributions from Add Events ae above, we see that 
+    //
+    //    The number of bacteria in node ce.node at the end of the second ce.t is the sum of ae.numBacteriaToAdd over all Add Events ae
+    // such that:
+    //
+    //      i) ae.node is an ancestor of ce.node; and
+    //      ii) depth(ae.node) + ce.t - ae.t == depth(ce.node) (">=" if ce.node is a leaf node); and
+    //      iii) ce.t >= ae.t
+    //
     ios::sync_with_stdio(false);
 
     const int N = readInt();
