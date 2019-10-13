@@ -103,25 +103,57 @@ std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
     return {-1, vector<int>()};
 }
 
-std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes, const int numEdges)
+std::pair<int, vector<int>> findMinSubgraphPartitioning(vector<Node>& nodes, const int numEdges)
 {
     vector<int> subgraphForNode(nodes.size(), 1);
     if (numEdges % 2 == 0)
+    {
+        // Already satisfies requirements; no partitioning required.
         return {1, subgraphForNode};
+    }
 
+    // From this point on, the number of edges is odd.
     for (const auto& node : nodes)
     {
         if (node.neighbours.size() % 2 == 1)
         {
+            // Found a node with an odd number of edges incident; if we move
+            // this node into its own partition, then the resulting graph
+            // will have exactly the same set of vertices as the original *minus*
+            // the (odd number of) edges incident with node.
+            //
+            // Since an odd number minus an odd number is even, this partitioning
+            // gives us an even number of edges.
             subgraphForNode[node.id] = 2;
             return {2, subgraphForNode};
         }
     }
 
+    // From this point on, we have an odd number of edges, but every node has an
+    // even number of edges incident with it.
+    //
+    // For reasons which aren't completely clear to me, no partitioning into 
+    // two partitions can satisfy the requirements, so we must use (at least) 3.
+    //
+    // However, as we'll see, 3 is sufficient.
+
     for (const auto& node : nodes)
     {
         if (!node.neighbours.empty())
         {
+            // A node with > 0 incident edges must exist, as the total number of 
+            // edges is odd.
+            //
+            // If we put this node into its own partition (partition #3), then the
+            // resulting graph has the same edges as the original, *minus* those
+            // incident with node.
+            //
+            // Since each neighbour of node now has one incident edge less, and originally
+            // had an even number of incident edges, each now has an odd number of edges.
+            //
+            // We then pick any one such neighbour and move it into its own partition (#2) and
+            // we have our partition for the reasons described in the "Found a node with an odd 
+            // number of edges incident" case, above.
             subgraphForNode[node.id] = 3;
             subgraphForNode[node.neighbours.front()->id] = 2;
             break;
@@ -133,42 +165,23 @@ std::pair<int, vector<int>> solveOptimised(vector<Node>& nodes, const int numEdg
 
 int main(int argc, char* argv[])
 {
+    // Slightly confused by this one: the code above is hopefully mostly self-explanatory, but there's
+    // one thing I can't figure out:
+    //
+    //    If the number of edges is odd but every node has an even degree, then no partitioning into
+    //    two or less partitions can satisfy the requirement.
+    //
+    // I've got this far: if the degree of each vertex is even, then there is an Eulerian Circuit/ Cycle on the
+    // graph.  Since the number of edges is odd, this Cycle has odd length.  A graph that has an odd length cycle
+    // cannot be bipartite.
+    //
+    // Now, bipartite-ness is *sufficient* for a partitioning into two partitions to satisfy the condition (bipartite-ness
+    // implies the vertices can be divided into two partitions, with no vertices in the same partition being connected
+    // by an edge - with this partitioning, *no* edges remain in the resulting graph, so the number of edges is 0, 
+    // which is even), but I can't think of any reason why bipartiteness should be *necessary*.
+    //
+    // Oh well - will just have to wait for the Editorial, I guess :)
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            const int N = (rand() % 20) + 2;
-            vector<pair<int, int>> allEdges;
-            for (int i = 1; i <= N; i++)
-            {
-                for (int j = i + 1; j <= N; j++)
-                {
-                    allEdges.push_back({i, j});
-                }
-            }
-            const int M = (rand() % allEdges.size()) + 1;
-
-            cout << N << " " << M << endl;
-
-            random_shuffle(allEdges.begin(), allEdges.end());
-
-            for (int i = 0; i < M; i++)
-            {
-                cout << allEdges[i].first << " " << allEdges[i].second << endl;
-
-            }
-        }
-
-        return 0;
-    }
-    
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -186,57 +199,23 @@ int main(int argc, char* argv[])
             nodes[u].neighbours.push_back(&(nodes[v]));
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
+
         for (int i = 0; i < N; i++)
         {
             nodes[i].id = i;
         }
 
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(nodes);
-        cout << "solutionBruteForce: " << solutionBruteForce.first << endl;
-        //assert(solutionBruteForce.first == 1 || solutionBruteForce.first == 2);
-        assert(solutionBruteForce.first <= 3);
-        for (const auto blah : solutionBruteForce.second)
-        {
-            cout << blah << " ";
-        }
-        cout << endl;
+        const auto minSubgraphPartitioning = findMinSubgraphPartitioning(nodes, M);
+        const int numSubgraphs = minSubgraphPartitioning.first;
+        const auto& subgraphForNode = minSubgraphPartitioning.second;
 
-#if 1
-        const auto solutionOptimised = solveOptimised(nodes, M);
-        cout << "solutionOptimised:  " << solutionOptimised.first << endl;
-        for (int i = 0; i < N; i++)
-        {
-            nodes[i].subgraphNum = solutionOptimised.second[i];
-        }
+        cout << numSubgraphs << endl;
 #if 0
-        for (const auto x : solutionOptimised.second)
+        for (const auto x : subgraphForNode)
         {
             cout << x << " ";
         }
         cout << endl;
-#endif
-
-
-        assert(isValidPartitioning(nodes));
-        assert(solutionOptimised.first == solutionBruteForce.first);
-#endif
-
-#else
-        const auto solutionOptimised = solveOptimised(nodes, M);
-        for (int i = 0; i < N; i++)
-        {
-            nodes[i].subgraphNum = solutionOptimised.second[i];
-        }
-        cout << solutionOptimised.first << endl;
-#if 1
-        for (const auto x : solutionOptimised.second)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-#endif
-        assert(isValidPartitioning(nodes));
 #endif
     }
 
