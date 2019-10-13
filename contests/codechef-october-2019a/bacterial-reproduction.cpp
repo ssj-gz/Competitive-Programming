@@ -217,14 +217,15 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
     // Record the AddEvents ('+') and CountBacteriaEvents ('?') associated with a node, on that node.
     for (int time = 0; time < queries.size(); time++)
     {
-        auto node = &(nodes[queries[time].nodeId - 1]);
-        if (queries[time].queryType == QueryType::AddBacteria)
+        auto& query = queries[time];
+        auto& node = nodes[query.nodeId - 1];
+        if (query.queryType == QueryType::AddBacteria)
         {
-            node->addBacteriaEvents.push_back({time, queries[time].numBacteriaToAdd});
+            node.addBacteriaEvents.push_back({time, query.numBacteriaToAdd});
         }
         else
         {
-            node->countBacteriaEvents.push_back({time, &(queries[time])});
+            node.countBacteriaEvents.push_back({time, &query});
         }
     }
 
