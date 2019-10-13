@@ -313,7 +313,9 @@ int main(int argc, char* argv[])
     //  (A+X)(A+X)(A+X)
     //
     // We see that even though the reproduction rules consider only the total bacteria for a node, we can still "separate out" the
-    // contributions of the X = ae.numBacteriaToAdd to the nodes at the simulation progresses.  In fact, it's hopefully easy to see that:
+    // contributions of the X = ae.numBacteriaToAdd to the nodes at the simulation progresses.  We see that bacteria at a node v will
+    // "drop" one level into the child nodes (i.e. increase their depth by 1) after each second (unless v is a leaf, in which case 
+    // bacteria "pool" there - if a bacterium ends up in a leaf node, it's there forever).  In fact, it's hopefully easy to see that:
     //
     //    At the end of time t (t >= ae.t), the Add Event ae contributes ae.numBacteriaToAdd to the bacteria count for precisely the
     //    set of nodes v such that either:
