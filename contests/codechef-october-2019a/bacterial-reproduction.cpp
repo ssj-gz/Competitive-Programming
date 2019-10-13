@@ -123,8 +123,8 @@ struct AddBacteriaEvent
 
 struct CountBacteriaEvent
 {
-    Query* originalQuery = nullptr;
     int time = -1;
+    Query* originalQuery = nullptr;
 };
 
 struct Node
@@ -207,8 +207,8 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
 {
     // Treat all bacteria originally in a node as an add event occurring at time -1
     // (simplifies the code).  This will lead to up to O(N) extra additions to the 
-    // SegmentTree.  We can easily avoid these extra additions at the cost of special-casing
-    // the initialBacteria in a couple of places in the code.
+    // SegmentTree.  We could easily avoid these extra additions at the cost of special-casing
+    // the initialBacteria in a couple of places in the code, but I'd rather keep things simple :)
     for (auto& node : nodes)
     {
         node.addBacteriaEvents.push_back({-1, node.initialBacteria});
@@ -224,7 +224,7 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         }
         else
         {
-            node->countBacteriaEvents.push_back({&(queries[time]), time});
+            node->countBacteriaEvents.push_back({time, &(queries[time])});
         }
     }
 
