@@ -335,7 +335,11 @@ int main(int argc, char* argv[])
     //      ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) (again, ">=" if ce.node is a leaf node)
     //
     // From this, we see that the concept of the difference between the time of a an event and the depth of the node it affects seems
-    // to be verify important, , and we call it the time-depth difference (TDD): TDD(e) = e.t - depth(e.node).
+    // to be verify important, and we call it the time-depth difference (TDD): TDD(e) = e.t - depth(e.node).  We may also write ii) as
+    //
+    //      ii) TDD(ae) == TDD(ce)
+    //
+    // if we want.
     //
     // As mentioned in the Quick Explanation, we are ultimately trying to re-order the queries/ events so that they are processed in the
     // order of visitation of the nodes they affect in a DFS from the root of the tree, but we must not break the "chronology" of the
@@ -356,7 +360,21 @@ int main(int argc, char* argv[])
     //
     // i.e. condition iii) always holds, so we can ignore it!
     //
-    // 
+    // So, we can now process the queries/ Events in a different order, as follows:
+    //
+    // Do a DFS from the root of the tree.  When we enter a node u, find all Add Events ae with ae.node == u, and and add ae.numBacteriaToAdd
+    // to a segment tree at "position" TDD(ae) (= ae.time - depth(u)).  When we exit node u (after exploring all nodes that have u as an ancestor), 
+    // undo these additions to the segment tree we made when we entered u.
+    //
+    // Now, say we enter some node v which has a Count Event ce affecting it (i.e. ce.node == v).  What can we find at "position" TDD(ce)? By the
+    // rules above, we'll find precisely the sum of ae.numBacteriaToAdd where ae.node is an ancestor of v and TDD(ae) == TDD(ce) i.e. exactly the answer
+    // to the query ce if v is a non-leaf!
+    //
+    // If v is a leaf, we instead just query the segment tree for the sum of entries at or to the right of "position" TDD(ce).
+    //
+    // And that's it! We still have to deal with the initial bacteria located in the nodes at the start of the simulation, but this is easy: 
+    // it's hopefully clear that the simulation would proceed identically if we treated these as arising from some synthetic Add Events which add the
+    // requisite bacteria to each node en masse 1 second before the simulation begins i.e. at t == -1.
     ios::sync_with_stdio(false);
 
     const int N = readInt();
