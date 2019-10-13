@@ -44,54 +44,55 @@ int readInt()
 
 // Typical SegmentTree - you can find similar implementations all over the place :)
 // This one has been modified to accept negative indices/ positions.
+// "Positions" are "TDD"'s - "Time-Depth Differences".
 class SegmentTree
 {
     public:
         SegmentTree() = default;
-        SegmentTree(int minPos, int maxPos)
-            : m_minPos{minPos},
-              m_maxPos{maxPos},
-              m_directValues(maxPos - minPos + 1),
-              m_numElements{2 * (maxPos - minPos + 1)},
+        SegmentTree(int minTDD, int maxTDD)
+            : m_minTDD{minTDD},
+              m_maxTDD{maxTDD},
+              m_directValues(maxTDD - minTDD + 1),
+              m_numElements{2 * (maxTDD - minTDD + 1)},
               m_elements(m_numElements + 1)
         {
         }
-        // Find the number in the given range (inclusive) in O(log2(maxPos - minPos)).
-        int64_t numInRange(int startPosition, int endPosition) const
+        // Find the number in the given range (inclusive) in O(log2(maxTDD - minTDD)).
+        int64_t numBacteriaInTDDRange(int startTDD, int endTDD) const
         {
-            startPosition -= m_minPos;
-            endPosition -= m_minPos;
-            startPosition++; // Make 1-relative.  startPosition and endPosition are inclusive.
-            endPosition++;
+            startTDD -= m_minTDD;
+            endTDD -= m_minTDD;
+            startTDD++; // Make 1-relative.  startTDD and endTDD are inclusive.
+            endTDD++;
             int64_t sum = 0;
             auto elements = m_elements.data();
-            while(endPosition > 0)
+            while(endTDD > 0)
             {
-                sum += elements[endPosition];
-                endPosition -= (endPosition & (endPosition*-1));
+                sum += elements[endTDD];
+                endTDD -= (endTDD & (endTDD*-1));
             }
-            startPosition--;
-            while(startPosition > 0)
+            startTDD--;
+            while(startTDD > 0)
             {
-                sum -= elements[startPosition];
-                startPosition -= (startPosition & (startPosition*-1));
+                sum -= elements[startTDD];
+                startTDD -= (startTDD & (startTDD*-1));
             }
             return sum;
         }
-        // Find the number in the range [position, maxPos].
-        int64_t numAtOrToRightOf(int position)
+        // Find the number in the range [tdd, maxTDD].
+        int64_t numBacteriaWithTDDAtLeast(int tdd)
         {
-            return numInRange(position, m_maxPos);
+            return numBacteriaInTDDRange(tdd, m_maxTDD);
         }
 
-        void addValueAt(int position, int64_t toAdd)
+        void addBacteriaAtTDD(int tdd, int64_t toAdd)
         {
-            assert(m_minPos <= position && position <= m_maxPos);
-            position -= m_minPos;
-            m_directValues[position] += toAdd;
+            assert(m_minTDD <= tdd && tdd <= m_maxTDD);
+            tdd -= m_minTDD;
+            m_directValues[tdd] += toAdd;
             const auto n = m_numElements;
             auto elements = m_elements.data();
-            int pos = position + 1; // Make 1-relative.
+            int pos = tdd + 1; // Make 1-relative.
             while(pos <= n)
             {
                 elements[pos] += toAdd;
@@ -99,14 +100,14 @@ class SegmentTree
                 pos += (pos & (pos * -1));
             }
         }
-        int64_t numAt(int position)
+        int64_t numBacteriaAtTDD(int tdd)
         {
-            assert(m_minPos <= position && position <= m_maxPos);
-            return m_directValues[position - m_minPos];
+            assert(m_minTDD <= tdd && tdd <= m_maxTDD);
+            return m_directValues[tdd - m_minTDD];
         }
     private:
-        int m_minPos;
-        int m_maxPos;
+        int m_minTDD;
+        int m_maxTDD;
         vector<int64_t> m_directValues;
         int m_numElements;
         vector<int64_t> m_elements;
@@ -166,7 +167,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
-        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, addBacteriaEvent.numBacteriaToAdd);
+        ancestorAddEventTimeDepthDiffs.addBacteriaAtTDD(timeDepthDiff, addBacteriaEvent.numBacteriaToAdd);
     }
     // Process the CountBacteria queries for this node.
     for (const auto& countBacteriaEvent : node->countBacteriaEvents)
@@ -180,11 +181,11 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         countBacteriaEvent.originalQuery->countBacteriaAnswer = 0;
         if (isLeaf)
         {
-            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numAtOrToRightOf(timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numBacteriaWithTDDAtLeast(timeDepthDiff);
         }
         else
         {
-            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numAt(timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numBacteriaAtTDD(timeDepthDiff);
         }
 
     }
@@ -198,7 +199,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
-        ancestorAddEventTimeDepthDiffs.addValueAt(timeDepthDiff, -addBacteriaEvent.numBacteriaToAdd);
+        ancestorAddEventTimeDepthDiffs.addBacteriaAtTDD(timeDepthDiff, -addBacteriaEvent.numBacteriaToAdd);
     }
 }
 
