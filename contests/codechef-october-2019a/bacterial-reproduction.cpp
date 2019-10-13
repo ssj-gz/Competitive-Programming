@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
     // the list of queries) and a *node* which it affects.  We'll ignore the bacterial initially present in each node (initialBacteria)
     // until right at the end as they'd just complicate matters, otherwise.
     //
-    // Secondly, we can track the contributions of a given Add Event ae whcih adds ae.numBacteriaToAdd bacteria to node ae.node at time 
+    // Secondly, we can track the contributions of a given Add Event ae which adds ae.numBacteriaToAdd bacteria to node ae.node at time 
     // ae.t independently from all the other globs of bacteria, whether said globs were there at the start of the simulation or
     // were added by an add event.  To see this, observe the following figure showing the evolution of the system from the beginning
     // of second ae.to to the end of second ae.t + 1.  The number in each node denotes the number of bacteria in that node.
