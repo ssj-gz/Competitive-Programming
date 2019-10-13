@@ -195,7 +195,7 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         processTree(child, ancestorAddEventTimeDepthDiffs);
     }
 
-    // Pop the AddBacteriaEvents we added when we first encountered this node.
+    // Leaving this node: "pop" the AddBacteriaEvents we added when we first encountered this node.
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
