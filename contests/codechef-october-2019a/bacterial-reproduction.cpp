@@ -2,11 +2,6 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/BACREP
 //
-#define SUBMISSION
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 
@@ -61,7 +56,7 @@ class SegmentTree
               m_elements(m_numElements + 1)
         {
         }
-        // Find the number in the given range (inclusive) in O(log2(maxId)).
+        // Find the number in the given range (inclusive) in O(log2(maxPos - minPos)).
         int64_t numInRange(int startPosition, int endPosition) const
         {
             startPosition -= m_minPos;
