@@ -252,6 +252,30 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
 
 int main(int argc, char* argv[])
 {
+    // QUICK(-ish) EXPLANATION
+    //
+    // Divide the queries into "Add Events" and "Query Events", both affecting a given node at a given time, 
+    // and treat the initial bacteria count at a node v as a special case of the former (i.e. an Add Event affecting 
+    // node v at time t = -1 - this makes the code a little simpler).
+    //
+    // It can be shown that the Count of bacteria at (non-leaf) node v at a time t is simply the sum, over all ancestors u of
+    // v, of all bacteria added in Add Events affecting node u at time t' satisfying 
+    //
+    //     t' - depth(u) == t - depth(v)
+    //
+    // (with the "==" change to ">=" in the case where v is a leaf).
+    //
+    // Thus, by doing a DFS from the root and, when encountering a node u, adding, for each t' such that an Add Event adds X
+    // bacteria to u, X at the position t' - depth(u) to a Segment Tree, by the time we get to node v we can deduce precisely
+    // the Count of bacteria at node v at any time t just by querying the Segment Tree for the number of bacteria at position
+    // (or at position greater than or equal to, if v is a leaf) t - depth(v).
+    //
+    // That is, we process the Add/ Count events not in the original order in which the appear in the list of queries but in 
+    // the order in which the node they affect appears in our DFS.
+    //
+    // In many problems, interfering with the order of the Events might upset the Chronology: i.e. we might (incorrectly) Count
+    // bacteria at time t that won't even be Added until a time *after* t! - but in this particular Problem it can be shown
+    // that this cannot happen, so processing the queries in a different order does not affect the result.
     ios::sync_with_stdio(false);
 
     const int N = readInt();
