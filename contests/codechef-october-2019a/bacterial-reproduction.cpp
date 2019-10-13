@@ -159,15 +159,15 @@ void fixParentAndChild(Node* node, int depth, Node* parent)
     }
 }
 
-void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
+void processTree(Node* node, SegmentTree& ancestorAddEventTDDs)
 {
-    // Add the timeDepthDiff & amount added for the AddBacteriaEvents associated with this node, for
+    // Add the timeDepthDiff & amount added for the AddBacteriaEvents associated with this node to ancestorAddEventTDDs, for
     // use by our descendents.
     // NB: we are treating node as its own "ancestor" (and its own "descendent"!) for simplicity :)
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
-        ancestorAddEventTimeDepthDiffs.addBacteriaAtTDD(timeDepthDiff, addBacteriaEvent.numBacteriaToAdd);
+        ancestorAddEventTDDs.addBacteriaAtTDD(timeDepthDiff, addBacteriaEvent.numBacteriaToAdd);
     }
     // Process the CountBacteria queries for this node.
     for (const auto& countBacteriaEvent : node->countBacteriaEvents)
@@ -181,25 +181,26 @@ void processTree(Node* node, SegmentTree& ancestorAddEventTimeDepthDiffs)
         countBacteriaEvent.originalQuery->countBacteriaAnswer = 0;
         if (isLeaf)
         {
-            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numBacteriaWithTDDAtLeast(timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTDDs.numBacteriaWithTDDAtLeast(timeDepthDiff);
         }
         else
         {
-            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTimeDepthDiffs.numBacteriaAtTDD(timeDepthDiff);
+            countBacteriaEvent.originalQuery->countBacteriaAnswer = ancestorAddEventTDDs.numBacteriaAtTDD(timeDepthDiff);
         }
 
     }
 
+    // Recurse.
     for (auto child : node->children)
     {
-        processTree(child, ancestorAddEventTimeDepthDiffs);
+        processTree(child, ancestorAddEventTDDs);
     }
 
     // Leaving this node: "pop" the AddBacteriaEvents we added when we first encountered this node.
     for (const auto& addBacteriaEvent : node->addBacteriaEvents)
     {
         const int timeDepthDiff = node->depth - addBacteriaEvent.time;
-        ancestorAddEventTimeDepthDiffs.addBacteriaAtTDD(timeDepthDiff, -addBacteriaEvent.numBacteriaToAdd);
+        ancestorAddEventTDDs.addBacteriaAtTDD(timeDepthDiff, -addBacteriaEvent.numBacteriaToAdd);
     }
 }
 
@@ -229,8 +230,8 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         }
     }
 
-    SegmentTree ancestorAddEventTimeDepthDiffs(-queries.size(), +queries.size());
-    processTree(&(nodes.front()), ancestorAddEventTimeDepthDiffs);
+    SegmentTree ancestorAddEventTDDs(-queries.size(), +queries.size());
+    processTree(&(nodes.front()), ancestorAddEventTDDs);
 
     // Collect the actual results of the "?" queries.
     vector<int64_t> countBacteriaQueryResults;
@@ -278,13 +279,13 @@ int main(int argc, char* argv[])
     //
     // Firstly, as mentioned in the so-called Quick Explanation, we classify each query as either a "Add Event" ("+", AddBacteriaEvent)
     // or a "Count Event" ("?", CountBacteriaEvent).  Each event has a *time* at which it occurs (derived from its position in
-    // the list of queries) and a *node* which it affects.  We'll ignore the bacterial initially present in each node (initialBacteria)
+    // the list of queries) and a *node* which it affects.  We'll ignore the bacteria initially present in each node (initialBacteria)
     // until right at the end as they'd just complicate matters, otherwise.
     //
     // Secondly, we can track the contributions of a given Add Event ae which adds ae.numBacteriaToAdd bacteria to node ae.node at time 
     // ae.t independently from all the other globs of bacteria, whether said globs were there at the start of the simulation or
     // were added by an add event.  To see this, observe the following figure showing the evolution of the system from the beginning
-    // of second ae.to to the end of second ae.t + 1.  The number in each node denotes the number of bacteria in that node.
+    // of second ae.t to the end of second ae.t + 1; the number in each node denotes the number of bacteria in that node.
     //
     //
     //        (A)
@@ -312,10 +313,10 @@ int main(int argc, char* argv[])
     //  (A+X)(A+X)(A+X)
     //
     // We see that even though the reproduction rules consider only the total bacteria for a node, we can still "separate out" the
-    // contributions of the ae.numBacteriaToAdd to the nodes at the simulation progresses.  In fact, it's hopefully easy to see that:
+    // contributions of the X = ae.numBacteriaToAdd to the nodes at the simulation progresses.  In fact, it's hopefully easy to see that:
     //
     //    At the end of time t (t >= ae.t), the Add Event ae contributes ae.numBacteriaToAdd to the bacteria count for precisely the
-    //    set of nodes such that either:
+    //    set of nodes v such that either:
     //
     //       i) v is a non-leaf and v is a descendent of ae.node and depth(ae.node) + (t - ae.t) == depth(v); or
     //       ii) v is a leaf and v is a descendent of ae.node and depth(ae.node) + (t - ae.t) >= depth(v).
@@ -335,7 +336,7 @@ int main(int argc, char* argv[])
     //      ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) (again, ">=" if ce.node is a leaf node)
     //
     // From this, we see that the concept of the difference between the time of a an event and the depth of the node it affects seems
-    // to be verify important, and we call it the time-depth difference (TDD): TDD(e) = e.t - depth(e.node).  We may also write ii) as
+    // to be verify important, so we give it a name - let the Time-Depth Difference (TDD) of an event e be TDD(e) = e.t - depth(e.node).  We may also write ii) as
     //
     //      ii) TDD(ae) == TDD(ce)
     //
@@ -349,7 +350,7 @@ int main(int argc, char* argv[])
     // Count Event that satisfy i) and ii) i.e.
     //
     //     i) ae.node is an ancestor of ce.node; and
-    //    ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) [I'm going to assume ce.node is a non-leaf for simplicity; the logic is much the same].
+    //    ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) [I'm going to assume ce.node is a non-leaf for simplicity; the logic is much the same for the leaf case].
     //   
     // Now, since ae.node is an ancestor of ce.node, we must have that depth(ae.node) <= depth(ce.node); thus:
     //
@@ -362,19 +363,20 @@ int main(int argc, char* argv[])
     //
     // So, we can now process the queries/ Events in a different order, as follows:
     //
-    // Do a DFS from the root of the tree.  When we enter a node u, find all Add Events ae with ae.node == u, and and add ae.numBacteriaToAdd
-    // to a segment tree at "position" TDD(ae) (= ae.time - depth(u)).  When we exit node u (after exploring all nodes that have u as an ancestor), 
-    // undo these additions to the segment tree we made when we entered u.
+    // Do a DFS from the root of the tree (processTree).  When we enter a node u, find all Add Events ae with ae.node == u, and add ae.numBacteriaToAdd
+    // to a segment tree (ancestorAddEventTDDs) at "position" TDD(ae) (= ae.time - depth(u)).  When we exit node u (after exploring all nodes 
+    // that have u as an ancestor), undo these additions to the segment tree we made when we entered u.
     //
-    // Now, say we enter some node v which has a Count Event ce affecting it (i.e. ce.node == v).  What can we find at "position" TDD(ce)? By the
-    // rules above, we'll find precisely the sum of ae.numBacteriaToAdd where ae.node is an ancestor of v and TDD(ae) == TDD(ce) i.e. exactly the answer
-    // to the query ce if v is a non-leaf!
+    // Now, say during our DFS we enter some node v which has a Count Event ce affecting it (i.e. ce.node == v).  What can we find at "position" TDD(ce) in the
+    // segment tree? By the rules above, we'll find precisely the sum of ae.numBacteriaToAdd where ae.node is an ancestor of v and TDD(ae) == TDD(ce) 
+    // i.e. exactly the answer to the query ce if v is a non-leaf!
     //
     // If v is a leaf, we instead just query the segment tree for the sum of entries at or to the right of "position" TDD(ce).
     //
     // And that's it! We still have to deal with the initial bacteria located in the nodes at the start of the simulation, but this is easy: 
     // it's hopefully clear that the simulation would proceed identically if we treated these as arising from some synthetic Add Events which add the
-    // requisite bacteria to each node en masse 1 second before the simulation begins i.e. at t == -1.
+    // requisite bacteria to each node en masse 1 second before the simulation begins i.e. at t == -1.  We add these synthetic Add Events in
+    // the first step of processQueries.
     ios::sync_with_stdio(false);
 
     const int N = readInt();
