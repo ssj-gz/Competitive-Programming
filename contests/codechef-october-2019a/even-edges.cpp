@@ -2,19 +2,11 @@
 // 
 // Solution to: https://www.codechef.com/OCT19A/problems/EVEDG
 //
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-//#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -30,78 +22,8 @@ T read()
 struct Node
 {
     vector<Node*> neighbours;
-    int subgraphNum = -1;
-    int colour = -1;
-
     int id = -1;
 };
-
-bool isValidPartitioning(const vector<Node>& nodes)
-{
-    int numSubgraphs = -1;
-    for (const auto& node : nodes)
-    {
-        if (node.subgraphNum + 1 > numSubgraphs)
-        {
-            numSubgraphs = node.subgraphNum + 1;
-        }
-    }
-    vector<int> twiceNumEdgesInSubgraph(numSubgraphs, 0);
-    for (const auto& node : nodes)
-    {
-        for (const auto neighbour : node.neighbours)
-        {
-            if (neighbour->subgraphNum == node.subgraphNum)
-            {
-                twiceNumEdgesInSubgraph[node.subgraphNum]++;
-            }
-        }
-    }
-    for (const auto twiceNumEdges : twiceNumEdgesInSubgraph)
-    {
-        const auto numEdges = twiceNumEdges / 2;
-        if ((numEdges % 2) == 1)
-            return false;
-    }
-
-
-    return true;
-}
-
-std::pair<int, vector<int>> solveBruteForce(vector<Node>& nodes)
-{
-    const int N = nodes.size();
-
-    int numsubGraphs = 1;
-    while (true)
-    {
-        vector<int> subgraphForNode(N, 0);
-        while (true)
-        {
-            for (int i = 0; i < N; i++)
-            {
-                nodes[i].subgraphNum = subgraphForNode[i];
-            }
-            if (isValidPartitioning(nodes))
-                return {numsubGraphs, subgraphForNode};
-
-            int index = 0;
-            while(index < N && subgraphForNode[index] == (numsubGraphs - 1))
-            {
-                subgraphForNode[index] = 0;
-                index++;
-            }
-            if (index == N)
-                break;
-            subgraphForNode[index]++;
-        }
-
-        numsubGraphs++;
-        cout << " Trying numsubGraphs: " << numsubGraphs << endl;
-    }
-    
-    return {-1, vector<int>()};
-}
 
 std::pair<int, vector<int>> findMinSubgraphPartitioning(vector<Node>& nodes, const int numEdges)
 {
@@ -210,13 +132,11 @@ int main(int argc, char* argv[])
         const auto& subgraphForNode = minSubgraphPartitioning.second;
 
         cout << numSubgraphs << endl;
-#if 0
         for (const auto x : subgraphForNode)
         {
             cout << x << " ";
         }
         cout << endl;
-#endif
     }
 
     assert(cin);
