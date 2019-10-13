@@ -330,6 +330,33 @@ int main(int argc, char* argv[])
     //      ii) depth(ae.node) + ce.t - ae.t == depth(ce.node) (">=" if ce.node is a leaf node); and
     //      iii) ce.t >= ae.t
     //
+    // We can re-write ii) as:
+    //
+    //      ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) (again, ">=" if ce.node is a leaf node)
+    //
+    // From this, we see that the concept of the difference between the time of a an event and the depth of the node it affects seems
+    // to be verify important, , and we call it the time-depth difference (TDD): TDD(e) = e.t - depth(e.node).
+    //
+    // As mentioned in the Quick Explanation, we are ultimately trying to re-order the queries/ events so that they are processed in the
+    // order of visitation of the nodes they affect in a DFS from the root of the tree, but we must not break the "chronology" of the
+    // events, as represented by condition iii).  What can we do?
+    //
+    // Well, it turns out that, if i) and ii) are satisfied, then so is iii), automagically! To see this, let ae be an Add Event and ce a
+    // Count Event that satisfy i) and ii) i.e.
+    //
+    //     i) ae.node is an ancestor of ce.node; and
+    //    ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) [I'm going to assume ce.node is a non-leaf for simplicity; the logic is much the same].
+    //   
+    // Now, since ae.node is an ancestor of ce.node, we must have that depth(ae.node) <= depth(ce.node); thus:
+    //
+    //    ae.t - depth(ae.node) == ce.t - depth(ce.node)  
+    // => ae.t - ce.t == depth(ce.node) - depth(ae.node)
+    // => ae.t - ce.t >= 0
+    // => ae.t >= ce.t
+    //
+    // i.e. condition iii) always holds, so we can ignore it!
+    //
+    // 
     ios::sync_with_stdio(false);
 
     const int N = readInt();
