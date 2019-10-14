@@ -230,7 +230,8 @@ vector<int64_t> processQueries(vector<Node>& nodes, vector<Query>& queries)
         }
     }
 
-    SegmentTree ancestorAddEventTDDs(-queries.size(), +queries.size());
+    SegmentTree ancestorAddEventTDDs(-queries.size(),  // Minimum timeDepthDiff occurs when depth is 0 and we are dealing with the final query.
+                                     +nodes.size() + 1); // Max timeDepthDiff occurs when depth is N and we are dealing with the initialBacteria query (t == -1).
     processTree(&(nodes.front()), ancestorAddEventTDDs);
 
     // Collect the actual results of the "?" queries.
