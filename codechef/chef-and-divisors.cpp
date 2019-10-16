@@ -9,12 +9,12 @@
 
 using namespace std;
 
-constexpr int maxFactor = 1'000'000;
+constexpr int maxPrimeFactor = 1'000'000;
 
-vector<int64_t> computeFactors(int64_t number, const vector<int>& primesUpToMaxFactor)
+vector<int64_t> computeFactors(int64_t number, const vector<int>& primesUpToMaxPrimeFactor)
 {
     vector<std::pair<int64_t, int64_t>> primeFactorisation;
-    for (const auto prime : primesUpToMaxFactor)
+    for (const auto prime : primesUpToMaxPrimeFactor)
     {
         const auto oldNumber = number;
         int numOfPrime = 0;
@@ -80,9 +80,9 @@ T read()
     return toRead;
 }
 
-int64_t findXorOfFactors(int64_t N, const vector<int>& primesUpToMaxFactor)
+int64_t findXorOfFactors(int64_t N, const vector<int>& primesUpToMaxPrimeFactor)
 {
-    const auto factors = computeFactors(N, primesUpToMaxFactor);
+    const auto factors = computeFactors(N, primesUpToMaxPrimeFactor);
 
     int64_t xorOfFactors = 0;
     for (const auto factor : factors)
@@ -98,16 +98,16 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
 
     // Sieve of Eratosthenes.  To help with factorising numbers, compute a lookup table for
-    // primes up to maxFactor.
-    vector<int> primesUpToMaxFactor;
-    vector<bool> isPrime(maxFactor + 1, true);
-    for (int64_t factor = 2; factor <= maxFactor; factor++)
+    // primes up to maxPrimeFactor.
+    vector<int> primesUpToMaxPrimeFactor;
+    vector<bool> isPrime(maxPrimeFactor + 1, true);
+    for (int64_t factor = 2; factor <= maxPrimeFactor; factor++)
     {
         const bool isFactorPrime = isPrime[factor];
         assert(factor < isPrime.size());
         if (isFactorPrime)
         {
-            primesUpToMaxFactor.push_back(factor);
+            primesUpToMaxPrimeFactor.push_back(factor);
         }
         for (int64_t multiple = factor * factor; multiple < isPrime.size(); multiple += factor)
         {
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     {
         const int64_t N = read<int64_t>();
 
-        cout << findXorOfFactors(N, primesUpToMaxFactor) << endl;
+        cout << findXorOfFactors(N, primesUpToMaxPrimeFactor) << endl;
     }
 
     assert(cin);
