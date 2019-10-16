@@ -78,7 +78,9 @@ int main(int argc, char* argv[])
             cout << N << endl;
             for (int i = 0; i < N; i++)
             {
-                cout << ((rand() % 401) + 350) << " ";
+                cout << ((rand() % 401) + 350);
+                if (i != N - 1)
+                    cout << " ";
             }
             cout << endl;
 
