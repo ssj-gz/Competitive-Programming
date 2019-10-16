@@ -2,12 +2,6 @@
 // 
 // Solution to: https://www.codechef.com/problems/S10E
 //
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 
@@ -26,7 +20,7 @@ T read()
     return toRead;
 }
 
-int solveBruteForce(const vector<int>& priceForDay)
+int findNumGoodDays(const vector<int>& priceForDay)
 {
     int result = 0;
     for (int day = 0; day < priceForDay.size(); day++)
@@ -50,15 +44,6 @@ int solveBruteForce(const vector<int>& priceForDay)
     return result;
 }
 
-#if 0
-SolutionType solveOptimised()
-{
-    SolutionType result;
-    
-    return result;
-}
-#endif
-
 
 int main(int argc, char* argv[])
 {
@@ -75,37 +60,37 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = (rand() % 94) + 7;
+
+            cout << N << endl;
+            for (int i = 0; i < N; i++)
+            {
+                cout << ((rand() % 401) + 350) << " ";
+            }
+            cout << endl;
+
         }
 
         return 0;
     }
     
     const auto T = read<int>();
+    assert(1 <= T && T <= 100);
 
     for (int t = 0; t < T; t++)
     {
         const int N = read<int>();
+        assert(N >= 7 && N <= 100);
 
         vector<int> priceForDay(N);
 
         for (auto& price : priceForDay)
         {
             price = read<int>();
+            assert(350 <= price && price <= 750);
         }
 
-#ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(priceForDay);
-        cout << solutionBruteForce << endl;
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
-#endif
+        cout << findNumGoodDays(priceForDay) << endl;
     }
 
     assert(cin);
