@@ -9,7 +9,7 @@
 
 using namespace std;
 
-constexpr int maxPrimeFactor = 1'000'000;
+constexpr int maxPrimeFactor = 1'000'000; // "1'000'000" is not actually prime, but you know what I mean :)
 
 vector<int64_t> computeFactors(int64_t number, const vector<int>& primesUpToMaxPrimeFactor)
 {
