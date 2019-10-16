@@ -2,6 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/problems/S10E
 //
+#define DIAGNOSTICS
 #include <iostream>
 #include <vector>
 
@@ -27,18 +28,30 @@ int findNumGoodDays(const vector<int>& priceForDay)
     {
         const int currentPrice = priceForDay[day];
         bool isGood = true;
+#ifdef DIAGNOSTICS
+        cout << "Day: " << (day + 1) << " out of " << priceForDay.size() << " ";
+#endif
         for (int previousDay = day - 1; day - previousDay <= 5 && previousDay >= 0; previousDay--)
         {
             if (priceForDay[previousDay] <= currentPrice)
             {
                 isGood = false;
+#ifdef DIAGNOSTICS
+                cout << "Not good - price is " << priceForDay[previousDay] << " on day " << (previousDay + 1) << " which is >= " << currentPrice << endl;
+#endif
                 break;
             }
 
         }
 
         if (isGood)
+        {
+#ifdef DIAGNOSTICS
+            cout << "Good" << endl;
+#endif
             result++;
+        }
+
     }
     
     return result;
@@ -60,7 +73,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int N = (rand() % 94) + 7;
+            const int N = (rand() % 3) + 7;
 
             cout << N << endl;
             for (int i = 0; i < N; i++)
