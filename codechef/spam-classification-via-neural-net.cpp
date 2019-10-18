@@ -37,22 +37,11 @@ std::pair<int, int> findNumNonSpammersAndSpammers(const vector<int>& weights, co
     const int affectOfNetOnEven = parityAfterApplyingNet(0);
     const int affectOfNetOnOdd = parityAfterApplyingNet(1);
 
-    int numEvenInRange = -1;
-    if (numInRange % 2 == 0)
-    {
-        numEvenInRange = numInRange / 2;
-    }
-    else
-    {
-        if ((minX % 2) == 0)
-            numEvenInRange = numInRange / 2 + 1;
-        else
-            numEvenInRange = numInRange / 2;
-    }
+    const int numEvenInRange = (numInRange / 2) + (((numInRange % 2) == 1 && (minX % 2 == 0)) ? 1 : 0); // Easy but boring to figure out :)
+    const auto numOddInRange = numInRange - numEvenInRange;
 
     int numNonSpammers = 0;
     int numSpammers = 0;
-    const auto numOddInRange = numInRange - numEvenInRange;
 
     if (affectOfNetOnEven % 2 == 0)
     {
