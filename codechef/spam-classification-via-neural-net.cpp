@@ -54,14 +54,69 @@ std::pair<int, int> solveBruteForce(const vector<int>& weights, const vector<int
     return {numNonSpammers, numSpammers};
 }
 
-#if 0
-SolutionType solveOptimised()
+std::pair<int, int> solveOptimised(const vector<int>& weights, const vector<int>& bias, int minX, int maxX)
 {
-    SolutionType result;
+    const int N = weights.size();
+
+    const int numInRange = maxX - minX + 1;
+
+    auto parityAfterApplyingNet = [N, &weights, &bias](const int id)
+    {
+        int netResultParity = id % 2;
+        for (int layer = 0; layer < N; layer++)
+        {
+            netResultParity = (weights[layer] * netResultParity + bias[layer]) % 2;
+        }
+        return netResultParity;
+    };
+
+    const int affectOnEven = parityAfterApplyingNet(0);
+    const int affectOnOdd = parityAfterApplyingNet(1);
+
+    int numEvenInRange = -1;
+    if (numInRange % 2 == 0)
+    {
+        numEvenInRange = numInRange / 2;
+    }
+    else
+    {
+        if ((minX % 2) == 0)
+            numEvenInRange = numInRange / 2 + 1;
+        else
+            numEvenInRange = numInRange / 2;
+    }
+
+    int numNonSpammers = 0;
+    int numSpammers = 0;
+    const auto numOddInRange = numInRange - numEvenInRange;
+
+    if (affectOnEven % 2 == 0)
+    {
+        numNonSpammers += numEvenInRange;
+    }
+    else
+    {
+        numSpammers += numEvenInRange;
+    }
+
+
+    if (affectOnOdd % 2 == 0)
+    {
+        numNonSpammers += numOddInRange;
+    }
+    else
+    {
+        numSpammers += numOddInRange;
+    }
+
     
-    return result;
+    
+
+
+
+
+    return {numNonSpammers, numSpammers};
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -118,9 +173,9 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(weights, bias, minX, maxX);
         cout << "solutionBruteForce: " << solutionBruteForce.first << " " << solutionBruteForce.second << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+        const auto solutionOptimised = solveOptimised(weights, bias, minX, maxX);
+        cout << "solutionOptimised:  " << solutionOptimised.first << " " << solutionOptimised.second << endl;
 
         assert(solutionOptimised == solutionBruteForce);
 #endif
