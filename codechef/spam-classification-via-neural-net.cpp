@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/problems/SPAMCLAS
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -180,8 +180,8 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(weights, bias, minX, maxX);
+        cout << solutionOptimised.first << " " << solutionOptimised.second << endl;
 #endif
     }
 
