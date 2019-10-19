@@ -43,7 +43,7 @@ std::pair<int, int> findNumNonSpammersAndSpammers(const vector<int>& weights, co
     int numNonSpammers = 0;
     int numSpammers = 0;
 
-    if (affectOfNetOnEven % 2 == 0)
+    if (affectOfNetOnEven == 0)
     {
         numNonSpammers += numEvenInRange;
     }
@@ -53,7 +53,7 @@ std::pair<int, int> findNumNonSpammersAndSpammers(const vector<int>& weights, co
     }
 
 
-    if (affectOfNetOnOdd % 2 == 0)
+    if (affectOfNetOnOdd == 0)
     {
         numNonSpammers += numOddInRange;
     }
