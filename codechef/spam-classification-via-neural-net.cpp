@@ -34,8 +34,8 @@ std::pair<int, int> findNumNonSpammersAndSpammers(const vector<int>& weights, co
         return netResultParity;
     };
 
-    const int affectOfNetOnEven = parityAfterApplyingNet(0);
-    const int affectOfNetOnOdd = parityAfterApplyingNet(1);
+    const int effectOfNetOnEven = parityAfterApplyingNet(0);
+    const int effectOfNetOnOdd = parityAfterApplyingNet(1);
 
     const int numEvenInRange = (numInRange / 2) + (((numInRange % 2) == 1 && (minX % 2 == 0)) ? 1 : 0); // Easy but boring to figure out :)
     const auto numOddInRange = numInRange - numEvenInRange;
@@ -43,7 +43,7 @@ std::pair<int, int> findNumNonSpammersAndSpammers(const vector<int>& weights, co
     int numNonSpammers = 0;
     int numSpammers = 0;
 
-    if (affectOfNetOnEven == 0)
+    if (effectOfNetOnEven == 0)
     {
         numNonSpammers += numEvenInRange;
     }
@@ -53,7 +53,7 @@ std::pair<int, int> findNumNonSpammersAndSpammers(const vector<int>& weights, co
     }
 
 
-    if (affectOfNetOnOdd == 0)
+    if (effectOfNetOnOdd == 0)
     {
         numNonSpammers += numOddInRange;
     }
@@ -74,9 +74,9 @@ int main(int argc, char* argv[])
     //    (weight_i * layerInput + bias_i) % 2 = (weight_i * (layerInput % 2) + bias_i) % 2.
     //
     // Thus, by induction, the parity of the output of the whole network depends only on the parity of the 
-    // input, so it makes sense to compute affectOfNetOnOdd and affectOfNetOnEven.
+    // input, so it makes sense to compute effectOfNetOnOdd and effectOfNetOnEven.
     //
-    // We can then use these affectOfNetOnEven/Odd values, along with the number of odd and even ids in the 
+    // We can then use these effectOfNetOnEven/Odd values, along with the number of odd and even ids in the 
     // range [minX, maxX], to find the number of ids in the range that give even parity (non-spammers) and 
     // odd parity (spammers) respectively.
     //
