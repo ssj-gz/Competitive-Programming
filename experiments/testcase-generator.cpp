@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
     {
         vector<string> readTestInput;
         string testInputLine;
-        while (cin >> testInputLine)
+        while (std::getline(cin, testInputLine))
         {
             readTestInput.push_back(testInputLine);
         }
