@@ -358,9 +358,10 @@ int main(int argc, char* argv[])
     // Now, since ae.node is an ancestor of ce.node, we must have that depth(ae.node) <= depth(ce.node); thus:
     //
     //    ae.t - depth(ae.node) == ce.t - depth(ce.node)  
-    // => ae.t - ce.t == depth(ce.node) - depth(ae.node)
-    // => ae.t - ce.t >= 0
-    // => ae.t >= ce.t
+    // => ae.t - ce.t == depth(ae.node) - depth(ce.node)
+    // => ae.t - ce.t <= 0
+    // => ae.t <= ce.t
+    // => ce.t >= ae.t
     //
     // i.e. condition iii) always holds, so we can ignore it!
     //
