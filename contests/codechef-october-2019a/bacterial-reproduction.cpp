@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
     //      ii) ae.t - depth(ae.node) == ce.t - depth(ce.node) (again, ">=" if ce.node is a leaf node)
     //
     // From this, we see that the concept of the difference between the time of a an event and the depth of the node it affects seems
-    // to be verify important, so we give it a name - let the Time-Depth Difference (TDD) of an event e be TDD(e) = e.t - depth(e.node).  We may also write ii) as
+    // to be very important, so we give it a name - let the Time-Depth Difference (TDD) of an event e be TDD(e) = e.t - depth(e.node).  We may also write ii) as
     //
     //      ii) TDD(ae) == TDD(ce)
     //
