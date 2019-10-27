@@ -20,7 +20,7 @@ bool isRainbow(const vector<int>& originalA)
 {
     if (originalA != vector<int>(originalA.rbegin(), originalA.rend()))
     {
-        // Rainbow's must be palindromes.
+        // Rainbows must be palindromes.
         return false;
     }
 
