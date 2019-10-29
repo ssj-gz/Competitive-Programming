@@ -2,14 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/problems/TALAZY
 //
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
-#include <vector>
 
 #include <cassert>
 
@@ -26,21 +19,20 @@ T read()
     return toRead;
 }
 
-int64_t solveBruteForce(int64_t N, int64_t B, int64_t M)
+int64_t findTimeTaken(int64_t numProblemsToSolve, int64_t breakLength, int64_t timeToSolveOneProblem)
 {
     int64_t timeTaken = 0;
 
-    int64_t timeToSolveOneProblem = M;
     while (true)
     {
-        const auto numToSolveBeforeBreak = ((N % 2) == 0) ? N / 2 : N / 2 + 1;
+        const auto numToSolveBeforeBreak = ((numProblemsToSolve % 2) == 0) ? numProblemsToSolve / 2 : numProblemsToSolve / 2 + 1;
         timeTaken += numToSolveBeforeBreak * timeToSolveOneProblem;
-        N -= numToSolveBeforeBreak;
+        numProblemsToSolve -= numToSolveBeforeBreak;
 
-        if (N == 0)
+        if (numProblemsToSolve == 0)
             break;
 
-        timeTaken += B;
+        timeTaken += breakLength;
 
         timeToSolveOneProblem *= 2;
 
@@ -87,8 +79,7 @@ int main(int argc, char* argv[])
         const auto B = read<int64_t>();
         const auto M = read<int64_t>();
 
-        const auto solutionBruteForce = solveBruteForce(N, B, M);
-        cout << solutionBruteForce << endl;
+        cout << findTimeTaken(N, B, M) << endl;
     }
 
     assert(cin);
