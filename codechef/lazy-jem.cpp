@@ -66,7 +66,11 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            cout << rand() % 10'000'000 + 1 << " ";
+            cout << rand() % 10'000'000 + 1 << " ";
+            cout << rand() % 10'000'000 + 1;
         }
+        cout << endl;
 
         return 0;
     }
