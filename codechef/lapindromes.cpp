@@ -59,13 +59,21 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
         //const int T = rand() % 100 + 1;
         const int T = 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
+            const int len = 1 + rand() % 12;
+            const int maxChar = 1 + rand() % numLetters;
+
+            string s;
+            for (int i = 0; i < len; i++)
+            {
+                s.push_back('a' + rand() % maxChar);
+            }
+            cout << s << endl;
         }
 
         return 0;
