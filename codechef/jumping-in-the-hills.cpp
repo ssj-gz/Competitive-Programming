@@ -77,6 +77,19 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = 1 + rand() % 100;
+            const int U = 1 + rand() % 100;
+            const int D = 1 + rand() % 100;
+
+            cout << N << " " << U << " " << D << endl;
+
+            const int maxHeight = 1 + rand() % 100;
+
+            for (int i = 0; i < N; i++)
+            {
+                cout << (1 + rand() % maxHeight) << " ";
+            }
+            cout << endl;
         }
 
         return 0;
