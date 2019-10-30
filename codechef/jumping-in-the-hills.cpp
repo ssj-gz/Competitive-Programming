@@ -39,7 +39,7 @@ int solveBruteForce(int N, int U, int D, const vector<int>& hillHeights)
     {
         if (hillHeights[hillPos + 1] - hillHeights[hillPos] > U)
             break;
-        if (hillHeights[hillPos + 1] - hillHeights[hillPos] > D)
+        if (hillHeights[hillPos] - hillHeights[hillPos + 1] > D)
         {
             if (haveParachute)
                 haveParachute = false;
