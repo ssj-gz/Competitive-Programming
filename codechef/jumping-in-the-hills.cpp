@@ -18,10 +18,10 @@ T read()
     return toRead;
 }
 
-int findMaxReachableHillPos(int numHills, int maxJumpUpwards, int maxJumpDownNoParachute, const vector<int>& hillHeights)
+int findMaxReachableHillPos(const int numHills, const int maxJumpUpwards, const int maxJumpDownNoParachute, const vector<int>& hillHeights)
 {
-    int hillPos = 0;
-    bool haveParachute = true;
+    auto hillPos = 0;
+    auto haveParachute = true;
 
     for (hillPos = 0; hillPos + 1 < numHills; hillPos++)
     {
@@ -45,11 +45,11 @@ int main(int argc, char* argv[])
     
     const auto T = read<int>();
 
-    for (int t = 0; t < T; t++)
+    for (auto t = 0; t < T; t++)
     {
-        const int numHills = read<int>();
-        const int maxJumpUpwards = read<int>();
-        const int maxJumpDownNoParachute = read<int>();
+        const auto numHills = read<int>();
+        const auto maxJumpUpwards = read<int>();
+        const auto maxJumpDownNoParachute = read<int>();
 
         vector<int> hillHeights(numHills);
         for (auto& height : hillHeights)
