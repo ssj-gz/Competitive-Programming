@@ -3,7 +3,6 @@
 // Solution to: https://www.codechef.com/problems/GOODBAD
 //
 #include <iostream>
-#include <vector>
 
 #include <cassert>
 
