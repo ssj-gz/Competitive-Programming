@@ -48,6 +48,22 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = rand() % 100 + 1;
+            cout << N << endl;
+
+            auto genRandomString = [](const int N)
+            {
+                string s;
+                for (int i = 0; i < N; i++)
+                    s += '0' + rand() % 2;
+                return s;
+            };
+
+            const string sourceBinaryString = genRandomString(N);
+            const string targetBinaryString = genRandomString(N);
+
+            cout << sourceBinaryString << endl;
+            cout << targetBinaryString << endl;
         }
 
         return 0;
