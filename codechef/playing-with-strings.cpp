@@ -2,18 +2,10 @@
 // 
 // Solution to: https://www.codechef.com/problems/PLAYSTR
 //
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -28,6 +20,9 @@ T read()
 
 bool canConvertByAdjacentSwaps(const string& sourceBinaryString, const string& targetBinaryString)
 {
+    // Can transform one into the other if and only if they have the same number of 0's and 1's
+    // (or equivalently, since sourceBinaryString and targetBinaryString are the same length,
+    // the same number of 0's).
     assert(sourceBinaryString.length() == targetBinaryString.length());
     return count(sourceBinaryString.begin(), sourceBinaryString.end(), '0') == 
            count(targetBinaryString.begin(), targetBinaryString.end(), '0');
@@ -36,38 +31,6 @@ bool canConvertByAdjacentSwaps(const string& sourceBinaryString, const string& t
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            const int N = rand() % 100 + 1;
-            cout << N << endl;
-
-            auto genRandomString = [](const int N)
-            {
-                string s;
-                for (int i = 0; i < N; i++)
-                    s += '0' + rand() % 2;
-                return s;
-            };
-
-            const string sourceBinaryString = genRandomString(N);
-            const string targetBinaryString = genRandomString(N);
-
-            cout << sourceBinaryString << endl;
-            cout << targetBinaryString << endl;
-        }
-
-        return 0;
-    }
     
     const auto T = read<int>();
 
