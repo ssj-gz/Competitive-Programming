@@ -14,6 +14,7 @@
 #include <cassert>
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
+#include <algorithm> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -78,6 +79,22 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = 1 + rand() % 100;
+            const int K = rand() % (N + 1);
+            cout << N << " " << K << endl;
+            string s;
+            const int numLowercase = rand() % (N + 1);
+            vector<bool> useLowercase(N);
+            for (int i = 0; i < numLowercase; i++)
+                useLowercase[i] = true;
+
+            random_shuffle(useLowercase.begin(), useLowercase.end());
+
+            for (int i = 0; i < N; i++)
+            {
+                s += (useLowercase[i] ? 'a' : 'A') + rand() % 26;
+            }
+            cout << s << endl;
         }
 
         return 0;
