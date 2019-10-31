@@ -18,12 +18,12 @@ T read()
     return toRead;
 }
 
-string findPossibleSenders(int N, const string& s, int K)
+string findPossibleSenders(const string& message, int numFlipsAllowed)
 {
     int numLowerCase = 0;
     int numUpperCase = 0;
 
-    for (const auto letter : s)
+    for (const auto letter : message)
     {
         if (islower(letter))
             numLowerCase++;
@@ -31,14 +31,14 @@ string findPossibleSenders(int N, const string& s, int K)
             numUpperCase++;
     }
 
-    const bool couldBeChef = numUpperCase <= K;
-    const bool couldBeBrother = numLowerCase <= K;
+    const bool couldBeChef = (numUpperCase <= numFlipsAllowed);
+    const bool couldBeBrother = (numLowerCase <= numFlipsAllowed);
 
     if (couldBeChef && couldBeBrother)
         return "both";
-    if (couldBeChef)
-        return "chef";;
-    if (couldBeBrother)
+    else if (couldBeChef)
+        return "chef";
+    else if (couldBeBrother)
         return "brother";
     
     return "none";
@@ -52,11 +52,11 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
-        const int N = read<int>();
-        const int K = read<int>();
-        const string s = read<string>();
+        read<int>(); // N (unused).
+        const int numFlipsAllowed = read<int>();
+        const string message = read<string>();
 
-        cout << findPossibleSenders(N, s, K) << endl;
+        cout << findPossibleSenders(message, numFlipsAllowed) << endl;
     }
 
     assert(cin);
