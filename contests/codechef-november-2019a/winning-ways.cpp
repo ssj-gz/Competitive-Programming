@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <set>
 #include <sstream>
 #include <fstream>
 #include <limits>
@@ -412,6 +413,37 @@ int main(int argc, char** argv)
     const auto result = (findWinner(Player1, initialState, CPU, CPU));
     cout << result << endl;
 
+    set<GameState> gameStates;
+    for (const auto& blah : playStateForLookup)
+    {
+        GameState blee = blah.first.first;
+        sort(blee.numStonesInPile.begin(), blee.numStonesInPile.end());
+        gameStates.insert(blee);
+    }
+
+    for (const auto& gameState : gameStates)
+    {
+        auto printIsWinner = [](const auto& gameState, const auto player)
+        {
+            if (playStateForLookup.find({gameState, player}) == playStateForLookup.end())
+                return false;
+            
+            const auto result = playStateForLookup[{gameState, player}];
+            const bool isWinForPlayer = (result == winForPlayer(player));
+            int numNonEmpty = 0;
+            for (const auto x : gameState.numStonesInPile)
+            {
+                if (x != 0)
+                    numNonEmpty++;
+            }
+            cout << "Game state: " << gameState << " with " << numNonEmpty << " piles is a " << (isWinForPlayer ? "win" : "loss") << " for current player" << endl;
+            return true;
+        };
+
+        if (printIsWinner(gameState, Player1))
+            continue;
+        printIsWinner(gameState, Player2);
+    }
 
 }
 
