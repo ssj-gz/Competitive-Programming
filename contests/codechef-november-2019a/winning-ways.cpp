@@ -417,6 +417,27 @@ int main(int argc, char** argv)
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
+    auto areBitsDivisibleBy3 = [](const vector<int>& numStonesInPile)
+    {
+        const int maxBits = 20;
+        vector<int> numOfBits(maxBits + 1, 0);
+        for (const auto x : numStonesInPile)
+        {
+            const auto bin = asBinary(x, maxBits);
+            for (int i = maxBits - 1; i >= 0; i--)
+            {
+                if (bin[i] == '1')
+                    numOfBits[i]++;
+            }
+        }
+        for (const auto x : numOfBits)
+        {
+            if ((x % 3) != 0)
+                return false;
+        }
+        return true;
+    };
+
     ifstream testCaseFileIn;
     bool isTestcaseFromFile = false;
     if (argc == 2)
@@ -458,7 +479,7 @@ int main(int argc, char** argv)
 
     for (const auto& gameState : gameStates)
     {
-        auto printIsWinner = [](const auto& gameState, const auto player)
+        auto printIsWinner = [&areBitsDivisibleBy3](const auto& gameState, const auto player)
         {
             if (playStateForLookup.find({gameState, player}) == playStateForLookup.end())
                 return false;
@@ -473,11 +494,12 @@ int main(int argc, char** argv)
                 if (x != 0)
                     numNonEmpty++;
             }
-            cout << "Game state: " << gameState << " with " << numNonEmpty << " piles is a " << (isWinForPlayer ? "win" : "loss") << " for current player" << endl;
-            for (const auto x : gameState.numStonesInPile)
-            {
-                cout << asBinary(x, 5) << endl;
-            }
+            cout << "Game state: " << gameState << " with " << numNonEmpty << " piles is a " << (isWinForPlayer ? "win" : "loss") << " for current player; areBitsDivisibleBy3: " << areBitsDivisibleBy3(gameState.numStonesInPile) << endl;
+            assert(isWinForPlayer == !areBitsDivisibleBy3(gameState.numStonesInPile));
+            //for (const auto x : gameState.numStonesInPile)
+            //{
+                //cout << asBinary(x, 5) << endl;
+            //}
 
             return true;
         };
