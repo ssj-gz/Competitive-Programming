@@ -12,6 +12,31 @@
 
 using namespace std;
 
+string asBinary(int64_t n, int numDigits)
+{
+    string asBinary;
+    if (n == 0)
+        return "0";
+    for (int i = 0; i < numDigits; i++)
+    {
+        if ((n & 1) == 1)
+        {
+            asBinary.push_back('1');
+        }
+        else
+        {
+            asBinary.push_back('0');
+        }
+
+        n >>= 1;
+    }
+
+    reverse(asBinary.begin(), asBinary.end());
+
+    return asBinary;
+}
+
+
 //#define VERY_VERBOSE
 #define PRINT_COMPUTER_MOVES
 
@@ -352,7 +377,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
                     chosenMove = Move::preferredMove(losingMovesForCurrentPlayer, playState, currentPlayer, gameState);
                 }
 #ifdef PRINT_COMPUTER_MOVES
-                cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : (playState == Draw ? "Draw" : "Lose")) << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << endl;
+                cout << "Computer (" << currentPlayer << ") played move: " << chosenMove << " and thinks it will " << (playState == winForPlayer(currentPlayer) ? "Win" : (playState == Draw ? "Draw" : "Lose")) << ". Game state now: " <<  gameStateAfterMove(gameState, currentPlayer, chosenMove) << "(" << winningMovesForCurrentPlayer.size() << " winning moves)" << endl;
 #endif
                 updatePlayStateFromMove(chosenMove, false);
             }
@@ -386,6 +411,8 @@ PlayState findWinner(Player firstPlayer, const GameState& initialGameState, Play
 
 int main(int argc, char** argv)
 {
+    // Hypothesis - we win if and only if, for each power of 2, the number of times
+    // that power of 2 appears in the list of stone piles sizes is divisible by 3.
     struct timeval time; 
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -408,11 +435,18 @@ int main(int argc, char** argv)
     for (auto& pile : numStonesInPile)
         testCaseIn >> pile;
 
+    cout << "Initial bit state: " << endl;
+    for (const auto x : numStonesInPile)
+    {
+        cout << asBinary(x, 5) << endl;
+    }
+
     GameState initialState;
     initialState.numStonesInPile = numStonesInPile;
     const auto result = (findWinner(Player1, initialState, CPU, CPU));
     cout << result << endl;
 
+#if 1
     set<GameState> gameStates;
     for (const auto& blah : playStateForLookup)
     {
@@ -420,6 +454,7 @@ int main(int argc, char** argv)
         sort(blee.numStonesInPile.begin(), blee.numStonesInPile.end());
         gameStates.insert(blee);
     }
+    cout << "Num distinct game states: " << gameStates.size() << endl;
 
     for (const auto& gameState : gameStates)
     {
@@ -430,6 +465,8 @@ int main(int argc, char** argv)
             
             const auto result = playStateForLookup[{gameState, player}];
             const bool isWinForPlayer = (result == winForPlayer(player));
+            //if (isWinForPlayer)
+                //return true;
             int numNonEmpty = 0;
             for (const auto x : gameState.numStonesInPile)
             {
@@ -437,13 +474,20 @@ int main(int argc, char** argv)
                     numNonEmpty++;
             }
             cout << "Game state: " << gameState << " with " << numNonEmpty << " piles is a " << (isWinForPlayer ? "win" : "loss") << " for current player" << endl;
+            for (const auto x : gameState.numStonesInPile)
+            {
+                cout << asBinary(x, 5) << endl;
+            }
+
             return true;
         };
 
         if (printIsWinner(gameState, Player1))
             continue;
-        printIsWinner(gameState, Player2);
+        const bool blah = printIsWinner(gameState, Player2);
+        assert(blah);
     }
+#endif
 
 }
 
