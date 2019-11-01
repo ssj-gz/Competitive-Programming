@@ -53,6 +53,14 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = 1 + rand() % 10;
+            const int maxChar = 1 + rand() % 26;
+
+            for (int i = 0; i < N; i++)
+            {
+                cout << static_cast<char>('a' + (rand() % maxChar));
+            }
+            cout << endl;
         }
 
         return 0;
