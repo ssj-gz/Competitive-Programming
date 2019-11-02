@@ -39,7 +39,7 @@ string asBinary(int64_t n, int numDigits)
 
 
 //#define VERY_VERBOSE
-#define PRINT_COMPUTER_MOVES
+//#define PRINT_COMPUTER_MOVES
 
 enum PlayState { Player1Win, Player1Lose, Draw };
 enum Player { Player1, Player2 };
@@ -397,6 +397,10 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
 
 #endif
     playStateForLookup[{gameState, currentPlayer}] = playState;
+    if (playStateForLookup.size() % 1000 == 0)
+    {
+        cerr << "playStateForLookup size: " << playStateForLookup.size() << endl;
+    }
 
     return playState;
 }
@@ -455,6 +459,28 @@ constexpr auto maxX = 1'000'000'000UL;
 
 int main(int argc, char** argv)
 {
+    if (argc == 2 && string(argv[1]) == "--test")
+    {
+        struct timeval time; 
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        const int T = 1;
+        cout << T << endl;
+        for (int t = 0; t < T; t++)
+        {
+            const int N = 1 + rand() % 5;
+            const int K = 1 + rand() % 5;
+            const int maxX = 24;
+
+            cout << N << " " << K << endl;
+            for (int i = 0; i < N; i++)
+            {
+                cout << (1 + rand() % maxX) << endl;
+            }
+        }
+        return 0;
+    }
 
     const int rootMaxX = sqrt(maxX);
     vector<char> isPrime(1'000'000 + 1, true);
@@ -485,13 +511,6 @@ int main(int argc, char** argv)
             isPrime[multiple] = false;
         }
     }
-
-
-    // Hypothesis - we win if and only if, for each power of 2, the number of times
-    // that power of 2 appears in the list of stone piles sizes is divisible by 3.
-    struct timeval time; 
-    gettimeofday(&time,NULL);
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
 
     auto areBitsDivisibleBy3 = [](const vector<int64_t>& numStonesInPile)
@@ -535,6 +554,13 @@ int main(int argc, char** argv)
 
         vector<int> thresholdIndexForPerson(numPeople, 0);
         int numInitialWinStates = 0;
+        int totalInitialStates = 1;
+        for (int i = 0; i < numPeople; i++)
+        {
+            totalInitialStates *= numThresholds;
+        }
+        int numInitialStatesDone = 0;
+        cerr << "totalInitialStates: " << totalInitialStates << endl;
         while (true)
         {
             playStateForLookup.clear();
@@ -571,11 +597,18 @@ int main(int argc, char** argv)
                 break;
 
             thresholdIndexForPerson[index]++;
+
+            numInitialStatesDone++;
+            if (numInitialStatesDone % 100 == 0)
+            {
+                cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
+            }
         }
 
-        cout << numInitialWinStates << endl;
+        cout << "solutionBruteForce: " << numInitialWinStates << endl;
 
     }
+    assert(cin);
 
 #if 0
     set<GameState> gameStates;
