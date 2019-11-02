@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -751,6 +751,9 @@ int main(int argc, char** argv)
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
+        cout << "solutionOptimised1: " << solutionOptimised1 << endl;
+#else
         const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
         cout << "solutionOptimised1: " << solutionOptimised1 << endl;
 #endif
