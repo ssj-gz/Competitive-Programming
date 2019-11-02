@@ -81,7 +81,8 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState);
 class GameState
 {
     public:
-        vector<int> numStonesInPile;
+        vector<int64_t> thresholdForPile;
+        vector<int64_t> numStonesInPile;
         bool hasWinningPlayerOverride(Player currentPlayer) const
         {
             // Assume that a GameState that has no moves that lead to a Lose for the
@@ -103,13 +104,13 @@ bool operator<(const GameState& lhs, const GameState& rhs)
 struct StackAndNumStones
 {
     int stackIndex = -1;
-    int numStonesToTake = -1;
+    int numStonesToAdd = -1;
 };
 
 class Move
 {
     public:
-        vector<StackAndNumStones> numStonesToTakeFromStacks;
+        vector<StackAndNumStones> numStonesToAddToStacks;
         static Move preferredMove(const vector<Move>& moves, PlayState moveOutcome, Player currentPlayer, const GameState& gameState)
         {
             assert(!moves.empty());
@@ -129,10 +130,10 @@ ostream& operator<<(ostream& os, const GameState& gameState)
 
 ostream& operator<<(ostream& os, const Move& move)
 {
-    cout << "Choose " << move.numStonesToTakeFromStacks.size() << " stacks" << endl;
-    for (const auto x : move.numStonesToTakeFromStacks)
+    cout << "Choose " << move.numStonesToAddToStacks.size() << " stacks" << endl;
+    for (const auto x : move.numStonesToAddToStacks)
     {
-        os << "Take " << x.numStonesToTake << " from stack: " << x.stackIndex << endl;
+        os << "Take " << x.numStonesToAdd << " from stack: " << x.stackIndex << endl;
     }
     return os;
 }
@@ -169,11 +170,14 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
     // Choose one stack.
     for (int stackIndex = 0; stackIndex < gameState.numStonesInPile.size(); stackIndex++)
     {
-        for (int numStonesToTake = 1; numStonesToTake <= gameState.numStonesInPile[stackIndex]; numStonesToTake++)
+        for (int numStonesToAdd = 1; numStonesToAdd + gameState.numStonesInPile[stackIndex] <= gameState.thresholdForPile[stackIndex]; numStonesToAdd++)
         {
             Move move;
-            move.numStonesToTakeFromStacks.push_back({stackIndex, numStonesToTake});
-            moves.push_back(move);
+            if (gameState.thresholdForPile[stackIndex] % (numStonesToAdd + gameState.numStonesInPile[stackIndex]) == 0)
+            {
+                move.numStonesToAddToStacks.push_back({stackIndex, numStonesToAdd});
+                moves.push_back(move);
+            }
         }
     }
     // Choose two stacks.
@@ -190,16 +194,18 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
                 continue;
             }
 
-            for (int numStonesToTake1 = 1; numStonesToTake1 <= gameState.numStonesInPile[stack1Index]; numStonesToTake1++)
+            for (int numStonesToAdd1 = 1; numStonesToAdd1 + gameState.numStonesInPile[stack1Index] <= gameState.thresholdForPile[stack1Index]; numStonesToAdd1++)
             {
-                for (int numStonesToTake2 = 1; numStonesToTake2 <= gameState.numStonesInPile[stack2Index]; numStonesToTake2++)
+                for (int numStonesToAdd2 = 1; numStonesToAdd2 + gameState.numStonesInPile[stack2Index] <= gameState.thresholdForPile[stack2Index]; numStonesToAdd2++)
                 {
-                    Move move;
-                    move.numStonesToTakeFromStacks.push_back({stack1Index, numStonesToTake1});
-                    move.numStonesToTakeFromStacks.push_back({stack2Index, numStonesToTake2});
-                    moves.push_back(move);
-
-
+                    if (gameState.thresholdForPile[stack1Index] % (numStonesToAdd1 + gameState.numStonesInPile[stack1Index]) == 0 &&
+                        gameState.thresholdForPile[stack2Index] % (numStonesToAdd2 + gameState.numStonesInPile[stack2Index]) == 0)
+                    {
+                        Move move;
+                        move.numStonesToAddToStacks.push_back({stack1Index, numStonesToAdd1});
+                        move.numStonesToAddToStacks.push_back({stack2Index, numStonesToAdd2});
+                        moves.push_back(move);
+                    }
                 }
             }
         }
@@ -211,14 +217,15 @@ vector<Move> movesFor(Player currentPlayer, const GameState& gameState)
 GameState gameStateAfterMove(const GameState& gameState, Player currentPlayer, const Move& move)
 {
     GameState nextGameState;
+    nextGameState.thresholdForPile = gameState.thresholdForPile;
     nextGameState.numStonesInPile = gameState.numStonesInPile;
-    assert(move.numStonesToTakeFromStacks.size() == 1 || move.numStonesToTakeFromStacks.size() == 2);
+    assert(move.numStonesToAddToStacks.size() == 1 || move.numStonesToAddToStacks.size() == 2);
 
-    for (const auto x : move.numStonesToTakeFromStacks)
+    for (const auto x : move.numStonesToAddToStacks)
     {
         assert(x.stackIndex >= 0 && x.stackIndex < nextGameState.numStonesInPile.size());
-        nextGameState.numStonesInPile[x.stackIndex] -= x.numStonesToTake;
-        assert(nextGameState.numStonesInPile[x.stackIndex] >= 0);
+        nextGameState.numStonesInPile[x.stackIndex] += x.numStonesToAdd;
+        assert(nextGameState.numStonesInPile[x.stackIndex] <= nextGameState.thresholdForPile[x.stackIndex]);
     }
 
     return nextGameState;
@@ -486,7 +493,8 @@ int main(int argc, char** argv)
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    auto areBitsDivisibleBy3 = [](const vector<int>& numStonesInPile)
+
+    auto areBitsDivisibleBy3 = [](const vector<int64_t>& numStonesInPile)
     {
         const int maxBits = 20;
         vector<int> numOfBits(maxBits + 1, 0);
@@ -507,36 +515,27 @@ int main(int argc, char** argv)
         return true;
     };
 
-    ifstream testCaseFileIn;
-    bool isTestcaseFromFile = false;
-    if (argc == 2)
+    int T;
+    cin >> T;
+
+    for (int t = 0; t < T; t++)
     {
-        const auto testCaseFilename = argv[1];
-        testCaseFileIn.open(testCaseFilename);
-        assert(testCaseFileIn.is_open());
-        isTestcaseFromFile = true;
-    }
-    istream& testCaseIn = (isTestcaseFromFile ? testCaseFileIn : cin);
+        int numPiles;
+        cin >> numPiles;
 
-    int numPiles;
-    testCaseIn >> numPiles;
+        vector<int64_t> thresholdForPile(numPiles);
+        for (auto& threshold : thresholdForPile)
+            cin >> threshold;
 
-    vector<int> numStonesInPile(numPiles);
-    for (auto& pile : numStonesInPile)
-        testCaseIn >> pile;
+        GameState initialState;
+        initialState.numStonesInPile = vector<int64_t>(numPiles, 1);
+        initialState.thresholdForPile = thresholdForPile;
 
-    cout << "Initial bit state: " << endl;
-    for (const auto x : numStonesInPile)
-    {
-        cout << asBinary(x, 5) << endl;
+        const auto result = (findWinner(Player1, initialState, CPU, CPU));
+        cout << result << endl;
     }
 
-    GameState initialState;
-    initialState.numStonesInPile = numStonesInPile;
-    const auto result = (findWinner(Player1, initialState, CPU, CPU));
-    cout << result << endl;
-
-#if 1
+#if 0
     set<GameState> gameStates;
     for (const auto& blah : playStateForLookup)
     {
