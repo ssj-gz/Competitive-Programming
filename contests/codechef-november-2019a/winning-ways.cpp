@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -580,10 +580,17 @@ ModNum solveBruteForce(const vector<int64_t>& thresholds, int64_t numPeople)
 ModNum solveOptimised1(const vector<int64_t>& thresholds, int64_t numPeople, const vector<int>& primesUpToRootMaxN)
 {
     const int numThresholds = thresholds.size();
-    vector<int> numStonesInNimPile(numThresholds);
+    vector<int> numStonesInNimPileForThreshold(numThresholds);
     for (int i = 0; i < numThresholds; i++)
     {
         numStonesInNimPileForThreshold[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
+    }
+    // largestNumPile will be <= 1440, say.
+    const auto largestNumPile = *max_element(numStonesInNimPileForThreshold.begin(), numStonesInNimPileForThreshold.end());
+    int largestBitnum = 0;
+    while (1 << (largestBitnum + 1) <= largestNumPile)
+    {
+        largestBitnum++;
     }
     auto areBitsDivisibleBy3 = [](const vector<int>& numStonesInPile)
     {
@@ -649,6 +656,67 @@ ModNum solveOptimised1(const vector<int64_t>& thresholds, int64_t numPeople, con
         {
             cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
         }
+    }
+    return numInitialWinStates;
+}
+
+ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, const vector<int>& primesUpToRootMaxN)
+{
+    ModNum numInitialWinStates = 0;
+
+    const int numThresholds = thresholds.size();
+    vector<int> numStonesInNimPileForThreshold(numThresholds);
+    for (int i = 0; i < numThresholds; i++)
+    {
+        numStonesInNimPileForThreshold[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
+    }
+    // largestNumPile will be <= 1440, say.
+    const auto largestNumPile = *max_element(numStonesInNimPileForThreshold.begin(), numStonesInNimPileForThreshold.end());
+    cout << "largestNumPile: " << largestNumPile << endl;
+    int largestBitnum = 0;
+    while (1 << (largestBitnum + 1) <= largestNumPile)
+    {
+        largestBitnum++;
+    }
+    cout << "largestBitnum: " << largestBitnum << endl;
+    int numTernaries = 1;
+    for (int i = 0; i < largestBitnum; i++)
+    {
+        numTernaries *= 3;
+    }
+    auto toTernaryVector = [largestBitnum](int N)
+    {
+        vector<int> ternaryVector;
+        for (int i = 0; i < largestBitnum; i++)
+        {
+            ternaryVector.push_back(N % 3);
+            N -= (N % 3);
+            N /= 3;
+        }
+        return ternaryVector;
+    };
+    auto toInt = [largestBitnum](const vector<int>& ternaryVector)
+    {
+        int powerOf3 = 1;
+        int asInt = 0;
+        for (int i = 0; i < largestBitnum; i++)
+        {
+            asInt += ternaryVector[i] * powerOf3;
+            powerOf3 *= 3;
+        }
+        return asInt;
+    };
+
+
+    for (int i = 0; i <= largestNumPile; i++)
+    {
+        cout << "I: " << i << endl;
+        for (const auto x : toTernaryVector(i))
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        assert(toInt(toTernaryVector(i)) == i);
     }
     return numInitialWinStates;
 }
@@ -749,10 +817,12 @@ int main(int argc, char** argv)
             //cout << "threshold: " << threshold << endl;
         }
 #ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        //const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
+        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
         const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
         cout << "solutionOptimised1: " << solutionOptimised1 << endl;
+        const auto solutionOptimised2 = solveOptimised2(thresholds, numPeople, primesUpToRootMaxN);
+        cout << "solutionOptimised2: " << solutionOptimised2 << endl;
 #else
         const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
         cout << "solutionOptimised1: " << solutionOptimised1 << endl;
