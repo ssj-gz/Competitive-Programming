@@ -669,6 +669,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     for (int i = 0; i < numThresholds; i++)
     {
         numStonesInNimPileForThreshold[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
+        cout << "threshold: " << thresholds[i] << " num factors: " << numStonesInNimPileForThreshold[i] << endl;
     }
     // largestNumPile will be <= 1440, say.
     const auto largestNumPile = *max_element(numStonesInNimPileForThreshold.begin(), numStonesInNimPileForThreshold.end());
@@ -887,6 +888,7 @@ int main(int argc, char** argv)
         cout << "solutionOptimised1: " << solutionOptimised1 << endl;
         const auto solutionOptimised2 = solveOptimised2(thresholds, numPeople, primesUpToRootMaxN);
         cout << "solutionOptimised2: " << solutionOptimised2 << endl;
+        assert(solutionOptimised1.value() == solutionOptimised2.value());
 #else
         const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
         cout << "solutionOptimised1: " << solutionOptimised1 << endl;
