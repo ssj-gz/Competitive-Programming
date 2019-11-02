@@ -520,19 +520,61 @@ int main(int argc, char** argv)
 
     for (int t = 0; t < T; t++)
     {
-        int numPiles;
-        cin >> numPiles;
+        int numThresholds;
+        cin >> numThresholds;
 
-        vector<int64_t> thresholdForPile(numPiles);
-        for (auto& threshold : thresholdForPile)
+        int64_t numPeople;
+        cin >> numPeople;
+
+        vector<int64_t> thresholds(numThresholds);
+        for (auto& threshold : thresholds)
+        {
             cin >> threshold;
+            cout << "threshold: " << threshold << endl;
+        }
 
-        GameState initialState;
-        initialState.numStonesInPile = vector<int64_t>(numPiles, 1);
-        initialState.thresholdForPile = thresholdForPile;
+        vector<int> thresholdIndexForPerson(numPeople, 0);
+        int numInitialWinStates = 0;
+        while (true)
+        {
+            playStateForLookup.clear();
+            GameState initialState;
+            initialState.numStonesInPile = vector<int64_t>(numPeople, 1);
+            for (const auto thresholdIndex : thresholdIndexForPerson)
+            {
+                initialState.thresholdForPile.push_back(thresholds[thresholdIndex]);
+            }
+            const auto result = findWinner(Player1, initialState, CPU, CPU);
+            cout << "With thresholds: ";
+            for (const auto x : initialState.thresholdForPile)
+            {
+                cout << x << " ";
+            }
+            if (result == Player1Win)
+            {
+                cout << " Irshad wins";
+                numInitialWinStates++;
+            }
+            else
+            {
+                cout << " Irshad loses";
+            }
+            cout << endl;
 
-        const auto result = (findWinner(Player1, initialState, CPU, CPU));
-        cout << result << endl;
+            int index = 0;
+            while (index < numPeople && thresholdIndexForPerson[index] == numThresholds - 1)
+            {
+                thresholdIndexForPerson[index] = 0;
+                index++;
+            }
+            if (index == numPeople)
+                break;
+
+            thresholdIndexForPerson[index]++;
+        }
+
+        cout << numInitialWinStates << endl;
+
     }
 
 #if 0
