@@ -707,6 +707,16 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         return asInt;
     };
 
+    auto addTernaryVectors = [](const vector<int>& ternaryVector1, const vector<int>& ternaryVector2)
+    {
+        vector<int> result;
+        for (int i = 0; i < ternaryVector1.size(); i++)
+        {
+            result.push_back((ternaryVector1[i] + ternaryVector2[i]) % 3);
+        }
+        return result;
+    };
+
 
     for (int i = 0; i <= largestNumPile; i++)
     {
@@ -718,6 +728,8 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         cout << endl;
         assert(toInt(toTernaryVector(i)) == i);
     }
+
+    vector<ModNum> dp(numTernaries, 0);
     return numInitialWinStates;
 }
 
