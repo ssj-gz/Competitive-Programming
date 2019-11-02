@@ -577,6 +577,82 @@ ModNum solveBruteForce(const vector<int64_t>& thresholds, int64_t numPeople)
     return numInitialWinStates;
 }
 
+ModNum solveOptimised1(const vector<int64_t>& thresholds, int64_t numPeople, const vector<int>& primesUpToRootMaxN)
+{
+    const int numThresholds = thresholds.size();
+    vector<int> numStonesInNimPile(numThresholds);
+    for (int i = 0; i < numThresholds; i++)
+    {
+        numStonesInNimPile[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
+    }
+    auto areBitsDivisibleBy3 = [](const vector<int>& numStonesInPile)
+    {
+        const int maxBits = 20;
+        vector<int> numOfBits(maxBits + 1, 0);
+        for (const auto x : numStonesInPile)
+        {
+            const auto bin = asBinary(x, maxBits);
+            for (int i = maxBits - 1; i >= 0; i--)
+            {
+                if (bin[i] == '1')
+                    numOfBits[i]++;
+            }
+        }
+        for (const auto x : numOfBits)
+        {
+            if ((x % 3) != 0)
+                return false;
+        }
+        return true;
+    };
+    vector<int> thresholdIndexForPerson(numPeople, 0);
+    ModNum numInitialWinStates = 0;
+    int totalInitialStates = 1;
+    for (int i = 0; i < numPeople; i++)
+    {
+        totalInitialStates *= numThresholds;
+    }
+    int numInitialStatesDone = 0;
+    cerr << "totalInitialStates: " << totalInitialStates << endl;
+    while (true)
+    {
+        playStateForLookup.clear();
+        vector<int> numStonesInPile;
+        for (const auto thresholdIndex : thresholdIndexForPerson)
+        {
+            numStonesInPile.push_back(numStonesInNimPile[thresholdIndex]);
+        }
+        if (!areBitsDivisibleBy3(numStonesInPile))
+        {
+            cout << " Irshad wins";
+            numInitialWinStates++;
+        }
+        else
+        {
+            cout << " Irshad loses";
+        }
+        cout << endl;
+
+        int index = 0;
+        while (index < numPeople && thresholdIndexForPerson[index] == numThresholds - 1)
+        {
+            thresholdIndexForPerson[index] = 0;
+            index++;
+        }
+        if (index == numPeople)
+            break;
+
+        thresholdIndexForPerson[index]++;
+
+        numInitialStatesDone++;
+        if (numInitialStatesDone % 100 == 0)
+        {
+            cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
+        }
+    }
+    return numInitialWinStates;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -675,6 +751,8 @@ int main(int argc, char** argv)
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
+        cout << "solutionOptimised1: " << solutionOptimised1 << endl;
 #endif
 
     }
