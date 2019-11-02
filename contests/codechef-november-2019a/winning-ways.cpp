@@ -459,7 +459,7 @@ PlayState findWinnerAux(Player currentPlayer, const GameState& gameState, Player
     playStateForLookup[{gameState, currentPlayer}] = playState;
     if (playStateForLookup.size() % 1000 == 0)
     {
-        cerr << "playStateForLookup size: " << playStateForLookup.size() << endl;
+        //cerr << "playStateForLookup size: " << playStateForLookup.size() << endl;
     }
 
     return playState;
@@ -569,7 +569,7 @@ ModNum solveBruteForce(const vector<int64_t>& thresholds, int64_t numPeople)
         numInitialStatesDone++;
         if (numInitialStatesDone % 100 == 0)
         {
-            cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
+            //cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
         }
     }
 
@@ -654,7 +654,7 @@ ModNum solveOptimised1(const vector<int64_t>& thresholds, int64_t numPeople, con
         numInitialStatesDone++;
         if (numInitialStatesDone % 100 == 0)
         {
-            cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
+            //cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
         }
     }
     return numInitialWinStates;
@@ -686,7 +686,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     };
 
     vector<PileSizeAndNumOccurences> pileSizesAndOccurences;
-    for (const auto pileSize : numStonesInNimPileForThreshold)
+    for (int pileSize = 0; pileSize <= largestNumPile; pileSize++)
     {
         pileSizesAndOccurences.push_back({pileSize, numThresholdsWithPileSize[pileSize]});
     }
