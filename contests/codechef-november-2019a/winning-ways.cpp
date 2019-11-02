@@ -816,9 +816,9 @@ int main(int argc, char** argv)
         cout << T << endl;
         for (int t = 0; t < T; t++)
         {
-            const int N = 1 + rand() % 5;
-            const int K = 1 + rand() % 5;
-            const int maxX = 24;
+            const int N = 1 + rand() % 10;
+            const int K = 1 + rand() % 7;
+            const int maxX = 1000;
 
             cout << N << " " << K << endl;
             for (int i = 0; i < N; i++)
