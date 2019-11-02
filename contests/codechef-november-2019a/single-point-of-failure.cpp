@@ -45,7 +45,7 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
     {
         if (currentNode->isInDFSStack)
         {
-            cout << " found cycle: currentNode: " << (currentNode->id) << " parent: " << (parentNode == nullptr ? -1 : parentNode->id) << " # ancestors: " << ancestors.size() << endl;
+            //cout << " found cycle: currentNode: " << (currentNode->id) << " parent: " << (parentNode == nullptr ? -1 : parentNode->id) << " # ancestors: " << ancestors.size() << endl;
             destCycle = ancestors;
         }
         return;
@@ -88,12 +88,14 @@ bool isRobust(vector<Node>& nodes)
         const auto cycle = findACycle(&startNode, nodes);
         if (!cycle.empty())
         {
+#if 0
             cout << " found cycle: ";
             for (const auto node : cycle)
             {
                 cout << " " << node->id;
             }
             cout << endl;
+#endif
             return true;
         }
     }
@@ -110,10 +112,10 @@ int solveBruteForce(vector<Node>& nodes)
 
     for (auto& node : nodes)
     {
-        cout << "Removing node with id: " << node.id << endl;
+        //cout << "Removing node with id: " << node.id << endl;
         node.isRemoved = true;
         const bool stillRobust = isRobust(nodes);
-        cout << "stillRobust? " << stillRobust << endl;
+        //cout << "stillRobust? " << stillRobust << endl;
         if (!stillRobust)
             return node.id;
         node.isRemoved = false;
@@ -148,6 +150,23 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            vector<pair<int, int>> allEdges;
+            const int N = 2 + rand() % 100; // TODO - Not sure if self-loops are permitted, yet - if so, allow N = 1.
+            for (int i = 1; i <= N; i++)
+            {
+                for (int j = i + 1; j <= N; j++)
+                {
+                    allEdges.push_back({i, j});
+                }
+            }
+            random_shuffle(allEdges.begin(), allEdges.end());
+            const int numEdges = 1 + rand() % allEdges.size();
+
+            cout << N << " " << numEdges << endl;
+            for (int i = 0; i < numEdges; i++)
+            {
+                cout << allEdges[i].first << " " << allEdges[i].second << endl;
+            }
         }
 
         return 0;
