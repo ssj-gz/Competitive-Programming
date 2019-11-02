@@ -694,7 +694,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
 
     cout << "largestNumPile: " << largestNumPile << endl;
     int largestBitnum = 0;
-    while (1 << (largestBitnum + 1) <= largestNumPile)
+    while (1 << (largestBitnum) <= largestNumPile)
     {
         largestBitnum++;
     }
@@ -725,6 +725,17 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             powerOf3 *= 3;
         }
         return asInt;
+    };
+
+    auto pileSizeToTernaryVector = [largestBitnum](int pileSize)
+    {
+        vector<int> ternaryVector;
+        for (int i = 0; i < largestBitnum; i++)
+        {
+            ternaryVector.push_back(pileSize % 2);
+            pileSize /= 2;
+        }
+        return ternaryVector;
     };
 
     auto addTernaryVectors = [](const vector<int>& ternaryVector1, const vector<int>& ternaryVector2)
@@ -763,8 +774,14 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             const auto asVector = toTernaryVector(tern);
             for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
             {
-                const auto pileSizeAsVector = toTernaryVector(pileSizeAndNumOccurrences.pileSize);
-                nextDP[toInt(addTernaryVectors(asVector, pileSizeAsVector))] += dp[tern] * pileSizeAndNumOccurrences.numOccurences;
+                const auto pileSizeAsTernaryVector = pileSizeToTernaryVector(pileSizeAndNumOccurrences.pileSize);
+                cout << "pileSize: " << pileSizeAndNumOccurrences.pileSize << " pileSizeAsTernaryVector: ";
+                for (const auto x : pileSizeAsTernaryVector)
+                {
+                    cout << x << " ";
+                }
+                cout << endl;
+                nextDP[toInt(addTernaryVectors(asVector, pileSizeAsTernaryVector))] += dp[tern] * pileSizeAndNumOccurrences.numOccurences;
             }
         }
         dp = nextDP;
