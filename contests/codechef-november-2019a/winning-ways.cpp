@@ -672,6 +672,25 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     }
     // largestNumPile will be <= 1440, say.
     const auto largestNumPile = *max_element(numStonesInNimPileForThreshold.begin(), numStonesInNimPileForThreshold.end());
+    vector<int> numThresholdsWithPileSize(largestNumPile + 1, 0);
+    for (const auto pileSize : numStonesInNimPileForThreshold)
+    {
+        numThresholdsWithPileSize[pileSize]++;
+    }
+
+    struct PileSizeAndNumOccurences
+    {
+        int pileSize = -1;
+        int numOccurences = 0;
+    };
+
+    vector<PileSizeAndNumOccurences> pileSizesAndOccurences;
+    for (const auto pileSize : numStonesInNimPileForThreshold)
+    {
+        pileSizesAndOccurences.push_back({pileSize, numThresholdsWithPileSize[pileSize]});
+    }
+
+
     cout << "largestNumPile: " << largestNumPile << endl;
     int largestBitnum = 0;
     while (1 << (largestBitnum + 1) <= largestNumPile)
@@ -730,6 +749,21 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     }
 
     vector<ModNum> dp(numTernaries, 0);
+    for (int i = 0; i < numPeople; i++)
+    {
+        vector<ModNum> nextDP(numTernaries, 0);
+        for (int tern = 0; tern < numTernaries; tern++)
+        {
+            const auto asVector = toTernaryVector(tern);
+            for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
+            {
+                const auto pileSizeAsVector = toTernaryVector(pileSizeAndNumOccurrences.pileSize);
+                nextDP[toInt(addTernaryVectors(asVector, pileSizeAsVector))] += nextDP[tern] * pileSizeAndNumOccurrences.numOccurences;
+            }
+        }
+        dp = nextDP;
+    }
+    numInitialWinStates = dp[0];
     return numInitialWinStates;
 }
 
