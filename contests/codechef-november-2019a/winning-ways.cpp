@@ -748,7 +748,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         assert(toInt(toTernaryVector(i)) == i);
     }
 
-    vector<ModNum> dp(numTernaries, 0);
+    vector<ModNum> dp(numTernaries, 1);
     for (int i = 0; i < numPeople; i++)
     {
         vector<ModNum> nextDP(numTernaries, 0);
@@ -758,12 +758,15 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
             {
                 const auto pileSizeAsVector = toTernaryVector(pileSizeAndNumOccurrences.pileSize);
-                nextDP[toInt(addTernaryVectors(asVector, pileSizeAsVector))] += nextDP[tern] * pileSizeAndNumOccurrences.numOccurences;
+                nextDP[toInt(addTernaryVectors(asVector, pileSizeAsVector))] += dp[tern] * pileSizeAndNumOccurrences.numOccurences;
             }
         }
         dp = nextDP;
     }
-    numInitialWinStates = dp[0];
+    for (int i = 1; i < numTernaries; i++)
+    {
+        numInitialWinStates += dp[i];
+    }
     return numInitialWinStates;
 }
 
