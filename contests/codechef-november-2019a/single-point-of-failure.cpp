@@ -45,6 +45,7 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
     {
         if (currentNode->isInDFSStack)
         {
+            cout << " found cycle: currentNode: " << (currentNode->id) << " parent: " << (parentNode == nullptr ? -1 : parentNode->id) << " # ancestors: " << ancestors.size() << endl;
             destCycle = ancestors;
         }
         return;
@@ -58,7 +59,7 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
         if (childNode == parentNode)
             continue;
 
-        findACycleAux(childNode, parentNode, destCycle, ancestors);
+        findACycleAux(childNode, currentNode, destCycle, ancestors);
     }
 
     ancestors.pop_back();
@@ -87,6 +88,12 @@ bool isRobust(vector<Node>& nodes)
         const auto cycle = findACycle(&startNode, nodes);
         if (!cycle.empty())
         {
+            cout << " found cycle: ";
+            for (const auto node : cycle)
+            {
+                cout << " " << node->id;
+            }
+            cout << endl;
             return true;
         }
     }
@@ -101,12 +108,13 @@ int solveBruteForce(vector<Node>& nodes)
     if (!isRobust(nodes))
         return -1;
 
-    int result = -1;
-
     for (auto& node : nodes)
     {
+        cout << "Removing node with id: " << node.id << endl;
         node.isRemoved = true;
-        if (!isRobust(nodes))
+        const bool stillRobust = isRobust(nodes);
+        cout << "stillRobust? " << stillRobust << endl;
+        if (!stillRobust)
             return node.id;
         node.isRemoved = false;
     }
@@ -150,6 +158,7 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
+        cout << "t: " << (t + 1) << endl;
 
         const int numNodes = read<int>();
         const int numEdges = read<int>();
