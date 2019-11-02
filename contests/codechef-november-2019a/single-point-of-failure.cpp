@@ -39,13 +39,15 @@ struct Node
 
 void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle, vector<Node*>& ancestors)
 {
+    if (currentNode->isRemoved)
+        return;
     if (currentNode->visitedInDFS)
     {
         if (currentNode->isInDFSStack)
         {
             destCycle = ancestors;
-            return;
         }
+        return;
     }
     currentNode->visitedInDFS = true;
     ancestors.push_back(currentNode);
@@ -78,15 +80,38 @@ vector<Node*> findACycle(Node* startNode, vector<Node>& nodes)
     return cycle;
 }
 
+bool isRobust(vector<Node>& nodes)
+{
+    for (auto& startNode : nodes)
+    {
+        const auto cycle = findACycle(&startNode, nodes);
+        if (!cycle.empty())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 #if 1
 int solveBruteForce(vector<Node>& nodes)
 {
+    if (!isRobust(nodes))
+        return -1;
+
     int result = -1;
 
-    cout << "Cycle size: " << findACycle(&(nodes.front()), nodes).size() << endl;
+    for (auto& node : nodes)
+    {
+        node.isRemoved = true;
+        if (!isRobust(nodes))
+            return node.id;
+        node.isRemoved = false;
+    }
     
-    return result;
+    return -1;
 }
 #endif
 
