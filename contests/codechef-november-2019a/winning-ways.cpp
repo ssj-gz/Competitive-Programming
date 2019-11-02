@@ -583,7 +583,7 @@ ModNum solveOptimised1(const vector<int64_t>& thresholds, int64_t numPeople, con
     vector<int> numStonesInNimPile(numThresholds);
     for (int i = 0; i < numThresholds; i++)
     {
-        numStonesInNimPile[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
+        numStonesInNimPileForThreshold[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
     }
     auto areBitsDivisibleBy3 = [](const vector<int>& numStonesInPile)
     {
@@ -620,7 +620,7 @@ ModNum solveOptimised1(const vector<int64_t>& thresholds, int64_t numPeople, con
         vector<int> numStonesInPile;
         for (const auto thresholdIndex : thresholdIndexForPerson)
         {
-            numStonesInPile.push_back(numStonesInNimPile[thresholdIndex]);
+            numStonesInPile.push_back(numStonesInNimPileForThreshold[thresholdIndex]);
         }
         if (!areBitsDivisibleBy3(numStonesInPile))
         {
@@ -746,7 +746,7 @@ int main(int argc, char** argv)
         for (auto& threshold : thresholds)
         {
             cin >> threshold;
-            cout << "threshold: " << threshold << endl;
+            //cout << "threshold: " << threshold << endl;
         }
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
