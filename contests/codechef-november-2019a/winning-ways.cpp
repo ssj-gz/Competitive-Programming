@@ -1,4 +1,5 @@
 // Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -26,6 +27,11 @@ class ModNum
         ModNum& operator+=(const ModNum& other)
         {
             m_n = (m_n + other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator++(int)
+        {
+            m_n = (m_n + 1) % Mod;
             return *this;
         }
         ModNum& operator*=(const ModNum& other)
@@ -510,6 +516,67 @@ int numFactors(int64_t number, const vector<int>& primesUpToRootMaxN)
 
 constexpr auto maxX = 1'000'000'000UL;
 
+ModNum solveBruteForce(const vector<int64_t>& thresholds, int64_t numPeople)
+{
+    const int numThresholds = thresholds.size();
+
+    vector<int> thresholdIndexForPerson(numPeople, 0);
+    ModNum numInitialWinStates = 0;
+    int totalInitialStates = 1;
+    for (int i = 0; i < numPeople; i++)
+    {
+        totalInitialStates *= numThresholds;
+    }
+    int numInitialStatesDone = 0;
+    cerr << "totalInitialStates: " << totalInitialStates << endl;
+    while (true)
+    {
+        playStateForLookup.clear();
+        GameState initialState;
+        initialState.numStonesInPile = vector<int64_t>(numPeople, 1);
+        for (const auto thresholdIndex : thresholdIndexForPerson)
+        {
+            initialState.thresholdForPile.push_back(thresholds[thresholdIndex]);
+        }
+        const auto result = findWinner(Player1, initialState, CPU, CPU);
+        cout << "With thresholds: ";
+        for (const auto x : initialState.thresholdForPile)
+        {
+            cout << x << " ";
+        }
+        if (result == Player1Win)
+        {
+            cout << " Irshad wins";
+            numInitialWinStates++;
+        }
+        else
+        {
+            cout << " Irshad loses";
+        }
+        cout << endl;
+
+        int index = 0;
+        while (index < numPeople && thresholdIndexForPerson[index] == numThresholds - 1)
+        {
+            thresholdIndexForPerson[index] = 0;
+            index++;
+        }
+        if (index == numPeople)
+            break;
+
+        thresholdIndexForPerson[index]++;
+
+        numInitialStatesDone++;
+        if (numInitialStatesDone % 100 == 0)
+        {
+            cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
+        }
+    }
+
+
+    return numInitialWinStates;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -605,61 +672,10 @@ int main(int argc, char** argv)
             cin >> threshold;
             cout << "threshold: " << threshold << endl;
         }
-
-        vector<int> thresholdIndexForPerson(numPeople, 0);
-        int numInitialWinStates = 0;
-        int totalInitialStates = 1;
-        for (int i = 0; i < numPeople; i++)
-        {
-            totalInitialStates *= numThresholds;
-        }
-        int numInitialStatesDone = 0;
-        cerr << "totalInitialStates: " << totalInitialStates << endl;
-        while (true)
-        {
-            playStateForLookup.clear();
-            GameState initialState;
-            initialState.numStonesInPile = vector<int64_t>(numPeople, 1);
-            for (const auto thresholdIndex : thresholdIndexForPerson)
-            {
-                initialState.thresholdForPile.push_back(thresholds[thresholdIndex]);
-            }
-            const auto result = findWinner(Player1, initialState, CPU, CPU);
-            cout << "With thresholds: ";
-            for (const auto x : initialState.thresholdForPile)
-            {
-                cout << x << " ";
-            }
-            if (result == Player1Win)
-            {
-                cout << " Irshad wins";
-                numInitialWinStates++;
-            }
-            else
-            {
-                cout << " Irshad loses";
-            }
-            cout << endl;
-
-            int index = 0;
-            while (index < numPeople && thresholdIndexForPerson[index] == numThresholds - 1)
-            {
-                thresholdIndexForPerson[index] = 0;
-                index++;
-            }
-            if (index == numPeople)
-                break;
-
-            thresholdIndexForPerson[index]++;
-
-            numInitialStatesDone++;
-            if (numInitialStatesDone % 100 == 0)
-            {
-                cerr << "Done " << numInitialStatesDone << " initial states out of " << totalInitialStates << endl;
-            }
-        }
-
-        cout << "solutionBruteForce: " << numInitialWinStates << endl;
+#ifdef BRUTE_FORCE
+        const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+#endif
 
     }
     assert(cin);
