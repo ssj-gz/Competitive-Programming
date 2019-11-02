@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <cassert>
+#include <cmath>
 
 using namespace std;
 
@@ -408,9 +409,77 @@ PlayState findWinner(Player firstPlayer, const GameState& initialGameState, Play
     return result;
 }
 
+int numFactors(int64_t number, const vector<int>& primesUpToRootMaxN)
+{
+    vector<std::pair<int64_t, int64_t>> primeFactorisation;
+    for (const auto prime : primesUpToRootMaxN)
+    {
+        const auto oldNumber = number;
+        int numOfPrime = 0;
+        while (number % prime == 0)
+        {
+            numOfPrime++;
+            number = number / prime;
+        }
+        if (numOfPrime > 0)
+        {
+            primeFactorisation.push_back({prime, numOfPrime});
+        }
+        if (prime * prime > oldNumber)
+            break;
+    }
+    if (number > 1)
+    {
+        // If we ever exit the loop above with number != 1, number must
+        // be prime.
+        primeFactorisation.push_back({number, 1});
+    }
+
+    int numFactors = 1;
+    for (const auto primeFactor : primeFactorisation)
+    {
+        numFactors *= (primeFactor.second + 1);
+    }
+    return numFactors;
+}
+
+constexpr auto maxX = 1'000'000'000UL;
+
 
 int main(int argc, char** argv)
 {
+
+    const int rootMaxX = sqrt(maxX);
+    vector<char> isPrime(1'000'000 + 1, true);
+
+    // Sieve of Eratosthenes.  To help with factorising numbers, compute a lookup table for
+    // primes up to 1'000'000, but only store a list of primes for up to rootMaxX.
+    vector<int> primesUpToRootMaxN;
+    for (int64_t factor = 2; factor <= 1'000'000; factor++)
+    {
+        const bool isFactorPrime = isPrime[factor];
+        assert(factor < isPrime.size());
+        if (isFactorPrime)
+        {
+            if (factor <= rootMaxX)
+            {
+                primesUpToRootMaxN.push_back(factor);
+            }
+        }
+        for (int64_t multiple = factor * factor; multiple < isPrime.size(); multiple += factor)
+        {
+            if (!isPrime[multiple] && !isFactorPrime)
+            {
+                // This multiple has already been marked, and since factor is not prime,
+                // all subsequent multiples will already have been marked (by any of the
+                // prime factors of factor!), so we can stop here.
+                break;
+            }
+            isPrime[multiple] = false;
+        }
+    }
+
+
     // Hypothesis - we win if and only if, for each power of 2, the number of times
     // that power of 2 appears in the list of stone piles sizes is divisible by 3.
     struct timeval time; 
