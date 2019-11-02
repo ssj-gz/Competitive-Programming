@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -749,6 +749,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     };
 
 
+#if 0
     for (int i = 0; i <= largestNumPile; i++)
     {
         cout << "I: " << i << endl;
@@ -759,15 +760,22 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         cout << endl;
         assert(toInt(toTernaryVector(i)) == i);
     }
+#endif
+#if 0
     for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
     {
         cout << "pile size: " << pileSizeAndNumOccurrences.pileSize << " numOccurences: " << pileSizeAndNumOccurrences.numOccurences << endl;
     }
+#endif
 
     vector<ModNum> dp(numTernaries, 0);
     dp[0] = 1;
     for (int i = 0; i < numPeople; i++)
     {
+        if ((i % 100) == 0)
+        {
+            cout << "i: " << i << " / " << numPeople << endl;
+        }
         vector<ModNum> nextDP(numTernaries, 0);
         for (int tern = 0; tern < numTernaries; tern++)
         {
@@ -775,24 +783,26 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
             {
                 const auto pileSizeAsTernaryVector = pileSizeToTernaryVector(pileSizeAndNumOccurrences.pileSize);
+#if 0
                 cout << "pileSize: " << pileSizeAndNumOccurrences.pileSize << " pileSizeAsTernaryVector: ";
                 for (const auto x : pileSizeAsTernaryVector)
                 {
                     cout << x << " ";
                 }
                 cout << endl;
+#endif
                 nextDP[toInt(addTernaryVectors(asVector, pileSizeAsTernaryVector))] += dp[tern] * pileSizeAndNumOccurrences.numOccurences;
             }
         }
         dp = nextDP;
         for (int tern = 0; tern < numTernaries; tern++)
         {
-            cout << "i: " << i << " tern: ";
-            for (const auto x : toTernaryVector(tern))
-            {
-                cout << x << " ";
-            }
-            cout << " num: " << dp[tern] << endl;
+            //cout << "i: " << i << " tern: ";
+            //for (const auto x : toTernaryVector(tern))
+            //{
+                //cout << x << " ";
+            //}
+            //cout << " num: " << dp[tern] << endl;
         }
 
     }
@@ -816,9 +826,9 @@ int main(int argc, char** argv)
         cout << T << endl;
         for (int t = 0; t < T; t++)
         {
-            const int N = 1 + rand() % 10;
-            const int K = 1 + rand() % 7;
-            const int maxX = 1000;
+            const int N = 50'000;
+            const int K = 50'000;
+            const int maxX = 50'000;
 
             cout << N << " " << K << endl;
             for (int i = 0; i < N; i++)
@@ -907,8 +917,8 @@ int main(int argc, char** argv)
         cout << "solutionOptimised2: " << solutionOptimised2 << endl;
         assert(solutionOptimised1.value() == solutionOptimised2.value());
 #else
-        const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
-        cout << "solutionOptimised1: " << solutionOptimised1 << endl;
+        const auto solutionOptimised2 = solveOptimised2(thresholds, numPeople, primesUpToRootMaxN);
+        cout << solutionOptimised2 << endl;
 #endif
 
     }
