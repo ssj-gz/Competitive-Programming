@@ -267,6 +267,7 @@ int solveOptimised(vector<Node>& nodes)
     // Introduce synthetic nodes so that no two non-consecutive cycle
     // nodes are connected.
     vector<std::pair<Node*, Node*>> edgesToAdd;
+    const int originalNumNodes = nodes.size();
     for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++)
     {
         auto& node = *nodeIter;
@@ -285,6 +286,7 @@ int solveOptimised(vector<Node>& nodes)
                 assert(nodes.size() + 1 <= nodes.capacity());
                 nodes.push_back(Node());
                 auto newSyntheticNode = &(nodes.back());
+                newSyntheticNode->id = 1000 + nodes.size() - originalNumNodes;
                 edgesToAdd.push_back({&node, newSyntheticNode});
                 edgesToAdd.push_back({neighbour, newSyntheticNode});
             }
@@ -381,6 +383,7 @@ int solveOptimised(vector<Node>& nodes)
             // Removing either cycle node will break the cycle.
             cycleNodesConnectedToComponentOccurrences[0].first->numComponentCyclesBreaks++;
             cycleNodesConnectedToComponentOccurrences[1].first->numComponentCyclesBreaks++;
+            continue;
         }
         // Precisely one of the two cycles is joined to more than one node in this component.
         if (cycleNodesConnectedToComponentOccurrences[0].second > 1)
@@ -393,6 +396,7 @@ int solveOptimised(vector<Node>& nodes)
     int minNodeId = -1;
     for (auto node : cycle)
     {
+        cout << "node: " << node->id << " numComponentCyclesBreaks: " << node->numComponentCyclesBreaks << " numComponentsNeedToBreak: " << numComponentsNeedToBreak << endl;
         if (node->numComponentCyclesBreaks == numComponentsNeedToBreak)
         {
             if (minNodeId == -1 || node->id < minNodeId)
