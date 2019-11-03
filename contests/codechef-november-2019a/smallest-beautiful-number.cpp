@@ -79,7 +79,8 @@ bool isNumericallyLessThan(const string& lhsNumAsString, const string& rhsNumAsS
     return lhsNumAsString < rhsNumAsString;
 }
 
-
+int64_t largestThig = 0;
+int largestThog = 0;
 #if 1
 string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
 {
@@ -90,7 +91,7 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
     const int64_t squareDigitSumOrig = N;
 
     if (isSquare(squareDigitSumOrig))
-        return numberAsString;
+        return "";
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
@@ -110,10 +111,12 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
             //numberAsString.pop_back();
 
             int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
+            const int64_t dbgRequiredSquareDigitSum = requiredSquareDigitSum;
+            const auto dbgNumTrailingDigitsToReplace = numTrailingDigitsToReplace;
             //cout << "requiredSquareDigitSum: " << requiredSquareDigitSum << " bestReplacementDigits.length(): " << bestReplacementDigits.length() << endl;
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
-                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+                return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
             }
             //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << " requiredSquareDigitSum: " << requiredSquareDigitSum << " sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum]: " << sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] << endl;
             if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
@@ -132,6 +135,8 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
                     //cout << " new requiredSquareDigitSum: " << requiredSquareDigitSum << endl;
                 }
                 assert(!replacementTrailingDigits.empty());
+                largestThig = max(largestThig, dbgRequiredSquareDigitSum);
+                largestThog = max(largestThog, dbgNumTrailingDigitsToReplace);
 
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
@@ -190,8 +195,8 @@ int main(int argc, char* argv[])
     }
     cout << "maxBlah: " << maxBlah << endl;
 #endif
-    const int maxVal = 10'000;
-    const int maxNumDigits = 1000;
+    const int maxVal = 2040;
+    const int maxNumDigits = 30;
     vector<vector<int>> sumOfSquaresLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
     sumOfSquaresLookup[0][0] = 1;
     for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
@@ -231,16 +236,18 @@ int main(int argc, char* argv[])
         }
     }
     {
-        for (int N = 1; N <= 10'000; N++)
+        for (int N = 1; N <= 1'000'000; N++)
         {
             cout << "N: " << N << endl;
-            const auto solutionBruteForce = solveBruteForce(N);
-            cout << "solutionBruteForce: " << solutionBruteForce << endl;
+            //const auto solutionBruteForce = solveBruteForce(N);
+            //cout << "solutionBruteForce: " << solutionBruteForce << endl;
             const auto solutionOptimised = solveOptimised(N, sumOfSquaresLookup);
             cout << "solutionOptimised:  " << solutionOptimised << endl;
-            assert(solutionOptimised == solutionBruteForce);
+            //assert(solutionOptimised == solutionBruteForce);
         }
     }
+    cout << "largestThig: " << largestThig << endl;
+    cout << "largestThog: " << largestThog << endl;
 
     // TODO - read in testcase.
     const auto T = read<int>();
