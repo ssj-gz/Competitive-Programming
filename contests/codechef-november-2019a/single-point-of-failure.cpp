@@ -250,6 +250,7 @@ int solveOptimised(vector<Node>& nodes)
 
     for (int i = 0; i < cycle.size(); i++)
     {
+        cout << " cycle node: " << cycle[i]->id << endl;
         cycle[i]->isInCycle = true;
         cycle[i]->isRemoved = true;
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
