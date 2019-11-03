@@ -158,6 +158,17 @@ vector<Node*> getComponent(Node* rootNode, int markAsComponentNum)
 
 }
 
+bool componentHasCycle(const vector<Node*>& component)
+{
+    int numEdgesTimesTwo = 0;
+    for (const auto node : component)
+    {
+        numEdgesTimesTwo += node->neighbours.size();
+    }
+    assert(numEdgesTimesTwo % 2 == 0);
+    return (numEdgesTimesTwo / 2) != component.size() - 1;
+}
+
 #if 1
 int solveOptimised(vector<Node>& nodes)
 {
@@ -186,8 +197,30 @@ int solveOptimised(vector<Node>& nodes)
     for (int i = 0; i < cycle.size(); i++)
     {
         cycle[i]->isInCycle = true;
+        cycle[i]->isRemoved = true;
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
     }
+
+    for (auto& node : nodes)
+    {
+        node.componentNum = -1;
+    }
+    components.clear();
+    for (auto& startNode : nodes)
+    {
+        if (startNode.componentNum == -1)
+        {
+            auto component = getComponent(&startNode, components.size());
+            components.push_back(component);
+        }
+    }
+    for (const auto& component : components)
+    {
+        if (componentHasCycle(component))
+            return -1;
+    }
+
+    // None of the components has a cycle in G-C.
     
     return result;
 }
