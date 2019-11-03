@@ -37,6 +37,8 @@ struct Node
     bool isInDFSStack = false;
     bool isRemoved = false;
     int componentNum = -1;
+
+    int numComponentCyclesBreaks = 0;
 };
 
 class NodeMultiSet
@@ -46,6 +48,7 @@ class NodeMultiSet
             : m_numNodesWithId{maxNodeId + 1}
         {
         }
+        // O(1).
         void addNode(Node* nodeToAdd)
         {
             m_numNodesWithId[nodeToAdd->id]++;
@@ -55,6 +58,7 @@ class NodeMultiSet
                 m_nodesInSet.push_back(nodeToAdd);
             }
         }
+        // O(number of distinct nodes in set).
         vector<std::pair<Node*, int>> nodesAndOccurrences() const
         {
             vector<std::pair<Node*, int>> nodesAndOccurrences;
@@ -63,6 +67,15 @@ class NodeMultiSet
                 nodesAndOccurrences.push_back({node, m_numNodesWithId[node->id]});
             }
             return nodesAndOccurrences;
+        }
+        // O(number of distinct nodes in set).
+        void clear()
+        {
+            for (auto node : m_nodesInSet)
+            {
+                m_numNodesWithId[node->id] = 0;
+            }
+            m_nodesInSet.clear();
         }
     private:
         vector<Node*> m_nodesInSet;
@@ -251,8 +264,74 @@ int solveOptimised(vector<Node>& nodes)
     }
 
     // None of the components has a cycle in G-C.
+    NodeMultiSet cycleNodesConnectedToComponent(nodes.size());
+    int numComponentsNeedToBreak = 0;
+    for (const auto& component : components)
+    {
+        cycleNodesConnectedToComponent.clear();
+        for (const auto& node : component)
+        {
+            for (auto neighbour : node->neighbours)
+            {
+                if (neighbour->isInCycle)
+                    cycleNodesConnectedToComponent.addNode(neighbour);
+            }
+        }
+
+        const auto cycleNodesConnectedToComponentOccurrences = cycleNodesConnectedToComponent.nodesAndOccurrences();
+        if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().second == 1))
+        {
+            continue;
+        }
+
+        // This component has a cycle in G but not in G-C.
+        numComponentsNeedToBreak++;
+
+        if (cycleNodesConnectedToComponentOccurrences.size() >= 3)
+        {
+            // 3 distinct cycle nodes connected; cannot be broken by any node that breaks C.
+            return -1;
+        }
+
+        if (cycleNodesConnectedToComponentOccurrences.size() == 1)
+        {
+            // Can (and must) be broken by removing the connected cycle node.
+            assert(cycleNodesConnectedToComponentOccurrences.front().second > 1);
+            cycleNodesConnectedToComponentOccurrences.front().first->numComponentCyclesBreaks++;
+            continue;
+        }
+
+        assert(cycleNodesConnectedToComponentOccurrences.size() == 2);
+        if (cycleNodesConnectedToComponentOccurrences[0].second > 1 && cycleNodesConnectedToComponentOccurrences[1].second > 1)
+        {
+            // We'd need to remove both cycle nodes to break this cycle - can't be done.
+            return -1;
+        }
+        if (cycleNodesConnectedToComponentOccurrences[0].second == 1 && cycleNodesConnectedToComponentOccurrences[1].second == 1)
+        {
+            // Removing either cycle node will break the cycle.
+            cycleNodesConnectedToComponentOccurrences[0].first->numComponentCyclesBreaks++;
+            cycleNodesConnectedToComponentOccurrences[1].first->numComponentCyclesBreaks++;
+        }
+        // Precisely one of the two cycles is joined to more than one node in this component.
+        if (cycleNodesConnectedToComponentOccurrences[0].second > 1)
+            cycleNodesConnectedToComponentOccurrences[0].first->numComponentCyclesBreaks++;
+        else
+            cycleNodesConnectedToComponentOccurrences[1].first->numComponentCyclesBreaks++;
+
+    }
+
+    int minNodeId = -1;
+    for (auto node : cycle)
+    {
+        if (node->numComponentCyclesBreaks == numComponentsNeedToBreak)
+        {
+            if (minNodeId == -1 || node->id < minNodeId)
+                minNodeId = node->id;
+        }
+    }
     
-    return result;
+    return minNodeId;
 }
 #endif
 
