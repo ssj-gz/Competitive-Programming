@@ -45,18 +45,20 @@ class NodeMultiSet
 {
     public:
         NodeMultiSet(int maxNodeId)
-            : m_numNodesWithId{maxNodeId + 1}
+            : m_numNodesWithId(maxNodeId + 1, 0)
         {
         }
         // O(1).
         void addNode(Node* nodeToAdd)
         {
-            m_numNodesWithId[nodeToAdd->id]++;
-            if (m_numNodesWithId[nodeToAdd->id] == 1)
+            cout <<  "  addNode: " << nodeToAdd->id << " m_numNodesWithId: " << m_numNodesWithId[nodeToAdd->id] << endl;
+            if (m_numNodesWithId[nodeToAdd->id] == 0)
             {
-                // Node was not in set; add it.
+                // Node is not in set; add it.
+                cout << "  adding node: " << nodeToAdd->id << endl;
                 m_nodesInSet.push_back(nodeToAdd);
             }
+            m_numNodesWithId[nodeToAdd->id]++;
         }
         // O(number of distinct nodes in set).
         vector<std::pair<Node*, int>> nodesAndOccurrences() const
@@ -286,17 +288,31 @@ int solveOptimised(vector<Node>& nodes)
     int numComponentsNeedToBreak = 0;
     for (const auto& component : components)
     {
+        cout << "Component: ";
+        for (const auto x : component)
+        {
+            cout << x->id << " ";
+        }
+        cout << endl;
         cycleNodesConnectedToComponent.clear();
         for (const auto& node : component)
         {
             for (auto neighbour : node->neighbours)
             {
                 if (neighbour->isInCycle)
+                {
+                    cout << "  cycle node connected: " << neighbour->id << endl;
                     cycleNodesConnectedToComponent.addNode(neighbour);
+                }
             }
         }
 
         const auto cycleNodesConnectedToComponentOccurrences = cycleNodesConnectedToComponent.nodesAndOccurrences();
+        cout << "cycleNodesConnectedToComponent: " << endl;
+        for (const auto x : cycleNodesConnectedToComponentOccurrences)
+        {
+            cout << " node: " << x.first->id << " " << x.second << " times" << endl;
+        }
         if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().second == 1))
         {
             continue;
