@@ -30,6 +30,8 @@ struct Node
 {
     vector<Node*> neighbours;
     int id = -1;
+    bool isInCycle = false;
+    Node* nextInCycle = nullptr;
 
     bool visitedInDFS = false;
     bool isInDFSStack = false;
@@ -125,10 +127,67 @@ int solveBruteForce(vector<Node>& nodes)
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+vector<Node*> getComponent(Node* rootNode, int markAsComponentNum)
 {
-    SolutionType result;
+    assert(rootNode->componentNum == -1);
+    assert(!rootNode->isRemoved);
+    vector<Node*> component = { rootNode };
+    vector<Node*> toExplore = {rootNode};
+    rootNode->componentNum = markAsComponentNum;
+
+    while (!toExplore.empty())
+    {
+        vector<Node*> nextToExplore;
+        for (auto node : toExplore)
+        {
+            for (auto neighbour : node->neighbours)
+            {
+                if (!neighbour->isRemoved && neighbour->componentNum == -1)
+                {
+                    neighbour->componentNum = markAsComponentNum;
+                    component.push_back(neighbour);
+                    nextToExplore.push_back(neighbour);
+                }
+            }
+        }
+
+        toExplore = nextToExplore;
+    }
+
+    return component;
+
+}
+
+#if 1
+int solveOptimised(vector<Node>& nodes)
+{
+    int result = 0;
+    vector<vector<Node*>> components;
+    for (auto& startNode : nodes)
+    {
+        if (startNode.componentNum == -1)
+        {
+            auto component = getComponent(&startNode, components.size());
+            components.push_back(component);
+        }
+    }
+
+    vector<Node*> cycle;
+    for (const auto& component : components)
+    {
+        cycle = findACycle(component.front(), nodes);
+        if (!cycle.empty())
+            break;
+    }
+
+    if (cycle.empty())
+        return -1;
+
+    for (int i = 0; i < cycle.size(); i++)
+    {
+        cycle[i]->isInCycle = true;
+        cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
+    }
     
     return result;
 }
@@ -182,7 +241,9 @@ int main(int argc, char* argv[])
         const int numNodes = read<int>();
         const int numEdges = read<int>();
 
-        vector<Node> nodes(numNodes);
+        vector<Node> nodes;
+        nodes.reserve(numNodes + numEdges); // We might be creating up to numEdges synthetic nodes.
+        nodes.resize(numNodes);
         for (int i = 0; i < numNodes; i++)
         {
             nodes[i].id = (i + 1);
@@ -202,8 +263,8 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(nodes);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(nodes);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
