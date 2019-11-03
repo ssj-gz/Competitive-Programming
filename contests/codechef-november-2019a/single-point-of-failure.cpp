@@ -88,10 +88,16 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
         return;
     if (currentNode->visitedInDFS)
     {
-        if (currentNode->isInDFSStack)
+        if (currentNode->isInDFSStack && destCycle.empty())
         {
-            //cout << " found cycle: currentNode: " << (currentNode->id) << " parent: " << (parentNode == nullptr ? -1 : parentNode->id) << " # ancestors: " << ancestors.size() << endl;
-            destCycle = ancestors;
+            auto ancestorsCopy = ancestors;
+            assert(!ancestorsCopy.empty());
+            destCycle.push_back(currentNode);
+            while (ancestorsCopy.back() != currentNode)
+            {
+                destCycle.push_back(ancestorsCopy.back());
+                ancestorsCopy.pop_back();
+            }
         }
         return;
     }
