@@ -206,8 +206,14 @@ bool componentHasCycle(const vector<Node*>& component)
     int numEdgesTimesTwo = 0;
     for (const auto node : component)
     {
-        numEdgesTimesTwo += node->neighbours.size();
+        assert(!node->isRemoved);
+        for (auto neighbour : node->neighbours)
+        {
+            if (!neighbour->isRemoved)
+                numEdgesTimesTwo++;
+        }
     }
+    cout << "numEdgesTimesTwo: " << numEdgesTimesTwo << endl;
     assert(numEdgesTimesTwo % 2 == 0);
     return (numEdgesTimesTwo / 2) != component.size() - 1;
 }
