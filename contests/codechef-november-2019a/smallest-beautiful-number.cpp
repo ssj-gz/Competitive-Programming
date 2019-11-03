@@ -70,6 +70,15 @@ string solveBruteForce(int N)
 }
 #endif
 
+bool isNumericallyLessThan(const string& lhsNumAsString, const string& rhsNumAsString)
+{
+    if (lhsNumAsString.length() < rhsNumAsString.length())
+        return true;
+    if (lhsNumAsString.length() > rhsNumAsString.length())
+        return false;
+    return lhsNumAsString < rhsNumAsString;
+}
+
 
 #if 1
 string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
@@ -85,37 +94,58 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
-    const int64_t nextSquare = (sqrtN + 1) * (sqrtN + 1);
-    assert(nextSquare > N);
+    int64_t nextSquareRoot = sqrtN + 1;
+    assert(nextSquareRoot * nextSquareRoot > N);
 
-    int numTrailingDigitsToReplace = 1;
-    while (numTrailingDigitsToReplace <= N)
+    string bestReplacementDigits;
+
+    while (true)
     {
-        int64_t squareDigitSum = squareDigitSumOrig - numTrailingDigitsToReplace;
-        numberAsString.pop_back();
-
-        int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
-        //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << " requiredSquareDigitSum: " << requiredSquareDigitSum << " sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum]: " << sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] << endl;
-        if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
+        const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
+        //cout << "nextSquare: " << nextSquare << " N: " << N << endl;
+        int numTrailingDigitsToReplace = 1;
+        while (numTrailingDigitsToReplace < sumOfSquaresLookup.size())
         {
-            string replacementTrailingDigits;
-            while (requiredSquareDigitSum > 0)
-            {
-                const int nextDigitValue = sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum];
-                //cout << "nextDigitValue: " << nextDigitValue << endl;
-                assert(nextDigitValue != -1);
-                replacementTrailingDigits += '0' + nextDigitValue;
+            const int64_t squareDigitSum = squareDigitSumOrig - numTrailingDigitsToReplace;
+            //numberAsString.pop_back();
 
-                requiredSquareDigitSum -= nextDigitValue * nextDigitValue;
-                numTrailingDigitsToReplace--;
-                //cout << " new requiredSquareDigitSum: " << requiredSquareDigitSum << endl;
+            int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
+            cout << "requiredSquareDigitSum: " << requiredSquareDigitSum << " bestReplacementDigits.length(): " << bestReplacementDigits.length() << endl;
+            if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
+            {
+                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+            }
+            //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << " requiredSquareDigitSum: " << requiredSquareDigitSum << " sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum]: " << sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] << endl;
+            if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
+            {
+                //cout << "Found!" << endl;
+                string replacementTrailingDigits;
+                while (requiredSquareDigitSum > 0)
+                {
+                    const int nextDigitValue = sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum];
+                    //cout << "nextDigitValue: " << nextDigitValue << endl;
+                    assert(nextDigitValue != -1);
+                    replacementTrailingDigits += '0' + nextDigitValue;
+
+                    requiredSquareDigitSum -= nextDigitValue * nextDigitValue;
+                    numTrailingDigitsToReplace--;
+                    //cout << " new requiredSquareDigitSum: " << requiredSquareDigitSum << endl;
+                }
+                assert(!replacementTrailingDigits.empty());
+
+                if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
+                {
+                    bestReplacementDigits = replacementTrailingDigits;
+                    cout << "New bestReplacementDigits: " << replacementTrailingDigits << endl;
+
+                }
+                break;
             }
 
-            return numberAsString + replacementTrailingDigits;
+            numTrailingDigitsToReplace++;
+
         }
-
-        numTrailingDigitsToReplace++;
-
+        nextSquareRoot++;
     }
 
 
@@ -160,8 +190,8 @@ int main(int argc, char* argv[])
     }
     cout << "maxBlah: " << maxBlah << endl;
 #endif
-    const int maxVal = 3'000;
-    const int maxNumDigits = 40;
+    const int maxVal = 10'000;
+    const int maxNumDigits = 1000;
     vector<vector<int>> sumOfSquaresLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
     sumOfSquaresLookup[0][0] = 1;
     for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
@@ -184,6 +214,7 @@ int main(int argc, char* argv[])
         bool canGenerate = false;
         for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
         {
+            //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
             if (sumOfSquaresLookup[numDigits][val] != -1)
             {
                 canGenerate = true;
@@ -192,7 +223,14 @@ int main(int argc, char* argv[])
         }
         assert(canGenerate);
     }
-    
+    for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
+    {
+        for (int val = 1; val <= maxVal; val++)
+        {
+            //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
+        }
+    }
+
     // TODO - read in testcase.
     const auto T = read<int>();
 
