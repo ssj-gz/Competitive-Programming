@@ -52,11 +52,11 @@ class NodeMultiSet
         // O(1).
         void addNode(Node* nodeToAdd)
         {
-            cout <<  "  addNode: " << nodeToAdd->id << " m_numNodesWithId: " << m_numNodesWithId[nodeToAdd->id] << endl;
+            //cout <<  "  addNode: " << nodeToAdd->id << " m_numNodesWithId: " << m_numNodesWithId[nodeToAdd->id] << endl;
             if (m_numNodesWithId[nodeToAdd->id] == 0)
             {
                 // Node is not in set; add it.
-                cout << "  adding node: " << nodeToAdd->id << endl;
+                //cout << "  adding node: " << nodeToAdd->id << endl;
                 m_nodesInSet.push_back(nodeToAdd);
             }
             m_numNodesWithId[nodeToAdd->id]++;
@@ -87,12 +87,14 @@ class NodeMultiSet
 
 void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle, vector<Node*>& ancestors)
 {
+#if 0
     cout << " findACycleAux: current node: " << currentNode->id << " parentNode: " << (parentNode == nullptr ? -1 : parentNode->id) << " ancestors: ";
     for (auto node : ancestors)
     {
         cout << node->id << " ";
     }
     cout << endl;
+#endif
     if (currentNode->isRemoved)
         return;
     if (currentNode->visitedInDFS)
@@ -114,16 +116,18 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
     ancestors.push_back(currentNode);
     currentNode->isInDFSStack = true;
 
+#if 0
     for (auto childNode : currentNode->neighbours)
     {
         cout << "neighbour of " << currentNode->id << " : " << childNode->id << endl;
     }
+#endif
 
     for (auto childNode : currentNode->neighbours)
     {
         if (childNode == parentNode)
         {
-            cout << " skipping " << childNode->id << endl;
+            //cout << " skipping " << childNode->id << endl;
             continue;
         }
 
@@ -137,7 +141,7 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
 
 vector<Node*> findACycle(Node* startNode, vector<Node>& nodes)
 {
-    cout << "Find a cycle starting at " << startNode->id << endl;
+    //cout << "Find a cycle starting at " << startNode->id << endl;
     for (auto& node : nodes)
     {
         node.visitedInDFS = false;
@@ -155,10 +159,10 @@ bool isRobust(vector<Node>& nodes)
     for (auto& startNode : nodes)
     {
         const auto cycle = findACycle(&startNode, nodes);
-        cout << " starting at node: " << startNode.id << " cycle len: " << cycle.size() << endl;
+        //cout << " starting at node: " << startNode.id << " cycle len: " << cycle.size() << endl;
         if (!cycle.empty())
         {
-#if 1
+#if 0
             cout << " found cycle: ";
             for (const auto node : cycle)
             {
@@ -182,11 +186,11 @@ int solveBruteForce(vector<Node>& nodes)
 
     for (auto& node : nodes)
     {
-        cout << "Removing node with id: " << node.id << endl;
+        //cout << "Removing node with id: " << node.id << endl;
         node.isRemoved = true;
         const bool stillRobust = isRobust(nodes);
         node.isRemoved = false;
-        cout << "stillRobust? " << stillRobust << endl;
+        //cout << "stillRobust? " << stillRobust << endl;
         if (!stillRobust)
             return node.id;
     }
@@ -238,7 +242,7 @@ bool componentHasCycle(const vector<Node*>& component)
                 numEdgesTimesTwo++;
         }
     }
-    cout << "numEdgesTimesTwo: " << numEdgesTimesTwo << endl;
+    //cout << "numEdgesTimesTwo: " << numEdgesTimesTwo << endl;
     assert(numEdgesTimesTwo % 2 == 0);
     return (numEdgesTimesTwo / 2) != component.size() - 1;
 }
@@ -275,7 +279,7 @@ int solveOptimised(vector<Node>& nodes)
 
     for (int i = 0; i < cycle.size(); i++)
     {
-        cout << " cycle node: " << cycle[i]->id << endl;
+        //cout << " cycle node: " << cycle[i]->id << endl;
         cycle[i]->isInCycle = true;
         cycle[i]->isRemoved = true;
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
@@ -307,7 +311,7 @@ int solveOptimised(vector<Node>& nodes)
                 newSyntheticNode->id = 1000 + nodes.size() - originalNumNodes;
                 edgesToAdd.push_back({&node, newSyntheticNode});
                 edgesToAdd.push_back({neighbour, newSyntheticNode});
-                cout << "added synthetic node with id: " << newSyntheticNode->id << endl;
+                //cout << "added synthetic node with id: " << newSyntheticNode->id << endl;
             }
         }
 
@@ -344,12 +348,14 @@ int solveOptimised(vector<Node>& nodes)
     int numComponentsNeedToBreak = 0;
     for (const auto& component : components)
     {
+#if 0
         cout << "Component: ";
         for (const auto x : component)
         {
             cout << x->id << " ";
         }
         cout << endl;
+#endif
         cycleNodesConnectedToComponent.clear();
         for (const auto& node : component)
         {
@@ -444,7 +450,7 @@ int main(int argc, char* argv[])
         for (int t = 0; t < T; t++)
         {
             vector<pair<int, int>> allEdges;
-            const int N = 2 + rand() % 5; // TODO - Not sure if self-loops are permitted, yet - if so, allow N = 1.
+            const int N = 2 + rand() % 100; // TODO - Not sure if self-loops are permitted, yet - if so, allow N = 1.
             for (int i = 1; i <= N; i++)
             {
                 for (int j = i + 1; j <= N; j++)
