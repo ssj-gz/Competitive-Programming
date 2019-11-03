@@ -26,6 +26,11 @@ T read()
     assert(cin);
     return toRead;
 }
+bool isSquare(const int N)
+{
+    const int sqrtN = sqrt(N);
+    return (sqrtN * sqrtN == N) || ((sqrtN + 1) * (sqrtN + 1) == N);
+}
 
 bool isBeautiful(const string& numberAsString)
 {
@@ -35,10 +40,7 @@ bool isBeautiful(const string& numberAsString)
         const int64_t digitValue = digit - '0';
         sumOfDigitsSquared += digitValue * digitValue;
     }
-    const int64_t sqrtBlah = sqrt(sumOfDigitsSquared);
-    if (sqrtBlah * sqrtBlah == sumOfDigitsSquared || (sqrtBlah + 1) * (sqrtBlah + 1) == sumOfDigitsSquared)
-        return true;
-    return false;
+    return isSquare(sumOfDigitsSquared);
 }
 
 #if 1
@@ -68,11 +70,6 @@ string solveBruteForce(int N)
 }
 #endif
 
-bool isSquare(const int N)
-{
-    const int sqrtN = sqrt(N);
-    return (sqrtN * sqrtN == N) || ((sqrtN + 1) * (sqrtN + 1) == N);
-}
 
 #if 1
 string solveOptimised(int N)
@@ -124,7 +121,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int N = 1 + rand() % 10000;
+            const int N = 1 + rand() % 50000;
             cout << N << endl;
         }
 
