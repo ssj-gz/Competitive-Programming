@@ -32,6 +32,7 @@ struct Node
     int id = -1;
     bool isInCycle = false;
     Node* nextInCycle = nullptr;
+    Node* prevInCycle = nullptr;
 
     bool visitedInDFS = false;
     bool isInDFSStack = false;
@@ -86,6 +87,12 @@ class NodeMultiSet
 
 void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle, vector<Node*>& ancestors)
 {
+    cout << " findACycleAux: current node: " << currentNode->id << " parentNode: " << (parentNode == nullptr ? -1 : parentNode->id) << " ancestors: ";
+    for (auto node : ancestors)
+    {
+        cout << node->id << " ";
+    }
+    cout << endl;
     if (currentNode->isRemoved)
         return;
     if (currentNode->visitedInDFS)
@@ -109,8 +116,16 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
 
     for (auto childNode : currentNode->neighbours)
     {
+        cout << "neighbour of " << currentNode->id << " : " << childNode->id << endl;
+    }
+
+    for (auto childNode : currentNode->neighbours)
+    {
         if (childNode == parentNode)
+        {
+            cout << " skipping " << childNode->id << endl;
             continue;
+        }
 
         findACycleAux(childNode, currentNode, destCycle, ancestors);
     }
@@ -122,6 +137,7 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
 
 vector<Node*> findACycle(Node* startNode, vector<Node>& nodes)
 {
+    cout << "Find a cycle starting at " << startNode->id << endl;
     for (auto& node : nodes)
     {
         node.visitedInDFS = false;
@@ -139,9 +155,10 @@ bool isRobust(vector<Node>& nodes)
     for (auto& startNode : nodes)
     {
         const auto cycle = findACycle(&startNode, nodes);
+        cout << " starting at node: " << startNode.id << " cycle len: " << cycle.size() << endl;
         if (!cycle.empty())
         {
-#if 0
+#if 1
             cout << " found cycle: ";
             for (const auto node : cycle)
             {
@@ -165,13 +182,13 @@ int solveBruteForce(vector<Node>& nodes)
 
     for (auto& node : nodes)
     {
-        //cout << "Removing node with id: " << node.id << endl;
+        cout << "Removing node with id: " << node.id << endl;
         node.isRemoved = true;
         const bool stillRobust = isRobust(nodes);
-        //cout << "stillRobust? " << stillRobust << endl;
+        node.isRemoved = false;
+        cout << "stillRobust? " << stillRobust << endl;
         if (!stillRobust)
             return node.id;
-        node.isRemoved = false;
     }
     
     return -1;
@@ -262,6 +279,7 @@ int solveOptimised(vector<Node>& nodes)
         cycle[i]->isInCycle = true;
         cycle[i]->isRemoved = true;
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
+        cycle[i]->prevInCycle = cycle[(cycle.size() + i - 1) % cycle.size()];
     }
 
     // Introduce synthetic nodes so that no two non-consecutive cycle
@@ -278,7 +296,7 @@ int solveOptimised(vector<Node>& nodes)
         {
             if (!neighbour->isInCycle)
                 continue;
-            if (node.nextInCycle == neighbour)
+            if (node.nextInCycle == neighbour || node.prevInCycle == neighbour)
                 continue;
 
             if (node.id < neighbour->id)
@@ -289,10 +307,11 @@ int solveOptimised(vector<Node>& nodes)
                 newSyntheticNode->id = 1000 + nodes.size() - originalNumNodes;
                 edgesToAdd.push_back({&node, newSyntheticNode});
                 edgesToAdd.push_back({neighbour, newSyntheticNode});
+                cout << "added synthetic node with id: " << newSyntheticNode->id << endl;
             }
         }
 
-        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return neighbour->isInCycle && neighbour != node.nextInCycle; }), node.neighbours.end());
+        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return neighbour->isInCycle && neighbour != node.nextInCycle && neighbour != node.prevInCycle; }), node.neighbours.end());
     }
     for (const auto edge : edgesToAdd)
     {
@@ -425,7 +444,7 @@ int main(int argc, char* argv[])
         for (int t = 0; t < T; t++)
         {
             vector<pair<int, int>> allEdges;
-            const int N = 2 + rand() % 100; // TODO - Not sure if self-loops are permitted, yet - if so, allow N = 1.
+            const int N = 2 + rand() % 5; // TODO - Not sure if self-loops are permitted, yet - if so, allow N = 1.
             for (int i = 1; i <= N; i++)
             {
                 for (int j = i + 1; j <= N; j++)
