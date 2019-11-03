@@ -124,6 +124,8 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = 1 + rand() % 10000;
+            cout << N << endl;
         }
 
         return 0;
