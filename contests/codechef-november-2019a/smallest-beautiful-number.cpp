@@ -72,33 +72,52 @@ string solveBruteForce(int N)
 
 
 #if 1
-string solveOptimised(int N)
+string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
 {
     string result;
 
     string numberAsString(N, '1');
 
-    int64_t squareDigitSum = N;
+    const int64_t squareDigitSumOrig = N;
 
-    while (true)
+    if (isSquare(squareDigitSumOrig))
+        return numberAsString;
+
+    const int sqrtN = sqrt(N);
+    assert(sqrtN * sqrtN < N);
+    const int64_t nextSquare = (sqrtN + 1) * (sqrtN + 1);
+    assert(nextSquare > N);
+
+    int numTrailingDigitsToReplace = 1;
+    while (numTrailingDigitsToReplace <= N)
     {
-        if (isSquare(squareDigitSum))
-            return numberAsString;
-        int index = N - 1;
-        while (index >= 0 && numberAsString[index] == '9')
-        {
-            squareDigitSum = squareDigitSum - (9 * 9) + (1 * 1);
-            numberAsString[index] = '1';
-            index--;
-        }
-        if (index == -1)
-            break;
+        int64_t squareDigitSum = squareDigitSumOrig - numTrailingDigitsToReplace;
+        numberAsString.pop_back();
 
-        const int digitValue = numberAsString[index] - '0';
-        squareDigitSum -= digitValue * digitValue;
-        numberAsString[index]++;
-        squareDigitSum += (digitValue + 1) * (digitValue + 1);
+        int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
+        //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << " requiredSquareDigitSum: " << requiredSquareDigitSum << " sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum]: " << sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] << endl;
+        if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
+        {
+            string replacementTrailingDigits;
+            while (requiredSquareDigitSum > 0)
+            {
+                const int nextDigitValue = sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum];
+                //cout << "nextDigitValue: " << nextDigitValue << endl;
+                assert(nextDigitValue != -1);
+                replacementTrailingDigits += '0' + nextDigitValue;
+
+                requiredSquareDigitSum -= nextDigitValue * nextDigitValue;
+                numTrailingDigitsToReplace--;
+                //cout << " new requiredSquareDigitSum: " << requiredSquareDigitSum << endl;
+            }
+
+            return numberAsString + replacementTrailingDigits;
+        }
+
+        numTrailingDigitsToReplace++;
+
     }
+
 
     return "";
 
@@ -141,6 +160,38 @@ int main(int argc, char* argv[])
     }
     cout << "maxBlah: " << maxBlah << endl;
 #endif
+    const int maxVal = 3'000;
+    const int maxNumDigits = 40;
+    vector<vector<int>> sumOfSquaresLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
+    sumOfSquaresLookup[0][0] = 1;
+    for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
+    {
+        for (int digitVal = 9; digitVal >= 1; digitVal--)
+        {
+            for (int val = 0; val <= maxVal; val++)
+            {
+                if (sumOfSquaresLookup[numDigits - 1][val] == -1)
+                    continue;
+                if (val + digitVal * digitVal <= maxVal)
+                {
+                    sumOfSquaresLookup[numDigits][val + digitVal * digitVal] = digitVal;
+                }
+            }
+        }
+    }
+    for (int val = 1; val <= maxVal; val++)
+    {
+        bool canGenerate = false;
+        for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
+        {
+            if (sumOfSquaresLookup[numDigits][val] != -1)
+            {
+                canGenerate = true;
+                break;
+            }
+        }
+        assert(canGenerate);
+    }
     
     // TODO - read in testcase.
     const auto T = read<int>();
@@ -156,7 +207,7 @@ int main(int argc, char* argv[])
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 1
-        const auto solutionOptimised = solveOptimised(N);
+        const auto solutionOptimised = solveOptimised(N, sumOfSquaresLookup);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
