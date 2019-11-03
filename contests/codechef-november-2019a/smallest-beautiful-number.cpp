@@ -121,15 +121,30 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int N = 1 + rand() % 50000;
+            const int N = 1 + rand() % 10000;
             cout << N << endl;
         }
 
         return 0;
     }
+#if 0
+    int maxBlah = 0;
+    for (int N = 1; N <= 1'000'000; N++)
+    {
+        if (isSquare(N))
+            continue;
+        const int sqrtN = sqrt(N);
+        assert(sqrtN * sqrtN < N);
+        assert((sqrtN + 1) * (sqrtN + 1) > N);
+        cout << "N: " << N << endl;
+        maxBlah = max(maxBlah, (sqrtN + 1) * (sqrtN + 1) - N);
+    }
+    cout << "maxBlah: " << maxBlah << endl;
+#endif
     
     // TODO - read in testcase.
     const auto T = read<int>();
+
 
     for (int t = 0; t < T; t++)
     {
