@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/LSTBTF
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -91,7 +91,7 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
     const int64_t squareDigitSumOrig = N;
 
     if (isSquare(squareDigitSumOrig))
-        return "";
+        return numberAsString;
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
@@ -116,7 +116,7 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
             //cout << "requiredSquareDigitSum: " << requiredSquareDigitSum << " bestReplacementDigits.length(): " << bestReplacementDigits.length() << endl;
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
-                return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
+                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
             }
             //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << " requiredSquareDigitSum: " << requiredSquareDigitSum << " sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum]: " << sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] << endl;
             if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
@@ -170,12 +170,12 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
         //const int T = rand() % 100 + 1;
-        const int T = 1;
+        const int T = 1000;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
-            const int N = 1 + rand() % 10000;
+            const int N = 1 + rand() % 1'000'000;
             cout << N << endl;
         }
 
@@ -235,6 +235,7 @@ int main(int argc, char* argv[])
             //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
         }
     }
+#if 0
     {
         for (int N = 1; N <= 1'000'000; N++)
         {
@@ -248,6 +249,7 @@ int main(int argc, char* argv[])
     }
     cout << "largestThig: " << largestThig << endl;
     cout << "largestThog: " << largestThog << endl;
+#endif
 
     // TODO - read in testcase.
     const auto T = read<int>();
