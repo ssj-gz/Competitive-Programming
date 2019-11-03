@@ -68,12 +68,43 @@ string solveBruteForce(int N)
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+bool isSquare(const int N)
 {
-    SolutionType result;
-    
-    return result;
+    const int sqrtN = sqrt(N);
+    return (sqrtN * sqrtN == N) || ((sqrtN + 1) * (sqrtN + 1) == N);
+}
+
+#if 1
+string solveOptimised(int N)
+{
+    string result;
+
+    string numberAsString(N, '1');
+
+    int64_t squareDigitSum = N;
+
+    while (true)
+    {
+        if (isSquare(squareDigitSum))
+            return numberAsString;
+        int index = N - 1;
+        while (index >= 0 && numberAsString[index] == '9')
+        {
+            squareDigitSum = squareDigitSum - (9 * 9) + (1 * 1);
+            numberAsString[index] = '1';
+            index--;
+        }
+        if (index == -1)
+            break;
+
+        const int digitValue = numberAsString[index] - '0';
+        squareDigitSum -= digitValue * digitValue;
+        numberAsString[index]++;
+        squareDigitSum += (digitValue + 1) * (digitValue + 1);
+    }
+
+    return "";
+
 }
 #endif
 
@@ -110,8 +141,8 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(N);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(N);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
