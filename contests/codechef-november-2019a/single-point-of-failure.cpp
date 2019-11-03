@@ -215,6 +215,11 @@ bool componentHasCycle(const vector<Node*>& component)
 #if 1
 int solveOptimised(vector<Node>& nodes)
 {
+    for (auto& node : nodes)
+    {
+        node.isRemoved = false; // TODO - remove this when we no longer have solveBruteForce.
+    }
+
     int result = 0;
     vector<vector<Node*>> components;
     for (auto& startNode : nodes)
