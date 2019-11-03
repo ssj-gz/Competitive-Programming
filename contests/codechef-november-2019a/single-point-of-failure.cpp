@@ -251,7 +251,7 @@ int solveOptimised(vector<Node>& nodes)
     components.clear();
     for (auto& startNode : nodes)
     {
-        if (startNode.componentNum == -1)
+        if (!startNode.isRemoved && startNode.componentNum == -1)
         {
             auto component = getComponent(&startNode, components.size());
             components.push_back(component);
