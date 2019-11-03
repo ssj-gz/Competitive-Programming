@@ -110,7 +110,7 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
             //numberAsString.pop_back();
 
             int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
-            cout << "requiredSquareDigitSum: " << requiredSquareDigitSum << " bestReplacementDigits.length(): " << bestReplacementDigits.length() << endl;
+            //cout << "requiredSquareDigitSum: " << requiredSquareDigitSum << " bestReplacementDigits.length(): " << bestReplacementDigits.length() << endl;
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
                 return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
@@ -136,7 +136,7 @@ string solveOptimised(int N, const vector<vector<int>>& sumOfSquaresLookup)
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
                     bestReplacementDigits = replacementTrailingDigits;
-                    cout << "New bestReplacementDigits: " << replacementTrailingDigits << endl;
+                    //cout << "New bestReplacementDigits: " << replacementTrailingDigits << endl;
 
                 }
                 break;
@@ -228,6 +228,17 @@ int main(int argc, char* argv[])
         for (int val = 1; val <= maxVal; val++)
         {
             //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
+        }
+    }
+    {
+        for (int N = 1; N <= 10'000; N++)
+        {
+            cout << "N: " << N << endl;
+            const auto solutionBruteForce = solveBruteForce(N);
+            cout << "solutionBruteForce: " << solutionBruteForce << endl;
+            const auto solutionOptimised = solveOptimised(N, sumOfSquaresLookup);
+            cout << "solutionOptimised:  " << solutionOptimised << endl;
+            assert(solutionOptimised == solutionBruteForce);
         }
     }
 
