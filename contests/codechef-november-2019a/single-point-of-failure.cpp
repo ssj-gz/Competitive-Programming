@@ -39,6 +39,36 @@ struct Node
     int componentNum = -1;
 };
 
+class NodeMultiSet
+{
+    public:
+        NodeMultiSet(int maxNodeId)
+            : m_numNodesWithId{maxNodeId + 1}
+        {
+        }
+        void addNode(Node* nodeToAdd)
+        {
+            m_numNodesWithId[nodeToAdd->id]++;
+            if (m_numNodesWithId[nodeToAdd->id] == 1)
+            {
+                // Node was not in set; add it.
+                m_nodesInSet.push_back(nodeToAdd);
+            }
+        }
+        vector<std::pair<Node*, int>> nodesAndOccurrences() const
+        {
+            vector<std::pair<Node*, int>> nodesAndOccurrences;
+            for (auto node : m_nodesInSet)
+            {
+                nodesAndOccurrences.push_back({node, m_numNodesWithId[node->id]});
+            }
+            return nodesAndOccurrences;
+        }
+    private:
+        vector<Node*> m_nodesInSet;
+        vector<int> m_numNodesWithId;
+};
+
 void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle, vector<Node*>& ancestors)
 {
     if (currentNode->isRemoved)
