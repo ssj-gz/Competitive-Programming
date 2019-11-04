@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/WEIRDO
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -189,7 +189,7 @@ long double calcLogScore(const vector<string>& recipes)
         }
     }
 
-    cout << "logScore: " << logScore << endl;
+    //cout << "logScore: " << logScore << endl;
 
     return logScore;
 }
@@ -316,8 +316,12 @@ int main(int argc, char* argv[])
         //assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(numRecipes, recipes);
+        if (solutionOptimised == -1)
+            cout << "Infinity";
+        else
+            cout << solutionOptimised;
+        cout << endl;
 #endif
     }
 
