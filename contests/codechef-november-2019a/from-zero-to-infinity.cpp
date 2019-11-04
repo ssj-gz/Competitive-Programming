@@ -66,6 +66,31 @@ bool isAlicesRecipeBruteForce(const string& recipe)
 
     return true;
 }
+bool isAlicesRecipe(const string& recipe)
+{
+    int maxPrefixVMC = 0;
+    int currentPrefixVMC = 0;
+    int previousVMC = -1;
+    int previousPreviousVMC = -1;
+
+    for (int i = 0; i < recipe.size(); i++)
+    {
+        const auto letter = recipe[i];
+        if (isVowel(letter))
+            currentPrefixVMC++;
+        else
+            currentPrefixVMC--;
+
+        if (i >= 1 && currentPrefixVMC - maxPrefixVMC < 0)
+            return false;
+
+        previousPreviousVMC = previousVMC;
+        previousVMC = currentPrefixVMC;
+        maxPrefixVMC = max(maxPrefixVMC, previousPreviousVMC);
+    }
+
+    return true;
+}
 
 long double calcScoreBruteForce(const vector<string>& recipes)
 {
@@ -191,6 +216,23 @@ int main(int argc, char* argv[])
         return 0;
     }
 #endif
+    {
+        while (true)
+        {
+            const int stringLen = 1 + rand() % 100;
+            string s;
+            for (int i = 0; i < stringLen; i++)
+            {
+                s += 'a' + rand() % 2;
+            }
+            cout << "s: " << s << endl;
+            const bool bruteForce = isAlicesRecipeBruteForce(s);
+            const bool optimised = isAlicesRecipe(s);
+
+            cout << "bruteForce: " << bruteForce << " optimised: " << optimised << endl;
+            assert(bruteForce == optimised);
+        }
+    }
 
     
     const auto T = read<int>();
