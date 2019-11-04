@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - 2019-11-02
+// Simon St James (ssjgz) - 2019-11-04
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/WEIRDO
 //
@@ -10,6 +10,9 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <cmath>
+#include <iomanip>
+#include <limits>
 
 #include <cassert>
 
@@ -47,41 +50,6 @@ SolutionType solveOptimised()
 
 int main(int argc, char* argv[])
 {
-    {
-        while (true)
-        {
-            const int len = 1 + rand() % 100;
-            string s;
-            for (int i = 0; i < len; i++)
-            {
-                s += '0' + rand() % 2;
-            }
-            bool hasAdjacentOnes = false;
-            for (int i = 1; i < len; i++)
-            {
-                if (s[i] == '1' && s[i - 1] == '1')
-                {
-                    hasAdjacentOnes = true;
-                    break;
-                }
-            }
-
-            bool allSubstringsAtLeastAsMany0s = true;
-            for (int l = 0; l < len; l++)
-            {
-                for (int r = l + 1; r < len; r++)
-                {
-                    string substring = s.substr(l, r - l + 1);
-                    const int num0s = count(substring.begin(), substring.end(), '0');
-                    const int num1s = count(substring.begin(), substring.end(), '1');
-                    if (num1s > num0s)
-                        allSubstringsAtLeastAsMany0s = false;
-                }
-            }
-            cout << "s: " << s << endl;
-            assert(allSubstringsAtLeastAsMany0s == !hasAdjacentOnes);
-        }
-    }
     ios::sync_with_stdio(false);
     if (argc == 2 && string(argv[1]) == "--test")
     {
@@ -99,6 +67,27 @@ int main(int argc, char* argv[])
 
         return 0;
     }
+
+    auto intpower = [](int64_t base, int64_t exponent)
+    {
+        int64_t result = 1;
+        for (int i = 0; i < exponent; i++)
+        {
+            result *= base;
+        }
+        return result;
+    };
+
+    {
+        cout <<  std::setprecision (std::numeric_limits<long double>::digits10 + 1);
+        cout << "log 5: " << logl(5) << endl;
+        cout << "Blee: " << static_cast<long double>(intpower(2, 12) * intpower(5, 8) * intpower(3, 20)) / (intpower(7, 4) * intpower(5, 7) * intpower(6, 5)) << endl;
+
+        cout << "Bloo: " << expl(12 * logl(2) + 8 * logl(5) + 20 * logl(3) - (4 * logl(7) + 7 * logl(5) + 5 * logl(6))) << endl;
+
+        return 0;
+    }
+
     
     // TODO - read in testcase.
     const auto T = read<int>();
