@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -826,8 +826,8 @@ int main(int argc, char** argv)
         cout << T << endl;
         for (int t = 0; t < T; t++)
         {
-            const int N = 50'000;
-            const int K = 50'000;
+            const int N = 1000;
+            const int K = 50;
             const int maxX = 50'000;
 
             cout << N << " " << K << endl;
@@ -911,11 +911,11 @@ int main(int argc, char** argv)
 #ifdef BRUTE_FORCE
         //const auto solutionBruteForce = solveBruteForce(thresholds, numPeople);
         //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
-        cout << "solutionOptimised1: " << solutionOptimised1 << endl;
+        //const auto solutionOptimised1 = solveOptimised1(thresholds, numPeople, primesUpToRootMaxN);
+        //cout << "solutionOptimised1: " << solutionOptimised1 << endl;
         const auto solutionOptimised2 = solveOptimised2(thresholds, numPeople, primesUpToRootMaxN);
         cout << "solutionOptimised2: " << solutionOptimised2 << endl;
-        assert(solutionOptimised1.value() == solutionOptimised2.value());
+        //assert(solutionOptimised1.value() == solutionOptimised2.value());
 #else
         const auto solutionOptimised2 = solveOptimised2(thresholds, numPeople, primesUpToRootMaxN);
         cout << solutionOptimised2 << endl;
