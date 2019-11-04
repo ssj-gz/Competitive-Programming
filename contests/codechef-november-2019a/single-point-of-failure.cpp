@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/FAILURE
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -142,11 +142,13 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
 vector<Node*> findACycle(Node* startNode, vector<Node>& nodes)
 {
     //cout << "Find a cycle starting at " << startNode->id << endl;
+#if 0
     for (auto& node : nodes)
     {
         node.visitedInDFS = false;
         node.isInDFSStack = false;
     }
+#endif
     vector<Node*> cycle;
     vector<Node*> ancestors;
     findACycleAux(startNode, nullptr, cycle, ancestors);
@@ -255,7 +257,7 @@ int solveOptimised(vector<Node>& nodes)
         node.isRemoved = false; // TODO - remove this when we no longer have solveBruteForce.
     }
 
-    int result = 0;
+    //int result = 0;
     vector<vector<Node*>> components;
     for (auto& startNode : nodes)
     {
@@ -363,18 +365,20 @@ int solveOptimised(vector<Node>& nodes)
             {
                 if (neighbour->isInCycle)
                 {
-                    cout << "  cycle node connected: " << neighbour->id << endl;
+                    //cout << "  cycle node connected: " << neighbour->id << endl;
                     cycleNodesConnectedToComponent.addNode(neighbour);
                 }
             }
         }
 
         const auto cycleNodesConnectedToComponentOccurrences = cycleNodesConnectedToComponent.nodesAndOccurrences();
+#if 0
         cout << "cycleNodesConnectedToComponent: " << endl;
         for (const auto x : cycleNodesConnectedToComponentOccurrences)
         {
             cout << " node: " << x.first->id << " " << x.second << " times" << endl;
         }
+#endif
         if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().second == 1))
         {
             continue;
@@ -421,7 +425,7 @@ int solveOptimised(vector<Node>& nodes)
     int minNodeId = -1;
     for (auto node : cycle)
     {
-        cout << "node: " << node->id << " numComponentCyclesBreaks: " << node->numComponentCyclesBreaks << " numComponentsNeedToBreak: " << numComponentsNeedToBreak << endl;
+        //cout << "node: " << node->id << " numComponentCyclesBreaks: " << node->numComponentCyclesBreaks << " numComponentsNeedToBreak: " << numComponentsNeedToBreak << endl;
         if (node->numComponentCyclesBreaks == numComponentsNeedToBreak)
         {
             if (minNodeId == -1 || node->id < minNodeId)
@@ -476,7 +480,7 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
-        cout << "t: " << (t + 1) << endl;
+        //cout << "t: " << (t + 1) << endl;
 
         const int numNodes = read<int>();
         const int numEdges = read<int>();
@@ -510,7 +514,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(nodes);
         cout << solutionOptimised << endl;
 #endif
     }
