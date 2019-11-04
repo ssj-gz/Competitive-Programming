@@ -165,12 +165,60 @@ long double solveBruteForce(const int numRecipes, const vector<string>& recipes)
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+long double calcLogScore(const vector<string>& recipes)
 {
-    SolutionType result;
+    long double logScore = 0;
+    for (char letter = 'a'; letter <= 'z'; letter++)
+    {
+        int numRecipesWithLetter = 0;
+        int numOccurencesOfLetter = 0;
+        for (const auto& recipe : recipes)
+        {
+            const int numOfLetterInRecipe = std::count(recipe.begin(), recipe.end(), letter);
+            if (numOfLetterInRecipe > 0)
+                numRecipesWithLetter++;
+
+            numOccurencesOfLetter += numOfLetterInRecipe;
+        }
+
+        if (numOccurencesOfLetter > 0)
+        {
+            assert(numRecipesWithLetter > 0);
+            logScore += logl(static_cast<long double>(numRecipesWithLetter));
+            logScore -= recipes.size() * logl(static_cast<long double>(numOccurencesOfLetter));
+        }
+    }
+
+    cout << "logScore: " << logScore << endl;
+
+    return logScore;
+}
+
+#if 1
+long double solveOptimised(const int numRecipes, const vector<string>& recipes)
+{
+    long double result = 0;
+
+    vector<string> alicesRecipes;
+    vector<string> bobsRecipes;
+
+    for (const auto& recipe : recipes)
+    {
+        if (isAlicesRecipe(recipe))
+            alicesRecipes.push_back(recipe);
+        else
+            bobsRecipes.push_back(recipe);
+    }
+
+    const auto aliceScoreLog = calcLogScore(alicesRecipes);
+    const auto bobScoreLog = calcLogScore(bobsRecipes);
+
+    const auto logMaxRatio = logl(static_cast<long double>(10'000'000));
+
+    if (aliceScoreLog - bobScoreLog >= logMaxRatio)
+        return -1;
     
-    return result;
+    return expl(aliceScoreLog - bobScoreLog);
 }
 #endif
 
@@ -216,6 +264,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 #endif
+#if 0
     {
         while (true)
         {
@@ -233,6 +282,7 @@ int main(int argc, char* argv[])
             assert(bruteForce == optimised);
         }
     }
+#endif
 
     
     const auto T = read<int>();
@@ -254,11 +304,16 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(numRecipes, recipes);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+        const auto solutionOptimised = solveOptimised(numRecipes, recipes);
+        cout << "solutionOptimised:  ";
+        if (solutionOptimised == -1)
+            cout << "Infinity";
+        else
+            cout << solutionOptimised;
+        cout << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
+        //assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
         const auto solutionOptimised = solveOptimised();
