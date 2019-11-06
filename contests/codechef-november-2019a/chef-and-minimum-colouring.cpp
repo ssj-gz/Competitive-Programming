@@ -87,6 +87,17 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = 2 + rand() % 100;
+            const int M = 2 + rand() % (N - 1);
+            assert(M <= N);
+            const int maxA = 1 + rand() % 100;
+
+            cout << N << " " << M << endl;
+
+            for (int i = 0; i < N; i++)
+            {
+                cout << (1 + rand() % maxA) << " ";
+            }
         }
 
         return 0;
