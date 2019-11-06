@@ -26,53 +26,55 @@ T read()
     return toRead;
 }
 
+struct OccurencesOfValue
+{
+    int value = -1;
+    int numOccurences = 0;
+}
+
+vector<OccurencesOfValue> buildOccurrenceList(const vector<int64_t>& values)
+{
+    vector<OccurencesOfValue> occurrencesOfValue;
+    vector<int64_t> valuesSorted;
+    sort(valuesSorted.begin(), valuesSorted.end());
+    int previousValue = valuesSorted[0];
+    int numOfValue = 0;
+    for (const auto& x : valuesSorted)
+    {
+        if (x != previousValue)
+        {
+            occurrencesOfValue.push_back({x, numOfValue});
+            numOfValue = 0;
+        }
+        numOfValue++;
+    }
+    occurrencesOfValue.push_back({valuesSorted.back(), numOfValue}); // Pick up the stray.
+
+    return occurrencesOfValue;
+}
+
 #if 1
 int solveBruteForce(int N, int M, const vector<int64_t>& a)
 {
-    int result = 0;
+    // Ok - if c1, c2, ... , cm are the colours, then any
+    // valid colouring is of the form:
+    //
+    // π(c1)π(c2)...π(cm)π(c1)π(c2)...π(cm)...π(c1)π(c2)...
+    //
+    // where π is a permutation of c1, c2, ... , cm i.e.
+    // is it some permutation of c1, c2, ... , cm.
+    //
+    // Similarly, a choice is valid for such a π if and only if
+    // it is valid for the colouring:
+    //
+    // c1c2...cmc1c2...cm...c1c2...
+    //
+    // The colours at i and j are different if and only if i != j mod m,
+    // so we merely need to find, for each k ... 1, 2, ..., m, the 
+    // maximum a[i] such that i mod m = k and the minimum a[j] such that
+    // j mod m != k.
 
-    vector<int> colouring(N, 0);
 
-    while (true)
-    {
-        bool isValidColouring = true;
-        for (int i = 0; i  + M <= a.size() && isValidColouring; i++)
-        {
-            vector<bool> isColouredUsed(M, false);
-            for (int j = i; j < i + M; j++)
-            {
-                if (isColouredUsed[colouring[j]])
-                {
-                    isValidColouring = false;
-                    break;
-                }
-                isColouredUsed[colouring[j]] = true;
-            }
-        }
-
-        if (isValidColouring)
-        {
-            cout << "Valid colouring: " << endl;
-            for (int i = 0; i < N; i++)
-            {
-                cout << " " << colouring[i];
-            }
-            cout << endl;
-        }
-
-        int index = 0;
-        while (index < N && colouring[index] == M - 1)
-        {
-            colouring[index] = 0;
-            index++;
-        }
-        if (index == N)
-            break;
-
-        colouring[index]++;
-    }
-    
-    return result;
 }
 #endif
 
