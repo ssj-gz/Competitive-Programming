@@ -29,6 +29,7 @@ struct Coord
 
 long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord>& phase2Coords, const vector<Coord>& phase3Coords, const vector<Coord>& phase4Coords)
 {
+    // Simple bit of dynamic programming; work backwards from the end to the beginning point (x, y).
     const int numPhases = 3;
     struct CoordAndDistToEnd
     {
@@ -55,10 +56,10 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
             {
                 assert(distToEndForPhaseInfo[phase][j].bestDistToEnd != -1);
                 const auto nextPhaseCoord = distToEndForPhaseInfo[phase][j].coord;
-                const auto distToNextPhase = sqrt(static_cast<long double>((phaseCoord.x - nextPhaseCoord.x) * (phaseCoord.x - nextPhaseCoord.x) + (phaseCoord.y - nextPhaseCoord.y) * (phaseCoord.y - nextPhaseCoord.y)));
-                if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhase + distToEndForPhaseInfo[phase][j].bestDistToEnd)
+                const auto distToNextPhaseCoord = sqrt(static_cast<long double>((phaseCoord.x - nextPhaseCoord.x) * (phaseCoord.x - nextPhaseCoord.x) + (phaseCoord.y - nextPhaseCoord.y) * (phaseCoord.y - nextPhaseCoord.y)));
+                if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhaseCoord + distToEndForPhaseInfo[phase][j].bestDistToEnd)
                 {
-                    currentBestDistToEnd = distToNextPhase + distToEndForPhaseInfo[phase][j].bestDistToEnd;
+                    currentBestDistToEnd = distToNextPhaseCoord + distToEndForPhaseInfo[phase][j].bestDistToEnd;
                 }
 
             }
@@ -101,7 +102,12 @@ int main(int argc, char* argv[])
         const vector<Coord> cd = readCoordVector(M);
         const vector<Coord> ef = readCoordVector(K);
         
-        cout << min(findMinDistance(x, y, ab, cd, ef), findMinDistance(x, y, cd, ab, ef)) << endl;
+        cout << min(
+                    // Visit the ab before the cd one.
+                    findMinDistance(x, y, ab, cd, ef), 
+                    // Visit the cd before the ab one.
+                    findMinDistance(x, y, cd, ab, ef)
+                   ) << endl;
 
     }
 
