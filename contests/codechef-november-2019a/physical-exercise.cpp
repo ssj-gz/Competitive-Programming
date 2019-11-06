@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <iomanip>
+#include <limits>
 
 #include <cassert>
 
@@ -62,7 +64,7 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
                 assert(dp[phase][j].distToEnd != -1);
                 const auto nextPhaseCoord = dp[phase][j].coord;
                 const auto distToNextPhase = sqrt(static_cast<long double>((phaseCoord.x - nextPhaseCoord.x) * (phaseCoord.x - nextPhaseCoord.x) + (phaseCoord.y - nextPhaseCoord.y) * (phaseCoord.y - nextPhaseCoord.y)));
-                cout << "phase: " << phase << " i: " << i << " j: " << j << " dp[phase][j].distToEnd: " << dp[phase][j].distToEnd << " distToNextPhase: " << distToNextPhase << endl;
+                //cout << "phase: " << phase << " i: " << i << " j: " << j << " dp[phase][j].distToEnd: " << dp[phase][j].distToEnd << " distToNextPhase: " << distToNextPhase << endl;
                 if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhase + dp[phase][j].distToEnd)
                 {
                     currentBestDistToEnd = distToNextPhase + dp[phase][j].distToEnd;
@@ -94,6 +96,9 @@ int main(int argc, char* argv[])
 
         return 0;
     }
+
+    cout << std::setprecision (std::numeric_limits<long double>::digits10 + 1);
+
     
     const auto T = read<int>();
 
