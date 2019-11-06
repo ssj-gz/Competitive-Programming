@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <limits>
 
 #include <cassert>
 
@@ -26,32 +27,6 @@ T read()
     return toRead;
 }
 
-struct OccurencesOfValue
-{
-    int value = -1;
-    int numOccurences = 0;
-}
-
-vector<OccurencesOfValue> buildOccurrenceList(const vector<int64_t>& values)
-{
-    vector<OccurencesOfValue> occurrencesOfValue;
-    vector<int64_t> valuesSorted;
-    sort(valuesSorted.begin(), valuesSorted.end());
-    int previousValue = valuesSorted[0];
-    int numOfValue = 0;
-    for (const auto& x : valuesSorted)
-    {
-        if (x != previousValue)
-        {
-            occurrencesOfValue.push_back({x, numOfValue});
-            numOfValue = 0;
-        }
-        numOfValue++;
-    }
-    occurrencesOfValue.push_back({valuesSorted.back(), numOfValue}); // Pick up the stray.
-
-    return occurrencesOfValue;
-}
 
 #if 1
 int solveBruteForce(int N, int M, const vector<int64_t>& a)
@@ -73,8 +48,17 @@ int solveBruteForce(int N, int M, const vector<int64_t>& a)
     // so we merely need to find, for each k ... 1, 2, ..., m, the 
     // maximum a[i] such that i mod m = k and the minimum a[j] such that
     // j mod m != k.
+    int64_t minDistance = std::numeric_limits<int64_t>::max();
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = i + 1; j < N; j++)
+        {
+            if ((i % M) != (j % M))
+                minDistance = min(minDistance, abs(a[i] - a[j]));
+        }
+    }
 
-
+    return minDistance;
 }
 #endif
 
