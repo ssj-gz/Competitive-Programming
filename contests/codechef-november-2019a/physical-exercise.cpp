@@ -97,11 +97,11 @@ int main(int argc, char* argv[])
 
         };
 
-        const vector<Coord> a = readCoordVector(N);
-        const vector<Coord> b = readCoordVector(M);
-        const vector<Coord> c = readCoordVector(K);
+        const vector<Coord> ab = readCoordVector(N);
+        const vector<Coord> cd = readCoordVector(M);
+        const vector<Coord> ef = readCoordVector(K);
         
-        cout << min(findMinDistance(x, y, a, b, c), findMinDistance(x, y, b, a, c)) << endl;
+        cout << min(findMinDistance(x, y, ab, cd, ef), findMinDistance(x, y, cd, ab, ef)) << endl;
 
     }
 
