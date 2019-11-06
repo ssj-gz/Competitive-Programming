@@ -42,7 +42,7 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
         long double distToEnd = -1;
     };
 
-    vector<vector<CoordAndDistToEnd>> dp(numPhases);
+    vector<vector<CoordAndDistToEnd>> dp(numPhases + 2);
     dp[0].push_back({{x, y}, -1});
     for (int i = 0; i < phase2Coords.size(); i++)
         dp[1].push_back({phase2Coords[i], -1});
@@ -51,7 +51,7 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
     for (int i = 0; i < phase4Coords.size(); i++)
         dp[3].push_back({phase4Coords[i], 0});
 
-    for (int phase = numPhases - 1; phase >=0 ; phase++)
+    for (int phase = numPhases; phase >=1 ; phase--)
     {
         for (int i = 0; i < dp[phase - 1].size(); i++)
         {
@@ -59,6 +59,8 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
             auto& currentBestDistToEnd = dp[phase - 1][i].distToEnd;
             for (int j = 0; j < dp[phase].size(); j++)
             {
+                cout << "phase: " << phase << " i: " << i << " j: " << j << " dp[phase][j].distToEnd: " << dp[phase][j].distToEnd << endl;
+                assert(dp[phase][j].distToEnd != -1);
                 const auto nextPhaseCoord = dp[phase][j].coord;
                 const auto distToNextPhase = sqrt(static_cast<long double>((phaseCoord.x - nextPhaseCoord.x) * (phaseCoord.x - nextPhaseCoord.x) + (phaseCoord.y - nextPhaseCoord.y) * (phaseCoord.y - nextPhaseCoord.y)));
                 if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhase + dp[phase][j].distToEnd)
@@ -99,21 +101,23 @@ int main(int argc, char* argv[])
     {
         const auto x = read<int64_t>();
         const auto y = read<int64_t>();
+
         const auto N = read<int64_t>();
+        const auto M = read<int64_t>();
+        const auto K = read<int64_t>();
+
         vector<Coord> a(N);
         for (auto& coord : a)
         {
             coord.x = read<int64_t>();
             coord.y = read<int64_t>();
         }
-        const auto M = read<int64_t>();
         vector<Coord> b(M);
         for (auto& coord : b)
         {
             coord.x = read<int64_t>();
             coord.y = read<int64_t>();
         }
-        const auto K = read<int64_t>();
         vector<Coord> c(K);
         for (auto& coord : c)
         {
