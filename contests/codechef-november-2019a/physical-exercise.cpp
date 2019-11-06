@@ -85,25 +85,22 @@ int main(int argc, char* argv[])
         const auto M = read<int64_t>();
         const auto K = read<int64_t>();
 
-        vector<Coord> a(N);
-        for (auto& coord : a)
+        auto readCoordVector = [](int numElements)
         {
-            coord.x = read<int64_t>();
-            coord.y = read<int64_t>();
-        }
-        vector<Coord> b(M);
-        for (auto& coord : b)
-        {
-            coord.x = read<int64_t>();
-            coord.y = read<int64_t>();
-        }
-        vector<Coord> c(K);
-        for (auto& coord : c)
-        {
-            coord.x = read<int64_t>();
-            coord.y = read<int64_t>();
-        }
+            vector<Coord> coordVector(numElements);
+            for (auto& coord : coordVector)
+            {
+                coord.x = read<int64_t>();
+                coord.y = read<int64_t>();
+            }
+            return coordVector;
 
+        };
+
+        const vector<Coord> a = readCoordVector(N);
+        const vector<Coord> b = readCoordVector(M);
+        const vector<Coord> c = readCoordVector(K);
+        
         cout << min(findMinDistance(x, y, a, b, c), findMinDistance(x, y, b, a, c)) << endl;
 
     }
