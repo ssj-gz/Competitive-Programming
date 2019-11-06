@@ -70,8 +70,20 @@ int main(int argc, char* argv[])
         const int T = 1;
         cout << T << endl;
 
+        const vector<char> letters = {'b', 'o', 'a', 'c'};
+
         for (int t = 0; t < T; t++)
         {
+            string top;
+            string bottom;
+            for (int i = 0; i < 3; i++)
+            {
+                top += letters[rand() % letters.size()];
+                bottom += letters[rand() % letters.size()];
+            }
+            cout << top <<endl;
+            cout << bottom <<endl;
+
         }
 
         return 0;
