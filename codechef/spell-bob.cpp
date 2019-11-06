@@ -27,19 +27,24 @@ T read()
     return toRead;
 }
 
+string applyPermutation(const string toPermute, const vector<int>& indexPermutation)
+{
+    string permuted;
+    for (auto index : indexPermutation)
+        permuted += toPermute[index];
+
+    return permuted;
+}
+
 bool canSpellBob(const string& topOrig, const string& bottomOrig)
 {
     assert(topOrig.length() == 3 && bottomOrig.length() == 3);
-    vector<int> permutation = {0, 1, 2};
-    const auto origPermutation = permutation;
+    vector<int> indexPermutation = {0, 1, 2};
+    const auto indexPermutationOrig = indexPermutation;
     while (true)
     {
-        string top;
-        for (auto index : permutation)
-            top += topOrig[index];
-        string bottom;
-        for (auto index : permutation)
-            bottom += bottomOrig[index];
+        const string top = applyPermutation(topOrig, indexPermutation);
+        const string bottom = applyPermutation(bottomOrig, indexPermutation);
 
         if ((top[0] == 'b' || bottom[0] == 'b') &&
             (top[1] == 'o' || bottom[1] == 'o') &&
@@ -48,8 +53,8 @@ bool canSpellBob(const string& topOrig, const string& bottomOrig)
             return true;
         }
 
-        next_permutation(permutation.begin(), permutation.end());
-        if (permutation == origPermutation)
+        next_permutation(indexPermutation.begin(), indexPermutation.end());
+        if (indexPermutation == indexPermutationOrig)
             break;
     }
 
