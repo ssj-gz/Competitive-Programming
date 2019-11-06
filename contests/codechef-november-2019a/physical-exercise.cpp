@@ -36,7 +36,7 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
         long double bestDistToEnd = -1;
     };
 
-    vector<vector<CoordAndDistToEnd>> distToEndForPhaseInfo(numPhases + 2);
+    vector<vector<CoordAndDistToEnd>> distToEndForPhaseInfo(numPhases + 1);
     distToEndForPhaseInfo[0].push_back({{x, y}, -1});
     for (int i = 0; i < phase2Coords.size(); i++)
         distToEndForPhaseInfo[1].push_back({phase2Coords[i], -1});
