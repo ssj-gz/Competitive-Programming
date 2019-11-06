@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/NOV19B/problems/CAMC
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -29,7 +29,7 @@ T read()
 
 
 #if 1
-int solveBruteForce(int N, int M, const vector<int64_t>& a)
+int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 {
     // Ok - if c1, c2, ... , cm are the colours, then any
     // valid colouring is of the form:
@@ -62,10 +62,40 @@ int solveBruteForce(int N, int M, const vector<int64_t>& a)
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+#if 1
+int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 {
-    SolutionType result;
+    int64_t result = std::numeric_limits<int64_t>::max();
+
+    vector<std::pair<int64_t, int>> aSortedPlusIndicesModM;
+    for (int i = 0; i < N; i++)
+    {
+        aSortedPlusIndicesModM.push_back({a[i], i % M});
+    }
+    sort(aSortedPlusIndicesModM.begin(), aSortedPlusIndicesModM.end(), [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
+
+#if 0
+    for (const auto& x : aSortedPlusIndicesModM)
+    {
+        cout << "{" << x.first << ", " << x.second << "}, " << " ";
+    }
+    cout << endl;
+#endif
+
+    int lastValue = aSortedPlusIndicesModM.front().first;
+    int lastValuesIndexModM = aSortedPlusIndicesModM.front().second;
+    for (const auto& x : aSortedPlusIndicesModM)
+    {
+        //cout << "x: {" << x.first << ", " << x.second << "} lastValue: " << lastValue << " lastValuesIndexModM: " << lastValuesIndexModM << endl;
+        if (x.second != lastValuesIndexModM)
+        {
+            result = min(result, abs(x.first - lastValue));
+            //cout << "Updating result: " << result << endl;
+            lastValuesIndexModM = x.second;
+        }
+        lastValue = x.first;
+    }
+
     
     return result;
 }
@@ -120,14 +150,14 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(N, M, a);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(N, M, a);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(N, M, a);
         cout << solutionOptimised << endl;
 #endif
     }
