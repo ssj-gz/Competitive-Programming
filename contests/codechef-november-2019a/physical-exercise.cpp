@@ -33,40 +33,39 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
     struct CoordAndDistToEnd
     {
         Coord coord;
-        long double distToEnd = -1;
+        long double bestDistToEnd = -1;
     };
 
-    vector<vector<CoordAndDistToEnd>> dp(numPhases + 2);
-    dp[0].push_back({{x, y}, -1});
+    vector<vector<CoordAndDistToEnd>> distToEndForPhaseInfo(numPhases + 2);
+    distToEndForPhaseInfo[0].push_back({{x, y}, -1});
     for (int i = 0; i < phase2Coords.size(); i++)
-        dp[1].push_back({phase2Coords[i], -1});
+        distToEndForPhaseInfo[1].push_back({phase2Coords[i], -1});
     for (int i = 0; i < phase3Coords.size(); i++)
-        dp[2].push_back({phase3Coords[i], -1});
+        distToEndForPhaseInfo[2].push_back({phase3Coords[i], -1});
     for (int i = 0; i < phase4Coords.size(); i++)
-        dp[3].push_back({phase4Coords[i], 0});
+        distToEndForPhaseInfo[3].push_back({phase4Coords[i], 0}); // Already at the end, so "0".
 
     for (int phase = numPhases; phase >=1 ; phase--)
     {
-        for (int i = 0; i < dp[phase - 1].size(); i++)
+        for (int i = 0; i < distToEndForPhaseInfo[phase - 1].size(); i++)
         {
-            const auto phaseCoord = dp[phase - 1][i].coord;
-            auto& currentBestDistToEnd = dp[phase - 1][i].distToEnd;
-            for (int j = 0; j < dp[phase].size(); j++)
+            const auto phaseCoord = distToEndForPhaseInfo[phase - 1][i].coord;
+            auto& currentBestDistToEnd = distToEndForPhaseInfo[phase - 1][i].bestDistToEnd;
+            for (int j = 0; j < distToEndForPhaseInfo[phase].size(); j++)
             {
-                assert(dp[phase][j].distToEnd != -1);
-                const auto nextPhaseCoord = dp[phase][j].coord;
+                assert(distToEndForPhaseInfo[phase][j].bestDistToEnd != -1);
+                const auto nextPhaseCoord = distToEndForPhaseInfo[phase][j].coord;
                 const auto distToNextPhase = sqrt(static_cast<long double>((phaseCoord.x - nextPhaseCoord.x) * (phaseCoord.x - nextPhaseCoord.x) + (phaseCoord.y - nextPhaseCoord.y) * (phaseCoord.y - nextPhaseCoord.y)));
-                //cout << "phase: " << phase << " i: " << i << " j: " << j << " dp[phase][j].distToEnd: " << dp[phase][j].distToEnd << " distToNextPhase: " << distToNextPhase << endl;
-                if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhase + dp[phase][j].distToEnd)
+                if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhase + distToEndForPhaseInfo[phase][j].bestDistToEnd)
                 {
-                    currentBestDistToEnd = distToNextPhase + dp[phase][j].distToEnd;
+                    currentBestDistToEnd = distToNextPhase + distToEndForPhaseInfo[phase][j].bestDistToEnd;
                 }
 
             }
         }
     }
 
-    return dp[0][0].distToEnd;
+    return distToEndForPhaseInfo[0][0].bestDistToEnd;
 }
 
 int main(int argc, char* argv[])
