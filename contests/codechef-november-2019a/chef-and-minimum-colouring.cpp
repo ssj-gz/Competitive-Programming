@@ -33,14 +33,57 @@ T read()
 int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 {
     int64_t minDistance = std::numeric_limits<int64_t>::max();
-    for (int i = 0; i < N; i++)
+    vector<int> boxIndices(M);
+    for (int choiceIndex = 0; choiceIndex < M; choiceIndex++)
     {
-        for (int j = i + 1; j < N; j++)
-        {
-            if ((i % M) != (j % M))
-                minDistance = min(minDistance, abs(a[i] - a[j]));
-        }
+        boxIndices[choiceIndex] = choiceIndex;
     }
+    while (true)
+    {
+        // Test this set of chosen indices.
+        vector<bool> isColourUsed(M, false);
+        bool isValidChoice = true;
+        for (int i = 0; i < M; i++)
+        {
+            if (isColourUsed[boxIndices[i] % M])
+                isValidChoice = false;
+
+            isColourUsed[boxIndices[i] % M] = true;
+        }
+
+        if (isValidChoice)
+        {
+            int64_t largestElement = -1;
+            int64_t smallestElement = std::numeric_limits<int64_t>::max();
+
+            for (int i = 0; i < M; i++)
+            {
+                if (a[i] > largestElement)
+                    largestElement = a[i];
+                if (a[i] < smallestElement)
+                    smallestElement = a[i];
+            }
+
+            minDistance = min(minDistance, largestElement - smallestElement);
+        }
+
+        // Next choice of M boxes.
+        int index = M - 1;
+        while (index >= 0 && boxIndices[index] == M - 1 - (M - 1 - index))
+        {
+            index--;
+        }
+        if (index < 0)
+            break;
+        int nextChoice = boxIndices[index] + 1;
+        for (int i = index; i < M; i++)
+        {
+            boxIndices[i] = nextChoice;
+            nextChoice++;
+        }
+
+    }
+
 
     return minDistance;
 }
