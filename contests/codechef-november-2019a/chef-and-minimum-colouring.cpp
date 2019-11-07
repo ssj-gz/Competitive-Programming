@@ -155,13 +155,81 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
+    cout << "sortedValuesWithColour: " << endl;
+    for (const auto x : sortedValuesWithColour)
+    {
+        cout << "{" << x.value << ", " << x.originalColour << " } ";
+    }
+    cout << endl;
+
     result = min(result, minThing(sortedValuesWithColour, M));
 
-    const int colourOfSmallest = sortedValuesWithColour[0].originalColour;
-    const auto blah = find_if(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [colourOfSmallest](const auto valueAndColour) { return valueAndColour.originalColour != colourOfSmallest; });
-    assert(blah != sortedValuesWithColour.end());
-    sortedValuesWithColour.erase(sortedValuesWithColour.begin(), blah);
-    result = min(result, minThing(sortedValuesWithColour, M));
+    int rightIndex = 0;
+    vector<int> numOfColourInRange(M, 0);
+    numOfColourInRange[sortedValuesWithColour[0].originalColour]++;
+    int numColoursInRange = 1;
+    for (int leftIndex = 0; leftIndex < N; leftIndex++)
+    {
+        cout << "Begin loop; leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
+        //numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]++;
+        //if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 1)
+            //numColoursInRange++;
+        //cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
+        cout << "numOfColourInRange: " << endl;
+        for (const auto x : numOfColourInRange)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+
+        while (numColoursInRange < M && rightIndex < N)
+        {
+            rightIndex++;
+            if (rightIndex < N)
+            {
+                numOfColourInRange[sortedValuesWithColour[rightIndex].originalColour]++;
+                if (numOfColourInRange[sortedValuesWithColour[rightIndex].originalColour] == 1)
+                    numColoursInRange++;
+            }
+            cout << " rightIndex: " << rightIndex << " numColoursInRange: " << numColoursInRange << endl;
+        }
+
+        cout << "leftIndex: " << leftIndex << " rightIndex: " << rightIndex << endl;
+        cout << "numOfColourInRange: " << endl;
+        for (const auto x : numOfColourInRange)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+
+        if (numColoursInRange != M)
+            break;
+        assert(rightIndex > leftIndex);
+
+        int newRightIndex = rightIndex;
+        while (newRightIndex < N && sortedValuesWithColour[newRightIndex].originalColour == sortedValuesWithColour[leftIndex].originalColour)
+        {
+            newRightIndex++;
+        }
+
+        if (newRightIndex != N)
+        {
+            result = min(result, sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value);
+        }
+
+
+        numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]--;
+        if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 0)
+            numColoursInRange--;
+        cout << "Dropped leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
+        cout << "numOfColourInRange: " << endl;
+        for (const auto x : numOfColourInRange)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+
+    }
 
 
     
