@@ -2,20 +2,12 @@
 // 
 // Solution to: https://www.codechef.com/NOV19B/problems/CAMC
 //
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <limits>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -29,79 +21,6 @@ T read()
 }
 
 
-#if 1
-int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
-{
-    int64_t minDistance = std::numeric_limits<int64_t>::max();
-    vector<int> boxIndices(M);
-    for (int choiceIndex = 0; choiceIndex < M; choiceIndex++)
-    {
-        boxIndices[choiceIndex] = choiceIndex;
-    }
-    while (true)
-    {
-        // Test this set of chosen indices.
-        vector<bool> isColourUsed(M, false);
-        bool isValidChoice = true;
-        for (int i = 0; i < M; i++)
-        {
-            if (isColourUsed[boxIndices[i] % M])
-                isValidChoice = false;
-
-            isColourUsed[boxIndices[i] % M] = true;
-        }
-#if 0
-        string s(N, '.');
-        for (int i = 0; i < M; i++)
-        {
-            s[boxIndices[i]] = 'X';
-        }
-        cout << s << " " << isValidChoice << endl;
-#endif
-
-        if (isValidChoice)
-        {
-            int64_t largestElement = -1;
-            int64_t smallestElement = std::numeric_limits<int64_t>::max();
-
-            for (int i = 0; i < M; i++)
-            {
-                const auto chosenValue = a[boxIndices[i]];
-                if (chosenValue > largestElement)
-                    largestElement = chosenValue;
-                if (chosenValue < smallestElement)
-                    smallestElement = chosenValue;
-            }
-            //cout << "largestElement: " << largestElement << " smallestElement: " << smallestElement << endl;
-
-            minDistance = min(minDistance, largestElement - smallestElement);
-        }
-
-        // Next choice of M boxes.
-        int index = M - 1;
-        while (index >= 0 && boxIndices[index] == N - 1 - (M - 1 - index))
-        {
-            index--;
-        }
-        if (index < 0)
-            break;
-        int nextChoice = boxIndices[index] + 1;
-        for (int i = index; i < M; i++)
-        {
-            boxIndices[i] = nextChoice;
-            nextChoice++;
-        }
-
-    }
-
-
-    return minDistance;
-}
-#endif
-
-
-
-#if 1
 int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 {
     // Ok - if c1, c2, ... , cm are the colours, then any
@@ -234,39 +153,11 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
     return result;
 }
-#endif
 
 
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            const int N = 2 + rand() % 25;
-            const int M = 2 + rand() % (N - 1);
-            assert(M <= N);
-            const int maxA = 1 + rand() % 100;
-
-            cout << N << " " << M << endl;
-
-            for (int i = 0; i < N; i++)
-            {
-                cout << (1 + rand() % maxA) << " ";
-            }
-        }
-
-        return 0;
-    }
     
     const auto T = read<int>();
 
@@ -279,21 +170,8 @@ int main(int argc, char* argv[])
         for (auto& x : a)
             x = read<int64_t>();
 
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(N, M, a);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
-        const auto solutionOptimised = solveOptimised(N, M, a);
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
         const auto solutionOptimised = solveOptimised(N, M, a);
         cout << solutionOptimised << endl;
-#endif
     }
 
     assert(cin);
