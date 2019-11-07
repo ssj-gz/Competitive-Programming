@@ -73,26 +73,18 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     };
     int64_t result = std::numeric_limits<int64_t>::max();
 
-    vector<ValueAndOriginalIndex> aSortedPlusIndices;
+    vector<ValueAndOriginalIndex> aSortedAndIndices;
     for (int i = 0; i < N; i++)
     {
-        aSortedPlusIndices.push_back({a[i], i});
+        aSortedAndIndices.push_back({a[i], i});
     }
-    sort(aSortedPlusIndices.begin(), aSortedPlusIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
-
-#if 0
-    for (const auto& x : aSortedPlusIndicesModM)
-    {
-        cout << "{" << x.first << ", " << x.second << "}, " << " ";
-    }
-    cout << endl;
-#endif
+    sort(aSortedAndIndices.begin(), aSortedAndIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
     for (int i = 1; i < N; i++)
     {
-        if ((aSortedPlusIndices[i].originalIndex % M) != (aSortedPlusIndices[i - 1].originalIndex % M))
+        if ((aSortedAndIndices[i].originalIndex % M) != (aSortedAndIndices[i - 1].originalIndex % M))
         {
-            result = min(result, abs(aSortedPlusIndices[i].value - aSortedPlusIndices[i - 1].value));
+            result = min(result, abs(aSortedAndIndices[i].value - aSortedAndIndices[i - 1].value));
         }
     }
 
