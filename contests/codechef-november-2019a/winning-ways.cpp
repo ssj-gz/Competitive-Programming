@@ -768,7 +768,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     }
 #endif
 
-#if 1
+#if 0
     {
         cout << "numTernaries: " << numTernaries << endl;
         int powerOf2 = 1;
@@ -776,7 +776,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
         {
             const auto pileSizeAsTernaryVector = pileSizeToTernaryVector(pileSizeAndNumOccurrences.pileSize);
-            dp[toInt(pileSizeAsTernaryVector)] += pileSizeAndNumOccurrences.numOccurences;
+            dp[toInt(pileSizeAsTernaryVector)] = pileSizeAndNumOccurrences.numOccurences;
         }
         while (true)
         {
@@ -833,6 +833,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             //}
             //cout << " num: " << dp[tern] << endl;
         }
+        cout << "i: " << i << " dp[0]: " << dp[0] << endl;
 
     }
     for (int i = 1; i < numTernaries; i++)
