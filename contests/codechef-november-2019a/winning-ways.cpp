@@ -803,7 +803,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             }
             return combinedBlahs;
         };
-        cout << "numTernaries: " << numTernaries << endl;
+        //cout << "numTernaries: " << numTernaries << endl;
         int powerOf2 = 1;
         vector<ModNum> dp(numTernaries, 0);
         for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
@@ -827,25 +827,26 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             }
             dp = nextDP;
 #endif
-            cout << "numPeopleTemp: " << numPeopleTemp << endl;
+            //cout << "numPeopleTemp: " << numPeopleTemp << endl;
             if ((numPeopleTemp % 2) == 1)
             {
-                cout << "Combining result" << endl;
+                //cout << "Combining result" << endl;
                 result = combineBlahs(result, dp);
             }
             numPeopleTemp >>= 1;
             powerOf2 *= 2;
             dp = combineBlahs(dp, dp);
-            cout << "powerOf2: " << powerOf2 << " dp[0]: " << dp[0] << endl;
-            if (powerOf2 == 16384)
-                return 0;
+            //cout << "powerOf2: " << powerOf2 << " dp[0]: " << dp[0] << endl;
+            //if (powerOf2 == 16384)
+                //return 0;
         }
         ModNum numInitialWinStates = 0;
         for (int i = 1; i < numTernaries; i++)
         {
             numInitialWinStates += result[i];
         }
-        cout << "Blee: " << numInitialWinStates << endl;
+        //cout << "Blee: " << numInitialWinStates << endl;
+        return numInitialWinStates;
     }
 #endif
 
