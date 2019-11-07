@@ -50,13 +50,13 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 
             isColourUsed[boxIndices[i] % M] = true;
         }
-#if 0
+#if 1
         string s(N, '.');
         for (int i = 0; i < M; i++)
         {
             s[boxIndices[i]] = 'X';
         }
-        cout << s << endl;
+        cout << s << " " << isValidChoice << endl;
 #endif
 
         if (isValidChoice)
@@ -66,11 +66,13 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 
             for (int i = 0; i < M; i++)
             {
-                if (a[i] > largestElement)
-                    largestElement = a[i];
-                if (a[i] < smallestElement)
-                    smallestElement = a[i];
+                const auto chosenValue = a[boxIndices[i]];
+                if (chosenValue > largestElement)
+                    largestElement = chosenValue;
+                if (chosenValue < smallestElement)
+                    smallestElement = chosenValue;
             }
+            cout << "largestElement: " << largestElement << " smallestElement: " << smallestElement << endl;
 
             minDistance = min(minDistance, largestElement - smallestElement);
         }
