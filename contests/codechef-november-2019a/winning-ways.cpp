@@ -1,4 +1,11 @@
-// Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
+// Simon St James (ssjgz) - 2019-11-07
+//
+// Solution to: https://www.codechef.com/NOV19A/problems/MDSWIN
+//
+// Built with my Framework for exploring "Optimal Play" Game Theory games (2017-12-03).
+//
+// I'm only expecting the first two subtasks for this to pass - looking forward to learning
+// some stuff from the Editorial :)
 //#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
