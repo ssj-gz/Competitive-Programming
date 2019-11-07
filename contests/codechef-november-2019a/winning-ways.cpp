@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) - 2017-12-03.  Framework for exploring "Optimal Play" Game Theory games, complete with example ("Move The Coins").
-#define BRUTE_FORCE
+//#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -669,7 +669,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     for (int i = 0; i < numThresholds; i++)
     {
         numStonesInNimPileForThreshold[i] = numFactors(thresholds[i], primesUpToRootMaxN) - 1;
-        cout << "threshold: " << thresholds[i] << " num factors: " << numStonesInNimPileForThreshold[i] << endl;
+        //cout << "threshold: " << thresholds[i] << " num factors: " << numStonesInNimPileForThreshold[i] << endl;
     }
     // largestNumPile will be <= 1440, say.
     const auto largestNumPile = *max_element(numStonesInNimPileForThreshold.begin(), numStonesInNimPileForThreshold.end());
@@ -692,13 +692,13 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     }
 
 
-    cout << "largestNumPile: " << largestNumPile << endl;
+    //cout << "largestNumPile: " << largestNumPile << endl;
     int largestBitnum = 0;
     while (1 << (largestBitnum) <= largestNumPile)
     {
         largestBitnum++;
     }
-    cout << "largestBitnum: " << largestBitnum << endl;
+    //cout << "largestBitnum: " << largestBitnum << endl;
     int numTernaries = 1;
     for (int i = 0; i < largestBitnum; i++)
     {
@@ -768,13 +768,42 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     }
 #endif
 
+#if 1
+    {
+        cout << "numTernaries: " << numTernaries << endl;
+        int powerOf2 = 1;
+        vector<ModNum> dp(numTernaries, 0);
+        for (const auto pileSizeAndNumOccurrences : pileSizesAndOccurences)
+        {
+            const auto pileSizeAsTernaryVector = pileSizeToTernaryVector(pileSizeAndNumOccurrences.pileSize);
+            dp[toInt(pileSizeAsTernaryVector)] += pileSizeAndNumOccurrences.numOccurences;
+        }
+        while (true)
+        {
+            vector<ModNum> nextDP(numTernaries, 0);
+            for (int tern1 = 0; tern1 < numTernaries; tern1++)
+            {
+                const auto asVector1 = toTernaryVector(tern1);
+                for (int tern2 = 0; tern2 < numTernaries; tern2++)
+                {
+                    const auto asVector2 = toTernaryVector(tern2);
+                    nextDP[toInt(addTernaryVectors(asVector1, asVector2))] += dp[tern1] * dp[tern2];
+                }
+            }
+            powerOf2 *= 2;
+            dp = nextDP;
+            cout << "powerOf2: " << powerOf2 << " dp[0]: " << dp[0] << endl;
+        }
+    }
+#endif
+
     vector<ModNum> dp(numTernaries, 0);
     dp[0] = 1;
     for (int i = 0; i < numPeople; i++)
     {
         if ((i % 100) == 0)
         {
-            cout << "i: " << i << " / " << numPeople << endl;
+            //cout << "i: " << i << " / " << numPeople << endl;
         }
         vector<ModNum> nextDP(numTernaries, 0);
         for (int tern = 0; tern < numTernaries; tern++)
@@ -800,7 +829,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             //cout << "i: " << i << " tern: ";
             //for (const auto x : toTernaryVector(tern))
             //{
-                //cout << x << " ";
+            //cout << x << " ";
             //}
             //cout << " num: " << dp[tern] << endl;
         }
