@@ -770,6 +770,11 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
 
 #if 1
     {
+        vector<vector<int>> ternaryVectorLookup(numTernaries);
+        for (int i = 0; i < numTernaries; i++)
+        {
+            ternaryVectorLookup[i] = toTernaryVector(i);
+        }
         cout << "numTernaries: " << numTernaries << endl;
         int powerOf2 = 1;
         vector<ModNum> dp(numTernaries, 0);
@@ -783,10 +788,10 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             vector<ModNum> nextDP(numTernaries, 0);
             for (int tern1 = 0; tern1 < numTernaries; tern1++)
             {
-                const auto asVector1 = toTernaryVector(tern1);
+                const auto& asVector1 = ternaryVectorLookup[tern1];
                 for (int tern2 = 0; tern2 < numTernaries; tern2++)
                 {
-                    const auto asVector2 = toTernaryVector(tern2);
+                    const auto& asVector2 = ternaryVectorLookup[tern2];
                     nextDP[toInt(addTernaryVectors(asVector1, asVector2))] += dp[tern1] * dp[tern2];
                 }
             }
