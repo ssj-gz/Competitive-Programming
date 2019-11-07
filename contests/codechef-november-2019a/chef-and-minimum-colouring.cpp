@@ -125,7 +125,6 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
