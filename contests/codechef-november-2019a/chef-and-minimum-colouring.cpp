@@ -96,6 +96,32 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
     return minDistance;
 }
 #endif
+struct ValueAndColour
+{
+    int64_t value = -1; 
+    int originalColour = -1; 
+};
+
+int64_t minThing(const vector<ValueAndColour>& sortedValuesWithColour, int numColours)
+{
+    int numColoursUsed = 0;
+    vector<bool> isColourUsed(numColours, false);
+
+    for (int i = 0; i < sortedValuesWithColour.size(); i++)
+    {
+        if (isColourUsed[sortedValuesWithColour[i].originalColour])
+            numColoursUsed++;
+        isColourUsed[sortedValuesWithColour[i].originalColour] = true;
+
+        if (sortedValuesWithColour[i].originalColour != sortedValuesWithColour[0].originalColour &&
+           numColoursUsed == numColours)
+        {
+            return sortedValuesWithColour[i].value - sortedValuesWithColour[0].value;
+        }
+    }
+    assert(false);
+};
+
 
 #if 1
 int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
@@ -118,11 +144,6 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     // maximum a[i] such that i mod m = k and the minimum a[j] such that
     // j mod m != k.
     // TODO - rest of documentation, etc.
-    struct ValueAndColour
-    {
-        int64_t value = -1; 
-        int originalColour = -1; 
-    };
     int64_t result = std::numeric_limits<int64_t>::max();
 
     vector<ValueAndColour> sortedValuesWithColour;
@@ -131,6 +152,14 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
         sortedValuesWithColour.push_back({a[i], i % M});
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
+
+    result = min(result, minThing(sortedValuesWithColour, M));
+
+    const int colourOfSmallest = sortedValuesWithColour[0].originalColour;
+    const auto blah = find_if(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [colourOfSmallest](const auto valueAndColour) { return valueAndColour.originalColour != colourOfSmallest; });
+    assert(blah != sortedValuesWithColour.end());
+    sortedValuesWithColour.erase(sortedValuesWithColour.begin(), blah);
+    result = min(result, minThing(sortedValuesWithColour, M));
 
 
     
