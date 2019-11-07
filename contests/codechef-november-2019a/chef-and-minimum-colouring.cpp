@@ -6,7 +6,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -137,11 +137,25 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
+    int previousColour = -1;
+    int numInRun = 0;
+    for (int i = N - 1; i >= 0; i--)
+    {
+        if (sortedValuesWithColour[i].colour != previousColour)
+        {
+            numInRun = 0;
+            previousColour = sortedValuesWithColour[i].colour;
+        }
+        numInRun++;
+        sortedValuesWithColour[i].indexOfNextDifferentColour = (i + numInRun == N ? -1 : i + numInRun);
+
+    }
+
 #if 0
     cout << "sortedValuesWithColour: " << endl;
     for (const auto x : sortedValuesWithColour)
     {
-        cout << "{" << x.value << ", " << x.colour << " } ";
+        cout << "{" << x.value << ", " << x.colour <<  ", " << x.indexOfNextDifferentColour << " } ";
     }
     cout << endl;
 #endif
@@ -204,8 +218,13 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
         if (newRightIndex != N)
         {
+            assert(newRightIndex == rightIndex ||  sortedValuesWithColour[rightIndex].indexOfNextDifferentColour == newRightIndex);
             //cout << "Best for leftIndex: " << sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value << endl;
             result = min(result, sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value);
+        }
+        else
+        {
+            assert(newRightIndex == rightIndex ||sortedValuesWithColour[rightIndex].indexOfNextDifferentColour == -1);
         }
 
 
