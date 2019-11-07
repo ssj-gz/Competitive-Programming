@@ -768,7 +768,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
     }
 #endif
 
-#if 0
+#if 1
     {
         cout << "numTernaries: " << numTernaries << endl;
         int powerOf2 = 1;
@@ -793,6 +793,8 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             powerOf2 *= 2;
             dp = nextDP;
             cout << "powerOf2: " << powerOf2 << " dp[0]: " << dp[0] << endl;
+            if (powerOf2 == 8)
+                return 0;
         }
     }
 #endif
