@@ -155,14 +155,16 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
+#if 1
     cout << "sortedValuesWithColour: " << endl;
     for (const auto x : sortedValuesWithColour)
     {
         cout << "{" << x.value << ", " << x.originalColour << " } ";
     }
     cout << endl;
+#endif
 
-    result = min(result, minThing(sortedValuesWithColour, M));
+    //result = min(result, minThing(sortedValuesWithColour, M));
 
     int rightIndex = 0;
     vector<int> numOfColourInRange(M, 0);
@@ -174,13 +176,15 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
         //numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]++;
         //if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 1)
             //numColoursInRange++;
-        //cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
+        cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
+#if 1
         cout << "numOfColourInRange: " << endl;
         for (const auto x : numOfColourInRange)
         {
             cout << " " << x;
         }
         cout << endl;
+#endif
 
         while (numColoursInRange < M && rightIndex < N)
         {
@@ -196,11 +200,13 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
         cout << "leftIndex: " << leftIndex << " rightIndex: " << rightIndex << endl;
         cout << "numOfColourInRange: " << endl;
+#if 1
         for (const auto x : numOfColourInRange)
         {
             cout << " " << x;
         }
         cout << endl;
+#endif
 
         if (numColoursInRange != M)
             break;
@@ -214,6 +220,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
         if (newRightIndex != N)
         {
+            cout << "Best for leftIndex: " << sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value << endl;
             result = min(result, sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value);
         }
 
@@ -221,6 +228,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
         numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]--;
         if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 0)
             numColoursInRange--;
+#if 0
         cout << "Dropped leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
         cout << "numOfColourInRange: " << endl;
         for (const auto x : numOfColourInRange)
@@ -228,6 +236,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
             cout << " " << x;
         }
         cout << endl;
+#endif
 
     }
 
