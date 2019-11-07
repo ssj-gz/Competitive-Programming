@@ -50,7 +50,7 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 
             isColourUsed[boxIndices[i] % M] = true;
         }
-#if 1
+#if 0
         string s(N, '.');
         for (int i = 0; i < M; i++)
         {
@@ -72,7 +72,7 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
                 if (chosenValue < smallestElement)
                     smallestElement = chosenValue;
             }
-            cout << "largestElement: " << largestElement << " smallestElement: " << smallestElement << endl;
+            //cout << "largestElement: " << largestElement << " smallestElement: " << smallestElement << endl;
 
             minDistance = min(minDistance, largestElement - smallestElement);
         }
