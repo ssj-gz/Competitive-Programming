@@ -38,6 +38,7 @@ void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::
     {
         sum += pair.second - pair.first;
     }
+    cout << "# pairs: " << pairsSoFar.size() << " sum: " << sum << endl;
     if (answers[pairsSoFar.size()].first < sum)
     {
         answers[pairsSoFar.size()].first = sum;
@@ -94,6 +95,9 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
     {
         answers[i].first = numeric_limits<int64_t>::min();
     }
+
+    vector<std::pair<int64_t, int64_t>> pairsSoFar;
+    solutionBruteForceAux(0, psByS, pairsSoFar, isIndexUsed, answers);
     
     vector<int64_t> result;
     for (int i = 1; i <= N / 2; i++)
