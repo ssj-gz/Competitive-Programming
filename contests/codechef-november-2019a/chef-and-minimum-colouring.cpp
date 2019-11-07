@@ -104,25 +104,6 @@ struct ValueAndColour
     int originalColour = -1; 
 };
 
-int64_t minThing(const vector<ValueAndColour>& sortedValuesWithColour, int numColours)
-{
-    int numColoursUsed = 0;
-    vector<bool> isColourUsed(numColours, false);
-
-    for (int i = 0; i < sortedValuesWithColour.size(); i++)
-    {
-        if (isColourUsed[sortedValuesWithColour[i].originalColour])
-            numColoursUsed++;
-        isColourUsed[sortedValuesWithColour[i].originalColour] = true;
-
-        if (sortedValuesWithColour[i].originalColour != sortedValuesWithColour[0].originalColour &&
-           numColoursUsed == numColours)
-        {
-            return sortedValuesWithColour[i].value - sortedValuesWithColour[0].value;
-        }
-    }
-    return std::numeric_limits<int64_t>::max();
-};
 
 
 #if 1
