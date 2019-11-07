@@ -84,7 +84,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     {
         if ((aSortedAndIndices[i].originalIndex % M) != (aSortedAndIndices[i - 1].originalIndex % M))
         {
-            result = min(result, abs(aSortedAndIndices[i].value - aSortedAndIndices[i - 1].value));
+            result = min(result, aSortedAndIndices[i].value - aSortedAndIndices[i - 1].value);
         }
     }
 
