@@ -6,7 +6,7 @@
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-//#define NDEBUG
+#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -210,22 +210,9 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
             break;
         assert(rightIndex > leftIndex);
 
-        int newRightIndex = rightIndex;
-        while (newRightIndex < N && sortedValuesWithColour[newRightIndex].colour == sortedValuesWithColour[leftIndex].colour)
-        {
-            newRightIndex++;
-        }
-
-        if (newRightIndex != N)
-        {
-            assert(newRightIndex == rightIndex ||  sortedValuesWithColour[rightIndex].indexOfNextDifferentColour == newRightIndex);
-            //cout << "Best for leftIndex: " << sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value << endl;
-            result = min(result, sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value);
-        }
-        else
-        {
-            assert(newRightIndex == rightIndex ||sortedValuesWithColour[rightIndex].indexOfNextDifferentColour == -1);
-        }
+        const int minDifferentColourRightIndex = (sortedValuesWithColour[rightIndex].colour != sortedValuesWithColour[leftIndex].colour ? rightIndex : sortedValuesWithColour[rightIndex].indexOfNextDifferentColour);
+        if (minDifferentColourRightIndex != -1)
+            result = min(result, sortedValuesWithColour[minDifferentColourRightIndex].value - sortedValuesWithColour[leftIndex].value);
 
 
         numOfColourInRange[sortedValuesWithColour[leftIndex].colour]--;
