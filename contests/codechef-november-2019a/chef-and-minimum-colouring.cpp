@@ -46,7 +46,6 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     {
         int64_t value = -1; 
         int colour = -1; 
-        int indexOfNextDifferentColour = -1;
     };
 
     vector<ValueAndColour> sortedValuesWithColour;
@@ -58,20 +57,6 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
     // NB: from this point onwards, all references to "index"/ "indices" refer to indices in sortedValuesWithColour, not in the
     // original "a", which we no longer care about.
-
-    // Compute indexOfNextDifferentColour for each element in sortedValuesWithColour.
-    int previousColour = -1;
-    int numInRun = 0;
-    for (int i = N - 1; i >= 0; i--)
-    {
-        if (sortedValuesWithColour[i].colour != previousColour)
-        {
-            numInRun = 0;
-            previousColour = sortedValuesWithColour[i].colour;
-        }
-        numInRun++;
-        sortedValuesWithColour[i].indexOfNextDifferentColour = (i + numInRun == N ? -1 : i + numInRun);
-    }
 
     int64_t result = std::numeric_limits<int64_t>::max();
 
@@ -100,14 +85,11 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
             break;
         }
         assert(rightIndex > leftIndex);
+        assert(sortedValuesWithColour[rightIndex].colour != sortedValuesWithColour[leftIndex].colour);
 
-        // Pick the smallest minDifferentColourRightIndex >= rightIndex such that leftIndex and rightIndex have different colours.
-        // If such a minDifferentColourRightIndex, then there is a choice of M indices all with different colours with
+        // There is a choice of M indices all with different colours with
         // the min value = sortedValuesWithColour[leftIndex] and the max value sortedValuesWithColour[rightIndex].
-        const int minDifferentColourRightIndex = (sortedValuesWithColour[rightIndex].colour != sortedValuesWithColour[leftIndex].colour ? rightIndex : sortedValuesWithColour[rightIndex].indexOfNextDifferentColour);
-        if (minDifferentColourRightIndex != -1)
-            result = min(result, sortedValuesWithColour[minDifferentColourRightIndex].value - sortedValuesWithColour[leftIndex].value);
-
+        result = min(result, sortedValuesWithColour[rightIndex].value - sortedValuesWithColour[leftIndex].value);
 
         // Drop the left hand element of the range.
         numOfColourInRange[sortedValuesWithColour[leftIndex].colour]--;
