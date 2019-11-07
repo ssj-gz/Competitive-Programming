@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/NOV19B/problems/CAMC
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -155,7 +155,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
-#if 1
+#if 0
     cout << "sortedValuesWithColour: " << endl;
     for (const auto x : sortedValuesWithColour)
     {
@@ -172,12 +172,12 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     int numColoursInRange = 1;
     for (int leftIndex = 0; leftIndex < N; leftIndex++)
     {
-        cout << "Begin loop; leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
+        //cout << "Begin loop; leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
         //numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]++;
         //if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 1)
             //numColoursInRange++;
-        cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
-#if 1
+        //cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
+#if 0
         cout << "numOfColourInRange: " << endl;
         for (const auto x : numOfColourInRange)
         {
@@ -195,12 +195,12 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
                 if (numOfColourInRange[sortedValuesWithColour[rightIndex].originalColour] == 1)
                     numColoursInRange++;
             }
-            cout << " rightIndex: " << rightIndex << " numColoursInRange: " << numColoursInRange << endl;
+            //cout << " rightIndex: " << rightIndex << " numColoursInRange: " << numColoursInRange << endl;
         }
 
-        cout << "leftIndex: " << leftIndex << " rightIndex: " << rightIndex << endl;
-        cout << "numOfColourInRange: " << endl;
-#if 1
+        //cout << "leftIndex: " << leftIndex << " rightIndex: " << rightIndex << endl;
+        //cout << "numOfColourInRange: " << endl;
+#if 0
         for (const auto x : numOfColourInRange)
         {
             cout << " " << x;
@@ -220,7 +220,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
         if (newRightIndex != N)
         {
-            cout << "Best for leftIndex: " << sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value << endl;
+            //cout << "Best for leftIndex: " << sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value << endl;
             result = min(result, sortedValuesWithColour[newRightIndex].value - sortedValuesWithColour[leftIndex].value);
         }
 
