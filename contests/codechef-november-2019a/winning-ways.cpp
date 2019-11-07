@@ -796,20 +796,29 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         {
             ternaryVectorLookup[i] = toTernaryVector(i);
         }
-        auto combineBlahs = [numTernaries, &ternaryVectorLookup, &ternaryFromAddingTernaryVectors](const vector<ModNum>& blah1, const vector<ModNum>& blah2)
+        vector<vector<int>> ternaryProductLookup(numTernaries, vector<int>(numTernaries, 0));
+        for (int tern1 = 0; tern1 < numTernaries; tern1++)
+        {
+            const auto& asVector1 = ternaryVectorLookup[tern1];
+            for (int tern2 = 0; tern2 < numTernaries; tern2++)
+            {
+                const auto& asVector2 = ternaryVectorLookup[tern2];
+                ternaryProductLookup[tern1][tern2] = ternaryFromAddingTernaryVectors(asVector1, asVector2);
+            }
+        }
+        auto combineBlahs = [numTernaries, &ternaryVectorLookup, &ternaryProductLookup](const vector<ModNum>& blah1, const vector<ModNum>& blah2)
         {
             vector<ModNum> combinedBlahs(numTernaries, 0);
             for (int tern1 = 0; tern1 < numTernaries; tern1++)
             {
-                const auto& asVector1 = ternaryVectorLookup[tern1];
                 for (int tern2 = 0; tern2 < numTernaries; tern2++)
                 {
-                    const auto& asVector2 = ternaryVectorLookup[tern2];
-                    combinedBlahs[ternaryFromAddingTernaryVectors(asVector1, asVector2)] += blah1[tern1] * blah2[tern2];
+                    combinedBlahs[ternaryProductLookup[tern1][tern2]] += blah1[tern1] * blah2[tern2];
                 }
             }
             return combinedBlahs;
         };
+
         //cout << "numTernaries: " << numTernaries << endl;
         int powerOf2 = 1;
         vector<ModNum> dp(numTernaries, 0);
@@ -845,7 +854,7 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
             dp = combineBlahs(dp, dp);
             //cout << "powerOf2: " << powerOf2 << " dp[0]: " << dp[0] << endl;
             //if (powerOf2 == 16384)
-                //return 0;
+            //return 0;
         }
         ModNum numInitialWinStates = 0;
         for (int i = 1; i < numTernaries; i++)
