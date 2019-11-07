@@ -56,6 +56,10 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
+    // NB: from this point onwards, all references to "index"/ "indices" refer to indices in sortedValuesWithColour, not in the
+    // original "a", which we no longer care about.
+
+    // Compute indexOfNextDifferentColour for each element in sortedValuesWithColour.
     int previousColour = -1;
     int numInRun = 0;
     for (int i = N - 1; i >= 0; i--)
@@ -67,19 +71,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
         }
         numInRun++;
         sortedValuesWithColour[i].indexOfNextDifferentColour = (i + numInRun == N ? -1 : i + numInRun);
-
     }
-
-#if 0
-    cout << "sortedValuesWithColour: " << endl;
-    for (const auto x : sortedValuesWithColour)
-    {
-        cout << "{" << x.value << ", " << x.colour <<  ", " << x.indexOfNextDifferentColour << " } ";
-    }
-    cout << endl;
-#endif
-
-    //result = min(result, minThing(sortedValuesWithColour, M));
 
     int64_t result = std::numeric_limits<int64_t>::max();
 
@@ -89,20 +81,9 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     int numColoursInRange = 1;
     for (int leftIndex = 0; leftIndex < N; leftIndex++)
     {
-        //cout << "Begin loop; leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
-        //numOfColourInRange[sortedValuesWithColour[leftIndex].colour]++;
-        //if (numOfColourInRange[sortedValuesWithColour[leftIndex].colour] == 1)
-        //numColoursInRange++;
-        //cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
-#if 0
-        cout << "numOfColourInRange: " << endl;
-        for (const auto x : numOfColourInRange)
-        {
-            cout << " " << x;
-        }
-        cout << endl;
-#endif
-
+        // Maintain the invariant that rightIndex is the smallest index >= leftIndex
+        // such that the set { a[j].colour | leftIndex <= j <= rightIndex} is 
+        // precisely the set of M colours.
         while (numColoursInRange < M && rightIndex < N)
         {
             rightIndex++;
@@ -112,44 +93,27 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
                 if (numOfColourInRange[sortedValuesWithColour[rightIndex].colour] == 1)
                     numColoursInRange++;
             }
-            //cout << " rightIndex: " << rightIndex << " numColoursInRange: " << numColoursInRange << endl;
         }
-
-        //cout << "leftIndex: " << leftIndex << " rightIndex: " << rightIndex << endl;
-        //cout << "numOfColourInRange: " << endl;
-#if 0
-        for (const auto x : numOfColourInRange)
-        {
-            cout << " " << x;
-        }
-        cout << endl;
-#endif
-
         if (numColoursInRange != M)
+        {
+            // Could not find all M colours in indices >= leftIndex; no point progressing.
             break;
+        }
         assert(rightIndex > leftIndex);
 
+        // Pick the smallest minDifferentColourRightIndex >= rightIndex such that leftIndex and rightIndex have different colours.
+        // If such a minDifferentColourRightIndex, then there is a choice of M indices all with different colours with
+        // the min value = sortedValuesWithColour[leftIndex] and the max value sortedValuesWithColour[rightIndex].
         const int minDifferentColourRightIndex = (sortedValuesWithColour[rightIndex].colour != sortedValuesWithColour[leftIndex].colour ? rightIndex : sortedValuesWithColour[rightIndex].indexOfNextDifferentColour);
         if (minDifferentColourRightIndex != -1)
             result = min(result, sortedValuesWithColour[minDifferentColourRightIndex].value - sortedValuesWithColour[leftIndex].value);
 
 
+        // Drop the left hand element of the range.
         numOfColourInRange[sortedValuesWithColour[leftIndex].colour]--;
         if (numOfColourInRange[sortedValuesWithColour[leftIndex].colour] == 0)
             numColoursInRange--;
-#if 0
-        cout << "Dropped leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
-        cout << "numOfColourInRange: " << endl;
-        for (const auto x : numOfColourInRange)
-        {
-            cout << " " << x;
-        }
-        cout << endl;
-#endif
-
     }
-
-
 
     return result;
 }
