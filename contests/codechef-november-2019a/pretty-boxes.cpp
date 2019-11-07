@@ -28,25 +28,25 @@ T read()
     return toRead;
 }
 
-void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::pair<int64_t, int64_t>>& pairsSoFar, vector<bool>& isIndexUsed, vector<std::pair<int64_t, vector<std::pair<int64_t, int64_t>>>>& answers)
+void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::pair<int64_t, int64_t>>& indexPairsSoFar, vector<bool>& isIndexUsed, vector<std::pair<int64_t, vector<std::pair<int64_t, int64_t>>>>& answers)
 {
     if (index == psByS.size())
         return;
 
     int64_t sum = 0;
-    for (const auto& pair : pairsSoFar)
+    for (const auto& pair : indexPairsSoFar)
     {
         sum += psByS[pair.second] - psByS[pair.first];
     }
-    cout << "# pairs: " << pairsSoFar.size() << " sum: " << sum << endl;
-    if (answers[pairsSoFar.size()].first < sum)
+    cout << "# pairs: " << indexPairsSoFar.size() << " sum: " << sum << endl;
+    if (answers[indexPairsSoFar.size()].first < sum)
     {
-        answers[pairsSoFar.size()].first = sum;
-        answers[pairsSoFar.size()].second = pairsSoFar;
+        answers[indexPairsSoFar.size()].first = sum;
+        answers[indexPairsSoFar.size()].second = indexPairsSoFar;
     }
 
     // Don't use this index.
-    solutionBruteForceAux(index + 1, psByS, pairsSoFar, isIndexUsed, answers);
+    solutionBruteForceAux(index + 1, psByS, indexPairsSoFar, isIndexUsed, answers);
 
     if (isIndexUsed[index])
         return;
@@ -58,9 +58,9 @@ void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::
             continue;
 
         isIndexUsed[otherIndexForPair] = true;
-        pairsSoFar.push_back({index, otherIndexForPair});
-        solutionBruteForceAux(index + 1, psByS, pairsSoFar, isIndexUsed, answers);
-        pairsSoFar.pop_back();
+        indexPairsSoFar.push_back({index, otherIndexForPair});
+        solutionBruteForceAux(index + 1, psByS, indexPairsSoFar, isIndexUsed, answers);
+        indexPairsSoFar.pop_back();
         isIndexUsed[otherIndexForPair] = false;
     }
 
@@ -101,8 +101,8 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
         answers[i].first = numeric_limits<int64_t>::min();
     }
 
-    vector<std::pair<int64_t, int64_t>> pairsSoFar;
-    solutionBruteForceAux(0, psByS, pairsSoFar, isIndexUsed, answers);
+    vector<std::pair<int64_t, int64_t>> indexPairsSoFar;
+    solutionBruteForceAux(0, psByS, indexPairsSoFar, isIndexUsed, answers);
     
     vector<int64_t> result;
     for (int i = 1; i <= N / 2; i++)
