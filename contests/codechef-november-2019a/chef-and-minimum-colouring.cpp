@@ -98,11 +98,6 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
     return minDistance;
 }
 #endif
-struct ValueAndColour
-{
-    int64_t value = -1; 
-    int originalColour = -1; 
-};
 
 
 
@@ -127,7 +122,13 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     // maximum a[i] such that i mod m = k and the minimum a[j] such that
     // j mod m != k.
     // TODO - rest of documentation, etc.
-    int64_t result = std::numeric_limits<int64_t>::max();
+
+    struct ValueAndColour
+    {
+        int64_t value = -1; 
+        int colour = -1; 
+        int indexOfNextDifferentColour = -1;
+    };
 
     vector<ValueAndColour> sortedValuesWithColour;
     for (int i = 0; i < N; i++)
@@ -140,23 +141,25 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     cout << "sortedValuesWithColour: " << endl;
     for (const auto x : sortedValuesWithColour)
     {
-        cout << "{" << x.value << ", " << x.originalColour << " } ";
+        cout << "{" << x.value << ", " << x.colour << " } ";
     }
     cout << endl;
 #endif
 
     //result = min(result, minThing(sortedValuesWithColour, M));
 
+    int64_t result = std::numeric_limits<int64_t>::max();
+
     int rightIndex = 0;
     vector<int> numOfColourInRange(M, 0);
-    numOfColourInRange[sortedValuesWithColour[0].originalColour]++;
+    numOfColourInRange[sortedValuesWithColour[0].colour]++;
     int numColoursInRange = 1;
     for (int leftIndex = 0; leftIndex < N; leftIndex++)
     {
         //cout << "Begin loop; leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
-        //numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]++;
-        //if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 1)
-            //numColoursInRange++;
+        //numOfColourInRange[sortedValuesWithColour[leftIndex].colour]++;
+        //if (numOfColourInRange[sortedValuesWithColour[leftIndex].colour] == 1)
+        //numColoursInRange++;
         //cout << "updated leftIndex colour:  numColoursInRange: " << numColoursInRange << endl;
 #if 0
         cout << "numOfColourInRange: " << endl;
@@ -172,8 +175,8 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
             rightIndex++;
             if (rightIndex < N)
             {
-                numOfColourInRange[sortedValuesWithColour[rightIndex].originalColour]++;
-                if (numOfColourInRange[sortedValuesWithColour[rightIndex].originalColour] == 1)
+                numOfColourInRange[sortedValuesWithColour[rightIndex].colour]++;
+                if (numOfColourInRange[sortedValuesWithColour[rightIndex].colour] == 1)
                     numColoursInRange++;
             }
             //cout << " rightIndex: " << rightIndex << " numColoursInRange: " << numColoursInRange << endl;
@@ -194,7 +197,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
         assert(rightIndex > leftIndex);
 
         int newRightIndex = rightIndex;
-        while (newRightIndex < N && sortedValuesWithColour[newRightIndex].originalColour == sortedValuesWithColour[leftIndex].originalColour)
+        while (newRightIndex < N && sortedValuesWithColour[newRightIndex].colour == sortedValuesWithColour[leftIndex].colour)
         {
             newRightIndex++;
         }
@@ -206,8 +209,8 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
         }
 
 
-        numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour]--;
-        if (numOfColourInRange[sortedValuesWithColour[leftIndex].originalColour] == 0)
+        numOfColourInRange[sortedValuesWithColour[leftIndex].colour]--;
+        if (numOfColourInRange[sortedValuesWithColour[leftIndex].colour] == 0)
             numColoursInRange--;
 #if 0
         cout << "Dropped leftIndex: " << leftIndex << " numColoursInRange: " << numColoursInRange << endl;
@@ -222,7 +225,7 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     }
 
 
-    
+
     return result;
 }
 #endif
