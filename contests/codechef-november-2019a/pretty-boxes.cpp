@@ -36,7 +36,7 @@ void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::
     int64_t sum = 0;
     for (const auto& pair : pairsSoFar)
     {
-        sum += pair.second - pair.first;
+        sum += psByS[pair.second] - psByS[pair.first];
     }
     cout << "# pairs: " << pairsSoFar.size() << " sum: " << sum << endl;
     if (answers[pairsSoFar.size()].first < sum)
