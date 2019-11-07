@@ -121,7 +121,7 @@ int64_t minThing(const vector<ValueAndColour>& sortedValuesWithColour, int numCo
             return sortedValuesWithColour[i].value - sortedValuesWithColour[0].value;
         }
     }
-    assert(false);
+    return std::numeric_limits<int64_t>::max();
 };
 
 
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(N, M, a);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
+#if 1
         const auto solutionOptimised = solveOptimised(N, M, a);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
