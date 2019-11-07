@@ -81,7 +81,12 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
     {
         sAndP.push_back({SOrig[i], POrig[i]});
     }
-    sort(sAndP.begin(), sAndP.end(), [](const auto& lhs, const auto& rhs) { return lhs.s < rhs.s; });
+    sort(sAndP.begin(), sAndP.end(), [](const auto& lhs, const auto& rhs) 
+            { 
+                if (lhs.s != rhs.s)
+                    return lhs.s < rhs.s;
+                return lhs.p < rhs.p;
+            });
 
     vector<int64_t> psByS;
     for (int i = 0; i < N; i++)
