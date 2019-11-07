@@ -82,18 +82,12 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     cout << endl;
 #endif
 
-    int lastValue = aSortedPlusIndicesModM.front().first;
-    int lastValuesIndexModM = aSortedPlusIndicesModM.front().second;
-    for (const auto& x : aSortedPlusIndicesModM)
+    for (int i = 1; i < N; i++)
     {
-        //cout << "x: {" << x.first << ", " << x.second << "} lastValue: " << lastValue << " lastValuesIndexModM: " << lastValuesIndexModM << endl;
-        if (x.second != lastValuesIndexModM)
+        if (aSortedPlusIndicesModM[i].second != aSortedPlusIndicesModM[i - 1].second)
         {
-            result = min(result, abs(x.first - lastValue));
-            //cout << "Updating result: " << result << endl;
-            lastValuesIndexModM = x.second;
+            result = min(result, abs(aSortedPlusIndicesModM[i].first - aSortedPlusIndicesModM[i - 1].first));
         }
-        lastValue = x.first;
     }
 
     
