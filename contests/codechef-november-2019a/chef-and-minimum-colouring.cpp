@@ -31,23 +31,6 @@ T read()
 #if 1
 int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 {
-    // Ok - if c1, c2, ... , cm are the colours, then any
-    // valid colouring is of the form:
-    //
-    // π(c1)π(c2)...π(cm)π(c1)π(c2)...π(cm)...π(c1)π(c2)...
-    //
-    // where π is a permutation of c1, c2, ... , cm i.e.
-    // is it some permutation of c1, c2, ... , cm.
-    //
-    // Similarly, a choice is valid for such a π if and only if
-    // it is valid for the colouring:
-    //
-    // c1c2...cmc1c2...cm...c1c2...
-    //
-    // The colours at i and j are different if and only if i != j mod m,
-    // so we merely need to find, for each k ... 1, 2, ..., m, the 
-    // maximum a[i] such that i mod m = k and the minimum a[j] such that
-    // j mod m != k.
     int64_t minDistance = std::numeric_limits<int64_t>::max();
     for (int i = 0; i < N; i++)
     {
@@ -65,14 +48,32 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 #if 1
 int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 {
+    // Ok - if c1, c2, ... , cm are the colours, then any
+    // valid colouring is of the form:
+    //
+    // π(c1)π(c2)...π(cm)π(c1)π(c2)...π(cm)...π(c1)π(c2)...
+    //
+    // where π is a permutation of c1, c2, ... , cm i.e.
+    // is it some permutation of c1, c2, ... , cm.
+    //
+    // Similarly, a choice is valid for such a π if and only if
+    // it is valid for the colouring:
+    //
+    // c1c2...cmc1c2...cm...c1c2...
+    //
+    // The colours at i and j are different if and only if i != j mod m,
+    // so we merely need to find, for each k ... 1, 2, ..., m, the 
+    // maximum a[i] such that i mod m = k and the minimum a[j] such that
+    // j mod m != k.
+    // TODO - rest of documentation, etc.
     int64_t result = std::numeric_limits<int64_t>::max();
 
-    vector<std::pair<int64_t, int>> aSortedPlusIndicesModM;
+    vector<std::pair<int64_t, int>> aSortedPlusIndices;
     for (int i = 0; i < N; i++)
     {
-        aSortedPlusIndicesModM.push_back({a[i], i % M});
+        aSortedPlusIndices.push_back({a[i], i % M});
     }
-    sort(aSortedPlusIndicesModM.begin(), aSortedPlusIndicesModM.end(), [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
+    sort(aSortedPlusIndices.begin(), aSortedPlusIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
 
 #if 0
     for (const auto& x : aSortedPlusIndicesModM)
@@ -84,9 +85,9 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
     for (int i = 1; i < N; i++)
     {
-        if (aSortedPlusIndicesModM[i].second != aSortedPlusIndicesModM[i - 1].second)
+        if ((aSortedPlusIndices[i].second % M) != (aSortedPlusIndices[i - 1].second % M))
         {
-            result = min(result, abs(aSortedPlusIndicesModM[i].first - aSortedPlusIndicesModM[i - 1].first));
+            result = min(result, abs(aSortedPlusIndices[i].first - aSortedPlusIndices[i - 1].first));
         }
     }
 
