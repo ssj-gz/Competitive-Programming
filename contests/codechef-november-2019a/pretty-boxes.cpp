@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 #include <cassert>
 
@@ -27,10 +28,47 @@ T read()
     return toRead;
 }
 
+void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::pair<int64_t, int64_t>>& pairsSoFar, vector<bool>& isIndexUsed, vector<std::pair<int64_t, vector<std::pair<int64_t, int64_t>>>>& answers)
+{
+    if (index == psByS.size())
+        return;
+
+    int64_t sum = 0;
+    for (const auto& pair : pairsSoFar)
+    {
+        sum += pair.second - pair.first;
+    }
+    if (answers[pairsSoFar.size()].first < sum)
+    {
+        answers[pairsSoFar.size()].first = sum;
+        answers[pairsSoFar.size()].second = pairsSoFar;
+    }
+
+    // Don't use this index.
+    solutionBruteForceAux(index + 1, psByS, pairsSoFar, isIndexUsed, answers);
+
+    if (isIndexUsed[index])
+        return;
+
+    isIndexUsed[index] = true;
+    for (int otherIndexForPair = index + 1; otherIndexForPair < psByS.size(); otherIndexForPair++)
+    {
+        if (isIndexUsed[otherIndexForPair])
+            continue;
+
+        isIndexUsed[otherIndexForPair] = true;
+        pairsSoFar.push_back({index, otherIndexForPair});
+        solutionBruteForceAux(index + 1, psByS, pairsSoFar, isIndexUsed, answers);
+        pairsSoFar.pop_back();
+        isIndexUsed[otherIndexForPair] = false;
+    }
+
+    isIndexUsed[index] = false;
+}
+
 #if 1
 vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vector<int64_t>& POrig)
 {
-    vector<int64_t> result;
     struct SAndP
     {
         int64_t s = -1;
@@ -49,7 +87,19 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
     {
         psByS.push_back(sAndP[i].p);
     }
+
+    vector<bool> isIndexUsed(N, false);
+    vector<std::pair<int64_t, vector<std::pair<int64_t, int64_t>>>> answers(N / 2 + 2);
+    for (int i = 0; i < N; i++)
+    {
+        answers[i].first = numeric_limits<int64_t>::min();
+    }
     
+    vector<int64_t> result;
+    for (int i = 1; i <= N / 2; i++)
+    {
+        result.push_back(answers[i].first);
+    }
     return result;
 }
 #endif
