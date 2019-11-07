@@ -118,27 +118,20 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     // maximum a[i] such that i mod m = k and the minimum a[j] such that
     // j mod m != k.
     // TODO - rest of documentation, etc.
-    struct ValueAndOriginalIndex
+    struct ValueAndColour
     {
         int64_t value = -1; 
-        int originalIndex = -1; 
+        int originalColour = -1; 
     };
     int64_t result = std::numeric_limits<int64_t>::max();
 
-    vector<ValueAndOriginalIndex> aSortedAndIndices;
+    vector<ValueAndColour> sortedValuesWithColour;
     for (int i = 0; i < N; i++)
     {
-        aSortedAndIndices.push_back({a[i], i});
+        sortedValuesWithColour.push_back({a[i], i % M});
     }
-    sort(aSortedAndIndices.begin(), aSortedAndIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
+    sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
-    for (int i = 1; i < N; i++)
-    {
-        if ((aSortedAndIndices[i].originalIndex % M) != (aSortedAndIndices[i - 1].originalIndex % M))
-        {
-            result = min(result, aSortedAndIndices[i].value - aSortedAndIndices[i - 1].value);
-        }
-    }
 
     
     return result;
