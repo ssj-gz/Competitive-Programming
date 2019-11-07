@@ -748,6 +748,18 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
         return result;
     };
 
+    auto ternaryFromAddingTernaryVectors = [largestBitnum](const vector<int>& ternaryVector1, const vector<int>& ternaryVector2)
+    {
+        int powerOf3 = 1;
+        int asInt = 0;
+        for (int i = 0; i < largestBitnum; i++)
+        {
+            asInt += ((ternaryVector1[i] + ternaryVector2[i]) % 3) * powerOf3;
+            powerOf3 *= 3;
+        }
+        return asInt;
+    };
+
 
 #if 0
     for (int i = 0; i <= largestNumPile; i++)
@@ -792,13 +804,13 @@ ModNum solveOptimised2(const vector<int64_t>& thresholds, int64_t numPeople, con
                 for (int tern2 = 0; tern2 < numTernaries; tern2++)
                 {
                     const auto& asVector2 = ternaryVectorLookup[tern2];
-                    nextDP[toInt(addTernaryVectors(asVector1, asVector2))] += dp[tern1] * dp[tern2];
+                    nextDP[ternaryFromAddingTernaryVectors(asVector1, asVector2)] += dp[tern1] * dp[tern2];
                 }
             }
             powerOf2 *= 2;
             dp = nextDP;
             cout << "powerOf2: " << powerOf2 << " dp[0]: " << dp[0] << endl;
-            if (powerOf2 == 8)
+            if (powerOf2 == 16384)
                 return 0;
         }
     }
