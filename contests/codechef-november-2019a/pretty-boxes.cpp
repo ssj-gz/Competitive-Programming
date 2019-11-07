@@ -132,6 +132,15 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
+        const int N = 1 + rand() % 10;
+        const int maxS = 1 + rand() % 100;
+        const int maxP = 1 + rand() % 100;
+
+        cout << N << endl;
+        for (int i = 0; i < N; i++)
+        {
+            cout << (1 + rand() % maxS) << " " << (1 + rand() % maxP) << endl;
+        }
 
         return 0;
     }
