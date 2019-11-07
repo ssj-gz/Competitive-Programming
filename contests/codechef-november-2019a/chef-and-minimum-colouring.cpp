@@ -66,14 +66,19 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
     // maximum a[i] such that i mod m = k and the minimum a[j] such that
     // j mod m != k.
     // TODO - rest of documentation, etc.
+    struct ValueAndOriginalIndex
+    {
+        int64_t value = -1; 
+        int originalIndex = -1; 
+    };
     int64_t result = std::numeric_limits<int64_t>::max();
 
-    vector<std::pair<int64_t, int>> aSortedPlusIndices;
+    vector<ValueAndOriginalIndex> aSortedPlusIndices;
     for (int i = 0; i < N; i++)
     {
-        aSortedPlusIndices.push_back({a[i], i % M});
+        aSortedPlusIndices.push_back({a[i], i});
     }
-    sort(aSortedPlusIndices.begin(), aSortedPlusIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
+    sort(aSortedPlusIndices.begin(), aSortedPlusIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
 
 #if 0
     for (const auto& x : aSortedPlusIndicesModM)
@@ -85,9 +90,9 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
     for (int i = 1; i < N; i++)
     {
-        if ((aSortedPlusIndices[i].second % M) != (aSortedPlusIndices[i - 1].second % M))
+        if ((aSortedPlusIndices[i].originalIndex % M) != (aSortedPlusIndices[i - 1].originalIndex % M))
         {
-            result = min(result, abs(aSortedPlusIndices[i].first - aSortedPlusIndices[i - 1].first));
+            result = min(result, abs(aSortedPlusIndices[i].value - aSortedPlusIndices[i - 1].value));
         }
     }
 
