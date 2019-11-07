@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/NOV19B/problems/CAMC
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -50,6 +50,14 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 
             isColourUsed[boxIndices[i] % M] = true;
         }
+#if 0
+        string s(N, '.');
+        for (int i = 0; i < M; i++)
+        {
+            s[boxIndices[i]] = 'X';
+        }
+        cout << s << endl;
+#endif
 
         if (isValidChoice)
         {
@@ -69,7 +77,7 @@ int64_t solveBruteForce(int N, int M, const vector<int64_t>& a)
 
         // Next choice of M boxes.
         int index = M - 1;
-        while (index >= 0 && boxIndices[index] == M - 1 - (M - 1 - index))
+        while (index >= 0 && boxIndices[index] == N - 1 - (M - 1 - index))
         {
             index--;
         }
@@ -153,7 +161,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int N = 2 + rand() % 100;
+            const int N = 2 + rand() % 25;
             const int M = 2 + rand() % (N - 1);
             assert(M <= N);
             const int maxA = 1 + rand() % 100;
@@ -185,7 +193,7 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(N, M, a);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 1
+#if 0
         const auto solutionOptimised = solveOptimised(N, M, a);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
