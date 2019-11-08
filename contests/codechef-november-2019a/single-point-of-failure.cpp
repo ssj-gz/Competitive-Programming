@@ -218,7 +218,7 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
             }
         }
 
-        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return neighbour->isInCycle && neighbour != node.nextInCycle && neighbour != node.prevInCycle; }), node.neighbours.end());
+        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return node.isAdjacentToInCycle(neighbour); }), node.neighbours.end());
     }
     for (const auto edge : edgesToAdd)
     {
