@@ -166,6 +166,24 @@ vector<Node*> getComponent(Node* rootNode, int markAsComponentNum)
 
 }
 
+vector<vector<Node*>> getComponents(vector<Node>& nodes)
+{
+    for (auto& node : nodes)
+    {
+        node.componentNum = -1;
+    }
+    vector<vector<Node*>> components;
+    for (auto& startNode : nodes)
+    {
+        if (!startNode.isRemoved && startNode.componentNum == -1)
+        {
+            auto component = getComponent(&startNode, components.size());
+            components.push_back(component);
+        }
+    }
+    return components;
+}
+
 bool componentHasCycle(const vector<Node*>& component)
 {
     int numEdgesTimesTwo = 0;
@@ -236,18 +254,8 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
 
 int findSinglePointOfFailure(vector<Node>& nodes)
 {
-    vector<vector<Node*>> components;
-    for (auto& startNode : nodes)
-    {
-        if (startNode.componentNum == -1)
-        {
-            auto component = getComponent(&startNode, components.size());
-            components.push_back(component);
-        }
-    }
-
     vector<Node*> cycle;
-    for (const auto& component : components)
+    for (const auto& component : getComponents(nodes))
     {
         cycle = findACycle(component.front(), nodes);
         if (!cycle.empty())
@@ -255,7 +263,11 @@ int findSinglePointOfFailure(vector<Node>& nodes)
     }
 
     if (cycle.empty())
+    {
+        // No cycles anywhere in the original graph -> no single point
+        // of failure.
         return -1;
+    }
 
     for (int i = 0; i < cycle.size(); i++)
     {
@@ -264,25 +276,22 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
     }
 
+    // Deal with cycles caused by edges between nodes in C which are
+    // not adjacent in C without special casing.
     addSyntheticEdgesBetweenNonAdjacentCycleNodes(nodes);
 
-    for (auto& node : nodes)
-    {
-        node.componentNum = -1;
-    }
-    components.clear();
-    for (auto& startNode : nodes)
-    {
-        if (!startNode.isRemoved && startNode.componentNum == -1)
-        {
-            auto component = getComponent(&startNode, components.size());
-            components.push_back(component);
-        }
-    }
+    // Get the list of components remaining after we've removed C.
+    const vector<vector<Node*>> components = getComponents(nodes);
+
     for (const auto& component : components)
     {
         if (componentHasCycle(component))
+        {
+            // A cycle exists that has no nodes in common with C;
+            // no way of removing a single node and breaking both
+            // C and this cycle.
             return -1;
+        }
     }
 
     // None of the components has a cycle in G-C.
