@@ -193,7 +193,7 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
 {
     // Introduce synthetic nodes so that no two non-consecutive cycle
     // nodes are connected.
-    vector<std::pair<Node*, Node*>> edgesToAdd;
+    vector<std::pair<Node*, Node*>> directEdgesToReplace;
     for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++)
     {
         auto& node = *nodeIter;
@@ -207,22 +207,26 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
             if (node.isAdjacentToInCycle(neighbour))
                 continue;
 
-            if (node.id < neighbour->id)
+            if (node.id < neighbour->id) // Ensure we don't process the same "pair" more than once.
             {
-                assert(nodes.size() + 1 <= nodes.capacity());
-                nodes.push_back(Node());
-                auto newSyntheticNode = &(nodes.back());
-                edgesToAdd.push_back({&node, newSyntheticNode});
-                edgesToAdd.push_back({neighbour, newSyntheticNode});
+                directEdgesToReplace.push_back({&node, neighbour});
             }
         }
 
         node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return node.isAdjacentToInCycle(neighbour); }), node.neighbours.end());
     }
-    for (const auto edge : edgesToAdd)
+    for (const auto edge : directEdgesToReplace)
     {
-        edge.first->neighbours.push_back(edge.second);
-        edge.second->neighbours.push_back(edge.first);
+        assert(nodes.size() + 1 <= nodes.capacity());
+        nodes.push_back(Node());
+        auto newSyntheticNode = &(nodes.back());
+
+        edge.first->neighbours.push_back(newSyntheticNode);
+        newSyntheticNode->neighbours.push_back(edge.first);
+        
+        edge.second->neighbours.push_back(newSyntheticNode);
+        newSyntheticNode->neighbours.push_back(edge.second);
+
     }
 
 }
