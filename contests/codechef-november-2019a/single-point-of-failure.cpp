@@ -213,8 +213,15 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
             }
         }
 
-        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return node.isAdjacentToInCycle(neighbour); }), node.neighbours.end());
+        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), 
+                                        [&node](const auto neighbour) 
+                                        { 
+                                            return node.isAdjacentToInCycle(neighbour); 
+                                        }),
+                              node.neighbours.end());
     }
+    // Having removed edges between pairs of non-adjacent cycle nodes, add the synthetic node
+    // as a bridge between them.
     for (const auto edge : directEdgesToReplace)
     {
         assert(nodes.size() + 1 <= nodes.capacity());
@@ -226,7 +233,6 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
         
         edge.second->neighbours.push_back(newSyntheticNode);
         newSyntheticNode->neighbours.push_back(edge.second);
-
     }
 
 }
