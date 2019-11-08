@@ -313,15 +313,17 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         const auto cycleNodesConnectedToComponentOccurrences = cycleNodesConnectedToComponent.nodesAndOccurrences();
         if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().numOccurences == 1))
         {
+            // This component would have no cycles even when C is added back in.
             continue;
         }
 
-        // This component has a cycle in G but not in G-C.
+        // This component has a cycle in G but not in G-C - removal of the single point of failure must
+        // break the cycle in this component.
         numComponentsNeedToBreak++;
 
         if (cycleNodesConnectedToComponentOccurrences.size() >= 3)
         {
-            // 3 distinct cycle nodes connected; cannot be broken by any node that breaks C.
+            // 3 distinct cycle nodes connected; cannot be broken by any single node that breaks C.
             return -1;
         }
 
@@ -333,6 +335,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
             continue;
         }
 
+        // After this point, precisely two cycle nodes are connected to a node in this component.
         assert(cycleNodesConnectedToComponentOccurrences.size() == 2);
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences > 1)
         {
@@ -346,11 +349,15 @@ int findSinglePointOfFailure(vector<Node>& nodes)
             cycleNodesConnectedToComponentOccurrences[1].node->numComponentCyclesBreaks++;
             continue;
         }
-        // Precisely one of the two cycles is joined to more than one node in this component.
+        // Precisely one of the two cycle nodes is joined to more than one node in this component.
+        // Removing that cycle node will break the cycle in this component.
+        assert((cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1) != (cycleNodesConnectedToComponentOccurrences[1].numOccurences > 1));
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1)
             cycleNodesConnectedToComponentOccurrences[0].node->numComponentCyclesBreaks++;
         else
+        {
             cycleNodesConnectedToComponentOccurrences[1].node->numComponentCyclesBreaks++;
+        }
 
     }
 
@@ -375,7 +382,6 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
-
         const int numNodes = read<int>();
         const int numEdges = read<int>();
 
