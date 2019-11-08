@@ -245,12 +245,15 @@ bool componentHasCycle(const vector<Node*>& component)
                 numEdgesTimesTwo++;
         }
     }
-    //cout << "numEdgesTimesTwo: " << numEdgesTimesTwo << endl;
     assert(numEdgesTimesTwo % 2 == 0);
-    return (numEdgesTimesTwo / 2) != component.size() - 1;
+    const auto numEdges = numEdgesTimesTwo / 2;
+    assert(numEdges >= component.size() - 1);
+    // A connected graph over N nodes will have at least
+    // N - 1 edges.
+    // It is a tree if and only if it has precisely N - 1 edges.
+    return numEdges != component.size() - 1;
 }
 
-#if 1
 int solveOptimised(vector<Node>& nodes)
 {
     for (auto& node : nodes)
@@ -314,7 +317,6 @@ int solveOptimised(vector<Node>& nodes)
                 newSyntheticNode->id = 1000 + nodes.size() - originalNumNodes;
                 edgesToAdd.push_back({&node, newSyntheticNode});
                 edgesToAdd.push_back({neighbour, newSyntheticNode});
-                //cout << "added synthetic node with id: " << newSyntheticNode->id << endl;
             }
         }
 
@@ -325,7 +327,6 @@ int solveOptimised(vector<Node>& nodes)
         edge.first->neighbours.push_back(edge.second);
         edge.second->neighbours.push_back(edge.first);
     }
-
 
     for (auto& node : nodes)
     {
@@ -351,14 +352,6 @@ int solveOptimised(vector<Node>& nodes)
     int numComponentsNeedToBreak = 0;
     for (const auto& component : components)
     {
-#if 0
-        cout << "Component: ";
-        for (const auto x : component)
-        {
-            cout << x->id << " ";
-        }
-        cout << endl;
-#endif
         cycleNodesConnectedToComponent.clear();
         for (const auto& node : component)
         {
@@ -366,20 +359,12 @@ int solveOptimised(vector<Node>& nodes)
             {
                 if (neighbour->isInCycle)
                 {
-                    //cout << "  cycle node connected: " << neighbour->id << endl;
                     cycleNodesConnectedToComponent.addNode(neighbour);
                 }
             }
         }
 
         const auto cycleNodesConnectedToComponentOccurrences = cycleNodesConnectedToComponent.nodesAndOccurrences();
-#if 0
-        cout << "cycleNodesConnectedToComponent: " << endl;
-        for (const auto x : cycleNodesConnectedToComponentOccurrences)
-        {
-            cout << " node: " << x.first->id << " " << x.second << " times" << endl;
-        }
-#endif
         if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().second == 1))
         {
             continue;
@@ -426,7 +411,6 @@ int solveOptimised(vector<Node>& nodes)
     int minNodeId = -1;
     for (auto node : cycle)
     {
-        //cout << "node: " << node->id << " numComponentCyclesBreaks: " << node->numComponentCyclesBreaks << " numComponentsNeedToBreak: " << numComponentsNeedToBreak << endl;
         if (node->numComponentCyclesBreaks == numComponentsNeedToBreak)
         {
             if (minNodeId == -1 || node->id < minNodeId)
@@ -436,52 +420,15 @@ int solveOptimised(vector<Node>& nodes)
     
     return minNodeId;
 }
-#endif
-
 
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            vector<pair<int, int>> allEdges;
-            const int N = 2 + rand() % 100; // TODO - Not sure if self-loops are permitted, yet - if so, allow N = 1.
-            for (int i = 1; i <= N; i++)
-            {
-                for (int j = i + 1; j <= N; j++)
-                {
-                    allEdges.push_back({i, j});
-                }
-            }
-            random_shuffle(allEdges.begin(), allEdges.end());
-            const int numEdges = 1 + rand() % allEdges.size();
-
-            cout << N << " " << numEdges << endl;
-            for (int i = 0; i < numEdges; i++)
-            {
-                cout << allEdges[i].first << " " << allEdges[i].second << endl;
-            }
-        }
-
-        return 0;
-    }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
     {
-        //cout << "t: " << (t + 1) << endl;
 
         const int numNodes = read<int>();
         const int numEdges = read<int>();
@@ -503,21 +450,8 @@ int main(int argc, char* argv[])
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
 
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(nodes);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
-        const auto solutionOptimised = solveOptimised(nodes);
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
         const auto solutionOptimised = solveOptimised(nodes);
         cout << solutionOptimised << endl;
-#endif
     }
 
     assert(cin);
