@@ -169,89 +169,89 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     }
     cout << endl;
 
-    multiset<int64_t> unused;
-    multiset<int64_t> uppers;
-    vector<std::pair<int64_t, int64_t>> blah;
-    int64_t bestSum = 0;
-    for (const auto& x : psByS)
+    vector<int64_t> result;
+    for (int maxPairs = 1; maxPairs <= N / 2; maxPairs++)
     {
-        cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
+        cout << "** maxPairs: " << maxPairs << " **" << endl;
+        multiset<int64_t> unused;
+        multiset<int64_t> uppers;
+        vector<std::pair<int64_t, int64_t>> blah;
+        int64_t bestSum = 0;
+        for (const auto& x : psByS)
+        {
+            cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
+            for (const auto x : blah)
+            {
+                cout << "{" << x.first << ", " << x.second << "} ";
+            }
+            cout << endl;
+            cout << "unused: " << endl;
+            for (const auto x : unused)
+            {
+                cout << x << " ";
+            }
+            cout << endl;
+            cout << "uppers: " << endl;
+            for (const auto x : uppers)
+            {
+                cout << x << " ";
+            }
+            cout << endl;
+            const auto newSumIfIgnoreX = bestSum;
+            auto newSumIfAdd = std::numeric_limits<int64_t>::min();
+            if (!unused.empty() && blah.size() < maxPairs)
+            {
+                newSumIfAdd = bestSum + x - *unused.begin();
+            }
+            auto newSumIfReplace = std::numeric_limits<int64_t>::min();
+            if (!uppers.empty())
+            {
+                newSumIfReplace = bestSum + x - *uppers.begin();
+            }
+            cout << "newSumIfIgnoreX: " << newSumIfIgnoreX << " newSumIfAdd: " << newSumIfAdd << " newSumIfReplace: " << newSumIfReplace << endl;
+
+            if (newSumIfIgnoreX >= newSumIfAdd && newSumIfIgnoreX >= newSumIfReplace)
+            {
+                unused.insert(x);
+                continue;
+            }
+
+            if (newSumIfReplace > newSumIfAdd)
+            {
+                const auto toReplace = *uppers.begin();
+                uppers.erase(uppers.begin());
+                uppers.insert(x);
+                unused.insert(toReplace);
+                int lower = 0;
+                for (auto blahIter = blah.begin(); blahIter != blah.end(); blahIter++)
+                {
+                    if (blahIter->second == toReplace)
+                    {
+                        lower = blahIter->first;
+                        blah.erase(blahIter);
+                        break;
+                    }
+                }
+                assert(lower != 0);
+                blah.push_back({lower, x});
+                bestSum = newSumIfReplace;
+            }
+            else
+            {
+                const int newLower = *unused.begin();
+                unused.erase(unused.begin());
+                uppers.insert(x);
+                blah.push_back({newLower, x});
+
+                bestSum = newSumIfAdd;
+            }
+        }
+        cout << "** Max pairs: " << maxPairs << " Final sum: " << bestSum << " from pairs: " << endl;
         for (const auto x : blah)
         {
             cout << "{" << x.first << ", " << x.second << "} ";
         }
-        cout << "unused: " << endl;
-        for (const auto x : unused)
-        {
-            cout << x << " ";
-        }
         cout << endl;
-        cout << "uppers: " << endl;
-        for (const auto x : uppers)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
-        const auto newSumIfIgnoreX = bestSum;
-        auto newSumIfAdd = std::numeric_limits<int64_t>::min();
-        if (!unused.empty())
-        {
-            newSumIfAdd = bestSum + x - *unused.begin();
-        }
-        auto newSumIfReplace = std::numeric_limits<int64_t>::min();
-        if (!uppers.empty())
-        {
-            newSumIfReplace = bestSum + x - *uppers.begin();
-        }
-        cout << "newSumIfIgnoreX: " << newSumIfIgnoreX << " newSumIfAdd: " << newSumIfAdd << " newSumIfReplace: " << newSumIfReplace << endl;
-
-        if (newSumIfIgnoreX >= newSumIfAdd && newSumIfIgnoreX >= newSumIfReplace)
-        {
-            unused.insert(x);
-            continue;
-        }
-
-        if (newSumIfReplace > newSumIfAdd)
-        {
-            const auto toReplace = *uppers.begin();
-            uppers.erase(uppers.begin());
-            uppers.insert(x);
-            unused.insert(toReplace);
-            int lower = 0;
-            for (auto blahIter = blah.begin(); blahIter != blah.end(); blahIter++)
-            {
-                if (blahIter->second == toReplace)
-                {
-                    lower = blahIter->first;
-                    blah.erase(blahIter);
-                    break;
-                }
-            }
-            assert(lower != 0);
-            blah.push_back({lower, x});
-            bestSum = newSumIfReplace;
-        }
-        else
-        {
-            const int newLower = *unused.begin();
-            unused.erase(unused.begin());
-            uppers.insert(x);
-            blah.push_back({newLower, x});
-
-            bestSum = newSumIfAdd;
-        }
-    }
-    cout << "Final sum: " << bestSum << " from pairs: " << endl;
-    for (const auto x : blah)
-    {
-        cout << "{" << x.first << ", " << x.second << "} ";
-    }
-    cout << endl;
-
-    vector<int64_t> result;
-    // TODO - this is wrong, of course :)
-    for (int i = 1; i <= N / 2; i++)
-    {
         result.push_back(bestSum);
     }
 
