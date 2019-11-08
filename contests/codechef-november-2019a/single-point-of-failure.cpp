@@ -200,9 +200,8 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
     // Introduce synthetic nodes so that no two non-consecutive cycle
     // nodes are connected.
     vector<std::pair<Node*, Node*>> directEdgesToReplace;
-    for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++)
+    for (auto& node : nodes)
     {
-        auto& node = *nodeIter;
         if (!node.isInCycle)
             continue;
 
