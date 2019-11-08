@@ -62,9 +62,10 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
                 assert(distToEndForPhaseInfo[phase][j].bestDistToEnd != -1);
                 const auto nextPhaseCoord = distToEndForPhaseInfo[phase][j].coord;
                 const auto distToNextPhaseCoord = sqrt(static_cast<long double>((phaseCoord.x - nextPhaseCoord.x) * (phaseCoord.x - nextPhaseCoord.x) + (phaseCoord.y - nextPhaseCoord.y) * (phaseCoord.y - nextPhaseCoord.y)));
-                if (currentBestDistToEnd == -1 || currentBestDistToEnd >= distToNextPhaseCoord + distToEndForPhaseInfo[phase][j].bestDistToEnd)
+                const auto distToEndViaNextPhaseCoord = distToNextPhaseCoord + distToEndForPhaseInfo[phase][j].bestDistToEnd ;
+                if (currentBestDistToEnd == -1 || distToEndViaNextPhaseCoord < currentBestDistToEnd)
                 {
-                    currentBestDistToEnd = distToNextPhaseCoord + distToEndForPhaseInfo[phase][j].bestDistToEnd;
+                    currentBestDistToEnd = distToEndViaNextPhaseCoord;
                 }
 
             }
@@ -76,8 +77,14 @@ long double findMinDistance(const int64_t x, const int64_t y, const vector<Coord
 
 int main(int argc, char* argv[])
 {
+    // Very easy - basically Dynamic Programming 101.  No clever  tricks/ observations
+    // needed - hopefully the code is self-explanatory!
+    //
+    // I kind of wish Div 1 had had CAMC added as its replacement scorable problem rather
+    // than this - it's much more interesting/ tricky.
     ios::sync_with_stdio(false);
 
+    // We need to output answers with high precision.
     cout << std::setprecision (std::numeric_limits<long double>::digits10 + 1);
     
     const auto T = read<int>();
