@@ -25,7 +25,7 @@ struct Node
     int id = -1;
     bool isInCycle = false;
     Node* nextInCycle = nullptr;
-    bool isAdjacentToInCycle(Node* otherNode)
+    bool isConsecutiveWithInCycle(Node* otherNode)
     {
         return isInCycle && otherNode->isInCycle && 
                (otherNode->nextInCycle == this || this->nextInCycle == otherNode);
@@ -205,7 +205,7 @@ bool componentHasCycle(const vector<Node*>& component)
     return numEdges != component.size() - 1;
 }
 
-void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
+void addSyntheticEdgesBetweenConnectedNonConsecutiveCycleNodes(vector<Node>& nodes)
 {
     // Introduce synthetic nodes so that no two non-consecutive cycle
     // nodes are connected.
@@ -219,7 +219,7 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
         {
             if (!neighbour->isInCycle)
                 continue;
-            if (node.isAdjacentToInCycle(neighbour))
+            if (node.isConsecutiveWithInCycle(neighbour))
                 continue;
 
             if (node.id < neighbour->id) // Ensure we don't process the same "pair" more than once.
@@ -231,11 +231,11 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
         node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), 
                                         [&node](const auto neighbour) 
                                         { 
-                                            return node.isAdjacentToInCycle(neighbour); 
+                                            return node.isConsecutiveWithInCycle(neighbour); 
                                         }),
                               node.neighbours.end());
     }
-    // Having removed edges between pairs of non-adjacent cycle nodes, add the synthetic node
+    // Having removed edges between pairs of non-consecutive cycle nodes, add the synthetic node
     // as a bridge between them.
     for (const auto edge : directEdgesToReplace)
     {
@@ -277,8 +277,8 @@ int findSinglePointOfFailure(vector<Node>& nodes)
     }
 
     // Deal with cycles caused by edges between nodes in C which are
-    // not adjacent in C without special casing.
-    addSyntheticEdgesBetweenNonAdjacentCycleNodes(nodes);
+    // not consecutive in C without special casing.
+    addSyntheticEdgesBetweenConnectedNonConsecutiveCycleNodes(nodes);
 
     // Get the list of components remaining after we've removed C.
     const vector<vector<Node*>> components = getComponents(nodes);
