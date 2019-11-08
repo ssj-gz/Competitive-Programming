@@ -53,11 +53,8 @@ class NodeMultiSet
         // O(1).
         void addNode(Node* nodeToAdd)
         {
-            //cout <<  "  addNode: " << nodeToAdd->id << " m_numNodesWithId: " << m_numNodesWithId[nodeToAdd->id] << endl;
             if (m_numNodesWithId[nodeToAdd->id] == 0)
             {
-                // Node is not in set; add it.
-                //cout << "  adding node: " << nodeToAdd->id << endl;
                 m_nodesInSet.push_back(nodeToAdd);
             }
             m_numNodesWithId[nodeToAdd->id]++;
@@ -195,7 +192,6 @@ int solveOptimised(vector<Node>& nodes)
         node.isRemoved = false; // TODO - remove this when we no longer have solveBruteForce.
     }
 
-    //int result = 0;
     vector<vector<Node*>> components;
     for (auto& startNode : nodes)
     {
@@ -219,7 +215,6 @@ int solveOptimised(vector<Node>& nodes)
 
     for (int i = 0; i < cycle.size(); i++)
     {
-        //cout << " cycle node: " << cycle[i]->id << endl;
         cycle[i]->isInCycle = true;
         cycle[i]->isRemoved = true;
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
@@ -229,7 +224,6 @@ int solveOptimised(vector<Node>& nodes)
     // Introduce synthetic nodes so that no two non-consecutive cycle
     // nodes are connected.
     vector<std::pair<Node*, Node*>> edgesToAdd;
-    const int originalNumNodes = nodes.size();
     for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++)
     {
         auto& node = *nodeIter;
@@ -248,7 +242,6 @@ int solveOptimised(vector<Node>& nodes)
                 assert(nodes.size() + 1 <= nodes.capacity());
                 nodes.push_back(Node());
                 auto newSyntheticNode = &(nodes.back());
-                newSyntheticNode->id = 1000 + nodes.size() - originalNumNodes;
                 edgesToAdd.push_back({&node, newSyntheticNode});
                 edgesToAdd.push_back({neighbour, newSyntheticNode});
             }
