@@ -47,6 +47,12 @@ struct Node
     int numComponentCyclesBreaks = 0;
 };
 
+struct NodeAndOccurences
+{
+    Node* node = nullptr;
+    int numOccurences = -1;
+};
+
 class NodeMultiSet
 {
     public:
@@ -64,9 +70,9 @@ class NodeMultiSet
             m_numNodesWithId[nodeToAdd->id]++;
         }
         // O(number of distinct nodes in set).
-        vector<std::pair<Node*, int>> nodesAndOccurrences() const
+        vector<NodeAndOccurences> nodesAndOccurrences() const
         {
-            vector<std::pair<Node*, int>> nodesAndOccurrences;
+            vector<NodeAndOccurences> nodesAndOccurrences;
             for (auto node : m_nodesInSet)
             {
                 nodesAndOccurrences.push_back({node, m_numNodesWithId[node->id]});
@@ -306,7 +312,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         }
 
         const auto cycleNodesConnectedToComponentOccurrences = cycleNodesConnectedToComponent.nodesAndOccurrences();
-        if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().second == 1))
+        if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().numOccurences == 1))
         {
             continue;
         }
@@ -323,29 +329,29 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         if (cycleNodesConnectedToComponentOccurrences.size() == 1)
         {
             // Can (and must) be broken by removing the connected cycle node.
-            assert(cycleNodesConnectedToComponentOccurrences.front().second > 1);
-            cycleNodesConnectedToComponentOccurrences.front().first->numComponentCyclesBreaks++;
+            assert(cycleNodesConnectedToComponentOccurrences.front().numOccurences > 1);
+            cycleNodesConnectedToComponentOccurrences.front().node->numComponentCyclesBreaks++;
             continue;
         }
 
         assert(cycleNodesConnectedToComponentOccurrences.size() == 2);
-        if (cycleNodesConnectedToComponentOccurrences[0].second > 1 && cycleNodesConnectedToComponentOccurrences[1].second > 1)
+        if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences > 1)
         {
             // We'd need to remove both cycle nodes to break this cycle - can't be done.
             return -1;
         }
-        if (cycleNodesConnectedToComponentOccurrences[0].second == 1 && cycleNodesConnectedToComponentOccurrences[1].second == 1)
+        if (cycleNodesConnectedToComponentOccurrences[0].numOccurences == 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences == 1)
         {
             // Removing either cycle node will break the cycle.
-            cycleNodesConnectedToComponentOccurrences[0].first->numComponentCyclesBreaks++;
-            cycleNodesConnectedToComponentOccurrences[1].first->numComponentCyclesBreaks++;
+            cycleNodesConnectedToComponentOccurrences[0].node->numComponentCyclesBreaks++;
+            cycleNodesConnectedToComponentOccurrences[1].node->numComponentCyclesBreaks++;
             continue;
         }
         // Precisely one of the two cycles is joined to more than one node in this component.
-        if (cycleNodesConnectedToComponentOccurrences[0].second > 1)
-            cycleNodesConnectedToComponentOccurrences[0].first->numComponentCyclesBreaks++;
+        if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1)
+            cycleNodesConnectedToComponentOccurrences[0].node->numComponentCyclesBreaks++;
         else
-            cycleNodesConnectedToComponentOccurrences[1].first->numComponentCyclesBreaks++;
+            cycleNodesConnectedToComponentOccurrences[1].node->numComponentCyclesBreaks++;
 
     }
 
