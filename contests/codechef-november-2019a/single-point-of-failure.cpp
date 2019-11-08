@@ -185,6 +185,44 @@ bool componentHasCycle(const vector<Node*>& component)
     return numEdges != component.size() - 1;
 }
 
+void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
+{
+    // Introduce synthetic nodes so that no two non-consecutive cycle
+    // nodes are connected.
+    vector<std::pair<Node*, Node*>> edgesToAdd;
+    for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++)
+    {
+        auto& node = *nodeIter;
+        if (!node.isInCycle)
+            continue;
+
+        for (auto neighbour : node.neighbours)
+        {
+            if (!neighbour->isInCycle)
+                continue;
+            if (node.nextInCycle == neighbour || node.prevInCycle == neighbour)
+                continue;
+
+            if (node.id < neighbour->id)
+            {
+                assert(nodes.size() + 1 <= nodes.capacity());
+                nodes.push_back(Node());
+                auto newSyntheticNode = &(nodes.back());
+                edgesToAdd.push_back({&node, newSyntheticNode});
+                edgesToAdd.push_back({neighbour, newSyntheticNode});
+            }
+        }
+
+        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return neighbour->isInCycle && neighbour != node.nextInCycle && neighbour != node.prevInCycle; }), node.neighbours.end());
+    }
+    for (const auto edge : edgesToAdd)
+    {
+        edge.first->neighbours.push_back(edge.second);
+        edge.second->neighbours.push_back(edge.first);
+    }
+
+}
+
 int solveOptimised(vector<Node>& nodes)
 {
     for (auto& node : nodes)
@@ -221,39 +259,7 @@ int solveOptimised(vector<Node>& nodes)
         cycle[i]->prevInCycle = cycle[(cycle.size() + i - 1) % cycle.size()];
     }
 
-    // Introduce synthetic nodes so that no two non-consecutive cycle
-    // nodes are connected.
-    vector<std::pair<Node*, Node*>> edgesToAdd;
-    for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++)
-    {
-        auto& node = *nodeIter;
-        if (!node.isInCycle)
-            continue;
-
-        for (auto neighbour : node.neighbours)
-        {
-            if (!neighbour->isInCycle)
-                continue;
-            if (node.nextInCycle == neighbour || node.prevInCycle == neighbour)
-                continue;
-
-            if (node.id < neighbour->id)
-            {
-                assert(nodes.size() + 1 <= nodes.capacity());
-                nodes.push_back(Node());
-                auto newSyntheticNode = &(nodes.back());
-                edgesToAdd.push_back({&node, newSyntheticNode});
-                edgesToAdd.push_back({neighbour, newSyntheticNode});
-            }
-        }
-
-        node.neighbours.erase(remove_if(node.neighbours.begin(), node.neighbours.end(), [&node](const auto neighbour) { return neighbour->isInCycle && neighbour != node.nextInCycle && neighbour != node.prevInCycle; }), node.neighbours.end());
-    }
-    for (const auto edge : edgesToAdd)
-    {
-        edge.first->neighbours.push_back(edge.second);
-        edge.second->neighbours.push_back(edge.first);
-    }
+    addSyntheticEdgesBetweenNonAdjacentCycleNodes(nodes);
 
     for (auto& node : nodes)
     {
