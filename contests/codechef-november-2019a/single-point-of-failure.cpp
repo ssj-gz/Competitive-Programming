@@ -237,7 +237,7 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
 
 }
 
-int solveOptimised(vector<Node>& nodes)
+int findSinglePointOfFailure(vector<Node>& nodes)
 {
     vector<vector<Node*>> components;
     for (auto& startNode : nodes)
@@ -391,8 +391,8 @@ int main(int argc, char* argv[])
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
 
-        const auto solutionOptimised = solveOptimised(nodes);
-        cout << solutionOptimised << endl;
+        const auto singlePointOfFailure = findSinglePointOfFailure(nodes);
+        cout << singlePointOfFailure << endl;
     }
 
     assert(cin);
