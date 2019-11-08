@@ -88,14 +88,6 @@ class NodeMultiSet
 
 void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle, vector<Node*>& ancestors)
 {
-#if 0
-    cout << " findACycleAux: current node: " << currentNode->id << " parentNode: " << (parentNode == nullptr ? -1 : parentNode->id) << " ancestors: ";
-    for (auto node : ancestors)
-    {
-        cout << node->id << " ";
-    }
-    cout << endl;
-#endif
     if (currentNode->isRemoved)
         return;
     if (currentNode->visitedInDFS)
@@ -117,18 +109,10 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
     ancestors.push_back(currentNode);
     currentNode->isInDFSStack = true;
 
-#if 0
-    for (auto childNode : currentNode->neighbours)
-    {
-        cout << "neighbour of " << currentNode->id << " : " << childNode->id << endl;
-    }
-#endif
-
     for (auto childNode : currentNode->neighbours)
     {
         if (childNode == parentNode)
         {
-            //cout << " skipping " << childNode->id << endl;
             continue;
         }
 
@@ -140,67 +124,17 @@ void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle
 
 }
 
+// Returns some arbitrary cycle in the component containing startNode
+// if and only if there is a cycle present in that component.
+// (If not, returns an empty list).
 vector<Node*> findACycle(Node* startNode, vector<Node>& nodes)
 {
-    //cout << "Find a cycle starting at " << startNode->id << endl;
-#if 0
-    for (auto& node : nodes)
-    {
-        node.visitedInDFS = false;
-        node.isInDFSStack = false;
-    }
-#endif
     vector<Node*> cycle;
     vector<Node*> ancestors;
     findACycleAux(startNode, nullptr, cycle, ancestors);
     
     return cycle;
 }
-
-bool isRobust(vector<Node>& nodes)
-{
-    for (auto& startNode : nodes)
-    {
-        const auto cycle = findACycle(&startNode, nodes);
-        //cout << " starting at node: " << startNode.id << " cycle len: " << cycle.size() << endl;
-        if (!cycle.empty())
-        {
-#if 0
-            cout << " found cycle: ";
-            for (const auto node : cycle)
-            {
-                cout << " " << node->id;
-            }
-            cout << endl;
-#endif
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-#if 1
-int solveBruteForce(vector<Node>& nodes)
-{
-    if (!isRobust(nodes))
-        return -1;
-
-    for (auto& node : nodes)
-    {
-        //cout << "Removing node with id: " << node.id << endl;
-        node.isRemoved = true;
-        const bool stillRobust = isRobust(nodes);
-        node.isRemoved = false;
-        //cout << "stillRobust? " << stillRobust << endl;
-        if (!stillRobust)
-            return node.id;
-    }
-    
-    return -1;
-}
-#endif
 
 vector<Node*> getComponent(Node* rootNode, int markAsComponentNum)
 {
