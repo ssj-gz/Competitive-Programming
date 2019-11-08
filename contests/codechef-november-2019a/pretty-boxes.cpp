@@ -101,6 +101,7 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
     {
         answers[i].first = numeric_limits<int64_t>::min();
     }
+    answers[0].first = 0; // Assuming a choice of 0 boxes is OK?
 
     vector<std::pair<int64_t, int64_t>> indexPairsSoFar;
     solutionBruteForceAux(0, psByS, indexPairsSoFar, isIndexUsed, answers);
@@ -125,7 +126,7 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
     for (int i = 1; i <= N / 2; i++)
     {
         int64_t bestFori = numeric_limits<int64_t>::min();
-        for (int j = 1; j <= i; j++)
+        for (int j = 0; j <= i; j++)
         {
             bestFori = max(bestFori, answers[j].first);
         }
@@ -247,7 +248,14 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     }
     cout << endl;
 
-    return vector<int64_t>();
+    vector<int64_t> result;
+    // TODO - this is wrong, of course :)
+    for (int i = 1; i <= N / 2; i++)
+    {
+        result.push_back(bestSum);
+    }
+
+    return result;
 }
 #endif
 
@@ -302,7 +310,7 @@ int main(int argc, char* argv[])
         cout << "solutionOptimised: " << x << endl;
     }
 
-    //assert(solutionOptimised == solutionBruteForce);
+    assert((solutionOptimised.empty() && solutionBruteForce.empty()) ||  solutionOptimised.back() == solutionBruteForce.back());
 #endif
 #else
     const auto solutionOptimised = solveOptimised();
