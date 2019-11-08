@@ -239,11 +239,6 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
 
 int solveOptimised(vector<Node>& nodes)
 {
-    for (auto& node : nodes)
-    {
-        node.isRemoved = false; // TODO - remove this when we no longer have solveBruteForce.
-    }
-
     vector<vector<Node*>> components;
     for (auto& startNode : nodes)
     {
