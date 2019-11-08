@@ -123,7 +123,12 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
     vector<int64_t> result;
     for (int i = 1; i <= N / 2; i++)
     {
-        result.push_back(answers[i].first);
+        int64_t bestFori = numeric_limits<int64_t>::min();
+        for (int j = 1; j <= i; j++)
+        {
+            bestFori = max(bestFori, answers[j].first);
+        }
+        result.push_back(bestFori);
     }
     return result;
 }
