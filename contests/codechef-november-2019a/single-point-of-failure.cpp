@@ -33,7 +33,6 @@ struct Node
     int id = -1;
     bool isInCycle = false;
     Node* nextInCycle = nullptr;
-    Node* prevInCycle = nullptr;
     bool isAdjacentToInCycle(Node* otherNode)
     {
         return isInCycle && otherNode->isInCycle && 
@@ -261,7 +260,6 @@ int solveOptimised(vector<Node>& nodes)
         cycle[i]->isInCycle = true;
         cycle[i]->isRemoved = true;
         cycle[i]->nextInCycle = cycle[(i + 1) % cycle.size()];
-        cycle[i]->prevInCycle = cycle[(cycle.size() + i - 1) % cycle.size()];
     }
 
     addSyntheticEdgesBetweenNonAdjacentCycleNodes(nodes);
