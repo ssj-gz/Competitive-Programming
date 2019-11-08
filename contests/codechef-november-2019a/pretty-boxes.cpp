@@ -38,7 +38,7 @@ void solutionBruteForceAux(int index, const vector<int64_t>& psByS, vector<std::
     {
         sum += psByS[pair.second] - psByS[pair.first];
     }
-    cout << "# pairs: " << indexPairsSoFar.size() << " sum: " << sum << endl;
+    //cout << "# pairs: " << indexPairsSoFar.size() << " sum: " << sum << endl;
     if (answers[indexPairsSoFar.size()].first < sum)
     {
         answers[indexPairsSoFar.size()].first = sum;
@@ -103,6 +103,22 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
 
     vector<std::pair<int64_t, int64_t>> indexPairsSoFar;
     solutionBruteForceAux(0, psByS, indexPairsSoFar, isIndexUsed, answers);
+
+    cout << "sAndP:" << endl;
+    for (const auto x : sAndP)
+    {
+        cout << x.p << " ";
+    }
+    cout << endl;
+    for (int i = 0; i <= N / 2; i++)
+    {
+        cout << "Picking exactly " << i << " sum: " << answers[i].first << " - ";
+        for (const auto x : answers[i].second)
+        {
+            cout << "(" << sAndP[x.first].p << ", " << sAndP[x.second].p << ") ";
+        }
+        cout << endl;
+    }
     
     vector<int64_t> result;
     for (int i = 1; i <= N / 2; i++)
