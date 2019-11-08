@@ -34,6 +34,11 @@ struct Node
     bool isInCycle = false;
     Node* nextInCycle = nullptr;
     Node* prevInCycle = nullptr;
+    bool isAdjacentToInCycle(Node* otherNode)
+    {
+        return isInCycle && otherNode->isInCycle && 
+               (otherNode->nextInCycle == this || this->nextInCycle == otherNode);
+    }
 
     bool visitedInDFS = false;
     bool isInDFSStack = false;
@@ -200,7 +205,7 @@ void addSyntheticEdgesBetweenNonAdjacentCycleNodes(vector<Node>& nodes)
         {
             if (!neighbour->isInCycle)
                 continue;
-            if (node.nextInCycle == neighbour || node.prevInCycle == neighbour)
+            if (node.isAdjacentToInCycle(neighbour))
                 continue;
 
             if (node.id < neighbour->id)
