@@ -12,6 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <set>
 
 #include <cassert>
 
@@ -134,12 +135,118 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+#if 1
+vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector<int64_t>& POrig)
 {
-    SolutionType result;
-    
-    return result;
+    struct SAndP
+    {
+        int64_t s = -1;
+        int64_t p = -1;
+    };
+
+    vector<SAndP> sAndP;
+    for (int i = 0; i < N; i++)
+    {
+        sAndP.push_back({SOrig[i], POrig[i]});
+    }
+    sort(sAndP.begin(), sAndP.end(), [](const auto& lhs, const auto& rhs) 
+            { 
+            if (lhs.s != rhs.s)
+            return lhs.s < rhs.s;
+            return lhs.p < rhs.p;
+            });
+
+    vector<int64_t> psByS;
+    for (int i = 0; i < N; i++)
+    {
+        psByS.push_back(sAndP[i].p);
+    }
+    cout << "psByS:" << endl;
+    for (const auto x : psByS)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+
+    multiset<int64_t> unused;
+    multiset<int64_t> uppers;
+    vector<std::pair<int64_t, int64_t>> blah;
+    int64_t bestSum = 0;
+    for (const auto& x : psByS)
+    {
+        cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
+        for (const auto x : blah)
+        {
+            cout << "{" << x.first << ", " << x.second << "} ";
+        }
+        cout << "unused: " << endl;
+        for (const auto x : unused)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        cout << "uppers: " << endl;
+        for (const auto x : uppers)
+        {
+            cout << x << " ";
+        }
+        cout << endl;
+        const auto newSumIfIgnoreX = bestSum;
+        auto newSumIfAdd = std::numeric_limits<int64_t>::min();
+        if (!unused.empty())
+        {
+            newSumIfAdd = bestSum + x - *unused.begin();
+        }
+        auto newSumIfReplace = std::numeric_limits<int64_t>::min();
+        if (!uppers.empty())
+        {
+            newSumIfReplace = bestSum + x - *uppers.begin();
+        }
+        cout << "newSumIfIgnoreX: " << newSumIfIgnoreX << " newSumIfAdd: " << newSumIfAdd << " newSumIfReplace: " << newSumIfReplace << endl;
+
+        if (newSumIfIgnoreX >= newSumIfAdd && newSumIfIgnoreX >= newSumIfReplace)
+        {
+            unused.insert(x);
+            continue;
+        }
+
+        if (newSumIfReplace > newSumIfAdd)
+        {
+            const auto toReplace = *uppers.begin();
+            uppers.erase(uppers.begin());
+            uppers.insert(x);
+            unused.insert(toReplace);
+            int lower = 0;
+            for (auto blahIter = blah.begin(); blahIter != blah.end(); blahIter++)
+            {
+                if (blahIter->second == toReplace)
+                {
+                    lower = blahIter->first;
+                    blah.erase(blahIter);
+                    break;
+                }
+            }
+            assert(lower != 0);
+            blah.push_back({lower, x});
+            bestSum = newSumIfReplace;
+        }
+        else
+        {
+            const int newLower = *unused.begin();
+            unused.erase(unused.begin());
+            blah.push_back({newLower, x});
+
+            bestSum = newSumIfAdd;
+        }
+    }
+    cout << "Final sum: " << bestSum << " from pairs: " << endl;
+    for (const auto x : blah)
+    {
+        cout << "{" << x.first << ", " << x.second << "} ";
+    }
+    cout << endl;
+
+    return vector<int64_t>();
 }
 #endif
 
@@ -186,11 +293,15 @@ int main(int argc, char* argv[])
         cout << "solutionBruteForce: " << x << endl;
     }
 #endif
-#if 0
-    const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+    const auto solutionOptimised = solveOptimised(N, S, P);
+    cout << "solutionOptimised--: " << endl;
+    for (const auto x : solutionOptimised)
+    {
+        cout << "solutionOptimised: " << x << endl;
+    }
 
-    assert(solutionOptimised == solutionBruteForce);
+    //assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
     const auto solutionOptimised = solveOptimised();
