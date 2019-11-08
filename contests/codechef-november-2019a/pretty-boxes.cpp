@@ -97,7 +97,7 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
 
     vector<bool> isIndexUsed(N, false);
     vector<std::pair<int64_t, vector<std::pair<int64_t, int64_t>>>> answers(N / 2 + 2);
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i <= N / 2; i++)
     {
         answers[i].first = numeric_limits<int64_t>::min();
     }
@@ -234,6 +234,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         {
             const int newLower = *unused.begin();
             unused.erase(unused.begin());
+            uppers.insert(x);
             blah.push_back({newLower, x});
 
             bestSum = newSumIfAdd;
