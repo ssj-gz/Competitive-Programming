@@ -216,15 +216,19 @@ int main(int argc, char* argv[])
     for (int val = 1; val <= maxVal; val++)
     {
         bool canGenerate = false;
+        int minDigits = 1000;
         for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
         {
             //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
             if (sumOfSquaresLookup[numDigits][val] != -1)
             {
                 canGenerate = true;
-                break;
+                //break;
+                minDigits = min(minDigits, numDigits);
             }
         }
+        //cout << "val: " << val << " can be generated with " << minDigits << " digits.   Less than upper bound: = " << ((val / 81) + 4 - minDigits) << endl;
+        assert(minDigits <= (val / 81) + 4);
         assert(canGenerate);
     }
     for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
