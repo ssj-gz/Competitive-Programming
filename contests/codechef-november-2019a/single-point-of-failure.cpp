@@ -2,19 +2,11 @@
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/FAILURE
 //
-#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
