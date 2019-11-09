@@ -2,11 +2,11 @@
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/PBOXES
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -417,8 +417,11 @@ int main(int argc, char* argv[])
     assert(solutionBruteForce == solutionOptimised);
 #endif
 #else
-    const auto solutionOptimised = solveOptimised();
-    cout << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised(N, S, P);
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << endl;
+    }
 #endif
 
     assert(cin);
