@@ -174,12 +174,14 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     {
         psByS.push_back(sAndP[i].p);
     }
+#if 0
     cout << "psByS:" << endl;
     for (const auto x : psByS)
     {
         cout << x << " ";
     }
     cout << endl;
+#endif
 
     vector<int64_t> result(N / 2 + 1);
     multiset<PValueAndIndex> unused;
@@ -189,12 +191,13 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     for (int i = 0; i < N; i++)
     {
         const auto x = psByS[i];
-        cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
+        //cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
         //for (const auto x : blah)
         //{
             //cout << "{" << x.first << ", " << x.second << "} ";
         //}
         //cout << endl;
+#if 0
         cout << "unused: " << endl;
         for (const auto x : unused)
         {
@@ -213,6 +216,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
             cout << x.p << " ";
         }
         cout << endl;
+#endif
         const auto newSumIfIgnoreX = bestSum;
         auto newSumIfAdd = std::numeric_limits<int64_t>::min();
         if (!unused.empty())
@@ -224,7 +228,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         {
             newSumIfReplace = bestSum + x - uppers.begin()->p;
         }
-        cout << "newSumIfIgnoreX: " << newSumIfIgnoreX << " newSumIfAdd: " << newSumIfAdd << " newSumIfReplace: " << newSumIfReplace << endl;
+        //cout << "newSumIfIgnoreX: " << newSumIfIgnoreX << " newSumIfAdd: " << newSumIfAdd << " newSumIfReplace: " << newSumIfReplace << endl;
 
         if (newSumIfIgnoreX >= newSumIfAdd && newSumIfIgnoreX >= newSumIfReplace)
         {
@@ -250,7 +254,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
             bestSum = newSumIfAdd;
         }
     }
-    cout << "Final sum: " << bestSum << " from pairs: " << endl;
+    //cout << "Final sum: " << bestSum << " from pairs: " << endl;
 #if 0
     for (const auto x : blah)
     {
@@ -273,7 +277,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     {
         s[x.index] = '+';
     }
-    cout << s << endl;
+    //cout << s << endl;
 #endif
     set<int> openUppers;
     int numUnattachedLowers = 0;
@@ -344,7 +348,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         s[bestUpperToRemove] = '.';
         s[bestLowerToRemove] = '.';
         bestSum = scoreForBestRemovedUpperAndLower;
-        cout << "s: " << s << " bestSum: " << bestSum << endl;
+        //cout << "s: " << s << " bestSum: " << bestSum << endl;
         uppers.erase({psByS[bestUpperToRemove], bestUpperToRemove});
         lowers.erase({psByS[bestLowerToRemove], bestLowerToRemove});
 
