@@ -349,11 +349,14 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         lowers.erase({psByS[bestLowerToRemove], bestLowerToRemove});
 
 
+        result[uppers.size()] = bestSum;
+
 
         assert(uppers.size() == lowers.size());
     }
 
     
+    result.erase(result.begin());
 
     return result;
 }
