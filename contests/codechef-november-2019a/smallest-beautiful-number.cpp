@@ -34,11 +34,12 @@ bool isNumericallyLessThan(const string& lhsNumAsString, const string& rhsNumAsS
     return lhsNumAsString < rhsNumAsString;
 }
 
+int largestNumIterations = 0;
 string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOfSquaresLookup)
 {
     string result;
 
-    string numberAsString(N, '1');
+    string numberAsString(1, '1');
 
     const int64_t squareDigitSumOrig = N;
 
@@ -52,6 +53,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
 
     string bestReplacementDigits;
 
+    int numIterations = 0;
     while (true)
     {
         const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
@@ -67,7 +69,8 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
 
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
-                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+                cout << "N: " << N << " Took: " << numIterations << " iterations" << endl;
+                return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
             }
 
             if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
@@ -95,6 +98,8 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
 
         }
         nextSquareRoot++;
+        numIterations++;
+        largestNumIterations = max(largestNumIterations, numIterations);
     }
 
 
@@ -165,20 +170,22 @@ int main(int argc, char* argv[])
             //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
         }
     }
-#if 0
+#if 1
     {
         for (int N = 1; N <= 1'000'000; N++)
         {
             cout << "N: " << N << endl;
             //const auto solutionBruteForce = solveBruteForce(N);
             //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-            const auto solutionOptimised = solveOptimised(N, sumOfSquaresLookup);
-            cout << "solutionOptimised:  " << solutionOptimised << endl;
+            const auto blah = findMinBeautifulNumberWithNDigits(N, sumOfSquaresLookup);
+            //cout << "solutionOptimised:  " << solutionOptimised << endl;
             //assert(solutionOptimised == solutionBruteForce);
         }
+        //cout << "largestThig: " << largestThig << endl;
+        //cout << "largestThog: " << largestThog << endl;
+        cout << "largestNumIterations: " << largestNumIterations << endl;
+        return 0;
     }
-    cout << "largestThig: " << largestThig << endl;
-    cout << "largestThog: " << largestThog << endl;
 #endif
 
     const auto T = read<int>();
