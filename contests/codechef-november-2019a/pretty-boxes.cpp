@@ -413,7 +413,8 @@ int main(int argc, char* argv[])
         cout << "solutionOptimised: " << x << endl;
     }
 
-    assert((solutionOptimised.empty() && solutionBruteForce.empty()) ||  solutionOptimised.back() == solutionBruteForce.back());
+    //assert((solutionOptimised.empty() && solutionBruteForce.empty()) ||  solutionOptimised.back() == solutionBruteForce.back());
+    assert(solutionBruteForce == solutionOptimised);
 #endif
 #else
     const auto solutionOptimised = solveOptimised();
