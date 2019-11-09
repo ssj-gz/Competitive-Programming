@@ -2,6 +2,10 @@
 // 
 // Solution to: https://www.codechef.com/NOV19A/problems/PBOXES
 //
+// Still some doubt as to whether "no presents" is allowed, so can't tell
+// if this is correct :(
+// This is O(N^3), but should be easy to reduce to O(N^2).
+// Just aiming for Subtask #1 for this submission :)
 #define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
