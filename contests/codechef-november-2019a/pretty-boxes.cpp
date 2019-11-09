@@ -184,17 +184,17 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     vector<int64_t> result(N / 2 + 1);
     multiset<PValueAndIndex> unused;
     multiset<PValueAndIndex> uppers;
-    vector<std::pair<int64_t, int64_t>> blah;
+    multiset<PValueAndIndex> lowers;
     int64_t bestSum = 0;
     for (int i = 0; i < N; i++)
     {
         const auto x = psByS[i];
         cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
-        for (const auto x : blah)
-        {
-            cout << "{" << x.first << ", " << x.second << "} ";
-        }
-        cout << endl;
+        //for (const auto x : blah)
+        //{
+            //cout << "{" << x.first << ", " << x.second << "} ";
+        //}
+        //cout << endl;
         cout << "unused: " << endl;
         for (const auto x : unused)
         {
@@ -203,6 +203,12 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         cout << endl;
         cout << "uppers: " << endl;
         for (const auto x : uppers)
+        {
+            cout << x.p << " ";
+        }
+        cout << endl;
+        cout << "lowers: " << endl;
+        for (const auto x : lowers)
         {
             cout << x.p << " ";
         }
@@ -232,46 +238,40 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
             uppers.erase(uppers.begin());
             uppers.insert({x, i});
             unused.insert(toReplace);
-            int lower = 0;
-            for (auto blahIter = blah.begin(); blahIter != blah.end(); blahIter++)
-            {
-                if (blahIter->second == toReplace.p)
-                {
-                    lower = blahIter->first;
-                    blah.erase(blahIter);
-                    break;
-                }
-            }
-            assert(lower != 0);
-            blah.push_back({lower, x});
             bestSum = newSumIfReplace;
         }
         else
         {
-            const int newLower = unused.begin()->p;
+            const auto newLower = *(unused.begin());
             unused.erase(unused.begin());
             uppers.insert({x, i});
-            blah.push_back({newLower, x});
+            lowers.insert(newLower);
 
             bestSum = newSumIfAdd;
         }
     }
     cout << "Final sum: " << bestSum << " from pairs: " << endl;
+#if 0
     for (const auto x : blah)
     {
         cout << "{" << x.first << ", " << x.second << "} ";
     }
     cout << endl;
-    for (int i = blah.size(); i <= N / 2; i++)
+#endif
+    assert(lowers.size() == uppers.size());
+    for (int i = uppers.size(); i <= N / 2; i++)
     {
         result[i] = bestSum;
     }
-#if 0
+#if 1
     string s(N, '.');
-    for (const auto& x : blah)
+    for (const auto& x : lowers)
     {
-        s[x.first] = '-';
-        s[x.second] = '+';
+        s[x.index] = '-';
+    }
+    for (const auto& x : uppers)
+    {
+        s[x.index] = '+';
     }
     cout << s << endl;
 #endif
