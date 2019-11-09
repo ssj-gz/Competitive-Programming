@@ -136,6 +136,18 @@ vector<int64_t> solveBruteForce(int N, const vector<int64_t>& SOrig, const vecto
 }
 #endif
 
+struct PValueAndIndex
+{
+    int64_t p = -1;
+    int index = -1;
+};
+bool operator<(const PValueAndIndex& lhs, const PValueAndIndex& rhs)
+{
+    if (lhs.p != rhs.p)
+        return lhs.p < rhs.p;
+    return lhs.index < rhs.index;
+}
+
 #if 1
 vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector<int64_t>& POrig)
 {
@@ -170,12 +182,13 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     cout << endl;
 
     vector<int64_t> result(N / 2 + 1);
-    multiset<int64_t> unused;
-    multiset<int64_t> uppers;
+    multiset<PValueAndIndex> unused;
+    multiset<PValueAndIndex> uppers;
     vector<std::pair<int64_t, int64_t>> blah;
     int64_t bestSum = 0;
-    for (const auto& x : psByS)
+    for (int i = 0; i < N; i++)
     {
+        const auto x = psByS[i];
         cout << "Iteration: x: " << x << " bestSum: " << bestSum << " pairs: " << endl;
         for (const auto x : blah)
         {
@@ -185,31 +198,31 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         cout << "unused: " << endl;
         for (const auto x : unused)
         {
-            cout << x << " ";
+            cout << x.p << " ";
         }
         cout << endl;
         cout << "uppers: " << endl;
         for (const auto x : uppers)
         {
-            cout << x << " ";
+            cout << x.p << " ";
         }
         cout << endl;
         const auto newSumIfIgnoreX = bestSum;
         auto newSumIfAdd = std::numeric_limits<int64_t>::min();
         if (!unused.empty())
         {
-            newSumIfAdd = bestSum + x - *unused.begin();
+            newSumIfAdd = bestSum + x - unused.begin()->p;
         }
         auto newSumIfReplace = std::numeric_limits<int64_t>::min();
         if (!uppers.empty())
         {
-            newSumIfReplace = bestSum + x - *uppers.begin();
+            newSumIfReplace = bestSum + x - uppers.begin()->p;
         }
         cout << "newSumIfIgnoreX: " << newSumIfIgnoreX << " newSumIfAdd: " << newSumIfAdd << " newSumIfReplace: " << newSumIfReplace << endl;
 
         if (newSumIfIgnoreX >= newSumIfAdd && newSumIfIgnoreX >= newSumIfReplace)
         {
-            unused.insert(x);
+            unused.insert({x, i});
             continue;
         }
 
@@ -217,12 +230,12 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         {
             const auto toReplace = *uppers.begin();
             uppers.erase(uppers.begin());
-            uppers.insert(x);
+            uppers.insert({x, i});
             unused.insert(toReplace);
             int lower = 0;
             for (auto blahIter = blah.begin(); blahIter != blah.end(); blahIter++)
             {
-                if (blahIter->second == toReplace)
+                if (blahIter->second == toReplace.p)
                 {
                     lower = blahIter->first;
                     blah.erase(blahIter);
@@ -235,9 +248,9 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         }
         else
         {
-            const int newLower = *unused.begin();
+            const int newLower = unused.begin()->p;
             unused.erase(unused.begin());
-            uppers.insert(x);
+            uppers.insert({x, i});
             blah.push_back({newLower, x});
 
             bestSum = newSumIfAdd;
