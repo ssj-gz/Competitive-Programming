@@ -332,11 +332,11 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                     }
                 }
 #endif
-                const auto lowestUpper = std::prev(allowedUppers.end());
-                const auto dbgLowestUpperVal = lowestUpper->p;
-                const auto dbgLowestUpperIndex = lowestUpper->index;
-                cout << "lowestUpperVal: " << lowestUpperVal << " dbgLowestUpperVal: " << dbgLowestUpperVal << endl;
-                cout << "lowestUpperIndex: " << lowestUpperIndex << " dbgLowestUpperIndex: " << dbgLowestUpperIndex << endl;
+                const auto lowestUpper = *allowedUppers.begin();
+                const auto dbgLowestUpperVal = lowestUpper.p;
+                const auto dbgLowestUpperIndex = lowestUpper.index;
+                //cout << "lowestUpperVal: " << lowestUpperVal << " dbgLowestUpperVal: " << dbgLowestUpperVal << endl;
+                //cout << "lowestUpperIndex: " << lowestUpperIndex << " dbgLowestUpperIndex: " << dbgLowestUpperIndex << endl;
                 assert(dbgLowestUpperVal == lowestUpperVal);
                 assert(dbgLowestUpperIndex == lowestUpperIndex);
                 scoreFromRemovingThisLower -= lowestUpperVal;
