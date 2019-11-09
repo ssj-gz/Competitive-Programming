@@ -275,6 +275,83 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     }
     cout << s << endl;
 #endif
+    set<int> openUppers;
+    int numUnattachedLowers = 0;
+    while (!uppers.empty())
+    {
+        int bestLowerToRemove = -1;
+        int bestUpperToRemove = -1;
+        int64_t scoreForBestRemovedUpperAndLower = std::numeric_limits<int64_t>::min();
+        for (int i = N - 1; i >= 0; i--)
+        {
+            if (s[i] == '+')
+            {
+                openUppers.insert(i);
+            }
+            if (s[i] == '-')
+            {
+                // Consequences of removing this?
+                // Can remove:
+                //   i) Any open upper.
+                //  ii) Any upper to our left.
+                int64_t scoreFromRemovingThisLower = bestSum + psByS[i];
+                int64_t lowestUpperIndex = -1;
+                int64_t lowestUpperVal = std::numeric_limits<int64_t>::max();
+                for (int j = 0; j < i; j++)
+                {
+                    if (s[j] == '+')
+                    {
+                        if (psByS[j] < lowestUpperVal)
+                        {
+                            lowestUpperVal = psByS[j];
+                            lowestUpperIndex = j;
+                        }
+                    }
+                }
+
+                for (const auto upper : openUppers)
+                {
+                    if (psByS[upper] < lowestUpperVal)
+                    {
+                        lowestUpperVal = psByS[upper];
+                        lowestUpperIndex = upper;
+                    }
+                }
+                scoreFromRemovingThisLower -= lowestUpperVal;
+                if (scoreFromRemovingThisLower > scoreForBestRemovedUpperAndLower)
+                {
+                    scoreForBestRemovedUpperAndLower = scoreFromRemovingThisLower;
+                    bestUpperToRemove = lowestUpperIndex;
+                    bestLowerToRemove = i;
+                }
+
+            }
+
+            if (s[i] == '-')
+            {
+                assert(!openUppers.empty());
+                numUnattachedLowers++;
+                assert(numUnattachedLowers <= openUppers.size());
+                if (numUnattachedLowers == openUppers.size())
+                {
+                    openUppers.clear();
+                    numUnattachedLowers = 0;
+                }
+            }
+
+        }
+        assert(bestLowerToRemove != -1 && bestUpperToRemove != -1);
+        s[bestUpperToRemove] = '.';
+        s[bestLowerToRemove] = '.';
+        bestSum = scoreForBestRemovedUpperAndLower;
+        cout << "s: " << s << " bestSum: " << bestSum << endl;
+        uppers.erase({psByS[bestUpperToRemove], bestUpperToRemove});
+        lowers.erase({psByS[bestLowerToRemove], bestLowerToRemove});
+
+
+
+        assert(uppers.size() == lowers.size());
+    }
 
     
 
