@@ -57,6 +57,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     while (true)
     {
         const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
+        cout << "N: " << N << " nextSquare: " << nextSquare << endl;
         //cout << "nextSquare: " << nextSquare << " N: " << N << endl;
         int numTrailingDigitsToReplace = 1;
         while (numTrailingDigitsToReplace < sumOfSquaresLookup.size())
@@ -87,10 +88,16 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 }
                 assert(!replacementTrailingDigits.empty());
 
+                cout << "Making " << dbgRequiredSquareDigitSum << " requires: " << replacementTrailingDigits;
+
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
+                    cout << " (better than previous best " << bestReplacementDigits << ")";
                     bestReplacementDigits = replacementTrailingDigits;
+                    largestNumIterations = max(largestNumIterations, numIterations);
+                    //cout << "N: " << N << " stilluseful: " << numIterations << endl;
                 }
+                cout << endl;
                 break;
             }
 
@@ -99,7 +106,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
         }
         nextSquareRoot++;
         numIterations++;
-        largestNumIterations = max(largestNumIterations, numIterations);
+        //largestNumIterations = max(largestNumIterations, numIterations);
     }
 
 
