@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <limits>
 #include <set>
+#include <iomanip>
 
 #include <cassert>
 
@@ -286,6 +287,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     set<int> openUppers;
     set<PValueAndIndex> allowedUppers;
     int numUnattachedLowers = 0;
+    vector<int64_t> bestScoreForRemovingLower(N, -1);
     while (!uppers.empty())
     {
         int bestLowerToRemove = -1;
@@ -342,8 +344,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                     bestUpperToRemove = lowestUpperIndex;
                     bestLowerToRemove = i;
                 }
-
-
+                bestScoreForRemovingLower[i] = scoreFromRemovingThisLower;
             }
 
             if (s[i] == '-')
@@ -372,6 +373,13 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         uppers.erase({psByS[bestUpperToRemove], bestUpperToRemove});
         lowers.erase({psByS[bestLowerToRemove], bestLowerToRemove});
 
+        cout << "bestScoreForRemovingLower: " << endl;
+        for (const auto& x : bestScoreForRemovingLower)
+        {
+            cout << setw(4) << x << " ";
+        }
+        cout << endl;
+
 
         result[uppers.size()] = bestSum;
 
@@ -396,7 +404,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
-        const int N = 2 + rand() % 13;
+        const int N = 2 + rand() % 20;
         const int maxS = 1 + rand() % 100;
         const int maxP = 1 + rand() % 100;
 
