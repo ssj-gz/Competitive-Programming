@@ -284,12 +284,17 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     //cout << s << endl;
 #endif
     set<int> openUppers;
+    set<PValueAndIndex> allowedUppers;
     int numUnattachedLowers = 0;
     while (!uppers.empty())
     {
         int bestLowerToRemove = -1;
         int bestUpperToRemove = -1;
         int64_t scoreForBestRemovedUpperAndLower = std::numeric_limits<int64_t>::min();
+        for (auto upper : uppers)
+        {
+            allowedUppers.insert(upper);
+        }
         for (int i = N - 1; i >= 0; i--)
         {
             if (s[i] == '+')
@@ -303,8 +308,9 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                 //   i) Any open upper.
                 //  ii) Any upper to our left.
                 int64_t scoreFromRemovingThisLower = bestSum + psByS[i];
-                int64_t lowestUpperIndex = -1;
+#if 1
                 int64_t lowestUpperVal = std::numeric_limits<int64_t>::max();
+                int lowestUpperIndex = -1;
                 for (int j = 0; j < i; j++)
                 {
                     if (s[j] == '+')
@@ -325,6 +331,14 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                         lowestUpperIndex = upper;
                     }
                 }
+#endif
+                const auto lowestUpper = std::prev(allowedUppers.end());
+                const auto dbgLowestUpperVal = lowestUpper->p;
+                const auto dbgLowestUpperIndex = lowestUpper->index;
+                cout << "lowestUpperVal: " << lowestUpperVal << " dbgLowestUpperVal: " << dbgLowestUpperVal << endl;
+                cout << "lowestUpperIndex: " << lowestUpperIndex << " dbgLowestUpperIndex: " << dbgLowestUpperIndex << endl;
+                assert(dbgLowestUpperVal == lowestUpperVal);
+                assert(dbgLowestUpperIndex == lowestUpperIndex);
                 scoreFromRemovingThisLower -= lowestUpperVal;
                 if (scoreFromRemovingThisLower > scoreForBestRemovedUpperAndLower)
                 {
@@ -332,6 +346,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                     bestUpperToRemove = lowestUpperIndex;
                     bestLowerToRemove = i;
                 }
+
 
             }
 
@@ -342,7 +357,12 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                 assert(numUnattachedLowers <= openUppers.size());
                 if (numUnattachedLowers == openUppers.size())
                 {
-                    openUppers.clear();
+                    while (!openUppers.empty())
+                    {
+                        allowedUppers.erase({psByS[*openUppers.begin()], *openUppers.begin()});
+                        openUppers.erase(openUppers.begin());
+
+                    }
                     numUnattachedLowers = 0;
                 }
             }
