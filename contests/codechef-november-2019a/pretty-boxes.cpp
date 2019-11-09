@@ -308,7 +308,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                 //   i) Any open upper.
                 //  ii) Any upper to our left.
                 int64_t scoreFromRemovingThisLower = bestSum + psByS[i];
-#if 1
+#if 0
                 int64_t lowestUpperVal = std::numeric_limits<int64_t>::max();
                 int lowestUpperIndex = -1;
                 for (int j = 0; j < i; j++)
@@ -333,12 +333,8 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                 }
 #endif
                 const auto lowestUpper = *allowedUppers.begin();
-                const auto dbgLowestUpperVal = lowestUpper.p;
-                const auto dbgLowestUpperIndex = lowestUpper.index;
-                //cout << "lowestUpperVal: " << lowestUpperVal << " dbgLowestUpperVal: " << dbgLowestUpperVal << endl;
-                //cout << "lowestUpperIndex: " << lowestUpperIndex << " dbgLowestUpperIndex: " << dbgLowestUpperIndex << endl;
-                assert(dbgLowestUpperVal == lowestUpperVal);
-                assert(dbgLowestUpperIndex == lowestUpperIndex);
+                const auto lowestUpperVal = lowestUpper.p;
+                const auto lowestUpperIndex = lowestUpper.index;
                 scoreFromRemovingThisLower -= lowestUpperVal;
                 if (scoreFromRemovingThisLower > scoreForBestRemovedUpperAndLower)
                 {
