@@ -287,9 +287,11 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
     set<int> openUppers;
     set<PValueAndIndex> allowedUppers;
     int numUnattachedLowers = 0;
-    vector<int64_t> bestScoreForRemovingLower(N, -1);
+    vector<int64_t> bestUpperForHere(N, -1);
+    vector<int64_t> prevBestUpperForHere;
     while (!uppers.empty())
     {
+        set<int> lockIndices;
         int bestLowerToRemove = -1;
         int bestUpperToRemove = -1;
         int64_t scoreForBestRemovedUpperAndLower = std::numeric_limits<int64_t>::min();
@@ -344,7 +346,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
                     bestUpperToRemove = lowestUpperIndex;
                     bestLowerToRemove = i;
                 }
-                bestScoreForRemovingLower[i] = scoreFromRemovingThisLower;
+                bestUpperForHere[i] = lowestUpperVal;
             }
 
             if (s[i] == '-')
@@ -361,6 +363,7 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
 
                     }
                     numUnattachedLowers = 0;
+                    lockIndices.insert(i);
                 }
             }
 
@@ -373,10 +376,39 @@ vector<int64_t> solveOptimised(int N, const vector<int64_t>& SOrig, const vector
         uppers.erase({psByS[bestUpperToRemove], bestUpperToRemove});
         lowers.erase({psByS[bestLowerToRemove], bestLowerToRemove});
 
-        cout << "bestScoreForRemovingLower: " << endl;
-        for (const auto& x : bestScoreForRemovingLower)
+#if 0
+        cout << "bestUpperForHere: " << endl;
+        for (const auto& x : bestUpperForHere)
         {
             cout << setw(4) << x << " ";
+        }
+        cout << endl;
+#endif
+#if 0
+        if (!prevBestUpperForHere.empty())
+        {
+            cout << "diff bestUpperForHere from last: " << endl;
+            for (int i = 0; i < N; i++)
+            {
+                if (s[i] == '-')
+                {
+                    cout << setw(3) << bestUpperForHere[i] - prevBestUpperForHere[i] << " ";
+                }
+                else
+                {
+                    cout << setw(3) << '*' << " ";
+                }
+            }
+            cout << endl;
+
+        }
+#endif
+        prevBestUpperForHere = bestUpperForHere;
+
+        cout << "lockIndices: " << endl;
+        for (const auto x : lockIndices)
+        {
+            cout << " " << x;
         }
         cout << endl;
 
@@ -404,7 +436,8 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
-        const int N = 2 + rand() % 20;
+        //const int N = 2 + rand() % 20;
+        const int N = 1000;
         const int maxS = 1 + rand() % 100;
         const int maxP = 1 + rand() % 100;
 
