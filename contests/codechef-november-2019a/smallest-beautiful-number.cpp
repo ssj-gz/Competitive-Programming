@@ -39,7 +39,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     const int64_t squareDigitSumOrig = N;
 
     if (isSquare(squareDigitSumOrig))
-        return string (1, '1');
+        return string (N, '1');
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
