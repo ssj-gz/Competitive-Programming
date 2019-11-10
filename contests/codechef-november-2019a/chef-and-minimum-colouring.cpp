@@ -113,11 +113,11 @@ int main(int argc, char* argv[])
     //
     // QUICK EXPLANATION
     //
-    // Let c_0, c_1, ... c_{m-1} be the M different colours.  Once valid colouring
+    // Let c_0, c_1, ... c_{m-1} be the M different colours.  One valid colouring
     // would be to simple colour the box i with the colour c_{i mod M} (where i is
     // 0-relative) - call this the Main Colouring.  In fact, this Main Colouring
-    // is "essentially" the only colouring in that all other colourings are just
-    // the Main Colouring with the colours permuted.  In particular, for any colouring,
+    // is "essentially" the only valid colouring in that all other valid colourings are just
+    // the Main Colouring with the colours permuted.  In particular, for any valid colouring,
     // a choice of M boxes will have different colours in that colouring if and only
     // if they have different colours in the Main Colouring, so we can just assume
     // that the Main Colouring is always used by Chef.
@@ -129,6 +129,71 @@ int main(int argc, char* argv[])
     // in our sorted list have, between them, the full set of M colours.  It's then
     // easy to find the set of all choices of M boxes that give the smallest 
     // difference between max and min values of the boxes.
+    //
+    // LONGER EXPLANATION
+    //
+    // Let's deal with the valid colourings, first.
+    //
+    // Lemma
+    //
+    // Let the boxes be coloured with a valid colouring.  Then for any consecutive block
+    // of M m boxes, the colours of the boxes, in order, are a permutation of 
+    // {c_0, c_1, ... c_{m-1}}.
+    //
+    // Proof
+    //
+    // There are M boxes, each of a colour in {c_0, c_1, ... c_{m-1}}, and each a different
+    // colour - pretty much by definition, the box colours in order must be a permutation 
+    // of this set.
+    //
+    // Corollary
+    //
+    // For any valid colouring, there is a permutation π of {c_0, c_1, ... c_{m-1}}
+    // such that the first M boxes are coloured π(c_0), π(c_1), ... , π(c_{m-1}),
+    // respectively.
+    //
+    // Lemma 
+    // Let the boxes have a valid colouring.  Then there is a permutation π of 
+    // {c_0, c_1, ... c_{m-1}} such that the box i is coloured π(c_{i % M}).
+    //
+    // Proof
+    //
+    // From the Corollary above, this holds for i = 0, 1, ... M - 1, so that forms
+    // a base case for induction on i >= M.
+    //
+    // Assume it holds true for i >= M - 1; what can we deduce about the colour C of the
+    // (i+1)th box?
+    //
+    // The by induction hypothesis, the boxes with indices i - m + 1, i - m + 2, ... , i - 1, i
+    // are coloured c_{(i - m + 1) % M}, c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}.
+    // The indices are a block of M consecutive indices, so because we have a valid colouring,
+    // we must have:
+    //
+    //   {c_{(i - m + 1) % M}, c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}} =
+    //   {c_0, c_1, ... c_{M - 1}}
+    //
+    // Drop the first index (i - m + 1): then we have M - 1 consecutive indices, and:
+    //
+    //   {c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}} =
+    //   {c_0, c_1, ... c_{M - 1}} - c_{(i - m + 1) % M
+    //
+    // Now add the next index, i+1 - then we have M consecutive indices again, and:
+    //
+    //   {c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}, C} =
+    //   ({c_0, c_1, ... c_{M - 1}} - c_{(i - m + 1) % M) ⋃ C                       (1)
+    //
+    // But because it is a valid colouring, the boxes colours at these M consecutive indices 
+    // must be precisely {c_0, c_1, ..., c_{M - 1}} in some order; i.e.
+    //
+    //   {c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}, C} =
+    //   {c_0, c_1, ... c_{M - 1}}                                                  (2)
+    //
+    // Substituting (2) into (1) gives:
+    //   {c_0, c_1, ... c_{M - 1}} =
+    //   ({c_0, c_1, ... c_{M - 1}} - c_{(i - m + 1) % M) ⋃ C
+    //
+    // which can only be the case if C = c_{(i - m + 1) % M}.  Hence result.
+
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
