@@ -193,6 +193,13 @@ int main(int argc, char* argv[])
     //   ({c_0, c_1, ... c_{M - 1}} - c_{(i - m + 1) % M) ⋃ C
     //
     // which can only be the case if C = c_{(i - m + 1) % M}.  Hence result.
+    //
+    // TODO - two pointer thing; ValueAndColour[leftIndex].colour != ValueAndColour[rightIndex].colour
+    // due to minimality of rightIndex; choosing indices leftIndex, rightIndex, and M - 2 indices
+    // in [leftIndex + 1, rightIndex - 1] that have remaining M - 2 colours other than that of leftIndex and
+    // rightIndex gives set of indices of all different colours where max = ValueAndColour[leftIndex] and
+    // min = ValueAndColour[rightIndex], and max - min is minimal for this leftIndex, so over all
+    // leftIndex = 0, 1, ... N - 1, have our result.
 
     ios::sync_with_stdio(false);
     
