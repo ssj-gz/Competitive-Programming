@@ -34,9 +34,6 @@ bool isNumericallyLessThan(const string& lhsNumAsString, const string& rhsNumAsS
     return lhsNumAsString < rhsNumAsString;
 }
 
-int largestNumIterations = 0;
-int64_t largestSumToMake = 0;
-int largestNumDigits = 0;
 string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOfSquaresLookup)
 {
     const int64_t squareDigitSumOrig = N;
@@ -50,32 +47,31 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     assert(nextSquareRoot * nextSquareRoot > N);
 
     string bestReplacementDigits;
-
-    int numIterations = 0;
     while (true)
     {
         const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
-        cout << "N: " << N << " nextSquare: " << nextSquare << endl;
-        //cout << "nextSquare: " << nextSquare << " N: " << N << endl;
         int numTrailingDigitsToReplace = 1;
         while (numTrailingDigitsToReplace < sumOfSquaresLookup.size())
         {
-            //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << endl;
-            const int64_t squareDigitSum = squareDigitSumOrig - numTrailingDigitsToReplace;
+            // Sum of digits squared if we lopped off the last numTrailingDigitsToReplace of the N 1's.
+            const int64_t sumOfDigitsSquared = squareDigitSumOrig - numTrailingDigitsToReplace; 
 
-            int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
-            const int64_t dbgRequiredSquareDigitSum = requiredSquareDigitSum;
-            const auto dbgNumTrailingDigitsToReplace = numTrailingDigitsToReplace;
+            int64_t requiredSquareDigitSum = nextSquare - sumOfDigitsSquared;
 
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
-                //cout << "N: " << N << " Took: " << numIterations << " iterations" << endl;
-                return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
-                //return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+                // With each further iteration, requiredSquareDigitSum is just going to keep on increasing,
+                // and it's already sufficiently large that we'll need to replace more digits than are in
+                // bestReplacementDigits - the current value of bestReplacementDigits is the best we're ever
+                // going to get.
+                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
             }
 
             if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
             {
+                // We can form requiredSquareDigitSum using numTrailingDigitsToReplace digits - use
+                // our dp lookup table sumOfSquaresLookup to reconstruct the smallest numTrailingDigitsToReplace
+                // digit number whose sum of digits square is requiredSquareDigitSum.
                 string replacementTrailingDigits;
                 while (requiredSquareDigitSum > 0)
                 {
@@ -88,32 +84,16 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 }
                 assert(!replacementTrailingDigits.empty());
 
-                cout << "Making " << dbgRequiredSquareDigitSum << " requires: " << replacementTrailingDigits /*<< " (" << (string(N - replacementTrailingDigits.length(), '1') + replacementTrailingDigits) << ")"*/;
-
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
-                    cout << " (better than previous best " << bestReplacementDigits << ")";
                     bestReplacementDigits = replacementTrailingDigits;
                     largestNumIterations = max(largestNumIterations, numIterations);
-                    if (dbgRequiredSquareDigitSum > largestSumToMake )
-                    {
-                        largestSumToMake = max(largestSumToMake, dbgRequiredSquareDigitSum);
-                        //cout << endl << "new largest largestSumToMake: " << dbgRequiredSquareDigitSum << " N: " << N << endl;
-                    }
-                    if (largestNumDigits <  dbgNumTrailingDigitsToReplace)
-                    {
-                        largestNumDigits = dbgNumTrailingDigitsToReplace;
-                        //cout << endl << "new largest largestNumDigits: " << largestNumDigits << " N: " << N << endl;
-                        
-                    }
-                    //cout << "N: " << N << " stilluseful: " << numIterations << endl;
                 }
-                cout << endl;
+                // We've found the best value for this value of nextSquare; skip to the next.
                 break;
             }
 
             numTrailingDigitsToReplace++;
-
         }
         nextSquareRoot++;
         numIterations++;
