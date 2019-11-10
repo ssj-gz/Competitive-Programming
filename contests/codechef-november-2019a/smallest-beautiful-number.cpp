@@ -39,14 +39,10 @@ int64_t largestSumToMake = 0;
 int largestNumDigits = 0;
 string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOfSquaresLookup)
 {
-    string result;
-
-    string numberAsString(1, '1');
-
     const int64_t squareDigitSumOrig = N;
 
     if (isSquare(squareDigitSumOrig))
-        return numberAsString;
+        return string (1, '1');
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
@@ -74,8 +70,8 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
                 cout << "N: " << N << " Took: " << numIterations << " iterations" << endl;
-                //return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
-                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+                return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
+                //return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
             }
 
             if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
@@ -170,7 +166,7 @@ int main(int argc, char* argv[])
     cout << "maxBlah: " << maxBlah << endl;
 #endif
     const int maxVal = 2040;     // Arrived at empirically by exploring all N = 1 - 1'000'000.  Occurs at N = 999987.
-    const int maxNumDigits = 30; //     "                "                "                  .  Occurs at N = 958428.
+    const int maxNumDigits = 27; //     "                "                "                  .  Occurs at N = 958428.
     // sumOfSquaresLookup[d][v] gives the first digit in the minimum representation of v
     // using exactly d digits if v can be expressed with d digits, else -1.
     vector<vector<int>> sumOfSquaresLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
@@ -215,7 +211,7 @@ int main(int argc, char* argv[])
             //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
         }
     }
-#if 0
+#if 1
     {
         for (int N = 1; N <= 1'000'000; N++)
         {
