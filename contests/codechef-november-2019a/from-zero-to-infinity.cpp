@@ -62,7 +62,7 @@ bool isAlicesRecipe(const string& recipe)
 
         previousPreviousVMC = previousVMC;
         previousVMC = currentPrefixVMC;
-        maxPrefixVMC = max(maxPrefixVMC, previousPreviousVMC); // i.e. ensure that the maxPrefixVMC is for a prefix at least 2 less than
+        maxPrefixVMC = max(maxPrefixVMC, previousPreviousVMC); // i.e. ensure that the maxPrefixVMC is for a prefix with length at least 2 less than
                                                                // the current prefix, as we only consider substrings of length >= 2.
     }
 
