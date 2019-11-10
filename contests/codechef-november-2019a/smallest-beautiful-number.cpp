@@ -31,10 +31,10 @@ bool isNumericallyLessThan(const string& lhsNumAsString, const string& rhsNumAsS
         return true;
     if (lhsNumAsString.length() > rhsNumAsString.length())
         return false;
-    return lhsNumAsString < rhsNumAsString;
+    return lhsNumAsString < rhsNumAsString; // Same number of digits? Lexicographical comparison will work.
 }
 
-string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOfSquaresLookup)
+string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOfSquaredDigitsLookup)
 {
     const int64_t squareDigitSumOrig = N;
 
@@ -51,7 +51,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     {
         const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
         int numTrailingDigitsToReplace = 1;
-        while (numTrailingDigitsToReplace < sumOfSquaresLookup.size())
+        while (numTrailingDigitsToReplace < sumOfSquaredDigitsLookup.size())
         {
             // Sum of digits squared if we lopped off the last numTrailingDigitsToReplace of the N 1's.
             const int64_t sumOfDigitsSquared = squareDigitSumOrig - numTrailingDigitsToReplace; 
@@ -67,15 +67,15 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
             }
 
-            if (sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
+            if (sumOfSquaredDigitsLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
             {
                 // We can form requiredSquareDigitSum using numTrailingDigitsToReplace digits - use
-                // our dp lookup table sumOfSquaresLookup to reconstruct the smallest numTrailingDigitsToReplace
+                // our dp lookup table sumOfSquaredDigitsLookup to reconstruct the smallest numTrailingDigitsToReplace
                 // digit number whose sum of digits square is requiredSquareDigitSum.
                 string replacementTrailingDigits;
                 while (requiredSquareDigitSum > 0)
                 {
-                    const int nextDigitValue = sumOfSquaresLookup[numTrailingDigitsToReplace][requiredSquareDigitSum];
+                    const int nextDigitValue = sumOfSquaredDigitsLookup[numTrailingDigitsToReplace][requiredSquareDigitSum];
                     assert(nextDigitValue != -1);
                     replacementTrailingDigits += '0' + nextDigitValue;
 
@@ -87,7 +87,6 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
                     bestReplacementDigits = replacementTrailingDigits;
-                    largestNumIterations = max(largestNumIterations, numIterations);
                 }
                 // We've found the best value for this value of nextSquare; skip to the next.
                 break;
@@ -96,11 +95,9 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
             numTrailingDigitsToReplace++;
         }
         nextSquareRoot++;
-        numIterations++;
-        //largestNumIterations = max(largestNumIterations, numIterations);
     }
 
-
+    assert(false); // There is no N such that no N-digit number is beautiful.
     return "";
 }
 
@@ -129,100 +126,40 @@ int main(int argc, char* argv[])
 //    11111111111111111111168
     // N = 24 has the most iterations (i.e. square numbers) that must be checked (12 of them).
 
-
     ios::sync_with_stdio(false);
-#if 0
-    int maxBlah = 0;
-    for (int N = 1; N <= 1'000'000; N++)
-    {
-        if (isSquare(N))
-            continue;
-        const int sqrtN = sqrt(N);
-        assert(sqrtN * sqrtN < N);
-        assert((sqrtN + 1) * (sqrtN + 1) > N);
-        cout << "N: " << N << endl;
-        maxBlah = max(maxBlah, (sqrtN + 1) * (sqrtN + 1) - N);
-    }
-    cout << "maxBlah: " << maxBlah << endl;
-#endif
-    const int maxVal = 2040;     // Arrived at empirically by exploring all N = 1 - 1'000'000.  Occurs at N = 999987.
-    const int maxNumDigits = 27; //     "                "                "                  .  Occurs at N = 958428, when trying to make the square 960400 = 980^2.
-    // sumOfSquaresLookup[d][v] gives the first digit in the minimum representation of v
-    // using exactly d digits if v can be expressed with d digits, else -1.
-    vector<vector<int>> sumOfSquaresLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
-    sumOfSquaresLookup[0][0] = 1;
+    const int maxVal = 2040;     // Arrived at empirically by exhaustively exploring all N = 1 to 1'000'000.  Occurs at N = 999987.
+    const int maxNumDigits = 27; //     "                "                "                  "             .  Occurs at N = 958428, when trying to make the square 960400 = 980^2.
+    // sumOfSquaredDigitsLookup[d][v] gives the first digit in the minimum decimal value
+    // of exactly d digits (no 0's, leading or otherwise) whose sum-of-digits-square is v, or -1 if there is no
+    // such d-digit decimal.
+    vector<vector<int>> sumOfSquaredDigitsLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
+    sumOfSquaredDigitsLookup[0][0] = 1;
     for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
     {
+        // Count down the digits, so that if multiple leading digits give
+        // the same value, only the smallest (and thus, the one corresponding
+        // to the minimal decimal value) is stored.
         for (int digitVal = 9; digitVal >= 1; digitVal--)
         {
             for (int val = 0; val <= maxVal; val++)
             {
-                if (sumOfSquaresLookup[numDigits - 1][val] == -1)
+                if (sumOfSquaredDigitsLookup[numDigits - 1][val] == -1)
                     continue;
                 if (val + digitVal * digitVal <= maxVal)
                 {
-                    sumOfSquaresLookup[numDigits][val + digitVal * digitVal] = digitVal;
+                    sumOfSquaredDigitsLookup[numDigits][val + digitVal * digitVal] = digitVal;
                 }
             }
         }
     }
-    for (int val = 1; val <= maxVal; val++)
-    {
-        bool canGenerate = false;
-        int minDigits = 1000;
-        for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
-        {
-            //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
-            if (sumOfSquaresLookup[numDigits][val] != -1)
-            {
-                canGenerate = true;
-                //break;
-                minDigits = min(minDigits, numDigits);
-            }
-        }
-        //cout << "val: " << val << " can be generated with " << minDigits << " digits.   Less than upper bound: = " << ((val / 81) + 4 - minDigits) << endl;
-        assert(minDigits <= (val / 81) + 4);
-        assert(canGenerate);
-    }
-    for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
-    {
-        for (int val = 1; val <= maxVal; val++)
-        {
-            //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
-        }
-    }
-#if 0
-    {
-        for (int N = 1; N <= 1'000'000; N++)
-        {
-            //cout << "N: " << N << endl;
-            //const auto solutionBruteForce = solveBruteForce(N);
-            //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-            const auto blah = findMinBeautifulNumberWithNDigits(N, sumOfSquaresLookup);
-            cout << "Q: 2 lines" << endl;
-            cout << 1 << endl;
-            cout << N << endl;
-            cout << "A: 1 lines" << endl;
-            cout << blah << endl;
-            //cout << "solutionOptimised:  " << solutionOptimised << endl;
-            //assert(solutionOptimised == solutionBruteForce);
-        }
-        //cout << "largestThig: " << largestThig << endl;
-        //cout << "largestThog: " << largestThog << endl;
-        //cout << "largestNumIterations: " << largestNumIterations << endl;
-        //cout << "largestSumToMake: " << largestSumToMake <<  endl;
-        return 0;
-    }
-#endif
 
     const auto T = read<int>();
-
 
     for (int t = 0; t < T; t++)
     {
         const int N = read<int>();
 
-        cout << findMinBeautifulNumberWithNDigits(N, sumOfSquaresLookup) << endl;
+        cout << findMinBeautifulNumberWithNDigits(N, sumOfSquaredDigitsLookup) << endl;
     }
 
     assert(cin);
