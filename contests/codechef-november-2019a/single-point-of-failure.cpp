@@ -377,6 +377,26 @@ int findSinglePointOfFailure(vector<Node>& nodes)
 
 int main(int argc, char* argv[])
 {
+    // Fairly easy one, though shows a flaw with (purely) randomised testcase
+    // generation: I put some assertions in some of the parts of the code
+    // to ensure they were being exercised, but for some of these, none of 100'000(!)
+    // randomised tests exercised the logic - manual creation of tests to exercise
+    // the bits of logic took only a few minutes.
+    //
+    // Still passed first time, though - maybe the Problem Tester ran into the same
+    // problem I did and ended up with really weak testcases XD
+    //
+    // QUICK EXPLANATION
+    //
+    // There is a simple, well-known O(N) algorithm for determining if a graph G has a 
+    // cycle, and returning some arbitrary one C if there is.  If there is no cycle
+    // C, there can be no SPF, and so we're done.
+    //
+    // Otherwise, the SPF *must* be a node in the cycle C (removing the SPF must
+    // stop C from being a cycle).  By removing the cycle C from G, we obtain a bunch
+    // of connected components, and by examining these components their points-of-contact
+    // with nodes in C in the original graph, we can deduce, using fairly simple rules, 
+    // which nodes in C must be removed to ensure that there are no cycles in G.
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
