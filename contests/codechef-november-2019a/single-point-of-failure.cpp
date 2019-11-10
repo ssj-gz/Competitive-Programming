@@ -71,7 +71,8 @@ class NodeMultiSet
             }
             return nodesAndOccurrences;
         }
-        // O(number of distinct nodes in set).
+        // O(number of distinct nodes in set) i.e. the cost of clearing the NodeMultiSet is 
+        // amortised into the cost of populating it in the first place.
         void clear()
         {
             for (auto node : m_nodesInSet)
@@ -85,6 +86,8 @@ class NodeMultiSet
         vector<int> m_numNodesWithId;
 };
 
+// Well-known algorithm for extracting a cycle, if one exists.
+// Which one you get is more-or-less arbitrary.
 void findACycleAux(Node* currentNode, Node* parentNode, vector<Node*>& destCycle, vector<Node*>& ancestors)
 {
     if (currentNode->isRemoved)
@@ -135,6 +138,7 @@ vector<Node*> findACycle(Node* startNode, vector<Node>& nodes)
     return cycle;
 }
 
+// Helper for getComponents.
 vector<Node*> getComponent(Node* rootNode, int markAsComponentNum)
 {
     assert(rootNode->componentNum == -1);
@@ -166,6 +170,8 @@ vector<Node*> getComponent(Node* rootNode, int markAsComponentNum)
 
 }
 
+// Decompose the graph into fully-connected components in O(N).
+// Nodes marked as isRemoved are ignored.
 vector<vector<Node*>> getComponents(vector<Node>& nodes)
 {
     for (auto& node : nodes)
@@ -199,9 +205,7 @@ bool componentHasCycle(const vector<Node*>& component)
     assert(numEdgesTimesTwo % 2 == 0);
     const auto numEdges = numEdgesTimesTwo / 2;
     assert(numEdges >= component.size() - 1);
-    // A connected graph over N nodes will have at least
-    // N - 1 edges.
-    // It is a tree if and only if it has precisely N - 1 edges.
+    // A connected component over K nodes is a tree if and only if it has precisely K - 1 edges.
     return numEdges != component.size() - 1;
 }
 
@@ -254,6 +258,7 @@ void addSyntheticEdgesBetweenConnectedNonConsecutiveCycleNodes(vector<Node>& nod
 
 int findSinglePointOfFailure(vector<Node>& nodes)
 {
+    // Try and find a cycle in any of the components of the graph.
     vector<Node*> cycle;
     for (const auto& component : getComponents(nodes))
     {
@@ -277,13 +282,13 @@ int findSinglePointOfFailure(vector<Node>& nodes)
     }
 
     // Deal with cycles caused by edges between nodes in C which are
-    // not consecutive in C without special casing.
+    // not consecutive in C, without special casing.
     addSyntheticEdgesBetweenConnectedNonConsecutiveCycleNodes(nodes);
 
     // Get the list of components remaining after we've removed C.
-    const vector<vector<Node*>> components = getComponents(nodes);
+    const vector<vector<Node*>> componentsWithoutC = getComponents(nodes);
 
-    for (const auto& component : components)
+    for (const auto& component : componentsWithoutC)
     {
         if (componentHasCycle(component))
         {
@@ -294,10 +299,10 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         }
     }
 
-    // None of the components has a cycle in G-C.
+    // None of the componentsWithoutC has a cycle in G-C.
     NodeMultiSet cycleNodesConnectedToComponent(nodes.size());
     int numComponentsNeedToBreak = 0;
-    for (const auto& component : components)
+    for (const auto& component : componentsWithoutC)
     {
         cycleNodesConnectedToComponent.clear();
         for (const auto& node : component)
@@ -315,6 +320,8 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         if (cycleNodesConnectedToComponentOccurrences.empty() || (cycleNodesConnectedToComponentOccurrences.size() == 1 && cycleNodesConnectedToComponentOccurrences.front().numOccurences == 1))
         {
             // This component would have no cycles even when C is added back in.
+            // (In the original graph C, this component would look like a tree sprouting out
+            // of one of the nodes in the cycle C).
             continue;
         }
 
@@ -324,14 +331,33 @@ int findSinglePointOfFailure(vector<Node>& nodes)
 
         if (cycleNodesConnectedToComponentOccurrences.size() >= 3)
         {
-            // 3 distinct cycle nodes connected; cannot be broken by any single node that breaks C.
+            //          D──...───E──...───F        ┐
+            //          │        │        │        ├ Component
+            //          │        │        │        ┘
+            // ┌──...──CA──...──CB──...──CC─...──┐ ┐
+            // │                                 │ ├ Cycle C
+            // └─────────────────────────────────┘ ┘        
+
+            // 3 distinct cycle nodes connected (CA, CB, CC) to the component; the cycles cannot be broken 
+            // by any single node that breaks C.  The SPF would have to be one of CA, CB and CC, but:
+            //
+            //    if we remove CA, we still have the cycle E ... F - CC ... CB - E;
+            //    if we remove CB, we still have the cycle D ... E ... F - CC ... CB ... CA - D;
+            //    if we remove CC, we still have the cycle D ... E - CB ... CA - D.
             return -1;
         }
 
         if (cycleNodesConnectedToComponentOccurrences.size() == 1)
         {
-            // Can (and must) be broken by removing the connected cycle node.
             assert(cycleNodesConnectedToComponentOccurrences.front().numOccurences > 1);
+            //            ...─B─...─C─...          ┐
+            //                 \   /               ├ Component's only point of contact with C is CA, but 
+            //                  \ /                ┘ at least two nodes in the component are joined to CA.
+            // ┌───────────...──CA──...──────────┐ ┐
+            // │                                 │ ├ Cycle C
+            // └─────────────────────────────────┘ ┘        
+            // The cycle B ... C ... CA ... B can (and must) be broken by removing the connected cycle node, CA.
+
             cycleNodesConnectedToComponentOccurrences.front().node->numComponentCyclesBreaks++;
             continue;
         }
@@ -340,7 +366,16 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         assert(cycleNodesConnectedToComponentOccurrences.size() == 2);
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences > 1)
         {
-            // We'd need to remove both cycle nodes to break this cycle - can't be done.
+            //   ...─C─...─D──........──E─...─F─...    ┐
+            //        \   /             \   /         ├ Component has exactly two points of contact with C (CA and CB),
+            //         \ /               \ /          ┘ but each of CA and CB is connected to at least two points of component.
+            // ┌──...──CA──...──────...──CB──...────┐ ┐
+            // │                                    │ ├ Cycle C
+            // └────────────────────────────────────┘ ┘        
+            // We'd need to remove both cycle nodes to break this cycle - can't be done:
+            //
+            //    if we remove CA, we'd still have the cycle CB ... E ... F ... CB;
+            //    if we remove CB, we'd still have the cycle CA ... C ... D ... CA;
             return -1;
         }
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences == 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences == 1)
