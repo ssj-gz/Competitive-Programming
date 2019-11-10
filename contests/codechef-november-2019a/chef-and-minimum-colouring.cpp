@@ -23,25 +23,6 @@ T read()
 
 int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 {
-    // Ok - if c1, c2, ... , cm are the colours, then any
-    // valid colouring is of the form:
-    //
-    // π(c1)π(c2)...π(cm)π(c1)π(c2)...π(cm)...π(c1)π(c2)...
-    //
-    // where π is a permutation of c1, c2, ... , cm i.e.
-    // is it some permutation of c1, c2, ... , cm.
-    //
-    // Similarly, a choice is valid for such a π if and only if
-    // it is valid for the colouring:
-    //
-    // c1c2...cmc1c2...cm...c1c2...
-    //
-    // The colours at i and j are different if and only if i != j mod m,
-    // so we merely need to find, for each k ... 1, 2, ..., m, the 
-    // maximum a[i] such that i mod m = k and the minimum a[j] such that
-    // j mod m != k.
-    // TODO - rest of documentation, etc.
-
     struct ValueAndColour
     {
         int64_t value = -1; 
