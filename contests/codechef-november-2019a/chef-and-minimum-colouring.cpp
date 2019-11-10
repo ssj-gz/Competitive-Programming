@@ -103,6 +103,29 @@ int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
 
 int main(int argc, char* argv[])
 {
+    // Quite a neat little problem; I'd rather have had this than the much more
+    // straightforward "PHCUL" as the replacement Div 1 problem, but oh well :)
+    //
+    // Anyway:
+    //
+    // QUICK EXPLANATION
+    //
+    // Let c_0, c_1, ... c_{m-1} be the M different colours.  Once valid colouring
+    // would be to simple colour the box i with the colour c_{i mod M} (where i is
+    // 0-relative) - call this the Main Colouring.  In fact, this Main Colouring
+    // is "essentially" the only colouring in that all other colourings are just
+    // the Main Colouring with the colours permuted.  In particular, for any colouring,
+    // a choice of M boxes will have different colours in that colouring if and only
+    // if they have different colours in the Main Colouring, so we can just assume
+    // that the Main Colouring is always used by Chef.
+    //
+    // Sort the boxes in order of value, taking care to not forget each box's 
+    // colour in the Main Colouring.  Then we can use the Two Pointer Technique to
+    // find, for each leftIndex = 0, 1, ... , N - 1, the smallest rightIndex >=
+    // leftIndex such that the boxes at indices in the range [leftIndex, rightIndex]
+    // in our sorted list have, between them, the full set of M colours.  It's then
+    // easy to find the set of all choices of M boxes that give the smallest 
+    // difference between max and min values of the boxes.
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
