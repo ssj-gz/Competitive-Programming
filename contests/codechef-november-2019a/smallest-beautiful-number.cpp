@@ -123,28 +123,44 @@ int main(int argc, char* argv[])
     // in order to be guaranteed to find the result for any given N up to 1'000'000 (computing the 
     // answer for such an N is very fast), and also that there is no such N such that no N-digit 
     // number is beautiful.
-
-//  Example about having to check multiple squares.  N = 23 is the one where we still getting different results after the most number of iterations.
-//    N: 23 nextSquare: 25
-//    N: 23 nextSquare: 36
-//    N: 23 nextSquare: 49
-//    Making 29 requires: 234 (11111111111111111111234) (better than previous best )
-//    N: 23 nextSquare: 64
-//    Making 44 requires: 226 (11111111111111111111226) (better than previous best 234)
-//    N: 23 nextSquare: 81
-//    Making 61 requires: 346 (11111111111111111111346)
-//    N: 23 nextSquare: 100
-//    Making 81 requires: 2238 (11111111111111111112238)
-//    N: 23 nextSquare: 121
-//    Making 100 requires: 68 (11111111111111111111168) (better than previous best 226)
-//    N: 23 nextSquare: 144
-//    Making 125 requires: 2269 (11111111111111111112269)
-//    N: 23 nextSquare: 169
-//    Making 149 requires: 289 (11111111111111111111289)
-//    N: 23 nextSquare: 196
-//    N: 23 Took: 9 iterations
-//    11111111111111111111168
+    //
+    // LONGER EXPLANATION
+    //
+    // The code and comments hopefully speak for themselves - analysing the approximate run-time is the
+    // hardest part, probably.
+    //
+    // TODO - just Skeletal notes at this point.
+    //
+    //  Example about having to check multiple squares.  N = 23 is the one where we still getting different results after the most number of iterations.
+    //    N: 23 nextSquare: 25
+    //    N: 23 nextSquare: 36
+    //    N: 23 nextSquare: 49
+    //    Making 29 requires: 234 (11111111111111111111234) (better than previous best )
+    //    N: 23 nextSquare: 64
+    //    Making 44 requires: 226 (11111111111111111111226) (better than previous best 234)
+    //    N: 23 nextSquare: 81
+    //    Making 61 requires: 346 (11111111111111111111346)
+    //    N: 23 nextSquare: 100
+    //    Making 81 requires: 2238 (11111111111111111112238)
+    //    N: 23 nextSquare: 121
+    //    Making 100 requires: 68 (11111111111111111111168) (better than previous best 226)
+    //    N: 23 nextSquare: 144
+    //    Making 125 requires: 2269 (11111111111111111112269)
+    //    N: 23 nextSquare: 169
+    //    Making 149 requires: 289 (11111111111111111111289)
+    //    N: 23 nextSquare: 196
+    //    N: 23 Took: 9 iterations
+    //    11111111111111111111168
     // N = 24 has the most iterations (i.e. square numbers) that must be checked (12 of them).
+    //
+    // For X = 1 ... 80, we need at most 4 digits to get a number with sum-of-digit-squares = X (revealed by exhaustive search over such X).
+    // Corollary: The maximum number of digits to form any X is X / (9 * 9) + 4.  (Prepend a 9 and decrease X by 9 * 9 - after
+    // X / (9 * 9) steps, X will be less than 81, and so will need at most 4 further digits).
+    //
+    // Similarly, the maximum sum-of-digit-squares from a d-digit number is d * 9 * 9 - corollary: X requires at least X / (9 * 9) digits.
+    // The difference between N and the next square after N is (I think) bounded by 2 x sqrt(N) + 1, so the first requiredSquareDigitSum isn't
+    // going to be huge.  The one after that also isn't that much bigger - is the next value of requiredSquareDigitSum bounded by 2 * requiredSquareDigitSum,
+    // approximately?
 
     ios::sync_with_stdio(false);
     const int maxSquareDigitSumValue = 2040;     // Arrived at empirically by exhaustively exploring all N = 1 to 1'000'000.  Occurs at N = 999987.
