@@ -356,7 +356,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
             // ┌───────────...──CA──...──────────┐ ┐
             // │                                 │ ├ Cycle C
             // └─────────────────────────────────┘ ┘        
-            // The cycle B ... C ... CA ... B can (and must) be broken by removing the connected cycle node, CA.
+            // The cycle B ... C - CA - B can (and must) be broken by removing the connected cycle node, CA.
 
             cycleNodesConnectedToComponentOccurrences.front().node->numComponentCyclesBreaks++;
             continue;
@@ -366,7 +366,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
         assert(cycleNodesConnectedToComponentOccurrences.size() == 2);
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences > 1)
         {
-            //   ...─C─...─D──........──E─...─F─...    ┐
+            //   ...─C─...─D──........──E─...─F─...   ┐
             //        \   /             \   /         ├ Component has exactly two points of contact with C (CA and CB),
             //         \ /               \ /          ┘ but each of CA and CB is connected to at least two points of component.
             // ┌──...──CA──...──────...──CB──...────┐ ┐
@@ -374,19 +374,38 @@ int findSinglePointOfFailure(vector<Node>& nodes)
             // └────────────────────────────────────┘ ┘        
             // We'd need to remove both cycle nodes to break this cycle - can't be done:
             //
-            //    if we remove CA, we'd still have the cycle CB ... E ... F ... CB;
-            //    if we remove CB, we'd still have the cycle CA ... C ... D ... CA;
+            //    if we remove CA, we'd still have the cycle CB - E ... F - CB;
+            //    if we remove CB, we'd still have the cycle CA - C ... D - CA.
             return -1;
         }
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences == 1 && cycleNodesConnectedToComponentOccurrences[1].numOccurences == 1)
         {
-            // Removing either cycle node will break the cycle.
+            //               D──....──E             ┐
+            //               │        │             ├ Component has exactly two points of contact with C (CA and CB),
+            //               │        │             ┘ and each of CA and CB is connected to precisely one node of component.
+            // ┌───────...──CA──...──CB──...──────┐ ┐
+            // │                                  │ ├ Cycle C
+            // └──────────────────────────────────┘ ┘        
+            // We'd need to remove both cycle nodes to break this cycle - can't be done:
+            //
+            //    if we remove CA, we'd still have the cycle CB ... E ... F ... CB;
+            //    if we remove CB, we'd still have the cycle CA ... C ... D ... CA;
+            //
+            // Removing *either* of the cycle nodes CA and CB will break the cycle C and the cycle
+            // CA - D ... E - CB ... CA.
             cycleNodesConnectedToComponentOccurrences[0].node->numComponentCyclesBreaks++;
             cycleNodesConnectedToComponentOccurrences[1].node->numComponentCyclesBreaks++;
             continue;
         }
         // Precisely one of the two cycle nodes is joined to more than one node in this component.
-        // Removing that cycle node will break the cycle in this component.
+        // Removing that cycle node (in this case, CB, wlog) will break the cycle in this component.
+        //
+        //               D──....─E─...─F             ┐
+        //               │        \   /              ├ Component has exactly two points of contact with C (CA and CB),
+        //               │         \ /               ┘ and CA (wlog) is attached to exactly one node of component; CB to at least two.
+        // ┌───────...──CA───...───CB──...─────────┐ ┐
+        // │                                       │ ├ Cycle C
+        // └───────────────────────────────────────┘ ┘        
         assert((cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1) != (cycleNodesConnectedToComponentOccurrences[1].numOccurences > 1));
         if (cycleNodesConnectedToComponentOccurrences[0].numOccurences > 1)
             cycleNodesConnectedToComponentOccurrences[0].node->numComponentCyclesBreaks++;
