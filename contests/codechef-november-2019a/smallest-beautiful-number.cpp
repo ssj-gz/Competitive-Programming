@@ -147,27 +147,27 @@ int main(int argc, char* argv[])
     // N = 24 has the most iterations (i.e. square numbers) that must be checked (12 of them).
 
     ios::sync_with_stdio(false);
-    const int maxVal = 2040;     // Arrived at empirically by exhaustively exploring all N = 1 to 1'000'000.  Occurs at N = 999987.
-    const int maxNumDigits = 27; //     "                "                "                  "             .  Occurs at N = 958428, when trying to make the square 960400 = 980^2.
+    const int maxSquareDigitSumValue = 2040;     // Arrived at empirically by exhaustively exploring all N = 1 to 1'000'000.  Occurs at N = 999987.
+    const int maxNumDigits = 27;                 //     "                "                "                  "             .  Occurs at N = 958428, when trying to make the square 960400 = 980^2.
     // sumOfSquaredDigitsLookup[d][v] gives the first digit in the minimum decimal value
     // of exactly d digits (no 0's, leading or otherwise) whose sum-of-digits-square is v, or -1 if there is no
     // such d-digit decimal.
-    vector<vector<int>> sumOfSquaredDigitsLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
+    vector<vector<int>> sumOfSquaredDigitsLookup(maxNumDigits + 1, vector<int>(maxSquareDigitSumValue + 1, -1));
     sumOfSquaredDigitsLookup[0][0] = 1;
     for (int numDigits = 1; numDigits <= maxNumDigits; numDigits++)
     {
         // Count down the digits, so that if multiple leading digits give
-        // the same value, only the smallest (and thus, the one corresponding
+        // the same square-digit-sum value, only the smallest (and thus, the one corresponding
         // to the minimal decimal value) is stored.
         for (int digitVal = 9; digitVal >= 1; digitVal--)
         {
-            for (int val = 0; val <= maxVal; val++)
+            for (int squareDigitSumValue = 0; squareDigitSumValue <= maxSquareDigitSumValue; squareDigitSumValue++)
             {
-                if (sumOfSquaredDigitsLookup[numDigits - 1][val] == -1)
+                if (sumOfSquaredDigitsLookup[numDigits - 1][squareDigitSumValue] == -1)
                     continue;
-                if (val + digitVal * digitVal <= maxVal)
+                if (squareDigitSumValue + digitVal * digitVal <= maxSquareDigitSumValue)
                 {
-                    sumOfSquaredDigitsLookup[numDigits][val + digitVal * digitVal] = digitVal;
+                    sumOfSquaredDigitsLookup[numDigits][squareDigitSumValue + digitVal * digitVal] = digitVal;
                 }
             }
         }
