@@ -104,6 +104,26 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
 
 int main(int argc, char* argv[])
 {
+    // QUICK EXPLANATION
+    //
+    // The smallest N-digit number with no 0's (leading or otherwise) is the number
+    // consist of N 1's, and the sum-of-digit-squares for this number is N.
+    // If N is square, then we're done; else, it makes sense to try and find a way,
+    // for each successive square nextSquare > N, for each number of digits d = 1, 2, ...
+    // to replace the last d of the N 1's with a d-digit number such that the newly-formed
+    // number has a sum-of-digits-squared equal to nextSquare, and to find the smallest
+    // replacement number that achieves this.
+    //
+    // Knowing when to stop considering new values of nextSquare requires a teeny little
+    // bit of analysis.  Finding the maximum value of d (maxNumDigits) that we need to
+    // consider before we can stop looking could probably be done with some analysis,
+    // but I just went ahead and found it by exhaustively solving for all N = 1, 2, ... 1'000'000 :p
+    //
+    // We find that we only have to consider a few values of d and a few values of nextSquare
+    // in order to be guaranteed to find the result for any given N up to 1'000'000 (computing the 
+    // answer for such an N is very fast), and also that there is no such N such that no N-digit 
+    // number is beautiful.
+
 //  Example about having to check multiple squares.  N = 23 is the one where we still getting different results after the most number of iterations.
 //    N: 23 nextSquare: 25
 //    N: 23 nextSquare: 36
