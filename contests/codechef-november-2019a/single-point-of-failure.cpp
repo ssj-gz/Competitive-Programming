@@ -212,7 +212,33 @@ bool componentHasCycle(const vector<Node*>& component)
 void addSyntheticEdgesBetweenConnectedNonConsecutiveCycleNodes(vector<Node>& nodes)
 {
     // Introduce synthetic nodes so that no two non-consecutive cycle
-    // nodes are connected.
+    // nodes are connected; e.g. in the example below, NA and NB are
+    // directly connected by an edge even though they are not consecutive
+    // in the cycle (the cycle-nodes C and B lie between NA and NB, for example).
+    //
+    // ┌─────...────NB───...───────────────────┐ ┐
+    // C            │                          │ │
+    // │            │                          │ │
+    // .            │                          │ │
+    // .            │                          │ │
+    // .            │                          │ │
+    // │            │                          │ ├ Cycle C
+    // NA───────────┘                          │ │ 
+    // │                                       │ │
+    // └─────...────B───...────────────────────┘ ┘        
+    //
+    // We introduce a synthetic node s, leaving the graph looking like:
+    //
+    // ┌─────...────NB───...───────────────────┐ ┐
+    // C            │                          │ │
+    // │            │                          │ │
+    // .            │                          │ │
+    // .            │                          │ │
+    // .            │                          │ │
+    // │            │                          │ ├ Cycle C
+    // NA───────────s                          │ │ 
+    // │                                       │ │
+    // └─────...────B───...────────────────────┘ ┘        
     vector<std::pair<Node*, Node*>> directEdgesToReplace;
     for (auto& node : nodes)
     {
@@ -325,7 +351,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
             continue;
         }
 
-        // This component has a cycle in G but not in G-C - removal of the single point of failure must
+        // This component has a cycle in G but not in G-C - removal of the SPF would need to
         // break the cycle in this component.
         numComponentsNeedToBreak++;
 
@@ -398,7 +424,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
             continue;
         }
         // Precisely one of the two cycle nodes is joined to more than one node in this component.
-        // Removing that cycle node (in this case, CB, wlog) will break the cycle in this component.
+        // Removing that cycle node (in this case, CB, wlog) will break the cycle CB - E ... F - CB in this component.
         //
         //               D──....─E─...─F             ┐
         //               │        \   /              ├ Component has exactly two points of contact with C (CA and CB),
@@ -421,6 +447,7 @@ int findSinglePointOfFailure(vector<Node>& nodes)
     {
         if (node->numComponentCyclesBreaks == numComponentsNeedToBreak)
         {
+            // Removal of this node will break every cycle.
             if (minNodeId == -1 || node->id < minNodeId)
                 minNodeId = node->id;
         }
@@ -451,6 +478,26 @@ int main(int argc, char* argv[])
     // of connected components, and by examining these components their points-of-contact
     // with nodes in C in the original graph, we can deduce, using fairly simple rules, 
     // which nodes in C must be removed to ensure that there are no cycles in G.
+    // 
+    // LONGER EXPLANATION
+    //
+    // The algorithm for finding a cycle is detailed here: https://en.wikipedia.org/wiki/Cycle_(graph_theory)#Cycle_detection
+    // The cycle C returned by findACycle is more or less arbitrary, but whether it is a huge cycle
+    // encompassing all N nodes, or teeny-weeny little 3-cycle triangle, the SPF *must* be a node in C
+    // in order to leave no cycles when that SPF is removed.  We need to account for the fact that the
+    // initial graph may not be connected, so we extract all connected components (getComponents) and check
+    // each one for a cycle.  If no cycles are found anywhere, there is no SPF, and we're done.
+    //
+    // We then remove the cycle C to get G - C and examine the components that are left, and how each such remaining component
+    // touches C in the original graph G (see cycleNodesConnectedToComponentOccurrences); at this point, reading the
+    // code might be the best explanation for all the cases we need to consider - it's got ASCII Art and everything!
+    // 
+    // One small note - the case where a cycle C has additional connections between nodes in the cycle that aren't consecutive
+    // in the cycle needs special attention: I side-step this by inserting a "synthetic" node between each
+    // pair of such nodes (max O(M) of these) and breaking the original edge between them: then in G - C each synthetic node
+    // is a component, and the algorithm deals with them in the normal way.  See addSyntheticEdgesBetweenConnectedNonConsecutiveCycleNodes.
+    //
+    // The whole algorithm is O(N).
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
@@ -477,8 +524,7 @@ int main(int argc, char* argv[])
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
 
-        const auto singlePointOfFailure = findSinglePointOfFailure(nodes);
-        cout << singlePointOfFailure << endl;
+        cout << findSinglePointOfFailure(nodes) << endl;
     }
 
     assert(cin);
