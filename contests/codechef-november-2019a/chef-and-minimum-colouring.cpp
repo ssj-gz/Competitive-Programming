@@ -105,6 +105,9 @@ int main(int argc, char* argv[])
 {
     // Quite a neat little problem; I'd rather have had this than the much more
     // straightforward "PHCUL" as the replacement Div 1 problem, but oh well :)
+    // Managed to mess it up on the first attempt by - somehow - completely 
+    // mis-interpreting the question, showing that I can still make stupid
+    // schoolboy errors after decades of practice XD
     //
     // Anyway:
     //
