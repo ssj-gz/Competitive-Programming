@@ -55,12 +55,12 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     while (true)
     {
         const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
-        cout << "N: " << N << " nextSquare: " << nextSquare << endl;
+        //cout << "N: " << N << " nextSquare: " << nextSquare << endl;
         //cout << "nextSquare: " << nextSquare << " N: " << N << endl;
         int numTrailingDigitsToReplace = 1;
         while (numTrailingDigitsToReplace < sumOfSquaresLookup.size())
         {
-            cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << endl;
+            //cout << "numTrailingDigitsToReplace: " << numTrailingDigitsToReplace << endl;
             const int64_t squareDigitSum = squareDigitSumOrig - numTrailingDigitsToReplace;
 
             int64_t requiredSquareDigitSum = nextSquare - squareDigitSum;
@@ -69,7 +69,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
 
             if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
             {
-                cout << "N: " << N << " Took: " << numIterations << " iterations" << endl;
+                //cout << "N: " << N << " Took: " << numIterations << " iterations" << endl;
                 return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
                 //return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
             }
@@ -88,27 +88,27 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 }
                 assert(!replacementTrailingDigits.empty());
 
-                cout << "Making " << dbgRequiredSquareDigitSum << " requires: " << replacementTrailingDigits /*<< " (" << (string(N - replacementTrailingDigits.length(), '1') + replacementTrailingDigits) << ")"*/;
+                //cout << "Making " << dbgRequiredSquareDigitSum << " requires: " << replacementTrailingDigits /*<< " (" << (string(N - replacementTrailingDigits.length(), '1') + replacementTrailingDigits) << ")"*/;
 
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
-                    cout << " (better than previous best " << bestReplacementDigits << ")";
+                    //cout << " (better than previous best " << bestReplacementDigits << ")";
                     bestReplacementDigits = replacementTrailingDigits;
                     largestNumIterations = max(largestNumIterations, numIterations);
                     if (dbgRequiredSquareDigitSum > largestSumToMake )
                     {
                         largestSumToMake = max(largestSumToMake, dbgRequiredSquareDigitSum);
-                        cout << endl << "new largest largestSumToMake: " << dbgRequiredSquareDigitSum << " N: " << N << endl;
+                        //cout << endl << "new largest largestSumToMake: " << dbgRequiredSquareDigitSum << " N: " << N << endl;
                     }
                     if (largestNumDigits <  dbgNumTrailingDigitsToReplace)
                     {
                         largestNumDigits = dbgNumTrailingDigitsToReplace;
-                        cout << endl << "new largest largestNumDigits: " << largestNumDigits << " N: " << N << endl;
+                        //cout << endl << "new largest largestNumDigits: " << largestNumDigits << " N: " << N << endl;
                         
                     }
                     //cout << "N: " << N << " stilluseful: " << numIterations << endl;
                 }
-                cout << endl;
+                //cout << endl;
                 break;
             }
 
@@ -215,17 +215,22 @@ int main(int argc, char* argv[])
     {
         for (int N = 1; N <= 1'000'000; N++)
         {
-            cout << "N: " << N << endl;
+            //cout << "N: " << N << endl;
             //const auto solutionBruteForce = solveBruteForce(N);
             //cout << "solutionBruteForce: " << solutionBruteForce << endl;
             const auto blah = findMinBeautifulNumberWithNDigits(N, sumOfSquaresLookup);
+            cout << "Q: 2 lines" << endl;
+            cout << 1 << endl;
+            cout << N << endl;
+            cout << "A: 1 lines" << endl;
+            cout << blah << endl;
             //cout << "solutionOptimised:  " << solutionOptimised << endl;
             //assert(solutionOptimised == solutionBruteForce);
         }
         //cout << "largestThig: " << largestThig << endl;
         //cout << "largestThog: " << largestThog << endl;
-        cout << "largestNumIterations: " << largestNumIterations << endl;
-        cout << "largestSumToMake: " << largestSumToMake <<  endl;
+        //cout << "largestNumIterations: " << largestNumIterations << endl;
+        //cout << "largestSumToMake: " << largestSumToMake <<  endl;
         return 0;
     }
 #endif
