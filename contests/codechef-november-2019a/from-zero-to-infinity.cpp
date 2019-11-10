@@ -38,7 +38,23 @@ bool isVowel(char letter)
 
 bool isAlicesRecipe(const string& recipe)
 {
-    int maxPrefixVMC = 0;
+    // We need to check whether, for every substring (of length >= 2) of the string
+    // "recipe", that substring contains at least as many vowels as consonants.
+    // Let VMC(s) be the number of Vowels Minus the number of Consonants in a string s.
+    //
+    // Note that every substring of length >= 2 of recipe can be expressed as a prefix P of recipe with
+    // a prefix of P, P' (itself a prefix of recipe) subject to |P| - |P'| >= 2 removed from the beginning of P.
+    // Let P - P' be the string obtained by removing the prefix P' from the front of P.
+    // Thus, it suffices to compute whether, for each prefix P of recipe, there is no prefix P'
+    // of recipe with |P| - |P'| >= 2 and VMC(P - P') < 0.  Note that it is very easy to compute VMC(P) 
+    // for each successive prefix P of recipe.
+    //
+    // Let P be a prefix of recipe.  How can we decide whether, for all prefixes P' with |P| - |P'| >= 2, VMC(P - P') < 0?
+    // Easy - note that VMC(P - P') == VMC(P) - VMC(P').  This has its lowest value - and so is most likely to
+    // be < 0 - when we pick such a P' with the *highest* value of VMC(P').
+    //
+    // Hopefully the code is now self-explanatory :)
+    int highestPrefixVMC = 0;
     int currentPrefixVMC = 0;
     int previousVMC = -1;
     int previousPreviousVMC = -1;
@@ -52,9 +68,9 @@ bool isAlicesRecipe(const string& recipe)
             currentPrefixVMC--;
 
         if (i >= 1 // We only consider substrings of length >= 2.
-                && currentPrefixVMC - maxPrefixVMC < 0)
+                && currentPrefixVMC - highestPrefixVMC < 0)
         {
-            // Chopping off the prefix that gave rise to maxPrefixVMC from
+            // Chopping off the prefix that gave rise to highestPrefixVMC from
             // the current prefix yields a string, of length >= 2, with
             // fewer vowels than consonants; this recipe is Bob's.
             return false;
@@ -62,8 +78,8 @@ bool isAlicesRecipe(const string& recipe)
 
         previousPreviousVMC = previousVMC;
         previousVMC = currentPrefixVMC;
-        maxPrefixVMC = max(maxPrefixVMC, previousPreviousVMC); // i.e. ensure that the maxPrefixVMC is for a prefix with length at least 2 less than
-                                                               // the current prefix, as we only consider substrings of length >= 2.
+        highestPrefixVMC = max(highestPrefixVMC, previousPreviousVMC); // i.e. ensure that the highestPrefixVMC is the highest VMC for a prefix with *length at least 2 less than
+                                                                       // the current prefix*, as we only want to consider substrings of length >= 2.
     }
 
     return true;
@@ -142,6 +158,26 @@ int main(int argc, char* argv[])
     // large integers raised to the power of another potentially large integer - to within
     // a given degree of precision.  This calculation can be easily performed using some
     // basic properties of logarithms.
+    //
+    // LONGER EXPLANATION
+    //
+    // The problem of deciding whether the Recipe is Alice/ Bob's is explained in isAlicesRecipe.
+    // For the remainder of the problem - computing the ratio of two huge integers - 
+    // we use the basic properties of logarithms (see any introductory maths text dealing with
+    // logs - or the Wikipedia article: https://en.wikipedia.org/wiki/Logarithm - for more details):
+    //
+    //    log(ab) = log(a) + log(b) (i)
+    //    log(a/b) = log(a) - lob(b)
+    //
+    // From (i) it follows, by induction, that:
+    //
+    //    log(a_1a_2 ... a_m) = log(a_1) + log(a_2) + ... + log(a_m)
+    //
+    // and it further follows, again by induction, that for integer k:
+    //   
+    //    log(a^k) = k log(a).
+    //
+    // With this in mind, the code is hopefully self-explanatory :)
 
     ios::sync_with_stdio(false);
 
