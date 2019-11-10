@@ -55,7 +55,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     while (true)
     {
         const int64_t nextSquare = nextSquareRoot * nextSquareRoot;
-        //cout << "N: " << N << " nextSquare: " << nextSquare << endl;
+        cout << "N: " << N << " nextSquare: " << nextSquare << endl;
         //cout << "nextSquare: " << nextSquare << " N: " << N << endl;
         int numTrailingDigitsToReplace = 1;
         while (numTrailingDigitsToReplace < sumOfSquaresLookup.size())
@@ -88,11 +88,11 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 }
                 assert(!replacementTrailingDigits.empty());
 
-                //cout << "Making " << dbgRequiredSquareDigitSum << " requires: " << replacementTrailingDigits /*<< " (" << (string(N - replacementTrailingDigits.length(), '1') + replacementTrailingDigits) << ")"*/;
+                cout << "Making " << dbgRequiredSquareDigitSum << " requires: " << replacementTrailingDigits /*<< " (" << (string(N - replacementTrailingDigits.length(), '1') + replacementTrailingDigits) << ")"*/;
 
                 if (bestReplacementDigits.empty() || isNumericallyLessThan(replacementTrailingDigits, bestReplacementDigits))
                 {
-                    //cout << " (better than previous best " << bestReplacementDigits << ")";
+                    cout << " (better than previous best " << bestReplacementDigits << ")";
                     bestReplacementDigits = replacementTrailingDigits;
                     largestNumIterations = max(largestNumIterations, numIterations);
                     if (dbgRequiredSquareDigitSum > largestSumToMake )
@@ -108,7 +108,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                     }
                     //cout << "N: " << N << " stilluseful: " << numIterations << endl;
                 }
-                //cout << endl;
+                cout << endl;
                 break;
             }
 
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
     cout << "maxBlah: " << maxBlah << endl;
 #endif
     const int maxVal = 2040;     // Arrived at empirically by exploring all N = 1 - 1'000'000.  Occurs at N = 999987.
-    const int maxNumDigits = 27; //     "                "                "                  .  Occurs at N = 958428.
+    const int maxNumDigits = 27; //     "                "                "                  .  Occurs at N = 958428, when trying to make the square 960400 = 980^2.
     // sumOfSquaresLookup[d][v] gives the first digit in the minimum representation of v
     // using exactly d digits if v can be expressed with d digits, else -1.
     vector<vector<int>> sumOfSquaresLookup(maxNumDigits + 1, vector<int>(maxVal + 1, -1));
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
             //cout << "val: " << val << " numDigits: " << numDigits << " sumOfSquaresLookup[numDigits][val]: " << sumOfSquaresLookup[numDigits][val] << endl;
         }
     }
-#if 1
+#if 0
     {
         for (int N = 1; N <= 1'000'000; N++)
         {
