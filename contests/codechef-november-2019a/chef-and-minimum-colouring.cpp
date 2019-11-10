@@ -21,7 +21,7 @@ T read()
 }
 
 
-int64_t solveOptimised(int N, int M, const vector<int64_t>& a)
+int64_t findMinValueDiffOfValidBoxChoices(int N, int M, const vector<int64_t>& a)
 {
     struct ValueAndColour
     {
@@ -195,8 +195,7 @@ int main(int argc, char* argv[])
         for (auto& x : a)
             x = read<int64_t>();
 
-        const auto solutionOptimised = solveOptimised(N, M, a);
-        cout << solutionOptimised << endl;
+        cout << findMinValueDiffOfValidBoxChoices(N, M, a) << endl;
     }
 
     assert(cin);
