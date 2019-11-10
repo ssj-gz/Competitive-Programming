@@ -130,6 +130,19 @@ long double calcScoreRatio(const int numRecipes, const vector<string>& recipes)
 
 int main(int argc, char* argv[])
 {
+    // Wasn't sure if logl and expl would be accurate enough for this, but thankfully
+    // they were and it worked first time :)
+    //
+    // QUICK EXPLANATION
+    //
+    // Deciding which of Alice/ Bob a given recipe R belongs to can be easily decided
+    // in O(R) by considering the "vowels minus consonants" (VMC) value of each prefix of
+    // R, but that's not the main point of this Problem: the main point is to be able to
+    // compute the ratio of two very large integers - each the product of several potentially
+    // large integers raised to the power of another potentially large integer - to within
+    // a given degree of precision.  This calculation can be easily performed using some
+    // basic properties of logarithms.
+
     ios::sync_with_stdio(false);
 
     const auto T = read<int>();
