@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
     // QUICK EXPLANATION
     //
     // Let c_0, c_1, ... c_{m-1} be the M different colours.  One valid colouring
-    // would be to simple colour the box i with the colour c_{i mod M} (where i is
+    // would be to simple colour the box i with the colour c_{i % M} (where i is
     // 0-relative) - call this the Main Colouring.  In fact, this Main Colouring
     // is "essentially" the only valid colouring in that all other valid colourings are just
     // the Main Colouring with the colours permuted.  In particular, for any valid colouring,
@@ -145,9 +145,9 @@ int main(int argc, char* argv[])
     // Assume it holds true for i >= M - 1; what can we deduce about the colour C of the
     // (i+1)th box?
     //
-    // The by induction hypothesis, the boxes with indices i - m + 1, i - m + 2, ... , i - 1, i
+    // By induction hypothesis, the boxes with indices i - m + 1, i - m + 2, ... , i - 1, i
     // are coloured c_{(i - m + 1) % M}, c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}.
-    // The indices are a block of M consecutive indices, so because we have a valid colouring,
+    // These indices are a block of M consecutive indices, so because we have a valid colouring,
     // we must have:
     //
     //   {c_{(i - m + 1) % M}, c_{(i - m + 2) % M}, ... , c_{(i - 1) % M}, c_{i % M}} =
@@ -175,13 +175,59 @@ int main(int argc, char* argv[])
     //
     // which can only be the case if C = c_{(i - m + 1) % M}.  Hence result.
     //
-    // TODO - two pointer thing; ValueAndColour[leftIndex].colour != ValueAndColour[rightIndex].colour
-    // due to minimality of rightIndex; choosing indices leftIndex, rightIndex, and M - 2 indices
-    // in [leftIndex + 1, rightIndex - 1] that have remaining M - 2 colours other than that of leftIndex and
-    // rightIndex gives set of indices of all different colours where max = ValueAndColour[leftIndex] and
-    // min = ValueAndColour[rightIndex], and max - min is minimal for this leftIndex, so over all
-    // leftIndex = 0, 1, ... N - 1, have our result.
-
+    // Lemma
+    //
+    // Given a valid colouring of boxes, the boxes with indices i and j have a different colouring
+    // if and only if i and j have a different colouring in the Main Colouring.
+    //
+    // Proof 
+    //
+    // The colours of the boxes i and j are, from the Lemma above, π(c_{i % M}) and π(c_{j % M}) respectively, for
+    // some permutation π of {c_0, c_1, ... c_{M - 1}}.  Since π is a permutation, it has an 
+    // inverse, π^-1.  Thus:
+    //
+    //     the boxes i and j have the same colour <=>
+    //     π(c_{i % M}) = π(c_{j % M}) <=>
+    //     π^-1(π(c_{i % M})) = π^-1(π(c_{j % M})) <=>
+    //     c_{i % M} = c_{j % M}
+    //     colour in Main colouring of i = colour in Main colouring of i.
+    //
+    // Corollary
+    //
+    // We can just assume that we are using the Main Colouring i.e. that the colour of box i is c_{i % M}.
+    //
+    // That's the issue of box colouring dealt with; now the issue of actually choosing boxes! As mentioned
+    // in the Quick Explanation, we now sort the boxes by value, taking care to keep track of each box's
+    // colour from the Main Colouring (see ValueAndColour).  From henceforth, this sorted vector is the only
+    // one we care about (we ignore the original array, "a"), and any mention of "box indices" etc refers to
+    // a box's index in this ValueAndColour array.
+    //
+    // Let leftIndex range from 0 to N - 1, and for each leftIndex, find the smallest index rightIndex, 
+    // rightIndex >= leftIndex, such that the set { a[j].colour | leftIndex <= j <= rightIndex} is 
+    // precisely the set of M colours.  This is pretty easy to do using standard Two-Pointer technique; the code 
+    // hopefully speaks for itself.  It could have perhaps been implemented more simply using a multiset to store
+    // the colours in the range [leftIndex, rightIndex], but the approach used is faster :)
+    //
+    // Note that by the minimality of rightIndex, ValueAndColour[leftIndex].colour != ValueAndColour[rightIndex].colour:
+    // if we had ValueAndColour[leftIndex].colour != ValueAndColour[rightIndex].colour, then rightIndex we contribue
+    // no additional colours to the set of colours in the range [leftIndex, rightIndex], and we would be able
+    // to reduce it by at least 1, contradicting its minimality.
+    //
+    // Note that all indices j in the range [leftIndex, rightIndex] satisfy 
+    //
+    //     ValueAndColour[leftIndex].value <= ValueAndColour[j].value <= ValueAndColour[rightIndex].value
+    //
+    // i.e. leftIndex and rightIndex have the min and max values in the range, respectively.
+    //
+    // Now, we can use our leftIndex and rightIndex to form a set of M indices where the difference between
+    // the max and min values of indexed boxes is minimal for the given leftIndex and is equal to
+    // ValueAndColour[rightIndex].value - ValueAndColour[leftIndex].value and where all indices have
+    // different coloured boxes: just take leftIndex, rightIndex, and M - 2 indices in the range
+    // [leftIndex + 1, rightIndex - 1] that make up the remaining M - 2 colours that are other than those
+    // of leftIndex and rightIndex.
+    //
+    // Finding the minimum difference of max element - min element over all leftIndex = 0, 1, ... , N -1
+    // gives us our result.
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
