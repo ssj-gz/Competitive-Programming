@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     // find, for each leftIndex = 0, 1, ... , N - 1, the smallest rightIndex >=
     // leftIndex such that the boxes at indices in the range [leftIndex, rightIndex]
     // in our sorted list have, between them, the full set of M colours.  It's then
-    // easy to find the set of all choices of M boxes that give the smallest 
+    // easy to find the set of choices of M boxes that give the smallest 
     // difference between max and min values of the boxes.
     //
     // LONGER EXPLANATION
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     //
     // That's the issue of box colouring dealt with; now the issue of actually choosing boxes! As mentioned
     // in the Quick Explanation, we now sort the boxes by value, taking care to keep track of each box's
-    // colour from the Main Colouring (see ValueAndColour).  From henceforth, this sorted vector is the only
+    // colour from the Main Colouring (see ValueAndColour).  From here on, this sorted vector is the only
     // one we care about (we ignore the original array, "a"), and any mention of "box indices" etc refers to
     // a box's index in this ValueAndColour array.
     //
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
     // the colours in the range [leftIndex, rightIndex], but the approach used is faster :)
     //
     // Note that by the minimality of rightIndex, ValueAndColour[leftIndex].colour != ValueAndColour[rightIndex].colour:
-    // if we had ValueAndColour[leftIndex].colour != ValueAndColour[rightIndex].colour, then rightIndex we contribue
+    // if we had ValueAndColour[rightIndex].colour == ValueAndColour[leftIndex].colour, then rightIndex would contribue
     // no additional colours to the set of colours in the range [leftIndex, rightIndex], and we would be able
     // to reduce it by at least 1, contradicting its minimality.
     //
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
     // Now, we can use our leftIndex and rightIndex to form a set of M indices where the difference between
     // the max and min values of indexed boxes is minimal for the given leftIndex and is equal to
     // ValueAndColour[rightIndex].value - ValueAndColour[leftIndex].value and where all indices have
-    // different coloured boxes: just take leftIndex, rightIndex, and M - 2 indices in the range
+    // different coloured boxes: just take the indices leftIndex, rightIndex, and M - 2 indices in the range
     // [leftIndex + 1, rightIndex - 1] that make up the remaining M - 2 colours that are other than those
     // of leftIndex and rightIndex.
     //
