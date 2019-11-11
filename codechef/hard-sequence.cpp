@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/problems/HRDSEQ
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -30,12 +30,13 @@ T read()
 int solveBruteForce(int N)
 {
     int result = 0;
-    
+
     vector<int> elements;
     elements.push_back(0);
 
     for (int i = 0; i < N - 1; i++)
     {
+#if 0
         cout << "i: " << i << endl;
 
         cout << "elements: " << endl;
@@ -44,8 +45,9 @@ int solveBruteForce(int N)
             cout << x << " ";
         }
         cout << endl;
+#endif
         const auto lastElement = elements.back();
-        cout << "i: " << i << " lastElement: " << lastElement << endl;
+        //cout << "i: " << i << " lastElement: " << lastElement << endl;
         int lastOccurence = -1;
 
         if (elements.size() > 1)
@@ -54,16 +56,13 @@ int solveBruteForce(int N)
             {
                 if (elements[index] == lastElement)
                 {
-                    if (lastOccurence == -1)
-                    {
-                        lastOccurence = index;
-                        break;
-                    }
+                    lastOccurence = index;
+                    break;
                 }
             }
         }
 
-        cout << "lastOccurence: " << lastOccurence << " elements.size(): " << elements.size() << endl;
+        //cout << "lastOccurence: " << lastOccurence << " elements.size(): " << elements.size() << endl;
 
         if (lastOccurence != -1)
         {
@@ -75,14 +74,16 @@ int solveBruteForce(int N)
         }
     }
 
-        cout << "elements final: " << endl;
-        for (const auto x : elements)
-        {
-            cout << x << " ";
-        }
-        cout << endl;
+#if 0
+    cout << "elements final: " << endl;
+    for (const auto x : elements)
+    {
+        cout << x << " ";
+    }
+    cout << endl;
+#endif
 
-    
+
     return count(elements.begin(), elements.end(), elements.back());
 }
 
@@ -124,8 +125,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
+        cout << solveBruteForce(N) << endl;
 #endif
     }
 
