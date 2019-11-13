@@ -39,7 +39,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     const int64_t squareDigitSumOrig = N;
 
     if (isSquare(squareDigitSumOrig))
-        return string (N, '1');
+        return ""/*string (N, '1')*/;
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
@@ -54,17 +54,17 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
         while (numTrailingDigitsToReplace < sumOfSquaredDigitsLookup.size())
         {
             // Sum of digits squared if we lopped off the last numTrailingDigitsToReplace of the N 1's.
-            const int64_t sumOfDigitsSquared = squareDigitSumOrig - numTrailingDigitsToReplace; 
+            //const int64_t sumOfDigitsSquared = squareDigitSumOrig - numTrailingDigitsToReplace; 
 
-            int64_t requiredSquareDigitSum = nextSquare - sumOfDigitsSquared;
+            int64_t requiredSquareDigitSum = nextSquare - squareDigitSumOrig;
 
-            if (!bestReplacementDigits.empty() && requiredSquareDigitSum > 9 * 9 * bestReplacementDigits.length())
+            if (!bestReplacementDigits.empty() && (nextSquare - (squareDigitSumOrig - numTrailingDigitsToReplace)) > 9 * 9 * bestReplacementDigits.length())
             {
                 // With each further iteration, requiredSquareDigitSum is just going to keep on increasing,
                 // and it's already sufficiently large that we'll need to replace more digits than are in
                 // bestReplacementDigits - the current value of bestReplacementDigits is the best we're ever
                 // going to get.
-                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+                return /*string(N - bestReplacementDigits.length(), '1') +*/ bestReplacementDigits;
             }
 
             if (sumOfSquaredDigitsLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
@@ -79,7 +79,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                     assert(nextDigitValue != -1);
                     replacementTrailingDigits += '0' + nextDigitValue;
 
-                    requiredSquareDigitSum -= nextDigitValue * nextDigitValue;
+                    requiredSquareDigitSum -= nextDigitValue * nextDigitValue - 1;
                     numTrailingDigitsToReplace--;
                 }
                 assert(!replacementTrailingDigits.empty());
@@ -181,9 +181,9 @@ int main(int argc, char* argv[])
             {
                 if (sumOfSquaredDigitsLookup[numDigits - 1][squareDigitSumValue] == -1)
                     continue;
-                if (squareDigitSumValue + digitVal * digitVal <= maxSquareDigitSumValue)
+                if (squareDigitSumValue + digitVal * digitVal - 1 <=  maxSquareDigitSumValue)
                 {
-                    sumOfSquaredDigitsLookup[numDigits][squareDigitSumValue + digitVal * digitVal] = digitVal;
+                    sumOfSquaredDigitsLookup[numDigits][squareDigitSumValue + digitVal * digitVal - 1] = digitVal;
                 }
             }
         }
@@ -195,7 +195,16 @@ int main(int argc, char* argv[])
     {
         const int N = read<int>();
 
-        cout << findMinBeautifulNumberWithNDigits(N, sumOfSquaredDigitsLookup) << endl;
+        //cout << findMinBeautifulNumberWithNDigits(N, sumOfSquaredDigitsLookup) << endl;
+        auto resultSuffix = findMinBeautifulNumberWithNDigits(N, sumOfSquaredDigitsLookup);
+        int numLeading1s = N - resultSuffix.size();
+        while (!resultSuffix.empty() && resultSuffix.front() == '1')
+        {
+            numLeading1s++;
+            resultSuffix.erase(resultSuffix.begin());
+        }
+        cout << "1x" << numLeading1s << "+" << resultSuffix << endl;
+
     }
 
     assert(cin);
