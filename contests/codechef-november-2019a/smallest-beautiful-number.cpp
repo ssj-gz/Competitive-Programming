@@ -39,7 +39,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
     const int64_t squareDigitSumOrig = N;
 
     if (isSquare(squareDigitSumOrig))
-        return string (N, '1');
+        return "";
 
     const int sqrtN = sqrt(N);
     assert(sqrtN * sqrtN < N);
@@ -64,7 +64,7 @@ string findMinBeautifulNumberWithNDigits(int N, const vector<vector<int>>& sumOf
                 // and it's already sufficiently large that we'll need to replace more digits than are in
                 // bestReplacementDigits - the current value of bestReplacementDigits is the best we're ever
                 // going to get.
-                return string(N - bestReplacementDigits.length(), '1') + bestReplacementDigits;
+                return bestReplacementDigits;
             }
 
             if (sumOfSquaredDigitsLookup[numTrailingDigitsToReplace][requiredSquareDigitSum] != -1)
@@ -189,6 +189,7 @@ int main(int argc, char* argv[])
         }
     }
 
+#if 0
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -197,6 +198,28 @@ int main(int argc, char* argv[])
 
         cout << findMinBeautifulNumberWithNDigits(N, sumOfSquaredDigitsLookup) << endl;
     }
+#else
+    for (int N = 1; N <= 1'000'000; N++)
+    {
+        auto resultSuffix = findMinBeautifulNumberWithNDigits(N, sumOfSquaredDigitsLookup);
+        int numLeading1s = N - resultSuffix.size();
+        while (!resultSuffix.empty() && resultSuffix.front() == '1')
+        {
+            numLeading1s++;
+            resultSuffix.erase(resultSuffix.begin());
+        }
+        int64_t sum = numLeading1s;
+        for (const auto digit : resultSuffix)
+        {
+            const int digitValue = digit - '0';
+            sum += digitValue * digitValue;
+        }
+
+        const int sqrtSum = sqrt(sum);
+        assert(sqrtSum * sqrtSum == sum);
+        cout << "N: " << N << " leading-1's-compressed-result: " << "1x" << numLeading1s << "+" << resultSuffix << " sum: " << sum << "( = " << sqrtSum << " x " << sqrtSum << ")" << endl;
+    }
+#endif
 
     assert(cin);
 }
