@@ -6,6 +6,8 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <set>
+#include <iomanip>
 
 #include <cassert>
 
@@ -27,19 +29,22 @@ int64_t findMinValueDiffOfValidBoxChoices(int N, int M, const vector<int64_t>& a
     {
         int64_t value = -1; 
         int colour = -1; 
+        int originalIndex = -1;
     };
 
     vector<ValueAndColour> sortedValuesWithColour;
     for (int i = 0; i < N; i++)
     {
-        sortedValuesWithColour.push_back({a[i], i % M});
+        sortedValuesWithColour.push_back({a[i], i % M, i});
     }
     sort(sortedValuesWithColour.begin(), sortedValuesWithColour.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
+
 
     // NB: from this point onwards, all references to "index"/ "indices" refer to indices in sortedValuesWithColour, not in the
     // original "a", which we no longer care about.
 
     int64_t result = std::numeric_limits<int64_t>::max();
+    vector<int> bestOriginalIndices;
 
     int rightIndex = 0;
     vector<int> numOfColourInRange(M, 0);
@@ -70,13 +75,66 @@ int64_t findMinValueDiffOfValidBoxChoices(int N, int M, const vector<int64_t>& a
 
         // There is a choice of M indices all with different colours with
         // the min value = sortedValuesWithColour[leftIndex] and the max value sortedValuesWithColour[rightIndex].
-        result = min(result, sortedValuesWithColour[rightIndex].value - sortedValuesWithColour[leftIndex].value);
+
+        const int64_t maxMinDiffForChoice = sortedValuesWithColour[rightIndex].value - sortedValuesWithColour[leftIndex].value;
+        if (maxMinDiffForChoice < result)
+        {
+            set<int> remainingColours;
+            for (int i = 0; i < M; i++)
+                remainingColours.insert(i);
+            vector<int> choiceIndices;
+            choiceIndices.push_back(sortedValuesWithColour[leftIndex].originalIndex);
+            choiceIndices.push_back(sortedValuesWithColour[rightIndex].originalIndex);
+            remainingColours.erase(sortedValuesWithColour[leftIndex].colour);
+            remainingColours.erase(sortedValuesWithColour[rightIndex].colour);
+            for (int i = leftIndex + 1; i <= rightIndex - 1; i++)
+            {
+                if (remainingColours.find(sortedValuesWithColour[i].colour) != remainingColours.end())
+                {
+                    remainingColours.erase(sortedValuesWithColour[i].colour);
+                    choiceIndices.push_back(sortedValuesWithColour[i].originalIndex);
+                }
+            }
+            bestOriginalIndices = choiceIndices;
+            result = maxMinDiffForChoice;
+        }
 
         // Drop the left hand element of the range.
         numOfColourInRange[sortedValuesWithColour[leftIndex].colour]--;
         if (numOfColourInRange[sortedValuesWithColour[leftIndex].colour] == 0)
             numColoursInRange--;
     }
+
+    vector<string> colourNames = {"R", "G", "B", "Y", "W", "P", "O", "M"};
+    assert(M <= colourNames.size());
+    cout << "Best choice:" << endl;
+    for (int i = 0; i < N; i++)
+    {
+        bool isChosenIndex = (find(bestOriginalIndices.begin(), bestOriginalIndices.end(), i) != bestOriginalIndices.end());
+        if (isChosenIndex)
+        {
+            cout << "[";
+        }
+        else
+        {
+            cout << " ";
+        }
+        cout << setw(3) << a[i];
+        if (isChosenIndex)
+        {
+            cout << "]";
+        }
+        else
+        {
+            cout << " ";
+        }
+    }
+    cout << endl;
+    for (int i = 0; i < N; i++)
+    {
+        cout << setw(3) << colourNames[i % M] << "  ";
+    }
+    cout << endl;
 
     return result;
 }
