@@ -2,6 +2,7 @@
 
 require 'faraday'
 require 'json'
+require 'fileutils'
 
 def usage_and_die()
     print "Expected - a codechef solution url of the form: https://www.codechef.com/viewsolution/<numeric id>"
@@ -39,6 +40,7 @@ html.each_line do |line|
         elsif language == 'PYTH 3.6'
             filename = userName + "-" + problemCode + ".py"
             File.open(filename, "w") { |file| file.print "#! /usr/bin/python3\n" + code }
+            FileUtils.chmod 0755, filename
         end
 
 
