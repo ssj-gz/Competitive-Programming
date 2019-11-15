@@ -36,6 +36,9 @@ html.each_line do |line|
         if language == 'C++14'
             filename = userName + "-" + problemCode + ".cpp"
             File.open(filename, "w") { |file| file.print code }
+        elsif language == 'PYTH 3.6'
+            filename = userName + "-" + problemCode + ".py"
+            File.open(filename, "w") { |file| file.print "#! /usr/bin/python3\n" + code }
         end
 
 
