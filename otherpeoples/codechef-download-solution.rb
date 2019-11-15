@@ -3,9 +3,24 @@
 require 'faraday'
 require 'json'
 
+def usage_and_die()
+    print "Expected - a codechef solution url of the form: https://www.codechef.com/viewsolution/<numeric id>"
+    exit false
+end
+
+if ARGV.length != 1
+    usage_and_die()
+end
+
+SOLUTION_URL=ARGV[0]
+
+if ! (SOLUTION_URL =~ /https:\/\/www.codechef.com\/viewsolution\/\d+$/)
+    usage_and_die()
+end
+
 STDOUT.sync = true
 
-html = Faraday.new('https://www.codechef.com/viewsolution/27801820', headers: { 'User-Agent' => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0'}).get.body
+html = Faraday.new(SOLUTION_URL, headers: { 'User-Agent' => 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0'}).get.body
 
 html.each_line do |line| 
     if (line =~ /var meta_info = (\{.*\});\s*$/)
