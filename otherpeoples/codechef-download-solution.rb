@@ -26,7 +26,6 @@ html = Faraday.new(SOLUTION_URL, headers: { 'User-Agent' => 'Mozilla/5.0 (X11; U
 html.each_line do |line| 
     if (line =~ /var meta_info = (\{.*\});\s*$/)
         meta_info = JSON.parse($1)
-        print JSON.pretty_generate(meta_info)
         data = meta_info['data']
 
         code = data['plaintext']
@@ -44,6 +43,7 @@ html.each_line do |line|
             File.open(filename, "w") { |file| file.print code }
         end
 
+        print "Solution written to: #{filename}\n"
 
     end
 end
