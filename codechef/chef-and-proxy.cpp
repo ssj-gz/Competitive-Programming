@@ -31,7 +31,7 @@ bool canBeMarkedAsProxy(const int dayIndex, const string& attendance)
 {
     if (attendance[dayIndex] == 'P')
         return false;
-    if (dayIndex - 2 < 0 || dayIndex + 2 > attendance.size())
+    if (dayIndex - 2 < 0 || dayIndex + 2 >= attendance.size())
         return false;
 
     if ((attendance[dayIndex - 2] == 'P' || attendance[dayIndex - 1] == 'P') &&
@@ -51,9 +51,18 @@ int solveBruteForce(int D, const string& attendance)
     int numPossibleProxyAttendances = 0;
     for (int dayIndex = 0; dayIndex < D; dayIndex++)
     {
+        //cout << "dayIndex: " << dayIndex << " ";
         if (canBeMarkedAsProxy(dayIndex, attendance))
+        {
+            //cout << "canBeMarkedAsProxy" << endl;
             numPossibleProxyAttendances++;
+        }
+        else
+        {
+            //cout << " can not be marked as proxy" << endl;
+        }
     }
+    //cout << "numActualAttendances: " << numActualAttendances << " numAttendancesFor75: " << numAttendancesFor75 << " numPossibleProxyAttendances: " << numPossibleProxyAttendances << endl;
 
 
     if (numActualAttendances < numAttendancesFor75)
@@ -109,6 +118,7 @@ int main(int argc, char* argv[])
     {
         const int D = read<int>();
         const string S = read<string>();
+        assert(S.length() == D);
 
 
         const auto solutionBruteForce = solveBruteForce(D, S);
