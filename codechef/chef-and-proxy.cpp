@@ -106,6 +106,20 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int D = rand() % 1000 + 1;
+            cout << D << endl;
+            const int numPresent = rand() % (D + 1);
+            string attendance;
+            for (int i = 0; i < D; i++)
+            {
+                if (i < numPresent)
+                    attendance += "P";
+                else
+                    attendance += "A";
+            }
+            random_shuffle(attendance.begin(), attendance.end());
+            cout << attendance << endl;
+            assert(attendance.size() == D && count(attendance.begin(), attendance.end(), 'P') == numPresent);
         }
 
         return 0;
