@@ -75,6 +75,27 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int maxValue = rand() % 50 + 1;
+
+            const int sequenceLength = rand() % 20 + 1;
+            cout << sequenceLength << endl;
+            for (int i = 0; i < sequenceLength; i++)
+            {
+                cout << ((rand() % maxValue + 1));
+                if (i != sequenceLength - 1)
+                    cout << " ";
+            }
+            cout << endl;
+
+            const int candiateSubsequenceLength = rand() % 20 + 1;
+            cout << candiateSubsequenceLength << endl;
+            for (int i = 0; i < candiateSubsequenceLength; i++)
+            {
+                cout << ((rand() % maxValue + 1));
+                if (i != candiateSubsequenceLength - 1)
+                    cout << " ";
+            }
+            cout << endl;
         }
 
         return 0;
