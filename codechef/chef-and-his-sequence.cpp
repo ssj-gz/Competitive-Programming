@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
         // TODO - generate randomised test.
         //const int T = rand() % 100 + 1;
-        const int T = 1;
+        const int T = rand() % 10 + 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
