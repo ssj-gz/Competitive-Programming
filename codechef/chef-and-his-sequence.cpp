@@ -27,7 +27,7 @@ T read()
 }
 
 #if 1
-bool solveBruteForce(const vector<int>& sequence, const vector<int>& candiateSubsequence)
+bool containsAsSubsequence(const vector<int>& sequence, const vector<int>& candiateSubsequence)
 {
     int numOfCandidateSubsequenceFound = 0;
     for (const auto sequenceValue : sequence)
@@ -56,6 +56,12 @@ SolutionType solveOptimised()
 
 int main(int argc, char* argv[])
 {
+    // Trivial - the answer difficult part is that the Problem Statement is 
+    // so sloppy that it's hard to tell exactly what it wants
+    // (it basically wants to know if what I've called "candiateSubsequence" occurs
+    // as a subsequence of sequence).
+    //
+    // This is easily-solved with the greedy algorithm above.
     ios::sync_with_stdio(false);
     if (argc == 2 && string(argv[1]) == "--test")
     {
@@ -74,7 +80,6 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -89,21 +94,7 @@ int main(int argc, char* argv[])
         for (auto& value : candiateSubsequence)
             value = read<int>();
 
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(sequence, candiateSubsequence);
-        cout << (solutionBruteForce ? "Yes" : "No") << endl;
-#endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
-#endif
+        cout << (containsAsSubsequence(sequence, candiateSubsequence) ? "Yes" : "No") << endl;
     }
 
     assert(cin);
