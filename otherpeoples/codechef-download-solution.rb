@@ -5,15 +5,20 @@ require 'json'
 require 'fileutils'
 
 def usage_and_die()
-    print "Expected - a codechef solution url of the form: https://www.codechef.com/viewsolution/<numeric id>"
+    print "Expected - a codechef solution url of the form: https://www.codechef.com/viewsolution/<numeric id> [and optional suffix for filename]"
     exit false
 end
 
-if ARGV.length != 1
+if ARGV.length != 1 && ARGV.length != 2
     usage_and_die()
 end
 
 SOLUTION_URL=ARGV[0]
+SUFFIX= if ARGV.length > 1
+            "-" + ARGV[1]
+        else
+            ""
+        end
 
 if ! (SOLUTION_URL =~ /https:\/\/www.codechef.com\/viewsolution\/\d+$/)
     usage_and_die()
@@ -34,7 +39,7 @@ html.each_line do |line|
         language = data['languageShortName']
         languageExtension = data['languageExtension']
 
-        filename = userName + "-" + problemCode + "." + languageExtension
+        filename = userName + "-" + problemCode + SUFFIX + "." + languageExtension
 
         if language == 'PYTH 3.6'
             File.open(filename, "w") { |file| file.print "#! /usr/bin/python3\n" + code }
@@ -45,6 +50,7 @@ html.each_line do |line|
 
         print "Solution written to: #{filename}\n"
 
+        break
     end
 end
 
