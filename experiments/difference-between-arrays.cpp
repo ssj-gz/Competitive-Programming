@@ -84,37 +84,43 @@ int solveBruteForce(const vector<int>& a)
 #if 1
 int solveOptimised(const vector<int>& a)
 {
-    // l_return's algorithm.
+    // Minor adaption of l_return's algorithm.
     int minMaxDifference = std::numeric_limits<int>::max();
 
-    map<int, int> blah;
+    map<int, int> numOfElement;
     for (auto x : a)
     {
-        while (x % 2 == 0)
+        if (x % 2 == 1)
         {
-            x = x / 2;
+            x = x * 2;
         }
-        blah[x]++;
+        numOfElement[x]++;
     }
 
-    for (int i = 0; i < 2 * a.size(); i++)
+    while (true)
     {
         cout << "Current set: " << endl;
-        for (const auto x : blah)
+        for (const auto x : numOfElement)
         {
             cout << x.first << " x " << x.second << endl;
         }
-        const int maxElement = std::prev(blah.end())->first;
-        const int minElement = blah.begin()->first;
+        const int maxElement = std::prev(numOfElement.end())->first;
+        const int minElement = numOfElement.begin()->first;
 
         cout << "maxElement: " << maxElement << " minElement: " << minElement << " diff: " << (maxElement - minElement) << endl;
-
         minMaxDifference = min(minMaxDifference, maxElement - minElement);
 
-        blah[minElement]--;
-        if (blah[minElement] == 0)
-            blah.erase(blah.begin());
-        blah[2 * minElement]++;
+        if (maxElement % 2 == 0)
+        {
+            numOfElement[maxElement]--;
+            if (numOfElement[maxElement] == 0)
+                numOfElement.erase(std::prev(numOfElement.end()));
+            numOfElement[maxElement / 2]++;
+        }
+        else
+        {
+            break;
+        }
     }
 
     
