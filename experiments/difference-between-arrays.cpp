@@ -2,7 +2,7 @@
 // 
 // Solution to: TODO - problem link here!
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -81,7 +81,6 @@ int solveBruteForce(const vector<int>& a)
     return minMaxDifference;
 }
 
-#if 1
 int solveOptimised(const vector<int>& a)
 {
     // Minor adaption of l_return's algorithm.
@@ -99,15 +98,9 @@ int solveOptimised(const vector<int>& a)
 
     while (true)
     {
-        cout << "Current set: " << endl;
-        for (const auto x : numOfElement)
-        {
-            cout << x.first << " x " << x.second << endl;
-        }
         const int maxElement = std::prev(numOfElement.end())->first;
         const int minElement = numOfElement.begin()->first;
 
-        cout << "maxElement: " << maxElement << " minElement: " << minElement << " diff: " << (maxElement - minElement) << endl;
         minMaxDifference = min(minMaxDifference, maxElement - minElement);
 
         if (maxElement % 2 == 0)
@@ -126,7 +119,6 @@ int solveOptimised(const vector<int>& a)
     
     return minMaxDifference;
 }
-#endif
 
 
 int main(int argc, char* argv[])
@@ -180,7 +172,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(a);
         cout << solutionOptimised << endl;
 #endif
     }
