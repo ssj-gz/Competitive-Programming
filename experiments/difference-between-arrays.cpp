@@ -2,11 +2,11 @@
 // 
 // Solution to: TODO - problem link here!
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
-#define NDEBUG
+//#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -155,7 +155,6 @@ int solveOptimised(const vector<int>& a)
         newValueAtOriginalIndex[valuesAndIndices[bestLeftIndex].originalIndex] = valuesAndIndices[bestLeftIndex].value;
         newValueAtOriginalIndex[valuesAndIndices[bestRightIndex].originalIndex] = valuesAndIndices[bestRightIndex].value;
         assert(valuesAndIndices[bestLeftIndex].originalIndex != valuesAndIndices[bestRightIndex].originalIndex);
-        cout << "originalIndex for leftIndex: " << valuesAndIndices[bestLeftIndex].originalIndex << " rightIndex: " << valuesAndIndices[bestRightIndex].originalIndex << endl;
         for (int i = bestLeftIndex + 1; i <= bestRightIndex - 1; i++)
         {
             const int originalIndex = valuesAndIndices[i].originalIndex;
@@ -163,34 +162,46 @@ int solveOptimised(const vector<int>& a)
             {
                 originalIndicesUsed.insert(originalIndex);
                 newValueAtOriginalIndex[originalIndex] = valuesAndIndices[i].value;
-                cout << "originalIndex: " << originalIndex << " newValueAtOriginalIndex: " << newValueAtOriginalIndex[originalIndex] << endl;
             }
         }
-        cout << "#originalIndicesUsed: " << originalIndicesUsed.size() << " a.size(): " << a.size() << endl;
         assert(originalIndicesUsed.size() == a.size());
 
         vector<int> copyOfA(a);
-        auto printArray = [&copyOfA]() { for (const auto x : copyOfA) cout << x << " "; cout << endl; };
+        auto printArray = [&copyOfA](int highlightIndex) { 
+            for (int i = 0; i < copyOfA.size(); i++)
+            {
+                if (i == highlightIndex)
+                    cout << "[";
+                cout << copyOfA[i];
+                if (i == highlightIndex)
+                    cout << "]";
+                cout << " ";
+            }
+            cout << endl;
+        };
+        cout << "Starting array: " << endl;
+        printArray(-1);
+        cout << endl;
         for (int i = 0; i < a.size(); i++)
         {
-            cout << "i: " << i << endl;
             while (newValueAtOriginalIndex[i] > copyOfA[i])
             {
-                cout << "(need to double)" << endl;
                 assert(copyOfA[i] % 2 == 1);
-                cout << "Double the odd value " << a[i] << " at index " << i << endl;
+                cout << "Double the odd value " << copyOfA[i] << " at index " << i << " giving " << copyOfA[i] * 2 << endl;
                 copyOfA[i] *= 2;
-                printArray();
+                printArray(i);
+                cout << endl;
             }
             while (newValueAtOriginalIndex[i] < copyOfA[i])
             {
-                cout << "(need to halve)" << endl;
                 assert(copyOfA[i] % 2 == 0);
-                cout << "Halve the even value " << a[i] << " at index " << i << endl;
+                cout << "Halve the even value " << copyOfA[i] << " at index " << i << " giving " << copyOfA[i] / 2 << endl;
                 copyOfA[i] /= 2;
-                printArray();
+                printArray(i);
+                cout << endl;
             }
             assert(copyOfA[i] == newValueAtOriginalIndex[i]);
+
         }
         const int difference = *max_element(copyOfA.begin(), copyOfA.end()) - *min_element(copyOfA.begin(), copyOfA.end());
         assert(difference == minMaxDifference);
