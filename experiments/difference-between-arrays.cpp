@@ -29,7 +29,7 @@ T read()
 }
 int solveBruteForce(const vector<int>& a)
 {
-    int maxDifference = std::numeric_limits<int>::min();
+    int minMaxDifference = std::numeric_limits<int>::max();
 
     set<vector<int>> toExplore = { a };
     set<vector<int>> alreadySeen = { a };
@@ -40,7 +40,7 @@ int solveBruteForce(const vector<int>& a)
         set<vector<int>> nextToExplore;
         for (const auto& x : toExplore)
         {
-            maxDifference = max(maxDifference, *max_element(x.begin(), x.end()) - *min_element(x.begin(), x.end()));
+            minMaxDifference = min(minMaxDifference, *max_element(x.begin(), x.end()) - *min_element(x.begin(), x.end()));
 
             for (int i = 0; i < x.size(); i++)
             {
@@ -63,8 +63,9 @@ int solveBruteForce(const vector<int>& a)
         }
         toExplore = nextToExplore;
     }
+    cout << "#alreadySeen: " << alreadySeen.size() << endl;
 
-    return maxDifference;
+    return minMaxDifference;
 }
 
 #if 1
