@@ -2,7 +2,7 @@
 // 
 // Solution to: TODO - problem link here!
 //
-#define SUBMISSION
+//#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -118,6 +118,9 @@ int solveOptimised(const vector<int>& a)
     numOfOriginalIndexInRange[valuesAndIndices[leftIndex].originalIndex]++;
     int numOriginalIndicesInRange = 1;
     int rightIndex = 0;
+
+    int bestLeftIndex = -1;
+    int bestRightIndex = -1;
     while (leftIndex < valuesAndIndices.size())
     {
         while (rightIndex < valuesAndIndices.size() && numOriginalIndicesInRange < a.size())
@@ -130,13 +133,70 @@ int solveOptimised(const vector<int>& a)
         if (rightIndex == valuesAndIndices.size())
             break;
 
-        minMaxDifference = min(minMaxDifference, valuesAndIndices[rightIndex].value - valuesAndIndices[leftIndex].value);
+        const int maxDifference = valuesAndIndices[rightIndex].value - valuesAndIndices[leftIndex].value;
+        if (maxDifference < minMaxDifference)
+        {
+            bestLeftIndex = leftIndex;
+            bestRightIndex = rightIndex;
+
+            minMaxDifference = maxDifference;
+        }
 
         numOfOriginalIndexInRange[valuesAndIndices[leftIndex].originalIndex]--;
         if (numOfOriginalIndexInRange[valuesAndIndices[leftIndex].originalIndex] == 0)
             numOriginalIndicesInRange--;
         leftIndex++;
     }
+
+    {
+        // Diagnostics.
+        vector<int> newValueAtOriginalIndex(a.size());
+        set<int> originalIndicesUsed = { valuesAndIndices[bestLeftIndex].originalIndex, valuesAndIndices[bestRightIndex].originalIndex };
+        newValueAtOriginalIndex[valuesAndIndices[bestLeftIndex].originalIndex] = valuesAndIndices[bestLeftIndex].value;
+        newValueAtOriginalIndex[valuesAndIndices[bestRightIndex].originalIndex] = valuesAndIndices[bestRightIndex].value;
+        assert(valuesAndIndices[bestLeftIndex].originalIndex != valuesAndIndices[bestRightIndex].originalIndex);
+        cout << "originalIndex for leftIndex: " << valuesAndIndices[bestLeftIndex].originalIndex << " rightIndex: " << valuesAndIndices[bestRightIndex].originalIndex << endl;
+        for (int i = bestLeftIndex + 1; i <= bestRightIndex - 1; i++)
+        {
+            const int originalIndex = valuesAndIndices[i].originalIndex;
+            if (originalIndicesUsed.find(originalIndex) == originalIndicesUsed.end())
+            {
+                originalIndicesUsed.insert(originalIndex);
+                newValueAtOriginalIndex[originalIndex] = valuesAndIndices[i].value;
+                cout << "originalIndex: " << originalIndex << " newValueAtOriginalIndex: " << newValueAtOriginalIndex[originalIndex] << endl;
+            }
+        }
+        cout << "#originalIndicesUsed: " << originalIndicesUsed.size() << " a.size(): " << a.size() << endl;
+        assert(originalIndicesUsed.size() == a.size());
+
+        vector<int> copyOfA(a);
+        auto printArray = [&copyOfA]() { for (const auto x : copyOfA) cout << x << " "; cout << endl; };
+        for (int i = 0; i < a.size(); i++)
+        {
+            cout << "i: " << i << endl;
+            while (newValueAtOriginalIndex[i] > copyOfA[i])
+            {
+                cout << "(need to double)" << endl;
+                assert(copyOfA[i] % 2 == 1);
+                cout << "Double the odd value " << a[i] << " at index " << i << endl;
+                copyOfA[i] *= 2;
+                printArray();
+            }
+            while (newValueAtOriginalIndex[i] < copyOfA[i])
+            {
+                cout << "(need to halve)" << endl;
+                assert(copyOfA[i] % 2 == 0);
+                cout << "Halve the even value " << a[i] << " at index " << i << endl;
+                copyOfA[i] /= 2;
+                printArray();
+            }
+            assert(copyOfA[i] == newValueAtOriginalIndex[i]);
+        }
+        const int difference = *max_element(copyOfA.begin(), copyOfA.end()) - *min_element(copyOfA.begin(), copyOfA.end());
+        assert(difference == minMaxDifference);
+    }
+
+
     return minMaxDifference;
 }
 
