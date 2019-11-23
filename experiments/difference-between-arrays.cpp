@@ -71,7 +71,11 @@ int solveBruteForce(const vector<int>& a)
 int solveOptimised(const vector<int>& a)
 {
     int maxDifference = std::numeric_limits<int>::min();
+    // The min value that can be formed by applying the transforms any number of times
+    // to any of the values encountered so far.
     int minValueSoFar = std::numeric_limits<int>::max();
+    // The max value that can be formed by applying the transforms any number of times
+    // to any of the values encountered so far.
     int maxValueSoFar = -1;
 
     for (auto value : a)
@@ -107,8 +111,6 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
         const int T = 1;
         cout << T << endl;
 
@@ -131,7 +133,6 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
