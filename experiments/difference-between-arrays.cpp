@@ -12,6 +12,8 @@
 #include <vector>
 #include <limits>
 #include <set>
+#include <map>
+#include <algorithm>
 
 #include <cassert>
 
@@ -40,7 +42,18 @@ int solveBruteForce(const vector<int>& a)
         set<vector<int>> nextToExplore;
         for (const auto& x : toExplore)
         {
-            minMaxDifference = min(minMaxDifference, *max_element(x.begin(), x.end()) - *min_element(x.begin(), x.end()));
+            const int difference = *max_element(x.begin(), x.end()) - *min_element(x.begin(), x.end());
+            if (difference < minMaxDifference)
+            {
+                cout << "New best: diff: " << difference << endl;
+                for (const auto a : x)
+                {
+                    cout << a << " ";
+                }
+                cout << endl;
+
+                minMaxDifference = difference;
+            }
 
             for (int i = 0; i < x.size(); i++)
             {
@@ -71,35 +84,41 @@ int solveBruteForce(const vector<int>& a)
 #if 1
 int solveOptimised(const vector<int>& a)
 {
-    int maxDifference = std::numeric_limits<int>::min();
-    // The min value that can be formed by applying the transforms any number of times
-    // to any of the values encountered so far.
-    int minValueSoFar = std::numeric_limits<int>::max();
-    // The max value that can be formed by applying the transforms any number of times
-    // to any of the values encountered so far.
-    int maxValueSoFar = -1;
+    // l_return's algorithm.
+    int minMaxDifference = std::numeric_limits<int>::max();
 
-    for (auto value : a)
+    map<int, int> blah;
+    for (auto x : a)
     {
-        const int maxTransformed = (value % 2 == 1) ? 2 * value : value;
-        int minTransformed = value;
-        while (value % 2 == 0)
+        while (x % 2 == 0)
         {
-            value = value / 2;
-            minTransformed = value;
+            x = x / 2;
         }
-
-        if (minValueSoFar != std::numeric_limits<int>::max() && maxValueSoFar != -1)
-        {
-            maxDifference = max(maxDifference, abs(maxTransformed - minValueSoFar));
-            maxDifference = max(maxDifference, abs(minTransformed - maxValueSoFar));
-        }
-
-        minValueSoFar = min(minValueSoFar, minTransformed);
-        maxValueSoFar = max(maxValueSoFar, maxTransformed);
+        blah[x]++;
     }
+
+    for (int i = 0; i < 2 * a.size(); i++)
+    {
+        cout << "Current set: " << endl;
+        for (const auto x : blah)
+        {
+            cout << x.first << " x " << x.second << endl;
+        }
+        const int maxElement = std::prev(blah.end())->first;
+        const int minElement = blah.begin()->first;
+
+        cout << "maxElement: " << maxElement << " minElement: " << minElement << " diff: " << (maxElement - minElement) << endl;
+
+        minMaxDifference = min(minMaxDifference, maxElement - minElement);
+
+        blah[minElement]--;
+        if (blah[minElement] == 0)
+            blah.erase(blah.begin());
+        blah[2 * minElement]++;
+    }
+
     
-    return maxDifference;
+    return minMaxDifference;
 }
 #endif
 
