@@ -83,55 +83,20 @@ int solveBruteForce(const vector<int>& a)
 
 int solveOptimised(const vector<int>& a)
 {
-#if 0
-    // Minor adaption of l_return's algorithm.
-    int minMaxDifference = std::numeric_limits<int>::max();
-
-    map<int, int> numOfElement;
-    for (auto x : a)
-    {
-        if (x % 2 == 1)
-        {
-            x = x * 2;
-        }
-        numOfElement[x]++;
-    }
-
-    while (true)
-    {
-        const int maxElement = std::prev(numOfElement.end())->first;
-        const int minElement = numOfElement.begin()->first;
-
-        minMaxDifference = min(minMaxDifference, maxElement - minElement);
-
-        if (maxElement % 2 == 0)
-        {
-            numOfElement[maxElement]--;
-            if (numOfElement[maxElement] == 0)
-                numOfElement.erase(std::prev(numOfElement.end()));
-            numOfElement[maxElement / 2]++;
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    
-    return minMaxDifference;
-#else
     // mishraanoopam's algorithm from https://discuss.codechef.com/t/help-needed-in-past-american-express-hiring-challenge/45082/16
     int minMaxDifference = std::numeric_limits<int>::max();
     struct TransformedValueAndIndex
     {
         int value = -1;
-        int index = -1;
+        int originalIndex = -1;
     };
 
     vector<TransformedValueAndIndex> valuesAndIndices;
     for (int i = 0; i < a.size(); i++)
     {
         int value = a[i];
+        // Build up the full set of values that can be created, using the given rules,
+        // from a[i], and add them to valuesAndIndices.
         if (value % 2 == 1)
         {
             value = value * 2;
@@ -144,32 +109,35 @@ int solveOptimised(const vector<int>& a)
         valuesAndIndices.push_back({value, i});
     }
     sort(valuesAndIndices.begin(), valuesAndIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
+
+    // Two pointers - for each leftIndex (in valuesAndIndices array), find the minimum rightIndex such
+    // that the set { valuesAndIndices[j].originalIndex | leftIndex <= j <= rightIndex } is the set of n 
+    // original indices 0, 1, 2, ... n ( = a.size())
     int leftIndex = 0;
-    map<int, int> numOfIndexInRange;
-    numOfIndexInRange[valuesAndIndices[leftIndex].index]++;
-    int numIndicesInRange = 1;
+    map<int, int> numOfOriginalIndexInRange;
+    numOfOriginalIndexInRange[valuesAndIndices[leftIndex].originalIndex]++;
+    int numOriginalIndicesInRange = 1;
     int rightIndex = 0;
     while (leftIndex < valuesAndIndices.size())
     {
-        while (rightIndex < valuesAndIndices.size() && numIndicesInRange < a.size())
+        while (rightIndex < valuesAndIndices.size() && numOriginalIndicesInRange < a.size())
         {
             rightIndex++;
-            numOfIndexInRange[valuesAndIndices[rightIndex].index]++;
-            if (numOfIndexInRange[valuesAndIndices[rightIndex].index] == 1)
-                numIndicesInRange++;
+            numOfOriginalIndexInRange[valuesAndIndices[rightIndex].originalIndex]++;
+            if (numOfOriginalIndexInRange[valuesAndIndices[rightIndex].originalIndex] == 1)
+                numOriginalIndicesInRange++;
         }
         if (rightIndex == valuesAndIndices.size())
             break;
 
         minMaxDifference = min(minMaxDifference, valuesAndIndices[rightIndex].value - valuesAndIndices[leftIndex].value);
 
-        numOfIndexInRange[valuesAndIndices[leftIndex].index]--;
-        if (numOfIndexInRange[valuesAndIndices[leftIndex].index] == 0)
-            numIndicesInRange--;
+        numOfOriginalIndexInRange[valuesAndIndices[leftIndex].originalIndex]--;
+        if (numOfOriginalIndexInRange[valuesAndIndices[leftIndex].originalIndex] == 0)
+            numOriginalIndicesInRange--;
         leftIndex++;
     }
     return minMaxDifference;
-#endif
 }
 
 
