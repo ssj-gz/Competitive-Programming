@@ -83,6 +83,7 @@ int solveBruteForce(const vector<int>& a)
 
 int solveOptimised(const vector<int>& a)
 {
+#if 0
     // Minor adaption of l_return's algorithm.
     int minMaxDifference = std::numeric_limits<int>::max();
 
@@ -118,6 +119,57 @@ int solveOptimised(const vector<int>& a)
 
     
     return minMaxDifference;
+#else
+    // mishraanoopam's algorithm from https://discuss.codechef.com/t/help-needed-in-past-american-express-hiring-challenge/45082/16
+    int minMaxDifference = std::numeric_limits<int>::max();
+    struct TransformedValueAndIndex
+    {
+        int value = -1;
+        int index = -1;
+    };
+
+    vector<TransformedValueAndIndex> valuesAndIndices;
+    for (int i = 0; i < a.size(); i++)
+    {
+        int value = a[i];
+        if (value % 2 == 1)
+        {
+            value = value * 2;
+        }
+        while (value % 2 == 0)
+        {
+            valuesAndIndices.push_back({value, i});
+            value = value / 2;
+        }
+        valuesAndIndices.push_back({value, i});
+    }
+    sort(valuesAndIndices.begin(), valuesAndIndices.end(), [](const auto& lhs, const auto& rhs) { return lhs.value < rhs.value; });
+    int leftIndex = 0;
+    map<int, int> numOfIndexInRange;
+    numOfIndexInRange[valuesAndIndices[leftIndex].index]++;
+    int numIndicesInRange = 1;
+    int rightIndex = 0;
+    while (leftIndex < valuesAndIndices.size())
+    {
+        while (rightIndex < valuesAndIndices.size() && numIndicesInRange < a.size())
+        {
+            rightIndex++;
+            numOfIndexInRange[valuesAndIndices[rightIndex].index]++;
+            if (numOfIndexInRange[valuesAndIndices[rightIndex].index] == 1)
+                numIndicesInRange++;
+        }
+        if (rightIndex == valuesAndIndices.size())
+            break;
+
+        minMaxDifference = min(minMaxDifference, valuesAndIndices[rightIndex].value - valuesAndIndices[leftIndex].value);
+
+        numOfIndexInRange[valuesAndIndices[leftIndex].index]--;
+        if (numOfIndexInRange[valuesAndIndices[leftIndex].index] == 0)
+            numIndicesInRange--;
+        leftIndex++;
+    }
+    return minMaxDifference;
+#endif
 }
 
 
