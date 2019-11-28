@@ -23,7 +23,6 @@ T read()
 
 vector<int64_t> answerQueries(const vector<int64_t>& aOriginal, const vector<int>& queries)
 {
-
     vector<int64_t> a(aOriginal);
     sort(a.begin(), a.end());
 
@@ -51,18 +50,41 @@ vector<int64_t> answerQueries(const vector<int64_t>& aOriginal, const vector<int
         }
         if (maxElement / 2 > 0)
         {
-            assert(newElements.empty() || maxElement / 2 <= newElements.front());
+            assert(newElements.empty() || maxElement / 2 <= newElements.front()); // i.e. newElements is always sorted.
             newElements.push_front(maxElement / 2);
         }
         currentOperationNum++;
     }
     
     return queryResults;
-
 }
 
 int main(int argc, char* argv[])
 {
+    // Fairly easy one - an asymptotically optimal solution is easy to spot:
+    // we could just simulate the process using a std::multiset for a O((N + M) log N)
+    // solution.  Unfortunately, the large sizes of N and M combined with the high constant
+    // factor of std::multiset operations means that this would probably *just* time-out.
+    //
+    // We can use a more optimised (though still O(N log N)) approach - just sort
+    // the array initially (very fast - std::sort has a low constant factor) and then
+    // just simulate each operation with the exception that "new" elements - those that are the 
+    // result of dividing the current max element by two and "re-adding" it into the
+    // array - are added instead to an auxilliary deque called - appropriately enough - "newElements".
+    // To decide what the current maximum element in the array would be if we were simulating the
+    // process naively, we simply need to compare the current max element in
+    // the array and the current max element in newElements and see which is largest.
+    //
+    // A moment's though tell us that each new element we add *cannot* be greater than
+    // any newElements we've added so far, so if we just prepend each new element
+    // to newElements, then newElements will always be in sorted order (see that assertion
+    // concerning maxElement / 2 and newElements.front()).  Thus, both the array and 
+    // newElements are always in sorted order, making finding (and removing) the maximum
+    // element very efficient.
+    //
+    // With this in mind, hopefully the code now becomes self-explanatory: after the initial
+    // sort, answering the queries takes a very quick O(1) per query.
+
     ios::sync_with_stdio(false);
 
     const int N = read<int>();
