@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
     const auto solutionOptimised = solveOptimised(a, queries);
     for (const auto x : solutionOptimised)
     {
-        cout << x << endl;
+        cout << x << '\n';
     }
 #endif
 
