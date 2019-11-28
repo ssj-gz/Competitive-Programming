@@ -12,6 +12,7 @@
 #include <vector>
 #include <deque>
 #include <limits>
+#include <algorithm>
 
 #include <cassert>
 
