@@ -75,13 +75,20 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
 
-        for (int t = 0; t < T; t++)
+        const int N = rand() % 100 + 1;
+        const int M = N;
+        const int maxA = rand() % 1000 + 1;
+
+        cout << N << " " << M << endl;
+        for (int i = 0; i < N; i++)
         {
+            cout << (1 + rand() % maxA) << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < M; i++)
+        {
+            cout << (i + 1) << endl;
         }
 
         return 0;
