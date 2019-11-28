@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/problems/COOK82C
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <vector>
+#include <deque>
 
 #include <cassert>
 
@@ -57,12 +58,47 @@ vector<int64_t> solveBruteForce(const vector<int64_t>& aOriginal, const vector<i
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+#if 1
+vector<int64_t> solveOptimised(const vector<int64_t>& aOriginal, const vector<int>& queries)
 {
-    SolutionType result;
+    vector<int64_t> result;
+
+    deque<int64_t> newElements;
+
+
+    vector<int64_t> a(aOriginal);
+    sort(a.begin(), a.end());
+
+    int currentOperationNum = 1;
+    int queryIndex = 0;
+
+    while (queryIndex < queries.size())
+    {
+        bool maxIsInA = (newElements.empty() || (!a.empty() && a.back() >= newElements.back()));
+        const auto maxElement = maxIsInA ? a.back() : newElements.back();
+        if (currentOperationNum == queries[queryIndex])
+        {
+            result.push_back(maxElement);
+            queryIndex++;
+        }
+        if (maxIsInA)
+        {
+            a.pop_back();
+        }
+        else
+        {
+            newElements.pop_back();
+        }
+        if (maxElement / 2 > 0)
+        {
+            assert(newElements.empty() || maxElement / 2 <= newElements.front());
+            newElements.push_front(maxElement / 2);
+        }
+        currentOperationNum++;
+    }
     
     return result;
+
 }
 #endif
 
@@ -116,15 +152,22 @@ int main(int argc, char* argv[])
         cout << "solutionBruteForce: " << x << endl;
     }
 #endif
-#if 0
-    const auto solutionOptimised = solveOptimised();
-    cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+    const auto solutionOptimised = solveOptimised(a, queries);
+    cout << "solutionOptimised:  " << endl;
+    for (const auto x : solutionOptimised)
+    {
+        cout << "solutionOptimised: " << x << endl;
+    }
 
     assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-    const auto solutionOptimised = solveOptimised();
-    cout << solutionOptimised << endl;
+    const auto solutionOptimised = solveOptimised(a, queries);
+    for (const auto x : solutionOptimised)
+    {
+        cout << x << endl;
+    }
 #endif
 
     assert(cin);
