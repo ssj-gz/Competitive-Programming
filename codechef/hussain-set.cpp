@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <deque>
+#include <limits>
 
 #include <cassert>
 
@@ -112,14 +113,23 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int N = rand() % 100 + 1;
+        const int N = 1'000'000;
         const int M = N;
-        const int maxA = rand() % 1000 + 1;
+        const int maxPowerOf2 = 63;
+        const int64_t maxValue = std::numeric_limits<int64_t>::max();
 
         cout << N << " " << M << endl;
         for (int i = 0; i < N; i++)
         {
-            cout << (1 + rand() % maxA) << " ";
+            const int powerOf2 = rand() % (maxPowerOf2 + 1);
+            int64_t twoToThePower = 1;
+            for (int j = 0; j < powerOf2; j++)
+            {
+                twoToThePower *= 2;
+            }
+            int multiplier = rand() % (maxValue / twoToThePower + 1);
+
+            cout << (multiplier * twoToThePower) << " ";
         }
         cout << endl;
         for (int i = 0; i < M; i++)
