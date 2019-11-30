@@ -7,9 +7,6 @@
 
 #include <cassert>
 
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-#include <algorithm> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-
 using namespace std;
 
 template <typename T>
@@ -21,35 +18,9 @@ T read()
     return toRead;
 }
 
-
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            string animalString;
-            const int numSnakes = rand() % 20 + 1;
-            const int numMongooses = rand() % 20 + 1;
-            for (int i = 0; i < numSnakes; i++)
-                animalString += 's';
-            for (int i = 0; i < numMongooses; i++)
-                animalString += 'm';
-            random_shuffle(animalString.begin(), animalString.end());
-            cout << animalString << endl;
-        }
-
-        return 0;
-    }
     
     const auto T = read<int>();
 
@@ -61,6 +32,7 @@ int main(int argc, char* argv[])
             if (animalString[i] == 'm')
             {
                 // Prefer to eat the leftmost snake, if there is one.
+                // The 'e' character represents "eaten snake".
                 if (i - 1 >= 0 && animalString[i - 1] == 's')
                 {
                     animalString[i - 1] = 'e';
