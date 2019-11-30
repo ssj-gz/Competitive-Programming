@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
+#include <algorithm> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -36,6 +37,15 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            string animalString;
+            const int numSnakes = rand() % 20 + 1;
+            const int numMongooses = rand() % 20 + 1;
+            for (int i = 0; i < numSnakes; i++)
+                animalString += 's';
+            for (int i = 0; i < numMongooses; i++)
+                animalString += 'm';
+            random_shuffle(animalString.begin(), animalString.end());
+            cout << animalString << endl;
         }
 
         return 0;
