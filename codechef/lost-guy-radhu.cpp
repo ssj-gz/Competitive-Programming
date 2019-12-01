@@ -4,6 +4,7 @@
 //
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include <cassert>
 
@@ -36,6 +37,39 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = rand() % 10 + 1;
+            const int Q = N;
+
+            const int maxValue = rand() % 100 + 1;
+
+            cout << N << " " << Q << endl;
+            vector<int> queries;
+            for (int i = 0; i < N; i++)
+            {
+                queries.push_back(i + 1);
+            }
+            random_shuffle(queries.begin(), queries.end());
+            vector<int> scores;
+            for (int i = 0; i < N; i++)
+            {
+                scores.push_back(rand() % (maxValue + 1));
+            }
+
+            for (int i = 0; i < N; i++)
+            {
+                cout << scores[i] ;
+                if (i != N -1)
+                    cout << " ";
+            }
+            cout << endl;
+            for (int i = 0; i < Q; i++)
+            {
+                cout << queries[i] ;
+                if (i != Q -1)
+                    cout << " ";
+            }
+            cout << endl;
+
         }
 
         return 0;
