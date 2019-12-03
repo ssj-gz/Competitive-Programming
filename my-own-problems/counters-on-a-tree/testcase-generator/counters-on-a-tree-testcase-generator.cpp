@@ -24,19 +24,20 @@ struct NodeData
     int numCounters = -1;
 };
 
-void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, std::ostream& testcaseOutStream)
+void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
 {
     treeGenerator.scrambleNodeIdsAndReorder(nullptr);
     treeGenerator.scrambleEdgeOrder();
-    testcaseOutStream << treeGenerator.numNodes() << std::endl;
+    destTestcase.writeLine(treeGenerator.numNodes());
     for (const auto& node : treeGenerator.nodes())
     {
-        testcaseOutStream << node->data.numCounters << std::endl;
+        destTestcase.writeLine(node->data.numCounters);
     }
     for (const auto& edge : treeGenerator.edges())
     {
-        testcaseOutStream << edge->nodeA->id() << " " << edge->nodeB->id() << std::endl;
+        destTestcase.writeLine(edge->nodeA->id(), edge->nodeB->id());
     }
+    std::cout << destTestcase.contents() << std::endl;
 }
 
 int main()
@@ -56,6 +57,6 @@ int main()
         {
             node->data.numCounters = rnd.next(maxCounters + 1);
         }
-        scrambleAndwriteTestcase(treeGenerator, std::cout);
+        scrambleAndwriteTestcase(treeGenerator, testcase);
     }
 }
