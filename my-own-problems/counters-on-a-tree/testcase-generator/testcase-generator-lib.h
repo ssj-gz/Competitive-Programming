@@ -9,17 +9,11 @@ template <typename SubtaskInfo>
 class Testcase
 {
     public:
-        template <typename Head, typename... Tail>
-        void writeLine(const Head& head, Tail... tail)
+        template <typename... Types>
+        void writeLine(Types... toPrint)
         {
-            m_contents << head << " ";
-            writeLine(tail...);
+            writeLineHelper(toPrint...);
 
-        }
-        template<typename Head>
-        void writeLine(const Head& head)
-        {
-            m_contents << head << std::endl;
         }
         std::string contents()
         {
@@ -28,6 +22,19 @@ class Testcase
         }
     private:
         std::ostringstream m_contents;
+
+        template <typename Head, typename... Tail>
+        void writeLineHelper(const Head& head, Tail... tail)
+        {
+            m_contents << head << " ";
+            writeLine(tail...);
+
+        }
+        template<typename Head>
+        void writeLineHelper(const Head& head)
+        {
+            m_contents << head << std::endl;
+        }
 
 };
 
