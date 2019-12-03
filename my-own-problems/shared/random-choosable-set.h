@@ -3,6 +3,8 @@
 #include <cassert>
 
 #include <type_traits>
+
+#include "testlib.h"
 /**
  * Insert/ remove/ find pointers to an object in O(log N); choose a random
  * pointer to an object which is currently in the set in O(1).
@@ -67,7 +69,7 @@ class RandomChooseableSet
         TPtr chooseRandom() const
         {
             assert(!empty());
-            return m_vec[rand() % m_vec.size()];
+            return m_vec[rnd.next(m_vec.size())];
         }
     private:
         std::map<TPtr, int> m_indexFor;
