@@ -11,6 +11,18 @@ struct NodeData
 constexpr int maxNodes = 100'000;
 constexpr int maxCounters = 16;
 
+void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, std::ostream& testcaseOutStream)
+{
+    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+    treeGenerator.scrambleEdgeOrder();
+    testcaseOutStream << treeGenerator.numNodes() << std::endl;
+    for (const auto& node : treeGenerator.nodes())
+    {
+        testcaseOutStream << node->data.numCounters << std::endl;
+    }
+    treeGenerator.printEdges(testcaseOutStream);
+}
+
 int main()
 {
     rnd.setSeed(17666);
@@ -21,12 +33,5 @@ int main()
     {
         node->data.numCounters = rnd.next(maxCounters + 1);
     }
-    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
-    treeGenerator.scrambleEdgeOrder();
-    std::cout << treeGenerator.numNodes() << std::endl;
-    for (const auto& node : treeGenerator.nodes())
-    {
-        std::cout << node->data.numCounters << std::endl;
-    }
-    treeGenerator.printEdges(std::cout);
+    scrambleAndwriteTestcase(treeGenerator, std::cout);
 }
