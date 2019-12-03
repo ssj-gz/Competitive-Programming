@@ -34,7 +34,9 @@ class Testcase
             return m_contents.str();
         }
     private:
-        std::ostringstream m_contents;
+        // Write in binary mode - don't want '\r's added to newlines if we
+        // generate on e.g. windows.
+        std::ostringstream m_contents{std::ios_base::out | std::ios_base::binary};
 
         template <typename Head, typename... Tail>
         void writeLineHelper(const Head& head, Tail... tail)
