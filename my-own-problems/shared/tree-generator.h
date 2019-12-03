@@ -207,7 +207,7 @@ class TreeGenerator
                 assert(forcedRootNodeIter != m_nodes.end());
                 if (forcedRootNodeIter != m_nodes.begin())
                 {
-                    swap((*m_nodes.begin())->scrambledId, forceAsRootNode->scrambledId);
+                    std::swap((*m_nodes.begin())->scrambledId, forceAsRootNode->scrambledId);
                     iter_swap(m_nodes.begin(), forcedRootNodeIter);
                 } 
                 assert(forceAsRootNode->scrambledId == 1);
