@@ -33,7 +33,10 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, std::ostre
     {
         testcaseOutStream << node->data.numCounters << std::endl;
     }
-    treeGenerator.printEdges(testcaseOutStream);
+    for (const auto& edge : treeGenerator.edges())
+    {
+        testcaseOutStream << edge->nodeA->id() << " " << edge->nodeB->id() << std::endl;
+    }
 }
 
 int main()
