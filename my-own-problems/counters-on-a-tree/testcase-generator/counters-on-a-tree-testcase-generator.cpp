@@ -3,13 +3,25 @@
 
 #include <iostream>
 
+constexpr int maxNodes = 100'000;
+constexpr int maxCounters = 16;
+constexpr int maxNumTestcases = 16;
+
+struct SubtaskInfo
+{
+    int subtaskId = -1;
+    int maxNodesPerTestcase = -1;
+    int maxNodesOverAllTestcases = -1;
+    int maxNumCountersPerNode = -1;
+    int maxNumTestcases = -1;
+};
+
+SubtaskInfo subtask1 = { 1, maxNodes, 2 * maxNodes, maxCounters, maxNumTestcases };
+
 struct NodeData
 {
     int numCounters = -1;
 };
-
-constexpr int maxNodes = 100'000;
-constexpr int maxCounters = 16;
 
 void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, std::ostream& testcaseOutStream)
 {
