@@ -181,11 +181,11 @@ class TreeGenerator
         }
         void scrambleNodeOrder()
         {
-            random_shuffle(m_nodes.begin(), m_nodes.end());
+            shuffle(m_nodes.begin(), m_nodes.end());
         }
         void scrambleEdgeOrder()
         {
-            random_shuffle(m_edges.begin(), m_edges.end());
+            shuffle(m_edges.begin(), m_edges.end());
             for (auto& edge : m_edges)
             {
                 if (rnd.next(2) == 1)
