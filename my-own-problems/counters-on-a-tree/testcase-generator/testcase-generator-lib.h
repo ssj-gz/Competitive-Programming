@@ -10,6 +10,25 @@ struct Testcase
 };
 
 template <typename SubtaskInfo>
+class TestFileInfo
+{
+    public:
+        TestFileInfo& belongingToSubtask(const SubtaskInfo& containingSubtask)
+        {
+            assert(m_containingSubtask == nullptr);
+            m_containingSubtask = &containingSubtask;
+            return *this;
+        }
+
+        const SubtaskInfo* containingSubtask() const
+        {
+            return m_containingSubtask;
+        }
+
+        const SubtaskInfo* m_containingSubtask = nullptr;
+};
+
+template <typename SubtaskInfo>
 class TestcaseInfo
 {
     public:
@@ -25,13 +44,6 @@ class TestcaseInfo
             m_seed = seed;
             return *this;
         }
-        TestcaseInfo& belongingToSubtask(const SubtaskInfo& containingSubtask)
-        {
-            assert(m_containingSubtask.empty());
-            m_containingSubtask = containingSubtask;
-            return *this;
-        }
-
         std::string description() const
         {
             return m_description;
@@ -40,24 +52,18 @@ class TestcaseInfo
         {
             return m_seed;
         }
-        SubtaskInfo* containingSubtask() const
-        {
-            return m_containingSubtask;
-        }
     private:
         std::string m_description;
         int m_seed = -1;
-        SubtaskInfo* m_containingSubtask = nullptr;
 };
 
 template <typename SubtaskInfo>
-class Testfile
+class TestFile
 {
     public:
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
         {
             assert(newTestcaseInfo.seed() != -1);
-            assert(newTestcaseInfo.containingSubtask() != nullptr);
 
             m_testcases.push_back(std::make_unique<Testcase<SubtaskInfo>>());
             return *m_testcases.back();
@@ -65,4 +71,20 @@ class Testfile
         
     private:
         std::vector<std::unique_ptr<Testcase<SubtaskInfo>>> m_testcases;
+};
+
+template <typename SubtaskInfo>
+class TestSuite
+{
+    public:
+        TestFile<SubtaskInfo>& newTestFile(const TestFileInfo<SubtaskInfo>& newTestFileInfo)
+        {
+            assert(newTestFileInfo.containingSubtask() != nullptr);
+
+            m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>());
+            return *m_testFiles.back();
+        };
+        
+    private:
+        std::vector<std::unique_ptr<TestFile<SubtaskInfo>>> m_testFiles;
 };
