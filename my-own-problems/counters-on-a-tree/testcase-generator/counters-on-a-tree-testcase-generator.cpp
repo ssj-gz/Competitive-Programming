@@ -1,5 +1,6 @@
 #include <tree-generator.h>
 #include <testlib.h>
+#include "testcase-generator-lib.h"
 
 #include <iostream>
 
@@ -37,13 +38,21 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, std::ostre
 
 int main()
 {
-    rnd.setSeed(17666);
-    TreeGenerator<NodeData> treeGenerator;
-    auto rootNode = treeGenerator.createNode();
-    treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
-    for (auto& node : treeGenerator.nodes())
+    TestSuite<SubtaskInfo> testsuite;
     {
-        node->data.numCounters = rnd.next(maxCounters + 1);
+        auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1));
+
+        auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(17666)
+                                                            .withDescription("max nodes - randomly generated with 2 percent preference for leaves"));
+
+        rnd.setSeed(17666);
+        TreeGenerator<NodeData> treeGenerator;
+        auto rootNode = treeGenerator.createNode();
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
+        for (auto& node : treeGenerator.nodes())
+        {
+            node->data.numCounters = rnd.next(maxCounters + 1);
+        }
+        scrambleAndwriteTestcase(treeGenerator, std::cout);
     }
-    scrambleAndwriteTestcase(treeGenerator, std::cout);
 }
