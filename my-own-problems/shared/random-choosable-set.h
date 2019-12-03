@@ -1,5 +1,6 @@
 #include <vector>
 #include <map>
+#include <cassert>
 
 #include <type_traits>
 /**
