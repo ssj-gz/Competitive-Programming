@@ -1,3 +1,7 @@
+#include <vector>
+#include <map>
+
+#include <type_traits>
 /**
  * Insert/ remove/ find pointers to an object in O(log N); choose a random
  * pointer to an object which is currently in the set in O(1).
@@ -65,6 +69,6 @@ class RandomChooseableSet
             return m_vec[rand() % m_vec.size()];
         }
     private:
-        map<TPtr, int> m_indexFor;
-        vector<TPtr> m_vec;
+        std::map<TPtr, int> m_indexFor;
+        std::vector<TPtr> m_vec;
 };
