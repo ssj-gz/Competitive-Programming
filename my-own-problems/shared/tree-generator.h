@@ -189,7 +189,7 @@ class TreeGenerator
             for (auto& edge : m_edges)
             {
                 if (rnd.next(2) == 1)
-                    swap(edge->nodeA, edge->nodeB);
+                    std::swap(edge->nodeA, edge->nodeB);
             }
         }
         // Scrambles the order of the nodes, then re-ids them, in new order, with the first
