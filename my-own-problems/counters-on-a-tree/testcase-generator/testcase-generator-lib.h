@@ -1,12 +1,34 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <sstream>
 
 #include <testlib.h>
 
 template <typename SubtaskInfo>
-struct Testcase
+class Testcase
 {
+    public:
+        template <typename Head, typename... Tail>
+        void writeLine(const Head& head, Tail... tail)
+        {
+            m_contents << head << " ";
+            writeLine(tail...);
+
+        }
+        template<typename Head>
+        void writeLine(const Head& head)
+        {
+            m_contents << head << std::endl;
+        }
+        std::string contents()
+        {
+            m_contents.flush();
+            return m_contents.str();
+        }
+    private:
+        std::ostringstream m_contents;
+
 };
 
 template <typename SubtaskInfo>
