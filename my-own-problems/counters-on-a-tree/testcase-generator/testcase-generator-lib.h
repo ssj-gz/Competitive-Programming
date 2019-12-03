@@ -15,6 +15,19 @@ class Testcase
             writeLineHelper(toPrint...);
 
         }
+        template <typename FwdIter>
+        void writeObjectsAsLine(FwdIter begin, FwdIter end)
+        {
+            FwdIter current = begin;
+            while (current != end)
+            {
+                m_contents << *current;
+                current++;
+                if (current != end)
+                    m_contents << ' ';
+            }
+            m_contents << std::endl;
+        }
         std::string contents()
         {
             m_contents.flush();

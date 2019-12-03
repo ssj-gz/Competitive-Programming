@@ -29,10 +29,13 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     treeGenerator.scrambleNodeIdsAndReorder(nullptr);
     treeGenerator.scrambleEdgeOrder();
     destTestcase.writeLine(treeGenerator.numNodes());
+
+    std::vector<int> numCountersForNode;
     for (const auto& node : treeGenerator.nodes())
     {
-        destTestcase.writeLine(node->data.numCounters);
+        numCountersForNode.push_back(node->data.numCounters);
     }
+    destTestcase.writeObjectsAsLine(numCountersForNode.begin(), numCountersForNode.end());
     for (const auto& edge : treeGenerator.edges())
     {
         destTestcase.writeLine(edge->nodeA->id(), edge->nodeB->id());
