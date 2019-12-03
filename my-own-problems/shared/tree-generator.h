@@ -231,11 +231,11 @@ class TreeGenerator
             }
             return edges;
         }
-        void printEdges() const
+        void printEdges(std::ostream& outStream) const
         {
             for (const auto& edge : m_edges)
             {
-                std::cout << edge->nodeA->id() << " " << edge->nodeB->id() << std::endl;
+                outStream << edge->nodeA->id() << " " << edge->nodeB->id() << std::endl;
             }
         }
     private:

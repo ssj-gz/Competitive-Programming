@@ -28,5 +28,5 @@ int main()
     {
         std::cout << node->data.numCounters << std::endl;
     }
-    treeGenerator.printEdges();
+    treeGenerator.printEdges(std::cout);
 }
