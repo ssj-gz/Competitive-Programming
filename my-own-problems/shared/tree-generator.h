@@ -7,6 +7,8 @@
 #include <cassert>
 #include <iostream>
 
+#include "testlib.h"
+
 template <typename NodeData>
 struct TestEdge;
 template <typename NodeData>
@@ -61,7 +63,7 @@ class TreeGenerator
         }
         TestNode<NodeData>* createNodeWithRandomParent()
         {
-            const int parentIndex = rand() % m_nodes.size();
+            const int parentIndex = rnd.next(m_nodes.size());
             auto randomParent = m_nodes[parentIndex].get();
             return createNode(randomParent);
         }
@@ -107,7 +109,7 @@ class TreeGenerator
 
             for (int i = 0; i < numNewNodes; )
             {
-                const double random = static_cast<double>(rand()) / RAND_MAX * 100;
+                const double random = rnd.next(100.0);
                 TestNode<NodeData>* newNodeParent = nullptr;
                 bool parentWasPreferred = false;
                 if (random <= preferencePercent && !preferredSetCopy.empty())
@@ -186,7 +188,7 @@ class TreeGenerator
             random_shuffle(m_edges.begin(), m_edges.end());
             for (auto& edge : m_edges)
             {
-                if (rand() % 2 == 1)
+                if (rnd.next(2) == 1)
                     swap(edge->nodeA, edge->nodeB);
             }
         }
