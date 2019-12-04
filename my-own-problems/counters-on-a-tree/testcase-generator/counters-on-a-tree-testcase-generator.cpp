@@ -3,6 +3,7 @@
 #include "testcase-generator-lib.h"
 
 #include <iostream>
+#include <set>
 
 constexpr int maxNodes = 100'000;
 constexpr int maxCounters = 16;
@@ -137,6 +138,12 @@ int main(int argc, char* argv[])
     testsuite.writeTestFiles();
 }
 
+struct Node
+{
+    std::vector<Node*> neighbours;
+    int nodeId = -1;
+};
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask)
 {
     using std::cout;
@@ -146,6 +153,12 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     for (int t = 0; t < numTestCases; t++)
     {
         const auto& [numNodes] = testFileReader.readLine<int>();
+
+        std::vector<Node> nodes(numNodes);
+        for (int i = 0; i < numNodes; i++)
+        {
+            nodes[i].nodeId = (i + 1);
+        }
         
         const auto numCountersForNode = testFileReader.readLineOfValues<int>(numNodes);
         for (const auto numCounters : numCountersForNode)
@@ -159,7 +172,25 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             testFileReader.addErrorUnless(0 <= edgeNodeAId && edgeNodeAId <= numNodes, "Invalid node id " + std::to_string(edgeNodeAId));
             testFileReader.addErrorUnless(0 <= edgeNodeBId && edgeNodeBId <= numNodes, "Invalid node id " + std::to_string(edgeNodeBId));
             
+            nodes[edgeNodeAId - 1].neighbours.push_back(&(nodes[edgeNodeBId - 1]));
+            nodes[edgeNodeBId - 1].neighbours.push_back(&(nodes[edgeNodeAId - 1]));
         }
+
+        int nodeId = 1;
+        for (const auto& node : nodes)
+        {
+            std::set<Node*> distinctNeighbours;
+            for (const auto neighbour : node.neighbours)
+            {
+                testFileReader.addErrorUnless(neighbour != &node, "Node " + std::to_string(node.nodeId) + " is connected to itself!");
+                testFileReader.addErrorUnless(distinctNeighbours.find(neighbour) == distinctNeighbours.end(), "Node " + std::to_string(nodeId) + " is connected to node " + std::to_string(neighbour->nodeId) + " more than once!");
+
+                distinctNeighbours.insert(neighbour);
+            }
+            nodeId++;
+        }
+
+
         testFileReader.markTestcaseAsValidated();
     }
 
