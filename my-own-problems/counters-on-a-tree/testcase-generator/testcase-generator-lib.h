@@ -198,9 +198,13 @@ class TestSuite
                     stringToTrim.pop_back();
                 }
             };
+            std::map<int, std::vector<const TestFile<SubtaskInfo>*>> testFilesBySubtaskId;
+            std::map<const TestFile<SubtaskInfo>*, std::string> fileNameForTestFile;
             int testFileNum = 1;
             for (const auto& testFile : m_testFiles)
             {
+                testFilesBySubtaskId[testFile->containingSubtask()->subtaskId].push_back(testFile.get());
+
                 const auto& testcases = testFile->testcases();
                 const int numTestCases = testcases.size();
                 assert(numTestCases > 0);
@@ -218,13 +222,27 @@ class TestSuite
                 auto testFileContents = testFileOutStream.str();
                 trimTrailingWhiteSpace(testFileContents);
 
-                std::ofstream testFileOutFileStream("testfile-" + std::to_string(testFileNum) + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt");
+                const std::string filename = "testfile-" + std::to_string(testFileNum) + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt";
+                fileNameForTestFile[testFile.get()] = filename;
+
+                std::ofstream testFileOutFileStream(filename);
                 assert(testFileOutFileStream.is_open());
                 testFileOutFileStream << testFileContents;
                 assert(testFileOutFileStream.flush());
                 testFileOutFileStream.close();
 
                 testFileNum++;
+            }
+
+            for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
+            {
+                std::cout << "Generated the following test files: " << std::endl;
+                std::cout << "Subtask: " << subtaskId << std::endl;
+                for (const auto testFile : testFilesForSubtask)
+                {
+                    std::cout << "   " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
+                }
+
             }
         }
     private:
