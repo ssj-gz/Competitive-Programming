@@ -156,6 +156,9 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         for (int i = 0; i < numNodes - 1; i++)
         {
             const auto& [edgeNodeAId, edgeNodeBId] = testFileReader.readLine<int, int>();
+            testFileReader.addErrorUnless(0 <= edgeNodeAId && edgeNodeAId <= numNodes, "Invalid node id " + std::to_string(edgeNodeAId));
+            testFileReader.addErrorUnless(0 <= edgeNodeBId && edgeNodeBId <= numNodes, "Invalid node id " + std::to_string(edgeNodeBId));
+            
         }
         testFileReader.markTestcaseAsValidated();
     }
