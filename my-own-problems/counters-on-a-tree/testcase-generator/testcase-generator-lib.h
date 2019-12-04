@@ -308,7 +308,7 @@ class TestFileReader
 
             std::tuple<Types...> readValues;
 
-            readLineHelper<decltype(readValues), 0, sizeof(Types)..., Types...>(readValues);
+            readLineHelper<decltype(readValues), 0, Types...>(readValues);
 
             m_testFileInStream.flags(originalFlags);
 
@@ -331,7 +331,7 @@ class TestFileReader
         std::istream& m_testFileInStream;
         std::vector<std::string> m_errorMessages;
 
-        template<typename ValuesType, std::size_t ValueIndex, std::size_t NumValues, typename Head, typename... Tail >
+        template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
         void readLineHelper(ValuesType& readValues)
         {
             Head nextValue;
