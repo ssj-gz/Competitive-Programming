@@ -153,6 +153,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     for (int t = 0; t < numTestCases; t++)
     {
         const auto& [numNodes] = testFileReader.readLine<int>();
+        testFileReader.addErrorUnless(numNodes >= 1, "numNodes must be greater than or equal to 1, not " + std::to_string(numNodes));
+        testFileReader.addErrorUnless(numNodes <= containingSubtask.maxNodesPerTestcase, "numNodes must be greater than or equal to maxNodesPerTestcase, not " + std::to_string(numNodes));
 
         std::vector<Node> nodes(numNodes);
         for (int i = 0; i < numNodes; i++)
