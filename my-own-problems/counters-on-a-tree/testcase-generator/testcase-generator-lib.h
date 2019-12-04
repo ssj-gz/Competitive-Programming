@@ -98,6 +98,16 @@ class TestcaseInfo
         {
             return m_description;
         }
+        TestcaseInfo& withSeed(const int seed)
+        {
+            assert(m_seed == -1);
+            m_seed = seed;
+            return *this;
+        }
+        int seed() const
+        {
+            return m_seed;
+        }
     private:
         std::string m_description;
         int m_seed = -1;
