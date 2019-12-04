@@ -2,6 +2,7 @@
 #include <memory>
 #include <cassert>
 #include <sstream>
+#include <fstream>
 
 #include <testlib.h>
 
@@ -28,9 +29,8 @@ class Testcase
             }
             m_contents << std::endl;
         }
-        std::string contents()
+        std::string contents() const
         {
-            m_contents.flush();
             return m_contents.str();
         }
     private:
@@ -117,6 +117,11 @@ template <typename SubtaskInfo>
 class TestFile
 {
     public:
+        TestFile(const TestFileInfo<SubtaskInfo>& testFileInfo)
+        {
+            assert(testFileInfo.containingSubtask() != nullptr);
+            m_containingSubtask = testFileInfo.containingSubtask();
+        }
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
         {
             m_testcases.push_back(std::make_unique<Testcase<SubtaskInfo>>());
@@ -126,9 +131,25 @@ class TestFile
             }
             return *m_testcases.back();
         };
+
+        const SubtaskInfo* containingSubtask() const
+        {
+            return m_containingSubtask;
+        }
+
+        std::vector<const Testcase<SubtaskInfo>*> testcases() const
+        {
+            std::vector<const Testcase<SubtaskInfo>*> testcases;
+            for (const auto& testcase : m_testcases)
+            {
+                testcases.push_back(testcase.get());
+            }
+            return testcases;
+        }
         
     private:
         std::vector<std::unique_ptr<Testcase<SubtaskInfo>>> m_testcases;
+        const SubtaskInfo* m_containingSubtask = nullptr;
 };
 
 template <typename SubtaskInfo>
@@ -142,13 +163,50 @@ class TestSuite
 
             rnd.setSeed(newTestFileInfo.seed());
 
-            m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>());
+            m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>(newTestFileInfo));
             return *m_testFiles.back();
         };
         void setTestFileVerifier(std::function<bool(std::istream&, const SubtaskInfo&)> testFileVerifier)
         {
             assert(!m_testFileVerifier);
             m_testFileVerifier = testFileVerifier;
+        }
+        void writeTestFiles()
+        {
+            int testFileNum = 1;
+            for (const auto& testFile : m_testFiles)
+            {
+                const auto& testcases = testFile->testcases();
+                const int numTestCases = testcases.size();
+                assert(numTestCases > 0);
+
+                std::ostringstream testFileOutStream;
+                testFileOutStream << numTestCases << std::endl;
+                for (const auto& testcase : testcases)
+                {
+                    auto testCaseContents = testcase->contents();
+                    while (!testCaseContents.empty() && isspace(testCaseContents.back()))
+                    {
+                        testCaseContents.pop_back();
+                    }
+                    assert(!testCaseContents.empty());
+                    testFileOutStream << testCaseContents << std::endl;
+                }
+
+                auto testFileOut = testFileOutStream.str();
+
+                while (!testFileOut.empty() && isspace(testFileOut.back()))
+                {
+                    testFileOut.pop_back();
+                }
+
+                std::ofstream testFileOutFileStream("testfile-" + std::to_string(testFileNum) + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt");
+                assert(testFileOutFileStream.is_open());
+                testFileOutFileStream << testFileOut;
+                assert(testFileOutFileStream.flush());
+
+
+            }
         }
     private:
         std::vector<std::unique_ptr<TestFile<SubtaskInfo>>> m_testFiles;

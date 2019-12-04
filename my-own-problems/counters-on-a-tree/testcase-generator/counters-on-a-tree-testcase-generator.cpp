@@ -40,7 +40,6 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     {
         destTestcase.writeLine(edge->nodeA->id(), edge->nodeB->id());
     }
-    std::cout << destTestcase.contents() << std::endl;
 }
 
 /**
@@ -112,4 +111,5 @@ int main(int argc, char* argv[])
             scrambleAndwriteTestcase(treeGenerator, testcase);
         }
     }
+    testsuite.writeTestFiles();
 }
