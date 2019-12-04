@@ -209,6 +209,7 @@ class TestFileReader
             }
 
             std::istringstream lineStream(line);
+            std::noskipws(lineStream);
             readLineHelper<decltype(readValues), 0, Types...>(readValues, lineStream);
 
             m_testFileInStream.flags(originalFlags);
@@ -238,6 +239,41 @@ class TestFileReader
             Head nextValue;
             lineStream >> nextValue;
             std::get<ValueIndex>(readValues) = nextValue;
+            if (!lineStream)
+            {
+                addError("Failed to read value with index " << ValueIndex);
+                return;
+            }
+
+            assert((lineStream & std::skipws) == 0);
+            char followingChar = '\0';
+            cin >> followingChar;
+            if (!followingChar == ' ')
+            {
+                addError("Expecting a space; got '" + followingChar + "' instead.");
+                return;
+            }
+
+            readLineHelper<ValuesType, ValueIndex + 1, Tail...>(readValues, lineStream);
+        }
+        template<typename ValuesType, std::size_t ValueIndex, typename Head>
+        void readLineHelper(ValuesType& readValues, std::istream& lineStream)
+        {
+            Head nextValue;
+            lineStream >> nextValue;
+            std::get<ValueIndex>(readValues) = nextValue;
+            if (!lineStream)
+            {
+                addError("Failed to read value with index " << ValueIndex);
+                return;
+            }
+
+            assert((lineStream & std::skipws) == 0);
+            if (lineStream.peek() != std::istringstream::traits_type::eof())
+            {
+                addError("Got trailing characters after reading last value.");
+                return;
+            }
         }
 };
 
