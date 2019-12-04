@@ -82,7 +82,23 @@ void addCounters(TreeGenerator<NodeData>& treeGenerator, double percentageWithCo
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask)
 {
+    using std::cout;
+    using std::endl;
+
     const auto& [numTestCases] = testFileReader.readLine<int>();
+    cout << "numTestCases: " << numTestCases << endl;
+    for (int t = 0; t < numTestCases; t++)
+    {
+        const auto& [numNodes] = testFileReader.readLine<int>();
+        cout << " numNodes: " << numNodes << endl;
+        
+        const auto numCountersForNode = testFileReader.readLineOfValues<int>(numNodes);
+
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            const auto& [edgeNodeAId, edgeNodeBId] = testFileReader.readLine<int, int>();
+        }
+    }
 
     return true;
 }
