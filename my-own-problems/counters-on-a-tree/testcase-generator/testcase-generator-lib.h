@@ -120,6 +120,10 @@ class TestFile
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
         {
             m_testcases.push_back(std::make_unique<Testcase<SubtaskInfo>>());
+            if (newTestcaseInfo.seed() != -1)
+            {
+                rnd.setSeed(newTestcaseInfo.seed());
+            }
             return *m_testcases.back();
         };
         
@@ -135,6 +139,8 @@ class TestSuite
         {
             assert(newTestFileInfo.containingSubtask() != nullptr);
             assert(newTestFileInfo.seed() != -1);
+
+            rnd.setSeed(newTestFileInfo.seed());
 
             m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>());
             return *m_testFiles.back();

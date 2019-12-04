@@ -52,7 +52,6 @@ int main()
 
         auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves"));
 
-        rnd.setSeed(17666);
         TreeGenerator<NodeData> treeGenerator;
         auto rootNode = treeGenerator.createNode();
         treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
