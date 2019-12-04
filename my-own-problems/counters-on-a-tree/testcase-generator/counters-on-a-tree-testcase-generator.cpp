@@ -192,6 +192,27 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             nodeId++;
         }
 
+        auto rootNode = &(nodes.front());
+        std::vector<Node*> toExplore = { rootNode };
+        std::set<Node*> visited = { rootNode };
+        while (!toExplore.empty())
+        {
+            std::vector<Node*> nextToExplore;
+            for (const auto& node : toExplore)
+            {
+                for (const auto neighbour : node->neighbours)
+                {
+                    if (visited.find(neighbour) == visited.end())
+                    {
+                        nextToExplore.push_back(neighbour);
+                        visited.insert(neighbour);
+                    }
+                }
+            }
+            toExplore = nextToExplore;
+        }
+
+        testFileReader.addErrorUnless(visited.size() == numNodes, "Tree is not connected!");
 
         testFileReader.markTestcaseAsValidated();
     }
