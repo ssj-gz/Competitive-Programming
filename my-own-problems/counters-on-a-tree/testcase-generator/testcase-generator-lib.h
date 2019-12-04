@@ -63,12 +63,24 @@ class TestFileInfo
             m_containingSubtask = &containingSubtask;
             return *this;
         }
+        TestFileInfo& withSeed(const int seed)
+        {
+            assert(m_seed == -1);
+            m_seed = seed;
+            return *this;
+        }
+        int seed() const
+        {
+            return m_seed;
+        }
 
         const SubtaskInfo* containingSubtask() const
         {
             return m_containingSubtask;
         }
 
+    private:
+        int m_seed = -1;
         const SubtaskInfo* m_containingSubtask = nullptr;
 };
 
@@ -82,19 +94,9 @@ class TestcaseInfo
             m_description = description;
             return *this;
         }
-        TestcaseInfo& withSeed(const int seed)
-        {
-            assert(m_seed == -1);
-            m_seed = seed;
-            return *this;
-        }
         std::string description() const
         {
             return m_description;
-        }
-        int seed() const
-        {
-            return m_seed;
         }
     private:
         std::string m_description;
@@ -107,8 +109,6 @@ class TestFile
     public:
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
         {
-            assert(newTestcaseInfo.seed() != -1);
-
             m_testcases.push_back(std::make_unique<Testcase<SubtaskInfo>>());
             return *m_testcases.back();
         };
@@ -124,6 +124,7 @@ class TestSuite
         TestFile<SubtaskInfo>& newTestFile(const TestFileInfo<SubtaskInfo>& newTestFileInfo)
         {
             assert(newTestFileInfo.containingSubtask() != nullptr);
+            assert(newTestFileInfo.seed() != -1);
 
             m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>());
             return *m_testFiles.back();

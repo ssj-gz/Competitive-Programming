@@ -47,10 +47,10 @@ int main()
 {
     TestSuite<SubtaskInfo> testsuite;
     {
-        auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1));
+        auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+                                                                          .withSeed(17666));
 
-        auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(17666)
-                                                            .withDescription("max nodes - randomly generated with 2 percent preference for leaves"));
+        auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves"));
 
         rnd.setSeed(17666);
         TreeGenerator<NodeData> treeGenerator;
