@@ -318,41 +318,46 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; cin >> x; return x; };
 
-    const auto numNodes = readInt();
-    vector<Node> nodes(numNodes);
-
-    for (auto i = 0; i < numNodes; i++)
+    const auto numTestcases = readInt();
+    for (int t = 0; t < numTestcases; t++)
     {
-        const auto numCoins = readInt();
+        const auto numNodes = readInt();
+        vector<Node> nodes(numNodes);
 
-        nodes[i].hasCoin = ((numCoins % 2) == 1);
-        nodes[i].nodeNumber = (i + 1);
-    }
+        for (auto i = 0; i < numNodes; i++)
+        {
+            const auto numCoins = readInt();
 
-    for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
-    {
-        const auto node1Index = readInt() - 1;
-        const auto node2Index = readInt() - 1;
+            nodes[i].hasCoin = ((numCoins % 2) == 1);
+            nodes[i].nodeNumber = (i + 1);
+        }
 
-        nodes[node1Index].children.push_back(&(nodes[node2Index]));
-        nodes[node2Index].children.push_back(&(nodes[node1Index]));
-    }
+        for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
+        {
+            const auto node1Index = readInt() - 1;
+            const auto node2Index = readInt() - 1;
 
-    auto rootNode = &(nodes.front());
-    fixParentChildAndCountDescendants(rootNode, nullptr);
-    doHeavyLightDecomposition(rootNode, false);
+            nodes[node1Index].children.push_back(&(nodes[node2Index]));
+            nodes[node2Index].children.push_back(&(nodes[node1Index]));
+        }
 
-    computeGrundyNumberIfRootForAllNodes(nodes);
+        auto rootNode = &(nodes.front());
+        fixParentChildAndCountDescendants(rootNode, nullptr);
+        heavyChains.clear(); // TODO - stop using globals!
+        doHeavyLightDecomposition(rootNode, false);
 
-    vector<int> nodesThatGiveBobWinWhenRoot;
-    for (auto& node : nodes)
-    {
-        if (node.grundyNumberIfRoot == 0)
-            nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
-    }
-    cout << nodesThatGiveBobWinWhenRoot.size() << endl;
-    for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
-    {
-        cout << bobWinNodeNum << endl;
+        computeGrundyNumberIfRootForAllNodes(nodes);
+
+        vector<int> nodesThatGiveBobWinWhenRoot;
+        for (auto& node : nodes)
+        {
+            if (node.grundyNumberIfRoot == 0)
+                nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
+        }
+        cout << nodesThatGiveBobWinWhenRoot.size() << endl;
+        for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
+        {
+            cout << bobWinNodeNum << endl;
+        }
     }
 }
