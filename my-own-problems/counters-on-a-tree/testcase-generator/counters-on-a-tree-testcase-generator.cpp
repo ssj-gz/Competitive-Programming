@@ -43,9 +43,15 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     std::cout << destTestcase.contents() << std::endl;
 }
 
+bool verifyTestFile(std::istream& testFileStream, SubtaskInfo& containingSubtask)
+{
+    return true;
+}
+
 int main()
 {
     TestSuite<SubtaskInfo> testsuite;
+    testsuite.setTestFileVerifier(&verifyTestFile);
     {
         auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
                                                                           .withSeed(17666));

@@ -145,7 +145,12 @@ class TestSuite
             m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>());
             return *m_testFiles.back();
         };
-        
+        void setTestFileVerifier(std::function<bool(std::istream&, SubtaskInfo&)> testFileVerifier)
+        {
+            assert(!m_testFileVerifier);
+            m_testFileVerifier = testFileVerifier;
+        }
     private:
         std::vector<std::unique_ptr<TestFile<SubtaskInfo>>> m_testFiles;
+        std::function<bool(std::istream&, SubtaskInfo&)> m_testFileVerifier;
 };
