@@ -237,6 +237,10 @@ class TestFileReader
         {
             return m_testcaseNum;
         }
+        bool hasUnreadData()
+        {
+            return m_testFileInStream.peek() != std::istringstream::traits_type::eof();
+        }
         void addError(const std::string& errorMessage)
         {
             m_errorMessages.push_back(errorMessage + " at line " + std::to_string(m_numLinesRead) + ", testcase: " + std::to_string(m_testcaseNum));
@@ -403,6 +407,10 @@ class TestSuite
                     if (testFileReader.numTestcasesValidated() != numTestCases)
                     {
                         testFileReader.addError("Only " + std::to_string(testFileReader.numTestcasesValidated()) + " of " + std::to_string(numTestCases) + " were marked as validated");
+                    }
+                    if (testFileReader.hasUnreadData())
+                    {
+                        testFileReader.addError("Found trailing data at end of file");
                     }
                     if (testFileReader.hasErrors())
                     {
