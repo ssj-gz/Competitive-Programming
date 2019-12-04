@@ -257,35 +257,8 @@ class TestFileReader
 
             for (int i = 0; i < numValuesToRead; i++)
             {
-                ValueType value;
-                lineStream >> value;
-                if (!lineStream)
-                {
-                    addError("Failed to read value with index " + std::to_string(i));
-                    return readValues;
-                }
+                ValueType value = readAndValidateValue<ValueType>(lineStream, i, i == numValuesToRead - 1);
                 readValues.push_back(value);
-
-                if (i != numValuesToRead - 1)
-                {
-                    assert((lineStream.flags() & std::ios::skipws) == 0);
-                    char followingChar = '\0';
-                    lineStream >> followingChar;
-                    if (followingChar != ' ')
-                    {
-                        addError(std::string("Expecting a space; got '") + followingChar + "' instead.");
-                        return readValues;
-                    }
-                }
-                else
-                {
-                    assert((lineStream.flags() & std::ios::skipws) == 0);
-                    if (lineStream.peek() != std::istringstream::traits_type::eof())
-                    {
-                        addError("Got trailing characters after reading last value.");
-                        return readValues;
-                    }
-                }
             }
 
 
@@ -312,44 +285,48 @@ class TestFileReader
         std::enable_if_t<sizeof...(Tail) != 0, void>  // Needed to disambiguate the two readLineHelper overloads.
         readLineHelper(ValuesType& readValues, std::istream& lineStream)
         {
-            Head nextValue;
-            lineStream >> nextValue;
-            std::get<ValueIndex>(readValues) = nextValue;
-            if (!lineStream)
-            {
-                addError("Failed to read value with index " + std::to_string(ValueIndex));
-                return;
-            }
-
-            assert((lineStream.flags() & std::ios::skipws) == 0);
-            char followingChar = '\0';
-            lineStream >> followingChar;
-            if (followingChar != ' ')
-            {
-                addError(std::string("Expecting a space; got '") + followingChar + "' instead.");
-                return;
-            }
+            std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, false, ValueIndex);
 
             readLineHelper<ValuesType, ValueIndex + 1, Tail...>(readValues, lineStream);
         }
         template<typename ValuesType, std::size_t ValueIndex, typename Head>
         void readLineHelper(ValuesType& readValues, std::istream& lineStream)
         {
-            Head nextValue;
-            lineStream >> nextValue;
-            std::get<ValueIndex>(readValues) = nextValue;
+            std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, true, ValueIndex);
+        }
+        template <typename ValueType>
+        ValueType readAndValidateValue(std::istream& lineStream, bool isLastOnLine, int index)
+        {
+            ValueType value;
+            lineStream >> value;
             if (!lineStream)
             {
-                addError("Failed to read value with index " + std::to_string(ValueIndex));
-                return;
+                addError("Failed to read value with index " + std::to_string(index));
+                return value;
             }
 
-            assert((lineStream.flags() & std::ios::skipws) == 0);
-            if (lineStream.peek() != std::istringstream::traits_type::eof())
+            if (!isLastOnLine)
             {
-                addError("Got trailing characters after reading last value.");
-                return;
+                assert((lineStream.flags() & std::ios::skipws) == 0);
+                char followingChar = '\0';
+                lineStream >> followingChar;
+                if (followingChar != ' ')
+                {
+                    addError(std::string("Expecting a space; got '") + followingChar + "' instead.");
+                    return value;
+                }
             }
+            else
+            {
+                assert((lineStream.flags() & std::ios::skipws) == 0);
+                if (lineStream.peek() != std::istringstream::traits_type::eof())
+                {
+                    addError("Got trailing characters after reading last value.");
+                    return value;
+                }
+            }
+
+            return value;
         }
 };
 
