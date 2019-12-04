@@ -43,7 +43,7 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     std::cout << destTestcase.contents() << std::endl;
 }
 
-bool verifyTestFile(std::istream& testFileStream, SubtaskInfo& containingSubtask)
+bool verifyTestFile(std::istream& testFileStream, const SubtaskInfo& containingSubtask)
 {
     return true;
 }
