@@ -206,7 +206,7 @@ class TestSuite
                 assert(testFileOutFileStream.flush());
                 testFileOutFileStream.close();
 
-
+                testFileNum++;
             }
         }
     private:
