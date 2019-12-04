@@ -256,15 +256,28 @@ class TestSuite
                 for (const auto testFile : testFilesForSubtask)
                 {
                     std::cout << "   " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
-                    std::cout << "      " << testFile->numTestCases() << " test cases; printing out ones with descriptions: " << std::endl;
-                    int testcaseNum = 1;
-                    for (const auto testcase : testFile->testcases())
-                    {
-                        if (!testcase->description().empty())
-                        {
-                            std::cout << "         Testcase # " << testcaseNum << ": " << testcase->description() << std::endl;
-                        }
 
+                    std::cout << "      " << testFile->numTestCases() << " test cases";
+
+                    const auto& testcases = testFile->testcases();
+                    if (std::count_if(testcases.begin(), testcases.end(), [](const auto& testcase) { return !testcase->description().empty();}) != 0)
+                    {
+                        std::cout << "; printing out ones with descriptions: " << std::endl;
+                        int testcaseNum = 1;
+
+                        for (const auto testcase : testcases)
+                        {
+                            if (!testcase->description().empty())
+                            {
+                                std::cout << "         Testcase # " << testcaseNum << ": " << testcase->description() << std::endl;
+                            }
+
+                            testcaseNum++;
+                        }
+                    }
+                    else
+                    {
+                        std::cout << std::endl;
                     }
                 }
 
