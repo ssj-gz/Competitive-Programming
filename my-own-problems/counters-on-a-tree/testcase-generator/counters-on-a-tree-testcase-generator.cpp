@@ -149,12 +149,16 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     using std::cout;
     using std::endl;
 
+    int64_t totalNumNodes = 0;
+
     const auto& [numTestCases] = testFileReader.readLine<int>();
     for (int t = 0; t < numTestCases; t++)
     {
         const auto& [numNodes] = testFileReader.readLine<int>();
         testFileReader.addErrorUnless(numNodes >= 1, "numNodes must be greater than or equal to 1, not " + std::to_string(numNodes));
         testFileReader.addErrorUnless(numNodes <= containingSubtask.maxNodesPerTestcase, "numNodes must be greater than or equal to maxNodesPerTestcase, not " + std::to_string(numNodes));
+
+        totalNumNodes += numNodes;
 
         std::vector<Node> nodes(numNodes);
         for (int i = 0; i < numNodes; i++)
@@ -216,6 +220,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
 
         testFileReader.markTestcaseAsValidated();
     }
+    testFileReader.addErrorUnless(totalNumNodes <= containingSubtask.maxNodesOverAllTestcases, "Total numNodes must be less than or equal to maxNodesOverAllTestcases, not " + std::to_string(totalNumNodes));
 
     return true;
 }
