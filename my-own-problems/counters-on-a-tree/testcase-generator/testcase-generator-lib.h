@@ -173,6 +173,13 @@ class TestSuite
         }
         void writeTestFiles()
         {
+            auto trimTrailingWhiteSpace = [](std::string& stringToTrim)
+            {
+                while (!stringToTrim.empty() && isspace(stringToTrim.back()))
+                {
+                    stringToTrim.pop_back();
+                }
+            };
             int testFileNum = 1;
             for (const auto& testFile : m_testFiles)
             {
@@ -185,25 +192,19 @@ class TestSuite
                 for (const auto& testcase : testcases)
                 {
                     auto testCaseContents = testcase->contents();
-                    while (!testCaseContents.empty() && isspace(testCaseContents.back()))
-                    {
-                        testCaseContents.pop_back();
-                    }
+                    trimTrailingWhiteSpace(testCaseContents);
                     assert(!testCaseContents.empty());
                     testFileOutStream << testCaseContents << std::endl;
                 }
 
-                auto testFileOut = testFileOutStream.str();
-
-                while (!testFileOut.empty() && isspace(testFileOut.back()))
-                {
-                    testFileOut.pop_back();
-                }
+                auto testFileContents = testFileOutStream.str();
+                trimTrailingWhiteSpace(testFileContents);
 
                 std::ofstream testFileOutFileStream("testfile-" + std::to_string(testFileNum) + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt");
                 assert(testFileOutFileStream.is_open());
-                testFileOutFileStream << testFileOut;
+                testFileOutFileStream << testFileContents;
                 assert(testFileOutFileStream.flush());
+                testFileOutFileStream.close();
 
 
             }
