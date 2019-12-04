@@ -115,7 +115,8 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
-                    .withSeed(88893));
+                                                                              .withSeed(88893)
+                                                                              .withDescription("lots of small testcases up to 1000 nodes each"));
 
             int numNodesInTestFile = 0;
             while (numNodesInTestFile < subtask1.maxNodesOverAllTestcases)

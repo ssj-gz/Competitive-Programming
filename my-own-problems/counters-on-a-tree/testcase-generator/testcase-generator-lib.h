@@ -69,6 +69,12 @@ class TestFileInfo
             m_seed = seed;
             return *this;
         }
+        TestFileInfo& withDescription(const std::string& description)
+        {
+            assert(m_description.empty());
+            m_description = description;
+            return *this;
+        }
         int seed() const
         {
             return m_seed;
@@ -79,9 +85,14 @@ class TestFileInfo
             return m_containingSubtask;
         }
 
+        std::string description() const
+        {
+            return m_description;
+        }
     private:
         int m_seed = -1;
         const SubtaskInfo* m_containingSubtask = nullptr;
+        std::string m_description;
 };
 
 template <typename SubtaskInfo>
@@ -121,6 +132,7 @@ class TestFile
         {
             assert(testFileInfo.containingSubtask() != nullptr);
             m_containingSubtask = testFileInfo.containingSubtask();
+            m_description = testFileInfo.description();
         }
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
         {
@@ -137,6 +149,11 @@ class TestFile
             return m_containingSubtask;
         }
 
+        std::string description() const
+        {
+            return m_description;
+        }
+
         std::vector<const Testcase<SubtaskInfo>*> testcases() const
         {
             std::vector<const Testcase<SubtaskInfo>*> testcases;
@@ -150,6 +167,7 @@ class TestFile
     private:
         std::vector<std::unique_ptr<Testcase<SubtaskInfo>>> m_testcases;
         const SubtaskInfo* m_containingSubtask = nullptr;
+        std::string m_description;
 };
 
 template <typename SubtaskInfo>
