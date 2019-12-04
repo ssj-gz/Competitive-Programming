@@ -314,8 +314,22 @@ class TestFileReader
 
             return readValues;
         }
+        void addError(const std::string& errorMessage)
+        {
+            m_errorMessages.push_back(errorMessage);
+        }
+        std::vector<std::string> errorMessages() const
+        {
+            return m_errorMessages;
+        }
+        bool hasErrors() const
+        {
+            return !m_errorMessages.empty();
+        }
+
     private:
         std::istream& m_testFileInStream;
+        std::vector<std::string> m_errorMessages;
 
         template<typename ValuesType, std::size_t ValueIndex, std::size_t NumValues, typename Head, typename... Tail >
         void readLineHelper(ValuesType& readValues)
