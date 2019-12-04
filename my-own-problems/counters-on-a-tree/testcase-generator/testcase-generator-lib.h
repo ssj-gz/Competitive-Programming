@@ -251,7 +251,7 @@ class TestFileReader
             std::string line;
             if (!std::getline(m_testFileInStream, line))
             {
-                addError("Could not read line.");
+                addError("Could not read line");
                 return "";
             }
 
@@ -259,13 +259,13 @@ class TestFileReader
 
             if (line.empty())
             {
-                addError("Got an empty line.");
+                addError("Got an empty line");
                 return "";
             }
 
             if (isspace(line.front()))
             {
-                addError("Got leading whitespace.");
+                addError("Got leading whitespace");
                 return "";
             }
 
@@ -309,7 +309,7 @@ class TestFileReader
                 lineStream >> followingChar;
                 if (followingChar != ' ')
                 {
-                    addError(std::string("Expecting a space after value with index " + std::to_string(index) + "; got '") + followingChar + "' instead.");
+                    addError(std::string("Expecting a space after value with index " + std::to_string(index) + "; got '") + followingChar + "' instead");
                     return value;
                 }
             }
@@ -318,7 +318,7 @@ class TestFileReader
                 assert((lineStream.flags() & std::ios::skipws) == 0);
                 if (lineStream.peek() != std::istringstream::traits_type::eof())
                 {
-                    addError("Got trailing characters after reading last value.");
+                    addError("Got trailing characters after reading last value");
                     return value;
                 }
             }
