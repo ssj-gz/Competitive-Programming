@@ -288,7 +288,13 @@ class TestFileReader
         template <typename ValueType>
         ValueType readAndValidateValue(std::istream& lineStream, bool isLastOnLine, int index)
         {
-            ValueType value;
+            ValueType value{};
+            if (std::isspace(lineStream.peek()))
+            {
+                addError("Got superfluous space before value with index " + std::to_string(index));
+                return value;
+            }
+                    
             lineStream >> value;
             if (!lineStream)
             {
