@@ -202,25 +202,7 @@ class TestFileReader
 
             std::tuple<Types...> readValues;
 
-            std::string line;
-            if (!std::getline(m_testFileInStream, line))
-            {
-                addError("Could not read line.");
-                return readValues;
-            }
-
-            if (line.empty())
-            {
-                addError("Got an empty line.");
-                return readValues;
-            }
-
-            if (isspace(line.front()))
-            {
-                addError("Got leading whitespace.");
-                return readValues;
-            }
-
+            const auto line = readLine();
             std::istringstream lineStream(line);
             std::noskipws(lineStream);
             readLineHelper<decltype(readValues), 0, Types...>(readValues, lineStream);
@@ -234,24 +216,7 @@ class TestFileReader
         {
             std::vector<ValueType> readValues;
 
-            std::string line;
-            if (!std::getline(m_testFileInStream, line))
-            {
-                addError("Could not read line.");
-                return readValues;
-            }
-
-            if (line.empty())
-            {
-                addError("Got an empty line.");
-                return readValues;
-            }
-
-            if (isspace(line.front()))
-            {
-                addError("Got leading whitespace.");
-                return readValues;
-            }
+            const auto line = readLine();
             std::istringstream lineStream(line);
             std::noskipws(lineStream);
 
@@ -260,7 +225,6 @@ class TestFileReader
                 ValueType value = readAndValidateValue<ValueType>(lineStream, i, i == numValuesToRead - 1);
                 readValues.push_back(value);
             }
-
 
             return readValues;
         }
@@ -280,6 +244,30 @@ class TestFileReader
     private:
         std::istringstream m_testFileInStream;
         std::vector<std::string> m_errorMessages;
+
+        std::string readLine()
+        {
+            std::string line;
+            if (!std::getline(m_testFileInStream, line))
+            {
+                addError("Could not read line.");
+                return "";
+            }
+
+            if (line.empty())
+            {
+                addError("Got an empty line.");
+                return "";
+            }
+
+            if (isspace(line.front()))
+            {
+                addError("Got leading whitespace.");
+                return "";
+            }
+
+            return line;
+        }
 
         template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
         std::enable_if_t<sizeof...(Tail) != 0, void>  // Needed to disambiguate the two readLineHelper overloads.
