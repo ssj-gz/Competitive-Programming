@@ -247,7 +247,8 @@ class TestFileReader
         std::vector<std::string> m_errorMessages;
 
         template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
-        std::enable_if_t<sizeof...(Tail) != 0, void> readLineHelper(ValuesType& readValues, std::istream& lineStream)
+        std::enable_if_t<sizeof...(Tail) != 0, void>  // Needed to disambiguate the two readLineHelper overloads.
+        readLineHelper(ValuesType& readValues, std::istream& lineStream)
         {
             Head nextValue;
             lineStream >> nextValue;
