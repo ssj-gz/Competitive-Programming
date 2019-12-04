@@ -229,6 +229,68 @@ class TestFileReader
 
             return readValues;
         }
+        template<typename ValueType>
+        std::vector<ValueType> readLineOfValues(int numValuesToRead)
+        {
+            std::vector<ValueType> readValues;
+
+            std::string line;
+            if (!std::getline(m_testFileInStream, line))
+            {
+                addError("Could not read line.");
+                return readValues;
+            }
+
+            if (line.empty())
+            {
+                addError("Got an empty line.");
+                return readValues;
+            }
+
+            if (isspace(line.front()))
+            {
+                addError("Got leading whitespace.");
+                return readValues;
+            }
+            std::istringstream lineStream(line);
+            std::noskipws(lineStream);
+
+            for (int i = 0; i < numValuesToRead; i++)
+            {
+                ValueType value;
+                lineStream >> value;
+                if (!lineStream)
+                {
+                    addError("Failed to read value with index " + std::to_string(i));
+                    return readValues;
+                }
+                readValues.push_back(value);
+
+                if (i != numValuesToRead - 1)
+                {
+                    assert((lineStream.flags() & std::ios::skipws) == 0);
+                    char followingChar = '\0';
+                    lineStream >> followingChar;
+                    if (followingChar != ' ')
+                    {
+                        addError(std::string("Expecting a space; got '") + followingChar + "' instead.");
+                        return readValues;
+                    }
+                }
+                else
+                {
+                    assert((lineStream.flags() & std::ios::skipws) == 0);
+                    if (lineStream.peek() != std::istringstream::traits_type::eof())
+                    {
+                        addError("Got trailing characters after reading last value.");
+                        return readValues;
+                    }
+                }
+            }
+
+
+            return readValues;
+        }
         void addError(const std::string& errorMessage)
         {
             m_errorMessages.push_back(errorMessage);
