@@ -93,12 +93,23 @@ int main(int argc, char* argv[])
         auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
                                                                           .withSeed(122));
 
-        auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 10944 Bob wins"));
+        {
+            auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 10944 Bob wins"));
 
-        TreeGenerator<NodeData> treeGenerator;
-        auto rootNode = treeGenerator.createNode();
-        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
-        addCounters(treeGenerator, 80.0);
-        scrambleAndwriteTestcase(treeGenerator, testcase);
+            TreeGenerator<NodeData> treeGenerator;
+            auto rootNode = treeGenerator.createNode();
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
+            addCounters(treeGenerator, 80.0);
+            scrambleAndwriteTestcase(treeGenerator, testcase);
+        }
+        {
+            auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 4295 Bob wins"));
+
+            TreeGenerator<NodeData> treeGenerator;
+            auto rootNode = treeGenerator.createNode();
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'992, 7.0);
+            addCounters(treeGenerator, 70.0);
+            scrambleAndwriteTestcase(treeGenerator, testcase);
+        }
     }
 }
