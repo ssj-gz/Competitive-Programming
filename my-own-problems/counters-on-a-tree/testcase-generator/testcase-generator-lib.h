@@ -186,6 +186,61 @@ class TestFile
         std::string m_description;
 };
 
+class TestFileReader
+{
+    public:
+        TestFileReader(const std::string& testFileContents)
+            : m_testFileInStream{testFileContents}
+        {
+        }
+        template<typename... Types>
+        std::tuple<Types...> readLine()
+        {
+            const auto originalFlags = m_testFileInStream.flags();
+            std::noskipws(m_testFileInStream);
+
+            std::tuple<Types...> readValues;
+
+            std::string line;
+            if (!std::getline(m_testFileInStream, line))
+            {
+                addError("Could not read line");
+                return readValues;
+            }
+
+            std::istringstream lineStream(line);
+            readLineHelper<decltype(readValues), 0, Types...>(readValues, lineStream);
+
+            m_testFileInStream.flags(originalFlags);
+
+            return readValues;
+        }
+        void addError(const std::string& errorMessage)
+        {
+            m_errorMessages.push_back(errorMessage);
+        }
+        std::vector<std::string> errorMessages() const
+        {
+            return m_errorMessages;
+        }
+        bool hasErrors() const
+        {
+            return !m_errorMessages.empty();
+        }
+
+    private:
+        std::istringstream m_testFileInStream;
+        std::vector<std::string> m_errorMessages;
+
+        template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
+        void readLineHelper(ValuesType& readValues, std::istream& lineStream)
+        {
+            Head nextValue;
+            lineStream >> nextValue;
+            std::get<ValueIndex>(readValues) = nextValue;
+        }
+};
+
 template <typename SubtaskInfo>
 class TestSuite
 {
@@ -200,7 +255,7 @@ class TestSuite
             m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>(newTestFileInfo));
             return *m_testFiles.back();
         };
-        void setTestFileVerifier(std::function<bool(std::istream&, const SubtaskInfo&)> testFileVerifier)
+        void setTestFileVerifier(std::function<bool(TestFileReader&, const SubtaskInfo&)> testFileVerifier)
         {
             assert(!m_testFileVerifier);
             m_testFileVerifier = testFileVerifier;
@@ -237,6 +292,12 @@ class TestSuite
 
                 auto testFileContents = testFileOutStream.str();
                 trimTrailingWhiteSpace(testFileContents);
+
+                if (m_testFileVerifier)
+                {
+                    TestFileReader testFileReader(testFileContents);
+                    m_testFileVerifier(testFileReader, *testFile->containingSubtask());
+                }
 
                 std::string paddedFileNumber = std::to_string(testFileNum);
                 while (paddedFileNumber.length() < 3)
@@ -290,60 +351,5 @@ class TestSuite
         }
     private:
         std::vector<std::unique_ptr<TestFile<SubtaskInfo>>> m_testFiles;
-        std::function<bool(std::istream&, const SubtaskInfo&)> m_testFileVerifier;
-};
-
-class TestFileReader
-{
-    public:
-        TestFileReader(std::istream& testFileInStream)
-            : m_testFileInStream{testFileInStream}
-        {
-        }
-        template<typename... Types>
-        std::tuple<Types...> readLine()
-        {
-            const auto originalFlags = m_testFileInStream.flags();
-            std::noskipws(m_testFileInStream);
-
-            std::tuple<Types...> readValues;
-
-            std::string line;
-            if (!std::getline(m_testFileInStream, line))
-            {
-                addError("Could not read line");
-                return readValues;
-            }
-
-            std::istringstream lineStream(line);
-            readLineHelper<decltype(readValues), 0, Types...>(readValues, lineStream);
-
-            m_testFileInStream.flags(originalFlags);
-
-            return readValues;
-        }
-        void addError(const std::string& errorMessage)
-        {
-            m_errorMessages.push_back(errorMessage);
-        }
-        std::vector<std::string> errorMessages() const
-        {
-            return m_errorMessages;
-        }
-        bool hasErrors() const
-        {
-            return !m_errorMessages.empty();
-        }
-
-    private:
-        std::istream& m_testFileInStream;
-        std::vector<std::string> m_errorMessages;
-
-        template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
-        void readLineHelper(ValuesType& readValues, std::istream& lineStream)
-        {
-            Head nextValue;
-            lineStream >> nextValue;
-            std::get<ValueIndex>(readValues) = nextValue;
-        }
+        std::function<bool(TestFileReader&, const SubtaskInfo&)> m_testFileVerifier;
 };
