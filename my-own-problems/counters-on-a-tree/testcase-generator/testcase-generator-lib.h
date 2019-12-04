@@ -245,6 +245,13 @@ class TestFileReader
         {
             m_errorMessages.push_back(errorMessage + " at line " + std::to_string(m_numLinesRead) + ", testcase: " + std::to_string(m_testcaseNum));
         }
+        void addErrorUnless(bool condition, const std::string& errorMessage)
+        {
+            if (!condition)
+            {
+                addError(errorMessage);
+            }
+        }
         std::vector<std::string> errorMessages() const
         {
             return m_errorMessages;

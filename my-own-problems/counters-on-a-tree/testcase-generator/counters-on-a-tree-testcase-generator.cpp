@@ -143,13 +143,15 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     using std::endl;
 
     const auto& [numTestCases] = testFileReader.readLine<int>();
-    cout << "numTestCases: " << numTestCases << endl;
     for (int t = 0; t < numTestCases; t++)
     {
         const auto& [numNodes] = testFileReader.readLine<int>();
-        cout << " numNodes: " << numNodes << endl;
         
         const auto numCountersForNode = testFileReader.readLineOfValues<int>(numNodes);
+        for (const auto numCounters : numCountersForNode)
+        {
+            testFileReader.addErrorUnless(0 <= numCounters && numCounters <= containingSubtask.maxNumCountersPerNode, "Invalid number of counters for a node");
+        }
 
         for (int i = 0; i < numNodes - 1; i++)
         {
