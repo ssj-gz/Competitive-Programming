@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <tuple>
+#include <type_traits>
 
 #include <testlib.h>
 
@@ -204,7 +205,19 @@ class TestFileReader
             std::string line;
             if (!std::getline(m_testFileInStream, line))
             {
-                addError("Could not read line");
+                addError("Could not read line.");
+                return readValues;
+            }
+
+            if (line.empty())
+            {
+                addError("Got an empty line.");
+                return readValues;
+            }
+
+            if (isspace(line.front()))
+            {
+                addError("Got leading whitespace.");
                 return readValues;
             }
 
@@ -234,23 +247,23 @@ class TestFileReader
         std::vector<std::string> m_errorMessages;
 
         template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
-        void readLineHelper(ValuesType& readValues, std::istream& lineStream)
+        std::enable_if_t<sizeof...(Tail) != 0, void> readLineHelper(ValuesType& readValues, std::istream& lineStream)
         {
             Head nextValue;
             lineStream >> nextValue;
             std::get<ValueIndex>(readValues) = nextValue;
             if (!lineStream)
             {
-                addError("Failed to read value with index " << ValueIndex);
+                addError("Failed to read value with index " + std::to_string(ValueIndex));
                 return;
             }
 
-            assert((lineStream & std::skipws) == 0);
+            assert((lineStream.flags() & std::ios::skipws) == 0);
             char followingChar = '\0';
-            cin >> followingChar;
-            if (!followingChar == ' ')
+            lineStream >> followingChar;
+            if (followingChar != ' ')
             {
-                addError("Expecting a space; got '" + followingChar + "' instead.");
+                addError(std::string("Expecting a space; got '") + followingChar + "' instead.");
                 return;
             }
 
@@ -264,11 +277,11 @@ class TestFileReader
             std::get<ValueIndex>(readValues) = nextValue;
             if (!lineStream)
             {
-                addError("Failed to read value with index " << ValueIndex);
+                addError("Failed to read value with index " + std::to_string(ValueIndex));
                 return;
             }
 
-            assert((lineStream & std::skipws) == 0);
+            assert((lineStream.flags() & std::ios::skipws) == 0);
             if (lineStream.peek() != std::istringstream::traits_type::eof())
             {
                 addError("Got trailing characters after reading last value.");
