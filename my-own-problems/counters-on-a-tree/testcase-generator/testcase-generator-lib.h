@@ -237,7 +237,11 @@ class TestSuite
                 auto testFileContents = testFileOutStream.str();
                 trimTrailingWhiteSpace(testFileContents);
 
-                const std::string filename = "testfile-" + std::to_string(testFileNum) + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt";
+                std::string paddedFileNumber = std::to_string(testFileNum);
+                while (paddedFileNumber.length() < 3)
+                    paddedFileNumber = '0' + paddedFileNumber;
+
+                const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt";
                 fileNameForTestFile[testFile.get()] = filename;
 
                 std::ofstream testFileOutFileStream(filename);
