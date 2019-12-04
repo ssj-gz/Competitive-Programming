@@ -82,6 +82,9 @@ void addCounters(TreeGenerator<NodeData>& treeGenerator, double percentageWithCo
 
 bool verifyTestFile(std::istream& testFileStream, const SubtaskInfo& containingSubtask)
 {
+    TestFileReader testFileReader(testFileStream);
+    const auto& [numTestCases] = testFileReader.readLine<int>();
+
     return true;
 }
 

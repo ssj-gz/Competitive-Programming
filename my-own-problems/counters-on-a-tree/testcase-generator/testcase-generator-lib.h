@@ -3,6 +3,7 @@
 #include <cassert>
 #include <sstream>
 #include <fstream>
+#include <tuple>
 
 #include <testlib.h>
 
@@ -290,4 +291,37 @@ class TestSuite
     private:
         std::vector<std::unique_ptr<TestFile<SubtaskInfo>>> m_testFiles;
         std::function<bool(std::istream&, const SubtaskInfo&)> m_testFileVerifier;
+};
+
+class TestFileReader
+{
+    public:
+        TestFileReader(std::istream& testFileInStream)
+            : m_testFileInStream{testFileInStream}
+        {
+        }
+        template<typename... Types>
+        std::tuple<Types...> readLine()
+        {
+            const auto originalFlags = m_testFileInStream.flags();
+            std::noskipws(m_testFileInStream);
+
+            std::tuple<Types...> readValues;
+
+            readLineHelper<decltype(readValues), 0, sizeof(Types)..., Types...>(readValues);
+
+            m_testFileInStream.flags(originalFlags);
+
+            return readValues;
+        }
+    private:
+        std::istream& m_testFileInStream;
+
+        template<typename ValuesType, std::size_t ValueIndex, std::size_t NumValues, typename Head, typename... Tail >
+        void readLineHelper(ValuesType& readValues)
+        {
+            Head nextValue;
+            m_testFileInStream >> nextValue;
+            std::get<ValueIndex>(readValues) = nextValue;
+        }
 };
