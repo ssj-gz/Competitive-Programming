@@ -105,6 +105,27 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
 
 int main(int argc, char* argv[])
 {
+    if (true)
+    {
+        std::noskipws(std::cin);
+        char blah;
+        std::string blee;
+        while (std::cin >> blah)
+        {
+            blee.push_back(blah);
+        }
+        std::cout << "blee:" << std::endl;
+        std::cout << blee << std::endl;
+        TestFileReader testFileReader(blee);
+        verifyTestFile(testFileReader, subtask1);
+        std::cout << "Errors: " << std::endl;
+        for (const auto& errorMessage : testFileReader.errorMessages())
+        {
+            std::cout << errorMessage << std::endl;
+        }
+
+        return 0;
+    }
     TestSuite<SubtaskInfo> testsuite;
     testsuite.setTestFileVerifier(&verifyTestFile);
     {
