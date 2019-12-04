@@ -222,7 +222,7 @@ class TestFileReader
 
             for (int i = 0; i < numValuesToRead; i++)
             {
-                ValueType value = readAndValidateValue<ValueType>(lineStream, i, i == numValuesToRead - 1);
+                ValueType value = readAndValidateValue<ValueType>(lineStream, i == numValuesToRead - 1, i);
                 readValues.push_back(value);
             }
 
@@ -230,7 +230,7 @@ class TestFileReader
         }
         void addError(const std::string& errorMessage)
         {
-            m_errorMessages.push_back(errorMessage);
+            m_errorMessages.push_back(errorMessage + " at line " + std::to_string(m_numLinesRead));
         }
         std::vector<std::string> errorMessages() const
         {
@@ -244,6 +244,7 @@ class TestFileReader
     private:
         std::istringstream m_testFileInStream;
         std::vector<std::string> m_errorMessages;
+        int m_numLinesRead = 0;
 
         std::string readLine()
         {
@@ -253,6 +254,8 @@ class TestFileReader
                 addError("Could not read line.");
                 return "";
             }
+
+            m_numLinesRead++;
 
             if (line.empty())
             {
@@ -300,7 +303,7 @@ class TestFileReader
                 lineStream >> followingChar;
                 if (followingChar != ' ')
                 {
-                    addError(std::string("Expecting a space; got '") + followingChar + "' instead.");
+                    addError(std::string("Expecting a space after value with index " + std::to_string(index) + "; got '") + followingChar + "' instead.");
                     return value;
                 }
             }
