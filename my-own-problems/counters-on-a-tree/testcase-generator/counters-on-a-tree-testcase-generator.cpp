@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
                                                                           .withSeed(122));
 
         {
-            auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 10944 Bob wins"));
+            auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 10942 Bob wins"));
 
             TreeGenerator<NodeData> treeGenerator;
             auto rootNode = treeGenerator.createNode();
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
             scrambleAndwriteTestcase(treeGenerator, testcase);
         }
         {
-            auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 4295 Bob wins"));
+            auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 2923 Bob wins"));
 
             TreeGenerator<NodeData> treeGenerator;
             auto rootNode = treeGenerator.createNode();
