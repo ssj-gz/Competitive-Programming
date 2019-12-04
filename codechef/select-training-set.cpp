@@ -10,6 +10,7 @@
 #endif
 #include <iostream>
 #include <map>
+#include <algorithm>
 
 #include <cassert>
 
@@ -45,7 +46,7 @@ int main(int argc, char* argv[])
         {
             const int N = rand() % 100 + 1;
             const int maxLetter = 1 + rand() % 26;
-            const int maxWordLength = rand() % 10 + 1;
+            const int maxWordLength = rand() % 5 + 1;
             struct WordClassification
             {
                 string word;
