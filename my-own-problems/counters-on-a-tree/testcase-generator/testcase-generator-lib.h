@@ -228,9 +228,18 @@ class TestFileReader
 
             return readValues;
         }
+        void markTestcaseAsValidated()
+        {
+            if (!hasErrors())
+                m_testcaseNum++;
+        }
+        int numTestcasesValidated() const
+        {
+            return m_testcaseNum;
+        }
         void addError(const std::string& errorMessage)
         {
-            m_errorMessages.push_back(errorMessage + " at line " + std::to_string(m_numLinesRead));
+            m_errorMessages.push_back(errorMessage + " at line " + std::to_string(m_numLinesRead) + ", testcase: " + std::to_string(m_testcaseNum));
         }
         std::vector<std::string> errorMessages() const
         {
@@ -245,6 +254,7 @@ class TestFileReader
         std::istringstream m_testFileInStream;
         std::vector<std::string> m_errorMessages;
         int m_numLinesRead = 0;
+        int m_testcaseNum = 0;
 
         std::string readLine()
         {
@@ -390,6 +400,10 @@ class TestSuite
                 {
                     TestFileReader testFileReader(testFileContents);
                     m_testFileVerifier(testFileReader, *testFile->containingSubtask());
+                    if (testFileReader.numTestcasesValidated() != numTestCases)
+                    {
+                        testFileReader.addError("Only " + std::to_string(testFileReader.numTestcasesValidated()) + " of " + std::to_string(numTestCases) + " were marked as validated");
+                    }
                     if (testFileReader.hasErrors())
                     {
                         std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") and filename " << filename << "  has validation errors:" << std::endl;

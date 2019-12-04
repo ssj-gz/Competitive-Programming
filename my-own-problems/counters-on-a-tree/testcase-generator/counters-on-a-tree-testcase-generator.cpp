@@ -98,6 +98,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         {
             const auto& [edgeNodeAId, edgeNodeBId] = testFileReader.readLine<int, int>();
         }
+        testFileReader.markTestcaseAsValidated();
     }
 
     return true;
