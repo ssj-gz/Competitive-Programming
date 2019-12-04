@@ -7,9 +7,42 @@
 #include <testlib.h>
 
 template <typename SubtaskInfo>
+class TestcaseInfo
+{
+    public:
+        TestcaseInfo& withDescription(const std::string& description)
+        {
+            assert(m_description.empty());
+            m_description = description;
+            return *this;
+        }
+        std::string description() const
+        {
+            return m_description;
+        }
+        TestcaseInfo& withSeed(const int seed)
+        {
+            assert(m_seed == -1);
+            m_seed = seed;
+            return *this;
+        }
+        int seed() const
+        {
+            return m_seed;
+        }
+    private:
+        std::string m_description;
+        int m_seed = -1;
+};
+
+template <typename SubtaskInfo>
 class Testcase
 {
     public:
+        Testcase(const TestcaseInfo<SubtaskInfo>& testcaseInfo)
+        {
+            m_description = testcaseInfo.description();
+        }
         template <typename... Types>
         void writeLine(Types... toPrint)
         {
@@ -33,10 +66,16 @@ class Testcase
         {
             return m_contents.str();
         }
+
+        std::string description() const
+        {
+            return m_description;
+        }
     private:
         // Write in binary mode - don't want '\r's added to newlines if we
         // generate on e.g. windows.
         std::ostringstream m_contents{std::ios_base::out | std::ios_base::binary};
+        std::string m_description;
 
         template <typename Head, typename... Tail>
         void writeLineHelper(const Head& head, Tail... tail)
@@ -96,35 +135,6 @@ class TestFileInfo
 };
 
 template <typename SubtaskInfo>
-class TestcaseInfo
-{
-    public:
-        TestcaseInfo& withDescription(const std::string& description)
-        {
-            assert(m_description.empty());
-            m_description = description;
-            return *this;
-        }
-        std::string description() const
-        {
-            return m_description;
-        }
-        TestcaseInfo& withSeed(const int seed)
-        {
-            assert(m_seed == -1);
-            m_seed = seed;
-            return *this;
-        }
-        int seed() const
-        {
-            return m_seed;
-        }
-    private:
-        std::string m_description;
-        int m_seed = -1;
-};
-
-template <typename SubtaskInfo>
 class TestFile
 {
     public:
@@ -136,7 +146,7 @@ class TestFile
         }
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
         {
-            m_testcases.push_back(std::make_unique<Testcase<SubtaskInfo>>());
+            m_testcases.push_back(std::make_unique<Testcase<SubtaskInfo>>(newTestcaseInfo));
             if (newTestcaseInfo.seed() != -1)
             {
                 rnd.setSeed(newTestcaseInfo.seed());
@@ -152,6 +162,11 @@ class TestFile
         std::string description() const
         {
             return m_description;
+        }
+
+        int numTestCases() const
+        {
+            return m_testcases.size();
         }
 
         std::vector<const Testcase<SubtaskInfo>*> testcases() const
@@ -241,6 +256,16 @@ class TestSuite
                 for (const auto testFile : testFilesForSubtask)
                 {
                     std::cout << "   " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
+                    std::cout << "      " << testFile->numTestCases() << " test cases; printing out ones with descriptions: " << std::endl;
+                    int testcaseNum = 1;
+                    for (const auto testcase : testFile->testcases())
+                    {
+                        if (!testcase->description().empty())
+                        {
+                            std::cout << "         Testcase # " << testcaseNum << ": " << testcase->description() << std::endl;
+                        }
+
+                    }
                 }
 
             }
