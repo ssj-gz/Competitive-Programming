@@ -370,13 +370,20 @@ class TestSuite
                 auto testFileContents = testFileOutStream.str();
                 trimTrailingWhiteSpace(testFileContents);
 
+                std::string paddedFileNumber = std::to_string(testFileNum);
+                while (paddedFileNumber.length() < 3)
+                    paddedFileNumber = '0' + paddedFileNumber;
+
+                const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt";
+                fileNameForTestFile[testFile.get()] = filename;
+
                 if (m_testFileVerifier)
                 {
                     TestFileReader testFileReader(testFileContents);
                     m_testFileVerifier(testFileReader, *testFile->containingSubtask());
                     if (testFileReader.hasErrors())
                     {
-                        std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") has validation errors:" << std::endl;
+                        std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") and filename " << filename << "  has validation errors:" << std::endl;
                         for (const auto& errorMessage : testFileReader.errorMessages())
                         {
                             std::cerr << "     " << errorMessage << std::endl;
@@ -384,12 +391,6 @@ class TestSuite
                     }
                 }
 
-                std::string paddedFileNumber = std::to_string(testFileNum);
-                while (paddedFileNumber.length() < 3)
-                    paddedFileNumber = '0' + paddedFileNumber;
-
-                const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt";
-                fileNameForTestFile[testFile.get()] = filename;
 
                 std::ofstream testFileOutFileStream(filename);
                 assert(testFileOutFileStream.is_open());
