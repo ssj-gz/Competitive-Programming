@@ -374,6 +374,14 @@ class TestSuite
                 {
                     TestFileReader testFileReader(testFileContents);
                     m_testFileVerifier(testFileReader, *testFile->containingSubtask());
+                    if (testFileReader.hasErrors())
+                    {
+                        std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") has validation errors:" << std::endl;
+                        for (const auto& errorMessage : testFileReader.errorMessages())
+                        {
+                            std::cerr << "     " << errorMessage << std::endl;
+                        }
+                    }
                 }
 
                 std::string paddedFileNumber = std::to_string(testFileNum);
