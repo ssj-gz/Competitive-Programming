@@ -79,11 +79,11 @@ class TreeGenerator
         }
         std::vector<TestNode<NodeData>*> createNodesWithRandomParentPreferringLeafNodes(int numNewNodes, double leafNodePreferencePercent)
         {
-            std::set<TestNode<NodeData>*> leaves;
+            std::vector<TestNode<NodeData>*> leaves; // Use std::vector instead of std::set as ordering of pointers in std::set may not be stable across runs.
             for (auto& node : m_nodes)
             {
                 if (node->neighbours.size() <= 1)
-                    leaves.insert(node.get());
+                    leaves.push_back(node.get());
             }
 
             return createNodesWithRandomParentPreferringFromSet(leaves, numNewNodes, leafNodePreferencePercent, [](TestNode<NodeData>* newNode, TestNode<NodeData>* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
@@ -94,7 +94,7 @@ class TreeGenerator
                     });
         }
 
-        std::vector<TestNode<NodeData>*> createNodesWithRandomParentPreferringFromSet(const std::set<TestNode<NodeData>*>& preferredSet, int numNewNodes, double preferencePercent, std::function<void(TestNode<NodeData>* newNode, TestNode<NodeData>* parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)> onCreateNode)
+        std::vector<TestNode<NodeData>*> createNodesWithRandomParentPreferringFromSet(const std::vector<TestNode<NodeData>*>& preferredSet, int numNewNodes, double preferencePercent, std::function<void(TestNode<NodeData>* newNode, TestNode<NodeData>* parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)> onCreateNode)
         {
             std::vector<TestNode<NodeData>*> newNodes;
             RandomChooseableSet<TestNode<NodeData>*> preferredSetCopy(preferredSet.begin(), preferredSet.end());
