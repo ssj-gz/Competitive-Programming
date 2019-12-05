@@ -483,6 +483,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         testFileReader.markTestcaseAsValidated();
     }
     testFileReader.addErrorUnless(totalNumNodes <= containingSubtask.maxNodesOverAllTestcases, "Total numNodes must be less than or equal to maxNodesOverAllTestcases, not " + std::to_string(totalNumNodes));
+    testFileReader.markTestFileAsValidated();
 
     return true;
 }

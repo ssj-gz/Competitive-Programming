@@ -237,6 +237,7 @@ class TestFileReader
         }
         void markTestcaseAsValidated()
         {
+            assert(!m_isTestFileMarkedAsValidated);
             if (!hasErrors())
                 m_testcaseNum++;
         }
@@ -244,6 +245,17 @@ class TestFileReader
         {
             return m_testcaseNum;
         }
+        void markTestFileAsValidated()
+        {
+            assert(!m_isTestFileMarkedAsValidated);
+            if (!hasErrors())
+                m_isTestFileMarkedAsValidated = true;
+        }
+        bool isTestFileMarkedAsValidated() const
+        {
+            return m_isTestFileMarkedAsValidated;
+        }
+
         bool hasUnreadData()
         {
             return m_testFileInStream.peek() != std::istringstream::traits_type::eof();
@@ -273,6 +285,7 @@ class TestFileReader
         std::vector<std::string> m_errorMessages;
         int m_numLinesRead = 0;
         int m_testcaseNum = 0;
+        bool m_isTestFileMarkedAsValidated = false;
 
         std::string readLine()
         {
@@ -418,10 +431,16 @@ class TestSuite
                 {
                     TestFileReader testFileReader(testFileContents);
                     m_testFileVerifier(testFileReader, *testFile->containingSubtask());
+                    // Check that the Verifier has been paying at least *some* attention, and not just rubber-stamping stuff!
                     if (testFileReader.numTestcasesValidated() != numTestCases)
                     {
                         testFileReader.addError("Only " + std::to_string(testFileReader.numTestcasesValidated()) + " of " + std::to_string(numTestCases) + " were marked as validated");
                     }
+                    if (!testFileReader.isTestFileMarkedAsValidated())
+                    {
+                        testFileReader.addError("The testfile was not marked as validated!");
+                    }
+
                     if (testFileReader.hasUnreadData())
                     {
                         testFileReader.addError("Found trailing data at end of file");
