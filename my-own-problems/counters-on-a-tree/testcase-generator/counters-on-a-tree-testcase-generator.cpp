@@ -18,8 +18,8 @@ struct SubtaskInfo
     int maxNumTestcases = -1;
 };
 
-SubtaskInfo subtask1 = { 1, maxNodes, 2 * maxNodes, maxCounters, maxNumTestcases };
 SubtaskInfo subtask2 = { 2, 1000, 2 * maxNodes, maxCounters, 10 };
+SubtaskInfo subtask3 = { 3, maxNodes, 2 * maxNodes, maxCounters, maxNumTestcases };
 
 struct NodeData
 {
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     testsuite.setTestFileVerifier(&verifyTestFile);
     {
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                     .withSeed(122));
 
             {
@@ -112,14 +112,14 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                                                                               .withSeed(88893)
                                                                               .withDescription("lots of small testcases up to 1000 nodes each"));
 
             int numNodesInTestFile = 0;
-            while (numNodesInTestFile < subtask1.maxNodesOverAllTestcases)
+            while (numNodesInTestFile < subtask3.maxNodesOverAllTestcases)
             {
-                const int numNodes = rnd.next(std::min(subtask1.maxNodesOverAllTestcases - numNodesInTestFile, 1000)) + 1;
+                const int numNodes = rnd.next(std::min(subtask3.maxNodesOverAllTestcases - numNodesInTestFile, 1000)) + 1;
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
 
 
