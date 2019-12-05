@@ -22,19 +22,19 @@ class TestcaseInfo
         {
             return m_description;
         }
-        TestcaseInfo& withSeed(const int seed)
+        TestcaseInfo& withSeed(const int64_t seed)
         {
             assert(m_seed == -1);
             m_seed = seed;
             return *this;
         }
-        int seed() const
+        int64_t seed() const
         {
             return m_seed;
         }
     private:
         std::string m_description;
-        int m_seed = -1;
+        int64_t m_seed = -1;
 };
 
 template <typename SubtaskInfo>
@@ -104,7 +104,7 @@ class TestFileInfo
             m_containingSubtask = &containingSubtask;
             return *this;
         }
-        TestFileInfo& withSeed(const int seed)
+        TestFileInfo& withSeed(const int64_t seed)
         {
             assert(m_seed == -1);
             m_seed = seed;
@@ -116,7 +116,7 @@ class TestFileInfo
             m_description = description;
             return *this;
         }
-        int seed() const
+        int64_t seed() const
         {
             return m_seed;
         }
@@ -131,7 +131,7 @@ class TestFileInfo
             return m_description;
         }
     private:
-        int m_seed = -1;
+        int64_t m_seed = -1;
         const SubtaskInfo* m_containingSubtask = nullptr;
         std::string m_description;
 };
