@@ -260,10 +260,6 @@ class TestFileReader
             return m_isTestFileMarkedAsValidated;
         }
 
-        bool hasUnreadData()
-        {
-            return m_testFileInStream.peek() != std::istringstream::traits_type::eof();
-        }
         void addError(const std::string& errorMessage)
         {
             m_errorMessages.push_back(errorMessage + " at line " + std::to_string(m_numLinesRead) + ", testcase: " + std::to_string(m_testcaseNum));
@@ -369,6 +365,11 @@ class TestFileReader
             }
 
             return value;
+        }
+
+        bool hasUnreadData()
+        {
+            return m_testFileInStream.peek() != std::istringstream::traits_type::eof();
         }
 };
 
