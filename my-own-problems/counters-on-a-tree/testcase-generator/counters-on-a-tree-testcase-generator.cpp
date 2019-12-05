@@ -113,6 +113,34 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                                                                              .withDescription("long-ish and jagged")
+                                                                              .withSeed(479435));
+
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter"));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                treeGenerator.addNodeChain(rootNode, 30'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(50'000, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(19902, 99.0);
+                addCounters(treeGenerator, 85.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter")
+                                                                                 .withSeed(2828));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                treeGenerator.addNodeChain(rootNode, 30'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(40'000, 2.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(28'000, 90);
+                addCounters(treeGenerator, 74.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }{
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                                                                               .withSeed(88893)
                                                                               .withDescription("lots of small testcases up to 1000 nodes each"));
 
