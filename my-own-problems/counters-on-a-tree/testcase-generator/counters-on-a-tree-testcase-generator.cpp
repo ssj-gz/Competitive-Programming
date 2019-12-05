@@ -300,6 +300,35 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                                                                              .withDescription("fat with long")
+                                                                              .withSeed(123));
+
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 20744 Bob wins")
+                                                                                 .withSeed(985005231));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto fatNode1 = treeGenerator.createNode();
+                auto fatNode2 = treeGenerator.addNodeChain(fatNode1, 31'657).back();
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 60'000, 99, 
+                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                            addNewNodeToSet = false;
+                            removeParentFromSet = false;
+                        });
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 5.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 80.0);
+
+                addCounters(treeGenerator, 72.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+                for (const auto node : treeGenerator.nodes())
+                {
+                    std::cout << "Node with degree: " << node->neighbours.size() << std::endl;
+                }
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                                                                               .withSeed(88893)
                                                                               .withDescription("lots of small testcases up to 1000 nodes each"));
 
