@@ -347,10 +347,6 @@ int main(int argc, char* argv[])
 
                 addCounters(treeGenerator, 75.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
-                for (const auto node : treeGenerator.nodes())
-                {
-                    std::cout << "Node with degree: " << node->neighbours.size() << std::endl;
-                }
             }
         }
         {
