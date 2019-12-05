@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
                 treeGenerator.addNodeChain(rootNode, 73'000);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(14'000, 2.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(11'000, 2.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15883, 89);
                 addCounters(treeGenerator, 83.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
