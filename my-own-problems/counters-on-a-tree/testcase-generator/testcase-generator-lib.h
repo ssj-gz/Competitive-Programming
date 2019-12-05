@@ -194,6 +194,22 @@ class TestFile
         int m_currentSeedForTestFile = -1;
 };
 
+/**
+ * Very, very strict testfile line reader/ parser.  The two readLine() overloads
+ * read the next line of the testfile and parse the requested types from it.
+ * While doing this, it tests that, amongst other things:
+ *  
+ *   i) No lines are empty.
+ *   ii) No lines have leading whitespace.
+ *   iii) There is precisely one space between each value in the line.
+ *   iv) All requested values can be parsed successfully.
+ *   v) There is no trailing data in the line.
+ *   vi) There is no trailing data in the testfile (checked upon the (mandatory) call
+ *       to markTestcaseAsValidated()).
+ *
+ * Writing your testcases using Testcase::writeLine/ writeObjectsAsLine should automatically
+ * ensure this, but I'm very much a "belts and braces" kind of guy :)
+ */
 class TestFileReader
 {
     public:
