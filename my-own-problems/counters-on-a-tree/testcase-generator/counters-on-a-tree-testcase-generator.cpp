@@ -89,6 +89,8 @@ int main(int argc, char* argv[])
 {
     TestSuite<SubtaskInfo> testsuite;
     testsuite.setTestFileVerifier(&verifyTestFile);
+    
+    // SUBTASK 3
     {
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
