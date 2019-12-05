@@ -376,6 +376,28 @@ int main(int argc, char* argv[])
                 numNodesInTestFile += numNodes;
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                                                                              .withSeed(113388)
+                                                                              .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
+
+            int numNodesInTestFile = 0;
+            for (int t = 0; t < subtask3.maxNumTestcases; t++)
+            {
+                const int numNodes = (t  == subtask3.maxNumTestcases - 1 ? subtask3.maxNodesOverAllTestcases - numNodesInTestFile : rnd.next(200) + 1);
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                const int numNodesPhase1 = rnd.next(numNodes);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
+                addCounters(treeGenerator, rnd.next(100.0));
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+
+                numNodesInTestFile += numNodes;
+            }
+        }
     }
     testsuite.writeTestFiles();
 }
