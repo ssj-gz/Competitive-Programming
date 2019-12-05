@@ -144,6 +144,7 @@ class TestFile
         {
             assert(testFileInfo.containingSubtask() != nullptr);
             m_containingSubtask = testFileInfo.containingSubtask();
+            m_currentSeedForTestFile = testFileInfo.seed();
             m_description = testFileInfo.description();
         }
         Testcase<SubtaskInfo>& newTestcase(const TestcaseInfo<SubtaskInfo>& newTestcaseInfo)
@@ -152,6 +153,11 @@ class TestFile
             if (newTestcaseInfo.seed() != -1)
             {
                 rnd.setSeed(newTestcaseInfo.seed());
+                m_currentSeedForTestFile = newTestcaseInfo.seed();
+            }
+            else
+            {
+                assert(m_currentSeedForTestFile != -1 && "Creating a new Testcase with no seed when no seed has yet been set for this TestFile is forbidden");
             }
             return *m_testcases.back();
         };
@@ -185,6 +191,7 @@ class TestFile
         std::vector<std::unique_ptr<Testcase<SubtaskInfo>>> m_testcases;
         const SubtaskInfo* m_containingSubtask = nullptr;
         std::string m_description;
+        int m_currentSeedForTestFile = -1;
 };
 
 class TestFileReader
@@ -355,9 +362,9 @@ class TestSuite
         TestFile<SubtaskInfo>& newTestFile(const TestFileInfo<SubtaskInfo>& newTestFileInfo)
         {
             assert(newTestFileInfo.containingSubtask() != nullptr);
-            assert(newTestFileInfo.seed() != -1);
 
-            rnd.setSeed(newTestFileInfo.seed());
+            if (newTestFileInfo.seed() != -1)
+                rnd.setSeed(newTestFileInfo.seed());
 
             m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>(newTestFileInfo));
             return *m_testFiles.back();
