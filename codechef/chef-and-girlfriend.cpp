@@ -51,13 +51,10 @@ pair<int, int> calcNumSecondsUntilMeetingForPlans(const int girlfriendBustopTime
             // position the girlfriend is at when Chef finally reaches home.
             const int chefDistFromHomeWhenGirlfriendArrivesAtBusStop = secondsToReachHome - secondsUntilGirlfriendArrives;
             const int girlfriendDistFromHomeWhenChefArrivesHome = secondsToReachHome - chefDistFromHomeWhenGirlfriendArrivesAtBusStop;
-            //cout << "girlfriendDistFromHomeWhenChefArrivesHome: " << girlfriendDistFromHomeWhenChefArrivesHome << " chefDistFromHomeWhenGirlfriendArrivesAtBusStop: " << chefDistFromHomeWhenGirlfriendArrivesAtBusStop << endl;
-            //assert(girlfriendDistFromHomeWhenChefArrivesHome >= chefDistFromHomeWhenGirlfriendArrivesAtBusStop);
             return {plan1NumSecondsUntilMeeting, secondsToReachHome + girlfriendDistFromHomeWhenChefArrivesHome / 2};
         }
     }
 }
-
 
 int main(int argc, char* argv[])
 {
@@ -74,6 +71,32 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int dist = 1 + (rand() % 180);
+            auto padToLength2 = [](const int num)
+            {
+                string numAsString = to_string(num);
+                if (numAsString.size() < 2)
+                    numAsString = '0' + numAsString;
+
+                return numAsString;
+            };
+
+            string time1;
+            string time2;
+            while (true)
+            {
+                time1 = padToLength2(rand() % 24) + ":" + padToLength2(rand() % 60);
+                time2 = padToLength2(rand() % 24) + ":" + padToLength2(rand() % 60);
+
+                if (time2 > time1)
+                    swap(time1, time2);
+                if (time1 != time2)
+                    break;
+            }
+
+            cout << time1 << endl;
+            cout << time2 << endl;
+            cout << dist << endl;
         }
 
         return 0;
