@@ -128,8 +128,8 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter")
-                                                                                 .withSeed(2828));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter, 13 Bob wins")
+                                                                                 .withSeed(93786));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
