@@ -321,6 +321,32 @@ int main(int argc, char* argv[])
 
                 addCounters(treeGenerator, 72.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; three nodes with high degree, two separated by long distance; 75% with counters; 592 Bob wins")
+                                                                                 .withSeed(2408558017));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto fatNode1 = treeGenerator.createNode();
+                auto fatNode2 = treeGenerator.addNodeChain(fatNode1, 20'000).back();
+                auto fatNode3 = treeGenerator.addNodeChain(fatNode1, 1323).back();
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 30'000, 99, 
+                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                            addNewNodeToSet = false;
+                            removeParentFromSet = false;
+                        });
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2, fatNode3}, 30'000, 99, 
+                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                            addNewNodeToSet = false;
+                            removeParentFromSet = false;
+                        });
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 3.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 90.0);
+
+                addCounters(treeGenerator, 75.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
                 for (const auto node : treeGenerator.nodes())
                 {
                     std::cout << "Node with degree: " << node->neighbours.size() << std::endl;
