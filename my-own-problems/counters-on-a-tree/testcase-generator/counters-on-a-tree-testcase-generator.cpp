@@ -15,11 +15,13 @@ struct SubtaskInfo
     int maxNodesPerTestcase = -1;
     int maxNodesOverAllTestcases = -1;
     int maxNumCountersPerNode = -1;
+    int maxNumCountersOverAllNodes = -1;
     int maxNumTestcases = -1;
 };
 
-SubtaskInfo subtask2 = { 2, 1000, 2 * maxNodes, maxCounters, 10 };
-SubtaskInfo subtask3 = { 3, maxNodes, 2 * maxNodes, maxCounters, maxNumTestcases };
+SubtaskInfo subtask1 = { 1, 15, 150, 15, 5, 10 };
+SubtaskInfo subtask2 = { 2, 1000, 2 * maxNodes, maxCounters, std::numeric_limits<int>::max(), 10 };
+SubtaskInfo subtask3 = { 3, maxNodes, 2 * maxNodes, maxCounters, std::numeric_limits<int>::max(), maxNumTestcases };
 
 struct NodeData
 {
