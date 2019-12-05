@@ -409,10 +409,14 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         }
         
         const auto numCountersForNode = testFileReader.readLineOfValues<int>(numNodes);
+        int numCountersAcrossAllNodes = 0;
         for (const auto numCounters : numCountersForNode)
         {
+            numCountersAcrossAllNodes += numCounters;
             testFileReader.addErrorUnless(0 <= numCounters && numCounters <= containingSubtask.maxNumCountersPerNode, "Invalid number of counters for a node");
         }
+
+        testFileReader.addErrorUnless(numCountersAcrossAllNodes <= containingSubtask.maxNumCountersOverAllNodes, "Too many counters across all nodes");
 
         for (int i = 0; i < numNodes - 1; i++)
         {
