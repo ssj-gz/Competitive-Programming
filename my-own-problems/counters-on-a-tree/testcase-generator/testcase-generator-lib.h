@@ -250,6 +250,10 @@ class TestFileReader
             assert(!m_isTestFileMarkedAsValidated);
             if (!hasErrors())
                 m_isTestFileMarkedAsValidated = true;
+            if (hasUnreadData())
+            {
+                addError("Found trailing data at end of file");
+            }
         }
         bool isTestFileMarkedAsValidated() const
         {
@@ -441,10 +445,6 @@ class TestSuite
                         testFileReader.addError("The testfile was not marked as validated!");
                     }
 
-                    if (testFileReader.hasUnreadData())
-                    {
-                        testFileReader.addError("Found trailing data at end of file");
-                    }
                     if (testFileReader.hasErrors())
                     {
                         std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") and filename " << filename << "  has validation errors:" << std::endl;
