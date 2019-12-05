@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/ZCOPRAC/problems/ZCO13001/
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-    const auto solutionOptimised = solveOptimised();
+    const auto solutionOptimised = solveOptimised(teamStrengths);
     cout << solutionOptimised << endl;
 #endif
 
