@@ -140,7 +140,26 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 74.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-        }{
+        }
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                                                                              .withDescription("long")
+                                                                              .withSeed(123));
+
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 70k long arm; 78% with counter; 10 Bob wins")
+                                                                                 .withSeed(31552));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                treeGenerator.addNodeChain(rootNode, 70'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15'000, 3.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(14876, 80);
+                addCounters(treeGenerator, 78.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
+        {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                                                                               .withSeed(88893)
                                                                               .withDescription("lots of small testcases up to 1000 nodes each"));
