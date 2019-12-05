@@ -117,8 +117,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("long-ish and jagged")
-                                                                              .withSeed(123));
+                                                                              .withDescription("long-ish and jagged"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, 12 Bob wins")
@@ -147,8 +146,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("long")
-                                                                              .withSeed(123));
+                                                                              .withDescription("long"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 70k long arm; 78% with counter; 10 Bob wins")
@@ -177,8 +175,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("fat")
-                                                                              .withSeed(123));
+                                                                              .withDescription("fat"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes four vertices with high degree; 78% with counter; 16130 Bob wins")
@@ -230,8 +227,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("three long arms")
-                                                                              .withSeed(123));
+                                                                              .withDescription("three long arms"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 82% with counter; 8 Bob wins")
@@ -266,8 +262,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("four long arms")
-                                                                              .withSeed(123));
+                                                                              .withDescription("four long arms"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 70% with counter; 9 Bob wins")
@@ -304,8 +299,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("fat with long")
-                                                                              .withSeed(123));
+                                                                              .withDescription("fat with long"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 20744 Bob wins")
