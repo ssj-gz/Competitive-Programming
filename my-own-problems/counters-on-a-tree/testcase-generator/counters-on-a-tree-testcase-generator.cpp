@@ -173,6 +173,32 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                                                                              .withDescription("fat")
+                                                                              .withSeed(123));
+
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes four vertices with high degree; 72% with counter; 16130 Bob wins")
+                                                                                 .withSeed(30684));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                auto node1 = treeGenerator.createNode(rootNode);
+                auto node2 = treeGenerator.createNode(rootNode);
+                auto node3 = treeGenerator.createNode(node1);
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2, node3}, 70'000, 99.8, 
+                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                            addNewNodeToSet = false;
+                            removeParentFromSet = false;
+                        });
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'998 - treeGenerator.numNodes(), 50);
+
+                addCounters(treeGenerator, 78.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                                                                               .withSeed(88893)
                                                                               .withDescription("lots of small testcases up to 1000 nodes each"));
 
