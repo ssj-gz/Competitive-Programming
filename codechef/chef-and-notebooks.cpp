@@ -35,6 +35,32 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+
+            int numPagesToWrite = -1;
+            int numPagesInNoteBook = -1;
+            while (true)
+            {
+                numPagesToWrite = 1 + rand() % 30;
+                numPagesInNoteBook = 1 + rand() % 30;
+                if (numPagesInNoteBook == numPagesToWrite)
+                    continue;
+
+                if (numPagesToWrite < numPagesInNoteBook)
+                    swap(numPagesToWrite, numPagesInNoteBook);
+                break;
+            }
+            const int maxCost = 1 + rand() % 100;
+            const int maxPages = 1 + rand() % 100;
+            const int N = 1 + rand() % 10;
+            const int moneyLeft = 1 + rand() % 100;
+
+            cout << numPagesToWrite << " " << numPagesInNoteBook << " " << moneyLeft << " " << N << endl;
+            for (int i = 0; i < N; i++)
+            {
+                cout << (1 + rand() % maxPages) << " " << (1 + rand() % maxCost) << endl;
+            }
+
+            
         }
 
         return 0;
