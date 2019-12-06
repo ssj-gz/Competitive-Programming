@@ -3,11 +3,8 @@
 // Solution to: https://www.codechef.com/problems/CNOTE
 //
 #include <iostream>
-#include <vector>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -23,50 +20,7 @@ T read()
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-
-            int numPagesToWrite = -1;
-            int numPagesInNoteBook = -1;
-            while (true)
-            {
-                numPagesToWrite = 1 + rand() % 30;
-                numPagesInNoteBook = 1 + rand() % 30;
-                if (numPagesInNoteBook == numPagesToWrite)
-                    continue;
-
-                if (numPagesToWrite < numPagesInNoteBook)
-                    swap(numPagesToWrite, numPagesInNoteBook);
-                break;
-            }
-            const int maxCost = 1 + rand() % 100;
-            const int maxPages = 1 + rand() % 100;
-            const int N = 1 + rand() % 10;
-            const int moneyLeft = 1 + rand() % 100;
-
-            cout << numPagesToWrite << " " << numPagesInNoteBook << " " << moneyLeft << " " << N << endl;
-            for (int i = 0; i < N; i++)
-            {
-                cout << (1 + rand() % maxPages) << " " << (1 + rand() % maxCost) << endl;
-            }
-
-            
-        }
-
-        return 0;
-    }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -91,7 +45,6 @@ int main(int argc, char* argv[])
         }
 
         cout << (foundNoteBook ? "LuckyChef" : "UnluckyChef") << endl;
-            
     }
 
     assert(cin);
