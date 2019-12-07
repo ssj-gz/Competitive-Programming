@@ -13,17 +13,17 @@ Alice and Bob are playing a game with coins on a tree $T$ over $N$ vertices numb
 For example, if the tree $T$ currently looks like this and, for this game, we have chosen $R=1$:
 
 
-![image](https://s3.amazonaws.com/hr-assets/0/1521711755-f6308f380d-move-the-coins-2-example-move-example-1of2.png)
+![image](https://s3.amazonaws.com/hr-assets/0/1521711755-f6308f380d-counters-on-a-tree-example-move-example-1of2.png)
 
 Then the current player can pick a coin in any of vertices $v = 2, 4$ or $5$.  Let's assume he picks the coin in $5$, as shown below; then he can move the coin $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up in vertex $4$, $2$ or $1$, respectively:
 
 
-![image](https://s3.amazonaws.com/hr-assets/0/1521711917-0016648f68-move-the-coins-2-example-move-example-2of2.png)
+![image](https://s3.amazonaws.com/hr-assets/0/1521711917-0016648f68-counters-on-a-tree-example-move-example-2of2.png)
 
 Let's assume he picks $X=2$, so he moves the coin to vertex $2$.  Then the tree now looks like:
 
 
-![image](https://s3.amazonaws.com/hr-assets/0/1521712073-48296db0ed-move-the-coins-2-example-move-example-3of3.png)
+![image](https://s3.amazonaws.com/hr-assets/0/1521712073-48296db0ed-counters-on-a-tree-example-move-example-3of3.png)
 
 and it is the other player's turn to move.
 
