@@ -40,19 +40,6 @@ string computeMinString(int K)
 
 int main(int argc, char* argv[])
 {
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        // Exhaustive testcase generator.
-        for (int K = 1; K <= 100; K++)
-        {
-            cout << "Q: 2 lines" << endl;
-            cout << 1 << endl;
-            cout << K << endl;
-            cout << "A: 1 lines" << endl;
-            cout << computeMinString(K) << endl;
-        }
-        return 0;
-    }
     const int T = read<int>();
 
     for (int t = 0; t < T; t++)
