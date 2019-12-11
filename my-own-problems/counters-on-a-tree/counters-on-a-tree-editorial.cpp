@@ -49,9 +49,6 @@ class HeightTracker
                     break;
                 m_numBits++;
             }
-            //assert(m_numBits == maxBinaryDigits);
-            //clear();
-            //m_versionNumber++;
         }
         void insertHeight(const int newHeight)
         {
@@ -285,9 +282,8 @@ Node* findCentroid(Node* startNode)
     return centroid;
 }
 
-void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker)
+void doCentroidDecomposition(Node* startNode)
 {
-    //heightTracker.clear();
     Node* centroid = findCentroid(startNode);
 
     auto propagateHeights = [](Node* node, int depth, HeightTracker& heightTracker)
@@ -316,8 +312,6 @@ void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker)
     {
         HeightTracker heightTracker(numNodesInComponent);
         // Do it again, this time backwards ...  
-        //cout << "now in reverse: " << endl;
-        //heightTracker.clear();
         reverse(centroid->neighbours.begin(), centroid->neighbours.end());
         // ... and also include the centre, this time.
         if (centroid->hasCoin)
@@ -334,7 +328,7 @@ void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker)
     {
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
-        doCentroidDecomposition(neighbour, heightTracker);
+        doCentroidDecomposition(neighbour);
     }
 }
 
@@ -344,7 +338,6 @@ int main(int argc, char* argv[])
     auto readInt = [](){ int x; cin >> x; return x; };
 
     const auto numTestcases = readInt();
-    //const auto numTestcases = 1;
     for (int t = 0; t < numTestcases; t++)
     {
         const auto numNodes = readInt();
@@ -367,8 +360,7 @@ int main(int argc, char* argv[])
         }
 
         auto rootNode = &(nodes.front());
-        HeightTracker heightTracker(100'000);
-        doCentroidDecomposition(rootNode, heightTracker);
+        doCentroidDecomposition(rootNode);
 
         vector<int> nodesThatGiveBobWinWhenRoot;
         int nodeNumber = 1;
