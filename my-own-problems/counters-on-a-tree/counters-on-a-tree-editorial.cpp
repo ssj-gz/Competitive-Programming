@@ -424,7 +424,8 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
     // Do it again, this time backwards ...  
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     // ... and also include the centre, this time.
-    heightTracker.insertHeight(0);
+    if (centroid->hasCoin)
+        heightTracker.insertHeight(0);
     for (auto& child : centroid->neighbours)
     {
         doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
