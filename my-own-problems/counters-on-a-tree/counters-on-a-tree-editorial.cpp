@@ -165,8 +165,6 @@ class HeightTracker
         int m_cumulativeHeightAdjustment = 0;
         int m_grundyNumber = 0;
 
-        int m_versionNumber = 0;
-
         int m_pendingHeightAdjustment = 0;
 };
 
@@ -188,7 +186,7 @@ int countDescendants(Node* node, Node* parentNode)
 }
 
 template <typename NodeProcessor>
-void doDfsCentroid(Node* node, Node* parentNode, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+void doDfs(Node* node, Node* parentNode, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
 {
     if (heightTrackerAdjustment == AdjustWithDepth)
         heightTracker.adjustAllHeights(1);
@@ -199,7 +197,7 @@ void doDfsCentroid(Node* node, Node* parentNode, int depth, HeightTracker& heigh
     {
         if (child == parentNode)
             continue;
-        doDfsCentroid(child, node, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+        doDfs(child, node, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
     }
 
     if (heightTrackerAdjustment == AdjustWithDepth)
@@ -270,11 +268,10 @@ void doCentroidDecomposition(Node* startNode)
 
     {
         HeightTracker heightTracker(numNodesInComponent);
-        //heightTracker.clear();
         for (auto& child : centroid->neighbours)
         {
-            doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
-            doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+            doDfs(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
+            doDfs(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
         }
     }
     {
@@ -286,8 +283,8 @@ void doCentroidDecomposition(Node* startNode)
             heightTracker.insertHeight(0);
         for (auto& child : centroid->neighbours)
         {
-            doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
-            doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+            doDfs(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
+            doDfs(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
         }
         centroid->grundyNumberIfRoot ^= heightTracker.grundyNumber();
     }
@@ -295,6 +292,8 @@ void doCentroidDecomposition(Node* startNode)
     for (auto& neighbour : centroid->neighbours)
     {
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
+        // Erase the edge from the centroid's neighbour to the centroid, essentially "chopping off" each child into its own
+        // component.
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
         doCentroidDecomposition(neighbour);
     }
