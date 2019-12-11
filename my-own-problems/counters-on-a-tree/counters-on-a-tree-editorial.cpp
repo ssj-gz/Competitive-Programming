@@ -65,7 +65,7 @@ class HeightTracker
             for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
             {
                 const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
-                numHeightsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
+                m_heightsModPowerOf2[binaryDigitNum][heightModPowerOf2]++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
                     if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
@@ -147,16 +147,6 @@ class HeightTracker
                 } 
             }
         }
-        int& numHeightsModPowerOf2(int binaryDigitNum, int modPowerOf2)
-        {
-            auto& numHeights = m_heightsModPowerOf2[binaryDigitNum][modPowerOf2];
-            //if (numHeights.versionNumber != m_versionNumber)
-            //{
-                //numHeights.value = 0;
-                //numHeights.versionNumber = m_versionNumber;
-            //}
-            return numHeights;
-        }
         int grundyNumber()
         {
             numGrundyNumberCalls++;
@@ -166,29 +156,7 @@ class HeightTracker
             }
             return m_grundyNumber;
         }
-#if 0
-        void clear()
-        {
-            // Lazily "clear" in O(log2 N) by updating the version number.
-            m_versionNumber++;
-            auto powerOf2 = 2;
-            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
-            {
-                m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
-                m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
-
-                powerOf2 <<= 1;
-            }
-            m_grundyNumber = 0;
-            m_cumulativeHeightAdjustment = 0;
-        }
-#endif
     private:
-        struct VersionedValue
-        {
-            int value = 0;
-            int versionNumber = -1;
-        };
         int m_numBits = 0;
         vector<int> m_heightsModPowerOf2[maxBinaryDigits + 1];
         int m_makesDigitOneBegin[maxBinaryDigits + 1];
@@ -366,7 +334,6 @@ int main(int argc, char* argv[])
         int nodeNumber = 1;
         for (auto& node : nodes)
         {
-            //assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
             if (node.grundyNumberIfRoot == 0)
                 nodesThatGiveBobWinWhenRoot.push_back(nodeNumber);
 
@@ -378,10 +345,11 @@ int main(int argc, char* argv[])
             cout << bobWinNodeNum << endl;
         }
     }
-    //cout << "numInsertHeights: " << numInsertHeights << endl;
-    //cout << "numAdjustHeights: " << numAdjustHeights << endl;
-    //cout << "numGrundyNumberCalls: " << numGrundyNumberCalls << endl;
-    //cout << "numCallsToPropagateHeights: " << numCallsToPropagateHeights << endl;
-    //cout << "numCallsToCollectHeights: " << numCallsToCollectHeights << endl;
-
+#if 0
+    cout << "numInsertHeights: " << numInsertHeights << endl;
+    cout << "numAdjustHeights: " << numAdjustHeights << endl;
+    cout << "numGrundyNumberCalls: " << numGrundyNumberCalls << endl;
+    cout << "numCallsToPropagateHeights: " << numCallsToPropagateHeights << endl;
+    cout << "numCallsToCollectHeights: " << numCallsToCollectHeights << endl;
+#endif
 }
