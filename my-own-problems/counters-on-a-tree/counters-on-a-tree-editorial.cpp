@@ -497,6 +497,14 @@ int main(int argc, char* argv[])
         doHeavyLightDecomposition(rootNode, false);
 
         computeGrundyNumberIfRootForAllNodes(nodes);
+        HeightTracker heightTracker;
+        vector<vector<int>> blee;
+        decompose(rootNode, blee, heightTracker);
+
+        for (auto& node : nodes)
+        {
+            cout << "node: " << node.nodeNumber << " dbgGrundyNumberIfRoot: " << node.dbgGrundyNumberIfRoot << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << endl;
+        }
 
         vector<int> nodesThatGiveBobWinWhenRoot;
         for (auto& node : nodes)
