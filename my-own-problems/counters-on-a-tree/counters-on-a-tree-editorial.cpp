@@ -396,7 +396,7 @@ Node* findCentroid(Node* startNode)
 
 
 
-void decompose(Node* startNode, vector<vector<int>>& blee, HeightTracker& heightTracker, int indentLevel = 0)
+void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 0)
 {
     heightTracker.clear();
     //cout << indent << "Decomposing graph containing " << startNode->index << endl;
@@ -454,7 +454,7 @@ void decompose(Node* startNode, vector<vector<int>>& blee, HeightTracker& height
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode), neighbour->neighbours.end());
-        decompose(neighbour, blee, heightTracker);
+        decompose(neighbour, heightTracker);
     }
 
 }
@@ -498,8 +498,7 @@ int main(int argc, char* argv[])
 
         computeGrundyNumberIfRootForAllNodes(nodes);
         HeightTracker heightTracker;
-        vector<vector<int>> blee;
-        decompose(rootNode, blee, heightTracker);
+        decompose(rootNode, heightTracker);
 
         for (auto& node : nodes)
         {
