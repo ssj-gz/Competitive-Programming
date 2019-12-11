@@ -272,7 +272,7 @@ Node* findCentroid(Node* startNode)
     return centroid;
 }
 
-void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker, int indentLevel = 0)
+void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker)
 {
     heightTracker.clear();
     Node* centroid = findCentroid(startNode);
@@ -312,7 +312,7 @@ void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker, int 
     {
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
-        doCentroidDecomposition(neighbour, heightTracker, indentLevel + 1);
+        doCentroidDecomposition(neighbour, heightTracker);
     }
 }
 
