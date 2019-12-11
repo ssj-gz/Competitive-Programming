@@ -318,14 +318,19 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
 int countDescendants(Node* node, Node* parentNode)
 {
     int numDescendants = 1; // Current node.
+    cout << "countDescendants: node: " << node->nodeNumber << endl;
 
     for (const auto& child : node->neighbours)
     {
         if (child == parentNode)
             continue;
 
+        cout << "  countDescendants: node: " << node->nodeNumber << " has neighbour: " << child->nodeNumber << endl;
+
         numDescendants += countDescendants(child, node);
     }
+
+    cout << "countDescendants: node: " << node->nodeNumber << " numDescendants: " << numDescendants << endl;
 
     return numDescendants;
 }
@@ -460,7 +465,7 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
-        neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid), neighbour->neighbours.end());
+        neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
         decompose(neighbour, heightTracker, indentLevel + 1);
     }
 
@@ -518,7 +523,7 @@ int main(int argc, char* argv[])
 
         for (auto& node : nodes)
         {
-            cout << "node: " << node.nodeNumber << " dbgGrundyNumberIfRoot: " << node.dbgGrundyNumberIfRoot << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << endl;
+            cout << "node: " << node.nodeNumber << " dbgGrundyNumberIfRoot: " << node.dbgGrundyNumberIfRoot << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << (node.dbgGrundyNumberIfRoot == node.grundyNumberIfRoot ? "MATCH" : "**NO MATCH**") << endl;
         }
 
         vector<int> nodesThatGiveBobWinWhenRoot;
