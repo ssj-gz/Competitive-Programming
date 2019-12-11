@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) 16/3/18.
-// Editorial solution for "Move the Coins, Yet Again!".
+// Editorial solution for "Counters on a Tree".
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cassert>
 
-//#define USE_CENTROID_DECOMPOSITION
+#define USE_CENTROID_DECOMPOSITION
 
 using namespace std;
 
