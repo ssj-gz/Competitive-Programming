@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <cassert>
 
+#define USE_CENTROID_DECOMPOSITION
+
 using namespace std;
 
 constexpr auto maxHeight = 100'000;
@@ -22,10 +24,61 @@ struct Node
 {
     int nodeNumber = -1;
     bool hasCoin = false;
+    vector<Node*> children;
     vector<Node*> neighbours;
+    vector<Node*> lightChildren;
+    int numDescendants = 0;
 
+    int dbgGrundyNumberIfRoot = 0;
     int grundyNumberIfRoot = 0;
 };
+
+vector<vector<Node*>> heavyChains;
+
+int fixParentChildAndCountDescendants(Node* node, Node* parentNode)
+{
+    node->numDescendants = 1;
+    if (parentNode)
+        node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
+
+    for (auto child : node->children)
+        node->numDescendants += fixParentChildAndCountDescendants(child, node);
+
+    return node->numDescendants;
+}
+
+// Build up heavyChains; move the heavy child of each node to the front of that node's children.
+void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
+{
+    if (followedHeavyEdge)
+    {
+        // Continue this chain.
+        heavyChains.back().push_back(node);
+    }
+    else
+    {
+        // Start a new chain.
+        heavyChains.push_back({node});
+    }
+    if (!node->children.empty())
+    {
+        auto heavyChild = *max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
+                {
+                    return lhs->numDescendants < rhs->numDescendants;
+                });
+        doHeavyLightDecomposition(heavyChild, true);
+        for (auto child : node->children)
+        {
+            if (child != heavyChild)
+                node->lightChildren.push_back(child);
+        }
+
+        for (auto lightChild : node->lightChildren)
+        {
+            doHeavyLightDecomposition(lightChild, false);
+        }
+    }
+}
 
 int numInsertHeights = 0;
 int numAdjustHeights = 0;
@@ -194,6 +247,88 @@ class HeightTracker
 };
 
 enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
+template <typename NodeProcessor>
+void doDfs(Node* node, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+{
+    if (heightTrackerAdjustment == AdjustWithDepth)
+        heightTracker.adjustAllHeights(1);
+
+    processNode(node, depth);
+
+    for (auto child : node->children)
+        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+
+    if (heightTrackerAdjustment == AdjustWithDepth)
+        heightTracker.adjustAllHeights(-1);
+}
+
+void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
+{
+    HeightTracker heightTracker;
+    auto collectHeights = [&heightTracker](Node* node, int depth)
+                        {
+                            numCallsToCollectHeights++;
+                            if (node->hasCoin)
+                                heightTracker.insertHeight(depth);
+                        };
+    auto propagateHeights = [&heightTracker](Node* node, int depth)
+                        {
+                            numCallsToPropagateHeights++;
+                            node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
+                        };
+    for (auto& chain : heavyChains)
+    {
+        for (auto pass = 1; pass <= 2; pass++)
+        {
+            heightTracker.clear();
+            // Crawl along chain, collecting from one node and propagating to the next.
+            for (auto node : chain)
+            {
+                if (pass == 1 )
+                {
+                    // Once only (first pass chosen arbitrarily) - add this node's coin
+                    // (if any) so that it gets propagated to light descendants ...
+                    if (node->hasCoin)
+                        heightTracker.insertHeight(0);
+                    // ... and update its grundy number now, so that it *doesn't* include
+                    // the contributions from its light descendants.
+                    node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
+                }
+
+                for (auto lightChild : node->lightChildren)
+                {
+                    // Propagate all coins found so far along the chain in this direction
+                    // to light descendants ...
+                    doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateHeights);
+                    // ... and collect from light descendants.
+                    doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectHeights);
+                }
+
+                if (pass == 2)
+                {
+                    // In pass 1, we ensured that this node's coin (if any) was propagated
+                    // to its light descendants.  Don't do it this time - wait until
+                    // we've processed this coin's light descendants before adding this
+                    // coin's node to the heightTracker!
+                    if (node->hasCoin)
+                        heightTracker.insertHeight(0);
+                    // In pass 1, we ensured that this node's grundy number *wasn't* updated from
+                    // its light descendants - this time, ensure that it is updated, by
+                    // waiting until we've processed this coin's light descendants before updating
+                    // its dbgGrundyNumberIfRoot.
+                    node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
+                }
+
+                // Prepare for the reverse pass.
+                reverse(node->lightChildren.begin(), node->lightChildren.end());
+                // Move one node along the chain - increase all heights accordingly!
+                heightTracker.adjustAllHeights(1);
+            }
+            // Now do it backwards.
+            reverse(chain.begin(), chain.end());
+        }
+    }
+}
 
 int countDescendants(Node* node, Node* parentNode)
 {
@@ -264,6 +399,7 @@ int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, N
     return numDescendents;
 }
 
+
 Node* findCentroid(Node* startNode)
 {
     const auto totalNumNodes = countDescendants(startNode, nullptr);
@@ -273,7 +409,7 @@ Node* findCentroid(Node* startNode)
     return centroid;
 }
 
-void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker, int indentLevel = 0)
+void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 0)
 {
     heightTracker.clear();
     Node* centroid = findCentroid(startNode);
@@ -313,9 +449,10 @@ void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker, int 
     {
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
-        doCentroidDecomposition(neighbour, heightTracker, indentLevel + 1);
+        decompose(neighbour, heightTracker, indentLevel + 1);
     }
 }
+
 
 int main(int argc, char* argv[])
 {
@@ -341,19 +478,48 @@ int main(int argc, char* argv[])
             const auto node1Index = readInt() - 1;
             const auto node2Index = readInt() - 1;
 
+            nodes[node1Index].children.push_back(&(nodes[node2Index]));
+            nodes[node2Index].children.push_back(&(nodes[node1Index]));
             nodes[node1Index].neighbours.push_back(&(nodes[node2Index]));
             nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
         }
 
+#if 0
+        for (auto& node : nodes)
+        {
+            cout << "node: " << node.nodeNumber << " hasCoin: " << node.hasCoin << " has neighbours: " << endl;
+            for (const auto neighbour : node.neighbours)
+            {
+                cout << " " << neighbour->nodeNumber << endl;
+            }
+        }
+#endif
+
         auto rootNode = &(nodes.front());
+#ifndef USE_CENTROID_DECOMPOSITION
+        fixParentChildAndCountDescendants(rootNode, nullptr);
+        heavyChains.clear(); // TODO - stop using globals!
+        doHeavyLightDecomposition(rootNode, false);
+        computeGrundyNumberIfRootForAllNodes(nodes);
+#else
         HeightTracker heightTracker;
-        doCentroidDecomposition(rootNode, heightTracker);
+        decompose(rootNode, heightTracker);
+#endif
+
+        for (auto& node : nodes)
+        {
+            //cout << "node: " << node.nodeNumber << " dbgGrundyNumberIfRoot: " << node.dbgGrundyNumberIfRoot << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << (node.dbgGrundyNumberIfRoot == node.grundyNumberIfRoot ? "MATCH" : "**NO MATCH**") << endl;
+        }
 
         vector<int> nodesThatGiveBobWinWhenRoot;
         for (auto& node : nodes)
         {
             assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
+#ifdef USE_CENTROID_DECOMPOSITION
             if (node.grundyNumberIfRoot == 0)
+#else
+            if (node.dbgGrundyNumberIfRoot == 0)
+#endif
                 nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
         }
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
