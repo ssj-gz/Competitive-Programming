@@ -408,10 +408,12 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
 
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
+                            cout << "Propagate heights: node: " << node->nodeNumber << " depth: " <<  depth << " heightTracker.grundyNumber: " << heightTracker.grundyNumber() << endl;
                             node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     auto collectHeights = [&heightTracker](Node* node, int depth)
                         {
+                            cout << "Collect heights: node: " << node->nodeNumber << " depth: " <<  depth << " hasCoin?: " << node->hasCoin << endl;
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
@@ -422,6 +424,8 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
         doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
     }
     // Do it again, this time backwards ...  
+    cout << "now in reverse: " << endl;
+    heightTracker.clear();
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     // ... and also include the centre, this time.
     if (centroid->hasCoin)
@@ -492,6 +496,15 @@ int main(int argc, char* argv[])
             nodes[node2Index].children.push_back(&(nodes[node1Index]));
             nodes[node1Index].neighbours.push_back(&(nodes[node2Index]));
             nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
+        }
+
+        for (auto& node : nodes)
+        {
+            cout << "node: " << node.nodeNumber << " hasCoin: " << node.hasCoin << " has neighbours: " << endl;
+            for (const auto neighbour : node.neighbours)
+            {
+                cout << " " << neighbour->nodeNumber << endl;
+            }
         }
 
         auto rootNode = &(nodes.front());
