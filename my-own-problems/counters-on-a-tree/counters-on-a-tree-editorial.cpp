@@ -454,8 +454,8 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
         }
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
-        assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode) != neighbour->neighbours.end());
-        neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode), neighbour->neighbours.end());
+        assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
+        neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid), neighbour->neighbours.end());
         decompose(neighbour, heightTracker, indentLevel + 1);
     }
 
