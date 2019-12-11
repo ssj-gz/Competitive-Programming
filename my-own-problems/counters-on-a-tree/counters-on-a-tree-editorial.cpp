@@ -152,8 +152,9 @@ class HeightTracker
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
+                    const auto reducedHeightDiff = heightDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
                     auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    for (auto i = 0; i < heightDiff; i++)
+                    for (auto i = 0; i < reducedHeightDiff; i++)
                     {
                         parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
                         m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) & (powerOf2 - 1);
@@ -176,7 +177,8 @@ class HeightTracker
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
                     auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    for (auto i = 0; i < heightDiff; i++)
+                    const auto reducedHeightDiff = heightDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
+                    for (auto i = 0; i < reducedHeightDiff; i++)
                     {
                         parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
                         m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) & (powerOf2 - 1);
