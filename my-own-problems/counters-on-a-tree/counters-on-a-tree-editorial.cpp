@@ -26,6 +26,7 @@ struct Node
     vector<Node*> lightChildren;
     int numDescendants = 0;
 
+    int dbgGrundyNumberIfRoot = 0;
     int grundyNumberIfRoot = 0;
 };
 
@@ -257,7 +258,7 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                         };
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
-                            node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                            node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     for (auto& chain : heavyChains)
     {
@@ -275,7 +276,7 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                         heightTracker.insertHeight(0);
                     // ... and update its grundy number now, so that it *doesn't* include
                     // the contributions from its light descendants.
-                    node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                    node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
 
                 for (auto lightChild : node->lightChildren)
@@ -298,8 +299,8 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                     // In pass 1, we ensured that this node's grundy number *wasn't* updated from
                     // its light descendants - this time, ensure that it is updated, by
                     // waiting until we've processed this coin's light descendants before updating
-                    // its grundyNumberIfRoot.
-                    node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                    // its dbgGrundyNumberIfRoot.
+                    node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
                 }
 
                 // Prepare for the reverse pass.
@@ -351,7 +352,7 @@ int main(int argc, char* argv[])
         vector<int> nodesThatGiveBobWinWhenRoot;
         for (auto& node : nodes)
         {
-            if (node.grundyNumberIfRoot == 0)
+            if (node.dbgGrundyNumberIfRoot == 0)
                 nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
         }
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
