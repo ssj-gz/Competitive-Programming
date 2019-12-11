@@ -392,6 +392,7 @@ int main(int argc, char* argv[])
                 numNodesInTestFile += numNodes;
             }
         }
+        // TODO - fat node where each arm has length at least two - this will give many subtrees when doing centroid decomposition.
     }
     testsuite.writeTestFiles();
 }
