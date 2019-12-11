@@ -531,6 +531,7 @@ int main(int argc, char* argv[])
         vector<int> nodesThatGiveBobWinWhenRoot;
         for (auto& node : nodes)
         {
+            assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
             if (node.grundyNumberIfRoot == 0)
                 nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
         }
