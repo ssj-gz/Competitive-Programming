@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <cassert>
 
+//#define USE_CENTROID_DECOMPOSITION
+
 using namespace std;
 
 constexpr auto maxHeight = 100'000;
@@ -78,6 +80,12 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge)
     }
 }
 
+int numInsertHeights = 0;
+int numAdjustHeights = 0;
+int numGrundyNumberCalls = 0;
+int numCallsToPropagateHeights = 0;
+int numCallsToCollectHeights = 0;
+
 class HeightTracker
 {
     public:
@@ -93,6 +101,7 @@ class HeightTracker
         }
         void insertHeight(const int newHeight)
         {
+            numInsertHeights++;
             doPendingHeightAdjustments();
             const auto newHeightAdjusted = newHeight 
                 // The m_makesDigitOneBegin/End will have been shifted by a total of m_cumulativeHeightAdjustment, so counteract that.
@@ -125,6 +134,7 @@ class HeightTracker
 
         void adjustAllHeights(int heightDiff)
         {
+            numAdjustHeights++;
             m_pendingHeightAdjustment += heightDiff;
         }
         void doPendingHeightAdjustments()
@@ -194,6 +204,7 @@ class HeightTracker
         }
         int grundyNumber()
         {
+            numGrundyNumberCalls++;
             if (m_pendingHeightAdjustment != 0)
             {
                 doPendingHeightAdjustments();
@@ -254,11 +265,13 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
     HeightTracker heightTracker;
     auto collectHeights = [&heightTracker](Node* node, int depth)
                         {
+                            numCallsToCollectHeights++;
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
+                            numCallsToPropagateHeights++;
                             node->dbgGrundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     for (auto& chain : heavyChains)
@@ -401,10 +414,12 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
 
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
+                            numCallsToPropagateHeights++;
                             node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     auto collectHeights = [&heightTracker](Node* node, int depth)
                         {
+                            numCallsToCollectHeights++;
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
@@ -479,13 +494,15 @@ int main(int argc, char* argv[])
 #endif
 
         auto rootNode = &(nodes.front());
-        //fixParentChildAndCountDescendants(rootNode, nullptr);
-        //heavyChains.clear(); // TODO - stop using globals!
-        //doHeavyLightDecomposition(rootNode, false);
-
-        //computeGrundyNumberIfRootForAllNodes(nodes);
+#ifndef USE_CENTROID_DECOMPOSITION
+        fixParentChildAndCountDescendants(rootNode, nullptr);
+        heavyChains.clear(); // TODO - stop using globals!
+        doHeavyLightDecomposition(rootNode, false);
+        computeGrundyNumberIfRootForAllNodes(nodes);
+#else
         HeightTracker heightTracker;
         decompose(rootNode, heightTracker);
+#endif
 
         for (auto& node : nodes)
         {
@@ -496,7 +513,11 @@ int main(int argc, char* argv[])
         for (auto& node : nodes)
         {
             assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
+#ifdef USE_CENTROID_DECOMPOSITION
             if (node.grundyNumberIfRoot == 0)
+#else
+            if (node.dbgGrundyNumberIfRoot == 0)
+#endif
                 nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
         }
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
@@ -505,4 +526,10 @@ int main(int argc, char* argv[])
             cout << bobWinNodeNum << endl;
         }
     }
+    cout << "numInsertHeights: " << numInsertHeights << endl;
+    cout << "numAdjustHeights: " << numAdjustHeights << endl;
+    cout << "numGrundyNumberCalls: " << numGrundyNumberCalls << endl;
+    cout << "numCallsToPropagateHeights: " << numCallsToPropagateHeights << endl;
+    cout << "numCallsToCollectHeights: " << numCallsToCollectHeights << endl;
+
 }
