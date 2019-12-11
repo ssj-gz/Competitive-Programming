@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 16/3/18.
 // Editorial solution for "Move the Coins, Yet Again!".
-#define SUBMISSION
+//#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -453,6 +453,7 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
         }
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
+        assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode) != neighbour->neighbours.end());
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode), neighbour->neighbours.end());
         decompose(neighbour, heightTracker);
     }
