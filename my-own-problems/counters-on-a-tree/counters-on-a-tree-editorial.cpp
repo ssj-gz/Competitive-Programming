@@ -23,6 +23,7 @@ struct Node
     int nodeNumber = -1;
     bool hasCoin = false;
     vector<Node*> children;
+    vector<Node*> neighbours;
     vector<Node*> lightChildren;
     int numDescendants = 0;
 
@@ -314,6 +315,103 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
     }
 }
 
+int countDescendants(Node* node, Node* parentNode)
+{
+    int numDescendants = 1; // Current node.
+
+    for (const auto& child : node->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        numDescendants += countDescendants(child, node);
+    }
+
+    return numDescendants;
+}
+
+int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
+{
+    int numDescendents = 1;
+
+    bool childHasTooManyDescendants = false;
+
+    for (const auto& child : currentNode->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        const auto numChildDescendants = findCentroidAux(child, currentNode, totalNodes, centroid);
+        if (numChildDescendants > totalNodes / 2)
+        {
+            // Not the centroid, but can't break here - must continue processing children.
+            childHasTooManyDescendants = true;
+        }
+
+        numDescendents += numChildDescendants;
+    }
+
+    if (!childHasTooManyDescendants)
+    {
+        // No child has more than totalNodes/2 descendants, but what about the remainder of the graph?
+        const auto nonChildDescendants = totalNodes - numDescendents;
+        if (nonChildDescendants <= totalNodes / 2)
+        {
+            assert(centroid);
+            *centroid = currentNode;
+        }
+    }
+
+    return numDescendents;
+}
+
+
+Node* findCentroid(Node* startNode)
+{
+    const auto totalNumNodes = countDescendants(startNode, nullptr);
+    Node* centroid = nullptr;
+    findCentroidAux(startNode, nullptr, totalNumNodes, &centroid);
+    assert(centroid);
+    return centroid;
+}
+
+
+
+void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
+{
+    //cout << indent << "Decomposing graph containing " << startNode->index << endl;
+    const auto numNodes = countDescendants(startNode, nullptr);
+    Node* centroid = findCentroid(startNode);
+    //cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
+    //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
+
+    static int numNodesTotal = 0;
+    numNodesTotal += numNodes;
+    cout << "numNodesTotal: " << numNodesTotal << endl;
+
+    vector<Node*> descendantsSoFar;
+    descendantsSoFar.push_back(centroid);
+    for (auto& neighbour : centroid->neighbours)
+    {
+#if 0
+        auto newDescendants = getDescendants(neighbour, centroid);
+        assert(newDescendants.size() <= numNodes / 2);
+        for (const auto& descendant : newDescendants)
+        {
+            for (const auto& oldDescendant : descendantsSoFar)
+            {
+                countPair(descendant, oldDescendant);
+            }
+        }
+        descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
+#endif
+        neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode), neighbour->neighbours.end());
+        decompose(neighbour, blee, indentLevel + 1);
+    }
+
+}
+
+
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
@@ -340,6 +438,8 @@ int main(int argc, char* argv[])
 
             nodes[node1Index].children.push_back(&(nodes[node2Index]));
             nodes[node2Index].children.push_back(&(nodes[node1Index]));
+            nodes[node1Index].neighbours.push_back(&(nodes[node2Index]));
+            nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
         }
 
         auto rootNode = &(nodes.front());
