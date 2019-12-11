@@ -342,7 +342,7 @@ void doDfsCentroid(Node* node, Node* parentNode, int depth, HeightTracker& heigh
     {
         if (child == parentNode)
             continue;
-        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+        doDfsCentroid(child, node, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
     }
 
     if (heightTrackerAdjustment == AdjustWithDepth)
