@@ -35,18 +35,27 @@ int numCallsToCollectHeights = 0;
 class HeightTracker
 {
     public:
-        HeightTracker()
+        HeightTracker(int maxHeight)
         {
             auto powerOf2 = 2;
+            m_numBits = -1;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2[binaryDigitNum] = vector<VersionedValue>(powerOf2);
+                m_heightsModPowerOf2[binaryDigitNum] = vector<int>(powerOf2);
+                m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
+                m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
                 powerOf2 <<= 1;
+                if (powerOf2 / 4 > maxHeight)
+                    break;
+                m_numBits++;
             }
-            clear();
+            //assert(m_numBits == maxBinaryDigits);
+            //clear();
+            //m_versionNumber++;
         }
         void insertHeight(const int newHeight)
         {
+            const int numBits = m_numBits;
             numInsertHeights++;
             doPendingHeightAdjustments();
             const auto newHeightAdjusted = newHeight 
@@ -56,7 +65,7 @@ class HeightTracker
                 + (1 << (maxBinaryDigits + 1)); 
             assert(newHeightAdjusted >= 0);
             auto powerOf2 = 2;
-            for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+            for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
             {
                 const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
                 numHeightsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
@@ -91,10 +100,11 @@ class HeightTracker
             m_pendingHeightAdjustment = 0;
             m_cumulativeHeightAdjustment += heightDiff;
 
+            const int numBits = m_numBits;
             auto powerOf2 = 2;
             if (heightDiff > 0)
             {
-                for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+                for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
@@ -102,11 +112,11 @@ class HeightTracker
                     auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
                     for (auto i = 0; i < reducedHeightDiff; i++)
                     {
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
                         m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) & (powerOf2 - 1);
 
                         m_makesDigitOneBegin[binaryDigitNum] = (powerOf2 + m_makesDigitOneBegin[binaryDigitNum] - 1) & (powerOf2 - 1);
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
                     }
 
                     if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
@@ -119,18 +129,18 @@ class HeightTracker
             {
                 heightDiff = -heightDiff;
                 assert(heightDiff > 0);
-                for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+                for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
                     auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
                     const auto reducedHeightDiff = heightDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
                     for (auto i = 0; i < reducedHeightDiff; i++)
                     {
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
                         m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) & (powerOf2 - 1);
 
                         m_makesDigitOneEnd[binaryDigitNum] = (m_makesDigitOneEnd[binaryDigitNum] + 1) & (powerOf2 - 1);
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += numHeightsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
+                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
                     }
 
                     if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
@@ -143,12 +153,12 @@ class HeightTracker
         int& numHeightsModPowerOf2(int binaryDigitNum, int modPowerOf2)
         {
             auto& numHeights = m_heightsModPowerOf2[binaryDigitNum][modPowerOf2];
-            if (numHeights.versionNumber != m_versionNumber)
-            {
-                numHeights.value = 0;
-                numHeights.versionNumber = m_versionNumber;
-            }
-            return numHeights.value;
+            //if (numHeights.versionNumber != m_versionNumber)
+            //{
+                //numHeights.value = 0;
+                //numHeights.versionNumber = m_versionNumber;
+            //}
+            return numHeights;
         }
         int grundyNumber()
         {
@@ -159,6 +169,7 @@ class HeightTracker
             }
             return m_grundyNumber;
         }
+#if 0
         void clear()
         {
             // Lazily "clear" in O(log2 N) by updating the version number.
@@ -174,13 +185,15 @@ class HeightTracker
             m_grundyNumber = 0;
             m_cumulativeHeightAdjustment = 0;
         }
+#endif
     private:
         struct VersionedValue
         {
             int value = 0;
             int versionNumber = -1;
         };
-        vector<VersionedValue> m_heightsModPowerOf2[maxBinaryDigits + 1];
+        int m_numBits = 0;
+        vector<int> m_heightsModPowerOf2[maxBinaryDigits + 1];
         int m_makesDigitOneBegin[maxBinaryDigits + 1];
         int m_makesDigitOneEnd[maxBinaryDigits + 1];
 
@@ -215,7 +228,7 @@ void doDfsCentroid(Node* node, Node* parentNode, int depth, HeightTracker& heigh
     if (heightTrackerAdjustment == AdjustWithDepth)
         heightTracker.adjustAllHeights(1);
 
-    processNode(node, depth);
+    processNode(node, depth, heightTracker);
 
     for (auto child : node->neighbours)
     {
@@ -274,39 +287,48 @@ Node* findCentroid(Node* startNode)
 
 void doCentroidDecomposition(Node* startNode, HeightTracker& heightTracker)
 {
-    heightTracker.clear();
+    //heightTracker.clear();
     Node* centroid = findCentroid(startNode);
 
-    auto propagateHeights = [&heightTracker](Node* node, int depth)
+    auto propagateHeights = [](Node* node, int depth, HeightTracker& heightTracker)
                         {
                             numCallsToPropagateHeights++;
                             node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
-    auto collectHeights = [&heightTracker](Node* node, int depth)
+    auto collectHeights = [](Node* node, int depth, HeightTracker& heightTracker)
                         {
                             numCallsToCollectHeights++;
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
 
-    for (auto& child : centroid->neighbours)
+    const auto numNodesInComponent = countDescendants(startNode, nullptr);
+
     {
-        doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
-        doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+        HeightTracker heightTracker(numNodesInComponent);
+        //heightTracker.clear();
+        for (auto& child : centroid->neighbours)
+        {
+            doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
+            doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+        }
     }
-    // Do it again, this time backwards ...  
-    //cout << "now in reverse: " << endl;
-    heightTracker.clear();
-    reverse(centroid->neighbours.begin(), centroid->neighbours.end());
-    // ... and also include the centre, this time.
-    if (centroid->hasCoin)
-        heightTracker.insertHeight(0);
-    for (auto& child : centroid->neighbours)
     {
-        doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
-        doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+        HeightTracker heightTracker(numNodesInComponent);
+        // Do it again, this time backwards ...  
+        //cout << "now in reverse: " << endl;
+        //heightTracker.clear();
+        reverse(centroid->neighbours.begin(), centroid->neighbours.end());
+        // ... and also include the centre, this time.
+        if (centroid->hasCoin)
+            heightTracker.insertHeight(0);
+        for (auto& child : centroid->neighbours)
+        {
+            doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
+            doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+        }
+        centroid->grundyNumberIfRoot ^= heightTracker.grundyNumber();
     }
-    centroid->grundyNumberIfRoot ^= heightTracker.grundyNumber();
 
     for (auto& neighbour : centroid->neighbours)
     {
@@ -322,6 +344,7 @@ int main(int argc, char* argv[])
     auto readInt = [](){ int x; cin >> x; return x; };
 
     const auto numTestcases = readInt();
+    //const auto numTestcases = 1;
     for (int t = 0; t < numTestcases; t++)
     {
         const auto numNodes = readInt();
@@ -344,14 +367,14 @@ int main(int argc, char* argv[])
         }
 
         auto rootNode = &(nodes.front());
-        HeightTracker heightTracker;
+        HeightTracker heightTracker(100'000);
         doCentroidDecomposition(rootNode, heightTracker);
 
         vector<int> nodesThatGiveBobWinWhenRoot;
         int nodeNumber = 1;
         for (auto& node : nodes)
         {
-            assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
+            //assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
             if (node.grundyNumberIfRoot == 0)
                 nodesThatGiveBobWinWhenRoot.push_back(nodeNumber);
 
