@@ -330,6 +330,25 @@ int countDescendants(Node* node, Node* parentNode)
     return numDescendants;
 }
 
+template <typename NodeProcessor>
+void doDfsCentroid(Node* node, Node* parentNode, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+{
+    if (heightTrackerAdjustment == AdjustWithDepth)
+        heightTracker.adjustAllHeights(1);
+
+    processNode(node, depth);
+
+    for (auto child : node->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+    }
+
+    if (heightTrackerAdjustment == AdjustWithDepth)
+        heightTracker.adjustAllHeights(-1);
+}
+
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
     int numDescendents = 1;
@@ -377,13 +396,42 @@ Node* findCentroid(Node* startNode)
 
 
 
-void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
+void decompose(Node* startNode, vector<vector<int>>& blee, HeightTracker& heightTracker, int indentLevel = 0)
 {
+    heightTracker.clear();
     //cout << indent << "Decomposing graph containing " << startNode->index << endl;
     const auto numNodes = countDescendants(startNode, nullptr);
     Node* centroid = findCentroid(startNode);
     //cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
     //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
+
+    auto propagateHeights = [&heightTracker](Node* node, int depth)
+                        {
+                            node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                        };
+    auto collectHeights = [&heightTracker](Node* node, int depth)
+                        {
+                            if (node->hasCoin)
+                                heightTracker.insertHeight(depth);
+                        };
+
+    for (auto& child : centroid->neighbours)
+    {
+        doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
+        doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+    }
+    // Do it again, this time backwards ...  
+    reverse(centroid->neighbours.begin(), centroid->neighbours.end());
+    // ... and also include the centre, this time.
+    heightTracker.insertHeight(0);
+    for (auto& child : centroid->neighbours)
+    {
+        doDfsCentroid(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
+        doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+    }
+    centroid->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+
+
 
     static int numNodesTotal = 0;
     numNodesTotal += numNodes;
@@ -406,7 +454,7 @@ void decompose(Node* startNode, vector<vector<int>>& blee, int indentLevel = 0)
         descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
 #endif
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode), neighbour->neighbours.end());
-        decompose(neighbour, blee, indentLevel + 1);
+        decompose(neighbour, blee, heightTracker);
     }
 
 }
