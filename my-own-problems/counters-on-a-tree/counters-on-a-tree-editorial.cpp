@@ -20,7 +20,6 @@ constexpr auto maxBinaryDigits = log2(maxHeight);
 
 struct Node
 {
-    int nodeNumber = -1;
     bool hasCoin = false;
     vector<Node*> neighbours;
 
@@ -322,19 +321,17 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; cin >> x; return x; };
 
-    //const auto numTestcases = readInt();
-    const auto numTestcases = 1;
+    const auto numTestcases = readInt();
     for (int t = 0; t < numTestcases; t++)
     {
         const auto numNodes = readInt();
         vector<Node> nodes(numNodes);
 
-        for (auto i = 0; i < numNodes; i++)
+        for (auto& node : nodes)
         {
             const auto numCoins = readInt();
 
-            nodes[i].hasCoin = ((numCoins % 2) == 1);
-            nodes[i].nodeNumber = (i + 1);
+            node.hasCoin = ((numCoins % 2) == 1);
         }
 
         for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
@@ -351,11 +348,14 @@ int main(int argc, char* argv[])
         doCentroidDecomposition(rootNode, heightTracker);
 
         vector<int> nodesThatGiveBobWinWhenRoot;
+        int nodeNumber = 1;
         for (auto& node : nodes)
         {
             assert(node.grundyNumberIfRoot == node.dbgGrundyNumberIfRoot);
             if (node.grundyNumberIfRoot == 0)
-                nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
+                nodesThatGiveBobWinWhenRoot.push_back(nodeNumber);
+
+            nodeNumber++;
         }
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
         for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
