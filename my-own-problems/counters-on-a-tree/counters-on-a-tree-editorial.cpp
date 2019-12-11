@@ -318,19 +318,19 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
 int countDescendants(Node* node, Node* parentNode)
 {
     int numDescendants = 1; // Current node.
-    cout << "countDescendants: node: " << node->nodeNumber << endl;
+    //cout << "countDescendants: node: " << node->nodeNumber << endl;
 
     for (const auto& child : node->neighbours)
     {
         if (child == parentNode)
             continue;
 
-        cout << "  countDescendants: node: " << node->nodeNumber << " has neighbour: " << child->nodeNumber << endl;
+        //cout << "  countDescendants: node: " << node->nodeNumber << " has neighbour: " << child->nodeNumber << endl;
 
         numDescendants += countDescendants(child, node);
     }
 
-    cout << "countDescendants: node: " << node->nodeNumber << " numDescendants: " << numDescendants << endl;
+    //cout << "countDescendants: node: " << node->nodeNumber << " numDescendants: " << numDescendants << endl;
 
     return numDescendants;
 }
@@ -405,20 +405,20 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
 {
     heightTracker.clear();
     string indent(indentLevel, ' ');
-    cout << indent << "Decomposing graph containing " << startNode->nodeNumber << endl;
+    //cout << indent << "Decomposing graph containing " << startNode->nodeNumber << endl;
     const auto numNodes = countDescendants(startNode, nullptr);
     Node* centroid = findCentroid(startNode);
-    cout << indent << " centroid: " << centroid->nodeNumber << " num nodes: " << numNodes << endl;
-    cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
+    //cout << indent << " centroid: " << centroid->nodeNumber << " num nodes: " << numNodes << endl;
+    //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
 
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
-                            cout << "Propagate heights: node: " << node->nodeNumber << " depth: " <<  depth << " heightTracker.grundyNumber: " << heightTracker.grundyNumber() << endl;
+                            //cout << "Propagate heights: node: " << node->nodeNumber << " depth: " <<  depth << " heightTracker.grundyNumber: " << heightTracker.grundyNumber() << endl;
                             node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     auto collectHeights = [&heightTracker](Node* node, int depth)
                         {
-                            cout << "Collect heights: node: " << node->nodeNumber << " depth: " <<  depth << " hasCoin?: " << node->hasCoin << endl;
+                            //cout << "Collect heights: node: " << node->nodeNumber << " depth: " <<  depth << " hasCoin?: " << node->hasCoin << endl;
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
@@ -429,7 +429,7 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
         doDfsCentroid(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
     }
     // Do it again, this time backwards ...  
-    cout << "now in reverse: " << endl;
+    //cout << "now in reverse: " << endl;
     heightTracker.clear();
     reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     // ... and also include the centre, this time.
@@ -446,7 +446,7 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
 
     static int numNodesTotal = 0;
     numNodesTotal += numNodes;
-    cout << "numNodesTotal: " << numNodesTotal << endl;
+    //cout << "numNodesTotal: " << numNodesTotal << endl;
 
     vector<Node*> descendantsSoFar;
     descendantsSoFar.push_back(centroid);
@@ -503,6 +503,7 @@ int main(int argc, char* argv[])
             nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
         }
 
+#if 0
         for (auto& node : nodes)
         {
             cout << "node: " << node.nodeNumber << " hasCoin: " << node.hasCoin << " has neighbours: " << endl;
@@ -511,6 +512,7 @@ int main(int argc, char* argv[])
                 cout << " " << neighbour->nodeNumber << endl;
             }
         }
+#endif
 
         auto rootNode = &(nodes.front());
         fixParentChildAndCountDescendants(rootNode, nullptr);
@@ -523,13 +525,13 @@ int main(int argc, char* argv[])
 
         for (auto& node : nodes)
         {
-            cout << "node: " << node.nodeNumber << " dbgGrundyNumberIfRoot: " << node.dbgGrundyNumberIfRoot << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << (node.dbgGrundyNumberIfRoot == node.grundyNumberIfRoot ? "MATCH" : "**NO MATCH**") << endl;
+            //cout << "node: " << node.nodeNumber << " dbgGrundyNumberIfRoot: " << node.dbgGrundyNumberIfRoot << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << (node.dbgGrundyNumberIfRoot == node.grundyNumberIfRoot ? "MATCH" : "**NO MATCH**") << endl;
         }
 
         vector<int> nodesThatGiveBobWinWhenRoot;
         for (auto& node : nodes)
         {
-            if (node.dbgGrundyNumberIfRoot == 0)
+            if (node.grundyNumberIfRoot == 0)
                 nodesThatGiveBobWinWhenRoot.push_back(node.nodeNumber);
         }
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
