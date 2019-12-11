@@ -399,11 +399,12 @@ Node* findCentroid(Node* startNode)
 void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 0)
 {
     heightTracker.clear();
-    //cout << indent << "Decomposing graph containing " << startNode->index << endl;
+    string indent(indentLevel, ' ');
+    cout << indent << "Decomposing graph containing " << startNode->nodeNumber << endl;
     const auto numNodes = countDescendants(startNode, nullptr);
     Node* centroid = findCentroid(startNode);
-    //cout << indent << " centroid: " << centroid->index << " num nodes: " << numNodes << endl;
-    //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
+    cout << indent << " centroid: " << centroid->nodeNumber << " num nodes: " << numNodes << endl;
+    cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
 
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
@@ -455,7 +456,7 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
 #endif
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode) != neighbour->neighbours.end());
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), startNode), neighbour->neighbours.end());
-        decompose(neighbour, heightTracker);
+        decompose(neighbour, heightTracker, indentLevel + 1);
     }
 
 }
