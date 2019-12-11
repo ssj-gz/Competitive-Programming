@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) 16/3/18.
 // Editorial solution for "Move the Coins, Yet Again!".
-//#define SUBMISSION
+#define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
 #endif
@@ -318,19 +318,14 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
 int countDescendants(Node* node, Node* parentNode)
 {
     int numDescendants = 1; // Current node.
-    //cout << "countDescendants: node: " << node->nodeNumber << endl;
 
     for (const auto& child : node->neighbours)
     {
         if (child == parentNode)
             continue;
 
-        //cout << "  countDescendants: node: " << node->nodeNumber << " has neighbour: " << child->nodeNumber << endl;
-
         numDescendants += countDescendants(child, node);
     }
-
-    //cout << "countDescendants: node: " << node->nodeNumber << " numDescendants: " << numDescendants << endl;
 
     return numDescendants;
 }
@@ -399,26 +394,17 @@ Node* findCentroid(Node* startNode)
     return centroid;
 }
 
-
-
 void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 0)
 {
     heightTracker.clear();
-    string indent(indentLevel, ' ');
-    //cout << indent << "Decomposing graph containing " << startNode->nodeNumber << endl;
-    const auto numNodes = countDescendants(startNode, nullptr);
     Node* centroid = findCentroid(startNode);
-    //cout << indent << " centroid: " << centroid->nodeNumber << " num nodes: " << numNodes << endl;
-    //cout << " indentLevel: " << indentLevel << " numNodes: " << numNodes << endl;
 
     auto propagateHeights = [&heightTracker](Node* node, int depth)
                         {
-                            //cout << "Propagate heights: node: " << node->nodeNumber << " depth: " <<  depth << " heightTracker.grundyNumber: " << heightTracker.grundyNumber() << endl;
                             node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
                         };
     auto collectHeights = [&heightTracker](Node* node, int depth)
                         {
-                            //cout << "Collect heights: node: " << node->nodeNumber << " depth: " <<  depth << " hasCoin?: " << node->hasCoin << endl;
                             if (node->hasCoin)
                                 heightTracker.insertHeight(depth);
                         };
@@ -442,33 +428,12 @@ void decompose(Node* startNode, HeightTracker& heightTracker, int indentLevel = 
     }
     centroid->grundyNumberIfRoot ^= heightTracker.grundyNumber();
 
-
-
-    static int numNodesTotal = 0;
-    numNodesTotal += numNodes;
-    //cout << "numNodesTotal: " << numNodesTotal << endl;
-
-    vector<Node*> descendantsSoFar;
-    descendantsSoFar.push_back(centroid);
     for (auto& neighbour : centroid->neighbours)
     {
-#if 0
-        auto newDescendants = getDescendants(neighbour, centroid);
-        assert(newDescendants.size() <= numNodes / 2);
-        for (const auto& descendant : newDescendants)
-        {
-            for (const auto& oldDescendant : descendantsSoFar)
-            {
-                countPair(descendant, oldDescendant);
-            }
-        }
-        descendantsSoFar.insert(descendantsSoFar.end(), newDescendants.begin(), newDescendants.end());
-#endif
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
         decompose(neighbour, heightTracker, indentLevel + 1);
     }
-
 }
 
 
@@ -514,11 +479,11 @@ int main(int argc, char* argv[])
 #endif
 
         auto rootNode = &(nodes.front());
-        fixParentChildAndCountDescendants(rootNode, nullptr);
-        heavyChains.clear(); // TODO - stop using globals!
-        doHeavyLightDecomposition(rootNode, false);
+        //fixParentChildAndCountDescendants(rootNode, nullptr);
+        //heavyChains.clear(); // TODO - stop using globals!
+        //doHeavyLightDecomposition(rootNode, false);
 
-        computeGrundyNumberIfRootForAllNodes(nodes);
+        //computeGrundyNumberIfRootForAllNodes(nodes);
         HeightTracker heightTracker;
         decompose(rootNode, heightTracker);
 
