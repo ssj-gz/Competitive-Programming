@@ -465,7 +465,8 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; cin >> x; return x; };
 
-    const auto numTestcases = readInt();
+    //const auto numTestcases = readInt();
+    const auto numTestcases = 1; // TODO - change this back to the line above!
     for (int t = 0; t < numTestcases; t++)
     {
         const auto numNodes = readInt();
