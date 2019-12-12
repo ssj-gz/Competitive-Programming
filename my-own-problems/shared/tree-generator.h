@@ -197,7 +197,7 @@ class TreeGenerator
         void scrambleNodeIdsAndReorder(TestNode<NodeData>* forceAsRootNode)
         {
             scrambleNodeOrder();
-            for (int i = 0; i < m_nodes.size(); i++)
+            for (int i = 0; i < numNodes(); i++)
             {
                 m_nodes[i]->scrambledId = (i + 1);
             }
