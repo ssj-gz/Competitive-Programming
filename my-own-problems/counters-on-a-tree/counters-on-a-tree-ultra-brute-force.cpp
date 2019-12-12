@@ -67,6 +67,11 @@ bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
 
     buildParentLookup(rootNode, nullptr, parentLookup);
 
+    for (const auto& node : nodes)
+    {
+        cout << "Node id: " << (node.index + 1) << " has parent: " << (parentLookup[node.index] ? (parentLookup[node.index]->index + 1) : -1) << endl;
+    }
+
     vector<int> initialState;
     for (const auto& node : nodes)
     {
@@ -93,6 +98,8 @@ int main()
         {
             node.index = nodeIndex;
             node.numCoins = readInt();
+
+            nodeIndex++;
         }
 
         for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
