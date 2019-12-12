@@ -419,79 +419,86 @@ class TestSuite
             };
             std::map<int, std::vector<const TestFile<SubtaskInfo>*>> testFilesBySubtaskId;
             std::map<const TestFile<SubtaskInfo>*, std::string> fileNameForTestFile;
-            int testFileNum = 1;
             bool hasAnyValidationErrors = false;
             for (const auto& testFile : m_testFiles)
             {
                 testFilesBySubtaskId[testFile->containingSubtask()->subtaskId].push_back(testFile.get());
-
-                const auto& testcases = testFile->testcases();
-                const int numTestCases = testcases.size();
-                assert(numTestCases > 0);
-
-                std::ostringstream testFileOutStream;
-                testFileOutStream << numTestCases << std::endl;
-                for (const auto& testcase : testcases)
-                {
-                    auto testCaseContents = testcase->contents();
-                    trimTrailingWhiteSpace(testCaseContents);
-                    assert(!testCaseContents.empty());
-                    testFileOutStream << testCaseContents << std::endl;
-                }
-
-                auto testFileContents = testFileOutStream.str();
-                trimTrailingWhiteSpace(testFileContents);
-
-                std::string paddedFileNumber = std::to_string(testFileNum);
-                while (paddedFileNumber.length() < 3)
-                    paddedFileNumber = '0' + paddedFileNumber;
-
-                const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".in";
-                fileNameForTestFile[testFile.get()] = filename;
-
-                if (m_testFileVerifier)
-                {
-                    TestFileReader testFileReader(testFileContents);
-                    m_testFileVerifier(testFileReader, *testFile->containingSubtask());
-                    // Check that the Verifier has been paying at least *some* attention, and not just rubber-stamping stuff!
-                    if (testFileReader.numTestcasesValidated() != numTestCases)
-                    {
-                        testFileReader.addError("Only " + std::to_string(testFileReader.numTestcasesValidated()) + " of " + std::to_string(numTestCases) + " were marked as validated");
-                    }
-                    if (!testFileReader.isTestFileMarkedAsValidated())
-                    {
-                        testFileReader.addError("The testfile was not marked as validated!");
-                    }
-
-                    if (testFileReader.hasErrors())
-                    {
-                        hasAnyValidationErrors = true;
-                        std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") and filename " << filename << "  has validation errors:" << std::endl;
-                        for (const auto& errorMessage : testFileReader.errorMessages())
-                        {
-                            std::cerr << "     " << errorMessage << std::endl;
-                        }
-                    }
-                }
-
-
-                std::ofstream testFileOutFileStream(filename);
-                assert(testFileOutFileStream.is_open());
-                testFileOutFileStream << testFileContents;
-                assert(testFileOutFileStream.flush());
-                testFileOutFileStream.close();
-
-                testFileNum++;
             }
 
+            // Verify and write out testfiles.
+            int testFileNum = 1;
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
             {
-                std::cout << "Generated the following test files: " << std::endl;
+                for (const auto& testFile : testFilesForSubtask)
+                {
+                    const auto& testcases = testFile->testcases();
+                    const int numTestCases = testcases.size();
+                    assert(numTestCases > 0);
+
+                    std::ostringstream testFileOutStream;
+                    testFileOutStream << numTestCases << std::endl;
+                    for (const auto& testcase : testcases)
+                    {
+                        auto testCaseContents = testcase->contents();
+                        trimTrailingWhiteSpace(testCaseContents);
+                        assert(!testCaseContents.empty());
+                        testFileOutStream << testCaseContents << std::endl;
+                    }
+
+                    auto testFileContents = testFileOutStream.str();
+                    trimTrailingWhiteSpace(testFileContents);
+
+                    std::string paddedFileNumber = std::to_string(testFileNum);
+                    while (paddedFileNumber.length() < 3)
+                        paddedFileNumber = '0' + paddedFileNumber;
+
+                    const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".in";
+                    fileNameForTestFile[testFile] = filename;
+
+                    if (m_testFileVerifier)
+                    {
+                        TestFileReader testFileReader(testFileContents);
+                        m_testFileVerifier(testFileReader, *testFile->containingSubtask());
+                        // Check that the Verifier has been paying at least *some* attention, and not just rubber-stamping stuff!
+                        if (testFileReader.numTestcasesValidated() != numTestCases)
+                        {
+                            testFileReader.addError("Only " + std::to_string(testFileReader.numTestcasesValidated()) + " of " + std::to_string(numTestCases) + " were marked as validated");
+                        }
+                        if (!testFileReader.isTestFileMarkedAsValidated())
+                        {
+                            testFileReader.addError("The testfile was not marked as validated!");
+                        }
+
+                        if (testFileReader.hasErrors())
+                        {
+                            hasAnyValidationErrors = true;
+                            std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") and filename " << filename << "  has validation errors:" << std::endl;
+                            for (const auto& errorMessage : testFileReader.errorMessages())
+                            {
+                                std::cerr << "     " << errorMessage << std::endl;
+                            }
+                        }
+                    }
+
+
+                    std::ofstream testFileOutFileStream(filename);
+                    assert(testFileOutFileStream.is_open());
+                    testFileOutFileStream << testFileContents;
+                    assert(testFileOutFileStream.flush());
+                    testFileOutFileStream.close();
+
+                    testFileNum++;
+                }
+            }
+
+            std::cout << "Generated the following test files: " << std::endl;
+            testFileNum = 1;
+            for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
+            {
                 std::cout << "Subtask: " << subtaskId << std::endl;
                 assert(!testFilesBySubtaskId.empty());
                 const SubtaskInfo& subTaskInfo = *testFilesForSubtask.front()->containingSubtask();
                 std::cout << subTaskInfo << std::endl;
-                int testFileNum = 1;
                 for (const auto testFile : testFilesForSubtask)
                 {
                     std::cout << "   Testfile # " << testFileNum << " filename: " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
