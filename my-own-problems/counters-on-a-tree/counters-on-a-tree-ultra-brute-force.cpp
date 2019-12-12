@@ -59,7 +59,7 @@ bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>
 
 bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
 {
-    cout << "firstPlayerWins? rootNode " << rootNode->index << endl;
+    //cout << "firstPlayerWins? rootNode " << rootNode->index << endl;
     const int numNodes = nodes.size();
     vector<Node*> parentLookup(numNodes, nullptr);
 
@@ -67,7 +67,7 @@ bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
 
     for (const auto& node : nodes)
     {
-        cout << "Node id: " << (node.index + 1) << " has parent: " << (parentLookup[node.index] ? (parentLookup[node.index]->index + 1) : -1) << endl;
+        //cout << "Node id: " << (node.index + 1) << " has parent: " << (parentLookup[node.index] ? (parentLookup[node.index]->index + 1) : -1) << endl;
     }
 
     vector<vector<Node*>> allowedMovesForNodeLookup(numNodes);
@@ -128,7 +128,7 @@ int main()
         for (auto& rootNode : nodes)
         {
             const bool bobWins = !firstPlayerWins(nodes, &rootNode);
-            cout << "root node: " << (rootNode.index + 1) << " bob wins: " << bobWins << endl;
+            //cout << "root node: " << (rootNode.index + 1) << " bob wins: " << bobWins << endl;
             if (bobWins)
             {
                 result = (result + powerOf2) % MOD;
