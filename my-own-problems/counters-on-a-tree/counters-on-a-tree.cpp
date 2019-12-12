@@ -848,6 +848,7 @@ int main(int argc, char* argv[])
         assert(cin);
 
         auto rootNode = &(nodes.front());
+        heavyChains.clear();
         fixParentChildAndCountDescendants(rootNode, nullptr);
         doHeavyLightDecomposition(rootNode, false);
 
@@ -868,10 +869,24 @@ int main(int argc, char* argv[])
         }
 
         //cout << "numBlah: " << numBlah << " numNodes: " << numNodes << endl;
+        int64_t MOD = 1'000'000'007;
+        int64_t powerOf2 = 1;
+        int64_t result = 0;
+        for (auto& node : nodes)
+        {
+            if (node.grundyNumber == 0)
+            {
+                result = (result + powerOf2) % MOD;
+            }
+            powerOf2 = (powerOf2 * 2) % MOD;
+        }
+        cout << result << endl;
+#if 0
         cout << nodeNumbersBobWin.size() << endl;
         for (const auto nodeNum : nodeNumbersBobWin)
         {
             cout << nodeNum << endl; 
         }
+#endif
     }
 }
