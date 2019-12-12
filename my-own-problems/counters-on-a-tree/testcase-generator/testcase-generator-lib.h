@@ -486,9 +486,10 @@ class TestSuite
             {
                 std::cout << "Generated the following test files: " << std::endl;
                 std::cout << "Subtask: " << subtaskId << std::endl;
+                int testFileNum = 1;
                 for (const auto testFile : testFilesForSubtask)
                 {
-                    std::cout << "   " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
+                    std::cout << "   Testfile # " << testFileNum << " filename: " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
 
                     std::cout << "      " << testFile->numTestCases() << " test cases";
 
@@ -512,6 +513,7 @@ class TestSuite
                     {
                         std::cout << std::endl;
                     }
+                    testFileNum++;
                 }
 
             }
