@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 10942 Bob wins"));
 
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
                 addCounters(treeGenerator, 80.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 2923 Bob wins"));
 
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'992, 7.0);
                 addCounters(treeGenerator, 70.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 
 
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const int numNodesPhase1 = rnd.next(numNodes);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
@@ -382,7 +382,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
 
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const int numNodesPhase1 = rnd.next(numNodes);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
