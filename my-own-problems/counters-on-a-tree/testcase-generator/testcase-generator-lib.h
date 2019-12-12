@@ -528,6 +528,7 @@ class TestSuite
                     testFileNum++;
                 }
 
+                std::cout << std::endl;
             }
 
             if (hasAnyValidationErrors)
