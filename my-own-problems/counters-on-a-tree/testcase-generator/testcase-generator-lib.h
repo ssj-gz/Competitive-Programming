@@ -408,7 +408,7 @@ class TestSuite
             assert(!m_testFileVerifier);
             m_testFileVerifier = testFileVerifier;
         }
-        void writeTestFiles()
+        bool writeTestFiles()
         {
             auto trimTrailingWhiteSpace = [](std::string& stringToTrim)
             {
@@ -523,7 +523,10 @@ class TestSuite
             if (hasAnyValidationErrors)
             {
                 std::cerr << "\n** Error - some testfiles had some validation errors (see above for more details) - the generated testfiles should *NOT* be submitted for use in a Contest!!! **" << std::endl;
+                return false;
             }
+
+            return true;
         }
     private:
         std::vector<std::unique_ptr<TestFile<SubtaskInfo>>> m_testFiles;

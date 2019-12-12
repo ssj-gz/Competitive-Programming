@@ -394,7 +394,11 @@ int main(int argc, char* argv[])
         }
         // TODO - fat node where each arm has length at least two - this will give many subtrees when doing centroid decomposition.
     }
-    testsuite.writeTestFiles();
+    const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
+    if (!validatedAndWrittenSuccessfully)
+        return EXIT_FAILURE;
+
+    return EXIT_SUCCESS;
 }
 
 struct Node
