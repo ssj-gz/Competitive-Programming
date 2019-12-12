@@ -81,7 +81,8 @@ std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo
 {
     outStream << "Constraints: " << std::endl;
     outStream << " Maximum num nodes per testcase (i.e. N): " << subtaskInfo.maxNodesPerTestcase << std::endl;
-    outStream << " Maximum sum of N over all testcases: " << subtaskInfo.maxNodesOverAllTestcases << std::endl;
+    if (subtaskInfo.maxNodesOverAllTestcases != NoExplicitLimit)
+        outStream << " Maximum sum of N over all testcases: " << subtaskInfo.maxNodesOverAllTestcases << std::endl;
     outStream << " Max counters initially placed on a node (i.e. c_i): " << subtaskInfo.maxNumCountersPerNode << std::endl;
     if (subtaskInfo.maxNumCountersOverAllNodes != NoExplicitLimit)
         outStream << " Max sum of initial counters over all nodes (i.e. c_1 + c_2 + ... + c_N) : " << subtaskInfo.maxNumCountersOverAllNodes << std::endl;
@@ -156,6 +157,25 @@ int main(int argc, char* argv[])
 {
     TestSuite<SubtaskInfo> testsuite;
     testsuite.setTestFileVerifier(&verifyTestFile);
+
+    // SUBTASK 1
+    {
+        auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+                                                                          .withDescription("Misc tiny testcases")
+                                                                          .withSeed(999));
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("10 nodes in a chain; 1 counter placed on each 'even' node"));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                treeGenerator.addNodeChain(rootNode, 9);
+                for (int i = 0; i < treeGenerator.numNodes(); i++)
+                {
+                    treeGenerator.nodes()[i]->data.numCounters = ((i % 2) == 0);
+                }
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+    }
     
     // SUBTASK 3
     {
