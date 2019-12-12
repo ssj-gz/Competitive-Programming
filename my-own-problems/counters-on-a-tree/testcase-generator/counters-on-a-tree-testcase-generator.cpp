@@ -175,6 +175,31 @@ int main(int argc, char* argv[])
                 }
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
+            {
+                // Random tiny testcases.
+                while (testFile.numTestCases() < subtask1.maxNumTestcases)
+                {
+                    auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
+                    const int numNodes = 1 + rnd.next(subtask1.maxNodesPerTestcase);
+                    const int totalCounters = 1 + rnd.next(subtask1.maxNumCountersOverAllNodes);
+                    TreeGenerator<NodeData> treeGenerator;
+                    treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                    while (treeGenerator.numNodes() < numNodes)
+                    {
+                        treeGenerator.createNodeWithRandomParent();
+                    }
+                    for (auto& node : treeGenerator.nodes())
+                    {
+                        node->data.numCounters = 0;
+                    }
+                    for (int i = 0; i < totalCounters; i++)
+                    {
+                        const int addToNodeId = rnd.next(numNodes);
+                        treeGenerator.nodes()[addToNodeId]->data.numCounters++;
+                    }
+                    scrambleAndwriteTestcase(treeGenerator, testcase);
+                }
+            }
     }
     
     // SUBTASK 3
