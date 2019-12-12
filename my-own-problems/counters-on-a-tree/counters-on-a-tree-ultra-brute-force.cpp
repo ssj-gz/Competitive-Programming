@@ -25,12 +25,12 @@ void buildParentLookup(Node* currentNode, Node* parentNode, vector<Node*>& paren
     }
 }
 
-enum Result { Unknown, CurrentPlayerWins, CurrentPlayerLoses };
+enum class Result { Unknown, CurrentPlayerWins, CurrentPlayerLoses };
 bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>, Result>& resultLookup, const vector<vector<Node*>>& allowedMovesForNodeLookup)
 {
-    if (resultLookup[state] != Unknown)
+    if (resultLookup[state] != Result::Unknown)
     {
-        return resultLookup[state] == CurrentPlayerWins;
+        return resultLookup[state] == Result::CurrentPlayerWins;
     }
 
     bool currentPlayerHasWinningMove = false;
@@ -52,7 +52,7 @@ bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>
         }
     }
 
-    resultLookup[state] = (currentPlayerHasWinningMove ? CurrentPlayerWins : CurrentPlayerLoses);
+    resultLookup[state] = (currentPlayerHasWinningMove ? Result::CurrentPlayerWins : Result::CurrentPlayerLoses);
 
     return currentPlayerHasWinningMove;
 };
@@ -80,6 +80,7 @@ bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
             allowedMoves.push_back(currentNode);
             currentNode = parentLookup[currentNode->index];
         }
+        allowedMovesForNodeLookup[node.index] = allowedMoves;
     }
 
     vector<int> initialState;
@@ -126,7 +127,9 @@ int main()
         int64_t powerOf2 = 1;
         for (auto& rootNode : nodes)
         {
-            if (!firstPlayerWins(nodes, &rootNode))
+            const bool bobWins = !firstPlayerWins(nodes, &rootNode);
+            cout << "root node: " << (rootNode.index + 1) << " bob wins: " << bobWins << endl;
+            if (bobWins)
             {
                 result = (result + powerOf2) % MOD;
             }
