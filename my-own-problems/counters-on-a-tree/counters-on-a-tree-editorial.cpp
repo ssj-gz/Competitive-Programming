@@ -44,9 +44,9 @@ class HeightTracker
                 m_heightsModPowerOf2[binaryDigitNum] = vector<int>(powerOf2);
                 m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
                 m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
+                if (powerOf2 / 2 > maxHeight) 
+                    break; // i.e. even if we scrolled this powerOf2 maxHeight units, we'd never enter the "make digit 1" zone.
                 powerOf2 <<= 1;
-                if (powerOf2 / 4 > maxHeight)
-                    break;
                 m_numBits++;
             }
         }
