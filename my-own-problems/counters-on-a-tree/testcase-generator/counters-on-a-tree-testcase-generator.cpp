@@ -23,6 +23,19 @@ SubtaskInfo subtask1 = { 1, 15, 150, 15, 5, 10 };
 SubtaskInfo subtask2 = { 2, 1000, 2 * maxNodes, maxCounters, std::numeric_limits<int>::max(), 10 };
 SubtaskInfo subtask3 = { 3, maxNodes, 2 * maxNodes, maxCounters, std::numeric_limits<int>::max(), maxNumTestcases };
 
+std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo)
+{
+    outStream << "Constraints: " << std::endl;
+    outStream << " Maximum num nodes per testcase (i.e. N): " << subtaskInfo.maxNodesPerTestcase << std::endl;
+    outStream << " Maximum sum of N over all testcases: " << subtaskInfo.maxNodesOverAllTestcases << std::endl;
+    outStream << " Max counters initially placed on a node (i.e. c_i): " << subtaskInfo.maxNumCountersPerNode << std::endl;
+    if (subtaskInfo.maxNumCountersOverAllNodes != std::numeric_limits<int>::max())
+        outStream << " Max sum of initial counters over all nodes (i.e. c_1 + c_2 + ... + c_N) : " << subtaskInfo.maxNumCountersOverAllNodes << std::endl;
+    outStream << " Max num testcases (i.e. T): " << subtaskInfo.maxNumTestcases << std::endl;
+
+    return outStream;
+};
+
 struct NodeData
 {
     int numCounters = -1;

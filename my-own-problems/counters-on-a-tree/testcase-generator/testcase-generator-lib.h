@@ -488,6 +488,9 @@ class TestSuite
             {
                 std::cout << "Generated the following test files: " << std::endl;
                 std::cout << "Subtask: " << subtaskId << std::endl;
+                assert(!testFilesBySubtaskId.empty());
+                const SubtaskInfo& subTaskInfo = *testFilesForSubtask.front()->containingSubtask();
+                std::cout << subTaskInfo << std::endl;
                 int testFileNum = 1;
                 for (const auto testFile : testFilesForSubtask)
                 {
