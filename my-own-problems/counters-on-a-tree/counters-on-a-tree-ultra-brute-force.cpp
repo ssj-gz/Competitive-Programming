@@ -26,7 +26,7 @@ void buildParentLookup(Node* currentNode, Node* parentNode, vector<Node*>& paren
 }
 
 enum Result { Unknown, CurrentPlayerWins, CurrentPlayerLoses };
-bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>, Result>& resultLookup, const vector<Node*>& parentLookup)
+bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>, Result>& resultLookup, const vector<vector<Node*>>& allowedMovesForNodeLookup)
 {
     if (resultLookup[state] != Unknown)
     {
@@ -37,20 +37,18 @@ bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>
     const int numNodes = state.size();
     for (int nodeIndex = 0; nodeIndex < numNodes; nodeIndex++)
     {
-        if (nodeIndex == rootNode->index)
-            continue;
-
         if (state[nodeIndex] > 0)
         {
-            vector<int> nextState = state;
-            Node* parentNode = parentLookup[nodeIndex];
-            assert(parentNode);
-            nextState[nodeIndex]--;
-            nextState[parentNode->index]++;
+            for (auto destNode : allowedMovesForNodeLookup[nodeIndex])
+            {
+                vector<int> nextState = state;
+                nextState[nodeIndex]--;
+                nextState[destNode->index]++;
+                const auto isWinForPlayer = (!currentPlayerWins(nextState, rootNode, resultLookup, allowedMovesForNodeLookup));
+                if (isWinForPlayer)
+                    currentPlayerHasWinningMove = true;
+            }
 
-            const auto isWinForPlayer = (!currentPlayerWins(nextState, rootNode, resultLookup, parentLookup));
-            if (isWinForPlayer)
-                currentPlayerHasWinningMove = true;
         }
     }
 
@@ -72,6 +70,18 @@ bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
         cout << "Node id: " << (node.index + 1) << " has parent: " << (parentLookup[node.index] ? (parentLookup[node.index]->index + 1) : -1) << endl;
     }
 
+    vector<vector<Node*>> allowedMovesForNodeLookup(numNodes);
+    for (const auto& node : nodes)
+    {
+        vector<Node*> allowedMoves;
+        Node* currentNode = parentLookup[node.index];
+        while (currentNode)
+        {
+            allowedMoves.push_back(currentNode);
+            currentNode = parentLookup[currentNode->index];
+        }
+    }
+
     vector<int> initialState;
     for (const auto& node : nodes)
     {
@@ -80,7 +90,7 @@ bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
 
     map<vector<int>, Result> resultLookup;
 
-    return currentPlayerWins(initialState, rootNode, resultLookup, parentLookup);
+    return currentPlayerWins(initialState, rootNode, resultLookup, allowedMovesForNodeLookup);
 }
 
 int main()
