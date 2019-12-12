@@ -445,7 +445,7 @@ class TestSuite
                 while (paddedFileNumber.length() < 3)
                     paddedFileNumber = '0' + paddedFileNumber;
 
-                const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".txt";
+                const std::string filename = "testfile-" + paddedFileNumber + "-subtask-" + std::to_string(testFile->containingSubtask()->subtaskId) + ".in";
                 fileNameForTestFile[testFile.get()] = filename;
 
                 if (m_testFileVerifier)
