@@ -420,6 +420,7 @@ class TestSuite
             std::map<int, std::vector<const TestFile<SubtaskInfo>*>> testFilesBySubtaskId;
             std::map<const TestFile<SubtaskInfo>*, std::string> fileNameForTestFile;
             int testFileNum = 1;
+            bool hasAnyValidationErrors = false;
             for (const auto& testFile : m_testFiles)
             {
                 testFilesBySubtaskId[testFile->containingSubtask()->subtaskId].push_back(testFile.get());
@@ -464,6 +465,7 @@ class TestSuite
 
                     if (testFileReader.hasErrors())
                     {
+                        hasAnyValidationErrors = true;
                         std::cerr << "** The testfile with description (" << (testFile->description().empty() ? "no description" : testFile->description()) << ") and filename " << filename << "  has validation errors:" << std::endl;
                         for (const auto& errorMessage : testFileReader.errorMessages())
                         {
@@ -516,6 +518,11 @@ class TestSuite
                     testFileNum++;
                 }
 
+            }
+
+            if (hasAnyValidationErrors)
+            {
+                std::cerr << "\n** Error - some testfiles had some validation errors (see above for more details) - the generated testfiles should *NOT* be submitted for use in a Contest!!! **" << std::endl;
             }
         }
     private:
