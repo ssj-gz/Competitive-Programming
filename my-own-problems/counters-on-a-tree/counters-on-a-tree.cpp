@@ -706,51 +706,54 @@ int main(int argc, char* argv[])
         if (string(argv[1]) == "--test")
         {
             //const int numNodes = rand() % 10 + 1;
-            TreeGenerator treeGenerator;
-            const int numNodes = 100'000;
-            const int numEdges = numNodes - 1;
-            auto rootNode = treeGenerator.createNode();
+            const int T = 1;
+            cout << T << endl;
+            for (int t = 0; t < T; t++)
+            {
+                TreeGenerator treeGenerator;
+                const int numNodes = rand() % 16000 + 1;
+                const int numEdges = numNodes - 1;
+                auto rootNode = treeGenerator.createNode();
 #if 0
-            //auto blah = treeGenerator.addNodeChain(rootNode, 4 * numNodes / 10);
-            auto blah = treeGenerator.addNodeChain(rootNode, 4);
-            //auto endOfChain = blah.back();
-            //for (auto chainNode : blah)
-            //{
-            //treeGenerator.createNode(chainNode);
-            //}
+                //auto blah = treeGenerator.addNodeChain(rootNode, 4 * numNodes / 10);
+                auto blah = treeGenerator.addNodeChain(rootNode, 4);
+                //auto endOfChain = blah.back();
+                //for (auto chainNode : blah)
+                //{
+                //treeGenerator.createNode(chainNode);
+                //}
 #endif
 #if 0
-            //set<TestNode*> preferredSet = {rootNode, endOfChain};
-            set<TestNode*> preferredSet(blah.begin(), blah.end());
-            treeGenerator.createNodesWithRandomParentPreferringFromSet(preferredSet, numNodes - treeGenerator.numNodes(), 99.0f, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
-                    {
-                    //addNewNodeToSet = parentWasPreferred;
-                    addNewNodeToSet = false;
-                    removeParentFromSet = false;
-                    });
+                //set<TestNode*> preferredSet = {rootNode, endOfChain};
+                set<TestNode*> preferredSet(blah.begin(), blah.end());
+                treeGenerator.createNodesWithRandomParentPreferringFromSet(preferredSet, numNodes - treeGenerator.numNodes(), 99.0f, [](TestNode* newNode, TestNode* newNodeParent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                        //addNewNodeToSet = parentWasPreferred;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
+                        });
 #endif
-            //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
-            //treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
-            //treeGenerator.addNodeChain(rootNode, 22'000);
-            //treeGenerator.addNodeChain(rootNode, 22'000);
-            //treeGenerator.addNodeChain(rootNode, 22'000);
-            treeGenerator.addNodeChain(rootNode, 70'000);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(5000, 2.0);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+                //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 2.0);
+                //treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+                //treeGenerator.addNodeChain(rootNode, 22'000);
+                //treeGenerator.addNodeChain(rootNode, 22'000);
+                //treeGenerator.addNodeChain(rootNode, 22'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rand() % 100);
 
-            for (auto node : treeGenerator.nodes())
-            {
-                node->data.numCoins = rand() % 20;
-            }
+                for (auto node : treeGenerator.nodes())
+                {
+                    node->data.numCoins = rand() % 20;
+                }
 
-            cout << numNodes << endl;
-            treeGenerator.scrambleNodeIdsAndReorder(nullptr);
-            treeGenerator.scrambleEdgeOrder();
-            for (auto node : treeGenerator.nodes())
-            {
-                cout << node->data.numCoins << endl;
+                cout << numNodes << endl;
+                treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+                treeGenerator.scrambleEdgeOrder();
+                for (auto node : treeGenerator.nodes())
+                {
+                    cout << node->data.numCoins << endl;
+                }
+                treeGenerator.printEdges();
             }
-            treeGenerator.printEdges();
             return 0;
         }
         else if (string(argv[1]) == "--scramble")
@@ -796,72 +799,79 @@ int main(int argc, char* argv[])
         }
     }
 
-    int numNodes;
-    cin >> numNodes;
+    int numTests;
+    cin >> numTests;
 
-    cout << "numNodes: " << numNodes << endl;
-
-    vector<Node> nodes(numNodes);
-    for (int nodeIndex = 0; nodeIndex < numNodes; nodeIndex++)
+    for (int t = 0; t < numTests; t++)
     {
-        nodes[nodeIndex].id = nodeIndex + 1;
-    }
 
-    for (int i = 0; i < numNodes; i++)
-    {
-        int numCoins;
-        cin >> numCoins;
-        //cout << "numCoins: " << numCoins << endl;
-        nodes[i].hasCoin = ((numCoins % 2) == 1);
-        //nodes[i].hasCoin = rand() % 2;
-    }
+        int numNodes;
+        cin >> numNodes;
 
-    for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
-    {
-        int node1;
-        cin >> node1;
-        int node2;
-        cin >> node2;
-        //cout << "node1 : " << node1 << " node2: " << node2 << endl;
-        // Make 0-relative.
-        node1--;
-        node2--;
+        //cout << "numNodes: " << numNodes << endl;
+
+        vector<Node> nodes(numNodes);
+        for (int nodeIndex = 0; nodeIndex < numNodes; nodeIndex++)
+        {
+            nodes[nodeIndex].id = nodeIndex + 1;
+        }
+
+        for (int i = 0; i < numNodes; i++)
+        {
+            int numCoins;
+            cin >> numCoins;
+            //cout << "numCoins: " << numCoins << endl;
+            nodes[i].hasCoin = ((numCoins % 2) == 1);
+            //nodes[i].hasCoin = rand() % 2;
+        }
+
+        for (int edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
+        {
+            int node1;
+            cin >> node1;
+            int node2;
+            cin >> node2;
+            //cout << "node1 : " << node1 << " node2: " << node2 << endl;
+            // Make 0-relative.
+            node1--;
+            node2--;
+            assert(cin);
+
+            //cout << "edge: " << nodes[node1].id << " - " << nodes[node2].id << endl;
+
+            nodes[node1].children.push_back(&(nodes[node2]));
+            nodes[node2].children.push_back(&(nodes[node1]));
+
+            nodes[node1].neighbours.push_back(&(nodes[node2]));
+            nodes[node2].neighbours.push_back(&(nodes[node1]));
+        }
         assert(cin);
 
-        //cout << "edge: " << nodes[node1].id << " - " << nodes[node2].id << endl;
+        auto rootNode = &(nodes.front());
+        fixParentChildAndCountDescendants(rootNode, nullptr);
+        doHeavyLightDecomposition(rootNode, false);
 
-        nodes[node1].children.push_back(&(nodes[node2]));
-        nodes[node2].children.push_back(&(nodes[node1]));
-
-        nodes[node1].neighbours.push_back(&(nodes[node2]));
-        nodes[node2].neighbours.push_back(&(nodes[node1]));
-    }
-    assert(cin);
-
-    auto rootNode = &(nodes.front());
-    fixParentChildAndCountDescendants(rootNode, nullptr);
-    doHeavyLightDecomposition(rootNode, false);
-
-    computeGrundyNumberForAllNodes(nodes);
-    int nodeNum = 1;
-    vector<int> nodeNumbersBobWin;
-    for (auto& node : nodes)
-    {
-        const auto resultBruteForce = grundyNumberBruteForce(&node);
-        cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
-        //cout << "Node: " << node.id << " grundy:" << resultBruteForce << endl;
-        assert(resultBruteForce == node.grundyNumber);
-        if (node.grundyNumber == 0)
+        computeGrundyNumberForAllNodes(nodes);
+        int nodeNum = 1;
+        vector<int> nodeNumbersBobWin;
+        for (auto& node : nodes)
         {
-            nodeNumbersBobWin.push_back(nodeNum);
+            const auto resultBruteForce = grundyNumberBruteForce(&node);
+            cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+            //cout << "Node: " << node.id << " grundy:" << resultBruteForce << endl;
+            assert(resultBruteForce == node.grundyNumber);
+            if (node.grundyNumber == 0)
+            {
+                nodeNumbersBobWin.push_back(nodeNum);
+            }
+            nodeNum++;
         }
-        nodeNum++;
-    }
 
-    //cout << "numBlah: " << numBlah << " numNodes: " << numNodes << endl;
-    cout << nodeNumbersBobWin.size() << endl;
-    for (const auto nodeNum : nodeNumbersBobWin)
-    {
-        cout << nodeNum << endl; 
+        //cout << "numBlah: " << numBlah << " numNodes: " << numNodes << endl;
+        cout << nodeNumbersBobWin.size() << endl;
+        for (const auto nodeNum : nodeNumbersBobWin)
+        {
+            cout << nodeNum << endl; 
+        }
     }
 }
