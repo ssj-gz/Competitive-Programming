@@ -176,7 +176,8 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                // Random tiny testcases.
+                // Random tiny testcases. TODO - these are actually pretty weak and boring, but the
+                // size is so small it's hard to think of anything interesting to do with them!
                 while (testFile.numTestCases() < subtask1.maxNumTestcases)
                 {
                     auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
@@ -200,6 +201,25 @@ int main(int argc, char* argv[])
                     scrambleAndwriteTestcase(treeGenerator, testcase);
                 }
             }
+    }
+    
+    // SUBTASK 2
+    {
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                                                                              .withSeed(9734)
+                                                                              .withDescription("Misc testcases with ~1000 nodes"));
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                const int numNodes = rnd.next(subtask3.maxNodesPerTestcase - 100, subtask3.maxNodesPerTestcase);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(1.0, 100.0));
+                addCounters(treeGenerator, rnd.next(70.0, 95.0));
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     
     // SUBTASK 3
