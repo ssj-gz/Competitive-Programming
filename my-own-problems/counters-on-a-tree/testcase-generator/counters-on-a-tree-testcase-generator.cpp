@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
     // SUBTASK 2
     {
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask2)
                                                                               .withSeed(9734)
                                                                               .withDescription("Misc testcases with ~1000 nodes"));
             {
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                const int numNodes = rnd.next(subtask3.maxNodesPerTestcase - 100, subtask3.maxNodesPerTestcase);
+                const int numNodes = rnd.next(subtask2.maxNodesPerTestcase - 100, subtask2.maxNodesPerTestcase);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(1.0, 100.0));
                 addCounters(treeGenerator, rnd.next(70.0, 95.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
