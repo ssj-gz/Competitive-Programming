@@ -706,7 +706,7 @@ int main(int argc, char* argv[])
         if (string(argv[1]) == "--test")
         {
             //const int numNodes = rand() % 10 + 1;
-            const int T = 1;
+            const int T = rand() % 10 + 1;
             cout << T << endl;
             for (int t = 0; t < T; t++)
             {
