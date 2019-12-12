@@ -68,7 +68,7 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumCountersPerNode(maxCounters)
                                             .withMaxNumCountersOverAllNodes(NoExplicitLimit)
-                                            .withMaxNumTestcases(10);
+                                            .withMaxNumTestcases(50);
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withMaxNodesPerTestcase(maxNodes)
