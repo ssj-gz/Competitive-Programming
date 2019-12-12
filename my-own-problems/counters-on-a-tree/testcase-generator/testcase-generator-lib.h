@@ -403,6 +403,10 @@ class TestSuite
             m_testFiles.push_back(std::make_unique<TestFile<SubtaskInfo>>(newTestFileInfo));
             return *m_testFiles.back();
         };
+        int numTestFiles() const
+        {
+            return m_testFiles.size();
+        }
         void setTestFileVerifier(std::function<bool(TestFileReader&, const SubtaskInfo&)> testFileVerifier)
         {
             assert(!m_testFileVerifier);
