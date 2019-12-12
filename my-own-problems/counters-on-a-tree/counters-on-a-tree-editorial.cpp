@@ -338,11 +338,25 @@ int main(int argc, char* argv[])
 
             nodeNumber++;
         }
+#if 0
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
         for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
         {
             cout << bobWinNodeNum << endl;
         }
+#endif
+        int64_t MOD = 1'000'000'007;
+        int64_t result = 0;
+        int64_t powerOf2 = 1;
+        for (auto& node : nodes)
+        {
+            if (node.grundyNumberIfRoot == 0)
+            {
+                result = (result + powerOf2) % MOD;
+            }
+            powerOf2 = (powerOf2 * 2) % MOD;
+        }
+        cout << result << endl;
     }
 #if 0
     cout << "numInsertHeights: " << numInsertHeights << endl;
