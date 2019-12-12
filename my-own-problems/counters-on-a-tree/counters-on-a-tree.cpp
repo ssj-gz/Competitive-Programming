@@ -318,7 +318,7 @@ int grundyNumberBruteForce(Node* node, Node* parent = nullptr, int depth = 0)
     if (depth > maxDepth)
     {
         maxDepth = depth;
-        cout << " new max depth: " << maxDepth << endl; 
+        //cout << " new max depth: " << maxDepth << endl; 
     }
     int grundyNumber = (node->hasCoin ? depth : 0);
     for (const auto child : node->neighbours)
@@ -857,7 +857,7 @@ int main(int argc, char* argv[])
         for (auto& node : nodes)
         {
             const auto resultBruteForce = grundyNumberBruteForce(&node);
-            cout << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
+            //cerr << "Node: " << node.id << " real grundy number: " <<  resultBruteForce << " optimised grundy number: " << node.grundyNumber << " " << (resultBruteForce == node.grundyNumber ? "MATCH" : "MISMATCH") << endl; 
             //cout << "Node: " << node.id << " grundy:" << resultBruteForce << endl;
             assert(resultBruteForce == node.grundyNumber);
             if (node.grundyNumber == 0)
