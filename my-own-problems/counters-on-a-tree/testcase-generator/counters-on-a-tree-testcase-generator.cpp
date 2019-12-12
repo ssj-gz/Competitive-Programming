@@ -209,12 +209,14 @@ int main(int argc, char* argv[])
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask2)
                                                                               .withSeed(9734)
                                                                               .withDescription("Misc testcases with ~1000 nodes"));
+            for (int t = 0; t < subtask2.maxNumTestcases; t++)
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
                 const int numNodes = rnd.next(subtask2.maxNodesPerTestcase - 100, subtask2.maxNodesPerTestcase);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
                 addCounters(treeGenerator, rnd.next(70.0, 95.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
