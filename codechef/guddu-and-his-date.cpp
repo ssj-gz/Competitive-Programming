@@ -2,7 +2,7 @@
 // 
 // Solution to: https://www.codechef.com/problems/CB2000
 //
-//#define SUBMISSION
+#define SUBMISSION
 #define BRUTE_FORCE
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised.value() == solutionBruteForce.value());
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(N);
         cout << solutionOptimised << endl;
 #endif
     }
