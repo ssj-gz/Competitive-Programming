@@ -17,6 +17,63 @@
 
 using namespace std;
 
+const int64_t Mod = 1'000'000'007ULL;
+
+class ModNum
+{
+    public:
+        ModNum(int64_t n = 0)
+            : m_n{n}
+        {
+            assert(n >= 0);
+        }
+        ModNum& operator+=(const ModNum& other)
+        {
+            m_n = (m_n + other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator-=(const ModNum& other)
+        {
+            m_n = (Mod + m_n - other.m_n) % Mod;
+            return *this;
+        }
+        ModNum& operator*=(const ModNum& other)
+        {
+            m_n = (m_n * other.m_n) % Mod;
+            return *this;
+        }
+        int64_t value() const { return m_n; };
+    private:
+        int64_t m_n;
+};
+
+ModNum operator+(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result += rhs;
+    return result;
+}
+
+ModNum operator-(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result -= rhs;
+    return result;
+}
+
+ModNum operator*(const ModNum& lhs, const ModNum& rhs)
+{
+    ModNum result(lhs);
+    result *= rhs;
+    return result;
+}
+
+ostream& operator<<(ostream& os, const ModNum& toPrint)
+{
+    os << toPrint.value();
+    return os;
+}
+
 template <typename T>
 T read()
 {
@@ -27,14 +84,14 @@ T read()
 }
 
 #if 1
-int64_t solveBruteForce(const string& N)
+ModNum solveBruteForce(const string& N)
 {
-    int64_t result = 1;
+    ModNum result = 1;
     for (int i = 0; i < N.length(); i++)
     {
         for (int j = i + 1; j < N.length(); j++)
         {
-            result = (result * abs(N[i] - N[j])) % 1'000'000'007;
+            result = result * abs(N[i] - N[j]);
         }
     }
     
@@ -42,10 +99,32 @@ int64_t solveBruteForce(const string& N)
 }
 #endif
 
-#if 0
-SolutionType solveOptimised()
+#if 1
+ModNum solveOptimised(const string& N)
 {
-    SolutionType result;
+    ModNum result = 1;
+    int numOfDigit[10] = {};
+    for (const auto digit : N)
+    {
+        numOfDigit[digit - '0']++;
+    }
+    for (int i = 0; i <= 9; i++)
+    {
+        if (numOfDigit[i] > 1)
+            return 0;
+    }
+    for (int i = 0; i <= 9; i++)
+    {
+        if (numOfDigit[i] == 0)
+            continue;
+        for (int j = i + 1; j <= 9; j++)
+        {
+            if (numOfDigit[j] == 0)
+                continue;
+            result *= ModNum(abs(j - i)) * numOfDigit[i] * numOfDigit[j];
+
+        }
+    }
     
     return result;
 }
@@ -67,6 +146,14 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int stringLen = rand() % 20 + 1;
+            string s;
+            s.push_back('0' + 1 + rand() % 9);
+            for (int i = 0; i < stringLen - 1; i++)
+            {
+                s.push_back('0' + rand() % 10);
+            }
+            cout << s << endl;
         }
 
         return 0;
@@ -84,11 +171,11 @@ int main(int argc, char* argv[])
         const auto solutionBruteForce = solveBruteForce(N);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
+#if 1
+        const auto solutionOptimised = solveOptimised(N);
         cout << "solutionOptimised:  " << solutionOptimised << endl;
 
-        assert(solutionOptimised == solutionBruteForce);
+        assert(solutionOptimised.value() == solutionBruteForce.value());
 #endif
 #else
         const auto solutionOptimised = solveOptimised();
