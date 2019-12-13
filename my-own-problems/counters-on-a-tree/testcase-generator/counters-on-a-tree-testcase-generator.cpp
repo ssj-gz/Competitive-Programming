@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                     .withDescription("misc fat testcases"));
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; 9683 Bob wins")
                         .withSeed(2093108616));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -547,8 +547,8 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms")
-                                .withSeed(100028));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms; 65% with counter; 10 Bob wins")
+                                .withSeed(3755540899));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode = treeGenerator.createNode();
