@@ -11,12 +11,12 @@
 
 using namespace std;
 
-constexpr auto maxHeight = 100'000;
+constexpr auto maxDist = 100'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
         return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
 }
-constexpr auto maxBinaryDigits = log2(maxHeight);
+constexpr auto maxBinaryDigits = log2(maxDist);
 
 struct Node
 {
@@ -26,49 +26,49 @@ struct Node
     int grundyNumberIfRoot = 0;
 };
 
-int numInsertHeights = 0;
-int numAdjustHeights = 0;
+int numInsertDists = 0;
+int numAdjustDists = 0;
 int numGrundyNumberCalls = 0;
-int numCallsToPropagateHeights = 0;
-int numCallsToCollectHeights = 0;
+int numCallsToPropagateDists = 0;
+int numCallsToCollectDists = 0;
 
-class HeightTracker
+class DistTracker
 {
     public:
-        HeightTracker(int maxHeight)
+        DistTracker(int maxDist)
         {
             auto powerOf2 = 2;
             m_numBits = -1;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2[binaryDigitNum] = vector<int>(powerOf2);
+                m_distsModPowerOf2[binaryDigitNum] = vector<int>(powerOf2);
                 m_makesDigitOneBegin[binaryDigitNum] = powerOf2 >> 1;
                 m_makesDigitOneEnd[binaryDigitNum] = powerOf2 - 1;
-                if (powerOf2 / 2 > maxHeight) 
-                    break; // i.e. even if we scrolled this powerOf2 maxHeight units, we'd never enter the "make digit 1" zone.
+                if (powerOf2 / 2 > maxDist) 
+                    break; // i.e. even if we scrolled this powerOf2 maxDist units, we'd never enter the "make digit 1" zone.
                 powerOf2 <<= 1;
                 m_numBits++;
             }
         }
-        void insertHeight(const int newHeight)
+        void insertDist(const int newDist)
         {
             const int numBits = m_numBits;
-            numInsertHeights++;
-            doPendingHeightAdjustments();
-            const auto newHeightAdjusted = newHeight 
-                // The m_makesDigitOneBegin/End will have been shifted by a total of m_cumulativeHeightAdjustment, so counteract that.
-                - m_cumulativeHeightAdjustment
-                // Add a number guarantees that newHeightAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
+            numInsertDists++;
+            doPendingDistAdjustments();
+            const auto newDistAdjusted = newDist 
+                // The m_makesDigitOneBegin/End will have been shifted by a total of m_cumulativeDistAdjustment, so counteract that.
+                - m_cumulativeDistAdjustment
+                // Add a number guarantees that newDistAdjusted >= 0, but does not affect its value modulo the powers of 2 we care about.
                 + (1 << (maxBinaryDigits + 1)); 
-            assert(newHeightAdjusted >= 0);
+            assert(newDistAdjusted >= 0);
             auto powerOf2 = 2;
             for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
             {
-                const auto heightModPowerOf2 = newHeightAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
-                m_heightsModPowerOf2[binaryDigitNum][heightModPowerOf2]++;
+                const auto distModPowerOf2 = newDistAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
+                m_distsModPowerOf2[binaryDigitNum][distModPowerOf2]++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
-                    if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
+                    if (distModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && distModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
                         m_grundyNumber ^= (powerOf2 >> 1);
                 }
                 else
@@ -76,7 +76,7 @@ class HeightTracker
                     const auto makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
                     const auto makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
                     assert(0 <= makeDigitZeroBegin && makeDigitZeroBegin <= makeDigitZeroEnd && makeDigitZeroEnd < powerOf2);
-                    if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
+                    if (!(distModPowerOf2 >= makeDigitZeroBegin && distModPowerOf2 <= makeDigitZeroEnd))
                         m_grundyNumber ^= (powerOf2 >> 1);
                 }
 
@@ -84,39 +84,39 @@ class HeightTracker
             }
         };
 
-        void adjustAllHeights(int heightDiff)
+        void adjustAllDists(int distDiff)
         {
-            numAdjustHeights++;
-            m_pendingHeightAdjustment += heightDiff;
+            numAdjustDists++;
+            m_pendingDistAdjustment += distDiff;
         }
-        void doPendingHeightAdjustments()
+        void doPendingDistAdjustments()
         {
-            auto heightDiff = m_pendingHeightAdjustment;
-            if (heightDiff == 0)
+            auto distDiff = m_pendingDistAdjustment;
+            if (distDiff == 0)
                 return;
-            m_pendingHeightAdjustment = 0;
-            m_cumulativeHeightAdjustment += heightDiff;
+            m_pendingDistAdjustment = 0;
+            m_cumulativeDistAdjustment += distDiff;
 
             const int numBits = m_numBits;
             auto powerOf2 = 2;
-            if (heightDiff > 0)
+            if (distDiff > 0)
             {
                 for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
-                    const auto reducedHeightDiff = heightDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
-                    auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    for (auto i = 0; i < reducedHeightDiff; i++)
+                    const auto reducedDistDiff = distDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
+                    auto parityChangeToNumberOfDistsThatMakeDigitsOne = 0;
+                    for (auto i = 0; i < reducedDistDiff; i++)
                     {
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
+                        parityChangeToNumberOfDistsThatMakeDigitsOne += m_distsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
                         m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) & (powerOf2 - 1);
 
                         m_makesDigitOneBegin[binaryDigitNum] = (powerOf2 + m_makesDigitOneBegin[binaryDigitNum] - 1) & (powerOf2 - 1);
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
+                        parityChangeToNumberOfDistsThatMakeDigitsOne += m_distsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
                     }
 
-                    if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
+                    if ((parityChangeToNumberOfDistsThatMakeDigitsOne & 1) == 1)
                         m_grundyNumber ^= (powerOf2 >> 1); // This binary digit in the grundy number has flipped; update grundyNumber.
 
                     powerOf2 <<= 1;
@@ -124,23 +124,23 @@ class HeightTracker
             }
             else
             {
-                heightDiff = -heightDiff;
-                assert(heightDiff > 0);
+                distDiff = -distDiff;
+                assert(distDiff > 0);
                 for (auto binaryDigitNum = 0; binaryDigitNum <= numBits; binaryDigitNum++)
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
-                    auto parityChangeToNumberOfHeightsThatMakeDigitsOne = 0;
-                    const auto reducedHeightDiff = heightDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
-                    for (auto i = 0; i < reducedHeightDiff; i++)
+                    auto parityChangeToNumberOfDistsThatMakeDigitsOne = 0;
+                    const auto reducedDistDiff = distDiff & (powerOf2 - 1); // Scrolling powerOf2 units is the same as not scrolling at all!
+                    for (auto i = 0; i < reducedDistDiff; i++)
                     {
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
+                        parityChangeToNumberOfDistsThatMakeDigitsOne += m_distsModPowerOf2[binaryDigitNum][m_makesDigitOneBegin[binaryDigitNum]];
                         m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) & (powerOf2 - 1);
 
                         m_makesDigitOneEnd[binaryDigitNum] = (m_makesDigitOneEnd[binaryDigitNum] + 1) & (powerOf2 - 1);
-                        parityChangeToNumberOfHeightsThatMakeDigitsOne += m_heightsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
+                        parityChangeToNumberOfDistsThatMakeDigitsOne += m_distsModPowerOf2[binaryDigitNum][m_makesDigitOneEnd[binaryDigitNum]];
                     }
 
-                    if ((parityChangeToNumberOfHeightsThatMakeDigitsOne & 1) == 1)
+                    if ((parityChangeToNumberOfDistsThatMakeDigitsOne & 1) == 1)
                         m_grundyNumber ^= (powerOf2 >> 1);
 
                     powerOf2 <<= 1;
@@ -150,25 +150,25 @@ class HeightTracker
         int grundyNumber()
         {
             numGrundyNumberCalls++;
-            if (m_pendingHeightAdjustment != 0)
+            if (m_pendingDistAdjustment != 0)
             {
-                doPendingHeightAdjustments();
+                doPendingDistAdjustments();
             }
             return m_grundyNumber;
         }
     private:
         int m_numBits = 0;
-        vector<int> m_heightsModPowerOf2[maxBinaryDigits + 1];
+        vector<int> m_distsModPowerOf2[maxBinaryDigits + 1];
         int m_makesDigitOneBegin[maxBinaryDigits + 1];
         int m_makesDigitOneEnd[maxBinaryDigits + 1];
 
-        int m_cumulativeHeightAdjustment = 0;
+        int m_cumulativeDistAdjustment = 0;
         int m_grundyNumber = 0;
 
-        int m_pendingHeightAdjustment = 0;
+        int m_pendingDistAdjustment = 0;
 };
 
-enum HeightTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
+enum DistTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 
 int countDescendants(Node* node, Node* parentNode)
 {
@@ -186,22 +186,22 @@ int countDescendants(Node* node, Node* parentNode)
 }
 
 template <typename NodeProcessor>
-void doDfs(Node* node, Node* parentNode, int depth, HeightTracker& heightTracker, HeightTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+void doDfs(Node* node, Node* parentNode, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
 {
-    if (heightTrackerAdjustment == AdjustWithDepth)
-        heightTracker.adjustAllHeights(1);
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(1);
 
-    processNode(node, depth, heightTracker);
+    processNode(node, depth, distTracker);
 
     for (auto child : node->neighbours)
     {
         if (child == parentNode)
             continue;
-        doDfs(child, node, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+        doDfs(child, node, depth + 1, distTracker, distTrackerAdjustment, processNode);
     }
 
-    if (heightTrackerAdjustment == AdjustWithDepth)
-        heightTracker.adjustAllHeights(-1);
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(-1);
 }
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
@@ -252,41 +252,41 @@ void doCentroidDecomposition(Node* startNode)
 {
     Node* centroid = findCentroid(startNode);
 
-    auto propagateHeights = [](Node* node, int depth, HeightTracker& heightTracker)
+    auto propagateDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
-                            numCallsToPropagateHeights++;
-                            node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                            numCallsToPropagateDists++;
+                            node->grundyNumberIfRoot ^= distTracker.grundyNumber();
                         };
-    auto collectHeights = [](Node* node, int depth, HeightTracker& heightTracker)
+    auto collectDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
-                            numCallsToCollectHeights++;
+                            numCallsToCollectDists++;
                             if (node->hasCoin)
-                                heightTracker.insertHeight(depth);
+                                distTracker.insertDist(depth);
                         };
 
     const auto numNodesInComponent = countDescendants(startNode, nullptr);
 
     {
-        HeightTracker heightTracker(numNodesInComponent);
+        DistTracker distTracker(numNodesInComponent);
         for (auto& child : centroid->neighbours)
         {
-            doDfs(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
-            doDfs(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+            doDfs(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
+            doDfs(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
     }
     {
-        HeightTracker heightTracker(numNodesInComponent);
+        DistTracker distTracker(numNodesInComponent);
         // Do it again, this time backwards ...  
         reverse(centroid->neighbours.begin(), centroid->neighbours.end());
         // ... and also include the centre, this time.
         if (centroid->hasCoin)
-            heightTracker.insertHeight(0);
+            distTracker.insertDist(0);
         for (auto& child : centroid->neighbours)
         {
-            doDfs(child, centroid, 1, heightTracker, AdjustWithDepth, propagateHeights );
-            doDfs(child, centroid, 1, heightTracker, DoNotAdjust, collectHeights );
+            doDfs(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
+            doDfs(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
-        centroid->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+        centroid->grundyNumberIfRoot ^= distTracker.grundyNumber();
     }
 
     for (auto& neighbour : centroid->neighbours)
@@ -359,10 +359,10 @@ int main(int argc, char* argv[])
         cout << result << endl;
     }
 #if 0
-    cout << "numInsertHeights: " << numInsertHeights << endl;
-    cout << "numAdjustHeights: " << numAdjustHeights << endl;
+    cout << "numInsertDists: " << numInsertDists << endl;
+    cout << "numAdjustDists: " << numAdjustDists << endl;
     cout << "numGrundyNumberCalls: " << numGrundyNumberCalls << endl;
-    cout << "numCallsToPropagateHeights: " << numCallsToPropagateHeights << endl;
-    cout << "numCallsToCollectHeights: " << numCallsToCollectHeights << endl;
+    cout << "numCallsToPropagateDists: " << numCallsToPropagateDists << endl;
+    cout << "numCallsToCollectDists: " << numCallsToCollectDists << endl;
 #endif
 }
