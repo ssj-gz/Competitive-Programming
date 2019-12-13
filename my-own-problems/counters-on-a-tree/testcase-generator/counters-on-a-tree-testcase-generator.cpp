@@ -251,11 +251,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("long-ish and jagged"));
+                    .withDescription("long-ish and jagged"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, 12 Bob wins")
-                                                                                 .withSeed(31050));
+                        .withSeed(31050));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
             }
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter, 13 Bob wins")
-                                                                                 .withSeed(93786));
+                        .withSeed(93786));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -280,11 +280,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("long"));
+                    .withDescription("long"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 70k long arm; 78% with counter; 10 Bob wins")
-                                                                                 .withSeed(31552));
+                        .withSeed(31552));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
             }
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 73k long arm; 83% with counter; 6 Bob wins")
-                                                                                 .withSeed(729264059));
+                        .withSeed(729264059));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -309,11 +309,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("fat"));
+                    .withDescription("fat"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes four vertices with high degree; 78% with counter; 16130 Bob wins")
-                                                                                 .withSeed(30684));
+                        .withSeed(30684));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -323,8 +323,8 @@ int main(int argc, char* argv[])
                 treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2, node3}, 70'000, 99.8, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
-                            addNewNodeToSet = false;
-                            removeParentFromSet = false;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
                         });
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'998 - treeGenerator.numNodes(), 50);
 
@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
             }
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes five vertices with high degree; 93% with counter; 28156 Bob wins")
-                                                                                 .withSeed(23837));
+                        .withSeed(23837));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -344,14 +344,14 @@ int main(int argc, char* argv[])
                 treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2}, 40'000, 99.8, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
-                            addNewNodeToSet = false;
-                            removeParentFromSet = false;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
                         });
                 treeGenerator.createNodesWithRandomParentPreferringFromSet({node1, node3, node4}, 30'000, 99.8, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
-                            addNewNodeToSet = false;
-                            removeParentFromSet = false;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
                         });
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'998 - treeGenerator.numNodes(), 80);
 
@@ -361,11 +361,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("three long arms"));
+                    .withDescription("three long arms"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 82% with counter; 8 Bob wins")
-                                                                                 .withSeed(22726));
+                        .withSeed(22726));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -380,7 +380,7 @@ int main(int argc, char* argv[])
             }
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 86% with counter; 7 Bob wins")
-                                                                                 .withSeed(3370476204LL));
+                        .withSeed(3370476204LL));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -396,11 +396,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("four long arms"));
+                    .withDescription("four long arms"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 70% with counter; 9 Bob wins")
-                                                                                 .withSeed(3646594962));
+                        .withSeed(3646594962));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -416,7 +416,7 @@ int main(int argc, char* argv[])
             }
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 68% with counter; 9 Bob wins")
-                                                                                 .withSeed(2093108616));
+                        .withSeed(2093108616));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -433,11 +433,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withDescription("fat with long"));
+                    .withDescription("fat with long"));
 
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 20744 Bob wins")
-                                                                                 .withSeed(985005231));
+                        .withSeed(985005231));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode1 = treeGenerator.createNode();
@@ -445,8 +445,8 @@ int main(int argc, char* argv[])
                 treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 60'000, 99, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
-                            addNewNodeToSet = false;
-                            removeParentFromSet = false;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
                         });
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 5.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 80.0);
@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
             }
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; three nodes with high degree, two separated by long distance; 75% with counters; 592 Bob wins")
-                                                                                 .withSeed(2408558017));
+                        .withSeed(2408558017));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode1 = treeGenerator.createNode();
@@ -465,14 +465,14 @@ int main(int argc, char* argv[])
                 treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 30'000, 99, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
-                            addNewNodeToSet = false;
-                            removeParentFromSet = false;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
                         });
                 treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2, fatNode3}, 30'000, 99, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
-                            addNewNodeToSet = false;
-                            removeParentFromSet = false;
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
                         });
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 3.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 90.0);
@@ -483,8 +483,8 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withSeed(88893)
-                                                                              .withDescription("lots of small testcases up to 1000 nodes each"));
+                    .withSeed(88893)
+                    .withDescription("lots of small testcases up to 1000 nodes each"));
 
             int numNodesInTestFile = 0;
             while (numNodesInTestFile < subtask3.maxNodesOverAllTestcases)
@@ -506,8 +506,8 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
-                                                                              .withSeed(113388)
-                                                                              .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
+                    .withSeed(113388)
+                    .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
 
             int numNodesInTestFile = 0;
             for (int t = 0; t < subtask3.maxNumTestcases; t++)
@@ -527,6 +527,47 @@ int main(int argc, char* argv[])
             }
         }
         // TODO - fat node where each arm has length at least two - this will give many subtrees when doing centroid decomposition.
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+                    .withDescription("misc fat testcases"));
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two")
+                        .withSeed(2093108616));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto fatNode = treeGenerator.createNode();
+                while (treeGenerator.numNodes() < 81'000)
+                {
+                    treeGenerator.addNodeChain(fatNode, 2);
+                }
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((99'999 - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999 - treeGenerator.numNodes(), 90.0);
+
+                addCounters(treeGenerator, 71.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms")
+                                .withSeed(100028));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto fatNode = treeGenerator.createNode();
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode}, 33'123, 99, 
+                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                        addNewNodeToSet = false;
+                        removeParentFromSet = false;
+                        });
+                treeGenerator.addNodeChain(fatNode, rnd.next(20'000, 25'000));
+                treeGenerator.addNodeChain(fatNode, rnd.next(20'000, 25'000));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 15.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 80.0);
+
+                addCounters(treeGenerator, 65.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
