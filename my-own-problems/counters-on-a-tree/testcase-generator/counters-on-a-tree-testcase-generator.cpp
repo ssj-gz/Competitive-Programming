@@ -161,48 +161,35 @@ int main(int argc, char* argv[])
     // SUBTASK 1
     {
         auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
-                                                                          .withDescription("Misc tiny testcases")
-                                                                          .withSeed(999));
+                                                                          .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 10'000 - 20'000 states.  Not chosen to be the 'worst case' for the given constraints - it's only Subtask 1 :)"));
+        {
+            // Random tiny testcases. The seeds have been chosen by trial and error to require
+            // a decent number of game states to be explored (generally, 10'000 - 20'000 per testcase)
+            // and to have an "interesting" number of wins for Bob (i.e. - not all "0 wins for Bob!")
+            const std::vector<int64_t> interestingSeeds = { 199129607, 3581965989, 1361934870, 3700666412 , 2606593986, 3560654285, 4275087403, 3440781289, 3938355243, 3397278980 };
+            for (const int64_t seed : interestingSeeds)
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("10 nodes in a chain; 1 counter placed on each 'even' node"));
-
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(seed));
+                const int numNodes = 1 + rnd.next(subtask1.maxNodesPerTestcase);
+                const int totalCounters = 1 + rnd.next(subtask1.maxNumCountersOverAllNodes);
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 9);
-                for (int i = 0; i < treeGenerator.numNodes(); i++)
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                while (treeGenerator.numNodes() < numNodes)
                 {
-                    treeGenerator.nodes()[i]->data.numCounters = ((i % 2) == 0);
+                    treeGenerator.createNodeWithRandomParent();
+                }
+                for (auto& node : treeGenerator.nodes())
+                {
+                    node->data.numCounters = 0;
+                }
+                for (int i = 0; i < totalCounters; i++)
+                {
+                    const int addToNodeId = rnd.next(numNodes);
+                    treeGenerator.nodes()[addToNodeId]->data.numCounters++;
                 }
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-            {
-                // Random tiny testcases. The seeds have been chosen by trial and error to require
-                // a decent number of game states to be explored (generally, 10'000 - 20'000 per testcase)
-                // and to have an "interesting" number of wins for Bob (i.e. - not all "0 wins for Bob!")
-                const std::vector<int64_t> interestingSeeds = { 3581965989, 1361934870, 3700666412 , 2606593986, 3560654285, 4275087403, 3440781289, 3938355243, 3397278980 };
-                for (const int64_t seed : interestingSeeds)
-                {
-                    auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(seed));
-                    const int numNodes = 1 + rnd.next(subtask1.maxNodesPerTestcase);
-                    const int totalCounters = 1 + rnd.next(subtask1.maxNumCountersOverAllNodes);
-                    TreeGenerator<NodeData> treeGenerator;
-                    treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-                    while (treeGenerator.numNodes() < numNodes)
-                    {
-                        treeGenerator.createNodeWithRandomParent();
-                    }
-                    for (auto& node : treeGenerator.nodes())
-                    {
-                        node->data.numCounters = 0;
-                    }
-                    for (int i = 0; i < totalCounters; i++)
-                    {
-                        const int addToNodeId = rnd.next(numNodes);
-                        treeGenerator.nodes()[addToNodeId]->data.numCounters++;
-                    }
-                    scrambleAndwriteTestcase(treeGenerator, testcase);
-                }
-            }
+        }
     }
     
     // SUBTASK 2
