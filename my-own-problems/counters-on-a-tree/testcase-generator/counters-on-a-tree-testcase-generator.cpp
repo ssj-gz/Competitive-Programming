@@ -59,8 +59,8 @@ const int NoExplicitLimit = std::numeric_limits<int>::max();
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withMaxNodesPerTestcase(15)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
-                                            .withMaxNumCountersPerNode(7)
-                                            .withMaxNumCountersOverAllNodes(7)
+                                            .withMaxNumCountersPerNode(6)
+                                            .withMaxNumCountersOverAllNodes(6)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
@@ -161,12 +161,12 @@ int main(int argc, char* argv[])
     // SUBTASK 1
     {
         auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
-                                                                          .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 10'000 - 20'000 states.  Not chosen to be the 'worst case' for the given constraints - it's only Subtask 1 :)"));
+                                                                          .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 20'000 - 25'000 states.  This appears to be close to the 'worst' case for the given constraints."));
         {
             // Random tiny testcases. The seeds have been chosen by trial and error to require
-            // a decent number of game states to be explored (generally, 10'000 - 20'000 per testcase)
-            // and to have an "interesting" number of wins for Bob (i.e. - not all "0 wins for Bob!")
-            const std::vector<int64_t> interestingSeeds = { 199129607, 3581965989, 1361934870, 3700666412 , 2606593986, 3560654285, 4275087403, 3440781289, 3938355243, 3397278980 };
+            // a decent number of game states to be explored and to have an "interesting" number of wins for 
+            // Bob (i.e. - not all "0 wins for Bob!")
+            const std::vector<int64_t> interestingSeeds = { 1852137548,3402243705,4269023167,488828579,3709510291,1049640463,748851021,2763056888,1853276030,2647223804 };
             for (const int64_t seed : interestingSeeds)
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(seed));
