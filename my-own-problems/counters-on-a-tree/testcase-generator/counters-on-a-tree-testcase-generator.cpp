@@ -59,8 +59,8 @@ const int NoExplicitLimit = std::numeric_limits<int>::max();
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withMaxNodesPerTestcase(15)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
-                                            .withMaxNumCountersPerNode(5)
-                                            .withMaxNumCountersOverAllNodes(5)
+                                            .withMaxNumCountersPerNode(7)
+                                            .withMaxNumCountersOverAllNodes(7)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
@@ -176,11 +176,13 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                // Random tiny testcases. TODO - these are actually pretty weak and boring, but the
-                // size is so small it's hard to think of anything interesting to do with them!
-                while (testFile.numTestCases() < subtask1.maxNumTestcases)
+                // Random tiny testcases. The seeds have been chosen by trial and error to require
+                // a decent number of game states to be explored (generally, 10'000 - 20'000 per testcase)
+                // and to have an "interesting" number of wins for Bob (i.e. - not all "0 wins for Bob!")
+                const std::vector<int64_t> interestingSeeds = { 3581965989, 1361934870, 3700666412 , 2606593986, 3560654285, 4275087403, 3440781289, 3938355243, 3397278980 };
+                for (const int64_t seed : interestingSeeds)
                 {
-                    auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
+                    auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(seed));
                     const int numNodes = 1 + rnd.next(subtask1.maxNodesPerTestcase);
                     const int totalCounters = 1 + rnd.next(subtask1.maxNumCountersOverAllNodes);
                     TreeGenerator<NodeData> treeGenerator;
