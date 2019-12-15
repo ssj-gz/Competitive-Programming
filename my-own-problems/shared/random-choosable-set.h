@@ -69,7 +69,7 @@ class RandomChooseableSet
         TPtr chooseRandom() const
         {
             assert(!empty());
-            return m_vec[rnd.next(m_vec.size())];
+            return m_vec[rnd.next(static_cast<int>(m_vec.size()))];
         }
     private:
         std::map<TPtr, int> m_indexFor;

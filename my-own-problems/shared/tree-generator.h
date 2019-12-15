@@ -63,7 +63,7 @@ class TreeGenerator
         }
         TestNode<NodeData>* createNodeWithRandomParent()
         {
-            const int parentIndex = rnd.next(m_nodes.size());
+            const int parentIndex = rnd.next(static_cast<int>(m_nodes.size())); // The static_cast is necessary, as the type of m_nodes.size() varies according to platform.
             auto randomParent = m_nodes[parentIndex].get();
             return createNode(randomParent);
         }
