@@ -349,8 +349,8 @@ int main(int argc, char* argv[])
                     .withDescription("fat"));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes four vertices with high degree; 78% with counter; TODO Bob wins")
-                        .withSeed(3158314537));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes four vertices with high degree; 78% with counter; 31166 Bob wins")
+                        .withSeed(1018053492));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
