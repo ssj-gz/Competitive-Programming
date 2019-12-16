@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
             // Random tiny testcases. The seeds have been chosen by trial and error to require
             // a decent number of game states to be explored and to have an "interesting" number of wins for 
             // Bob (i.e. - not all "0 wins for Bob!")
-            const std::vector<int64_t> interestingSeeds = { 1852137548,3402243705,4269023167,488828579,3709510291,1049640463,748851021,2763056888,1853276030,2647223804 };
+            const std::vector<int64_t> interestingSeeds = { 1117689295,1995870019,1351345120,1637048025,2589603398,1565844328,2842239588,4118263269,1622708364,2918014348 };
             for (const int64_t seed : interestingSeeds)
             {
                 auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withSeed(seed));
