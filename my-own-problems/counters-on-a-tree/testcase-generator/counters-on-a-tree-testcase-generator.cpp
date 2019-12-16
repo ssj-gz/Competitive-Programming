@@ -694,7 +694,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             toExplore = nextToExplore;
         }
 
-        testFileReader.addErrorUnless(visited.size() == numNodes, "Tree is not connected!");
+        testFileReader.addErrorUnless(static_cast<int>(visited.size()) == numNodes, "Tree is not connected!");
 
         testFileReader.markTestcaseAsValidated();
     }
