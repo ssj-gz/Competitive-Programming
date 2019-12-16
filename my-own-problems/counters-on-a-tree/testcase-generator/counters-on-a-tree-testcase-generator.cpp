@@ -160,9 +160,9 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
-        auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
-                                                                          .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 20'000 - 25'000 states.  This appears to be close to the 'worst' case for the given constraints."));
         {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+                    .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 20'000 - 25'000 states.  This appears to be close to the 'worst' case for the given constraints."));
             // Random tiny testcases. The seeds have been chosen by trial and error to require
             // a decent number of game states to be explored and to have an "interesting" number of wins for 
             // Bob (i.e. - not all "0 wins for Bob!")
