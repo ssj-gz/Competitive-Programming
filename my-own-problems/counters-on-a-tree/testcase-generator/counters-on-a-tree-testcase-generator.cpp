@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
                     .withSeed(122));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 10942 Bob wins"));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; TODO Bob wins"));
 
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 2923 Bob wins"));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; TODO Bob wins"));
 
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
                     .withDescription("long-ish and jagged"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, 12 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, TODO Bob wins")
                         .withSeed(31050));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter, 13 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter, TODO Bob wins")
                         .withSeed(93786));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
                     .withDescription("long"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 70k long arm; 78% with counter; 10 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 70k long arm; 78% with counter; TODO Bob wins")
                         .withSeed(31552));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 73k long arm; 83% with counter; 6 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 73k long arm; 83% with counter; TODO Bob wins")
                         .withSeed(729264059));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -301,7 +301,7 @@ int main(int argc, char* argv[])
                     .withDescription("fat"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes four vertices with high degree; 78% with counter; 16130 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes four vertices with high degree; 78% with counter; TODO Bob wins")
                         .withSeed(30684));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -321,7 +321,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes five vertices with high degree; 93% with counter; 28156 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes five vertices with high degree; 93% with counter; TODO Bob wins")
                         .withSeed(23837));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -353,7 +353,7 @@ int main(int argc, char* argv[])
                     .withDescription("three long arms"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 82% with counter; 8 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 82% with counter; TODO Bob wins")
                         .withSeed(22726));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -368,7 +368,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 86% with counter; 7 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 86% with counter; TODO Bob wins")
                         .withSeed(3370476204LL));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -388,7 +388,7 @@ int main(int argc, char* argv[])
                     .withDescription("four long arms"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 70% with counter; 9 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 70% with counter; TODO Bob wins")
                         .withSeed(3646594962));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 68% with counter; 9 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 4 long arms; 68% with counter; TODO Bob wins")
                         .withSeed(2093108616));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -425,7 +425,7 @@ int main(int argc, char* argv[])
                     .withDescription("fat with long"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 20744 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; TODO Bob wins")
                         .withSeed(985005231));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; three nodes with high degree, two separated by long distance; 75% with counters; 592 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; three nodes with high degree, two separated by long distance; 75% with counters; TODO Bob wins")
                         .withSeed(2408558017));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -520,7 +520,7 @@ int main(int argc, char* argv[])
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                     .withDescription("misc fat testcases"));
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; 9683 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; TODO Bob wins")
                         .withSeed(2093108616));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -536,7 +536,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms; 65% with counter; 10 Bob wins")
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms; 65% with counter; TODO Bob wins")
                                 .withSeed(3755540899));
 
                 TreeGenerator<NodeData> treeGenerator;
