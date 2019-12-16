@@ -535,8 +535,8 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms; 65% with counter; TODO Bob wins")
-                                .withSeed(2413818767));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node with two long arms; 65% with counter; 7 Bob wins")
+                                .withSeed(3340030381));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode = treeGenerator.createNode();
