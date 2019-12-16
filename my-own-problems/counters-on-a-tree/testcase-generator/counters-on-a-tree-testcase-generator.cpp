@@ -425,8 +425,8 @@ int main(int argc, char* argv[])
                     .withDescription("fat with long"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; TODO Bob wins")
-                        .withSeed(985005231));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 8735 Bob wins")
+                        .withSeed(3724110391));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode1 = treeGenerator.createNode();
