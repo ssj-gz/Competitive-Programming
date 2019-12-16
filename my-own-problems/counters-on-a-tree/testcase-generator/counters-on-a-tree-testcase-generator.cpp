@@ -515,13 +515,12 @@ int main(int argc, char* argv[])
                 numNodesInTestFile += numNodes;
             }
         }
-        // TODO - fat node where each arm has length at least two - this will give many subtrees when doing centroid decomposition.
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
                     .withDescription("misc fat testcases"));
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; TODO Bob wins")
-                        .withSeed(2093108616));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; 22325 Bob wins")
+                        .withSeed(1808886558));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode = treeGenerator.createNode();
