@@ -242,6 +242,23 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask2)
+                                                                              .withSeed(937439724)
+                                                                              .withDescription("Another set of misc testcases with ~1000 nodes"));
+            for (int t = 0; t < subtask2.maxNumTestcases; t++)
+            {
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo());
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                const int numNodes = rnd.next(subtask2.maxNodesPerTestcase - 100, subtask2.maxNodesPerTestcase);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
+                addCounters(treeGenerator, rnd.next(70.0, 95.0));
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     
     // SUBTASK 3
