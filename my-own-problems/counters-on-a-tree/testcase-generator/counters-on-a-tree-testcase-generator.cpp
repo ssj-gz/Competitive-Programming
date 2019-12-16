@@ -97,6 +97,7 @@ struct NodeData
 };
 
 using CoTTestCaseInfo = TestcaseInfo<SubtaskInfo>;
+using CoTTestFileInfo = TestFileInfo<SubtaskInfo>;
 
 void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
 {
@@ -163,7 +164,7 @@ int main(int argc, char* argv[])
     // SUBTASK 1
     {
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
                     .withSeed(98749873)
                     .withDescription("Misc tiny testcases - purely randomly generated."));
 
@@ -191,7 +192,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
                     .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 20'000 - 25'000 states.  This appears to be close to the 'worst' case for the given constraints."));
             // Random tiny testcases. The seeds have been chosen by trial and error to require
             // a decent number of game states to be explored and to have an "interesting" number of wins for 
@@ -225,7 +226,7 @@ int main(int argc, char* argv[])
     // SUBTASK 2
     {
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask2)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask2)
                                                                               .withSeed(9734)
                                                                               .withDescription("Misc testcases with ~1000 nodes"));
             for (int t = 0; t < subtask2.maxNumTestcases; t++)
@@ -246,7 +247,7 @@ int main(int argc, char* argv[])
     // SUBTASK 3
     {
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(122));
 
             {
@@ -269,7 +270,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("long-ish and jagged"));
 
             {
@@ -298,7 +299,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("long"));
 
             {
@@ -327,7 +328,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("fat"));
 
             {
@@ -379,7 +380,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("three long arms"));
 
             {
@@ -414,7 +415,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("four long arms"));
 
             {
@@ -451,7 +452,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("fat with long"));
 
             {
@@ -501,7 +502,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(88893)
                     .withDescription("lots of small testcases up to 1000 nodes each"));
 
@@ -524,7 +525,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(113388)
                     .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
 
@@ -546,7 +547,7 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask3)
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("misc fat testcases"));
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; 22325 Bob wins")
