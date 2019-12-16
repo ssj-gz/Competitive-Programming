@@ -353,8 +353,8 @@ int main(int argc, char* argv[])
                     .withDescription("three long arms"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 82% with counter; TODO Bob wins")
-                        .withSeed(22726));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes; 3 long arms; 82% with counter; 7 Bob wins")
+                        .withSeed(3359440718));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
