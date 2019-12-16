@@ -162,6 +162,34 @@ int main(int argc, char* argv[])
     {
         {
             auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
+                    .withSeed(98749873)
+                    .withDescription("Misc tiny testcases - purely randomly generated."));
+
+            for (int i = 0; i < subtask1.maxNumTestcases; i++)
+            {
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>());
+                const int numNodes = 1 + rnd.next(subtask1.maxNodesPerTestcase);
+                const int totalCounters = 1 + rnd.next(subtask1.maxNumCountersOverAllNodes);
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                while (treeGenerator.numNodes() < numNodes)
+                {
+                    treeGenerator.createNodeWithRandomParent();
+                }
+                for (auto& node : treeGenerator.nodes())
+                {
+                    node->data.numCounters = 0;
+                }
+                for (int i = 0; i < totalCounters; i++)
+                {
+                    const int addToNodeId = rnd.next(numNodes);
+                    treeGenerator.nodes()[addToNodeId]->data.numCounters++;
+                }
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(TestFileInfo<SubtaskInfo>().belongingToSubtask(subtask1)
                     .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 20'000 - 25'000 states.  This appears to be close to the 'worst' case for the given constraints."));
             // Random tiny testcases. The seeds have been chosen by trial and error to require
             // a decent number of game states to be explored and to have an "interesting" number of wins for 
