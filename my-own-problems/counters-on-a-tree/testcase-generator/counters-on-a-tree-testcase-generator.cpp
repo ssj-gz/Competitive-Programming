@@ -243,8 +243,8 @@ int main(int argc, char* argv[])
                     .withDescription("long-ish and jagged"));
 
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, TODO Bob wins")
-                        .withSeed(31050));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, 15 Bob wins")
+                        .withSeed(1619071763));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
