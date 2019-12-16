@@ -284,15 +284,15 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 73k long arm; 81% with counter; 3 Bob wins")
-                        .withSeed(653687522));
+                auto& testcase = testFile.newTestcase(TestcaseInfo<SubtaskInfo>().withDescription("almost max nodes - 73k long arm; 83% with counter; 6 Bob wins")
+                        .withSeed(2643792404));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
                 treeGenerator.addNodeChain(rootNode, 73'000);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(11'000, 2.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15883, 89);
-                addCounters(treeGenerator, 81.0);
+                addCounters(treeGenerator, 83.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
