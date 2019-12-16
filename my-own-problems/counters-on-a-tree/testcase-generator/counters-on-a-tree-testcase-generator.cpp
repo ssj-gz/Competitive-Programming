@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
                     .withDescription("fat"));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes four vertices with high degree; 78% with counter; 4631 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes four vertices with high degree; 78% with counter; TODO Bob wins")
                         .withSeed(3158314537));
 
                 TreeGenerator<NodeData> treeGenerator;
@@ -369,7 +369,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes five vertices with high degree; 93% with counter; 31258 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes five vertices with high degree; 93% with counter; TODO Bob wins")
                         .withSeed(23837));
 
                 TreeGenerator<NodeData> treeGenerator;
