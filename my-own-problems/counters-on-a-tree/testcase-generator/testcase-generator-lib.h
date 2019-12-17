@@ -330,17 +330,17 @@ class TestFileReader
         }
 
         template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
-        std::enable_if_t<sizeof...(Tail) != 0, void>  // Needed to disambiguate the two readLineHelper overloads.
-        readLineHelper(ValuesType& readValues, std::istream& lineStream)
-        {
-            std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, false, ValueIndex);
-
-            readLineHelper<ValuesType, ValueIndex + 1, Tail...>(readValues, lineStream);
-        }
-        template<typename ValuesType, std::size_t ValueIndex, typename Head>
         void readLineHelper(ValuesType& readValues, std::istream& lineStream)
         {
-            std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, true, ValueIndex);
+            if constexpr(sizeof...(Tail) == 0)
+            {
+                std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, true, ValueIndex);
+            }
+            else
+            {
+                std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, false, ValueIndex);
+                readLineHelper<ValuesType, ValueIndex + 1, Tail...>(readValues, lineStream);
+            }
         }
         template <typename ValueType>
         ValueType readAndValidateValue(std::istream& lineStream, bool isLastOnLine, int index)
