@@ -62,12 +62,6 @@ int main(int argc, char* argv[])
             }
         }
         cout << endl;
-        vector<int> postFriendIds;
-        for (int i = 1; i <= maxPostFriendId; i++)
-        {
-            postFriendIds.push_back(i);
-        }
-        random_shuffle(postFriendIds.begin(), postFriendIds.end());
         for (int i = 0; i < numPosts; i++)
         {
             string s;
@@ -76,7 +70,7 @@ int main(int argc, char* argv[])
             {
                 s += 'a' + rand() % 26;
             }
-            cout << postFriendIds[i] << " " << (1 + rand() % maxPopularity) << s << endl;
+            cout << (1 + rand() % maxPostFriendId) << " " << (1 + rand() % maxPopularity) << s << endl;
         }
 
         return 0;
