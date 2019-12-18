@@ -332,7 +332,8 @@ class TestFileReader
         template<typename ValuesType, std::size_t ValueIndex, typename Head, typename... Tail >
         void readLineHelper(ValuesType& readValues, std::istream& lineStream)
         {
-            if constexpr(sizeof...(Tail) == 0)
+            constexpr auto isLastOnLine = (sizeof...(Tail) == 0);
+            if constexpr(isLastOnLine)
             {
                 std::get<ValueIndex>(readValues) = readAndValidateValue<Head>(lineStream, true, ValueIndex);
             }
