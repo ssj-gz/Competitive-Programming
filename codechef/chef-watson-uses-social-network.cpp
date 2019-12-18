@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         const int numSpecialFriends = 1 + rand() % 100;
         const int numPosts = 1 + rand() % 100;
 
-        const int maxPopularity = 1 + rand() % 100;
+        const int maxPopularity = numPosts + rand() % 100;
         const int maxSpecialFriendId = numSpecialFriends + rand() % 100;
         const int maxPostFriendId = 1 + rand() % 100;
 
