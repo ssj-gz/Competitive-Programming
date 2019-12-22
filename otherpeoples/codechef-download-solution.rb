@@ -39,6 +39,8 @@ html.each_line do |line|
         language = data['languageShortName']
         languageExtension = data['languageExtension']
 
+        languageExtension = "cpp" if language == 'C' # Rename "*.c" to "*.cpp".
+
         filename = userName + "-" + problemCode + SUFFIX + "." + languageExtension
 
         if language == 'PYTH 3.6'
