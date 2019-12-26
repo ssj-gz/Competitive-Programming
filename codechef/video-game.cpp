@@ -2,18 +2,10 @@
 // 
 // Solution to: https://www.codechef.com/ZCOPRAC/problems/ZCO14001
 //
-//#define SUBMISSION
-#define BRUTE_FORCE
-#ifdef SUBMISSION
-#undef BRUTE_FORCE
-#define NDEBUG
-#endif
 #include <iostream>
 #include <vector>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -29,50 +21,20 @@ T read()
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int numStacks = rand() % 20 + 1;
-        const int maxHeight = rand() % 100 + 1;
-
-        cout  << numStacks << " " << maxHeight << endl;
-
-        for (int i = 0; i < numStacks; i++)
-        {
-            cout << (rand() % (maxHeight + 1));
-            if (i != numStacks - 1)
-                cout << " ";
-        }
-        cout << endl;
-
-        const int numCommands = rand() % 1000 + 1;
-        for (int i = 0; i < numCommands; i++)
-        {
-            cout << (1 + rand() % 4) << " ";
-
-        }
-        cout << 0 << endl;
-
-
-        return 0;
-    }
     
-    const int numStacks = read<int>();
-    const int maxHeight = read<int>();
+    const auto numStacks = read<int>();
+    const auto maxHeight = read<int>();
 
     vector<int> numBoxesInStack(numStacks);
     for (auto& numBoxes : numBoxesInStack)
         numBoxes = read<int>();
 
-    bool finished = false;
-    int cranePos = 0;
-    bool carryingBox = false;
-    while (!finished)
+    auto isFinished = false;
+    auto cranePos = 0;
+    auto isCarryingBox = false;
+    while (!isFinished)
     {
-        const int command = read<int>();
+        const auto command = read<int>();
 
         switch (command)
         {
@@ -87,23 +49,23 @@ int main(int argc, char* argv[])
                     cranePos++;
                 break;
             case 3:
-                // Pick up.
-                if (!carryingBox && numBoxesInStack[cranePos] > 0)
+                // Pick up, if we can.
+                if (!isCarryingBox && numBoxesInStack[cranePos] > 0)
                 {
-                    carryingBox = true;
+                    isCarryingBox = true;
                     numBoxesInStack[cranePos]--;
                 }
                 break;
             case 4:
-                // Drop.
-                if (carryingBox && numBoxesInStack[cranePos] < maxHeight)
+                // Drop, if we can.
+                if (isCarryingBox && numBoxesInStack[cranePos] < maxHeight)
                 {
-                    carryingBox = false;
+                    isCarryingBox = false;
                     numBoxesInStack[cranePos]++;
                 }
                 break;
             case 0:
-                finished = true;
+                isFinished = true;
                 break;
         }
 
