@@ -20,11 +20,17 @@ Since the result can be very large, please output it mod 1'000'000'007.
 Approach (Sketch)
 =================
 
-The problem is ostensibly a Game Theory problem but, as hinted, the Game Theory part is very elementary: the game is simply Nim in disguise, with each Counter c corresponding to a pile of size dist(c, R), where dist(c, R) is the minimum distance between the node containing c and the node R.  Just as with Nim, the winner can be computed via taking the xor sum over all c of dist(c, R): if this is 0, Bob wins; else Bob loses.  Obviously, doing this for each node R would give a O(N^2) solution, so that won't do! The "real" problem is to compute this more efficiently.
+NB: a fuller, Editorial-style solution will be available shortly.
 
-Note first that it's easily shown that the full value c(v) is not required; instead, just the *parity* of c(v) is important.  Thus, we say that node v *hasCounter* if and only if the original c(v) is odd.
+The problem is ostensibly a Game Theory problem but, as hinted, the Game Theory part is very elementary: the game is simply Nim in disguise, with each Counter C corresponding to a pile of size dist(C, R), where dist(C, R) is the minimum distance between the node containing C and the node R.  Just as with Nim, the winner can be computed via finding the grundy number for each node R for game(T, R), which is the xor sum over all counters C of dist(C, R): if this is 0, Bob wins; else Bob loses.  Obviously, doing this for each node R would give a O(N^2) solution, so that won't do! The "real" problem is to compute this more efficiently.
 
-The solution then consists of doing the following:
+Note first that it's easily shown that the full value c(v) is not required; instead, just the *parity* of c(v) is important.  Thus, we say that node v *hasCounter* if and only if the original c(v) is odd.  The solution, then can be reduced to (the still O(N^2)) pseudocode:
+
+    for each node R:
+        for each node v such that v hasCounter:
+            R.grundyNumber ^= dist(v, R)
+
+The optimised solution then consists of doing the following:
 
 Write a "DistTracker" data structure, with the following operations:
 
@@ -53,4 +59,4 @@ It would not be suitable for a Lunchtime or Cook-off, IMO, but should be fine fo
 [X] Problem description (markdown and LaTeX, plus explanatory diagrams and examples; ready for approval)
 [X] Test-Plan, Testcase generator, and Testcases (ready for approval)
 [X] Editorial code solution (readable, well-documented code; ready for approval)
-[ ] Editorial write-up
+[ ] Editorial write-up (in progress)
