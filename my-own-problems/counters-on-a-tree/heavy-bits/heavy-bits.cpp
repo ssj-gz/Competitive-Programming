@@ -232,55 +232,55 @@ int64_t solveOptimised(const string& B)
     vector<int64_t> sumOfWeightStartingAt(N + 1, 0);
     vector<int64_t> sumOfbsStartingAt[2] = {vector<int64_t>(N + 1, 0), vector<int64_t>(N + 1, 0)};
     int numbsInSuffix[2] = {0, 0};
-    for (int index = N - 1; index >= 0; index--)
+    for (int suffixBeginIndex = N - 1; suffixBeginIndex >= 0; suffixBeginIndex--)
     {
-        const int bitValue = B[index] - '0';
+        const int bitValue = B[suffixBeginIndex] - '0';
 
-        const auto suffixLength = N - index;
+        const auto suffixLength = N - suffixBeginIndex;
 
-        sumOfbsStartingAt[bitValue][index] = suffixLength + sumOfbsStartingAt[bitValue][index + 1];
-        sumOfbsStartingAt[1 - bitValue][index] = sumOfbsStartingAt[1 - bitValue][index + 1];
+        sumOfbsStartingAt[bitValue][suffixBeginIndex] = suffixLength + sumOfbsStartingAt[bitValue][suffixBeginIndex + 1];
+        sumOfbsStartingAt[1 - bitValue][suffixBeginIndex] = sumOfbsStartingAt[1 - bitValue][suffixBeginIndex + 1];
 
-        auto blah = [&](const int numbsInPrefix[2], const int index) -> int64_t
+        auto blah = [&](const int numbsInPrefix[2], const int suffixBeginIndex) -> int64_t
         {
-            if (index == N)
+            if (suffixBeginIndex == N)
                 return 0;
 
             const auto prefixBalance = numbsInPrefix[0] - numbsInPrefix[1];
             if (prefixBalance == 0)
             {
-                return sumOfWeightStartingAt[index] + numbsInPrefix[0] * (N - index);
+                return sumOfWeightStartingAt[suffixBeginIndex] + numbsInPrefix[0] * (N - suffixBeginIndex);
             }
             
-            auto num0sInSuffix = numbsInPrefixLen[0][N] - numbsInPrefixLen[0][index];
-            auto num1sInSuffix = numbsInPrefixLen[1][N] - numbsInPrefixLen[1][index];
+            auto num0sInSuffix = numbsInPrefixLen[0][N] - numbsInPrefixLen[0][suffixBeginIndex];
+            auto num1sInSuffix = numbsInPrefixLen[1][N] - numbsInPrefixLen[1][suffixBeginIndex];
 
             const auto currentSuffixBalance = num0sInSuffix - num1sInSuffix;
 
             const auto mostPopulousPrefixBit = (prefixBalance > 0 ? 0 : 1);
             const auto desiredSuffixBalance = currentSuffixBalance + prefixBalance;
-            // balanceIndex: the smallest index >= index such that prefixBalance + balance[s[index, balanceIndex]] = 0.
+            // balanceIndex: the smallest index >= suffixBeginIndex such that prefixBalance + balance[s[suffixBeginIndex, balanceIndex]] = 0.
             const auto balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             if (balanceIndex == NeverBalanced)
             {
-                return sumOfbsStartingAt[mostPopulousPrefixBit][index] + (N - index) * numbsInPrefix[mostPopulousPrefixBit] ;
+                return sumOfbsStartingAt[mostPopulousPrefixBit][suffixBeginIndex] + (N - suffixBeginIndex) * numbsInPrefix[mostPopulousPrefixBit] ;
             }
             else
             {
-                const int numbsInRange[2] = { numbsInPrefixLen[0][balanceIndex + 1] - numbsInPrefixLen[0][index], numbsInPrefixLen[1][balanceIndex + 1] - numbsInPrefixLen[1][index] };
-                const auto rangeLen = balanceIndex + 1 - index;
+                const int numbsInRange[2] = { numbsInPrefixLen[0][balanceIndex + 1] - numbsInPrefixLen[0][suffixBeginIndex], numbsInPrefixLen[1][balanceIndex + 1] - numbsInPrefixLen[1][suffixBeginIndex] };
+                const auto rangeLen = balanceIndex + 1 - suffixBeginIndex;
                 assert(numbsInPrefix[0] != numbsInPrefix[1]);
                 const auto afterBalanceSuffixLen = N - (balanceIndex + 1);
 
                 int64_t result = 0;
-                result = sumOfbsStartingAt[mostPopulousPrefixBit][index] - sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
+                result = sumOfbsStartingAt[mostPopulousPrefixBit][suffixBeginIndex] - sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
                 result -= numbsInRange[mostPopulousPrefixBit] * afterBalanceSuffixLen;
                 result += rangeLen * numbsInPrefix[mostPopulousPrefixBit];
 
                 assert(result >= 0);
-                assert((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
-                // TODO - replace "balanceIndex - index + 1" with rangeLen and "(N - (balanceIndex + 1))" with afterBalanceSuffixLen?
-                result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - index + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
+                assert((balanceIndex - suffixBeginIndex + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
+                // TODO - replace "balanceIndex - suffixBeginIndex + 1" with rangeLen and "(N - (balanceIndex + 1))" with afterBalanceSuffixLen?
+                result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - suffixBeginIndex + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
                 
                 return result;
             }
@@ -288,7 +288,7 @@ int64_t solveOptimised(const string& B)
 
         int numOfbsInFakePrefix[2] = {0, 0};
         numOfbsInFakePrefix[bitValue] = 1;
-        sumOfWeightStartingAt[index] = blah(numOfbsInFakePrefix, index + 1) + 1; // "+1" for the contribution of just the 1-char prefix, on its own.
+        sumOfWeightStartingAt[suffixBeginIndex] = blah(numOfbsInFakePrefix, suffixBeginIndex + 1) + 1; // "+1" for the contribution of just the 1-char prefix, on its own.
 
 #ifdef VERIFY_RESULTS
         {
@@ -308,14 +308,14 @@ int64_t solveOptimised(const string& B)
 #endif
         numbsInSuffix[bitValue]++;
         const auto currentSuffixBalance = numbsInSuffix[0] - numbsInSuffix[1];
-        nextIndexWithSuffixBalance[currentSuffixBalance] = index;
+        nextIndexWithSuffixBalance[currentSuffixBalance] = suffixBeginIndex;
 
-        for (const auto& query : queriesForIndex[index])
+        for (const auto& query : queriesForIndex[suffixBeginIndex])
         {
-            const auto queryResult = blah(query.numbsInPrefix, index);
+            const auto queryResult = blah(query.numbsInPrefix, suffixBeginIndex);
 
 #ifdef VERIFY_RESULTS
-            const auto dbgQueryResult = sumOfBlah(query.numbsInPrefix[0], query.numbsInPrefix[1], index, B);
+            const auto dbgQueryResult = sumOfBlah(query.numbsInPrefix[0], query.numbsInPrefix[1], suffixBeginIndex, B);
             assert(queryResult == dbgQueryResult);
 #endif
 
