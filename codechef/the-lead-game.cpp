@@ -49,11 +49,7 @@ int main(int argc, char* argv[])
         assert(greatestLead != 0);
     }
 
-    cout << (winnerIsPlayer1 ? 1 : 2);
-    cout << " ";
-    cout << greatestLead << endl;
-
-
+    cout << (winnerIsPlayer1 ? 1 : 2) << " " << greatestLead << endl;
 
     assert(cin);
 }
