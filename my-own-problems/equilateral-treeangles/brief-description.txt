@@ -9,9 +9,8 @@ Count the number of triples (p, q, r) where p, q and r are nodes of T; p, q and 
 APPROACH (SKETCH)
 =================
 
-NB: An Editorial-style write-up is under development.  The proofs of correctness and worst-case performance are non-trivial, and so are omitted from this Sketch Approach, which
-    is already too long.  Please forgive the handwavy-ness - the Editorial-style write-up will be more rigorous! 
-
+NB: An Editorial-style write-up is under development.  The proofs of correctness and worst-case performance are very non-trivial, and so are omitted from this Sketch Approach, which
+    is already too long!  Please forgive the handwavy-ness and vagueness - the Editorial-style write-up will be more complete and rigorous! 
 
 Pick an arbitrary vertex R as the root of a tree, and do a DFS from R.
 
@@ -51,10 +50,10 @@ computation of the number of Type i) triplets; the second is separate and uses C
 
 There's a reasonably well known algorithm for calculating, for each node v, the set of all descendents of v in O(N log N):
 
-doDfs(root)
+findDescendents(root)
     set_of_descendents = empty-set
     for each child c of root:
-        set_of_descendents_of_child = doDfs(c)
+        set_of_descendents_of_child = findDescendents(c)
         if |set_of_descendents_of_child| > |set_of_descendents|:
             swap set_of_descendents with set_of_descendents_of_child (O(1)).
 
@@ -67,7 +66,7 @@ The algorithm looks like it's O(N^2) worst case, but the fact that we always "co
 asymptotically better (O(N log N)), for the same reason as disjoint-union-by-size is O(N log N): https://en.wikipedia.org/wiki/Disjoint-set_data_structure#by_size
 
 For a node v, let height(v) = dist(R, v).  We adapt the algorithm to compute not the set of descendents of each node v, but a count (map) of *heights of descendents of suitable 
-nodes of v*; it can be shown that this also is achievable in worst case O(N log N).
+nodes of v* i.e. a map where the keys are heights and the values are the number of descendents of v which are suitable and have that height; it can be shown that this also is achievable in worst case O(N log N).
 
 With some more book-keeping, it can be shown that we can extract, in O(N log N) time and space, for all nodes v, for all heights h [NB: obviously such heights are stored sparsely, else the space requirements would be O(N^2)]:
 
@@ -85,10 +84,10 @@ and also
 
 This completes Phase one of two.
 
-We see that the latter is the number of triples of Type i) (more precisely - it is the number of such triples divided by the number of permutations of a triple, 3! - see later).
+We see that the latter count of triples is the number of triples of Type i) (more precisely - it is the number of such triples divided by the number of permutations of a triple, 3! - see later).
 
 The former is a step towards the computation of the number of Type ii) triples - referring to the definition of Type ii), we've found, for each X, the number of q's and r's with a given
-height h (which equates to a distance d from X: height(q) - height(x)), and now we just need to find for each X and h the number of p's such that dist(p, X) = height(q) - height(X).  We do this latter step via Centroid Decomposition.
+height h (which equates to a distance d from X: height(q) - height(x)) an lca X, and now we just need to find for each X and h the number of p's such that dist(p, X) = height(q) - height(X).  We do this latter step via Centroid Decomposition.
 
 More precisely, Phase one gives us, for each node v, a map from heights to number of pairs of descendents called v.numPairsWithHeightWithLCA_v - all in O(N log N) time and space.
 
@@ -98,11 +97,9 @@ We then perform Centroid Decomposition with an efficient DistTracker class that 
     * addToAllDistances(distanceIncrease) - adds distanceIncrease to each of the tracked distances in O(1).
     * getNumWithDistance(distance) - return the number of tracked distances whos current value is precisely distance in O(1).     
 
-A simple combination of CD and DistTracker allows us to finally "complete" the "q's" and "r's" found in Phase one with the "p's" necessary to form a complete, Type ii)-triplet.
+A simple combination of CD and DistTracker allows us to finally "complete" the "q's" and "r's" found in Phase one with the "p's" necessary to form a complete, Type ii)-triplet in O(N x (log N) x (log N)).
 
 It can be further shown that if a triplet (p, q, r) of either type (i) or ii)) is counted by the algorithm, then none of its (3! - 1) other permutations - (p, r, q); (r, p, q) etc - will be counted, so simply multiplying the count of Type i) and Type ii) triplets by 3! gives us the final result.
-          
-        
-        
-        
+
+The whole algorithm runs in O(N x (log N) x (log N)) time with O(N log N) space.
 
