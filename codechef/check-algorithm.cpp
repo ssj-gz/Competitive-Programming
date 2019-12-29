@@ -70,6 +70,12 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int numLetters = 1 + rand() % 100;
+            const int maxLetterIndex = 1 + rand() % 26;
+
+            for (int i = 0; i < numLetters; i++)
+                cout << static_cast<char>('a' + rand() % maxLetterIndex);
+            cout << endl;
         }
 
         return 0;
