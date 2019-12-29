@@ -23,23 +23,23 @@ string compress(const string& originalString)
     string toCompress = originalString + "."; // Append a sentinel value, to simplify the code.
     string compressed;
 
-    char previousLetter = '\0';
+    char currentRunLetter = '\0';
     int numOfLetterInRun = 0;
     for (auto letter : toCompress)
     {
-        if (letter == previousLetter)
+        if (letter == currentRunLetter)
         {
             numOfLetterInRun++;
         }
         else
         {
-            if (previousLetter != '\0')
+            if (currentRunLetter != '\0')
             {
-                compressed += previousLetter + to_string(numOfLetterInRun);
+                compressed += currentRunLetter + to_string(numOfLetterInRun);
             }
 
-                previousLetter = letter;
-                numOfLetterInRun = 1;
+            currentRunLetter = letter;
+            numOfLetterInRun = 1;
         }
     }
 
