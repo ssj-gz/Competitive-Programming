@@ -9,35 +9,11 @@
 
 using namespace std;
 
-// Lots of input to read, so use ultra-fast reader.
-void scan_integer( int &x )
+template <typename T>
+T read()
 {
-    int c = getchar_unlocked();
-    x = 0;
-    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
-    for( ;c>47 && c<58; c = getchar_unlocked() ) {
-        x = (x << 1) + (x << 3) + c - 48;
-    }
-}
-
-void scan_char( char &x )
-{
-    int c = getchar_unlocked();
-    for( ; (c != '+' && c != '?'); c = getchar_unlocked() );
-    x = c;
-}
-
-char readChar()
-{
-    char toRead;
-    scan_char(toRead);
-    return toRead;
-}
-
-int readInt()
-{
-    int toRead;
-    scan_integer(toRead);
+    T toRead;
+    cin >> toRead;
     assert(cin);
     return toRead;
 }
@@ -383,37 +359,37 @@ int main(int argc, char* argv[])
     // the first step of processQueries.
     ios::sync_with_stdio(false);
 
-    const int N = readInt();
-    const int Q = readInt();
+    const int N = read<int>();
+    const int Q = read<int>();
 
     // Read and store graph.
     vector<Node> nodes(N);
     for (int i = 0; i < N - 1; i++)
     {
-        const int x = readInt() - 1;
-        const int y = readInt() - 1;
+        const int x = read<int>() - 1;
+        const int y = read<int>() - 1;
 
         nodes[x].neighbours.push_back(&(nodes[y]));
         nodes[y].neighbours.push_back(&(nodes[x]));
     }
     for (int i = 0; i < N; i++)
     {
-        nodes[i].initialBacteria = readInt();
+        nodes[i].initialBacteria = read<int>();
     }
 
     // Read and store queries.
     vector<Query> queries(Q);
     for (int i = 0; i < Q; i++)
     {
-        const auto queryType = readChar();
-        const int nodeId = readInt();
+        const auto queryType = read<char>();
+        const int nodeId = read<int>();
 
         queries[i].nodeId = nodeId;
 
         if (queryType == '+')
         {
             queries[i].queryType = QueryType::AddBacteria;
-            queries[i].numBacteriaToAdd = readInt();
+            queries[i].numBacteriaToAdd = read<int>();
         }
         else
         {
