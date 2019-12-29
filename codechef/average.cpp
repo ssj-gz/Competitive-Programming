@@ -10,6 +10,8 @@
 
 using namespace std;
 
+//#define DIAGNOSTICS
+
 template <typename T>
 T read()
 {
@@ -35,7 +37,12 @@ bool isAverageOfPair(const int targetAverage, const vector<int>& sortedA)
             return false;
 
         if (sortedA[leftIndex] + sortedA[rightIndex] == targetPairSum)
+        {
+#ifdef DIAGNOSTICS
+            cout << "The number: " << targetAverage << " is the average of " << sortedA[leftIndex] << " and " << sortedA[rightIndex] << endl;
+#endif
             return true;
+        }
     }
 
     return false;
@@ -48,8 +55,17 @@ int countAverageElements(const vector<int>& a)
     sort(sortedA.begin(), sortedA.end());
     for (const auto& targetAverage : a)
     {
-        if (isAverageOfPair(targetAverage, sortedA))
+        const bool isAverage = isAverageOfPair(targetAverage, sortedA);
+        if (isAverage)
+        {
             result++;
+        }
+#ifdef DIAGNOSTICS
+        else
+        {
+            cout << "The number: " << targetAverage << " is the not average of any pair of numbers" << endl;
+        }
+#endif
     }
     
     return result;
