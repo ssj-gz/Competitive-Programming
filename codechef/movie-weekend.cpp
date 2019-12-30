@@ -63,7 +63,8 @@ int main(int argc, char* argv[])
                 {
                     return lhsMovie.rating < rhsMovie.rating;
                 }
-                    return lhsMovie.index > rhsMovie.index;
+                // Prefer *minimal* index, hence the ">".
+                return lhsMovie.index > rhsMovie.index;
             });
 
         cout << bestMovie.index << endl;
