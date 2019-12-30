@@ -42,6 +42,27 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const int N = 1 + rand() % 10;
+            const int maxLength = 1 + rand() % 100;
+            const int maxRating = 1 + rand() % 100;
+
+            cout << N << endl;
+
+            for (int i = 0; i < N; i++)
+            {
+                cout << (1 + rand() % maxLength);
+                if (i != N - 1)
+                    cout << " ";
+            }
+            cout << endl;
+ 
+            for (int i = 0; i < N; i++)
+            {
+                cout << (1 + rand() % maxRating);
+                if (i != N - 1)
+                    cout << " ";
+            }       
+            cout << endl;
         }
 
         return 0;
