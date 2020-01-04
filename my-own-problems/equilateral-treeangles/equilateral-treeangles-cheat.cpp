@@ -76,6 +76,9 @@ void bfs(Node& rootNode, int64_t& result)
         }
 
         visitedViaChild.erase(remove_if(visitedViaChild.begin(), visitedViaChild.end(), [](const auto viaChild) { return viaChild.empty(); }), visitedViaChild.end());
+
+        if (visitedViaChild.size() < 3)
+            break;
     }
 
 
