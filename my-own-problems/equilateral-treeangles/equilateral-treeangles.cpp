@@ -1146,13 +1146,38 @@ int main(int argc, char* argv[])
             TreeGenerator treeGenerator;
             TestNode* rootNode = treeGenerator.createNode();
 
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+            //treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+            //treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+            //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+
+            vector<TestNode*> leafNodes;
+
+            for (int i = 0; i < 3; i++)
+            {
+                leafNodes.push_back(treeGenerator.createNode(rootNode));
+            }
+
+            while (treeGenerator.numNodes() < numNodes - 2)
+            {
+                cerr << " # leaf nodes: " << leafNodes.size() << endl;
+                vector<TestNode*> nextLeafNodes;
+                for (auto leafNode : leafNodes)
+                {
+                    auto newLeafNode = treeGenerator.createNode(leafNode);
+                    nextLeafNodes.push_back(newLeafNode);
+                    newLeafNode = treeGenerator.createNode(leafNode);
+                    nextLeafNodes.push_back(newLeafNode);
+
+                    if (treeGenerator.numNodes() >= numNodes - 2)
+                        break;
+                }
+
+                leafNodes = nextLeafNodes;
+            }
 
             for (auto& node : treeGenerator.nodes())
             {
-                node->data.hasPerson = ((rand() % 10'000) != 0);
+                node->data.hasPerson = ((rand() % 2) != 0);
             }
 
             treeGenerator.scrambleNodeIdsAndReorder(nullptr);
