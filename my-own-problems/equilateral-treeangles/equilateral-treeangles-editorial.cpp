@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
 
     int numNodes;
     cin >> numNodes;
-    assert(1 <= numNodes && numNodes <= 100'000);
+    assert(1 <= numNodes && numNodes <= 200'000);
 
     vector<Node> nodes(numNodes);
 
@@ -344,8 +344,8 @@ int main(int argc, char* argv[])
         int v;
         cin >> v;
 
-        assert(1 <= u && u <= 100'000);
-        assert(1 <= v && v <= 100'000);
+        assert(1 <= u && u <= 200'000);
+        assert(1 <= v && v <= 200'000);
 
         // Make 0-relative.
         u--;

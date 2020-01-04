@@ -1142,7 +1142,7 @@ int main(int argc, char* argv[])
             gettimeofday(&time,NULL);
             srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-            const int numNodes = 100'000;
+            const int numNodes = 200'000;
             TreeGenerator treeGenerator;
             TestNode* rootNode = treeGenerator.createNode();
 
@@ -1157,7 +1157,12 @@ int main(int argc, char* argv[])
                 leafNodes.push_back(treeGenerator.createNode(rootNode));
             }
 
-            while (treeGenerator.numNodes() < numNodes - 2)
+            for (int i = 0; i < 50'000; i++)
+            {
+                treeGenerator.createNode(rootNode);
+            }
+
+            while (treeGenerator.numNodes() < (numNodes - 1) / 2)
             {
                 cerr << " # leaf nodes: " << leafNodes.size() << endl;
                 vector<TestNode*> nextLeafNodes;
@@ -1168,12 +1173,16 @@ int main(int argc, char* argv[])
                     newLeafNode = treeGenerator.createNode(leafNode);
                     nextLeafNodes.push_back(newLeafNode);
 
-                    if (treeGenerator.numNodes() >= numNodes - 2)
+                    if (treeGenerator.numNodes() >= (numNodes - 1) / 2)
                         break;
                 }
 
                 leafNodes = nextLeafNodes;
             }
+
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
 
             for (auto& node : treeGenerator.nodes())
             {
