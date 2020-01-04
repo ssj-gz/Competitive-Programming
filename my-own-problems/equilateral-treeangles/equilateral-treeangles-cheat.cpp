@@ -29,25 +29,30 @@ void bfs(Node& rootNode, int64_t& result)
     cout << "bfs from node: " << rootNode.id << endl;
 
     const int numChildren = rootNode.neighbours.size();
+    //cout << " numChildren: " << numChildren << endl;
 
 
     vector<vector<Node*>> visitedViaChild;
 
+    vector<Node*> visitedNodes = { &rootNode };
     for (auto rootNodeNeighbour : rootNode.neighbours)
     {
         visitedViaChild.push_back({rootNodeNeighbour});
+        rootNodeNeighbour->visitedInBFS = true;
+        visitedNodes.push_back(rootNodeNeighbour);
     }
-    vector<Node*> visitedNodes = { &rootNode };
     rootNode.visitedInBFS = true; 
 
     while (!visitedViaChild.empty())
     {
+        //cout << " Iteration.   # visitedViaChild: " << visitedViaChild.size() << endl;
         int64_t numWithPerson = 0;
         int64_t numPairsWithPersonViaDifferentChild = 0;
         for (const auto& viaChild : visitedViaChild)
         {
             const int numWithPersonViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->hasPerson; });
-            const int64_t numNewTriples = numPairsWithPersonViaDifferentChild * numWithPersonViaThisChild;
+            const int64_t numNewTriples = numPairsWithPersonViaDifferentChild * numWithPersonViaThisChild * 6;
+            //cout << "  numWithPerson: " << numWithPerson << " numPairsWithPersonViaDifferentChild: " << numPairsWithPersonViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
             result += numNewTriples;
             numPairsWithPersonViaDifferentChild += numWithPerson * numWithPersonViaThisChild;
             numWithPerson += numWithPersonViaThisChild;
