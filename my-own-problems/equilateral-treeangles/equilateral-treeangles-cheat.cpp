@@ -26,7 +26,7 @@ int64_t numTriples(int64_t n)
 
 void bfs(Node& rootNode, int64_t& result)
 {
-    cout << "bfs from node: " << rootNode.id << endl;
+    //cout << "bfs from node: " << rootNode.id << endl;
 
     const int numChildren = rootNode.neighbours.size();
     //cout << " numChildren: " << numChildren << endl;
