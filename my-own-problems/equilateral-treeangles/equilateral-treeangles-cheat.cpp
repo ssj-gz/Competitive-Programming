@@ -43,8 +43,14 @@ void bfs(Node& rootNode, int64_t& result)
     }
     rootNode.visitedInBFS = true; 
 
+    int iterationNum = 0;
     while (!visitedViaChild.empty())
     {
+        if (visitedViaChild.size() < 3)
+        {
+            //cout << "  breaking at iteration: " << iterationNum << " after visiting " << visitedNodes.size() << endl;
+            break;
+        }
         //cout << " Iteration.   # visitedViaChild: " << visitedViaChild.size() << endl;
         int64_t numWithPerson = 0;
         int64_t numPairsWithPersonViaDifferentChild = 0;
@@ -75,10 +81,16 @@ void bfs(Node& rootNode, int64_t& result)
             viaChild = nextVisitedViaChild;
         }
 
+        const int original = visitedViaChild.size();
         visitedViaChild.erase(remove_if(visitedViaChild.begin(), visitedViaChild.end(), [](const auto viaChild) { return viaChild.empty(); }), visitedViaChild.end());
+        const int newSize = visitedViaChild.size();
 
-        if (visitedViaChild.size() < 3)
-            break;
+        if (newSize < original)
+        {
+            //cout << "Pruned " << (original - newSize) << " at iteration: " << iterationNum << endl;
+        }
+
+        iterationNum++;
     }
 
 
