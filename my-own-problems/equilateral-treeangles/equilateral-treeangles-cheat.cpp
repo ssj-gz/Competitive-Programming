@@ -26,42 +26,53 @@ int64_t numTriples(int64_t n)
 
 void bfs(Node& rootNode, int64_t& result)
 {
-    //cout << "bfs from node: " << rootNode.id << endl;
+    cout << "bfs from node: " << rootNode.id << endl;
 
-    vector<Node*> toExplore = { &rootNode };
+    const int numChildren = rootNode.neighbours.size();
+
+
+    vector<vector<Node*>> visitedViaChild;
+
+    for (auto rootNodeNeighbour : rootNode.neighbours)
+    {
+        visitedViaChild.push_back({rootNodeNeighbour});
+    }
     vector<Node*> visitedNodes = { &rootNode };
     rootNode.visitedInBFS = true; 
 
-    while (!toExplore.empty())
+    while (!visitedViaChild.empty())
     {
-        //cout << " # toExplore: " << toExplore.size() << endl;
-        vector<Node*> nextToExplore;
-
         int64_t numWithPerson = 0;
-        for (auto node : toExplore)
+        int64_t numPairsWithPersonViaDifferentChild = 0;
+        for (const auto& viaChild : visitedViaChild)
         {
-            if (node->hasPerson)
-                numWithPerson++;
+            const int numWithPersonViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->hasPerson; });
+            const int64_t numNewTriples = numPairsWithPersonViaDifferentChild * numWithPersonViaThisChild;
+            result += numNewTriples;
+            numPairsWithPersonViaDifferentChild += numWithPerson * numWithPersonViaThisChild;
+            numWithPerson += numWithPersonViaThisChild;
         }
-        //cout << " numWithPerson: " << numWithPerson << endl;
-
-        result += numTriples(numWithPerson);
-
-        for (auto node : toExplore)
+        for (auto& viaChild : visitedViaChild)
         {
-            for (auto neighbour : node->neighbours)
+            vector<Node*> nextVisitedViaChild;
+            for (auto node : viaChild)
             {
-                if (!neighbour->visitedInBFS)
+                for (auto neighbour : node->neighbours)
                 {
-                    neighbour->visitedInBFS = true;
-                    nextToExplore.push_back(neighbour);
-                    visitedNodes.push_back(neighbour);
+                    if (!neighbour->visitedInBFS)
+                    {
+                        neighbour->visitedInBFS = true;
+                        nextVisitedViaChild.push_back(neighbour);
+                        visitedNodes.push_back(neighbour);
+                    }
                 }
             }
+            viaChild = nextVisitedViaChild;
         }
 
-        toExplore = nextToExplore;
+        visitedViaChild.erase(remove_if(visitedViaChild.begin(), visitedViaChild.end(), [](const auto viaChild) { return viaChild.empty(); }), visitedViaChild.end());
     }
+
 
     for (auto node : visitedNodes)
         node->visitedInBFS = false;
