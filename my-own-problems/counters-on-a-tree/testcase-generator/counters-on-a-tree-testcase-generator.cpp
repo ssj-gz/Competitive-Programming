@@ -1,9 +1,9 @@
 #include <tree-generator.h>
 #include <testlib.h>
 #include "testcase-generator-lib.h"
+#include "random-utilities.h"
 
 #include <iostream>
-#include <numeric>
 #include <set>
 
 constexpr int maxNodes = 100'000;
@@ -156,8 +156,6 @@ void addCounters(TreeGenerator<NodeData>& treeGenerator, double percentageWithCo
 }
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
-
-std::vector<int> findValuesWithSum(const int numValues, const int targetSum, const int minValue);
 
 int main(int argc, char* argv[])
 {
@@ -705,47 +703,4 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     testFileReader.markTestFileAsValidated();
 
     return true;
-}
-
-/**
- * @return a vector of \a numValues values, each of which is at least \a minValue, and 
-           where the sum of all values is precisely \a targetSum
- */
-std::vector<int> findValuesWithSum(const int numValues, const int targetSum, const int minValue)
-{
-    // See e.g. https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics).
-    const int numBars = numValues;
-    const int numStars = targetSum - minValue * numValues;
-    std::string starsAndBars;
-    for (int i = 0; i < numStars; i++)
-    {
-        starsAndBars.push_back('*');
-    }
-    for (int i = 0; i < numBars - 1; i++)
-    {
-        starsAndBars.push_back('-');
-    }
-    shuffle(starsAndBars.begin(), starsAndBars.end());
-    // Sentinel.
-    starsAndBars.push_back('-');
-
-    std::vector<int> values;
-    int numStarsInRun = 0;
-    for (const auto character : starsAndBars)
-    {
-        if (character == '-')
-        {
-            values.push_back(minValue + numStarsInRun);
-            numStarsInRun = 0;
-        }
-        else
-        {
-            numStarsInRun++;
-        }
-    }
-    assert(values.size() == numValues);
-    assert(std::accumulate(values.begin(), values.end(), 0) == targetSum);
-    assert(*min_element(values.begin(), values.end()) >= minValue);
-
-    return values;
 }
