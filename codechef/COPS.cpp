@@ -16,6 +16,8 @@ T read()
     return toRead;
 }
 
+//#define DIAGNOSTICS
+
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
@@ -52,6 +54,13 @@ int main(int argc, char* argv[])
             if (safe)
                 numSafeHouses++;
         }
+#ifdef DIAGNOSTICS
+        for (const auto isSafe : isHouseSafe)
+        {
+            cout << (isSafe ? "." : "X");
+        }
+        cout << endl;
+#endif
 
         cout << numSafeHouses << endl;
     }
