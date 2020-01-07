@@ -3,40 +3,85 @@ BRIEF DESCRIPTION
 
 A binary string of length N (1 <= N <= 1'000'000) is a string consisting of N 0's and 1's e.g. S = 101011 is a binary string of length 6.
 
-For a binary string S, let num0s(S) be the number of 0's in S, and num1s(S) be the number of 1's e.g. num0s(101011) = 2, num1s(101011) = 4.
-Let the *heaviness* of S be max(num0s(S), num1s(S)) e.g. heaviness(101011) = max(2, 4) = 4.
+For a binary string B, let num0s(B) be the number of 0's in B, and num1s(B) be the number of 1's e.g. num0s(101011) = 2, num1s(101011) = 4.
+Let the *heaviness* of B be max(num0s(B), num1s(B)) e.g. heaviness(101011) = max(2, 4) = 4.
 
-Let D(S) be the set of all *distinct* substrings of S.
+Let D(B) be the set of all *distinct* substrings of B.
 
 Compute the sum
 
-$\Sigma_{s \in D(S)} \textit{heaviness}(s)$
+$\Sigma_{b \in D(B)} \textit{heaviness}(b)$
 
 APPROACH (SKETCH)
 =================
 
-NB: A full, Editorial-style solution is under development.
+NB: A full, Editorial-style writeup is under development.  Some of the fine detail below might be slightly wrong, but an extensively tested O(N) implementation exists and rest assured, the proper
+Editorial-style writeup will be correct :)
 
-Whenever we see "distinct substrings", we should probably think "suffix automata".  The high constraints for N suggest that we need
+Whenever we see "distinct substrings", we should probably think "suffix automata" ("SFA").  The high constraints for N suggest that we need
 an O(N) (rather than O(N log N)) algorithm for this - my implementation uses Ukkonen's Algorithm (https://en.wikipedia.org/wiki/Ukkonen's_algorithm), with
 all final states made explicit.
 
-Following a DFS character-by-character over the suffix automation representing the distinct substrings of S will generate all distinct substrings, and
+Let B = b_1b_2 ... b_N be a binary string of length N (each b_i is 0 or 1).  Let B[i, j] be the substring b_ib_{i+1}...b_{j}.  For convenience, let B[i, j] be the empty
+string if i > j.
+
+Recall that in a SFA representing a binary string B of length N, we have O(N) *states* s representing *substrings* word(s) of B, with the root state, s_0, say, representing the empty string.  
+All non-root states s have a *predecessor* pred(s), connected to s via a *transition*.  *Transitions* from pred(s) to s in the SFA are labelled with a "begin(s)" and "end(S)" index 
+indicating that the transition represents the substring B[begin(s), end(s)].
+
+Following a DFS character-by-character over the suffix automation representing the distinct substrings of B will generate all distinct substrings, and
 it is easy to incrementally compute the heaviness of each substring generated so far, giving us the required result: however, this would be
 O(N^2), which will not do.
 
-For a state s in the automaton, let word(s) be the unique substring of S that, when followed, leads to s.  For non-root s, let pred(s) be the predecessor state of s 
-and begin(s), end(s) the indices in S such that following S[begin(s), end(s)] from pred(s) brings us to s.
+More formally, we could obtain our result by computing, for each non-root state s,
+
+$\Sigma_{s is non-root} \Sigma_{i = begin(s)}^{end(s)} word(s).B[begin(s), i]}$
+                        |--------------------------(*)-----------------------|
+
+which would be O(N^2).  Computing the inner sum (*) in O(1) is the key to solving this problem.
+
+Let FakePrefix(num0s, num1s) be a binary string consisting of precisely num0s 0's and num1s 1's in any order.
+
+Define heavySubstringSumWithPrefix(num0sInPrefix, num1sInPrefix, begin, end) = 
+
+$\Sigma_i=begin^end heaviness(FakePrefix(num0sInPrefix, num1sInPrefix).B[begin, i]).$
+
+Define heavySuffixSumWithPrefix(num0sInPrefix, num1sInPrefix, suffixBegin) = heavySubstringSumWithPrefix(num0sInPrefix, num1sInPrefix, suffixBegin, n).
+
+It can be shown that 
+
+heavySubstringSumWithPrefix(num0sInPrefix, num1sInPrefix, begin, end) = heavySuffixSumWithPrefix(num0sInPrefix, num1sInPrefix, begin) -
+                                                                        heavySuffixSumWithPrefix(num0sInPrefix + num0s(B[begin, end]),
+                                                                                                 num1sInPrefix + num1s(B[begin, end]),
+                                                                                                 end + 1) (1)
 
 
-# TODO - this all requires extensive checking!
+Using this notation, (*) becomes
 
-Define blah(num0sInPrefix, num1sInPrefix, suffixBeginIndex) = $\Sigma_{i = \textit{suffixBeginIndex}}^{N} \textit{heaviness}(\textit{num0sInPrefix}\times 0.\textit{num1sInPrefix }\times 1.S[\textit{suffixBeginIndex} \dots])$
+(*) = heavySubstringSumWithPrefix(num0s(word(s)), num1s(word(s)), begin(s), end(s)) (2)
 
-It can be shown that the answer we need is the sum over all states of non-root states s of the following:
+For given indices begin and end, num0s(B[begin, end]) and num1s(B[begin, end]) can be computed in O(1) by precomputing some lookup tables.  From this it follows that during a DFS
+on the SFA, num0s(word(s)) and num1s(word(s)) can be computing in O(1) per state s.
 
-    -blah(num0s(word(pred(s)), num1s(word(pred(s)), begin(pred(s), s))
-    +blah(num0s(word(pred(s)), num1s(word(pred(s)), begin(pred(s), s)) # Completely wrong, blah blah.
+It further follows, from (2), that a DFS over the SFA creates two *heavy suffix sum queries* (HSSQs) each of the form heavySuffixSumWithPrefix(A, B, C) where each of the arguments A, B and C
+can be computed in O(1) per state, and solving these queries will give us our result.
+
+I don't *think* it's possible to compute these HSSQs at the point at which they are  generated, *but* if we store them for later processing (after the DFS is computed) and compute them in descending
+order of their suffixBegin (C), then we can compute all of them in a total of O(N). 
+
+Let sumOfBsStartingAt(bit, suffixBegin) = 
+
+$\Sigma_{i=suffixBegin}^{end} num0s(B[suffixBegin, end])$ if bit == 0, and similar for bit == 1: then all N + 1 values of sumOfBsStartingAt can be computed in O(N) using a simple recurrence relation.
+
+Let sumOfWeightStartingAt(suffixBeginPos) = heavySuffixSumWithPrefix(0, 0, suffixBeginPos).
+
+Let the *balance* balance(B) of a binary string B be num0s[B] - num1s[B].  We say that B is balanced is balance(B) = 0.  By working backwards from suffixBegin = N, for a given string FakePrefix(a, b).B[suffixBegin, N], we
+can find the next *balance point* (the index i > suffixBegin at which the string FakePrefix(a, b).B[i, N] is balanced) in O(1) per suffixBegin.  Using this, we can compute each sumOfWeightStartingAt(suffixBegin) and from this, 
+compute (in tandem with sumOfWeightStartingAt), each stored HSSQ, giving us our final result in a total of O(N): O(N) to build the SFA representing B; O(N) to perform the DFS that stores the HSSQs for later computation;
+and O(N) to finally compute all the HSSQs.
+
+
+
 
     
 
