@@ -1,3 +1,6 @@
+#ifndef RANDOM_CHOOSABLE_SET_H
+#define RANDOM_CHOOSABLE_SET_H
+
 #include <vector>
 #include <map>
 #include <cassert>
@@ -75,3 +78,6 @@ class RandomChooseableSet
         std::map<TPtr, int> m_indexFor;
         std::vector<TPtr> m_vec;
 };
+
+#endif
+
