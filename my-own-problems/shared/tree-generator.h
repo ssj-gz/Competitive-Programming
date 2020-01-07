@@ -1,3 +1,6 @@
+#ifndef TREE_GENERATOR_H
+#define TREE_GENERATOR_H
+
 #include "random-choosable-set.h"
 
 #include <vector>
@@ -237,4 +240,5 @@ class TreeGenerator
 
 };
 
+#endif
 
