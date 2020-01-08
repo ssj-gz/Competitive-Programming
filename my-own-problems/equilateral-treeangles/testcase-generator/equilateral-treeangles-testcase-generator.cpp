@@ -218,6 +218,26 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(364234));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 10'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 17.  Then finish off with random nodes"));
+                const int numNodes = 200'000;
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 10'000);
+
+                treeGenerator.turnEdgesIntoPaths(17);
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+
+                setRandomSuitable(treeGenerator, 83.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
