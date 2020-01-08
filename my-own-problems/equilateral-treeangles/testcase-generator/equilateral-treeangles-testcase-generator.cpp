@@ -121,6 +121,31 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
 {
     auto rootNode = treeGenerator.createNode();
 
+    std::vector<TestNode<NodeData>*> leafNodes;
+
+    for (int i = 0; i < 3; i++)
+    {
+        leafNodes.push_back(treeGenerator.createNode(rootNode));
+    }
+
+    while (treeGenerator.numNodes() < approxNumNodes)
+    {
+        std::vector<TestNode<NodeData>*> nextLeafNodes;
+        for (auto leafNode : leafNodes)
+        {
+            const int numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
+            for (int i = 0; i < numNewChildren; i++)
+            {
+                nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
+            }
+
+            if (treeGenerator.numNodes() >= approxNumNodes)
+                break;
+        }
+
+        leafNodes = nextLeafNodes;
+    }
+
     return rootNode;
 }
 
@@ -149,38 +174,8 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Squat graph where all nodes have degree at least 3.  Some central nodes have high degree"));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, (numNodes - 1) / 2);
-
-                //treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
-                //treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
-                //treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
-
-                std::vector<TestNode<NodeData>*> leafNodes;
-
-                for (int i = 0; i < 3; i++)
-                {
-                    leafNodes.push_back(treeGenerator.createNode(rootNode));
-                }
-
                 const int numNodesInSquatGraph = 50'000;
-                while (treeGenerator.numNodes() < numNodesInSquatGraph)
-                {
-                    //cerr << " # leaf nodes: " << leafNodes.size() << endl;
-                    std::vector<TestNode<NodeData>*> nextLeafNodes;
-                    for (auto leafNode : leafNodes)
-                    {
-                        const int numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
-                        for (int i = 0; i < numNewChildren; i++)
-                        {
-                            nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
-                        }
-
-                        if (treeGenerator.numNodes() >= numNodesInSquatGraph)
-                            break;
-                    }
-
-                    leafNodes = nextLeafNodes;
-                }
+                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
 
                 for (int i = 0; i < 50'000; i++)
                 {
