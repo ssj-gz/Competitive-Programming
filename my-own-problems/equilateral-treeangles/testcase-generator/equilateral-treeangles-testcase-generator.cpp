@@ -174,7 +174,6 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("The core is a squat graph of 50'000 nodes where all nodes have degree at least 3.  50'000 more nodes are then added to the root node, then 100'000 more random nodes."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                const int numNodesInSquatGraph = 50'000;
                 auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
 
                 for (int i = 0; i < 50'000; i++)
