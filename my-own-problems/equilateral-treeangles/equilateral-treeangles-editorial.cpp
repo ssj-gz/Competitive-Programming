@@ -331,42 +331,49 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    int numNodes;
-    cin >> numNodes;
-    assert(1 <= numNodes && numNodes <= 200'000);
+    int numTestcases;
+    cin >> numTestcases;
 
-    vector<Node> nodes(numNodes);
-
-    for (int i = 0; i < numNodes - 1; i++)
+    for (int t = 0; t < numTestcases; t++)
     {
-        int u;
-        cin >> u;
-        int v;
-        cin >> v;
+        int numNodes;
+        cin >> numNodes;
+        assert(1 <= numNodes && numNodes <= 200'000);
 
-        assert(1 <= u && u <= 200'000);
-        assert(1 <= v && v <= 200'000);
+        vector<Node> nodes(numNodes);
 
-        // Make 0-relative.
-        u--;
-        v--;
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            int u;
+            cin >> u;
+            int v;
+            cin >> v;
 
-        // More "neighbours" than "children" at the moment, but we'll sort that out
-        // in fixParentChildAndCountDescendants!
-        nodes[u].children.push_back(&(nodes[v]));
-        nodes[v].children.push_back(&(nodes[u]));
+            assert(1 <= u && u <= 200'000);
+            assert(1 <= v && v <= 200'000);
+
+            // Make 0-relative.
+            u--;
+            v--;
+
+            // More "neighbours" than "children" at the moment, but we'll sort that out
+            // in fixParentChildAndCountDescendants!
+            nodes[u].children.push_back(&(nodes[v]));
+            nodes[v].children.push_back(&(nodes[u]));
+        }
+        for (int i = 0; i < numNodes; i++)
+        {
+            int hasPerson;
+            cin >> hasPerson;
+
+            assert(hasPerson == 0 || hasPerson == 1);
+
+            nodes[i].hasPerson = (hasPerson == 1);
+        }
+
+        const auto numTriplets = findNumTriplets(nodes);
+        cout << numTriplets << endl;
     }
-    for (int i = 0; i < numNodes; i++)
-    {
-        int hasPerson;
-        cin >> hasPerson;
 
-        assert(hasPerson == 0 || hasPerson == 1);
-
-        nodes[i].hasPerson = (hasPerson == 1);
-    }
     assert(cin);
-
-    const auto numTriplets = findNumTriplets(nodes);
-    cout << numTriplets << endl;
 }
