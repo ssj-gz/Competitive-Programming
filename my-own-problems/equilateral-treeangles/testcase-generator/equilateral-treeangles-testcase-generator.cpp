@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("The core is a squat graph of 50'000 nodes where all nodes have degree at least 3.  50'000 more nodes are then added to three nodes close to the centre, then 100'000 more random nodes."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
 
                 const auto nodes = treeGenerator.nodes();
                 std:: vector<TestNode<NodeData>*> allCentralIshNodes(nodes.begin(), nodes.begin() + 50);
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 10'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 17.  Then finish off with random nodes"));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 10'000);
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 10'000);
 
                 treeGenerator.turnEdgesIntoPaths(17);
 
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 1'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 180.  Then finish off with random nodes"));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 1'000);
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 1'000);
 
                 treeGenerator.turnEdgesIntoPaths(180);
 
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 100 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 1800.  Then finish off with random nodes"));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
 
                 treeGenerator.turnEdgesIntoPaths(1800);
 
