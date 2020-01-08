@@ -189,6 +189,35 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(38938));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("The core is a squat graph of 50'000 nodes where all nodes have degree at least 3.  50'000 more nodes are then added to three nodes close to the centre, then 100'000 more random nodes."));
+                const int numNodes = 200'000;
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
+
+                const auto nodes = treeGenerator.nodes();
+                std:: vector<TestNode<NodeData>*> allCentralIshNodes(nodes.begin(), nodes.begin() + 50);
+                const auto threeCentralNodes = chooseKRandomFrom(3, allCentralIshNodes);
+
+                treeGenerator.createNodesWithRandomParentPreferringFromSet(threeCentralNodes, 50'000, 99.8,
+                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
+                        {
+                            addNewNodeToSet = false;
+                            removeParentFromSet = false;
+                        });
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+
+                setRandomSuitable(treeGenerator, 83.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
