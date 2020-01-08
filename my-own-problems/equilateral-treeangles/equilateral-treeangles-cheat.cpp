@@ -112,44 +112,50 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    int numNodes;
-    cin >> numNodes;
-    assert(1 <= numNodes && numNodes <= 200'000);
+    int numTestCases;
+    cin >> numTestCases;
 
-    vector<Node> nodes(numNodes);
-    for (int i = 0; i < numNodes; i++)
-        nodes[i].id = (i + 1);
-
-    for (int i = 0; i < numNodes - 1; i++)
+    for (int t = 0; t < numTestCases; t++)
     {
-        int u;
-        cin >> u;
-        int v;
-        cin >> v;
+        int numNodes;
+        cin >> numNodes;
+        assert(1 <= numNodes && numNodes <= 200'000);
 
-        assert(1 <= u && u <= 200'000);
-        assert(1 <= v && v <= 200'000);
+        vector<Node> nodes(numNodes);
+        for (int i = 0; i < numNodes; i++)
+            nodes[i].id = (i + 1);
 
-        // Make 0-relative.
-        u--;
-        v--;
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            int u;
+            cin >> u;
+            int v;
+            cin >> v;
 
-        nodes[u].neighbours.push_back(&(nodes[v]));
-        nodes[v].neighbours.push_back(&(nodes[u]));
-    }
-    for (int i = 0; i < numNodes; i++)
-    {
-        int hasPerson;
-        cin >> hasPerson;
+            assert(1 <= u && u <= 200'000);
+            assert(1 <= v && v <= 200'000);
 
-        assert(hasPerson == 0 || hasPerson == 1);
+            // Make 0-relative.
+            u--;
+            v--;
 
-        nodes[i].hasPerson = (hasPerson == 1);
+            nodes[u].neighbours.push_back(&(nodes[v]));
+            nodes[v].neighbours.push_back(&(nodes[u]));
+        }
+        for (int i = 0; i < numNodes; i++)
+        {
+            int hasPerson;
+            cin >> hasPerson;
+
+            assert(hasPerson == 0 || hasPerson == 1);
+
+            nodes[i].hasPerson = (hasPerson == 1);
+        }
+
+        const auto numTriplets = findNumTriplets(nodes);
+        cout << numTriplets << endl;
     }
     assert(cin);
-
-    const auto numTriplets = findNumTriplets(nodes);
-    cout << numTriplets << endl;
 }
 
 
