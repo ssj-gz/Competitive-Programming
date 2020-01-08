@@ -162,12 +162,8 @@ int main(int argc, char* argv[])
                     leafNodes.push_back(treeGenerator.createNode(rootNode));
                 }
 
-                for (int i = 0; i < 50'000; i++)
-                {
-                    treeGenerator.createNode(rootNode);
-                }
-
-                while (treeGenerator.numNodes() < (numNodes - 1) / 2)
+                const int numNodesInSquatGraph = 50'000;
+                while (treeGenerator.numNodes() < numNodesInSquatGraph)
                 {
                     //cerr << " # leaf nodes: " << leafNodes.size() << endl;
                     std::vector<TestNode<NodeData>*> nextLeafNodes;
@@ -179,12 +175,18 @@ int main(int argc, char* argv[])
                             nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
                         }
 
-                        if (treeGenerator.numNodes() >= (numNodes - 1) / 2)
+                        if (treeGenerator.numNodes() >= numNodesInSquatGraph)
                             break;
                     }
 
                     leafNodes = nextLeafNodes;
                 }
+
+                for (int i = 0; i < 50'000; i++)
+                {
+                    treeGenerator.createNode(rootNode);
+                }
+
 
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
