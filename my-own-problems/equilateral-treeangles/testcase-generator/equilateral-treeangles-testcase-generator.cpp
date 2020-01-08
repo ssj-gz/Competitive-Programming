@@ -168,6 +168,29 @@ int main(int argc, char* argv[])
     {
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(983242));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Root node has degree 50'000, then 150'000 random nodes added"));
+                const int numNodes = 200'000;
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+
+                for (int i = 0; i < 50'000; i++)
+                {
+                    treeGenerator.createNode(rootNode);
+                }
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+
+                setRandomSuitable(treeGenerator, 80.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(122));
 
             {
