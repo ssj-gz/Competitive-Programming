@@ -529,7 +529,7 @@ class TestSuite
                     }
                     else
                     {
-                        std::cout << std::endl;
+                        std::cout << "; none with individual descriptions." << std::endl;
                     }
                     testFileNum++;
                     std::cout << std::endl;
