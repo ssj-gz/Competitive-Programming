@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
                     .withSeed(122));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Squat graph where all nodes have degree at least 3.  Some central nodes have high degree"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("The core is a squat graph of 50'000 nodes where all nodes have degree at least 3.  50'000 more nodes are then added to the root node, then 100'000 more random nodes."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 const int numNodesInSquatGraph = 50'000;
@@ -182,12 +182,9 @@ int main(int argc, char* argv[])
                     treeGenerator.createNode(rootNode);
                 }
 
-
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
-
-
 
                 setRandomSuitable(treeGenerator, 80.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
