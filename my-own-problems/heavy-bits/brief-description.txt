@@ -1,7 +1,7 @@
 BRIEF DESCRIPTION
 =================
 
-A binary string of length N (1 <= N <= 1'000'000) is a string consisting of N 0's and 1's e.g. S = 101011 is a binary string of length 6.
+A binary string of length N (1 <= N <= 1'000'000) is a string consisting of N 0's and 1's e.g. B = 101011 is a binary string of length 6.
 
 For a binary string B, let num0s(B) be the number of 0's in B, and num1s(B) be the number of 1's e.g. num0s(101011) = 2, num1s(101011) = 4.
 Let the *heaviness* of B be max(num0s(B), num1s(B)) e.g. heaviness(101011) = max(2, 4) = 4.
@@ -10,7 +10,7 @@ Let D(B) be the set of all *distinct* substrings of B.
 
 Compute the sum
 
-$\Sigma_{b \in D(B)} \textit{heaviness}(b)$
+$\Sigma_{b \in D(B)} heaviness(b)$
 
 APPROACH (SKETCH)
 =================
@@ -26,7 +26,7 @@ Let B = b_1b_2 ... b_N be a binary string of length N (each b_i is 0 or 1).  Let
 string whenever i > j.
 
 Recall that in a SFA representing a binary string B of length N, we have O(N) *states* s representing *substrings* word(s) of B, with the root state, s_0, say, representing the empty string.  
-All non-root states s have a *predecessor* pred(s), connected to s via a *transition*.  *Transitions* from pred(s) to s in the SFA are labelled with a "begin(s)" and "end(S)" index 
+All non-root states s have a *predecessor* pred(s), connected to s via a *transition*.  *Transitions* from pred(s) to s in the SFA are labelled with a "begin(s)" and "end(s)" index 
 indicating that the transition represents the substring B[begin(s), end(s)].
 
 Following a DFS character-by-character over the suffix automation representing the distinct substrings of B will generate all distinct substrings, and
