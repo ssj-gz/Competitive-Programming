@@ -162,6 +162,7 @@ int main(int argc, char* argv[])
     
     // SUBTASK 2
     {
+        {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask2)
                                                                     .withDescription("100 random testcases with each having <= 1000 nodes")
                                     .withSeed(3432432));
@@ -178,6 +179,7 @@ int main(int argc, char* argv[])
                 setRandomSuitable(treeGenerator, rnd.next(70.0, 95.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
+        }
     }
     
     // SUBTASK 3
