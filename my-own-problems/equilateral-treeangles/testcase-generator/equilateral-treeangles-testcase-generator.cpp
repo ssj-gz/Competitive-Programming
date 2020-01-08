@@ -117,6 +117,13 @@ void setRandomSuitable(TreeGenerator<NodeData>& treeGenerator, double percentage
     }
 }
 
+TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes)
+{
+    auto rootNode = treeGenerator.createNode();
+
+    return rootNode;
+}
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
@@ -142,7 +149,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Squat graph where all nodes have degree at least 3.  Some central nodes have high degree"));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
+                auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, (numNodes - 1) / 2);
 
                 //treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
                 //treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
