@@ -25,12 +25,6 @@ struct TestNode
         return (scrambledId == -1) ? originalId : scrambledId;
     }
     NodeData data;
-
-    // Filled in my doGenericInfoDFS.
-    TestNode* parent = nullptr;
-    int visitNum = -1;
-    int endVisitNum = -1;
-    int height = -1;
 };
 template <typename NodeData>
 struct TestEdge
