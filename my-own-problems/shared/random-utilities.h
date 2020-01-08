@@ -46,5 +46,18 @@ inline std::vector<int> chooseRandomValuesWithSum(const int numValues, const int
     return values;
 }
 
+/**
+ * @return a vector of \a numToChoose values randomly-chosen from \a toChooseFrom.
+ */
+template<typename ValueType>
+std::vector<ValueType> chooseKRandomFrom(const int numToChoose, const std::vector<ValueType>& toChooseFrom)
+{
+    assert(numToChoose <= toChooseFrom.size());
+    std::vector<ValueType> toChooseFromScrambled = toChooseFrom;
+    shuffle(toChooseFromScrambled.begin(), toChooseFromScrambled.end());
+
+    return std::vector<ValueType>(toChooseFromScrambled.begin(), toChooseFromScrambled.begin() + numToChoose);
+}
+
 #endif
 
