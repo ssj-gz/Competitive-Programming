@@ -336,6 +336,34 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                                                                    .withDescription("Generic squat-ish graph with three long arms: first 25'000 nodes are grown preferring non-leafs; then 75'000 preferring leaves; then three arms of length 30'000 are attached to random nodes.  Then the remaining nodes are random")
+                                                                    .withSeed(94543));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat graph"));
+                const int numNodes = 200'000;
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(25'000, 3.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(75'000, 98);
+
+                const auto nodesWithoutArms = treeGenerator.nodes();
+                for (int i = 0; i < 3; i++)
+                {
+                    treeGenerator.addNodeChain(nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))], 30'000);
+                }
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+
+                setRandomSuitable(treeGenerator, 78.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
