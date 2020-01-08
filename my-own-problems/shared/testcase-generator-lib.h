@@ -434,6 +434,7 @@ class TestSuite
             int testFileNum = 1;
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
             {
+                (void)subtaskId; // Suppress "unused variable" warning.
                 for (const auto& testFile : testFilesForSubtask)
                 {
                     const auto& testcases = testFile->testcases();
