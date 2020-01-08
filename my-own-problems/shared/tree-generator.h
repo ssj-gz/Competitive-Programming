@@ -228,6 +228,28 @@ class TreeGenerator
             }
             return edges;
         }
+        /**
+         * Remove all edges.  For each pair of nodes that were originally connected by an edge,
+         * insert a chain of nodes of length \a pathLength between them.
+         */
+        void turnEdgesIntoPaths(int pathLength)
+        {
+            std::vector<TestEdge<NodeData>> originalEdges;
+            for (auto& edge : edges())
+            {
+                originalEdges.push_back(*edge);
+            }
+            m_edges.clear();
+            for (auto& node : m_nodes)
+            {
+                node->neighbours.clear();
+            }
+
+            for (const auto& originalEdge : originalEdges)
+            {
+                addEdge(originalEdge.nodeB, addNodeChain(originalEdge.nodeA, pathLength).back());
+            }
+        }
     private:
         std::vector<std::unique_ptr<TestNode<NodeData>>> m_nodes;
         std::vector<std::unique_ptr<TestEdge<NodeData>>> m_edges;
