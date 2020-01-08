@@ -548,7 +548,7 @@ int main(int argc, char* argv[])
                     .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
 
             int numNodesInTestFile = 0;
-            const auto numNodesForTestCase = findValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 1);
+            const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 1);
             for (const auto numNodes : numNodesForTestCase)
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo());

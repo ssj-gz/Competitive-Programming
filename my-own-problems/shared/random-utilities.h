@@ -7,7 +7,7 @@
  * @return a vector of \a numValues values, each of which is at least \a minValue, and
            where the sum of all values is precisely \a targetSum
  */
-inline std::vector<int> findValuesWithSum(const int numValues, const int targetSum, const int minValue)
+inline std::vector<int> chooseRandomValuesWithSum(const int numValues, const int targetSum, const int minValue)
 {
     // See e.g. https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics).
     const int numBars = numValues;
