@@ -504,7 +504,7 @@ class TestSuite
                 std::cout << "Subtask: " << subtaskId << std::endl;
                 assert(!testFilesBySubtaskId.empty());
                 const SubtaskInfo& subTaskInfo = *testFilesForSubtask.front()->containingSubtask();
-                std::cout << subTaskInfo << std::endl;
+                std::cout << subTaskInfo << std::endl << std::endl;
                 for (const auto testFile : testFilesForSubtask)
                 {
                     std::cout << "   Testfile # " << testFileNum << " filename: " << fileNameForTestFile[testFile] << " (" << (testFile->description().empty() ? "no description" : testFile->description()) << ")" << std::endl;
@@ -514,7 +514,7 @@ class TestSuite
                     const auto& testcases = testFile->testcases();
                     if (std::count_if(testcases.begin(), testcases.end(), [](const auto& testcase) { return !testcase->description().empty();}) != 0)
                     {
-                        std::cout << "; printing out ones with descriptions: " << std::endl;
+                        std::cout << "; printing out ones with descriptions: " << std::endl << std::endl;
                         int testcaseNum = 1;
 
                         for (const auto testcase : testcases)
@@ -532,6 +532,7 @@ class TestSuite
                         std::cout << std::endl;
                     }
                     testFileNum++;
+                    std::cout << std::endl;
                 }
 
                 std::cout << std::endl;
