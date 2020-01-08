@@ -317,6 +317,25 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                                                                    .withDescription("Generic squat-ish graph: first 50'000 nodes are grown preferring non-leafs; then remaining 150'000 preferring leaves")
+                                                                    .withSeed(94543));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat graph"));
+                const int numNodes = 200'000;
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(1 * (numNodes - treeGenerator.numNodes()) / 4, 3.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+
+                setRandomSuitable(treeGenerator, 89.0);
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
