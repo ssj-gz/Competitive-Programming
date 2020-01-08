@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
                     std::vector<TestNode<NodeData>*> nextLeafNodes;
                     for (auto leafNode : leafNodes)
                     {
-                        const int numNewChildren = 2;
+                        const int numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
                         for (int i = 0; i < numNewChildren; i++)
                         {
                             nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
