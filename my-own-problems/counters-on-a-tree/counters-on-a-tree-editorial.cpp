@@ -329,6 +329,7 @@ int main(int argc, char* argv[])
         auto rootNode = &(nodes.front());
         doCentroidDecomposition(rootNode);
 
+#if 0
         vector<int> nodesThatGiveBobWinWhenRoot;
         int nodeNumber = 1;
         for (auto& node : nodes)
@@ -338,7 +339,6 @@ int main(int argc, char* argv[])
 
             nodeNumber++;
         }
-#if 0
         cout << nodesThatGiveBobWinWhenRoot.size() << endl;
         for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
         {
