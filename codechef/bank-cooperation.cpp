@@ -20,7 +20,7 @@ T read()
 }
 constexpr auto numBanks = 8;
 
-void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating, int bankIndex, vector<bool>& isBankIndexUsed, int64_t valueSoFar, int64_t& bestValue)
+void findLargestAmountInSingleContainerAux(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating, int bankIndex, vector<bool>& isBankIndexUsed, int64_t valueSoFar, int64_t& bestValue)
 {
     if (bankIndex == numBanks)
     {
@@ -41,20 +41,20 @@ void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<ve
     }
 
     // Don't use this bank.
-    solveBruteForceAux(amountStolenFromBank, areBanksCooperating, bankIndex + 1, isBankIndexUsed, valueSoFar, bestValue);
+    findLargestAmountInSingleContainerAux(amountStolenFromBank, areBanksCooperating, bankIndex + 1, isBankIndexUsed, valueSoFar, bestValue);
 
     // Use this bank.
     isBankIndexUsed[bankIndex] = true;
-    solveBruteForceAux(amountStolenFromBank, areBanksCooperating, bankIndex + 1, isBankIndexUsed, valueSoFar + amountStolenFromBank[bankIndex], bestValue);
+    findLargestAmountInSingleContainerAux(amountStolenFromBank, areBanksCooperating, bankIndex + 1, isBankIndexUsed, valueSoFar + amountStolenFromBank[bankIndex], bestValue);
     isBankIndexUsed[bankIndex] = false;
 }
 
-int64_t solveBruteForce(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating)
+int64_t findLargestAmountInSingleContainer(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating)
 {
     int64_t result = 0;
 
     vector<bool> isBankIndexUsed(numBanks, false);
-    solveBruteForceAux(amountStolenFromBank, areBanksCooperating, 0, isBankIndexUsed, 0, result);
+    findLargestAmountInSingleContainerAux(amountStolenFromBank, areBanksCooperating, 0, isBankIndexUsed, 0, result);
     
     return result;
 }
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     //
     // Turns out that, no, there are inputs whose output is too big for an int32. 
     //
-    // Sigh.
+    // Sigh - wish they'd rephrased it as "each amount stolen fits easily into 32 bit integer type".
     ios::sync_with_stdio(false);
     
     vector<int> amountStolenFromBank(numBanks);
@@ -92,8 +92,7 @@ int main(int argc, char* argv[])
         areBanksCooperating[bank2][bank1] = true;
     }
 
-    const auto solutionBruteForce = solveBruteForce(amountStolenFromBank, areBanksCooperating);
-    cout << solutionBruteForce << endl;
+    cout << findLargestAmountInSingleContainer(amountStolenFromBank, areBanksCooperating) << endl;
 
     assert(cin);
 }
