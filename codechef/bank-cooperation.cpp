@@ -28,7 +28,7 @@ T read()
 }
 constexpr auto numBanks = 8;
 
-void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating, int bankIndex, vector<bool>& isBankIndexUsed, int valueSoFar, int& bestValue)
+void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating, int bankIndex, vector<bool>& isBankIndexUsed, int64_t valueSoFar, int64_t& bestValue)
 {
     if (bankIndex == numBanks)
     {
@@ -69,9 +69,9 @@ void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<ve
     isBankIndexUsed[bankIndex] = false;
 }
 
-int solveBruteForce(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating)
+int64_t solveBruteForce(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating)
 {
-    int result = 0;
+    int64_t result = 0;
 
     vector<bool> isBankIndexUsed(numBanks, false);
     solveBruteForceAux(amountStolenFromBank, areBanksCooperating, 0, isBankIndexUsed, 0, result);
@@ -130,7 +130,6 @@ int main(int argc, char* argv[])
         return 0;
     }
     
-
     vector<int> amountStolenFromBank(numBanks);
     for (auto& amount : amountStolenFromBank)
         amount = read<int>();
