@@ -25,8 +25,8 @@ struct Query
 };
 
 /**
- * @return vector bools, one for each query, where the value is true if and only if
- *         the result of that query is ODD. 
+ * @return vector of bools, one for each query, where the value is true if and only if
+ *         the result of the corresponding query is ODD. 
  */
 vector<bool> calcQueryResults(const vector<int>& a, const vector<Query>& queries)
 {
@@ -42,7 +42,6 @@ vector<bool> calcQueryResults(const vector<int>& a, const vector<Query>& queries
         numEvensInPrefixOfLen.push_back(numEvens);
     }
 
-
     for (const auto& query : queries)
     {
         const auto numEvensInRange = numEvensInPrefixOfLen[query.rightIndex + 1] - numEvensInPrefixOfLen[query.leftIndex];
@@ -55,6 +54,12 @@ vector<bool> calcQueryResults(const vector<int>& a, const vector<Query>& queries
 
 int main(int argc, char* argv[])
 {
+    // Easy one: the bitwise-and of a set of numbers is odd if and only if
+    // the odd bit is set, which is true if and only if the odd bit is set
+    // in all numbers, which is true if and only if none of the numbers is
+    // odd.  The problem thus reduces to testing whether there are any even
+    // numbers in each range, which can be easily done with a prefix-array
+    // (numEvensInPrefixOfLen).
     ios::sync_with_stdio(false);
     
     const auto T = read<int>();
