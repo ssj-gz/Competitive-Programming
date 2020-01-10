@@ -28,34 +28,41 @@ T read()
 }
 constexpr auto numBanks = 8;
 
-void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<vector<int>>& cooperatorsWithBank, int bankIndex, vector<int>& numUsedCooperatorsWithBank, int valueSoFar, int& bestValue)
+void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating, int bankIndex, vector<bool>& isBankIndexUsed, int valueSoFar, int& bestValue)
 {
-    bestValue = max(bestValue, valueSoFar);
     if (bankIndex == numBanks)
+    {
+        for (int i = 0; i < numBanks; i++)
+        {
+            for (int j = 0; j < numBanks; j++)
+            {
+                if (isBankIndexUsed[i] && isBankIndexUsed[j] && areBanksCooperating[i][j])
+                {
+                    // Invalid selection of banks.
+                    return;
+                }
+            }
+        }
+        // Valid selection.
+        bestValue = max(bestValue, valueSoFar);
         return;
+    }
 
     // Don't use this bank.
-    solveBruteForceAux(amountStolenFromBank, cooperatorsWithBank, bankIndex + 1, numUsedCooperatorsWithBank, valueSoFar, bestValue);
+    solveBruteForceAux(amountStolenFromBank, areBanksCooperating, bankIndex + 1, isBankIndexUsed, valueSoFar, bestValue);
 
-    if (numUsedCooperatorsWithBank[bankIndex] == 0)
-    {
-        // Use this bank.
-        for (const auto cooperator : cooperatorsWithBank[bankIndex])
-            numUsedCooperatorsWithBank[cooperator]++;
-
-        solveBruteForceAux(amountStolenFromBank, cooperatorsWithBank, bankIndex + 1, numUsedCooperatorsWithBank, valueSoFar + amountStolenFromBank[bankIndex], bestValue);
-
-        for (const auto cooperator : cooperatorsWithBank[bankIndex])
-            numUsedCooperatorsWithBank[cooperator]--;
-    }
+    // Use this bank.
+    isBankIndexUsed[bankIndex] = true;
+    solveBruteForceAux(amountStolenFromBank, areBanksCooperating, bankIndex + 1, isBankIndexUsed, valueSoFar + amountStolenFromBank[bankIndex], bestValue);
+    isBankIndexUsed[bankIndex] = false;
 }
 
-int solveBruteForce(const vector<int>& amountStolenFromBank, const vector<vector<int>>& cooperatorsWithBank)
+int solveBruteForce(const vector<int>& amountStolenFromBank, const vector<vector<bool>>& areBanksCooperating)
 {
     int result = 0;
 
-    vector<int> numUsedCooperatorsWithBank(numBanks, 0);
-    solveBruteForceAux(amountStolenFromBank, cooperatorsWithBank, 0, numUsedCooperatorsWithBank, 0, result);
+    vector<bool> isBankIndexUsed(numBanks, false);
+    solveBruteForceAux(amountStolenFromBank, areBanksCooperating, 0, isBankIndexUsed, 0, result);
     
     return result;
 }
@@ -117,20 +124,20 @@ int main(int argc, char* argv[])
 
     const int numCooperatingBanks = read<int>();
 
-    vector<vector<int>> cooperatorsWithBank(numBanks);
+    vector<vector<bool>> areBanksCooperating(numBanks, vector<bool>(numBanks, false));
 
     for (int i = 0; i < numCooperatingBanks; i++)
     {
         const auto bank1 = read<int>() - 1;
         const auto bank2 = read<int>() - 1;
 
-        cooperatorsWithBank[bank1].push_back(bank2);
-        cooperatorsWithBank[bank2].push_back(bank1);
+        areBanksCooperating[bank1][bank2] = true;
+        areBanksCooperating[bank2][bank1] = true;
     }
 
 #ifdef BRUTE_FORCE
 #if 1
-        const auto solutionBruteForce = solveBruteForce(amountStolenFromBank, cooperatorsWithBank);
+        const auto solutionBruteForce = solveBruteForce(amountStolenFromBank, areBanksCooperating);
         //cout << "solutionBruteForce: " << solutionBruteForce << endl;
         cout << solutionBruteForce << endl;
 #endif
