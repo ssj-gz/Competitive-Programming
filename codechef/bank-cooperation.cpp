@@ -94,24 +94,13 @@ int main(int argc, char* argv[])
                 cout << " ";
         }
         cout << endl;
-        vector<pair<int, int>> totalPairs;
-        for (int i = 0; i < numBanks; i++)
-        {
-            for (int j = i + 1; j < numBanks; j++)
-            {
-                totalPairs.push_back({i + 1, j + 1});
-            }
-        }
-
-        random_shuffle(totalPairs.begin(), totalPairs.end());
-
-        const int numCooperatingBanks = rand() % (1 + totalPairs.size());
+        const int numCooperatingBanks = rand() % 1000;
 
         cout << numCooperatingBanks << endl;
 
         for (int i = 0; i < numCooperatingBanks; i++)
         {
-            cout << totalPairs[i].first << " " << totalPairs[i].second << endl;
+            cout << (1 + rand() % numBanks) << " " << (1 + rand() % numBanks) << endl;
         }
 
         return 0;
@@ -133,6 +122,16 @@ int main(int argc, char* argv[])
 
         areBanksCooperating[bank1][bank2] = true;
         areBanksCooperating[bank2][bank1] = true;
+    }
+
+    for (int i = 0; i < numBanks; i++)
+    {
+        for (int j = 0; j < numBanks; j++)
+        {
+            cout << (areBanksCooperating[i][j] ? "X" : ".");
+        }
+        cout << endl;
+
     }
 
 #ifdef BRUTE_FORCE
