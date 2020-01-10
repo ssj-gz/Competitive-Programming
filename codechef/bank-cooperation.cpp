@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
                 cout << " ";
         }
         cout << endl;
-        const int numCooperatingBanks = rand() % 1000;
+        const int numCooperatingBanks = rand() % 100;
 
         cout << numCooperatingBanks << endl;
 
@@ -120,10 +120,14 @@ int main(int argc, char* argv[])
         const auto bank1 = read<int>() - 1;
         const auto bank2 = read<int>() - 1;
 
+        if (bank1 == bank2)
+            continue;
+
         areBanksCooperating[bank1][bank2] = true;
         areBanksCooperating[bank2][bank1] = true;
     }
 
+#if 0
     for (int i = 0; i < numBanks; i++)
     {
         for (int j = 0; j < numBanks; j++)
@@ -133,6 +137,7 @@ int main(int argc, char* argv[])
         cout << endl;
 
     }
+#endif
 
 #ifdef BRUTE_FORCE
 #if 1
