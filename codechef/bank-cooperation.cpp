@@ -44,7 +44,19 @@ void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<ve
             }
         }
         // Valid selection.
-        bestValue = max(bestValue, valueSoFar);
+        if (valueSoFar > bestValue)
+        {
+            bestValue =  valueSoFar;
+#if 0
+            cout << "Obtained new best: " << valueSoFar << endl;
+            for (int i = 0; i < numBanks; i++)
+            {
+                if (isBankIndexUsed[i])
+                    cout << "[" << (i + 1) << ": " << amountStolenFromBank[i] << "] ";
+            }
+            cout << endl;
+#endif
+        }
         return;
     }
 
@@ -94,13 +106,25 @@ int main(int argc, char* argv[])
                 cout << " ";
         }
         cout << endl;
-        const int numCooperatingBanks = rand() % 100;
 
-        cout << numCooperatingBanks << endl;
+        vector<pair<int, int>> allBankPairs;
 
-        for (int i = 0; i < numCooperatingBanks; i++)
+        for (int i = 0; i < numBanks; i++)
         {
-            cout << (1 + rand() % numBanks) << " " << (1 + rand() % numBanks) << endl;
+            for (int j = 0; j < numBanks; j++)
+            {
+                if (i != j)
+                    allBankPairs.push_back({i + 1, j + 1});
+            }
+        }
+
+        const int numPairsCooperatingBanks = rand() % (allBankPairs.size() + 1);
+        cout << numPairsCooperatingBanks << endl;
+
+        for (int i = 0; i < numPairsCooperatingBanks; i++)
+        {
+            const int pairIndex = rand() % numPairsCooperatingBanks;
+            cout << allBankPairs[pairIndex].first << " " << allBankPairs[pairIndex].second << endl;
         }
 
         return 0;
@@ -111,50 +135,23 @@ int main(int argc, char* argv[])
     for (auto& amount : amountStolenFromBank)
         amount = read<int>();
 
-    const int numCooperatingBanks = read<int>();
+    const int numPairsCooperatingBanks = read<int>();
 
     vector<vector<bool>> areBanksCooperating(numBanks, vector<bool>(numBanks, false));
 
-    for (int i = 0; i < numCooperatingBanks; i++)
+    for (int i = 0; i < numPairsCooperatingBanks; i++)
     {
         const auto bank1 = read<int>() - 1;
         const auto bank2 = read<int>() - 1;
 
-        if (bank1 == bank2)
-            continue;
+        assert(bank1 != bank2);
 
         areBanksCooperating[bank1][bank2] = true;
         areBanksCooperating[bank2][bank1] = true;
     }
 
-#if 0
-    for (int i = 0; i < numBanks; i++)
-    {
-        for (int j = 0; j < numBanks; j++)
-        {
-            cout << (areBanksCooperating[i][j] ? "X" : ".");
-        }
-        cout << endl;
-
-    }
-#endif
-
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(amountStolenFromBank, areBanksCooperating);
-        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-        cout << solutionBruteForce << endl;
-#endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
-        const auto solutionOptimised = solveOptimised();
-        cout << solutionOptimised << endl;
-#endif
+    const auto solutionBruteForce = solveBruteForce(amountStolenFromBank, areBanksCooperating);
+    cout << solutionBruteForce << endl;
 
     assert(cin);
 }
