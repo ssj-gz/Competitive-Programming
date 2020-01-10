@@ -44,19 +44,7 @@ void solveBruteForceAux(const vector<int>& amountStolenFromBank, const vector<ve
             }
         }
         // Valid selection.
-        if (valueSoFar > bestValue)
-        {
-            bestValue =  valueSoFar;
-#if 0
-            cout << "Obtained new best: " << valueSoFar << endl;
-            for (int i = 0; i < numBanks; i++)
-            {
-                if (isBankIndexUsed[i])
-                    cout << "[" << (i + 1) << ": " << amountStolenFromBank[i] << "] ";
-            }
-            cout << endl;
-#endif
-        }
+        bestValue = max(bestValue, valueSoFar);
         return;
     }
 
@@ -78,16 +66,6 @@ int64_t solveBruteForce(const vector<int>& amountStolenFromBank, const vector<ve
     
     return result;
 }
-
-#if 0
-SolutionType solveOptimised()
-{
-    SolutionType result;
-    
-    return result;
-}
-#endif
-
 
 int main(int argc, char* argv[])
 {
