@@ -1231,73 +1231,78 @@ int main(int argc, char* argv[])
             assert(false);
         }
     }
-    int numNodes;
-    cin >> numNodes;
-    assert(1 <= numNodes && numNodes <= 100'000);
+    int numTestCases;
+    cin >> numTestCases;
+    for (int t = 0; t < numTestCases; t++)
+    {
+        int numNodes;
+        cin >> numNodes;
+        //assert(1 <= numNodes && numNodes <= 100'000);
 
-    vector<Node> nodes(numNodes);
+        vector<Node> nodes(numNodes);
 
 #if 0
-    HeightTracker heightTracker(100);
-    heightTracker.insertHeight(3);
-    heightTracker.insertHeight(5);
-    heightTracker.adjustAllHeights(10);
-    heightTracker.insertHeight(7);
-    cout << "blee: " << endl;
-    cout << " " << heightTracker.numWithHeight(3) << endl;
-    cout << " " << heightTracker.numWithHeight(5) << endl;
-    cout << " " << heightTracker.numWithHeight(13) << endl;
-    cout << " " << heightTracker.numWithHeight(15) << endl;
-    cout << " " << heightTracker.numWithHeight(7) << endl;
+        HeightTracker heightTracker(100);
+        heightTracker.insertHeight(3);
+        heightTracker.insertHeight(5);
+        heightTracker.adjustAllHeights(10);
+        heightTracker.insertHeight(7);
+        cout << "blee: " << endl;
+        cout << " " << heightTracker.numWithHeight(3) << endl;
+        cout << " " << heightTracker.numWithHeight(5) << endl;
+        cout << " " << heightTracker.numWithHeight(13) << endl;
+        cout << " " << heightTracker.numWithHeight(15) << endl;
+        cout << " " << heightTracker.numWithHeight(7) << endl;
 #endif
 
-    for (int i = 0; i < numNodes - 1; i++)
-    {
-        int u;
-        cin >> u;
-        int v;
-        cin >> v;
-        assert(1 <= u && u <= 100'000);
-        assert(1 <= v && v <= 100'000);
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            int u;
+            cin >> u;
+            int v;
+            cin >> v;
+            //assert(1 <= u && u <= 100'000);
+            //assert(1 <= v && v <= 100'000);
 
-        // Make 0-relative.
-        u--;
-        v--;
+            // Make 0-relative.
+            u--;
+            v--;
 
-        nodes[u].neighbours.push_back(&(nodes[v]));
-        nodes[v].neighbours.push_back(&(nodes[u]));
-    }
-    for (int i = 0; i < numNodes; i++)
-    {
-        int hasPerson;
-        cin >> hasPerson;
+            nodes[u].neighbours.push_back(&(nodes[v]));
+            nodes[v].neighbours.push_back(&(nodes[u]));
+        }
+        for (int i = 0; i < numNodes; i++)
+        {
+            int hasPerson;
+            cin >> hasPerson;
 
-        assert(hasPerson == 0 || hasPerson == 1);
+            assert(hasPerson == 0 || hasPerson == 1);
 
-        nodes[i].hasPerson = (hasPerson == 1);
+            nodes[i].hasPerson = (hasPerson == 1);
 
-        nodes[i].index = i;
-        nodes[i].id = i + 1;
-    }
-    assert(cin);
+            nodes[i].index = i;
+            nodes[i].id = i + 1;
+        }
+        assert(cin);
 
-    auto rootNode = &(nodes.front());
-    fixParentChildAndCountDescendants(rootNode, nullptr, 0);
-    vector<Node*> ancestors;
-    fillInDFSInfo(rootNode, nullptr, ancestors);
+        auto rootNode = &(nodes.front());
+        fixParentChildAndCountDescendants(rootNode, nullptr, 0);
+        vector<Node*> ancestors;
+        fillInDFSInfo(rootNode, nullptr, ancestors);
 
 
 #ifdef BRUTE_FORCE
-    ///const auto solutionBruteForce = solveBruteForce(nodes);
-    const auto solutionBruteForce2 = solveBruteForce2(nodes);
-    const auto solutionOptimised = solveOptimised(nodes);
-    //cout << "solutionBruteForce: " << solutionBruteForce << endl;
-    cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
-    cout << "solutionOptimised: " << solutionOptimised << endl;
-    //assert(solutionOptimised == solutionBruteForce);
-    assert(solutionOptimised == solutionBruteForce2);
+        ///const auto solutionBruteForce = solveBruteForce(nodes);
+        const auto solutionBruteForce2 = solveBruteForce2(nodes);
+        const auto solutionOptimised = solveOptimised(nodes);
+        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
+        cout << "solutionOptimised: " << solutionOptimised << endl;
+        //assert(solutionOptimised == solutionBruteForce);
+        assert(solutionOptimised == solutionBruteForce2);
 #else
-    const auto solutionOptimised = solveOptimised(nodes);
-    cout << solutionOptimised << endl;
+        const auto solutionOptimised = solveOptimised(nodes);
+        cout << solutionOptimised << endl;
 #endif
+    }
 }
