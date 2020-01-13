@@ -5,12 +5,12 @@ if [ "$#" -eq 1 ]; then
     EXECUTABLE=$1
 fi
 
-time -p for i in testcase-generator/testfile*.in; do 
-    echo -n $i 
-    cat $i | /usr/bin/time -f %e -o last-testcase-time.txt ${EXECUTABLE} > last-output 
-    last_testcase_time="$(cat last-testcase-time.txt)"
+time -p for testfile_name in testcase-generator/testfile*.in; do 
+    echo -n $testfile_name 
+    cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} > last-output 
+    last_testcase_time="$(cat last-testfile-time.txt)"
     echo " (${last_testcase_time} seconds)"
-    diff ${i//.in/.out} last-output 
+    diff ${testfile_name//.in/.out} last-output 
     if [ $? -eq "0" ]; then 
         echo -e "[\033[0;32mOK\033[0m]"
     else  
