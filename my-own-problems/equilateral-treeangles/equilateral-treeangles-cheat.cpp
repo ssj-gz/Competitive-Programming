@@ -8,6 +8,8 @@
 
 using namespace std;
 
+//#define DIAGNOSTICS
+
 struct Node
 {
     vector<Node*> neighbours;
@@ -26,10 +28,12 @@ int64_t numTriples(int64_t n)
 
 void bfs(Node& rootNode, int64_t& result)
 {
-    //cout << "bfs from node: " << rootNode.id << endl;
 
     const int numChildren = rootNode.neighbours.size();
-    //cout << " numChildren: " << numChildren << endl;
+#ifdef DIAGNOSTICS
+    cout << "bfs from node: " << rootNode.id << endl;
+    cout << " numChildren: " << numChildren << endl;
+#endif
 
 
     vector<vector<Node*>> visitedViaChild;
@@ -48,17 +52,23 @@ void bfs(Node& rootNode, int64_t& result)
     {
         if (visitedViaChild.size() < 3)
         {
-            //cout << "  breaking at iteration: " << iterationNum << " after visiting " << visitedNodes.size() << endl;
+#ifdef DIAGNOSTICS
+            cout << "  breaking at iteration: " << iterationNum << " after visiting " << visitedNodes.size() << endl;
+#endif
             break;
         }
-        //cout << " Iteration.   # visitedViaChild: " << visitedViaChild.size() << endl;
+#ifdef DIAGNOSTICS
+        cout << " Iteration.   # visitedViaChild: " << visitedViaChild.size() << endl;
+#endif
         int64_t numWithPerson = 0;
         int64_t numPairsWithPersonViaDifferentChild = 0;
         for (const auto& viaChild : visitedViaChild)
         {
             const int numWithPersonViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->hasPerson; });
             const int64_t numNewTriples = numPairsWithPersonViaDifferentChild * numWithPersonViaThisChild * 6;
-            //cout << "  numWithPerson: " << numWithPerson << " numPairsWithPersonViaDifferentChild: " << numPairsWithPersonViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
+#ifdef DIAGNOSTICS
+            cout << "  numWithPerson: " << numWithPerson << " numPairsWithPersonViaDifferentChild: " << numPairsWithPersonViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
+#endif
             result += numNewTriples;
             numPairsWithPersonViaDifferentChild += numWithPerson * numWithPersonViaThisChild;
             numWithPerson += numWithPersonViaThisChild;
@@ -87,7 +97,9 @@ void bfs(Node& rootNode, int64_t& result)
 
         if (newSize < original)
         {
-            //cout << "Pruned " << (original - newSize) << " at iteration: " << iterationNum << endl;
+#ifdef DIAGNOSTICS
+            cout << "Pruned " << (original - newSize) << " at iteration: " << iterationNum << endl;
+#endif
         }
 
         iterationNum++;
