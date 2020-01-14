@@ -86,7 +86,7 @@ std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo
         outStream << " Maximum sum of N over all testcases: " << subtaskInfo.maxNodesOverAllTestcases << std::endl;
     outStream << " Max counters initially placed on a node (i.e. c_i): " << subtaskInfo.maxNumCountersPerNode << std::endl;
     if (subtaskInfo.maxNumCountersOverAllNodes != NoExplicitLimit)
-        outStream << " Max sum of initial counters over all nodes (i.e. c_1 + c_2 + ... + c_N) : " << subtaskInfo.maxNumCountersOverAllNodes << std::endl;
+        outStream << " Max sum of initial counters over all nodes per testcase (i.e. c_1 + c_2 + ... + c_N) : " << subtaskInfo.maxNumCountersOverAllNodes << std::endl;
     outStream << " Max num testcases (i.e. T): " << subtaskInfo.maxNumTestcases << std::endl;
 
     return outStream;
