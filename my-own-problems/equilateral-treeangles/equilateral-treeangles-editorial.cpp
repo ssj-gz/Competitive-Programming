@@ -353,8 +353,8 @@ int main(int argc, char* argv[])
             const auto u = read<int>();
             const auto v = read<int>();
 
-            assert(1 <= u && u <= 200'000);
-            assert(1 <= v && v <= 200'000);
+            assert(1 <= u && u <= numNodes);
+            assert(1 <= v && v <= numNodes);
 
             // More "neighbours" than "children" at the moment, but we'll sort that out
             // in fixParentChildAndCountDescendants!
