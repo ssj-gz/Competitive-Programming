@@ -14,9 +14,11 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} > last-output 
     last_testcase_time="$(cat last-testfile-time.txt)"
     echo " (${last_testcase_time} seconds)"
-    diff ${testfile_name//.in/.out} last-output 
 
-    if [ $? -eq "0" ]; then 
+    diff ${testfile_name//.in/.out} last-output 
+    DIFF_AGAINST_CORRECT_RESULT=$?
+
+    if [ ${DIFF_AGAINST_CORRECT_RESULT} -eq "0" ]; then 
         echo -e "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
         echo -e "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
