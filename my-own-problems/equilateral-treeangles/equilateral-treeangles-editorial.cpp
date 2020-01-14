@@ -147,7 +147,6 @@ void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustmen
         distTracker.adjustAllDists(-1);
 }
 
-
 void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
     vector<vector<Node*>> heavyChains;
@@ -327,44 +326,44 @@ int64_t findNumTriplets(vector<Node>& nodes)
     return result;
 }
 
+template <typename T>
+T read()
+{
+    T toRead;
+    cin >> toRead;
+    assert(cin);
+    return toRead;
+}
+
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    int numTestcases;
-    cin >> numTestcases;
+    const auto numTestcases = read<int>();
 
-    for (int t = 0; t < numTestcases; t++)
+    for (auto t = 0; t < numTestcases; t++)
     {
-        int numNodes;
-        cin >> numNodes;
+        const auto numNodes = read<int>();
         assert(1 <= numNodes && numNodes <= 200'000);
 
         vector<Node> nodes(numNodes);
 
         for (int i = 0; i < numNodes - 1; i++)
         {
-            int u;
-            cin >> u;
-            int v;
-            cin >> v;
+            const auto u = read<int>();
+            const auto v = read<int>();
 
             assert(1 <= u && u <= 200'000);
             assert(1 <= v && v <= 200'000);
 
-            // Make 0-relative.
-            u--;
-            v--;
-
             // More "neighbours" than "children" at the moment, but we'll sort that out
             // in fixParentChildAndCountDescendants!
-            nodes[u].children.push_back(&(nodes[v]));
-            nodes[v].children.push_back(&(nodes[u]));
+            nodes[u - 1].children.push_back(&(nodes[v - 1]));
+            nodes[v - 1].children.push_back(&(nodes[u - 1]));
         }
-        for (int i = 0; i < numNodes; i++)
+        for (auto i = 0; i < numNodes; i++)
         {
-            int hasPerson;
-            cin >> hasPerson;
+            const auto hasPerson = read<int>();
 
             assert(hasPerson == 0 || hasPerson == 1);
 
