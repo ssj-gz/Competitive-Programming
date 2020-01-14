@@ -12,9 +12,9 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     echo " (${last_testcase_time} seconds)"
     diff ${testfile_name//.in/.out} last-output 
     if [ $? -eq "0" ]; then 
-        echo -e "[\033[0;32mOK\033[0m]"
+        echo -e "[\033[0;32mCORRECT\033[0m]"
     else  
-        echo -e "[\033[0;31mNO MATCH\033[0m]"
+        echo -e "[\033[0;31mWRONG ANSWER\033[0m]"
     fi
 done
 
