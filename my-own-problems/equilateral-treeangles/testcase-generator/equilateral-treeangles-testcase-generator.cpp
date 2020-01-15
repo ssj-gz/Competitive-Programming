@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
     {
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask2)
-                                                                    .withDescription("100 random testcases with each having <= 1000 nodes")
+                                                                    .withDescription("100 random testcases with each having <= 1000 nodes.")
                                     .withSeed(3432432));
 
             for (int t = 0; t < subtask2.maxNumTestcases; t++)
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
                     .withSeed(983242));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Root node has degree 50'000, then 150'000 random nodes added"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Root node has degree 50'000, then 150'000 random nodes added."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
                     .withSeed(364234));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 10'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 17.  Then finish off with random nodes"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 10'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 17.  Then finish off with random nodes."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 10'000);
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
                     .withSeed(364234));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 1'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 180.  Then finish off with random nodes"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 1'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 180.  Then finish off with random nodes."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 1'000);
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
                     .withSeed(94543));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 100 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 1800.  Then finish off with random nodes"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 100 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 1800.  Then finish off with random nodes."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
@@ -324,7 +324,7 @@ int main(int argc, char* argv[])
                                                                     .withSeed(94543));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph: first 50'000 nodes are grown preferring non-leafs; then remaining 150'000 preferring leaves"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph: first 50'000 nodes are grown preferring non-leafs; then remaining 150'000 preferring leaves."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
@@ -342,7 +342,7 @@ int main(int argc, char* argv[])
                                                                     .withSeed(94543));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph with three long arms: first 25'000 nodes are grown preferring non-leafs; then 75'000 preferring leaves; then three arms of length 30'000 are attached to random nodes.  Then the remaining nodes are random"));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph with three long arms: first 25'000 nodes are grown preferring non-leafs; then 75'000 preferring leaves; then three arms of length 30'000 are attached to random nodes.  Then the remaining nodes are random."));
                 const int numNodes = 200'000;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
@@ -367,7 +367,7 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(113388)
-                    .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
+                    .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases."));
 
             int numNodesInTestFile = 0;
             const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 1);
