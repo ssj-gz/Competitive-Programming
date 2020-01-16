@@ -20,10 +20,10 @@ T read()
 
 int findLongestValidPrefix(const string& string)
 {
-    int longestValidPrefix = 0;
-    int numOpenBrackets = 0;
+    auto longestValidPrefix = 0;
+    auto numOpenBrackets = 0;
 
-    int prefixLength = 0;
+    auto prefixLength = 0;
     for (const auto character : string)
     {
         prefixLength++;
