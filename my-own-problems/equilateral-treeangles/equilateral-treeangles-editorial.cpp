@@ -188,8 +188,8 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
             {
                 if (pass == 1 )
                 {
-                    // Once only (first pass chosen arbitrarily) - add this node's coin
-                    // (if any) so that it gets propagated to light descendants ...
+                    // Once only (first pass chosen arbitrarily) - add this node's dist
+                    // (if hasPerson) so that it gets propagated to light descendants ...
                     if (node->hasPerson)
                         distTracker.insertDist(0);
                     // ... and also (partially) complete its Type A Triangles.
@@ -198,7 +198,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
 
                 for (auto lightChild : node->lightChildren)
                 {
-                    // Propagate all coins found so far along the chain in this direction
+                    // Propagate all dists of nodes which hasPerson found so far along the chain in this direction
                     // to light descendants ...
                     doDfs(lightChild, 1, distTracker, AdjustWithDepth, propagateDists);
                     // ... and collect from light descendants.
@@ -207,10 +207,10 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
 
                 if (pass == 2)
                 {
-                    // In pass 1, we ensured that this node's coin (if any) was propagated
+                    // In pass 1, we ensured that this node's dist (if hasPerson) was propagated
                     // to its light descendants.  Don't do it this time - wait until
-                    // we've processed this coin's light descendants before adding this
-                    // coin's node to the distTracker!
+                    // we've processed this node's light descendants before adding this
+                    // node to the distTracker!
                     if (node->hasPerson)
                         distTracker.insertDist(0);
                 }
