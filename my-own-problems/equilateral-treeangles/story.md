@@ -23,7 +23,7 @@ For each testcase, output in a single line the number of optimally successful tr
 
 ###Constraints 
 - $1 \leq T \leq 1000$
-- $1 \leq N$
+- $1 \leq N \leq 200000$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
 ###Subtasks
