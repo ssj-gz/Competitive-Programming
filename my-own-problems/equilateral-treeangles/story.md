@@ -18,6 +18,9 @@ Help Chef find the number of ways of choosing triples of sites $p$, $q$ and $r$ 
 - The next $N-1$ lines describe how sites are connected by roads: each line takes the form of two space-separated integers $u$ and $v$ indicating that the sites labelled $u$ and $v$ should be connected by a road.
 - The next $N$ lines describe the _suitablility_ of sites - each line consists of a single integer which is either 0 or 1: if the $i^{\textit{th}}$ line consists of the number 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
 
+###Output:
+For each testcase, output in a single line answer the number of optimally successful triples.
+
 ###Constraints 
 - $1 \leq T \leq 1000$
 - $1 \leq N$
