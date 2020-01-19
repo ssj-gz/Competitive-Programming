@@ -28,5 +28,27 @@ Help Chef find the number of ways of choosing triples of sites $p$, $q$ and $r$ 
 - 10 points : $1 \leq T \leq 10$ and $1 \leq N \leq 1000$
 - 85 points: original constraints
 
+###Sample Input:
 
+```
+1
+9
+2 6
+1 2
+7 2
+5 8
+3 9
+8 4
+5 9
+2 5
+1 0 1 1 1 0 1 0 0
+```
+
+###Sample Output:
+
+```
+8
+```
+
+###EXPLANATION:
 
