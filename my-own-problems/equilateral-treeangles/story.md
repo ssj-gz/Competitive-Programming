@@ -1,6 +1,6 @@
 In the original [Chef and Gordon Ramsey](https://www.codechef.com/problems/CHGORAM), Chef wanted to close all but three of this Restaurants, and copied his arch-rival Gordon's secret formula to placing his three remaining Restaurants so as to ensure their success.
 
-Chef is now seeking to expand his chain of Restaurants to a new town and, would you know it, the dastardly Gordon has already set up his own chain of Restaurants there! Once again, Chef conducts a little <strike>Industrial Espionage</strike> Market Research and discovers that Gordon's Restaurants have a different secret formula in this new town: here again, the most successful way to arrange Restaurants is in _triples_, but this time the optimal placement for success is for all Restaurants in the triple be _equidistant_ from one another. As before, Chef is wondering how many ways there are to build his triple of Restaurants in this new town in such a way that they are optimally successful?
+Chef is now seeking to expand his chain of Restaurants to a new town and, would you know it, the dastardly Gordon has already set up his own chain of Restaurants there! Once again, Chef conducts a little <strike>Industrial Espionage</strike> Market Research and discovers that Gordon's Restaurants have a different secret formula in this new town: here again, the most successful way to arrange Restaurants is in _triples_, but this time the optimal placement for success is for all Restaurants in the triple to be _equidistant_ from one another. As before, Chef is wondering how many ways there are to build his triple of Restaurants in this new town in such a way that they are optimally successful?
 
 More formally, the new town has $N$ _sites_ each labelled with a distinct number from $1$ to $N$, and these sites are connected by $N - 1$ _roads_, each of length 1 mile, in such a way that any site $v$ can be reached from any other site $u$ by following roads starting at $u$.  For a pair of sites $u$ and $v$, let $\textit{dist}(u, v)$ be the distance, in miles, of the shortest sequence of roads leading from $u$ to $v$.
 
@@ -64,4 +64,6 @@ We note also that $\textit{dist}(1,3)=4$, $\textit{dist}(1,4)=4$, and $\textit{d
 Finally, we see that $\textit{dist}(3,4)=4$, $\textit{dist}(3,7)=4$, and $\textit{dist}(4,7)=4$, so $(3,4,7)$ is another successful arrangement of Restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
 
 There are no other successful triples, so we print the number `18`.
+
+
 
