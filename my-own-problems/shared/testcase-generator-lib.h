@@ -548,9 +548,9 @@ class TestSuite
             testFileNum = 1;
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
             {
-                std::cout << "Subtask: " << subtaskId << std::endl;
                 assert(!testFilesBySubtaskId.empty());
                 const SubtaskInfo& subTaskInfo = *testFilesForSubtask.front()->containingSubtask();
+                std::cout << "Subtask: " << subtaskId << " (score: " << subTaskInfo.score << ")" << std::endl;
                 std::cout << subTaskInfo << std::endl << std::endl;
                 for (const auto testFile : testFilesForSubtask)
                 {
