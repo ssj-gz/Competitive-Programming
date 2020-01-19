@@ -478,7 +478,7 @@ class TestSuite
             }
 
             // Verify and write out testfiles.
-            int testFileNum = 0; // Start at 000.
+            int testFileNum = 0; // Start at "testfile-000*.in".
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
             {
                 (void)subtaskId; // Suppress "unused variable" warning.
@@ -545,7 +545,7 @@ class TestSuite
             }
 
             std::cout << "Generated the following test files: " << std::endl;
-            testFileNum = 1;
+            testFileNum = 0; // Start at "testfile #0".
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
             {
                 assert(!testFilesBySubtaskId.empty());
