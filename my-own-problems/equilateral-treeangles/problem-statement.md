@@ -25,7 +25,7 @@ For each testcase, output in a single line the number of optimally successful tr
 - $1 \leq T \leq 1000$
 - $1 \leq N \leq 200000$
 - $1 \leq u,v \leq N$
-- $s_i=0 \in \{0,1\}$ and 
+- $s_i \in \{0,1\}$ and 
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
 ###Subtasks
