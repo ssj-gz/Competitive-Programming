@@ -16,7 +16,7 @@ Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$
 - First line will contain $T$, number of testcases. Then the testcases follow. 
 - The first line of a testcase is $N$, the number of sites in the new town.
 - The next $N-1$ lines describe how sites are connected by roads: each line takes the form of two space-separated integers $u$ and $v$ indicating that the sites labelled $u$ and $v$ should be connected by a road.
-- The next $N$ lines describe the _suitablility_ of sites - each line consists of a single integer which is either 0 or 1: if the $i^{\textit{th}}$ line consists of the number 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
+- The last line of the testcase describes the _suitablility_ of sites - the line consists of $N$ space-separated integers, each of which is either 0 or 1: if the $i^{\textit{th}}$ integer is 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
 
 ###Output:
 For each testcase, output in a single line answer the number of optimally successful triples of sites for his Restaurants.
