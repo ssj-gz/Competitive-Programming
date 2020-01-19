@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int numTripletPermutations = 6; // i.e. == factorial(3).
+const int numTripletPermutations = 1 * 2 * 3; // i.e. == factorial(3).
 
 struct Node
 {
