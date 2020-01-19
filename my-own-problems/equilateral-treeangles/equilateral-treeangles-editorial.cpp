@@ -14,7 +14,7 @@ struct Node
 {
     vector<Node*> children;
 
-    bool hasPerson = false;
+    bool isSuitable = false;
     int numDescendants = -1;
     Node* parentNode = nullptr;
     int height = 0;
@@ -155,7 +155,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
     DistTracker distTracker(nodes.size());
     auto collectDists = [&distTracker](Node* node, int depth)
     {
-        if (node->hasPerson)
+        if (node->isSuitable)
             distTracker.insertDist(depth);
     };
     auto completeTypeATrianglesForNode = [&distTracker, &numTriangles](Node* node)
@@ -189,8 +189,8 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
                 if (pass == 1 )
                 {
                     // Once only (first pass chosen arbitrarily) - add this node's dist
-                    // (if hasPerson) so that it gets propagated to light descendants ...
-                    if (node->hasPerson)
+                    // (if isSuitable) so that it gets propagated to light descendants ...
+                    if (node->isSuitable)
                         distTracker.insertDist(0);
                     // ... and also (partially) complete its Type A Triangles.
                     completeTypeATrianglesForNode(node);
@@ -198,7 +198,7 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
 
                 for (auto lightChild : node->lightChildren)
                 {
-                    // Propagate all dists of nodes which hasPerson found so far along the chain in this direction
+                    // Propagate all dists of nodes which isSuitable found so far along the chain in this direction
                     // to light descendants ...
                     doDfs(lightChild, 1, distTracker, AdjustWithDepth, propagateDists);
                     // ... and collect from light descendants.
@@ -207,11 +207,11 @@ void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numT
 
                 if (pass == 2)
                 {
-                    // In pass 1, we ensured that this node's dist (if hasPerson) was propagated
+                    // In pass 1, we ensured that this node's dist (if isSuitable) was propagated
                     // to its light descendants.  Don't do it this time - wait until
                     // we've processed this node's light descendants before adding this
                     // node to the distTracker!
-                    if (node->hasPerson)
+                    if (node->isSuitable)
                         distTracker.insertDist(0);
                 }
 
@@ -248,8 +248,8 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
             // This block of code (i.e. the body of the containing for... loop) 
             // is executed O(n log2 n) times over the whole run.
             // It is guaranteed to be executed with descendantHeight if the current
-            // child has a descendant of descendantHeight that hasPerson and a previous child of this
-            // node also has a descendant of descendantHeight that hasPerson, but may also
+            // child has a descendant of descendantHeight that isSuitable and a previous child of this
+            // node also has a descendant of descendantHeight that isSuitable, but may also
             // be executed under different circumstances.
             const auto descendantHeight = descendantHeightPair.first;
 
@@ -286,7 +286,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                     numTriangles += numNewTriangles;
                 }
 
-                // These numPairsWithHeightViaDifferentChildren would, when combined with a non-ancestor of currentNode that hasPerson and is
+                // These numPairsWithHeightViaDifferentChildren would, when combined with a non-ancestor of currentNode that isSuitable and is
                 // (descendantHeight - currentNode->height) distance away from currentNode, form a "Type A" triangle.
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
@@ -299,7 +299,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
         }
     }
 
-    if (currentNode->hasPerson)
+    if (currentNode->isSuitable)
     {
         infoForDescendantHeight[currentNode->height].numWithHeight++;
         infoForDescendantHeight[currentNode->height].lastUpdatedAtNode = currentNode;
@@ -363,11 +363,11 @@ int main(int argc, char* argv[])
         }
         for (auto i = 0; i < numNodes; i++)
         {
-            const auto hasPerson = read<int>();
+            const auto isSuitable = read<int>();
 
-            assert(hasPerson == 0 || hasPerson == 1);
+            assert(isSuitable == 0 || isSuitable == 1);
 
-            nodes[i].hasPerson = (hasPerson == 1);
+            nodes[i].isSuitable = (isSuitable == 1);
         }
 
         const auto numTriplets = findNumTriplets(nodes);
