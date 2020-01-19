@@ -11,6 +11,7 @@ Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$
 * $p$, $q$ and $r$ are all _suitable_; and
 * $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
 
+___
 ###Input:
 
 - First line will contain $T$, number of testcases. Then the testcases follow. 
@@ -18,9 +19,11 @@ Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$
 - The next $N-1$ lines describe how sites are connected by roads: each line takes the form of two space-separated integers $u$ and $v$ indicating that the sites labelled $u$ and $v$ should be connected by a road.
 - The last line of the testcase describes the _suitablility_ of sites - the line consists of $N$ space-separated integers $s_1, s_2, \dots , s_N$, with each $s_i$ equal to either 0 or 1: if $s_i$ is 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
 
+___
 ###Output:
 For each testcase, output in a single line the number of optimally successful triples of sites for his Restaurants.
 
+___
 ###Constraints 
 - $1 \leq T \leq 1000$
 - $1 \leq N \leq 200000$
@@ -28,6 +31,7 @@ For each testcase, output in a single line the number of optimally successful tr
 - $s_i \in \{0,1\}$ and 
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
+___
 ###Subtasks
 **Subtask #1 (5 points):** $1 \leq T \leq 10$ and $1 \leq N \leq 100$
 
@@ -35,6 +39,7 @@ For each testcase, output in a single line the number of optimally successful tr
 
 **Subtask #3 (85 points)**: original constraints
 
+___
 ###Sample Input:
 
 ```
@@ -51,12 +56,14 @@ For each testcase, output in a single line the number of optimally successful tr
 1 0 1 1 1 0 1 0 0
 ```
 
+___
 ###Sample Output:
 
 ```
 18
 ```
 
+___
 ###Explanation
 
 We see that the list of _suitable_ sites consists of the sites labelled $1$, $3$, $4$, $5$ and $7$.  We only need to consider triples formed by choosing three of these suitable sites.
