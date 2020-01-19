@@ -19,7 +19,7 @@ Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$
 - The last line of the testcase describes the _suitablility_ of sites - the line consists of $N$ space-separated integers, each of which is either 0 or 1: if the $i^{\textit{th}}$ integer is 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
 
 ###Output:
-For each testcase, output in a single line answer the number of optimally successful triples of sites for his Restaurants.
+For each testcase, output in a single line the number of optimally successful triples of sites for his Restaurants.
 
 ###Constraints 
 - $1 \leq T \leq 1000$
