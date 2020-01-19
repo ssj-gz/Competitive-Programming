@@ -50,7 +50,7 @@ For each testcase, output in a single line answer the number of optimally succes
 ###Sample Output:
 
 ```
-8
+18
 ```
 
 ###EXPLANATION:
