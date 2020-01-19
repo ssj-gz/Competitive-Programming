@@ -9,4 +9,4 @@ Chef can't just build his Restaurant on just any site he wants: the site $u$ mus
 Help Chef find the number of ways of choosing triples of sites $p$, $q$ and $r$ such that:
 
 * $p$, $q$ and $r$ are all _suitable_; and
-* $p$, $q$ and $r$ are _equidistant_ from on another i.e. $dist(p,q)=dist(q,r)=dist(r,p)$
+* $p$, $q$ and $r$ are _equidistant_ from one another i.e. $dist(p,q)=dist(q,r)=dist(r,p)$
