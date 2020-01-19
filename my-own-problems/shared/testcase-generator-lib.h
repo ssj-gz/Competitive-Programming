@@ -437,6 +437,8 @@ class TestSuite
                 }
                 subtasksById[containingSubtask->subtaskId] = containingSubtask;
             }
+
+            // Verify subtask ids are sequential.
             const int numSubTasks = subtasksById.size();
             for (int subtaskId = 1; subtaskId <= numSubTasks; subtaskId++)
             {
