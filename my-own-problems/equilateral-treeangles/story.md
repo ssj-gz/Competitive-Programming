@@ -4,9 +4,9 @@ Chef is now seeking to expand his chain of Restaurants to a new town and, would 
 
 More formally, the new town has $N$ _sites_ each labelled with a distinct number from $1$ to $N$, and these sites are connected by $N - 1$ bidirectional _roads_, each of length 1 mile, in such a way that any site $v$ can be reached from any other site $u$ by following roads starting at $u$.  For a pair of sites $u$ and $v$, let $\textit{dist}(u, v)$ be the distance, in miles, of the shortest sequence of roads leading from $u$ to $v$.
 
-Chef can't just build his Restaurant on just any site he wants: the site $u$ must be _suitable_ if he wishes to build a Restaurant on site $u$.  
+Chef can't build his Restaurant on just any site he wants: the site $u$ must be _suitable_ if he wishes to build a Restaurant on site $u$.  
 
-Help Chef find the number of ways of choosing triples of sites $p$, $q$ and $r$ such that:
+Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$ and $r$ to build his Restaurants on such that the arrangement is _optimally successful_ i.e. such that:
 
 * $p$, $q$ and $r$ are all _suitable_; and
 * $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
@@ -19,7 +19,7 @@ Help Chef find the number of ways of choosing triples of sites $p$, $q$ and $r$ 
 - The next $N$ lines describe the _suitablility_ of sites - each line consists of a single integer which is either 0 or 1: if the $i^{\textit{th}}$ line consists of the number 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
 
 ###Output:
-For each testcase, output in a single line answer the number of optimally successful triples.
+For each testcase, output in a single line answer the number of optimally successful triples of sites for his Restaurants.
 
 ###Constraints 
 - $1 \leq T \leq 1000$
