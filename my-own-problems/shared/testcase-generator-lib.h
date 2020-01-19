@@ -445,6 +445,14 @@ class TestSuite
                 assert(subtasksById[subtaskId] != nullptr && "Subtask ids should be sequential, starting from 1");
             }
 
+            // Verify subtask scores sum to 100.
+            int totalSubtaskScores = 0;
+            for (int subtaskId = 1; subtaskId <= numSubTasks; subtaskId++)
+            {
+                totalSubtaskScores += subtasksById[subtaskId]->score;
+            }
+            assert(totalSubtaskScores == 100);
+
             // Verify and write out testfiles.
             int testFileNum = 0; // Start at 000.
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
