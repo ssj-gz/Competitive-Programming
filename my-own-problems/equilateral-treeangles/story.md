@@ -65,24 +65,3 @@ Finally, we see that $dist(3,4)=4$, $dist(3,7)=4$, and $dist(4,7)=4$, so $(3,4,7
 
 There are no other successful triples, so we print the number `18`.
 
-
- Found  triple: 1, 5, 7 (distance: 2)
- Found  triple: 1, 7, 5 (distance: 2)
- Found  triple: 5, 1, 7 (distance: 2)
- Found  triple: 5, 7, 1 (distance: 2)
- Found  triple: 7, 1, 5 (distance: 2)
- Found  triple: 7, 5, 1 (distance: 2)
-
- Found  triple: 1, 3, 4 (distance: 4)
- Found  triple: 1, 4, 3 (distance: 4)
- Found  triple: 3, 1, 4 (distance: 4)
- Found  triple: 3, 4, 1 (distance: 4)
- Found  triple: 3, 4, 7 (distance: 4)
- Found  triple: 3, 7, 4 (distance: 4)
- Found  triple: 4, 1, 3 (distance: 4)
- Found  triple: 4, 3, 1 (distance: 4)
- Found  triple: 4, 3, 7 (distance: 4)
- Found  triple: 4, 7, 3 (distance: 4)
- Found  triple: 7, 3, 4 (distance: 4)
- Found  triple: 7, 4, 3 (distance: 4)
-
