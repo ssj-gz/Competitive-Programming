@@ -13,6 +13,8 @@ constexpr int maxNumTestcases = 1000;
 struct SubtaskInfo
 {
     int subtaskId = -1;
+    int score = -1;
+
     int maxNodesPerTestcase = -1;
     int maxNodesOverAllTestcases = -1;
     int maxNumCountersPerNode = -1;
@@ -26,6 +28,11 @@ struct SubtaskInfo
     SubtaskInfo& withSubtaskId(int subtaskId)
     {
         this->subtaskId = subtaskId;
+        return *this;
+    }
+    SubtaskInfo& withScore(int score)
+    {
+        this->score = score;
         return *this;
     }
     SubtaskInfo& withMaxNodesPerTestcase(int maxNodesPerTestcase)
@@ -58,6 +65,7 @@ struct SubtaskInfo
 const int NoExplicitLimit = std::numeric_limits<int>::max();
 
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
+                                            .withScore(5)
                                             .withMaxNodesPerTestcase(15)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumCountersPerNode(6)
@@ -65,6 +73,7 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
+                                            .withScore(10)
                                             .withMaxNodesPerTestcase(1000)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumCountersPerNode(maxCounters)
@@ -72,6 +81,7 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withMaxNumTestcases(100);
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
+                                            .withScore(85)
                                             .withMaxNodesPerTestcase(maxNodes)
                                             .withMaxNodesOverAllTestcases(2 * maxNodes)
                                             .withMaxNumCountersPerNode(maxCounters)
