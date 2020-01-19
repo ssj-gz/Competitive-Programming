@@ -57,7 +57,7 @@ For each testcase, output in a single line answer the number of optimally succes
 
 See see that the list of _suitable_ sites consists of the sites labelled $1$, $3$, $4$, $5$ and $7$.  We only need to consider triples formed by choosing three of these suitable sites.
 
-We note that $dist(1,5)=2$, and $dist(1,7)=2$, and $dist(5,7)=2$, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1), $(7,1,5)$ and $(7,5,1)$ (that's *6* triples so far).
+We note that $dist(1,5)=2$, and $dist(1,7)=2$, and $dist(5,7)=2$, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's *6* triples so far).
 
 We note also that $dist(1,3)=4$, $dist(1,4)=4$, and $dist(3,4)=4$, so $(1,3,4$) is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's *12* so far).
 
