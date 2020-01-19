@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Root node has degree 50'000, then 150'000 random nodes added."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
 
@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("The core is a squat graph of 50'000 nodes where all nodes have degree at least 3.  50'000 more nodes are then added to the root node, then 100'000 more random nodes."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
 
@@ -301,7 +301,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("The core is a squat graph of 50'000 nodes where all nodes have degree at least 3.  50'000 more nodes are then added to three nodes close to the centre, then 100'000 more random nodes."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 50'000);
 
@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 10'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 17.  Then finish off with random nodes."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 10'000);
 
@@ -350,7 +350,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 1'000 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 180.  Then finish off with random nodes."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 1'000);
 
@@ -370,7 +370,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Start with a squat graph of 100 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 1800.  Then finish off with random nodes."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
 
@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph: first 50'000 nodes are grown preferring non-leafs; then remaining 150'000 preferring leaves."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
 
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph with three long arms: first 25'000 nodes are grown preferring non-leafs; then 75'000 preferring leaves; then three arms of length 30'000 are attached to random nodes.  Then the remaining nodes are random."));
-                const int numNodes = 200'000;
+                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
 
