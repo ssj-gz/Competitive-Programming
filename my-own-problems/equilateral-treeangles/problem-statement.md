@@ -53,7 +53,7 @@ For each testcase, output in a single line the number of optimally successful tr
 18
 ```
 
-###EXPLANATION:
+###Explanation
 
 We see that the list of _suitable_ sites consists of the sites labelled $1$, $3$, $4$, $5$ and $7$.  We only need to consider triples formed by choosing three of these suitable sites.
 
