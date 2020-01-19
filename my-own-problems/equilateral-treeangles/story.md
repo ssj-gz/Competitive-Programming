@@ -57,11 +57,11 @@ For each testcase, output in a single line answer the number of optimally succes
 
 See see that the list of _suitable_ sites consists of the sites labelled $1$, $3$, $4$, $5$ and $7$.  We only need to consider triples formed by choosing three of these suitable sites.
 
-We note that $\textit{dist}(1,5)=2$, and $\textit{dist}(1,7)=2$, and $\textit{dist}(5,7)=2$, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
+We note that $\textit{dist}(1,5)=2$ miles, and $\textit{dist}(1,7)=2$ miles, and $\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
 
-We note also that $\textit{dist}(1,3)=4$, $\textit{dist}(1,4)=4$, and $\textit{dist}(3,4)=4$, so $(1,3,4$) is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
+We note also that $\textit{dist}(1,3)=4$ miles, $\textit{dist}(1,4)=4$ miles, and $\textit{dist}(3,4)=4$ miles, so $(1,3,4$) is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
 
-Finally, we see that $\textit{dist}(3,4)=4$, $\textit{dist}(3,7)=4$, and $\textit{dist}(4,7)=4$, so $(3,4,7)$ is another successful arrangement of Restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
+Finally, we see that $\textit{dist}(3,4)=4$ miles, $\textit{dist}(3,7)=4$ miles, and $\textit{dist}(4,7)=4$ miles, so $(3,4,7)$ is another successful arrangement of Restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
 
 There are no other successful triples, so we print the number `18`.
 
