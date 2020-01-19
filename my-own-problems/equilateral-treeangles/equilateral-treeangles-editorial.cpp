@@ -1,4 +1,6 @@
 // Simon St James (ssjgz) - Editorial solution for "Equilateral Treeangles" - 2019-07-17.
+// Problem was later renamed to "Chef and Gordon Ramsay 2" when I saw CHGORAM in AUG19
+// and noticed how my Problem could be turned into a sequel to it :)
 #include <iostream>
 #include <vector>
 #include <map>
