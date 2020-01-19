@@ -433,7 +433,11 @@ class TestSuite
 
                 if (subtasksById[containingSubtask->subtaskId] != nullptr)
                 {
-                    assert(subtasksById[containingSubtask->subtaskId] == containingSubtask && "Duplicate subtask id!");
+                    if (subtasksById[containingSubtask->subtaskId] != containingSubtask)
+                    {
+                        hasAnyValidationErrors = true;
+                        std::cerr << "Error: Duplicate subtaskId: two Subtasks have the same id of " << containingSubtask->subtaskId << std::endl;
+                    }
                 }
                 subtasksById[containingSubtask->subtaskId] = containingSubtask;
             }
@@ -442,16 +446,36 @@ class TestSuite
             const int numSubTasks = subtasksById.size();
             for (int subtaskId = 1; subtaskId <= numSubTasks; subtaskId++)
             {
-                assert(subtasksById[subtaskId] != nullptr && "Subtask ids should be sequential, starting from 1");
+                if (subtasksById[subtaskId] == nullptr)
+                {
+                    hasAnyValidationErrors = true;
+                    std::cerr << "Error: Subtask ids should be sequential, starting from 1: got: " << std::endl;
+                    for (const auto& [subtaskId, subtask] : subtasksById)
+                    {
+                        (void)subtask; // Suppress "unused variable" warning.
+                        std::cerr << subtaskId << " ";
+                    }
+                    std::cerr << std::endl;
+                }
             }
 
             // Verify subtask scores sum to 100.
             int totalSubtaskScores = 0;
             for (int subtaskId = 1; subtaskId <= numSubTasks; subtaskId++)
             {
+                const int subtaskScore = subtasksById[subtaskId]->score;
+                if (subtaskScore <= 0 || subtaskScore > 100)
+                {
+                    hasAnyValidationErrors = true;
+                    std::cerr << "Error: Subtask with id " << subtaskId << " has score not in range [1,100]: "  << subtaskScore << std::endl;
+                }
                 totalSubtaskScores += subtasksById[subtaskId]->score;
             }
-            assert(totalSubtaskScores == 100);
+            if (totalSubtaskScores != 100)
+            {
+                hasAnyValidationErrors = true;
+                std::cerr << "Error: Total scores over all Subtasks should sum to 100, not " << totalSubtaskScores << std::endl;
+            }
 
             // Verify and write out testfiles.
             int testFileNum = 0; // Start at 000.
