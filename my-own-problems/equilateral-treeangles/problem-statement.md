@@ -4,7 +4,7 @@ Chef is now seeking to expand his chain of Restaurants to a new town and, would 
 
 More formally, the new town has $N$ _sites_ each labelled with a distinct number from $1$ to $N$, and these sites are connected by $N - 1$ bidirectional _roads_, each of length 1 mile, in such a way that any site $v$ can be reached from any other site $u$ by following roads starting at $u$.  For a pair of sites $u$ and $v$, let $\textit{dist}(u, v)$ be the distance, in miles, of the shortest sequence of roads leading from $u$ to $v$.
 
-Chef can't build his Restaurant on just any site he wants: the site $u$ must be _suitable_ if he wishes to build a Restaurant on site $u$.  
+Chef can't build a Restaurant on just any site; only on sites that are deemed _suitable_.
 
 Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$ and $r$ to build his Restaurants on such that the arrangement is _optimally successful_ i.e. such that:
 
