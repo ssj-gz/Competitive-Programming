@@ -1,4 +1,4 @@
-//#define BRUTE_FORCE
+#define BRUTE_FORCE
 #include <iostream>
 #include <vector>
 #include <map>
@@ -495,7 +495,7 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
                     if (distanceBetweenNodes[node1->index][node2->index] == distance)
                     {
-                        //cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << " (distance: " << distance << ")" << endl;
+                        cout << " Found  triple: " << node.id << ", " << node1->id << ", " << node2->id << " (distance: " << distance << ")" << endl;
                         result++;
                     }
                 }
@@ -1292,10 +1292,10 @@ int main(int argc, char* argv[])
 
 
 #ifdef BRUTE_FORCE
-        ///const auto solutionBruteForce = solveBruteForce(nodes);
+        const auto solutionBruteForce = solveBruteForce(nodes);
         const auto solutionBruteForce2 = solveBruteForce2(nodes);
         const auto solutionOptimised = solveOptimised(nodes);
-        //cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
         cout << "solutionBruteForce2: " << solutionBruteForce2 << endl;
         cout << "solutionOptimised: " << solutionOptimised << endl;
         //assert(solutionOptimised == solutionBruteForce);
