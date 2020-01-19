@@ -424,10 +424,23 @@ class TestSuite
             };
             std::map<int, std::vector<const TestFile<SubtaskInfo>*>> testFilesBySubtaskId;
             std::map<const TestFile<SubtaskInfo>*, std::string> fileNameForTestFile;
+            std::map<int, const SubtaskInfo*> subtasksById;
             bool hasAnyValidationErrors = false;
             for (const auto& testFile : m_testFiles)
             {
-                testFilesBySubtaskId[testFile->containingSubtask()->subtaskId].push_back(testFile.get());
+                auto containingSubtask = testFile->containingSubtask();
+                testFilesBySubtaskId[containingSubtask->subtaskId].push_back(testFile.get());
+
+                if (subtasksById[containingSubtask->subtaskId] != nullptr)
+                {
+                    assert(subtasksById[containingSubtask->subtaskId] == containingSubtask && "Duplicate subtask id!");
+                }
+                subtasksById[containingSubtask->subtaskId] = containingSubtask;
+            }
+            const int numSubTasks = subtasksById.size();
+            for (int subtaskId = 1; subtaskId <= numSubTasks; subtaskId++)
+            {
+                assert(subtasksById[subtaskId] != nullptr && "Subtask ids should be sequential, starting from 1");
             }
 
             // Verify and write out testfiles.
