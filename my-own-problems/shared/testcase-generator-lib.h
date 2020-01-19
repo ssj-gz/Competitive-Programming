@@ -431,7 +431,7 @@ class TestSuite
             }
 
             // Verify and write out testfiles.
-            int testFileNum = 1;
+            int testFileNum = 0; // Start at 000.
             for (const auto& [subtaskId, testFilesForSubtask] : testFilesBySubtaskId)
             {
                 (void)subtaskId; // Suppress "unused variable" warning.
