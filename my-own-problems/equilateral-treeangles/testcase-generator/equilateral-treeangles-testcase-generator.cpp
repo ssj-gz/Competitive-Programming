@@ -44,16 +44,19 @@ struct SubtaskInfo
 
 const int NoExplicitLimit = std::numeric_limits<int>::max();
 
+// For subtask1, a very naive O(N^3) solution should be able to pass.
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
-                                            .withMaxNodesPerTestcase(15)
+                                            .withMaxNodesPerTestcase(100)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumTestcases(10);
                                             
+// For subtask2, a naive O(N^2) solution should be able to pass.
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withMaxNodesPerTestcase(1000)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumTestcases(100);
 
+// Sub-quadratic for subtask3, please :)
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withMaxNodesPerTestcase(maxNodes)
                                             .withMaxNodesOverAllTestcases(maxNodes)
@@ -197,6 +200,19 @@ int main(int argc, char* argv[])
                 treeGenerator.addEdge(two, five);
 
                 writeTestcase(treeGenerator, sampleTestcase);
+            }
+            for (int i = 1; i <= subtask1.maxNumTestcases - 1; i++)
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo());
+                const int numNodes = rnd.next(1, subtask1.maxNodesPerTestcase);
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
+                setRandomSuitable(treeGenerator, rnd.next(70.0, 95.0));
+                scrambleAndwriteTestcase(treeGenerator, testcase);
             }
     }
     
