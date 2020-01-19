@@ -585,6 +585,26 @@ class TestSuite
                 std::cout << std::endl;
             }
 
+            // Print some handy information for filling in some of the "Edit Problem" fields.
+            std::cout << "In the Edit Problem page, the contents of the field 'Problem test sequence' should be: " << std::endl;
+            for (int i = 0; i < numTestFiles(); i++)
+            {
+                std::cout << "#" << i << " ";
+            }
+            std::cout << std::endl << std::endl;
+
+            std::cout << "In the Edit Problem page, the contents of the field 'Auxiliary data passed to masterjudge' should be: " << std::endl;
+            std::cout << numSubTasks << " ";
+            for (int subtaskId = 1; subtaskId <= numSubTasks; subtaskId++)
+            {
+                std::cout << subtasksById[subtaskId]->score << " ";
+            }
+            for (const auto& testFile : m_testFiles)
+            {
+                std::cout << testFile->containingSubtask()->subtaskId << " ";
+            }
+            std::cout << std::endl << std::endl;
+
             if (hasAnyValidationErrors)
             {
                 std::cerr << "\n** Error - some testfiles had some validation errors (see above for more details) - the generated testfiles should *NOT* be submitted for use in a Contest!!! **" << std::endl;
