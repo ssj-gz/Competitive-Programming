@@ -12,6 +12,7 @@ constexpr int maxNumTestcases = 1000;
 struct SubtaskInfo
 {
     int subtaskId = -1;
+    int score = -1;
     int maxNodesPerTestcase = -1;
     int maxNodesOverAllTestcases = -1;
     int maxNumTestcases = -1;
@@ -23,6 +24,11 @@ struct SubtaskInfo
     SubtaskInfo& withSubtaskId(int subtaskId)
     {
         this->subtaskId = subtaskId;
+        return *this;
+    }
+    SubtaskInfo& withScore(int score)
+    {
+        this->score = score;
         return *this;
     }
     SubtaskInfo& withMaxNodesPerTestcase(int maxNodesPerTestcase)
@@ -46,18 +52,21 @@ const int NoExplicitLimit = std::numeric_limits<int>::max();
 
 // For subtask1, a very naive O(N^3) solution should be able to pass.
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
+                                            .withScore(5)
                                             .withMaxNodesPerTestcase(100)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumTestcases(10);
                                             
 // For subtask2, a naive O(N^2) solution should be able to pass.
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
+                                            .withScore(10)
                                             .withMaxNodesPerTestcase(1000)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumTestcases(100);
 
 // Sub-quadratic for subtask3, please :)
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
+                                            .withScore(85)
                                             .withMaxNodesPerTestcase(maxNodes)
                                             .withMaxNodesOverAllTestcases(maxNodes)
                                             .withMaxNumTestcases(maxNumTestcases);
