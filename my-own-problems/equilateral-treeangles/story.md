@@ -7,5 +7,5 @@ More formally, the new town has $N$ _sites_ each labelled with a distinct number
 Chef can't just build his Restaurant on any site he wants: the site $u$ must be _suitable_ if he wishes to build a Restaurant on site $u$.  Help Chef find the number of ways of choosing triples of sites $p$, $q$ and $r$ such that:
 
 * $p$, $q$ and $r$ are all _suitable_; and
-* $p$, $q$ and $r$ are _equidistant_ from on another i.e. $dist(p,q)=dist(q,r)=dist(r,p)
+* $p$, $q$ and $r$ are _equidistant_ from on another i.e. $dist(p,q)=dist(q,r)=dist(r,p)$
 
