@@ -78,10 +78,8 @@ struct NodeData
 using EQTTestCaseInfo = TestcaseInfo<SubtaskInfo>;
 using EQTTestFileInfo = TestFileInfo<SubtaskInfo>;
 
-void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
+void writeTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
 {
-    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
-    treeGenerator.scrambleEdgeOrder();
     destTestcase.writeLine(treeGenerator.numNodes());
 
     for (const auto& edge : treeGenerator.edges())
@@ -96,6 +94,15 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     }
     destTestcase.writeObjectsAsLine(nodeIsSuitable.begin(), nodeIsSuitable.end());
 }
+
+void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
+{
+    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+    treeGenerator.scrambleEdgeOrder();
+
+    writeTestcase(treeGenerator, destTestcase);
+}
+
 
 /**
  * Set isSuitable for random nodes, ensuring that the given percentage of nodes have isSuitable == true.
@@ -158,6 +165,39 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask1)
+                                                                    .withDescription("Sample testcase, plus 9 random ones")
+                                    .withSeed(3432432));
+
+            {
+                auto& sampleTestcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase"));
+                TreeGenerator<NodeData> treeGenerator;
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+                auto four = treeGenerator.createNode();
+                auto five = treeGenerator.createNode();
+                auto six = treeGenerator.createNode();
+                auto seven = treeGenerator.createNode();
+                auto eight = treeGenerator.createNode();
+                auto nine = treeGenerator.createNode();
+
+                for (auto node : {one, three, four, five, seven})
+                {
+                    node->data.isSuitable = true;
+                }
+
+                treeGenerator.addEdge(two, six);
+                treeGenerator.addEdge(one, two);
+                treeGenerator.addEdge(seven, two);
+                treeGenerator.addEdge(five, eight);
+                treeGenerator.addEdge(three, nine);
+                treeGenerator.addEdge(eight, four);
+                treeGenerator.addEdge(five, nine);
+                treeGenerator.addEdge(two, five);
+
+                writeTestcase(treeGenerator, sampleTestcase);
+            }
     }
     
     // SUBTASK 2
