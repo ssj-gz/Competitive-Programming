@@ -306,10 +306,24 @@ class TestFileReader
         std::string readLine()
         {
             std::string line;
-            if (!std::getline(m_testFileInStream, line))
+            while (true)
             {
-                addError("Could not read line");
-                return "";
+                const int nextCharValue = m_testFileInStream.get();
+                if (nextCharValue == std::istringstream::traits_type::eof())
+                {
+                    addError("Could not read line: reached eof before '\\n'!");
+                    return "";
+                }
+                const char character = static_cast<char>(nextCharValue);
+                if (character == '\r')
+                {
+                    addError("Got a '\\r' character while reading line!");
+                    return "";
+                }
+                if (character == '\n')
+                    break;
+
+                line += character;
             }
 
             m_numLinesRead++;
@@ -499,7 +513,6 @@ class TestSuite
                     }
 
                     auto testFileContents = testFileOutStream.str();
-                    trimTrailingWhiteSpace(testFileContents);
 
                     std::string paddedFileNumber = std::to_string(testFileNum);
                     while (paddedFileNumber.length() < 3)
