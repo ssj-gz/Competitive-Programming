@@ -41,7 +41,7 @@ ___
 **Subtask #3 (85 points)**: original constraints
 
 ___
-###Sample Input
+###Example Input
 
 ```
 4
@@ -75,7 +75,7 @@ ___
 ```
 
 ___
-###Sample Output
+###Example Output
 
 ```
 0
