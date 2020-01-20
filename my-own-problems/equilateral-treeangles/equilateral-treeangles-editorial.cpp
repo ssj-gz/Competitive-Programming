@@ -289,7 +289,8 @@ void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& 
             if (blah.second == 0)
                 continue;
 
-            cout << " height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
+            //cout << "Blah Node: " << node.id << "  height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
+            assert(node.numWithHeight[height] == numWithHeight[height]);
         }
     }
 
@@ -361,7 +362,12 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightViaDifferentChildren += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
-                cout << "Node: " << currentNode->id << " Height: " << descendantHeight << " numKnownDescendantsWithHeight: " << numKnownDescendantsWithHeight << " numUnprocessedDescendantsWithHeight: " << numUnprocessedDescendantsWithHeight << endl;
+                //cout << "Node: " << currentNode->id << " Height: " << descendantHeight << " numKnownDescendantsWithHeight: " << numKnownDescendantsWithHeight << " numUnprocessedDescendantsWithHeight: " << numUnprocessedDescendantsWithHeight << endl;
+                if (currentNode->numWithHeight[descendantHeight] == 0)
+                {
+                    // This hasn't been updated yet, so has missed the numKnownDescendantsWithHeight.
+                    currentNode->numWithHeight[descendantHeight] += numKnownDescendantsWithHeight;
+                }
                 currentNode->numWithHeight[descendantHeight] += numUnprocessedDescendantsWithHeight;
 
             }
