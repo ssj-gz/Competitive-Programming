@@ -93,6 +93,8 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge, vector<vector
     }
 }
 
+#define VERIFY_DIST_TRACKER
+
 class DistTracker
 {
     public:
@@ -105,6 +107,9 @@ class DistTracker
         {
             numWithDistValue(newDist)++;
             m_largestDist = max(m_largestDist, newDist);
+#ifdef VERIFY_DIST_TRACKER
+            m_verifyDists.push_back(newDist);
+#endif
         };
         int numWithDist(int dist)
         {
@@ -114,10 +119,23 @@ class DistTracker
         {
             m_cumulativeDistAdjustment += distDiff;
             assert(m_cumulativeDistAdjustment >= 0);
-            m_largestDist += distDiff;
+            if (m_largestDist != -1)
+                m_largestDist += distDiff;
+#ifdef VERIFY_DIST_TRACKER
+            for (auto& dist : m_verifyDists)
+                dist += distDiff;
+#endif
         }
         int largestDist() const
         {
+#ifdef VERIFY_DIST_TRACKER
+            int debugLargest = -1;
+            for (auto& dist : m_verifyDists)
+                debugLargest = max(debugLargest, dist);
+
+            assert(debugLargest == m_largestDist);
+#endif
+
             return m_largestDist;
         }
         void clear()
@@ -125,7 +143,12 @@ class DistTracker
             // Reset all dist counts to 0 in O(1) by upping the 
             // m_versionNum.
             m_cumulativeDistAdjustment = 0;
+            m_largestDist = -1;
             m_versionNum++;
+#ifdef VERIFY_DIST_TRACKER
+            m_verifyDists.clear();
+
+#endif
         }
     private:
         int m_cumulativeDistAdjustment = 0;
@@ -139,6 +162,10 @@ class DistTracker
         int m_versionNum = 0;
 
         int m_largestDist = -1;
+
+#ifdef VERIFY_DIST_TRACKER
+        vector<int> m_verifyDists;
+#endif
 
         int& numWithDistValue(int dist)
         {
@@ -410,7 +437,9 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
             //assert(descendantHeight > node->height);
 
             const int requiredNonDescendantDist = (descendantHeight - node->height);
-            cout << "completeTypeATrianglesForNode " << node->id << " node height: " << node->height << " descendantHeight: " << descendantHeight  << " requiredNonDescendantDist: " << requiredNonDescendantDist << endl;
+            if (requiredNonDescendantDist > distTracker.largestDist())
+                break; // Optimisation - no point continuing with larger descendantHeights.
+            //cout << "completeTypeATrianglesForNode " << node->id << " node height: " << node->height << " descendantHeight: " << descendantHeight  << " requiredNonDescendantDist: " << requiredNonDescendantDist << endl;
             const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
             assert(numNewTriangles >= 0);
             numTriangles += numNewTriangles;
@@ -551,7 +580,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightViaDifferentChildren += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
-                cout << "Node: " << currentNode->id << " Height: " << descendantHeight << " numKnownDescendantsWithHeight: " << numKnownDescendantsWithHeight << " numUnprocessedDescendantsWithHeight: " << numUnprocessedDescendantsWithHeight << endl;
+                //cout << "Node: " << currentNode->id << " Height: " << descendantHeight << " numKnownDescendantsWithHeight: " << numKnownDescendantsWithHeight << " numUnprocessedDescendantsWithHeight: " << numUnprocessedDescendantsWithHeight << endl;
                 if (currentNode->numWithHeight[descendantHeight] == 0)
                 {
                     // This hasn't been updated yet, so has missed the numKnownDescendantsWithHeight.
@@ -597,6 +626,7 @@ int64_t findNumTriplets(vector<Node>& nodes)
     completeTrianglesOfTypeASlow(nodes, rootNode, debugResult);
     completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, centroidDecompositionResult);
     cout << "result: " << result << " debugResult: " << debugResult << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
+    assert(centroidDecompositionResult == result);
     assert(debugResult == result);
 
     return result;
