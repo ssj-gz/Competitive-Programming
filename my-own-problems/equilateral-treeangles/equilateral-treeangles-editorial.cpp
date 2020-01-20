@@ -106,7 +106,7 @@ void doDfs(Node* node, Node* parentNode, int depth, DistTracker& distTracker, Di
 
 int countDescendants(Node* node, Node* parentNode)
 {
-    int numDescendants = 1; // Current node.
+    auto numDescendants = 1; // Current node.
 
     for (const auto& child : node->neighbours)
     {
@@ -121,9 +121,9 @@ int countDescendants(Node* node, Node* parentNode)
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
-    int numDescendents = 1;
+    auto numDescendents = 1;
 
-    bool childHasTooManyDescendants = false;
+    auto childHasTooManyDescendants = false;
 
     for (const auto& child : currentNode->neighbours)
     {
@@ -173,13 +173,13 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
         // Type A Triangles are fully completed.
         for (const auto& heightPair : node->descendentWithHeightInfo)
         {
-            const int descendantHeight = heightPair.first;
-            const int requiredNonDescendantDist = (descendantHeight - node->height);
+            const auto descendantHeight = heightPair.first;
+            const auto requiredNonDescendantDist = (descendantHeight - node->height);
             if (requiredNonDescendantDist > distTracker.largestDist())
                 break; // Optimisation - no point continuing with larger descendantHeights.
 
-            const int64_t numPairsWithHeightWithNodeAsLCA = heightPair.second.numPairsWithHeightWithNodeAsLCA;
-            const int64_t numNewTriangles = numPairsWithHeightWithNodeAsLCA * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
+            const auto numPairsWithHeightWithNodeAsLCA = heightPair.second.numPairsWithHeightWithNodeAsLCA;
+            const auto numNewTriangles = numPairsWithHeightWithNodeAsLCA * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
             assert(numNewTriangles >= 0);
             numTriangles += numNewTriangles;
         }
@@ -238,8 +238,8 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
     {
         for (const auto descendantHeightPair : node.descendentWithHeightInfo)
         {
-            const int height = descendantHeightPair.first;
-            const int64_t numPairsWithHeightWithNodeAsLCA = descendantHeightPair.second.numPairsWithHeightWithNodeAsLCA;
+            const auto height = descendantHeightPair.first;
+            const auto numPairsWithHeightWithNodeAsLCA = descendantHeightPair.second.numPairsWithHeightWithNodeAsLCA;
 
             // Centroid decomposition would have (wrongly) added numPairsWithHeightWithNodeAsLCA[height] * numTripletPermutations 
             // for each suitable descendent of node which had height - correct for this.
@@ -285,8 +285,8 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
             assert (descendantHeight > currentNode->height);
 
-            int numUnprocessedDescendantsWithHeight = -1;
-            int numKnownDescendantsWithHeight = -1;
+            auto numUnprocessedDescendantsWithHeight = -1;
+            auto numKnownDescendantsWithHeight = -1;
             if (transientHeightInfo.lastUpdatedAtNode == currentNode || transientHeightInfo.lastUpdatedAtNode == nullptr)
             {
                 assert(heightInfoForNode.lastUpdatedAtNode != currentNode);
@@ -304,13 +304,13 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
             if (earlierChildHasThisHeight)
             {
                 auto& descendantHeightInfo = currentNode->descendentWithHeightInfo[descendantHeight];
-                int64_t& numPairsWithHeightWithNodeAsLCA = descendantHeightInfo.numPairsWithHeightWithNodeAsLCA;
-                int& numberDescendentsWithThisHeight = descendantHeightInfo.number;
+                auto& numPairsWithHeightWithNodeAsLCA = descendantHeightInfo.numPairsWithHeightWithNodeAsLCA;
+                auto& numberDescendentsWithThisHeight = descendantHeightInfo.number;
 
                 if (numUnprocessedDescendantsWithHeight * numPairsWithHeightWithNodeAsLCA > 0)
                 {
                     // Found a triple where all three nodes have currentNode as their LCA: a "Type B" triangle.
-                    const int64_t numNewTriangles = numPairsWithHeightWithNodeAsLCA * numUnprocessedDescendantsWithHeight * numTripletPermutations;
+                    const auto numNewTriangles = numPairsWithHeightWithNodeAsLCA * numUnprocessedDescendantsWithHeight * numTripletPermutations;
                     assert(numNewTriangles >= 0);
                     numTriangles += numNewTriangles;
                 }
@@ -383,7 +383,7 @@ int main(int argc, char* argv[])
 
         vector<Node> nodes(numNodes);
 
-        for (int i = 0; i < numNodes - 1; i++)
+        for (auto i = 0; i < numNodes - 1; i++)
         {
             const auto u = read<int>();
             const auto v = read<int>();
