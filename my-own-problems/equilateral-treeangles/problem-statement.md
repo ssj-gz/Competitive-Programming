@@ -96,7 +96,7 @@ Throughout, we only care about the _suitable_ sites: no other site can be part o
 
 **Example case 4:** The suitable sites are those labelled $1$, $3$, $4$, $5$ and $7$.  We note that $\textit{dist}(1,5)=\textit{dist}(1,7)=\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
 
-We note also that $\textit{dist}(1,3)=\textit{dist}(1,4)=\textit{dist}(3,4)=4$ miles, so $(1,3,4$) is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
+We note also that $\textit{dist}(1,3)=\textit{dist}(1,4)=\textit{dist}(3,4)=4$ miles, so $(1,3,4)$ is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
 
 Finally, we see that $\textit{dist}(3,4)=\textit{dist}(3,7)=\textit{dist}(4,7)=4$ miles, so $(3,4,7)$ is another successful arrangement of Restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
 
