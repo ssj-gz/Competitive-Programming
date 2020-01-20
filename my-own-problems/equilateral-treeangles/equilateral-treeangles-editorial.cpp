@@ -15,15 +15,13 @@ const int numTripletPermutations = 1 * 2 * 3; // i.e. == factorial(3).
 struct DescendentWithHeightInfo
 {
     int64_t numPairsWithHeightViaDifferentChildren = 0;
-    // Not strictly correct: if numPairsWithHeightViaDifferentChildren > 0, then this
-    // will indeed be the number of descendents of this Node which have height
-    // numWithHeight[height], but if numPairsWithHeightViaDifferentChildren == 0, this
-    // will also be 0.
+    // The name "number" is not strictly correct: if numPairsWithHeightViaDifferentChildren > 0, then this
+    // will indeed be the number of descendents of this Node which have this height
+    // but if numPairsWithHeightViaDifferentChildren == 0, "number" will also be 0.
     // 
-    // This is used to avoid the overcount when performing completeTrianglesOfTypeA
+    // The "number" count is used to avoid the overcount when performing completeTrianglesOfTypeA
     // (Centroid Decomposition has no notion of our parent-child relationship, so
-    // will count "children" of a Node alongside "non-children" of a Node.
-    // TODO - explain this better.
+    // will count "children" of a Node alongside "non-children" of a Node.)
     int number = 0;
 };
 
@@ -119,8 +117,6 @@ int countDescendants(Node* node, Node* parentNode)
 
     return numDescendants;
 }
-
-
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
@@ -255,6 +251,7 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
         }
     }
 }
+
 map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
 {
     currentNode->height = height;
@@ -311,7 +308,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
             {
                 auto& descendantHeightInfo = currentNode->descendentWithHeightInfo[descendantHeight];
                 int64_t& numPairsWithHeightViaDifferentChildren = descendantHeightInfo.numPairsWithHeightViaDifferentChildren;
-                int& number = descendantHeightInfo.number;
+                int& numberDescendentsWithThisHeight = descendantHeightInfo.number;
 
                 if (numUnprocessedDescendantsWithHeight * numPairsWithHeightViaDifferentChildren > 0)
                 {
@@ -326,13 +323,13 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightViaDifferentChildren += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
-                //cout << "Node: " << currentNode->id << " Height: " << descendantHeight << " numKnownDescendantsWithHeight: " << numKnownDescendantsWithHeight << " numUnprocessedDescendantsWithHeight: " << numUnprocessedDescendantsWithHeight << endl;
-                if (number == 0)
+
+                if (numberDescendentsWithThisHeight == 0)
                 {
                     // This hasn't been updated yet, so has missed the numKnownDescendantsWithHeight.
-                    number += numKnownDescendantsWithHeight;
+                    numberDescendentsWithThisHeight += numKnownDescendantsWithHeight;
                 }
-                number += numUnprocessedDescendantsWithHeight;
+                numberDescendentsWithThisHeight += numUnprocessedDescendantsWithHeight;
 
             }
 
