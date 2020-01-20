@@ -304,6 +304,137 @@ void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& 
     }
 }
 
+template <typename NodeProcessor>
+void doDfsNew(Node* node, Node* parentNode, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
+{
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(1);
+
+    processNode(node, depth, distTracker);
+
+    for (auto child : node->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+        doDfsNew(child, node, depth + 1, distTracker, distTrackerAdjustment, processNode);
+    }
+
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(-1);
+}
+
+
+int countDescendants(Node* node, Node* parentNode)
+{
+    int numDescendants = 1; // Current node.
+
+    for (const auto& child : node->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        numDescendants += countDescendants(child, node);
+    }
+
+    return numDescendants;
+}
+
+
+
+int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
+{
+    int numDescendents = 1;
+
+    bool childHasTooManyDescendants = false;
+
+    for (const auto& child : currentNode->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        const auto numChildDescendants = findCentroidAux(child, currentNode, totalNodes, centroid);
+        if (numChildDescendants > totalNodes / 2)
+        {
+            // Not the centroid, but can't break here - must continue processing children.
+            childHasTooManyDescendants = true;
+        }
+
+        numDescendents += numChildDescendants;
+    }
+
+    if (!childHasTooManyDescendants)
+    {
+        // No child has more than totalNodes/2 descendants, but what about the remainder of the graph?
+        const auto nonChildDescendants = totalNodes - numDescendents;
+        if (nonChildDescendants <= totalNodes / 2)
+        {
+            assert(centroid);
+            *centroid = currentNode;
+        }
+    }
+
+    return numDescendents;
+}
+
+Node* findCentroid(Node* startNode)
+{
+    const auto totalNumNodes = countDescendants(startNode, nullptr);
+    Node* centroid = nullptr;
+    findCentroidAux(startNode, nullptr, totalNumNodes, &centroid);
+    assert(centroid);
+    return centroid;
+}
+
+void doCentroidDecomposition(Node* startNode)
+{
+    Node* centroid = findCentroid(startNode);
+
+    auto propagateDists = [](Node* node, int depth, DistTracker& distTracker)
+                        {
+                            // TODO - process node.
+                        };
+    auto collectDists = [](Node* node, int depth, DistTracker& distTracker)
+                        {
+                            if (node->isSuitable)
+                                distTracker.insertDist(depth);
+                        };
+
+    const auto numNodesInComponent = countDescendants(startNode, nullptr);
+
+    {
+        DistTracker distTracker(numNodesInComponent);
+        for (auto& child : centroid->neighbours)
+        {
+            doDfsNew(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
+            doDfsNew(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
+        }
+    }
+    {
+        DistTracker distTracker(numNodesInComponent);
+        // Do it again, this time backwards ...
+        reverse(centroid->neighbours.begin(), centroid->neighbours.end());
+        // ... and also include the centre, this time.
+        if (centroid->isSuitable)
+            distTracker.insertDist(0);
+        for (auto& child : centroid->neighbours)
+        {
+            doDfsNew(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
+            doDfsNew(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
+        }
+        // TODO - do something with the Centroid.
+        //centroid->grundyNumberIfRoot ^= distTracker.grundyNumber();
+    }
+
+    for (auto& neighbour : centroid->neighbours)
+    {
+        assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
+        // Erase the edge from the centroid's neighbour to the centroid, essentially "chopping off" each child into its own
+        // component.
+        neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
+        doCentroidDecomposition(neighbour);
+    }
+}
+
 void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
     // Fix the overcount caused by Centroid Decomposition (over-)counting descendents of a node as non-descendents
