@@ -45,14 +45,13 @@ struct HeightInfo
 void fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
 {
     node->parentNode = parentNode;
-    node->height = height;
+    //node->height = height;
 
     if (parentNode)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
 
     for (auto child : node->children)
         fixParentChildAndCountDescendants(child, node, height + 1);
-
 }
 
 class DistTracker
@@ -274,8 +273,10 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
         }
     }
 }
-map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTriangles)
+map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int height, int64_t& numTriangles)
 {
+    currentNode->height = height;
+
     map<int, HeightInfo> infoForDescendantHeight;
 
     for (auto child : currentNode->children)
@@ -285,7 +286,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
         // it could have been O(size of std::map), which would (silently!) lead to 
         // asymptotically worse performance!
         // Luckily, this code uses C++11 features so we can't accidentally fall into this trap.
-        auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, numTriangles);
+        auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, height + 1, numTriangles);
         if (infoForChildDescendantHeight.size() > infoForDescendantHeight.size())
         {
             swap(infoForDescendantHeight, infoForChildDescendantHeight);
@@ -372,7 +373,7 @@ int64_t findNumTriplets(vector<Node>& nodes)
 
     // Fills in numPairsWithHeightViaDifferentChildren for each node, and 
     // additionally counts all "Type B" triangles and adds them to results.
-    buildDescendantHeightInfo(rootNode, result);
+    buildDescendantHeightInfo(rootNode, 0, result);
 
     int64_t centroidDecompositionResult = result;
 
