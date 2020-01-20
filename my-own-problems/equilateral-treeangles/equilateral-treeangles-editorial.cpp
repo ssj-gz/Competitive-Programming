@@ -93,8 +93,6 @@ void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge, vector<vector
     }
 }
 
-#define VERIFY_DIST_TRACKER
-
 class DistTracker
 {
     public:
@@ -107,9 +105,6 @@ class DistTracker
         {
             numWithDistValue(newDist)++;
             m_largestDist = max(m_largestDist, newDist);
-#ifdef VERIFY_DIST_TRACKER
-            m_verifyDists.push_back(newDist);
-#endif
         };
         int numWithDist(int dist)
         {
@@ -121,20 +116,9 @@ class DistTracker
             assert(m_cumulativeDistAdjustment >= 0);
             if (m_largestDist != -1)
                 m_largestDist += distDiff;
-#ifdef VERIFY_DIST_TRACKER
-            for (auto& dist : m_verifyDists)
-                dist += distDiff;
-#endif
         }
         int largestDist() const
         {
-#ifdef VERIFY_DIST_TRACKER
-            int debugLargest = -1;
-            for (auto& dist : m_verifyDists)
-                debugLargest = max(debugLargest, dist);
-
-            assert(debugLargest == m_largestDist);
-#endif
 
             return m_largestDist;
         }
@@ -145,10 +129,6 @@ class DistTracker
             m_cumulativeDistAdjustment = 0;
             m_largestDist = -1;
             m_versionNum++;
-#ifdef VERIFY_DIST_TRACKER
-            m_verifyDists.clear();
-
-#endif
         }
     private:
         int m_cumulativeDistAdjustment = 0;
@@ -162,10 +142,6 @@ class DistTracker
         int m_versionNum = 0;
 
         int m_largestDist = -1;
-
-#ifdef VERIFY_DIST_TRACKER
-        vector<int> m_verifyDists;
-#endif
 
         int& numWithDistValue(int dist)
         {
