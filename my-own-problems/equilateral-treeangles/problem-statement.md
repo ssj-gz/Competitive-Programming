@@ -1,12 +1,12 @@
-In the original [Chef and Gordon Ramsay](https://www.codechef.com/problems/CHGORAM), Chef wanted to close all but three of this Restaurants, and used his arch-rival Gordon's Secret Restaurant-Placement Formula to decide which three to leave open to ensure their success.
+In the original [Chef and Gordon Ramsay](https://www.codechef.com/problems/CHGORAM), Chef wanted to close all but three of this restaurants, and used his arch-rival Gordon's Secret Restaurant-Placement Formula to decide which three to leave open to ensure their success.
 
-Chef is now seeking to expand his chain of Restaurants to a new town and, would you know it, the dastardly Gordon has already set up his own chain of Restaurants there! Once again, Chef conducts a little <strike>Industrial Espionage</strike> Market Research and discovers that Gordon's Secret Restaurant-Placement Formula is different for this new town: the most successful way to arrange Restaurants is still in _triples_, but this time the best placement for the Restaurants in a triple is one where they are _equidistant_ from one another. As before, Chef is wondering how many ways there are to build his triple of Restaurants in this new town in such a way that they are optimally successful?
+Chef is now seeking to expand his chain of restaurants to a new town and, would you know it, the dastardly Gordon has already set up his own chain of restaurants there! Once again, Chef conducts a little <strike>Industrial Espionage</strike> Market Research and discovers that Gordon's Secret Restaurant-Placement Formula is different for this new town: the most successful way to arrange restaurants is still in _triples_, but this time the best placement for the restaurants in a triple is one where they are _equidistant_ from one another. As before, Chef is wondering how many ways there are to build his triple of restaurants in this new town in such a way that they are optimally successful?
 
 More formally, the new town has $N$ _sites_ each labelled with a distinct number from $1$ to $N$, and these sites are connected by $N - 1$ bidirectional _roads_, each of length 1 mile, in such a way that any site $v$ can be reached from any other site $u$ by following roads starting at $u$. For a pair of sites $u$ and $v$, let $\textit{dist}(u, v)$ be the distance, in miles, of the shortest sequence of roads leading from $u$ to $v$.
 
-Chef can't build a Restaurant on just any site; only on sites that are deemed _suitable_.
+Chef can't build a restaurant on just any site; only on sites that are deemed _suitable_.
 
-Help Chef find the number of ways of choosing triples $(p, q, r)$ of distinct sites $p$, $q$ and $r$ on which to build his Restaurants such that the arrangement is _optimally successful_ i.e. such that:
+Help Chef find the number of ways of choosing triples $(p, q, r)$ of distinct sites $p$, $q$ and $r$ on which to build his restaurants such that the arrangement is _optimally successful_ i.e. such that:
 
 * $p$, $q$ and $r$ are all _suitable_; and
 * $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
@@ -21,7 +21,7 @@ ___
 
 ___
 ###Output
-For each testcase, output in a single line the number of optimally successful triples of sites for his Restaurants.
+For each testcase, output in a single line the number of optimally successful triples of sites for his restaurants.
 
 ___
 ###Constraints 
@@ -94,11 +94,11 @@ Throughout, we only care about the _suitable_ sites: no other site can be part o
 
 **Example case 3:** There are only three suitable sites (those labelled $2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,5)=3$ miles, unfortunately $\textit{dist}(2,5)=2$ miles $\neq 3$ miles, so the three suitable sites are not equidistant from each other: we output `0`.
 
-**Example case 4:** The suitable sites are those labelled $1$, $3$, $4$, $5$ and $7$. We note that $\textit{dist}(1,5)=\textit{dist}(1,7)=\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
+**Example case 4:** The suitable sites are those labelled $1$, $3$, $4$, $5$ and $7$. We note that $\textit{dist}(1,5)=\textit{dist}(1,7)=\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
 
-We note also that $\textit{dist}(1,3)=\textit{dist}(1,4)=\textit{dist}(3,4)=4$ miles, so $(1,3,4)$ is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
+We note also that $\textit{dist}(1,3)=\textit{dist}(1,4)=\textit{dist}(3,4)=4$ miles, so $(1,3,4)$ is another successful arrangement of restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
 
-Finally, we see that $\textit{dist}(3,4)=\textit{dist}(3,7)=\textit{dist}(4,7)=4$ miles, so $(3,4,7)$ is another successful arrangement of Restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
+Finally, we see that $\textit{dist}(3,4)=\textit{dist}(3,7)=\textit{dist}(4,7)=4$ miles, so $(3,4,7)$ is another successful arrangement of restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
 
 There are no other successful triples, so we print the number `18`.
 
