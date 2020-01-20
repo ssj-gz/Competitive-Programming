@@ -24,6 +24,8 @@ struct Node
     map<int, int64_t> numPairsWithHeightViaDifferentChildren;
 
     vector<Node*> lightChildren;
+
+    vector<Node*> neighbours; // TODO - remove this.
 };
 
 struct HeightInfo
@@ -228,6 +230,33 @@ void completeTrianglesOfTypeA(const vector<Node>& nodes, Node* rootNode, int64_t
     }
 }
 
+void dfsSlow(Node* currentNode, Node* parentNode, int depth, Node* rootNode, int64_t& numTriangles)
+{
+    if (currentNode == nullptr)
+        return;
+    if (currentNode->isSuitable)
+    {
+        const int requiredRootDescendantHeight = rootNode->height + depth;
+        numTriangles += rootNode->numPairsWithHeightViaDifferentChildren[requiredRootDescendantHeight] * numTripletPermutations;
+    }
+
+    for (auto neighbour : currentNode->neighbours)
+    {
+        if (neighbour == parentNode)
+            continue;
+        dfsSlow(neighbour, currentNode, depth + 1, rootNode, numTriangles);
+    }
+    
+}
+
+void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
+{
+    for (auto& node : nodes)
+    {
+        dfsSlow(node.parentNode, &node, 1, &node, numTriangles);
+    }
+}
+
 map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTriangles)
 {
     map<int, HeightInfo> infoForDescendantHeight;
@@ -321,9 +350,16 @@ int64_t findNumTriplets(vector<Node>& nodes)
     // additionally counts all "Type B" triangles and adds them to results.
     buildDescendantHeightInfo(rootNode, result);
 
+
+    int64_t debugResult = result;
+
     // Finishes off the computation of the number of "Type A" triangles
     // that we began in buildDescendantHeightInfo.
     completeTrianglesOfTypeA(nodes, rootNode, result);
+
+    completeTrianglesOfTypeASlow(nodes, rootNode, debugResult);
+    cout << "result: " << result << " debugResult: " << debugResult << endl;
+    assert(debugResult == result);
 
     return result;
 }
@@ -362,6 +398,9 @@ int main(int argc, char* argv[])
             // in fixParentChildAndCountDescendants!
             nodes[u - 1].children.push_back(&(nodes[v - 1]));
             nodes[v - 1].children.push_back(&(nodes[u - 1]));
+
+            nodes[u - 1].neighbours.push_back(&(nodes[v - 1]));
+            nodes[v - 1].neighbours.push_back(&(nodes[u - 1]));
         }
         for (auto i = 0; i < numNodes; i++)
         {
