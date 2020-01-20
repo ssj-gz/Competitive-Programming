@@ -55,7 +55,7 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
                                             .withMaxNodesPerTestcase(100)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
-                                            .withMaxNumTestcases(10);
+                                            .withMaxNumTestcases(100);
                                             
 // For subtask2, a naive O(N^2) solution should be able to pass.
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask1)
-                                                                    .withDescription("10 random testcases with at most 100 nodes each.")
+                                                                    .withDescription(std::to_string(subtask1.maxNumTestcases) + " random testcases with at most 100 nodes each.")
                                                                     .withSeed(0));
             for (int i = 1; i <= subtask1.maxNumTestcases; i++)
             {
