@@ -17,7 +17,6 @@ struct Node
     vector<Node*> children;
 
     bool isSuitable = false;
-    int numDescendants = -1;
     Node* parentNode = nullptr;
     int height = 0;
 
@@ -43,9 +42,8 @@ struct HeightInfo
     Node* lastUpdatedAtNode = nullptr;
 };
 
-int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
+void fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
 {
-    node->numDescendants = 1;
     node->parentNode = parentNode;
     node->height = height;
 
@@ -53,9 +51,8 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
         node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
 
     for (auto child : node->children)
-        node->numDescendants += fixParentChildAndCountDescendants(child, node, height + 1);
+        fixParentChildAndCountDescendants(child, node, height + 1);
 
-    return node->numDescendants;
 }
 
 class DistTracker
