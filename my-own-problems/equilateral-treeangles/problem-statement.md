@@ -92,7 +92,7 @@ Throughout, we only care about the _suitable_ sites: no other site can be part o
 
 **Example case 2:** The suitable sites are those labelled $1$, $2$, $4$ and $5$, and $\textit{dist}(1,2)=\textit{dist}(1,4)=\textit{dist}(1,5)=\textit{dist}(2,4)=\textit{dist}(2,5)=\textit{dist}(4,5)=2$ miles, so _any_ triple consisting of sites drawn from these four suitable sites is optimally successful.  In no particular order, these are $(1, 2, 4)$, $(1, 2, 5)$, $(1, 4, 2)$, $(1, 4, 5)$, $(1, 5, 2)$, $(1, 5, 4)$, $(2, 1, 4)$, $(2, 1, 5)$, $(2, 4, 1)$, $(2, 4, 5)$, $(2, 5, 1)$, $(2, 5, 4)$, $(4, 1, 2)$, $(4, 1, 5)$, $(4, 2, 1)$, $(4, 2, 5)$, $(4, 5, 1)$, $(4, 5, 2)$, $(5, 1, 2)$, $(5, 1, 4)$, $(5, 2, 1)$, $(5, 2, 4)$, $(5, 4, 1)$ and $(5, 4, 2)$.  There are $24$ of them, so we output `24`.
 
-**Example case 3:** There are only three suitable sites (those labelled $2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,2)=3$ miles, unfortunately $\textit{dist}(2,5)=2$ miles $\neq 3$ miles, so the three suitable sites are not equidistant from each other: we output `0`.
+**Example case 3:** There are only three suitable sites (those labelled $2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,5)=3$ miles, unfortunately $\textit{dist}(2,5)=2$ miles $\neq 3$ miles, so the three suitable sites are not equidistant from each other: we output `0`.
 
 **Example case 4:** The suitable sites are those labelled $1$, $3$, $4$, $5$ and $7$.  We note that $\textit{dist}(1,5)=\textit{dist}(1,7)=\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
 
