@@ -177,15 +177,11 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
         for (const auto& heightPair : node->descendentWithHeightInfo)
         {
             const int descendantHeight = heightPair.first;
-            const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second.numPairsWithHeightViaDifferentChildren;
-            if (numPairsWithHeightViaDifferentChildren == 0)
-                continue; // TODO - this shouldn't be necessary - I think some of the debug code is messing it up.
-            //assert(descendantHeight > node->height);
-
             const int requiredNonDescendantDist = (descendantHeight - node->height);
             if (requiredNonDescendantDist > distTracker.largestDist())
                 break; // Optimisation - no point continuing with larger descendantHeights.
-            //cout << "completeTypeATrianglesForNode " << node->id << " node height: " << node->height << " descendantHeight: " << descendantHeight  << " requiredNonDescendantDist: " << requiredNonDescendantDist << endl;
+
+            const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second.numPairsWithHeightViaDifferentChildren;
             const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
             assert(numNewTriangles >= 0);
             numTriangles += numNewTriangles;
