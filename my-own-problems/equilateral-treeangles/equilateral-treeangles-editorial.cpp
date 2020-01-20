@@ -243,9 +243,6 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
             const int height = descendantHeightPair.first;
             const int64_t numPairsWithHeightWithNodeAsLCA = descendantHeightPair.second.numPairsWithHeightWithNodeAsLCA;
 
-            if (numPairsWithHeightWithNodeAsLCA == 0)
-                continue;
-
             // Centroid decomposition would have (wrongly) added numPairsWithHeightWithNodeAsLCA[height] * numTripletPermutations 
             // for each suitable descendent of node which had height - correct for this.
             numTriangles -= numPairsWithHeightWithNodeAsLCA * node.descendentWithHeightInfo[height].number * numTripletPermutations;
