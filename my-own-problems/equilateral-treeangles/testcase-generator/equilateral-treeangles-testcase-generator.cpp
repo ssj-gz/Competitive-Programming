@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
     {
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask2)
-                                                                    .withDescription("100 random testcases with each having <= 1000 nodes.")
+                                                                    .withDescription(std::to_string(subtask2.maxNumTestcases) + " random testcases with each having <= 1000 nodes.")
                                     .withSeed(3432432));
 
             for (int t = 0; t < subtask2.maxNumTestcases; t++)
