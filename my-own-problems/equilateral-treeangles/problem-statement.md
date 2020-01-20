@@ -89,7 +89,7 @@ ___
 
 Throughout, we only care about the _suitable_ sites: no other site can be part of an optimally successful triple.
 
-**Example case 1:** There are only two _suitable_ sites (the sites labelled $1$ and $2$), so there is no way of forming any triples of suitable sites: we output `0`.
+**Example case 1:** There are only two _suitable_ sites (the sites labelled $1$ and $2$), so there is no way of forming any triples of distinct suitable sites: we output `0`.
 
 **Example case 2:** The suitable sites are those labelled $1$, $2$, $4$ and $5$, and $\textit{dist}(1,2)=\textit{dist}(1,4)=\textit{dist}(1,5)=\textit{dist}(2,4)=\textit{dist}(2,5)=\textit{dist}(4,5)=2$ miles, so _any_ triple consisting of sites drawn from these four suitable sites is optimally successful. In no particular order, these are $(1, 2, 4)$, $(1, 2, 5)$, $(1, 4, 2)$, $(1, 4, 5)$, $(1, 5, 2)$, $(1, 5, 4)$, $(2, 1, 4)$, $(2, 1, 5)$, $(2, 4, 1)$, $(2, 4, 5)$, $(2, 5, 1)$, $(2, 5, 4)$, $(4, 1, 2)$, $(4, 1, 5)$, $(4, 2, 1)$, $(4, 2, 5)$, $(4, 5, 1)$, $(4, 5, 2)$, $(5, 1, 2)$, $(5, 1, 4)$, $(5, 2, 1)$, $(5, 2, 4)$, $(5, 4, 1)$ and $(5, 4, 2)$. There are $24$ of them, so we output `24`.
 
