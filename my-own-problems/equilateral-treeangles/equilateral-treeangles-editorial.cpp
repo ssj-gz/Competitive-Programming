@@ -34,8 +34,6 @@ struct Node
     int height = 0;
 
     map<int, DescendentWithHeightInfo> descendentWithHeightInfo;
-
-
 };
 
 struct HeightInfo
