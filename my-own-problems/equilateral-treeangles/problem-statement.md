@@ -6,10 +6,11 @@ More formally, the new town has $N$ _sites_ each labelled with a distinct number
 
 Chef can't build a restaurant on just any site; only on sites that are deemed _suitable_.
 
-Help Chef find the number of ways of choosing triples $(p, q, r)$ of distinct sites $p$, $q$ and $r$ on which to build his restaurants such that the arrangement is _optimally successful_ i.e. such that:
+Help Chef find the number of ways of choosing triples $(p, q, r)$ of sites on which to build his restaurants such that the arrangement is _optimally successful_ i.e. such that:
 
-1. $p$, $q$ and $r$ are all _suitable_; and
-2. $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
+1. $p$, $q$ and $r$ are pairwise _distinct_
+2. $p$, $q$ and $r$ are all _suitable_
+3. $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
 
 ___
 ###Input
