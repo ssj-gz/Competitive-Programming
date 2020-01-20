@@ -438,7 +438,7 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
             doDfsNew(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
         // TODO - do something with the Centroid.
-        //centroid->grundyNumberIfRoot ^= distTracker.grundyNumber();
+        completeTypeATrianglesForNode(centroid, distTracker); // TODO - is this right?
     }
 
     for (auto& neighbour : centroid->neighbours)
@@ -577,13 +577,15 @@ int64_t findNumTriplets(vector<Node>& nodes)
 
 
     int64_t debugResult = result;
+    int64_t centroidDecompositionResult = result;
 
     // Finishes off the computation of the number of "Type A" triangles
     // that we began in buildDescendantHeightInfo.
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
     completeTrianglesOfTypeASlow(nodes, rootNode, debugResult);
-    cout << "result: " << result << " debugResult: " << debugResult << endl;
+    //completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, centroidDecompositionResult);
+    //cout << "result: " << result << " debugResult: " << debugResult << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
     assert(debugResult == result);
 
     return result;
