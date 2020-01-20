@@ -178,11 +178,30 @@ int main(int argc, char* argv[])
     // SUBTASK 1
     {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask1)
-                                                                    .withDescription("Sample testcase, plus 9 random ones")
+                                                                    .withDescription("Sample testcase, plus 8 random ones")
                                     .withSeed(3432432));
 
             {
-                auto& sampleTestcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase"));
+                auto& sampleTestcase1 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase"));
+                TreeGenerator<NodeData> treeGenerator;
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+                auto four = treeGenerator.createNode();
+
+                for (auto node : {one, two})
+                {
+                    node->data.isSuitable = true;
+                }
+
+                treeGenerator.addEdge(three, two);
+                treeGenerator.addEdge(four, three);
+                treeGenerator.addEdge(one, three);
+
+                writeTestcase(treeGenerator, sampleTestcase1);
+            }
+            {
+                auto& sampleTestcase4 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 4"));
                 TreeGenerator<NodeData> treeGenerator;
                 auto one = treeGenerator.createNode();
                 auto two = treeGenerator.createNode();
@@ -208,7 +227,7 @@ int main(int argc, char* argv[])
                 treeGenerator.addEdge(five, nine);
                 treeGenerator.addEdge(two, five);
 
-                writeTestcase(treeGenerator, sampleTestcase);
+                writeTestcase(treeGenerator, sampleTestcase4);
             }
             for (int i = 1; i <= subtask1.maxNumTestcases - 1; i++)
             {
