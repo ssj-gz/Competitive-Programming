@@ -33,10 +33,8 @@ struct Node
     // TODO - explain this better.
     map<int, int64_t> numWithHeight;
 
-    vector<Node*> lightChildren;
 
     vector<Node*> neighbours; // TODO - remove this.
-    int id = -1; // TODO - remove this.
 };
 
 struct HeightInfo
@@ -58,39 +56,6 @@ int fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
         node->numDescendants += fixParentChildAndCountDescendants(child, node, height + 1);
 
     return node->numDescendants;
-}
-
-// Build up heavyChains.
-void doHeavyLightDecomposition(Node* node, bool followedHeavyEdge, vector<vector<Node*>>& heavyChains)
-{
-    if (followedHeavyEdge)
-    {
-        // Continue this chain.
-        heavyChains.back().push_back(node);
-    }
-    else
-    {
-        // Start a new chain.
-        heavyChains.push_back({node});
-    }
-    if (!node->children.empty())
-    {
-        auto heavyChild = *max_element(node->children.begin(), node->children.end(), [](const Node* lhs, const Node* rhs)
-                {
-                return lhs->numDescendants < rhs->numDescendants;
-                });
-        doHeavyLightDecomposition(heavyChild, true, heavyChains);
-        for (auto child : node->children)
-        {
-            if (child != heavyChild)
-                node->lightChildren.push_back(child);
-        }
-
-        for (auto lightChild : node->lightChildren)
-        {
-            doHeavyLightDecomposition(lightChild, false, heavyChains);
-        }
-    }
 }
 
 class DistTracker
@@ -138,165 +103,6 @@ class DistTracker
 enum DistTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 
 template <typename NodeProcessor>
-void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
-{
-    if (distTrackerAdjustment == AdjustWithDepth)
-        distTracker.adjustAllDists(1);
-
-    processNode(node, depth);
-
-    for (auto child : node->children)
-        doDfs(child, depth + 1, distTracker, distTrackerAdjustment, processNode);
-
-    if (distTrackerAdjustment == AdjustWithDepth)
-        distTracker.adjustAllDists(-1);
-}
-
-#if 0
-void completeTrianglesOfTypeA(const vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
-{
-    vector<vector<Node*>> heavyChains;
-    doHeavyLightDecomposition(rootNode, false, heavyChains);
-
-    DistTracker distTracker(nodes.size());
-    auto collectDists = [&distTracker](Node* node, int depth)
-    {
-        if (node->isSuitable)
-            distTracker.insertDist(depth);
-    };
-    auto completeTypeATrianglesForNode = [&distTracker, &numTriangles](Node* node)
-    {
-        // This will actually be called O(log2 n) for each node before the node's
-        // Type A Triangles are fully completed.
-        for (const auto& heightPair : node->numPairsWithHeightViaDifferentChildren)
-        {
-            const int descendantHeight = heightPair.first;
-            const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second;
-            assert(descendantHeight > node->height);
-
-            const int requiredNonDescendantDist = (descendantHeight - node->height);
-            const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
-            assert(numNewTriangles >= 0);
-            numTriangles += numNewTriangles;
-        }
-    };
-    auto propagateDists = [&completeTypeATrianglesForNode](Node* node, int depth)
-    {
-        completeTypeATrianglesForNode(node);
-    };
-    for (auto& chain : heavyChains)
-    {
-        for (auto pass = 1; pass <= 2; pass++)
-        {
-            distTracker.clear();
-            // Crawl along chain, collecting from one node and propagating to the next.
-            for (auto node : chain)
-            {
-                if (pass == 1 )
-                {
-                    // Once only (first pass chosen arbitrarily) - add this node's dist
-                    // (if isSuitable) so that it gets propagated to light descendants ...
-                    if (node->isSuitable)
-                        distTracker.insertDist(0);
-                    // ... and also (partially) complete its Type A Triangles.
-                    completeTypeATrianglesForNode(node);
-                }
-
-                for (auto lightChild : node->lightChildren)
-                {
-                    // Propagate all dists of nodes which isSuitable found so far along the chain in this direction
-                    // to light descendants ...
-                    doDfs(lightChild, 1, distTracker, AdjustWithDepth, propagateDists);
-                    // ... and collect from light descendants.
-                    doDfs(lightChild, 1, distTracker, DoNotAdjust, collectDists);
-                }
-
-                if (pass == 2)
-                {
-                    // In pass 1, we ensured that this node's dist (if isSuitable) was propagated
-                    // to its light descendants.  Don't do it this time - wait until
-                    // we've processed this node's light descendants before adding this
-                    // node to the distTracker!
-                    if (node->isSuitable)
-                        distTracker.insertDist(0);
-                }
-
-                // Prepare for the reverse pass.
-                reverse(node->lightChildren.begin(), node->lightChildren.end());
-                // Move one node along the chain - increase all heights accordingly!
-                distTracker.adjustAllDists(1);
-            }
-            // Now do it backwards.
-            reverse(chain.begin(), chain.end());
-        }
-    }
-}
-#endif
-
-void dfsSlow(Node* currentNode, Node* parentNode, int depth, Node* rootNode, int64_t& numTriangles)
-{
-    if (currentNode == nullptr)
-        return;
-    if (currentNode->isSuitable)
-    {
-        const int requiredRootDescendantHeight = rootNode->height + depth;
-        numTriangles += rootNode->numPairsWithHeightViaDifferentChildren[requiredRootDescendantHeight] * numTripletPermutations;
-    }
-
-    for (auto neighbour : currentNode->neighbours)
-    {
-        if (neighbour == parentNode)
-            continue;
-        dfsSlow(neighbour, currentNode, depth + 1, rootNode, numTriangles);
-    }
-    
-}
-
-void countNumWithHeight(Node* currentNode, int height, map<int, int64_t>& numWithHeight)
-{
-    if (currentNode->isSuitable)
-        numWithHeight[height]++;
-
-    for (auto child : currentNode->children)
-        countNumWithHeight(child, height + 1, numWithHeight);
-}
-
-void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
-{
-#if 0
-    for (auto& node : nodes)
-    {
-        dfsSlow(node.parentNode, &node, 1, &node, numTriangles);
-    }
-#else
-    for (auto& node : nodes)
-    {
-        dfsSlow(&node, nullptr, 0, &node, numTriangles);
-    }
-#endif
-    // Fix the overcount caused by Centroid Decomposition (over-)counting descendents of a node as non-descendents
-    // of a node!
-    for (auto& node : nodes)
-    {
-        map<int, int64_t> numWithHeight;
-        countNumWithHeight(&node, node.height, numWithHeight);
-
-        for (const auto blah : node.numPairsWithHeightViaDifferentChildren)
-        {
-            const int height = blah.first;
-            const int64_t pairs = blah.second;
-
-            if (blah.second == 0)
-                continue;
-
-            //cout << "Blah Node: " << node.id << "  height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
-            assert(node.numWithHeight[height] == numWithHeight[height]);
-            numTriangles -= pairs * node.numWithHeight[height] * numTripletPermutations;
-        }
-    }
-}
-
-template <typename NodeProcessor>
 void doDfsNew(Node* node, Node* parentNode, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
 {
     if (distTrackerAdjustment == AdjustWithDepth)
@@ -314,7 +120,6 @@ void doDfsNew(Node* node, Node* parentNode, int depth, DistTracker& distTracker,
     if (distTrackerAdjustment == AdjustWithDepth)
         distTracker.adjustAllDists(-1);
 }
-
 
 int countDescendants(Node* node, Node* parentNode)
 {
@@ -606,10 +411,6 @@ int main(int argc, char* argv[])
         assert(1 <= numNodes && numNodes <= 200'000);
 
         vector<Node> nodes(numNodes);
-        for (int i = 0; i < numNodes; i++)
-        {
-            nodes[i].id = (i + 1);
-        }
 
         for (int i = 0; i < numNodes - 1; i++)
         {
