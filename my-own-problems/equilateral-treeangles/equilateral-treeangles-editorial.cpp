@@ -271,10 +271,17 @@ void countNumWithHeight(Node* currentNode, int height, map<int, int64_t>& numWit
 
 void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
+#if 0
     for (auto& node : nodes)
     {
         dfsSlow(node.parentNode, &node, 1, &node, numTriangles);
     }
+#else
+    for (auto& node : nodes)
+    {
+        dfsSlow(&node, nullptr, 0, &node, numTriangles);
+    }
+#endif
 
     for (auto& node : nodes)
     {
@@ -291,6 +298,7 @@ void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& 
 
             //cout << "Blah Node: " << node.id << "  height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
             assert(node.numWithHeight[height] == numWithHeight[height]);
+            numTriangles -= pairs * node.numWithHeight[height] * numTripletPermutations;
         }
     }
 
