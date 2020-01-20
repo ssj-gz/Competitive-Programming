@@ -595,13 +595,13 @@ int64_t findNumTriplets(vector<Node>& nodes)
 
     // Finishes off the computation of the number of "Type A" triangles
     // that we began in buildDescendantHeightInfo.
-    completeTrianglesOfTypeA(nodes, rootNode, result);
+    //completeTrianglesOfTypeA(nodes, rootNode, result);
 
     completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, centroidDecompositionResult);
     //cout << "result: " << result << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
-    assert(centroidDecompositionResult == result);
+    //assert(centroidDecompositionResult == result);
 
-    return result;
+    return centroidDecompositionResult;
 }
 
 template <typename T>
