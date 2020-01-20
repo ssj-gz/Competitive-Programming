@@ -34,9 +34,15 @@ ___
 
 ___
 ###Subtasks
-**Subtask #1 (5 points):** $1 \leq T \leq 100$ and $1 \leq N \leq 100$
+**Subtask #1 (5 points):** 
 
-**Subtask #2 (10 points)**: $1 \leq T \leq 100$ and $1 \leq N \leq 1000$
+* $1 \leq T \leq 100$
+* $1 \leq N \leq 100$
+
+**Subtask #2 (10 points)**: 
+
+* $1 \leq T \leq 100$ 
+* $1 \leq N \leq 1000$
 
 **Subtask #3 (85 points)**: original constraints
 
