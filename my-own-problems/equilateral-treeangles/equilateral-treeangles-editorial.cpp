@@ -36,6 +36,7 @@ struct Node
     vector<Node*> lightChildren;
 
     vector<Node*> neighbours; // TODO - remove this.
+    int id = -1; // TODO - remove this.
 };
 
 struct HeightInfo
@@ -259,12 +260,40 @@ void dfsSlow(Node* currentNode, Node* parentNode, int depth, Node* rootNode, int
     
 }
 
+void countNumWithHeight(Node* currentNode, int height, map<int, int64_t>& numWithHeight)
+{
+    if (currentNode->isSuitable)
+        numWithHeight[height]++;
+
+    for (auto child : currentNode->children)
+        countNumWithHeight(child, height + 1, numWithHeight);
+}
+
 void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
     for (auto& node : nodes)
     {
         dfsSlow(node.parentNode, &node, 1, &node, numTriangles);
     }
+
+    for (auto& node : nodes)
+    {
+        map<int, int64_t> numWithHeight;
+        countNumWithHeight(&node, node.height, numWithHeight);
+
+        for (const auto blah : node.numPairsWithHeightViaDifferentChildren)
+        {
+            const int height = blah.first;
+            const int64_t pairs = blah.second;
+
+            if (blah.second == 0)
+                continue;
+
+            cout << " height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
+        }
+    }
+
+
 }
 
 map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTriangles)
@@ -332,6 +361,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightViaDifferentChildren += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
+                cout << "Node: " << currentNode->id << " Height: " << descendantHeight << " numKnownDescendantsWithHeight: " << numKnownDescendantsWithHeight << " numUnprocessedDescendantsWithHeight: " << numUnprocessedDescendantsWithHeight << endl;
                 currentNode->numWithHeight[descendantHeight] += numUnprocessedDescendantsWithHeight;
 
             }
@@ -396,6 +426,10 @@ int main(int argc, char* argv[])
         assert(1 <= numNodes && numNodes <= 200'000);
 
         vector<Node> nodes(numNodes);
+        for (int i = 0; i < numNodes; i++)
+        {
+            nodes[i].id = (i + 1);
+        }
 
         for (int i = 0; i < numNodes - 1; i++)
         {
