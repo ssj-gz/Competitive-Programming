@@ -14,8 +14,7 @@ const int numTripletPermutations = 1 * 2 * 3; // i.e. == factorial(3).
 
 struct Node
 {
-    vector<Node*> children;
-
+    vector<Node*> neighbours;
     bool isSuitable = false;
     int height = 0;
 
@@ -32,7 +31,6 @@ struct Node
     map<int, int64_t> numWithHeight;
 
 
-    vector<Node*> neighbours; // TODO - remove this.
 };
 
 struct HeightInfo
