@@ -273,20 +273,22 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
         }
     }
 }
-map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int height, int64_t& numTriangles)
+map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
 {
     currentNode->height = height;
 
     map<int, HeightInfo> infoForDescendantHeight;
 
-    for (auto child : currentNode->children)
+    for (auto child : currentNode->neighbours)
     {
+        if (child == parentNode)
+            continue;
         // Quick C++ performance note: in C++11 onwards, capturing a returned std::map
         // in a local variable is O(1), due to Move Semantics.  Prior to this, though,
         // it could have been O(size of std::map), which would (silently!) lead to 
         // asymptotically worse performance!
         // Luckily, this code uses C++11 features so we can't accidentally fall into this trap.
-        auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, height + 1, numTriangles);
+        auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriangles);
         if (infoForChildDescendantHeight.size() > infoForDescendantHeight.size())
         {
             swap(infoForDescendantHeight, infoForChildDescendantHeight);
@@ -373,7 +375,7 @@ int64_t findNumTriplets(vector<Node>& nodes)
 
     // Fills in numPairsWithHeightViaDifferentChildren for each node, and 
     // additionally counts all "Type B" triangles and adds them to results.
-    buildDescendantHeightInfo(rootNode, 0, result);
+    buildDescendantHeightInfo(rootNode, nullptr, 0, result);
 
     int64_t centroidDecompositionResult = result;
 
