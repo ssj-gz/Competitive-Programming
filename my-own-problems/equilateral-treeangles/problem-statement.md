@@ -12,7 +12,7 @@ Help Chef find the number of ways of choosing triples of distinct sites $p$, $q$
 * $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
 
 ___
-###Input:
+###Input
 
 - First line will contain $T$, number of testcases. Then the testcases follow. 
 - The first line of a testcase is $N$, the number of sites in the new town.
@@ -20,7 +20,7 @@ ___
 - The last line of the testcase describes the _suitablility_ of sites - the line consists of $N$ space-separated integers $s_1, s_2, \ldots , s_N$, with each $s_i$ equal to either 0 or 1: if $s_i$ is 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is not _suitable_.
 
 ___
-###Output:
+###Output
 For each testcase, output in a single line the number of optimally successful triples of sites for his Restaurants.
 
 ___
@@ -40,7 +40,7 @@ ___
 **Subtask #3 (85 points)**: original constraints
 
 ___
-###Sample Input:
+###Sample Input
 
 ```
 4
@@ -74,7 +74,7 @@ ___
 ```
 
 ___
-###Sample Output:
+###Sample Output
 
 ```
 0
