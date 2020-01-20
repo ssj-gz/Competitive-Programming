@@ -475,7 +475,7 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
     for (auto& node : nodes)
     {
         map<int, int64_t> numWithHeight;
-        countNumWithHeight(&node, node.height, numWithHeight);
+        //countNumWithHeight(&node, node.height, numWithHeight);
 
         for (const auto blah : node.numPairsWithHeightViaDifferentChildren)
         {
@@ -486,7 +486,7 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
                 continue;
 
             //cout << "Blah Node: " << node.id << "  height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
-            assert(node.numWithHeight[height] == numWithHeight[height]);
+            //assert(node.numWithHeight[height] == numWithHeight[height]);
             numTriangles -= pairs * node.numWithHeight[height] * numTripletPermutations;
         }
     }
