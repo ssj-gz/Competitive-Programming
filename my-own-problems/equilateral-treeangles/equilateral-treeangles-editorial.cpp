@@ -325,7 +325,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
                 if (numberDescendentsWithThisHeight == 0)
                 {
-                    // This hasn't been updated yet, so has missed the numKnownDescendantsWithHeight.
+                    // This hasn't been updated yet, so has missed the numKnownDescendantsWithHeight; incorporate it now.
                     numberDescendentsWithThisHeight += numKnownDescendantsWithHeight;
                 }
                 numberDescendentsWithThisHeight += numUnprocessedDescendantsWithHeight;
