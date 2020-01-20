@@ -16,7 +16,7 @@ struct DescendentWithHeightInfo
 {
     int64_t numPairsWithHeightViaDifferentChildren = 0;
     // Not strictly correct: if numPairsWithHeightViaDifferentChildren > 0, then this
-    // will indeed by the number of descendents of this Node which have height
+    // will indeed be the number of descendents of this Node which have height
     // numWithHeight[height], but if numPairsWithHeightViaDifferentChildren == 0, this
     // will also be 0.
     // 
