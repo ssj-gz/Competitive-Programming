@@ -389,6 +389,22 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
 {
     Node* centroid = findCentroid(startNode);
 
+    auto completeTypeATrianglesForNode = [&numTriangles](Node* node, DistTracker& distTracker)
+    {
+        // This will actually be called O(log2 n) for each node before the node's
+        // Type A Triangles are fully completed.
+        for (const auto& heightPair : node->numPairsWithHeightViaDifferentChildren)
+        {
+            const int descendantHeight = heightPair.first;
+            const int64_t numPairsWithHeightViaDifferentChildren = heightPair.second;
+            assert(descendantHeight > node->height);
+
+            const int requiredNonDescendantDist = (descendantHeight - node->height);
+            const int64_t numNewTriangles = numPairsWithHeightViaDifferentChildren * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
+            assert(numNewTriangles >= 0);
+            numTriangles += numNewTriangles;
+        }
+    };
     auto propagateDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
                             // TODO - process node.
