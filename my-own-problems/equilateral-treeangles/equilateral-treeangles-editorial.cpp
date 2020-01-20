@@ -385,7 +385,7 @@ Node* findCentroid(Node* startNode)
     return centroid;
 }
 
-void doCentroidDecomposition(Node* startNode)
+void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
 {
     Node* centroid = findCentroid(startNode);
 
@@ -431,12 +431,13 @@ void doCentroidDecomposition(Node* startNode)
         // Erase the edge from the centroid's neighbour to the centroid, essentially "chopping off" each child into its own
         // component.
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
-        doCentroidDecomposition(neighbour);
+        doCentroidDecomposition(neighbour, numTriangles);
     }
 }
 
 void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
+    doCentroidDecomposition(rootNode, numTriangles);
     // Fix the overcount caused by Centroid Decomposition (over-)counting descendents of a node as non-descendents
     // of a node!
     for (auto& node : nodes)
