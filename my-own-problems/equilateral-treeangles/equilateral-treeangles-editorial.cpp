@@ -591,19 +591,15 @@ int64_t findNumTriplets(vector<Node>& nodes)
     // additionally counts all "Type B" triangles and adds them to results.
     buildDescendantHeightInfo(rootNode, result);
 
-
-    int64_t debugResult = result;
     int64_t centroidDecompositionResult = result;
 
     // Finishes off the computation of the number of "Type A" triangles
     // that we began in buildDescendantHeightInfo.
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
-    completeTrianglesOfTypeASlow(nodes, rootNode, debugResult);
     completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, centroidDecompositionResult);
-    cout << "result: " << result << " debugResult: " << debugResult << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
+    cout << "result: " << result << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
     assert(centroidDecompositionResult == result);
-    assert(debugResult == result);
 
     return result;
 }
