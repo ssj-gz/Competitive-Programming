@@ -86,7 +86,7 @@ class DistTracker
 enum DistTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 
 template <typename NodeProcessor>
-void doDfsNew(Node* node, Node* parentNode, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
+void doDfs(Node* node, Node* parentNode, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
 {
     if (distTrackerAdjustment == AdjustWithDepth)
         distTracker.adjustAllDists(1);
@@ -97,7 +97,7 @@ void doDfsNew(Node* node, Node* parentNode, int depth, DistTracker& distTracker,
     {
         if (child == parentNode)
             continue;
-        doDfsNew(child, node, depth + 1, distTracker, distTrackerAdjustment, processNode);
+        doDfs(child, node, depth + 1, distTracker, distTrackerAdjustment, processNode);
     }
 
     if (distTrackerAdjustment == AdjustWithDepth)
@@ -200,8 +200,8 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
         DistTracker distTracker(numNodesInComponent);
         for (auto& child : centroid->neighbours)
         {
-            doDfsNew(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
-            doDfsNew(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
+            doDfs(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
+            doDfs(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
     }
     {
@@ -213,8 +213,8 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
             distTracker.insertDist(0);
         for (auto& child : centroid->neighbours)
         {
-            doDfsNew(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
-            doDfsNew(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
+            doDfs(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
+            doDfs(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
         addSomeTypeATrianglesForNode(centroid, distTracker);
     }
