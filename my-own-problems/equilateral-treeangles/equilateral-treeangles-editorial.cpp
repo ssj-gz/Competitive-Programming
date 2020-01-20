@@ -405,9 +405,9 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
             numTriangles += numNewTriangles;
         }
     };
-    auto propagateDists = [](Node* node, int depth, DistTracker& distTracker)
+    auto propagateDists = [&completeTypeATrianglesForNode](Node* node, int depth, DistTracker& distTracker)
                         {
-                            // TODO - process node.
+                            completeTypeATrianglesForNode(node, distTracker);
                         };
     auto collectDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
