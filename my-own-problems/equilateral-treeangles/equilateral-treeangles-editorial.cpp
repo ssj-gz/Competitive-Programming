@@ -149,7 +149,7 @@ void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustmen
         distTracker.adjustAllDists(-1);
 }
 
-void completeTrianglesOfTypeA(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
+void completeTrianglesOfTypeA(const vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
     vector<vector<Node*>> heavyChains;
     doHeavyLightDecomposition(rootNode, false, heavyChains);
