@@ -8,8 +8,8 @@ Chef can't build a restaurant on just any site; only on sites that are deemed _s
 
 Help Chef find the number of ways of choosing triples $(p, q, r)$ of distinct sites $p$, $q$ and $r$ on which to build his restaurants such that the arrangement is _optimally successful_ i.e. such that:
 
-* $p$, $q$ and $r$ are all _suitable_; and
-* $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
+1. $p$, $q$ and $r$ are all _suitable_; and
+2. $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$
 
 ___
 ###Input
