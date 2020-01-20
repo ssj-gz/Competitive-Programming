@@ -17,7 +17,6 @@ struct Node
     vector<Node*> children;
 
     bool isSuitable = false;
-    Node* parentNode = nullptr;
     int height = 0;
 
     map<int, int64_t> numPairsWithHeightViaDifferentChildren;
@@ -44,7 +43,7 @@ struct HeightInfo
 
 void fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
 {
-    node->parentNode = parentNode;
+    //node->parentNode = parentNode;
     //node->height = height;
 
     if (parentNode)
