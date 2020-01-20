@@ -41,18 +41,6 @@ struct HeightInfo
     Node* lastUpdatedAtNode = nullptr;
 };
 
-void fixParentChildAndCountDescendants(Node* node, Node* parentNode, int height)
-{
-    //node->parentNode = parentNode;
-    //node->height = height;
-
-    if (parentNode)
-        node->children.erase(find(node->children.begin(), node->children.end(), parentNode));
-
-    for (auto child : node->children)
-        fixParentChildAndCountDescendants(child, node, height + 1);
-}
-
 class DistTracker
 {
     public:
@@ -370,7 +358,6 @@ int64_t findNumTriplets(vector<Node>& nodes)
     int64_t result = 0;
 
     auto rootNode = &(nodes.front());
-    fixParentChildAndCountDescendants(rootNode, nullptr, 0);
 
     // Fills in numPairsWithHeightViaDifferentChildren for each node, and 
     // additionally counts all "Type B" triangles and adds them to results.
@@ -418,11 +405,6 @@ int main(int argc, char* argv[])
 
             assert(1 <= u && u <= numNodes);
             assert(1 <= v && v <= numNodes);
-
-            // More "neighbours" than "children" at the moment, but we'll sort that out
-            // in fixParentChildAndCountDescendants!
-            nodes[u - 1].children.push_back(&(nodes[v - 1]));
-            nodes[v - 1].children.push_back(&(nodes[u - 1]));
 
             nodes[u - 1].neighbours.push_back(&(nodes[v - 1]));
             nodes[v - 1].neighbours.push_back(&(nodes[u - 1]));
