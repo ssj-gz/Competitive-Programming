@@ -22,6 +22,16 @@ struct Node
     int height = 0;
 
     map<int, int64_t> numPairsWithHeightViaDifferentChildren;
+    // Not strictly correct: if numPairsWithHeightViaDifferentChildren > 0, then this
+    // will indeed by the number of descendents of this Node which have height
+    // numWithHeight[height], but if numPairsWithHeightViaDifferentChildren == 0, this
+    // will also be 0.
+    // 
+    // This is used to avoid the overcount when performing completeTrianglesOfTypeA
+    // (Centroid Decomposition has no notion of our parent-child relationship, so
+    // will count "children" of a Node alongside "non-children" of a Node.
+    // TODO - explain this better.
+    map<int, int64_t> numWithHeight;
 
     vector<Node*> lightChildren;
 
@@ -322,6 +332,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTr
                 // We store numPairsWithHeightViaDifferentChildren for this descendantHeight inside currentNode: the required non-ancestors of
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightViaDifferentChildren += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
+                currentNode->numWithHeight[descendantHeight] += numUnprocessedDescendantsWithHeight;
 
             }
 
