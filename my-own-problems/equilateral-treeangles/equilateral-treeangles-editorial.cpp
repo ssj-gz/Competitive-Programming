@@ -236,8 +236,6 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
     // of a node!
     for (auto& node : nodes)
     {
-        map<int, int64_t> numWithHeight;
-
         for (const auto descendantHeightPair : node.descendentWithHeightInfo)
         {
             const int height = descendantHeightPair.first;
