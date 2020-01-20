@@ -480,17 +480,17 @@ int main(int argc, char* argv[])
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
 
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(25'000, 3.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(75'000, 98);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(20'000, 3.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(85'000, 98);
 
                 const auto nodesWithoutArms = treeGenerator.nodes();
                 for (int i = 0; i < 3; i++)
                 {
-                    treeGenerator.addNodeChain(nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))], 30'000);
+                    treeGenerator.addNodeChain(nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))], 27'000);
                 }
 
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
 
                 setRandomSuitable(treeGenerator, 78.0);
