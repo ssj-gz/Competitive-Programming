@@ -223,8 +223,7 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
             doDfsNew(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
             doDfsNew(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
-        // TODO - do something with the Centroid.
-        completeTypeATrianglesForNode(centroid, distTracker); // TODO - is this right?
+        completeTypeATrianglesForNode(centroid, distTracker);
     }
 
     for (auto& neighbour : centroid->neighbours)
@@ -245,7 +244,6 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
     for (auto& node : nodes)
     {
         map<int, int64_t> numWithHeight;
-        //countNumWithHeight(&node, node.height, numWithHeight);
 
         for (const auto descendantHeightPair : node.descendentWithHeightInfo)
         {
@@ -255,6 +253,8 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
             if (numPairsWithHeightViaDifferentChildren == 0)
                 continue;
 
+            // Centroid decomposition would have (wrongly) added numPairsWithHeightViaDifferentChildren[height] * numTripletPermutations 
+            // for each suitable descendent of node which had height - correct for this.
             numTriangles -= numPairsWithHeightViaDifferentChildren * node.descendentWithHeightInfo[height].number * numTripletPermutations;
         }
     }
