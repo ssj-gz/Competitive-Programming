@@ -222,6 +222,27 @@ int main(int argc, char* argv[])
                 writeTestcase(treeGenerator, sampleTestcase2);
             }
             {
+                auto& sampleTestcase3 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 3"));
+                TreeGenerator<NodeData> treeGenerator;
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+                auto four = treeGenerator.createNode();
+                auto five = treeGenerator.createNode();
+
+                for (auto node : {two, four, five})
+                {
+                    node->data.isSuitable = true;
+                }
+
+                treeGenerator.addEdge(one, three);
+                treeGenerator.addEdge(four, three);
+                treeGenerator.addEdge(two, one);
+                treeGenerator.addEdge(one, five);
+
+                writeTestcase(treeGenerator, sampleTestcase3);
+            }
+            {
                 auto& sampleTestcase4 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 4"));
                 TreeGenerator<NodeData> treeGenerator;
                 auto one = treeGenerator.createNode();
