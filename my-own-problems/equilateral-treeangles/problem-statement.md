@@ -22,7 +22,7 @@ ___
 
 ___
 ###Output
-For each testcase, output in a single line the number of optimally successful triples of sites for his restaurants.
+For each testcase, print a single line containing one integer - the number of optimally successful triples of sites for Chef's new restaurants.
 
 ___
 ###Constraints 
