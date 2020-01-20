@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
                                                                     .withSeed(0));
 
             {
-                auto& sampleTestcase1 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 1"));
+                auto& sampleTestcase1 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 1 - answer 0, as only two suitable sites"));
                 TreeGenerator<NodeData> treeGenerator;
                 auto one = treeGenerator.createNode();
                 auto two = treeGenerator.createNode();
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
                 writeTestcase(treeGenerator, sampleTestcase1);
             }
             {
-                auto& sampleTestcase2 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 2"));
+                auto& sampleTestcase2 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 2 - four suitable nodes each connected directly to central unsuitable node; any triple of suitable nodes will do, giving 24 triples"));
                 TreeGenerator<NodeData> treeGenerator;
                 auto one = treeGenerator.createNode();
                 auto two = treeGenerator.createNode();
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
                 writeTestcase(treeGenerator, sampleTestcase2);
             }
             {
-                auto& sampleTestcase3 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 3"));
+                auto& sampleTestcase3 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 3 - three suitable nodes, but not equidistant, therefore 0 triples"));
                 TreeGenerator<NodeData> treeGenerator;
                 auto one = treeGenerator.createNode();
                 auto two = treeGenerator.createNode();
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
                 writeTestcase(treeGenerator, sampleTestcase3);
             }
             {
-                auto& sampleTestcase4 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 4"));
+                auto& sampleTestcase4 = testFile.newTestcase(EQTTestCaseInfo().withDescription("Sample testcase 4 - a total of 18 triples, with some triples having a mutual distance of 2; the others, 4"));
                 TreeGenerator<NodeData> treeGenerator;
                 auto one = treeGenerator.createNode();
                 auto two = treeGenerator.createNode();
