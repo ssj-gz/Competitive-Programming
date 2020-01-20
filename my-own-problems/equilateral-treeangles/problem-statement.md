@@ -28,7 +28,7 @@ ___
 - $1 \leq T \leq 1000$
 - $1 \leq N \leq 200000$
 - $1 \leq u,v \leq N$
-- $s_i \in \{0,1\}$ and 
+- $s_i \in \{0,1\}$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
 ___
