@@ -122,37 +122,16 @@ class DistTracker
 
             return m_largestDist;
         }
-        void clear()
-        {
-            // Reset all dist counts to 0 in O(1) by upping the 
-            // m_versionNum.
-            m_cumulativeDistAdjustment = 0;
-            m_largestDist = -1;
-            m_versionNum++;
-        }
     private:
         int m_cumulativeDistAdjustment = 0;
-        struct VersionedValue
-        {
-            int versionNum = -1;
-            int value = -1;
-        };
-        vector<VersionedValue> m_numWithDist;
+        vector<int> m_numWithDist;
         int m_maxDist = -1;
-        int m_versionNum = 0;
 
         int m_largestDist = -1;
 
         int& numWithDistValue(int dist)
         {
-            VersionedValue& versionedValue = m_numWithDist[dist - m_cumulativeDistAdjustment + m_maxDist];
-            if (versionedValue.versionNum != m_versionNum)
-            {
-                versionedValue.value = 0;
-                versionedValue.versionNum = m_versionNum;
-            }
-
-            return versionedValue.value;
+            return m_numWithDist[dist - m_cumulativeDistAdjustment + m_maxDist];
         }
 };
 
@@ -173,6 +152,7 @@ void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustmen
         distTracker.adjustAllDists(-1);
 }
 
+#if 0
 void completeTrianglesOfTypeA(const vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
     vector<vector<Node*>> heavyChains;
@@ -251,6 +231,7 @@ void completeTrianglesOfTypeA(const vector<Node>& nodes, Node* rootNode, int64_t
         }
     }
 }
+#endif
 
 void dfsSlow(Node* currentNode, Node* parentNode, int depth, Node* rootNode, int64_t& numTriangles)
 {
