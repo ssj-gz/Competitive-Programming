@@ -598,7 +598,7 @@ int64_t findNumTriplets(vector<Node>& nodes)
     completeTrianglesOfTypeA(nodes, rootNode, result);
 
     completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, centroidDecompositionResult);
-    cout << "result: " << result << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
+    //cout << "result: " << result << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
     assert(centroidDecompositionResult == result);
 
     return result;
