@@ -88,15 +88,13 @@ ___
 
 Throughout, we only care about the _suitable_ sites: no other site can be part of an optimally successful triple.
 
-**Example case 1:** There are only two suitable sites ($1$ and $2$), so there is no way of forming any triples of suitable sites: we output `0`.
+**Example case 1:** There are only two _suitable_ sites (the sites labelled $1$ and $2$), so there is no way of forming any triples of suitable sites: we output `0`.
 
-**Example case 2:** The set of suitable sites is $1$, $2$, $4$ and $5$, and $\textit{dist}(1,2)=\textit{dist}(1,4)=\textit{dist}(1,5)=\textit{dist}(2,4)=\textit{dist}(2,5)=\textit{dist}(4,5)=2$, so _any_ triple consisting of sites drawn from these four suitable sites is optimally successful.  In no particular order, these are $(1, 2, 4)$, $(1, 2, 5)$, $(1, 4, 2)$, $(1, 4, 5)$, $(1, 5, 2)$, $(1, 5, 4)$, $(2, 1, 4)$, $(2, 1, 5)$, $(2, 4, 1)$, $(2, 4, 5)$, $(2, 5, 1)$, $(2, 5, 4)$, $(4, 1, 2)$, $(4, 1, 5)$, $(4, 2, 1)$, $(4, 2, 5)$, $(4, 5, 1)$, $(4, 5, 2)$, $(5, 1, 2)$, $(5, 1, 4)$, $(5, 2, 1)$, $(5, 2, 4)$, $(5, 4, 1)$ and $(5, 4, 2)$.  There are $24$ of them, so we output `24`.
+**Example case 2:** The suitable sites are those labelled $1$, $2$, $4$ and $5$, and $\textit{dist}(1,2)=\textit{dist}(1,4)=\textit{dist}(1,5)=\textit{dist}(2,4)=\textit{dist}(2,5)=\textit{dist}(4,5)=2$ miles, so _any_ triple consisting of sites drawn from these four suitable sites is optimally successful.  In no particular order, these are $(1, 2, 4)$, $(1, 2, 5)$, $(1, 4, 2)$, $(1, 4, 5)$, $(1, 5, 2)$, $(1, 5, 4)$, $(2, 1, 4)$, $(2, 1, 5)$, $(2, 4, 1)$, $(2, 4, 5)$, $(2, 5, 1)$, $(2, 5, 4)$, $(4, 1, 2)$, $(4, 1, 5)$, $(4, 2, 1)$, $(4, 2, 5)$, $(4, 5, 1)$, $(4, 5, 2)$, $(5, 1, 2)$, $(5, 1, 4)$, $(5, 2, 1)$, $(5, 2, 4)$, $(5, 4, 1)$ and $(5, 4, 2)$.  There are $24$ of them, so we output `24`.
 
-**Example case 3:** There are only three suitable sites ($2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,2)=3$, $\textit{dist}(2,5)=2 \neq 3$, so the three suitable sites are not equidistant from each other: we output `0`.
+**Example case 3:** There are only three suitable sites (those labelled $2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,2)=3$ miles, unfortunately $\textit{dist}(2,5)=2$ miles $\neq 3$ miles, so the three suitable sites are not equidistant from each other: we output `0`.
 
-**Example case 4:** We see that the list of _suitable_ sites consists of the sites labelled $1$, $3$, $4$, $5$ and $7$.  We only need to consider triples formed by choosing three of these suitable sites.
-
-We note that $\textit{dist}(1,5)=2$ miles, and $\textit{dist}(1,7)=2$ miles, and $\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
+**Example case 4:** The suitable sites are those labelled $1$, $3$, $4$, $5$ and $7$.  We note that $\textit{dist}(1,5)=2$ miles, and $\textit{dist}(1,7)=2$ miles, and $\textit{dist}(5,7)=2$ miles, so $(1,5,7)$ is a successful arrangement of Restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
 
 We note also that $\textit{dist}(1,3)=4$ miles, $\textit{dist}(1,4)=4$ miles, and $\textit{dist}(3,4)=4$ miles, so $(1,3,4$) is another successful arrangement of Restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
 
