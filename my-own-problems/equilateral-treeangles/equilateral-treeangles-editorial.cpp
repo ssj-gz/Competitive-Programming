@@ -349,25 +349,19 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
 int64_t findNumTriplets(vector<Node>& nodes)
 {
-    int64_t result = 0;
+    int64_t numTriplets = 0;
 
     auto rootNode = &(nodes.front());
 
     // Fills in numPairsWithHeightViaDifferentChildren for each node, and 
     // additionally counts all "Type B" triangles and adds them to results.
-    buildDescendantHeightInfo(rootNode, nullptr, 0, result);
-
-    int64_t centroidDecompositionResult = result;
+    buildDescendantHeightInfo(rootNode, nullptr, 0, numTriplets);
 
     // Finishes off the computation of the number of "Type A" triangles
     // that we began in buildDescendantHeightInfo.
-    //completeTrianglesOfTypeA(nodes, rootNode, result);
+    completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, numTriplets);
 
-    completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, centroidDecompositionResult);
-    //cout << "result: " << result << " centroidDecompositionResult: " << centroidDecompositionResult << endl;
-    //assert(centroidDecompositionResult == result);
-
-    return centroidDecompositionResult;
+    return numTriplets;
 }
 
 template <typename T>
