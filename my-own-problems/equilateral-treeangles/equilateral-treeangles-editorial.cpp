@@ -282,7 +282,8 @@ void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& 
         dfsSlow(&node, nullptr, 0, &node, numTriangles);
     }
 #endif
-
+    // Fix the overcount caused by Centroid Decomposition (over-)counting descendents of a node as non-descendents
+    // of a node!
     for (auto& node : nodes)
     {
         map<int, int64_t> numWithHeight;
@@ -301,10 +302,31 @@ void completeTrianglesOfTypeASlow(vector<Node>& nodes, Node* rootNode, int64_t& 
             numTriangles -= pairs * node.numWithHeight[height] * numTripletPermutations;
         }
     }
-
-
 }
 
+void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
+{
+    // Fix the overcount caused by Centroid Decomposition (over-)counting descendents of a node as non-descendents
+    // of a node!
+    for (auto& node : nodes)
+    {
+        map<int, int64_t> numWithHeight;
+        countNumWithHeight(&node, node.height, numWithHeight);
+
+        for (const auto blah : node.numPairsWithHeightViaDifferentChildren)
+        {
+            const int height = blah.first;
+            const int64_t pairs = blah.second;
+
+            if (blah.second == 0)
+                continue;
+
+            //cout << "Blah Node: " << node.id << "  height: " << height << " node.numWithHeight: " << node.numWithHeight[height] << " debug: " << numWithHeight[height] << endl;
+            assert(node.numWithHeight[height] == numWithHeight[height]);
+            numTriangles -= pairs * node.numWithHeight[height] * numTripletPermutations;
+        }
+    }
+}
 map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, int64_t& numTriangles)
 {
     map<int, HeightInfo> infoForDescendantHeight;
