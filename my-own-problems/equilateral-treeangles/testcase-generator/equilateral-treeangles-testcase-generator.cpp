@@ -486,7 +486,8 @@ int main(int argc, char* argv[])
                 const auto nodesWithoutArms = treeGenerator.nodes();
                 for (int i = 0; i < 3; i++)
                 {
-                    treeGenerator.addNodeChain(nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))], 27'000);
+                    auto armRootNode = nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))];
+                    treeGenerator.addNodeChain(armRootNode, 27'000);
                 }
 
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
