@@ -294,7 +294,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
             auto numUnprocessedDescendantsWithHeight = -1;
             auto numKnownDescendantsWithHeight = -1;
-            if (transientHeightInfo.lastUpdatedAtNode == currentNode || transientHeightInfo.lastUpdatedAtNode == nullptr)
+            if (transientHeightInfo.lastUpdatedAtNode == currentNode)
             {
                 assert(heightInfoForNode.lastUpdatedAtNode != currentNode);
                 numUnprocessedDescendantsWithHeight = heightInfoForNode.numWithHeight;
