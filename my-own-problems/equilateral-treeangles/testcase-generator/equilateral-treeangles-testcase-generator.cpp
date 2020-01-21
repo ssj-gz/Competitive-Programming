@@ -476,7 +476,6 @@ int main(int argc, char* argv[])
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic spindly-ish graph, using maxNodes, with three long arms grafted onto it: first ~5000 nodes are grown more-or-less randomly; then ~75'000 preferring leaves; then three arms of length ~24000 are attached to random nodes.  Then the remaining nodes are essentially random.  The exact parameters used for each 'growth' phase were found by a random search that tried to make the 'cheat' solution time-out as hard as it could :)"));
-                const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
 
