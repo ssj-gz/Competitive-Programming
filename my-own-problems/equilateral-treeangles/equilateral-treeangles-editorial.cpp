@@ -259,7 +259,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 {
     currentNode->height = height;
 
-    map<int, HeightInfo> infoForDescendantHeight;
+    map<int, HeightInfo> persistentInfoForDescendantHeight;
 
     for (auto child : currentNode->neighbours)
     {
@@ -271,13 +271,15 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
         // not being used), which would (silently!) lead to asymptotically worse performance!
         //
         // Luckily, this code uses C++11 features so we can't accidentally fall into this trap.
-        auto infoForChildDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriangles);
-        if (infoForChildDescendantHeight.size() > infoForDescendantHeight.size())
+        auto transientInfoForDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriangles);
+        if (transientInfoForDescendantHeight.size() > persistentInfoForDescendantHeight.size())
         {
-            swap(infoForDescendantHeight, infoForChildDescendantHeight);
+            // We'll be "copying" the tran
+            // Swapping is O(1).
+            swap(persistentInfoForDescendantHeight, transientInfoForDescendantHeight);
         }
 
-        for (auto descendantHeightPair : infoForChildDescendantHeight)
+        for (auto transientDescendantHeightPair : transientInfoForDescendantHeight)
         {
             // This block of code (i.e. the body of the containing for... loop) 
             // is executed O(n log2 n) times over the whole run.
@@ -285,15 +287,16 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
             // child has a descendant of descendantHeight that isSuitable and a previous child of this
             // node also has a descendant of descendantHeight that isSuitable, but may also
             // be executed under different circumstances.
-            const auto descendantHeight = descendantHeightPair.first;
+            const auto descendantHeight = transientDescendantHeightPair.first;
 
-            const auto& transientHeightInfo = descendantHeightPair.second;
-            auto& heightInfoForNode = infoForDescendantHeight[descendantHeight];
+            const auto& transientHeightInfo = transientDescendantHeightPair.second;
+            auto& heightInfoForNode = persistentInfoForDescendantHeight[descendantHeight];
 
             assert (descendantHeight > currentNode->height);
 
             auto numUnprocessedDescendantsWithHeight = -1;
             auto numKnownDescendantsWithHeight = -1;
+            assert(transientHeightInfo.lastUpdatedAtNode != nullptr);
             if (transientHeightInfo.lastUpdatedAtNode == currentNode)
             {
                 assert(heightInfoForNode.lastUpdatedAtNode != currentNode);
@@ -344,11 +347,11 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
     if (currentNode->isSuitable)
     {
-        infoForDescendantHeight[currentNode->height].numWithHeight++;
-        infoForDescendantHeight[currentNode->height].lastUpdatedAtNode = currentNode;
+        persistentInfoForDescendantHeight[currentNode->height].numWithHeight++;
+        persistentInfoForDescendantHeight[currentNode->height].lastUpdatedAtNode = currentNode;
     }
 
-    return infoForDescendantHeight;
+    return persistentInfoForDescendantHeight;
 }
 
 int64_t findNumTriplets(vector<Node>& nodes)
