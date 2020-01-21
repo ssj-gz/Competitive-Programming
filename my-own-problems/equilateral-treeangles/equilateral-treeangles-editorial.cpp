@@ -12,13 +12,13 @@ using namespace std;
 
 const int numTripletPermutations = 1 * 2 * 3; // i.e. == factorial(3).
 
-struct DescendentWithHeightInfo
+struct DescendantWithHeightInfo
 {
-    // The number of suitable pairs of descendents of Node with the given height
+    // The number of suitable pairs of descendants of Node with the given height
     // that have Node as their Lowest Common Ancestor.
     int64_t numPairsWithHeightWithNodeAsLCA = 0;
     // The name "number" is not strictly correct: if numPairsWithHeightWithNodeAsLCA > 0, then this
-    // will indeed be the number of suitable descendents of this Node which have this height
+    // will indeed be the number of suitable descendants of this Node which have this height
     // but if numPairsWithHeightWithNodeAsLCA == 0, "number" will also be 0.
     // 
     // The "number" count is used to avoid the overcount when performing completeTrianglesOfTypeA
@@ -33,7 +33,7 @@ struct Node
     bool isSuitable = false;
     int height = 0;
 
-    map<int, DescendentWithHeightInfo> descendentWithHeightInfo;
+    map<int, DescendantWithHeightInfo> descendantWithHeightInfo;
 };
 
 struct HeightInfo
@@ -121,7 +121,7 @@ int countDescendants(Node* node, Node* parentNode)
 
 int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, Node** centroid)
 {
-    auto numDescendents = 1;
+    auto numDescendants = 1;
 
     auto childHasTooManyDescendants = false;
 
@@ -137,13 +137,13 @@ int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, N
             childHasTooManyDescendants = true;
         }
 
-        numDescendents += numChildDescendants;
+        numDescendants += numChildDescendants;
     }
 
     if (!childHasTooManyDescendants)
     {
         // No child has more than totalNodes/2 descendants, but what about the remainder of the graph?
-        const auto nonChildDescendants = totalNodes - numDescendents;
+        const auto nonChildDescendants = totalNodes - numDescendants;
         if (nonChildDescendants <= totalNodes / 2)
         {
             assert(centroid);
@@ -151,7 +151,7 @@ int findCentroidAux(Node* currentNode, Node* parentNode, const int totalNodes, N
         }
     }
 
-    return numDescendents;
+    return numDescendants;
 }
 
 Node* findCentroid(Node* startNode)
@@ -171,7 +171,7 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
     {
         // This will be called O(log2 n) times for each node before the node's
         // Type A Triangles are fully completed.
-        for (const auto& heightPair : node->descendentWithHeightInfo)
+        for (const auto& heightPair : node->descendantWithHeightInfo)
         {
             const auto descendantHeight = heightPair.first;
             const auto requiredNonDescendantDist = (descendantHeight - node->height);
@@ -232,18 +232,18 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
 void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
 {
     doCentroidDecomposition(rootNode, numTriangles);
-    // Fix the overcount caused by Centroid Decomposition (over-)counting descendents of a node as non-descendents
+    // Fix the overcount caused by Centroid Decomposition (over-)counting descendants of a node as non-descendants
     // of a node!
     for (auto& node : nodes)
     {
-        for (const auto descendantHeightPair : node.descendentWithHeightInfo)
+        for (const auto descendantHeightPair : node.descendantWithHeightInfo)
         {
             const auto height = descendantHeightPair.first;
             const auto numPairsWithHeightWithNodeAsLCA = descendantHeightPair.second.numPairsWithHeightWithNodeAsLCA;
 
             // Centroid decomposition would have (wrongly) added numPairsWithHeightWithNodeAsLCA[height] * numTripletPermutations 
-            // for each suitable descendent of node which had height - correct for this.
-            numTriangles -= numPairsWithHeightWithNodeAsLCA * node.descendentWithHeightInfo[height].number * numTripletPermutations;
+            // for each suitable descendant of node which had height - correct for this.
+            numTriangles -= numPairsWithHeightWithNodeAsLCA * node.descendantWithHeightInfo[height].number * numTripletPermutations;
         }
     }
 }
@@ -303,9 +303,9 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
             const auto earlierChildHasThisHeight = (numKnownDescendantsWithHeight > 0);
             if (earlierChildHasThisHeight)
             {
-                auto& descendantHeightInfo = currentNode->descendentWithHeightInfo[descendantHeight];
+                auto& descendantHeightInfo = currentNode->descendantWithHeightInfo[descendantHeight];
                 auto& numPairsWithHeightWithNodeAsLCA = descendantHeightInfo.numPairsWithHeightWithNodeAsLCA;
-                auto& numberDescendentsWithThisHeight = descendantHeightInfo.number;
+                auto& numberDescendantsWithThisHeight = descendantHeightInfo.number;
 
                 if (numUnprocessedDescendantsWithHeight * numPairsWithHeightWithNodeAsLCA > 0)
                 {
@@ -321,12 +321,12 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
                 // currentNode will be found by completeTrianglesOfTypeA() later on.
                 numPairsWithHeightWithNodeAsLCA += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
 
-                if (numberDescendentsWithThisHeight == 0)
+                if (numberDescendantsWithThisHeight == 0)
                 {
                     // This hasn't been updated yet, so has missed the numKnownDescendantsWithHeight; incorporate it now.
-                    numberDescendentsWithThisHeight += numKnownDescendantsWithHeight;
+                    numberDescendantsWithThisHeight += numKnownDescendantsWithHeight;
                 }
-                numberDescendentsWithThisHeight += numUnprocessedDescendantsWithHeight;
+                numberDescendantsWithThisHeight += numUnprocessedDescendantsWithHeight;
 
             }
 
