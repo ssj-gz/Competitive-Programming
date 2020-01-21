@@ -475,24 +475,25 @@ int main(int argc, char* argv[])
                                                                     .withSeed(94543));
 
             {
-                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic squat-ish graph with three long arms: first 25'000 nodes are grown preferring non-leafs; then 75'000 preferring leaves; then three arms of length 30'000 are attached to random nodes.  Then the remaining nodes are random."));
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo().withDescription("Generic spindly-ish graph, using maxNodes, with three long arms grafted onto it: first ~5000 nodes are grown more-or-less randomly; then ~75'000 preferring leaves; then three arms of length ~24000 are attached to random nodes.  Then the remaining nodes are essentially random.  The exact parameters used for each 'growth' phase were found by a random search that tried to make the 'cheat' solution time-out as hard as it could :)"));
                 const int numNodes = maxNodes;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
 
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(20'000, 3.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(85'000, 98);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(4849, 43.3214);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(77511, 96.5569);
 
                 const auto nodesWithoutArms = treeGenerator.nodes();
                 for (int i = 0; i < 3; i++)
                 {
                     auto armRootNode = nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))];
-                    treeGenerator.addNodeChain(armRootNode, 27'000);
+                    treeGenerator.addNodeChain(armRootNode, 24039);
                 }
 
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
+                // These weird-looking numbers made the cheat solution time-out pretty hard.  No idea why, but not complaining :)
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(11674, 98.2326);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(7678, 15.073);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(26170, 97.8658);
 
                 setRandomSuitable(treeGenerator, 78.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
