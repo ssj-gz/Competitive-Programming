@@ -12,7 +12,6 @@ Help Chef find the number of ways of choosing triples $(p, q, r)$ of sites on wh
 2. $p$, $q$ and $r$ are all _suitable_.
 3. $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$.
 
-___
 ###Input
 
 - First line will contain $T$, number of testcases. Then the testcases follow. 
@@ -20,11 +19,9 @@ ___
 - The next $N-1$ lines describe how sites are connected by roads: each line consists of two space-separated integers $u$ and $v$ indicating that the sites labelled $u$ and $v$ are connected by a road.
 - The last line of the testcase describes the _suitablility_ of sites - the line consists of $N$ space-separated integers $s_1, s_2, \ldots , s_N$: for each valid $i$, if $s_i$ is 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is **not** _suitable_.
 
-___
 ###Output
 For each testcase, print a single line containing one integer - the number of optimally successful triples of sites for Chef's new restaurants.
 
-___
 ###Constraints 
 - $1 \leq T \leq 1000$
 - $1 \leq N \leq 200000$
@@ -32,7 +29,6 @@ ___
 - $s_i \in \{0,1\}$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
-___
 ###Subtasks
 **Subtask #1 (5 points):** 
 
@@ -46,7 +42,6 @@ ___
 
 **Subtask #3 (85 points)**: original constraints
 
-___
 ###Example Input
 
 ```
@@ -80,7 +75,6 @@ ___
 1 0 1 1 1 0 1 0 0
 ```
 
-___
 ###Example Output
 
 ```
@@ -90,7 +84,6 @@ ___
 18
 ```
 
-___
 ###Explanation
 
 Throughout, we only care about the _suitable_ sites: no other site can be part of an optimally successful triple.
