@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const int n = 1 + rand() % 1000;
+            const int n = 1 + rand() % 500;
             cout << n << endl;
         }
 
