@@ -60,18 +60,18 @@ void bfs(Node& rootNode, int64_t& result)
 #ifdef DIAGNOSTICS
         cout << " Iteration.   # visitedViaChild: " << visitedViaChild.size() << endl;
 #endif
-        int64_t numWithPerson = 0;
-        int64_t numPairsWithPersonViaDifferentChild = 0;
+        int64_t numSuitable = 0;
+        int64_t numSuitablePairsViaDifferentChild = 0;
         for (const auto& viaChild : visitedViaChild)
         {
-            const int numWithPersonViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->isSuitable; });
-            const int64_t numNewTriples = numPairsWithPersonViaDifferentChild * numWithPersonViaThisChild * 6;
+            const int numSuitableViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->isSuitable; });
+            const int64_t numNewTriples = numSuitablePairsViaDifferentChild * numSuitableViaThisChild * 6;
 #ifdef DIAGNOSTICS
-            cout << "  numWithPerson: " << numWithPerson << " numPairsWithPersonViaDifferentChild: " << numPairsWithPersonViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
+            cout << "  numSuitable: " << numSuitable << " numSuitablePairsViaDifferentChild: " << numSuitablePairsViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
 #endif
             result += numNewTriples;
-            numPairsWithPersonViaDifferentChild += numWithPerson * numWithPersonViaThisChild;
-            numWithPerson += numWithPersonViaThisChild;
+            numSuitablePairsViaDifferentChild += numSuitable * numSuitableViaThisChild;
+            numSuitable += numSuitableViaThisChild;
         }
         for (auto& viaChild : visitedViaChild)
         {
