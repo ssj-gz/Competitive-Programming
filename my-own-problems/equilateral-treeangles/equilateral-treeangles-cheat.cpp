@@ -14,7 +14,7 @@ struct Node
 {
     vector<Node*> neighbours;
 
-    bool hasPerson = false;
+    bool isSuitable = false;
     bool visitedInBFS = false;
     int id = -1;
 };
@@ -64,7 +64,7 @@ void bfs(Node& rootNode, int64_t& result)
         int64_t numPairsWithPersonViaDifferentChild = 0;
         for (const auto& viaChild : visitedViaChild)
         {
-            const int numWithPersonViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->hasPerson; });
+            const int numWithPersonViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->isSuitable; });
             const int64_t numNewTriples = numPairsWithPersonViaDifferentChild * numWithPersonViaThisChild * 6;
 #ifdef DIAGNOSTICS
             cout << "  numWithPerson: " << numWithPerson << " numPairsWithPersonViaDifferentChild: " << numPairsWithPersonViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
@@ -156,12 +156,12 @@ int main(int argc, char* argv[])
         }
         for (int i = 0; i < numNodes; i++)
         {
-            int hasPerson;
-            cin >> hasPerson;
+            int isSuitable;
+            cin >> isSuitable;
 
-            assert(hasPerson == 0 || hasPerson == 1);
+            assert(isSuitable == 0 || isSuitable == 1);
 
-            nodes[i].hasPerson = (hasPerson == 1);
+            nodes[i].isSuitable = (isSuitable == 1);
         }
 
         const auto numTriplets = findNumTriplets(nodes);
