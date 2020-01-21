@@ -23,7 +23,7 @@ struct DescendentWithHeightInfo
     // 
     // The "number" count is used to avoid the overcount when performing completeTrianglesOfTypeA
     // (Centroid Decomposition has no notion of our parent-child relationship, so
-    // will count "children" of a Node alongside "non-children" of a Node.)
+    // will count "descendants" of a Node alongside "non-descendants" of a Node.)
     int number = 0;
 };
 
