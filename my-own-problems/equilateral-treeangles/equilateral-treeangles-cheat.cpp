@@ -1,4 +1,4 @@
-// Simon St James (ssjgz) - simpler solution than the Editorial solution that I hope to break! - 2020-01-04
+// O(N^2) solution to Equitree - should be able to pass Subtasks #1 and #2.
 #include <iostream>
 #include <vector>
 #include <map>
