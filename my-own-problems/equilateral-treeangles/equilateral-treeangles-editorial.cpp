@@ -33,6 +33,8 @@ struct Node
     bool isSuitable = false;
     int height = 0;
 
+    // The total number of entries into descendantWithHeightInfo, summed across *all* nodes,
+    // will be O(n log n).
     map<int, DescendantWithHeightInfo> descendantWithHeightInfo;
 };
 
@@ -45,20 +47,24 @@ struct HeightInfo
 class DistTracker
 {
     public:
+        // O(maxDist).
         DistTracker(int maxDist)
             : m_numWithDist(2 * maxDist + 1), 
             m_maxDist(maxDist)
-    {
-    }
+        {
+        }
+        // O(1).
         void insertDist(const int newDist)
         {
             numWithDistValue(newDist)++;
             m_largestDist = max(m_largestDist, newDist);
         };
+        // O(1).
         int numWithDist(int dist)
         {
             return numWithDistValue(dist);
         }
+        // O(1).
         void adjustAllDists(int distDiff)
         {
             m_cumulativeDistAdjustment += distDiff;
@@ -66,6 +72,7 @@ class DistTracker
             if (m_largestDist != -1)
                 m_largestDist += distDiff;
         }
+        // O(1).
         int largestDist() const
         {
             return m_largestDist;
