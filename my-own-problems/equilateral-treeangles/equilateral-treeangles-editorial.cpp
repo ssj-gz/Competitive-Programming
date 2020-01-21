@@ -274,11 +274,12 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
         auto transientInfoForDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriangles);
         if (transientInfoForDescendantHeight.size() > persistentInfoForDescendantHeight.size())
         {
-            // We'll be "copying" the tran
-            // Swapping is O(1).
+            // "Copy" the smaller set into the larger set for asymptotically-good performance gains!
+            // NB: std::swap'ing is O(1).
             swap(persistentInfoForDescendantHeight, transientInfoForDescendantHeight);
         }
 
+        // "Copy" the transient info (which will go out of scope, at the end of this block) into the persistentInfoForDescendantHeight.
         for (auto transientDescendantHeightPair : transientInfoForDescendantHeight)
         {
             // This block of code (i.e. the body of the containing for... loop) 
@@ -287,6 +288,9 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
             // child has a descendant of descendantHeight that isSuitable and a previous child of this
             // node also has a descendant of descendantHeight that isSuitable, but may also
             // be executed under different circumstances.
+            //
+            // Since this block of code adds at most one entry into currentNode's descendantWithHeightInfo member,
+            // the sum of node->descendantWithHeightInfo.size() over all nodes is O(n log2 n).
             const auto descendantHeight = transientDescendantHeightPair.first;
 
             const auto& transientHeightInfo = transientDescendantHeightPair.second;
