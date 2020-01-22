@@ -84,8 +84,8 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 ###Example Output
 
 ```
-2
-7
+4
+14
 ```
 
 ###Explanation
@@ -142,4 +142,4 @@ $$
 \sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = = 2 + 4 + 8 = 14
 $$
 
-After taking this modulo $1000000007$, the final answer is $7$.
+After taking this modulo $1000000007$, the final answer is $14$.
