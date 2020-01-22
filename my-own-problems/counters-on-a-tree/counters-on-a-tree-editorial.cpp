@@ -26,12 +26,6 @@ struct Node
     int grundyNumberIfRoot = 0;
 };
 
-int numInsertDists = 0;
-int numAdjustDists = 0;
-int numGrundyNumberCalls = 0;
-int numCallsToPropagateDists = 0;
-int numCallsToCollectDists = 0;
-
 class DistTracker
 {
     public:
@@ -53,7 +47,6 @@ class DistTracker
         void insertDist(const int newDist)
         {
             const int numBits = m_numBits;
-            numInsertDists++;
             doPendingDistAdjustments();
             const auto newDistAdjusted = newDist 
                 // The m_makesDigitOneBegin/End will have been shifted by a total of m_cumulativeDistAdjustment, so counteract that.
@@ -86,7 +79,6 @@ class DistTracker
 
         void adjustAllDists(int distDiff)
         {
-            numAdjustDists++;
             m_pendingDistAdjustment += distDiff;
         }
         void doPendingDistAdjustments()
@@ -149,7 +141,6 @@ class DistTracker
         }
         int grundyNumber()
         {
-            numGrundyNumberCalls++;
             if (m_pendingDistAdjustment != 0)
             {
                 doPendingDistAdjustments();
@@ -254,12 +245,10 @@ void doCentroidDecomposition(Node* startNode)
 
     auto propagateDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
-                            numCallsToPropagateDists++;
                             node->grundyNumberIfRoot ^= distTracker.grundyNumber();
                         };
     auto collectDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
-                            numCallsToCollectDists++;
                             if (node->hasCoin)
                                 distTracker.insertDist(depth);
                         };
@@ -330,22 +319,6 @@ int main(int argc, char* argv[])
         auto rootNode = &(nodes.front());
         doCentroidDecomposition(rootNode);
 
-#if 0
-        vector<int> nodesThatGiveBobWinWhenRoot;
-        int nodeNumber = 1;
-        for (auto& node : nodes)
-        {
-            if (node.grundyNumberIfRoot == 0)
-                nodesThatGiveBobWinWhenRoot.push_back(nodeNumber);
-
-            nodeNumber++;
-        }
-        cout << nodesThatGiveBobWinWhenRoot.size() << endl;
-        for (const auto bobWinNodeNum : nodesThatGiveBobWinWhenRoot)
-        {
-            cout << bobWinNodeNum << endl;
-        }
-#endif
         int64_t MOD = 1'000'000'007;
         int64_t result = 0;
         int64_t powerOf2 = 2; // 2 to the power of 1.
@@ -359,11 +332,4 @@ int main(int argc, char* argv[])
         }
         cout << result << endl;
     }
-#if 0
-    cout << "numInsertDists: " << numInsertDists << endl;
-    cout << "numAdjustDists: " << numAdjustDists << endl;
-    cout << "numGrundyNumberCalls: " << numGrundyNumberCalls << endl;
-    cout << "numCallsToPropagateDists: " << numCallsToPropagateDists << endl;
-    cout << "numCallsToCollectDists: " << numCallsToCollectDists << endl;
-#endif
 }
