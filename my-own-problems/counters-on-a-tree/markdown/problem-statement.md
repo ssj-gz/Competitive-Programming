@@ -98,7 +98,7 @@ Although the graph is undirected, we've added _arrows_ along edges for clarity, 
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
 
-If we set the root $R$ to be the vertex $1$, then we play on the following tree:
+If we set $R$ to be the vertex $1$, then we play on the following tree:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
 
