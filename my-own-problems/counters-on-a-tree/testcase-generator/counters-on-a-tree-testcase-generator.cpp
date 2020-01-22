@@ -116,16 +116,17 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     treeGenerator.scrambleEdgeOrder();
     destTestcase.writeLine(treeGenerator.numNodes());
 
+    for (const auto& edge : treeGenerator.edges())
+    {
+        destTestcase.writeLine(edge->nodeA->id(), edge->nodeB->id());
+    }
+
     std::vector<int> numCountersForNode;
     for (const auto& node : treeGenerator.nodes())
     {
         numCountersForNode.push_back(node->data.numCounters);
     }
     destTestcase.writeObjectsAsLine(numCountersForNode.begin(), numCountersForNode.end());
-    for (const auto& edge : treeGenerator.edges())
-    {
-        destTestcase.writeLine(edge->nodeA->id(), edge->nodeB->id());
-    }
 }
 
 /**
@@ -651,6 +652,16 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             nodes[i].nodeId = (i + 1);
         }
         
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            const auto& [edgeNodeAId, edgeNodeBId] = testFileReader.readLine<int, int>();
+            testFileReader.addErrorUnless(0 <= edgeNodeAId && edgeNodeAId <= numNodes, "Invalid node id " + std::to_string(edgeNodeAId));
+            testFileReader.addErrorUnless(0 <= edgeNodeBId && edgeNodeBId <= numNodes, "Invalid node id " + std::to_string(edgeNodeBId));
+            
+            nodes[edgeNodeAId - 1].neighbours.push_back(&(nodes[edgeNodeBId - 1]));
+            nodes[edgeNodeBId - 1].neighbours.push_back(&(nodes[edgeNodeAId - 1]));
+        }
+
         const auto numCountersForNode = testFileReader.readLineOfValues<int>(numNodes);
         int numCountersAcrossAllNodes = 0;
         for (const auto numCounters : numCountersForNode)
@@ -661,15 +672,6 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
 
         testFileReader.addErrorUnless(numCountersAcrossAllNodes <= containingSubtask.maxNumCountersOverAllNodes, "Too many counters across all nodes");
 
-        for (int i = 0; i < numNodes - 1; i++)
-        {
-            const auto& [edgeNodeAId, edgeNodeBId] = testFileReader.readLine<int, int>();
-            testFileReader.addErrorUnless(0 <= edgeNodeAId && edgeNodeAId <= numNodes, "Invalid node id " + std::to_string(edgeNodeAId));
-            testFileReader.addErrorUnless(0 <= edgeNodeBId && edgeNodeBId <= numNodes, "Invalid node id " + std::to_string(edgeNodeBId));
-            
-            nodes[edgeNodeAId - 1].neighbours.push_back(&(nodes[edgeNodeBId - 1]));
-            nodes[edgeNodeBId - 1].neighbours.push_back(&(nodes[edgeNodeAId - 1]));
-        }
 
         int nodeId = 1;
         for (const auto& node : nodes)
