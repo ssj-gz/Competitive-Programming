@@ -12,8 +12,6 @@ struct Node
     int index = -1;
     int numCounters = -1;
     vector<Node*> neighbours;
-
-    bool bobWinsIfR = false;
 };
 
 void buildParentLookup(Node* currentNode, Node* parentNode, vector<Node*>& parentLookup)
