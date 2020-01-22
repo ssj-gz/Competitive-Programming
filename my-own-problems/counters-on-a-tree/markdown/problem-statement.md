@@ -94,6 +94,9 @@ Although the graph is undirected, we've added _arrows_ along edges for clarity, 
 
 **Example case 1:** TODO
 
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-1of2.png)
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-2of2.png)
+
 **Example case 2:** The original $T$ looks like this:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
@@ -143,3 +146,5 @@ $$
 $$
 
 After taking this modulo $1000000007$, the final answer is $14$.
+
+
