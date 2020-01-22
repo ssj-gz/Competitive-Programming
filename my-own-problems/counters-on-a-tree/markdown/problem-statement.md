@@ -92,12 +92,45 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 Although the graph is undirected, we've added _arrows_ along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
 
-**Example case 1:** TODO
+**Example case 1:** The original $T$ looks like this:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-1of2.png)
+
+Let's examine each game for $R=1,2,3$.
+
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-2of2.png)
 
-**Example case 2:** The original $T$ looks like this:
+For $R = 1$:
+
+Alice turns out to be the winner, here; she has two possible moves:
+
+1. Take the Counter in node $3$ and move it to node $2$; or
+1. Take the Counter in node $3$ and move it to node $1$.
+
+If she does the latter, then at the end of her move, all Counters will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing optimally, she does precisely that :)
+
+For $R = 2$:
+
+Bob gets his revenge this time! Alice has two possible moves:
+
+1. Take the Counter in node $1$ and move it to node $2$; or
+1. Take the Counter in node $3$ and move it to node $2$.
+
+In either case, at the end of her move there will be exactly one Counter remaining in a node other than $R = 2$.  Bob merely has to move this Counter to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
+
+For $R = 3$:
+
+Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move is to take the Counter in node $1$ and move it to node $3$).
+
+We've figured out $\textit{winner}(\textit{game}(T, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{Bob_win}=\{2\}$ and our desired sum is:
+
+$$
+\sum\limits_{R \in \textit{Bob_win}}2^R = 2^2 = 4
+$$
+
+Taking this modulo $10^9+7$, the answer for this testcase is $4$.
+
+**Example case 2:** The original $T$ looks like:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
 
