@@ -48,3 +48,18 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 - $1 \leq u,v \leq N$
 - $0 \leq c_i \leq 16$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
+
+###Subtasks
+**Subtask #1 (5 points):** 
+
+- $1 \leq T \leq 10$
+- $1 \leq N \leq 10$
+- $0 \leq c_i \leq 6$ for all valid $i$
+- the sum of $c_i$ over all nodes $i$ in a testcase does not exceed $10$
+
+**Subtask #2 (10 points)**: 
+
+* $1 \leq T \leq 100$ 
+* $1 \leq N \leq 1000$
+
+**Subtask #3 (85 points)**: original constraints
