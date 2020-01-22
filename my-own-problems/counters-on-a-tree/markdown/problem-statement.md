@@ -25,6 +25,8 @@ Bob knows some elementary Game Theory, so is able to very quickly predict who wi
 
 Can you help Bob figure out the answer? More formally, if Bob_win is the set of R such that winner(game(T, R)) == Bob, then you must calculate the value of
 
-sum [i in Bob_win] { 2^i }
+$$
+\sum\limits_{R \in \textit{Bob_win}}2^R
+$$
 
-Since the result can be very large, please output it mod 1'000'000'007.
+Since the result can be very large, please output it mod $1000000007$.
