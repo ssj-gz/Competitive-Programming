@@ -136,4 +136,10 @@ Finally, $R = 6$:
 
 Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T, 6))$ is Alice.
 
-So there are $\textit{Bob_w} = 3$ values of $R$ for which Bob wins: $R = 1, R = 2$ and $R = 3$.  So on the first line we output the value of $\textit{Bob_w}$ (that is, $3$), and on the following three lines, we output $1$, $2$ and $3$.
+We now know $\textit{winner}(\textit{game}(T, R))$ all possible values of $R$, and we see that $\textit{Bob_win}={1, 2, 3}$, so the value of our desired sum is:
+
+$$
+\sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = 7
+$$
+
+After taking this modulo $1000000007$, the final answer is $7$.
