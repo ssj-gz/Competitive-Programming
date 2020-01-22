@@ -348,7 +348,7 @@ int main(int argc, char* argv[])
 #endif
         int64_t MOD = 1'000'000'007;
         int64_t result = 0;
-        int64_t powerOf2 = 1;
+        int64_t powerOf2 = 2; // 2 to the power of 1.
         for (auto& node : nodes)
         {
             if (node.grundyNumberIfRoot == 0)

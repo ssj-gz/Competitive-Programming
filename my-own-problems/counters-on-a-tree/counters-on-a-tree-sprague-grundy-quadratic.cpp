@@ -61,7 +61,7 @@ int main()
 
         int64_t MOD = 1'000'000'007;
         int64_t result = 0;
-        int64_t powerOf2 = 1;
+        int64_t powerOf2 = 2;
         for (auto& rootNode : nodes)
         {
             const bool bobWins = (grundyContributionFromSubtree(&rootNode, nullptr, 0) == 0);
