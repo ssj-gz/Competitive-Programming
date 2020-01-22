@@ -87,3 +87,11 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 2
 7
 ```
+
+###Explanation
+
+Although the graph is undirected, we've added _arrows_ along edges for clarity, indicating the direction that Counters must be moved in for each $R$.  $R$ itself is highlighted in red.
+
+**Example case 1:** TODO
+
+**Example case 2:** TODO
