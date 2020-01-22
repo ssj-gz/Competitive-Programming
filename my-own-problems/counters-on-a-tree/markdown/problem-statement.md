@@ -139,7 +139,7 @@ Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T, 6))$ is A
 We now know $\textit{winner}(\textit{game}(T, R))$ all possible values of $R$, and we see that $\textit{Bob_win}={1, 2, 3}$, so the value of our desired sum is:
 
 $$
-\sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = 7
+\sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = = 2 + 4 + 8 = 14
 $$
 
 After taking this modulo $1000000007$, the final answer is $7$.
