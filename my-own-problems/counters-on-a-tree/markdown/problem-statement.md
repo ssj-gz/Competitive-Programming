@@ -139,7 +139,7 @@ Finally, $R = 6$:
 
 Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T, 6))$ is Alice.
 
-We now know $\textit{winner}(\textit{game}(T, R))$ for all possible values of $R$, and we see that $\textit{Bob_win}={1, 2, 3}$, so the value of our desired sum is:
+We now know $\textit{winner}(\textit{game}(T, R))$ for all possible values of $R$, and we see that $\textit{Bob_win}=\{1, 2, 3\}$, so the value of our desired sum is:
 
 $$
 \sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
