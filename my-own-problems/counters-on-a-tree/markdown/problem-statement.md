@@ -94,4 +94,46 @@ Although the graph is undirected, we've added _arrows_ along edges for clarity, 
 
 **Example case 1:** TODO
 
-**Example case 2:** TODO
+**Example case 2:** The original $T$ looks like this:
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
+
+If we set the root $R$ to be the vertex $1$, then we play on the following tree:
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
+
+For $R = 1$, it can be shown that if both players play optimally, the winner will be Bob - so $\textit{winner}(T, 1)$ is Bob.
+
+For $R = 2$, we have the following:
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-3of7.png)
+
+and again, it can be shown that $\textit{winner}(T,2)$ is Bob.
+
+
+For $R = 3$:
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-4of7.png)
+
+Once again, $\textit{winner}(T,3)$ can be shown to be Bob.
+
+$R = 4$:
+
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-5of7.png)
+
+This time, Alice will win if both players play optimally i.e. $\textit{winner}(T,4)$ is Alice.
+
+$R = 5$
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-6of7.png)
+
+Alice wins for $R = 5$, too; $\textit{winner}(T,5)$ is Alice.
+
+Finally, $R = 6$:
+
+![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-7of7.png)
+
+Once more, Alice wins in this case - $\textit{winner}(T,6)$ is Alice.
+
+So there are $\textit{Bob_w} = 3$ values of $R$ for which Bob wins: $R = 1, R = 2$ and $R = 3$.  So on the first line we output the value of $\textit{Bob_w}$ (that is, $3$), and on the following three lines, we output $1$, $2$ and $3$.
