@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
-                                                                    .withDescription("Misc tiny testcases - randomly generated to require (naive) state-space searches of 20'000 - 40'000 states, which should be solvable with a brute-force implementation"));
+                                                                    .withDescription("Misc tiny testcases - randomly generated to require (naive) state-space searches of ~20'000 - ~40'000 states, which should be solvable with a brute-force implementation"));
             // Random tiny testcases. The seeds have been chosen by trial and error to require
             // a decent number of game states to be explored and to have an "interesting" number of wins for 
             // Bob (i.e. - not all "0 wins for Bob!")
