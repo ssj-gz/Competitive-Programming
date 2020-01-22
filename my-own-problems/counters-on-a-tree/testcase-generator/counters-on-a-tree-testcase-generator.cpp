@@ -66,10 +66,10 @@ const int NoExplicitLimit = std::numeric_limits<int>::max();
 
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
-                                            .withMaxNodesPerTestcase(15)
+                                            .withMaxNodesPerTestcase(10)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumCountersPerNode(6)
-                                            .withMaxNumCountersOverAllNodes(6)
+                                            .withMaxNumCountersOverAllNodes(10)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
@@ -203,6 +203,33 @@ int main(int argc, char* argv[])
 
                 writeTestCase(treeGenerator, testcase);
             }
+            {
+                auto& testcase = sampleTestFile.newTestcase(CoTTestCaseInfo().withDescription("Sample testcase 2"));
+
+                TreeGenerator<NodeData> treeGenerator;
+
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+                auto four = treeGenerator.createNode();
+                auto five = treeGenerator.createNode();
+                auto six = treeGenerator.createNode();
+
+                treeGenerator.addEdge(one, two);
+                treeGenerator.addEdge(one, three);
+                treeGenerator.addEdge(four, three);
+                treeGenerator.addEdge(three, five);
+                treeGenerator.addEdge(four, six);
+
+                one->data.numCounters = 0;
+                two->data.numCounters = 2;
+                three->data.numCounters = 2;
+                four->data.numCounters = 1;
+                five->data.numCounters = 3;
+                six->data.numCounters = 2;
+
+                writeTestCase(treeGenerator, testcase);
+            }
         }
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
@@ -234,11 +261,11 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
-                    .withDescription("Misc tiny testcases - randomly generated to require state-space searches of 20'000 - 25'000 states.  This appears to be close to the 'worst' case for the given constraints."));
+                                                                    .withDescription("Misc tiny testcases - randomly generated to require (naive) state-space searches of 20'000 - 40'000 states, which should be solvable with a brute-force implementation"));
             // Random tiny testcases. The seeds have been chosen by trial and error to require
             // a decent number of game states to be explored and to have an "interesting" number of wins for 
             // Bob (i.e. - not all "0 wins for Bob!")
-            const std::vector<int64_t> interestingSeeds = { 1117689295,1995870019,1351345120,1637048025,2589603398,1565844328,2842239588,4118263269,1622708364,2918014348 };
+            const std::vector<int64_t> interestingSeeds = {3278532515,3230993539,2064839250,2755995828,1625171967,3635781804,1918932262,222378395,3537075288,2999645071};
             for (const int64_t seed : interestingSeeds)
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withSeed(seed));
