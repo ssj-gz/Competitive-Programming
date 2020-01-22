@@ -110,10 +110,8 @@ struct NodeData
 using CoTTestCaseInfo = TestcaseInfo<SubtaskInfo>;
 using CoTTestFileInfo = TestFileInfo<SubtaskInfo>;
 
-void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
+void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
 {
-    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
-    treeGenerator.scrambleEdgeOrder();
     destTestcase.writeLine(treeGenerator.numNodes());
 
     for (const auto& edge : treeGenerator.edges())
@@ -127,6 +125,14 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
         numCountersForNode.push_back(node->data.numCounters);
     }
     destTestcase.writeObjectsAsLine(numCountersForNode.begin(), numCountersForNode.end());
+}
+
+void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
+{
+    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+    treeGenerator.scrambleEdgeOrder();
+
+    writeTestCase(treeGenerator, destTestcase);
 }
 
 /**
@@ -175,6 +181,29 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
+        {
+            auto& sampleTestFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
+                                                                          .withDescription("Sample testcases")
+                                                                          .withSeed(0));
+            {
+                auto& testcase = sampleTestFile.newTestcase(CoTTestCaseInfo().withDescription("Sample testcase 1"));
+
+                TreeGenerator<NodeData> treeGenerator;
+
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+
+                treeGenerator.addEdge(one, two);
+                treeGenerator.addEdge(two, three);
+
+                one->data.numCounters = 1;
+                two->data.numCounters = 0;
+                three->data.numCounters = 1;
+
+                writeTestCase(treeGenerator, testcase);
+            }
+        }
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask1)
                     .withSeed(98749873)
