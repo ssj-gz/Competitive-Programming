@@ -1,9 +1,9 @@
-Alice and Bob are playing a game with coins on a tree $T$ over $N$ vertices numbered $1...N$. The vertex numbered $i$ initially has $c_i$ coins on it.  The game is played as follows:
+Bob and Alice are playing a game with Counters on a Tree T, which has N nodes numbered from 1 to N (1 <= N <= 100'000).  For a node R (1 <= R <= N), define game(T, R) as the game with the following rules:
 
-- At the beginning of the game, one vertex is designated the *root* of $T$ - call this vertex $R$.
-- The players then take turns to make a *valid move*, with Alice taking the first turn.
-- If the current player cannot make a valid move, then the game ends and the other player is deemed the winner.
-- A *valid move* for a player is to pick a vertex $v \ne R$ which has at least one coin in it, and move a single coin in $v$ to a vertex some non-zero number of steps along the path from $v$ to $R$. 
+1) A copy of T is taken, and for each node v of T, we ensure that there are precisely c(v) Counters on v.
+2) Bob and Alice now take turns to make a move, with Alice making the first move.
+3) A move consists of taking a counter (c, say) from some node other than R and moving it to an *allowed* node.  Let v_c be the node that c is currently on; then the set of allowed nodes for this c is the set of v != v_c on the shortest path between nodes v_c and R.
+4) If a player cannot make a move on their turn (i.e. because all the Counters are on node R), then the game ends and the other player is declared the winner.
 
 For example, if the tree $T$ currently looks like this and, for this game, we have chosen $R=1$:
 
@@ -19,6 +19,12 @@ Let's assume he picks $X=2$, so he moves the coin to vertex $2$.  Then the tree 
 
 and it is the other player's turn to move.
 
-If the game is played on a tree $T$, and $R$ is the designated root of $T$ for that game, then let $\textit{winner}(T, R)$ be whichever of Alice or Bob will win if both players play the game optimally on $T$.
+Let winner(game(T, R)) be whichever of Bob or Alice wins the game(T, R), assuming both play perfectly.
 
-Given a tree $T$, find the $R$'s such that $\textit{winner}(T, R)$ is Bob.
+Bob knows some elementary Game Theory, so is able to very quickly predict who will win game(T, R) for a given R.  Unimpressed, Alice gives him a harder task: she challenges him to find winner(game(T, R)) for *all of* R = 1, 2, ... , n.
+
+Can you help Bob figure out the answer? More formally, if Bob_win is the set of R such that winner(game(T, R)) == Bob, then you must calculate the value of
+
+sum [i in Bob_win] { 2^i }
+
+Since the result can be very large, please output it mod 1'000'000'007.
