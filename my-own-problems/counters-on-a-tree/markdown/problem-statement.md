@@ -1,4 +1,4 @@
-Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node $v$ has $c(v)$ Counters on it. For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
+Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node $v$ has $c(v)$ Counters on it. For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
 
 1. A copy of $T$ is taken, and for each node $v$ of $T$, we ensure that there are precisely $c(v)$ Counters on $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
@@ -127,7 +127,7 @@ $R = 4$:
 
 This time, Alice will win if both players play optimally i.e. $\textit{winner}(\textit{game}(T, 4))$ is Alice.
 
-$R = 5$
+$R = 5$:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-6of7.png)
 
@@ -139,10 +139,10 @@ Finally, $R = 6$:
 
 Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T, 6))$ is Alice.
 
-We now know $\textit{winner}(\textit{game}(T, R))$ all possible values of $R$, and we see that $\textit{Bob_win}={1, 2, 3}$, so the value of our desired sum is:
+We now know $\textit{winner}(\textit{game}(T, R))$ for all possible values of $R$, and we see that $\textit{Bob_win}={1, 2, 3}$, so the value of our desired sum is:
 
 $$
-\sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = = 2 + 4 + 8 = 14
+\sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
 $$
 
 After taking this modulo $1000000007$, the final answer is $14$.
