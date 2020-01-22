@@ -310,13 +310,6 @@ int main(int argc, char* argv[])
         const auto numNodes = readInt();
         vector<Node> nodes(numNodes);
 
-        for (auto& node : nodes)
-        {
-            const auto numCoins = readInt();
-
-            node.hasCoin = ((numCoins % 2) == 1);
-        }
-
         for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
         {
             const auto node1Index = readInt() - 1;
@@ -325,6 +318,14 @@ int main(int argc, char* argv[])
             nodes[node1Index].neighbours.push_back(&(nodes[node2Index]));
             nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
         }
+
+        for (auto& node : nodes)
+        {
+            const auto numCoins = readInt();
+
+            node.hasCoin = ((numCoins % 2) == 1);
+        }
+
 
         auto rootNode = &(nodes.front());
         doCentroidDecomposition(rootNode);

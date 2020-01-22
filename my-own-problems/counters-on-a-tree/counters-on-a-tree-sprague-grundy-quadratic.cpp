@@ -41,15 +41,6 @@ int main()
         const auto numNodes = readInt();
         vector<Node> nodes(numNodes);
 
-        int nodeIndex = 0;
-        for (auto& node : nodes)
-        {
-            node.index = nodeIndex;
-            node.numCoins = readInt();
-
-            nodeIndex++;
-        }
-
         for (auto edgeNum = 0; edgeNum < numNodes - 1; edgeNum++)
         {
             const auto node1Index = readInt() - 1;
@@ -57,6 +48,15 @@ int main()
 
             nodes[node1Index].neighbours.push_back(&(nodes[node2Index]));
             nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
+        }
+
+        int nodeIndex = 0;
+        for (auto& node : nodes)
+        {
+            node.index = nodeIndex;
+            node.numCoins = readInt();
+
+            nodeIndex++;
         }
 
         int64_t MOD = 1'000'000'007;
