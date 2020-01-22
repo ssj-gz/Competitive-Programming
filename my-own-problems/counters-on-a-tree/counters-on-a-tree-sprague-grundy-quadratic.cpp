@@ -1,3 +1,4 @@
+// O(N^2) solution; expected to pass Subtasks #1 and #2
 #include <iostream>
 #include <vector>
 #include <map>
@@ -7,8 +8,7 @@ using namespace std;
 
 struct Node
 {
-    int index = -1;
-    int numCoins = -1;
+    int numCounters = -1;
     vector<Node*> neighbours;
 
     int grundyNumberIfRoot = 0;
@@ -17,7 +17,7 @@ struct Node
 int grundyContributionFromSubtree(Node* currentNode, Node* parentNode, int depth)
 {
     int grundyContribution = 0;
-    if (currentNode->numCoins % 2 == 1)
+    if (currentNode->numCounters % 2 == 1)
         grundyContribution ^= depth;
 
     for (const auto child : currentNode->neighbours)
@@ -50,13 +50,9 @@ int main()
             nodes[node2Index].neighbours.push_back(&(nodes[node1Index]));
         }
 
-        int nodeIndex = 0;
         for (auto& node : nodes)
         {
-            node.index = nodeIndex;
-            node.numCoins = readInt();
-
-            nodeIndex++;
+            node.numCounters = readInt();
         }
 
         int64_t MOD = 1'000'000'007;
