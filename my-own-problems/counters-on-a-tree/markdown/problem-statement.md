@@ -23,7 +23,7 @@ Let $\textit{winner}(\textit{game}(T, R))$ be whichever of Bob or Alice wins the
 
 Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T, R)$ for a given R.  Unimpressed, Alice gives him a harder task: she challenges him to find $\textit{winner}(\textit{game}(T, R))$ for *all of* $R = 1, 2, \ldots , n$.
 
-Can you help Bob figure out the answer? More formally, if $\textit{Bob_win}$ is the set of R such that $\textit{winner}(\textit{game}(T, R)) =$ Bob, then you must calculate the value of
+Can you help Bob figure out the answer? More formally, if $\textit{Bob_win}$ is the set of $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob, then you must calculate the value of
 
 $$
 \sum\limits_{R \in \textit{Bob_win}}2^R
