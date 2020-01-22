@@ -1,3 +1,5 @@
+// Very, very brute force implementation - worse than O(2^N) :)
+// Expected to pass Subtask #1 only.
 #include <iostream>
 #include <vector>
 #include <map>
@@ -8,7 +10,7 @@ using namespace std;
 struct Node
 {
     int index = -1;
-    int numCoins = -1;
+    int numCounters = -1;
     vector<Node*> neighbours;
 
     bool bobWinsIfR = false;
@@ -59,16 +61,10 @@ bool currentPlayerWins(const vector<int>& state, Node* rootNode, map<vector<int>
 
 bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
 {
-    //cout << "firstPlayerWins? rootNode " << rootNode->index << endl;
     const int numNodes = nodes.size();
     vector<Node*> parentLookup(numNodes, nullptr);
 
     buildParentLookup(rootNode, nullptr, parentLookup);
-
-    for (const auto& node : nodes)
-    {
-        //cout << "Node id: " << (node.index + 1) << " has parent: " << (parentLookup[node.index] ? (parentLookup[node.index]->index + 1) : -1) << endl;
-    }
 
     vector<vector<Node*>> allowedMovesForNodeLookup(numNodes);
     for (const auto& node : nodes)
@@ -86,7 +82,7 @@ bool firstPlayerWins(const vector<Node>& nodes, Node* rootNode)
     vector<int> initialState;
     for (const auto& node : nodes)
     {
-        initialState.push_back(node.numCoins);
+        initialState.push_back(node.numCounters);
     }
 
     map<vector<int>, Result> resultLookup;
@@ -117,7 +113,7 @@ int main()
         for (auto& node : nodes)
         {
             node.index = nodeIndex;
-            node.numCoins = readInt();
+            node.numCounters = readInt();
 
             nodeIndex++;
         }
@@ -128,7 +124,6 @@ int main()
         for (auto& rootNode : nodes)
         {
             const bool bobWins = !firstPlayerWins(nodes, &rootNode);
-            //cout << "root node: " << (rootNode.index + 1) << " bob wins: " << bobWins << endl;
             if (bobWins)
             {
                 result = (result + powerOf2) % MOD;
