@@ -63,3 +63,27 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 * $1 \leq N \leq 1000$
 
 **Subtask #3 (85 points)**: original constraints
+
+###Example Input
+
+```
+2
+3 
+1 2
+2 3
+1 0 1
+6
+1 2
+1 3
+4 3
+3 5
+4 6
+0 2 2 1 3 2
+```
+
+###Example Output
+
+```
+2
+7
+```
