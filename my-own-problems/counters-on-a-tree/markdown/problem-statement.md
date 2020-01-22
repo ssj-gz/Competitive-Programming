@@ -29,7 +29,7 @@ $$
 \sum\limits_{R \in \textit{Bob_win}}2^R
 $$
 
-Since the result can be very large, please output it mod $1000000007$.
+Since the result can be very large, please output it modulo $1000000007$.
 
 ###Input
 
