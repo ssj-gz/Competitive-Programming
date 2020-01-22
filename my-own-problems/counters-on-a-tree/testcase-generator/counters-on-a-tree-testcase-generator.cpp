@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask2)
                                                                               .withSeed(9734)
-                                                                              .withDescription("Misc testcases with ~1000 nodes"));
+                                                                              .withDescription("100 random testcases with ~1000 nodes"));
             for (int t = 0; t < subtask2.maxNumTestcases; t++)
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo());
@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask2)
                                                                               .withSeed(937439724)
-                                                                              .withDescription("Another set of misc testcases with ~1000 nodes"));
+                                                                              .withDescription("Another set of 100 random testcases with ~1000 nodes"));
             for (int t = 0; t < subtask2.maxNumTestcases; t++)
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo());
