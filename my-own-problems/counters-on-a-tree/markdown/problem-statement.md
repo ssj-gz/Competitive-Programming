@@ -41,3 +41,10 @@ Since the result can be very large, please output it mod $1000000007$.
 ###Output
 
 For each testcase, print a single line containing one integer - the sum, modulo $1000000007$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob.
+
+###Constraints 
+- $1 \leq T \leq 1000$
+- $1 \leq N \leq 100000$
+- $1 \leq u,v \leq N$
+- $0 \leq c_i \leq 16$ for all valid $i$
+- the sum of $N$ over all $T$ testcases does not exceed $200000$
