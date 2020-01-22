@@ -120,7 +120,7 @@ In either case, at the end of her move there will be exactly one Counter remaini
 
 For $R = 3$:
 
-Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move is to take the Counter in node $1$ and move it to node $3$).
+Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to take the Counter in node $1$ and move it to node $3$).
 
 We've figured out $\textit{winner}(\textit{game}(T, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{Bob_win}=\{2\}$ and our desired sum is:
 
