@@ -29,7 +29,7 @@ $$
 \sum\limits_{R \in \textit{Bob_win}}2^R
 $$
 
-Since the result can be very large, please output it modulo $1000000007$.
+Since the result can be very large, please output it modulo $10^9+7$.
 
 ###Input
 
@@ -40,7 +40,7 @@ Since the result can be very large, please output it modulo $1000000007$.
 
 ###Output
 
-For each testcase, print a single line containing one integer - the sum, modulo $1000000007$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob.
+For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob.
 
 ###Constraints 
 - $1 \leq T \leq 1000$
@@ -145,6 +145,6 @@ $$
 \sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
 $$
 
-After taking this modulo $1000000007$, the final answer is $14$.
+After taking this modulo $10^9+7$, the final answer is $14$.
 
 
