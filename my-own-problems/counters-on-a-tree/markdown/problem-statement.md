@@ -1,4 +1,4 @@
-Bob and Alice are playing a game with Counters on a Tree $T$, which has $N$ nodes each labelled with a distinct number from $1$ to $N$.  For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
+Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes each labelled with a distinct number from $1$ to $N$.  At the beginning of a game, the node $v$ has $c(v)$ Counters on it.  For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
 
 1. A copy of $T$ is taken, and for each node $v$ of $T$, we ensure that there are precisely $c(v)$ Counters on $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
