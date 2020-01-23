@@ -9,11 +9,11 @@ For example, if the tree $T$ currently looks like this and, for this game, we ha
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example1of3.png)
 
-Then the current player can pick a Counter in any of vertices $v = 2, 4$ or $5$ (if there were any Counters in node $3$, they'd be able to pick one of those, too). Let's assume they pick the Counter in $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up in vertex $4$, $2$ or $1$, respectively:
+Then the current player can pick a Counter in any of nodes $v = 2, 4$ or $5$ (if there were any Counters in node $3$, they'd be able to pick one of those, too). Let's assume they pick the Counter in $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up in node $4$, $2$ or $1$, respectively:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example2of3.png)
 
-Let's assume they pick $X=2$, so they move the Counter to vertex $2$. Then the tree now looks like:
+Let's assume they pick $X=2$, so they move the Counter to node $2$. Then the tree now looks like:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example3of3.png)
 
@@ -134,7 +134,7 @@ Taking this modulo $10^9+7$, the answer for this testcase is $4$.
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
 
-If we set $R$ to be the vertex $1$, then we play on the following tree:
+If we set $R$ to be the node $1$, then we play on the following tree:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
 
