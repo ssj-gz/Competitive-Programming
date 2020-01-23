@@ -90,7 +90,7 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 ###Explanation
 
-Although the tree $T$ is undirected, we've added _arrows_ along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
+Although the tree $T$ is undirected, _arrows_ have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
 
 **Example case 1:** The original $T$ looks like this:
 
