@@ -102,7 +102,7 @@ Let's examine each $\textit{game}(T,R)$ for $R=1,2,3$.
 
 For $R = 1$:
 
-Alice turns out to be the winner, here; she has two possible moves:
+Alice turns out to be the winner, here; on the first turn, she has two possible moves:
 
 1. Take the Counter in node $3$ and move it to node $2$; or
 1. Take the Counter in node $3$ and move it to node $1$.
@@ -111,7 +111,7 @@ If she does the latter, then at the end of her move, all Counters will be in nod
 
 For $R = 2$:
 
-Bob gets his revenge this time! Alice has two possible moves:
+Bob gets his revenge this time! Alice has two possible initial moves:
 
 1. Take the Counter in node $1$ and move it to node $2$; or
 1. Take the Counter in node $3$ and move it to node $2$.
