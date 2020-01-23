@@ -1,6 +1,6 @@
-Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node $v$ has $c(v)$ Counters on it. For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
+Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
 
-1. A copy of $T$ is taken, and for each node $v$ of $T$, we ensure that there are precisely $c(v)$ Counters on $v$.
+1. A copy of $T$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node labelled $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
 3. A move consists of taking a counter ($C$, say) from some node other than $R$ and moving it to an *allowed* node. Let $v_C$ be the node that $C$ is currently on; then the set of allowed nodes for this $C$ is the set of $v \ne v_C$ on the shortest path between nodes $v_C$ and $R$
 4. If a player cannot make a move on their turn (i.e. because all the Counters are on node $R$), then the game ends and the other player is declared the winner.
