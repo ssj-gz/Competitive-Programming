@@ -23,10 +23,10 @@ Let $\textit{winner}(\textit{game}(T, R))$ be whichever of Bob or Alice wins the
 
 Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find $\textit{winner}(\textit{game}(T, R))$ for *all of* $R = 1, 2, \ldots , n$.
 
-Can you help Bob figure out the answer? More formally, if $\textit{Bob_win}$ is the set of $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob, then you must calculate the value of
+Can you help Bob figure out the answer? More formally, if $\textit{Bob_Win_R}$ is the set of $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob, then you must calculate the value of
 
 $$
-\sum\limits_{R \in \textit{Bob_win}}2^R
+\sum\limits_{R \in \textit{Bob_Win_R}}2^R
 $$
 
 Since the result can be very large, please output it modulo $10^9+7$.
@@ -122,10 +122,10 @@ For $R = 3$:
 
 Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to take the Counter in node $1$ and move it to node $3$).
 
-We've figured out $\textit{winner}(\textit{game}(T, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{Bob_win}=\{2\}$ and our desired sum is:
+We've figured out $\textit{winner}(\textit{game}(T, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{Bob_Win_R}=\{2\}$ and our desired sum is:
 
 $$
-\sum\limits_{R \in \textit{Bob_win}}2^R = 2^2 = 4
+\sum\limits_{R \in \textit{Bob_Win_R}}2^R = 2^2 = 4
 $$
 
 Taking this modulo $10^9+7$, the answer for this testcase is $4$.
@@ -172,10 +172,10 @@ Finally, $R = 6$:
 
 Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T, 6))$ is Alice.
 
-We now know $\textit{winner}(\textit{game}(T, R))$ for all possible values of $R$, and we see that $\textit{Bob_win}=\{1, 2, 3\}$, so the value of our desired sum is:
+We now know $\textit{winner}(\textit{game}(T, R))$ for all possible values of $R$, and we see that $\textit{Bob_Win_R}=\{1, 2, 3\}$, so the value of our desired sum is:
 
 $$
-\sum\limits_{R \in \textit{Bob_win}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
+\sum\limits_{R \in \textit{Bob_Win_R}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
 $$
 
 After taking this modulo $10^9+7$, the final answer is $14$.
