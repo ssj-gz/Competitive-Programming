@@ -107,7 +107,7 @@ Alice turns out to be the winner, here; on the first turn, she has two possible 
 1. Take the Counter in node $3$ and move it to node $2$; or
 1. Take the Counter in node $3$ and move it to node $1$.
 
-If she does the latter, then at the end of her move, all Counters will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing optimally, she does precisely that :)
+If she does the latter, then at the end of her move, all Counters will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing perfectly, she does precisely that :)
 
 For $R = 2$:
 
@@ -138,7 +138,7 @@ If we set $R$ to be the node $1$, then we play on the following tree:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
 
-For $R = 1$, it can be shown that if both players play optimally, the winner will be Bob - so $\textit{winner}(\textit{game}(T, 1))$ is Bob.
+For $R = 1$, it can be shown that if both players play perfectly, the winner will be Bob - so $\textit{winner}(\textit{game}(T, 1))$ is Bob.
 
 For $R = 2$, we have the following:
 
@@ -158,7 +158,7 @@ $R = 4$:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-5of7.png)
 
-This time, Alice will win if both players play optimally i.e. $\textit{winner}(\textit{game}(T, 4))$ is Alice.
+This time, Alice will win if both players play perfectly i.e. $\textit{winner}(\textit{game}(T, 4))$ is Alice.
 
 $R = 5$:
 
