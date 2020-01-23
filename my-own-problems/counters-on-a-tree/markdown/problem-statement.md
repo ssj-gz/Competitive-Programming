@@ -96,7 +96,7 @@ Although the tree $T$ is undirected, we've added _arrows_ along edges for clarit
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-1of2.png)
 
-Let's examine each game for $R=1,2,3$.
+Let's examine each $\textit{game}(T,R)$ for $R=1,2,3$.
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-2of2.png)
 
