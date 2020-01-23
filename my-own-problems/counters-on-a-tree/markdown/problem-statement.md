@@ -9,7 +9,7 @@ For example, if the tree $T$ currently looks like this and, for this game, we ha
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example1of3.png)
 
-Then the current player can pick a Counter in any of nodes $v = 2, 4$ or $5$ (if there were any Counters in node $3$, they'd be able to pick one of those, too). Let's assume they pick the Counter in $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up in node $4$, $2$ or $1$, respectively:
+Then the current player can pick a Counter on any of nodes $v = 2, 4$ or $5$ (if there were any Counters on node $3$, they'd be able to pick one of those, too). Let's assume they pick the Counter on $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example2of3.png)
 
@@ -116,7 +116,7 @@ Bob gets his revenge this time! Alice has two possible initial moves:
 1. Take the Counter in node $1$ and move it to node $2$; or
 1. Take the Counter in node $3$ and move it to node $2$.
 
-In either case, at the end of her move there will be exactly one Counter remaining in a node other than $R = 2$.  Bob merely has to move this Counter to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
+In either case, at the end of her move there will be exactly one Counter remaining on a node other than $R = 2$.  Bob merely has to move this Counter to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
 
 For $R = 3$:
 
