@@ -579,6 +579,20 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(4066867418) // Seed is important - was chosen by randomised search!
+                    .withDescription("A testfile designed (by random search!) to make radoslav192-29145890.cpp TLE extra hard, redux - this one seems to work better than the previous one, though again, it's a mystery as to why :)"));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo());
+
+                TreeGenerator<NodeData> treeGenerator;
+                makeRandomGrowthPhaseTree(treeGenerator, subtask3.maxNodesOverAllTestcases);
+
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
