@@ -542,6 +542,37 @@ int main(int argc, char* argv[])
                 numNodesInTestFile += numNodes;
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(1066015433) // Seed is important - was chosen by randomised search!
+                    .withDescription("A testfile designed (by random search!) to make radoslav192-29145890.cpp TLE extra hard.  I have no idea why it works as well as it does :)"));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo());
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numGrowthPhases = rnd.next(1, 10);
+                const auto numNodesForGrowthPhase = chooseRandomValuesWithSum(numGrowthPhases, numNodes - 1, 1);
+                std::vector<double> leafPreferenceForGrowthPhase;
+                for (int i = 0; i < numGrowthPhases; i++)
+                {
+                    leafPreferenceForGrowthPhase.push_back(rnd.next(0.0, 100.0));
+                }
+
+                for (int growthPhase = 0; growthPhase < numGrowthPhases; growthPhase++)
+                {
+                    treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesForGrowthPhase[growthPhase], leafPreferenceForGrowthPhase[growthPhase]);
+                }
+
+                const double percentage = rnd.next(70.0, 90.0);
+                setRandomSuitable(treeGenerator, percentage);
+
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
