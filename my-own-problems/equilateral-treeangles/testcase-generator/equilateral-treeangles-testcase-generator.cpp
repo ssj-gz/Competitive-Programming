@@ -168,6 +168,29 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
     return rootNode;
 }
 
+TestNode<NodeData>* makeRandomGrowthPhaseTree(TreeGenerator<NodeData>& treeGenerator, const int numNodes)
+{
+    auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+
+    const int numGrowthPhases = rnd.next(1, 10);
+    const auto numNodesForGrowthPhase = chooseRandomValuesWithSum(numGrowthPhases, numNodes - 1, 1);
+    std::vector<double> leafPreferenceForGrowthPhase;
+    for (int i = 0; i < numGrowthPhases; i++)
+    {
+        leafPreferenceForGrowthPhase.push_back(rnd.next(0.0, 100.0));
+    }
+
+    for (int growthPhase = 0; growthPhase < numGrowthPhases; growthPhase++)
+    {
+        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesForGrowthPhase[growthPhase], leafPreferenceForGrowthPhase[growthPhase]);
+    }
+
+    const double percentage = rnd.next(70.0, 90.0);
+    setRandomSuitable(treeGenerator, percentage);
+
+    return rootNode;
+}
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
@@ -551,24 +574,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo());
 
                 TreeGenerator<NodeData> treeGenerator;
-                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-
-                const int numNodes = subtask3.maxNodesOverAllTestcases;
-                const int numGrowthPhases = rnd.next(1, 10);
-                const auto numNodesForGrowthPhase = chooseRandomValuesWithSum(numGrowthPhases, numNodes - 1, 1);
-                std::vector<double> leafPreferenceForGrowthPhase;
-                for (int i = 0; i < numGrowthPhases; i++)
-                {
-                    leafPreferenceForGrowthPhase.push_back(rnd.next(0.0, 100.0));
-                }
-
-                for (int growthPhase = 0; growthPhase < numGrowthPhases; growthPhase++)
-                {
-                    treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesForGrowthPhase[growthPhase], leafPreferenceForGrowthPhase[growthPhase]);
-                }
-
-                const double percentage = rnd.next(70.0, 90.0);
-                setRandomSuitable(treeGenerator, percentage);
+                makeRandomGrowthPhaseTree(treeGenerator, subtask3.maxNodesOverAllTestcases);
 
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
