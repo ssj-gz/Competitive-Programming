@@ -559,12 +559,13 @@ int main(int argc, char* argv[])
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const int numNodesPhase1 = rnd.next(numNodes);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(100.0));
                 setRandomSuitable(treeGenerator, rnd.next(100.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
 
-                numNodesInTestFile += numNodes;
+                numNodesInTestFile += treeGenerator.numNodes();
             }
+            assert(numNodesInTestFile == subtask3.maxNodesOverAllTestcases);
         }
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
@@ -593,6 +594,35 @@ int main(int argc, char* argv[])
 
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(111)
+                    .withDescription("Root node has degree 35'000.  Each neighbour has two chains of length two added to it.  Then random nodes."));
+
+            {
+                auto& testcase = testFile.newTestcase(EQTTestCaseInfo());
+                const int numNodes = subtask3.maxNodesPerTestcase;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                for (int i = 0; i < 35'000; i++)
+                {
+                    treeGenerator.createNode(rootNode);
+                }
+                for (auto& neighbourEdge : rootNode->neighbours)
+                {
+                    treeGenerator.addNodeChain(neighbourEdge->otherNode(rootNode), 2);
+                }
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(100.0));
+                setRandomSuitable(treeGenerator, 84.0);
+                assert(treeGenerator.numNodes() == numNodes);
+
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+
         }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
