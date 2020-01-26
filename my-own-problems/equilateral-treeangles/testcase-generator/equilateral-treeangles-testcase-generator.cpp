@@ -536,12 +536,13 @@ int main(int argc, char* argv[])
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const int numNodesPhase1 = rnd.next(numNodes);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(100.0));
                 setRandomSuitable(treeGenerator, rnd.next(100.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
 
-                numNodesInTestFile += numNodes;
+                numNodesInTestFile += treeGenerator.numNodes();
             }
+            assert(numNodesInTestFile == subtask3.maxNodesOverAllTestcases);
         }
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
