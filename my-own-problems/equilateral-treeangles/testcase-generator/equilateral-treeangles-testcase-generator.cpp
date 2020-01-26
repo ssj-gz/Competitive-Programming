@@ -581,7 +581,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(4066867418) // Seed is important - was chosen by randomised search! 2872316772 and 4080260406 might be better, though.
+                    .withSeed(2872316772) // Seed is important - was chosen by randomised search!
                     .withDescription("A testfile designed (by random search!) to make radoslav192-29145890.cpp TLE extra hard, redux - this one seems to work better than the previous one, though again, it's a mystery as to why :)"));
 
             {
