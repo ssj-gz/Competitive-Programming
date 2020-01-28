@@ -9,7 +9,7 @@ For example, if the tree $T$ currently looks like this and, for this game, we ha
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example1of3.png)
 
-Then the current player can pick a Counter on any of nodes $v = 2, 4$ or $5$ (if there were any Counters on node $3$, they'd be able to pick one of those, too). Let's assume they pick the Counter on $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
+Then the current player can pick a Counter on any of nodes $v = 2, 4$ or $5$ (if there were any Counters on node $3$, picking one of those would also be an option). Let's assume they pick the Counter on $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example2of3.png)
 
