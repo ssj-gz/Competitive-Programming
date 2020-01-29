@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(EQTTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(111)
-                    .withDescription("Root node has degree 35'000.  Each neighbour has two chains of length two added to it.  Then random nodes."));
+                    .withDescription("Root node has degree 39'000.  Each neighbour has two chains of length two added to it.  Then random nodes."));
 
             {
                 auto& testcase = testFile.newTestcase(EQTTestCaseInfo());
