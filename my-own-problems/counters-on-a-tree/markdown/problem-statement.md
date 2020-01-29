@@ -36,7 +36,7 @@ Since the result can be very large, please output it modulo $10^9+7$.
 - First line will contain $T$, number of testcases. Then the testcases follow. 
 - The first line of a testcase is $N$, the number of nodes in the tree $T$.
 - The next $N-1$ lines describe how nodes are connected by edges in $T$: each line consists of two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
-- The last line of the testcase describes the _number of initial Counters_ on each node - the line consists of $N$ space-separated integers $c_1, c_2, \ldots , c_N$: for each valid $i$, the node labelled $i$ in $T$ should have $c_i$ Counters placed on it at the beginning of a _game_.
+- The last line of the testcase describes the _number of initial Counters_ on each node and consists of $N$ space-separated integers $c_1, c_2, \ldots , c_N$: for each valid $i$, the node labelled $i$ in $T$ should have $c_i$ Counters placed on it at the beginning of a _game_.
 
 ###Output
 
