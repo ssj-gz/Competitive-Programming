@@ -19,7 +19,7 @@ Let's assume they pick $X=2$, so they move the Counter to node $2$. Then the tre
 
 and it is the other player's turn to move.
 
-Let $\textit{winner}(\textit{game}(T, R))$ be whichever of Bob or Alice wins the $\textit{game}(T, R)$, assuming both play perfectly.
+Let $\textit{winner}(\textit{game}(T, R))$ be whichever of Bob or Alice wins the $\textit{game}(T, R)$, assuming both players play perfectly.
 
 Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find $\textit{winner}(\textit{game}(T, R))$ for *all of* $R = 1, 2, \ldots , n$.
 
