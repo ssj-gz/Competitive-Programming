@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                for (int i = 0; i < 35'000; i++)
+                for (int i = 0; i < 39'000; i++)
                 {
                     treeGenerator.createNode(rootNode);
                 }
