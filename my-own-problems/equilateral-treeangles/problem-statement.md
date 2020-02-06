@@ -1,49 +1,42 @@
-In the original [Chef and Gordon Ramsay](https://www.codechef.com/problems/CHGORAM) problem, Chef wanted to close all but three of this restaurants, and used his arch-rival Gordon's Secret Restaurant-Placement Formula to decide which three to leave open to ensure their success.
+In the original [Chef and Gordon Ramsay](https://www.codechef.com/problems/CHGORAM) problem, Chef wanted to close all but three of this restaurants, and used his arch-rival Gordon's Secret Restaurant Placement Formula to decide which three to leave open to ensure their success.
 
-Chef is now seeking to expand his chain of restaurants to a new town and, would you know it, the dastardly Gordon has already set up his own chain of restaurants there! Once again, Chef conducts a little <strike>Industrial Espionage</strike> Market Research and discovers that Gordon's Secret Restaurant-Placement Formula is different for this new town: the _optimally successful_ way to arrange restaurants is still in _triples_, but this time the best placement for the restaurants in a triple is one where they are _equidistant_ from one another. As before, Chef is wondering how many ways there are to build an optimally successful triple of restaurants in this new town?
+Chef is now seeking to expand his chain of restaurants to a new town and, would you know it, the dastardly Gordon has already set up his own chain of restaurants there! Once again, Chef conducts a little <strike>Industrial Espionage</strike> Market Research and discovers that Gordon's Secret Restaurant Placement Formula is different for this new town: the optimal way to arrange restaurants is still in triples, but this time, the restaurants in any optimal triple have to be *equidistant* from each other. Just like before, Chef is wondering about the number of ways to build an optimally successful triple of restaurants in this new town.
 
-More formally, the new town has $N$ _sites_ each labelled with a distinct number from $1$ to $N$, and these sites are connected by $N - 1$ bidirectional _roads_, each of length 1 mile, in such a way that any site $v$ can be reached from any other site $u$ by following roads starting at $u$. For a pair of sites $u$ and $v$, let $\textit{dist}(u, v)$ be the distance, in miles, of the shortest sequence of roads leading from $u$ to $v$.
+More formally, the new town has $N$ *sites* (numbered $1$ through $N$) connected by $N - 1$ bidirectional roads (the length of each road is $1$ mile) in such a way that any site $v$ can be reached from any other site $u$ using these roads. For any pair of sites $u$ and $v$, let $\textit{dist}(u, v)$ be the length, in miles, of the shortest sequence of roads that connects $u$ and $v$.
 
-Chef can't build a restaurant on just any site; only on sites that are deemed _suitable_.
+Some sites have been deemed *suitable* for building a restaurant; other sites are unsuitable. Help Chef find the number of ways to choose an ordered triple of sites $(p, q, r)$ on which he could build his restaurants such that this arrangement of restaurants would be *optimally successful*, i.e.:
+1. $p$, $q$ and $r$ are pairwise distinct.
+2. $p$, $q$ and $r$ are all suitable sites.
+3. $p$, $q$ and $r$ are equidistant from one another, i.e. $\textit{dist}(p,q) = \textit{dist}(q,r) = \textit{dist}(r,p)$.
 
-Help Chef find the number of ways of choosing triples $(p, q, r)$ of sites on which to build his restaurants such that the arrangement is _optimally successful_ i.e. such that:
+### Input
+- The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
+- The first line of each test case contains a single integer $N$.
+- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ denoting that sites $u$ and $v$ are connected by a road.
+- The last line contains $N$ space-separated integers $s_1, s_2, \ldots, s_N$, where $s_i = 1$ denotes that site $i$ is suitable, while $s_i = 0$ denotes that it is not suitable.
 
-1. $p$, $q$ and $r$ are _pairwise distinct_.
-2. $p$, $q$ and $r$ are all _suitable_.
-3. $p$, $q$ and $r$ are _equidistant_ from one another i.e. $\textit{dist}(p,q)=\textit{dist}(q,r)=\textit{dist}(r,p)$.
+### Output
+For each test case, print a single line containing one integer ― the number of triples of sites which result in optimally successful arrangements of restaurants.
 
-###Input
+### Constraints 
+- $1 \le T \le 1,000$
+- $1 \le N \le 200,000$
+- $1 \le u, v \le N$
+- $s_i \in \{0,1\}$ for each valid $i$
+- the sum of $N$ over all test cases does not exceed $200,000$
 
-- First line will contain $T$, number of testcases. Then the testcases follow. 
-- The first line of a testcase is $N$, the number of sites in the new town.
-- The next $N-1$ lines describe how sites are connected by roads: each line consists of two space-separated integers $u$ and $v$ indicating that the sites labelled $u$ and $v$ are connected by a road.
-- The last line of the testcase describes the _suitablility_ of sites - the line consists of $N$ space-separated integers $s_1, s_2, \ldots , s_N$: for each valid $i$, if $s_i$ is 1, then the site labelled $i$ is _suitable_; otherwise, the site labelled $i$ is **not** _suitable_.
-
-###Output
-For each testcase, print a single line containing one integer - the number of optimally successful triples of sites for Chef's new restaurants.
-
-###Constraints 
-- $1 \leq T \leq 1000$
-- $1 \leq N \leq 200000$
-- $1 \leq u,v \leq N$
-- $s_i \in \{0,1\}$ for all valid $i$
-- the sum of $N$ over all $T$ testcases does not exceed $200000$
-
-###Subtasks
+### Subtasks
 **Subtask #1 (5 points):** 
-
-* $1 \leq T \leq 100$
-* $1 \leq N \leq 100$
+- $T \le 100$
+- $N \le 100$
 
 **Subtask #2 (10 points)**: 
-
-* $1 \leq T \leq 100$ 
-* $1 \leq N \leq 1000$
+- $T \le 100$
+- $N \le 1,000$
 
 **Subtask #3 (85 points)**: original constraints
 
-###Example Input
-
+### Example Input
 ```
 4
 4 
@@ -75,8 +68,7 @@ For each testcase, print a single line containing one integer - the number of op
 1 0 1 1 1 0 1 0 0
 ```
 
-###Example Output
-
+### Example Output
 ```
 0
 24
@@ -84,23 +76,17 @@ For each testcase, print a single line containing one integer - the number of op
 18
 ```
 
-###Explanation
+### Explanation
+Throughout, we only care about the suitable sites, since no other site can be part of an optimally successful triple.
 
-Throughout, we only care about the _suitable_ sites: no other site can be part of an optimally successful triple.
+**Example case 1:** There are only two suitable sites (the sites $1$ and $2$), so there is no way to form any triple of distinct suitable sites.
 
-**Example case 1:** There are only two _suitable_ sites (the sites labelled $1$ and $2$), so there is no way of forming any triples of distinct suitable sites: the number of optimally successful triples for this testcase is $0$.
+**Example case 2:** The suitable sites are $1$, $2$, $4$ and $5$, and the distance between any two of them is always $2$ miles, so any triple consisting of sites drawn from these four suitable sites results in an optimally successful arrangement.
 
-**Example case 2:** The suitable sites are those labelled $1$, $2$, $4$ and $5$, and $\textit{dist}(1,2)=\textit{dist}(1,4)=\textit{dist}(1,5)=\textit{dist}(2,4)=\textit{dist}(2,5)=\textit{dist}(4,5)=2$ miles, so _any_ triple consisting of sites drawn from these four suitable sites is optimally successful. In no particular order, the list of all such triples is $(1, 2, 4)$, $(1, 2, 5)$, $(1, 4, 2)$, $(1, 4, 5)$, $(1, 5, 2)$, $(1, 5, 4)$, $(2, 1, 4)$, $(2, 1, 5)$, $(2, 4, 1)$, $(2, 4, 5)$, $(2, 5, 1)$, $(2, 5, 4)$, $(4, 1, 2)$, $(4, 1, 5)$, $(4, 2, 1)$, $(4, 2, 5)$, $(4, 5, 1)$, $(4, 5, 2)$, $(5, 1, 2)$, $(5, 1, 4)$, $(5, 2, 1)$, $(5, 2, 4)$, $(5, 4, 1)$ and $(5, 4, 2)$. There are $24$ of them, so the answer for this testcase is $24$.
+**Example case 3:** There are only three suitable sites (those labelled $2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,5)=3$ miles, unfortunately $\textit{dist}(5,2)=2$ miles, so the three suitable sites are not equidistant from each other.
 
-**Example case 3:** There are only three suitable sites (those labelled $2$, $4$ and $5$), but while $\textit{dist}(2,4)=\textit{dist}(4,5)=3$ miles, unfortunately $\textit{dist}(5,2)=2$ miles $\neq 3$ miles, so the three suitable sites are not equidistant from each other, and the answer for this testcase is $0$.
-
-**Example case 4:** The suitable sites are those labelled $1$, $3$, $4$, $5$ and $7$. We note that $\textit{dist}(1,5)=\textit{dist}(5,7)=\textit{dist}(7,1)=2$ miles, so $(1,5,7)$ is a successful arrangement of restaurants, as are $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$ (that's **6** triples so far).
-
-We note also that $\textit{dist}(1,3)=\textit{dist}(3,4)=\textit{dist}(4,1)=4$ miles, so $(1,3,4)$ is another successful arrangement of restaurants, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$ (that's **12** so far).
-
-Finally, we see that $\textit{dist}(3,4)=\textit{dist}(4,7)=\textit{dist}(7,3)=4$ miles, so $(3,4,7)$ is another successful arrangement of restaurants, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$, so we are now up to **18** successful triples.
-
-There are no other successful triples, so the answer for this testcase is $18$.
-
-
+**Example case 4:** The suitable sites are $1$, $3$, $4$, $5$ and $7$.
+- Since $\textit{dist}(1,5)=\textit{dist}(5,7)=\textit{dist}(7,1)=2$ miles, the triple $(1,5,7)$ results in an optimally successful arrangement, as do $(1,7,5)$, $(5,1,7)$, $(5,7,1)$, $(7,1,5)$ and $(7,5,1)$.
+- Also, since $\textit{dist}(1,3)=\textit{dist}(3,4)=\textit{dist}(4,1)=4$ miles, $(1,3,4)$ is another triple that results in an optimally successful arrangement, as are $(1,4,3)$, $(3,1,4)$, $(3,4,1)$, $(4,1,3)$ and $(4,3,1)$.
+- Finally, we see that $\textit{dist}(3,4)=\textit{dist}(4,7)=\textit{dist}(7,3)=4$ miles, so $(3,4,7)$ is another triple that results in an optimally successful arrangement, as are $(3,7,4)$, $(4,3,7)$, $(4,7,3)$, $(7,3,4)$ and $(7,4,3)$. That's $18$ triples in total.
 
