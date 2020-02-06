@@ -35,8 +35,8 @@ Since the result can be very large, please output it modulo $10^9+7$.
 
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
 - The first line of a testcase contains a single integer $N$.
-- Each of the next $N-1$ lines consists of two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
-- The last line of the testcase consists of $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node labelled $i$ in $T$ at the beginning of a *game*.
+- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
+- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node labelled $i$ in the tree $T$ at the beginning of a game.
 
 ### Output
 
