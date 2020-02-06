@@ -47,7 +47,7 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 - $1 \le N \le 10^5$
 - $1 \le u,v \le N$
 - $0 \le c_i \le 16$ for all valid $i$
-- the sum of $N$ over all $T$ testcases does not exceed $200000$
+- the sum of $N$ over all $T$ testcases does not exceed $200,000$
 
 ### Subtasks
 **Subtask #1 (5 points):** 
