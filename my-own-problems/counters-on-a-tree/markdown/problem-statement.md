@@ -31,25 +31,25 @@ $$
 
 Since the result can be very large, please output it modulo $10^9+7$.
 
-###Input
+### Input
 
 - First line will contain $T$, number of testcases. Then the testcases follow. 
 - The first line of a testcase is $N$, the number of nodes in the tree $T$.
 - The next $N-1$ lines describe how nodes are connected by edges in $T$: each line consists of two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
 - The last line of the testcase describes the _number of initial Counters_ on each node and consists of $N$ space-separated integers $c_1, c_2, \ldots , c_N$: for each valid $i$, the node labelled $i$ in $T$ should have $c_i$ Counters placed on it at the beginning of a _game_.
 
-###Output
+### Output
 
 For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob.
 
-###Constraints 
+### Constraints 
 - $1 \le T \le 1000$
 - $1 \le N \le 100000$
 - $1 \le u,v \le N$
 - $0 \le c_i \le 16$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
-###Subtasks
+### Subtasks
 **Subtask #1 (5 points):** 
 
 - $1 \le T \le 10$
@@ -64,7 +64,7 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 **Subtask #3 (85 points)**: original constraints
 
-###Example Input
+### Example Input
 
 ```
 2
@@ -81,14 +81,14 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 0 2 2 1 3 2
 ```
 
-###Example Output
+### Example Output
 
 ```
 4
 14
 ```
 
-###Explanation
+### Explanation
 
 Although the tree $T$ is undirected, _arrows_ have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
 
