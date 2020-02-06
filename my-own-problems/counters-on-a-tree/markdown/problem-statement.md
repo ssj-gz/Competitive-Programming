@@ -52,15 +52,15 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 ### Subtasks
 **Subtask #1 (5 points):** 
 
-- $1 \le T \le 10$
-- $1 \le N \le 10$
-- $0 \le c_i \le 6$ for all valid $i$
+- $T \le 10$
+- $N \le 10$
+- $c_i \le 6$ for all valid $i$
 - the sum of $c_i$ over all nodes $i$ in a testcase does not exceed $10$
 
 **Subtask #2 (10 points)**: 
 
-* $1 \le T \le 10^2$ 
-* $1 \le N \le 10^3$
+* $T \le 10^2$ 
+* $N \le 10^3$
 
 **Subtask #3 (85 points)**: original constraints
 
