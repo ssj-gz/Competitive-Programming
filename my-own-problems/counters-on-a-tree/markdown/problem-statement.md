@@ -1,4 +1,4 @@
-Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \leq R \leq N)$, define $\textit{game}(T, R)$ as the game with the following rules:
+Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T, R)$ as the game with the following rules:
 
 1. A copy of $T$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node labelled $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
@@ -43,24 +43,24 @@ Since the result can be very large, please output it modulo $10^9+7$.
 For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob.
 
 ###Constraints 
-- $1 \leq T \leq 1000$
-- $1 \leq N \leq 100000$
-- $1 \leq u,v \leq N$
-- $0 \leq c_i \leq 16$ for all valid $i$
+- $1 \le T \le 1000$
+- $1 \le N \le 100000$
+- $1 \le u,v \le N$
+- $0 \le c_i \le 16$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
 
 ###Subtasks
 **Subtask #1 (5 points):** 
 
-- $1 \leq T \leq 10$
-- $1 \leq N \leq 10$
-- $0 \leq c_i \leq 6$ for all valid $i$
+- $1 \le T \le 10$
+- $1 \le N \le 10$
+- $0 \le c_i \le 6$ for all valid $i$
 - the sum of $c_i$ over all nodes $i$ in a testcase does not exceed $10$
 
 **Subtask #2 (10 points)**: 
 
-* $1 \leq T \leq 100$ 
-* $1 \leq N \leq 1000$
+* $1 \le T \le 100$ 
+* $1 \le N \le 1000$
 
 **Subtask #3 (85 points)**: original constraints
 
