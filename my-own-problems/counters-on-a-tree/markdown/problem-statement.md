@@ -1,11 +1,11 @@
-Bob and Alice are playing a game with *Counters* on a *board* which is a tree $TB$ with $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(TB, R)$ as the game with the following rules:
+Bob and Alice are playing a game with *Counters* on a *board* which is a tree $T_{\textit{board}}$ with $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
 
-1. A copy of $TB$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node labelled $v$.
+1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node labelled $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
 3. A move consists of taking a single Counter ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$
 4. If a player cannot make a move on their turn (i.e. because all the Counters are on node $R$), then the game ends and the other player is declared the winner.
 
-For example, if the tree $TB$ currently looks like this and, for this game, we have chosen $R=1$:
+For example, if the tree $T_{\textit{board}}$ currently looks like this and, for this game, we have chosen $R=1$:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example1of3.png)
 
@@ -19,11 +19,11 @@ Let's assume they pick $X=2$, so they move the Counter to node $2$. Then the tre
 
 and it is the other player's turn to move.
 
-Let $\textit{winner}(\textit{game}(TB, R))$ be whichever of Bob or Alice wins the $\textit{game}(TB, R)$, assuming both players play perfectly.
+Let $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ be whichever of Bob or Alice wins the $\textit{game}(T_{\textit{board}}, R)$, assuming both players play perfectly.
 
-Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(TB, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find $\textit{winner}(\textit{game}(TB, R))$ for *all of* $R = 1, 2, \ldots , n$.
+Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T_{\textit{board}}, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for *all of* $R = 1, 2, \ldots , n$.
 
-Can you help Bob figure out the answer? More formally, if $\textit{BobWinR}$ is the set of $R$ such that $\textit{winner}(\textit{game}(TB, R)) =$ Bob, then you must calculate the value of
+Can you help Bob figure out the answer? More formally, if $\textit{BobWinR}$ is the set of $R$ such that $\textit{winner}(\textit{game}(T_{\textit{board}}, R)) =$ Bob, then you must calculate the value of
 
 $$
 \sum\limits_{R \in \textit{BobWinR}}2^R
@@ -36,11 +36,11 @@ Since the result can be very large, please output it modulo $10^9+7$.
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
 - The first line of a testcase contains a single integer $N$.
 - Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
-- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node labelled $i$ in the tree $TB$ at the beginning of a game.
+- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node labelled $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
 
 ### Output
 
-For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(TB, R)) =$ Bob.
+For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T_{\textit{board}}, R)) =$ Bob.
 
 ### Constraints 
 - $1 \le T \le 1,000$
@@ -90,13 +90,13 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 ### Explanation
 
-Although the tree $TB$ is undirected, *arrows* have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
+Although the tree $T_{\textit{board}}$ is undirected, *arrows* have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
 
-**Example case 1:** The original $TB$ looks like this:
+**Example case 1:** The original $T_{\textit{board}}$ looks like this:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-1of2.png)
 
-Let's examine each $\textit{game}(TB,R)$ for $R=1,2,3$.
+Let's examine each $\textit{game}(T_{\textit{board}},R)$ for $R=1,2,3$.
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-2of2.png)
 
@@ -122,7 +122,7 @@ For $R = 3$:
 
 Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to take the Counter in node $1$ and move it to node $3$).
 
-We've figured out $\textit{winner}(\textit{game}(TB, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{BobWinR}=\{2\}$ and our desired sum is:
+We've figured out $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{BobWinR}=\{2\}$ and our desired sum is:
 
 $$
 \sum\limits_{R \in \textit{BobWinR}}2^R = 2^2 = 4
@@ -130,7 +130,7 @@ $$
 
 Taking this modulo $10^9+7$, the answer for this testcase is $4$.
 
-**Example case 2:** The original $TB$ looks like:
+**Example case 2:** The original $T_{\textit{board}}$ looks like:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
 
@@ -138,41 +138,41 @@ If we set $R$ to be the node $1$, then we play on the following tree:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
 
-For $R = 1$, it can be shown that if both players play perfectly, the winner will be Bob - so $\textit{winner}(\textit{game}(TB, 1))$ is Bob.
+For $R = 1$, it can be shown that if both players play perfectly, the winner will be Bob - so $\textit{winner}(\textit{game}(T_{\textit{board}}, 1))$ is Bob.
 
 For $R = 2$, we have the following:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-3of7.png)
 
-and again, it can be shown that $\textit{winner}(\textit{game}(TB, 2))$ is Bob.
+and again, it can be shown that $\textit{winner}(\textit{game}(T_{\textit{board}}, 2))$ is Bob.
 
 
 For $R = 3$:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-4of7.png)
 
-Once again, $\textit{winner}(\textit{game}(TB, 3))$ can be shown to be Bob.
+Once again, $\textit{winner}(\textit{game}(T_{\textit{board}}, 3))$ can be shown to be Bob.
 
 $R = 4$:
 
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-5of7.png)
 
-This time, Alice will win if both players play perfectly i.e. $\textit{winner}(\textit{game}(TB, 4))$ is Alice.
+This time, Alice will win if both players play perfectly i.e. $\textit{winner}(\textit{game}(T_{\textit{board}}, 4))$ is Alice.
 
 $R = 5$:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-6of7.png)
 
-Alice wins for $R = 5$, too; $\textit{winner}(\textit{game}(TB, 5))$ is Alice.
+Alice wins for $R = 5$, too; $\textit{winner}(\textit{game}(T_{\textit{board}}, 5))$ is Alice.
 
 Finally, $R = 6$:
 
 ![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-7of7.png)
 
-Once more, Alice wins in this case - $\textit{winner}(\textit{game}(TB, 6))$ is Alice.
+Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T_{\textit{board}}, 6))$ is Alice.
 
-We now know $\textit{winner}(\textit{game}(TB, R))$ for all possible values of $R$, and we see that $\textit{BobWinR}=\{1, 2, 3\}$, so the value of our desired sum is:
+We now know $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all possible values of $R$, and we see that $\textit{BobWinR}=\{1, 2, 3\}$, so the value of our desired sum is:
 
 $$
 \sum\limits_{R \in \textit{BobWinR}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
