@@ -1,4 +1,4 @@
-Bob and Alice are playing a game with _Counters_ on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T, R)$ as the game with the following rules:
+Bob and Alice are playing a game with *Counters* on a Tree $T$, which has $N$ nodes, each labelled with a distinct number from $1$ to $N$. At the beginning of a game, the node labelled $v$ has $c_v$ Counters on it. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T, R)$ as the game with the following rules:
 
 1. A copy of $T$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node labelled $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
@@ -36,7 +36,7 @@ Since the result can be very large, please output it modulo $10^9+7$.
 - First line will contain $T$, number of testcases. Then the testcases follow. 
 - The first line of a testcase is $N$, the number of nodes in the tree $T$.
 - The next $N-1$ lines describe how nodes are connected by edges in $T$: each line consists of two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
-- The last line of the testcase describes the _number of initial Counters_ on each node and consists of $N$ space-separated integers $c_1, c_2, \ldots , c_N$: for each valid $i$, the node labelled $i$ in $T$ should have $c_i$ Counters placed on it at the beginning of a _game_.
+- The last line of the testcase describes the *number of initial Counters* on each node and consists of $N$ space-separated integers $c_1, c_2, \ldots , c_N$: for each valid $i$, the node labelled $i$ in $T$ should have $c_i$ Counters placed on it at the beginning of a *game*.
 
 ### Output
 
@@ -90,7 +90,7 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 ### Explanation
 
-Although the tree $T$ is undirected, _arrows_ have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
+Although the tree $T$ is undirected, *arrows* have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
 
 **Example case 1:** The original $T$ looks like this:
 
