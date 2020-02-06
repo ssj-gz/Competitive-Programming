@@ -43,8 +43,8 @@ Since the result can be very large, please output it modulo $10^9+7$.
 For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T, R)) =$ Bob.
 
 ### Constraints 
-- $1 \le T \le 1000$
-- $1 \le N \le 100000$
+- $1 \le T \le 10^3$
+- $1 \le N \le 10^5$
 - $1 \le u,v \le N$
 - $0 \le c_i \le 16$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200000$
@@ -59,8 +59,8 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 **Subtask #2 (10 points)**: 
 
-* $1 \le T \le 100$ 
-* $1 \le N \le 1000$
+* $1 \le T \le 10^2$ 
+* $1 \le N \le 10^3$
 
 **Subtask #3 (85 points)**: original constraints
 
