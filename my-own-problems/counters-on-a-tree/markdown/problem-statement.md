@@ -1,6 +1,6 @@
-Bob and Alice are playing a board game.  The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes, each labelled with a distinct number from $1$ to $N$. The game involves moving a set of *Counters* around the board, with each node $v$ having $c_v$ Counters on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
+Bob and Alice are playing a board game.  The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes, each numbered with a distinct number from $1$ to $N$. The game involves moving a set of *Counters* around the board, with each node $v$ having $c_v$ Counters on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
 
-1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node labelled $v$.
+1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node numbered $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
 3. A move consists of taking a single Counter ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$.
 4. If a player cannot make a move on their turn (i.e. because all the Counters are on node $R$), then the game ends and the other player is declared the winner.
@@ -35,8 +35,8 @@ Since the result can be very large, please output it modulo $10^9+7$.
 
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
 - The first line of a testcase contains a single integer $N$.
-- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes labelled $u$ and $v$ are connected by an edge.
-- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node labelled $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
+- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes numbered $u$ and $v$ are connected by an edge.
+- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node numbered $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
 
 ### Output
 
