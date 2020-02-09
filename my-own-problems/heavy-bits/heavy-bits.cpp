@@ -14,6 +14,7 @@
 #include <vector>
 #include <set>
 #include <limits>
+#include <algorithm>
 
 #include <cassert>
 
@@ -207,6 +208,8 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
     }
 }
 
+vector<int> totalPrefixSizes;
+
 int64_t solveOptimised(const string& B)
 {
     int64_t result = 0;
@@ -314,7 +317,8 @@ int64_t solveOptimised(const string& B)
 
         for (const auto& query : queriesForIndex[suffixBeginIndex])
         {
-            cout << "query - suffixBeginIndex: " << suffixBeginIndex << " num0sInSuffix: " << query.numbsInPrefix[0] << " num1sInSuffix: " << query.numbsInPrefix[1] << " total prefix: " << (query.numbsInPrefix[0] + query.numbsInPrefix[1]) <<endl;
+            //cout << "query - suffixBeginIndex: " << suffixBeginIndex << " num0sInSuffix: " << query.numbsInPrefix[0] << " num1sInSuffix: " << query.numbsInPrefix[1] << " total prefix: " << (query.numbsInPrefix[0] + query.numbsInPrefix[1]) <<endl;
+            totalPrefixSizes.push_back(query.numbsInPrefix[0] + query.numbsInPrefix[1]);
             const auto queryResult = blah(query.numbsInPrefix, suffixBeginIndex);
 
 #ifdef VERIFY_RESULTS
@@ -355,7 +359,7 @@ int main(int argc, char* argv[])
         string s;
         for (int i = 0; i < 100'000; i++)
         {
-            if (rand() % 10'000 == 0)
+            if (rand() % 30'000 == 0)
                 s += '0';
             else
                 s += '1';
@@ -398,6 +402,12 @@ int main(int argc, char* argv[])
     }
 
     assert(cin);
+
+    sort(totalPrefixSizes.begin(), totalPrefixSizes.end(), std::greater<>());
+
+    cout << "totalPrefixSizes: " << endl;
+    for (const auto x : totalPrefixSizes)
+        cout << x << endl;
 }
 
 SuffixTree::SuffixTree(const string& s)
