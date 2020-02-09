@@ -265,7 +265,7 @@ int64_t solveOptimised(const string& B)
             const auto balanceIndex = nextIndexWithSuffixBalance[desiredSuffixBalance] - 1;
             if (balanceIndex == NeverBalanced)
             {
-                return sumOfbsStartingAt[mostPopulousPrefixBit][suffixBeginIndex] + (N - suffixBeginIndex) * numbsInPrefix[mostPopulousPrefixBit] ;
+                return sumOfbsStartingAt[mostPopulousPrefixBit][suffixBeginIndex] + static_cast<int64_t>(N - suffixBeginIndex) * numbsInPrefix[mostPopulousPrefixBit] ;
             }
             else
             {
@@ -276,13 +276,13 @@ int64_t solveOptimised(const string& B)
 
                 int64_t result = 0;
                 result = sumOfbsStartingAt[mostPopulousPrefixBit][suffixBeginIndex] - sumOfbsStartingAt[mostPopulousPrefixBit][balanceIndex + 1];
-                result -= numbsInRange[mostPopulousPrefixBit] * afterBalanceSuffixLen;
+                result -= numbsInRange[mostPopulousPrefixBit] * static_cast<int64_t>(afterBalanceSuffixLen);
                 result += rangeLen * numbsInPrefix[mostPopulousPrefixBit];
 
                 assert(result >= 0);
                 assert((balanceIndex - suffixBeginIndex + 1 + numbsInPrefix[0] + numbsInPrefix[1]) % 2 == 0);
                 // TODO - replace "balanceIndex - suffixBeginIndex + 1" with rangeLen and "(N - (balanceIndex + 1))" with afterBalanceSuffixLen?
-                result += sumOfWeightStartingAt[balanceIndex + 1] +  ((balanceIndex - suffixBeginIndex + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
+                result += sumOfWeightStartingAt[balanceIndex + 1] +  static_cast<int64_t>((balanceIndex - suffixBeginIndex + 1 + numbsInPrefix[0] + numbsInPrefix[1]) / 2) * (N - (balanceIndex + 1));
                 
                 return result;
             }
