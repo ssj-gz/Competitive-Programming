@@ -188,6 +188,7 @@ struct Query
 };
 
 int maxDepth = 0;
+vector<int> transitionLengths;
 
 void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefixLen, vector<vector<Query>>& queriesForIndex, int depth)
 {
@@ -200,7 +201,8 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
 
-        cout << "Transition length: " << (transition.substringFollowed.endIndex - transition.substringFollowed.startIndex) << endl;
+        //cout << "Transition length: " << (transition.substringFollowed.endIndex - transition.substringFollowed.startIndex) << endl;
+        transitionLengths.push_back(transition.substringFollowed.endIndex - transition.substringFollowed.startIndex + 1);
 
         queriesForIndex[transition.substringFollowed.startIndex].push_back({{num0sSoFar, num1sSoFar}, false});
         //cout << "query - suffixBeginIndex: " << (transition.substringFollowed.startIndex) << " num0sInPrefix: " << num0sSoFar << " num1sInPrefix: " << num1sSoFar << " total prefix: " << (num0sSoFar + num1sSoFar) <<endl;
@@ -235,6 +237,16 @@ int64_t solveOptimised(const string& B)
 
     vector<vector<Query>> queriesForIndex(N);
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, numbsInPrefixLen[0], queriesForIndex, 0);
+
+    vector<int> numQueries;
+    for (const auto& queries : queriesForIndex)
+    {
+        numQueries.push_back(queries.size());
+    }
+    sort(numQueries.begin(), numQueries.end(), greater<>());
+    cout << "numQueries: " << endl;
+    for (const auto x : numQueries)
+        cout << x << endl;
 
     constexpr auto NeverBalanced = -2;
 
@@ -413,6 +425,11 @@ int main(int argc, char* argv[])
     cout << "maxDepth: " << maxDepth << endl;
     cout << "totalPrefixSizes: " << endl;
     for (const auto x : totalPrefixSizes)
+        cout << x << endl;
+
+    sort(transitionLengths.begin(), transitionLengths.end(), std::greater<>());
+    cout << "transitionLengths: " << endl;
+    for (const auto x : transitionLengths)
         cout << x << endl;
 }
 
