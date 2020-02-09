@@ -197,8 +197,10 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
 
         queriesForIndex[transition.substringFollowed.startIndex].push_back({{num0sSoFar, num1sSoFar}, false});
+        //cout << "query - suffixBeginIndex: " << (transition.substringFollowed.startIndex) << " num0sInPrefix: " << num0sSoFar << " num1sInPrefix: " << num1sSoFar << " total prefix: " << (num0sSoFar + num1sSoFar) <<endl;
         if (transition.substringFollowed.endIndex + 1 < B.size())
         {
+            //cout << "query - suffixBeginIndex: " << (transition.substringFollowed.endIndex + 1) << " num0sInPrefix: " << nextNum0sSoFar << " num1sInPrefix: " << nextNum1sSoFar << " total prefix: " << (nextNum0sSoFar + nextNum1sSoFar) <<endl;
             queriesForIndex[transition.substringFollowed.endIndex + 1].push_back({{nextNum0sSoFar, nextNum1sSoFar}, true});
         }
         solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, num0sInPrefixLen, queriesForIndex);
@@ -312,6 +314,7 @@ int64_t solveOptimised(const string& B)
 
         for (const auto& query : queriesForIndex[suffixBeginIndex])
         {
+            cout << "query - suffixBeginIndex: " << suffixBeginIndex << " num0sInSuffix: " << query.numbsInPrefix[0] << " num1sInSuffix: " << query.numbsInPrefix[1] << " total prefix: " << (query.numbsInPrefix[0] + query.numbsInPrefix[1]) <<endl;
             const auto queryResult = blah(query.numbsInPrefix, suffixBeginIndex);
 
 #ifdef VERIFY_RESULTS
@@ -331,6 +334,7 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     if (argc == 2 && string(argv[1]) == "--test")
     {
+#if 0
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
@@ -347,6 +351,26 @@ int main(int argc, char* argv[])
             }
             cout << endl;
         }
+#else
+        string s;
+        for (int i = 0; i < 100'000; i++)
+        {
+            if (rand() % 10'000 == 0)
+                s += '0';
+            else
+                s += '1';
+        }
+        for (int i = 0; i < 900'000; i++)
+        {
+            if (rand() % 2 == 0)
+                s += '0';
+            else
+                s += '1';
+        }
+        cout << 1 << endl;
+        cout << s.size() << endl;
+        cout << s << endl;
+#endif
 
         return 0;
     }
