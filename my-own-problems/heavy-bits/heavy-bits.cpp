@@ -187,8 +187,11 @@ struct Query
     bool subtractFromResult = false;
 };
 
-void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefixLen, vector<vector<Query>>& queriesForIndex)
+int maxDepth = 0;
+
+void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefixLen, vector<vector<Query>>& queriesForIndex, int depth)
 {
+    maxDepth = max(maxDepth, depth);
     for (const auto& transition : state->transitions)
     {
         auto nextState = transition.nextState;
@@ -197,6 +200,8 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
 
+        cout << "Transition length: " << (transition.substringFollowed.endIndex - transition.substringFollowed.startIndex) << endl;
+
         queriesForIndex[transition.substringFollowed.startIndex].push_back({{num0sSoFar, num1sSoFar}, false});
         //cout << "query - suffixBeginIndex: " << (transition.substringFollowed.startIndex) << " num0sInPrefix: " << num0sSoFar << " num1sInPrefix: " << num1sSoFar << " total prefix: " << (num0sSoFar + num1sSoFar) <<endl;
         if (transition.substringFollowed.endIndex + 1 < B.size())
@@ -204,7 +209,7 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
             //cout << "query - suffixBeginIndex: " << (transition.substringFollowed.endIndex + 1) << " num0sInPrefix: " << nextNum0sSoFar << " num1sInPrefix: " << nextNum1sSoFar << " total prefix: " << (nextNum0sSoFar + nextNum1sSoFar) <<endl;
             queriesForIndex[transition.substringFollowed.endIndex + 1].push_back({{nextNum0sSoFar, nextNum1sSoFar}, true});
         }
-        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, num0sInPrefixLen, queriesForIndex);
+        solveOptimisedAux(nextState, B, nextNum0sSoFar, nextNum1sSoFar, num0sInPrefixLen, queriesForIndex, depth + 1);
     }
 }
 
@@ -229,7 +234,7 @@ int64_t solveOptimised(const string& B)
     SuffixTree suffixTree(B);
 
     vector<vector<Query>> queriesForIndex(N);
-    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, numbsInPrefixLen[0], queriesForIndex);
+    solveOptimisedAux(suffixTree.rootState(), B, 0, 0, numbsInPrefixLen[0], queriesForIndex, 0);
 
     constexpr auto NeverBalanced = -2;
 
@@ -405,6 +410,7 @@ int main(int argc, char* argv[])
 
     sort(totalPrefixSizes.begin(), totalPrefixSizes.end(), std::greater<>());
 
+    cout << "maxDepth: " << maxDepth << endl;
     cout << "totalPrefixSizes: " << endl;
     for (const auto x : totalPrefixSizes)
         cout << x << endl;
