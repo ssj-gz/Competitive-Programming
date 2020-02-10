@@ -1,0 +1,19 @@
+This *probably* won't get accepted (for reasons explained below!) but I thought I'd propose it as I think it's a really neat Problem :)
+
+As with COUNTREE (http://campus.codechef.com/SITJMADM/problems/COUNTREE/) Alice and Bob are playing a game on a Tree T_orig, which involves moving "Counters" around the tree towards the node labelled 1.
+
+The rules are identical to those of COUNTREE, except that we fix R = 1 - please refer to that Problem Statement for more details :)
+
+Finding the winner of the game, assuming perfect play, is again (as with the COUNTREE case) trivial via Sprague-Grundy.
+
+Alice then proposes a series of queries: each query q_i consists of a pair of nodes u_i and v_i, and what we do is we sever the subtree rooted at node u_i and re-root it as node v_i to give a new game-board-tree, T_i, say.  We must then decide who is the winner, assuming perfect play of playing the game on this tree i.e. using the terminology of COUNTREE, we must find winner(game(T_i, 1)).
+
+The reasons why it might not get accepted are twofold:
+
+* The Problem Statement is very nearly identical to that of https://www.hackerrank.com/challenges/move-the-coins/problem - there's just a tiny change to the game rules, though this makes for a radically different solution!
+
+* I think someone who has thought about COUNTREE (which has been Approved) might have an advantage when they attempt this Problem (or vice-versa), but it's not clear to me how much of an advantage they'd have.
+
+Anyway, let me know your thoughts - I really like this Problem as it combines query-reordering, Euler Tours, Segment Trees, elementary game theory and some bit manipulation :)
+
+
