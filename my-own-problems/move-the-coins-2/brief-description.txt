@@ -1,6 +1,6 @@
 This *probably* won't get accepted (for reasons explained below!) but I thought I'd propose it as I think it's a really neat Problem :)
 
-As with COUNTREE (http://campus.codechef.com/SITJMADM/problems/COUNTREE/) Alice and Bob are playing a game on a Tree T_orig, which involves moving "Counters" around the tree towards the node labelled 1.
+As with COUNTREE (http://campus.codechef.com/SITJMADM/problems/COUNTREE/) Alice and Bob are playing a game on a Tree T_orig with N nodes (numbered 1 to N), which involves moving "Counters" around the tree towards the node labelled 1 (c_i Counters on the node numbered i at the beginning of the game).
 
 The rules are identical to those of COUNTREE, except that we fix R = 1 - please refer to that Problem Statement for more details :)
 
