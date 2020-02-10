@@ -8,7 +8,7 @@
 #ifdef SUBMISSION
 #undef BRUTE_FORCE
 #undef VERIFY_RESULTS
-//#define NDEBUG
+#define NDEBUG
 #endif
 #include <iostream>
 #include <vector>
@@ -21,6 +21,8 @@
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
+
+//#define DIAGNOSTICS
 
 
 /**
@@ -187,12 +189,16 @@ struct Query
     bool subtractFromResult = false;
 };
 
+#ifdef DIAGNOSTICS
 int maxDepth = 0;
 vector<int> transitionLengths;
+#endif
 
 void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0sSoFar, const int num1sSoFar, const vector<int>& num0sInPrefixLen, vector<vector<Query>>& queriesForIndex, int depth)
 {
+#ifdef DIAGNOSTICS
     maxDepth = max(maxDepth, depth);
+#endif
     for (const auto& transition : state->transitions)
     {
         auto nextState = transition.nextState;
@@ -201,8 +207,10 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
         const auto nextNum0sSoFar = num0sSoFar + num0sInSubstring;
         const auto nextNum1sSoFar = num1sSoFar + num1sInSubstring;
 
+#ifdef DIAGNOSTICS
         //cout << "Transition length: " << (transition.substringFollowed.endIndex - transition.substringFollowed.startIndex) << endl;
         transitionLengths.push_back(transition.substringFollowed.endIndex - transition.substringFollowed.startIndex + 1);
+#endif
 
         queriesForIndex[transition.substringFollowed.startIndex].push_back({{num0sSoFar, num1sSoFar}, false});
         //cout << "query - suffixBeginIndex: " << (transition.substringFollowed.startIndex) << " num0sInPrefix: " << num0sSoFar << " num1sInPrefix: " << num1sSoFar << " total prefix: " << (num0sSoFar + num1sSoFar) <<endl;
@@ -215,7 +223,9 @@ void solveOptimisedAux(SuffixTree::State* state, const string& B, const int num0
     }
 }
 
+#ifdef DIAGNOSTICS
 vector<int> totalPrefixSizes;
+#endif
 
 int64_t solveOptimised(const string& B)
 {
@@ -238,6 +248,7 @@ int64_t solveOptimised(const string& B)
     vector<vector<Query>> queriesForIndex(N);
     solveOptimisedAux(suffixTree.rootState(), B, 0, 0, numbsInPrefixLen[0], queriesForIndex, 0);
 
+#ifdef DIAGNOSTICS
     vector<int> numQueries;
     for (const auto& queries : queriesForIndex)
     {
@@ -247,6 +258,7 @@ int64_t solveOptimised(const string& B)
     cout << "numQueries: " << endl;
     for (const auto x : numQueries)
         cout << x << endl;
+#endif
 
     constexpr auto NeverBalanced = -2;
 
@@ -334,8 +346,10 @@ int64_t solveOptimised(const string& B)
 
         for (const auto& query : queriesForIndex[suffixBeginIndex])
         {
+#ifdef DIAGNOSTICS
             //cout << "query - suffixBeginIndex: " << suffixBeginIndex << " num0sInSuffix: " << query.numbsInPrefix[0] << " num1sInSuffix: " << query.numbsInPrefix[1] << " total prefix: " << (query.numbsInPrefix[0] + query.numbsInPrefix[1]) <<endl;
             totalPrefixSizes.push_back(query.numbsInPrefix[0] + query.numbsInPrefix[1]);
+#endif
             const auto queryResult = blah(query.numbsInPrefix, suffixBeginIndex);
 
 #ifdef VERIFY_RESULTS
@@ -420,6 +434,7 @@ int main(int argc, char* argv[])
 
     assert(cin);
 
+#ifdef DIAGNOSTICS
     sort(totalPrefixSizes.begin(), totalPrefixSizes.end(), std::greater<>());
 
     cout << "maxDepth: " << maxDepth << endl;
@@ -431,6 +446,7 @@ int main(int argc, char* argv[])
     cout << "transitionLengths: " << endl;
     for (const auto x : transitionLengths)
         cout << x << endl;
+#endif
 }
 
 SuffixTree::SuffixTree(const string& s)
