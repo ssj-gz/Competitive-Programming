@@ -1,14 +1,11 @@
 // O(N^2) solution to CHGORAM2 - should be able to pass Subtasks #1 and #2.
 #include <iostream>
 #include <vector>
-#include <map>
 #include <algorithm>
 
 #include <cassert>
 
 using namespace std;
-
-//#define DIAGNOSTICS
 
 struct Node
 {
@@ -21,6 +18,7 @@ struct Node
 
 int64_t numTriples(int64_t n)
 {
+    // i.e. "n choose 3".
     if (n < 3)
         return 0;
     return (n * (n - 1) * (n - 2));
@@ -28,14 +26,10 @@ int64_t numTriples(int64_t n)
 
 void bfs(Node& rootNode, int64_t& result)
 {
-
     const int numChildren = rootNode.neighbours.size();
-#ifdef DIAGNOSTICS
-    cout << "bfs from node: " << rootNode.id << endl;
-    cout << " numChildren: " << numChildren << endl;
-#endif
 
-
+    // Will store, for each child of rootNode, the list of nodes
+    // reachable from rootNode via that child.
     vector<vector<Node*>> visitedViaChild;
 
     vector<Node*> visitedNodes = { &rootNode };
@@ -47,28 +41,21 @@ void bfs(Node& rootNode, int64_t& result)
     }
     rootNode.visitedInBFS = true; 
 
-    int iterationNum = 0;
     while (!visitedViaChild.empty())
     {
         if (visitedViaChild.size() < 3)
         {
-#ifdef DIAGNOSTICS
-            cout << "  breaking at iteration: " << iterationNum << " after visiting " << visitedNodes.size() << endl;
-#endif
+            // Stop here - for a triple to be centred around rootNode, there need to be
+            // three nodes, equidistant from rootNode, and reached via rootNode via
+            // different children.  This is no longer possible.
             break;
         }
-#ifdef DIAGNOSTICS
-        cout << " Iteration.   # visitedViaChild: " << visitedViaChild.size() << endl;
-#endif
         int64_t numSuitable = 0;
         int64_t numSuitablePairsViaDifferentChild = 0;
         for (const auto& viaChild : visitedViaChild)
         {
             const int numSuitableViaThisChild = count_if(viaChild.begin(), viaChild.end(), [](const auto node) { return node->isSuitable; });
             const int64_t numNewTriples = numSuitablePairsViaDifferentChild * numSuitableViaThisChild * 6;
-#ifdef DIAGNOSTICS
-            cout << "  numSuitable: " << numSuitable << " numSuitablePairsViaDifferentChild: " << numSuitablePairsViaDifferentChild << " numNewTriples: " << numNewTriples << endl;
-#endif
             result += numNewTriples;
             numSuitablePairsViaDifferentChild += numSuitable * numSuitableViaThisChild;
             numSuitable += numSuitableViaThisChild;
@@ -91,20 +78,10 @@ void bfs(Node& rootNode, int64_t& result)
             viaChild = nextVisitedViaChild;
         }
 
-        const int original = visitedViaChild.size();
+        // Cull children of rootNode such that there are no longer any nodes at this distance from rootNode
+        // reachable from rootNode via that child.
         visitedViaChild.erase(remove_if(visitedViaChild.begin(), visitedViaChild.end(), [](const auto viaChild) { return viaChild.empty(); }), visitedViaChild.end());
-        const int newSize = visitedViaChild.size();
-
-        if (newSize < original)
-        {
-#ifdef DIAGNOSTICS
-            cout << "Pruned " << (original - newSize) << " at iteration: " << iterationNum << endl;
-#endif
-        }
-
-        iterationNum++;
     }
-
 
     for (auto node : visitedNodes)
         node->visitedInBFS = false;
@@ -112,12 +89,12 @@ void bfs(Node& rootNode, int64_t& result)
 
 int64_t findNumTriplets(vector<Node>& nodes)
 {
-    int64_t result = 0;
+    int64_t numTriplets = 0;
 
     for (auto& node : nodes)
-        bfs(node, result);
+        bfs(node, numTriplets);
 
-    return result;
+    return numTriplets;
 }
 
 int main(int argc, char* argv[])
