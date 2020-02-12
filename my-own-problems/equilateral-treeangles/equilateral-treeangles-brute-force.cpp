@@ -41,7 +41,7 @@ vector<vector<int>> computeNodeDistanceLookup(const vector<Node>& nodes)
 
 int64_t solveBruteForce(const vector<Node>& nodes)
 {
-    int64_t result = 0;
+    int64_t numTriplets = 0;
 
     const int numNodes = nodes.size();
 
@@ -85,7 +85,7 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
                     if (distanceBetweenNodes[node1->index][node2->index] == distance)
                     {
-                        result++;
+                        numTriplets++;
                     }
                 }
             }
@@ -93,7 +93,7 @@ int64_t solveBruteForce(const vector<Node>& nodes)
         numNodesProcessed++;
     }
 
-    return result;
+    return numTriplets;
 }
 
 int main(int argc, char* argv[])
