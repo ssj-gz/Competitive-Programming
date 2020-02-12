@@ -47,9 +47,9 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
     const auto distanceBetweenNodes = computeNodeDistanceLookup(nodes);
 
-    for (int i = 0; i < numNodes; i++)
+    for (auto i = 0; i < numNodes; i++)
     {
-        for (int j = 0; j < numNodes; j++)
+        for (auto j = 0; j < numNodes; j++)
         {
             assert(distanceBetweenNodes[i][j] != -1);
             assert(distanceBetweenNodes[i][j] == distanceBetweenNodes[j][i]);
@@ -57,18 +57,18 @@ int64_t solveBruteForce(const vector<Node>& nodes)
         }
     }
 
-    int numNodesProcessed = 0;
+    auto numNodesProcessed = 0;
     for (const auto& node : nodes)
     {
         if (!node.isSuitable)
             continue;
 
         vector<vector<const Node*>> nodesAtDistance(numNodes);
-        for (int i = 0; i < numNodes; i++)
+        for (auto i = 0; i < numNodes; i++)
         {
             nodesAtDistance[distanceBetweenNodes[node.index][i]].push_back(&(nodes[i]));
         }
-        for (int distance = 1; distance < numNodes; distance++)
+        for (auto distance = 1; distance < numNodes; distance++)
         {
             const auto& nd = nodesAtDistance[distance];
 
@@ -108,25 +108,25 @@ int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    const int numTestCases = readInt();
+    const auto numTestCases = readInt();
 
-    for (int t = 0; t < numTestCases; t++)
+    for (auto t = 0; t < numTestCases; t++)
     {
-        const int numNodes = readInt();
+        const auto numNodes = readInt();
 
         vector<Node> nodes(numNodes);
 
-        for (int i = 0; i < numNodes - 1; i++)
+        for (auto i = 0; i < numNodes - 1; i++)
         {
-            const int u = readInt() - 1;
-            const int v = readInt() - 1;
+            const auto u = readInt() - 1;
+            const auto v = readInt() - 1;
 
             nodes[u].neighbours.push_back(&(nodes[v]));
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
-        for (int i = 0; i < numNodes; i++)
+        for (auto i = 0; i < numNodes; i++)
         {
-            const int isSuitableValue = readInt();
+            const auto isSuitableValue = readInt();
 
             assert(isSuitableValue == 0 || isSuitableValue == 1);
 
