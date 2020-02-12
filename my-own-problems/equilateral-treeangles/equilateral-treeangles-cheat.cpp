@@ -24,27 +24,27 @@ int64_t numTriples(int64_t n)
     return (n * (n - 1) * (n - 2));
 }
 
-void bfs(Node& rootNode, int64_t& result)
+void bfs(Node& centreNode, int64_t& result)
 {
-    // Will store, for each child of rootNode, the list of nodes
-    // reachable from rootNode via that child.
+    // Will store, for each child of centreNode, the list of nodes
+    // reachable from centreNode via that child.
     vector<vector<Node*>> visitedViaChild;
 
-    vector<Node*> visitedNodes = { &rootNode };
-    for (auto rootNodeNeighbour : rootNode.neighbours)
+    vector<Node*> visitedNodes = { &centreNode };
+    for (auto rootNodeNeighbour : centreNode.neighbours)
     {
         visitedViaChild.push_back({rootNodeNeighbour});
         rootNodeNeighbour->visitedInBFS = true;
         visitedNodes.push_back(rootNodeNeighbour);
     }
-    rootNode.visitedInBFS = true; 
+    centreNode.visitedInBFS = true; 
 
     while (!visitedViaChild.empty())
     {
         if (visitedViaChild.size() < 3)
         {
-            // Stop here - for a triple to be centred around rootNode, there need to be
-            // three nodes, equidistant from rootNode, and reached via rootNode via
+            // Stop here - for a triple to be centred around centreNode, there need to be
+            // three nodes, equidistant from centreNode, and reached via centreNode via
             // different children.  This is no longer possible.
             break;
         }
@@ -76,8 +76,8 @@ void bfs(Node& rootNode, int64_t& result)
             viaChild = nextVisitedViaChild;
         }
 
-        // Cull children of rootNode such that there are no longer any nodes at this distance from rootNode
-        // reachable from rootNode via that child.
+        // Cull children of centreNode such that there are no longer any nodes at this distance from centreNode
+        // reachable from centreNode via that child.
         visitedViaChild.erase(remove_if(visitedViaChild.begin(), visitedViaChild.end(), [](const auto viaChild) { return viaChild.empty(); }), visitedViaChild.end());
     }
 
