@@ -97,18 +97,23 @@ int64_t findNumTriplets(vector<Node>& nodes)
     return numTriplets;
 }
 
+int readInt()
+{
+    int toRead;
+    cin >> toRead;
+    assert(cin);
+    return toRead;
+}
+
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
 
-    int numTestCases;
-    cin >> numTestCases;
+    const int numTestCases = readInt();
 
     for (int t = 0; t < numTestCases; t++)
     {
-        int numNodes;
-        cin >> numNodes;
-        assert(1 <= numNodes && numNodes <= 200'000);
+        const int numNodes = readInt();
 
         vector<Node> nodes(numNodes);
         for (int i = 0; i < numNodes; i++)
@@ -116,29 +121,19 @@ int main(int argc, char* argv[])
 
         for (int i = 0; i < numNodes - 1; i++)
         {
-            int u;
-            cin >> u;
-            int v;
-            cin >> v;
-
-            assert(1 <= u && u <= 200'000);
-            assert(1 <= v && v <= 200'000);
-
-            // Make 0-relative.
-            u--;
-            v--;
+            const int u = readInt() - 1;
+            const int v = readInt() - 1;
 
             nodes[u].neighbours.push_back(&(nodes[v]));
             nodes[v].neighbours.push_back(&(nodes[u]));
         }
         for (int i = 0; i < numNodes; i++)
         {
-            int isSuitable;
-            cin >> isSuitable;
+            const int isSuitableValue = readInt();
 
-            assert(isSuitable == 0 || isSuitable == 1);
+            assert(isSuitableValue == 0 || isSuitableValue == 1);
 
-            nodes[i].isSuitable = (isSuitable == 1);
+            nodes[i].isSuitable = (isSuitableValue == 1);
         }
 
         const auto numTriplets = findNumTriplets(nodes);
