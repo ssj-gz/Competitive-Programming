@@ -1,4 +1,4 @@
-// O(N^3) solution to Equitree - should be able to pass Subtask #1.
+// O(N^3) solution to CHGORAM2 - should be able to pass Subtask #1.
 #include <iostream>
 #include <vector>
 #include <algorithm>
