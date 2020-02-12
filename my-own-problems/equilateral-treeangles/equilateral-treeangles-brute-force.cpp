@@ -14,15 +14,15 @@ struct Node
     int index = -1;
 };
 
-void addDistancesFromRootNode(const int rootNodeIndex, const Node* currentNode, const Node* parentNode, int height, vector<vector<int>>& distanceBetweenNodes)
+void addDistancesFromRootNode(const int rootNodeIndex, const Node* currentNode, const Node* parentNode, int dist, vector<vector<int>>& distanceBetweenNodes)
 {
-    distanceBetweenNodes[rootNodeIndex][currentNode->index] = height;
+    distanceBetweenNodes[rootNodeIndex][currentNode->index] = dist;
     for (auto childNode : currentNode->neighbours)
     {
         if (childNode == parentNode)
             continue;
 
-        addDistancesFromRootNode(rootNodeIndex, childNode, currentNode, height + 1, distanceBetweenNodes);
+        addDistancesFromRootNode(rootNodeIndex, childNode, currentNode, dist + 1, distanceBetweenNodes);
     }
 }
 
