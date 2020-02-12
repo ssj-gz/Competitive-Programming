@@ -26,16 +26,27 @@ void addDistancesFromRootNode(const int rootNodeIndex, const Node* currentNode, 
     }
 }
 
+vector<vector<int>> computeNodeDistanceLookup(const vector<Node>& nodes)
+{
+    vector<vector<int>> distanceBetweenNodes(nodes.size(), vector<int>(nodes.size(), -1));
+    for (const auto& rootNode : nodes)
+    {
+        addDistancesFromRootNode(rootNode.index, &rootNode, nullptr, 0, distanceBetweenNodes);
+    }
+
+    return distanceBetweenNodes;
+}
+
+
+
 int64_t solveBruteForce(const vector<Node>& nodes)
 {
     int64_t result = 0;
 
     const int numNodes = nodes.size();
-    vector<vector<int>> distanceBetweenNodes(numNodes, vector<int>(numNodes, -1));
-    for (const auto& rootNode : nodes)
-    {
-        addDistancesFromRootNode(rootNode.index, &rootNode, nullptr, 0, distanceBetweenNodes);
-    }
+
+    const auto distanceBetweenNodes = computeNodeDistanceLookup(nodes);
+
     for (int i = 0; i < numNodes; i++)
     {
         for (int j = 0; j < numNodes; j++)
