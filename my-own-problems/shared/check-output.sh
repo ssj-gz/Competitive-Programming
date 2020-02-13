@@ -1,15 +1,15 @@
 #! /bin/bash
 
 usage() {
-    echo "Usage: check-output.sh [executable-name] [-n|--no-diff] [-a|--exe-arg executable-argument]"
+    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument]"
     echo
     echo "Finds all files of the form testfile<suffix>.in below the current directory and pipes them into executable-name (with"
     echo "executable-argument as an argument, if provided) and compares the resulting output with the corresponding testfile<suffix>.out."
     echo
     echo "Options:"
     echo
-    echo " * -n|--no-diff              In the event that the output from the invocation of executable-name does not match that of the corresponding .out"
-    echo "                             file, do not print the differences between them"                           
+    echo " * -d|--diff                 In the event that the output from the invocation of executable-name does not match that of the corresponding .out"
+    echo "                             file, print the differences between them using the diff command-line utility"                           
     echo " * -a|--executable-argument  The argument to be passed to executable-name when it is invoked"
     echo
     echo "Parameters:"
@@ -17,7 +17,7 @@ usage() {
     echo " * executable-name           The name of the executable to be tested.  Defaults to ./editorial"
 }
 
-params="$(getopt -o n,a: -l no-diff,exe-arg: --name "$cmdname" -- "$@")"
+params="$(getopt -o d,a: -l diff,exe-arg: --name "$cmdname" -- "$@")"
 
 if [ $? -ne 0 ]
 then
@@ -29,14 +29,14 @@ eval set -- "$params"
 unset params
   
 EXECUTABLE=./editorial
-NO_DIFF=false
+PRINT_DIFF_ON_MISMATCH=false
 EXECUTABLE_ARG=
 
 while true
 do
     case $1 in
-        -n|--no-diff)
-            NO_DIFF=true
+        -d|--diff)
+            PRINT_DIFF_ON_MISMATCH=true
             shift
             ;;
         -a|--exe_arg)
@@ -77,7 +77,7 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     if [ ${DIFF_AGAINST_CORRECT_RESULT} -eq "0" ]; then 
         echo -e "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
-        if [ ${NO_DIFF} != true ]; then
+        if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
             cat last-diff-output
         fi
         echo -e "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
