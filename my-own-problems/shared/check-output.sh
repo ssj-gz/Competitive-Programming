@@ -52,8 +52,6 @@ CHANGE_TO_GREEN="\033[0;32m"
 CHANGE_TO_WHITE="\033[0m"
 CHANGE_TO_RED="\033[0;31m"
 
-echo "Executable name: $EXECUTABLE NO_DIFF: ${NO_DIFF} EXECUTABLE_ARG ${EXECUTABLE_ARG}"
-
 time -p for testfile_name in testcase-generator/testfile*.in; do 
     echo -n $testfile_name 
     cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 
