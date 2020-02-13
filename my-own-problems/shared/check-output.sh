@@ -79,8 +79,8 @@ CHANGE_TO_RED="\033[0;31m"
 time -p for testfile_name in testcase-generator/testfile*.in; do 
     echo -n $testfile_name 
     cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 
-    last_testcase_time="$(cat last-testfile-time.txt)"
-    echo " (${last_testcase_time} seconds)"
+    last_testfile_time="$(cat last-testfile-time.txt)"
+    echo " (${last_testfile_time} seconds)"
 
     diff ${testfile_name//.in/.out} last-output > last-diff-output
     RESULT_OF_DIFF_AGAINST_CORRECT=$?
@@ -95,11 +95,11 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         echo -en "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
     fi
 
-    if (( $(echo "$last_testcase_time > $LONGEST_TESTCASE_SECONDS" |bc -l) )); then
-        LONGEST_TESTCASE_SECONDS=$last_testcase_time
+    if (( $(echo "$last_testfile_time > $LONGEST_TESTCASE_SECONDS" |bc -l) )); then
+        LONGEST_TESTCASE_SECONDS=$last_testfile_time
     fi
 
-    last_testcase_time_ms=$(echo $last_testcase_time*1000 | bc)
+    last_testcase_time_ms=$(echo $last_testfile_time*1000 | bc)
     if [[ ! -z "${TLE_MILLISECONDS}" &&  "$(echo "$last_testcase_time_ms > $TLE_MILLISECONDS" |bc -l)" -eq 1 ]]; then
         TLE_OCCURRED=true
         echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
