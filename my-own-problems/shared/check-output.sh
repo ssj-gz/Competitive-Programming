@@ -1,7 +1,7 @@
 #! /bin/bash
 
 usage() {
-    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument]"
+    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument] [-t|--tle-ms tle-milliseconds"
     echo
     echo "Finds all files of the form testfile<suffix>.in below the current directory and pipes them into executable-name (with"
     echo "executable-argument as an argument, if provided) and compares the resulting output with the corresponding testfile<suffix>.out."
@@ -11,13 +11,16 @@ usage() {
     echo " * -d|--diff                 In the event that the output from the invocation of executable-name does not match that of the corresponding .out"
     echo "                             file, print the differences between them using the diff command-line utility"                           
     echo " * -a|--executable-argument  The argument to be passed to executable-name when it is invoked"
+    echo " * -t|--tle-milliseconds     If the execution takes more than tle-milliseconds milliseconds, it is marked as TLE.  Note: the execution is"
+    echo "                             allowed to run its cause, even if it has taken more than tle-milliseconds milliseconds"
+
     echo
     echo "Parameters:"
     echo
     echo " * executable-name           The name of the executable to be tested.  Defaults to ./editorial"
 }
 
-params="$(getopt -o d,a: -l diff,exe-arg: --name "$cmdname" -- "$@")"
+params="$(getopt -o d,a:,t: -l diff,exe-arg:,tle-milliseconds: --name "$cmdname" -- "$@")"
 
 if [ $? -ne 0 ]
 then
@@ -31,6 +34,7 @@ unset params
 EXECUTABLE=./editorial
 PRINT_DIFF_ON_MISMATCH=false
 EXECUTABLE_ARG=
+TLE_MILLISECONDS=
 
 while true
 do
@@ -41,6 +45,10 @@ do
             ;;
         -a|--exe_arg)
             EXECUTABLE_ARG=${2-}
+            shift 2
+            ;;
+        -t|--tle-milliseconds)
+            TLE_MILLISECONDS=${2-}
             shift 2
             ;;
         -h|--help)
@@ -75,12 +83,18 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     RESULT_OF_DIFF_AGAINST_CORRECT=$?
 
     if [ ${RESULT_OF_DIFF_AGAINST_CORRECT} -eq "0" ]; then 
-        echo -e "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
+        echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
         if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
             cat last-diff-output
         fi
-        echo -e "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
+        echo -en "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
     fi
+
+    last_testcase_time_ms=$(echo $last_testcase_time*1000 | bc)
+    if [[ ! -z "${TLE_MILLISECONDS}" &&  "$(echo "$last_testcase_time_ms > $TLE_MILLISECONDS" |bc -l)" -eq 1 ]]; then
+        echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
+    fi
+    echo
 done
 
