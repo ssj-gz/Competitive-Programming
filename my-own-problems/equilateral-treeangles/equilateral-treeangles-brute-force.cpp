@@ -47,17 +47,6 @@ int64_t solveBruteForce(const vector<Node>& nodes)
 
     const auto distanceBetweenNodes = computeNodeDistanceLookup(nodes);
 
-    for (auto i = 0; i < numNodes; i++)
-    {
-        for (auto j = 0; j < numNodes; j++)
-        {
-            assert(distanceBetweenNodes[i][j] != -1);
-            assert(distanceBetweenNodes[i][j] == distanceBetweenNodes[j][i]);
-            assert(distanceBetweenNodes[i][j] < numNodes);
-        }
-    }
-
-    auto numNodesProcessed = 0;
     for (const auto& node : nodes)
     {
         if (!node.isSuitable)
@@ -90,7 +79,6 @@ int64_t solveBruteForce(const vector<Node>& nodes)
                 }
             }
         }
-        numNodesProcessed++;
     }
 
     return numTriplets;
