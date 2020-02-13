@@ -37,7 +37,7 @@ EXECUTABLE_ARG=
 TLE_MILLISECONDS=
 WA_OCCURRED=false
 TLE_OCCURRED=false
-LONGEST_TESTCASE_SECONDS=0
+LONGEST_TESTFILE_SECONDS=0
 
 while true
 do
@@ -95,19 +95,19 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         echo -en "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
     fi
 
-    if (( $(echo "$last_testfile_time > $LONGEST_TESTCASE_SECONDS" |bc -l) )); then
-        LONGEST_TESTCASE_SECONDS=$last_testfile_time
+    if (( $(echo "$last_testfile_time > $LONGEST_TESTFILE_SECONDS" |bc -l) )); then
+        LONGEST_TESTFILE_SECONDS=$last_testfile_time
     fi
 
-    last_testcase_time_ms=$(echo $last_testfile_time*1000 | bc)
-    if [[ ! -z "${TLE_MILLISECONDS}" &&  "$(echo "$last_testcase_time_ms > $TLE_MILLISECONDS" |bc -l)" -eq 1 ]]; then
+    last_testfile_time_ms=$(echo $last_testfile_time*1000 | bc)
+    if [[ ! -z "${TLE_MILLISECONDS}" &&  "$(echo "$last_testfile_time_ms > $TLE_MILLISECONDS" |bc -l)" -eq 1 ]]; then
         TLE_OCCURRED=true
         echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
     fi
     echo
 done
 
-echo "Longest testcase took ${LONGEST_TESTCASE_SECONDS} seconds"
+echo "Longest testfile took ${LONGEST_TESTFILE_SECONDS} seconds"
 
 PASS=true
 if [ ${WA_OCCURRED} == true ]; then
