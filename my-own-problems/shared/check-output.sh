@@ -1,7 +1,7 @@
 #! /bin/bash
 
 usage() {
-    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument] [-t|--tle-ms tle-milliseconds"
+    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument] [-t|--tle-ms tle-seconds"
     echo
     echo "Finds all files of the form testfile<suffix>.in below the current directory and pipes them into executable-name (with"
     echo "executable-argument as an argument, if provided) and compares the resulting output with the corresponding testfile<suffix>.out."
@@ -11,8 +11,9 @@ usage() {
     echo " * -d|--diff                 In the event that the output from the invocation of executable-name does not match that of the corresponding .out"
     echo "                             file, print the differences between them using the diff command-line utility"                           
     echo " * -a|--executable-argument  The argument to be passed to executable-name when it is invoked"
-    echo " * -t|--tle-milliseconds     If the execution takes more than tle-milliseconds milliseconds, it is marked as TLE.  Note: the execution is"
-    echo "                             allowed to run its cause, even if it has taken more than tle-milliseconds milliseconds"
+    echo " * -t|--tle-second     s     If the execution takes more than tle-seconds seconds, it is marked as TLE.  Note: the execution is"
+    echo "                             allowed to run its cause, even if it has taken more than tle-seconds seconds.  tle-seconds is permitted to be a"
+    echo "                             fractional value"
 
     echo
     echo "Parameters:"
@@ -20,7 +21,7 @@ usage() {
     echo " * executable-name           The name of the executable to be tested.  Defaults to ./editorial"
 }
 
-params="$(getopt -o d,a:,t: -l diff,exe-arg:,tle-milliseconds: --name "$cmdname" -- "$@")"
+params="$(getopt -o d,a:,t: -l diff,exe-arg:,tle-seconds: --name "$cmdname" -- "$@")"
 
 if [ $? -ne 0 ]
 then
@@ -34,7 +35,7 @@ unset params
 EXECUTABLE=./editorial
 PRINT_DIFF_ON_MISMATCH=false
 EXECUTABLE_ARG=
-TLE_MILLISECONDS=
+TLE_SECONDS=
 WA_OCCURRED=false
 TLE_OCCURRED=false
 LONGEST_TESTFILE_SECONDS=0
@@ -51,7 +52,7 @@ do
             shift 2
             ;;
         -t|--tle-milliseconds)
-            TLE_MILLISECONDS=${2-}
+            TLE_SECONDS=${2-}
             shift 2
             ;;
         -h|--help)
@@ -102,9 +103,7 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     if (( $(echo "$last_testfile_time > $LONGEST_TESTFILE_SECONDS" |bc -l) )); then
         LONGEST_TESTFILE_SECONDS=$last_testfile_time
     fi
-
-    last_testfile_time_ms=$(echo $last_testfile_time*1000 | bc)
-    if [[ ! -z "${TLE_MILLISECONDS}" &&  "$(echo "$last_testfile_time_ms > $TLE_MILLISECONDS" |bc -l)" -eq 1 ]]; then
+    if [[ ! -z "${TLE_SECONDS}" &&  "$(echo "$last_testfile_time > $TLE_SECONDS" |bc -l)" -eq 1 ]]; then
         TLE_OCCURRED=true
         echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
     fi
