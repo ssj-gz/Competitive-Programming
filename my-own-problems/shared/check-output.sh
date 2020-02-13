@@ -79,7 +79,7 @@ CHANGE_TO_RED="\033[0;31m"
 time -p for testfile_name in testcase-generator/testfile*.in; do 
     echo -n $testfile_name 
     cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 2> last-output-error
-    last_testfile_time="$(cat last-testfile-time.txt | grep -v exited)" # If ${EXECUTABLE} fails, last-testfile-time.txt will contain a "Command exited" line; remove it.
+    last_testfile_time="$(cat last-testfile-time.txt | grep -v Command)" # If ${EXECUTABLE} fails, last-testfile-time.txt will contain a "Command exited/ terminated" line; remove it.
     echo " (${last_testfile_time} seconds)"
 
     diff ${testfile_name//.in/.out} last-output > last-diff-output
