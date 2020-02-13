@@ -1,7 +1,20 @@
 #! /bin/bash
 
 usage() {
-    echo "Usage: TODO"
+    echo "Usage: check-output.sh [executable-name] [-n|--no-diff] [-a|--exe-arg executable-argument]"
+    echo
+    echo "Finds all files of the form testfile<suffix>.in below the current directory and pipes them into executable-name (with"
+    echo "executable-argument as an argument, if provided) and compares the resulting output with the corresponding testfile<suffix>.out."
+    echo
+    echo "Options:"
+    echo
+    echo " * -n|--no-diff              In the event that the output from the invocation of executable-name does not match that of the corresponding .out"
+    echo "                             file, do not print the differences between them"                           
+    echo " * -a|--executable-argument  The argument to be passed to executable-name when it is invoked"
+    echo
+    echo "Parameters:"
+    echo
+    echo " * executable-name           The name of the executable to be tested.  Defaults to ./editorial"
 }
 
 params="$(getopt -o n,a: -l no-diff,exe-arg: --name "$cmdname" -- "$@")"
