@@ -35,6 +35,8 @@ EXECUTABLE=./editorial
 PRINT_DIFF_ON_MISMATCH=false
 EXECUTABLE_ARG=
 TLE_MILLISECONDS=
+WA_OCCURRED=false
+TLE_OCCURRED=false
 
 while true
 do
@@ -85,6 +87,7 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     if [ ${RESULT_OF_DIFF_AGAINST_CORRECT} -eq "0" ]; then 
         echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
+        WA_OCCURRED=true
         if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
             cat last-diff-output
         fi
@@ -93,8 +96,25 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
 
     last_testcase_time_ms=$(echo $last_testcase_time*1000 | bc)
     if [[ ! -z "${TLE_MILLISECONDS}" &&  "$(echo "$last_testcase_time_ms > $TLE_MILLISECONDS" |bc -l)" -eq 1 ]]; then
+        TLE_OCCURRED=true
         echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
     fi
     echo
 done
 
+PASS=true
+if [ ${WA_OCCURRED} == true ]; then
+    PASS=false
+    echo -e "[${CHANGE_TO_RED}FAILED${CHANGE_TO_WHITE}] due to WA"
+fi
+if [ ${TLE_OCCURRED} == true ]; then
+    PASS=false
+    echo -e "[${CHANGE_TO_RED}FAILED${CHANGE_TO_WHITE}] due to TLE"
+fi
+
+if [ ${PASS} == true ]; then
+    echo -e "[${CHANGE_TO_GREEN}PASSED${CHANGE_TO_WHITE}]"
+    exit 0
+else
+    exit 1
+fi
