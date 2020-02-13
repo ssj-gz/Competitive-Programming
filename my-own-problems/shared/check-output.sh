@@ -72,9 +72,9 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     echo " (${last_testcase_time} seconds)"
 
     diff ${testfile_name//.in/.out} last-output > last-diff-output
-    DIFF_AGAINST_CORRECT_RESULT=$?
+    RESULT_OF_DIFF_AGAINST_CORRECT=$?
 
-    if [ ${DIFF_AGAINST_CORRECT_RESULT} -eq "0" ]; then 
+    if [ ${RESULT_OF_DIFF_AGAINST_CORRECT} -eq "0" ]; then 
         echo -e "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
         if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
