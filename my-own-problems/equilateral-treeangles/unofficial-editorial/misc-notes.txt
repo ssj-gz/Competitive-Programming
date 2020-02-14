@@ -5,3 +5,5 @@ https://www.hackerrank.com/challenges/find-the-nearest-clone/problem
 https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/592337 <-- me complaining about "Find the Nearest Clone" testcases (original).
 
 https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/605904 <-- my post with "Find the Nearest Clone" testcases that expose the Editorial as O(N^2).
+
+https://discuss.codechef.com/t/approach-for-question-making/37519 @shivank98 - "Problem history" suggestion
