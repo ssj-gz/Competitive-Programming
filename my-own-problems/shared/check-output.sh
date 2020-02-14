@@ -77,10 +77,40 @@ CHANGE_TO_GREEN="\033[0;32m"
 CHANGE_TO_WHITE="\033[0m"
 CHANGE_TO_RED="\033[0;31m"
 
+COMPLETION_NOTIFICATION_PIPE=testfile-completed.pipe
+
 time -p for testfile_name in testcase-generator/testfile*.in; do 
     echo -n $testfile_name 
-    cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 2> last-output-error
-    EXECUTABLE_RETURN_CODE=$?
+
+    if [ -e $COMPLETION_NOTIFICATION_PIPE ]; then
+        rm $COMPLETION_NOTIFICATION_PIPE
+        mkfifo $COMPLETION_NOTIFICATION_PIPE
+    fi
+
+
+    (cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 2> last-output-error; echo $? > $COMPLETION_NOTIFICATION_PIPE) &
+
+    seconds_elapsed=1
+
+    EXECUTABLE_RETURN_CODE=""
+    while true; do
+        read -t 1 EXECUTABLE_RETURN_CODE <> $COMPLETION_NOTIFICATION_PIPE
+
+        seconds_elapsed_message=" ${seconds_elapsed}s"
+        seconds_elapsed_message_num_chars=$(echo "$seconds_elapsed_message" | wc -c)
+
+        echo -ne "$seconds_elapsed_message"
+
+        # Move the cursor back to the beginning of the "Seconds elapsed" message we printed
+        for dummy in $(seq 1 $(($seconds_elapsed_message_num_chars - 1))); do
+            echo -en "\b"
+        done
+        if [ ! -z "$EXECUTABLE_RETURN_CODE" ]; then
+            break
+        fi
+
+        seconds_elapsed=$(($seconds_elapsed+1)) # Not strictly accurate, but we can work on that, I guess!
+    done
 
     last_testfile_time="$(cat last-testfile-time.txt | grep -v Command)" # If ${EXECUTABLE} fails, last-testfile-time.txt will contain a "Command exited/ terminated" line; remove it.
     echo " (${last_testfile_time} seconds)"
