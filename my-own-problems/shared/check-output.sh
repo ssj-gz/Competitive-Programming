@@ -1,7 +1,7 @@
 #! /bin/bash
 
 usage() {
-    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument] [-t|--tle-ms tle-seconds"
+    echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument] [-h] [-t|--tle-ms tle-seconds"
     echo
     echo "Finds all files of the form testfile<suffix>.in below the current directory and pipes them into executable-name (with"
     echo "executable-argument as an argument, if provided) and compares the resulting output with the corresponding testfile<suffix>.out."
@@ -14,14 +14,14 @@ usage() {
     echo " * -t|--tle-second     s     If the execution takes more than tle-seconds seconds, it is marked as TLE.  Note: the execution is"
     echo "                             allowed to run its cause, even if it has taken more than tle-seconds seconds.  tle-seconds is permitted to be a"
     echo "                             fractional value"
-
+    echo " * -h|--help                 Show this help text and exit"
     echo
     echo "Parameters:"
     echo
     echo " * executable-name           The name of the executable to be tested.  Defaults to ./editorial"
 }
 
-params="$(getopt -o d,a:,t: -l diff,exe-arg:,tle-seconds: --name "$cmdname" -- "$@")"
+params="$(getopt -o d,a:,t:,h -l diff,exe-arg:,tle-seconds:,help --name "$cmdname" -- "$@")"
 
 if [ $? -ne 0 ]
 then
