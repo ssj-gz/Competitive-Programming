@@ -36,9 +36,6 @@ EXECUTABLE=./editorial
 PRINT_DIFF_ON_MISMATCH=false
 EXECUTABLE_ARG=
 TLE_SECONDS=
-WA_OCCURRED=false
-TLE_OCCURRED=false
-LONGEST_TESTFILE_SECONDS=0
 
 while true
 do
@@ -79,6 +76,10 @@ CHANGE_TO_RED="\033[0;31m"
 
 COMPLETION_NOTIFICATION_PIPE=testfile-completed.pipe
 
+wa_occurred=false
+tle_occurred=false
+longest_testfile_seconds=0
+
 time -p for testfile_name in testcase-generator/testfile*.in; do 
     echo -n $testfile_name 
 
@@ -95,9 +96,9 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     seconds_elapsed=1
 
     # Wait for the signal that the executable has completed, printing the time elapsed every second.
-    EXECUTABLE_RETURN_CODE=""
+    executable_return_code=""
     while true; do
-        read -t 1 EXECUTABLE_RETURN_CODE <> $COMPLETION_NOTIFICATION_PIPE # Read from the Completion Notification Pipe, with a timeout of one second.
+        read -t 1 executable_return_code <> $COMPLETION_NOTIFICATION_PIPE # Read from the Completion Notification Pipe, with a timeout of one second.
                                                                           # The '<>' is from here: https://stackoverflow.com/a/6448737/900727
 
         # Print the "seconds elapsed" message, in RED if a TLE limit has been provided and has been exceeded.
@@ -113,7 +114,7 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         for dummy in $(seq 1 $(($seconds_elapsed_message_num_chars - 1))); do
             echo -en "\b"
         done
-        if [ ! -z "$EXECUTABLE_RETURN_CODE" ]; then
+        if [ ! -z "$executable_return_code" ]; then
             break
         fi
 
@@ -126,13 +127,13 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
 
     # Perform the diff, and store whether the output was expected or not.
     diff ${testfile_name//.in/.out} last-output > last-diff-output
-    RESULT_OF_DIFF_AGAINST_CORRECT=$?
+    result_of_diff_against_correct=$?
 
     # Print WA (and optionally diff and stderr contents) if appropriate.
-    if [ ${RESULT_OF_DIFF_AGAINST_CORRECT} -eq "0" ]; then 
+    if [ ${result_of_diff_against_correct} -eq "0" ]; then 
         echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
-        WA_OCCURRED=true
+        wa_occurred=true
         if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
             cat last-diff-output
         fi
@@ -144,35 +145,35 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     fi
 
     # Print NZEC (Non-Zero Exit Code - usually a crash) if appropriate.
-    if [ ${EXECUTABLE_RETURN_CODE} -ne "0" ]; then 
+    if [ ${executable_return_code} -ne "0" ]; then 
         echo -en "[${CHANGE_TO_RED}NZEC${CHANGE_TO_WHITE}]"
     fi
 
     # Print TLE if appropriate.
-    if (( $(echo "$last_testfile_time > $LONGEST_TESTFILE_SECONDS" |bc -l) )); then
-        LONGEST_TESTFILE_SECONDS=$last_testfile_time
+    if (( $(echo "$last_testfile_time > $longest_testfile_seconds" |bc -l) )); then
+        longest_testfile_seconds=$last_testfile_time
     fi
     if [[ ! -z "${TLE_SECONDS}" &&  "$(echo "$last_testfile_time > $TLE_SECONDS" |bc -l)" -eq 1 ]]; then
-        TLE_OCCURRED=true
+        tle_occurred=true
         echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
     fi
     echo
 done
 
 # All done; print summary.
-echo "Longest testfile took ${LONGEST_TESTFILE_SECONDS} seconds"
+echo "Longest testfile took ${longest_testfile_seconds} seconds"
 
-PASS=true
-if [ ${WA_OCCURRED} == true ]; then
-    PASS=false
+pass=true
+if [ ${wa_occurred} == true ]; then
+    pass=false
     echo -e "[${CHANGE_TO_RED}FAILED${CHANGE_TO_WHITE}] due to WA"
 fi
-if [ ${TLE_OCCURRED} == true ]; then
-    PASS=false
+if [ ${tle_occurred} == true ]; then
+    pass=false
     echo -e "[${CHANGE_TO_RED}FAILED${CHANGE_TO_WHITE}] due to TLE"
 fi
 
-if [ ${PASS} == true ]; then
+if [ ${pass} == true ]; then
     echo -e "[${CHANGE_TO_GREEN}PASSED${CHANGE_TO_WHITE}]"
     exit 0
 else
