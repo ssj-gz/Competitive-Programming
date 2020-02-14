@@ -88,17 +88,21 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     fi
 
 
+    # Run the executable with the given testfile in the background.  
+    # The fact that it has completed (and the executable's exit code) is reported via the Completion Notification Pipe.
     (cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 2> last-output-error; echo $? > $COMPLETION_NOTIFICATION_PIPE) &
 
     seconds_elapsed=1
 
+    # Wait for the signal that the executable has completed, printing the time elapsed every second.
     EXECUTABLE_RETURN_CODE=""
     while true; do
-        read -t 1 EXECUTABLE_RETURN_CODE <> $COMPLETION_NOTIFICATION_PIPE
+        read -t 1 EXECUTABLE_RETURN_CODE <> $COMPLETION_NOTIFICATION_PIPE # Read from the Completion Notification Pipe, with a timeout of one second.
+                                                                          # The '<>' is from here: https://stackoverflow.com/a/6448737/900727
 
+        # Print the "seconds elapsed" message, in RED if a TLE limit has been provided and has been exceeded.
         seconds_elapsed_message=" ${seconds_elapsed}s"
         seconds_elapsed_message_num_chars=$(echo "$seconds_elapsed_message" | wc -c)
-
         if [[ ! -z "${TLE_SECONDS}" &&  "$(echo "$seconds_elapsed > $TLE_SECONDS" |bc -l)" -eq 1 ]]; then
             echo -ne "${CHANGE_TO_RED}$seconds_elapsed_message${CHANGE_TO_WHITE}"
         else
@@ -116,12 +120,15 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         seconds_elapsed=$(($seconds_elapsed+1)) # Not strictly accurate, but we can work on that, I guess!
     done
 
+    # Find and print the (accurate) time taken to run the executable with the testcase.
     last_testfile_time="$(cat last-testfile-time.txt | grep -v Command)" # If ${EXECUTABLE} fails, last-testfile-time.txt will contain a "Command exited/ terminated" line; remove it.
     echo " (${last_testfile_time} seconds)"
 
+    # Perform the diff, and store whether the output was expected or not.
     diff ${testfile_name//.in/.out} last-output > last-diff-output
     RESULT_OF_DIFF_AGAINST_CORRECT=$?
 
+    # Print WA (and optionally diff and stderr contents) if appropriate.
     if [ ${RESULT_OF_DIFF_AGAINST_CORRECT} -eq "0" ]; then 
         echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
     else  
@@ -136,10 +143,12 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         echo -en "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
     fi
 
+    # Print NZEC (Non-Zero Exit Code - usually a crash) if appropriate.
     if [ ${EXECUTABLE_RETURN_CODE} -ne "0" ]; then 
         echo -en "[${CHANGE_TO_RED}NZEC${CHANGE_TO_WHITE}]"
     fi
 
+    # Print TLE if appropriate.
     if (( $(echo "$last_testfile_time > $LONGEST_TESTFILE_SECONDS" |bc -l) )); then
         LONGEST_TESTFILE_SECONDS=$last_testfile_time
     fi
@@ -150,6 +159,7 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     echo
 done
 
+# All done; print summary.
 echo "Longest testfile took ${LONGEST_TESTFILE_SECONDS} seconds"
 
 PASS=true
