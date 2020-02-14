@@ -99,7 +99,11 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         seconds_elapsed_message=" ${seconds_elapsed}s"
         seconds_elapsed_message_num_chars=$(echo "$seconds_elapsed_message" | wc -c)
 
-        echo -ne "$seconds_elapsed_message"
+        if [[ ! -z "${TLE_SECONDS}" &&  "$(echo "$seconds_elapsed > $TLE_SECONDS" |bc -l)" -eq 1 ]]; then
+            echo -ne "${CHANGE_TO_RED}$seconds_elapsed_message${CHANGE_TO_WHITE}"
+        else
+            echo -ne "$seconds_elapsed_message"
+        fi
 
         # Move the cursor back to the beginning of the "Seconds elapsed" message we printed
         for dummy in $(seq 1 $(($seconds_elapsed_message_num_chars - 1))); do
