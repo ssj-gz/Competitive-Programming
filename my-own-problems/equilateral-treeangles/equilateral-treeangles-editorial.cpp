@@ -179,7 +179,7 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
 
     auto addSomeTypeATrianglesForNode = [&numTriangles](Node* node, DistTracker& distTracker)
     {
-        // This will be called O(log2 n) times for each node before the node's
+        // This will be called O(log2 n) times for each node before that node's
         // Type A Triangles are fully completed.
         for (const auto& heightPair : node->descendantWithHeightInfo)
         {
