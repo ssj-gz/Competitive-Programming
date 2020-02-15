@@ -11,7 +11,7 @@ usage() {
     echo " * -d|--diff                 In the event that the output from the invocation of executable-name does not match that of the corresponding .out"
     echo "                             file, print the differences between them using the diff command-line utility"                           
     echo " * -a|--executable-argument  The argument to be passed to executable-name when it is invoked"
-    echo " * -t|--tle-second     s     If the execution takes more than tle-seconds seconds, it is marked as TLE.  Note: the execution is"
+    echo " * -t|--tle-seconds          If the execution takes more than tle-seconds seconds, it is marked as TLE.  Note: the execution is"
     echo "                             allowed to run its cause, even if it has taken more than tle-seconds seconds.  tle-seconds is permitted to be a"
     echo "                             fractional value"
     echo " * -h|--help                 Show this help text and exit"
