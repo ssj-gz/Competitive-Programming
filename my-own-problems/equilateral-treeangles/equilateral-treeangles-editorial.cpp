@@ -41,7 +41,10 @@ struct Node
 struct HeightInfo
 {
     int numWithHeight = 0;
-    Node* lastUpdatedAtNode = nullptr;
+    // Make a note of which Node this info has been incorporated into (i.e. which Node's
+    // descendantWithHeightInfo it has been used to update) so we don't accidentally
+    // incorporate it into the same Node twice!
+    Node* lastIncorporatedIntoNode = nullptr;
 };
 
 class DistTracker
@@ -274,12 +277,13 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
         auto transientInfoForDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriangles);
         if (transientInfoForDescendantHeight.size() > persistentInfoForDescendantHeight.size())
         {
-            // "Copy" the smaller set into the larger set for asymptotically-good performance gains!
+            // We'll be copying transientInfoForDescendantHeight into persistentInfoForDescendantHeight.
+            // Ensure that the former is smaller than the latter so that we can make use of the Small-to-Large
+            // trick.
             // NB: std::swap'ing is O(1).
             swap(persistentInfoForDescendantHeight, transientInfoForDescendantHeight);
         }
 
-        // "Copy" the transient info (which will go out of scope, at the end of this block) into the persistentInfoForDescendantHeight.
         for (auto transientDescendantHeightPair : transientInfoForDescendantHeight)
         {
             // This block of code (i.e. the body of the containing for... loop) 
@@ -300,16 +304,16 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
             auto numUnprocessedDescendantsWithHeight = -1;
             auto numKnownDescendantsWithHeight = -1;
-            assert(transientHeightInfo.lastUpdatedAtNode != nullptr);
-            if (transientHeightInfo.lastUpdatedAtNode == currentNode)
+            assert(transientHeightInfo.lastIncorporatedIntoNode != nullptr);
+            if (transientHeightInfo.lastIncorporatedIntoNode == currentNode)
             {
-                assert(heightInfoForNode.lastUpdatedAtNode != currentNode);
+                assert(heightInfoForNode.lastIncorporatedIntoNode != currentNode);
                 numUnprocessedDescendantsWithHeight = heightInfoForNode.numWithHeight;
                 numKnownDescendantsWithHeight = transientHeightInfo.numWithHeight;
             }
             else
             {
-                assert(transientHeightInfo.lastUpdatedAtNode != currentNode);
+                assert(transientHeightInfo.lastIncorporatedIntoNode != currentNode);
                 numUnprocessedDescendantsWithHeight = transientHeightInfo.numWithHeight;
                 numKnownDescendantsWithHeight = heightInfoForNode.numWithHeight;
             }
@@ -344,15 +348,17 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
             }
 
+            // "Copy" the transient info into persistent info, and make a note that this HeightInfo has been incorporated
+            // into currentNode.
             heightInfoForNode.numWithHeight += transientHeightInfo.numWithHeight;
-            heightInfoForNode.lastUpdatedAtNode = currentNode;
+            heightInfoForNode.lastIncorporatedIntoNode = currentNode;
         }
     }
 
     if (currentNode->isSuitable)
     {
         persistentInfoForDescendantHeight[currentNode->height].numWithHeight++;
-        persistentInfoForDescendantHeight[currentNode->height].lastUpdatedAtNode = currentNode;
+        persistentInfoForDescendantHeight[currentNode->height].lastIncorporatedIntoNode = currentNode;
     }
 
     return persistentInfoForDescendantHeight;
