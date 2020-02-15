@@ -233,8 +233,9 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
     {
         assert(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid) != neighbour->neighbours.end());
         // Erase the edge from the centroid's neighbour to the centroid, essentially "chopping off" each child into its own
-        // component.
+        // component ...
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
+        // ... and recurse.
         doCentroidDecomposition(neighbour, numTriangles);
     }
 }
