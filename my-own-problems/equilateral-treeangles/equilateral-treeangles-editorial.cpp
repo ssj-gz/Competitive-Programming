@@ -421,8 +421,8 @@ int main(int argc, char* argv[])
     //                        .......
     //                       /   |   \
     //                      p    q    r   <-- dist(p, x) = dist(q, x) = dist(r, x); 
-    //                                        p, q and r all have same distance from R 
-    //                                        (aka "height").
+    //                                        p, q and r all have same distance from X,
+    //                                        and so the same distance from R (aka "height").
     //
     // Type B - the two "lowest" nodes - say q and r wlog, are equidistant from their lca = X.  
     // p is *not* a descendent of X, but dist(p, X) = dist(q, X) (= dist(r, X)) e.g.
@@ -481,7 +481,7 @@ int main(int argc, char* argv[])
     //         * lca(u', v') = v; and
     //         * height(u') = height(v') = h (and so: dist(u', v) = dist(v', v))
     // 
-    // and also
+    // (this is stored as descendantWithHeightInfo.numPairsWithHeightWithNodeAsLCA) and also
     // 
     //     the number of triples (u', v', w') of v such that
     //         * u', v' and w' are all suitable;
@@ -498,7 +498,7 @@ int main(int argc, char* argv[])
     // The former is a step towards the computation of the number of Type B triples - 
     // referring to the definition of Type B, we've found, for each X, the number of q's 
     // and r's with a given height h (which equates to a distance d from X: height(q) - height(x))
-    // an lca X, and now we just need to find for each X and h the number of p's such that 
+    // and lca X, and now we just need to find for each X and h the number of p's such that 
     // dist(p, X) = height(q) - height(X).  We do this latter step via Centroid Decomposition.
     // 
     // More precisely, Phase one gives us, for each node v, a map from heights to number 
@@ -519,7 +519,7 @@ int main(int argc, char* argv[])
     // and "r's" found in Phase one with the "p's" necessary to form a complete, Type B-triplet 
     // in O(N x (log N) x (log N)).
     // 
-    // It can be further shown that if a triplet (p, q, r) of either type (i) or B) is 
+    // It can be further shown that if a triplet (p, q, r) of either type A or B is 
     // counted by the algorithm, then none of its (3! - 1) other permutations - (p, r, q); 
     // (r, p, q) etc - will be counted, so simply multiplying the count of Type A and 
     // Type B triplets by 3! gives us the final result.
@@ -532,14 +532,14 @@ int main(int argc, char* argv[])
     //                     |
     //                     X
     //                    / \
-    //                   A   B
+    //                   Y   Z
     //
-    // Imagine that A and B are the only suitable nodes, so there are no valid triples in 
+    // Imagine that Y and Z are the only suitable nodes, so there are no valid triples in 
     // this example.  
     //
     // Note that X's descendantWithHeightInfo[2].numPairsWithHeightWithNodeAsLCA will be 1.  
-    // The Centroid Decomposition step will then, unfortunately, treat A as a "completer" 
-    // of this pair (A, B) (and will treat B the same way), resulting in it reporting *2*
+    // The Centroid Decomposition step will then, unfortunately, treat Y as a "completer" 
+    // of this pair (Y, Z) (and will treat Z the same way), resulting in it reporting *2*
     // triples, instead of the correct answer of 0.  Luckily, it's easy (though clunky) to 
     // remove this overcount: see DescendantWithHeightInfo::number for more information.  
     // The proper Editorial solution, and the original HLD-based solution, don't have this 
