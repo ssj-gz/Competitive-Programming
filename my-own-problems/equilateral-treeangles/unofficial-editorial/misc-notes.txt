@@ -1,18 +1,3 @@
-
-Has some good features:
-* Broad range of outputs that are chaotic wrt to input
-
-Almost fell off my chair when I saw CHGORAM - count all triples of nodes satisfying conditions! But in the end, saved me having to come up with a story from scratch.
-
-Testing hard part
-* Simple cheat for O(N^2) solution was *devastatingly effective* on original tests
-** Passed all of them with ease XD
-** Back to the drawing board!
-** 006-008 designed specifically to violate some reasonable assumptions, but had no particular "cheat" implementation in mind, so almost deleted them - very pleased I didn't, as they were often the "Last Men Standing", as it were, even against official Tester
-*** Watching the Tester do his stuff is pretty nerve-wracking, incidentally - 013 and 014 are "mystery" tests designed by automated parameter-search to make his solution TLE as hard as they could - no idea how they work!
-* Initial few hours were demoralising; seemed to be an endless procession of people effortlessly dunking on it.  I kind of lost faith in the Problem, then, and wished I hadn't submitted it
-** Ultimately, though, surprisingly few people were able to solve it during the course of the Contest!
-
 # Problem History
 
 @shivank98 came up with this idea [a while back](https://discuss.codechef.com/t/approach-for-question-making/37519), and I thought it was a good one, so I'm take a stab at it :)
