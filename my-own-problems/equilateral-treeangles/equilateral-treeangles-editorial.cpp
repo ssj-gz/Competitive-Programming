@@ -18,7 +18,7 @@ struct DescendantWithHeightInfo
     // that have Node as their Lowest Common Ancestor.
     int64_t numPairsWithHeightWithNodeAsLCA = 0;
     // The name "number" is not strictly correct: if numPairsWithHeightWithNodeAsLCA > 0, then this
-    // will indeed be the number of suitable descendants of this Node which have this height
+    // will indeed be the number of suitable descendants of this Node which have this height,
     // but if numPairsWithHeightWithNodeAsLCA == 0, "number" will also be 0.
     // 
     // The "number" count is used to avoid the overcount when performing completeTrianglesOfTypeA
@@ -253,7 +253,7 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
             const auto numPairsWithHeightWithNodeAsLCA = descendantHeightPair.second.numPairsWithHeightWithNodeAsLCA;
 
             // Centroid decomposition would have (wrongly) added numPairsWithHeightWithNodeAsLCA[height] * numTripletPermutations 
-            // for each suitable descendant of node which had height - correct for this.
+            // for each suitable descendant of node with height "height" - correct for this.
             numTriangles -= numPairsWithHeightWithNodeAsLCA * node.descendantWithHeightInfo[height].number * numTripletPermutations;
         }
     }
@@ -280,8 +280,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
         {
             // We'll be copying transientInfoForDescendantHeight into persistentInfoForDescendantHeight.
             // Ensure that the former is smaller than the latter so that we can make use of the Small-to-Large
-            // trick.
-            // NB: std::swap'ing is O(1).
+            // trick. NB: std::swap'ing is O(1).
             swap(persistentInfoForDescendantHeight, transientInfoForDescendantHeight);
         }
 
@@ -290,8 +289,8 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
             // This block of code (i.e. the body of the containing for... loop) 
             // is executed O(n log2 n) times over the whole run.
             // It is guaranteed to be executed with descendantHeight if the current
-            // child has a descendant of descendantHeight that isSuitable and a previous child of this
-            // node also has a descendant of descendantHeight that isSuitable, but may also
+            // child has a descendant with height descendantHeight that isSuitable and a previous child of this
+            // node also has a descendant with height descendantHeight that isSuitable, but may also
             // be executed under different circumstances.
             //
             // Since this block of code adds at most one entry into currentNode's descendantWithHeightInfo member,
