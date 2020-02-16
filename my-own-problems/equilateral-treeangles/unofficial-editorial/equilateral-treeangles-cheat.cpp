@@ -41,7 +41,7 @@ void bfs(Node& centreNode, int64_t& result)
 
     while (!visitedViaChild.empty())
     {
-        if (visitedViaChild.size() < 3)
+        if (visitedViaChild.size() < 3) // <-- The tiny optimisation that absolutely devastated my original tests!
         {
             // Stop here - for a triple to be centred around centreNode, there need to be
             // three nodes, equidistant from centreNode, and reached via centreNode via
