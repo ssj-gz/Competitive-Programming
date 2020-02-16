@@ -8,6 +8,11 @@ https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/6059
 
 https://discuss.codechef.com/t/approach-for-question-making/37519 @shivank98 - "Problem history" suggestion
 
+Has some good features:
+* Broad range of outputs that are chaotic wrt to input
+
+Almost fell off my chair when I saw CHGORAM - count all triples of nodes satisfying conditions! But in the end, saved me having to come up with a story from scratch.
+
 Testing hard part
 * Simple cheat for O(N^2) solution was *devastatingly effective* on original tests
 ** Passed all of them with ease XD
