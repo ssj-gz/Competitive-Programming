@@ -7,3 +7,12 @@ https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/5923
 https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/605904 <-- my post with "Find the Nearest Clone" testcases that expose the Editorial as O(N^2).
 
 https://discuss.codechef.com/t/approach-for-question-making/37519 @shivank98 - "Problem history" suggestion
+
+Testing hard part
+* Simple cheat for O(N^2) solution was *devastatingly effective* on original tests
+** Passed all of them with ease XD
+** Back to the drawing board!
+** 006-008 designed specifically to violate some reasonable assumptions, but had no particular "cheat" implementation in mind, so almost deleted them - very pleased I didn't, as they were often the "Last Men Standing", as it were, even against official Tester
+*** Watching the Tester do his stuff is pretty nerve-wracking, incidentally - 013 and 014 are "mystery" tests designed by automated parameter-search to make his solution TLE as hard as they could - no idea how they work!
+* Initial few hours were demoralising; seemed to be an endless procession of people effortlessly dunking on it.  I kind of lost faith in the Problem, then, and wished I hadn't submitted it
+** Ultimately, though, surprisingly few people were able to solve it during the course of the Contest!
