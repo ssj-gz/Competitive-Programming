@@ -6,8 +6,6 @@ https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/5923
 
 https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/605904 <-- my post with "Find the Nearest Clone" testcases that expose the Editorial as O(N^2).
 
-https://discuss.codechef.com/t/approach-for-question-making/37519 @shivank98 - "Problem history" suggestion
-
 Has some good features:
 * Broad range of outputs that are chaotic wrt to input
 
@@ -21,3 +19,25 @@ Testing hard part
 *** Watching the Tester do his stuff is pretty nerve-wracking, incidentally - 013 and 014 are "mystery" tests designed by automated parameter-search to make his solution TLE as hard as they could - no idea how they work!
 * Initial few hours were demoralising; seemed to be an endless procession of people effortlessly dunking on it.  I kind of lost faith in the Problem, then, and wished I hadn't submitted it
 ** Ultimately, though, surprisingly few people were able to solve it during the course of the Contest!
+
+# Problem History
+
+@shivank98 came up with this idea [a while back](https://discuss.codechef.com/t/approach-for-question-making/37519), and I thought it was a good one, so I'm take a stab at it :)
+
+[TODO - image here]
+
+Oddly, CHGORAM2 arose out of my disatisfaction with a Hackerrank problem called ["Find the Nearest Clone"](https://www.hackerrank.com/challenges/find-the-nearest-clone/problem).  It's a neat Easy-Medium question that is utterly let down by its [legendarily](https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/592337) [poor](https://www.hackerrank.com/challenges/find-the-nearest-clone/forum/comments/605904) testcases - or rather, more fundamentally, by the fact that the Setter/ Editorialist did not realise that his purportedly $O(N)$ solution was in fact $O(N^2)$.
+
+I brainstormed ways of coming up with a tweak to the Problem that would enable me to re-do it (this time with decent testcases!) - perhaps count the number of ways of forming this closest pair? Or finding not the nearest *pair* of clones, but the nearest *triples* - triples of nodes who all have the same (minimum) distance from each other? Or perhaps counting all such triples? Or - maybe! - counting *all* triples of the same type??
+
+This latter seemed more plausible (for a tree, at least - not for an arbitrary graph as in the original Find the Nearest Clone!), and eventually I stripped it down to just two types: at the time, as you can see from the commit, I had a lame backstory in mind where the nodes were houses, and some houses had people in them, and you have to count the number of equidistant triples of people - something about the people in this town preferring to gather in triples and, out of a sense of fairness, wanted the journey time between any pairs of friend's houses to be the same, or somesuch nonsense :)
+
+Strangely for me, I came up with the basic idea - the Type A arrangement, countable using a DFS with the Small-to-Large optimisation used with descendent heights - almost straight away.  My git logs at the time explicitly mention [this](https://www.hackerrank.com/challenges/coloring-tree/problem) Hackerrank Problem, so I suppose by chance I was thinking about that Problem around this time, and that set me on the correct path.  Of course, I didn't get it completely correctly initially - I completely overlooked the existence of Type B arrangements (ha!) and also assumed that the "p" in  the Type A case would always be a direct ancestor of X (lol), but this latter factor was actually good - it made the problem much deeper, as now it seemed to required Centroid Decomposition, too!
+
+Actually implementing it didn't take too long - there was one heart-stopping moment where a test-run of my implementation took about 5 seconds on a testcase I generated (the git log at the time contains "I've gravely misjudged something, but don't yet know what.  Panic stations!"), but it turns out that I just had the direction of a "<" reversed and was doing the Large-to-Small Pessimisation instead of the Small-to-Large Optimisation XD
+
+With that fixed, I set my self to coming up with some more testcases which, ultimately, would prove to be by far the hardest part of this Problem.
+
+
+
+
