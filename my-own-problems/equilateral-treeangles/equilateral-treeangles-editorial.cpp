@@ -21,7 +21,7 @@ struct DescendantWithHeightInfo
     // will indeed be the number of suitable descendants of this Node which have this height,
     // but if numPairsWithHeightWithNodeAsLCA == 0, "number" will also be 0.
     // 
-    // The "number" count is used to avoid the overcount when performing completeTrianglesOfTypeA
+    // The "number" count is used to avoid the overcount when performing completeTripletsOfTypeA
     // (Centroid Decomposition has no notion of our parent-child relationship, so
     // will count "descendants" of a Node alongside "non-descendants" of a Node.)
     int number = 0;
@@ -173,14 +173,14 @@ Node* findCentroid(Node* startNode)
     return centroid;
 }
 
-void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
+void doCentroidDecomposition(Node* startNode, int64_t& numTriplets)
 {
     Node* centroid = findCentroid(startNode);
 
-    auto addSomeTypeATrianglesForNode = [&numTriangles](Node* node, DistTracker& distTracker)
+    auto addSomeTypeATripletsForNode = [&numTriplets](Node* node, DistTracker& distTracker)
     {
         // This will be called O(log2 n) times for each node before that node's
-        // Type A Triangles are fully completed.
+        // Type A Triplets are fully completed.
         for (const auto& heightPair : node->descendantWithHeightInfo)
         {
             const auto descendantHeight = heightPair.first;
@@ -189,14 +189,14 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
                 break; // Optimisation - no point continuing with larger descendantHeights.
 
             const auto numPairsWithHeightWithNodeAsLCA = heightPair.second.numPairsWithHeightWithNodeAsLCA;
-            const auto numNewTriangles = numPairsWithHeightWithNodeAsLCA * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
-            assert(numNewTriangles >= 0);
-            numTriangles += numNewTriangles;
+            const auto numNewTriplets = numPairsWithHeightWithNodeAsLCA * distTracker.numWithDist(requiredNonDescendantDist) * numTripletPermutations;
+            assert(numNewTriplets >= 0);
+            numTriplets += numNewTriplets;
         }
     };
-    auto propagateDists = [&addSomeTypeATrianglesForNode](Node* node, int depth, DistTracker& distTracker)
+    auto propagateDists = [&addSomeTypeATripletsForNode](Node* node, int depth, DistTracker& distTracker)
                         {
-                            addSomeTypeATrianglesForNode(node, distTracker);
+                            addSomeTypeATripletsForNode(node, distTracker);
                         };
     auto collectDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
@@ -226,7 +226,7 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
             doDfs(child, centroid, 1, distTracker, AdjustWithDepth, propagateDists );
             doDfs(child, centroid, 1, distTracker, DoNotAdjust, collectDists );
         }
-        addSomeTypeATrianglesForNode(centroid, distTracker);
+        addSomeTypeATripletsForNode(centroid, distTracker);
     }
 
     for (auto& neighbour : centroid->neighbours)
@@ -236,13 +236,13 @@ void doCentroidDecomposition(Node* startNode, int64_t& numTriangles)
         // component ...
         neighbour->neighbours.erase(std::find(neighbour->neighbours.begin(), neighbour->neighbours.end(), centroid));
         // ... and recurse.
-        doCentroidDecomposition(neighbour, numTriangles);
+        doCentroidDecomposition(neighbour, numTriplets);
     }
 }
 
-void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* rootNode, int64_t& numTriangles)
+void completeTripletsOfTypeACentroidDecomposition(vector<Node>& nodes, Node* rootNode, int64_t& numTriplets)
 {
-    doCentroidDecomposition(rootNode, numTriangles);
+    doCentroidDecomposition(rootNode, numTriplets);
     // Fix the overcount caused by Centroid Decomposition (over-)counting descendants of a node as non-descendants
     // of a node!
     for (auto& node : nodes)
@@ -254,12 +254,12 @@ void completeTrianglesOfTypeACentroidDecomposition(vector<Node>& nodes, Node* ro
 
             // Centroid decomposition would have (wrongly) added numPairsWithHeightWithNodeAsLCA[height] * numTripletPermutations 
             // for each suitable descendant of node with height "height" - correct for this.
-            numTriangles -= numPairsWithHeightWithNodeAsLCA * node.descendantWithHeightInfo[height].number * numTripletPermutations;
+            numTriplets -= numPairsWithHeightWithNodeAsLCA * node.descendantWithHeightInfo[height].number * numTripletPermutations;
         }
     }
 }
 
-map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNode, int height, int64_t& numTriangles)
+map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNode, int height, int64_t& numTriplets)
 {
     currentNode->height = height;
 
@@ -275,7 +275,7 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
         // not being used), which would (silently!) lead to asymptotically worse performance!
         //
         // Luckily, this code uses C++11 features so we can't accidentally fall into this trap.
-        auto transientInfoForDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriangles);
+        auto transientInfoForDescendantHeight = buildDescendantHeightInfo(child, currentNode, height + 1, numTriplets);
         if (transientInfoForDescendantHeight.size() > persistentInfoForDescendantHeight.size())
         {
             // We'll be copying transientInfoForDescendantHeight into persistentInfoForDescendantHeight.
@@ -328,16 +328,16 @@ map<int, HeightInfo> buildDescendantHeightInfo(Node* currentNode, Node* parentNo
 
                 if (numUnprocessedDescendantsWithHeight * numPairsWithHeightWithNodeAsLCA > 0)
                 {
-                    // Found a triple where all three nodes have currentNode as their LCA: a "Type B" triangle.
-                    const auto numNewTriangles = numPairsWithHeightWithNodeAsLCA * numUnprocessedDescendantsWithHeight * numTripletPermutations;
-                    assert(numNewTriangles >= 0);
-                    numTriangles += numNewTriangles;
+                    // Found a triple where all three nodes have currentNode as their LCA: a "Type B" triple.
+                    const auto numNewTriplets = numPairsWithHeightWithNodeAsLCA * numUnprocessedDescendantsWithHeight * numTripletPermutations;
+                    assert(numNewTriplets >= 0);
+                    numTriplets += numNewTriplets;
                 }
 
                 // These numPairsWithHeightWithNodeAsLCA would, when combined with a non-ancestor of currentNode that isSuitable and is
-                // (descendantHeight - currentNode->height) distance away from currentNode, form a "Type A" triangle.
+                // (descendantHeight - currentNode->height) distance away from currentNode, form a "Type A" triple.
                 // We store numPairsWithHeightWithNodeAsLCA for this descendantHeight inside currentNode: the required non-ancestors of
-                // currentNode will be found by completeTrianglesOfTypeA() later on.
+                // currentNode will be found by completeTripletsOfTypeA() later on.
                 numPairsWithHeightWithNodeAsLCA += numUnprocessedDescendantsWithHeight * numKnownDescendantsWithHeight;
 
                 if (numberDescendantsWithThisHeight == 0)
@@ -372,12 +372,12 @@ int64_t findNumTriplets(vector<Node>& nodes)
     auto rootNode = &(nodes.front());
 
     // Fills in numPairsWithHeightWithNodeAsLCA for each node, and 
-    // additionally counts all "Type B" triangles and adds them to results.
+    // additionally counts all "Type B" triples and adds them to results.
     buildDescendantHeightInfo(rootNode, nullptr, 0, numTriplets);
 
-    // Finishes off the computation of the number of "Type A" triangles
+    // Finishes off the computation of the number of "Type A" triples
     // that we began in buildDescendantHeightInfo.
-    completeTrianglesOfTypeACentroidDecomposition(nodes, rootNode, numTriplets);
+    completeTripletsOfTypeACentroidDecomposition(nodes, rootNode, numTriplets);
 
     return numTriplets;
 }
