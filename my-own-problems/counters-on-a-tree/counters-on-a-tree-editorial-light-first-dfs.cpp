@@ -240,10 +240,12 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                         };
     for (auto& chain : heavyChains)
     {
+        // The number of descendents of the top of the chain is an upper bound (though not a very
+        // tight one) for the maximum possible distance between two descendents of nodes in the chain.
         const int maxDistForChain = chain.front()->numDescendants + 1;
         for (auto pass = 1; pass <= 2; pass++)
         {
-            DistTracker distTracker(maxDistForChain); // TODO - optimise this - maxDist is way too big!
+            DistTracker distTracker(maxDistForChain);
             // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
