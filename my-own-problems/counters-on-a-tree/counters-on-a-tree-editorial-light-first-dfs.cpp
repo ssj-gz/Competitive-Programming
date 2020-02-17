@@ -238,6 +238,7 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                         };
     for (auto& chain : heavyChains)
     {
+        const int maxDist = chain.front()->numDescendants + 1;
         for (auto pass = 1; pass <= 2; pass++)
         {
             DistTracker distTracker(maxDist); // TODO - optimise this - maxDist is way too big!
