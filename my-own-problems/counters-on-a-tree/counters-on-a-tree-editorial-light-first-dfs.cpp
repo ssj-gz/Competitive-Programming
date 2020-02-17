@@ -84,7 +84,7 @@ class DistTracker
             auto powerOf2 = 2;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                m_heightsModPowerOf2[binaryDigitNum] = vector<VersionedValue>(powerOf2);
+                m_distsModPowerOf2[binaryDigitNum] = vector<VersionedValue>(powerOf2);
                 powerOf2 <<= 1;
             }
             clear();
@@ -101,11 +101,11 @@ class DistTracker
             auto powerOf2 = 2;
             for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
             {
-                const auto heightModPowerOf2 = newDistAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
-                numDistsModPowerOf2(binaryDigitNum, heightModPowerOf2)++;
+                const auto distModPowerOf2 = newDistAdjusted & (powerOf2 - 1); // "& (powerOf2 - 1)" is a faster "% powerOf2".
+                numDistsModPowerOf2(binaryDigitNum, distModPowerOf2)++;
                 if (m_makesDigitOneBegin[binaryDigitNum] <= m_makesDigitOneEnd[binaryDigitNum])
                 {
-                    if (heightModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && heightModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
+                    if (distModPowerOf2 >= m_makesDigitOneBegin[binaryDigitNum] && distModPowerOf2 <= m_makesDigitOneEnd[binaryDigitNum])
                         m_grundyNumber ^= (powerOf2 >> 1);
                 }
                 else
@@ -113,7 +113,7 @@ class DistTracker
                     const auto makeDigitZeroBegin = m_makesDigitOneEnd[binaryDigitNum] + 1;
                     const auto makeDigitZeroEnd = m_makesDigitOneBegin[binaryDigitNum] - 1;
                     assert(0 <= makeDigitZeroBegin && makeDigitZeroBegin <= makeDigitZeroEnd && makeDigitZeroEnd < powerOf2);
-                    if (!(heightModPowerOf2 >= makeDigitZeroBegin && heightModPowerOf2 <= makeDigitZeroEnd))
+                    if (!(distModPowerOf2 >= makeDigitZeroBegin && distModPowerOf2 <= makeDigitZeroEnd))
                         m_grundyNumber ^= (powerOf2 >> 1);
                 }
 
@@ -121,27 +121,27 @@ class DistTracker
             }
         };
 
-        void adjustAllDists(int heightDiff)
+        void adjustAllDists(int distDiff)
         {
-            m_pendingDistAdjustment += heightDiff;
+            m_pendingDistAdjustment += distDiff;
         }
         void doPendingDistAdjustments()
         {
-            auto heightDiff = m_pendingDistAdjustment;
-            if (heightDiff == 0)
+            auto distDiff = m_pendingDistAdjustment;
+            if (distDiff == 0)
                 return;
             m_pendingDistAdjustment = 0;
-            m_cumulativeDistAdjustment += heightDiff;
+            m_cumulativeDistAdjustment += distDiff;
 
             auto powerOf2 = 2;
-            if (heightDiff > 0)
+            if (distDiff > 0)
             {
                 for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // Scroll the begin/ end of the "makes digit one" zone to the left, updating m_grundyNumber
                     // on-the-fly.
                     auto parityChangeToNumberOfDistsThatMakeDigitsOne = 0;
-                    for (auto i = 0; i < heightDiff; i++)
+                    for (auto i = 0; i < distDiff; i++)
                     {
                         parityChangeToNumberOfDistsThatMakeDigitsOne += numDistsModPowerOf2(binaryDigitNum, m_makesDigitOneEnd[binaryDigitNum]);
                         m_makesDigitOneEnd[binaryDigitNum] = (powerOf2 + m_makesDigitOneEnd[binaryDigitNum] - 1) & (powerOf2 - 1);
@@ -158,13 +158,13 @@ class DistTracker
             }
             else
             {
-                heightDiff = -heightDiff;
-                assert(heightDiff > 0);
+                distDiff = -distDiff;
+                assert(distDiff > 0);
                 for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
                 {
                     // As above, but scroll the "makes digit one" zone to the right.
                     auto parityChangeToNumberOfDistsThatMakeDigitsOne = 0;
-                    for (auto i = 0; i < heightDiff; i++)
+                    for (auto i = 0; i < distDiff; i++)
                     {
                         parityChangeToNumberOfDistsThatMakeDigitsOne += numDistsModPowerOf2(binaryDigitNum, m_makesDigitOneBegin[binaryDigitNum]);
                         m_makesDigitOneBegin[binaryDigitNum] = (m_makesDigitOneBegin[binaryDigitNum] + 1) & (powerOf2 - 1);
@@ -182,7 +182,7 @@ class DistTracker
         }
         int& numDistsModPowerOf2(int binaryDigitNum, int modPowerOf2)
         {
-            auto& numDists = m_heightsModPowerOf2[binaryDigitNum][modPowerOf2];
+            auto& numDists = m_distsModPowerOf2[binaryDigitNum][modPowerOf2];
             if (numDists.versionNumber != m_versionNumber)
             {
                 numDists.value = 0;
@@ -219,7 +219,7 @@ class DistTracker
             int value = 0;
             int versionNumber = -1;
         };
-        vector<VersionedValue> m_heightsModPowerOf2[maxBinaryDigits + 1];
+        vector<VersionedValue> m_distsModPowerOf2[maxBinaryDigits + 1];
         int m_makesDigitOneBegin[maxBinaryDigits + 1];
         int m_makesDigitOneEnd[maxBinaryDigits + 1];
 
@@ -233,37 +233,37 @@ class DistTracker
 
 enum DistTrackerAdjustment {DoNotAdjust, AdjustWithDepth};
 template <typename NodeProcessor>
-void doDfs(Node* node, int depth, DistTracker& heightTracker, DistTrackerAdjustment heightTrackerAdjustment, NodeProcessor& processNode)
+void doDfs(Node* node, int depth, DistTracker& distTracker, DistTrackerAdjustment distTrackerAdjustment, NodeProcessor& processNode)
 {
-    if (heightTrackerAdjustment == AdjustWithDepth)
-        heightTracker.adjustAllDists(1);
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(1);
 
     processNode(node, depth);
 
     for (auto child : node->children)
-        doDfs(child, depth + 1, heightTracker, heightTrackerAdjustment, processNode);
+        doDfs(child, depth + 1, distTracker, distTrackerAdjustment, processNode);
 
-    if (heightTrackerAdjustment == AdjustWithDepth)
-        heightTracker.adjustAllDists(-1);
+    if (distTrackerAdjustment == AdjustWithDepth)
+        distTracker.adjustAllDists(-1);
 }
 
 void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
 {
-    DistTracker heightTracker;
-    auto collectDists = [&heightTracker](Node* node, int depth)
+    DistTracker distTracker;
+    auto collectDists = [&distTracker](Node* node, int depth)
                         {
                             if (node->hasCoin)
-                                heightTracker.insertDist(depth);
+                                distTracker.insertDist(depth);
                         };
-    auto propagateDists = [&heightTracker](Node* node, int depth)
+    auto propagateDists = [&distTracker](Node* node, int depth)
                         {
-                            node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                            node->grundyNumberIfRoot ^= distTracker.grundyNumber();
                         };
     for (auto& chain : heavyChains)
     {
         for (auto pass = 1; pass <= 2; pass++)
         {
-            heightTracker.clear();
+            distTracker.clear();
             // Crawl along chain, collecting from one node and propagating to the next.
             for (auto node : chain)
             {
@@ -272,19 +272,19 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                     // Once only (first pass chosen arbitrarily) - add this node's coin
                     // (if any) so that it gets propagated to light descendants ...
                     if (node->hasCoin)
-                        heightTracker.insertDist(0);
+                        distTracker.insertDist(0);
                     // ... and update its grundy number now, so that it *doesn't* include
                     // the contributions from its light descendants.
-                    node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                    node->grundyNumberIfRoot ^= distTracker.grundyNumber();
                 }
 
                 for (auto lightChild : node->lightChildren)
                 {
                     // Propagate all coins found so far along the chain in this direction
                     // to light descendants ...
-                    doDfs(lightChild, 1, heightTracker, AdjustWithDepth, propagateDists);
+                    doDfs(lightChild, 1, distTracker, AdjustWithDepth, propagateDists);
                     // ... and collect from light descendants.
-                    doDfs(lightChild, 1, heightTracker, DoNotAdjust, collectDists);
+                    doDfs(lightChild, 1, distTracker, DoNotAdjust, collectDists);
                 }
 
                 if (pass == 2)
@@ -292,20 +292,20 @@ void computeGrundyNumberIfRootForAllNodes(vector<Node>& nodes)
                     // In pass 1, we ensured that this node's coin (if any) was propagated
                     // to its light descendants.  Don't do it this time - wait until
                     // we've processed this coin's light descendants before adding this
-                    // coin's node to the heightTracker!
+                    // coin's node to the distTracker!
                     if (node->hasCoin)
-                        heightTracker.insertDist(0);
+                        distTracker.insertDist(0);
                     // In pass 1, we ensured that this node's grundy number *wasn't* updated from
                     // its light descendants - this time, ensure that it is updated, by
                     // waiting until we've processed this coin's light descendants before updating
                     // its grundyNumberIfRoot.
-                    node->grundyNumberIfRoot ^= heightTracker.grundyNumber();
+                    node->grundyNumberIfRoot ^= distTracker.grundyNumber();
                 }
 
                 // Prepare for the reverse pass.
                 reverse(node->lightChildren.begin(), node->lightChildren.end());
-                // Move one node along the chain - increase all heights accordingly!
-                heightTracker.adjustAllDists(1);
+                // Move one node along the chain - increase all dists accordingly!
+                distTracker.adjustAllDists(1);
             }
             // Now do it backwards.
             reverse(chain.begin(), chain.end());
