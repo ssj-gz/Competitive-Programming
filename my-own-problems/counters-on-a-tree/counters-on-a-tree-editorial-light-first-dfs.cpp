@@ -1,5 +1,7 @@
 // Simon St James (ssjgz) 16/3/18.
-// Editorial solution for "Move the Coins, Yet Again!".
+// Light-First DFS version of the COUNTREE Editorial Solution
+// This is significantly faster than the one based on Centroid Decomposition, but
+// less familiar, and so harder to explain :)
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
