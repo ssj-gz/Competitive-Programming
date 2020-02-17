@@ -3,7 +3,7 @@
 usage() {
     echo "Usage: check-output.sh [executable-name] [-d|--diff] [-a|--exe-arg executable-argument] [-h] [-t|--tle-ms tle-seconds"
     echo
-    echo "Finds all files of the form testfile<suffix>.in below the current directory and pipes them into executable-name (with"
+    echo "Finds all files of the form testcase-generator/testfile<suffix>.in below the current directory and pipes them into executable-name (with"
     echo "executable-argument as an argument, if provided) and compares the resulting output with the corresponding testfile<suffix>.out."
     echo
     echo "Options:"
@@ -88,9 +88,8 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
         mkfifo $COMPLETION_NOTIFICATION_PIPE
     fi
 
-
     # Run the executable with the given testfile in the background.  
-    # The fact that it has completed (and the executable's exit code) is reported via the Completion Notification Pipe.
+    # The fact that it has completed is reported via the Completion Notification Pipe, along with the executable's exit code.
     (cat $testfile_name | /usr/bin/time -f %e -o last-testfile-time.txt ${EXECUTABLE} ${EXECUTABLE_ARG} > last-output 2> last-output-error; echo $? > $COMPLETION_NOTIFICATION_PIPE) &
 
     seconds_elapsed=1
@@ -150,14 +149,15 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     fi
 
     # Print TLE if appropriate.
-    if (( $(echo "$last_testfile_time > $longest_testfile_seconds" |bc -l) )); then
-        longest_testfile_seconds=$last_testfile_time
-    fi
     if [[ ! -z "${TLE_SECONDS}" &&  "$(echo "$last_testfile_time > $TLE_SECONDS" |bc -l)" -eq 1 ]]; then
         tle_occurred=true
         echo -en "[${CHANGE_TO_RED}TLE${CHANGE_TO_WHITE}]"
     fi
     echo
+
+    if (( $(echo "$last_testfile_time > $longest_testfile_seconds" |bc -l) )); then
+        longest_testfile_seconds=$last_testfile_time
+    fi
 done
 
 # All done; print summary.
