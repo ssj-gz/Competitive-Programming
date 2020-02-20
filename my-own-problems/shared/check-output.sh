@@ -129,8 +129,8 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     diff ${testfile_name//.in/.out} last-output > last-diff-output
     result_of_diff_against_correct=$?
 
-    if [ ${executable_return_code} -eq "0" ]; then 
-        # Print WA (and optionally diff and stderr contents) if appropriate.
+    if [ ${executable_return_code} -eq "0" ]; then # Don't print WA (or CORRECT!) if NZEC occurred - it's implied.
+        # Print CORRECT/ WA (and optionally diff and stderr contents) as appropriate.
         if [ ${result_of_diff_against_correct} -eq "0" ]; then 
             echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
         else  
