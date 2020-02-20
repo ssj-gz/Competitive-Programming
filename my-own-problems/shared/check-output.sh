@@ -77,6 +77,7 @@ CHANGE_TO_RED="\033[0;31m"
 COMPLETION_NOTIFICATION_PIPE=testfile-completed.pipe
 
 wa_occurred=false
+nzec_occurred=false
 tle_occurred=false
 longest_testfile_seconds=0
 
@@ -128,23 +129,26 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     diff ${testfile_name//.in/.out} last-output > last-diff-output
     result_of_diff_against_correct=$?
 
-    # Print WA (and optionally diff and stderr contents) if appropriate.
-    if [ ${result_of_diff_against_correct} -eq "0" ]; then 
-        echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
-    else  
-        wa_occurred=true
-        if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
-            cat last-diff-output
+    if [ ${executable_return_code} -eq "0" ]; then 
+        # Print WA (and optionally diff and stderr contents) if appropriate.
+        if [ ${result_of_diff_against_correct} -eq "0" ]; then 
+            echo -en "[${CHANGE_TO_GREEN}CORRECT${CHANGE_TO_WHITE}]"
+        else  
+            wa_occurred=true
+            if [ ${PRINT_DIFF_ON_MISMATCH} == true ]; then
+                cat last-diff-output
+            fi
+            if [ -s last-output-error ]; then
+                echo "stderr:"
+                cat last-output-error
+            fi
+            echo -en "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
         fi
-        if [ -s last-output-error ]; then
-            echo "stderr:"
-            cat last-output-error
-        fi
-        echo -en "[${CHANGE_TO_RED}WRONG ANSWER${CHANGE_TO_WHITE}]"
     fi
 
     # Print NZEC (Non-Zero Exit Code - usually a crash) if appropriate.
     if [ ${executable_return_code} -ne "0" ]; then 
+        nzec_occurred=true
         echo -en "[${CHANGE_TO_RED}NZEC${CHANGE_TO_WHITE}]"
     fi
 
@@ -171,6 +175,10 @@ fi
 if [ ${tle_occurred} == true ]; then
     pass=false
     echo -e "[${CHANGE_TO_RED}FAILED${CHANGE_TO_WHITE}] due to TLE"
+fi
+if [ ${nzec_occurred} == true ]; then
+    pass=false
+    echo -e "[${CHANGE_TO_RED}FAILED${CHANGE_TO_WHITE}] due to NZEC"
 fi
 
 if [ ${pass} == true ]; then
