@@ -10,7 +10,6 @@ struct Node
     vector<Node*> children;
     bool hasCoin = false;
     Node* parent = nullptr;
-    bool usable = true;
     int height = -1;
 
     int grundyNumber = -1;
