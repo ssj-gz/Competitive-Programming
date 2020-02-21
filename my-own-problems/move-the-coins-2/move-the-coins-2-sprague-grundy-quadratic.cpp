@@ -11,8 +11,6 @@ struct Node
     bool hasCoin = false;
     Node* parent = nullptr;
     int height = -1;
-
-    int grundyNumber = -1;
 };
 
 struct Query
