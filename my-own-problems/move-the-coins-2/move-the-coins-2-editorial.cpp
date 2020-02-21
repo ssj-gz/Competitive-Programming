@@ -143,7 +143,7 @@ void answerQueries(Node* node, const int originalTreeGrundyNumber, vector<Segmen
 {
     auto countCoinsThatMakeDigitOneAfterHeightChange = [&numNodesWithHeightModuloPowerOf2](const int heightChange, int* destination)
     {
-        for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+        for (auto binaryDigitNum = 0; binaryDigitNum < numNodesWithHeightModuloPowerOf2.size(); binaryDigitNum++)
         {
             const auto powerOf2 = (1 << (binaryDigitNum + 1));
             const auto oneThreshold = (1 << (binaryDigitNum));
@@ -167,7 +167,7 @@ void answerQueries(Node* node, const int originalTreeGrundyNumber, vector<Segmen
         countCoinsThatMakeDigitOneAfterHeightChange(queryForNode.heightChange, queryForNode.originalCoinsThatMakeDigitOneAfterHeightChange);
     }
     // Update numNodesWithHeightModuloPowerOf2 with information from this node.
-    for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+    for (auto binaryDigitNum = 0; binaryDigitNum < numNodesWithHeightModuloPowerOf2.size(); binaryDigitNum++)
     {
         if (node->hasCoin)
         {
@@ -210,8 +210,8 @@ void answerQueries(Node* node, const int originalTreeGrundyNumber, vector<Segmen
 vector<int> calcGrundyNumbersForQueries(Node* rootNode, const int numQueries)
 {
     // Initialise the SegmentTrees.
-    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigits + 1);
-    for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
+    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigits + 1); // TODO - use the number of nodes for this testcase to decide the number of segment trees, rather than maxN (via maxBinaryDigits).
+    for (auto binaryDigitNum = 0; binaryDigitNum < numNodesWithHeightModuloPowerOf2.size(); binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
