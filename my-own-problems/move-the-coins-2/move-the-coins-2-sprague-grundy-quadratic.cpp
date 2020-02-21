@@ -116,8 +116,7 @@ int main(int argc, char** argv)
         nodes[b].children.push_back(&nodes[a]);
     }
 
-    int numQueries;
-    cin >> numQueries;
+    const auto numQueries = read<int>();
 
     vector<Query> queries(numQueries);
 
