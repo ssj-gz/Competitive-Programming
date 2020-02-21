@@ -54,7 +54,7 @@ void reparentNode(Node* nodeToMove, Node* newParent)
     }
 }
 
-void fixParentChildAndHeights(Node* node, Node* parent = nullptr)
+void fixParentChild(Node* node, Node* parent = nullptr)
 {
     node->parent = parent;
 
@@ -62,7 +62,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr)
 
     for (auto child : node->children)
     {
-        fixParentChildAndHeights(child, node);
+        fixParentChild(child, node);
     }
 }
 
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
     }
 
     auto rootNode = &(nodes.front());
-    fixParentChildAndHeights(rootNode);
+    fixParentChild(rootNode);
 
     const auto resultBruteForce = grundyNumbersForQueriesBruteForce(nodes, queries);
     vector<int> queriesWhereBobWins;
