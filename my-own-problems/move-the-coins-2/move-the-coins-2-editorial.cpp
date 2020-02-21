@@ -56,18 +56,18 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 }
 
 // Calculate grundyContribForSubtree for the given node, and return the result.
-int findGrundyContribForSubtree(Node* node)
+int findGrundyContribForSubtree(Node* subtreeRoot)
 {
     auto grundyContribForSubtree = 0;
-    if (node->hasCoin)
-        grundyContribForSubtree ^= node->originalHeight;
+    if (subtreeRoot->hasCoin)
+        grundyContribForSubtree ^= subtreeRoot->originalHeight;
 
-    for (auto child : node->children)
+    for (auto child : subtreeRoot->children)
     {
         grundyContribForSubtree ^= findGrundyContribForSubtree(child);
     }
 
-    node->grundyContribForSubtree = grundyContribForSubtree;
+    subtreeRoot->grundyContribForSubtree = grundyContribForSubtree;
 
     return grundyContribForSubtree;
 }
