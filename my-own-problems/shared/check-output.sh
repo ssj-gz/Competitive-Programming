@@ -86,8 +86,8 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
 
     if [ -e $COMPLETION_NOTIFICATION_PIPE ]; then
         rm $COMPLETION_NOTIFICATION_PIPE
-        mkfifo $COMPLETION_NOTIFICATION_PIPE
     fi
+    mkfifo $COMPLETION_NOTIFICATION_PIPE
 
     # Run the executable with the given testfile in the background.  
     # The fact that it has completed is reported via the Completion Notification Pipe, along with the executable's exit code.
