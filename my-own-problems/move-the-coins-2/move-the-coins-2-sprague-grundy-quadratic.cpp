@@ -18,23 +18,22 @@ struct Query
     Node* newParent = nullptr;
 };
 
-void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber, int& numNodes)
+void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber)
 {
-    numNodes++;
     if (node->hasCoin)
     {
         grundyNumber ^= depth;
     }
     for (Node* child : node->children)
     {
-        grundyNumberForTreeBruteForce(child, depth + 1, grundyNumber, numNodes);
+        grundyNumberForTreeBruteForce(child, depth + 1, grundyNumber);
     }
 }
 
 int grundyNumberForTreeBruteForce(Node* node, int& numNodes)
 {
     int grundyNumber = 0;
-    grundyNumberForTreeBruteForce(node, 0, grundyNumber, numNodes);
+    grundyNumberForTreeBruteForce(node, 0, grundyNumber);
     return grundyNumber;
 }
 
