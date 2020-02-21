@@ -240,55 +240,60 @@ int main(int argc, char* argv[])
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; scan_integer(x); return x; };
 
-    const auto numNodes = readInt();
+    const auto T = readInt();
 
-    vector<Node> nodes(numNodes);
-    for (auto i = 0; i < numNodes; i++)
+    for (auto t = 0; t < T; t++)
     {
-        const auto numCoins = readInt();
-        nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins at each height.
-    }
-    for (auto i = 0; i < numNodes - 1; i++)
-    {
-        // Make a and b 0-relative.
-        const auto a = readInt() - 1;
-        const auto b = readInt() - 1;
+        const auto numNodes = readInt();
 
-        nodes[a].children.push_back(&nodes[b]);
-        nodes[b].children.push_back(&nodes[a]);
-    }
-
-    auto rootNode = &(nodes.front());
-    fixParentChildAndHeights(rootNode);
-
-    const auto numQueries = readInt();
-
-    for (auto queryIndex = 0; queryIndex < numQueries; queryIndex++)
-    {
-        // Make u and v 0-relative.
-        const auto u = readInt() - 1;
-        const auto v = readInt() - 1;
-
-        // Re-order queries so that all queries that move a given node u are accessible from u.
-        auto nodeToMove = &(nodes[u]);
-        auto newParent = &(nodes[v]);
-        const auto heightChange = newParent->originalHeight - nodeToMove->parent->originalHeight;
-        nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, heightChange} );
-    }
-
-    const auto queryGrundyNumbers = calcGrundyNumbersForQueries(rootNode, numNodes, numQueries);
-    const int64_t MOD = 1'000'000'007;
-    int64_t result = 0;
-    int64_t powerOf2 = 2; // 2 to the power of 1.
-    for (const auto grundyNumber : queryGrundyNumbers)
-    {
-        if (grundyNumber == 0)
+        vector<Node> nodes(numNodes);
+        for (auto i = 0; i < numNodes; i++)
         {
-            result = (result + powerOf2) % MOD;
+            const auto numCoins = readInt();
+            nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins at each height.
         }
-        powerOf2 = (powerOf2 * 2) % MOD;
+        for (auto i = 0; i < numNodes - 1; i++)
+        {
+            // Make a and b 0-relative.
+            const auto a = readInt() - 1;
+            const auto b = readInt() - 1;
 
+            nodes[a].children.push_back(&nodes[b]);
+            nodes[b].children.push_back(&nodes[a]);
+        }
+
+        auto rootNode = &(nodes.front());
+        fixParentChildAndHeights(rootNode);
+
+        const auto numQueries = readInt();
+
+        for (auto queryIndex = 0; queryIndex < numQueries; queryIndex++)
+        {
+            // Make u and v 0-relative.
+            const auto u = readInt() - 1;
+            const auto v = readInt() - 1;
+
+            // Re-order queries so that all queries that move a given node u are accessible from u.
+            auto nodeToMove = &(nodes[u]);
+            auto newParent = &(nodes[v]);
+            const auto heightChange = newParent->originalHeight - nodeToMove->parent->originalHeight;
+            nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, heightChange} );
+        }
+
+        const auto queryGrundyNumbers = calcGrundyNumbersForQueries(rootNode, numNodes, numQueries);
+        const int64_t MOD = 1'000'000'007;
+        int64_t result = 0;
+        int64_t powerOf2 = 2; // 2 to the power of 1.
+        for (const auto grundyNumber : queryGrundyNumbers)
+        {
+            if (grundyNumber == 0)
+            {
+                result = (result + powerOf2) % MOD;
+            }
+            powerOf2 = (powerOf2 * 2) % MOD;
+
+        }
+        cout << result << endl;
     }
-    cout << result << endl;
 
 }
