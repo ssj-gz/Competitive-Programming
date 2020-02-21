@@ -54,7 +54,7 @@ void reparentNode(Node* nodeToMove, Node* newParent)
     }
 }
 
-void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
+void fixParentChildAndHeights(Node* node, Node* parent = nullptr)
 {
     node->parent = parent;
 
@@ -62,7 +62,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 
     for (auto child : node->children)
     {
-        fixParentChildAndHeights(child, node, height + 1);
+        fixParentChildAndHeights(child, node);
     }
 }
 
