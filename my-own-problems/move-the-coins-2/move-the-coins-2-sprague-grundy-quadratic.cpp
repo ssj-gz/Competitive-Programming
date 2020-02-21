@@ -123,10 +123,8 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < numQueries; i++)
     {
-        int u, v;
-        cin >> u >> v;
-        u--;
-        v--;
+        const auto u = read<int>() - 1;
+        const auto v = read<int>() - 1;
 
         queries[i].nodeToMove = &(nodes[u]);
         queries[i].newParent = &(nodes[v]);
