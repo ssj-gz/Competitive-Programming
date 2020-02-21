@@ -109,10 +109,8 @@ int main(int argc, char** argv)
     }
     for (int i = 0; i < numNodes - 1; i++)
     {
-        int a, b;
-        cin >> a >> b;
-        a--;
-        b--;
+        const auto a = read<int>() - 1;
+        const auto b = read<int>() - 1;
 
         nodes[a].children.push_back(&nodes[b]);
         nodes[b].children.push_back(&nodes[a]);
