@@ -8,7 +8,7 @@ using namespace std;
 struct Node
 {
     vector<Node*> children;
-    int numCoins = -1;
+    bool hasCoin = false;
     Node* parent = nullptr;
     int nodeId = -1;
     bool usable = true;
@@ -26,7 +26,7 @@ struct Query
 void grundyNumberForTreeBruteForce(Node* node, const int depth, int& grundyNumber, int& numNodes)
 {
     numNodes++;
-    for (int i = 0; i < node->numCoins; i++)
+    if (node->hasCoin)
     {
         grundyNumber ^= depth;
     }
@@ -106,7 +106,9 @@ int main(int argc, char** argv)
     for (int i = 0; i < numNodes; i++)
     {
         nodes[i].nodeId = i;
-        cin >> nodes[i].numCoins;
+        int numCoins;
+        cin >> numCoins;
+        nodes[i].hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
     }
     for (int i = 0; i < numNodes - 1; i++)
     {
