@@ -10,7 +10,6 @@ struct Node
     vector<Node*> children;
     bool hasCoin = false;
     Node* parent = nullptr;
-    int nodeId = -1;
     bool usable = true;
     int height = -1;
 
@@ -105,7 +104,6 @@ int main(int argc, char** argv)
     vector<Node> nodes(numNodes);
     for (int i = 0; i < numNodes; i++)
     {
-        nodes[i].nodeId = i;
         int numCoins;
         cin >> numCoins;
         nodes[i].hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
