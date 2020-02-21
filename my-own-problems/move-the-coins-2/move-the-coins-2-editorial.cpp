@@ -56,7 +56,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 }
 
 // Calculate grundyContribForSubtree for the given node, and return the result.
-int findGrundyContribsForNodes(Node* node)
+int findGrundyContribForSubtree(Node* node)
 {
     auto grundyContribForSubtree = 0;
     if (node->hasCoin)
@@ -64,7 +64,7 @@ int findGrundyContribsForNodes(Node* node)
 
     for (auto child : node->children)
     {
-        grundyContribForSubtree ^= findGrundyContribsForNodes(child);
+        grundyContribForSubtree ^= findGrundyContribForSubtree(child);
     }
 
     node->grundyContribForSubtree = grundyContribForSubtree;
@@ -219,7 +219,7 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
-    originalTreeGrundyNumber = findGrundyContribsForNodes(rootNode);
+    originalTreeGrundyNumber = findGrundyContribForSubtree(rootNode);
     queryGrundyNumbers.resize(numQueries);
     answerQueries(rootNode);
 
