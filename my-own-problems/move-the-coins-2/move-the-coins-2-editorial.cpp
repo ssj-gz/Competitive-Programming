@@ -207,7 +207,7 @@ void answerQueries(Node* node, const int originalTreeGrundyNumber, SegmentTree n
     }
 }
 
-vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
+vector<int> calcGrundyNumbersForQueries(Node* rootNode, const int numQueries)
 {
     // Initialise the SegmentTrees.
     SegmentTree numNodesWithHeightModuloPowerOf2[maxBinaryDigits + 1];
@@ -220,25 +220,24 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
     vector<int> queryGrundyNumbers(numQueries);
     answerQueries(rootNode, originalTreeGrundyNumber, numNodesWithHeightModuloPowerOf2, queryGrundyNumbers);
 
-    vector<int> queryNumbersWhereBobWins;
-    auto queryNumber = 1;
-    for (const auto queryGrundyNumber : queryGrundyNumbers)
-    {
-        if (queryGrundyNumber == 0)
-        {
-            // First player (i.e. Alice) loses according to Sprague-Grundy i.e. Bob wins.
-            queryNumbersWhereBobWins.push_back(queryNumber);
-        }
-        queryNumber++;
-    }
+    return queryGrundyNumbers;
+}
 
-    return queryNumbersWhereBobWins;
+// Lots of input to read, so use ultra-fast reader.
+void scan_integer( int &x )
+{
+    int c = getchar_unlocked();
+    x = 0;
+    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
+    for( ;c>47 && c<58; c = getchar_unlocked() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
 }
 
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    auto readInt = [](){ int x; cin >> x; return x; };
+    auto readInt = [](){ int x; scan_integer(x); return x; };
 
     const auto numNodes = readInt();
 
@@ -276,10 +275,19 @@ int main(int argc, char* argv[])
         nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, heightChange} );
     }
 
-    const auto result = queryNumbersWhereBobWins(rootNode, numQueries);
-    cout << result.size() << endl;
-    for (const auto queryNum : result)
+    const auto queryGrundyNumbers = calcGrundyNumbersForQueries(rootNode, numQueries);
+    const int64_t MOD = 1'000'000'007;
+    int64_t result = 0;
+    int64_t powerOf2 = 2; // 2 to the power of 1.
+    for (const auto grundyNumber : queryGrundyNumbers)
     {
-        cout << queryNum << endl;
+        if (grundyNumber == 0)
+        {
+            result = (result + powerOf2) % MOD;
+        }
+        powerOf2 = (powerOf2 * 2) % MOD;
+
     }
+    cout << result << endl;
+
 }
