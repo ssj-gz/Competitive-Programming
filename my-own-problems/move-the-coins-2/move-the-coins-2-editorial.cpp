@@ -139,7 +139,7 @@ int modPosOrNeg(int x, int modulus)
     return x % modulus;
 }
 
-void answerQueries(Node* node, const int originalTreeGrundyNumber, SegmentTree numNodesWithHeightModuloPowerOf2[], vector<int>& queryGrundyNumbers)
+void answerQueries(Node* node, const int originalTreeGrundyNumber, vector<SegmentTree>& numNodesWithHeightModuloPowerOf2, vector<int>& queryGrundyNumbers)
 {
     auto countCoinsThatMakeDigitOneAfterHeightChange = [&numNodesWithHeightModuloPowerOf2](const int heightChange, int* destination)
     {
@@ -210,7 +210,7 @@ void answerQueries(Node* node, const int originalTreeGrundyNumber, SegmentTree n
 vector<int> calcGrundyNumbersForQueries(Node* rootNode, const int numQueries)
 {
     // Initialise the SegmentTrees.
-    SegmentTree numNodesWithHeightModuloPowerOf2[maxBinaryDigits + 1];
+    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigits + 1);
     for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
