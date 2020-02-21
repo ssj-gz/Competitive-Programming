@@ -129,10 +129,10 @@ int main(int argc, char** argv)
     auto rootNode = &(nodes.front());
     fixParentChild(rootNode);
 
-    const auto resultBruteForce = grundyNumbersForQueriesBruteForce(nodes, queries);
+    const auto queryGrundyNumbers = grundyNumbersForQueriesBruteForce(nodes, queries);
     vector<int> queriesWhereBobWins;
     int queryNum = 1;
-    for (const auto queryResult : resultBruteForce)
+    for (const auto queryResult : queryGrundyNumbers)
     {
         if (queryResult == 0)
             queriesWhereBobWins.push_back(queryNum);
