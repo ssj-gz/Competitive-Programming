@@ -98,51 +98,56 @@ int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
 
-    const auto numNodes = read<int>();
+    const auto T = read<int>();
 
-    vector<Node> nodes(numNodes);
-    for (auto& node : nodes)
+    for (int t = 0; t < T; t++)
     {
-        const auto numCoins = read<int>();
-        node.hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
-    }
-    for (int i = 0; i < numNodes - 1; i++)
-    {
-        const auto a = read<int>() - 1;
-        const auto b = read<int>() - 1;
+        const auto numNodes = read<int>();
 
-        nodes[a].children.push_back(&nodes[b]);
-        nodes[b].children.push_back(&nodes[a]);
-    }
-
-    const auto numQueries = read<int>();
-
-    vector<Query> queries(numQueries);
-
-    for (int i = 0; i < numQueries; i++)
-    {
-        const auto u = read<int>() - 1;
-        const auto v = read<int>() - 1;
-
-        queries[i].nodeToMove = &(nodes[u]);
-        queries[i].newParent = &(nodes[v]);
-    }
-
-    auto rootNode = &(nodes.front());
-    fixParentChild(rootNode);
-
-    const auto queryGrundyNumbers = grundyNumbersForQueriesBruteForce(nodes, queries);
-    const int64_t MOD = 1'000'000'007;
-    int64_t result = 0;
-    int64_t powerOf2 = 2; // 2 to the power of 1.
-    for (const auto grundyNumber : queryGrundyNumbers)
-    {
-        if (grundyNumber == 0)
+        vector<Node> nodes(numNodes);
+        for (auto& node : nodes)
         {
-            result = (result + powerOf2) % MOD;
+            const auto numCoins = read<int>();
+            node.hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
         }
-        powerOf2 = (powerOf2 * 2) % MOD;
+        for (int i = 0; i < numNodes - 1; i++)
+        {
+            const auto a = read<int>() - 1;
+            const auto b = read<int>() - 1;
 
+            nodes[a].children.push_back(&nodes[b]);
+            nodes[b].children.push_back(&nodes[a]);
+        }
+
+        const auto numQueries = read<int>();
+
+        vector<Query> queries(numQueries);
+
+        for (int i = 0; i < numQueries; i++)
+        {
+            const auto u = read<int>() - 1;
+            const auto v = read<int>() - 1;
+
+            queries[i].nodeToMove = &(nodes[u]);
+            queries[i].newParent = &(nodes[v]);
+        }
+
+        auto rootNode = &(nodes.front());
+        fixParentChild(rootNode);
+
+        const auto queryGrundyNumbers = grundyNumbersForQueriesBruteForce(nodes, queries);
+        const int64_t MOD = 1'000'000'007;
+        int64_t result = 0;
+        int64_t powerOf2 = 2; // 2 to the power of 1.
+        for (const auto grundyNumber : queryGrundyNumbers)
+        {
+            if (grundyNumber == 0)
+            {
+                result = (result + powerOf2) % MOD;
+            }
+            powerOf2 = (powerOf2 * 2) % MOD;
+
+        }
+        cout << result << endl;
     }
-    cout << result << endl;
 }
