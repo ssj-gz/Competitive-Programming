@@ -10,7 +10,6 @@ struct Node
     vector<Node*> children;
     bool hasCoin = false;
     Node* parent = nullptr;
-    int height = -1;
 };
 
 struct Query
@@ -58,7 +57,6 @@ void reparentNode(Node* nodeToMove, Node* newParent)
 
 void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
 {
-    node->height = height;
     node->parent = parent;
 
     node->children.erase(remove(node->children.begin(), node->children.end(), parent), node->children.end());
