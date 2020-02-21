@@ -132,17 +132,17 @@ int main(int argc, char** argv)
     fixParentChild(rootNode);
 
     const auto queryGrundyNumbers = grundyNumbersForQueriesBruteForce(nodes, queries);
-    vector<int> queriesWhereBobWins;
-    int queryNum = 1;
-    for (const auto queryGrundyNumber : queryGrundyNumbers)
+    const int64_t MOD = 1'000'000'007;
+    int64_t result = 0;
+    int64_t powerOf2 = 2; // 2 to the power of 1.
+    for (const auto grundyNumber : queryGrundyNumbers)
     {
-        if (queryGrundyNumber == 0)
-            queriesWhereBobWins.push_back(queryNum);
-        queryNum++;
+        if (grundyNumber == 0)
+        {
+            result = (result + powerOf2) % MOD;
+        }
+        powerOf2 = (powerOf2 * 2) % MOD;
+
     }
-    cout << queriesWhereBobWins.size() << endl;
-    for (const auto queryNum : queriesWhereBobWins)
-    {
-        cout << queryNum << endl;
-    }
+    cout << result << endl;
 }
