@@ -131,8 +131,6 @@ class SegmentTree
 vector<int> queryGrundyNumbers;
 int originalTreeGrundyNumber;
 
-SegmentTree numNodesWithHeightModuloPowerOf2[maxBinaryDigits + 1];
-
 int modPosOrNeg(int x, int modulus)
 {
     if (x < 0)
@@ -215,10 +213,12 @@ void answerQueries(Node* node, SegmentTree (&numNodesWithHeightModuloPowerOf2)[m
 vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
 {
     // Initialise the SegmentTrees.
+    SegmentTree numNodesWithHeightModuloPowerOf2[maxBinaryDigits + 1];
     for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
     }
+
     originalTreeGrundyNumber = findGrundyContribForSubtree(rootNode);
     queryGrundyNumbers.resize(numQueries);
     answerQueries(rootNode, numNodesWithHeightModuloPowerOf2);
