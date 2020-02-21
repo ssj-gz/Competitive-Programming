@@ -207,10 +207,11 @@ void answerQueries(Node* node, const int originalTreeGrundyNumber, vector<Segmen
     }
 }
 
-vector<int> calcGrundyNumbersForQueries(Node* rootNode, const int numQueries)
+vector<int> calcGrundyNumbersForQueries(Node* rootNode, const int numNodes, const int numQueries)
 {
+    const auto maxBinaryDigitsForTestcase = log2(numNodes);
     // Initialise the SegmentTrees.
-    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigits + 1); // TODO - use the number of nodes for this testcase to decide the number of segment trees, rather than maxN (via maxBinaryDigits).
+    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigitsForTestcase + 1); // TODO - use the number of nodes for this testcase to decide the number of segment trees, rather than maxN (via maxBinaryDigits).
     for (auto binaryDigitNum = 0; binaryDigitNum < numNodesWithHeightModuloPowerOf2.size(); binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
@@ -275,7 +276,7 @@ int main(int argc, char* argv[])
         nodeToMove->queriesForNode.push_back(QueryForNode{queryIndex, heightChange} );
     }
 
-    const auto queryGrundyNumbers = calcGrundyNumbersForQueries(rootNode, numQueries);
+    const auto queryGrundyNumbers = calcGrundyNumbersForQueries(rootNode, numNodes, numQueries);
     const int64_t MOD = 1'000'000'007;
     int64_t result = 0;
     int64_t powerOf2 = 2; // 2 to the power of 1.
