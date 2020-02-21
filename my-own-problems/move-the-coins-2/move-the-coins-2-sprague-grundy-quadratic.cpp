@@ -101,10 +101,10 @@ int main(int argc, char** argv)
     const auto numNodes = read<int>();
 
     vector<Node> nodes(numNodes);
-    for (int i = 0; i < numNodes; i++)
+    for (auto& node : nodes)
     {
         const auto numCoins = read<int>();
-        nodes[i].hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
+        node.hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
     }
     for (int i = 0; i < numNodes - 1; i++)
     {
