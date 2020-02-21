@@ -103,8 +103,7 @@ int main(int argc, char** argv)
     vector<Node> nodes(numNodes);
     for (int i = 0; i < numNodes; i++)
     {
-        int numCoins;
-        cin >> numCoins;
+        const auto numCoins = read<int>();
         nodes[i].hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
     }
     for (int i = 0; i < numNodes - 1; i++)
