@@ -132,9 +132,9 @@ int main(int argc, char** argv)
     const auto queryGrundyNumbers = grundyNumbersForQueriesBruteForce(nodes, queries);
     vector<int> queriesWhereBobWins;
     int queryNum = 1;
-    for (const auto queryResult : queryGrundyNumbers)
+    for (const auto queryGrundyNumber : queryGrundyNumbers)
     {
-        if (queryResult == 0)
+        if (queryGrundyNumber == 0)
             queriesWhereBobWins.push_back(queryNum);
         queryNum++;
     }
