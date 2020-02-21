@@ -144,9 +144,9 @@ int modPosOrNeg(int x, int modulus)
     return x % modulus;
 }
 
-void answerQueries(Node* node)
+void answerQueries(Node* node, SegmentTree (&numNodesWithHeightModuloPowerOf2)[maxBinaryDigits + 1])
 {
-    auto countCoinsThatMakeDigitOneAfterHeightChange = [](const int heightChange, int* destination)
+    auto countCoinsThatMakeDigitOneAfterHeightChange = [&numNodesWithHeightModuloPowerOf2](const int heightChange, int* destination)
     {
         for (auto binaryDigitNum = 0; binaryDigitNum <= maxBinaryDigits; binaryDigitNum++)
         {
@@ -184,7 +184,7 @@ void answerQueries(Node* node)
     // Recurse, and so explore this node's descendants.
     for (auto child : node->children)
     {
-        answerQueries(child);
+        answerQueries(child, numNodesWithHeightModuloPowerOf2);
     }
     // We've now explored all this node's descendants. Now for each query that moves this node: use the stored 
     // originalCoinsThatMakeDigitOneAfterHeightChange and the newly-updated numNodesWithHeightModuloPowerOf2
@@ -221,7 +221,7 @@ vector<int> queryNumbersWhereBobWins(Node* rootNode, const int numQueries)
     }
     originalTreeGrundyNumber = findGrundyContribForSubtree(rootNode);
     queryGrundyNumbers.resize(numQueries);
-    answerQueries(rootNode);
+    answerQueries(rootNode, numNodesWithHeightModuloPowerOf2);
 
     vector<int> queryNumbersWhereBobWins;
     auto queryNumber = 1;
