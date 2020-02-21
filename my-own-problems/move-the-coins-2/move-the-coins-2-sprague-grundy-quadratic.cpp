@@ -85,12 +85,20 @@ vector<int> grundyNumbersForQueriesBruteForce(vector<Node>& nodes, const vector<
     return grundyNumbersForQueries;
 }
 
+template <typename T>
+T read()
+{
+    T toRead;
+    cin >> toRead;
+    assert(cin);
+    return toRead;
+}
+
 int main(int argc, char** argv)
 {
     ios::sync_with_stdio(false);
 
-    int numNodes;
-    cin >> numNodes;
+    const auto numNodes = read<int>();
 
     vector<Node> nodes(numNodes);
     for (int i = 0; i < numNodes; i++)
