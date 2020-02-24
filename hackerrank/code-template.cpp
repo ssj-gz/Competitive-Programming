@@ -3,10 +3,12 @@
 // Solution to: TODO - problem link here!
 //
 //#define SUBMISSION
-#define BRUTE_FORCE
 #ifdef SUBMISSION
-#undef BRUTE_FORCE
 #define NDEBUG
+#else
+#define _GLIBCXX_DEBUG       // Iterator safety; out-of-bounds access for Containers, etc.
+#pragma GCC optimize "trapv" // abort() on (signed) integer overflow.
+#define BRUTE_FORCE
 #endif
 #include <iostream>
 #include <vector>
