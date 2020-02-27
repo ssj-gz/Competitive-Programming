@@ -1104,24 +1104,19 @@ string asBinary(int64_t n)
 // Begin "quickPower"
 
 int64_t quickPower(int64_t n, int64_t m, int64_t modulus)
-{                                       
+{
     // Raise n to the m mod modulus using as few multiplications as 
     // we can e.g. n ^ 8 ==  (((n^2)^2)^2).
     int64_t result = 1;
-    int64_t power = 0;
+    int64_t powerOfN = n;
     while (m > 0)
     {
         if (m & 1)
         {
-            int64_t subResult = n;
-            for (int64_t i = 0; i < power; i++)
-            {
-                subResult = (subResult * subResult) % modulus;
-            }
-            result = (result * subResult) % modulus;
+            result = (result * powerOfN) % modulus;
         }
         m >>= 1;
-        power++;
+        powerOfN = (powerOfN * powerOfN) % modulus;
     }
     return result;
 }
