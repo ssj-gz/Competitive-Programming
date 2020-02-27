@@ -164,7 +164,15 @@ time -p for testfile_name in testcase-generator/testfile*.in; do
     fi
 done
 
-# All done; print summary.
+# All done; cleanup temporary files.
+rm $COMPLETION_NOTIFICATION_PIPE
+rm last-testfile-time.txt
+rm last-output
+rm last-output-error
+rm last-diff-output
+
+
+# Print summary.
 echo "Longest testfile took ${longest_testfile_seconds} seconds"
 
 pass=true
