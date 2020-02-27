@@ -5,6 +5,8 @@
 #include <iostream>
 #include <map>
 
+#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
+
 #include <cassert>
 
 using namespace std;
@@ -40,8 +42,26 @@ int64_t calcMaxDollarsForCoin(int64_t numCoins, map<int64_t, int64_t>& maxDollar
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2 && string(argv[1]) == "--test")
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+        // TODO - generate randomised test.
+        const int T = rand() % 10 + 1;
+        //const int T = 1;
+
+        for (int t = 0; t < T; t++)
+        {
+            const int N = 1 + rand() % 1'000'000'000;
+            cout << N << endl;
+        }
+
+        return 0;
+    }
+
     ios::sync_with_stdio(false);
-    
+
     map<int64_t, int64_t> maxDollarsForCoinLookup;
 
     int64_t numCoins;
