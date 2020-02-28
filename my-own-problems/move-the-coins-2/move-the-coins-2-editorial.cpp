@@ -211,7 +211,7 @@ vector<int> calcGrundyNumbersForQueries(Node* rootNode, const int numNodes, cons
 {
     const auto maxBinaryDigitsForTestcase = log2(numNodes);
     // Initialise the SegmentTrees.
-    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigitsForTestcase + 1); // TODO - use the number of nodes for this testcase to decide the number of segment trees, rather than maxN (via maxBinaryDigits).
+    vector<SegmentTree> numNodesWithHeightModuloPowerOf2(maxBinaryDigitsForTestcase + 1);
     for (auto binaryDigitNum = 0; binaryDigitNum < numNodesWithHeightModuloPowerOf2.size(); binaryDigitNum++)
     {
         numNodesWithHeightModuloPowerOf2[binaryDigitNum] = SegmentTree((1 << (binaryDigitNum + 1)) + 1);
