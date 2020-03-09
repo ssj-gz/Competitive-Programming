@@ -141,9 +141,8 @@ std::size_t calcTreeHash(TestNode<NodeData>* rootNode)
  * of height h, with p not a descendent of v, such that re-parenting v to p
  * gives a game board in which Bob wins.
  */
-std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeGenerator)
+void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeGenerator)
 {
-    std::map<TestNode<NodeData>*, std::vector<int>> result;
     auto rootNode = treeGenerator.nodes().front();
 
     fillInNodeHeightsAndVisitInfo(rootNode);
@@ -175,7 +174,6 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
                 const int grundyNumberIfRelocated = findGrundyNumberIfRelocatedNode(rootNode, -1, nodeToReparent, nodeToReparent->data.parent, newParentAtHeight);
                 if (grundyNumberIfRelocated == 0)
                 {
-                    result[nodeToReparent].push_back(newParentHeight);
                     nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
                 }
                 // Only need to check one newParentAtHeight: re-parenting nodeToReparent to any of them will give
@@ -185,7 +183,6 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
             assert(foundNewParentAtHeight || newParentHeight == nodeToReparent->data.height - 1);
         }
     }
-    return result;
 }
 
 
