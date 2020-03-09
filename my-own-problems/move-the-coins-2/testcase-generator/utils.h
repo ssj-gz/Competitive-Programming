@@ -22,6 +22,11 @@ struct NodeData
     int dfsVisitEnd = -1;
 
     NodeRelocateInfo nodeRelocateInfo;
+    bool isDescendentOf(TestNode<NodeData>* node)
+    {
+        return dfsVisitBegin >= node->data.dfsVisitBegin && 
+               dfsVisitEnd <= node->data.dfsVisitEnd; 
+    }
 };
 
 void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int height, int& dfsIndex)
@@ -172,9 +177,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
             {
                 if (newParentAtHeight == nodeToReparent->data.parent)
                     continue;
-                const bool isDescendentOfNodeToReparent = (newParentAtHeight->data.dfsVisitBegin > nodeToReparent->data.dfsVisitBegin &&
-                                                           newParentAtHeight->data.dfsVisitEnd < nodeToReparent->data.dfsVisitEnd);
-                if (isDescendentOfNodeToReparent)
+                if (newParentAtHeight->data.isDescendentOf(nodeToReparent))
                     continue;
 
                 foundNewParentAtHeight = true;
