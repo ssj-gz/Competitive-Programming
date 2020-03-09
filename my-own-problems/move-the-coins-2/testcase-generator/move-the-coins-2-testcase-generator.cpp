@@ -256,6 +256,8 @@ int main(int argc, char* argv[])
             for (const auto aliceWinQuery : aliceWinQueries)
                 queries.push_back(aliceWinQuery);
 
+            std::cerr << "Num bob wins:" << bobWinQueries.size() << std::endl;
+            std::cerr << "Num alice wins:" << aliceWinQueries.size() << std::endl;
 
             scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
