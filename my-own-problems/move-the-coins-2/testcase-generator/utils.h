@@ -29,7 +29,7 @@ void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<
         if (childNode == parent)
             continue;
 
-        fillInNodeHeightsAndVisitInfoAux(childNode, parent, height + 1, dfsIndex);
+        fillInNodeHeightsAndVisitInfoAux(childNode, currentNode, height + 1, dfsIndex);
     }
 
     currentNode->data.dfsVisitEnd = dfsIndex;
@@ -54,7 +54,7 @@ int findMaxHeightOfNonDescendent(TestNode<NodeData>* currentNode, TestNode<NodeD
         if (childNode == parent)
             continue;
 
-        maxHeightOfDescendent = std::max(maxHeightOfDescendent, findMaxHeightOfNonDescendent(childNode, parent, height + 1, nodeToIgnore));
+        maxHeightOfDescendent = std::max(maxHeightOfDescendent, findMaxHeightOfNonDescendent(childNode, currentNode, height + 1, nodeToIgnore));
     }
 
     return maxHeightOfDescendent;
