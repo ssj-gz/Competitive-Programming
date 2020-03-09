@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
 
     }
 
-    // SUBTASK 2
+    // SUBTASK 3
     {
         // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
         auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
