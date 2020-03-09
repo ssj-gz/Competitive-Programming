@@ -110,6 +110,7 @@ struct TestQuery
 {
     TestNode<NodeData>* nodeToReparent = nullptr;
     TestNode<NodeData>* newParentNode = nullptr;
+    bool isBobWin = false;
 };
 
 void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
@@ -242,9 +243,9 @@ int main(int argc, char* argv[])
                             continue;
 
                         if (isBobWin)
-                            bobWinQueries.push_back({nodeToReparent, newParent});
+                            bobWinQueries.push_back({nodeToReparent, newParent, true});
                         else
-                            aliceWinQueries.push_back({nodeToReparent, newParent});
+                            aliceWinQueries.push_back({nodeToReparent, newParent, false});
                     }
 
                 }
