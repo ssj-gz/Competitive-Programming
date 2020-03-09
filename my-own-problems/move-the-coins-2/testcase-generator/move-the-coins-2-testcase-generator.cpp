@@ -2,6 +2,7 @@
 #include <testlib.h>
 #include "testcase-generator-lib.h"
 #include "random-utilities.h"
+#include "utils.h"
 
 #include <iostream>
 #include <set>
@@ -100,11 +101,6 @@ std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo
     outStream << " Max num testcases (i.e. T): " << subtaskInfo.maxNumTestcases << std::endl;
 
     return outStream;
-};
-
-struct NodeData
-{
-    int numCounters = -1;
 };
 
 using MC2TestCaseInfo = TestcaseInfo<SubtaskInfo>;
