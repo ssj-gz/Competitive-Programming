@@ -137,7 +137,8 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
 
 void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, std::vector<TestQuery>& queries)
 {
-    treeGenerator.scrambleNodeIdsAndReorder(nullptr);
+    auto rootNode = treeGenerator.nodes().front();
+    treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
     treeGenerator.scrambleEdgeOrder();
 
     writeTestCase(treeGenerator, destTestcase, queries);
