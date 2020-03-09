@@ -136,6 +136,18 @@ std::size_t calcTreeHash(TestNode<NodeData>* rootNode)
     calcTreeHash(rootNode, nullptr, dfsIndex, treeHash);
     return treeHash;
 }
+
+std::vector<std::vector<TestNode<NodeData>*>> buildNodesAtHeightMap(const TreeGenerator<NodeData>& treeGenerator)
+{
+    fillInNodeHeightsAndVisitInfo(treeGenerator.nodes().front());
+    std::vector<std::vector<TestNode<NodeData>*>> nodesAtHeight(treeGenerator.numNodes());
+    for (auto node : treeGenerator.nodes())
+        nodesAtHeight[node->data.height].push_back(node);
+
+    return nodesAtHeight;
+}
+
+
 /**
  * For each node v in treeGenerator, find the heights h such that there is a node p
  * of height h, with p not a descendent of v, such that re-parenting v to p
