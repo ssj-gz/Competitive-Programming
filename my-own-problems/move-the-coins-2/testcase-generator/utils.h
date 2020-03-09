@@ -9,20 +9,34 @@
 struct NodeData
 {
     int numCounters = -1;
+
     int height = -1;
+    int dfsVisitBegin = -1;
+    int dfsVisitEnd = -1;
 };
 
-void fillInNodeHeights(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int height)
+void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int height, int& dfsIndex)
 {
     currentNode->data.height = height;
+    currentNode->data.dfsVisitBegin = dfsIndex;
+    dfsIndex++;
+
     for (auto edge : currentNode->neighbours)
     {
         auto childNode = edge->otherNode(currentNode);
         if (childNode == parent)
             continue;
 
-        fillInNodeHeights(childNode, parent, height + 1);
+        fillInNodeHeightsAndVisitInfoAux(childNode, parent, height + 1, dfsIndex);
     }
+
+    currentNode->data.dfsVisitEnd = dfsIndex;
+}
+
+void fillInNodeHeightsAndVisitInfo(TestNode<NodeData>* rootNode)
+{
+    int dfsIndex = 0;
+    fillInNodeHeightsAndVisitInfoAux(rootNode, nullptr, 0, dfsIndex);
 }
 
 int findMaxHeightOfNonDescendent(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int height, TestNode<NodeData>* nodeToIgnore)
@@ -90,7 +104,7 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
     std::map<TestNode<NodeData>*, std::vector<int>> result;
     auto rootNode = treeGenerator.nodes().front();
 
-    fillInNodeHeights(rootNode, nullptr, 0);
+    fillInNodeHeightsAndVisitInfo(rootNode);
     std::vector<std::vector<TestNode<NodeData>*>> nodesAtHeight(treeGenerator.numNodes());
     for (auto node : treeGenerator.nodes())
         nodesAtHeight[node->data.height].push_back(node);
