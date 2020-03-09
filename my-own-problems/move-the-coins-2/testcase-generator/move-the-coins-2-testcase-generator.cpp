@@ -106,7 +106,13 @@ std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo
 using MC2TestCaseInfo = TestcaseInfo<SubtaskInfo>;
 using MC2TestFileInfo = TestFileInfo<SubtaskInfo>;
 
-void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
+struct TestQuery
+{
+    TestNode<NodeData>* nodeToReparent = nullptr;
+    TestNode<NodeData>* newParentNode = nullptr;
+};
+
+void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
 {
     destTestcase.writeLine(treeGenerator.numNodes());
 
@@ -121,14 +127,20 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
         numCountersForNode.push_back(node->data.numCounters);
     }
     destTestcase.writeObjectsAsLine(numCountersForNode.begin(), numCountersForNode.end());
+
+    destTestcase.writeLine(queries.size());
+    for (const auto& query : queries)
+    {
+        destTestcase.writeLine(query.nodeToReparent->id(), query.newParentNode->id());
+    }
 }
 
-void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase)
+void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, std::vector<TestQuery>& queries)
 {
     treeGenerator.scrambleNodeIdsAndReorder(nullptr);
     treeGenerator.scrambleEdgeOrder();
 
-    writeTestCase(treeGenerator, destTestcase);
+    writeTestCase(treeGenerator, destTestcase, queries);
 }
 
 /**
@@ -187,7 +199,10 @@ int main(int argc, char* argv[])
             TreeGenerator<NodeData> treeGenerator;
             treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
             addCounters(treeGenerator, rnd.next(70.0, 95.0));
-            scrambleAndwriteTestcase(treeGenerator, testcase);
+
+            std::vector<TestQuery> queries;
+
+            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
     }
 
@@ -211,7 +226,9 @@ int main(int argc, char* argv[])
             const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
             findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
-            scrambleAndwriteTestcase(treeGenerator, testcase);
+            std::vector<TestQuery> queries;
+
+            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
 
     }
@@ -228,7 +245,10 @@ int main(int argc, char* argv[])
             TreeGenerator<NodeData> treeGenerator;
             treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
             addCounters(treeGenerator, rnd.next(70.0, 95.0));
-            scrambleAndwriteTestcase(treeGenerator, testcase);
+
+            std::vector<TestQuery> queries;
+
+            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
     }
 
@@ -243,6 +263,12 @@ struct Node
 {
     std::vector<Node*> neighbours;
     int nodeId = -1;
+};
+
+struct Query
+{
+    Node* nodeToReparent = nullptr;
+    Node* newParentNode = nullptr;
 };
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask)
@@ -286,6 +312,15 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         }
 
         testFileReader.addErrorUnless(numCountersAcrossAllNodes <= containingSubtask.maxNumCountersOverAllNodes, "Too many counters across all nodes");
+
+        const auto [numQueries] = testFileReader.readLine<int>();
+        std::vector<Query> queries;
+        for (int i = 0; i < numQueries; i++)
+        {
+            const auto& [nodeToReparentId, newParentNodeId] = testFileReader.readLine<int, int>();
+            // TODO - validation of queries.
+            queries.push_back({&(nodes[nodeToReparentId - 1]), &(nodes[newParentNodeId - 1])});
+        }
 
 
         int nodeId = 1;
