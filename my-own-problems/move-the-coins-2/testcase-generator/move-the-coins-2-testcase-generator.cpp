@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
 
             TreeGenerator<NodeData> treeGenerator;
             treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-            const int numNodes = rnd.next(1, 20);
+            const int numNodes = 1000;
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
             addCounters(treeGenerator, rnd.next(70.0, 95.0));
@@ -227,21 +227,34 @@ int main(int argc, char* argv[])
             findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
             // For debugging, generate a list of queries that are all wins for Bob.
+            std::vector<TestQuery> bobWinQueries;
+            std::vector<TestQuery> aliceWinQueries;
+
             std::vector<TestQuery> queries;
             for (auto nodeToReparent : treeGenerator.nodes())
             {
-                for (int newParentHeight : nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin)
+                for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent; newParentHeight++)
                 {
+                    const bool isBobWin = (std::find(nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.begin(), nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.end(), newParentHeight) != nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.end());
                     for (auto newParent : nodesAtHeight[newParentHeight])
                     {
                         if (newParent->data.isDescendentOf(nodeToReparent))
                             continue;
 
-                        queries.push_back({nodeToReparent, newParent});
+                        if (isBobWin)
+                            bobWinQueries.push_back({nodeToReparent, newParent});
+                        else
+                            aliceWinQueries.push_back({nodeToReparent, newParent});
                     }
 
                 }
             }
+
+            for (const auto bobWinQuery : bobWinQueries)
+                queries.push_back(bobWinQuery);
+            for (const auto aliceWinQuery : aliceWinQueries)
+                queries.push_back(aliceWinQuery);
+
 
             scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
