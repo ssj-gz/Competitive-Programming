@@ -91,6 +91,7 @@ void findGrundyNumberIfRelocatedNodeAux(TestNode<NodeData>* currentNode, TestNod
 
 int findGrundyNumberIfRelocatedNode(TestNode<NodeData>* rootNode, int height, TestNode<NodeData>* nodeToReparent, TestNode<NodeData>* oldParent, TestNode<NodeData>* newParent)
 {
+    assert(newParent != oldParent);
     int grundyNumber = 0;
     findGrundyNumberIfRelocatedNodeAux(rootNode, nullptr, 0, nodeToReparent, oldParent, newParent, grundyNumber);
 
@@ -150,6 +151,8 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
             bool foundNewParentAtHeight = false;
             for (auto newParentAtHeight : nodesAtHeight[newParentHeight])
             {
+                if (newParentAtHeight == nodeToReparent->data.parent)
+                    continue;
                 const bool isDescendentOfNodeToReparent = (newParentAtHeight->data.dfsVisitBegin > nodeToReparent->data.dfsVisitBegin &&
                                                            newParentAtHeight->data.dfsVisitEnd < nodeToReparent->data.dfsVisitEnd);
                 if (isDescendentOfNodeToReparent)
