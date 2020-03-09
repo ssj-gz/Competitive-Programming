@@ -115,15 +115,22 @@ int findGrundyNumberIfRelocatedNode(TestNode<NodeData>* rootNode, int height, Te
     return grundyNumber;
 }
 
-void calcTreeHash(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int& dfsIndex, std::size_t& treeHash)
+size_t combineHashes(size_t hash1, const size_t hash2)
 {
-    // Largely arbitrary "hash combine" function, taken from 
-    //  
+    // Largely arbitrary "hash combine" function, taken from
+    //
     //   https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x
     //
-    // Incorporating a node's dfsIndex, id, and numCounters seems like it would give a reasonably good hash.  The magic numbers are
-    // arbitrary.
-    treeHash ^= std::hash<int>()(dfsIndex * (currentNode->id() + currentNode->data.numCounters + 876474)) + 0x9e3779b9 + (treeHash<<6) + (treeHash>>2);
+    hash1 ^= hash2 + 0x9e3779b9 + (hash1<<6) + (hash1>>2);
+    return hash1;
+}
+
+void calcTreeHash(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int& dfsIndex, std::size_t& treeHash)
+{
+    // Incorporating a node's dfsIndex, id, and numCounters seems like it would give a reasonably good hash.
+    treeHash = combineHashes(treeHash, std::hash<int>()(dfsIndex));
+    treeHash = combineHashes(treeHash, std::hash<int>()(currentNode->id()));
+    treeHash = combineHashes(treeHash, std::hash<int>()(currentNode->data.numCounters));
 
     for (auto edge : currentNode->neighbours)
     {
