@@ -208,7 +208,8 @@ int main(int argc, char* argv[])
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
             addCounters(treeGenerator, rnd.next(70.0, 95.0));
 
-            findBobWinningRelocatedHeightsForNodes(treeGenerator);
+            const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+            findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
             scrambleAndwriteTestcase(treeGenerator, testcase);
         }

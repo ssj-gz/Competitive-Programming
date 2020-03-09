@@ -153,14 +153,9 @@ std::vector<std::vector<TestNode<NodeData>*>> buildNodesAtHeightMap(const TreeGe
  * of height h, with p not a descendent of v, such that re-parenting v to p
  * gives a game board in which Bob wins.
  */
-void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeGenerator)
+void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeGenerator, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeight)
 {
     auto rootNode = treeGenerator.nodes().front();
-
-    fillInNodeHeightsAndVisitInfo(rootNode);
-    std::vector<std::vector<TestNode<NodeData>*>> nodesAtHeight(treeGenerator.numNodes());
-    for (auto node : treeGenerator.nodes())
-        nodesAtHeight[node->data.height].push_back(node);
 
     for (auto nodeToReparent : treeGenerator.nodes())
     {
