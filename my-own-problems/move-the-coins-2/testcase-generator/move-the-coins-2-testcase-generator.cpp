@@ -226,7 +226,22 @@ int main(int argc, char* argv[])
             const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
             findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
+            // For debugging, generate a list of queries that are all wins for Bob.
             std::vector<TestQuery> queries;
+            for (auto nodeToReparent : treeGenerator.nodes())
+            {
+                for (int newParentHeight : nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin)
+                {
+                    for (auto newParent : nodesAtHeight[newParentHeight])
+                    {
+                        if (newParent->data.isDescendentOf(nodeToReparent))
+                            continue;
+
+                        queries.push_back({nodeToReparent, newParent});
+                    }
+
+                }
+            }
 
             scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
