@@ -168,7 +168,7 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
                 // the same grundy number.
                 break;
             }
-            assert(foundNewParentAtHeight);
+            assert(foundNewParentAtHeight || newParentHeight == nodeToReparent->data.height - 1);
         }
     }
     return result;
