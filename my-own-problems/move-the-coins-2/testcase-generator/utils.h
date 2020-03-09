@@ -162,6 +162,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
 {
     auto rootNode = treeGenerator.nodes().front();
 
+    int numNodesProcessed = 0;
     for (auto nodeToReparent : treeGenerator.nodes())
     {
         const int maxHeightOfNonDescendent = findMaxHeightOfNonDescendent(rootNode, nullptr, 0, nodeToReparent);
@@ -191,6 +192,11 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
                 break;
             }
             assert(foundNewParentAtHeight || newParentHeight == nodeToReparent->data.height - 1);
+        }
+        numNodesProcessed++;
+        if (numNodesProcessed % 100 == 0)
+        {
+            std::cerr << "Processed " << numNodesProcessed << " out of " << treeGenerator.numNodes() << std::endl;
         }
     }
 }
