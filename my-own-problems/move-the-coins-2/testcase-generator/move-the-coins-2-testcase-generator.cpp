@@ -175,6 +175,62 @@ int main(int argc, char* argv[])
     TestSuite<SubtaskInfo> testsuite;
     testsuite.setTestFileVerifier(&verifyTestFile);
 
+    // SUBTASK 1
+    {
+        // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
+        auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask1)
+                .withSeed(9734)
+                .withDescription("TODO - dummy subtask 1 testfile"));
+        {
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+            TreeGenerator<NodeData> treeGenerator;
+            treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+            addCounters(treeGenerator, rnd.next(70.0, 95.0));
+            scrambleAndwriteTestcase(treeGenerator, testcase);
+        }
+    }
+
+    // SUBTASK 2
+    {
+        // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
+        auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask2)
+                .withSeed(9734)
+                .withDescription("TODO - first testcase test"));
+        for (int t = 0; t < subtask2.maxNumTestcases; t++)
+        {
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+            TreeGenerator<NodeData> treeGenerator;
+            treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+            const int numNodes = rnd.next(1, 20);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
+            addCounters(treeGenerator, rnd.next(70.0, 95.0));
+
+            findBobWinningRelocatedHeightsForNodes(treeGenerator);
+
+            scrambleAndwriteTestcase(treeGenerator, testcase);
+        }
+
+    }
+
+    // SUBTASK 2
+    {
+        // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
+        auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                .withSeed(9734)
+                .withDescription("TODO - dummy subtask 1 testfile"));
+        {
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+            TreeGenerator<NodeData> treeGenerator;
+            treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+            addCounters(treeGenerator, rnd.next(70.0, 95.0));
+            scrambleAndwriteTestcase(treeGenerator, testcase);
+        }
+    }
+
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
         return EXIT_FAILURE;
