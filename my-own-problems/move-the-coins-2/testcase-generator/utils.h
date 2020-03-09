@@ -6,6 +6,12 @@
 #include <map>
 #include <vector>
 
+struct NodeRelocateInfo
+{
+    int maxHeightOfNonDescendent = -1;
+    std::vector<int> newParentHeightsForBobWin;
+};
+
 struct NodeData
 {
     int numCounters = -1;
@@ -14,6 +20,8 @@ struct NodeData
     int height = -1;
     int dfsVisitBegin = -1;
     int dfsVisitEnd = -1;
+
+    NodeRelocateInfo nodeRelocateInfo;
 };
 
 void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int height, int& dfsIndex)
@@ -149,6 +157,8 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
         if (maxHeightOfNonDescendent == -1)
             continue;
 
+        nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent = maxHeightOfNonDescendent;
+
         for (int newParentHeight = 0; newParentHeight <= maxHeightOfNonDescendent; newParentHeight++)
         {
             bool foundNewParentAtHeight = false;
@@ -166,6 +176,7 @@ std::map<TestNode<NodeData>*, std::vector<int>> findBobWinningRelocatedHeightsFo
                 if (grundyNumberIfRelocated == 0)
                 {
                     result[nodeToReparent].push_back(newParentHeight);
+                    nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
                 }
                 // Only need to check one newParentAtHeight: re-parenting nodeToReparent to any of them will give
                 // the same grundy number.
