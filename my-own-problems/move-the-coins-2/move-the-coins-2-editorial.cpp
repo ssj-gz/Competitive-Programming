@@ -247,11 +247,6 @@ int main(int argc, char* argv[])
         const auto numNodes = readInt();
 
         vector<Node> nodes(numNodes);
-        for (auto i = 0; i < numNodes; i++)
-        {
-            const auto numCoins = readInt();
-            nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins at each height.
-        }
         for (auto i = 0; i < numNodes - 1; i++)
         {
             // Make a and b 0-relative.
@@ -260,6 +255,11 @@ int main(int argc, char* argv[])
 
             nodes[a].children.push_back(&nodes[b]);
             nodes[b].children.push_back(&nodes[a]);
+        }
+        for (auto i = 0; i < numNodes; i++)
+        {
+            const auto numCoins = readInt();
+            nodes[i].hasCoin = ((numCoins % 2) == 1); // The Grundy number is dependent only on the parity of the number of coins at each height.
         }
 
         auto rootNode = &(nodes.front());

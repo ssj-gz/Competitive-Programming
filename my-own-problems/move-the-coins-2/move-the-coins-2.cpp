@@ -1150,11 +1150,6 @@ int main(int argc, char** argv)
     cin >> numNodes;
 
     vector<Node> nodes(numNodes);
-    for (int i = 0; i < numNodes; i++)
-    {
-        nodes[i].nodeId = i;
-        cin >> nodes[i].numCoins;
-    }
     for (int i = 0; i < numNodes - 1; i++)
     {
         int a, b;
@@ -1164,6 +1159,11 @@ int main(int argc, char** argv)
 
         nodes[a].children.push_back(&nodes[b]);
         nodes[b].children.push_back(&nodes[a]);
+    }
+    for (int i = 0; i < numNodes; i++)
+    {
+        nodes[i].nodeId = i;
+        cin >> nodes[i].numCoins;
     }
 
     int numQueries;

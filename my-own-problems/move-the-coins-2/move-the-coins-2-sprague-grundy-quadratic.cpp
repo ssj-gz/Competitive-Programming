@@ -105,11 +105,6 @@ int main(int argc, char** argv)
         const auto numNodes = read<int>();
 
         vector<Node> nodes(numNodes);
-        for (auto& node : nodes)
-        {
-            const auto numCoins = read<int>();
-            node.hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
-        }
         for (int i = 0; i < numNodes - 1; i++)
         {
             const auto a = read<int>() - 1;
@@ -117,6 +112,11 @@ int main(int argc, char** argv)
 
             nodes[a].children.push_back(&nodes[b]);
             nodes[b].children.push_back(&nodes[a]);
+        }
+        for (auto& node : nodes)
+        {
+            const auto numCoins = read<int>();
+            node.hasCoin = ((numCoins % 2) == 1); // Only care about the parity of the number of coins.
         }
 
         const auto numQueries = read<int>();
