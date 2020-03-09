@@ -10,6 +10,7 @@ struct NodeData
 {
     int numCounters = -1;
 
+    TestNode<NodeData>* parent = nullptr;
     int height = -1;
     int dfsVisitBegin = -1;
     int dfsVisitEnd = -1;
@@ -19,6 +20,7 @@ void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<
 {
     currentNode->data.height = height;
     currentNode->data.dfsVisitBegin = dfsIndex;
+    currentNode->data.parent = parent;
     dfsIndex++;
 
     for (auto edge : currentNode->neighbours)
