@@ -213,7 +213,6 @@ int main(int argc, char* argv[])
         auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask2)
                 .withSeed(9734)
                 .withDescription("TODO - first testcase test"));
-        for (int t = 0; t < subtask2.maxNumTestcases; t++)
         {
             auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
