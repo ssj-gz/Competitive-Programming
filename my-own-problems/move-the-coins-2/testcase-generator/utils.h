@@ -77,6 +77,9 @@ void findGrundyNumberIfRelocatedNodeAux(TestNode<NodeData>* currentNode, TestNod
             assert(currentNode == oldParent);
             continue;
         }
+        if (currentNode == nodeToReparent && childNode == oldParent)
+            continue;
+
 
         childNodes.push_back(childNode);
     }
