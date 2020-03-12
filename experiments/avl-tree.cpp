@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <memory>
 #include <limits>
 #include <cassert>
 
@@ -8,6 +9,11 @@ using namespace std;
 
 struct TreeNode
 {
+    TreeNode(int value)
+        : value{value}
+    {
+
+    }
     int value = -1;
     TreeNode *leftChild = nullptr;
     TreeNode *rightChild = nullptr;
@@ -24,11 +30,20 @@ class AVLTree
         void insertValue(int newValue)
         {
             if (!m_root)
-                m_root = new TreeNode({newValue});
+            {
+                m_root = createNode(newValue);
+            }
         }
 
     private:
         TreeNode* m_root = nullptr;
+
+        TreeNode* createNode(int value)
+        {
+            m_nodes.push_back(make_unique<TreeNode>(value));
+            return m_nodes.back().get();
+        }
+        vector<unique_ptr<TreeNode>> m_nodes;
 };
 
 // Debugging/ diagnostics.
