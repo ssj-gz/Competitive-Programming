@@ -69,7 +69,7 @@ class AVLTree
                 assert(newValue >= currentNode->value);
                 if (currentNode->rightChild)
                 {
-                    insertValue(newValue, currentNode->rightChild);
+                    currentNode->rightChild = insertValue(newValue, currentNode->rightChild);
                     currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->rightChild->maxDescendantDepth);
                 }
                 else
@@ -247,4 +247,5 @@ int main()
     assertTestcase({1, 3, 5});
 
     assertTestcase({5, 3, 6, 2, 1});
+    assertTestcase({5, 4, 6, 7, 8});
 }
