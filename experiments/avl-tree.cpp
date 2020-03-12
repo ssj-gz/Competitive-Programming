@@ -228,6 +228,11 @@ void printTree(AVLTree& tree)
 
 void assertTestcase(const vector<int>& valuesToInsert)
 {
+    cout << "Testcase:";
+    for (const auto x : valuesToInsert)
+        cout << " " << x;
+    cout << endl;
+
     auto expectedInOrderValues = valuesToInsert;
     sort(expectedInOrderValues.begin(), expectedInOrderValues.end());
 
