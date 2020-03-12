@@ -212,7 +212,7 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
 
 void printSubTree(TreeNode* subtreeRoot)
 {
-    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth;
     cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
 
     if (subtreeRoot->leftChild)
