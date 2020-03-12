@@ -242,7 +242,20 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
     vector<int> actualInOrderValues;
     collectInOrderValues(tree.root(), actualInOrderValues);
 
-    return (actualInOrderValues == expectedInOrderValues);
+    if (actualInOrderValues != expectedInOrderValues)
+    {
+        cout << "Expected values:";
+        for(const auto x : expectedInOrderValues)
+            cout << " " << x;
+        cout << endl;
+        cout << "Actual values:  ";
+        for(const auto x : actualInOrderValues)
+            cout << " " << x;
+        cout << endl;
+        return false;
+    }
+
+    return true;
 }
 
 void printSubTree(TreeNode* subtreeRoot)
