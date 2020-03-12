@@ -61,6 +61,18 @@ class AVLTree
                     currentNode->balanceFactor--;
                 }
             }
+            else
+            {
+                // Values in the right subtree of node must be *greater than or equal to* that
+                // that of currentNode.
+                assert(newValue >= currentNode->value);
+                if (!currentNode->rightChild)
+                {
+                    currentNode->rightChild = createNode(newValue);
+                    currentNode->maxDescendantDepth++;
+                    currentNode->balanceFactor++;
+                }
+            }
         }
 
         TreeNode* createNode(int value)
@@ -186,5 +198,6 @@ int main()
 {
     assertTestcase({1});
     assertTestcase({5, 3});
+    assertTestcase({5, 7});
 
 }
