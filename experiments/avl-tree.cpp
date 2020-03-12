@@ -101,20 +101,19 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
     {
         const auto& [isLeftChildBalanced, maxLeftChildDescendantDepth] = isSubtreeBalanced(subtreeRoot->leftChild);
         isBalanced = isBalanced && isLeftChildBalanced;
-        balanceFactor -= maxLeftChildDescendantDepth;
+        balanceFactor -= maxLeftChildDescendantDepth + 1;
         maxDescendantDepth = max(maxDescendantDepth, 1 + maxLeftChildDescendantDepth);
     }
     if (subtreeRoot->rightChild)
     {
         const auto& [isRightChildBalanced, maxRightChildDescendantDepth] = isSubtreeBalanced(subtreeRoot->rightChild);
         isBalanced = isBalanced && isRightChildBalanced;
-        balanceFactor += maxRightChildDescendantDepth;
+        balanceFactor += maxRightChildDescendantDepth + 1;
         maxDescendantDepth = max(maxDescendantDepth, 1 + maxRightChildDescendantDepth);
     }
 
     if (balanceFactor < -1 || balanceFactor > +1)
         isBalanced = false;
-
 
     return {isBalanced, maxDescendantDepth};
 }
