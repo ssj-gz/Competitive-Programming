@@ -309,6 +309,21 @@ int main()
 
     assertTestcase({1,2, 6, 4, 5, 3});
 
+    {
+        // Quick performance test.
+        const int N = rand() % 1'000'000 + 1;
+        vector<int> testcase;
+        const int maxValue = 1000;
+        for (int i = 0; i < N; i++)
+            testcase.push_back(rand() % maxValue);
+        AVLTree tree;
+        for (const auto x : testcase)
+        {
+            tree.insertValue(x);
+        }
+        return 0;
+    }
+
     while (true)
     {
         const int N = rand() % 1000 + 1;
