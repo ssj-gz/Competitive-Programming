@@ -334,30 +334,20 @@ void assertTestcase(const vector<int>& valuesToInsert)
 TreeNode* findKth(TreeNode* subtreeRoot, int k)
 {
     assert(k >= 0);
-    cout << "findKth - subtreeRoot: " << subtreeRoot->id << " k: " << k << endl;
     int numDescendantsLeftChild = 0;
     if (subtreeRoot->leftChild)
     {
         numDescendantsLeftChild = subtreeRoot->leftChild->numDescendants;
         if (numDescendantsLeftChild == k)
-        {
-            cout << "Found: node " << subtreeRoot->id << endl;
             return subtreeRoot;
-        }
 
         if (numDescendantsLeftChild > k)
         {
-            cout << "Following left child" << endl;
-            int numDescendantsLeftRightChild = 0;
-            //if (subtreeRoot->leftChild->rightChild)
-                //numDescendantsLeftRightChild = subtreeRoot->leftChild->rightChild->numDescendants + 1;
-
-            return findKth(subtreeRoot->leftChild, k - numDescendantsLeftRightChild);
+            return findKth(subtreeRoot->leftChild, k);
         }
     }
     if (k == 0)
         return subtreeRoot;
-    cout << "Following right child" << endl;
     assert(subtreeRoot->rightChild);
     return findKth(subtreeRoot->rightChild, k - numDescendantsLeftChild - 1);
 }
