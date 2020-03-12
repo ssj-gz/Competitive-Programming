@@ -79,18 +79,8 @@ class AVLTree
                     currentNode->balanceFactor++;
                 }
             }
-            currentNode->balanceFactor = 0;
-            currentNode->maxDescendantDepth = 0;
-            if (currentNode->leftChild)
-            {
-                currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->leftChild->maxDescendantDepth);
-                currentNode->balanceFactor -= 1 + currentNode->leftChild->maxDescendantDepth;
-            }
-            if (currentNode->rightChild)
-            {
-                currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->rightChild->maxDescendantDepth);
-                currentNode->balanceFactor += 1 + currentNode->rightChild->maxDescendantDepth;
-            }
+            updateInfoFromChildren(currentNode);
+
             if (currentNode->balanceFactor < -1)
             {
                 if (currentNode->leftChild->balanceFactor <= 0)
