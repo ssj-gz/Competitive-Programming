@@ -386,6 +386,13 @@ int main()
         {
             tree.insertValue(x);
         }
+        auto sortedTestcase = testcase;
+        sort(sortedTestcase.begin(), sortedTestcase.end());
+        for (int k = 0; k < sortedTestcase.size(); k++)
+        {
+            assert(findKth(tree, k)->value == sortedTestcase[k]);
+        }
+        return 0;
     }
     {
         const vector<int> testcase = { 2, 3, 5};
