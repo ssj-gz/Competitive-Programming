@@ -7,16 +7,16 @@
 
 using namespace std;
 
-struct TreeNode
+struct AVLNode
 {
-    TreeNode(int value)
+    AVLNode(int value)
         : value{value}
     {
 
     }
     int value = -1;
-    TreeNode *leftChild = nullptr;
-    TreeNode *rightChild = nullptr;
+    AVLNode *leftChild = nullptr;
+    AVLNode *rightChild = nullptr;
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
     int numDescendants = 1;
@@ -28,7 +28,7 @@ struct TreeNode
 class AVLTree
 {
     public:
-        TreeNode* root()
+        AVLNode* root()
         {
             return m_root;
         }
@@ -43,9 +43,9 @@ class AVLTree
         }
 
     private:
-        TreeNode* m_root = nullptr;
+        AVLNode* m_root = nullptr;
 
-        TreeNode* insertValue(int newValue, TreeNode* currentNode)
+        AVLNode* insertValue(int newValue, AVLNode* currentNode)
         {
             if (newValue < currentNode->value)
             {
@@ -101,7 +101,7 @@ class AVLTree
             return currentNode;
         }
 
-        TreeNode* rotateRight(TreeNode* subtreeRoot)
+        AVLNode* rotateRight(AVLNode* subtreeRoot)
         {
             const auto newSubtreeRoot = subtreeRoot->leftChild;
             auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
@@ -112,7 +112,7 @@ class AVLTree
             updateInfoFromChildren(newSubtreeRoot);
             return newSubtreeRoot;
         }
-        TreeNode* rotateLeft(TreeNode* subtreeRoot)
+        AVLNode* rotateLeft(AVLNode* subtreeRoot)
         {
             const auto newSubtreeRoot = subtreeRoot->rightChild;
             auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
@@ -124,7 +124,7 @@ class AVLTree
             return newSubtreeRoot;
         }
 
-        void updateInfoFromChildren(TreeNode* nodeToUpdate)
+        void updateInfoFromChildren(AVLNode* nodeToUpdate)
         {
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
@@ -151,18 +151,18 @@ class AVLTree
             }
         }
 
-        TreeNode* createNode(int value)
+        AVLNode* createNode(int value)
         {
-            m_nodes.push_back(make_unique<TreeNode>(value));
+            m_nodes.push_back(make_unique<AVLNode>(value));
             auto newNode = m_nodes.back().get();
             newNode->id = m_nodes.size();
             return newNode;
         }
-        vector<unique_ptr<TreeNode>> m_nodes;
+        vector<unique_ptr<AVLNode>> m_nodes;
 };
 
 // Debugging/ diagnostics.
-bool isBST(TreeNode* node, int lowerValueLimit, int upperValueLimit)
+bool isBST(AVLNode* node, int lowerValueLimit, int upperValueLimit)
 {
     bool result = true;
     if (node->leftChild)
@@ -178,12 +178,12 @@ bool isBST(TreeNode* node, int lowerValueLimit, int upperValueLimit)
     return result;
 }
 
-bool isBST(TreeNode* node)
+bool isBST(AVLNode* node)
 {
     return isBST(node, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 }
 
-std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
+std::pair<bool, int> isSubtreeBalanced(AVLNode* subtreeRoot)
 {
     bool isBalanced = true;
     int maxDescendantDepth = 0;
@@ -220,7 +220,7 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
     return {isBalanced, maxDescendantDepth};
 }
 
-std::pair<bool, int> isDescendantCountCorrect(TreeNode* subtreeRoot)
+std::pair<bool, int> isDescendantCountCorrect(AVLNode* subtreeRoot)
 {
     bool isCorrect = true;
     int numDescendants = 1;
@@ -254,12 +254,12 @@ bool isDescendantCountCorrect(AVLTree& tree)
     return isDescendantCountCorrect(tree.root()).first;
 }
 
-bool isBalanced(TreeNode* node)
+bool isBalanced(AVLNode* node)
 {
     return isSubtreeBalanced(node).first;
 }
 
-void collectInOrderValues(TreeNode* subtreeRoot, vector<int>& destValues)
+void collectInOrderValues(AVLNode* subtreeRoot, vector<int>& destValues)
 {
     if (subtreeRoot->leftChild)
         collectInOrderValues(subtreeRoot->leftChild, destValues);
@@ -291,7 +291,7 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
     return true;
 }
 
-void printSubTree(TreeNode* subtreeRoot)
+void printSubTree(AVLNode* subtreeRoot)
 {
     cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
     cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
@@ -332,7 +332,7 @@ void assertTestcase(const vector<int>& valuesToInsert)
     cout << "Testcase passed" << endl;
 }
 
-TreeNode* findKth(TreeNode* subtreeRoot, int k)
+AVLNode* findKth(AVLNode* subtreeRoot, int k)
 {
     assert(k >= 0);
     int numDescendantsLeftChild = 0;
@@ -357,7 +357,7 @@ TreeNode* findKth(TreeNode* subtreeRoot, int k)
     return findKth(subtreeRoot->rightChild, k - numDescendantsLeftChild - 1);
 }
 
-TreeNode* findKth(AVLTree& tree, int k) // k is 0-relative.
+AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
 {
     return findKth(tree.root(), k);
 }
@@ -419,7 +419,7 @@ int main()
 
         const auto kthSmallestValue = findKth(tree, K)->value;
         assert(kthSmallestValue == debugKthSmallestValue);
-        return 0;
+        //return 0;
     }
 
     while (true)
