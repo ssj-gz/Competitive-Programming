@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <limits>
+#include <cassert>
 
 using namespace std;
 
@@ -21,6 +23,8 @@ class AVLTree
         }
         void insertValue(int newValue)
         {
+            if (!m_root)
+                m_root = new TreeNode({newValue});
         }
 
     private:
@@ -100,6 +104,26 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
     return (actualInOrderValues == expectedInOrderValues);
 }
 
+void assertTestcase(const vector<int>& valuesToInsert)
+{
+    auto expectedInOrderValues = valuesToInsert;
+    sort(expectedInOrderValues.begin(), expectedInOrderValues.end());
+
+    AVLTree tree;
+    for (const auto value : valuesToInsert)
+    {
+        tree.insertValue(value);
+    }
+
+    assert(isBST(tree.root()));
+    assert(isBalanced(tree.root()));
+    assert(checkContents(tree, expectedInOrderValues));
+
+    cout << "Testcase passed" << endl;
+}
+
 int main()
 {
+    assertTestcase({1});
+
 }
