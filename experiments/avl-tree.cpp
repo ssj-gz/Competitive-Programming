@@ -93,14 +93,7 @@ class AVLTree
             }
             if (currentNode->balanceFactor < -1)
             {
-                cout << "balanceFactor: " << currentNode->balanceFactor << endl;
-                const auto newSubtreeRoot = currentNode->leftChild;
-                newSubtreeRoot->rightChild = currentNode;
-                currentNode->leftChild = nullptr;
-                currentNode->maxDescendantDepth = 0;
-                currentNode->balanceFactor = 0;
-                newSubtreeRoot->balanceFactor = -newSubtreeRoot->leftChild->maxDescendantDepth + newSubtreeRoot->rightChild->maxDescendantDepth;
-                return newSubtreeRoot;
+                return rotateRight(currentNode);
             }
             if (currentNode->balanceFactor > +1)
             {
@@ -115,6 +108,17 @@ class AVLTree
             }
 
             return currentNode;
+        }
+
+        TreeNode* rotateRight(TreeNode* subtreeRoot)
+        {
+            const auto newSubtreeRoot = subtreeRoot->leftChild;
+            newSubtreeRoot->rightChild = subtreeRoot;
+            subtreeRoot->leftChild = nullptr;
+            subtreeRoot->maxDescendantDepth = 0;
+            subtreeRoot->balanceFactor = 0;
+            newSubtreeRoot->balanceFactor = -newSubtreeRoot->leftChild->maxDescendantDepth + newSubtreeRoot->rightChild->maxDescendantDepth;
+            return newSubtreeRoot;
         }
 
         TreeNode* createNode(int value)
