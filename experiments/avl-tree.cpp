@@ -207,8 +207,16 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
     if (balanceFactor < -1 || balanceFactor > +1)
         isBalanced = false;
 
-    assert(subtreeRoot->maxDescendantDepth == maxDescendantDepth);
-    assert(subtreeRoot->balanceFactor == balanceFactor);
+    if (subtreeRoot->maxDescendantDepth != maxDescendantDepth)
+    {
+        cout << "Error: node " << subtreeRoot->id << " maxDescendantDepth should be " << maxDescendantDepth << " but is " << subtreeRoot->maxDescendantDepth << endl;
+        assert(subtreeRoot->maxDescendantDepth == maxDescendantDepth);
+    }
+    if (subtreeRoot->balanceFactor != balanceFactor)
+    {
+        cout << "Error: node " << subtreeRoot->id << " balanceFactor should be " << balanceFactor << " but is " << subtreeRoot->balanceFactor << endl;
+        assert(subtreeRoot->balanceFactor == balanceFactor);
+    }
 
     return {isBalanced, maxDescendantDepth};
 }
