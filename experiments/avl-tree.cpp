@@ -60,7 +60,6 @@ class AVLTree
             {
                 // Values in the right subtree of node must be *greater than or equal to* that
                 // that of currentNode.
-                assert(newValue >= currentNode->value);
                 if (currentNode->rightChild)
                     currentNode->rightChild = insertValue(newValue, currentNode->rightChild);
                 else
