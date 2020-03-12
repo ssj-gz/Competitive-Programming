@@ -39,7 +39,6 @@ class AVLTree
                 return;
             }
             m_root = insertValue(newValue, m_root);
-
         }
 
     private:
@@ -72,9 +71,13 @@ class AVLTree
             if (currentNode->balanceFactor < -1)
             {
                 if (currentNode->leftChild->balanceFactor <= 0)
+                {
+                    // Simple rotation.
                     return rotateRight(currentNode);
+                }
                 else
                 {
+                    // Double-rotation.
                     currentNode->leftChild = rotateLeft(currentNode->leftChild);
                     return rotateRight(currentNode);
                 }
@@ -82,9 +85,13 @@ class AVLTree
             if (currentNode->balanceFactor > +1)
             {
                 if (currentNode->rightChild->balanceFactor >= 0)
+                {
+                    // Simple rotation.
                     return rotateLeft(currentNode);
+                }
                 else
                 {
+                    // Double-rotation.
                     currentNode->rightChild = rotateRight(currentNode->rightChild);
                     return rotateLeft(currentNode);
                 }
@@ -113,9 +120,7 @@ class AVLTree
             updateInfoFromChildren(subtreeRoot);
 
             updateInfoFromChildren(newSubtreeRoot);
-
             return newSubtreeRoot;
-
         }
 
         void updateInfoFromChildren(TreeNode* nodeToUpdate)
@@ -335,12 +340,16 @@ TreeNode* findKth(TreeNode* subtreeRoot, int k)
 
         if (numDescendantsLeftChild > k)
         {
+            // The answer is somewhere in the left subtree.
             return findKth(subtreeRoot->leftChild, k);
         }
     }
     if (k == 0)
         return subtreeRoot;
+    // Recurse into right child.
     assert(subtreeRoot->rightChild);
+    // We're "cutting out" subtreeRoot and all its left-descendents, so reduce k
+    // by this number.
     return findKth(subtreeRoot->rightChild, k - numDescendantsLeftChild - 1);
 }
 
@@ -368,9 +377,9 @@ int main()
 
     {
         // Quick performance test.
-        const int N = rand() % 1'000'000 + 1;
+        const int N = 200'000;
         vector<int> testcase;
-        const int maxValue = 1000;
+        const int maxValue = 1'000'000;
         for (int i = 0; i < N; i++)
             testcase.push_back(rand() % maxValue);
         AVLTree tree;
@@ -383,6 +392,7 @@ int main()
         for (int k = 0; k < sortedTestcase.size(); k++)
         {
             assert(findKth(tree, k)->value == sortedTestcase[k]);
+            //cout << "k: " << k << " findKth: " << findKth(tree, k)->value << " actual kth: " << sortedTestcase[k] << endl;
         }
     }
     {
@@ -405,7 +415,7 @@ int main()
 
         const auto kthSmallestValue = findKth(tree, K)->value;
         assert(kthSmallestValue == debugKthSmallestValue);
-        //return 0;
+        return 0;
     }
 
     while (true)
