@@ -52,7 +52,7 @@ class AVLTree
                 // that of currentNode.
                 if (currentNode->leftChild)
                 {
-                    insertValue(newValue, currentNode->leftChild);
+                    currentNode->leftChild = insertValue(newValue, currentNode->leftChild);
                     currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->leftChild->maxDescendantDepth);
                 }
                 else
@@ -93,6 +93,7 @@ class AVLTree
             }
             if (currentNode->balanceFactor < -1)
             {
+                cout << "balanceFactor: " << currentNode->balanceFactor << endl;
                 const auto newSubtreeRoot = currentNode->leftChild;
                 newSubtreeRoot->rightChild = currentNode;
                 currentNode->leftChild = nullptr;
@@ -103,6 +104,7 @@ class AVLTree
             }
             if (currentNode->balanceFactor > +1)
             {
+                cout << "balanceFactor: " << currentNode->balanceFactor << endl;
                 const auto newSubtreeRoot = currentNode->rightChild;
                 newSubtreeRoot->leftChild = currentNode;
                 currentNode->rightChild = nullptr;
@@ -226,6 +228,7 @@ void assertTestcase(const vector<int>& valuesToInsert)
     {
         tree.insertValue(value);
     }
+    printTree(tree);
 
     assert(isBST(tree.root()));
     assert(isBalanced(tree.root()));
@@ -242,4 +245,6 @@ int main()
 
     assertTestcase({5, 3, 1});
     assertTestcase({1, 3, 5});
+
+    assertTestcase({5, 3, 6, 2, 1});
 }
