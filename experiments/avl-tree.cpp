@@ -104,7 +104,7 @@ class AVLTree
             if (currentNode->balanceFactor > +1)
             {
                 if (currentNode->rightChild->balanceFactor >= 0)
-                return rotateLeft(currentNode);
+                    return rotateLeft(currentNode);
                 else
                 {
                     currentNode->rightChild = rotateRight(currentNode->rightChild);
@@ -117,39 +117,45 @@ class AVLTree
 
         TreeNode* rotateRight(TreeNode* subtreeRoot)
         {
+            cout << "rotateRight" << endl;
             const auto newSubtreeRoot = subtreeRoot->leftChild;
+            auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
             newSubtreeRoot->rightChild = subtreeRoot;
-            subtreeRoot->leftChild = nullptr;
-            subtreeRoot->maxDescendantDepth = 0;
-            subtreeRoot->balanceFactor = 0;
+            subtreeRoot->leftChild = previousNewSubtreeRootRightChild;
+            updateInfoFromChildren(subtreeRoot);
 
-            newSubtreeRoot->balanceFactor = 0;
-            if (newSubtreeRoot->leftChild)
-                newSubtreeRoot->balanceFactor -= newSubtreeRoot->leftChild->maxDescendantDepth;
-            if (newSubtreeRoot->rightChild)
-                newSubtreeRoot->balanceFactor += newSubtreeRoot->rightChild->maxDescendantDepth;
+            updateInfoFromChildren(newSubtreeRoot);
             return newSubtreeRoot;
         }
         TreeNode* rotateLeft(TreeNode* subtreeRoot)
         {
+            cout << "rotateLeft" << endl;
             const auto newSubtreeRoot = subtreeRoot->rightChild;
+            auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
             newSubtreeRoot->leftChild = subtreeRoot;
-            subtreeRoot->rightChild = nullptr;
-            subtreeRoot->maxDescendantDepth = 0;
-            subtreeRoot->balanceFactor = 0;
+            subtreeRoot->rightChild = previousNewSubtreeRootLeftChild;
+            updateInfoFromChildren(subtreeRoot);
 
-            newSubtreeRoot->balanceFactor = 0;
-            newSubtreeRoot->maxDescendantDepth = 0;
-            if (newSubtreeRoot->leftChild)
-            {
-                newSubtreeRoot->balanceFactor -= newSubtreeRoot->leftChild->maxDescendantDepth;
-                newSubtreeRoot->maxDescendantDepth = max(newSubtreeRoot->maxDescendantDepth, 1 + newSubtreeRoot->leftChild->maxDescendantDepth);
-            }
-            if (newSubtreeRoot->rightChild)
-                newSubtreeRoot->balanceFactor += newSubtreeRoot->rightChild->maxDescendantDepth;
+            updateInfoFromChildren(newSubtreeRoot);
 
             return newSubtreeRoot;
 
+        }
+
+        void updateInfoFromChildren(TreeNode* nodeToUpdate)
+        {
+            nodeToUpdate->balanceFactor = 0;
+            nodeToUpdate->maxDescendantDepth = 0;
+            if (nodeToUpdate->leftChild)
+            {
+                nodeToUpdate->balanceFactor -= 1 + nodeToUpdate->leftChild->maxDescendantDepth;
+                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + nodeToUpdate->leftChild->maxDescendantDepth);
+            }
+            if (nodeToUpdate->rightChild)
+            {
+                nodeToUpdate->balanceFactor += 1 + nodeToUpdate->rightChild->maxDescendantDepth;
+                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + nodeToUpdate->rightChild->maxDescendantDepth);
+            }
         }
 
         TreeNode* createNode(int value)
@@ -312,6 +318,8 @@ int main()
 
     assertTestcase({5, 4, 6, 2, 3});
     assertTestcase({5, 4, 6, 8, 7});
+
+    assertTestcase({1,2, 6, 4, 5, 3});
 
     while (true)
     {
