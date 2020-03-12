@@ -67,7 +67,12 @@ class AVLTree
                 // Values in the right subtree of node must be *greater than or equal to* that
                 // that of currentNode.
                 assert(newValue >= currentNode->value);
-                if (!currentNode->rightChild)
+                if (currentNode->rightChild)
+                {
+                    insertValue(newValue, currentNode->rightChild);
+                    currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->rightChild->maxDescendantDepth);
+                }
+                else
                 {
                     currentNode->rightChild = createNode(newValue);
                     currentNode->maxDescendantDepth++;
@@ -91,6 +96,16 @@ class AVLTree
                 const auto newSubtreeRoot = currentNode->leftChild;
                 newSubtreeRoot->rightChild = currentNode;
                 currentNode->leftChild = nullptr;
+                currentNode->maxDescendantDepth = 0;
+                currentNode->balanceFactor = 0;
+                newSubtreeRoot->balanceFactor = -newSubtreeRoot->leftChild->maxDescendantDepth + newSubtreeRoot->rightChild->maxDescendantDepth;
+                return newSubtreeRoot;
+            }
+            if (currentNode->balanceFactor > +1)
+            {
+                const auto newSubtreeRoot = currentNode->rightChild;
+                newSubtreeRoot->leftChild = currentNode;
+                currentNode->rightChild = nullptr;
                 currentNode->maxDescendantDepth = 0;
                 currentNode->balanceFactor = 0;
                 newSubtreeRoot->balanceFactor = -newSubtreeRoot->leftChild->maxDescendantDepth + newSubtreeRoot->rightChild->maxDescendantDepth;
@@ -226,4 +241,5 @@ int main()
     assertTestcase({5, 7});
 
     assertTestcase({5, 3, 1});
+    assertTestcase({1, 3, 5});
 }
