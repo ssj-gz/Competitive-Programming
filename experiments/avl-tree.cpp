@@ -331,6 +331,42 @@ void assertTestcase(const vector<int>& valuesToInsert)
     cout << "Testcase passed" << endl;
 }
 
+TreeNode* findKth(TreeNode* subtreeRoot, int k)
+{
+    assert(k >= 0);
+    cout << "findKth - subtreeRoot: " << subtreeRoot->id << " k: " << k << endl;
+    int numDescendantsLeftChild = 0;
+    if (subtreeRoot->leftChild)
+    {
+        numDescendantsLeftChild = subtreeRoot->leftChild->numDescendants;
+        if (numDescendantsLeftChild == k)
+        {
+            cout << "Found: node " << subtreeRoot->id << endl;
+            return subtreeRoot;
+        }
+
+        if (numDescendantsLeftChild > k)
+        {
+            cout << "Following left child" << endl;
+            int numDescendantsLeftRightChild = 0;
+            //if (subtreeRoot->leftChild->rightChild)
+                //numDescendantsLeftRightChild = subtreeRoot->leftChild->rightChild->numDescendants + 1;
+
+            return findKth(subtreeRoot->leftChild, k - numDescendantsLeftRightChild);
+        }
+    }
+    if (k == 0)
+        return subtreeRoot;
+    cout << "Following right child" << endl;
+    assert(subtreeRoot->rightChild);
+    return findKth(subtreeRoot->rightChild, k - numDescendantsLeftChild - 1);
+}
+
+TreeNode* findKth(AVLTree& tree, int k) // k is 0-relative.
+{
+    return findKth(tree.root(), k);
+}
+
 int main()
 {
     assertTestcase({1});
@@ -361,6 +397,28 @@ int main()
             tree.insertValue(x);
         }
     }
+    {
+        const vector<int> testcase = { 2, 3, 5};
+        const int K = 2;
+        auto sortedTestcase = testcase;
+        sort(sortedTestcase.begin(), sortedTestcase.end());
+        const int debugKthSmallestValue = sortedTestcase[K];
+
+        AVLTree tree;
+        cout << "testcase:";
+        for (const auto x : testcase)
+        {
+            cout << " " << x;
+            tree.insertValue(x);
+        }
+        cout << endl;
+        cout << "K: " << K << endl;
+        printTree(tree);
+
+        const auto kthSmallestValue = findKth(tree, K)->value;
+        assert(kthSmallestValue == debugKthSmallestValue);
+        //return 0;
+    }
 
     while (true)
     {
@@ -370,6 +428,26 @@ int main()
         for (int i = 0; i < N; i++)
             testcase.push_back(rand() % maxValue);
         random_shuffle(testcase.begin(), testcase.end());
+        const int K = rand() % testcase.size();
+        auto sortedTestcase = testcase;
+        sort(sortedTestcase.begin(), sortedTestcase.end());
+        const int debugKthSmallestValue = sortedTestcase[K];
         assertTestcase(testcase);
+
+        AVLTree tree;
+        cout << "testcase:";
+        for (const auto x : testcase)
+        {
+            cout << " " << x;
+            tree.insertValue(x);
+        }
+        cout << endl;
+        printTree(tree);
+        cout << "K: " << K << endl;
+
+
+        const auto kthSmallestValue = findKth(tree, K)->value;
+        cout << "expected kthSmallestValue: " << debugKthSmallestValue << " actual kthSmallestValue: " << kthSmallestValue << endl;
+        assert(kthSmallestValue == debugKthSmallestValue);
     }
 }
