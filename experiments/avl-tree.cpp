@@ -52,16 +52,9 @@ class AVLTree
                 // Values in the left subtree of node must be *strictly less* than
                 // that of currentNode.
                 if (currentNode->leftChild)
-                {
                     currentNode->leftChild = insertValue(newValue, currentNode->leftChild);
-                    currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->leftChild->maxDescendantDepth);
-                }
                 else
-                {
                     currentNode->leftChild = createNode(newValue);
-                    currentNode->maxDescendantDepth++;
-                    currentNode->balanceFactor--;
-                }
             }
             else
             {
