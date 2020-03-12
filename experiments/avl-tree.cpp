@@ -313,10 +313,11 @@ int main()
 
     while (true)
     {
-        const int N = 6;
+        const int N = rand() % 1000 + 1;
         vector<int> testcase;
+        const int maxValue = 1 + rand() % 1000;
         for (int i = 0; i < N; i++)
-            testcase.push_back(i + 1);
+            testcase.push_back(rand() % maxValue);
         random_shuffle(testcase.begin(), testcase.end());
         assertTestcase(testcase);
     }
