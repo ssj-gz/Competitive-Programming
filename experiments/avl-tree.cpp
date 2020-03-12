@@ -32,11 +32,31 @@ class AVLTree
             if (!m_root)
             {
                 m_root = createNode(newValue);
+                return;
             }
+            insertValue(newValue, m_root);
+
         }
 
     private:
         TreeNode* m_root = nullptr;
+
+        void insertValue(int newValue, TreeNode* currentNode)
+        {
+            if (newValue < currentNode->value)
+            {
+                // Values in the left subtree of node must be *strictly less* than
+                // that of currentNode.
+                if (currentNode->leftChild)
+                {
+                    insertValue(newValue, currentNode->leftChild);
+                }
+                else
+                {
+                    currentNode->leftChild = createNode(newValue);
+                }
+            }
+        }
 
         TreeNode* createNode(int value)
         {
@@ -140,5 +160,6 @@ void assertTestcase(const vector<int>& valuesToInsert)
 int main()
 {
     assertTestcase({1});
+    assertTestcase({5, 3});
 
 }
