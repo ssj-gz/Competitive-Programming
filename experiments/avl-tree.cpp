@@ -37,14 +37,14 @@ class AVLTree
                 m_root = createNode(newValue);
                 return;
             }
-            insertValue(newValue, m_root);
+            m_root = insertValue(newValue, m_root);
 
         }
 
     private:
         TreeNode* m_root = nullptr;
 
-        void insertValue(int newValue, TreeNode* currentNode)
+        TreeNode* insertValue(int newValue, TreeNode* currentNode)
         {
             if (newValue < currentNode->value)
             {
@@ -53,6 +53,7 @@ class AVLTree
                 if (currentNode->leftChild)
                 {
                     insertValue(newValue, currentNode->leftChild);
+                    currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->leftChild->maxDescendantDepth);
                 }
                 else
                 {
@@ -73,6 +74,30 @@ class AVLTree
                     currentNode->balanceFactor++;
                 }
             }
+            currentNode->balanceFactor = 0;
+            currentNode->maxDescendantDepth = 0;
+            if (currentNode->leftChild)
+            {
+                currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->leftChild->maxDescendantDepth);
+                currentNode->balanceFactor -= 1 + currentNode->leftChild->maxDescendantDepth;
+            }
+            if (currentNode->rightChild)
+            {
+                currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->rightChild->maxDescendantDepth);
+                currentNode->balanceFactor += 1 + currentNode->rightChild->maxDescendantDepth;
+            }
+            if (currentNode->balanceFactor < -1)
+            {
+                const auto newSubtreeRoot = currentNode->leftChild;
+                newSubtreeRoot->rightChild = currentNode;
+                currentNode->leftChild = nullptr;
+                currentNode->maxDescendantDepth = 0;
+                currentNode->balanceFactor = 0;
+                newSubtreeRoot->balanceFactor = -newSubtreeRoot->leftChild->maxDescendantDepth + newSubtreeRoot->rightChild->maxDescendantDepth;
+                return newSubtreeRoot;
+            }
+
+            return currentNode;
         }
 
         TreeNode* createNode(int value)
@@ -200,4 +225,5 @@ int main()
     assertTestcase({5, 3});
     assertTestcase({5, 7});
 
+    assertTestcase({5, 3, 1});
 }
