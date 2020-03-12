@@ -291,4 +291,14 @@ int main()
 
     assertTestcase({5, 4, 6, 2, 3});
     assertTestcase({5, 4, 6, 8, 7});
+
+    while (true)
+    {
+        const int N = 6;
+        vector<int> testcase;
+        for (int i = 0; i < N; i++)
+            testcase.push_back(i + 1);
+        random_shuffle(testcase.begin(), testcase.end());
+        assertTestcase(testcase);
+    }
 }
