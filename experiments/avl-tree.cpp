@@ -107,7 +107,6 @@ class AVLTree
 
         TreeNode* rotateRight(TreeNode* subtreeRoot)
         {
-            cout << "rotateRight" << endl;
             const auto newSubtreeRoot = subtreeRoot->leftChild;
             auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
             newSubtreeRoot->rightChild = subtreeRoot;
@@ -119,7 +118,6 @@ class AVLTree
         }
         TreeNode* rotateLeft(TreeNode* subtreeRoot)
         {
-            cout << "rotateLeft" << endl;
             const auto newSubtreeRoot = subtreeRoot->rightChild;
             auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
             newSubtreeRoot->leftChild = subtreeRoot;
