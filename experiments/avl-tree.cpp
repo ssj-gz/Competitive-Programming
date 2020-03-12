@@ -103,7 +103,13 @@ class AVLTree
             }
             if (currentNode->balanceFactor > +1)
             {
+                if (currentNode->rightChild->balanceFactor >= 0)
                 return rotateLeft(currentNode);
+                else
+                {
+                    currentNode->rightChild = rotateRight(currentNode->rightChild);
+                    return rotateLeft(currentNode);
+                }
             }
 
             return currentNode;
@@ -116,7 +122,12 @@ class AVLTree
             subtreeRoot->leftChild = nullptr;
             subtreeRoot->maxDescendantDepth = 0;
             subtreeRoot->balanceFactor = 0;
-            newSubtreeRoot->balanceFactor = -newSubtreeRoot->leftChild->maxDescendantDepth + newSubtreeRoot->rightChild->maxDescendantDepth;
+
+            newSubtreeRoot->balanceFactor = 0;
+            if (newSubtreeRoot->leftChild)
+                newSubtreeRoot->balanceFactor -= newSubtreeRoot->leftChild->maxDescendantDepth;
+            if (newSubtreeRoot->rightChild)
+                newSubtreeRoot->balanceFactor += newSubtreeRoot->rightChild->maxDescendantDepth;
             return newSubtreeRoot;
         }
         TreeNode* rotateLeft(TreeNode* subtreeRoot)
@@ -279,4 +290,5 @@ int main()
     assertTestcase({5, 4, 6, 7, 8});
 
     assertTestcase({5, 4, 6, 2, 3});
+    assertTestcase({5, 4, 6, 8, 7});
 }
