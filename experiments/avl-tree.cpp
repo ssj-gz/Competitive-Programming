@@ -85,7 +85,7 @@ bool isBST(TreeNode* node, int lowerValueLimit, int upperValueLimit)
     if (node->rightChild)
     {
         // Assume everything to the left is *greater than or equal to* value.
-        result = result && isBST(node->leftChild, node->value, upperValueLimit);
+        result = result && isBST(node->rightChild, node->value, upperValueLimit);
     }
     return result;
 }
