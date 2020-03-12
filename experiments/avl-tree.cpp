@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <limits>
 
 using namespace std;
@@ -78,6 +79,25 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
 bool isBalanced(TreeNode* node)
 {
     return isSubtreeBalanced(node).first;
+}
+
+void collectInOrderValues(TreeNode* subtreeRoot, vector<int>& destValues)
+{
+    if (subtreeRoot->leftChild)
+        collectInOrderValues(subtreeRoot->leftChild, destValues);
+
+    destValues.push_back(subtreeRoot->value);
+
+    if (subtreeRoot->rightChild)
+        collectInOrderValues(subtreeRoot->rightChild, destValues);
+}
+
+bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
+{
+    vector<int> actualInOrderValues;
+    collectInOrderValues(tree.root(), actualInOrderValues);
+
+    return (actualInOrderValues == expectedInOrderValues);
 }
 
 int main()
