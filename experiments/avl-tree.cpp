@@ -139,6 +139,22 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
     return (actualInOrderValues == expectedInOrderValues);
 }
 
+void printSubTree(TreeNode* subtreeRoot)
+{
+    cout << "Node " << subtreeRoot << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor;
+    cout << " leftChild: " << subtreeRoot->leftChild << " rightChild: " << subtreeRoot->rightChild << endl;
+
+    if (subtreeRoot->leftChild)
+        printSubTree(subtreeRoot->leftChild);
+    if (subtreeRoot->rightChild)
+        printSubTree(subtreeRoot->rightChild);
+}
+
+void printTree(AVLTree& tree)
+{
+    printSubTree(tree.root());
+}
+
 void assertTestcase(const vector<int>& valuesToInsert)
 {
     auto expectedInOrderValues = valuesToInsert;
