@@ -69,16 +69,9 @@ class AVLTree
                 // that of currentNode.
                 assert(newValue >= currentNode->value);
                 if (currentNode->rightChild)
-                {
                     currentNode->rightChild = insertValue(newValue, currentNode->rightChild);
-                    currentNode->maxDescendantDepth = max(currentNode->maxDescendantDepth, 1 + currentNode->rightChild->maxDescendantDepth);
-                }
                 else
-                {
                     currentNode->rightChild = createNode(newValue);
-                    currentNode->maxDescendantDepth++;
-                    currentNode->balanceFactor++;
-                }
             }
             updateInfoFromChildren(currentNode);
 
@@ -392,7 +385,6 @@ int main()
         {
             assert(findKth(tree, k)->value == sortedTestcase[k]);
         }
-        return 0;
     }
     {
         const vector<int> testcase = { 2, 3, 5};
