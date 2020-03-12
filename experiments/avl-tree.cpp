@@ -18,6 +18,8 @@ struct TreeNode
     TreeNode *leftChild = nullptr;
     TreeNode *rightChild = nullptr;
     int balanceFactor = 0;
+
+    int id = -1;
 };
 
 class AVLTree
@@ -61,7 +63,9 @@ class AVLTree
         TreeNode* createNode(int value)
         {
             m_nodes.push_back(make_unique<TreeNode>(value));
-            return m_nodes.back().get();
+            auto newNode = m_nodes.back().get();
+            newNode->id = m_nodes.size();
+            return newNode;
         }
         vector<unique_ptr<TreeNode>> m_nodes;
 };
@@ -141,8 +145,8 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
 
 void printSubTree(TreeNode* subtreeRoot)
 {
-    cout << "Node " << subtreeRoot << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor;
-    cout << " leftChild: " << subtreeRoot->leftChild << " rightChild: " << subtreeRoot->rightChild << endl;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor;
+    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
 
     if (subtreeRoot->leftChild)
         printSubTree(subtreeRoot->leftChild);
