@@ -58,6 +58,7 @@ class AVLTree
                 {
                     currentNode->leftChild = createNode(newValue);
                     currentNode->maxDescendantDepth++;
+                    currentNode->balanceFactor--;
                 }
             }
         }
@@ -118,6 +119,7 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
         isBalanced = false;
 
     assert(subtreeRoot->maxDescendantDepth == maxDescendantDepth);
+    assert(subtreeRoot->balanceFactor == balanceFactor);
 
     return {isBalanced, maxDescendantDepth};
 }
