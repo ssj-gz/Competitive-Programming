@@ -18,6 +18,7 @@ struct TreeNode
     TreeNode *leftChild = nullptr;
     TreeNode *rightChild = nullptr;
     int balanceFactor = 0;
+    int maxDescendantDepth = 0;
 
     int id = -1;
 };
@@ -56,6 +57,7 @@ class AVLTree
                 else
                 {
                     currentNode->leftChild = createNode(newValue);
+                    currentNode->maxDescendantDepth++;
                 }
             }
         }
@@ -114,6 +116,8 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
 
     if (balanceFactor < -1 || balanceFactor > +1)
         isBalanced = false;
+
+    assert(subtreeRoot->maxDescendantDepth == maxDescendantDepth);
 
     return {isBalanced, maxDescendantDepth};
 }
