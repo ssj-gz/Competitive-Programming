@@ -19,6 +19,7 @@ struct TreeNode
     TreeNode *rightChild = nullptr;
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
+    int numDescendants = 1;
 
     int id = -1;
 };
@@ -134,15 +135,18 @@ class AVLTree
         {
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
+            nodeToUpdate->numDescendants = 1;
             if (nodeToUpdate->leftChild)
             {
                 nodeToUpdate->balanceFactor -= 1 + nodeToUpdate->leftChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + nodeToUpdate->leftChild->maxDescendantDepth);
+                nodeToUpdate->numDescendants += nodeToUpdate->leftChild->numDescendants;
             }
             if (nodeToUpdate->rightChild)
             {
                 nodeToUpdate->balanceFactor += 1 + nodeToUpdate->rightChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + nodeToUpdate->rightChild->maxDescendantDepth);
+                nodeToUpdate->numDescendants += nodeToUpdate->rightChild->numDescendants;
             }
         }
 
@@ -215,6 +219,40 @@ std::pair<bool, int> isSubtreeBalanced(TreeNode* subtreeRoot)
     return {isBalanced, maxDescendantDepth};
 }
 
+std::pair<bool, int> isDescendantCountCorrect(TreeNode* subtreeRoot)
+{
+    bool isCorrect = true;
+    int numDescendants = 1;
+
+    if (subtreeRoot->leftChild)
+    {
+        const auto& [isLeftDescendantCountCorrect, leftChildNumDescendants] = isDescendantCountCorrect(subtreeRoot->leftChild);
+        isCorrect = isCorrect && isLeftDescendantCountCorrect;
+        numDescendants += leftChildNumDescendants;
+    }
+    if (subtreeRoot->rightChild)
+    {
+        const auto& [isRightDescendantCountCorrect, rightChildNumDescendants] = isDescendantCountCorrect(subtreeRoot->rightChild);
+        isCorrect = isCorrect && isRightDescendantCountCorrect;
+        numDescendants += rightChildNumDescendants;
+    }
+
+    isCorrect = isCorrect && (subtreeRoot->numDescendants == numDescendants);
+
+    if (subtreeRoot->numDescendants != numDescendants)
+    {
+        cout << "Error: node " << subtreeRoot->id << " numDescendants should be " << numDescendants << " but is " << subtreeRoot->numDescendants << endl;
+        assert(subtreeRoot->numDescendants == numDescendants);
+    }
+
+    return {isCorrect, numDescendants};
+}
+
+bool isDescendantCountCorrect(AVLTree& tree)
+{
+    return isDescendantCountCorrect(tree.root()).first;
+}
+
 bool isBalanced(TreeNode* node)
 {
     return isSubtreeBalanced(node).first;
@@ -254,7 +292,7 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
 
 void printSubTree(TreeNode* subtreeRoot)
 {
-    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
     cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
 
     if (subtreeRoot->leftChild)
@@ -287,6 +325,7 @@ void assertTestcase(const vector<int>& valuesToInsert)
 
     assert(isBST(tree.root()));
     assert(isBalanced(tree.root()));
+    assert(isDescendantCountCorrect(tree));
     assert(checkContents(tree, expectedInOrderValues));
 
     cout << "Testcase passed" << endl;
@@ -321,7 +360,6 @@ int main()
         {
             tree.insertValue(x);
         }
-        return 0;
     }
 
     while (true)
