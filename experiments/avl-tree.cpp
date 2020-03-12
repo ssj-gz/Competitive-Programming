@@ -123,17 +123,22 @@ class AVLTree
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->numDescendants = 1;
-            if (nodeToUpdate->leftChild)
+
+            auto leftChild = nodeToUpdate->leftChild;
+
+            if (leftChild)
             {
-                nodeToUpdate->balanceFactor -= 1 + nodeToUpdate->leftChild->maxDescendantDepth;
-                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + nodeToUpdate->leftChild->maxDescendantDepth);
-                nodeToUpdate->numDescendants += nodeToUpdate->leftChild->numDescendants;
+                nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
+                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
+                nodeToUpdate->numDescendants += leftChild->numDescendants;
             }
-            if (nodeToUpdate->rightChild)
+
+            auto rightChild = nodeToUpdate->rightChild;
+            if (rightChild)
             {
-                nodeToUpdate->balanceFactor += 1 + nodeToUpdate->rightChild->maxDescendantDepth;
-                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + nodeToUpdate->rightChild->maxDescendantDepth);
-                nodeToUpdate->numDescendants += nodeToUpdate->rightChild->numDescendants;
+                nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
+                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
+                nodeToUpdate->numDescendants += rightChild->numDescendants;
             }
         }
 
