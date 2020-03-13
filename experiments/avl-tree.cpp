@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <memory>
 #include <limits>
@@ -153,12 +154,21 @@ class AVLTree
 
         AVLNode* createNode(int value)
         {
-            m_nodes.push_back(make_unique<AVLNode>(value));
-            auto newNode = m_nodes.back().get();
-            newNode->id = m_nodes.size();
+            if (m_nodes.empty() || m_nodes.back().size() == nodeBlockSize - 1)
+            {
+                m_nodes.push_back(vector<AVLNode>());
+                m_nodes.back().reserve(nodeBlockSize);
+            }
+            m_nodes.back().push_back(AVLNode(value));
+            auto newNode = &(m_nodes.back().back());
+            newNode->id = m_nextNodeId;
+            m_nextNodeId++;
             return newNode;
         }
-        vector<unique_ptr<AVLNode>> m_nodes;
+
+        static constexpr int nodeBlockSize = 10000;
+        deque<vector<AVLNode>> m_nodes;
+        int m_nextNodeId = 1;
 };
 
 // Debugging/ diagnostics.
