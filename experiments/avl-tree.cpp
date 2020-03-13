@@ -368,6 +368,38 @@ AVLNode* findKth(AVLNode* subtreeRoot, int k)
     return findKth(subtreeRoot->rightChild, k - numDescendantsLeftChild - 1);
 }
 
+AVLNode* findKthIterative(AVLTree& tree, int k)
+{
+    assert(k >= 0);
+    auto currentNode = tree.root();
+    while (true)
+    {
+        int numDescendantsLeftChild = 0;
+        auto leftChild = currentNode->leftChild;
+        if (leftChild)
+        {
+            numDescendantsLeftChild = leftChild->numDescendants;
+            if (numDescendantsLeftChild == k)
+                return currentNode;
+
+            if (numDescendantsLeftChild > k)
+            {
+                // The answer is somewhere in the left subtree.
+                currentNode = leftChild;
+                continue;
+            }
+        }
+        if (k == 0)
+            return currentNode;
+        // Recurse into right child.
+        assert(currentNode->rightChild);
+        currentNode = currentNode->rightChild;
+        // We're "cutting out" currentNode and all its left-descendents, so reduce k
+        // by this number.
+        k = k - numDescendantsLeftChild - 1;
+    }
+}
+
 AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
 {
     return findKth(tree.root(), k);
@@ -406,7 +438,8 @@ int main()
         sort(sortedTestcase.begin(), sortedTestcase.end());
         for (int k = 0; k < sortedTestcase.size(); k++)
         {
-            assert(findKth(tree, k)->value == sortedTestcase[k]);
+            //assert(findKth(tree, k)->value == sortedTestcase[k]);
+            assert(findKthIterative(tree, k)->value == sortedTestcase[k]);
             //cout << "k: " << k << " findKth: " << findKth(tree, k)->value << " actual kth: " << sortedTestcase[k] << endl;
         }
         //return 0;
