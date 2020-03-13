@@ -336,16 +336,17 @@ AVLNode* findKth(AVLNode* subtreeRoot, int k)
 {
     assert(k >= 0);
     int numDescendantsLeftChild = 0;
-    if (subtreeRoot->leftChild)
+    auto leftChild = subtreeRoot->leftChild;
+    if (leftChild)
     {
-        numDescendantsLeftChild = subtreeRoot->leftChild->numDescendants;
+        numDescendantsLeftChild = leftChild->numDescendants;
         if (numDescendantsLeftChild == k)
             return subtreeRoot;
 
         if (numDescendantsLeftChild > k)
         {
             // The answer is somewhere in the left subtree.
-            return findKth(subtreeRoot->leftChild, k);
+            return findKth(leftChild, k);
         }
     }
     if (k == 0)
@@ -398,6 +399,7 @@ int main()
             assert(findKth(tree, k)->value == sortedTestcase[k]);
             //cout << "k: " << k << " findKth: " << findKth(tree, k)->value << " actual kth: " << sortedTestcase[k] << endl;
         }
+        //return 0;
     }
     {
         const vector<int> testcase = { 2, 3, 5};
