@@ -405,6 +405,53 @@ AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
     return findKth(tree.root(), k);
 }
 
+void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToChooseFrom)
+{
+    vector<bool> hasBeenRemoved(numToChooseFrom, false);
+    AVLTree removedIndices;
+
+    for (const auto choiceIndex : numOfRemainingToChoose)
+    {
+        // Inefficient debug version.
+        int dbgCurrentIndex = 0;
+        while (hasBeenRemoved[dbgCurrentIndex])
+            dbgCurrentIndex++;
+        for (int i = 0; i < choiceIndex; i++)
+        {
+            dbgCurrentIndex++;
+            while (hasBeenRemoved[dbgCurrentIndex])
+                dbgCurrentIndex++;
+        }
+
+
+        // TODO VVVV
+#if 0
+        // Optimised version.
+        auto currentNode = removedIndices.root();
+        int chosenIndex = -1;
+        int numToLeftOfNode = 0;
+        if (currentNode == nullptr)
+        {
+            chosenIndex = 0;
+        }
+        else
+        {
+            if (currentNode->leftChild)
+                numToLeftOfNode = 
+        }
+
+        assert(chosenIndex == dbgCurrentIndex);
+        removedIndices.insert(chosenIndex);
+
+        hasBeenRemoved[chosenIndex] = true;
+#endif
+
+    }
+
+
+
+}
+
 int main()
 {
     assertTestcase({1});
