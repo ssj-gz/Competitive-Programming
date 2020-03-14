@@ -423,9 +423,9 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
 
     for (const auto choiceIndex : numOfRemainingToChoose)
     {
+#ifdef VERIFY_CHOICES_WITH_REMOVALS
         cout << " choiceIndex: " << choiceIndex << endl;
         cout << " Tree: " << endl;
-#ifdef VERIFY_CHOICES_WITH_REMOVALS
         printTree(removedIndices);
         // Inefficient debug version.
         int dbgCurrentIndex = 0;
@@ -449,29 +449,29 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
         int numUsedToLeftOffset = 0;
         while (currentNode)
         {
-            cout << "   currentNode: " << currentNode->id << endl;
+            //cout << "   currentNode: " << currentNode->id << endl;
             const int currentNodeIndex = currentNode->value;
             const int numUsedUpToCurrentNodeIndex = numUsedToLeftOffset + (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
             const int numFreeUpToCurrentNodeIndex = currentNodeIndex - numUsedUpToCurrentNodeIndex;
-            cout << " currentNodeIndex: " << currentNodeIndex << " numUsedUpToCurrentNodeIndex: " << numUsedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << " numUsedToLeftOffset: " << numUsedToLeftOffset << endl;
+            //cout << " currentNodeIndex: " << currentNodeIndex << " numUsedUpToCurrentNodeIndex: " << numUsedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << " numUsedToLeftOffset: " << numUsedToLeftOffset << endl;
             if (numFreeUpToCurrentNodeIndex >= choiceIndex + 1)
             {
                 // We've overshot; the required index is to the left of here; "recurse"
                 // into left child.
                 currentNode = currentNode->leftChild;
-                cout << "Recursing into left" << endl;
+                //cout << "Recursing into left" << endl;
             }
             else
             {
                 // Again, be optimistic about minPossibleIndex.
-                cout << "Original minPossibleIndex: " << minPossibleIndex << endl;
+                //cout << "Original minPossibleIndex: " << minPossibleIndex << endl;
                 minPossibleIndex = max(minPossibleIndex, currentNodeIndex + (choiceIndex - numFreeUpToCurrentNodeIndex) + 1);
-                cout << "Adjusted minPossibleIndex to " << minPossibleIndex << endl;
+                //cout << "Adjusted minPossibleIndex to " << minPossibleIndex << endl;
                 {
                     // Required index is to the right of here; "recurse" into the right child.
                     // In doing this, we're "forgetting" all the used indices to the left of 
                     // currentNode - record them in numUsedToLeftOffset.
-                    cout << "Recursing into right" << endl;
+                    //cout << "Recursing into right" << endl;
                     numUsedToLeftOffset += numUsedUpToCurrentNodeIndex - numUsedToLeftOffset + 1;
                     currentNode = currentNode->rightChild;
                 }
