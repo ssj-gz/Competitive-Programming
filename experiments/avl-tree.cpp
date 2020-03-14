@@ -417,45 +417,26 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
         cout << " " << x;
     }
     cout << endl;
-    vector<bool> hasBeenRemoved(numToChooseFrom, false);
+    vector<bool> dbgHasBeenRemoved(numToChooseFrom, false);
 #endif
     AVLTree removedIndices;
 
     for (const auto nthRemaining : numOfRemainingToChoose)
     {
-#ifdef VERIFY_CHOICES_WITH_REMOVALS
-        cout << " nthRemaining: " << nthRemaining << endl;
-        cout << " Tree: " << endl;
-        printTree(removedIndices);
-        // Inefficient debug version.
-        int dbgCurrentIndex = 0;
-        while (hasBeenRemoved[dbgCurrentIndex])
-            dbgCurrentIndex++;
-        for (int i = 0; i < nthRemaining; i++)
-        {
-            dbgCurrentIndex++;
-            while (hasBeenRemoved[dbgCurrentIndex])
-                dbgCurrentIndex++;
-        }
-        cout << "  dbgCurrentIndex: " << dbgCurrentIndex << endl;
-#endif
-
-
-        // Optimised version.
         // Be optimistic and give remappedIndex the smallest possible value:
         // we'll correct our optimism as we go along :)
         int remappedIndex = nthRemaining;
         auto currentNode = removedIndices.root();
-        int numUsedUpToCurrentNodeIndexOffset = 0;
+        int numRemovedUpToCurrentNodeIndexOffset = 0;
         while (currentNode)
         {
             const int indexOfCurrentNode = currentNode->value;
             const int numDescendantsLeftSubChild = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-            const int numUsedUpToCurrentNodeIndex = numUsedUpToCurrentNodeIndexOffset + numDescendantsLeftSubChild;
-            const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numUsedUpToCurrentNodeIndex;
+            const int numRemovedUpToCurrentNodeIndex = numRemovedUpToCurrentNodeIndexOffset + numDescendantsLeftSubChild;
+            const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
             if (numFreeUpToCurrentNodeIndex >= nthRemaining + 1)
             {
-                // We've overshot; the required index is to the left of here; "recurse"
+                // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
                 // into left child.
                 currentNode = currentNode->leftChild;
             }
@@ -464,22 +445,32 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
                 // Again, be optimistic about remappedIndex - we'll correct it as we go along.
                 remappedIndex = max(remappedIndex, indexOfCurrentNode + (nthRemaining - numFreeUpToCurrentNodeIndex) + 1);
                 // Required index is to the right of here; "recurse" into the right child.
-                // In doing this, we're "forgetting" all the used indices to the left of 
-                // currentNode - record them in numUsedUpToCurrentNodeIndexOffset.
-                numUsedUpToCurrentNodeIndexOffset += 1 + // currentNode is used ...
-                                                     numDescendantsLeftSubChild; // ... as are all the indices in currentNode->leftChild.
+                // In doing this, we're "forgetting" all the Removed indices to the left of 
+                // currentNode - record them in numRemovedUpToCurrentNodeIndexOffset.
+                numRemovedUpToCurrentNodeIndexOffset += 1 + // currentNode is Removed ...
+                                                        numDescendantsLeftSubChild; // ... as are all the indices in currentNode->leftChild.
                 currentNode = currentNode->rightChild;
             }
             
         }
-        const int chosenIndex = remappedIndex;
+        // We've successfully found the index in the original array; now mark it as Removed.
+        removedIndices.insertValue(remappedIndex);
 
 #ifdef VERIFY_CHOICES_WITH_REMOVALS
-        cout << " chosenIndex: " << chosenIndex << " dbgCurrentIndex: " << dbgCurrentIndex << endl;
-        assert(chosenIndex == dbgCurrentIndex);
-        hasBeenRemoved[chosenIndex] = true;
+        // Inefficient debug version.
+        int dbgRemappedIndex = 0;
+        while (dbgHasBeenRemoved[dbgRemappedIndex])
+            dbgRemappedIndex++;
+        for (int i = 0; i < nthRemaining; i++)
+        {
+            dbgRemappedIndex++;
+            while (dbgHasBeenRemoved[dbgRemappedIndex])
+                dbgRemappedIndex++;
+        }
+        cout << " remappedIndex: " << remappedIndex << " dbgRemappedIndex: " << dbgRemappedIndex << endl;
+        assert(remappedIndex == dbgRemappedIndex);
+        dbgHasBeenRemoved[remappedIndex] = true;
 #endif
-        removedIndices.insertValue(chosenIndex);
 
 
     }
