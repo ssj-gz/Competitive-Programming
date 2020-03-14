@@ -421,17 +421,17 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
 #endif
     AVLTree removedIndices;
 
-    for (const auto choiceIndex : numOfRemainingToChoose)
+    for (const auto nthRemaining : numOfRemainingToChoose)
     {
 #ifdef VERIFY_CHOICES_WITH_REMOVALS
-        cout << " choiceIndex: " << choiceIndex << endl;
+        cout << " nthRemaining: " << nthRemaining << endl;
         cout << " Tree: " << endl;
         printTree(removedIndices);
         // Inefficient debug version.
         int dbgCurrentIndex = 0;
         while (hasBeenRemoved[dbgCurrentIndex])
             dbgCurrentIndex++;
-        for (int i = 0; i < choiceIndex; i++)
+        for (int i = 0; i < nthRemaining; i++)
         {
             dbgCurrentIndex++;
             while (hasBeenRemoved[dbgCurrentIndex])
@@ -442,43 +442,37 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
 
 
         // Optimised version.
-        // Be optimistic and assume index "0" is unused - 
+        // Be optimistic and give remappedIndex the smallest possible value:
         // we'll correct our optimism as we go along :)
-        int minPossibleIndex = choiceIndex;
+        int remappedIndex = nthRemaining;
         auto currentNode = removedIndices.root();
-        int numUsedToLeftOffset = 0;
+        int numUsedUpToCurrentNodeIndexOffset = 0;
         while (currentNode)
         {
-            //cout << "   currentNode: " << currentNode->id << endl;
-            const int currentNodeIndex = currentNode->value;
+            const int indexOfCurrentNode = currentNode->value;
             const int numDescendantsLeftSubChild = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-            const int numUsedUpToCurrentNodeIndex = numUsedToLeftOffset + numDescendantsLeftSubChild;
-            const int numFreeUpToCurrentNodeIndex = currentNodeIndex - numUsedUpToCurrentNodeIndex;
-            //cout << " currentNodeIndex: " << currentNodeIndex << " numUsedUpToCurrentNodeIndex: " << numUsedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << " numUsedToLeftOffset: " << numUsedToLeftOffset << endl;
-            if (numFreeUpToCurrentNodeIndex >= choiceIndex + 1)
+            const int numUsedUpToCurrentNodeIndex = numUsedUpToCurrentNodeIndexOffset + numDescendantsLeftSubChild;
+            const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numUsedUpToCurrentNodeIndex;
+            if (numFreeUpToCurrentNodeIndex >= nthRemaining + 1)
             {
                 // We've overshot; the required index is to the left of here; "recurse"
                 // into left child.
                 currentNode = currentNode->leftChild;
-                //cout << "Recursing into left" << endl;
             }
             else
             {
-                // Again, be optimistic about minPossibleIndex.
-                //cout << "Original minPossibleIndex: " << minPossibleIndex << endl;
-                minPossibleIndex = max(minPossibleIndex, currentNodeIndex + (choiceIndex - numFreeUpToCurrentNodeIndex) + 1);
-                //cout << "Adjusted minPossibleIndex to " << minPossibleIndex << endl;
-                {
-                    // Required index is to the right of here; "recurse" into the right child.
-                    // In doing this, we're "forgetting" all the used indices to the left of 
-                    // currentNode - record them in numUsedToLeftOffset.
-                    numUsedToLeftOffset += 1 + numDescendantsLeftSubChild;
-                    currentNode = currentNode->rightChild;
-                }
+                // Again, be optimistic about remappedIndex - we'll correct it as we go along.
+                remappedIndex = max(remappedIndex, indexOfCurrentNode + (nthRemaining - numFreeUpToCurrentNodeIndex) + 1);
+                // Required index is to the right of here; "recurse" into the right child.
+                // In doing this, we're "forgetting" all the used indices to the left of 
+                // currentNode - record them in numUsedUpToCurrentNodeIndexOffset.
+                numUsedUpToCurrentNodeIndexOffset += 1 + // currentNode is used ...
+                                                     numDescendantsLeftSubChild; // ... as are all the indices in currentNode->leftChild.
+                currentNode = currentNode->rightChild;
             }
             
         }
-        const int chosenIndex = minPossibleIndex;
+        const int chosenIndex = remappedIndex;
 
 #ifdef VERIFY_CHOICES_WITH_REMOVALS
         cout << " chosenIndex: " << chosenIndex << " dbgCurrentIndex: " << dbgCurrentIndex << endl;
