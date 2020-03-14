@@ -303,6 +303,8 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
 
 void printSubTree(AVLNode* subtreeRoot)
 {
+    if (subtreeRoot == nullptr)
+        return;
     cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
     cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
 
@@ -407,11 +409,20 @@ AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
 
 void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToChooseFrom)
 {
+    cout << "choicesWithRemovals: numToChooseFrom " << numToChooseFrom << " choices:" << endl;
+    for (const auto x : numOfRemainingToChoose)
+    {
+        cout << " " << x;
+    }
+    cout << endl;
     vector<bool> hasBeenRemoved(numToChooseFrom, false);
     AVLTree removedIndices;
 
     for (const auto choiceIndex : numOfRemainingToChoose)
     {
+        cout << " choiceIndex: " << choiceIndex << endl;
+        cout << " Tree: " << endl;
+        printTree(removedIndices);
         // Inefficient debug version.
         int dbgCurrentIndex = 0;
         while (hasBeenRemoved[dbgCurrentIndex])
@@ -422,34 +433,57 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
             while (hasBeenRemoved[dbgCurrentIndex])
                 dbgCurrentIndex++;
         }
+        cout << "  dbgCurrentIndex: " << dbgCurrentIndex << endl;
 
 
-        // TODO VVVV
-#if 0
         // Optimised version.
+        // Be optimistic and assume index "0" is unused - 
+        // we'll correct our optimism as we go along :)
+        int minPossibleIndex = choiceIndex;
         auto currentNode = removedIndices.root();
-        int chosenIndex = -1;
-        int numToLeftOfNode = 0;
-        if (currentNode == nullptr)
+        int numUsedToLeftOffset = 0;
+        while (currentNode)
         {
-            chosenIndex = 0;
+            cout << "   currentNode: " << currentNode->id << endl;
+            const int currentNodeIndex = currentNode->value;
+            const int numUsedUpToCurrentNodeIndex = numUsedToLeftOffset + (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+            const int numFreeUpToCurrentNodeIndex = currentNodeIndex - numUsedUpToCurrentNodeIndex;
+            cout << " currentNodeIndex: " << currentNodeIndex << " numUsedUpToCurrentNodeIndex: " << numUsedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << " numUsedToLeftOffset: " << numUsedToLeftOffset << endl;
+            if (numFreeUpToCurrentNodeIndex >= choiceIndex + 1)
+            {
+                // We've overshot; the required index is to the left of here; "recurse"
+                // into left child.
+                currentNode = currentNode->leftChild;
+                cout << "Recursing into left" << endl;
+            }
+            else
+            {
+                // Again, be optimistic about minPossibleIndex.
+                cout << "Original minPossibleIndex: " << minPossibleIndex << endl;
+                minPossibleIndex = max(minPossibleIndex, currentNodeIndex + (choiceIndex - numFreeUpToCurrentNodeIndex) + 1);
+                cout << "Adjusted minPossibleIndex to " << minPossibleIndex << endl;
+                {
+                    // Required index is to the right of here; "recurse" into the right child.
+                    // In doing this, we're "forgetting" all the used indices to the left of 
+                    // currentNode - record them in numUsedToLeftOffset.
+                    cout << "Recursing into right" << endl;
+                    numUsedToLeftOffset += numUsedUpToCurrentNodeIndex - numUsedToLeftOffset + 1;
+                    currentNode = currentNode->rightChild;
+                }
+            }
+            
         }
-        else
-        {
-            if (currentNode->leftChild)
-                numToLeftOfNode = 
-        }
+        const int chosenIndex = minPossibleIndex;
 
+        cout << " chosenIndex: " << chosenIndex << " dbgCurrentIndex: " << dbgCurrentIndex << endl;
         assert(chosenIndex == dbgCurrentIndex);
-        removedIndices.insert(chosenIndex);
+        removedIndices.insertValue(chosenIndex);
 
         hasBeenRemoved[chosenIndex] = true;
-#endif
 
     }
 
-
-
+    cout << "Finished choicesWithRemovals" << endl;
 }
 
 int main()
@@ -468,6 +502,28 @@ int main()
     assertTestcase({5, 4, 6, 8, 7});
 
     assertTestcase({1,2, 6, 4, 5, 3});
+
+    {
+        vector<int> testcase;
+        testcase.push_back(5);
+        choicesWithRemovals(testcase, 10);
+
+    }
+    {
+        choicesWithRemovals({5, 3}, 10);
+    }
+    {
+        choicesWithRemovals({3, 5}, 10);
+    }
+    {
+        choicesWithRemovals({9, 8, 7}, 10);
+    }
+    {
+        choicesWithRemovals({1, 2, 3}, 10);
+    }
+    {
+        choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
+    }
 
     {
         // Quick performance test.
