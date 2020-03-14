@@ -421,11 +421,11 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
 #endif
     AVLTree removedIndices;
 
-    for (const auto nthRemaining : numOfRemainingToChoose)
+    for (const auto nthOfRemainingToChoose : numOfRemainingToChoose)
     {
         // Be optimistic and give remappedIndex the smallest possible value:
         // we'll correct our optimism as we go along :)
-        int remappedIndex = nthRemaining;
+        int remappedIndex = nthOfRemainingToChoose;
         auto currentNode = removedIndices.root();
         int numRemovedUpToCurrentNodeIndexOffset = 0;
         while (currentNode)
@@ -434,7 +434,7 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
             const int numDescendantsLeftSubChild = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
             const int numRemovedUpToCurrentNodeIndex = numRemovedUpToCurrentNodeIndexOffset + numDescendantsLeftSubChild;
             const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
-            if (numFreeUpToCurrentNodeIndex >= nthRemaining + 1)
+            if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
             {
                 // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
                 // into left child.
@@ -443,7 +443,7 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
             else
             {
                 // Again, be optimistic about remappedIndex - we'll correct it as we go along.
-                remappedIndex = max(remappedIndex, indexOfCurrentNode + (nthRemaining - numFreeUpToCurrentNodeIndex) + 1);
+                remappedIndex = max(remappedIndex, indexOfCurrentNode + (nthOfRemainingToChoose - numFreeUpToCurrentNodeIndex) + 1);
                 // Required index is to the right of here; "recurse" into the right child.
                 // In doing this, we're "forgetting" all the Removed indices to the left of 
                 // currentNode - record them in numRemovedUpToCurrentNodeIndexOffset.
@@ -461,7 +461,7 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
         int dbgRemappedIndex = 0;
         while (dbgHasBeenRemoved[dbgRemappedIndex])
             dbgRemappedIndex++;
-        for (int i = 0; i < nthRemaining; i++)
+        for (int i = 0; i < nthOfRemainingToChoose; i++)
         {
             dbgRemappedIndex++;
             while (dbgHasBeenRemoved[dbgRemappedIndex])
