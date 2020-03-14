@@ -409,7 +409,7 @@ AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
 
 void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToChooseFrom)
 {
-    cout << "choicesWithRemovals: numToChooseFrom " << numToChooseFrom << " choices:" << endl;
+    cout << "choicesWithRemovals: numToChooseFrom " << numToChooseFrom << " choices:";
     for (const auto x : numOfRemainingToChoose)
     {
         cout << " " << x;
@@ -523,6 +523,20 @@ int main()
     }
     {
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
+    }
+
+    {
+        for (int t = 0; t < 10000; t++)
+        {
+            const int numToChooseFrom = 1 + rand() % 20;
+            vector<int> numOfRemainingToChoose;
+            for (int i = 0; i < numToChooseFrom; i++)
+            {
+                cout << "Blah: " << numToChooseFrom - (numToChooseFrom - i) << endl;
+                numOfRemainingToChoose.push_back(rand() % (numToChooseFrom - i));
+            }
+            choicesWithRemovals(numOfRemainingToChoose, numToChooseFrom);
+        }
     }
 
     {
