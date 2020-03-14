@@ -407,7 +407,7 @@ AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
     return findKth(tree.root(), k);
 }
 
-#define VERIFY_CHOICES_WITH_REMOVALS
+//#define VERIFY_CHOICES_WITH_REMOVALS
 void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToChooseFrom)
 {
 #ifdef VERIFY_CHOICES_WITH_REMOVALS
@@ -533,6 +533,7 @@ int main()
     }
 
     {
+#if 0
         for (int t = 0; t < 10000; t++)
         {
             const int numToChooseFrom = 1 + rand() % 20;
@@ -544,6 +545,16 @@ int main()
             }
             choicesWithRemovals(numOfRemainingToChoose, numToChooseFrom);
         }
+#else
+        const int numToChooseFrom = 200'000;
+        vector<int> numOfRemainingToChoose;
+        for (int i = 0; i < numToChooseFrom; i++)
+        {
+            numOfRemainingToChoose.push_back(rand() % (numToChooseFrom - i));
+        }
+        choicesWithRemovals(numOfRemainingToChoose, numToChooseFrom);
+        return 0;
+#endif
     }
 
     {
