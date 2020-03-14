@@ -29,6 +29,10 @@ struct AVLNode
 class AVLTree
 {
     public:
+        AVLTree(int nodeBlockSize = 1)
+            : m_nodeBlockSize{nodeBlockSize}
+        {
+        }
         AVLNode* root()
         {
             return m_root;
@@ -154,10 +158,10 @@ class AVLTree
 
         AVLNode* createNode(int value)
         {
-            if (m_nodes.empty() || m_nodes.back().size() == nodeBlockSize - 1)
+            if (m_nodes.empty() || static_cast<int>(m_nodes.back().size()) == m_nodeBlockSize)
             {
                 m_nodes.push_back(vector<AVLNode>());
-                m_nodes.back().reserve(nodeBlockSize);
+                m_nodes.back().reserve(m_nodeBlockSize);
             }
             m_nodes.back().push_back(AVLNode(value));
             auto newNode = &(m_nodes.back().back());
@@ -166,7 +170,7 @@ class AVLTree
             return newNode;
         }
 
-        static constexpr int nodeBlockSize = 10000;
+        int m_nodeBlockSize = 1;
         deque<vector<AVLNode>> m_nodes;
         int m_nextNodeId = 1;
 };
