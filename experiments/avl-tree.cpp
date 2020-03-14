@@ -407,8 +407,10 @@ AVLNode* findKth(AVLTree& tree, int k) // k is 0-relative.
     return findKth(tree.root(), k);
 }
 
+#define VERIFY_CHOICES_WITH_REMOVALS
 void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToChooseFrom)
 {
+#ifdef VERIFY_CHOICES_WITH_REMOVALS
     cout << "choicesWithRemovals: numToChooseFrom " << numToChooseFrom << " choices:";
     for (const auto x : numOfRemainingToChoose)
     {
@@ -416,12 +418,14 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
     }
     cout << endl;
     vector<bool> hasBeenRemoved(numToChooseFrom, false);
+#endif
     AVLTree removedIndices;
 
     for (const auto choiceIndex : numOfRemainingToChoose)
     {
         cout << " choiceIndex: " << choiceIndex << endl;
         cout << " Tree: " << endl;
+#ifdef VERIFY_CHOICES_WITH_REMOVALS
         printTree(removedIndices);
         // Inefficient debug version.
         int dbgCurrentIndex = 0;
@@ -434,6 +438,7 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
                 dbgCurrentIndex++;
         }
         cout << "  dbgCurrentIndex: " << dbgCurrentIndex << endl;
+#endif
 
 
         // Optimised version.
@@ -475,11 +480,13 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
         }
         const int chosenIndex = minPossibleIndex;
 
+#ifdef VERIFY_CHOICES_WITH_REMOVALS
         cout << " chosenIndex: " << chosenIndex << " dbgCurrentIndex: " << dbgCurrentIndex << endl;
         assert(chosenIndex == dbgCurrentIndex);
+        hasBeenRemoved[chosenIndex] = true;
+#endif
         removedIndices.insertValue(chosenIndex);
 
-        hasBeenRemoved[chosenIndex] = true;
 
     }
 
