@@ -533,7 +533,7 @@ int main()
     }
 
     {
-#if 0
+#if 1
         for (int t = 0; t < 10000; t++)
         {
             const int numToChooseFrom = 1 + rand() % 20;
