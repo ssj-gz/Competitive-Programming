@@ -226,6 +226,8 @@ class AVLTree
 // Debugging/ diagnostics.
 bool isBST(AVLNode* node, int lowerValueLimit, int upperValueLimit)
 {
+    if (!node)
+        return true;
     bool result = true;
     if (node->leftChild)
     {
@@ -247,6 +249,11 @@ bool isBST(AVLNode* node)
 
 std::pair<bool, int> isSubtreeBalanced(AVLNode* subtreeRoot)
 {
+    if (!subtreeRoot)
+    {
+        return {true,0};
+
+    }
     bool isBalanced = true;
     int maxDescendantDepth = 0;
     int balanceFactor = 0;
@@ -421,36 +428,40 @@ void assertTestcase(const vector<int>& valuesToInsert)
 
 void assertPersistentTestcase(const vector<int>& valuesToInsert)
 {
-    // TODO - toughen this up a bit.
+#if 0
     cout << "Testcase:";
     for (const auto x : valuesToInsert)
         cout << " " << x;
     cout << endl;
+#endif
 
     AVLTree tree(true);
     vector<int> expectedInOrderValues;
+    int numAdded = 0;
     for (const auto value : valuesToInsert)
     {
         tree.insertValue(value);
         expectedInOrderValues.push_back(value);
         sort(expectedInOrderValues.begin(), expectedInOrderValues.end());
 
-        printTree(tree);
+        //printTree(tree);
 
         assert(isBST(tree.root()));
         assert(isBalanced(tree.root()));
         assert(isDescendantCountCorrect(tree));
         assert(checkContents(tree, expectedInOrderValues));
+        numAdded++;
+        //cout << "Added " << numAdded << " of " << valuesToInsert.size() << endl;
     }
 
     expectedInOrderValues.clear();
     for (int revisionNum = 0; revisionNum < valuesToInsert.size() + 1; revisionNum++)
     {
 
-        printTree(tree);
+        //printTree(tree);
 
-        assert(isBST(tree.root()));
-        assert(isBalanced(tree.root()));
+        assert(isBST(tree.rootForRevision(revisionNum)));
+        assert(isBalanced(tree.rootForRevision(revisionNum)));
         assert(isDescendantCountCorrect(tree));
         assert(checkContentsPersistent(tree, revisionNum, expectedInOrderValues));
 
@@ -459,6 +470,8 @@ void assertPersistentTestcase(const vector<int>& valuesToInsert)
             expectedInOrderValues.push_back(valuesToInsert[revisionNum]);
             sort(expectedInOrderValues.begin(), expectedInOrderValues.end());
         }
+
+        //cout << "Verified " << (revisionNum + 1) << " of " << (valuesToInsert.size() + 1) << endl;
     }
 
 
@@ -641,7 +654,19 @@ int main()
     {
         assertPersistentTestcase({1,2,3});
         assertPersistentTestcase({1,5,3});
-        return 0;
+        assertPersistentTestcase({1,5,3,2,4});
+        for (int t = 0; t < 10'000; t++)
+        {
+            const int N = rand() % 1000 + 1;
+            const int maxValue = rand() % 1000 + 1;
+            vector<int> testcase;
+            for (int i = 0; i < N; i++)
+            {
+                testcase.push_back(rand()% maxValue + 1);
+            }
+            cout << "Performing Persistence test " << (t + 1) << " out of " << 10'000 << endl;
+            assertPersistentTestcase(testcase);
+        }
     }
 
     {
