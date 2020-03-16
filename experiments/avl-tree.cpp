@@ -606,6 +606,113 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
     cout << "Finished choicesWithRemovals" << endl;
 }
 
+AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
+{
+    auto currentNode1 = tree1.root();
+    int numToLeftOffset1 = 0;
+    while (currentNode1)
+    {
+        const auto currentValue1 = currentNode1->value;
+        int numToLeftOffset2 = 0;
+        int numToLeft2 = 0;
+        auto currentNode2 = tree2.root();
+        while (currentNode2)
+        {
+            const int numInLeftSubchild2 = (currentNode2->leftChild ? currentNode2->leftChild->numDescendants : 0);
+            numToLeft2 = numToLeftOffset2 + numInLeftSubchild2 + 1;
+            if (currentNode2->value > currentValue1)
+            {
+                currentNode2 = currentNode2->leftChild;
+            }
+            else
+            {
+                currentNode2 = currentNode2->rightChild;
+                numToLeftOffset2 += 1 + numInLeftSubchild2;
+            }
+        }
+
+        const auto numInLeftSubchild1 = (currentNode1->leftChild ? currentNode1->leftChild->numDescendants : 0);
+        const auto numToLeft1 = numToLeftOffset1 + numInLeftSubchild1;
+        const auto numToLeftInBoth = numToLeft1 + numToLeft2;
+        if (numToLeftInBoth == k)
+        {
+            return currentNode1;
+        }
+
+        if (numToLeftInBoth < k)
+        {
+            currentNode1 = currentNode1->leftChild;
+        }
+        else
+        {
+            currentNode1 = currentNode1->rightChild;
+            numToLeftOffset1 += 1 + numInLeftSubchild1;
+        }
+    }
+
+    return nullptr;
+}
+
+void checkBlah(const vector<int>& testcaseOriginal)
+{
+    const int n = testcaseOriginal.size();
+    int removeBeginL = rand() % n;
+    int removeBeginR = rand() % n;
+    if (removeBeginL > removeBeginR)
+        swap(removeBeginL, removeBeginR);
+
+    const auto numLeft = n - (removeBeginR - removeBeginL + 1);
+    if (numLeft <= 0)
+        return;
+
+    const int K = rand() % numLeft;
+
+    cout << "checkBlah testcase:" ;
+    for (const auto x : testcaseOriginal)
+    {
+        cout << " " << x;
+    }
+    cout << endl;
+    cout << "n: " << n << " removeBeginL: " <<removeBeginL << " removeBeginR: " << removeBeginR << " K: " << K << endl;
+
+    AVLTree sortedPrefixes(true);
+    for (const auto value : testcaseOriginal)
+    {
+        sortedPrefixes.insertValue(value);
+    }
+    AVLTree sortedSuffixes(true);
+    for (auto valueReverseIter = testcaseOriginal.rbegin(); valueReverseIter != testcaseOriginal.rend(); valueReverseIter++)
+    {
+        sortedSuffixes.insertValue(*valueReverseIter);
+    }
+
+    auto testcase = testcaseOriginal;
+    testcase.erase(testcase.begin() + removeBeginL, testcase.begin() + removeBeginR + 1);
+
+    sort(testcase.begin(), testcase.end());
+
+    cout << "After removal and sorting:";
+    for (const auto value : testcase)
+    {
+        cout << " " << value;
+    }
+    cout << endl;
+
+    const auto dbgKthValue = testcase[K];
+
+    sortedPrefixes.switchToRevision(removeBeginL);
+    sortedSuffixes.switchToRevision(n - 1 - removeBeginR);
+
+    auto blah = findKthFromPair(K, sortedPrefixes, sortedSuffixes);
+    if (!blah)
+    {
+        blah = findKthFromPair(K, sortedSuffixes, sortedPrefixes);
+    }
+    assert(blah);
+    cout << "dbgKthValue: " << dbgKthValue << " actual: " << blah->value << endl;
+    assert(blah->value == dbgKthValue);
+}
+
 int main()
 {
     assertTestcase({1});
@@ -643,6 +750,18 @@ int main()
     }
     {
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
+    }
+    {
+        // Quick "findKthFromPair" test.
+        vector<int> blee;
+        for (int i = 0; i < 10; i++)
+        {
+            blee.push_back(i);
+        }
+        random_shuffle(blee.begin(), blee.end());
+        checkBlah(blee);
+
+
     }
     {
         // Quick Persistence performance test.
@@ -754,6 +873,7 @@ int main()
         assert(kthSmallestValue == debugKthSmallestValue);
         //return 0;
     }
+
 
     while (true)
     {
