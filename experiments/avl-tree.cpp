@@ -613,13 +613,19 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     while (currentNode1)
     {
         const auto currentValue1 = currentNode1->value;
+        cout << "currentValue1: " << currentValue1 << endl;
         int numToLeftOffset2 = 0;
         int numToLeft2 = 0;
+        int lastValue2 = -1;
         auto currentNode2 = tree2.root();
         while (currentNode2)
         {
+            lastValue2 = currentNode2->value;
             const int numInLeftSubchild2 = (currentNode2->leftChild ? currentNode2->leftChild->numDescendants : 0);
-            numToLeft2 = numToLeftOffset2 + numInLeftSubchild2 + 1;
+            if (currentNode2->value < currentValue1)
+            {
+                numToLeft2 = numToLeftOffset2 + numInLeftSubchild2 + 1;
+            }
             if (currentNode2->value > currentValue1)
             {
                 currentNode2 = currentNode2->leftChild;
@@ -630,12 +636,16 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
                 numToLeftOffset2 += 1 + numInLeftSubchild2;
             }
         }
+        cout << "lastValue2: " << lastValue2 << endl;
+        cout << "numToLeft2: " << numToLeft2 << endl;
 
         const auto numInLeftSubchild1 = (currentNode1->leftChild ? currentNode1->leftChild->numDescendants : 0);
         const auto numToLeft1 = numToLeftOffset1 + numInLeftSubchild1;
         const auto numToLeftInBoth = numToLeft1 + numToLeft2;
+        cout << "numToLeft1: " << numToLeft1 << " numToLeftInBoth: " << numToLeftInBoth << endl;
         if (numToLeftInBoth == k)
         {
+            cout << "Found: " << currentNode1->value << endl;
             return currentNode1;
         }
 
