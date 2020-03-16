@@ -613,7 +613,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     while (currentNode1)
     {
         const auto currentValue1 = currentNode1->value;
-        cout << "currentValue1: " << currentValue1 << endl;
+        //cout << "currentValue1: " << currentValue1 << endl;
         int numToLeftOffset2 = 0;
         int numToLeft2 = 0;
         int lastValue2 = -1;
@@ -636,16 +636,16 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
                 numToLeftOffset2 += 1 + numInLeftSubchild2;
             }
         }
-        cout << "lastValue2: " << lastValue2 << endl;
-        cout << "numToLeft2: " << numToLeft2 << endl;
+        //cout << "lastValue2: " << lastValue2 << endl;
+        //cout << "numToLeft2: " << numToLeft2 << endl;
 
         const auto numInLeftSubchild1 = (currentNode1->leftChild ? currentNode1->leftChild->numDescendants : 0);
         const auto numToLeft1 = numToLeftOffset1 + numInLeftSubchild1;
         const auto numToLeftInBoth = numToLeft1 + numToLeft2;
-        cout << "numToLeft1: " << numToLeft1 << " numToLeftInBoth: " << numToLeftInBoth << endl;
+        //cout << "numToLeft1: " << numToLeft1 << " numToLeftInBoth: " << numToLeftInBoth << endl;
         if (numToLeftInBoth == k)
         {
-            cout << "Found: " << currentNode1->value << endl;
+            //cout << "Found: " << currentNode1->value << endl;
             return currentNode1;
         }
 
@@ -744,6 +744,46 @@ void checkBlah(const vector<int>& testcaseOriginal)
     }
 }
 
+int timefindKthFromPair(const vector<int>& testcaseOriginal)
+{
+    const int n = testcaseOriginal.size();
+    AVLTree sortedPrefixes(true, testcaseOriginal.size());
+    for (const auto value : testcaseOriginal)
+    {
+        sortedPrefixes.insertValue(value);
+    }
+    AVLTree sortedSuffixes(true, testcaseOriginal.size());
+    for (auto valueReverseIter = testcaseOriginal.rbegin(); valueReverseIter != testcaseOriginal.rend(); valueReverseIter++)
+    {
+        sortedSuffixes.insertValue(*valueReverseIter);
+    }
+    int blee = 0;
+    for (int t = 0; t < 100'000; t++)
+    {
+        int removeBeginL = rand() % n;
+        int removeBeginR = rand() % n;
+        if (removeBeginL > removeBeginR)
+            swap(removeBeginL, removeBeginR);
+
+        const auto numLeft = n - (removeBeginR - removeBeginL + 1);
+        if (numLeft <= 0)
+            continue;
+
+        const int K = rand() % numLeft;
+
+        sortedPrefixes.switchToRevision(removeBeginL);
+        sortedSuffixes.switchToRevision(n - 1 - removeBeginR);
+
+        auto blah = findKthFromPair(K, sortedPrefixes, sortedSuffixes);
+        if (!blah)
+        {
+            blah = findKthFromPair(K, sortedSuffixes, sortedPrefixes);
+        }
+        blee += blah->value;
+    }
+    return blee;
+}
+
 int main()
 {
     assertTestcase({1});
@@ -781,6 +821,23 @@ int main()
     }
     {
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
+    }
+    {
+        // Quick "findKthFromPair" performance test.
+        vector<int> allNums;
+        const int N = 200'000;
+        for (int i = 0; i < N; i++)
+        {
+            allNums.push_back(i);
+        }
+        // Quick "findKthFromPair" test.
+        vector<int> blee = allNums;
+        random_shuffle(blee.begin(), blee.end());
+        blee.erase(blee.begin() + N, blee.end());
+
+        cout << "timefindKthFromPair" << endl;
+        cout << timefindKthFromPair(blee) << endl;
+        return 0;
     }
     {
         vector<int> allNums;
