@@ -55,8 +55,10 @@ class AVLTree
 
             if (m_isPersistent)
             {
+                m_rootForRevision.erase(m_rootForRevision.begin() + m_revisionNumber + 1, m_rootForRevision.end());
                 m_rootForRevision.push_back(m_root);
                 m_revisionNumber++;
+                assert(m_revisionNumber == m_rootForRevision.size() - 1);
             }
         }
         void switchToRevision(int revisionNum)
