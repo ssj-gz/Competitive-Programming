@@ -40,13 +40,9 @@ class AVLTree
         void insertValue(int newValue)
         {
             if (!m_root)
-            {
                 m_root = createNode(newValue);
-            }
             else
-            {
                 m_root = insertValue(newValue, m_root);
-            }
 
             if (m_isPersistent)
             {
