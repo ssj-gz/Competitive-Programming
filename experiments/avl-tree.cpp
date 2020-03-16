@@ -63,6 +63,7 @@ class AVLTree
         }
         void switchToRevision(int revisionNum)
         {
+            assert(m_isPersistent);
             m_revisionNumber = revisionNum;
         }
 
