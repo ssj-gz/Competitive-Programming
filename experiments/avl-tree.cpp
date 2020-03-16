@@ -132,13 +132,11 @@ class AVLTree
             auto newSubtreeRoot = subtreeRoot->leftChild;
             if (m_isPersistent)
             {
-                auto replacementNewSubtreeRoot = createNode(newSubtreeRoot->value);
-                *replacementNewSubtreeRoot = *newSubtreeRoot;
-                newSubtreeRoot = replacementNewSubtreeRoot;
+                // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
+                // AVLTree's, we must copy-on-write.
+                newSubtreeRoot = createNode(*newSubtreeRoot);
+                subtreeRoot = createNode(*subtreeRoot);
 
-                auto replacementSubtreeRoot = createNode(subtreeRoot->value);
-                *replacementSubtreeRoot = *subtreeRoot;
-                subtreeRoot = replacementSubtreeRoot;
             }
             auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
             newSubtreeRoot->rightChild = subtreeRoot;
@@ -154,13 +152,10 @@ class AVLTree
             auto newSubtreeRoot = subtreeRoot->rightChild;
             if (m_isPersistent)
             {
-                auto replacementNewSubtreeRoot = createNode(newSubtreeRoot->value);
-                *replacementNewSubtreeRoot = *newSubtreeRoot;
-                newSubtreeRoot = replacementNewSubtreeRoot;
-
-                auto replacementSubtreeRoot = createNode(subtreeRoot->value);
-                *replacementSubtreeRoot = *subtreeRoot;
-                subtreeRoot = replacementSubtreeRoot;
+                // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
+                // AVLTree's, we must copy-on-write.
+                newSubtreeRoot = createNode(*newSubtreeRoot);
+                subtreeRoot = createNode(*subtreeRoot);
             }
             auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
             newSubtreeRoot->leftChild = subtreeRoot;
@@ -204,6 +199,13 @@ class AVLTree
         {
             auto newNode = createNode();
             newNode->value = value;
+            return newNode;
+        }
+
+        AVLNode* createNode(const AVLNode& nodeToCopy)
+        {
+            auto newNode = createNode();
+            *newNode = nodeToCopy;
             return newNode;
         }
 
