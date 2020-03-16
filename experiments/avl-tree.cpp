@@ -649,7 +649,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
             return currentNode1;
         }
 
-        if (numToLeftInBoth < k)
+        if (numToLeftInBoth > k)
         {
             currentNode1 = currentNode1->leftChild;
         }
@@ -780,14 +780,18 @@ int main()
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
     }
     {
-        // Quick "findKthFromPair" test.
-        vector<int> blee;
-        for (int i = 0; i < 10; i++)
+        for (int t = 0; t < 100; t++)
         {
-            blee.push_back(i);
+            // Quick "findKthFromPair" test.
+            vector<int> blee;
+            const int N = rand() % 100 + 1;
+            for (int i = 0; i < N; i++)
+            {
+                blee.push_back(i);
+            }
+            random_shuffle(blee.begin(), blee.end());
+            checkBlah(blee);
         }
-        random_shuffle(blee.begin(), blee.end());
-        checkBlah(blee);
 
 
     }
