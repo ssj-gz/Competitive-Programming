@@ -666,79 +666,82 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 void checkBlah(const vector<int>& testcaseOriginal)
 {
     const int n = testcaseOriginal.size();
-    int removeBeginL = rand() % n;
-    int removeBeginR = rand() % n;
-    if (removeBeginL > removeBeginR)
-        swap(removeBeginL, removeBeginR);
-
-    const auto numLeft = n - (removeBeginR - removeBeginL + 1);
-    if (numLeft <= 0)
-        return;
-
-    const int K = rand() % numLeft;
-
-    cout << "checkBlah testcase:" ;
-    for (const auto x : testcaseOriginal)
+    for (int t = 0; t < 100; t++)
     {
-        cout << " " << x;
-    }
-    cout << endl;
-    cout << "n: " << n << " removeBeginL: " <<removeBeginL << " removeBeginR: " << removeBeginR << " K: " << K << endl;
+        int removeBeginL = rand() % n;
+        int removeBeginR = rand() % n;
+        if (removeBeginL > removeBeginR)
+            swap(removeBeginL, removeBeginR);
 
-    AVLTree sortedPrefixes(true);
-    for (const auto value : testcaseOriginal)
-    {
-        sortedPrefixes.insertValue(value);
-    }
-    AVLTree sortedSuffixes(true);
-    for (auto valueReverseIter = testcaseOriginal.rbegin(); valueReverseIter != testcaseOriginal.rend(); valueReverseIter++)
-    {
-        sortedSuffixes.insertValue(*valueReverseIter);
-    }
+        const auto numLeft = n - (removeBeginR - removeBeginL + 1);
+        if (numLeft <= 0)
+            return;
 
-    auto testcase = testcaseOriginal;
-    testcase.erase(testcase.begin() + removeBeginL, testcase.begin() + removeBeginR + 1);
+        const int K = rand() % numLeft;
 
-    sort(testcase.begin(), testcase.end());
+        cout << "checkBlah testcase:" ;
+        for (const auto x : testcaseOriginal)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+        cout << "n: " << n << " removeBeginL: " <<removeBeginL << " removeBeginR: " << removeBeginR << " K: " << K << endl;
 
-    cout << "After removal and sorting:";
-    for (const auto value : testcase)
-    {
-        cout << " " << value;
+        AVLTree sortedPrefixes(true);
+        for (const auto value : testcaseOriginal)
+        {
+            sortedPrefixes.insertValue(value);
+        }
+        AVLTree sortedSuffixes(true);
+        for (auto valueReverseIter = testcaseOriginal.rbegin(); valueReverseIter != testcaseOriginal.rend(); valueReverseIter++)
+        {
+            sortedSuffixes.insertValue(*valueReverseIter);
+        }
+
+        auto testcase = testcaseOriginal;
+        testcase.erase(testcase.begin() + removeBeginL, testcase.begin() + removeBeginR + 1);
+
+        sort(testcase.begin(), testcase.end());
+
+        cout << "After removal and sorting:";
+        for (const auto value : testcase)
+        {
+            cout << " " << value;
+        }
+        cout << endl;
+
+        const auto dbgKthValue = testcase[K];
+
+        sortedPrefixes.switchToRevision(removeBeginL);
+        cout << "sortedPrefix:";
+        vector<int> bloop;
+        collectInOrderValues(sortedPrefixes.root(), bloop);
+        for (const auto x : bloop)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+        printTree(sortedPrefixes);
+        sortedSuffixes.switchToRevision(n - 1 - removeBeginR);
+        cout << "sortedSuffix: " << endl;
+        bloop.clear();
+        collectInOrderValues(sortedSuffixes.root(), bloop);
+        for (const auto x : bloop)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+        printTree(sortedSuffixes);
+
+        auto blah = findKthFromPair(K, sortedPrefixes, sortedSuffixes);
+        if (!blah)
+        {
+            blah = findKthFromPair(K, sortedSuffixes, sortedPrefixes);
+        }
+        assert(blah);
+        cout << "dbgKthValue: " << dbgKthValue << " actual: " << blah->value << endl;
+        assert(blah->value == dbgKthValue);
     }
-    cout << endl;
-
-    const auto dbgKthValue = testcase[K];
-
-    sortedPrefixes.switchToRevision(removeBeginL);
-    cout << "sortedPrefix:";
-    vector<int> bloop;
-    collectInOrderValues(sortedPrefixes.root(), bloop);
-    for (const auto x : bloop)
-    {
-        cout << " " << x;
-    }
-    cout << endl;
-    printTree(sortedPrefixes);
-    sortedSuffixes.switchToRevision(n - 1 - removeBeginR);
-    cout << "sortedSuffix: " << endl;
-    bloop.clear();
-    collectInOrderValues(sortedSuffixes.root(), bloop);
-    for (const auto x : bloop)
-    {
-        cout << " " << x;
-    }
-    cout << endl;
-    printTree(sortedSuffixes);
-
-    auto blah = findKthFromPair(K, sortedPrefixes, sortedSuffixes);
-    if (!blah)
-    {
-        blah = findKthFromPair(K, sortedSuffixes, sortedPrefixes);
-    }
-    assert(blah);
-    cout << "dbgKthValue: " << dbgKthValue << " actual: " << blah->value << endl;
-    assert(blah->value == dbgKthValue);
 }
 
 int main()
@@ -788,7 +791,7 @@ int main()
         for (int t = 0; t < 1000; t++)
         {
             // Quick "findKthFromPair" test.
-            const int N = rand() % 100'000 + 1;
+            const int N = rand() % 1000 + 1;
             vector<int> blee = allNums;
             random_shuffle(blee.begin(), blee.end());
             blee.erase(blee.begin() + N, blee.end());
