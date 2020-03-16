@@ -780,16 +780,19 @@ int main()
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
     }
     {
+        vector<int> allNums;
+        for (int i = 0; i < 100'000; i++)
+        {
+            allNums.push_back(i);
+        }
         for (int t = 0; t < 100; t++)
         {
             // Quick "findKthFromPair" test.
-            vector<int> blee;
             const int N = rand() % 100 + 1;
-            for (int i = 0; i < N; i++)
-            {
-                blee.push_back(i);
-            }
+            vector<int> blee = allNums;
             random_shuffle(blee.begin(), blee.end());
+            blee.erase(blee.begin() + N, blee.end());
+
             checkBlah(blee);
         }
 
