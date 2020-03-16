@@ -29,22 +29,39 @@ struct AVLNode
 class AVLTree
 {
     public:
-        AVLTree(int nodeBlockSize = 1)
-            : m_nodeBlockSize{nodeBlockSize}
+        AVLTree(bool isPersistent = false, int nodeBlockSize = 1)
+            : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
         {
+            if (m_isPersistent)
+                m_rootForRevision.push_back(nullptr);
         }
         AVLNode* root()
         {
-            return m_root;
+            if (!m_isPersistent)
+                return m_root;
+            else
+                return m_rootForRevision.back();
+        }
+        AVLNode* rootForRevision(int revisionNum)
+        {
+            assert(m_isPersistent);
+            return m_rootForRevision[revisionNum];
         }
         void insertValue(int newValue)
         {
             if (!m_root)
             {
                 m_root = createNode(newValue);
-                return;
             }
-            m_root = insertValue(newValue, m_root);
+            else
+            {
+                m_root = insertValue(newValue, m_root);
+            }
+
+            if (m_isPersistent)
+            {
+                m_rootForRevision.push_back(m_root);
+            }
         }
 
     private:
@@ -52,6 +69,12 @@ class AVLTree
 
         AVLNode* insertValue(int newValue, AVLNode* currentNode)
         {
+            if (m_isPersistent)
+            {
+                auto newCurrentNode = createNode(currentNode->value);
+                *newCurrentNode = *currentNode;
+                currentNode = newCurrentNode;
+            }
             if (newValue < currentNode->value)
             {
                 // Values in the left subtree of node must be *strictly less* than
@@ -108,10 +131,21 @@ class AVLTree
 
         AVLNode* rotateRight(AVLNode* subtreeRoot)
         {
-            const auto newSubtreeRoot = subtreeRoot->leftChild;
+            auto newSubtreeRoot = subtreeRoot->leftChild;
+            if (m_isPersistent)
+            {
+                auto newNewSubtreeRoot = createNode(newSubtreeRoot->value);
+                *newNewSubtreeRoot = *newSubtreeRoot;
+                newSubtreeRoot = newSubtreeRoot;
+
+                auto newSubtreeRoot = createNode(subtreeRoot->value);
+                *newSubtreeRoot = *subtreeRoot;
+                subtreeRoot = newSubtreeRoot;
+            }
             auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
             newSubtreeRoot->rightChild = subtreeRoot;
             subtreeRoot->leftChild = previousNewSubtreeRootRightChild;
+            
             updateInfoFromChildren(subtreeRoot);
 
             updateInfoFromChildren(newSubtreeRoot);
@@ -119,7 +153,17 @@ class AVLTree
         }
         AVLNode* rotateLeft(AVLNode* subtreeRoot)
         {
-            const auto newSubtreeRoot = subtreeRoot->rightChild;
+            auto newSubtreeRoot = subtreeRoot->rightChild;
+            if (m_isPersistent)
+            {
+                auto newNewSubtreeRoot = createNode(newSubtreeRoot->value);
+                *newNewSubtreeRoot = *newSubtreeRoot;
+                newSubtreeRoot = newSubtreeRoot;
+
+                auto newSubtreeRoot = createNode(subtreeRoot->value);
+                *newSubtreeRoot = *subtreeRoot;
+                subtreeRoot = newSubtreeRoot;
+            }
             auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
             newSubtreeRoot->leftChild = subtreeRoot;
             subtreeRoot->rightChild = previousNewSubtreeRootLeftChild;
@@ -131,6 +175,8 @@ class AVLTree
 
         void updateInfoFromChildren(AVLNode* nodeToUpdate)
         {
+            // If m_isPersistent, assume that nodeToUpdate is already a newly-created
+            // copy of the original nodeToUpdate.
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->numDescendants = 1;
@@ -170,7 +216,9 @@ class AVLTree
             return newNode;
         }
 
+        bool m_isPersistent = false;
         int m_nodeBlockSize = 1;
+        vector<AVLNode*> m_rootForRevision;
         deque<vector<AVLNode>> m_nodes;
         int m_nextNodeId = 1;
 };
@@ -305,6 +353,27 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
     return true;
 }
 
+bool checkContentsPersistent(AVLTree& tree, int revisionNumber, const vector<int>& expectedInOrderValues)
+{
+    vector<int> actualInOrderValues;
+    collectInOrderValues(tree.rootForRevision(revisionNumber), actualInOrderValues);
+
+    if (actualInOrderValues != expectedInOrderValues)
+    {
+        cout << "Expected values:";
+        for(const auto x : expectedInOrderValues)
+            cout << " " << x;
+        cout << endl;
+        cout << "Actual values:  ";
+        for(const auto x : actualInOrderValues)
+            cout << " " << x;
+        cout << endl;
+        return false;
+    }
+
+    return true;
+}
+
 void printSubTree(AVLNode* subtreeRoot)
 {
     if (subtreeRoot == nullptr)
@@ -344,6 +413,52 @@ void assertTestcase(const vector<int>& valuesToInsert)
     assert(isBalanced(tree.root()));
     assert(isDescendantCountCorrect(tree));
     assert(checkContents(tree, expectedInOrderValues));
+
+    cout << "Testcase passed" << endl;
+}
+
+void assertPersistentTestcase(const vector<int>& valuesToInsert)
+{
+    // TODO - toughen this up a bit.
+    cout << "Testcase:";
+    for (const auto x : valuesToInsert)
+        cout << " " << x;
+    cout << endl;
+
+    AVLTree tree(true);
+    vector<int> expectedInOrderValues;
+    for (const auto value : valuesToInsert)
+    {
+        tree.insertValue(value);
+        expectedInOrderValues.push_back(value);
+        sort(expectedInOrderValues.begin(), expectedInOrderValues.end());
+
+        printTree(tree);
+
+        assert(isBST(tree.root()));
+        assert(isBalanced(tree.root()));
+        assert(isDescendantCountCorrect(tree));
+        assert(checkContents(tree, expectedInOrderValues));
+    }
+
+    expectedInOrderValues.clear();
+    for (int revisionNum = 0; revisionNum < valuesToInsert.size() + 1; revisionNum++)
+    {
+
+        printTree(tree);
+
+        assert(isBST(tree.root()));
+        assert(isBalanced(tree.root()));
+        assert(isDescendantCountCorrect(tree));
+        assert(checkContentsPersistent(tree, revisionNum, expectedInOrderValues));
+
+        if (revisionNum < valuesToInsert.size())
+        {
+            expectedInOrderValues.push_back(valuesToInsert[revisionNum]);
+            sort(expectedInOrderValues.begin(), expectedInOrderValues.end());
+        }
+    }
+
 
     cout << "Testcase passed" << endl;
 }
@@ -519,6 +634,12 @@ int main()
     }
     {
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
+    }
+
+    {
+        assertPersistentTestcase({1,2,3});
+        assertPersistentTestcase({1,5,3});
+        return 0;
     }
 
     {
