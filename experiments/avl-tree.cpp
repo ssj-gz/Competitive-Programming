@@ -40,12 +40,7 @@ class AVLTree
             if (!m_isPersistent)
                 return m_root;
             else
-                return m_rootForRevision.back();
-        }
-        AVLNode* rootForRevision(int revisionNum)
-        {
-            assert(m_isPersistent);
-            return m_rootForRevision[revisionNum];
+                return m_rootForRevision[m_revisionNumber];
         }
         void insertValue(int newValue)
         {
@@ -61,7 +56,12 @@ class AVLTree
             if (m_isPersistent)
             {
                 m_rootForRevision.push_back(m_root);
+                m_revisionNumber++;
             }
+        }
+        void switchToRevision(int revisionNum)
+        {
+            m_revisionNumber = revisionNum;
         }
 
     private:
@@ -217,10 +217,15 @@ class AVLTree
         }
 
         bool m_isPersistent = false;
+
         int m_nodeBlockSize = 1;
-        vector<AVLNode*> m_rootForRevision;
         deque<vector<AVLNode>> m_nodes;
+
         int m_nextNodeId = 1;
+
+        int m_revisionNumber = 0;
+        vector<AVLNode*> m_rootForRevision;
+
 };
 
 // Debugging/ diagnostics.
@@ -364,27 +369,6 @@ bool checkContents(AVLTree& tree, const vector<int>& expectedInOrderValues)
     return true;
 }
 
-bool checkContentsPersistent(AVLTree& tree, int revisionNumber, const vector<int>& expectedInOrderValues)
-{
-    vector<int> actualInOrderValues;
-    collectInOrderValues(tree.rootForRevision(revisionNumber), actualInOrderValues);
-
-    if (actualInOrderValues != expectedInOrderValues)
-    {
-        cout << "Expected values:";
-        for(const auto x : expectedInOrderValues)
-            cout << " " << x;
-        cout << endl;
-        cout << "Actual values:  ";
-        for(const auto x : actualInOrderValues)
-            cout << " " << x;
-        cout << endl;
-        return false;
-    }
-
-    return true;
-}
-
 void printSubTree(AVLNode* subtreeRoot)
 {
     if (subtreeRoot == nullptr)
@@ -461,11 +445,12 @@ void assertPersistentTestcase(const vector<int>& valuesToInsert)
     {
 
         //printTree(tree);
+        tree.switchToRevision(revisionNum);
 
-        assert(isBST(tree.rootForRevision(revisionNum)));
-        assert(isBalanced(tree.rootForRevision(revisionNum)));
+        assert(isBST(tree.root()));
+        assert(isBalanced(tree.root()));
         assert(isDescendantCountCorrect(tree));
-        assert(checkContentsPersistent(tree, revisionNum, expectedInOrderValues));
+        assert(checkContents(tree, expectedInOrderValues));
 
         if (revisionNum < valuesToInsert.size())
         {
