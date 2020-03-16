@@ -291,6 +291,8 @@ std::pair<bool, int> isSubtreeBalanced(AVLNode* subtreeRoot)
 
 std::pair<bool, int> isDescendantCountCorrect(AVLNode* subtreeRoot)
 {
+    if (!subtreeRoot)
+        return {true, 0};
     bool isCorrect = true;
     int numDescendants = 1;
 
