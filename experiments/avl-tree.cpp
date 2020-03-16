@@ -10,11 +10,6 @@ using namespace std;
 
 struct AVLNode
 {
-    AVLNode(int value)
-        : value{value}
-    {
-
-    }
     int value = -1;
     AVLNode *leftChild = nullptr;
     AVLNode *rightChild = nullptr;
@@ -207,12 +202,19 @@ class AVLTree
 
         AVLNode* createNode(int value)
         {
+            auto newNode = createNode();
+            newNode->value = value;
+            return newNode;
+        }
+
+        AVLNode* createNode()
+        {
             if (m_nodes.empty() || static_cast<int>(m_nodes.back().size()) == m_nodeBlockSize)
             {
                 m_nodes.push_back(vector<AVLNode>());
                 m_nodes.back().reserve(m_nodeBlockSize);
             }
-            m_nodes.back().push_back(AVLNode(value));
+            m_nodes.back().push_back(AVLNode());
             auto newNode = &(m_nodes.back().back());
             newNode->id = m_nextNodeId;
             m_nextNodeId++;
