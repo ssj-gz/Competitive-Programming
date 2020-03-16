@@ -137,13 +137,13 @@ class AVLTree
             auto newSubtreeRoot = subtreeRoot->leftChild;
             if (m_isPersistent)
             {
-                auto newNewSubtreeRoot = createNode(newSubtreeRoot->value);
-                *newNewSubtreeRoot = *newSubtreeRoot;
-                newSubtreeRoot = newSubtreeRoot;
+                auto replacementNewSubtreeRoot = createNode(newSubtreeRoot->value);
+                *replacementNewSubtreeRoot = *newSubtreeRoot;
+                newSubtreeRoot = replacementNewSubtreeRoot;
 
-                auto newSubtreeRoot = createNode(subtreeRoot->value);
-                *newSubtreeRoot = *subtreeRoot;
-                subtreeRoot = newSubtreeRoot;
+                auto replacementSubtreeRoot = createNode(subtreeRoot->value);
+                *replacementSubtreeRoot = *subtreeRoot;
+                subtreeRoot = replacementSubtreeRoot;
             }
             auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
             newSubtreeRoot->rightChild = subtreeRoot;
@@ -159,13 +159,13 @@ class AVLTree
             auto newSubtreeRoot = subtreeRoot->rightChild;
             if (m_isPersistent)
             {
-                auto newNewSubtreeRoot = createNode(newSubtreeRoot->value);
-                *newNewSubtreeRoot = *newSubtreeRoot;
-                newSubtreeRoot = newSubtreeRoot;
+                auto replacementNewSubtreeRoot = createNode(newSubtreeRoot->value);
+                *replacementNewSubtreeRoot = *newSubtreeRoot;
+                newSubtreeRoot = replacementNewSubtreeRoot;
 
-                auto newSubtreeRoot = createNode(subtreeRoot->value);
-                *newSubtreeRoot = *subtreeRoot;
-                subtreeRoot = newSubtreeRoot;
+                auto replacementSubtreeRoot = createNode(subtreeRoot->value);
+                *replacementSubtreeRoot = *subtreeRoot;
+                subtreeRoot = replacementSubtreeRoot;
             }
             auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
             newSubtreeRoot->leftChild = subtreeRoot;
