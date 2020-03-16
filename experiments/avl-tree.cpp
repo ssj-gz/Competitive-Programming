@@ -323,6 +323,8 @@ bool isBalanced(AVLNode* node)
 
 void collectInOrderValues(AVLNode* subtreeRoot, vector<int>& destValues)
 {
+    if (!subtreeRoot)
+        return;
     if (subtreeRoot->leftChild)
         collectInOrderValues(subtreeRoot->leftChild, destValues);
 
