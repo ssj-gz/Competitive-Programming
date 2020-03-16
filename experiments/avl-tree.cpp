@@ -785,10 +785,10 @@ int main()
         {
             allNums.push_back(i);
         }
-        for (int t = 0; t < 100; t++)
+        for (int t = 0; t < 1000; t++)
         {
             // Quick "findKthFromPair" test.
-            const int N = rand() % 100 + 1;
+            const int N = rand() % 100'000 + 1;
             vector<int> blee = allNums;
             random_shuffle(blee.begin(), blee.end());
             blee.erase(blee.begin() + N, blee.end());
