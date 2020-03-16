@@ -701,10 +701,24 @@ void checkBlah(const vector<int>& testcaseOriginal)
     const auto dbgKthValue = testcase[K];
 
     sortedPrefixes.switchToRevision(removeBeginL);
-    cout << "sortedPrefix: " << endl;
+    cout << "sortedPrefix:";
+    vector<int> bloop;
+    collectInOrderValues(sortedPrefixes.root(), bloop);
+    for (const auto x : bloop)
+    {
+        cout << " " << x;
+    }
+    cout << endl;
     printTree(sortedPrefixes);
     sortedSuffixes.switchToRevision(n - 1 - removeBeginR);
-    cout << "sortedSuffixes: " << endl;
+    cout << "sortedSuffix: " << endl;
+    bloop.clear();
+    collectInOrderValues(sortedSuffixes.root(), bloop);
+    for (const auto x : bloop)
+    {
+        cout << " " << x;
+    }
+    cout << endl;
     printTree(sortedSuffixes);
 
     auto blah = findKthFromPair(K, sortedPrefixes, sortedSuffixes);
