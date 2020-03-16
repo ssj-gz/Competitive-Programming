@@ -640,6 +640,28 @@ int main()
     {
         choicesWithRemovals({1, 2, 3, 5, 0, 4, 3, 1, 1, 0}, 10);
     }
+    {
+        // Quick Persistence performance test.
+        const int N = 500'000;
+        vector<int> testcase;
+        const int maxValue = 1'000'000;
+        for (int i = 0; i < N; i++)
+            testcase.push_back(rand() % maxValue);
+        AVLTree tree(true, 10'000);
+        for (const auto x : testcase)
+        {
+            tree.insertValue(x);
+        }
+        auto sortedTestcase = testcase;
+        sort(sortedTestcase.begin(), sortedTestcase.end());
+        for (int k = 0; k < sortedTestcase.size(); k++)
+        {
+            //assert(findKth(tree, k)->value == sortedTestcase[k]);
+            assert(findKthIterative(tree, k)->value == sortedTestcase[k]);
+            //cout << "k: " << k << " findKth: " << findKth(tree, k)->value << " actual kth: " << sortedTestcase[k] << endl;
+        }
+        //return 0;
+    }
 
     {
         assertPersistentTestcase({1,2,3});
