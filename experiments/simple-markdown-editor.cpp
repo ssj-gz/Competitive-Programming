@@ -428,8 +428,9 @@ struct Query
     int encryptedArgument2 = -1;
 };
 
-int64_t solveBruteForce(const vector<Query>& queries)
+vector<int> solveBruteForce(const vector<Query>& queries)
 {
+    vector<int> queryResults;
     string document;
     int decryptionKey = 0; 
 
@@ -499,6 +500,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
                         }
                     }
                     cout << "queryAnswer: " << queryAnswer << endl;
+                    queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
@@ -541,7 +543,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
         cout << "undoStackPointer: " << undoStackPointer << endl;
         queryNum++;
     }
-    return 0;
+    return queryResults;
 }
 
 void printSubTree(AVLNode* subtreeRoot)
@@ -572,8 +574,9 @@ void printTree(AVLTree& tree)
 }
 
 
-int64_t solveOptimised(const vector<Query>& queries)
+vector<int> solveOptimised(const vector<Query>& queries)
 {
+    vector<int> queryResults;
     AVLTree formattingCharsTree;
     // Sentinel value.
     formattingCharsTree.insertFormattingChar(0);
@@ -608,6 +611,7 @@ int64_t solveOptimised(const vector<Query>& queries)
                     cout << "IsRangeFormatted at " << queryPosition << endl;
                     const int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                     cout << "queryAnswer: " << queryAnswer << endl;
+                    queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
@@ -635,7 +639,7 @@ int64_t solveOptimised(const vector<Query>& queries)
         queryNum++;
     }
 
-    return 0;
+    return queryResults;
 }
 
 int main(int argc, char* argv[])
@@ -691,9 +695,15 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(queries);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
         const auto solutionOptimised = solveOptimised(queries);
-        cout << "solutionOptimised: " << solutionOptimised << endl;
+        cout << "solutionBruteForce:";
+        for (const auto x : solutionBruteForce)
+            cout << " " << x;
+        cout << endl;
+        cout << "solutionOptimised: ";
+        for (const auto x : solutionOptimised)
+            cout << " " << x;
+        cout << endl;
         assert(solutionOptimised == solutionBruteForce);
 #endif
     }
