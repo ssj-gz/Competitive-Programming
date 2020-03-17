@@ -44,6 +44,8 @@ struct AVLNode
     int id = -1;
 };
 
+void printSubTree(AVLNode* subtreeRoot);
+
 class AVLTree
 {
     public:
@@ -79,7 +81,7 @@ class AVLTree
                     {
                         int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
                         int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-                        const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+                        const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
                         if (currentNodePosition >= position)
                         {
                             formattingCharToRight = currentNode;
@@ -95,14 +97,19 @@ class AVLTree
                     }
                 }
                 assert(formattingCharToRight);
-                const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position - 1);
-                const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
+                cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
+                const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
+                const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position + 1;
                 cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
                 cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
+                cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
                 assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
                 assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
                 // Perform the actual insertion.
                 newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, root(), 0, 0);
+                cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
+                cout << "Current formattingCharsTree: " << endl;
+                printSubTree(newRoot);
                 // Update the "unformatted run size" of the formattingCharToRight.
                 newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
             }
@@ -183,6 +190,7 @@ class AVLTree
     private:
         AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
         {
+            auto originalNode = currentNode;
             if (m_isPersistent)
             {
                 auto newCurrentNode = createNode(currentNode->value);
@@ -191,16 +199,16 @@ class AVLTree
             }
             int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
             int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
+            cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
             if (position < currentNodePosition)
             {
                 // Positions in the left subtree of node must be *strictly less* than
                 // that of currentNode.
-                assert(position < currentNode->value);
                 if (currentNode->leftChild)
                     currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
                 else
-                    currentNode->leftChild = createNode(position);
+                    currentNode->leftChild = createNode(sizeOfUnformattedToLeftRun);
             }
             else
             {
@@ -210,7 +218,7 @@ class AVLTree
                     currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
                                                                                                                                   sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
                 else
-                    currentNode->rightChild = createNode(position);
+                    currentNode->rightChild = createNode(sizeOfUnformattedToLeftRun);
             }
             updateInfoFromChildren(currentNode);
 
@@ -316,27 +324,44 @@ class AVLTree
 
         AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
         {
+            if (!subTreeRoot)
+                return subTreeRoot;
             int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
             int sumOfLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->sumOfDescendantValues : 0);
-            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
-            // We'll be changing *some* aspect of subTreeRoot whatever happens, so do a copy-on-write.
-            subTreeRoot = createNode(*subTreeRoot);
-            if (currentNodePosition >= position)
+            auto originalSubTreeRoot = subTreeRoot;
+            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
+            cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << endl;
+            if (position <= currentNodePosition)
             {
                 if (!subTreeRoot->leftChild)
                 {
                     // This is the node to adjust.  Do copy-on-write.
-                    cout << "Adjusted old value of node " << subTreeRoot->id  << " from " << subTreeRoot->value << " to " << subTreeRoot->value + adjustment << endl;
+                    cout << "Adjusted old value of node " << originalSubTreeRoot->id  << " from " << originalSubTreeRoot->value << " to " << originalSubTreeRoot->value + adjustment << endl;
+                    subTreeRoot = createNode(*subTreeRoot);
                     subTreeRoot->value += adjustment;
                 }
                 else
                 {
+                    auto oldLeftChild = subTreeRoot->leftChild;
+                    adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
+                    subTreeRoot = createNode(*subTreeRoot);
                     subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
+                    const bool nodeToChangeWasInLeftChild = (subTreeRoot->leftChild != oldLeftChild);
+                    if (!nodeToChangeWasInLeftChild)
+                    {
+                        subTreeRoot->value += adjustment;
+                    }
                 }
             }
             else
             {
-                subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
+                auto oldRightChild = subTreeRoot->rightChild;
+                auto newRightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
+                if (newRightChild != oldRightChild)
+                {
+                    subTreeRoot = createNode(*subTreeRoot);
+                    subTreeRoot->rightChild = newRightChild;
+                }
             }
             return subTreeRoot;
         }
