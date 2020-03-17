@@ -455,6 +455,53 @@ int64_t solveOptimised(const vector<Query>& queries)
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
 
+    for (const auto& query : queries)
+    {
+        switch (query.type)
+        {
+            case Query::InsertFormatting:
+                {
+                    const int insertionPos = query.encryptedArgument - 1;
+                    cout << "InsertFormatting at " << insertionPos << endl;
+                    assert(false && "Not yet implemented");
+                }
+                break;
+            case Query::InsertNonFormatting:
+                {
+                    const int insertionPos = query.encryptedArgument - 1;
+                    const int numToInsert = query.encryptedArgument2;
+                    cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                    assert(false && "Not yet implemented");
+                }
+                break;
+            case Query::IsRangeFormatted:
+                {
+                    const int queryPosition = query.encryptedArgument - 1;
+                    cout << "IsRangeFormatted at " << queryPosition << endl;
+                    assert(false && "Not yet implemented");
+                    int queryAnswer = -1;
+                    cout << "queryAnswer: " << queryAnswer << endl;
+                }
+                break;
+            case Query::Undo:
+                {
+                    const int numToUndo = query.encryptedArgument;
+                    cout << "Undo " << numToUndo << endl;
+                    assert(false && "Not yet implemented");
+                }
+                break;
+            case Query::Redo:
+                {
+                    const int numToRedo = query.encryptedArgument;
+                    cout << "Redo " << numToRedo << endl;
+                    assert(false && "Not yet implemented");
+
+                }
+                break;
+        }
+
+    }
+
     return 0;
 }
 
@@ -512,6 +559,9 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(queries);
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        const auto solutionOptimised = solveOptimised(queries);
+        cout << "solutionOptimised: " << solutionOptimised << endl;
+        assert(solutionOptimised == solutionBruteForce);
 #endif
     }
 
