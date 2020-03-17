@@ -257,6 +257,7 @@ struct Query
     enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
     Type type;
     int encryptedArgument = -1;
+    int encryptedArgument2 = -1;
 };
 
 int64_t solveBruteForce(const vector<Query>& queries)
@@ -284,8 +285,10 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::InsertNonFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
-                    cout << "InsertNonFormatting at " << insertionPos << endl;
-                    document.insert(document.begin() + insertionPos, 'X');
+                    const int numToInsert = query.encryptedArgument2;
+                    cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                    const string charsToInsert(numToInsert, 'X');
+                    document.insert(insertionPos, charsToInsert);
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
                     undoStack.push_back({query.type, insertionPos});
@@ -397,6 +400,7 @@ int main(int argc, char* argv[])
                     break;
                 case 'N':
                     query.type = Query::InsertNonFormatting;
+                    query.encryptedArgument2 = read<int>();
                     break;
                 case 'Q':
                     query.type = Query::IsRangeFormatted;
