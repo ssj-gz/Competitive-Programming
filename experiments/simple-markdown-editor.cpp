@@ -252,6 +252,82 @@ class AVLTree
 
 };
 
+struct Query
+{
+    enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
+    Type type;
+    int encryptedArgument = -1;
+};
+
+int64_t solveBruteForce(const vector<Query>& queries)
+{
+    string dbgDocument;
+    int dbgDecryptionKey = 0; 
+
+    for (const auto& query : queries)
+    {
+        switch (query.type)
+        {
+            case Query::InsertFormatting:
+                {
+                    const int insertionPos = query.encryptedArgument - 1;
+                    dbgDocument.insert(dbgDocument.begin() + insertionPos, '*');
+                }
+                break;
+            case Query::InsertNonFormatting:
+                {
+                    const int insertionPos = query.encryptedArgument - 1;
+                    dbgDocument.insert(dbgDocument.begin() + insertionPos, 'X');
+                }
+                break;
+            case Query::IsRangeFormatted:
+                {
+                    const int queryPosition = query.encryptedArgument - 1;
+                    int dbgQueryAnswer = -1;
+                    {
+                        int openingFormatPos = -1;
+                        for (int pos = 0; pos < dbgDocument.size(); pos++)
+                        {
+                            if (dbgDocument[pos] == '*')
+                            {
+                                if (openingFormatPos == -1)
+                                {
+                                    // Open formatting.
+                                    openingFormatPos = pos;
+                                }
+                                else
+                                {
+                                    // Close formatting.
+                                    if (openingFormatPos < queryPosition && queryPosition < pos)
+                                    {
+                                        dbgQueryAnswer = pos - openingFormatPos - 1;
+                                    }
+                                    openingFormatPos = -1;
+                                }
+                            }
+                        }
+                    }
+                    cout << "dbgQueryAnswer: " << dbgQueryAnswer << endl;
+                }
+                break;
+            case Query::Undo:
+                {
+                    const int numToUndo = query.encryptedArgument;
+                    // TODO
+                }
+                break;
+            case Query::Redo:
+                {
+                    const int numToRedo = query.encryptedArgument;
+                    // TODO
+                }
+                break;
+        }
+        cout << "dbgDocument: " << dbgDocument << endl;
+    }
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
@@ -277,85 +353,34 @@ int main(int argc, char* argv[])
     for (int t = 0; t < T; t++)
     {
         const int numQueries = read<int>();
-        int decryptionKey = 0; // Not yet used - should probably write a proper testcase generator, first.
-#ifdef BRUTE_FORCE
-        string dbgDocument;
-        int dbgDecryptionKey = 0; 
-#endif
-        for (int i = 0; i < numQueries; i++)
+        vector<Query> queries(numQueries);
+        for (auto& query : queries)
         {
             const auto queryType = read<char>();
+            query.encryptedArgument = read<int>();
             switch (queryType)
             {
                 case 'F':
-                    {
-                        const int insertionPos = read<int>() - 1;
-#ifdef BRUTE_FORCE
-                        dbgDocument.insert(dbgDocument.begin() + insertionPos, '*');
-#endif
-                    }
+                    query.type = Query::InsertFormatting;
                     break;
                 case 'N':
-                    {
-                    const int insertionPos = read<int>() - 1;
-#ifdef BRUTE_FORCE
-                    dbgDocument.insert(dbgDocument.begin() + insertionPos, 'X');
-#endif
-                    }
+                    query.type = Query::InsertNonFormatting;
                     break;
                 case 'Q':
-                    {
-                        const int queryPosition = read<int>() - 1;
-#ifdef BRUTE_FORCE
-                        int dbgQueryAnswer = -1;
-                        {
-                            int openingFormatPos = -1;
-                            for (int pos = 0; pos < dbgDocument.size(); pos++)
-                            {
-                                if (dbgDocument[pos] == '*')
-                                {
-                                    if (openingFormatPos == -1)
-                                    {
-                                        // Open formatting.
-                                        openingFormatPos = pos;
-                                    }
-                                    else
-                                    {
-                                        // Close formatting.
-                                        if (openingFormatPos < queryPosition && queryPosition < pos)
-                                        {
-                                            dbgQueryAnswer = pos - openingFormatPos - 1;
-                                        }
-                                        openingFormatPos = -1;
-                                    }
-                                }
-                            }
-                        }
-                        cout << "dbgQueryAnswer: " << dbgQueryAnswer << endl;
-                    }
-#endif
+                    query.type = Query::IsRangeFormatted;
                     break;
                 case 'U':
-                    {
-                    const int numToUndo = read<int>() - 1;
-#ifdef BRUTE_FORCE
-                    // TODO
-#endif
-                    }
+                    query.type = Query::Undo;
                     break;
                 case 'R':
-                    {
-                    const int numToRedo = read<int>() - 1;
-#ifdef BRUTE_FORCE
-                    // TODO
-#endif
-                    }
+                    query.type = Query::Redo;
                     break;
             }
-#ifdef BRUTE_FORCE
-            cout << "dbgDocument: " << dbgDocument << endl;
-#endif
         }
+
+#ifdef BRUTE_FORCE
+        const auto solutionBruteForce = solveBruteForce(queries);
+#endif
     }
 
     assert(cin);
