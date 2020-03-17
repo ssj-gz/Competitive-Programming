@@ -63,7 +63,9 @@ class AVLTree
         void insertFormattingChar(int position)
         {
             if (!m_root)
-                m_root = createNode(position);
+            {
+                m_root = createNode(0);
+            }
             else
             {
                 // Find node representing the formatting character immediately to the 
