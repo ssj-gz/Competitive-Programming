@@ -154,7 +154,7 @@ class AVLTree
                 {
                     int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
                     int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-                    const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+                    const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
                     if (currentNodePosition >= position)
                     {
                         formattingCharToRight = currentNode;
@@ -171,6 +171,7 @@ class AVLTree
                 }
             }
             assert(formattingCharToRight);
+            cout << " distBetweenEnclosingFormattedChars formattingCharToRight: " << formattingCharToRight->id << " isSentinelValue: " << formattingCharToRight->isSentinelValue << endl;
             if (formattingCharToRight->isSentinelValue || formattingCharToRightPosNumFormattingToLeft % 2 == 0)
                 return -1;
             else
