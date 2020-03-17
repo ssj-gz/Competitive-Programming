@@ -487,6 +487,25 @@ int64_t solveBruteForce(const vector<Query>& queries)
     return 0;
 }
 
+void printSubTree(AVLNode* subtreeRoot)
+{
+    if (subtreeRoot == nullptr)
+        return;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants << " sumOfDescendantValues: " << subtreeRoot->sumOfDescendantValues;
+    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
+
+    if (subtreeRoot->leftChild)
+        printSubTree(subtreeRoot->leftChild);
+    if (subtreeRoot->rightChild)
+        printSubTree(subtreeRoot->rightChild);
+}
+
+void printTree(AVLTree& tree)
+{
+    printSubTree(tree.root());
+}
+
+
 int64_t solveOptimised(const vector<Query>& queries)
 {
     AVLTree formattingCharsTree;
@@ -538,6 +557,8 @@ int64_t solveOptimised(const vector<Query>& queries)
                 break;
         }
 
+        cout << "Current formattingCharsTree: " << endl;
+        printTree(formattingCharsTree);
     }
 
     return 0;
