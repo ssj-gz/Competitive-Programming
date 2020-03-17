@@ -118,7 +118,10 @@ class AVLTree
         void insertNonFormattingChars(int position, int numToAdd)
         {
             assert(root()); // The Sentinel node should have been added.
+            auto oldRoot = root();
             auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), position, numToAdd, 0, 0);
+
+            cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
 
             if (m_isPersistent)
             {
@@ -348,7 +351,9 @@ class AVLTree
         AVLNode* createNode(const AVLNode& nodeToCopy)
         {
             auto newNode = createNode();
+            const auto idBackup = newNode->id;
             *newNode = nodeToCopy;
+            newNode->id = idBackup;
             return newNode;
         }
 
