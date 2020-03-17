@@ -470,6 +470,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::IsRangeFormatted:
                 {
                     const int queryPosition = query.encryptedArgument - 1;
+                    assert(document[queryPosition] == 'X');
                     cout << "IsRangeFormatted at " << queryPosition << endl;
                     int queryAnswer = -1;
                     {
