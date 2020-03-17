@@ -202,14 +202,17 @@ class AVLTree
             int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
             cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
-            if (position < currentNodePosition)
+            if (position <= currentNodePosition)
             {
                 // Positions in the left subtree of node must be *strictly less* than
                 // that of currentNode.
                 if (currentNode->leftChild)
                     currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
                 else
+                {
+                    cout << "Inserted at leftChild" << endl;
                     currentNode->leftChild = createNode(sizeOfUnformattedToLeftRun);
+                }
             }
             else
             {
@@ -219,7 +222,10 @@ class AVLTree
                     currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
                                                                                                                                   sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
                 else
+                {
+                    cout << "Inserted at rightChild" << endl;
                     currentNode->rightChild = createNode(sizeOfUnformattedToLeftRun);
+                }
             }
             updateInfoFromChildren(currentNode);
 
