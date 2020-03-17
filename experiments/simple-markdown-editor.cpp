@@ -97,8 +97,10 @@ class AVLTree
                     }
                 }
                 assert(formattingCharToRight);
-                const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
+                const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position - 1);
                 const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
+                assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
+                assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
                 // Perform the actual insertion.
                 m_root = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, m_root, 0, 0);
                 // Update the "unformatted run size" of the formattingCharToRight.
