@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <deque>
+#include <algorithm>
 
 #include <cassert>
 
@@ -657,6 +658,212 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            string document;
+            int decryptionKey = 0; 
+
+            vector<Query> undoStack;
+            int undoStackPointer = -1;
+
+            const int numQueries = 1 + rand() % 100;
+            vector<Query> queries;
+            for (int i = 0; i < numQueries; i++)
+            {
+                bool haveQuery = false;
+                Query query;
+                int numFormatting = count(document.begin(), document.end(), '*');
+                int numNonFormatting = count(document.begin(), document.end(), 'X');
+                while (!haveQuery)
+                {
+                    const int queryType = rand() % 5;
+                    query.type = static_cast<Query::Type>(queryType);
+                    if (queryType == Query::Undo)
+                    {
+                        if (undoStackPointer == -1)
+                            continue;
+                        else
+                        {
+                            const int numToUndo = 1 + rand() % (undoStackPointer + 1);
+                            query.encryptedArgument = numToUndo;
+                            haveQuery = true;
+                        }
+                    }
+                    if (queryType == Query::Redo)
+                    {
+                        if (undoStackPointer + 1 == undoStack.size())
+                            continue;
+                        else
+                        {
+                            const int numToRedo = 1 + rand() % (undoStack.size() - 1 - undoStackPointer);
+                            query.encryptedArgument = numToRedo;
+                            haveQuery = true;
+                        }
+                    }
+                    if (queryType == Query::InsertFormatting)
+                    {
+                        const int pos = rand() % (document.size() + 1);
+                        query.encryptedArgument = pos + 1;
+                        haveQuery = true;
+                    }
+                    if (queryType == Query::InsertNonFormatting)
+                    {
+                        const int pos = rand() % (document.size() + 1);
+                        query.encryptedArgument = pos + 1;
+                        const int num = 1 + rand() % 10;
+                        query.encryptedArgument2 = num;
+                        haveQuery = true;
+                    }
+                    if (queryType == Query::IsRangeFormatted)
+                    {
+                        if (numNonFormatting == 0)
+                            continue;
+                        else
+                        {
+                            int nonFormattedToPick = rand() % numNonFormatting;
+                            int numNonFormattedSoFar = 0;
+                            int position = -1;
+                            for (int i = 0; i < document.size(); i++)
+                            {
+                                if (document[i] == 'X')
+                                {
+                                    if (numNonFormattedSoFar == nonFormattedToPick)
+                                    {
+                                        position = i;
+                                        break;
+                                    }
+                                    numNonFormattedSoFar++;
+                                }
+                            }
+                            assert(position != -1);
+                            query.encryptedArgument = position + 1;
+                            haveQuery = true;
+                        }
+
+                    }
+
+                }
+                queries.push_back(query);
+                switch (query.type)
+                {
+                    case Query::InsertFormatting:
+                        {
+                            const int insertionPos = query.encryptedArgument - 1;
+                            cerr << "InsertFormatting at " << insertionPos << endl;
+                            document.insert(document.begin() + insertionPos, '*');
+                            undoStackPointer++;
+                            undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                            Query undoQuery = query;
+                            undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
+                            undoStack.push_back(undoQuery);
+                        }
+                        break;
+                    case Query::InsertNonFormatting:
+                        {
+                            const int insertionPos = query.encryptedArgument - 1;
+                            const int numToInsert = query.encryptedArgument2;
+                            cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                            const string charsToInsert(numToInsert, 'X');
+                            document.insert(insertionPos, charsToInsert);
+                            undoStackPointer++;
+                            undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                            Query undoQuery = query;
+                            undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
+                            undoQuery.encryptedArgument2 = numToInsert; // Not strictly accurate - this is unencrypted!
+                            undoStack.push_back(undoQuery);
+                        }
+                        break;
+                    case Query::IsRangeFormatted:
+                        {
+                            const int queryPosition = query.encryptedArgument - 1;
+                            assert(document[queryPosition] == 'X');
+                            cerr << "IsRangeFormatted at " << queryPosition << endl;
+                            int queryAnswer = -1;
+                            {
+                                int openingFormatPos = -1;
+                                for (int pos = 0; pos < document.size(); pos++)
+                                {
+                                    if (document[pos] == '*')
+                                    {
+                                        if (openingFormatPos == -1)
+                                        {
+                                            // Open formatting.
+                                            openingFormatPos = pos;
+                                        }
+                                        else
+                                        {
+                                            // Close formatting.
+                                            if (openingFormatPos < queryPosition && queryPosition < pos)
+                                            {
+                                                queryAnswer = pos - openingFormatPos - 1;
+                                            }
+                                            openingFormatPos = -1;
+                                        }
+                                    }
+                                }
+                            }
+                            cerr << "queryAnswer: " << queryAnswer << endl;
+                        }
+                        break;
+                    case Query::Undo:
+                        {
+                            const int numToUndo = query.encryptedArgument;
+                            cerr << "Undo " << numToUndo << endl;
+                            for (int i = 0; i < numToUndo; i++)
+                            {
+                                const auto& queryToUndo = undoStack[undoStackPointer];
+                                const auto removalPosition = queryToUndo.encryptedArgument;
+                                const auto numToRemove = (queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1);
+                                document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
+                                undoStackPointer--;
+                            }
+                        }
+                        break;
+                    case Query::Redo:
+                        {
+                            const int numToRedo = query.encryptedArgument;
+                            cerr << "Redo " << numToRedo << endl;
+                            for (int i = 0; i < numToRedo; i++)
+                            {
+                                undoStackPointer++;
+                                const auto& queryToUndo = undoStack[undoStackPointer];
+                                const auto insertPosition = queryToUndo.encryptedArgument;
+                                const auto charToInsert = queryToUndo.type == Query::InsertNonFormatting ? 'X' : '*';
+                                const auto numToInsert = queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1;
+                                document.insert(insertPosition, string(numToInsert, charToInsert));
+                            }
+
+                        }
+                        break;
+                }
+                cerr << "document: " << document << endl;
+                cerr << "Undo stack: " << endl;
+                for (const auto x : undoStack)
+                {
+                    cerr << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
+                }
+                cerr << "undoStackPointer: " << undoStackPointer << endl;
+            }
+            cout << queries.size() << endl;
+            for (const auto& query : queries)
+            {
+                switch (query.type)
+                {
+                    case Query::InsertFormatting:
+                        cout << 'F' << " " << query.encryptedArgument << endl;
+                        break;
+                    case Query::InsertNonFormatting:
+                        cout << 'N' << " " << query.encryptedArgument << " " << query.encryptedArgument2 << endl;
+                        break;
+                    case Query::IsRangeFormatted:
+                        cout << 'Q' << " " << query.encryptedArgument << endl;
+                        break;
+                    case Query::Undo:
+                        cout << 'U' << " " << query.encryptedArgument << endl;
+                        break;
+                    case Query::Redo:
+                        cout << 'R' << " " << query.encryptedArgument << endl;
+                        break;
+                }
+            }
         }
 
         return 0;
