@@ -47,7 +47,7 @@ struct AVLNode
 class AVLTree
 {
     public:
-        AVLTree(bool isPersistent = false, int nodeBlockSize = 1)
+        AVLTree(bool isPersistent = true, int nodeBlockSize = 1)
             : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
         {
             if (m_isPersistent)
@@ -55,16 +55,14 @@ class AVLTree
         }
         AVLNode* root()
         {
-            if (!m_isPersistent)
-                return m_root;
-            else
-                return m_rootForRevision[m_undoStackPointer];
+            return m_rootForRevision[m_undoStackPointer];
         }
         void insertFormattingChar(int position)
         {
-            if (!m_root)
+            AVLNode* newRoot = nullptr;
+            if (!root())
             {
-                m_root = createNode(0);
+                newRoot = createNode(0);
             }
             else
             {
@@ -99,31 +97,33 @@ class AVLTree
                 assert(formattingCharToRight);
                 const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position - 1);
                 const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
+                cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
+                cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
                 assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
                 assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
                 // Perform the actual insertion.
-                m_root = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, m_root, 0, 0);
+                newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, root(), 0, 0);
                 // Update the "unformatted run size" of the formattingCharToRight.
-                m_root = adjustRunToLeftOfNodeToRightOf(m_root, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
+                newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
             }
 
             if (m_isPersistent)
             {
                 m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
-                m_rootForRevision.push_back(m_root);
+                m_rootForRevision.push_back(newRoot);
                 m_undoStackPointer++;
                 assert(m_undoStackPointer == m_rootForRevision.size() - 1);
             }
         }
         void insertNonFormattingChars(int position, int numToAdd)
         {
-            assert(m_root); // The Sentinel node should have been added.
-            m_root = adjustRunToLeftOfNodeToRightOf(m_root, position, numToAdd, 0, 0);
+            assert(root()); // The Sentinel node should have been added.
+            auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), position, numToAdd, 0, 0);
 
             if (m_isPersistent)
             {
                 m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
-                m_rootForRevision.push_back(m_root);
+                m_rootForRevision.push_back(newRoot);
                 m_undoStackPointer++;
                 assert(m_undoStackPointer == m_rootForRevision.size() - 1);
             }
@@ -178,8 +178,6 @@ class AVLTree
         }
 
     private:
-        AVLNode* m_root = nullptr;
-
         AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
         {
             if (m_isPersistent)
@@ -325,6 +323,7 @@ class AVLTree
                 if (!subTreeRoot->leftChild)
                 {
                     // This is the node to adjust.  Do copy-on-write.
+                    cout << "Adjusted old value of node " << subTreeRoot->id  << " from " << subTreeRoot->value << " to " << subTreeRoot->value + adjustment << endl;
                     subTreeRoot->value += adjustment;
                 }
                 else
@@ -515,6 +514,8 @@ int64_t solveOptimised(const vector<Query>& queries)
     // Sentinel value.
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
+    cout << "Initial formattingCharsTree: " << endl;
+    printTree(formattingCharsTree);
 
     for (const auto& query : queries)
     {
