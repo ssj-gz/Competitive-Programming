@@ -99,7 +99,7 @@ class AVLTree
                 assert(formattingCharToRight);
                 cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
                 const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
-                const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position + 1;
+                const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
                 cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
                 cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
                 cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
