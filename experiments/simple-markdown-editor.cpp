@@ -264,6 +264,9 @@ int64_t solveBruteForce(const vector<Query>& queries)
     string document;
     int decryptionKey = 0; 
 
+    vector<std::pair<Query::Type, int>> undoStack;
+    int undoStackPointer = -1;
+
     for (const auto& query : queries)
     {
         switch (query.type)
@@ -272,12 +275,18 @@ int64_t solveBruteForce(const vector<Query>& queries)
                 {
                     const int insertionPos = query.encryptedArgument - 1;
                     document.insert(document.begin() + insertionPos, '*');
+                    undoStackPointer++;
+                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                    undoStack.push_back({query.type, insertionPos});
                 }
                 break;
             case Query::InsertNonFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
                     document.insert(document.begin() + insertionPos, 'X');
+                    undoStackPointer++;
+                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                    undoStack.push_back({query.type, insertionPos});
                 }
                 break;
             case Query::IsRangeFormatted:
@@ -313,17 +322,35 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::Undo:
                 {
                     const int numToUndo = query.encryptedArgument;
-                    // TODO
+                    for (int i = 0; i < numToUndo; i++)
+                    {
+                        const auto removalPosition = undoStack[undoStackPointer].second;
+                        document.erase(document.begin() + removalPosition);
+                        undoStackPointer--;
+                    }
                 }
                 break;
             case Query::Redo:
                 {
                     const int numToRedo = query.encryptedArgument;
-                    // TODO
+                    for (int i = 0; i < numToRedo; i++)
+                    {
+                        const auto insertPosition = undoStack[undoStackPointer].second;
+                        const auto charToInsert = undoStack[undoStackPointer].first == Query::InsertNonFormatting ? 'X' : '*';
+                        document.insert(document.begin() + insertPosition, charToInsert);
+                        undoStackPointer++;
+                    }
+
                 }
                 break;
         }
         cout << "document: " << document << endl;
+        cout << "Undo stack: " << endl;
+        for (const auto x : undoStack)
+        {
+            cout << (undoStack[undoStackPointer].first == Query::InsertNonFormatting ? 'X' : '*') << " " << x.second << endl;
+        }
+        cout << "undoStackPointer: " << undoStackPointer << endl;
     }
     return 0;
 }
@@ -380,6 +407,7 @@ int main(int argc, char* argv[])
 
 #ifdef BRUTE_FORCE
         const auto solutionBruteForce = solveBruteForce(queries);
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
     }
 
