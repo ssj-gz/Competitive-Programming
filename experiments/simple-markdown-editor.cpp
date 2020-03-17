@@ -191,7 +191,7 @@ class AVLTree
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
             if (position < currentNodePosition)
             {
-                // Values in the left subtree of node must be *strictly less* than
+                // Positions in the left subtree of node must be *strictly less* than
                 // that of currentNode.
                 assert(position < currentNode->value);
                 if (currentNode->leftChild)
@@ -201,9 +201,8 @@ class AVLTree
             }
             else
             {
-                // Values in the right subtree of node must be *greater than or equal to* that
+                // Positions in the right subtree of node must be *greater than or equal to* that
                 // that of currentNode.
-                assert(position >= currentNode->value);
                 if (currentNode->rightChild)
                     currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
                                                                                                                                   sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
