@@ -177,12 +177,12 @@ class AVLTree
             else
                 return formattingCharToRight->value;
         }
-        int undo(int numToUndo)
+        void undo(int numToUndo)
         {
             assert(m_isPersistent);
             m_undoStackPointer -= numToUndo;
         }
-        int redo(int numToRedo)
+        void redo(int numToRedo)
         {
             assert(m_isPersistent);
             m_undoStackPointer += numToRedo;
@@ -592,14 +592,14 @@ int64_t solveOptimised(const vector<Query>& queries)
                 {
                     const int numToUndo = query.encryptedArgument;
                     cout << "Undo " << numToUndo << endl;
-                    assert(false && "Not yet implemented");
+                    formattingCharsTree.undo(numToUndo);
                 }
                 break;
             case Query::Redo:
                 {
                     const int numToRedo = query.encryptedArgument;
                     cout << "Redo " << numToRedo << endl;
-                    assert(false && "Not yet implemented");
+                    formattingCharsTree.redo(numToRedo);
 
                 }
                 break;
