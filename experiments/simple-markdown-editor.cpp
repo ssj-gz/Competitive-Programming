@@ -39,6 +39,8 @@ struct AVLNode
     int numDescendants = 1;
     int sumOfDescendantValues = 0;
 
+    bool isSentinelValue = false;
+
     int id = -1;
 };
 
@@ -63,7 +65,56 @@ class AVLTree
             if (!m_root)
                 m_root = createNode(position);
             else
-                m_root = insertFormattingChar(position, m_root, 0, 0);
+            {
+                // Find node representing the formatting character immediately to the 
+                // right of "position".
+                // It's guaranteed that there will be one, due to the Sentinel node.
+                AVLNode* formattingCharToRight = nullptr;
+                int formattingCharToRightPos = -1;
+                {
+                    auto currentNode = root();
+                    int numToLeftOffset = 0;
+                    int sumToLeftOffset = 0;
+                    while (currentNode)
+                    {
+                        int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+                        int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
+                        const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+                        if (currentNodePosition >= position)
+                        {
+                            formattingCharToRight = currentNode;
+                            formattingCharToRightPos = currentNodePosition;
+                            currentNode = currentNode->leftChild;
+                        }
+                        else
+                        {
+                            numToLeftOffset += 1 + numInLeftSubTree;
+                            sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
+                            currentNode = currentNode->rightChild;
+                        }
+                    }
+                }
+                assert(formattingCharToRight);
+                const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
+                const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
+                // Perform the actual insertion.
+                m_root = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, m_root, 0, 0);
+                // Update the "unformatted run size" of the formattingCharToRight.
+                m_root = adjustRunToLeftOfNodeToRightOf(m_root, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
+            }
+
+            if (m_isPersistent)
+            {
+                m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
+                m_rootForRevision.push_back(m_root);
+                m_undoStackPointer++;
+                assert(m_undoStackPointer == m_rootForRevision.size() - 1);
+            }
+        }
+        void insertNonFormattingChars(int position, int numToAdd)
+        {
+            assert(m_root); // The Sentinel node should have been added.
+            m_root = adjustRunToLeftOfNodeToRightOf(m_root, position, numToAdd, 0, 0);
 
             if (m_isPersistent)
             {
@@ -87,7 +138,7 @@ class AVLTree
     private:
         AVLNode* m_root = nullptr;
 
-        AVLNode* insertFormattingChar(int position, AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
+        AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
         {
             if (m_isPersistent)
             {
@@ -95,13 +146,16 @@ class AVLTree
                 *newCurrentNode = *currentNode;
                 currentNode = newCurrentNode;
             }
-            if (position < currentNode->value)
+            int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+            int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
+            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+            if (position < currentNodePosition)
             {
                 // Values in the left subtree of node must be *strictly less* than
                 // that of currentNode.
                 assert(position < currentNode->value);
                 if (currentNode->leftChild)
-                    currentNode->leftChild = insertFormattingChar(position, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
+                    currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
                 else
                     currentNode->leftChild = createNode(position);
             }
@@ -110,11 +164,9 @@ class AVLTree
                 // Values in the right subtree of node must be *greater than or equal to* that
                 // that of currentNode.
                 assert(position >= currentNode->value);
-                int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-                int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
                 if (currentNode->rightChild)
-                    currentNode->rightChild = insertFormattingChar(position, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
-                                                                                                      sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
+                    currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
+                                                                                                                                  sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
                 else
                     currentNode->rightChild = createNode(position);
             }
@@ -217,6 +269,31 @@ class AVLTree
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
                 nodeToUpdate->numDescendants += rightChild->numDescendants;
                 nodeToUpdate->sumOfDescendantValues += rightChild->sumOfDescendantValues;
+            }
+        }
+
+        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
+        {
+            int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
+            int sumOfLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->sumOfDescendantValues : 0);
+            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+            if (currentNodePosition >= position)
+            {
+                if (!subTreeRoot->leftChild)
+                {
+                    // This is the node to adjust.  Do copy-on-write.
+                    auto newCurrentNode = createNode(*subTreeRoot);
+                    newCurrentNode->value += adjustment;
+                    return newCurrentNode;
+                }
+                else
+                {
+                    return adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
+                }
+            }
+            else
+            {
+                return adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
             }
         }
 
@@ -374,6 +451,10 @@ int64_t solveBruteForce(const vector<Query>& queries)
 int64_t solveOptimised(const vector<Query>& queries)
 {
     AVLTree formattingCharsTree;
+    // Sentinel value.
+    formattingCharsTree.insertFormattingChar(0);
+    formattingCharsTree.root()->isSentinelValue = true;
+
     return 0;
 }
 
