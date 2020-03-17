@@ -427,7 +427,7 @@ struct Query
     int encryptedArgument2 = -1;
 };
 
-vector<int> solveBruteForce(const vector<Query>& queries)
+vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteForceDocs)
 {
     vector<int> queryResults;
     string document;
@@ -541,6 +541,7 @@ vector<int> solveBruteForce(const vector<Query>& queries)
         }
         cout << "undoStackPointer: " << undoStackPointer << endl;
         queryNum++;
+        bruteForceDocs.push_back(document);
     }
     return queryResults;
 }
@@ -573,7 +574,7 @@ void printTree(AVLTree& tree)
 }
 
 
-vector<int> solveOptimised(const vector<Query>& queries)
+vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
 {
     vector<int> queryResults;
     AVLTree formattingCharsTree;
@@ -635,6 +636,7 @@ vector<int> solveOptimised(const vector<Query>& queries)
         cout << "as doc:" << endl;
         printSubTreeDocument(formattingCharsTree.root());
         cout << endl;
+        cout << "expected doc: " << endl << bruteForceDocs[queryNum - 1] + "*" << endl;
         queryNum++;
     }
 
@@ -901,8 +903,9 @@ int main(int argc, char* argv[])
         }
 
 #ifdef BRUTE_FORCE
-        const auto solutionBruteForce = solveBruteForce(queries);
-        const auto solutionOptimised = solveOptimised(queries);
+        vector<string> bruteForceDocs;
+        const auto solutionBruteForce = solveBruteForce(queries, bruteForceDocs);
+        const auto solutionOptimised = solveOptimised(queries, bruteForceDocs);
         cout << "solutionBruteForce:";
         for (const auto x : solutionBruteForce)
             cout << " " << x;
