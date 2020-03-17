@@ -56,7 +56,7 @@ class AVLTree
             if (!m_isPersistent)
                 return m_root;
             else
-                return m_rootForRevision[m_revisionNumber];
+                return m_rootForRevision[m_undoStackPointer];
         }
         void insertValue(int newValue)
         {
@@ -67,21 +67,21 @@ class AVLTree
 
             if (m_isPersistent)
             {
-                m_rootForRevision.erase(m_rootForRevision.begin() + m_revisionNumber + 1, m_rootForRevision.end());
+                m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
                 m_rootForRevision.push_back(m_root);
-                m_revisionNumber++;
-                assert(m_revisionNumber == m_rootForRevision.size() - 1);
+                m_undoStackPointer++;
+                assert(m_undoStackPointer == m_rootForRevision.size() - 1);
             }
         }
         int undo(int numToUndo)
         {
             assert(m_isPersistent);
-            m_revisionNumber -= numToUndo;
+            m_undoStackPointer -= numToUndo;
         }
         int redo(int numToRedo)
         {
             assert(m_isPersistent);
-            m_revisionNumber += numToRedo;
+            m_undoStackPointer += numToRedo;
         }
 
     private:
@@ -252,7 +252,7 @@ class AVLTree
 
         int m_nextNodeId = 1;
 
-        int m_revisionNumber = 0;
+        int m_undoStackPointer = 0;
         vector<AVLNode*> m_rootForRevision;
 
 };
