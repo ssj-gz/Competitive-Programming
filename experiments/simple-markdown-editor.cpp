@@ -261,8 +261,8 @@ struct Query
 
 int64_t solveBruteForce(const vector<Query>& queries)
 {
-    string dbgDocument;
-    int dbgDecryptionKey = 0; 
+    string document;
+    int decryptionKey = 0; 
 
     for (const auto& query : queries)
     {
@@ -271,24 +271,24 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::InsertFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
-                    dbgDocument.insert(dbgDocument.begin() + insertionPos, '*');
+                    document.insert(document.begin() + insertionPos, '*');
                 }
                 break;
             case Query::InsertNonFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
-                    dbgDocument.insert(dbgDocument.begin() + insertionPos, 'X');
+                    document.insert(document.begin() + insertionPos, 'X');
                 }
                 break;
             case Query::IsRangeFormatted:
                 {
                     const int queryPosition = query.encryptedArgument - 1;
-                    int dbgQueryAnswer = -1;
+                    int queryAnswer = -1;
                     {
                         int openingFormatPos = -1;
-                        for (int pos = 0; pos < dbgDocument.size(); pos++)
+                        for (int pos = 0; pos < document.size(); pos++)
                         {
-                            if (dbgDocument[pos] == '*')
+                            if (document[pos] == '*')
                             {
                                 if (openingFormatPos == -1)
                                 {
@@ -300,14 +300,14 @@ int64_t solveBruteForce(const vector<Query>& queries)
                                     // Close formatting.
                                     if (openingFormatPos < queryPosition && queryPosition < pos)
                                     {
-                                        dbgQueryAnswer = pos - openingFormatPos - 1;
+                                        queryAnswer = pos - openingFormatPos - 1;
                                     }
                                     openingFormatPos = -1;
                                 }
                             }
                         }
                     }
-                    cout << "dbgQueryAnswer: " << dbgQueryAnswer << endl;
+                    cout << "queryAnswer: " << queryAnswer << endl;
                 }
                 break;
             case Query::Undo:
@@ -323,7 +323,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
                 }
                 break;
         }
-        cout << "dbgDocument: " << dbgDocument << endl;
+        cout << "document: " << document << endl;
     }
     return 0;
 }
