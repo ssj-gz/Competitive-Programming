@@ -277,24 +277,25 @@ class AVLTree
             int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
             int sumOfLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->sumOfDescendantValues : 0);
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree;
+            // We'll be changing *some* aspect of subTreeRoot whatever happens, so do a copy-on-write.
+            subTreeRoot = createNode(*subTreeRoot);
             if (currentNodePosition >= position)
             {
                 if (!subTreeRoot->leftChild)
                 {
                     // This is the node to adjust.  Do copy-on-write.
-                    auto newCurrentNode = createNode(*subTreeRoot);
-                    newCurrentNode->value += adjustment;
-                    return newCurrentNode;
+                    subTreeRoot->value += adjustment;
                 }
                 else
                 {
-                    return adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
+                    subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
                 }
             }
             else
             {
-                return adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
+                subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
             }
+            return subTreeRoot;
         }
 
         AVLNode* createNode(int value)
