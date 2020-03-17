@@ -73,10 +73,15 @@ class AVLTree
                 assert(m_revisionNumber == m_rootForRevision.size() - 1);
             }
         }
-        void switchToRevision(int revisionNum)
+        int undo(int numToUndo)
         {
             assert(m_isPersistent);
-            m_revisionNumber = revisionNum;
+            m_revisionNumber -= numToUndo;
+        }
+        int redo(int numToRedo)
+        {
+            assert(m_isPersistent);
+            m_revisionNumber += numToRedo;
         }
 
     private:
