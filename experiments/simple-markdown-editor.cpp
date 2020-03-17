@@ -464,7 +464,7 @@ int64_t solveOptimised(const vector<Query>& queries)
                 {
                     const int insertionPos = query.encryptedArgument - 1;
                     cout << "InsertFormatting at " << insertionPos << endl;
-                    assert(false && "Not yet implemented");
+                    formattingCharsTree.insertFormattingChar(insertionPos);
                 }
                 break;
             case Query::InsertNonFormatting:
@@ -472,7 +472,7 @@ int64_t solveOptimised(const vector<Query>& queries)
                     const int insertionPos = query.encryptedArgument - 1;
                     const int numToInsert = query.encryptedArgument2;
                     cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
-                    assert(false && "Not yet implemented");
+                    formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                 }
                 break;
             case Query::IsRangeFormatted:
