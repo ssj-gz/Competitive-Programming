@@ -175,7 +175,7 @@ class AVLTree
             if (formattingCharToRight->isSentinelValue || formattingCharToRightPosNumFormattingToLeft % 2 == 0)
                 return -1;
             else
-                return formattingCharToRight->value + 1;
+                return formattingCharToRight->value;
         }
         int undo(int numToUndo)
         {
