@@ -368,13 +368,7 @@ class AVLTree
             }
             else
             {
-                auto oldRightChild = subTreeRoot->rightChild;
-                auto newRightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
-                if (newRightChild != oldRightChild)
-                {
-                    subTreeRoot = createNode(*subTreeRoot);
-                    subTreeRoot->rightChild = newRightChild;
-                }
+                subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
             }
             updateInfoFromChildren(subTreeRoot);
             return subTreeRoot;
@@ -384,6 +378,7 @@ class AVLTree
         {
             auto newNode = createNode();
             newNode->value = value;
+            newNode->sumOfDescendantValues = value;
             return newNode;
         }
 
