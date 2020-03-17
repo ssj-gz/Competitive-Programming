@@ -58,12 +58,12 @@ class AVLTree
             else
                 return m_rootForRevision[m_undoStackPointer];
         }
-        void insertValue(int newValue)
+        void insertFormattingChar(int position)
         {
             if (!m_root)
-                m_root = createNode(newValue);
+                m_root = createNode(position);
             else
-                m_root = insertValue(newValue, m_root);
+                m_root = insertFormattingChar(position, m_root, 0, 0);
 
             if (m_isPersistent)
             {
@@ -87,7 +87,7 @@ class AVLTree
     private:
         AVLNode* m_root = nullptr;
 
-        AVLNode* insertValue(int newValue, AVLNode* currentNode)
+        AVLNode* insertFormattingChar(int position, AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
         {
             if (m_isPersistent)
             {
@@ -95,25 +95,28 @@ class AVLTree
                 *newCurrentNode = *currentNode;
                 currentNode = newCurrentNode;
             }
-            if (newValue < currentNode->value)
+            if (position < currentNode->value)
             {
                 // Values in the left subtree of node must be *strictly less* than
                 // that of currentNode.
-                assert(newValue < currentNode->value);
+                assert(position < currentNode->value);
                 if (currentNode->leftChild)
-                    currentNode->leftChild = insertValue(newValue, currentNode->leftChild);
+                    currentNode->leftChild = insertFormattingChar(position, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
                 else
-                    currentNode->leftChild = createNode(newValue);
+                    currentNode->leftChild = createNode(position);
             }
             else
             {
                 // Values in the right subtree of node must be *greater than or equal to* that
                 // that of currentNode.
-                assert(newValue >= currentNode->value);
+                assert(position >= currentNode->value);
+                int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+                int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
                 if (currentNode->rightChild)
-                    currentNode->rightChild = insertValue(newValue, currentNode->rightChild);
+                    currentNode->rightChild = insertFormattingChar(position, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
+                                                                                                      sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
                 else
-                    currentNode->rightChild = createNode(newValue);
+                    currentNode->rightChild = createNode(position);
             }
             updateInfoFromChildren(currentNode);
 
@@ -365,6 +368,12 @@ int64_t solveBruteForce(const vector<Query>& queries)
         }
         cout << "undoStackPointer: " << undoStackPointer << endl;
     }
+    return 0;
+}
+
+int64_t solveOptimised(const vector<Query>& queries)
+{
+    AVLTree formattingCharsTree;
     return 0;
 }
 
