@@ -274,6 +274,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::InsertFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
+                    cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
@@ -283,6 +284,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::InsertNonFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
+                    cout << "InsertNonFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, 'X');
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
@@ -292,6 +294,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::IsRangeFormatted:
                 {
                     const int queryPosition = query.encryptedArgument - 1;
+                    cout << "IsRangeFormatted at " << queryPosition << endl;
                     int queryAnswer = -1;
                     {
                         int openingFormatPos = -1;
@@ -322,6 +325,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::Undo:
                 {
                     const int numToUndo = query.encryptedArgument;
+                    cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
                     {
                         const auto removalPosition = undoStack[undoStackPointer].second;
@@ -333,12 +337,13 @@ int64_t solveBruteForce(const vector<Query>& queries)
             case Query::Redo:
                 {
                     const int numToRedo = query.encryptedArgument;
+                    cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
                     {
+                        undoStackPointer++;
                         const auto insertPosition = undoStack[undoStackPointer].second;
                         const auto charToInsert = undoStack[undoStackPointer].first == Query::InsertNonFormatting ? 'X' : '*';
                         document.insert(document.begin() + insertPosition, charToInsert);
-                        undoStackPointer++;
                     }
 
                 }
