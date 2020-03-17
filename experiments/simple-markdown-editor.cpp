@@ -431,7 +431,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
     string document;
     int decryptionKey = 0; 
 
-    vector<std::pair<Query::Type, int>> undoStack;
+    vector<Query> undoStack;
     int undoStackPointer = -1;
 
     int queryNum = 1;
@@ -447,7 +447,9 @@ int64_t solveBruteForce(const vector<Query>& queries)
                     document.insert(document.begin() + insertionPos, '*');
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                    undoStack.push_back({query.type, insertionPos});
+                    Query undoQuery = query;
+                    undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
+                    undoStack.push_back(undoQuery);
                 }
                 break;
             case Query::InsertNonFormatting:
@@ -459,7 +461,10 @@ int64_t solveBruteForce(const vector<Query>& queries)
                     document.insert(insertionPos, charsToInsert);
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                    undoStack.push_back({query.type, insertionPos});
+                    Query undoQuery = query;
+                    undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
+                    undoQuery.encryptedArgument2 = numToInsert; // Not strictly accurate - this is unencrypted!
+                    undoStack.push_back(undoQuery);
                 }
                 break;
             case Query::IsRangeFormatted:
@@ -499,8 +504,10 @@ int64_t solveBruteForce(const vector<Query>& queries)
                     cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
                     {
-                        const auto removalPosition = undoStack[undoStackPointer].second;
-                        document.erase(document.begin() + removalPosition);
+                        const auto& queryToUndo = undoStack[undoStackPointer];
+                        const auto removalPosition = queryToUndo.encryptedArgument;
+                        const auto numToRemove = (queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1);
+                        document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
                         undoStackPointer--;
                     }
                 }
@@ -512,9 +519,11 @@ int64_t solveBruteForce(const vector<Query>& queries)
                     for (int i = 0; i < numToRedo; i++)
                     {
                         undoStackPointer++;
-                        const auto insertPosition = undoStack[undoStackPointer].second;
-                        const auto charToInsert = undoStack[undoStackPointer].first == Query::InsertNonFormatting ? 'X' : '*';
-                        document.insert(document.begin() + insertPosition, charToInsert);
+                        const auto& queryToUndo = undoStack[undoStackPointer];
+                        const auto insertPosition = queryToUndo.encryptedArgument;
+                        const auto charToInsert = queryToUndo.type == Query::InsertNonFormatting ? 'X' : '*';
+                        const auto numToInsert = queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1;
+                        document.insert(insertPosition, string(numToInsert, charToInsert));
                     }
 
                 }
@@ -524,7 +533,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
         cout << "Undo stack: " << endl;
         for (const auto x : undoStack)
         {
-            cout << (undoStack[undoStackPointer].first == Query::InsertNonFormatting ? 'X' : '*') << " " << x.second << endl;
+            cout << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
         }
         cout << "undoStackPointer: " << undoStackPointer << endl;
         queryNum++;
