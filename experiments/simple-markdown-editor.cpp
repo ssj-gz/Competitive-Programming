@@ -426,8 +426,10 @@ int64_t solveBruteForce(const vector<Query>& queries)
     vector<std::pair<Query::Type, int>> undoStack;
     int undoStackPointer = -1;
 
+    int queryNum = 1;
     for (const auto& query : queries)
     {
+        cout << "Processing query " << queryNum << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
@@ -517,6 +519,7 @@ int64_t solveBruteForce(const vector<Query>& queries)
             cout << (undoStack[undoStackPointer].first == Query::InsertNonFormatting ? 'X' : '*') << " " << x.second << endl;
         }
         cout << "undoStackPointer: " << undoStackPointer << endl;
+        queryNum++;
     }
     return 0;
 }
@@ -549,8 +552,10 @@ int64_t solveOptimised(const vector<Query>& queries)
     cout << "Initial formattingCharsTree: " << endl;
     printTree(formattingCharsTree);
 
+    int queryNum = 1;
     for (const auto& query : queries)
     {
+        cout << "Processing query " << queryNum << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
@@ -595,6 +600,7 @@ int64_t solveOptimised(const vector<Query>& queries)
 
         cout << "Current formattingCharsTree: " << endl;
         printTree(formattingCharsTree);
+        queryNum++;
     }
 
     return 0;
