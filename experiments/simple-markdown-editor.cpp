@@ -333,6 +333,8 @@ class AVLTree
             cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << endl;
             if (position <= currentNodePosition)
             {
+                // TODO - work out the rightmost formatted char position in the leftChild: this should be O(1), I think.
+                // Then we can go back to *always* COWing at the top of the function, rather than scattering COWS all over the place!
                 if (!subTreeRoot->leftChild)
                 {
                     // This is the node to adjust.  Do copy-on-write.
