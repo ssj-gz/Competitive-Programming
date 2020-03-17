@@ -84,6 +84,7 @@ class AVLTree
                         int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
                         int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
                         const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
+                        cout << "insertFormattingChar finding formattingCharToRight - currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
                         if (currentNodePosition >= position)
                         {
                             formattingCharToRight = currentNode;
