@@ -45,6 +45,7 @@ struct AVLNode
 };
 
 void printSubTree(AVLNode* subtreeRoot);
+void printSubTreeDocument(AVLNode* subtreeRoot);
 
 class AVLTree
 {
@@ -543,6 +544,15 @@ void printSubTree(AVLNode* subtreeRoot)
     if (subtreeRoot->rightChild)
         printSubTree(subtreeRoot->rightChild);
 }
+void printSubTreeDocument(AVLNode* subtreeRoot)
+{
+    if (!subtreeRoot)
+        return;
+    printSubTreeDocument(subtreeRoot->leftChild);
+    cout << string(subtreeRoot->value, 'X');
+    cout << "*";
+    printSubTreeDocument(subtreeRoot->rightChild);
+}
 
 void printTree(AVLTree& tree)
 {
@@ -607,6 +617,9 @@ int64_t solveOptimised(const vector<Query>& queries)
 
         cout << "Current formattingCharsTree: " << endl;
         printTree(formattingCharsTree);
+        cout << "as doc:" << endl;
+        printSubTreeDocument(formattingCharsTree.root());
+        cout << endl;
         queryNum++;
     }
 
