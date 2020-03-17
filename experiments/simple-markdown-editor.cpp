@@ -339,30 +339,29 @@ class AVLTree
             int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
             int sumOfLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->sumOfDescendantValues : 0);
             auto originalSubTreeRoot = subTreeRoot;
+            subTreeRoot = createNode(*subTreeRoot);
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
             cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << endl;
             if (position <= currentNodePosition)
             {
-                // TODO - work out the rightmost formatted char position in the leftChild: this should be O(1), I think.
-                // Then we can go back to *always* COWing at the top of the function, rather than scattering COWS all over the place!
+                bool adjustInLeftSubChild = true;
                 if (!subTreeRoot->leftChild)
+                    adjustInLeftSubChild = false;
+                else
+                {
+                    const auto maxPosInLeftSubchild = currentNodePosition - subTreeRoot->value;
+                    if (maxPosInLeftSubchild < position)
+                        adjustInLeftSubChild = false;
+                }
+                if (!adjustInLeftSubChild)
                 {
                     // This is the node to adjust.  Do copy-on-write.
                     cout << "Adjusted old value of node " << originalSubTreeRoot->id  << " from " << originalSubTreeRoot->value << " to " << originalSubTreeRoot->value + adjustment << endl;
-                    subTreeRoot = createNode(*subTreeRoot);
                     subTreeRoot->value += adjustment;
                 }
                 else
                 {
-                    auto oldLeftChild = subTreeRoot->leftChild;
-                    adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
-                    subTreeRoot = createNode(*subTreeRoot);
                     subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
-                    const bool nodeToChangeWasInLeftChild = (subTreeRoot->leftChild != oldLeftChild);
-                    if (!nodeToChangeWasInLeftChild)
-                    {
-                        subTreeRoot->value += adjustment;
-                    }
                 }
             }
             else
@@ -375,6 +374,7 @@ class AVLTree
                     subTreeRoot->rightChild = newRightChild;
                 }
             }
+            updateInfoFromChildren(subTreeRoot);
             return subTreeRoot;
         }
 
