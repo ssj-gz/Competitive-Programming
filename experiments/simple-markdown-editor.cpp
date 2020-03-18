@@ -443,8 +443,6 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     auto currentNode = createNode(*treeIter.currentNode());
     if (position <= treeIter.currentNodePosition())
     {
-        // Positions in the left subtree of node must be *strictly less* than
-        // that of currentNode.
         if (currentNode->leftChild)
         {
             treeIter.followLeftChild();
@@ -457,8 +455,6 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     }
     else
     {
-        // Positions in the right subtree of node must be *greater than or equal to* that
-        // that of currentNode.
         if (currentNode->rightChild)
         {
             treeIter.followRightChild();
@@ -644,9 +640,6 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
 
 int AVLTree::distBetweenEnclosingFormattedChars(int position)
 {
-    // Find node representing the formatting character immediately to the 
-    // right of "position".
-    // It's guaranteed that there will be one, due to the Sentinel node.
     const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
 
     if (formattingCharToRightIter.currentNode()->isSentinelValue || formattingCharToRightIter.numFormattingCharsToLeft() % 2 == 0)
