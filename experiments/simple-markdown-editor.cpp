@@ -553,6 +553,7 @@ void AVLTree::insertNonFormattingChars(int position, int numToAdd)
 
 AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, AVLTreeIterator& treeIter, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
 {
+    assert(subTreeRoot == treeIter.currentNode());
     if (!subTreeRoot)
         return subTreeRoot;
     int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
@@ -560,6 +561,7 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, AVLTreeIt
     auto originalSubTreeRoot = subTreeRoot;
     subTreeRoot = createNode(*subTreeRoot);
     const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
+    assert(currentNodePosition == treeIter.currentNodePosition());
     //cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
     if (position <= currentNodePosition)
     {
@@ -583,11 +585,13 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, AVLTreeIt
         }
         else
         {
+            treeIter.followLeftChild();
             subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, treeIter, position, adjustment, numToLeftOffset, sumToLeftOffset);
         }
     }
     else
     {
+        treeIter.followRightChild();
         subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, treeIter, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
     }
     updateInfoFromChildren(subTreeRoot);
