@@ -11,6 +11,8 @@
 
 using namespace std;
 
+const int64_t Mod = 1'000'000'007;
+
 template <typename T>
 T read()
 {
@@ -376,6 +378,9 @@ AVLTreeIterator AVLTree::findFirstNodeToRightOf(int position, AVLNode* root)
 
 vector<int> solveOptimised(const vector<Query>& queries)
 {
+    int64_t decryptionKey = 0;
+    int64_t powerOf2 = 2;
+
     vector<int> queryResults;
     AVLTree formattingCharsTree;
     // Add Sentinel node.
@@ -389,39 +394,45 @@ vector<int> solveOptimised(const vector<Query>& queries)
         {
             case Query::InsertFormatting:
                 {
-                    const int insertionPos = query.encryptedArgument - 1;
+                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     formattingCharsTree.insertFormattingChar(insertionPos);
                 }
                 break;
             case Query::InsertNonFormatting:
                 {
-                    const int insertionPos = query.encryptedArgument - 1;
-                    const int numToInsert = query.encryptedArgument2;
+                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                    const int numToInsert = (query.encryptedArgument2 ^ decryptionKey);
                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                 }
                 break;
             case Query::IsRangeFormatted:
                 {
-                    const int queryPosition = query.encryptedArgument - 1;
-                    const int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                    const int queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
+                    int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                    if (queryAnswer == -1)
+                        queryAnswer = 3'141'592;
+                    decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+
                     queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
                 {
-                    const int numToUndo = query.encryptedArgument;
+                    const int numToUndo = (query.encryptedArgument ^ decryptionKey);
                     formattingCharsTree.undo(numToUndo);
                 }
                 break;
             case Query::Redo:
                 {
-                    const int numToRedo = query.encryptedArgument;
+                    const int numToRedo = (query.encryptedArgument ^ decryptionKey);
                     formattingCharsTree.redo(numToRedo);
                 }
                 break;
         }
 
         queryNum++;
+        powerOf2 = (2 * powerOf2) % Mod;
+
     }
 
     return queryResults;
