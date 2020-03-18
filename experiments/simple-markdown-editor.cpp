@@ -500,6 +500,7 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int 
     auto subTreeRoot = treeIter.currentNode();
     if (!subTreeRoot)
         return subTreeRoot;
+    // Whatever happens, we'll be altering properties of this node, so do a COW.
     subTreeRoot = createNode(*subTreeRoot);
     if (position <= treeIter.currentNodePosition())
     {
