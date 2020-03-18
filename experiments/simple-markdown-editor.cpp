@@ -181,6 +181,14 @@ class AVLTree
             return newNode;
         }
 
+        void updateUndoStackWithNewRoot(AVLNode* newRoot)
+        {
+            m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
+            m_rootForRevision.push_back(newRoot);
+            m_undoStackPointer++;
+            assert(m_undoStackPointer == m_rootForRevision.size() - 1);
+        }
+
         bool m_isPersistent = false;
 
         int m_nodeBlockSize = 1;
@@ -452,13 +460,7 @@ void AVLTree::insertFormattingChar(int position)
         newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value);
     }
 
-    if (m_isPersistent)
-    {
-        m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
-        m_rootForRevision.push_back(newRoot);
-        m_undoStackPointer++;
-        assert(m_undoStackPointer == m_rootForRevision.size() - 1);
-    }
+    updateUndoStackWithNewRoot(newRoot);
 }
 
 AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter)
@@ -542,13 +544,7 @@ void AVLTree::insertNonFormattingChars(int position, int numToAdd)
 
     //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
 
-    if (m_isPersistent)
-    {
-        m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
-        m_rootForRevision.push_back(newRoot);
-        m_undoStackPointer++;
-        assert(m_undoStackPointer == m_rootForRevision.size() - 1);
-    }
+    updateUndoStackWithNewRoot(newRoot);
 }
 
 AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int position, int adjustment)
