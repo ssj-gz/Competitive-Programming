@@ -669,7 +669,7 @@ int main(int argc, char* argv[])
             vector<Query> undoStack;
             int undoStackPointer = -1;
 
-            const int numQueries = 1 + rand() % 1000;
+            const int numQueries = 1 + rand() % 250'000;
             vector<Query> queries;
             for (int i = 0; i < numQueries; i++)
             {
