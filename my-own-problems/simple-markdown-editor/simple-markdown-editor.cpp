@@ -849,7 +849,6 @@ int main(int argc, char* argv[])
                         }
                         break;
                 }
-                cerr << "Query: " << queryNum << " encrypting with " << prevDecryptionKey << endl;
                 queries.back().encryptedArgument = queries.back().encryptedArgument ^ prevDecryptionKey;
                 queries.back().encryptedArgument2 = queries.back().encryptedArgument2 ^ prevDecryptionKey;
                 //cerr << "document: " << document << endl;
