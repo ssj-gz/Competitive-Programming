@@ -382,7 +382,7 @@ int64_t solveOptimised(const vector<Query>& queries)
     int64_t powerOf2 = 2;
 
     vector<int> queryResults;
-    AVLTree formattingCharsTree;
+    AVLTree formattingCharsTree(10'000);
     // Add Sentinel node.
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
