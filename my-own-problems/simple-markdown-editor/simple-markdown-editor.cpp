@@ -30,6 +30,8 @@ T read()
     return toRead;
 }
 
+const int64_t Mod = 1'000'000'007;
+
 struct AVLNode
 {
     int value = -1;
@@ -254,7 +256,9 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
 {
     vector<int> queryResults;
     string document;
-    int decryptionKey = 0; 
+
+    int64_t decryptionKey = 0; 
+    int64_t powerOf2 = 2;
 
     vector<Query> undoStack;
     int undoStackPointer = -1;
@@ -262,12 +266,12 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
     int queryNum = 1;
     for (const auto& query : queries)
     {
-        //cout << "Processing query " << queryNum << endl;
+        cout << "Processing query " << queryNum << " decryptionKey: " << decryptionKey << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
                 {
-                    const int insertionPos = query.encryptedArgument - 1;
+                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
                     undoStackPointer++;
@@ -279,8 +283,8 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                 break;
             case Query::InsertNonFormatting:
                 {
-                    const int insertionPos = query.encryptedArgument - 1;
-                    const int numToInsert = query.encryptedArgument2;
+                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                    const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
                     //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     const string charsToInsert(numToInsert, 'X');
                     document.insert(insertionPos, charsToInsert);
@@ -294,7 +298,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                 break;
             case Query::IsRangeFormatted:
                 {
-                    const int queryPosition = query.encryptedArgument - 1;
+                    const int queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
                     assert(document[queryPosition] == 'X');
                     //cout << "IsRangeFormatted at " << queryPosition << endl;
                     int queryAnswer = -1;
@@ -321,13 +325,18 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                             }
                         }
                     }
-                    //cout << "queryAnswer: " << queryAnswer << endl;
+                    cout << "queryAnswer: " << queryAnswer << endl;
+                    if (queryAnswer == -1)
+                        queryAnswer = 3'141'592;
+                    decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                    cout << "Changed decryptionKey to " << decryptionKey << endl;
+
                     queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
                 {
-                    const int numToUndo = query.encryptedArgument;
+                    const int numToUndo = query.encryptedArgument ^ decryptionKey;
                     //cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
                     {
@@ -341,7 +350,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                 break;
             case Query::Redo:
                 {
-                    const int numToRedo = query.encryptedArgument;
+                    const int numToRedo = (query.encryptedArgument ^ decryptionKey);
                     //cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
                     {
@@ -365,6 +374,8 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
         //cout << "undoStackPointer: " << undoStackPointer << endl;
         queryNum++;
         bruteForceDocs.push_back(document);
+
+        powerOf2 = (2 * powerOf2) % Mod;
     }
     return queryResults;
 }
@@ -556,6 +567,9 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
     //cout << "Initial formattingCharsTree: " << endl;
     //printTree(formattingCharsTree);
 
+    int64_t decryptionKey = 0;
+    int64_t powerOf2 = 2;
+
     int queryNum = 1;
     for (const auto& query : queries)
     {
@@ -564,38 +578,43 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
         {
             case Query::InsertFormatting:
                 {
-                    const int insertionPos = query.encryptedArgument - 1;
+                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     //cout << "InsertFormatting at " << insertionPos << endl;
                     formattingCharsTree.insertFormattingChar(insertionPos);
                 }
                 break;
             case Query::InsertNonFormatting:
                 {
-                    const int insertionPos = query.encryptedArgument - 1;
-                    const int numToInsert = query.encryptedArgument2;
+                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                    const int numToInsert = (query.encryptedArgument2 ^ decryptionKey);
                     //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                 }
                 break;
             case Query::IsRangeFormatted:
                 {
-                    const int queryPosition = query.encryptedArgument - 1;
+                    const int queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
                     //cout << "IsRangeFormatted at " << queryPosition << endl;
-                    const int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                    int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                    if (queryAnswer == -1)
+                        queryAnswer = 3'141'592;
+                    decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                    cout << "Changed decryptionKey to " << decryptionKey << endl;
+
                     //cout << "queryAnswer: " << queryAnswer << endl;
                     queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
                 {
-                    const int numToUndo = query.encryptedArgument;
+                    const int numToUndo = (query.encryptedArgument ^ decryptionKey);
                     //cout << "Undo " << numToUndo << endl;
                     formattingCharsTree.undo(numToUndo);
                 }
                 break;
             case Query::Redo:
                 {
-                    const int numToRedo = query.encryptedArgument;
+                    const int numToRedo = (query.encryptedArgument ^ decryptionKey);
                     //cout << "Redo " << numToRedo << endl;
                     formattingCharsTree.redo(numToRedo);
 
@@ -612,6 +631,7 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
         //cout << "expected doc: " << endl << expected << endl;
         //assert(actual == expected);
         queryNum++;
+        powerOf2 = (powerOf2 * 2) % Mod;
     }
 
     return queryResults;
@@ -635,20 +655,23 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        const int T = rand() % 100 + 1;
-        //const int T = 1;
+
+        //const int T = rand() % 100 + 1;
+        const int T = 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
             string document;
-            int decryptionKey = 0; 
+            int64_t decryptionKey = 0; 
+            int64_t powerOf2 = 2;
+
+            int queryNum = 1;
 
             vector<Query> undoStack;
             int undoStackPointer = -1;
 
-            const int numQueries = 1 + rand() % 250'000;
+            const int numQueries = 1 + rand() % 100;
             vector<Query> queries;
             for (int i = 0; i < numQueries; i++)
             {
@@ -656,6 +679,7 @@ int main(int argc, char* argv[])
                 Query query;
                 int numFormatting = count(document.begin(), document.end(), '*');
                 int numNonFormatting = count(document.begin(), document.end(), 'X');
+                const auto prevDecryptionKey = decryptionKey;
                 while (!haveQuery)
                 {
                     const int queryType = rand() % 5;
@@ -788,6 +812,9 @@ int main(int argc, char* argv[])
                                     }
                                 }
                             }
+                            if (queryAnswer == -1)
+                                queryAnswer = 3'141'592;
+                            decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
                             //cerr << "queryAnswer: " << queryAnswer << endl;
                         }
                         break;
@@ -822,6 +849,9 @@ int main(int argc, char* argv[])
                         }
                         break;
                 }
+                cerr << "Query: " << queryNum << " encrypting with " << prevDecryptionKey << endl;
+                queries.back().encryptedArgument = queries.back().encryptedArgument ^ prevDecryptionKey;
+                queries.back().encryptedArgument2 = queries.back().encryptedArgument2 ^ prevDecryptionKey;
                 //cerr << "document: " << document << endl;
                 //cerr << "Undo stack: " << endl;
                 for (const auto x : undoStack)
@@ -829,6 +859,8 @@ int main(int argc, char* argv[])
                     //cerr << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
                 }
                 //cerr << "undoStackPointer: " << undoStackPointer << endl;
+                queryNum++;
+                powerOf2 = (powerOf2 * 2) % Mod;
             }
             cout << queries.size() << endl;
             for (const auto& query : queries)
