@@ -683,6 +683,8 @@ int main(int argc, char* argv[])
                     query.type = static_cast<Query::Type>(queryType);
                     if (queryType == Query::Undo)
                     {
+                        if (rand() % 4 >= 1)
+                            continue; // Undos should be fairly rare.
                         if (undoStackPointer == -1)
                             continue;
                         else
@@ -694,6 +696,8 @@ int main(int argc, char* argv[])
                     }
                     if (queryType == Query::Redo)
                     {
+                        if (rand() % 4 >= 1)
+                            continue; // Redos should be fairly rare.
                         if (undoStackPointer + 1 == undoStack.size())
                             continue;
                         else
