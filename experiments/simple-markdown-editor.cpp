@@ -574,28 +574,18 @@ void AVLTree::insertFormattingChar(int position)
         // It's guaranteed that there will be one, due to the Sentinel node.
         AVLNode* formattingCharToRight = nullptr;
         int formattingCharToRightPos = -1;
+        AVLTreeIterator treeIter(root());
+        while (treeIter.currentNode())
         {
-            auto currentNode = root();
-            int numToLeftOffset = 0;
-            int sumToLeftOffset = 0;
-            while (currentNode)
+            if (treeIter.currentNodePosition() >= position)
             {
-                int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-                int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-                const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-                //cout << "insertFormattingChar finding formattingCharToRight - currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
-                if (currentNodePosition >= position)
-                {
-                    formattingCharToRight = currentNode;
-                    formattingCharToRightPos = currentNodePosition;
-                    currentNode = currentNode->leftChild;
-                }
-                else
-                {
-                    numToLeftOffset += 1 + numInLeftSubTree;
-                    sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
-                    currentNode = currentNode->rightChild;
-                }
+                formattingCharToRight = treeIter.currentNode();
+                formattingCharToRightPos = treeIter.currentNodePosition();
+                treeIter.followLeftChild();
+            }
+            else
+            {
+                treeIter.followRightChild();
             }
         }
         assert(formattingCharToRight);
