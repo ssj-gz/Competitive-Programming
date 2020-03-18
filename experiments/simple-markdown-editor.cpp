@@ -148,7 +148,7 @@ class AVLTree
             }
         }
 
-        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, AVLTreeIterator& treeIter, int position, int adjustment);
+        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int position, int adjustment);
 
         AVLNode* createNode(int value)
         {
@@ -449,7 +449,7 @@ void AVLTree::insertFormattingChar(int position)
         //printSubTree(newRoot);
         // Update the "unformatted run size" of the formattingCharToRight.
         AVLTreeIterator treeIter(newRoot);
-        newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value);
+        newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value);
     }
 
     if (m_isPersistent)
@@ -538,7 +538,7 @@ void AVLTree::insertNonFormattingChars(int position, int numToAdd)
     assert(root()); // The Sentinel node should have been added.
     auto oldRoot = root();
     AVLTreeIterator treeIter(root());
-    auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), treeIter, position, numToAdd);
+    auto newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position, numToAdd);
 
     //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
 
@@ -551,7 +551,7 @@ void AVLTree::insertNonFormattingChars(int position, int numToAdd)
     }
 }
 
-AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRootOld, AVLTreeIterator& treeIter, int position, int adjustment)
+AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int position, int adjustment)
 {
     auto subTreeRoot = treeIter.currentNode();
     if (!subTreeRoot)
@@ -578,13 +578,13 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRootOld, AVLTre
         else
         {
             treeIter.followLeftChild();
-            subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, treeIter, position, adjustment);
+            subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(treeIter, position, adjustment);
         }
     }
     else
     {
         treeIter.followRightChild();
-        subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, treeIter, position, adjustment);
+        subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(treeIter, position, adjustment);
     }
     updateInfoFromChildren(subTreeRoot);
     return subTreeRoot;
