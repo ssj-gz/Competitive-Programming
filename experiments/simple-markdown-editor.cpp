@@ -381,7 +381,7 @@ class AVLTreeIterator
         void followRightChild()
         {
             m_numToLeftOffset += m_numInLeftSubTree + 1;
-            m_sumOfLeftSubTree += m_sumOfLeftSubTree + m_currentNode->value;
+            m_sumToLeftOffset += m_sumOfLeftSubTree + m_currentNode->value;
             m_currentNode = m_currentNode->rightChild;
             updateCurrentNodePosition();
         }
