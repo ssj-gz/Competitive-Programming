@@ -64,22 +64,7 @@ class AVLTree
             return m_rootForRevision[m_undoStackPointer];
         }
         void insertFormattingChar(int position);
-        void insertNonFormattingChars(int position, int numToAdd)
-        {
-            assert(root()); // The Sentinel node should have been added.
-            auto oldRoot = root();
-            auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), position, numToAdd, 0, 0);
-
-            //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
-
-            if (m_isPersistent)
-            {
-                m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
-                m_rootForRevision.push_back(newRoot);
-                m_undoStackPointer++;
-                assert(m_undoStackPointer == m_rootForRevision.size() - 1);
-            }
-        }
+        void insertNonFormattingChars(int position, int numToAdd);
         int distBetweenEnclosingFormattedChars(int position);
         void undo(int numToUndo)
         {
@@ -543,6 +528,23 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     }
 
     return currentNode;
+}
+
+void AVLTree::insertNonFormattingChars(int position, int numToAdd)
+{
+    assert(root()); // The Sentinel node should have been added.
+    auto oldRoot = root();
+    auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), position, numToAdd, 0, 0);
+
+    //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
+
+    if (m_isPersistent)
+    {
+        m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
+        m_rootForRevision.push_back(newRoot);
+        m_undoStackPointer++;
+        assert(m_undoStackPointer == m_rootForRevision.size() - 1);
+    }
 }
 
 AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
