@@ -48,6 +48,8 @@ struct AVLNode
 void printSubTree(AVLNode* subtreeRoot);
 string subtreeAsDocument(AVLNode* subtreeRoot);
 
+class AVLTreeIterator;
+
 class AVLTree
 {
     public:
@@ -91,7 +93,7 @@ class AVLTree
         }
 
     private:
-        AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset);
+        AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter, int numToLeftOffset, int sumToLeftOffset);
 
         AVLNode* rotateRight(AVLNode* subtreeRoot)
         {
@@ -468,18 +470,20 @@ void AVLTree::insertFormattingChar(int position)
         // It's guaranteed that there will be one, due to the Sentinel node.
         AVLNode* formattingCharToRight = nullptr;
         int formattingCharToRightPos = -1;
-        AVLTreeIterator treeIter(root());
-        while (treeIter.currentNode())
         {
-            if (treeIter.currentNodePosition() >= position)
+            AVLTreeIterator treeIter(root());
+            while (treeIter.currentNode())
             {
-                formattingCharToRight = treeIter.currentNode();
-                formattingCharToRightPos = treeIter.currentNodePosition();
-                treeIter.followLeftChild();
-            }
-            else
-            {
-                treeIter.followRightChild();
+                if (treeIter.currentNodePosition() >= position)
+                {
+                    formattingCharToRight = treeIter.currentNode();
+                    formattingCharToRightPos = treeIter.currentNodePosition();
+                    treeIter.followLeftChild();
+                }
+                else
+                {
+                    treeIter.followRightChild();
+                }
             }
         }
         assert(formattingCharToRight);
@@ -492,7 +496,8 @@ void AVLTree::insertFormattingChar(int position)
         assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
         assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
         // Perform the actual insertion.
-        newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, root(), 0, 0);
+        AVLTreeIterator treeIter(root());
+        newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, treeIter, 0, 0);
         //cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
         //cout << "Current formattingCharsTree: " << endl;
         //printSubTree(newRoot);
@@ -509,8 +514,9 @@ void AVLTree::insertFormattingChar(int position)
     }
 }
 
-AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
+AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter, int numToLeftOffset, int sumToLeftOffset)
 {
+    auto currentNode = treeIter.currentNode();
     auto originalNode = currentNode;
     if (m_isPersistent)
     {
@@ -521,13 +527,19 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
     int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
     const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
+    //cout << "currentNodePosition: " << currentNodePosition << endl;
+    //cout << "treeIter. currentNodePosition: " << treeIter.currentNodePosition() << endl;
+    assert(currentNodePosition == treeIter.currentNodePosition());
     //cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
     if (position <= currentNodePosition)
     {
         // Positions in the left subtree of node must be *strictly less* than
         // that of currentNode.
         if (currentNode->leftChild)
-            currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
+        {
+            treeIter.followLeftChild();
+            currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, treeIter, numToLeftOffset, sumToLeftOffset);
+        }
         else
         {
             //cout << "Inserted at leftChild" << endl;
@@ -539,8 +551,11 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
         // Positions in the right subtree of node must be *greater than or equal to* that
         // that of currentNode.
         if (currentNode->rightChild)
-            currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
+        {
+            treeIter.followRightChild();
+            currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, treeIter, numToLeftOffset + 1 + numInLeftSubTree,
                                                                                                                           sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
+        }
         else
         {
             //cout << "Inserted at rightChild" << endl;
