@@ -420,6 +420,52 @@ class AVLTree
 
 };
 
+class AVLTreeIterator
+{
+    public:
+        AVLTreeIterator(AVLNode* root)
+            : m_currentNode(root)
+        {
+        };
+        AVLNode* currentNode() const
+        {
+            return m_currentNode;
+        }
+        int currentNodePosition() const
+        {
+            return m_currentNodePosition;
+        }
+        void followLeftChild()
+        {
+            assert(m_currentNode && m_currentNode->leftChild);
+            m_currentNode = m_currentNode->leftChild;
+            updateCurrentNodePosition();
+        }
+        void followRightChild()
+        {
+            assert(m_currentNode && m_currentNode->rightChild);
+            m_numToLeftOffset += m_numInLeftSubTree + 1;
+            m_sumOfLeftSubTree += m_sumOfLeftSubTree + m_currentNode->value;
+            m_currentNode = m_currentNode->rightChild;
+            updateCurrentNodePosition();
+        }
+    private:
+        AVLNode* m_currentNode = nullptr;
+        int m_currentNodePosition = -1;
+        int m_numToLeftOffset = 0;
+        int m_sumToLeftOffset = 0;
+
+        int m_numInLeftSubTree = -1;
+        int m_sumOfLeftSubTree = -1;
+
+        void updateCurrentNodePosition()
+        {
+            m_numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
+            m_sumOfLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->sumOfDescendantValues : 0);
+            m_currentNodePosition = m_numToLeftOffset + m_numInLeftSubTree + m_sumToLeftOffset + m_sumOfLeftSubTree + m_currentNode->value;
+        }
+};
+
 struct Query
 {
     enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
