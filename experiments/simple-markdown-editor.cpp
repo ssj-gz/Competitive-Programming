@@ -343,7 +343,7 @@ class AVLTree
             auto originalSubTreeRoot = subTreeRoot;
             subTreeRoot = createNode(*subTreeRoot);
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
-            cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << endl;
+            cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
             if (position <= currentNodePosition)
             {
                 bool adjustInLeftSubChild = true;
@@ -353,7 +353,8 @@ class AVLTree
                     adjustInLeftSubChild = false;
                 else
                 {
-                    const auto maxPosInLeftSubchild = currentNodePosition - subTreeRoot->value;
+                    const auto maxPosInLeftSubchild = currentNodePosition - subTreeRoot->value - 1;
+                    cout << " maxPosInLeftSubchild: " << maxPosInLeftSubchild << endl;
                     if (maxPosInLeftSubchild < position)
                         adjustInLeftSubChild = false;
                 }
