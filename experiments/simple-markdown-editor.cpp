@@ -504,18 +504,8 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int 
     subTreeRoot = createNode(*subTreeRoot);
     if (position <= treeIter.currentNodePosition())
     {
-        bool adjustInLeftSubChild = true;
-        if (position == treeIter.currentNodePosition())
-            adjustInLeftSubChild = false;
-        if (!subTreeRoot->leftChild)
-            adjustInLeftSubChild = false;
-        else
-        {
-            const auto maxPosInLeftSubchild = treeIter.currentNodePosition() - subTreeRoot->value - 1;
-            if (maxPosInLeftSubchild < position)
-                adjustInLeftSubChild = false;
-        }
-        if (!adjustInLeftSubChild)
+        const auto maxPosInLeftSubchild = treeIter.currentNodePosition() - subTreeRoot->value - 1;
+        if (maxPosInLeftSubchild < position)
         {
             // This is the node to adjust.
             subTreeRoot->value += adjustment;
