@@ -181,6 +181,8 @@ class AVLTree
             return newNode;
         }
 
+        AVLTreeIterator findFirstNodeToRightOf(int position, AVLNode* root);
+
         void updateUndoStackWithNewRoot(AVLNode* newRoot)
         {
             m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
@@ -576,6 +578,27 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int 
     return subTreeRoot;
 }
 
+AVLTreeIterator AVLTree::findFirstNodeToRightOf(int position, AVLNode* root)
+{
+    AVLTreeIterator treeIter(root);
+    AVLTreeIterator result(nullptr);
+    while (treeIter.currentNode())
+    {
+        if (treeIter.currentNodePosition() >= position)
+        {
+            result = treeIter;
+            treeIter.followLeftChild();
+        }
+        else
+        {
+            treeIter.followRightChild();
+        }
+    }
+    assert(result.currentNode());
+    return result;
+}
+
+
 vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
 {
     vector<int> queryResults;
@@ -652,23 +675,8 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
     // Find node representing the formatting character immediately to the 
     // right of "position".
     // It's guaranteed that there will be one, due to the Sentinel node.
-    AVLTreeIterator formattingCharToRightIter(nullptr);
-    {
-        AVLTreeIterator treeIter(root());
-        while (treeIter.currentNode())
-        {
-            if (treeIter.currentNodePosition() >= position)
-            {
-                formattingCharToRightIter = treeIter;
-                treeIter.followLeftChild();
-            }
-            else
-            {
-                treeIter.followRightChild();
-            }
-        }
-    }
-    assert(formattingCharToRightIter.currentNode());
+    AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
+
     if (formattingCharToRightIter.currentNode()->isSentinelValue || formattingCharToRightIter.numFormattingCharsToLeft() % 2 == 0)
         return -1;
     else
