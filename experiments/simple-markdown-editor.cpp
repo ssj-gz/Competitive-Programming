@@ -163,48 +163,7 @@ class AVLTree
             }
         }
 
-        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
-        {
-            if (!subTreeRoot)
-                return subTreeRoot;
-            int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
-            int sumOfLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->sumOfDescendantValues : 0);
-            auto originalSubTreeRoot = subTreeRoot;
-            subTreeRoot = createNode(*subTreeRoot);
-            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
-            //cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
-            if (position <= currentNodePosition)
-            {
-                bool adjustInLeftSubChild = true;
-                if (position == currentNodePosition)
-                    adjustInLeftSubChild = false;
-                if (!subTreeRoot->leftChild)
-                    adjustInLeftSubChild = false;
-                else
-                {
-                    const auto maxPosInLeftSubchild = currentNodePosition - subTreeRoot->value - 1;
-                    //cout << " maxPosInLeftSubchild: " << maxPosInLeftSubchild << endl;
-                    if (maxPosInLeftSubchild < position)
-                        adjustInLeftSubChild = false;
-                }
-                if (!adjustInLeftSubChild)
-                {
-                    // This is the node to adjust.  Do copy-on-write.
-                    //cout << "Adjusted old value of node " << originalSubTreeRoot->id  << " from " << originalSubTreeRoot->value << " to " << originalSubTreeRoot->value + adjustment << endl;
-                    subTreeRoot->value += adjustment;
-                }
-                else
-                {
-                    subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
-                }
-            }
-            else
-            {
-                subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
-            }
-            updateInfoFromChildren(subTreeRoot);
-            return subTreeRoot;
-        }
+        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset);
 
         AVLNode* createNode(int value)
         {
@@ -584,6 +543,49 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     }
 
     return currentNode;
+}
+
+AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
+{
+    if (!subTreeRoot)
+        return subTreeRoot;
+    int numInLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->numDescendants : 0);
+    int sumOfLeftSubTree = (subTreeRoot->leftChild ? subTreeRoot->leftChild->sumOfDescendantValues : 0);
+    auto originalSubTreeRoot = subTreeRoot;
+    subTreeRoot = createNode(*subTreeRoot);
+    const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
+    //cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
+    if (position <= currentNodePosition)
+    {
+        bool adjustInLeftSubChild = true;
+        if (position == currentNodePosition)
+            adjustInLeftSubChild = false;
+        if (!subTreeRoot->leftChild)
+            adjustInLeftSubChild = false;
+        else
+        {
+            const auto maxPosInLeftSubchild = currentNodePosition - subTreeRoot->value - 1;
+            //cout << " maxPosInLeftSubchild: " << maxPosInLeftSubchild << endl;
+            if (maxPosInLeftSubchild < position)
+                adjustInLeftSubChild = false;
+        }
+        if (!adjustInLeftSubChild)
+        {
+            // This is the node to adjust.  Do copy-on-write.
+            //cout << "Adjusted old value of node " << originalSubTreeRoot->id  << " from " << originalSubTreeRoot->value << " to " << originalSubTreeRoot->value + adjustment << endl;
+            subTreeRoot->value += adjustment;
+        }
+        else
+        {
+            subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
+        }
+    }
+    else
+    {
+        subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
+    }
+    updateInfoFromChildren(subTreeRoot);
+    return subTreeRoot;
 }
 
 vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
