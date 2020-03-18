@@ -157,7 +157,6 @@ class AVLTree
             }
             m_nodes.back().push_back(AVLNode());
             auto newNode = &(m_nodes.back().back());
-            m_nextNodeId++;
             return newNode;
         }
 
@@ -173,8 +172,6 @@ class AVLTree
 
         int m_nodeBlockSize = 1;
         deque<vector<AVLNode>> m_nodes;
-
-        int m_nextNodeId = 1;
 
         int m_undoStackPointer = 0;
         vector<AVLNode*> m_rootForRevision;
