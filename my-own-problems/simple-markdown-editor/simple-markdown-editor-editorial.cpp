@@ -376,7 +376,7 @@ AVLTreeIterator AVLTree::findFirstNodeToRightOf(int position, AVLNode* root)
     return result;
 }
 
-vector<int> solveOptimised(const vector<Query>& queries)
+int64_t solveOptimised(const vector<Query>& queries)
 {
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
@@ -435,7 +435,7 @@ vector<int> solveOptimised(const vector<Query>& queries)
 
     }
 
-    return queryResults;
+    return decryptionKey;
 }
 
 int AVLTree::distBetweenEnclosingFormattedChars(int position)
@@ -491,11 +491,7 @@ int main()
             }
         }
 
-        const auto solutionOptimised = solveOptimised(queries);
-        cout << "solutionOptimised: ";
-        for (const auto x : solutionOptimised)
-            cout << " " << x;
-        cout << endl;
+        cout << solveOptimised(queries) << endl;
     }
 
     assert(cin);

@@ -252,7 +252,7 @@ struct Query
     int encryptedArgument2 = -1;
 };
 
-vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteForceDocs)
+int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForceDocs)
 {
     vector<int> queryResults;
     string document;
@@ -377,7 +377,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
 
         powerOf2 = (2 * powerOf2) % Mod;
     }
-    return queryResults;
+    return decryptionKey;
 }
 
 void printSubTree(AVLNode* subtreeRoot)
@@ -557,7 +557,7 @@ AVLTreeIterator AVLTree::findFirstNodeToRightOf(int position, AVLNode* root)
 }
 
 
-vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
+int64_t solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
 {
     vector<int> queryResults;
     AVLTree formattingCharsTree;
@@ -634,7 +634,7 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
         powerOf2 = (powerOf2 * 2) % Mod;
     }
 
-    return queryResults;
+    return decryptionKey;
 }
 
 int AVLTree::distBetweenEnclosingFormattedChars(int position)
@@ -924,14 +924,8 @@ int main(int argc, char* argv[])
         vector<string> bruteForceDocs;
         const auto solutionBruteForce = solveBruteForce(queries, bruteForceDocs);
         const auto solutionOptimised = solveOptimised(queries, bruteForceDocs);
-        cout << "solutionBruteForce:";
-        for (const auto x : solutionBruteForce)
-            cout << " " << x;
-        cout << endl;
-        cout << "solutionOptimised: ";
-        for (const auto x : solutionOptimised)
-            cout << " " << x;
-        cout << endl;
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+        cout << "solutionOptimised:  " << solutionOptimised << endl;;
         assert(solutionOptimised == solutionBruteForce);
 #endif
     }
