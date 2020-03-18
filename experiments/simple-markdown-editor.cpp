@@ -61,70 +61,7 @@ class AVLTree
         {
             return m_rootForRevision[m_undoStackPointer];
         }
-        void insertFormattingChar(int position)
-        {
-            AVLNode* newRoot = nullptr;
-            if (!root())
-            {
-                newRoot = createNode(0);
-            }
-            else
-            {
-                // Find node representing the formatting character immediately to the 
-                // right of "position".
-                // It's guaranteed that there will be one, due to the Sentinel node.
-                AVLNode* formattingCharToRight = nullptr;
-                int formattingCharToRightPos = -1;
-                {
-                    auto currentNode = root();
-                    int numToLeftOffset = 0;
-                    int sumToLeftOffset = 0;
-                    while (currentNode)
-                    {
-                        int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-                        int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-                        const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-                        //cout << "insertFormattingChar finding formattingCharToRight - currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
-                        if (currentNodePosition >= position)
-                        {
-                            formattingCharToRight = currentNode;
-                            formattingCharToRightPos = currentNodePosition;
-                            currentNode = currentNode->leftChild;
-                        }
-                        else
-                        {
-                            numToLeftOffset += 1 + numInLeftSubTree;
-                            sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
-                            currentNode = currentNode->rightChild;
-                        }
-                    }
-                }
-                assert(formattingCharToRight);
-                //cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
-                const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
-                const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
-                //cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
-                //cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
-                //cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
-                assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
-                assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
-                // Perform the actual insertion.
-                newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, root(), 0, 0);
-                //cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
-                //cout << "Current formattingCharsTree: " << endl;
-                //printSubTree(newRoot);
-                // Update the "unformatted run size" of the formattingCharToRight.
-                newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
-            }
-
-            if (m_isPersistent)
-            {
-                m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
-                m_rootForRevision.push_back(newRoot);
-                m_undoStackPointer++;
-                assert(m_undoStackPointer == m_rootForRevision.size() - 1);
-            }
-        }
+        void insertFormattingChar(int position);
         void insertNonFormattingChars(int position, int numToAdd)
         {
             assert(root()); // The Sentinel node should have been added.
@@ -622,6 +559,70 @@ void printTree(AVLTree& tree)
     printSubTree(tree.root());
 }
 
+void AVLTree::insertFormattingChar(int position)
+{
+    AVLNode* newRoot = nullptr;
+    if (!root())
+    {
+        newRoot = createNode(0);
+    }
+    else
+    {
+        // Find node representing the formatting character immediately to the 
+        // right of "position".
+        // It's guaranteed that there will be one, due to the Sentinel node.
+        AVLNode* formattingCharToRight = nullptr;
+        int formattingCharToRightPos = -1;
+        {
+            auto currentNode = root();
+            int numToLeftOffset = 0;
+            int sumToLeftOffset = 0;
+            while (currentNode)
+            {
+                int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+                int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
+                const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
+                //cout << "insertFormattingChar finding formattingCharToRight - currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
+                if (currentNodePosition >= position)
+                {
+                    formattingCharToRight = currentNode;
+                    formattingCharToRightPos = currentNodePosition;
+                    currentNode = currentNode->leftChild;
+                }
+                else
+                {
+                    numToLeftOffset += 1 + numInLeftSubTree;
+                    sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
+                    currentNode = currentNode->rightChild;
+                }
+            }
+        }
+        assert(formattingCharToRight);
+        //cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
+        const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
+        const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
+        //cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
+        //cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
+        //cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
+        assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
+        assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
+        // Perform the actual insertion.
+        newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, root(), 0, 0);
+        //cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
+        //cout << "Current formattingCharsTree: " << endl;
+        //printSubTree(newRoot);
+        // Update the "unformatted run size" of the formattingCharToRight.
+        newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
+    }
+
+    if (m_isPersistent)
+    {
+        m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
+        m_rootForRevision.push_back(newRoot);
+        m_undoStackPointer++;
+        assert(m_undoStackPointer == m_rootForRevision.size() - 1);
+    }
+}
 
 vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
 {
