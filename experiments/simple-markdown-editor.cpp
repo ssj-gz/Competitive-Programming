@@ -363,6 +363,7 @@ class AVLTreeIterator
         AVLTreeIterator(AVLNode* root)
             : m_currentNode(root)
         {
+            updateCurrentNodePosition();
         };
         AVLNode* currentNode() const
         {
@@ -374,13 +375,11 @@ class AVLTreeIterator
         }
         void followLeftChild()
         {
-            assert(m_currentNode && m_currentNode->leftChild);
             m_currentNode = m_currentNode->leftChild;
             updateCurrentNodePosition();
         }
         void followRightChild()
         {
-            assert(m_currentNode && m_currentNode->rightChild);
             m_numToLeftOffset += m_numInLeftSubTree + 1;
             m_sumOfLeftSubTree += m_sumOfLeftSubTree + m_currentNode->value;
             m_currentNode = m_currentNode->rightChild;
@@ -392,11 +391,13 @@ class AVLTreeIterator
         int m_numToLeftOffset = 0;
         int m_sumToLeftOffset = 0;
 
-        int m_numInLeftSubTree = -1;
-        int m_sumOfLeftSubTree = -1;
+        int m_numInLeftSubTree = 0;
+        int m_sumOfLeftSubTree = 0;
 
         void updateCurrentNodePosition()
         {
+            if (!m_currentNode)
+                return;
             m_numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
             m_sumOfLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->sumOfDescendantValues : 0);
             m_currentNodePosition = m_numToLeftOffset + m_numInLeftSubTree + m_sumToLeftOffset + m_sumOfLeftSubTree + m_currentNode->value;
