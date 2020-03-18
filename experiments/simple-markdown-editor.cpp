@@ -572,7 +572,7 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int 
         }
         if (!adjustInLeftSubChild)
         {
-            // This is the node to adjust.  Do copy-on-write.
+            // This is the node to adjust.
             subTreeRoot->value += adjustment;
         }
         else
