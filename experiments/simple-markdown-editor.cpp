@@ -78,47 +78,7 @@ class AVLTree
                 assert(m_undoStackPointer == m_rootForRevision.size() - 1);
             }
         }
-        int distBetweenEnclosingFormattedChars(int position)
-        {
-            // Find node representing the formatting character immediately to the 
-            // right of "position".
-            // It's guaranteed that there will be one, due to the Sentinel node.
-            AVLNode* formattingCharToRight = nullptr;
-            int formattingCharToRightPos = -1;
-            int formattingCharToRightPosNumFormattingToLeft = -1;
-            {
-                auto currentNode = root();
-                int numToLeftOffset = 0;
-                int sumToLeftOffset = 0;
-                while (currentNode)
-                {
-                    int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-                    int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-                    const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-                    //cout << "distBetweenEnclosingFormattedChars: currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
-                    if (currentNodePosition >= position)
-                    {
-                        formattingCharToRight = currentNode;
-                        formattingCharToRightPos = currentNodePosition;
-                        formattingCharToRightPosNumFormattingToLeft = numToLeftOffset + numInLeftSubTree;
-                        currentNode = currentNode->leftChild;
-                    }
-                    else
-                    {
-                        numToLeftOffset += 1 + numInLeftSubTree;
-                        sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
-                        //cout << "distBetweenEnclosingFormattedChars Going right: numToLeftOffset " << numToLeftOffset << " sumToLeftOffset: " << sumToLeftOffset  << endl;
-                        currentNode = currentNode->rightChild;
-                    }
-                }
-            }
-            assert(formattingCharToRight);
-            //cout << " distBetweenEnclosingFormattedChars formattingCharToRight: " << formattingCharToRight->id << " isSentinelValue: " << formattingCharToRight->isSentinelValue << endl;
-            if (formattingCharToRight->isSentinelValue || formattingCharToRightPosNumFormattingToLeft % 2 == 0)
-                return -1;
-            else
-                return formattingCharToRight->value;
-        }
+        int distBetweenEnclosingFormattedChars(int position);
         void undo(int numToUndo)
         {
             assert(m_isPersistent);
@@ -684,6 +644,48 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
     }
 
     return queryResults;
+}
+
+int AVLTree::distBetweenEnclosingFormattedChars(int position)
+{
+    // Find node representing the formatting character immediately to the 
+    // right of "position".
+    // It's guaranteed that there will be one, due to the Sentinel node.
+    AVLNode* formattingCharToRight = nullptr;
+    int formattingCharToRightPos = -1;
+    int formattingCharToRightPosNumFormattingToLeft = -1;
+    {
+        auto currentNode = root();
+        int numToLeftOffset = 0;
+        int sumToLeftOffset = 0;
+        while (currentNode)
+        {
+            int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+            int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
+            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
+            //cout << "distBetweenEnclosingFormattedChars: currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
+            if (currentNodePosition >= position)
+            {
+                formattingCharToRight = currentNode;
+                formattingCharToRightPos = currentNodePosition;
+                formattingCharToRightPosNumFormattingToLeft = numToLeftOffset + numInLeftSubTree;
+                currentNode = currentNode->leftChild;
+            }
+            else
+            {
+                numToLeftOffset += 1 + numInLeftSubTree;
+                sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
+                //cout << "distBetweenEnclosingFormattedChars Going right: numToLeftOffset " << numToLeftOffset << " sumToLeftOffset: " << sumToLeftOffset  << endl;
+                currentNode = currentNode->rightChild;
+            }
+        }
+    }
+    assert(formattingCharToRight);
+    //cout << " distBetweenEnclosingFormattedChars formattingCharToRight: " << formattingCharToRight->id << " isSentinelValue: " << formattingCharToRight->isSentinelValue << endl;
+    if (formattingCharToRight->isSentinelValue || formattingCharToRightPosNumFormattingToLeft % 2 == 0)
+        return -1;
+    else
+        return formattingCharToRight->value;
 }
 
 int main(int argc, char* argv[])
