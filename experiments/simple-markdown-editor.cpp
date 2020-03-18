@@ -54,7 +54,7 @@ class AVLTree
 {
     public:
         AVLTree(bool isPersistent = true, int nodeBlockSize = 1)
-            : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
+            : m_nodeBlockSize{nodeBlockSize}
         {
             m_rootForRevision.push_back(nullptr);
         }
@@ -111,7 +111,7 @@ class AVLTree
 
         void updateInfoFromChildren(AVLNode* nodeToUpdate)
         {
-            // If m_isPersistent, assume that nodeToUpdate is already a newly-created
+            // We assume that nodeToUpdate is already a newly-COW'd
             // copy of the original nodeToUpdate.
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
@@ -180,8 +180,6 @@ class AVLTree
             m_undoStackPointer++;
             assert(m_undoStackPointer == m_rootForRevision.size() - 1);
         }
-
-        bool m_isPersistent = false;
 
         int m_nodeBlockSize = 1;
         deque<vector<AVLNode>> m_nodes;
