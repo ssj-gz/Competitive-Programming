@@ -20,6 +20,14 @@ T read()
     return toRead;
 }
 
+struct Query
+{
+    enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
+    Type type;
+    int encryptedArgument = -1;
+    int encryptedArgument2 = -1;
+};
+
 struct AVLNode
 {
     int value = -1;
@@ -221,14 +229,6 @@ class AVLTreeIterator
             m_sumOfLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->sumOfDescendantValues : 0);
             m_currentNodePosition = m_numToLeftOffset + m_numInLeftSubTree + m_sumToLeftOffset + m_sumOfLeftSubTree + m_currentNode->value;
         }
-};
-
-struct Query
-{
-    enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
-    Type type;
-    int encryptedArgument = -1;
-    int encryptedArgument2 = -1;
 };
 
 void AVLTree::insertFormattingChar(int position)
