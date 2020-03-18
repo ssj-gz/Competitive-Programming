@@ -167,7 +167,7 @@ class AVLTree
             m_rootForRevision.erase(m_rootForRevision.begin() + m_undoStackPointer + 1, m_rootForRevision.end());
             m_rootForRevision.push_back(newRoot);
             m_undoStackPointer++;
-            assert(m_undoStackPointer == m_rootForRevision.size() - 1);
+            assert(m_undoStackPointer == static_cast<int>(m_rootForRevision.size()) - 1);
         }
 
         int m_nodeBlockSize = 1;
