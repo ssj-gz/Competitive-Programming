@@ -422,28 +422,10 @@ void AVLTree::insertFormattingChar(int position)
         // Find node representing the formatting character immediately to the 
         // right of "position".
         // It's guaranteed that there will be one, due to the Sentinel node.
-        AVLNode* formattingCharToRight = nullptr;
-        int formattingCharToRightPos = -1;
-        {
-            AVLTreeIterator treeIter(root());
-            while (treeIter.currentNode())
-            {
-                if (treeIter.currentNodePosition() >= position)
-                {
-                    formattingCharToRight = treeIter.currentNode();
-                    formattingCharToRightPos = treeIter.currentNodePosition();
-                    treeIter.followLeftChild();
-                }
-                else
-                {
-                    treeIter.followRightChild();
-                }
-            }
-        }
-        assert(formattingCharToRight);
+        AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
         //cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
-        const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
-        const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
+        const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNode()->value - (formattingCharToRightIter.currentNodePosition() - position);
+        const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNodePosition() - position;
         //cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
         //cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
         //cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
@@ -459,7 +441,7 @@ void AVLTree::insertFormattingChar(int position)
         //printSubTree(newRoot);
         // Update the "unformatted run size" of the formattingCharToRight.
         AVLTreeIterator treeIter(newRoot);
-        newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value);
+        newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRightIter.currentNode()->value);
     }
 
     updateUndoStackWithNewRoot(newRoot);
