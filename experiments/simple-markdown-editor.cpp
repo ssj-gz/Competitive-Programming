@@ -46,7 +46,7 @@ struct AVLNode
 };
 
 void printSubTree(AVLNode* subtreeRoot);
-void printSubTreeDocument(AVLNode* subtreeRoot);
+string subtreeAsDocument(AVLNode* subtreeRoot);
 
 class AVLTree
 {
@@ -558,14 +558,16 @@ void printSubTree(AVLNode* subtreeRoot)
     if (subtreeRoot->rightChild)
         printSubTree(subtreeRoot->rightChild);
 }
-void printSubTreeDocument(AVLNode* subtreeRoot)
+string subtreeAsDocument(AVLNode* subtreeRoot)
 {
     if (!subtreeRoot)
-        return;
-    printSubTreeDocument(subtreeRoot->leftChild);
-    cout << string(subtreeRoot->value, 'X');
-    cout << "*";
-    printSubTreeDocument(subtreeRoot->rightChild);
+        return "";
+    string asDoc = subtreeAsDocument(subtreeRoot->leftChild);
+    asDoc += string(subtreeRoot->value, 'X');
+    asDoc += "*";
+    asDoc += subtreeAsDocument(subtreeRoot->rightChild);
+
+    return asDoc;
 }
 
 void printTree(AVLTree& tree)
@@ -634,9 +636,11 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
         cout << "Current formattingCharsTree: " << endl;
         printTree(formattingCharsTree);
         cout << "as doc:" << endl;
-        printSubTreeDocument(formattingCharsTree.root());
-        cout << endl;
-        cout << "expected doc: " << endl << bruteForceDocs[queryNum - 1] + "*" << endl;
+        const auto actual = subtreeAsDocument(formattingCharsTree.root());
+        cout << actual << endl;
+        const auto expected = bruteForceDocs[queryNum - 1] + "*" ;
+        cout << "expected doc: " << endl << expected << endl;
+        assert(actual == expected);
         queryNum++;
     }
 
