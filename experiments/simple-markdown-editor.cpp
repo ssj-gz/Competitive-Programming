@@ -526,12 +526,10 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     }
     int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
     int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-    const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
     //cout << "currentNodePosition: " << currentNodePosition << endl;
     //cout << "treeIter. currentNodePosition: " << treeIter.currentNodePosition() << endl;
-    assert(currentNodePosition == treeIter.currentNodePosition());
     //cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
-    if (position <= currentNodePosition)
+    if (position <= treeIter.currentNodePosition())
     {
         // Positions in the left subtree of node must be *strictly less* than
         // that of currentNode.
