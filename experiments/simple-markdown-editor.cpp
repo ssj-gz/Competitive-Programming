@@ -56,8 +56,7 @@ class AVLTree
         AVLTree(bool isPersistent = true, int nodeBlockSize = 1)
             : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
         {
-            if (m_isPersistent)
-                m_rootForRevision.push_back(nullptr);
+            m_rootForRevision.push_back(nullptr);
         }
         AVLNode* root()
         {
@@ -68,12 +67,10 @@ class AVLTree
         int distBetweenEnclosingFormattedChars(int position);
         void undo(int numToUndo)
         {
-            assert(m_isPersistent);
             m_undoStackPointer -= numToUndo;
         }
         void redo(int numToRedo)
         {
-            assert(m_isPersistent);
             m_undoStackPointer += numToRedo;
         }
 
@@ -83,14 +80,11 @@ class AVLTree
         AVLNode* rotateRight(AVLNode* subtreeRoot)
         {
             auto newSubtreeRoot = subtreeRoot->leftChild;
-            if (m_isPersistent)
-            {
-                // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
-                // AVLTree's, we must copy-on-write.
-                newSubtreeRoot = createNode(*newSubtreeRoot);
-                subtreeRoot = createNode(*subtreeRoot);
 
-            }
+            // We're modifying newSubtreeRoot and subtreeRoot, so copy-on-write.
+            newSubtreeRoot = createNode(*newSubtreeRoot);
+            subtreeRoot = createNode(*subtreeRoot);
+
             auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
             newSubtreeRoot->rightChild = subtreeRoot;
             subtreeRoot->leftChild = previousNewSubtreeRootRightChild;
@@ -103,13 +97,9 @@ class AVLTree
         AVLNode* rotateLeft(AVLNode* subtreeRoot)
         {
             auto newSubtreeRoot = subtreeRoot->rightChild;
-            if (m_isPersistent)
-            {
-                // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
-                // AVLTree's, we must copy-on-write.
-                newSubtreeRoot = createNode(*newSubtreeRoot);
-                subtreeRoot = createNode(*subtreeRoot);
-            }
+            // We're modifying newSubtreeRoot and subtreeRoot, so copy-on-write.
+            newSubtreeRoot = createNode(*newSubtreeRoot);
+            subtreeRoot = createNode(*subtreeRoot);
             auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
             newSubtreeRoot->leftChild = subtreeRoot;
             subtreeRoot->rightChild = previousNewSubtreeRootLeftChild;
