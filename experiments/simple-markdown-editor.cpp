@@ -53,7 +53,7 @@ class AVLTreeIterator;
 class AVLTree
 {
     public:
-        AVLTree(bool isPersistent = true, int nodeBlockSize = 1)
+        AVLTree(int nodeBlockSize = 1)
             : m_nodeBlockSize{nodeBlockSize}
         {
             m_rootForRevision.push_back(nullptr);
