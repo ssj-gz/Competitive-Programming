@@ -30,7 +30,7 @@ struct Query
 
 struct AVLNode
 {
-    int value = -1;
+    int leftNonFormattedRunSize = -1;
     AVLNode *leftChild = nullptr;
     AVLNode *rightChild = nullptr;
     int balanceFactor = 0;
@@ -109,7 +109,7 @@ class AVLTree
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->numDescendants = 1;
-            nodeToUpdate->sumOfDescendantValues = nodeToUpdate->value;
+            nodeToUpdate->sumOfDescendantValues = nodeToUpdate->leftNonFormattedRunSize;
 
             auto leftChild = nodeToUpdate->leftChild;
 
@@ -133,11 +133,11 @@ class AVLTree
 
         AVLNode* adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int position, int adjustment);
 
-        AVLNode* createNode(int value)
+        AVLNode* createNode(int leftNonFormattedRunSize)
         {
             auto newNode = createNode();
-            newNode->value = value;
-            newNode->sumOfDescendantValues = value;
+            newNode->leftNonFormattedRunSize = leftNonFormattedRunSize;
+            newNode->sumOfDescendantValues = leftNonFormattedRunSize;
             return newNode;
         }
 
@@ -208,7 +208,7 @@ class AVLTreeIterator
         void followRightChild()
         {
             m_numToLeftOffset += m_numInLeftSubTree + 1;
-            m_sumToLeftOffset += m_sumOfLeftSubTree + m_currentNode->value;
+            m_sumToLeftOffset += m_sumOfLeftSubTree + m_currentNode->leftNonFormattedRunSize;
             m_currentNode = m_currentNode->rightChild;
             updateCurrentNodePosition();
         }
@@ -227,7 +227,7 @@ class AVLTreeIterator
                 return;
             m_numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
             m_sumOfLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->sumOfDescendantValues : 0);
-            m_currentNodePosition = m_numToLeftOffset + m_numInLeftSubTree + m_sumToLeftOffset + m_sumOfLeftSubTree + m_currentNode->value;
+            m_currentNodePosition = m_numToLeftOffset + m_numInLeftSubTree + m_sumToLeftOffset + m_sumOfLeftSubTree + m_currentNode->leftNonFormattedRunSize;
         }
 };
 
@@ -241,7 +241,7 @@ void AVLTree::insertFormattingChar(int position)
     else
     {
         const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
-        const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNode()->value - (formattingCharToRightIter.currentNodePosition() - position);
+        const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNode()->leftNonFormattedRunSize - (formattingCharToRightIter.currentNodePosition() - position);
         const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNodePosition() - position;
         assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
         assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
@@ -252,7 +252,7 @@ void AVLTree::insertFormattingChar(int position)
         }
         // Update the "unformatted run size" of the formattingCharToRight.
         AVLTreeIterator treeIter(newRoot);
-        newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRightIter.currentNode()->value);
+        newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRightIter.currentNode()->leftNonFormattedRunSize);
     }
 
     updateUndoStackWithNewRoot(newRoot);
@@ -337,11 +337,11 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int 
     subTreeRoot = createNode(*subTreeRoot);
     if (position <= treeIter.currentNodePosition())
     {
-        const auto maxPosInLeftSubchild = treeIter.currentNodePosition() - subTreeRoot->value - 1;
+        const auto maxPosInLeftSubchild = treeIter.currentNodePosition() - subTreeRoot->leftNonFormattedRunSize - 1;
         if (maxPosInLeftSubchild < position)
         {
             // This is the node to adjust.
-            subTreeRoot->value += adjustment;
+            subTreeRoot->leftNonFormattedRunSize += adjustment;
         }
         else
         {
@@ -382,7 +382,7 @@ vector<int> solveOptimised(const vector<Query>& queries)
 {
     vector<int> queryResults;
     AVLTree formattingCharsTree;
-    // Add Sentinel value.
+    // Add Sentinel node.
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
 
@@ -439,7 +439,7 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
     if (formattingCharToRightIter.currentNode()->isSentinelValue || formattingCharToRightIter.numFormattingCharsToLeft() % 2 == 0)
         return -1;
     else
-        return formattingCharToRightIter.currentNode()->value;
+        return formattingCharToRightIter.currentNode()->leftNonFormattedRunSize;
 }
 
 int main()
