@@ -683,7 +683,6 @@ int main(int argc, char* argv[])
                     query.type = static_cast<Query::Type>(queryType);
                     if (queryType == Query::Undo)
                     {
-                        continue; // TODO - remove this!
                         if (undoStackPointer == -1)
                             continue;
                         else
@@ -695,7 +694,6 @@ int main(int argc, char* argv[])
                     }
                     if (queryType == Query::Redo)
                     {
-                        continue; // TODO - remove this!
                         if (undoStackPointer + 1 == undoStack.size())
                             continue;
                         else
