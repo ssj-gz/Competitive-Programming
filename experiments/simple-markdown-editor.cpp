@@ -148,7 +148,7 @@ class AVLTree
             }
         }
 
-        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset);
+        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, AVLTreeIterator& treeIter, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset);
 
         AVLNode* createNode(int value)
         {
@@ -439,14 +439,17 @@ void AVLTree::insertFormattingChar(int position)
         //cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
         assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
         assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
-        // Perform the actual insertion.
-        AVLTreeIterator treeIter(root());
-        newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, treeIter);
+        {
+            // Perform the actual insertion.
+            AVLTreeIterator treeIter(root());
+            newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, treeIter);
+        }
         //cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
         //cout << "Current formattingCharsTree: " << endl;
         //printSubTree(newRoot);
         // Update the "unformatted run size" of the formattingCharToRight.
-        newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
+        AVLTreeIterator treeIter(newRoot);
+        newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, treeIter, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
     }
 
     if (m_isPersistent)
@@ -534,7 +537,8 @@ void AVLTree::insertNonFormattingChars(int position, int numToAdd)
 {
     assert(root()); // The Sentinel node should have been added.
     auto oldRoot = root();
-    auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), position, numToAdd, 0, 0);
+    AVLTreeIterator treeIter(root());
+    auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), treeIter, position, numToAdd, 0, 0);
 
     //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
 
@@ -547,7 +551,7 @@ void AVLTree::insertNonFormattingChars(int position, int numToAdd)
     }
 }
 
-AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
+AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, AVLTreeIterator& treeIter, int position, int adjustment, int numToLeftOffset, int sumToLeftOffset)
 {
     if (!subTreeRoot)
         return subTreeRoot;
@@ -579,12 +583,12 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLNode* subTreeRoot, int posit
         }
         else
         {
-            subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, position, adjustment, numToLeftOffset, sumToLeftOffset);
+            subTreeRoot->leftChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->leftChild, treeIter, position, adjustment, numToLeftOffset, sumToLeftOffset);
         }
     }
     else
     {
-        subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
+        subTreeRoot->rightChild = adjustRunToLeftOfNodeToRightOf(subTreeRoot->rightChild, treeIter, position, adjustment, numToLeftOffset + numInLeftSubTree + 1 + sumOfLeftSubTree + subTreeRoot->value, sumToLeftOffset);
     }
     updateInfoFromChildren(subTreeRoot);
     return subTreeRoot;
