@@ -431,10 +431,18 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
 {
     const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
 
-    if (formattingCharToRightIter.currentNode()->isSentinelValue || formattingCharToRightIter.numFormattingCharsToLeft() % 2 == 0)
+    if (formattingCharToRightIter.currentNode()->isSentinelValue)
+    {
+        // There are no formatting chars to the right - only the "fake" Sentinel value.
         return -1;
-    else
-        return formattingCharToRightIter.currentNode()->leftNonFormattedRunSize;
+    }
+    if (formattingCharToRightIter.numFormattingCharsToLeft() % 2 == 0)
+    {
+        // The formatting char to the right is the *beginning* of a formatted range, not
+        // the end.
+        return -1;
+    }
+    return formattingCharToRightIter.currentNode()->leftNonFormattedRunSize;
 }
 
 int main()
