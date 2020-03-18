@@ -91,77 +91,7 @@ class AVLTree
         }
 
     private:
-        AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
-        {
-            auto originalNode = currentNode;
-            if (m_isPersistent)
-            {
-                auto newCurrentNode = createNode(currentNode->value);
-                *newCurrentNode = *currentNode;
-                currentNode = newCurrentNode;
-            }
-            int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-            int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-            //cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
-            if (position <= currentNodePosition)
-            {
-                // Positions in the left subtree of node must be *strictly less* than
-                // that of currentNode.
-                if (currentNode->leftChild)
-                    currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
-                else
-                {
-                    //cout << "Inserted at leftChild" << endl;
-                    currentNode->leftChild = createNode(sizeOfUnformattedToLeftRun);
-                }
-            }
-            else
-            {
-                // Positions in the right subtree of node must be *greater than or equal to* that
-                // that of currentNode.
-                if (currentNode->rightChild)
-                    currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
-                                                                                                                                  sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
-                else
-                {
-                    //cout << "Inserted at rightChild" << endl;
-                    currentNode->rightChild = createNode(sizeOfUnformattedToLeftRun);
-                }
-            }
-            updateInfoFromChildren(currentNode);
-
-            if (currentNode->balanceFactor < -1)
-            {
-                if (currentNode->leftChild->balanceFactor <= 0)
-                {
-                    // Simple rotation.
-                    return rotateRight(currentNode);
-                }
-                else
-                {
-                    // Double-rotation.
-                    currentNode->leftChild = rotateLeft(currentNode->leftChild);
-                    return rotateRight(currentNode);
-                }
-            }
-            if (currentNode->balanceFactor > +1)
-            {
-                if (currentNode->rightChild->balanceFactor >= 0)
-                {
-                    // Simple rotation.
-                    return rotateLeft(currentNode);
-                }
-                else
-                {
-                    // Double-rotation.
-                    currentNode->rightChild = rotateRight(currentNode->rightChild);
-                    return rotateLeft(currentNode);
-                }
-            }
-
-            return currentNode;
-        }
+        AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset);
 
         AVLNode* rotateRight(AVLNode* subtreeRoot)
         {
@@ -577,6 +507,78 @@ void AVLTree::insertFormattingChar(int position)
         m_undoStackPointer++;
         assert(m_undoStackPointer == m_rootForRevision.size() - 1);
     }
+}
+
+AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeftRun,  AVLNode* currentNode, int numToLeftOffset, int sumToLeftOffset)
+{
+    auto originalNode = currentNode;
+    if (m_isPersistent)
+    {
+        auto newCurrentNode = createNode(currentNode->value);
+        *newCurrentNode = *currentNode;
+        currentNode = newCurrentNode;
+    }
+    int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+    int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
+    const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
+    //cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
+    if (position <= currentNodePosition)
+    {
+        // Positions in the left subtree of node must be *strictly less* than
+        // that of currentNode.
+        if (currentNode->leftChild)
+            currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
+        else
+        {
+            //cout << "Inserted at leftChild" << endl;
+            currentNode->leftChild = createNode(sizeOfUnformattedToLeftRun);
+        }
+    }
+    else
+    {
+        // Positions in the right subtree of node must be *greater than or equal to* that
+        // that of currentNode.
+        if (currentNode->rightChild)
+            currentNode->rightChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->rightChild, numToLeftOffset + 1 + numInLeftSubTree,
+                                                                                                                          sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
+        else
+        {
+            //cout << "Inserted at rightChild" << endl;
+            currentNode->rightChild = createNode(sizeOfUnformattedToLeftRun);
+        }
+    }
+    updateInfoFromChildren(currentNode);
+
+    if (currentNode->balanceFactor < -1)
+    {
+        if (currentNode->leftChild->balanceFactor <= 0)
+        {
+            // Simple rotation.
+            return rotateRight(currentNode);
+        }
+        else
+        {
+            // Double-rotation.
+            currentNode->leftChild = rotateLeft(currentNode->leftChild);
+            return rotateRight(currentNode);
+        }
+    }
+    if (currentNode->balanceFactor > +1)
+    {
+        if (currentNode->rightChild->balanceFactor >= 0)
+        {
+            // Simple rotation.
+            return rotateLeft(currentNode);
+        }
+        else
+        {
+            // Double-rotation.
+            currentNode->rightChild = rotateRight(currentNode->rightChild);
+            return rotateLeft(currentNode);
+        }
+    }
+
+    return currentNode;
 }
 
 vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
