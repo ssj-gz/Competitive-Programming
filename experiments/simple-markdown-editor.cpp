@@ -333,6 +333,10 @@ class AVLTreeIterator
         {
             return m_currentNodePosition;
         }
+        int numFormattingCharsToLeft() const
+        {
+            return m_numToLeftOffset + m_numInLeftSubTree;
+        }
         void followLeftChild()
         {
             m_currentNode = m_currentNode->leftChild;
@@ -655,28 +659,19 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
     int formattingCharToRightPos = -1;
     int formattingCharToRightPosNumFormattingToLeft = -1;
     {
-        auto currentNode = root();
-        int numToLeftOffset = 0;
-        int sumToLeftOffset = 0;
-        while (currentNode)
+        AVLTreeIterator treeIter(root());
+        while (treeIter.currentNode())
         {
-            int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
-            int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
-            const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-            //cout << "distBetweenEnclosingFormattedChars: currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
-            if (currentNodePosition >= position)
+            if (treeIter.currentNodePosition() >= position)
             {
-                formattingCharToRight = currentNode;
-                formattingCharToRightPos = currentNodePosition;
-                formattingCharToRightPosNumFormattingToLeft = numToLeftOffset + numInLeftSubTree;
-                currentNode = currentNode->leftChild;
+                formattingCharToRight = treeIter.currentNode();
+                formattingCharToRightPos = treeIter.currentNodePosition();
+                formattingCharToRightPosNumFormattingToLeft = treeIter.numFormattingCharsToLeft();
+                treeIter.followLeftChild();
             }
             else
             {
-                numToLeftOffset += 1 + numInLeftSubTree;
-                sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
-                //cout << "distBetweenEnclosingFormattedChars Going right: numToLeftOffset " << numToLeftOffset << " sumToLeftOffset: " << sumToLeftOffset  << endl;
-                currentNode = currentNode->rightChild;
+                treeIter.followRightChild();
             }
         }
     }
