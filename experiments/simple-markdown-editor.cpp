@@ -465,14 +465,8 @@ void AVLTree::insertFormattingChar(int position)
 
 AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter)
 {
-    auto currentNode = treeIter.currentNode();
-    auto originalNode = currentNode;
-    if (m_isPersistent)
-    {
-        auto newCurrentNode = createNode(currentNode->value);
-        *newCurrentNode = *currentNode;
-        currentNode = newCurrentNode;
-    }
+    // We'll be altering this node whatever happens, so do a COW.
+    auto currentNode = createNode(*treeIter.currentNode());
     if (position <= treeIter.currentNodePosition())
     {
         // Positions in the left subtree of node must be *strictly less* than
@@ -538,12 +532,8 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
 void AVLTree::insertNonFormattingChars(int position, int numToAdd)
 {
     assert(root()); // The Sentinel node should have been added.
-    auto oldRoot = root();
     AVLTreeIterator treeIter(root());
     auto newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position, numToAdd);
-
-    //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
-
     updateUndoStackWithNewRoot(newRoot);
 }
 
