@@ -754,7 +754,7 @@ int main(int argc, char* argv[])
                     case Query::InsertFormatting:
                         {
                             const int insertionPos = query.encryptedArgument - 1;
-                            cerr << "InsertFormatting at " << insertionPos << endl;
+                            //cerr << "InsertFormatting at " << insertionPos << endl;
                             document.insert(document.begin() + insertionPos, '*');
                             undoStackPointer++;
                             undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
@@ -767,7 +767,7 @@ int main(int argc, char* argv[])
                         {
                             const int insertionPos = query.encryptedArgument - 1;
                             const int numToInsert = query.encryptedArgument2;
-                            cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                            //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                             const string charsToInsert(numToInsert, 'X');
                             document.insert(insertionPos, charsToInsert);
                             undoStackPointer++;
@@ -782,7 +782,7 @@ int main(int argc, char* argv[])
                         {
                             const int queryPosition = query.encryptedArgument - 1;
                             assert(document[queryPosition] == 'X');
-                            cerr << "IsRangeFormatted at " << queryPosition << endl;
+                            //cerr << "IsRangeFormatted at " << queryPosition << endl;
                             int queryAnswer = -1;
                             {
                                 int openingFormatPos = -1;
@@ -807,13 +807,13 @@ int main(int argc, char* argv[])
                                     }
                                 }
                             }
-                            cerr << "queryAnswer: " << queryAnswer << endl;
+                            //cerr << "queryAnswer: " << queryAnswer << endl;
                         }
                         break;
                     case Query::Undo:
                         {
                             const int numToUndo = query.encryptedArgument;
-                            cerr << "Undo " << numToUndo << endl;
+                            //cerr << "Undo " << numToUndo << endl;
                             for (int i = 0; i < numToUndo; i++)
                             {
                                 const auto& queryToUndo = undoStack[undoStackPointer];
@@ -827,7 +827,7 @@ int main(int argc, char* argv[])
                     case Query::Redo:
                         {
                             const int numToRedo = query.encryptedArgument;
-                            cerr << "Redo " << numToRedo << endl;
+                            //cerr << "Redo " << numToRedo << endl;
                             for (int i = 0; i < numToRedo; i++)
                             {
                                 undoStackPointer++;
@@ -841,13 +841,13 @@ int main(int argc, char* argv[])
                         }
                         break;
                 }
-                cerr << "document: " << document << endl;
-                cerr << "Undo stack: " << endl;
+                //cerr << "document: " << document << endl;
+                //cerr << "Undo stack: " << endl;
                 for (const auto x : undoStack)
                 {
-                    cerr << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
+                    //cerr << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
                 }
-                cerr << "undoStackPointer: " << undoStackPointer << endl;
+                //cerr << "undoStackPointer: " << undoStackPointer << endl;
             }
             cout << queries.size() << endl;
             for (const auto& query : queries)
