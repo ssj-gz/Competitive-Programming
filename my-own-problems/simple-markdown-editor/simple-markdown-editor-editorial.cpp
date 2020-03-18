@@ -236,7 +236,7 @@ void AVLTree::insertFormattingChar(int position)
     AVLNode* newRoot = nullptr;
     if (!root())
     {
-        newRoot = createNode(0);
+        newRoot = createNode(0); // Sentinel node.
     }
     else
     {
@@ -322,7 +322,6 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
 
 void AVLTree::insertNonFormattingChars(int position, int numToAdd)
 {
-    assert(root()); // The Sentinel node should have been added.
     AVLTreeIterator treeIter(root());
     auto newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position, numToAdd);
     updateUndoStackWithNewRoot(newRoot);
@@ -421,7 +420,6 @@ vector<int> solveOptimised(const vector<Query>& queries)
                 {
                     const int numToRedo = query.encryptedArgument;
                     formattingCharsTree.redo(numToRedo);
-
                 }
                 break;
         }
