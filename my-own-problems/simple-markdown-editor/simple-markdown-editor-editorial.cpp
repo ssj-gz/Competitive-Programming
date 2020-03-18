@@ -36,7 +36,7 @@ struct AVLNode
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
     int numDescendants = 1;
-    int sumOfDescendantValues = 0;
+    int totalNonFormattedDescendants = 0;
 
     bool isSentinelValue = false;
 };
@@ -109,7 +109,7 @@ class AVLTree
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->numDescendants = 1;
-            nodeToUpdate->sumOfDescendantValues = nodeToUpdate->leftNonFormattedRunSize;
+            nodeToUpdate->totalNonFormattedDescendants = nodeToUpdate->leftNonFormattedRunSize;
 
             auto leftChild = nodeToUpdate->leftChild;
 
@@ -118,7 +118,7 @@ class AVLTree
                 nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
                 nodeToUpdate->numDescendants += leftChild->numDescendants;
-                nodeToUpdate->sumOfDescendantValues += leftChild->sumOfDescendantValues;
+                nodeToUpdate->totalNonFormattedDescendants += leftChild->totalNonFormattedDescendants;
             }
 
             auto rightChild = nodeToUpdate->rightChild;
@@ -127,7 +127,7 @@ class AVLTree
                 nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
                 nodeToUpdate->numDescendants += rightChild->numDescendants;
-                nodeToUpdate->sumOfDescendantValues += rightChild->sumOfDescendantValues;
+                nodeToUpdate->totalNonFormattedDescendants += rightChild->totalNonFormattedDescendants;
             }
         }
 
@@ -137,7 +137,7 @@ class AVLTree
         {
             auto newNode = createNode();
             newNode->leftNonFormattedRunSize = leftNonFormattedRunSize;
-            newNode->sumOfDescendantValues = leftNonFormattedRunSize;
+            newNode->totalNonFormattedDescendants = leftNonFormattedRunSize;
             return newNode;
         }
 
@@ -226,7 +226,7 @@ class AVLTreeIterator
             if (!m_currentNode)
                 return;
             m_numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
-            m_sumOfLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->sumOfDescendantValues : 0);
+            m_sumOfLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->totalNonFormattedDescendants : 0);
             m_currentNodePosition = m_numToLeftOffset + m_numInLeftSubTree + m_sumToLeftOffset + m_sumOfLeftSubTree + m_currentNode->leftNonFormattedRunSize;
         }
 };
