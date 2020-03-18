@@ -84,7 +84,7 @@ class AVLTree
                         int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
                         int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
                         const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-                        cout << "insertFormattingChar finding formattingCharToRight - currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
+                        //cout << "insertFormattingChar finding formattingCharToRight - currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
                         if (currentNodePosition >= position)
                         {
                             formattingCharToRight = currentNode;
@@ -100,19 +100,19 @@ class AVLTree
                     }
                 }
                 assert(formattingCharToRight);
-                cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
+                //cout << "formattingCharToRight: " << formattingCharToRight->id << " value: " << formattingCharToRight->value << endl;
                 const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRight->value - (formattingCharToRightPos - position);
                 const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightPos - position;
-                cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
-                cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
-                cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
+                //cout << " newFormattingCharSizeOfUnformattedToLeftRun: " << newFormattingCharSizeOfUnformattedToLeftRun << endl; 
+                //cout << " adjustedFormattingCharToRightSizeOfUnformattedToLeftRun: " << adjustedFormattingCharToRightSizeOfUnformattedToLeftRun << endl; 
+                //cout << " formattingCharToRight->value: " << formattingCharToRight->value << endl;
                 assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
                 assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
                 // Perform the actual insertion.
                 newRoot = insertFormattingChar(position, newFormattingCharSizeOfUnformattedToLeftRun, root(), 0, 0);
-                cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
-                cout << "Current formattingCharsTree: " << endl;
-                printSubTree(newRoot);
+                //cout << " Inserted " << newFormattingCharSizeOfUnformattedToLeftRun << endl;
+                //cout << "Current formattingCharsTree: " << endl;
+                //printSubTree(newRoot);
                 // Update the "unformatted run size" of the formattingCharToRight.
                 newRoot = adjustRunToLeftOfNodeToRightOf(newRoot, position + 1, adjustedFormattingCharToRightSizeOfUnformattedToLeftRun - formattingCharToRight->value, 0, 0);
             }
@@ -131,7 +131,7 @@ class AVLTree
             auto oldRoot = root();
             auto newRoot = adjustRunToLeftOfNodeToRightOf(root(), position, numToAdd, 0, 0);
 
-            cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
+            //cout << "newRoot: " << newRoot->id << " oldRoot: " << oldRoot->id << endl;
 
             if (m_isPersistent)
             {
@@ -158,7 +158,7 @@ class AVLTree
                     int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
                     int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
                     const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-                    cout << "distBetweenEnclosingFormattedChars: currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
+                    //cout << "distBetweenEnclosingFormattedChars: currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
                     if (currentNodePosition >= position)
                     {
                         formattingCharToRight = currentNode;
@@ -170,13 +170,13 @@ class AVLTree
                     {
                         numToLeftOffset += 1 + numInLeftSubTree;
                         sumToLeftOffset += currentNode->value + sumOfLeftSubTree;
-                        cout << "distBetweenEnclosingFormattedChars Going right: numToLeftOffset " << numToLeftOffset << " sumToLeftOffset: " << sumToLeftOffset  << endl;
+                        //cout << "distBetweenEnclosingFormattedChars Going right: numToLeftOffset " << numToLeftOffset << " sumToLeftOffset: " << sumToLeftOffset  << endl;
                         currentNode = currentNode->rightChild;
                     }
                 }
             }
             assert(formattingCharToRight);
-            cout << " distBetweenEnclosingFormattedChars formattingCharToRight: " << formattingCharToRight->id << " isSentinelValue: " << formattingCharToRight->isSentinelValue << endl;
+            //cout << " distBetweenEnclosingFormattedChars formattingCharToRight: " << formattingCharToRight->id << " isSentinelValue: " << formattingCharToRight->isSentinelValue << endl;
             if (formattingCharToRight->isSentinelValue || formattingCharToRightPosNumFormattingToLeft % 2 == 0)
                 return -1;
             else
@@ -206,7 +206,7 @@ class AVLTree
             int numInLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
             int sumOfLeftSubTree = (currentNode->leftChild ? currentNode->leftChild->sumOfDescendantValues : 0);
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + currentNode->value;
-            cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
+            //cout << " About to do actual insert; currentNode: " << currentNode->id << " currentNodePosition: " << currentNodePosition << endl;
             if (position <= currentNodePosition)
             {
                 // Positions in the left subtree of node must be *strictly less* than
@@ -215,7 +215,7 @@ class AVLTree
                     currentNode->leftChild = insertFormattingChar(position, sizeOfUnformattedToLeftRun, currentNode->leftChild, numToLeftOffset, sumToLeftOffset);
                 else
                 {
-                    cout << "Inserted at leftChild" << endl;
+                    //cout << "Inserted at leftChild" << endl;
                     currentNode->leftChild = createNode(sizeOfUnformattedToLeftRun);
                 }
             }
@@ -228,7 +228,7 @@ class AVLTree
                                                                                                                                   sumToLeftOffset + currentNode->value + sumOfLeftSubTree);
                 else
                 {
-                    cout << "Inserted at rightChild" << endl;
+                    //cout << "Inserted at rightChild" << endl;
                     currentNode->rightChild = createNode(sizeOfUnformattedToLeftRun);
                 }
             }
@@ -343,7 +343,7 @@ class AVLTree
             auto originalSubTreeRoot = subTreeRoot;
             subTreeRoot = createNode(*subTreeRoot);
             const int currentNodePosition = numToLeftOffset + numInLeftSubTree + sumToLeftOffset + sumOfLeftSubTree + subTreeRoot->value;
-            cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
+            //cout << " adjustRunToLeftOfNodeToRightOf originalSubTreeRoot: " << originalSubTreeRoot->id << " value: " << originalSubTreeRoot->value << " currentNodePosition: " << currentNodePosition << " desired position: " << position << endl;
             if (position <= currentNodePosition)
             {
                 bool adjustInLeftSubChild = true;
@@ -354,14 +354,14 @@ class AVLTree
                 else
                 {
                     const auto maxPosInLeftSubchild = currentNodePosition - subTreeRoot->value - 1;
-                    cout << " maxPosInLeftSubchild: " << maxPosInLeftSubchild << endl;
+                    //cout << " maxPosInLeftSubchild: " << maxPosInLeftSubchild << endl;
                     if (maxPosInLeftSubchild < position)
                         adjustInLeftSubChild = false;
                 }
                 if (!adjustInLeftSubChild)
                 {
                     // This is the node to adjust.  Do copy-on-write.
-                    cout << "Adjusted old value of node " << originalSubTreeRoot->id  << " from " << originalSubTreeRoot->value << " to " << originalSubTreeRoot->value + adjustment << endl;
+                    //cout << "Adjusted old value of node " << originalSubTreeRoot->id  << " from " << originalSubTreeRoot->value << " to " << originalSubTreeRoot->value + adjustment << endl;
                     subTreeRoot->value += adjustment;
                 }
                 else
@@ -440,13 +440,13 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
     int queryNum = 1;
     for (const auto& query : queries)
     {
-        cout << "Processing query " << queryNum << endl;
+        //cout << "Processing query " << queryNum << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
-                    cout << "InsertFormatting at " << insertionPos << endl;
+                    //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
@@ -459,7 +459,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                 {
                     const int insertionPos = query.encryptedArgument - 1;
                     const int numToInsert = query.encryptedArgument2;
-                    cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                    //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     const string charsToInsert(numToInsert, 'X');
                     document.insert(insertionPos, charsToInsert);
                     undoStackPointer++;
@@ -474,7 +474,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                 {
                     const int queryPosition = query.encryptedArgument - 1;
                     assert(document[queryPosition] == 'X');
-                    cout << "IsRangeFormatted at " << queryPosition << endl;
+                    //cout << "IsRangeFormatted at " << queryPosition << endl;
                     int queryAnswer = -1;
                     {
                         int openingFormatPos = -1;
@@ -499,14 +499,14 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                             }
                         }
                     }
-                    cout << "queryAnswer: " << queryAnswer << endl;
+                    //cout << "queryAnswer: " << queryAnswer << endl;
                     queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
                 {
                     const int numToUndo = query.encryptedArgument;
-                    cout << "Undo " << numToUndo << endl;
+                    //cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
                     {
                         const auto& queryToUndo = undoStack[undoStackPointer];
@@ -520,7 +520,7 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
             case Query::Redo:
                 {
                     const int numToRedo = query.encryptedArgument;
-                    cout << "Redo " << numToRedo << endl;
+                    //cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
                     {
                         undoStackPointer++;
@@ -534,13 +534,13 @@ vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteF
                 }
                 break;
         }
-        cout << "document: " << document << endl;
-        cout << "Undo stack: " << endl;
+        //cout << "document: " << document << endl;
+        //cout << "Undo stack: " << endl;
         for (const auto x : undoStack)
         {
-            cout << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
+            //cout << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
         }
-        cout << "undoStackPointer: " << undoStackPointer << endl;
+        //cout << "undoStackPointer: " << undoStackPointer << endl;
         queryNum++;
         bruteForceDocs.push_back(document);
     }
@@ -584,19 +584,19 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
     // Sentinel value.
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
-    cout << "Initial formattingCharsTree: " << endl;
-    printTree(formattingCharsTree);
+    //cout << "Initial formattingCharsTree: " << endl;
+    //printTree(formattingCharsTree);
 
     int queryNum = 1;
     for (const auto& query : queries)
     {
-        cout << "Processing query " << queryNum << endl;
+        //cout << "Processing query " << queryNum << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
-                    cout << "InsertFormatting at " << insertionPos << endl;
+                    //cout << "InsertFormatting at " << insertionPos << endl;
                     formattingCharsTree.insertFormattingChar(insertionPos);
                 }
                 break;
@@ -604,44 +604,44 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
                 {
                     const int insertionPos = query.encryptedArgument - 1;
                     const int numToInsert = query.encryptedArgument2;
-                    cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                    //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                 }
                 break;
             case Query::IsRangeFormatted:
                 {
                     const int queryPosition = query.encryptedArgument - 1;
-                    cout << "IsRangeFormatted at " << queryPosition << endl;
+                    //cout << "IsRangeFormatted at " << queryPosition << endl;
                     const int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
-                    cout << "queryAnswer: " << queryAnswer << endl;
+                    //cout << "queryAnswer: " << queryAnswer << endl;
                     queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
                 {
                     const int numToUndo = query.encryptedArgument;
-                    cout << "Undo " << numToUndo << endl;
+                    //cout << "Undo " << numToUndo << endl;
                     formattingCharsTree.undo(numToUndo);
                 }
                 break;
             case Query::Redo:
                 {
                     const int numToRedo = query.encryptedArgument;
-                    cout << "Redo " << numToRedo << endl;
+                    //cout << "Redo " << numToRedo << endl;
                     formattingCharsTree.redo(numToRedo);
 
                 }
                 break;
         }
 
-        cout << "Current formattingCharsTree: " << endl;
-        printTree(formattingCharsTree);
-        cout << "as doc:" << endl;
-        const auto actual = subtreeAsDocument(formattingCharsTree.root());
-        cout << actual << endl;
-        const auto expected = bruteForceDocs[queryNum - 1] + "*" ;
-        cout << "expected doc: " << endl << expected << endl;
-        assert(actual == expected);
+        //cout << "Current formattingCharsTree: " << endl;
+        //printTree(formattingCharsTree);
+        //cout << "as doc:" << endl;
+        //const auto actual = subtreeAsDocument(formattingCharsTree.root());
+        //cout << actual << endl;
+        //const auto expected = bruteForceDocs[queryNum - 1] + "*" ;
+        //cout << "expected doc: " << endl << expected << endl;
+        //assert(actual == expected);
         queryNum++;
     }
 
