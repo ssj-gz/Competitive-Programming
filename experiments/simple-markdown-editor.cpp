@@ -654,7 +654,7 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
     // It's guaranteed that there will be one, due to the Sentinel node.
     AVLNode* formattingCharToRight = nullptr;
     int formattingCharToRightPos = -1;
-    int formattingCharToRightPosNumFormattingToLeft = -1;
+    int formattingCharToRightNumFormattingToLeft = -1;
     {
         AVLTreeIterator treeIter(root());
         while (treeIter.currentNode())
@@ -663,7 +663,7 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
             {
                 formattingCharToRight = treeIter.currentNode();
                 formattingCharToRightPos = treeIter.currentNodePosition();
-                formattingCharToRightPosNumFormattingToLeft = treeIter.numFormattingCharsToLeft();
+                formattingCharToRightNumFormattingToLeft = treeIter.numFormattingCharsToLeft();
                 treeIter.followLeftChild();
             }
             else
@@ -674,7 +674,7 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
     }
     assert(formattingCharToRight);
     //cout << " distBetweenEnclosingFormattedChars formattingCharToRight: " << formattingCharToRight->id << " isSentinelValue: " << formattingCharToRight->isSentinelValue << endl;
-    if (formattingCharToRight->isSentinelValue || formattingCharToRightPosNumFormattingToLeft % 2 == 0)
+    if (formattingCharToRight->isSentinelValue || formattingCharToRightNumFormattingToLeft % 2 == 0)
         return -1;
     else
         return formattingCharToRight->value;
