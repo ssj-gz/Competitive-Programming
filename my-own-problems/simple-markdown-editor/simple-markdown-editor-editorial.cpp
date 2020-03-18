@@ -2,22 +2,12 @@
 // 
 // Editorial Solution to: TODO - problem link here!
 //
-//#define SUBMISSION
-#ifdef SUBMISSION
-#define NDEBUG
-#else
-#define _GLIBCXX_DEBUG       // Iterator safety; out-of-bounds access for Containers, etc.
-#pragma GCC optimize "trapv" // abort() on (signed) integer overflow.
-#define BRUTE_FORCE
-#endif
 #include <iostream>
 #include <vector>
 #include <deque>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -41,12 +31,7 @@ struct AVLNode
     int sumOfDescendantValues = 0;
 
     bool isSentinelValue = false;
-
-    int id = -1;
 };
-
-void printSubTree(AVLNode* subtreeRoot);
-string subtreeAsDocument(AVLNode* subtreeRoot);
 
 class AVLTreeIterator;
 
@@ -151,9 +136,7 @@ class AVLTree
         AVLNode* createNode(const AVLNode& nodeToCopy)
         {
             auto newNode = createNode();
-            const auto idBackup = newNode->id;
             *newNode = nodeToCopy;
-            newNode->id = idBackup;
             return newNode;
         }
 
@@ -166,7 +149,6 @@ class AVLTree
             }
             m_nodes.back().push_back(AVLNode());
             auto newNode = &(m_nodes.back().back());
-            newNode->id = m_nextNodeId;
             m_nextNodeId++;
             return newNode;
         }
@@ -188,7 +170,6 @@ class AVLTree
 
         int m_undoStackPointer = 0;
         vector<AVLNode*> m_rootForRevision;
-
 };
 
 class AVLTreeIterator
@@ -249,154 +230,6 @@ struct Query
     int encryptedArgument = -1;
     int encryptedArgument2 = -1;
 };
-
-vector<int> solveBruteForce(const vector<Query>& queries, vector<string>& bruteForceDocs)
-{
-    vector<int> queryResults;
-    string document;
-    int decryptionKey = 0; 
-
-    vector<Query> undoStack;
-    int undoStackPointer = -1;
-
-    int queryNum = 1;
-    for (const auto& query : queries)
-    {
-        //cout << "Processing query " << queryNum << endl;
-        switch (query.type)
-        {
-            case Query::InsertFormatting:
-                {
-                    const int insertionPos = query.encryptedArgument - 1;
-                    //cout << "InsertFormatting at " << insertionPos << endl;
-                    document.insert(document.begin() + insertionPos, '*');
-                    undoStackPointer++;
-                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                    Query undoQuery = query;
-                    undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
-                    undoStack.push_back(undoQuery);
-                }
-                break;
-            case Query::InsertNonFormatting:
-                {
-                    const int insertionPos = query.encryptedArgument - 1;
-                    const int numToInsert = query.encryptedArgument2;
-                    //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
-                    const string charsToInsert(numToInsert, 'X');
-                    document.insert(insertionPos, charsToInsert);
-                    undoStackPointer++;
-                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                    Query undoQuery = query;
-                    undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
-                    undoQuery.encryptedArgument2 = numToInsert; // Not strictly accurate - this is unencrypted!
-                    undoStack.push_back(undoQuery);
-                }
-                break;
-            case Query::IsRangeFormatted:
-                {
-                    const int queryPosition = query.encryptedArgument - 1;
-                    assert(document[queryPosition] == 'X');
-                    //cout << "IsRangeFormatted at " << queryPosition << endl;
-                    int queryAnswer = -1;
-                    {
-                        int openingFormatPos = -1;
-                        for (int pos = 0; pos < document.size(); pos++)
-                        {
-                            if (document[pos] == '*')
-                            {
-                                if (openingFormatPos == -1)
-                                {
-                                    // Open formatting.
-                                    openingFormatPos = pos;
-                                }
-                                else
-                                {
-                                    // Close formatting.
-                                    if (openingFormatPos < queryPosition && queryPosition < pos)
-                                    {
-                                        queryAnswer = pos - openingFormatPos - 1;
-                                    }
-                                    openingFormatPos = -1;
-                                }
-                            }
-                        }
-                    }
-                    //cout << "queryAnswer: " << queryAnswer << endl;
-                    queryResults.push_back(queryAnswer);
-                }
-                break;
-            case Query::Undo:
-                {
-                    const int numToUndo = query.encryptedArgument;
-                    //cout << "Undo " << numToUndo << endl;
-                    for (int i = 0; i < numToUndo; i++)
-                    {
-                        const auto& queryToUndo = undoStack[undoStackPointer];
-                        const auto removalPosition = queryToUndo.encryptedArgument;
-                        const auto numToRemove = (queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1);
-                        document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
-                        undoStackPointer--;
-                    }
-                }
-                break;
-            case Query::Redo:
-                {
-                    const int numToRedo = query.encryptedArgument;
-                    //cout << "Redo " << numToRedo << endl;
-                    for (int i = 0; i < numToRedo; i++)
-                    {
-                        undoStackPointer++;
-                        const auto& queryToUndo = undoStack[undoStackPointer];
-                        const auto insertPosition = queryToUndo.encryptedArgument;
-                        const auto charToInsert = queryToUndo.type == Query::InsertNonFormatting ? 'X' : '*';
-                        const auto numToInsert = queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1;
-                        document.insert(insertPosition, string(numToInsert, charToInsert));
-                    }
-
-                }
-                break;
-        }
-        //cout << "document: " << document << endl;
-        //cout << "Undo stack: " << endl;
-        for (const auto x : undoStack)
-        {
-            //cout << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
-        }
-        //cout << "undoStackPointer: " << undoStackPointer << endl;
-        queryNum++;
-        bruteForceDocs.push_back(document);
-    }
-    return queryResults;
-}
-
-void printSubTree(AVLNode* subtreeRoot)
-{
-    if (subtreeRoot == nullptr)
-        return;
-    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants << " sumOfDescendantValues: " << subtreeRoot->sumOfDescendantValues << " isSentinelValue: " << subtreeRoot->isSentinelValue;
-    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
-
-    if (subtreeRoot->leftChild)
-        printSubTree(subtreeRoot->leftChild);
-    if (subtreeRoot->rightChild)
-        printSubTree(subtreeRoot->rightChild);
-}
-string subtreeAsDocument(AVLNode* subtreeRoot)
-{
-    if (!subtreeRoot)
-        return "";
-    string asDoc = subtreeAsDocument(subtreeRoot->leftChild);
-    asDoc += string(subtreeRoot->value, 'X');
-    asDoc += "*";
-    asDoc += subtreeAsDocument(subtreeRoot->rightChild);
-
-    return asDoc;
-}
-
-void printTree(AVLTree& tree)
-{
-    printSubTree(tree.root());
-}
 
 void AVLTree::insertFormattingChar(int position)
 {
@@ -545,27 +378,22 @@ AVLTreeIterator AVLTree::findFirstNodeToRightOf(int position, AVLNode* root)
     return result;
 }
 
-
-vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteForceDocs)
+vector<int> solveOptimised(const vector<Query>& queries)
 {
     vector<int> queryResults;
     AVLTree formattingCharsTree;
-    // Sentinel value.
+    // Add Sentinel value.
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
-    //cout << "Initial formattingCharsTree: " << endl;
-    //printTree(formattingCharsTree);
 
     int queryNum = 1;
     for (const auto& query : queries)
     {
-        //cout << "Processing query " << queryNum << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
                 {
                     const int insertionPos = query.encryptedArgument - 1;
-                    //cout << "InsertFormatting at " << insertionPos << endl;
                     formattingCharsTree.insertFormattingChar(insertionPos);
                 }
                 break;
@@ -573,44 +401,31 @@ vector<int> solveOptimised(const vector<Query>& queries, vector<string>& bruteFo
                 {
                     const int insertionPos = query.encryptedArgument - 1;
                     const int numToInsert = query.encryptedArgument2;
-                    //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                 }
                 break;
             case Query::IsRangeFormatted:
                 {
                     const int queryPosition = query.encryptedArgument - 1;
-                    //cout << "IsRangeFormatted at " << queryPosition << endl;
                     const int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
-                    //cout << "queryAnswer: " << queryAnswer << endl;
                     queryResults.push_back(queryAnswer);
                 }
                 break;
             case Query::Undo:
                 {
                     const int numToUndo = query.encryptedArgument;
-                    //cout << "Undo " << numToUndo << endl;
                     formattingCharsTree.undo(numToUndo);
                 }
                 break;
             case Query::Redo:
                 {
                     const int numToRedo = query.encryptedArgument;
-                    //cout << "Redo " << numToRedo << endl;
                     formattingCharsTree.redo(numToRedo);
 
                 }
                 break;
         }
 
-        //cout << "Current formattingCharsTree: " << endl;
-        //printTree(formattingCharsTree);
-        //cout << "as doc:" << endl;
-        //const auto actual = subtreeAsDocument(formattingCharsTree.root());
-        //cout << actual << endl;
-        //const auto expected = bruteForceDocs[queryNum - 1] + "*" ;
-        //cout << "expected doc: " << endl << expected << endl;
-        //assert(actual == expected);
         queryNum++;
     }
 
@@ -627,235 +442,9 @@ int AVLTree::distBetweenEnclosingFormattedChars(int position)
         return formattingCharToRightIter.currentNode()->value;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        const int T = rand() % 100 + 1;
-        //const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-            string document;
-            int decryptionKey = 0; 
-
-            vector<Query> undoStack;
-            int undoStackPointer = -1;
-
-            const int numQueries = 1 + rand() % 250'000;
-            vector<Query> queries;
-            for (int i = 0; i < numQueries; i++)
-            {
-                bool haveQuery = false;
-                Query query;
-                int numFormatting = count(document.begin(), document.end(), '*');
-                int numNonFormatting = count(document.begin(), document.end(), 'X');
-                while (!haveQuery)
-                {
-                    const int queryType = rand() % 5;
-                    query.type = static_cast<Query::Type>(queryType);
-                    if (queryType == Query::Undo)
-                    {
-                        if (rand() % 4 >= 1)
-                            continue; // Undos should be fairly rare.
-                        if (undoStackPointer == -1)
-                            continue;
-                        else
-                        {
-                            const int numToUndo = 1 + rand() % (undoStackPointer + 1);
-                            query.encryptedArgument = numToUndo;
-                            haveQuery = true;
-                        }
-                    }
-                    if (queryType == Query::Redo)
-                    {
-                        if (rand() % 4 >= 1)
-                            continue; // Redos should be fairly rare.
-                        if (undoStackPointer + 1 == undoStack.size())
-                            continue;
-                        else
-                        {
-                            const int numToRedo = 1 + rand() % (undoStack.size() - 1 - undoStackPointer);
-                            query.encryptedArgument = numToRedo;
-                            haveQuery = true;
-                        }
-                    }
-                    if (queryType == Query::InsertFormatting)
-                    {
-                        const int pos = rand() % (document.size() + 1);
-                        query.encryptedArgument = pos + 1;
-                        haveQuery = true;
-                    }
-                    if (queryType == Query::InsertNonFormatting)
-                    {
-                        const int pos = rand() % (document.size() + 1);
-                        query.encryptedArgument = pos + 1;
-                        const int num = 1 + rand() % 10;
-                        query.encryptedArgument2 = num;
-                        haveQuery = true;
-                    }
-                    if (queryType == Query::IsRangeFormatted)
-                    {
-                        if (numNonFormatting == 0)
-                            continue;
-                        else
-                        {
-                            int nonFormattedToPick = rand() % numNonFormatting;
-                            int numNonFormattedSoFar = 0;
-                            int position = -1;
-                            for (int i = 0; i < document.size(); i++)
-                            {
-                                if (document[i] == 'X')
-                                {
-                                    if (numNonFormattedSoFar == nonFormattedToPick)
-                                    {
-                                        position = i;
-                                        break;
-                                    }
-                                    numNonFormattedSoFar++;
-                                }
-                            }
-                            assert(position != -1);
-                            query.encryptedArgument = position + 1;
-                            haveQuery = true;
-                        }
-
-                    }
-
-                }
-                queries.push_back(query);
-                switch (query.type)
-                {
-                    case Query::InsertFormatting:
-                        {
-                            const int insertionPos = query.encryptedArgument - 1;
-                            //cerr << "InsertFormatting at " << insertionPos << endl;
-                            document.insert(document.begin() + insertionPos, '*');
-                            undoStackPointer++;
-                            undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                            Query undoQuery = query;
-                            undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
-                            undoStack.push_back(undoQuery);
-                        }
-                        break;
-                    case Query::InsertNonFormatting:
-                        {
-                            const int insertionPos = query.encryptedArgument - 1;
-                            const int numToInsert = query.encryptedArgument2;
-                            //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
-                            const string charsToInsert(numToInsert, 'X');
-                            document.insert(insertionPos, charsToInsert);
-                            undoStackPointer++;
-                            undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                            Query undoQuery = query;
-                            undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
-                            undoQuery.encryptedArgument2 = numToInsert; // Not strictly accurate - this is unencrypted!
-                            undoStack.push_back(undoQuery);
-                        }
-                        break;
-                    case Query::IsRangeFormatted:
-                        {
-                            const int queryPosition = query.encryptedArgument - 1;
-                            assert(document[queryPosition] == 'X');
-                            //cerr << "IsRangeFormatted at " << queryPosition << endl;
-                            int queryAnswer = -1;
-                            {
-                                int openingFormatPos = -1;
-                                for (int pos = 0; pos < document.size(); pos++)
-                                {
-                                    if (document[pos] == '*')
-                                    {
-                                        if (openingFormatPos == -1)
-                                        {
-                                            // Open formatting.
-                                            openingFormatPos = pos;
-                                        }
-                                        else
-                                        {
-                                            // Close formatting.
-                                            if (openingFormatPos < queryPosition && queryPosition < pos)
-                                            {
-                                                queryAnswer = pos - openingFormatPos - 1;
-                                            }
-                                            openingFormatPos = -1;
-                                        }
-                                    }
-                                }
-                            }
-                            //cerr << "queryAnswer: " << queryAnswer << endl;
-                        }
-                        break;
-                    case Query::Undo:
-                        {
-                            const int numToUndo = query.encryptedArgument;
-                            //cerr << "Undo " << numToUndo << endl;
-                            for (int i = 0; i < numToUndo; i++)
-                            {
-                                const auto& queryToUndo = undoStack[undoStackPointer];
-                                const auto removalPosition = queryToUndo.encryptedArgument;
-                                const auto numToRemove = (queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1);
-                                document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
-                                undoStackPointer--;
-                            }
-                        }
-                        break;
-                    case Query::Redo:
-                        {
-                            const int numToRedo = query.encryptedArgument;
-                            //cerr << "Redo " << numToRedo << endl;
-                            for (int i = 0; i < numToRedo; i++)
-                            {
-                                undoStackPointer++;
-                                const auto& queryToUndo = undoStack[undoStackPointer];
-                                const auto insertPosition = queryToUndo.encryptedArgument;
-                                const auto charToInsert = queryToUndo.type == Query::InsertNonFormatting ? 'X' : '*';
-                                const auto numToInsert = queryToUndo.type == Query::InsertNonFormatting ? queryToUndo.encryptedArgument2 : 1;
-                                document.insert(insertPosition, string(numToInsert, charToInsert));
-                            }
-
-                        }
-                        break;
-                }
-                //cerr << "document: " << document << endl;
-                //cerr << "Undo stack: " << endl;
-                for (const auto x : undoStack)
-                {
-                    //cerr << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
-                }
-                //cerr << "undoStackPointer: " << undoStackPointer << endl;
-            }
-            cout << queries.size() << endl;
-            for (const auto& query : queries)
-            {
-                switch (query.type)
-                {
-                    case Query::InsertFormatting:
-                        cout << 'F' << " " << query.encryptedArgument << endl;
-                        break;
-                    case Query::InsertNonFormatting:
-                        cout << 'N' << " " << query.encryptedArgument << " " << query.encryptedArgument2 << endl;
-                        break;
-                    case Query::IsRangeFormatted:
-                        cout << 'Q' << " " << query.encryptedArgument << endl;
-                        break;
-                    case Query::Undo:
-                        cout << 'U' << " " << query.encryptedArgument << endl;
-                        break;
-                    case Query::Redo:
-                        cout << 'R' << " " << query.encryptedArgument << endl;
-                        break;
-                }
-            }
-        }
-
-        return 0;
-    }
     
     const auto T = read<int>();
 
@@ -888,20 +477,11 @@ int main(int argc, char* argv[])
             }
         }
 
-#ifdef BRUTE_FORCE
-        vector<string> bruteForceDocs;
-        const auto solutionBruteForce = solveBruteForce(queries, bruteForceDocs);
-        const auto solutionOptimised = solveOptimised(queries, bruteForceDocs);
-        cout << "solutionBruteForce:";
-        for (const auto x : solutionBruteForce)
-            cout << " " << x;
-        cout << endl;
+        const auto solutionOptimised = solveOptimised(queries);
         cout << "solutionOptimised: ";
         for (const auto x : solutionOptimised)
             cout << " " << x;
         cout << endl;
-        assert(solutionOptimised == solutionBruteForce);
-#endif
     }
 
     assert(cin);
