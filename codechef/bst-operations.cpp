@@ -59,8 +59,8 @@ struct Node
     }
 
     Node* parent = nullptr;
-    Node* leftChild;
-    Node* rightChild;
+    Node* leftChild = nullptr;
+    Node* rightChild = nullptr;
 
     int value = -1;
     uint32_t position = 1;
@@ -75,13 +75,17 @@ Node* minValueNode(Node* subtreeRoot)
     if (!subtreeRoot->leftChild && !subtreeRoot->rightChild)
         return subtreeRoot;
 
-    Node* minimum = nullptr;
+    Node* minimum = subtreeRoot;
     if (subtreeRoot->leftChild)
-        minimum = minValueNode(subtreeRoot->leftChild);
+    {
+        auto minOnLeft = minValueNode(subtreeRoot->rightChild);
+        if (minOnLeft < minimum)
+            minimum = minOnLeft;
+    }
     if (subtreeRoot->rightChild)
     {
         auto minOnRight = minValueNode(subtreeRoot->rightChild);
-        if (!minimum || minOnRight < minimum)
+        if (minOnRight < minimum)
             minimum = minOnRight;
     }
     assert(minimum);
@@ -94,11 +98,15 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
     if (subtreeRoot->value < value)
     {
         subtreeRoot->rightChild = deleteNodeWithValue(value, subtreeRoot->rightChild);
+        if (subtreeRoot->rightChild)
+            subtreeRoot->rightChild->parent = subtreeRoot;
         return subtreeRoot;
     }
     else if (subtreeRoot->value > value)
     {
         subtreeRoot->leftChild = deleteNodeWithValue(value, subtreeRoot->leftChild);
+        if (subtreeRoot->leftChild)
+            subtreeRoot->leftChild->parent = subtreeRoot;
         return subtreeRoot;
     }
     else
@@ -112,12 +120,10 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
 
         if (!subtreeRoot->leftChild)
         {
-            subtreeRoot->rightChild->parent = subtreeRoot->parent;
             return subtreeRoot->rightChild;
         }
         if (!subtreeRoot->rightChild)
         {
-            subtreeRoot->leftChild->parent = subtreeRoot->parent;
             return subtreeRoot->leftChild;
         }
 
@@ -129,9 +135,10 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
         //
         auto descendantWithMinValue = minValueNode(subtreeRoot->rightChild);
         assert(!descendantWithMinValue->leftChild);
+        cout << "descendantWithMinValue id:" << descendantWithMinValue->dbgId << " value: " << descendantWithMinValue->value << endl;
 
         descendantWithMinValue->leftChild = subtreeRoot->leftChild;
-        subtreeRoot->leftChild->parent = descendantWithMinValue;
+        descendantWithMinValue->leftChild->parent = descendantWithMinValue;
 
         if (descendantWithMinValue->parent != subtreeRoot)
         {
@@ -140,7 +147,8 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
                 descendantWithMinValue->parent->leftChild->parent = descendantWithMinValue->parent;
 
             descendantWithMinValue->rightChild = subtreeRoot->rightChild;
-            descendantWithMinValue->rightChild->parent = descendantWithMinValue;
+            if (descendantWithMinValue->parent->rightChild)
+                descendantWithMinValue->rightChild->parent = descendantWithMinValue;
         }
 
 
