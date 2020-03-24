@@ -51,8 +51,8 @@ SolutionType solveOptimised()
 
 struct Node
 {
-    Node(Node* parent, int value)
-        : parent{parent}, value{value}
+    Node(Node* parent, int value, uint32_t position)
+        : parent{parent}, value{value}, position{position}
     {
         static int dbgNextNodeId = 1;
         dbgId = dbgNextNodeId;
@@ -64,7 +64,7 @@ struct Node
     Node* rightChild = nullptr;
 
     int value = -1;
-    //uint32_t position = 1;
+    uint32_t position = 1;
 
 
     int dbgId = -1;
@@ -93,26 +93,26 @@ Node* minValueNode(Node* subtreeRoot)
     return minimum;
 };
 
-Node* deleteNodeWithValue(int value, Node* subtreeRoot, uint32_t position)
+Node* deleteNodeWithValue(int value, Node* subtreeRoot)
 {
     assert(subtreeRoot);
     if (subtreeRoot->value < value)
     {
-        subtreeRoot->rightChild = deleteNodeWithValue(value, subtreeRoot->rightChild, position * 2 + 1);
+        subtreeRoot->rightChild = deleteNodeWithValue(value, subtreeRoot->rightChild);
         if (subtreeRoot->rightChild)
             subtreeRoot->rightChild->parent = subtreeRoot;
         return subtreeRoot;
     }
     else if (subtreeRoot->value > value)
     {
-        subtreeRoot->leftChild = deleteNodeWithValue(value, subtreeRoot->leftChild, position * 2);
+        subtreeRoot->leftChild = deleteNodeWithValue(value, subtreeRoot->leftChild);
         if (subtreeRoot->leftChild)
             subtreeRoot->leftChild->parent = subtreeRoot;
         return subtreeRoot;
     }
     else
     {
-        cout << position << endl;
+        cout << subtreeRoot->position << endl;
 
         if (!subtreeRoot->leftChild && !subtreeRoot->rightChild)
         {
@@ -123,7 +123,7 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot, uint32_t position)
         {
             return subtreeRoot->rightChild;
         }
-        if (!subtreeRoot->rightChild)
+        else if (!subtreeRoot->rightChild)
         {
             return subtreeRoot->leftChild;
         }
@@ -138,6 +138,7 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot, uint32_t position)
         //cout << "descendantWithMinValue id:" << descendantWithMinValue->dbgId << " value: " << descendantWithMinValue->value << endl;
         assert(!descendantWithMinValue->leftChild);
 
+#if 0
         descendantWithMinValue->leftChild = subtreeRoot->leftChild;
         descendantWithMinValue->leftChild->parent = descendantWithMinValue;
 
@@ -152,48 +153,39 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot, uint32_t position)
                 subtreeRoot->rightChild->parent = descendantWithMinValue;
         }
 
+        //descendantWithMinValue->position = subtreeRoot->position;
+
         //descendantWithMinValue->parent->leftChild = nullptr;
 
 
         //descendantWithMinValue->parent = subtreeRoot->parent;
 
         delete subtreeRoot;
+#endif
+        subtreeRoot->value = descendantWithMinValue->value;
+        if (subtreeRoot != descendantWithMinValue->parent)
+        {
+            assert(descendantWithMinValue->parent->leftChild == descendantWithMinValue);
+            descendantWithMinValue->parent->leftChild = descendantWithMinValue->rightChild;
+        }
+        else
+        {
+            subtreeRoot->rightChild = descendantWithMinValue->rightChild;
+            if (descendantWithMinValue->rightChild)
+                descendantWithMinValue->rightChild->parent = subtreeRoot;
+        }
 
-        return descendantWithMinValue;
+        return subtreeRoot;
 
     }
 }
-
-Node* insertNodeWithValue(int value, Node* subtreeRoot, Node* parent, uint32_t position)
-{
-    if (!subtreeRoot)
-    {
-        cout << position << endl;
-        return new Node(parent, value);
-    }
-    if (subtreeRoot->value > value)
-    {
-        subtreeRoot->leftChild = insertNodeWithValue(value, subtreeRoot->leftChild, subtreeRoot, position * 2);
-        return subtreeRoot;
-    }
-    else if (subtreeRoot->value < value)
-    {
-        subtreeRoot->rightChild = insertNodeWithValue(value, subtreeRoot->rightChild, subtreeRoot, position * 2 + 1);
-        return subtreeRoot;
-    }
-    else
-    {
-        assert(false);
-    }
-}
-
 
 void printSubTree(Node* subtreeRoot)
 {
     if (!subtreeRoot)
         return;
 
-    //cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) << " parent: " <<  (subtreeRoot->parent ? subtreeRoot->parent->dbgId : -1) << endl;
+    cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) /*<< " parent: " <<  (subtreeRoot->parent ? subtreeRoot->parent->dbgId : -1)*/ << endl;
     printSubTree(subtreeRoot->leftChild);
     printSubTree(subtreeRoot->rightChild);
 };
@@ -217,6 +209,28 @@ bool isBst(Node* root)
     return isBst(root, nullptr, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 }
 
+Node* insertNodeWithValue(int value, Node* subtreeRoot, Node* parent, uint32_t position)
+{
+    if (!subtreeRoot)
+    {
+        cout << position << endl;
+        return new Node(parent, value, position);
+    }
+    if (subtreeRoot->value > value)
+    {
+        subtreeRoot->leftChild = insertNodeWithValue(value, subtreeRoot->leftChild, subtreeRoot, position * 2);
+        return subtreeRoot;
+    }
+    else if (subtreeRoot->value < value)
+    {
+        subtreeRoot->rightChild = insertNodeWithValue(value, subtreeRoot->rightChild, subtreeRoot, position * 2 + 1);
+        return subtreeRoot;
+    }
+    else
+    {
+        assert(false);
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -271,17 +285,14 @@ int main(int argc, char* argv[])
         if (queryType == 'i')
         {
             const auto valueToInsert = read<int>();
-            //cout << "Insert value: " << valueToInsert << endl;
-            uint32_t newNodePosition = 0;
-
+            cout << "Insert value: " << valueToInsert << endl;
             rootNode = insertNodeWithValue(valueToInsert, rootNode, nullptr, 1);
-
         }
         else if (queryType == 'd')
         {
             const auto valueToDelete = read<int>();
-            //cout << "Delete value: " << valueToDelete << endl;
-            rootNode = deleteNodeWithValue(valueToDelete, rootNode, 1);
+            cout << "Delete value: " << valueToDelete << endl;
+            rootNode = deleteNodeWithValue(valueToDelete, rootNode);
             if (rootNode)
                 rootNode->parent = nullptr;
         }
