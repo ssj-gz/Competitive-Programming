@@ -49,21 +49,85 @@ SolutionType solveOptimised()
 
 struct Node
 {
-    Node()
+    Node(Node* parent, int value, uint32_t position)
+        : parent{parent}, value{value}, position{position}
     {
         static int dbgNextNodeId = 1;
         dbgId = dbgNextNodeId;
         dbgNextNodeId++;
     }
 
+    Node* parent = nullptr;
+    Node* leftChild;
+    Node* rightChild;
+
     int value = -1;
     uint32_t position = 1;
 
-    unique_ptr<Node> leftChild;
-    unique_ptr<Node> rightChild;
 
     int dbgId = -1;
 };
+
+Node* minValueNode(Node* subtreeRoot)
+{
+    assert(subtreeRoot);
+    if (!subtreeRoot->leftChild && !subtreeRoot->rightChild)
+        return subtreeRoot;
+
+    Node* minimum = nullptr;
+    if (subtreeRoot->leftChild)
+        minimum = minValueNode(subtreeRoot->leftChild);
+    if (subtreeRoot->rightChild)
+    {
+        auto minOnRight = minValueNode(subtreeRoot->rightChild);
+        if (!minimum || minOnRight < minimum)
+            minimum = minOnRight;
+    }
+    assert(minimum);
+    return minimum;
+};
+
+Node* deleteNodeWithValue(int value, Node* subtreeRoot)
+{
+    assert(subtreeRoot);
+    if (subtreeRoot->value < value)
+    {
+        subtreeRoot->rightChild = deleteNodeWithValue(value, subtreeRoot->rightChild);
+        return subtreeRoot;
+    }
+    else if (subtreeRoot->value > value)
+    {
+        subtreeRoot->leftChild = deleteNodeWithValue(value, subtreeRoot->leftChild);
+        return subtreeRoot;
+    }
+    else
+    {
+        cout << subtreeRoot->position << endl;
+
+        if (!subtreeRoot->leftChild)
+            return subtreeRoot->rightChild;
+        if (!subtreeRoot->rightChild)
+            return subtreeRoot->leftChild;
+
+
+        // Node to remove has two children; how do we re-structure the tree?
+        // Probably lots of ways of doing this; I'll use the logic in 
+        //
+        //   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
+        //
+        auto descendantWithMinValue = minValueNode(subtreeRoot->rightChild);
+        assert(!descendantWithMinValue->leftChild);
+        descendantWithMinValue->leftChild = subtreeRoot->leftChild;
+        subtreeRoot->leftChild->parent = descendantWithMinValue;
+        descendantWithMinValue->parent->leftChild = descendantWithMinValue->rightChild;
+        descendantWithMinValue->rightChild = subtreeRoot->rightChild;
+        subtreeRoot->rightChild->parent = descendantWithMinValue;
+        descendantWithMinValue->parent = subtreeRoot->parent;
+
+        return descendantWithMinValue;
+
+    }
+}
 
 void printSubTree(Node* subtreeRoot)
 {
@@ -71,9 +135,22 @@ void printSubTree(Node* subtreeRoot)
         return;
 
     cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) << endl;
-    printSubTree(subtreeRoot->leftChild.get());
-    printSubTree(subtreeRoot->rightChild.get());
+    printSubTree(subtreeRoot->leftChild);
+    printSubTree(subtreeRoot->rightChild);
 };
+
+bool isBst(Node* subtreeRoot, int minValue, int maxValue)
+{
+    if (!subtreeRoot)
+        return true;
+    return isBst(subtreeRoot->leftChild, minValue, subtreeRoot->value) &&
+           isBst(subtreeRoot->rightChild, subtreeRoot->value, maxValue);
+}
+
+bool isBst(Node* root)
+{
+    return isBst(root, std::numeric_limits<int>::max(), std::numeric_limits<int>::min());
+}
 
 
 int main(int argc, char* argv[])
@@ -98,7 +175,7 @@ int main(int argc, char* argv[])
     
     const int numQueries = read<int>();
 
-    unique_ptr<Node> rootNode = nullptr;
+    Node* rootNode = nullptr;
 
     for (int i = 0; i < numQueries; i++)
     {
@@ -110,39 +187,33 @@ int main(int argc, char* argv[])
 
             if (!rootNode)
             {
-                rootNode = make_unique<Node>();
-                rootNode->position = 1;
-                rootNode->value = valueToInsert;
-                newNode = rootNode.get();
+                rootNode = new Node(nullptr, valueToInsert, 1);
+                newNode = rootNode;
             }
             else
             {
-                Node* currentNode = rootNode.get();
+                Node* currentNode = rootNode;
                 while (true)
                 {
                     if (currentNode->value > valueToInsert)
                     {
                         if (currentNode->leftChild)
-                            currentNode = currentNode->leftChild.get();
+                            currentNode = currentNode->leftChild;
                         else
                         {
-                            currentNode->leftChild = make_unique<Node>();
-                            currentNode->leftChild->value = valueToInsert;
-                            currentNode->leftChild->position = 2 * currentNode->position;
-                            newNode = currentNode->leftChild.get();
+                            currentNode->leftChild = new Node(currentNode, valueToInsert, 2 * currentNode->position);
+                            newNode = currentNode->leftChild;
                             break;
                         }
                     }
                     else if (currentNode->value < valueToInsert)
                     {
                         if (currentNode->rightChild)
-                            currentNode = currentNode->rightChild.get();
+                            currentNode = currentNode->rightChild;
                         else
                         {
-                            currentNode->rightChild = make_unique<Node>();
-                            currentNode->rightChild->value = valueToInsert;
-                            currentNode->rightChild->position = 2 * currentNode->position + 1;
-                            newNode = currentNode->rightChild.get();
+                            currentNode->rightChild = new Node(currentNode, valueToInsert, 2 * currentNode->position + 1);
+                            newNode = currentNode->rightChild;
                             break;
                         }
                     }
@@ -158,41 +229,12 @@ int main(int argc, char* argv[])
         else if (queryType == 'd')
         {
             const auto valueToDelete = read<int>();
-
-            Node* parent = nullptr;
-            Node* currentNode = rootNode.get();
-            uint32_t deletedNodePos = 0;
-            while (true)
-            {
-                assert(currentNode);
-                if (currentNode->value == valueToDelete)
-                {
-                    deletedNodePos = currentNode->position;
-                    if (parent == nullptr)
-                    {
-                        rootNode.reset();
-                    }
-                    else
-                    {
-                        if (parent->leftChild.get() == currentNode)
-                            parent->leftChild.reset();
-                        if (parent->rightChild.get() == currentNode)
-                            parent->rightChild.reset();
-                    }
-                    break;
-                }
-                parent = currentNode;
-                if (currentNode->value < valueToDelete)
-                    currentNode = currentNode->rightChild.get();
-                if (currentNode->value > valueToDelete)
-                    currentNode = currentNode->leftChild.get();
-
-            }
-            cout << deletedNodePos << endl;
+            rootNode = deleteNodeWithValue(valueToDelete, rootNode);
         }
 
-        //cout << "After query: " << queryType << " tree: " << endl;
-        //printSubTree(rootNode.get());
+        cout << "After query: " << queryType << " tree: " << endl;
+        printSubTree(rootNode);
+        assert(isBst(rootNode));
     }
 
     assert(cin);
