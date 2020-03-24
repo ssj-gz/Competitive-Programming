@@ -163,6 +163,7 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
         delete subtreeRoot;
 #endif
         subtreeRoot->value = descendantWithMinValue->value;
+#if 0
         if (subtreeRoot != descendantWithMinValue->parent)
         {
             assert(descendantWithMinValue->parent->leftChild == descendantWithMinValue);
@@ -175,6 +176,8 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
                 descendantWithMinValue->rightChild->parent = subtreeRoot;
         }
         cout << descendantWithMinValue->position << endl;
+#endif
+        subtreeRoot->rightChild = deleteNodeWithValue(descendantWithMinValue->value, subtreeRoot->rightChild);
 
         return subtreeRoot;
 
@@ -186,7 +189,7 @@ void printSubTree(Node* subtreeRoot)
     if (!subtreeRoot)
         return;
 
-    cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) /*<< " parent: " <<  (subtreeRoot->parent ? subtreeRoot->parent->dbgId : -1)*/ << endl;
+    cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) << " parent: " <<  (subtreeRoot->parent ? subtreeRoot->parent->dbgId : -1) << endl;
     printSubTree(subtreeRoot->leftChild);
     printSubTree(subtreeRoot->rightChild);
 };
@@ -195,7 +198,7 @@ bool isBst(Node* subtreeRoot, Node* parent, int minValue, int maxValue)
 {
     if (!subtreeRoot)
         return true;
-    assert(subtreeRoot->parent == parent);
+    //assert(subtreeRoot->parent == parent);
     //cout << "minValue: " << minValue << " maxValue: " << maxValue << " value: " << subtreeRoot->value << endl;
     if (subtreeRoot->value < minValue)
         return false;
@@ -286,20 +289,20 @@ int main(int argc, char* argv[])
         if (queryType == 'i')
         {
             const auto valueToInsert = read<int>();
-            cout << "Insert value: " << valueToInsert << endl;
+            //cout << "Insert value: " << valueToInsert << endl;
             rootNode = insertNodeWithValue(valueToInsert, rootNode, nullptr, 1);
         }
         else if (queryType == 'd')
         {
             const auto valueToDelete = read<int>();
-            cout << "Delete value: " << valueToDelete << endl;
+            //cout << "Delete value: " << valueToDelete << endl;
             rootNode = deleteNodeWithValue(valueToDelete, rootNode);
             if (rootNode)
                 rootNode->parent = nullptr;
         }
 
         //cout << "After query: " << queryType << " tree: " << endl;
-        printSubTree(rootNode);
+        //printSubTree(rootNode);
         assert(isBst(rootNode));
     }
     //cout << "done" << endl;
