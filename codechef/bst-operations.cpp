@@ -174,6 +174,7 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
             if (descendantWithMinValue->rightChild)
                 descendantWithMinValue->rightChild->parent = subtreeRoot;
         }
+        cout << descendantWithMinValue->position << endl;
 
         return subtreeRoot;
 
