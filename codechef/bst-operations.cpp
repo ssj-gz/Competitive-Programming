@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <limits>
 #include <set>
 
 #include <cassert>
@@ -134,7 +135,7 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
         //   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
         //
         auto descendantWithMinValue = minValueNode(subtreeRoot->rightChild);
-        cout << "descendantWithMinValue id:" << descendantWithMinValue->dbgId << " value: " << descendantWithMinValue->value << endl;
+        //cout << "descendantWithMinValue id:" << descendantWithMinValue->dbgId << " value: " << descendantWithMinValue->value << endl;
         assert(!descendantWithMinValue->leftChild);
 
         descendantWithMinValue->leftChild = subtreeRoot->leftChild;
@@ -168,7 +169,7 @@ void printSubTree(Node* subtreeRoot)
     if (!subtreeRoot)
         return;
 
-    cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) << " parent: " <<  (subtreeRoot->parent ? subtreeRoot->parent->dbgId : -1) << endl;
+    //cout << "Node with id: " << subtreeRoot->dbgId << " value: " << subtreeRoot->value << " position: " << subtreeRoot->position << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->dbgId : -1) <<" rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->dbgId : -1) << " parent: " <<  (subtreeRoot->parent ? subtreeRoot->parent->dbgId : -1) << endl;
     printSubTree(subtreeRoot->leftChild);
     printSubTree(subtreeRoot->rightChild);
 };
@@ -246,7 +247,7 @@ int main(int argc, char* argv[])
         if (queryType == 'i')
         {
             const auto valueToInsert = read<int>();
-            cout << "Insert value: " << valueToInsert << endl;
+            //cout << "Insert value: " << valueToInsert << endl;
             Node* newNode = nullptr;
 
             if (!rootNode)
@@ -293,17 +294,17 @@ int main(int argc, char* argv[])
         else if (queryType == 'd')
         {
             const auto valueToDelete = read<int>();
-            cout << "Delete value: " << valueToDelete << endl;
+            //cout << "Delete value: " << valueToDelete << endl;
             rootNode = deleteNodeWithValue(valueToDelete, rootNode);
             if (rootNode)
                 rootNode->parent = nullptr;
         }
 
-        cout << "After query: " << queryType << " tree: " << endl;
+        //cout << "After query: " << queryType << " tree: " << endl;
         printSubTree(rootNode);
         assert(isBst(rootNode));
     }
-    cout << "done" << endl;
+    //cout << "done" << endl;
 
     assert(cin);
 }
