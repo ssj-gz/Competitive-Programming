@@ -78,14 +78,14 @@ Node* minValueNode(Node* subtreeRoot)
     Node* minimum = subtreeRoot;
     if (subtreeRoot->leftChild)
     {
-        auto minOnLeft = minValueNode(subtreeRoot->rightChild);
-        if (minOnLeft < minimum)
+        auto minOnLeft = minValueNode(subtreeRoot->leftChild);
+        if (minOnLeft->value < minimum->value)
             minimum = minOnLeft;
     }
     if (subtreeRoot->rightChild)
     {
         auto minOnRight = minValueNode(subtreeRoot->rightChild);
-        if (minOnRight < minimum)
+        if (minOnRight->value < minimum->value)
             minimum = minOnRight;
     }
     assert(minimum);
@@ -134,8 +134,8 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
         //   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
         //
         auto descendantWithMinValue = minValueNode(subtreeRoot->rightChild);
-        assert(!descendantWithMinValue->leftChild);
         cout << "descendantWithMinValue id:" << descendantWithMinValue->dbgId << " value: " << descendantWithMinValue->value << endl;
+        assert(!descendantWithMinValue->leftChild);
 
         descendantWithMinValue->leftChild = subtreeRoot->leftChild;
         descendantWithMinValue->leftChild->parent = descendantWithMinValue;
@@ -147,9 +147,11 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
                 descendantWithMinValue->parent->leftChild->parent = descendantWithMinValue->parent;
 
             descendantWithMinValue->rightChild = subtreeRoot->rightChild;
-            if (descendantWithMinValue->parent->rightChild)
-                descendantWithMinValue->rightChild->parent = descendantWithMinValue;
+            if (subtreeRoot->rightChild)
+                subtreeRoot->rightChild->parent = descendantWithMinValue;
         }
+
+        //descendantWithMinValue->parent->leftChild = nullptr;
 
 
         //descendantWithMinValue->parent = subtreeRoot->parent;
@@ -176,13 +178,18 @@ bool isBst(Node* subtreeRoot, Node* parent, int minValue, int maxValue)
     if (!subtreeRoot)
         return true;
     assert(subtreeRoot->parent == parent);
+    //cout << "minValue: " << minValue << " maxValue: " << maxValue << " value: " << subtreeRoot->value << endl;
+    if (subtreeRoot->value < minValue)
+        return false;
+    if (subtreeRoot->value > maxValue)
+        return false;
     return isBst(subtreeRoot->leftChild, subtreeRoot, minValue, subtreeRoot->value) &&
            isBst(subtreeRoot->rightChild, subtreeRoot, subtreeRoot->value, maxValue);
 }
 
 bool isBst(Node* root)
 {
-    return isBst(root, nullptr, std::numeric_limits<int>::max(), std::numeric_limits<int>::min());
+    return isBst(root, nullptr, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 }
 
 
@@ -195,7 +202,7 @@ int main(int argc, char* argv[])
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-        const int numQueries = 1 + rand() % 10;
+        const int numQueries = 1 + rand() % 1000;
         cout << numQueries << endl;
         set<int> valuesInTree;
         for (int i = 0; i < numQueries; i++)
@@ -211,6 +218,7 @@ int main(int argc, char* argv[])
             }
             else
             {
+                assert(!valuesInTree.empty());
                 int valueToDeleteIndex = rand() % valuesInTree.size();
                 auto valueToDeleteIter = valuesInTree.begin();
                 while (valueToDeleteIndex > 0)
@@ -219,6 +227,7 @@ int main(int argc, char* argv[])
                     valueToDeleteIter++;
                     assert(valueToDeleteIter != valuesInTree.end());
                 }
+                assert(valueToDeleteIter != valuesInTree.end());
                 cout << "d " << *valueToDeleteIter << endl;
                 valuesInTree.erase(valueToDeleteIter);
             }
@@ -294,6 +303,7 @@ int main(int argc, char* argv[])
         printSubTree(rootNode);
         assert(isBst(rootNode));
     }
+    cout << "done" << endl;
 
     assert(cin);
 }
