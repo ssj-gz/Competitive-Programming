@@ -7,9 +7,6 @@
 
 #include <cassert>
 
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-#include <set>        // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-
 using namespace std;
 
 template <typename T>
@@ -99,8 +96,8 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
         // look up AC solutions to figure out what it wanted: as near as I can
         // guess, the Problem Setter must have adapted that algorithm but mistakenly
         // printed *two* values (as I've had to resort to doing) - the first is 
-        // the expected subtreeRoot->position, but the second, incorrect one is
-        // the result of the call to 
+        // the expected subtreeRoot->position for the subtreeRoot whose value is valueToDelete, 
+        // but the second, incorrect one is the result of the call to 
         //
         //   deleteNodeWithValue(rightDescendantWithMinValue->value, subtreeRoot->rightChild)
         //
@@ -168,6 +165,8 @@ int main(int argc, char* argv[])
     // I would expect the output for each of the deletions to always be 1, but it is not:
     // it's more like the "position" of a Node is fixed at construction-time and never
     // changes, even if one of its parents is deleted.  Sigh.
+    //
+    // This solution leaks memory, but I'm too annoyed to address that at the moment XD
     
     ios::sync_with_stdio(false);
     
