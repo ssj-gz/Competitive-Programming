@@ -90,13 +90,24 @@ Node* deleteNodeWithValue(int value, Node* subtreeRoot)
         }
 
         // There are many ways to delete a node with two children from a BST
-        // (in such a way that we still have a BST).
-        // The one that is expected is, frankly, completely arbitrary and 
-        // seems "wrong" to me in that it prints out *two* positions (the Problem Statement
-        // implies we should only print one).
-        // I had to look up AC solutions to figure out what it wanted.
-        // I am unimpressed, to say the least - the odds of someone getting the "correct"
-        // answer without looking at AC solutions are slim, to say the least.
+        // (in such a way that we still have a BST).  I assumed that the one
+        // from here:
+        //
+        //   https://www.geeksforgeeks.org/binary-search-tree-set-2-delete/
+        //
+        // would work, but apparently not - or rather, not exactly.  I had to 
+        // look up AC solutions to figure out what it wanted: as near as I can
+        // guess, the Problem Setter must have adapted that algorithm but mistakenly
+        // printed *two* values (as I've had to resort to doing) - the first is 
+        // the expected subtreeRoot->position, but the second, incorrect one is
+        // the result of the call to 
+        //
+        //   deleteNodeWithValue(rightDescendantWithMinValue->value, subtreeRoot->rightChild)
+        //
+        // (below).
+        //
+        // In other words - the Problem Setter expects us to make exactly the same mistake that
+        // he did, otherwise we get WA XD
         auto rightDescendantWithMinValue = minValueNode(subtreeRoot->rightChild);
         assert(!rightDescendantWithMinValue->leftChild);
 
@@ -133,46 +144,32 @@ Node* insertNodeWithValue(int value, Node* subtreeRoot, uint32_t position)
 
 int main(int argc, char* argv[])
 {
+    // Wasted a huge amount of time on this - the question is completely 
+    // ambiguous, and the resolution of the ambiguities contradicts the
+    // Problem Statement.
+    // 
+    // See the comment in deleteNodeWithValue for more information.
+    //
+    // Also, the expected solution for the below (unambiguous) testcase appears
+    // to contradict the Problem Statement:
+    //
+    //   10
+    //   i 1
+    //   i 2
+    //   i 3
+    //   i 4
+    //   i 5
+    //   d 1
+    //   d 2
+    //   d 3
+    //   d 4
+    //   d 5
+    //
+    // I would expect the output for each of the deletions to always be 1, but it is not:
+    // it's more like the "position" of a Node is fixed at construction-time and never
+    // changes, even if one of its parents is deleted.  Sigh.
+    
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int numQueries = 1 + rand() % 35;
-        cout << numQueries << endl;
-        set<int> valuesInTree;
-        for (int i = 0; i < numQueries; i++)
-        {
-            const int queryType = rand() % (1 + (valuesInTree.empty() ? 0 : 1));
-            if (queryType == 0)
-            {
-                int valueToInsert = 1;
-                while (valuesInTree.find(valueToInsert) != valuesInTree.end())
-                    valueToInsert++;
-                cout << "i " << valueToInsert << endl;
-                valuesInTree.insert(valueToInsert);
-            }
-            else
-            {
-                assert(!valuesInTree.empty());
-                int valueToDeleteIndex = rand() % valuesInTree.size();
-                auto valueToDeleteIter = valuesInTree.begin();
-                while (valueToDeleteIndex > 0)
-                {
-                    valueToDeleteIndex--;
-                    valueToDeleteIter++;
-                    assert(valueToDeleteIter != valuesInTree.end());
-                }
-                assert(valueToDeleteIter != valuesInTree.end());
-                cout << "d " << *valueToDeleteIter << endl;
-                valuesInTree.erase(valueToDeleteIter);
-            }
-        }
-
-        return 0;
-    }
     
     const int numQueries = read<int>();
 
