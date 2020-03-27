@@ -2,6 +2,7 @@
 #define RANDOM_UTILITIES_H
 
 #include <numeric>
+#include <avl-tree.h>
 
 /**
  * @return a vector of \a numValues values, each of which is at least \a minValue, and
@@ -58,6 +59,76 @@ std::vector<ValueType> chooseKRandomFrom(const unsigned int numToChoose, const s
 
     return std::vector<ValueType>(toChooseFromScrambled.begin(), toChooseFromScrambled.begin() + numToChoose);
 }
+
+/**
+ * Returns a choice of \a numToChoose distinct indices, where each index
+ * is in the range 0 <= index < numToChoose.
+ *
+ * The choice is represented as a strictly-increasing vector of indices.
+ *
+ * Each possible choice of \a numToChoose distinct indices from \a numToChooseFrom
+ * has the same probability of being returned.
+ *
+ * The time complexity is O(N log N), where N = \a numToChoose i.e. it is independent of
+ * the value of \a numToChooseFrom.  The space complexity is O(N).
+ */
+std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChooseFrom)
+{
+    AVLTree removedIndices;
+
+    std::vector<int64_t> numOfRemainingToChoose;
+    {
+        int64_t numRemaining = numToChooseFrom;
+        for (int i = 0; i < numToChoose; i++)
+        {
+            numOfRemainingToChoose.push_back(rnd.next(static_cast<int64_t>(0), numRemaining));
+            numRemaining--;
+        }
+    }
+
+    std::vector<int64_t> chosenIndices;
+
+    for (const auto nthOfRemainingToChoose : numOfRemainingToChoose)
+    {
+        // Be optimistic and give remappedIndex the smallest possible value:
+        // we'll correct our optimism as we go along :)
+        int64_t remappedIndex = nthOfRemainingToChoose;
+        auto currentNode = removedIndices.root();
+        int64_t numRemovedUpToCurrentNodeIndexOffset = 0;
+        while (currentNode)
+        {
+            const int64_t indexOfCurrentNode = currentNode->value;
+            const int numDescendantsLeftSubChild = (currentNode->leftChild ? currentNode->leftChild->numDescendants : 0);
+            const int64_t numRemovedUpToCurrentNodeIndex = numRemovedUpToCurrentNodeIndexOffset + numDescendantsLeftSubChild;
+            const int64_t numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
+            if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
+            {
+                // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
+                // into left child.
+                currentNode = currentNode->leftChild;
+            }
+            else
+            {
+                // Again, be optimistic about remappedIndex - we'll correct it as we go along.
+                remappedIndex = std::max(remappedIndex, indexOfCurrentNode + (nthOfRemainingToChoose - numFreeUpToCurrentNodeIndex) + 1);
+                // Required index is to the right of here; "recurse" into the right child.
+                // In doing this, we're "forgetting" all the Removed indices to the left of
+                // currentNode - record them in numRemovedUpToCurrentNodeIndexOffset.
+                numRemovedUpToCurrentNodeIndexOffset += 1 + // currentNode is Removed ...
+                                                        numDescendantsLeftSubChild; // ... as are all the indices in currentNode->leftChild.
+                currentNode = currentNode->rightChild;
+            }
+
+        }
+        // We've successfully found the index in the original array; now mark it as Removed.
+        removedIndices.insertValue(remappedIndex);
+    }
+
+    std::sort(chosenIndices.begin(), chosenIndices.end());
+
+    return chosenIndices;
+}
+
 
 #endif
 
