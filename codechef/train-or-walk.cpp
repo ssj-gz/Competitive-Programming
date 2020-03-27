@@ -10,6 +10,8 @@
 
 using namespace std;
 
+//#define DIAGNOSTICS
+
 template <typename T>
 T read()
 {
@@ -50,10 +52,42 @@ int main(int argc, char* argv[])
         int minTime = timeJustWalk;
 
         const int timeWalkToTrain = distBeginToTrainBegin * walkSecsPerMetre;
+#ifdef DIAGNOSTICS
+        cout << "TIME JUST WALKING: " << endl;
+        cout << "Start position: " << cityPositions[beginIndex] << endl;
+        cout << "End position: " << cityPositions[endIndex] << endl;
+        cout << "Distance (metres): " << distBeginToEnd << endl;
+        cout << "Time taken to walk distance at " << walkSecsPerMetre << " seconds per metre: **" << timeJustWalk << "**" << endl;
+        cout << "Start train station position: " << cityPositions[trainBeginIndex] << endl;
+        cout << "Distance to walk from journey begin to start train station: " << distBeginToTrainBegin << endl;
+        cout << "Time taken to walk to start train station: " << timeWalkToTrain << endl;
+        if (timeWalkToTrain <= trainLeaveTime)
+        {
+            cout << "We can reach the train station on time" << endl;
+        }
+        else
+        {
+            cout << "We can't reach the train station on time, so the whole journey must be taken on foot" << endl;
+        }
+#endif
+
         if (timeWalkToTrain <= trainLeaveTime)
         {
             const int timeWalkThenTrain = max(trainLeaveTime, timeWalkToTrain) + distTrainBeginToTrainEnd * trainSecsPerMetre + distTrainEndToEnd * walkSecsPerMetre;
             minTime = min(minTime, timeWalkThenTrain);
+
+#ifdef DIAGNOSTICS
+            cout << "TIME WALKING TO STATION THEN CATCHING TRAIN THEN WALKING REST OF THE WAY: " << endl;
+            cout << "Time waiting for train to leave: " << trainLeaveTime << endl;
+            cout << "Start train station position: " << cityPositions[trainBeginIndex] << endl;
+            cout << "End train station position: " << cityPositions[trainEndIndex] << endl;
+            cout << "Distance between train stations: " << distTrainBeginToTrainEnd << endl;
+            cout << "Time taken to travel this distance by train, going at " << trainSecsPerMetre << " seconds per metre: " << distTrainBeginToTrainEnd * trainSecsPerMetre << endl;
+            cout << "Final end position: " << cityPositions[endIndex] << endl;
+            cout << "Distance between end train station and final end of journey: " << distTrainEndToEnd << endl;
+            cout << "Time taken to walk this distance at : " << walkSecsPerMetre << " seconds per meter: "  << (distTrainEndToEnd * walkSecsPerMetre) << endl;
+            cout << "Total time: **" << timeWalkThenTrain << "**" << endl;
+#endif
         }
 
         cout << minTime << endl;
