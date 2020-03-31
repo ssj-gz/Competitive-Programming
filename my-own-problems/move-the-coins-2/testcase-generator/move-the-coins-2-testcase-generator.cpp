@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 
             TreeGenerator<NodeData> treeGenerator;
             treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-            const int numNodes = 1000;
+            const int numNodes = rnd.next(900, 1000);
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
             addCounters(treeGenerator, rnd.next(70.0, 95.0));

@@ -273,11 +273,9 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
                     continue;
 
                 foundNewParentAtHeight = true;
-                const int dbgGrundyNumberIfRelocated = findGrundyNumberIfRelocatedNode(rootNode, -1, nodeToReparent, nodeToReparent->data.parent, newParentAtHeight);
                 const int grundyNumberIfRelocated = fullTreeGrundy ^ nodeToReparent->data.grundySubtreeContrib ^ distTracker.grundyNumber();
-                assert(grundyNumberIfRelocated == dbgGrundyNumberIfRelocated);
 
-                if (dbgGrundyNumberIfRelocated == 0)
+                if (grundyNumberIfRelocated == 0)
                 {
                     nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
                 }

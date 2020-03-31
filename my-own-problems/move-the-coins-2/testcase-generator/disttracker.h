@@ -5,7 +5,7 @@ constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 }
 constexpr auto maxBinaryDigits = log2(maxDist);
 
-#define VERIFY_DIST_TRACKER
+//#define VERIFY_DIST_TRACKER
 
 class DistTracker
 {
