@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <tree-generator.h>
+#include "disttracker.h"
 
 #include <map>
 #include <vector>
@@ -21,6 +22,7 @@ struct NodeData
     int height = -1;
     int dfsVisitBegin = -1;
     int dfsVisitEnd = -1;
+    int grundySubtreeContrib = 0;
 
     NodeRelocateInfo nodeRelocateInfo;
     bool isDescendentOf(TestNode<NodeData>* node)
@@ -74,6 +76,26 @@ int findMaxHeightOfNonDescendent(TestNode<NodeData>* currentNode, TestNode<NodeD
     return maxHeightOfDescendent;
 }
 
+int findGrundySubtreeContrib(TestNode<NodeData>* subtreeRoot, TestNode<NodeData>* parent)
+{
+    int grundyContrib = 0;
+    if (subtreeRoot->data.numCounters % 2 == 1)
+        grundyContrib ^= subtreeRoot->data.height;
+
+    for (auto edge : subtreeRoot->neighbours)
+    {
+        auto childNode = edge->otherNode(subtreeRoot);
+        if (childNode == parent)
+            continue;
+
+        grundyContrib ^= findGrundySubtreeContrib(childNode, subtreeRoot);
+    }
+
+    subtreeRoot->data.grundySubtreeContrib = grundyContrib;
+
+    return grundyContrib;
+}
+
 void findGrundyNumberIfRelocatedNodeAux(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int height, TestNode<NodeData>* nodeToReparent, TestNode<NodeData>* oldParent, TestNode<NodeData>* newParent, int& grundyNumber)
 {
     if (currentNode->data.numCounters % 2 == 1)
@@ -88,12 +110,15 @@ void findGrundyNumberIfRelocatedNodeAux(TestNode<NodeData>* currentNode, TestNod
             continue;
         if (childNode == nodeToReparent)
         {
+            // Simulate severing of nodeToReparent.
             assert(currentNode == oldParent);
             continue;
         }
-        if (currentNode == nodeToReparent && childNode == oldParent)
+        if (currentNode == nodeToReparent && childNode == nodeToReparent->data.parent)
+        {
+            // If we're nodeToReparent, don't go exploring up through our new parent!
             continue;
-
+        }
 
         childNodes.push_back(childNode);
     }
@@ -113,6 +138,24 @@ int findGrundyNumberIfRelocatedNode(TestNode<NodeData>* rootNode, int height, Te
     findGrundyNumberIfRelocatedNodeAux(rootNode, nullptr, 0, nodeToReparent, oldParent, newParent, grundyNumber);
 
     return grundyNumber;
+}
+
+void populateDistTracker(TestNode<NodeData>* currentNode, DistTracker& distTracker, const int nodeHeightAdjustment)
+{
+    if (currentNode->data.numCounters % 2 == 1)
+    {
+        assert(currentNode->data.height >= nodeHeightAdjustment);
+        distTracker.insertDist(currentNode->data.height - nodeHeightAdjustment);
+    }
+
+    for (auto edge : currentNode->neighbours)
+    {
+        auto childNode = edge->otherNode(currentNode);
+        if (childNode == currentNode->data.parent)
+            continue;
+
+        populateDistTracker(childNode, distTracker, nodeHeightAdjustment);
+    }
 }
 
 size_t combineHashes(size_t hash1, const size_t hash2)
@@ -206,6 +249,8 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
     // No cache; compute manually.
 
     int numNodesProcessed = 0;
+    findGrundySubtreeContrib(rootNode, nullptr);
+    const int fullTreeGrundy = rootNode->data.grundySubtreeContrib;
     for (auto nodeToReparent : treeGenerator.nodes())
     {
         const int maxHeightOfNonDescendent = findMaxHeightOfNonDescendent(rootNode, nullptr, 0, nodeToReparent);
@@ -213,6 +258,9 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
             continue;
 
         nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent = maxHeightOfNonDescendent;
+
+        DistTracker distTracker;
+        populateDistTracker(nodeToReparent, distTracker, nodeToReparent->data.height - 1); // TODO - not sure why the "- 1" is there(?)
 
         for (int newParentHeight = 0; newParentHeight <= maxHeightOfNonDescendent; newParentHeight++)
         {
@@ -225,8 +273,11 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
                     continue;
 
                 foundNewParentAtHeight = true;
-                const int grundyNumberIfRelocated = findGrundyNumberIfRelocatedNode(rootNode, -1, nodeToReparent, nodeToReparent->data.parent, newParentAtHeight);
-                if (grundyNumberIfRelocated == 0)
+                const int dbgGrundyNumberIfRelocated = findGrundyNumberIfRelocatedNode(rootNode, -1, nodeToReparent, nodeToReparent->data.parent, newParentAtHeight);
+                const int grundyNumberIfRelocated = fullTreeGrundy ^ nodeToReparent->data.grundySubtreeContrib ^ distTracker.grundyNumber();
+                assert(grundyNumberIfRelocated == dbgGrundyNumberIfRelocated);
+
+                if (dbgGrundyNumberIfRelocated == 0)
                 {
                     nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
                 }
@@ -235,6 +286,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
                 break;
             }
             assert(foundNewParentAtHeight || newParentHeight == nodeToReparent->data.height - 1);
+            distTracker.adjustAllDists(1);
         }
         numNodesProcessed++;
         if (numNodesProcessed % 100 == 0)
