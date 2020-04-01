@@ -34,8 +34,25 @@ struct Node
     vector<Node*> children;
     Node* parent = nullptr;
     int height = -1;
+    int id = -1;
 
+    int dfsBeginVisit = -1;
+    int dfsEndVisit = -1;
 };
+
+void fillInDFSVisit(Node* node, int& dfsVisitNum)
+{
+    node->dfsBeginVisit = dfsVisitNum;
+    dfsVisitNum++;
+
+    for (auto child : node->children)
+    {
+        fillInDFSVisit(child, dfsVisitNum);
+    }
+
+    node->dfsEndVisit = dfsVisitNum;
+    dfsVisitNum++;
+}
 
 // Calculate the height of each node, and remove its parent from its list of "children".
 void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
@@ -51,10 +68,40 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
-vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int>& queries)
+vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int64_t>& queries)
 {
     vector<pair<Node*, Node*>> result;
-    
+    auto rootNode = &(nodes.front());
+    {
+        int dfsVisitNum = 1;
+        fillInDFSVisit(rootNode, dfsVisitNum);
+    }
+
+    vector<pair<Node*, Node*>> validReparentings;
+
+    for (auto& nodeToReparent : nodes)
+    {
+        if (nodeToReparent.parent == nullptr)
+            continue;
+
+        for (auto& newParent : nodes)
+        {
+            const bool newParentIsDescendant = (newParent.dfsBeginVisit >= nodeToReparent.dfsBeginVisit && newParent.dfsEndVisit <= nodeToReparent.dfsEndVisit);
+            if (!newParentIsDescendant)
+                validReparentings.push_back({&nodeToReparent, &newParent});
+        }
+    }
+
+    for (const auto query : queries)
+    {
+        const auto index = query - 1; // Make 0-relative.
+        assert(0 <= index && index < validReparentings.size());
+        auto queryResultIter = validReparentings.begin() + index;
+        result.push_back(*queryResultIter);
+
+        validReparentings.erase(queryResultIter);
+    }
+
     return result;
 }
 
@@ -96,6 +143,10 @@ int main(int argc, char* argv[])
         const auto numNodes = read<int>();
 
         vector<Node> nodes(numNodes);
+        for (int i = 0; i < numNodes; i++)
+        {
+            nodes[i].id = i + 1;
+        }
         for (auto i = 0; i < numNodes - 1; i++)
         {
             // Make a and b 0-relative.
@@ -109,11 +160,24 @@ int main(int argc, char* argv[])
         auto rootNode = &(nodes.front());
         fixParentChildAndHeights(rootNode);
 
+        // TODO - eventually, we will need to make this online, using a decryption-key
+        // approach (similar to "Simple Markdown Editor").
+        const auto numQueries = read<int>();
+        vector<int64_t> queries(numQueries);
+        for (auto& query : queries)
+        {
+            query = read<int64_t>();
+        }
+
 
 #ifdef BRUTE_FORCE
-#if 0
-        const auto solutionBruteForce = solveBruteForce();
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
+#if 1
+        const auto solutionBruteForce = solveBruteForce(nodes, queries);
+        cout << "solutionBruteForce: " << endl;
+        for (const auto result : solutionBruteForce)
+        {
+            cout << "solutionBruteForce: " << result.first->id << " " << result.second->id << endl;
+        }
 #endif
 #if 0
         const auto solutionOptimised = solveOptimised();
