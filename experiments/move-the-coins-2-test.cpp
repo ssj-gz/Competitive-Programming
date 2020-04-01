@@ -54,6 +54,12 @@ void fillInDFSVisit(Node* node, int& dfsVisitNum)
     dfsVisitNum++;
 }
 
+void fillInDFSVisit(Node* rootNode)
+{
+    int dfsVisitNum = 1;
+    fillInDFSVisit(rootNode, dfsVisitNum);
+}
+
 // Calculate the height of each node, and remove its parent from its list of "children".
 void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
 {
@@ -79,6 +85,7 @@ vector<pair<Node*, Node*>> computeValidReparentings(vector<Node>& nodes)
 
         for (auto& newParent : nodes)
         {
+            assert(newParent.dfsBeginVisit != -1 && newParent.dfsEndVisit != -1);
             const bool newParentIsDescendant = (newParent.dfsBeginVisit >= nodeToReparent.dfsBeginVisit && newParent.dfsEndVisit <= nodeToReparent.dfsEndVisit);
             if (!newParentIsDescendant)
                 validReparentings.push_back({&nodeToReparent, &newParent});
@@ -92,10 +99,7 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 {
     vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
-    {
-        int dfsVisitNum = 1;
-        fillInDFSVisit(rootNode, dfsVisitNum);
-    }
+    fillInDFSVisit(rootNode);
 
     auto validReparentings = computeValidReparentings(nodes);
 
