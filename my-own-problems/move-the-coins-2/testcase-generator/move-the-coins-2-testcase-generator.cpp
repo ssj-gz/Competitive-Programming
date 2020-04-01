@@ -408,6 +408,38 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(30483)
+                    .withDescription("One long (~150k) arms originating at root; then a few ~5k arms added at random locations; then 25% of remaining of bristles; the rest, leaves.  200k nodes total"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+                const int numNodes = 200'000;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(148'000, 152'000));
+                const int maxNumNodesAfterNewChains = 175'000;
+                while (treeGenerator.numNodes() <= maxNumNodesAfterNewChains)
+                {
+                    const auto nodeChainLength = rnd.next(std::max(maxNumNodesAfterNewChains - treeGenerator.numNodes(), 3'000));
+                    const int posAlongArmForNewChain = rnd.next(static_cast<int>(arm1.size()));
+                    treeGenerator.addNodeChain(arm1[posAlongArmForNewChain], nodeChainLength);
+                }
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * rnd.next(25, 35) / 100, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
+
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+
+                std::vector<TestQuery> queries;
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
 
     }
 
