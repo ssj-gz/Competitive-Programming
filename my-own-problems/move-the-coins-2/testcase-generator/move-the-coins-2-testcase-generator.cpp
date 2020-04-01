@@ -7,7 +7,7 @@
 #include <iostream>
 #include <set>
 
-constexpr int maxNodes = 100'000;
+constexpr int maxNodes = 200'000;
 constexpr int maxCounters = 16;
 constexpr int maxNumTestcases = 1000;
 
@@ -268,8 +268,8 @@ int main(int argc, char* argv[])
     {
         // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
         auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
-                .withSeed(9734)
-                .withDescription("TODO - dummy subtask 1 testfile"));
+                .withSeed(10992)
+                .withDescription("Two long (~80k) arms originating at (or near) root; then 30% of remaining of bristles; the rest, leaves.  200k nodes total"));
         {
             auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
@@ -277,11 +277,15 @@ int main(int argc, char* argv[])
 
             TreeGenerator<NodeData> treeGenerator;
             auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-            treeGenerator.addNodeChain(rootNode, 90'000);
-            treeGenerator.addNodeChain(rootNode, 90'000);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, rnd.next(1.0, 100.0));
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
-            addCounters(treeGenerator, rnd.next(70.0, 95.0));
+            const auto mainArm = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
+            const int posOfSecondArmAlongMain = rnd.next(400, 500);
+            //const auto posOfSecondArmAlongMain = 0;
+            treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
+
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
+            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+            addCounters(treeGenerator, rnd.next(78.0, 85.0));
 
             const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
             findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
@@ -292,7 +296,9 @@ int main(int argc, char* argv[])
             //std::vector<TestQuery> aliceWinQueries;
 
             // TODO - this is all stupid - be smarter about how you pick the queries.
+
             std::vector<TestQuery> queries;
+#if 0
             for (auto nodeToReparent : treeGenerator.nodes())
             {
                 for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent; newParentHeight++)
@@ -321,7 +327,7 @@ int main(int argc, char* argv[])
 
             std::cerr << "Num bob wins:" << bobWinQueries.size() << std::endl;
             std::cerr << "Num alice wins:" << numAliceWins << std::endl;
-
+#endif
             scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
 
