@@ -266,7 +266,6 @@ int main(int argc, char* argv[])
 
     // SUBTASK 3
     {
-        // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
         auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
                 .withSeed(10992)
                 .withDescription("Two long (~80k) arms originating at (or near) root; then 30% of remaining of bristles; the rest, leaves.  200k nodes total"));
@@ -279,7 +278,6 @@ int main(int argc, char* argv[])
             auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
             const auto mainArm = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
             const int posOfSecondArmAlongMain = rnd.next(400, 500);
-            //const auto posOfSecondArmAlongMain = 0;
             treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
 
             treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
@@ -290,44 +288,7 @@ int main(int argc, char* argv[])
             const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
             findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
-            // For debugging, generate a list of queries that are all wins for Bob.
-            std::vector<TestQuery> bobWinQueries;
-            int numAliceWins = 0;
-            //std::vector<TestQuery> aliceWinQueries;
-
-            // TODO - this is all stupid - be smarter about how you pick the queries.
-
             std::vector<TestQuery> queries;
-#if 0
-            for (auto nodeToReparent : treeGenerator.nodes())
-            {
-                for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent; newParentHeight++)
-                {
-                    const bool isBobWin = (std::find(nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.begin(), nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.end(), newParentHeight) != nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.end());
-                    for (auto newParent : nodesAtHeight[newParentHeight])
-                    {
-                        if (newParent->data.isDescendentOf(nodeToReparent))
-                            continue;
-
-                        if (isBobWin)
-                            bobWinQueries.push_back({nodeToReparent, newParent, true});
-                        else
-                        {
-                            numAliceWins++;
-                        }
-                    }
-
-                }
-            }
-
-            for (const auto bobWinQuery : bobWinQueries)
-                queries.push_back(bobWinQuery);
-            //for (const auto aliceWinQuery : aliceWinQueries)
-                //queries.push_back(aliceWinQuery);
-
-            std::cerr << "Num bob wins:" << bobWinQueries.size() << std::endl;
-            std::cerr << "Num alice wins:" << numAliceWins << std::endl;
-#endif
             scrambleAndwriteTestcase(treeGenerator, testcase, queries);
         }
 
