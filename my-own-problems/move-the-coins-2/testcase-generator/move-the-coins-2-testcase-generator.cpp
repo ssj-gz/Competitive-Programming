@@ -266,30 +266,60 @@ int main(int argc, char* argv[])
 
     // SUBTASK 3
     {
-        auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
-                .withSeed(10992)
-                .withDescription("Two long (~80k) arms originating at (or near) root; then 30% of remaining of bristles; the rest, leaves.  200k nodes total"));
         {
-            auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(10992)
+                    .withDescription("Two long (~80k) arms originating at (or near) root; then 30% of remaining of bristles; the rest, leaves.  200k nodes total"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
-            const int numNodes = 200'000;
+                const int numNodes = 200'000;
 
-            TreeGenerator<NodeData> treeGenerator;
-            auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-            const auto mainArm = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
-            const int posOfSecondArmAlongMain = rnd.next(400, 500);
-            treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const auto mainArm = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
+                const int posOfSecondArmAlongMain = rnd.next(400, 500);
+                treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
 
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
-            treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
 
-            addCounters(treeGenerator, rnd.next(78.0, 85.0));
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
 
-            const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
-            findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
-            std::vector<TestQuery> queries;
-            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                std::vector<TestQuery> queries;
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(38432)
+                    .withDescription("Three long (~50k) arms originating at (or near) root; then 35% of remaining of bristles; the rest, leaves.  200k nodes total"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+                const int numNodes = 200'000;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                const int posOf3rdArmAlong1st = rnd.next(700, 800);
+                treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(48'000, 52'000));
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 35 / 100, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
+
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+
+                std::vector<TestQuery> queries;
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
         }
 
     }
