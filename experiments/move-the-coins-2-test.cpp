@@ -141,6 +141,47 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            const auto numNodes = 1 + rand() % 10;
+            vector<Node> nodes(numNodes);
+            for (int i = 0; i < numNodes; i++)
+                nodes[i].id = (i + 1);
+
+            vector<pair<Node*, Node*>> edges;
+
+            for (int childNodeIndex = 1; childNodeIndex < numNodes; childNodeIndex++)
+            {
+                const int parentIndex = rand() % childNodeIndex;
+                edges.push_back({&(nodes[parentIndex]), &(nodes[childNodeIndex])});
+            }
+            for (auto& edge : edges)
+            {
+                edge.first->children.push_back(edge.second);
+                edge.second->children.push_back(edge.first);
+            }
+
+            auto rootNode = &(nodes.front());
+            fixParentChildAndHeights(rootNode);
+            fillInDFSVisit(rootNode);
+            const auto validReparentings = computeValidReparentings(nodes);
+
+            const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
+
+            vector<int64_t> queries;
+            for (int queryNum = 0; queryNum < numQueries; queryNum++)
+            {
+                queries.push_back(1 + rand() % (validReparentings.size() - queryNum));
+            }
+
+            cout << numNodes << endl;
+            for (const auto edge : edges)
+            {
+                cout << edge.first->id << " " << edge.second->id << endl;
+            }
+            cout << numQueries << endl;
+            for (const auto query : queries)
+            {
+                cout << query << endl;
+            }
         }
 
         return 0;
