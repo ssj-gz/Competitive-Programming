@@ -68,15 +68,8 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
-vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int64_t>& queries)
+vector<pair<Node*, Node*>> computeValidReparentings(vector<Node>& nodes)
 {
-    vector<pair<Node*, Node*>> result;
-    auto rootNode = &(nodes.front());
-    {
-        int dfsVisitNum = 1;
-        fillInDFSVisit(rootNode, dfsVisitNum);
-    }
-
     vector<pair<Node*, Node*>> validReparentings;
 
     for (auto& nodeToReparent : nodes)
@@ -91,6 +84,20 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
                 validReparentings.push_back({&nodeToReparent, &newParent});
         }
     }
+
+    return validReparentings;
+}
+
+vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int64_t>& queries)
+{
+    vector<pair<Node*, Node*>> result;
+    auto rootNode = &(nodes.front());
+    {
+        int dfsVisitNum = 1;
+        fillInDFSVisit(rootNode, dfsVisitNum);
+    }
+
+    auto validReparentings = computeValidReparentings(nodes);
 
     for (const auto query : queries)
     {
