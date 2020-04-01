@@ -307,6 +307,8 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
         {
             cacheFileOut << newParentHeight << " ";
         }
+        cacheFileOut << endl;
+        cacheFileOut << endl;
     }
     assert(cacheFileOut);
     cacheFileOut.close();
