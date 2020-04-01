@@ -103,6 +103,16 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 
     auto validReparentings = computeValidReparentings(nodes);
 
+    sort(validReparentings.begin(), validReparentings.end(),
+            [](const auto& lhs, const auto& rhs)
+            {
+            if (lhs.first->id != rhs.first->id)
+                return lhs.first->id < rhs.second->id;
+            if (lhs.second->height != rhs.second->height)
+                return lhs.second->height < rhs.second->height;
+            return lhs.second->id < rhs.second->id;
+            });
+
     for (const auto query : queries)
     {
         const auto index = query - 1; // Make 0-relative.
