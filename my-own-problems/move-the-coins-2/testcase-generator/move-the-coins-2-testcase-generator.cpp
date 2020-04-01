@@ -182,6 +182,38 @@ void addCounters(TreeGenerator<NodeData>& treeGenerator, double percentageWithCo
 
 }
 
+TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes)
+{
+    auto rootNode = treeGenerator.createNode();
+
+    std::vector<TestNode<NodeData>*> leafNodes;
+
+    for (int i = 0; i < 3; i++)
+    {
+        leafNodes.push_back(treeGenerator.createNode(rootNode));
+    }
+
+    while (treeGenerator.numNodes() < approxNumNodes)
+    {
+        std::vector<TestNode<NodeData>*> nextLeafNodes;
+        for (auto leafNode : leafNodes)
+        {
+            const int numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
+            for (int i = 0; i < numNewChildren; i++)
+            {
+                nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
+            }
+
+            if (treeGenerator.numNodes() >= approxNumNodes)
+                break;
+        }
+
+        leafNodes = nextLeafNodes;
+    }
+
+    return rootNode;
+}
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
@@ -338,6 +370,31 @@ int main(int argc, char* argv[])
                 const int posOf4thArmAlong2nd = rnd.next(900, 1000);
                 treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(38'000, 42'000));
                 treeGenerator.addNodeChain(arm2[posOf4thArmAlong2nd], rnd.next(38'000, 42'000));
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 25 / 100, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
+
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+
+                std::vector<TestQuery> queries;
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(1111)
+                    .withDescription("Generic squat graph of 100 nodes where all node have degree 3.  Then turn each edge into path of length 1500.  Then fill in the remainder with bristles and leaves"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+                const int numNodes = 200'000;
+
+                TreeGenerator<NodeData> treeGenerator;
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
+                treeGenerator.turnEdgesIntoPaths(1500);
 
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 25 / 100, 70.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
