@@ -168,6 +168,16 @@ size_t combineHashes(size_t hash1, const size_t hash2)
     return hash1;
 }
 
+uint64_t combineHashes2(uint64_t hash1, const uint64_t hash2)
+{
+    // Largely arbitrary "hash combine" function, taken from
+    //
+    //   https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x
+    //
+    hash1 ^= hash2 + 0x9e3779b9 + (hash1<<6) + (hash1>>2);
+    return hash1;
+}
+
 void calcTreeHash(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int& dfsIndex, std::size_t& treeHash)
 {
     // Incorporating a node's dfsIndex, id, and numCounters seems like it would give a reasonably good hash.
@@ -185,11 +195,38 @@ void calcTreeHash(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, i
     }
 }
 
+void calcTreeHash2(TestNode<NodeData>* currentNode, TestNode<NodeData>* parent, int& dfsIndex, uint64_t& treeHash)
+{
+    // Incorporating a node's dfsIndex, id, and numCounters seems like it would give a reasonably good hash.
+    // NB: std::hash<int>()(x) just returns x cast to std::size_t with the GCC, so I don't bother to use it.  Plus,
+    // its values will vary across systems, which we don't want!
+    treeHash = combineHashes2(treeHash, dfsIndex);
+    treeHash = combineHashes2(treeHash, currentNode->id());
+    treeHash = combineHashes2(treeHash, currentNode->data.numCounters);
+
+    for (auto edge : currentNode->neighbours)
+    {
+        auto childNode = edge->otherNode(currentNode);
+        if (childNode == parent)
+            continue;
+
+        calcTreeHash2(childNode, currentNode, dfsIndex, treeHash);
+    }
+}
+
 std::size_t calcTreeHash(TestNode<NodeData>* rootNode)
 {
     std::size_t treeHash = 0;
     int dfsIndex = 0;
     calcTreeHash(rootNode, nullptr, dfsIndex, treeHash);
+    return treeHash;
+}
+
+uint64_t calcTreeHash2(TestNode<NodeData>* rootNode)
+{
+    uint64_t treeHash = 0;
+    int dfsIndex = 0;
+    calcTreeHash2(rootNode, nullptr, dfsIndex, treeHash);
     return treeHash;
 }
 
@@ -213,7 +250,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
 {
     auto rootNode = treeGenerator.nodes().front();
 
-    const auto treeHash = calcTreeHash(rootNode);
+    const auto treeHash = calcTreeHash2(rootNode);
     const std::string treeCacheFilename = "relocated-height-info-cache-" + std::to_string(treeHash);
 
     // Check cache.
