@@ -241,7 +241,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
         
         if (cacheFileIn)
         {
-            std::cerr << "Used cached version of newParentHeightsForBobWin" << std::endl;
+            std::cerr << "Used cached version of newParentHeightsForBobWin: " << treeCacheFilename << std::endl;
             return;
         }
     }
