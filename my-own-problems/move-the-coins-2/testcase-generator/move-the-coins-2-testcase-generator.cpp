@@ -398,6 +398,19 @@ int main(int argc, char* argv[])
             }
         }
         {
+            // seed: 627204325 maxBobWinsForNode: 1
+            // seed: 610081056 maxBobWinsForNode: 1
+            // seed: 286426225 maxBobWinsForNode: 1
+            // seed: 133312936 maxBobWinsForNode: 57
+            // seed: 361078039 maxBobWinsForNode: 141
+            // seed: 206174463 maxBobWinsForNode: 52
+            // seed: 479832082 maxBobWinsForNode: 26
+            // seed: 854565609 maxBobWinsForNode: 52
+            // seed: 343688415 maxBobWinsForNode: 1
+            // seed: 328184047 maxBobWinsForNode: 59
+            // seed: 862381040 maxBobWinsForNode: 1
+            // seed: 443418483 maxBobWinsForNode: 1
+            // seed: 176024828 maxBobWinsForNode: 32
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(1111)
                     .withDescription("Generic squat graph of 100 nodes where all node have degree 3.  Then turn each edge into path of length 1500.  Then fill in the remainder with bristles and leaves"));
