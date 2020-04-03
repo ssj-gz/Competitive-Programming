@@ -254,6 +254,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
     findGrundySubtreeContrib(rootNode, nullptr);
     const int fullTreeGrundy = rootNode->data.grundySubtreeContrib;
     int numPairs = 0;
+    int maxBobWinsForNode = 0;
     for (auto nodeToReparent : treeGenerator.nodes())
     {
         const int maxHeightOfNonDescendent = findMaxHeightOfNonDescendent(rootNode, nullptr, 0, nodeToReparent);
@@ -282,6 +283,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
                 {
                     nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
                     numPairs++;
+                    maxBobWinsForNode = std::max<int>(maxBobWinsForNode, nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.size());
                 }
                 // Only need to check one newParentAtHeight: re-parenting nodeToReparent to any of them will give
                 // the same grundy number.
@@ -293,7 +295,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
         numNodesProcessed++;
         if (numNodesProcessed % 100 == 0)
         {
-            std::cerr << "Processed " << numNodesProcessed << " out of " << treeGenerator.numNodes() << " numPairs: " << numPairs << std::endl;
+            std::cerr << "Processed " << numNodesProcessed << " out of " << treeGenerator.numNodes() << " numPairs: " << numPairs << " maxBobWinsForNode:" << maxBobWinsForNode << std::endl;
         }
     }
 
