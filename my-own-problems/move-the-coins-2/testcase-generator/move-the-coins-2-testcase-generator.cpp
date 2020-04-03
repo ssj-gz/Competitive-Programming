@@ -326,6 +326,20 @@ int main(int argc, char* argv[])
             }
         }
         {
+            // Just storing this data for if I need it; maxBobWinsForNode is, as its named suggests,
+            // is the max over all nodes v of v.nodeRelocateInfo.newParentHeightsForBobWin
+            // seed: 38432 maxBobWinsForNode: 43
+            // seed: 627204325 maxBobWinsForNode: 43
+            // seed: 267954190 maxBobWinsForNode: 1
+            // seed: 976174522 maxBobWinsForNode: 48
+            // seed: 448046354 maxBobWinsForNode: 1
+            // seed: 167109192 maxBobWinsForNode: 1
+            // seed: 16037662 maxBobWinsForNode: 72
+            // seed: 992499319 maxBobWinsForNode: 1
+            // seed: 39029083 maxBobWinsForNode: 1
+            // seed: 903493763 maxBobWinsForNode: 253
+            // seed: 661625455 maxBobWinsForNode: 1
+            // seed: 43829431 maxBobWinsForNode: 73
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(38432)
                     .withDescription("Three long (~50k) arms originating at (or near) root; then 35% of remaining of bristles; the rest, leaves.  200k nodes total"));
