@@ -444,6 +444,11 @@ int main(int argc, char* argv[])
             }
         }
         {
+            // seed: 627204325 maxBobWinsForNode: 44
+            // seed: 306881737 maxBobWinsForNode: 1
+            // seed: 640761651 maxBobWinsForNode: 1
+            // seed: 73294044 maxBobWinsForNode: 52
+            // seed: 925002009 maxBobWinsForNode: 1
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(30483)
                     .withDescription("One long (~150k) arms originating at root; then a few ~5k arms added at random locations; then 25% of remaining of bristles; the rest, leaves.  200k nodes total"));
