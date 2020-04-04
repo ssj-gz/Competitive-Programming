@@ -368,6 +368,14 @@ int main(int argc, char* argv[])
             }
         }
         {
+            // seed: 627204325 maxBobWinsForNode: 49
+            // seed: 729046313 maxBobWinsForNode: 1
+            // seed: 608207936 maxBobWinsForNode: 1
+            // seed: 495782303 maxBobWinsForNode: 65
+            // seed: 192950544 maxBobWinsForNode: 29
+            // seed: 620712104 maxBobWinsForNode: 1
+            // seed: 107466891 maxBobWinsForNode: 108
+            // seed: 667447149 maxBobWinsForNode: 58
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(2323)
                     .withDescription("Four long (~40k) arms originating at (or near) root; then 25% of remaining of bristles; the rest, leaves.  200k nodes total"));
