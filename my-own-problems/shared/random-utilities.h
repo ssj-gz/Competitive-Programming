@@ -129,6 +129,48 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
     return chosenIndices;
 }
 
+template <typename T>
+std::vector<T> chooseWithWeighting(const std::map<T, double>& valueWeight, const int numValuesToChoose)
+{
+    struct WeightAndValue
+    {
+        double weight = 0.0;
+        T value;
+    };
+    std::vector<WeightAndValue> cumulativeWeightsAndValue;
+    double totalWeight = 0.0;
+    for (const auto& [value, weight] : valueWeight)
+    {
+        cumulativeWeightsAndValue.push_back({totalWeight, value});
+        totalWeight += weight;
+    }
+    assert(totalWeight == 100.0);
+    sort(cumulativeWeightsAndValue.begin(), cumulativeWeightsAndValue.end(), 
+         [](const auto& lhs, const auto& rhs)
+         {
+             return lhs.weight > rhs.weight;
+         });
+
+    std::vector<T> chosenValues;
+    for (int i = 0; i < numValuesToChoose; i++)
+    {
+        const double randPercent = rnd.next(0.0, 100.0);
+        bool found = false;
+        for (int chosenIndex = 0; chosenIndex < cumulativeWeightsAndValue.size(); chosenIndex++)
+        {
+            if (randPercent >= cumulativeWeightsAndValue[chosenIndex].weight)
+            {
+                chosenValues.push_back(cumulativeWeightsAndValue[chosenIndex].value);
+                found = true;
+                break;
+            }
+        }
+        assert(found);
+    }
+    assert(static_cast<int>(chosenValues.size()) == numValuesToChoose);
+    return chosenValues;
+}
+
 
 #endif
 
