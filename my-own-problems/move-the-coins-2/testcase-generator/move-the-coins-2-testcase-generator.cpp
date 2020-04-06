@@ -7,6 +7,8 @@
 #include <iostream>
 #include <set>
 
+using namespace std;
+
 constexpr int maxNodes = 200'000;
 constexpr int maxCounters = 16;
 constexpr int maxNumTestcases = 1000;
@@ -213,6 +215,52 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
 
     return rootNode;
 }
+
+vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerator, const vector<TestNode<NodeData>*>& nodes, const int numToGenerate, const double percentageBobWin)
+{
+    struct NodeAndHeight
+    {
+        TestNode<NodeData>* nodeToReparent = nullptr;
+        int newParentHeight = -1;
+    };
+    vector<NodeAndHeight> bobWinPairs;
+    for (auto nodeToReparent : treeGenerator.nodes())
+    {
+        for (const auto newParentHeight : nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin)
+        {
+            bobWinPairs.push_back({nodeToReparent, newParentHeight});
+        }
+    }
+    const int numAvailableBobWins = bobWinPairs.size();
+    const int numBobWinsToGenerate = (numToGenerate * percentageBobWin) / 100.0;
+    assert(numBobWinsToGenerate >= numAvailableBobWins);
+
+    vector<NodeAndHeight> chosenBobWinPairs;
+    for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numBobWinsToGenerate, numAvailableBobWins))
+    {
+        chosenBobWinPairs.push_back(bobWinPairs[chosenBobWinIndex]);
+    }
+    // Add some random (likely) Alice wins.
+    // TODO - a better strategy than pure randomness, please - in cases where the max newParentHeightsForBobWin is high,
+    // we'll find that a given node will be chosen as a nodeToReparent much more often than chance will dictate, which
+    // could lead to a strategy for "guessing" patterns (though this is admittedly not very likely :))
+    // NB: statistically, the vast majority of these choices will result in an Alice win, but it's possible that some
+    // Bob wins might sneak in there, too.
+    vector<NodeAndHeight> chosenAliceWinPairs;
+    for (int i = 0; i < numToGenerate - chosenBobWinPairs.size(); i++)
+    {
+        const auto nodeToReparent = nodes[rnd.next(0, static_cast<int>(nodes.size()))];
+        const auto newParentHeight = rnd.next(0, nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent);
+        if (newParentHeight == -1)
+            continue;
+
+        chosenAliceWinPairs.push_back({nodeToReparent, newParentHeight});
+    }
+
+    // TODO - map newParentHeights to random new parent nodes at that height.
+    vector<TestQuery> generatedQueries;
+    return generatedQueries;
+};
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
