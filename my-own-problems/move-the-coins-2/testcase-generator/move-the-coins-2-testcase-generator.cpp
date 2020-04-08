@@ -238,12 +238,16 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     const int numAvailableBobWins = bobWinPairs.size();
     const int numBobWinsToGenerate = (numToGenerate * percentageBobWin) / 100.0;
     assert(numBobWinsToGenerate <= numAvailableBobWins);
+    cout << "numAvailableBobWins: " << numAvailableBobWins << " numBobWinsToGenerate: " << numBobWinsToGenerate << endl;
 
     vector<NodeAndHeight> chosenBobWinPairs;
     for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numBobWinsToGenerate, numAvailableBobWins))
     {
+        cout << " chosenBobWinIndex: " << chosenBobWinIndex << endl;
         chosenBobWinPairs.push_back(bobWinPairs[chosenBobWinIndex]);
     }
+
+    cout << "chosenBobWinPairs.size(): " << chosenBobWinPairs.size() << endl;
 
     baseGeneratedQueries.insert(baseGeneratedQueries.end(), chosenBobWinPairs.begin(), chosenBobWinPairs.end());
     numToGenerate -= chosenBobWinPairs.size();
@@ -272,11 +276,11 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     }
     for (const auto& [nodeToReparent, newParentHeights] : randomBobWinsByNodeToReparent)
     {
-        const auto nodeToEchoTo = nodes[rnd.next(0, static_cast<int>(nodes.size()))];
+        const auto nodeToEchoTo = nodes[rnd.next(static_cast<int>(nodes.size()))];
         if (!nodeToEchoTo->data.nodeRelocateInfo.newParentHeightsForBobWin.empty())
         {
             // Prefer to echo to nodes which have no Bob wins, but add some wiggle-room.
-            if (rnd.next(0.0, 100.0) >= 10.0)
+            if (rnd.next(0.0, 100.0) / 100.0 >= 10.0)
                 continue;
         }
 
@@ -293,6 +297,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
             generatedHeightOffsetFromBobWinQueries.push_back({nodeToEchoTo, adjustedHeight});
         }
     }
+    cout << "generatedHeightOffsetFromBobWinQueries.size(): " << generatedHeightOffsetFromBobWinQueries.size() << endl;
 
     baseGeneratedQueries.insert(baseGeneratedQueries.end(), generatedHeightOffsetFromBobWinQueries.begin(), generatedHeightOffsetFromBobWinQueries.end());
     numToGenerate -= generatedHeightOffsetFromBobWinQueries.size();
@@ -300,10 +305,11 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     // Now just add a small offset to the height of new parent height for any query generated so far (both Bob and Alice wins).
     int numSmallHeightOffsetToGenerate = rnd.next(30.0, 80.0) / 100.0 * numToGenerate;
     vector<NodeAndHeight> smallHeightOffsetQueries;
+    cout << "baseGeneratedQueries.size(): " << baseGeneratedQueries.size() << endl;
 
     while (numSmallHeightOffsetToGenerate > 0)
     {
-        const auto& pairToAdjust = baseGeneratedQueries[rnd.next(0, static_cast<int>(baseGeneratedQueries.size()))];
+        const auto& pairToAdjust = baseGeneratedQueries[rnd.next(static_cast<int>(baseGeneratedQueries.size()))];
         int adjustedHeight = pairToAdjust.newParentHeight + chooseWithWeighting<int>({
                                                                                    {-1, 30.0},
                                                                                    {+1, 30.0},
@@ -330,7 +336,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     // Just random choices for the remainder.
     while (numToGenerate > 0)
     {
-        const auto nodeToReparent = nodes[rnd.next(0, static_cast<int>(nodes.size()))];
+        const auto nodeToReparent = nodes[rnd.next(static_cast<int>(nodes.size()))];
         const auto newParentHeight = rnd.next(0, nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent);
         if (newParentHeight == -1)
             continue;
@@ -353,7 +359,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
             if (!nodeAtHeight->data.isDescendentOf(nodeToReparent))
                 dbgNumNonDescendantsAtHeight++;
         }
-        const int chosenIndexOfNodeAtHeight = rnd.next(0, dbgNumNonDescendantsAtHeight);
+        const int chosenIndexOfNodeAtHeight = rnd.next(dbgNumNonDescendantsAtHeight);
         int indexOfNodeAtHeight = 0;
         bool found = false;
         for (const auto& nodeAtHeight : nodesAtNewParentHeight)
