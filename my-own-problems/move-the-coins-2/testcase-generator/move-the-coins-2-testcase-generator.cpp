@@ -216,7 +216,7 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
     return rootNode;
 }
 
-vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerator, const vector<TestNode<NodeData>*>& nodes, int numToGenerate, const double percentageBobWin)
+vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerator, const vector<TestNode<NodeData>*>& nodes, int numToGenerate, const double percentageBobWin, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeightMap)
 {
     const auto originalNumToGenerate = numToGenerate;
 
@@ -340,7 +340,35 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     assert(static_cast<int>(baseGeneratedQueries.size()) == originalNumToGenerate);
 
     vector<TestQuery> generatedQueries;
-    // TODO - map newParentHeights to random new parent nodes at that height.
+    // TODO - optimise this - we can use the fact that the nodes at a given height are in DFS order, and 
+    // use lower_bound/ upper_bound to figure out how many nodes are non-descendants and then to pick
+    // one of these at random.
+    for (const auto& [nodeToReparent, newParentHeight] : baseGeneratedQueries)
+    {
+        const auto& nodesAtNewParentHeight = nodesAtHeightMap[newParentHeight];
+        int dbgNumNonDescendantsAtHeight = 0;
+        for (const auto& nodeAtHeight : nodesAtNewParentHeight)
+        {
+            if (!nodeAtHeight->data.isDescendentOf(nodeToReparent))
+                dbgNumNonDescendantsAtHeight++;
+        }
+        const int chosenIndexOfNodeAtHeight = rnd.next(0, dbgNumNonDescendantsAtHeight);
+        int indexOfNodeAtHeight = 0;
+        bool found = false;
+        for (const auto& nodeAtHeight : nodesAtNewParentHeight)
+        {
+            if (!nodeAtHeight->data.isDescendentOf(nodeToReparent))
+            {
+                if (indexOfNodeAtHeight == chosenIndexOfNodeAtHeight)
+                {
+                    found = true;
+                    generatedQueries.push_back({nodeToReparent, nodeAtHeight});
+                    break;
+                }
+            }
+        }
+    }
+    assert(static_cast<int>(generatedQueries.size()) == originalNumToGenerate);
     return generatedQueries;
 };
 
