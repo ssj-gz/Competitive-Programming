@@ -518,10 +518,14 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
-                const auto queriesAlongArm1 = generateQueriesFromNodes(mainArm, 100'000, rnd.next(30.0, 60.0), nodesAtHeight);
+                const auto queriesAlongArm1 = generateQueriesFromNodes(mainArm, 85'234, rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm1.begin(), queriesAlongArm1.end());
-                const auto queriesAlongArm2 = generateQueriesFromNodes(secondArm , 100'000, rnd.next(30.0, 60.0), nodesAtHeight);
+                const auto queriesAlongArm2 = generateQueriesFromNodes(secondArm , 91'768, rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm2.begin(), queriesAlongArm2.end());
+
+                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), 200'000 - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
+                queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
+
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
