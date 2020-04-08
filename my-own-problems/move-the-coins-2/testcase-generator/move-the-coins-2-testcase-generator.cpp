@@ -237,7 +237,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     }
     const int numAvailableBobWins = bobWinPairs.size();
     const int numBobWinsToGenerate = (numToGenerate * percentageBobWin) / 100.0;
-    assert(numBobWinsToGenerate >= numAvailableBobWins);
+    assert(numBobWinsToGenerate <= numAvailableBobWins);
 
     vector<NodeAndHeight> chosenBobWinPairs;
     for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numBobWinsToGenerate, numAvailableBobWins))
