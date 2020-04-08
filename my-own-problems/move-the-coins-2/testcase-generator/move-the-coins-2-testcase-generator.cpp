@@ -216,7 +216,7 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
     return rootNode;
 }
 
-vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerator, const vector<TestNode<NodeData>*>& nodes, int numToGenerate, const double percentageBobWin, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeightMap)
+vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& nodes, int numToGenerate, const double percentageBobWin, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeightMap)
 {
     const auto originalNumToGenerate = numToGenerate;
 
@@ -228,7 +228,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     vector<NodeAndHeight> baseGeneratedQueries;
 
     vector<NodeAndHeight> bobWinPairs;
-    for (auto nodeToReparent : treeGenerator.nodes())
+    for (auto nodeToReparent : nodes)
     {
         for (const auto newParentHeight : nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin)
         {
@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
             {
                 try
                 {
-                    queries = generateQueriesFromNodes(treeGenerator, treeGenerator.nodes(), 1'000, rnd.next(0.0, 40.0), nodesAtHeight);
+                    queries = generateQueriesFromNodes(treeGenerator.nodes(), 1'000, rnd.next(0.0, 40.0), nodesAtHeight);
                 }
                 catch (std::invalid_argument& exception)
                 {
@@ -502,9 +502,9 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
-                const auto queriesAlongArm1 = generateQueriesFromNodes(treeGenerator, mainArm, 100'000, 30.0, nodesAtHeight);
+                const auto queriesAlongArm1 = generateQueriesFromNodes(mainArm, 100'000, rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm1.begin(), queriesAlongArm1.end());
-                const auto queriesAlongArm2 = generateQueriesFromNodes(treeGenerator, secondArm , 100'000, 60.0, nodesAtHeight);
+                const auto queriesAlongArm2 = generateQueriesFromNodes(secondArm , 100'000, rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm2.begin(), queriesAlongArm2.end());
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
