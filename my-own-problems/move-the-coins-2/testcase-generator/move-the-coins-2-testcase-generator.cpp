@@ -243,7 +243,6 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     vector<NodeAndHeight> chosenBobWinPairs;
     for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numBobWinsToGenerate, numAvailableBobWins))
     {
-        cout << " chosenBobWinIndex: " << chosenBobWinIndex << endl;
         chosenBobWinPairs.push_back(bobWinPairs[chosenBobWinIndex]);
     }
 
