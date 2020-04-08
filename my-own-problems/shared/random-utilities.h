@@ -76,19 +76,19 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
 {
     AVLTree removedIndices;
 
-    std::vector<int64_t> numOfRemainingToChoose;
+    std::vector<int64_t> chosenIndexInRemaining;
     {
         int64_t numRemaining = numToChooseFrom;
         for (int i = 0; i < numToChoose; i++)
         {
-            numOfRemainingToChoose.push_back(rnd.next(static_cast<int64_t>(0), numRemaining));
+            chosenIndexInRemaining.push_back(rnd.next(static_cast<int64_t>(0), numRemaining));
             numRemaining--;
         }
     }
 
     std::vector<int64_t> chosenIndices;
 
-    for (const auto nthOfRemainingToChoose : numOfRemainingToChoose)
+    for (const auto nthOfRemainingToChoose : chosenIndexInRemaining)
     {
         // Be optimistic and give remappedIndex the smallest possible value:
         // we'll correct our optimism as we go along :)
