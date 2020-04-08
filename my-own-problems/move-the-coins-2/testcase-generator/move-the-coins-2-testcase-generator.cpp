@@ -325,6 +325,12 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
     }
     cout << "generatedHeightOffsetFromBobWinQueries.size(): " << generatedHeightOffsetFromBobWinQueries.size() << endl;
 
+    // We may have generated too many of this type of query - remove some from the end, if so.
+    while (numHeightOffsetFromBobWins < 0)
+    {
+        generatedHeightOffsetFromBobWinQueries.pop_back();
+        numHeightOffsetFromBobWins++;
+    }
     baseGeneratedQueries.insert(baseGeneratedQueries.end(), generatedHeightOffsetFromBobWinQueries.begin(), generatedHeightOffsetFromBobWinQueries.end());
     numToGenerate -= generatedHeightOffsetFromBobWinQueries.size();
 
