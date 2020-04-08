@@ -216,13 +216,17 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
     return rootNode;
 }
 
-vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerator, const vector<TestNode<NodeData>*>& nodes, const int numToGenerate, const double percentageBobWin)
+vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerator, const vector<TestNode<NodeData>*>& nodes, int numToGenerate, const double percentageBobWin)
 {
+    const auto originalNumToGenerate = numToGenerate;
+
     struct NodeAndHeight
     {
         TestNode<NodeData>* nodeToReparent = nullptr;
         int newParentHeight = -1;
     };
+    vector<NodeAndHeight> baseGeneratedQueries;
+
     vector<NodeAndHeight> bobWinPairs;
     for (auto nodeToReparent : treeGenerator.nodes())
     {
@@ -240,25 +244,103 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     {
         chosenBobWinPairs.push_back(bobWinPairs[chosenBobWinIndex]);
     }
+
+    baseGeneratedQueries.insert(baseGeneratedQueries.end(), chosenBobWinPairs.begin(), chosenBobWinPairs.end());
+    numToGenerate -= chosenBobWinPairs.size();
+
     // Add some random (likely) Alice wins.
-    // TODO - a better strategy than pure randomness, please - in cases where the max newParentHeightsForBobWin is high,
-    // we'll find that a given node will be chosen as a nodeToReparent much more often than chance will dictate, which
-    // could lead to a strategy for "guessing" patterns (though this is admittedly not very likely :))
-    // NB: statistically, the vast majority of these choices will result in an Alice win, but it's possible that some
-    // Bob wins might sneak in there, too.
-    vector<NodeAndHeight> chosenAliceWinPairs;
-    for (int i = 0; i < numToGenerate - chosenBobWinPairs.size(); i++)
+    //
+    // If the maximum value of newParentHeightsForBobWin.size() is large-ish, the strategy above may lead to disproportionately
+    // many repetitions of the same nodeToReparent in chosenBobWinPairs, and conceivably people could use this as a strategy to
+    // guess results.  For example: if the number of queries with nodeToReparent v is more than one, it's quite likely that
+    // most of the queries that reparent v will be Bob wins.
+    // 
+    // Attempt to obscure this by choosing Alice Wins with a similar "pattern" to the Bob wins (again, for the case where newParentHeightsForBobWin.size()
+    // is large-ish).
+    //
+    // We do this by picking a nodeToReparent v such that v.newParentHeightsForBobWin.size() is large-ish; picking a nodeToReparent u
+    // that has no Bob wins; picking a subset of newParentHeightsForBobWin for v; and "translating" these parent heights to u, adjusting
+    // the heights according to the height difference between u and v (the offsets between newParentHeightsForBobWin often have a discernible pattern,
+    // which we'll echo in the Alice wins that reparent u in order to add some camouflage).
+    vector<NodeAndHeight> generatedHeightOffsetFromBobWinQueries;
+    const int numHeightOffsetFromBobWins = rnd.next(30.0, 60.0) * numToGenerate;
+    map<TestNode<NodeData>*, vector<int>> randomBobWinsByNodeToReparent;
+    for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numHeightOffsetFromBobWins, numAvailableBobWins))
+    {
+        randomBobWinsByNodeToReparent[bobWinPairs[chosenBobWinIndex].nodeToReparent].push_back(bobWinPairs[chosenBobWinIndex].newParentHeight);
+    }
+    for (const auto& [nodeToReparent, newParentHeights] : randomBobWinsByNodeToReparent)
+    {
+        const auto nodeToEchoTo = nodes[rnd.next(0, static_cast<int>(nodes.size()))];
+        if (!nodeToEchoTo->data.nodeRelocateInfo.newParentHeightsForBobWin.empty())
+        {
+            // Prefer to echo to nodes which have no Bob wins, but add some wiggle-room.
+            if (rnd.next(0.0, 100.0) >= 10.0)
+                continue;
+        }
+
+        const int heightAdjustment = nodeToEchoTo->data.height - nodeToReparent->data.height;
+
+        for (const auto newParentHeight : newParentHeights)
+        {
+            int adjustedHeight = newParentHeight - heightAdjustment;
+            if (adjustedHeight < 0 || adjustedHeight > nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent)
+            {
+                // Invalid height; just pick one at random.
+                adjustedHeight = rnd.next(0, nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent);
+            }
+            generatedHeightOffsetFromBobWinQueries.push_back({nodeToEchoTo, adjustedHeight});
+        }
+    }
+
+    baseGeneratedQueries.insert(baseGeneratedQueries.end(), generatedHeightOffsetFromBobWinQueries.begin(), generatedHeightOffsetFromBobWinQueries.end());
+    numToGenerate -= generatedHeightOffsetFromBobWinQueries.size();
+
+    // Now just add a small offset to the height of new parent height for any query generated so far (both Bob and Alice wins).
+    int numSmallHeightOffsetToGenerate = rnd.next(30.0, 80.0) * numToGenerate;
+    vector<NodeAndHeight> smallHeightOffsetQueries;
+
+    while (numSmallHeightOffsetToGenerate > 0)
+    {
+        const auto& pairToAdjust = baseGeneratedQueries[rnd.next(0, static_cast<int>(baseGeneratedQueries.size()))];
+        int adjustedHeight = pairToAdjust.newParentHeight + chooseWithWeighting<int>({
+                                                                                   {-1, 30.0},
+                                                                                   {+1, 30.0},
+                                                                                   {-2, 12.5},
+                                                                                   {+2, 12.5},
+                                                                                   {-3, 6.0},
+                                                                                   {+3, 6.0},
+                                                                                   {-4, 1.5},
+                                                                                   {+4, 1.5}
+                                                                                 }, 1).front();
+        if (adjustedHeight < 0 || adjustedHeight > pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent)
+        {
+            // Invalid height; just pick one at random.
+            adjustedHeight = rnd.next(0, pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent);
+        }
+
+        smallHeightOffsetQueries.push_back({pairToAdjust.nodeToReparent, adjustedHeight});
+        numSmallHeightOffsetToGenerate--;
+    }
+
+    baseGeneratedQueries.insert(baseGeneratedQueries.end(), smallHeightOffsetQueries.begin(), smallHeightOffsetQueries.end());
+    numToGenerate -= smallHeightOffsetQueries.size();
+
+    // Just random choices for the remainder.
+    while (numToGenerate > 0)
     {
         const auto nodeToReparent = nodes[rnd.next(0, static_cast<int>(nodes.size()))];
         const auto newParentHeight = rnd.next(0, nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent);
         if (newParentHeight == -1)
             continue;
 
-        chosenAliceWinPairs.push_back({nodeToReparent, newParentHeight});
+        baseGeneratedQueries.push_back({nodeToReparent, newParentHeight});
+        numToGenerate--;
     }
+    assert(static_cast<int>(baseGeneratedQueries.size()) == originalNumToGenerate);
 
-    // TODO - map newParentHeights to random new parent nodes at that height.
     vector<TestQuery> generatedQueries;
+    // TODO - map newParentHeights to random new parent nodes at that height.
     return generatedQueries;
 };
 
