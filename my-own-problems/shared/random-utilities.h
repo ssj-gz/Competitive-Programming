@@ -84,7 +84,7 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
         int64_t numRemaining = numToChooseFrom;
         for (int i = 0; i < numToChoose; i++)
         {
-            chosenIndexInRemaining.push_back(rnd.next(static_cast<int64_t>(0), numRemaining));
+            chosenIndexInRemaining.push_back(rnd.next(numRemaining));
             numRemaining--;
         }
     }
@@ -127,6 +127,7 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
 
         }
         // We've successfully found the index in the original array; now mark it as Removed.
+        assert(0 <= remappedIndex && remappedIndex < numToChooseFrom);
         removedIndices.insertValue(remappedIndex);
         chosenIndices.push_back(remappedIndex);
     }
