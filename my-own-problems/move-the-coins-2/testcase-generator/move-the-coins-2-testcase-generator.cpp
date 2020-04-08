@@ -144,6 +144,8 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
     treeGenerator.scrambleEdgeOrder();
 
+    cout << "num bob wins: " << count_if(queries.begin(), queries.end(), [](const auto& query) { return query.isBobWin; }) << endl;
+
     writeTestCase(treeGenerator, destTestcase, queries);
 }
 
@@ -224,6 +226,12 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
     {
         TestNode<NodeData>* nodeToReparent = nullptr;
         int newParentHeight = -1;
+        bool operator<(const NodeAndHeight& other) const
+        {
+            if (nodeToReparent->id() != other.nodeToReparent->id())
+                return nodeToReparent->id() < other.nodeToReparent->id();
+            return newParentHeight < other.newParentHeight;
+        }
     };
     vector<NodeAndHeight> baseGeneratedQueries;
 
@@ -402,6 +410,14 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         assert(found);
     }
     assert(static_cast<int>(generatedQueries.size()) == originalNumToGenerate);
+
+    sort(bobWinPairs.begin(), bobWinPairs.end());
+    for (auto& query : generatedQueries)
+    {
+        query.isBobWin = binary_search(bobWinPairs.begin(), bobWinPairs.end(), NodeAndHeight{ query.nodeToReparent, query.newParentNode->data.height });
+    }
+
+    
     return generatedQueries;
 };
 
