@@ -263,7 +263,8 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     // the heights according to the height difference between u and v (the offsets between newParentHeightsForBobWin often have a discernible pattern,
     // which we'll echo in the Alice wins that reparent u in order to add some camouflage).
     vector<NodeAndHeight> generatedHeightOffsetFromBobWinQueries;
-    const int numHeightOffsetFromBobWins = rnd.next(30.0, 60.0) * numToGenerate;
+    const int numHeightOffsetFromBobWins = rnd.next(30.0, 60.0) / 100.0 * numToGenerate;
+    cout << "numHeightOffsetFromBobWins: " << numHeightOffsetFromBobWins << endl;
     map<TestNode<NodeData>*, vector<int>> randomBobWinsByNodeToReparent;
     for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numHeightOffsetFromBobWins, numAvailableBobWins))
     {
@@ -297,7 +298,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     numToGenerate -= generatedHeightOffsetFromBobWinQueries.size();
 
     // Now just add a small offset to the height of new parent height for any query generated so far (both Bob and Alice wins).
-    int numSmallHeightOffsetToGenerate = rnd.next(30.0, 80.0) * numToGenerate;
+    int numSmallHeightOffsetToGenerate = rnd.next(30.0, 80.0) / 100.0 * numToGenerate;
     vector<NodeAndHeight> smallHeightOffsetQueries;
 
     while (numSmallHeightOffsetToGenerate > 0)
@@ -489,6 +490,8 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
+                const auto queriesAlongArm1 = generateQueriesFromNodes(treeGenerator, mainArm, 100'000, 30.0, nodesAtHeight);
+                queries.insert(queries.end(), queriesAlongArm1.begin(), queriesAlongArm1.end());
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
