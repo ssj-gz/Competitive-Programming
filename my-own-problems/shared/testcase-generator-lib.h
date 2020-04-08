@@ -523,6 +523,7 @@ class TestSuite
 
                     if (m_testFileVerifier)
                     {
+                        std::cout << "Verifying testfile " << filename << " ... " << std::endl;
                         TestFileReader testFileReader(testFileContents);
                         m_testFileVerifier(testFileReader, *testFile->containingSubtask());
                         // Check that the Verifier has been paying at least *some* attention, and not just rubber-stamping stuff!
@@ -544,6 +545,7 @@ class TestSuite
                                 std::cerr << "     " << errorMessage << std::endl;
                             }
                         }
+                        std::cout << "Done verifying testfile " << filename << " ... " << std::endl;
                     }
 
 
