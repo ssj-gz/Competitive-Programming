@@ -194,13 +194,24 @@ uint64_t calcTreeHash(TestNode<NodeData>* rootNode)
     calcTreeHash(rootNode, nullptr, dfsIndex, treeHash);
     return treeHash;
 }
-
+/**
+ * Create a vector v where v[h] is precisely the list of TestNodes at height h, in order of their visitation
+ * during the canonical DFS i.e. in order of their dfsVisitBegin.
+ */
 std::vector<std::vector<TestNode<NodeData>*>> buildNodesAtHeightMap(const TreeGenerator<NodeData>& treeGenerator)
 {
     fillInNodeHeightsAndVisitInfo(treeGenerator.nodes().front());
     std::vector<std::vector<TestNode<NodeData>*>> nodesAtHeight(treeGenerator.numNodes());
     for (auto node : treeGenerator.nodes())
         nodesAtHeight[node->data.height].push_back(node);
+
+    for (auto& nodes : nodesAtHeight)
+    {
+        sort(nodes.begin(), nodes.end(), [](const auto& lhs, const auto& rhs)
+                {
+                    return lhs->data.dfsVisitBegin < rhs->data.dfsVisitBegin;
+                });
+    }
 
     return nodesAtHeight;
 }
