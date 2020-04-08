@@ -486,7 +486,7 @@ int main(int argc, char* argv[])
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const auto mainArm = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
                 const int posOfSecondArmAlongMain = rnd.next(400, 500);
-                treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
+                const auto secondArm = treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
 
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
@@ -499,6 +499,8 @@ int main(int argc, char* argv[])
                 std::vector<TestQuery> queries;
                 const auto queriesAlongArm1 = generateQueriesFromNodes(treeGenerator, mainArm, 100'000, 30.0, nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm1.begin(), queriesAlongArm1.end());
+                const auto queriesAlongArm2 = generateQueriesFromNodes(treeGenerator, secondArm , 100'000, 60.0, nodesAtHeight);
+                queries.insert(queries.end(), queriesAlongArm2.begin(), queriesAlongArm2.end());
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
