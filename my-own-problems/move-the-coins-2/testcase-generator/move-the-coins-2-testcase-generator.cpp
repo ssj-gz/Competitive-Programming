@@ -271,7 +271,8 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     map<TestNode<NodeData>*, vector<int>> randomBobWinsByNodeToReparent;
     for (const auto chosenBobWinIndex : chooseKRandomIndicesFrom(numHeightOffsetFromBobWins, numAvailableBobWins))
     {
-        randomBobWinsByNodeToReparent[bobWinPairs[chosenBobWinIndex].nodeToReparent].push_back(bobWinPairs[chosenBobWinIndex].newParentHeight);
+        const auto& [nodeToReparent, newParentHeight] = bobWinPairs[chosenBobWinIndex];
+        randomBobWinsByNodeToReparent[nodeToReparent].push_back(newParentHeight);
     }
     for (const auto& [nodeToReparent, newParentHeights] : randomBobWinsByNodeToReparent)
     {
