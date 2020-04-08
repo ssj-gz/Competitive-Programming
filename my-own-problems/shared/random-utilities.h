@@ -76,6 +76,8 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
 {
     AVLTree removedIndices;
 
+    // Create the sequence of indices to choose - here, we assume that we actually remove
+    // the chosen index after choosing it.
     std::vector<int64_t> chosenIndexInRemaining;
     {
         int64_t numRemaining = numToChooseFrom;
@@ -86,8 +88,11 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
         }
     }
 
+    // Simulate the removal of the indices in chosenIndexInRemaining and remap each chosen index
+    // to account for the removal of prior indices.
+    // The result - "chosenIndices" - is a strictly increasing list of indices i, each in the range
+    // 0 <= i < numToChooseFrom.
     std::vector<int64_t> chosenIndices;
-
     for (const auto nthOfRemainingToChoose : chosenIndexInRemaining)
     {
         // Be optimistic and give remappedIndex the smallest possible value:
