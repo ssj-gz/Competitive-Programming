@@ -367,6 +367,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
                 }
             }
         }
+        assert(found);
     }
     assert(static_cast<int>(generatedQueries.size()) == originalNumToGenerate);
     return generatedQueries;
