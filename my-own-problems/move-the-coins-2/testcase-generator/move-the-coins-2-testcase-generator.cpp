@@ -372,6 +372,7 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
                     generatedQueries.push_back({nodeToReparent, nodeAtHeight});
                     break;
                 }
+                indexOfNodeAtHeight++;
             }
         }
         assert(found);
