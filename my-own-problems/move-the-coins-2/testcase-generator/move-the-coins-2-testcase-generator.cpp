@@ -282,6 +282,8 @@ vector<TestQuery> generateQueriesFromNodes(TreeGenerator<NodeData>& treeGenerato
     {
         randomBobWinNodes.push_back(nodeToReparent);
     }
+    // Give randomBobWinNodes a deterministic ordering.
+    sort(randomBobWinNodes.begin(), randomBobWinNodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->id() < rhs->id(); });
     while (numHeightOffsetFromBobWins > 0)
     {
         const auto nodeWithBobWin = randomBobWinNodes[rnd.next(static_cast<int>(randomBobWinNodes.size()))];
