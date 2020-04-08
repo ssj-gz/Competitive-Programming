@@ -9,7 +9,7 @@ struct AVLNode
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
     int numDescendants = 1;
-    int sumOfDescendantValues = 0;
+    int64_t sumOfDescendantValues = 0;
 
     int id = -1;
 };
