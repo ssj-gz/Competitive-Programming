@@ -86,7 +86,7 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withScore(85)
                                             .withMaxNodesPerTestcase(maxNodes)
-                                            .withMaxNodesOverAllTestcases(2 * maxNodes)
+                                            .withMaxNodesOverAllTestcases(maxNodes)
                                             .withMaxNumCountersPerNode(maxCounters)
                                             .withMaxNumCountersOverAllNodes(NoExplicitLimit)
                                             .withMaxNumTestcases(maxNumTestcases);
@@ -515,7 +515,7 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
-                const int numNodes = 200'000;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
@@ -562,7 +562,7 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
-                const int numNodes = 200'000;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
                 const int numQueries = 200'000;
 
                 TreeGenerator<NodeData> treeGenerator;
