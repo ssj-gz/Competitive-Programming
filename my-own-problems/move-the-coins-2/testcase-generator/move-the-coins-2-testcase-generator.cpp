@@ -748,7 +748,53 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(903493763)
+                    .withDescription("Three long (~50k) arms originating at (or near) root (again!); then 33% of remaining of bristles; the rest, leaves.  200k nodes total.  Some queries along the first half of one of the arms, then concentrating on two nodes, each with low-ish height."));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(47'000, 53'000));
+                const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(47'000, 53'000));
+                const int posOf3rdArmAlong1st = rnd.next(700, 800);
+                const auto arm3 = treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(47'000, 53'000));
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 33 / 100, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
+
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+
+                std::vector<TestQuery> queries;
+                addQueriesAlongFirstHalfOfChain(queries, arm1, rnd.next(58'000, 62'000), 24.5, nodesAtHeight);
+
+                TestNode<NodeData>* firstNodeToConcentrateOn = nullptr;
+                while (true)
+                {
+                    const int indexAlongArm2 = rnd.next(static_cast<int>(arm2.size()));
+                    firstNodeToConcentrateOn = arm2[indexAlongArm2];
+                    cout << "Node height: " << firstNodeToConcentrateOn->data.height << " # bob wins: " << firstNodeToConcentrateOn->data.nodeRelocateInfo.newParentHeightsForBobWin.size() << endl;
+                    if (firstNodeToConcentrateOn->data.nodeRelocateInfo.newParentHeightsForBobWin.size() >= 200)
+                    {
+                        break;
+                    }
+                }
+
+
+                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
+                queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
