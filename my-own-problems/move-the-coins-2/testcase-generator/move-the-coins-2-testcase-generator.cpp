@@ -10,6 +10,7 @@
 using namespace std;
 
 constexpr int maxNodes = 200'000;
+constexpr int maxQueries = 200'000;
 constexpr int maxCounters = 16;
 constexpr int maxNumTestcases = 1000;
 
@@ -19,7 +20,9 @@ struct SubtaskInfo
     int score = -1;
 
     int maxNodesPerTestcase = -1;
+    int maxQueriesPerTestcase = -1;
     int maxNodesOverAllTestcases = -1;
+    int maxQueriesOverAllTestcases = -1;
     int maxNumCountersPerNode = -1;
     int maxNumCountersOverAllNodes = -1;
     int maxNumTestcases = -1;
@@ -43,9 +46,19 @@ struct SubtaskInfo
         this->maxNodesPerTestcase = maxNodesPerTestcase;
         return *this;
     }
+    SubtaskInfo& withMaxQueriesPerTestcase(int maxQueriesPerTestcase)
+    {
+        this->maxQueriesPerTestcase = maxQueriesPerTestcase;
+        return *this;
+    }
     SubtaskInfo& withMaxNodesOverAllTestcases(int maxNodesOverAllTestcases)
     {
         this->maxNodesOverAllTestcases = maxNodesOverAllTestcases;
+        return *this;
+    }
+    SubtaskInfo& withMaxQueriesOverAllTestcases(int maxQueriesOverAllTestcases)
+    {
+        this->maxQueriesOverAllTestcases = maxQueriesOverAllTestcases;
         return *this;
     }
     SubtaskInfo& withMaxNumCountersPerNode(int maxNumCountersPerNode)
@@ -78,7 +91,9 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withScore(10)
                                             .withMaxNodesPerTestcase(1000)
+                                            .withMaxQueriesPerTestcase(1000)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
+                                            .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumCountersPerNode(maxCounters)
                                             .withMaxNumCountersOverAllNodes(NoExplicitLimit)
                                             .withMaxNumTestcases(100);
@@ -86,7 +101,9 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withScore(85)
                                             .withMaxNodesPerTestcase(maxNodes)
+                                            .withMaxQueriesPerTestcase(maxQueries)
                                             .withMaxNodesOverAllTestcases(maxNodes)
+                                            .withMaxQueriesOverAllTestcases(maxQueries)
                                             .withMaxNumCountersPerNode(maxCounters)
                                             .withMaxNumCountersOverAllNodes(NoExplicitLimit)
                                             .withMaxNumTestcases(maxNumTestcases);
