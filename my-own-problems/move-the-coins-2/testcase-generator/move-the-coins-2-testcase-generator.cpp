@@ -427,6 +427,14 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
     return generatedQueries;
 };
 
+void addQueriesAlongFirstHalfOfChain(vector<TestQuery>& destQueries, const vector<TestNode<NodeData>*>& nodeChain, int numToGenerate, const double percentageBobWin, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeightMap)
+{
+    const vector<TestNode<NodeData>*> chainFirstHalf(nodeChain.begin(), nodeChain.begin() + nodeChain.size() / 2);
+    const auto queriesAlongFirstHalfOfChain = generateQueriesFromNodes(chainFirstHalf, numToGenerate, percentageBobWin, nodesAtHeightMap);
+    destQueries.insert(destQueries.end(), queriesAlongFirstHalfOfChain.begin(), queriesAlongFirstHalfOfChain.end());
+}
+
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
@@ -515,9 +523,6 @@ int main(int argc, char* argv[])
                 const int posOfSecondArmAlongMain = rnd.next(400, 500);
                 const auto secondArm = treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
 
-                const vector<TestNode<NodeData>*> mainArmFirstHalf(mainArm.begin(), mainArm.begin() + mainArm.size() / 2);
-                const vector<TestNode<NodeData>*> secondArmFirstHalf(secondArm.begin(), secondArm.begin() + secondArm.size() / 2);
-
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
 
@@ -527,10 +532,8 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
-                const auto queriesAlongArm1 = generateQueriesFromNodes(mainArmFirstHalf, 85'234, 31.3, nodesAtHeight);
-                queries.insert(queries.end(), queriesAlongArm1.begin(), queriesAlongArm1.end());
-                const auto queriesAlongArm2 = generateQueriesFromNodes(secondArmFirstHalf , 91'768, rnd.next(30.0, 60.0), nodesAtHeight);
-                queries.insert(queries.end(), queriesAlongArm2.begin(), queriesAlongArm2.end());
+                addQueriesAlongFirstHalfOfChain(queries, mainArm, 85'234, 31.3, nodesAtHeight);
+                addQueriesAlongFirstHalfOfChain(queries, secondArm , 91'768, rnd.next(30.0, 60.0), nodesAtHeight);
 
                 const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), 200'000 - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
