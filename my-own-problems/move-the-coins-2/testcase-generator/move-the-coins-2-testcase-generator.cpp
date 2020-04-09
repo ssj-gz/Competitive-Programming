@@ -557,19 +557,20 @@ int main(int argc, char* argv[])
             // seed: 661625455 maxBobWinsForNode: 1
             // seed: 43829431 maxBobWinsForNode: 73
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(38432)
-                    .withDescription("Three long (~50k) arms originating at (or near) root; then 35% of remaining of bristles; the rest, leaves.  200k nodes total"));
+                    .withSeed(16037662)
+                    .withDescription("Three long (~50k) arms originating at (or near) root; then 35% of remaining of bristles; the rest, leaves.  200k nodes total.  Queries mainly concentrate on the first halves of each of the three arms."));
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
                 const int numNodes = 200'000;
+                const int numQueries = 200'000;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
                 const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
                 const int posOf3rdArmAlong1st = rnd.next(700, 800);
-                treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(48'000, 52'000));
+                const auto arm3 = treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(48'000, 52'000));
 
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 35 / 100, 70.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
@@ -580,6 +581,13 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
+                addQueriesAlongFirstHalfOfChain(queries, arm1, rnd.next(58'000, 62'000), 24.5, nodesAtHeight);
+                addQueriesAlongFirstHalfOfChain(queries, arm2 , rnd.next(58'000, 62'000), 20.6, nodesAtHeight);
+                addQueriesAlongFirstHalfOfChain(queries, arm3 , rnd.next(58'000, 62'000), 21.7, nodesAtHeight);
+
+                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), 200'000 - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
+                queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
+
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
