@@ -515,6 +515,9 @@ int main(int argc, char* argv[])
                 const int posOfSecondArmAlongMain = rnd.next(400, 500);
                 const auto secondArm = treeGenerator.addNodeChain(mainArm[posOfSecondArmAlongMain], rnd.next(78'000, 82'000));
 
+                const vector<TestNode<NodeData>*> mainArmFirstHalf(mainArm.begin(), mainArm.begin() + mainArm.size() / 2);
+                const vector<TestNode<NodeData>*> secondArmFirstHalf(secondArm.begin(), secondArm.begin() + secondArm.size() / 2);
+
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) * 3 / 10, 70.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
 
@@ -524,9 +527,9 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
-                const auto queriesAlongArm1 = generateQueriesFromNodes(mainArm, 85'234, rnd.next(30.0, 60.0), nodesAtHeight);
+                const auto queriesAlongArm1 = generateQueriesFromNodes(mainArmFirstHalf, 85'234, 31.3, nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm1.begin(), queriesAlongArm1.end());
-                const auto queriesAlongArm2 = generateQueriesFromNodes(secondArm , 91'768, rnd.next(30.0, 60.0), nodesAtHeight);
+                const auto queriesAlongArm2 = generateQueriesFromNodes(secondArmFirstHalf , 91'768, rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), queriesAlongArm2.begin(), queriesAlongArm2.end());
 
                 const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), 200'000 - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
