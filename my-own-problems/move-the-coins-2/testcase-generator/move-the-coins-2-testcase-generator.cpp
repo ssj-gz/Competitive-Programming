@@ -533,6 +533,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
@@ -552,7 +553,7 @@ int main(int argc, char* argv[])
                 addQueriesAlongFirstHalfOfChain(queries, mainArm, 85'234, 31.3, nodesAtHeight);
                 addQueriesAlongFirstHalfOfChain(queries, secondArm , 91'768, rnd.next(30.0, 60.0), nodesAtHeight);
 
-                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), 200'000 - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
+                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
@@ -580,7 +581,7 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases;
-                const int numQueries = 200'000;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
@@ -602,7 +603,7 @@ int main(int argc, char* argv[])
                 addQueriesAlongFirstHalfOfChain(queries, arm2 , rnd.next(58'000, 62'000), 20.6, nodesAtHeight);
                 addQueriesAlongFirstHalfOfChain(queries, arm3 , rnd.next(58'000, 62'000), 21.7, nodesAtHeight);
 
-                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), 200'000 - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
+                const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
@@ -623,7 +624,7 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
-                const int numNodes = 200'000;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
@@ -666,7 +667,7 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
-                const int numNodes = 200'000;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
@@ -696,7 +697,7 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
-                const int numNodes = 200'000;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
