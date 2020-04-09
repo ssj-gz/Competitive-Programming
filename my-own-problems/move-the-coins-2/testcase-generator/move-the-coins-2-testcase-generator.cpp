@@ -671,12 +671,13 @@ int main(int argc, char* argv[])
             // seed: 443418483 maxBobWinsForNode: 1
             // seed: 176024828 maxBobWinsForNode: 32
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(1111)
-                    .withDescription("Generic squat graph of 100 nodes where all node have degree 3.  Then turn each edge into path of length 1500.  Then fill in the remainder with bristles and leaves"));
+                    .withSeed(479832082)
+                    .withDescription("Generic squat graph of 100 nodes where all node have degree 3.  Then turn each edge into path of length 1500.  Then fill in the remainder with bristles and leaves.  Queries are essentially random, though heavily biased towards Bob Wins"));
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
 
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
@@ -690,7 +691,8 @@ int main(int argc, char* argv[])
                 const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
-                std::vector<TestQuery> queries;
+                const auto queries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries, 13.8, nodesAtHeight);
+
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
