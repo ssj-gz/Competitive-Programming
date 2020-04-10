@@ -840,6 +840,57 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(111)
+                    .withDescription("A couple of large, random-ish trees and queries"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 1% probability, the rest random.  Random queries, though biased towards Bob wins"));
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases / 2;
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes * 85.0/ 100.0, 1.0);
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
+
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+
+                const auto queries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries, rnd.next(30.0, 60.0), nodesAtHeight);
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 99% probability, the rest random.  Random queries, though biased towards Bob wins"));
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases / 2;
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes * 85.0/ 100.0, 99.0);
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 70.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98.0);
+
+                addCounters(treeGenerator, rnd.next(78.0, 85.0));
+
+                const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+
+                const auto queries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries, rnd.next(30.0, 60.0), nodesAtHeight);
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
