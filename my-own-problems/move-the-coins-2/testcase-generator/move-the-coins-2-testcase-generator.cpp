@@ -807,6 +807,18 @@ int main(int argc, char* argv[])
                     }
                 }
                 assert(acceptableNodesToFocusOn.size() >= 2);
+                shuffle(acceptableNodesToFocusOn.begin(), acceptableNodesToFocusOn.end());
+                acceptableNodesToFocusOn.erase(acceptableNodesToFocusOn.begin() + 2, acceptableNodesToFocusOn.end());
+                assert(acceptableNodesToFocusOn.size() == 2);
+
+                for (auto node : acceptableNodesToFocusOn)
+                {
+                    const int numFocusedQueries = rnd.next(61'000, 63'000);
+                    const double percentBobWins = static_cast<double>(node->data.nodeRelocateInfo.newParentHeightsForBobWin.size() - rnd.next(1, 4)) / numFocusedQueries * 100.0;
+                    cout << "percentBobWins: " << percentBobWins << endl;
+                    const auto nodeFocusedQueries = generateQueriesFromNodes({node}, numFocusedQueries, percentBobWins, nodesAtHeight);
+                    queries.insert(queries.end(), nodeFocusedQueries.begin(), nodeFocusedQueries.end());
+                }
 
 #if 0
                 while (true)
