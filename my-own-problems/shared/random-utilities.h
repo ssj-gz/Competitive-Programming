@@ -162,11 +162,12 @@ std::vector<T> chooseWithWeighting(const std::map<T, double>& valueWeight, const
          });
 
     std::vector<T> chosenValues;
+    const int numAvailableValues = cumulativeWeightsAndValue.size();
     for (int i = 0; i < numValuesToChoose; i++)
     {
         const double randPercent = rnd.next(0.0, 100.0);
         bool found = false;
-        for (int chosenIndex = 0; chosenIndex < cumulativeWeightsAndValue.size(); chosenIndex++)
+        for (int chosenIndex = 0; chosenIndex < numAvailableValues; chosenIndex++)
         {
             if (randPercent >= cumulativeWeightsAndValue[chosenIndex].weight)
             {
