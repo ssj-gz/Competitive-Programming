@@ -23,6 +23,7 @@ struct NodeData
     int dfsVisitBegin = -1;
     int dfsVisitEnd = -1;
     int grundySubtreeContrib = 0;
+    int maxDescendantDist = -1;
 
     NodeRelocateInfo nodeRelocateInfo;
     bool isDescendentOf(TestNode<NodeData>* node)
@@ -37,6 +38,7 @@ void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<
     currentNode->data.height = height;
     currentNode->data.dfsVisitBegin = dfsIndex;
     currentNode->data.parent = parent;
+    currentNode->data.maxDescendantDist = 0;
     dfsIndex++;
 
     for (auto edge : currentNode->neighbours)
@@ -46,6 +48,7 @@ void fillInNodeHeightsAndVisitInfoAux(TestNode<NodeData>* currentNode, TestNode<
             continue;
 
         fillInNodeHeightsAndVisitInfoAux(childNode, currentNode, height + 1, dfsIndex);
+        currentNode->data.maxDescendantDist = std::max(currentNode->data.maxDescendantDist, 1 + childNode->data.maxDescendantDist);
     }
 
     currentNode->data.dfsVisitEnd = dfsIndex;

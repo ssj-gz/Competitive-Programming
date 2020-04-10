@@ -749,8 +749,22 @@ int main(int argc, char* argv[])
             }
         }
         {
+            // seed: 627204325 maxBobWinsForNode: 1
+            // seed: 478433582 maxBobWinsForNode: 101
+            // seed: 493861181 maxBobWinsForNode: 195
+            // seed: 449630792 maxBobWinsForNode: 1
+            // seed: 852721181 maxBobWinsForNode: 1
+            // seed: 716885559 maxBobWinsForNode: 279
+            // seed: 510026048 maxBobWinsForNode: 1
+            // seed: 333830483 maxBobWinsForNode: 1
+            // seed: 930883739 maxBobWinsForNode: 1
+            // seed: 128190829 maxBobWinsForNode: 1
+            // seed: 285621021 maxBobWinsForNode: 1
+            // seed: 200792510 maxBobWinsForNode: 201
+            // seed: 605985517 maxBobWinsForNode: 63
+
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(903493763)
+                    .withSeed(200792510)
                     .withDescription("Three long (~50k) arms originating at (or near) root (again!); then 33% of remaining of bristles; the rest, leaves.  200k nodes total.  Some queries along the first half of one of the arms, then concentrating on two nodes, each with low-ish height."));
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
@@ -776,7 +790,25 @@ int main(int argc, char* argv[])
                 std::vector<TestQuery> queries;
                 addQueriesAlongFirstHalfOfChain(queries, arm1, rnd.next(58'000, 62'000), 24.5, nodesAtHeight);
 
-                TestNode<NodeData>* firstNodeToConcentrateOn = nullptr;
+                auto allNodes = treeGenerator.nodes();
+                sort(allNodes.begin(), allNodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->data.maxDescendantDist > rhs->data.maxDescendantDist; });
+
+                // Prefer to focus on nodes that a) have a large maxDescendantDist (these will be harder to brute force); and b) have at
+                // least 40 newParentHeightsForBobWin (for variety).
+
+                vector<TestNode<NodeData>*> acceptableNodesToFocusOn;
+                const int minMaxDescendantDist = 47'000;
+                for (auto node : allNodes)
+                {
+                    const auto numNewParentHeightsForBobWin = node->data.nodeRelocateInfo.newParentHeightsForBobWin.size();
+                    if (numNewParentHeightsForBobWin >= 40 && node->data.maxDescendantDist >= minMaxDescendantDist)
+                    {
+                        acceptableNodesToFocusOn.push_back(node);
+                    }
+                }
+                assert(acceptableNodesToFocusOn.size() >= 2);
+
+#if 0
                 while (true)
                 {
                     const int indexAlongArm2 = rnd.next(static_cast<int>(arm2.size()));
@@ -787,6 +819,7 @@ int main(int argc, char* argv[])
                         break;
                     }
                 }
+#endif
 
 
                 const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
