@@ -845,6 +845,26 @@ int main(int argc, char* argv[])
                     .withSeed(111)
                     .withDescription("A couple of large, random-ish trees and queries"));
             {
+                // seed: 627204325 maxBobWinsForNode: 7
+                // seed: 280988413 maxBobWinsForNode: 1
+                // seed: 797977800 maxBobWinsForNode: 11
+                // seed: 557246613 maxBobWinsForNode: 6
+                // seed: 40359200 maxBobWinsForNode: 1
+                // seed: 78341875 maxBobWinsForNode: 1
+                // seed: 693113706 maxBobWinsForNode: 1
+                // seed: 681821811 maxBobWinsForNode: 13
+                // seed: 98680510 maxBobWinsForNode: 6
+                // seed: 514302571 maxBobWinsForNode: 12
+                // seed: 316625903 maxBobWinsForNode: 4
+                // seed: 721444634 maxBobWinsForNode: 6
+                // seed: 319914437 maxBobWinsForNode: 6
+                // seed: 614853481 maxBobWinsForNode: 9
+                // seed: 983570452 maxBobWinsForNode: 1
+                // seed: 475994678 maxBobWinsForNode: 1
+                // seed: 912975595 maxBobWinsForNode: 6
+                // seed: 531395595 maxBobWinsForNode: 1
+                // seed: 543763606 maxBobWinsForNode: 7
+                // seed: 972779061 maxBobWinsForNode: 7
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 1% probability, the rest random.  Random queries, though biased towards Bob wins"));
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
@@ -868,6 +888,12 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
             {
+                // seed: 627204325 maxBobWinsForNode: 1
+                // seed: 749926816 maxBobWinsForNode: 78
+                // seed: 731766203 maxBobWinsForNode: 43
+                // seed: 804613110 maxBobWinsForNode: 162
+                // seed: 765530524 maxBobWinsForNode: 176
+                // seed: 118148413 maxBobWinsForNode: 1
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 99% probability, the rest random.  Random queries, though biased towards Bob wins"));
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
