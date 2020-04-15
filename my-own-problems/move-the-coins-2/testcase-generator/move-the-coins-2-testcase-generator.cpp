@@ -509,22 +509,6 @@ int main(int argc, char* argv[])
             five->data.numCounters = 1;
             six->data.numCounters = 0;
 
-            const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
-            findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
-            cout << "Bob winning queries: " << endl;
-            for (const auto node : treeGenerator.nodes())
-            {
-                cout << "nodeToReparent: " << node->id() << " newParents: ";
-                for (const auto newParentHeight : node->data.nodeRelocateInfo.newParentHeightsForBobWin)
-                {
-                    for (const auto newParent : nodesAtHeight[newParentHeight])
-                    {
-                        cout << newParent->id() << " ";
-                    }
-                }
-                cout << endl;
-            }
-
             std::vector<TestQuery> queries = {
                                                 {four, two},  // Bob Win.
                                                 {three, four}, // Alice Win.
