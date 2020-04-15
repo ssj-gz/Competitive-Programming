@@ -599,10 +599,9 @@ int main(int argc, char* argv[])
 
     // SUBTASK 2
     {
-        // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
         auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask2)
                 .withSeed(9734)
-                .withDescription("TODO - first testcase test"));
+                .withDescription("1000 random, medium size testcases, each with 900-1000 nodes and 1000 queries which are mostly random but biased towards Bob wins."));
         for (int i = 0; i < subtask2.maxNumTestcases; i++)
         {
             cout << "i: " << i << endl;
