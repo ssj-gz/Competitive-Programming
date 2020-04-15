@@ -83,6 +83,7 @@ const int NoExplicitLimit = std::numeric_limits<int>::max();
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
                                             .withMaxNodesPerTestcase(10)
+                                            .withMaxQueriesPerTestcase(10)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumCountersPerNode(6)
                                             .withMaxNumCountersOverAllNodes(10)
@@ -239,6 +240,22 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
 {
     const auto originalNumToGenerate = numToGenerate;
 
+    bool canGenerateAtLeastOneQuery = false;
+    for (const auto node : nodes)
+    {
+        if (node->data.nodeRelocateInfo.maxHeightOfNonDescendent != -1)
+        {
+            canGenerateAtLeastOneQuery = true;
+            break;
+        }
+    }
+
+    if (!canGenerateAtLeastOneQuery)
+        throw std::invalid_argument("Can't generate any queries at all!");
+
+
+
+
     struct NodeAndHeight
     {
         TestNode<NodeData>* nodeToReparent = nullptr;
@@ -309,78 +326,85 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
     }
     // Give randomBobWinNodes a deterministic ordering.
     sort(randomBobWinNodes.begin(), randomBobWinNodes.end(), [](const auto& lhs, const auto& rhs) { return lhs->id() < rhs->id(); });
-    while (numHeightOffsetFromBobWins > 0)
+
+    if (!randomBobWinNodes.empty())
     {
-        const auto nodeWithBobWin = randomBobWinNodes[rnd.next(static_cast<int>(randomBobWinNodes.size()))];
-        const auto bobWinParentHeights = randomBobWinsByNodeToReparent[nodeWithBobWin];
-        const auto nodeToEchoTo = nodes[rnd.next(static_cast<int>(nodes.size()))];
-        if (!nodeToEchoTo->data.nodeRelocateInfo.newParentHeightsForBobWin.empty())
+        while (numHeightOffsetFromBobWins > 0)
         {
-            // Prefer to echo to nodes which have no Bob wins, but add some wiggle-room.
-            if (rnd.next(0.0, 100.0) / 100.0 >= 10.0)
+            const auto nodeWithBobWin = randomBobWinNodes[rnd.next(static_cast<int>(randomBobWinNodes.size()))];
+            const auto bobWinParentHeights = randomBobWinsByNodeToReparent[nodeWithBobWin];
+            const auto nodeToEchoTo = nodes[rnd.next(static_cast<int>(nodes.size()))];
+            if (!nodeToEchoTo->data.nodeRelocateInfo.newParentHeightsForBobWin.empty())
+            {
+                // Prefer to echo to nodes which have no Bob wins, but add some wiggle-room.
+                if (rnd.next(0.0, 100.0) / 100.0 >= 10.0)
+                    continue;
+            }
+            if (nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent == -1)
+            {
+                // Can't reparent nodeToEchoTo, so can't use it in queries.
                 continue;
-        }
-        if (nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent == -1)
-        {
-            // Can't reparent nodeToEchoTo, so can't use it in queries.
-            continue;
-        }
+            }
 
-        const int heightAdjustment = nodeToEchoTo->data.height - nodeWithBobWin->data.height;
+            const int heightAdjustment = nodeToEchoTo->data.height - nodeWithBobWin->data.height;
 
-        for (const auto bobWinParentHeight : bobWinParentHeights)
+            for (const auto bobWinParentHeight : bobWinParentHeights)
+            {
+                int adjustedHeight = bobWinParentHeight - heightAdjustment;
+                if (adjustedHeight < 0 || adjustedHeight > nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent)
+                {
+                    // Invalid height; just pick one at random.
+                    adjustedHeight = rnd.next(0, nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent);
+                }
+                generatedHeightOffsetFromBobWinQueries.push_back({nodeToEchoTo, adjustedHeight});
+                numHeightOffsetFromBobWins--;
+            }
+        }
+        cout << "generatedHeightOffsetFromBobWinQueries.size(): " << generatedHeightOffsetFromBobWinQueries.size() << endl;
+
+        // We may have generated too many of this type of query - remove some from the end, if so.
+        while (numHeightOffsetFromBobWins < 0)
         {
-            int adjustedHeight = bobWinParentHeight - heightAdjustment;
-            if (adjustedHeight < 0 || adjustedHeight > nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent)
+            generatedHeightOffsetFromBobWinQueries.pop_back();
+            numHeightOffsetFromBobWins++;
+        }
+        baseGeneratedQueries.insert(baseGeneratedQueries.end(), generatedHeightOffsetFromBobWinQueries.begin(), generatedHeightOffsetFromBobWinQueries.end());
+        numToGenerate -= generatedHeightOffsetFromBobWinQueries.size();
+    }
+
+    if (!baseGeneratedQueries.empty())
+    {
+        // Now just add a small offset to the height of new parent height for any query generated so far (both Bob and Alice wins).
+        int numSmallHeightOffsetToGenerate = rnd.next(30.0, 80.0) / 100.0 * numToGenerate;
+        vector<NodeAndHeight> smallHeightOffsetQueries;
+        cout << "baseGeneratedQueries.size(): " << baseGeneratedQueries.size() << endl;
+
+        while (numSmallHeightOffsetToGenerate > 0)
+        {
+            const auto& pairToAdjust = baseGeneratedQueries[rnd.next(static_cast<int>(baseGeneratedQueries.size()))];
+            int adjustedHeight = pairToAdjust.newParentHeight + chooseWithWeighting<int>({
+                    {-1, 30.0},
+                    {+1, 30.0},
+                    {-2, 12.5},
+                    {+2, 12.5},
+                    {-3, 6.0},
+                    {+3, 6.0},
+                    {-4, 1.5},
+                    {+4, 1.5}
+                    }, 1).front();
+            if (adjustedHeight < 0 || adjustedHeight > pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent)
             {
                 // Invalid height; just pick one at random.
-                adjustedHeight = rnd.next(0, nodeToEchoTo->data.nodeRelocateInfo.maxHeightOfNonDescendent);
+                adjustedHeight = rnd.next(0, pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent);
             }
-            generatedHeightOffsetFromBobWinQueries.push_back({nodeToEchoTo, adjustedHeight});
-            numHeightOffsetFromBobWins--;
-        }
-    }
-    cout << "generatedHeightOffsetFromBobWinQueries.size(): " << generatedHeightOffsetFromBobWinQueries.size() << endl;
 
-    // We may have generated too many of this type of query - remove some from the end, if so.
-    while (numHeightOffsetFromBobWins < 0)
-    {
-        generatedHeightOffsetFromBobWinQueries.pop_back();
-        numHeightOffsetFromBobWins++;
-    }
-    baseGeneratedQueries.insert(baseGeneratedQueries.end(), generatedHeightOffsetFromBobWinQueries.begin(), generatedHeightOffsetFromBobWinQueries.end());
-    numToGenerate -= generatedHeightOffsetFromBobWinQueries.size();
-
-    // Now just add a small offset to the height of new parent height for any query generated so far (both Bob and Alice wins).
-    int numSmallHeightOffsetToGenerate = rnd.next(30.0, 80.0) / 100.0 * numToGenerate;
-    vector<NodeAndHeight> smallHeightOffsetQueries;
-    cout << "baseGeneratedQueries.size(): " << baseGeneratedQueries.size() << endl;
-
-    while (numSmallHeightOffsetToGenerate > 0)
-    {
-        const auto& pairToAdjust = baseGeneratedQueries[rnd.next(static_cast<int>(baseGeneratedQueries.size()))];
-        int adjustedHeight = pairToAdjust.newParentHeight + chooseWithWeighting<int>({
-                                                                                   {-1, 30.0},
-                                                                                   {+1, 30.0},
-                                                                                   {-2, 12.5},
-                                                                                   {+2, 12.5},
-                                                                                   {-3, 6.0},
-                                                                                   {+3, 6.0},
-                                                                                   {-4, 1.5},
-                                                                                   {+4, 1.5}
-                                                                                 }, 1).front();
-        if (adjustedHeight < 0 || adjustedHeight > pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent)
-        {
-            // Invalid height; just pick one at random.
-            adjustedHeight = rnd.next(0, pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent);
+            smallHeightOffsetQueries.push_back({pairToAdjust.nodeToReparent, adjustedHeight});
+            numSmallHeightOffsetToGenerate--;
         }
 
-        smallHeightOffsetQueries.push_back({pairToAdjust.nodeToReparent, adjustedHeight});
-        numSmallHeightOffsetToGenerate--;
+        baseGeneratedQueries.insert(baseGeneratedQueries.end(), smallHeightOffsetQueries.begin(), smallHeightOffsetQueries.end());
+        numToGenerate -= smallHeightOffsetQueries.size();
     }
-
-    baseGeneratedQueries.insert(baseGeneratedQueries.end(), smallHeightOffsetQueries.begin(), smallHeightOffsetQueries.end());
-    numToGenerate -= smallHeightOffsetQueries.size();
 
     // Just random choices for the remainder.
     while (numToGenerate > 0)
@@ -461,64 +485,113 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
-        auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask1)
-                .withSeed(0)
-                .withDescription("Sample test input"));
         {
-            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("First sample testcase - query 2 is winning for Bob."));
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask1)
+                    .withSeed(0)
+                    .withDescription("Sample test input"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("First sample testcase - query 2 is winning for Bob."));
 
-            TreeGenerator<NodeData> treeGenerator;
-            auto one = treeGenerator.createNode();
-            auto two = treeGenerator.createNode();
-            auto three = treeGenerator.createNode();
-            auto four = treeGenerator.createNode();
+                TreeGenerator<NodeData> treeGenerator;
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+                auto four = treeGenerator.createNode();
 
-            treeGenerator.addEdge(one, two);
-            treeGenerator.addEdge(four, three);
-            treeGenerator.addEdge(four, one);
+                treeGenerator.addEdge(one, two);
+                treeGenerator.addEdge(four, three);
+                treeGenerator.addEdge(four, one);
 
-            one->data.numCounters = 1;
-            two->data.numCounters = 2;
-            three->data.numCounters = 1;
-            four->data.numCounters = 1;
+                one->data.numCounters = 1;
+                two->data.numCounters = 2;
+                three->data.numCounters = 1;
+                four->data.numCounters = 1;
 
-            std::vector<TestQuery> queries = { 
-                                                {two, three}, // Alice win.
-                                                {three, one}, // Bob win.
-                                                {three, two}  // Alice win.
-                                             };
-            writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
+                std::vector<TestQuery> queries = { 
+                                                    {two, three}, // Alice win.
+                                                    {three, one}, // Bob win.
+                                                    {three, two}  // Alice win.
+                                                 };
+                writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
+            }
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Second sample testcase - queries 1 and 3 are winning for Bob."));
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto one = treeGenerator.createNode();
+                auto two = treeGenerator.createNode();
+                auto three = treeGenerator.createNode();
+                auto four = treeGenerator.createNode();
+                auto five = treeGenerator.createNode();
+                auto six = treeGenerator.createNode();
+
+                treeGenerator.addEdge(one, two);
+                treeGenerator.addEdge(three, one);
+                treeGenerator.addEdge(one, four);
+                treeGenerator.addEdge(five, three);
+                treeGenerator.addEdge(six, four);
+
+                one->data.numCounters = 0;
+                two->data.numCounters = 2;
+                three->data.numCounters = 0;
+                four->data.numCounters = 1;
+                five->data.numCounters = 1;
+                six->data.numCounters = 0;
+
+                std::vector<TestQuery> queries = {
+                                                    {four, two},  // Bob Win.
+                                                    {three, four}, // Alice Win.
+                                                    {five, one},  // Bob Win.
+                                                 };
+                writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
+            }
         }
         {
-            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Second sample testcase - queries 1 and 3 are winning for Bob."));
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask1)
+                    .withSeed(1321223)
+                    .withDescription("Misc tiny testcases - purely randomly generated."));
 
-            TreeGenerator<NodeData> treeGenerator;
-            auto one = treeGenerator.createNode();
-            auto two = treeGenerator.createNode();
-            auto three = treeGenerator.createNode();
-            auto four = treeGenerator.createNode();
-            auto five = treeGenerator.createNode();
-            auto six = treeGenerator.createNode();
-
-            treeGenerator.addEdge(one, two);
-            treeGenerator.addEdge(three, one);
-            treeGenerator.addEdge(one, four);
-            treeGenerator.addEdge(five, three);
-            treeGenerator.addEdge(six, four);
-
-            one->data.numCounters = 0;
-            two->data.numCounters = 2;
-            three->data.numCounters = 0;
-            four->data.numCounters = 1;
-            five->data.numCounters = 1;
-            six->data.numCounters = 0;
-
-            std::vector<TestQuery> queries = {
-                                                {four, two},  // Bob Win.
-                                                {three, four}, // Alice Win.
-                                                {five, one},  // Bob Win.
-                                             };
-            writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
+            for (int i = 0; i < subtask1.maxNumTestcases; i++)
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+                bool generatedTestcase = false;
+                cout << "Trying to generate testcase " << (i + 1) << " of " << subtask1.maxNumTestcases << endl;
+                while (!generatedTestcase)
+                {
+                    try
+                    {
+                        const int numNodes = rnd.next(1, subtask1.maxNodesPerTestcase);
+                        const int numQueries = rnd.next(1, subtask1.maxQueriesPerTestcase);
+                        const int totalCounters = 1 + rnd.next(subtask1.maxNumCountersOverAllNodes);
+                        TreeGenerator<NodeData> treeGenerator;
+                        treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                        while (treeGenerator.numNodes() < numNodes)
+                        {
+                            treeGenerator.createNodeWithRandomParent();
+                        }
+                        for (auto& node : treeGenerator.nodes())
+                        {
+                            node->data.numCounters = 0;
+                        }
+                        for (int i = 0; i < totalCounters; i++)
+                        {
+                            const int addToNodeId = rnd.next(numNodes);
+                            treeGenerator.nodes()[addToNodeId]->data.numCounters++;
+                        }
+                        const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                        findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+                        vector<TestQuery> queries;
+                        queries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries, rnd.next(30.0, 60.0), nodesAtHeight);
+                        assert(queries.size() == numQueries);
+                        scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                        generatedTestcase = true;
+                    }
+                    catch (std::invalid_argument& exception)
+                    {
+                        cout << "Failed; retrying with different numbers" << endl;
+                    } 
+                }
+            }
         }
     }
 
