@@ -485,6 +485,53 @@ int main(int argc, char* argv[])
             std::vector<TestQuery> queries = { {two, three}, {three, one}, {three, two} };
             writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
         }
+        {
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Second sample testcase"));
+
+            TreeGenerator<NodeData> treeGenerator;
+            auto one = treeGenerator.createNode();
+            auto two = treeGenerator.createNode();
+            auto three = treeGenerator.createNode();
+            auto four = treeGenerator.createNode();
+            auto five = treeGenerator.createNode();
+            auto six = treeGenerator.createNode();
+
+            treeGenerator.addEdge(one, two);
+            treeGenerator.addEdge(three, one);
+            treeGenerator.addEdge(one, four);
+            treeGenerator.addEdge(five, three);
+            treeGenerator.addEdge(six, four);
+
+            one->data.numCounters = 0;
+            two->data.numCounters = 2;
+            three->data.numCounters = 0;
+            four->data.numCounters = 1;
+            five->data.numCounters = 1;
+            six->data.numCounters = 0;
+
+            const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+            findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
+            cout << "Bob winning queries: " << endl;
+            for (const auto node : treeGenerator.nodes())
+            {
+                cout << "nodeToReparent: " << node->id() << " newParents: ";
+                for (const auto newParentHeight : node->data.nodeRelocateInfo.newParentHeightsForBobWin)
+                {
+                    for (const auto newParent : nodesAtHeight[newParentHeight])
+                    {
+                        cout << newParent->id() << " ";
+                    }
+                }
+                cout << endl;
+            }
+
+            std::vector<TestQuery> queries = {
+                                                {four, two},  // Bob Win.
+                                                {three, four}, // Alice Win.
+                                                {five, one},  // Bob Win.
+                                             };
+            writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
+        }
     }
 
     // SUBTASK 2
