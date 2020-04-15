@@ -865,7 +865,8 @@ int main(int argc, char* argv[])
                 // seed: 531395595 maxBobWinsForNode: 1
                 // seed: 543763606 maxBobWinsForNode: 7
                 // seed: 972779061 maxBobWinsForNode: 7
-                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 1% probability, the rest random.  Random queries, though biased towards Bob wins"));
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 1% probability, the rest random.  Random queries, though biased towards Bob wins")
+                                                                       .withSeed(98680510));
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
                 const int numQueries = subtask3.maxQueriesOverAllTestcases / 2;
@@ -894,7 +895,8 @@ int main(int argc, char* argv[])
                 // seed: 804613110 maxBobWinsForNode: 162
                 // seed: 765530524 maxBobWinsForNode: 176
                 // seed: 118148413 maxBobWinsForNode: 1
-                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 99% probability, the rest random.  Random queries, though biased towards Bob wins"));
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Mostly leaves with 99% probability, the rest random.  Random queries, though biased towards Bob wins")
+                                                                       .withSeed(804613110));
 
                 const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
                 const int numQueries = subtask3.maxQueriesOverAllTestcases / 2;
