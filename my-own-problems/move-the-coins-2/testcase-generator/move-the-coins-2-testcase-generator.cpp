@@ -764,10 +764,30 @@ int main(int argc, char* argv[])
                 findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
 
                 std::vector<TestQuery> queries;
-                addQueriesAlongFirstHalfOfChain(queries, arm1, rnd.next(43'000, 47'000), rnd.next(20.0, 30.0), nodesAtHeight);
-                addQueriesAlongFirstHalfOfChain(queries, arm2 , rnd.next(43'000, 47'000), rnd.next(20.0, 40.0), nodesAtHeight);
-                addQueriesAlongFirstHalfOfChain(queries, arm3 , rnd.next(43'000, 47'000), rnd.next(20.0, 40.0), nodesAtHeight);
-                addQueriesAlongFirstHalfOfChain(queries, arm4 , rnd.next(43'000, 47'000), rnd.next(20.0, 40.0), nodesAtHeight);
+                // Split out the calculation of numToGenerate and percentageBobWin into separate variables, rather than calculating
+                // while passing them as arguments to addQueriesAlongFirstHalfOfChain: the order in which the rnd.next calls are
+                // made is important (for maintaining determinancy), but the order in which arguments to a function are evaluated
+                // is undefined!
+                {
+                    const auto percentageBobWin = rnd.next(20.0, 30.0);
+                    const auto numToGenerate = rnd.next(43'000, 47'000);
+                    addQueriesAlongFirstHalfOfChain(queries, arm1, numToGenerate, percentageBobWin, nodesAtHeight);
+                }
+                {
+                    const auto percentageBobWin = rnd.next(20.0, 40.0);
+                    const auto numToGenerate = rnd.next(43'000, 47'000);
+                    addQueriesAlongFirstHalfOfChain(queries, arm2 , numToGenerate, percentageBobWin, nodesAtHeight);
+                }
+                {
+                    const auto percentageBobWin = rnd.next(20.0, 40.0);
+                    const auto numToGenerate = rnd.next(43'000, 47'000);
+                    addQueriesAlongFirstHalfOfChain(queries, arm3 , numToGenerate, percentageBobWin, nodesAtHeight);
+                }
+                {
+                    const auto percentageBobWin = rnd.next(20.0, 40.0);
+                    const auto numToGenerate = rnd.next(43'000, 47'000);
+                    addQueriesAlongFirstHalfOfChain(queries, arm4 , numToGenerate, percentageBobWin, nodesAtHeight);
+                }
 
                 const auto remainingQueries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries - queries.size(), rnd.next(30.0, 60.0), nodesAtHeight);
                 queries.insert(queries.end(), remainingQueries.begin(), remainingQueries.end());
