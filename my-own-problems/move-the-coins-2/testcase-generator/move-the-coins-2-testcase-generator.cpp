@@ -551,11 +551,13 @@ int main(int argc, char* argv[])
                     .withSeed(1321223)
                     .withDescription("Misc tiny testcases - purely randomly generated."));
 
-            for (int i = 0; i < subtask1.maxNumTestcases; i++)
+            const vector<int64_t> interestingSeeds = { 240249054,2434200703,4226957038,2973646957,1184999958,2508839353,2488325520,1158695956,3472755837,2056034087 };
+            assert(static_cast<int>(interestingSeeds.size()) == subtask1.maxNumTestcases);
+
+            for (const auto seed : interestingSeeds)
             {
-                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withSeed(seed));
                 bool generatedTestcase = false;
-                cout << "Trying to generate testcase " << (i + 1) << " of " << subtask1.maxNumTestcases << endl;
                 while (!generatedTestcase)
                 {
                     try
