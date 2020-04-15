@@ -412,6 +412,14 @@ class TestSuite
         {
             assert(newTestFileInfo.containingSubtask() != nullptr);
 
+            std::cout << "Beginning creation of new TestFile (subtask " << newTestFileInfo.containingSubtask()->subtaskId << ")";
+            if (!newTestFileInfo.description().empty())
+            {
+                std::cout << " with description: " << newTestFileInfo.description();
+            }
+            std::cout << std::endl;
+
+
             if (newTestFileInfo.seed() != -1)
                 rnd.setSeed(newTestFileInfo.seed());
 
