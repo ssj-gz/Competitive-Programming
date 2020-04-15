@@ -461,20 +461,29 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
-        // TODO - remove this and replace with proper testcase - this is just here for debugging/ testing.
         auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask1)
-                .withSeed(9734)
-                .withDescription("TODO - dummy subtask 1 testfile"));
+                .withSeed(0)
+                .withDescription("Sample test input"));
         {
-            auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("First sample testcase"));
 
             TreeGenerator<NodeData> treeGenerator;
-            treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-            addCounters(treeGenerator, rnd.next(70.0, 95.0));
+            auto one = treeGenerator.createNode();
+            auto two = treeGenerator.createNode();
+            auto three = treeGenerator.createNode();
+            auto four = treeGenerator.createNode();
 
-            std::vector<TestQuery> queries;
+            treeGenerator.addEdge(one, two);
+            treeGenerator.addEdge(four, three);
+            treeGenerator.addEdge(four, one);
 
-            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            one->data.numCounters = 1;
+            two->data.numCounters = 2;
+            three->data.numCounters = 1;
+            four->data.numCounters = 1;
+
+            std::vector<TestQuery> queries = { {two, three}, {three, one}, {three, two} };
+            writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
         }
     }
 
