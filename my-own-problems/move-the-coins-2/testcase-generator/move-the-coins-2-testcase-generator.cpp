@@ -465,7 +465,7 @@ int main(int argc, char* argv[])
                 .withSeed(0)
                 .withDescription("Sample test input"));
         {
-            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("First sample testcase"));
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("First sample testcase - query 2 is winning for Bob."));
 
             TreeGenerator<NodeData> treeGenerator;
             auto one = treeGenerator.createNode();
@@ -482,11 +482,15 @@ int main(int argc, char* argv[])
             three->data.numCounters = 1;
             four->data.numCounters = 1;
 
-            std::vector<TestQuery> queries = { {two, three}, {three, one}, {three, two} };
+            std::vector<TestQuery> queries = { 
+                                                {two, three}, // Alice win.
+                                                {three, one}, // Bob win.
+                                                {three, two}  // Alice win.
+                                             };
             writeTestCase(treeGenerator, testcase, queries); // Don't scramble - should match the sample testcase in the Problem Statement exactly.
         }
         {
-            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Second sample testcase"));
+            auto& testcase = testFile.newTestcase(MC2TestCaseInfo().withDescription("Second sample testcase - queries 1 and 3 are winning for Bob."));
 
             TreeGenerator<NodeData> treeGenerator;
             auto one = treeGenerator.createNode();
