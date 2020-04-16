@@ -439,19 +439,19 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
                 dbgNumNonDescendantsAtHeight++;
         }
         const int chosenIndexOfNodeAtHeight = rnd.next(dbgNumNonDescendantsAtHeight);
-        int indexOfNodeAtHeight = 0;
+        int dbgIndexOfNodeAtHeight = 0;
         bool found = false;
-        for (const auto& nodeAtHeight : nodesAtNewParentHeight)
+        for (const auto& newParent : nodesAtNewParentHeight)
         {
-            if (!nodeAtHeight->data.isDescendentOf(nodeToReparent))
+            if (!newParent->data.isDescendentOf(nodeToReparent))
             {
-                if (indexOfNodeAtHeight == chosenIndexOfNodeAtHeight)
+                if (dbgIndexOfNodeAtHeight == chosenIndexOfNodeAtHeight)
                 {
                     found = true;
-                    generatedQueries.push_back({nodeToReparent, nodeAtHeight});
+                    generatedQueries.push_back({nodeToReparent, newParent});
                     break;
                 }
-                indexOfNodeAtHeight++;
+                dbgIndexOfNodeAtHeight++;
             }
         }
         assert(found);
