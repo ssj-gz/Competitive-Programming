@@ -435,13 +435,13 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         auto firstDescendantIter = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitBegin,
             [](const auto& lhsNode, const auto& rhsDfsBegin)
             {
-                cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
+                //cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
                 return lhsNode->data.dfsVisitBegin < rhsDfsBegin;
             });
         auto firstPostDescendantIter = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitEnd,
                 [](const auto& lhsNode, const auto& rhsDfsBegin)
                 {
-                cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
+                //cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
                 return lhsNode->data.dfsVisitBegin < rhsDfsBegin;
                 });
 
@@ -474,11 +474,11 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
             }
         }
         assert(found);
-        cout << "calculating numAtHeightBeforeDescendant; nodeToReparent's dfsVisitBegin:" << nodeToReparent->data.dfsVisitBegin << " dfsVisitEnd: " << nodeToReparent->data.dfsVisitEnd << endl;
-        cout << "dbgNumNonDescendantsAtHeight: " << dbgNumNonDescendantsAtHeight << " nodeToReparent: " << nodeToReparent->id() << endl;
+        //cout << "calculating numAtHeightBeforeDescendant; nodeToReparent's dfsVisitBegin:" << nodeToReparent->data.dfsVisitBegin << " dfsVisitEnd: " << nodeToReparent->data.dfsVisitEnd << endl;
+        //cout << "dbgNumNonDescendantsAtHeight: " << dbgNumNonDescendantsAtHeight << " nodeToReparent: " << nodeToReparent->id() << endl;
         for (const auto a : nodesAtNewParentHeight)
         {
-            cout << a->id() << "[" << a->data.dfsVisitBegin << ", " << a->data.dfsVisitEnd << "]" << " ";
+            //cout << a->id() << "[" << a->data.dfsVisitBegin << ", " << a->data.dfsVisitEnd << "]" << " ";
         }
         int dbgNumAtHeightBeforeDescendant = 0;
         int dbgNumAtHeightAfterDescendant = 0;
@@ -489,8 +489,8 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
             if (dbgNode->data.dfsVisitBegin >= nodeToReparent->data.dfsVisitEnd)
                 dbgNumAtHeightAfterDescendant++;
         }
-        cout << "dbgNumAtHeightBeforeDescendant: " << dbgNumAtHeightBeforeDescendant << " numAtHeightBeforeDescendant: " << numAtHeightBeforeDescendant << endl;
-        cout << "dbgNumAtHeightAfterDescendant: " << dbgNumAtHeightAfterDescendant << " numAtHeightAfterDescendant: " << numAtHeightAfterDescendant << endl;
+        //cout << "dbgNumAtHeightBeforeDescendant: " << dbgNumAtHeightBeforeDescendant << " numAtHeightBeforeDescendant: " << numAtHeightBeforeDescendant << endl;
+        //cout << "dbgNumAtHeightAfterDescendant: " << dbgNumAtHeightAfterDescendant << " numAtHeightAfterDescendant: " << numAtHeightAfterDescendant << endl;
         assert(dbgNumAtHeightBeforeDescendant == numAtHeightBeforeDescendant);
         assert(numAtHeightAfterDescendant == dbgNumAtHeightAfterDescendant);
 
@@ -503,8 +503,8 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         {
             chosenNewParent = nodesAtNewParentHeight[nodesAtNewParentHeight.size() - numAtHeightAfterDescendant + (chosenIndexOfNodeAtHeight - numAtHeightBeforeDescendant)];
         }
-        cout << "dbgchosenNewParent: " << dbgchosenNewParent->id() << endl;
-        cout << "chosenNewParent: " << (chosenNewParent == nullptr ? -1 : chosenNewParent->id()) << endl;
+        //cout << "dbgchosenNewParent: " << dbgchosenNewParent->id() << endl;
+        //cout << "chosenNewParent: " << (chosenNewParent == nullptr ? -1 : chosenNewParent->id()) << endl;
 
         assert(chosenNewParent == dbgchosenNewParent);
 
