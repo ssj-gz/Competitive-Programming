@@ -426,73 +426,26 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
     assert(static_cast<int>(baseGeneratedQueries.size()) == originalNumToGenerate);
 
     vector<TestQuery> generatedQueries;
-    // TODO - optimise this - we can use the fact that the nodes at a given height are in DFS order, and 
-    // use lower_bound/ upper_bound to figure out how many nodes are non-descendants and then to pick
-    // one of these at random.
+    // Generate a TestQuery from each baseGeneratedQuery by picking a random node (which it not a descendant of nodeToReparent)
+    // for at the newParentHeight.
     for (const auto& [nodeToReparent, newParentHeight] : baseGeneratedQueries)
     {
         const auto& nodesAtNewParentHeight = nodesAtHeightMap[newParentHeight];
         auto firstDescendantIter = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitBegin,
             [](const auto& lhsNode, const auto& rhsDfsBegin)
             {
-                //cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
                 return lhsNode->data.dfsVisitBegin < rhsDfsBegin;
             });
         auto firstPostDescendantIter = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitEnd,
                 [](const auto& lhsNode, const auto& rhsDfsBegin)
                 {
-                //cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
                 return lhsNode->data.dfsVisitBegin < rhsDfsBegin;
                 });
 
         const int numAtHeightBeforeDescendant = firstDescendantIter - nodesAtNewParentHeight.begin();
         const int numAtHeightAfterDescendant = nodesAtNewParentHeight.size() - (firstPostDescendantIter - nodesAtNewParentHeight.begin());
         const int numNonDescendantsAtHeight = numAtHeightBeforeDescendant + numAtHeightAfterDescendant;
-        int dbgNumNonDescendantsAtHeight = 0;
-        for (const auto& nodeAtHeight : nodesAtNewParentHeight)
-        {
-            if (!nodeAtHeight->data.isDescendentOf(nodeToReparent))
-                dbgNumNonDescendantsAtHeight++;
-        }
-        assert(dbgNumNonDescendantsAtHeight == numNonDescendantsAtHeight);
         const int chosenIndexOfNodeAtHeight = rnd.next(numNonDescendantsAtHeight);
-        int dbgIndexOfNodeAtHeight = 0;
-        TestNode<NodeData>* dbgchosenNewParent = nullptr;
-        bool found = false;
-        for (const auto& newParent : nodesAtNewParentHeight)
-        {
-            if (!newParent->data.isDescendentOf(nodeToReparent))
-            {
-                if (dbgIndexOfNodeAtHeight == chosenIndexOfNodeAtHeight)
-                {
-                    found = true;
-                    dbgchosenNewParent = newParent;
-                    generatedQueries.push_back({nodeToReparent, newParent});
-                    break;
-                }
-                dbgIndexOfNodeAtHeight++;
-            }
-        }
-        assert(found);
-        //cout << "calculating numAtHeightBeforeDescendant; nodeToReparent's dfsVisitBegin:" << nodeToReparent->data.dfsVisitBegin << " dfsVisitEnd: " << nodeToReparent->data.dfsVisitEnd << endl;
-        //cout << "dbgNumNonDescendantsAtHeight: " << dbgNumNonDescendantsAtHeight << " nodeToReparent: " << nodeToReparent->id() << endl;
-        for (const auto a : nodesAtNewParentHeight)
-        {
-            //cout << a->id() << "[" << a->data.dfsVisitBegin << ", " << a->data.dfsVisitEnd << "]" << " ";
-        }
-        int dbgNumAtHeightBeforeDescendant = 0;
-        int dbgNumAtHeightAfterDescendant = 0;
-        for (const auto dbgNode : nodesAtNewParentHeight)
-        {
-            if (dbgNode->data.dfsVisitBegin < nodeToReparent->data.dfsVisitBegin)
-                dbgNumAtHeightBeforeDescendant++;
-            if (dbgNode->data.dfsVisitBegin >= nodeToReparent->data.dfsVisitEnd)
-                dbgNumAtHeightAfterDescendant++;
-        }
-        //cout << "dbgNumAtHeightBeforeDescendant: " << dbgNumAtHeightBeforeDescendant << " numAtHeightBeforeDescendant: " << numAtHeightBeforeDescendant << endl;
-        //cout << "dbgNumAtHeightAfterDescendant: " << dbgNumAtHeightAfterDescendant << " numAtHeightAfterDescendant: " << numAtHeightAfterDescendant << endl;
-        assert(dbgNumAtHeightBeforeDescendant == numAtHeightBeforeDescendant);
-        assert(numAtHeightAfterDescendant == dbgNumAtHeightAfterDescendant);
 
         TestNode<NodeData>* chosenNewParent = nullptr;
         if (chosenIndexOfNodeAtHeight < numAtHeightBeforeDescendant)
@@ -503,11 +456,8 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         {
             chosenNewParent = nodesAtNewParentHeight[nodesAtNewParentHeight.size() - numAtHeightAfterDescendant + (chosenIndexOfNodeAtHeight - numAtHeightBeforeDescendant)];
         }
-        //cout << "dbgchosenNewParent: " << dbgchosenNewParent->id() << endl;
-        //cout << "chosenNewParent: " << (chosenNewParent == nullptr ? -1 : chosenNewParent->id()) << endl;
-
-        assert(chosenNewParent == dbgchosenNewParent);
-
+        assert(chosenNewParent);
+        generatedQueries.push_back({nodeToReparent, chosenNewParent});
     }
     assert(static_cast<int>(generatedQueries.size()) == originalNumToGenerate);
 
