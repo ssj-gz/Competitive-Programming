@@ -1008,6 +1008,46 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(13984)
+                    .withDescription("max testcases, mostly with about 200 nodes/ queries each but in total equalling maxNodesOverAllTestcases/ maxQueriesOverAllTestcases"));
+
+            const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 1);
+            const auto numQueriesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxQueriesOverAllTestcases, 1);
+            for (int i = 0; i < subtask3.maxNumTestcases; i++)
+            {
+                auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
+
+                const int numNodes = numNodesForTestCase[i];
+                const int numQueries = numQueriesForTestCase[i];
+                bool generatedTestcase = false;
+                while (!generatedTestcase)
+                {
+                    try
+                    {
+
+                        cout << "Attempting to generate testcase " << (i + 1) << " of " << subtask3.maxNumTestcases << " numNodes: " << numNodes << " numQueries: " << numQueries << endl;
+                        TreeGenerator<NodeData> treeGenerator;
+                        treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                        const int numNodesPhase1 = rnd.next(numNodes);
+                        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
+                        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
+                        addCounters(treeGenerator, rnd.next(100.0));
+
+                        const auto nodesAtHeight = buildNodesAtHeightMap(treeGenerator);
+                        findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight, false);
+
+                        const auto queries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries, rnd.next(0.0, 60.0), nodesAtHeight);
+                        scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                        generatedTestcase = true;
+                    }
+                    catch (std::invalid_argument& exc)
+                    {
+                    }
+                }
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
