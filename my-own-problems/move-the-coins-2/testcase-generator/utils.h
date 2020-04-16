@@ -232,33 +232,36 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
     const auto treeHash = calcTreeHash(rootNode);
     const std::string treeCacheFilename = "relocated-height-info-cache-" + std::to_string(treeHash);
 
-    // Check cache.
-    std::ifstream cacheFileIn(treeCacheFilename);
-    if (cacheFileIn)
+    if (cacheResults)
     {
-        const auto allNodes = treeGenerator.nodes();
-        for (int i = 0; i < allNodes.size(); i++)
-        {
-            int nodeToReparentId;
-            cacheFileIn >> nodeToReparentId;
-            auto nodeToReparent = allNodes[nodeToReparentId - 1];
-            cacheFileIn >> nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent;
-
-            int numNewParentHeightsForBobWin;
-            cacheFileIn >> numNewParentHeightsForBobWin;
-
-            for (int i = 0; i < numNewParentHeightsForBobWin; i++)
-            {
-                int newParentHeight;
-                cacheFileIn >> newParentHeight;
-                nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
-            }
-        }
-        
+        // Check cache.
+        std::ifstream cacheFileIn(treeCacheFilename);
         if (cacheFileIn)
         {
-            std::cerr << "Used cached version of newParentHeightsForBobWin: " << treeCacheFilename << std::endl;
-            return;
+            const auto allNodes = treeGenerator.nodes();
+            for (int i = 0; i < allNodes.size(); i++)
+            {
+                int nodeToReparentId;
+                cacheFileIn >> nodeToReparentId;
+                auto nodeToReparent = allNodes[nodeToReparentId - 1];
+                cacheFileIn >> nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent;
+
+                int numNewParentHeightsForBobWin;
+                cacheFileIn >> numNewParentHeightsForBobWin;
+
+                for (int i = 0; i < numNewParentHeightsForBobWin; i++)
+                {
+                    int newParentHeight;
+                    cacheFileIn >> newParentHeight;
+                    nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.push_back(newParentHeight);
+                }
+            }
+
+            if (cacheFileIn)
+            {
+                std::cerr << "Used cached version of newParentHeightsForBobWin: " << treeCacheFilename << std::endl;
+                return;
+            }
         }
     }
 
