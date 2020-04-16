@@ -225,7 +225,7 @@ std::vector<std::vector<TestNode<NodeData>*>> buildNodesAtHeightMap(const TreeGe
  * of height h, with p not a descendent of v, such that re-parenting v to p
  * gives a game board in which Bob wins.
  */
-void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeGenerator, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeight)
+void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeGenerator, const std::vector<std::vector<TestNode<NodeData>*>>& nodesAtHeight, bool cacheResults = true)
 {
     auto rootNode = treeGenerator.nodes().front();
 
@@ -313,23 +313,26 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
         }
     }
 
-    // Cache results for next time.
-    std::ofstream cacheFileOut(treeCacheFilename);
-
-    for (auto nodeToReparent : treeGenerator.nodes())
+    if (cacheResults)
     {
-        cacheFileOut << nodeToReparent->id() << std::endl;
-        cacheFileOut << nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent << std::endl;
-        cacheFileOut << nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.size() << std::endl;
-        for (const auto newParentHeight : nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin)
+        // Cache results for next time.
+        std::ofstream cacheFileOut(treeCacheFilename);
+
+        for (auto nodeToReparent : treeGenerator.nodes())
         {
-            cacheFileOut << newParentHeight << " ";
+            cacheFileOut << nodeToReparent->id() << std::endl;
+            cacheFileOut << nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent << std::endl;
+            cacheFileOut << nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin.size() << std::endl;
+            for (const auto newParentHeight : nodeToReparent->data.nodeRelocateInfo.newParentHeightsForBobWin)
+            {
+                cacheFileOut << newParentHeight << " ";
+            }
+            cacheFileOut << std::endl;
+            cacheFileOut << std::endl;
         }
-        cacheFileOut << std::endl;
-        cacheFileOut << std::endl;
+        assert(cacheFileOut);
+        cacheFileOut.close();
     }
-    assert(cacheFileOut);
-    cacheFileOut.close();
 }
 
 
