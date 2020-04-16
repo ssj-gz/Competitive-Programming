@@ -445,6 +445,7 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         const int numAtHeightBeforeDescendant = firstDescendantIter - nodesAtNewParentHeight.begin();
         const int numAtHeightAfterDescendant = nodesAtNewParentHeight.size() - (firstPostDescendantIter - nodesAtNewParentHeight.begin());
         const int numNonDescendantsAtHeight = numAtHeightBeforeDescendant + numAtHeightAfterDescendant;
+        assert(numNonDescendantsAtHeight > 0);
         const int chosenIndexOfNodeAtHeight = rnd.next(numNonDescendantsAtHeight);
 
         TestNode<NodeData>* chosenNewParent = nullptr;
@@ -1013,7 +1014,7 @@ int main(int argc, char* argv[])
                     .withSeed(13984)
                     .withDescription("max testcases, mostly with about 200 nodes/ queries each but in total equalling maxNodesOverAllTestcases/ maxQueriesOverAllTestcases"));
 
-            const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 1);
+            const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 2);
             const auto numQueriesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxQueriesOverAllTestcases, 1);
             for (int i = 0; i < subtask3.maxNumTestcases; i++)
             {
