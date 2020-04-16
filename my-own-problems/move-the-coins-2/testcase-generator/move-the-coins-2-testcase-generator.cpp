@@ -440,6 +440,7 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         }
         const int chosenIndexOfNodeAtHeight = rnd.next(dbgNumNonDescendantsAtHeight);
         int dbgIndexOfNodeAtHeight = 0;
+        TestNode<NodeData>* dbgchosenNewParent = nullptr;
         bool found = false;
         for (const auto& newParent : nodesAtNewParentHeight)
         {
@@ -448,6 +449,7 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
                 if (dbgIndexOfNodeAtHeight == chosenIndexOfNodeAtHeight)
                 {
                     found = true;
+                    dbgchosenNewParent = newParent;
                     generatedQueries.push_back({nodeToReparent, newParent});
                     break;
                 }
@@ -455,10 +457,11 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
             }
         }
         assert(found);
-        cout << "calculating numAtHeightBeforeDescendant; nodeToReparent's dfsVisitBegin:" << nodeToReparent->data.dfsVisitBegin << endl;
+        cout << "calculating numAtHeightBeforeDescendant; nodeToReparent's dfsVisitBegin:" << nodeToReparent->data.dfsVisitBegin << " dfsVisitEnd: " << nodeToReparent->data.dfsVisitEnd << endl;
+        cout << "dbgNumNonDescendantsAtHeight: " << dbgNumNonDescendantsAtHeight << " nodeToReparent: " << nodeToReparent->id() << endl;
         for (const auto a : nodesAtNewParentHeight)
         {
-            cout << a->data.dfsVisitBegin << " ";
+            cout << a->id() << "[" << a->data.dfsVisitBegin << ", " << a->data.dfsVisitEnd << "]" << " ";
         }
         cout << endl;
         auto firstDescendantIter = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitBegin,
@@ -474,21 +477,46 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         {
             if (dbgNode->data.dfsVisitBegin < nodeToReparent->data.dfsVisitBegin)
                 dbgNumAtHeightBeforeDescendant++;
-            if (dbgNode->data.dfsVisitBegin > nodeToReparent->data.dfsVisitEnd)
+            if (dbgNode->data.dfsVisitBegin >= nodeToReparent->data.dfsVisitEnd)
                 dbgNumAtHeightAfterDescendant++;
         }
 
         cout << "dbgNumAtHeightBeforeDescendant: " << dbgNumAtHeightBeforeDescendant << " numAtHeightBeforeDescendant: " << numAtHeightBeforeDescendant << endl;
         assert(dbgNumAtHeightBeforeDescendant == numAtHeightBeforeDescendant);
+#if 0
         auto firstPostDescendantIter = std::upper_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitEnd,
-            [](const auto& lhsDfsEnd, const auto& rhsNode)
-            {
+                [](const auto& lhsDfsEnd, const auto& rhsNode)
+                {
                 //cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
                 return lhsDfsEnd < rhsNode->data.dfsVisitBegin;
-            });
+                });
+#else
+        auto firstPostDescendantIter = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsVisitEnd,
+                [](const auto& lhsNode, const auto& rhsDfsBegin)
+                {
+                cout << "lamda: lhsNode: " << lhsNode->id() << " dfsVisitBegin: " << lhsNode->data.dfsVisitBegin << " rhsDfsBegin: " << rhsDfsBegin << endl;
+                return lhsNode->data.dfsVisitBegin < rhsDfsBegin;
+                });
+
+
+#endif
         const int numAtHeightAfterDescendant = nodesAtNewParentHeight.size() - (firstPostDescendantIter - nodesAtNewParentHeight.begin());
         cout << "dbgNumAtHeightAfterDescendant: " << dbgNumAtHeightAfterDescendant << " numAtHeightAfterDescendant: " << numAtHeightAfterDescendant << endl;
         assert(numAtHeightAfterDescendant == dbgNumAtHeightAfterDescendant);
+        TestNode<NodeData>* chosenNewParent = nullptr;
+        if (chosenIndexOfNodeAtHeight < numAtHeightBeforeDescendant)
+        {
+            chosenNewParent = nodesAtNewParentHeight[chosenIndexOfNodeAtHeight];
+        }
+        else
+        {
+            chosenNewParent = nodesAtNewParentHeight[nodesAtNewParentHeight.size() - numAtHeightAfterDescendant + (chosenIndexOfNodeAtHeight - numAtHeightBeforeDescendant)];
+        }
+        cout << "dbgchosenNewParent: " << dbgchosenNewParent->id() << endl;
+        cout << "chosenNewParent: " << (chosenNewParent == nullptr ? -1 : chosenNewParent->id()) << endl;
+
+        assert(chosenNewParent == dbgchosenNewParent);
+
     }
     assert(static_cast<int>(generatedQueries.size()) == originalNumToGenerate);
 
