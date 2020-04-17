@@ -1,3 +1,5 @@
+// O(N * Q) Sprague-Grundy based solution to MOVCOIN2.
+// Should only pass Subtasks 1 and 2.
 #include <iostream>
 #include <vector>
 #include <algorithm>
