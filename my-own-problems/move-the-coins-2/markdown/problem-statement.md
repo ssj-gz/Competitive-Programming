@@ -55,7 +55,7 @@ Since this value can be very large, please output it mod $10^9+7$.
 
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
 - The first line of a testcase contains a single integer $N$.
-- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes numbered $u$ and $v$ are connected by an edge.
+- Each of the next $N-1$ lines contains two space-separated integers $a$ and $b$ indicating that the nodes numbered $a$ and $b$ are connected by an edge.
 - The next line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node numbered $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
 - The next line contains a single integer $Q$ denoting the number of reparenting queries.
 - The next $Q$ lines each consist of two space-separated integers $u_i$ and $v_i$ denoting the $i^\text{th}$ reparenting query $q_i=(u_i, v_i)$.
