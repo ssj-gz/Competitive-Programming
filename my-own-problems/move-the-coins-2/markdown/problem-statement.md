@@ -39,6 +39,8 @@ Assuming we want to apply the reparenting query $q=(u,v)=(6,3)$.  Then we comput
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent2of2.png)
 
+Can you help Bob compute, for each of Alice's reparenting queries $q$, the winner of the game played on the transformed board $T(q)$?
+
 More formally, Bob is given the following:
 
 1. An original tree $T_\textit{orig}$
