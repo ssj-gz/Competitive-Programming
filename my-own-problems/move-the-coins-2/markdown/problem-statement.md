@@ -1,17 +1,17 @@
 A sequel to ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem), with a tiny twist :)
 
-Bob and Alice are playing a board game.  The board is in the form of a tree $T$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of *Coins* around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T)$ as the game with the following rules:
+Bob and Alice are playing a board game.  The board is in the form of a tree $T$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of *Coins* around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. Define $\textit{game}(T)$ as the game with the following rules:
 
 1. A copy of $T$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Coins on the node numbered $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
-3. A move consists of taking a single Coin ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$ (**this is the "tiny twist" from the original Problem**).
-4. If a player cannot make a move on their turn (i.e. because all the Coins are on node $R$), then the game ends and the other player is declared the winner.
+3. A move consists of taking a single Coin ($C$, say) from some node other than $1$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $1$ (**this is the "tiny twist" from the original Problem**).
+4. If a player cannot make a move on their turn (i.e. because all the Coins are on node $1$), then the game ends and the other player is declared the winner.
 
-For example, if the tree $T$ currently looks like this and, for this game, we have chosen $R=1$:
+For example, if the tree $T$ currently looks like this:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example1of3.png)
 
-Then the current player can pick a Coin on any of nodes $v = 2, 4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the Coin $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
+Then the current player can pick a Coin on any of nodes $v = 2, 4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the Coin $X$ steps towards $1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example2of3.png)
 
