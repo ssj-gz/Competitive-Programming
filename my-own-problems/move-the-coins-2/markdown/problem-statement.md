@@ -95,6 +95,36 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 **Subtask #3 (85 points)**: original constraints
 
+### Example Input
 
+```
+2
+4
+1 2
+4 3
+4 1
+1 2 1 1
+3
+2 3
+3 1
+3 2
+6
+1 2
+3 1
+1 4
+5 3
+6 4
+0 2 0 1 1 0
+3
+4 2
+3 4
+5 1
+```
 
+### Example Output
+
+```
+4
+10
+```
 
