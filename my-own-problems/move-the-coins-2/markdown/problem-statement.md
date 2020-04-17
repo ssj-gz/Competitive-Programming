@@ -30,3 +30,11 @@ Bob knows some elementary Game Theory, so given the _original tree_ $T_\textit{o
 3. _Re-parent_ the node $u_i$ to its _new parent_, $v_i$ i.e. add an edge between $u_i$ and $v_i$.
 
 The resulting tree is our $T(q_i)$.
+
+As an example, assume that the below is our $T_\textit{orig}$ with a set of $c_v$ giving the number of Coins on a node:
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent1of2.png)
+
+Assuming we want to apply the reparenting query $q=(6,3)$.  Then we compute $T((6,3))$ as follows:
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent2of2.png)
