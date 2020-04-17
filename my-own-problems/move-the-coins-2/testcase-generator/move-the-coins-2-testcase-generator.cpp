@@ -253,9 +253,6 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
     if (!canGenerateAtLeastOneQuery)
         throw std::invalid_argument("Can't generate any queries at all!");
 
-
-
-
     struct NodeAndHeight
     {
         TestNode<NodeData>* nodeToReparent = nullptr;
