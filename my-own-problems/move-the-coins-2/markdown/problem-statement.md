@@ -35,7 +35,7 @@ As an example, assume that the below is our $T_\textit{orig}$ with a set of $c_v
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent1of2.png)
 
-Assuming we want to apply the reparenting query $q=(6,3)$.  Then we compute $T((6,3))$ as follows:
+Assuming we want to apply the reparenting query $q=(u,v)=(6,3)$.  Then we compute $T((6,3))$ as follows:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent2of2.png)
 
@@ -75,6 +75,23 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 - $0 \le c_i \le 16$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200,000$
 - the sum of $Q$ over all $T$ testcases does not exceed $200,000$
+
+### Subtasks
+**Subtask #1 (5 points):** 
+
+- $T \le 10$
+- $N \le 10$
+- $Q \le 10$
+- $c_i \le 6$ for all valid $i$
+- the sum of $c_i$ over all nodes $i$ in a testcase does not exceed $10$
+
+**Subtask #2 (10 points)**: 
+
+* $T \le 100$ 
+* $N \le 1,000$
+* $Q \le 1,000$
+
+**Subtask #3 (85 points)**: original constraints
 
 
 
