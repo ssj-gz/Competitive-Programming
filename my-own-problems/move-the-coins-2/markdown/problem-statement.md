@@ -128,3 +128,36 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 10
 ```
 
+### Explanation
+
+**Example case 1:** The original tree $T_{\textit{orig}}$ looks like this (the initial Coins specified by the $c_i$ have been added for clarity):
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-1of4.png)
+
+The first query is $q_1=(u_1, v_1)=(2,3)$, and we construct the corresponding $T(q_1)$ as show below:
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-2of4.png)
+
+We see that $\textit{winner}(\textit{game}(T(q_1)))$ is Alice TODO - explanation
+
+The second query is $q_2=(u_2, v_2)=(3,1)$, and we construct the corresponding $T(q_2)$ as show below:
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-3of4.png)
+
+We see that $\textit{winner}(\textit{game}(T(q_2)))$ is Bob TODO - explanation,so we add $2$ to $\textit{BobWinQ}$.
+
+The third and final query is $q_3=(u_3, v_3)=(3,2)$, and we construct the corresponding $T(q_3)$ as show below:
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-4of4.png)
+
+Alice wins the game played on $T(q_3)$ TODO - explanation.
+
+So we have $\textit{BobWinQ}={2}$, so the sum we need to compute is
+
+$$
+\sum\limits_{i \in \textit{BobWinQ}}2^i = 2^2=4
+$$
+
+Taking this modulo $10^9+7$, the final answer for this testcase is $4$.
+
+**Example case 2:** The original tree $T_{\textit{orig}}$ looks like this: TODO
