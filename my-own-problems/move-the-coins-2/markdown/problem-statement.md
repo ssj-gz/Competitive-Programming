@@ -1,6 +1,6 @@
 A sequel to ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem), with a tiny twist :)
 
-Bob and Alice are playing a board game.  The board is in the form of a tree $T$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of *Coins* around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. Define $\textit{game}(T)$ as the game with the following rules:
+Bob and Alice are playing a board game.  The board is in the form of a tree $T$ with $N$ nodes, numbered from $1$ to $N$, and _rooted_ at node $1$. The game involves moving a set of *Coins* around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. Define $\textit{game}(T)$ as the game with the following rules:
 
 1. A copy of $T$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Coins on the node numbered $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
@@ -23,7 +23,7 @@ and it is the other player's turn to move.
 
 Let $\textit{winner}(\textit{game}(T))$ be whichever of Bob or Alice wins the $\textit{game}(T)$, assuming both players play perfectly.
 
-Bob knows some elementary Game Theory, so given the _original tree_ $T_\textit{orig}$ and the initial distribution $c_v$ of Coins at the start of the game, he can easily decide $\textit{winner}(\textit{game}(T))$ without having to play.  As in the original Problem, Alice now gives him a set of _reparenting queries_ $q_i=(u_i, v_i)$, $i=1,2,\ldots\,Q$, and challenges him, for each query $q_i$, to find $\textit{winner}(\textit{game}(T(q_i)))$, where $T(q_i)$ is the _transformed tree_ created from applying the reparenting query $q_i=(u_i, v_i)$ to the original tree $T_{\textit{orig}}$ as follows:
+Bob knows some elementary Game Theory, so given the _original tree_ $T_\textit{orig}$ and the initial distribution $c_v$ of Coins at the start of the game, he can easily decide $\textit{winner}(\textit{game}(T_\textit{orig}))$ without even having to play!  As in the original Problem, Alice now gives him a set of _reparenting queries_ $q_i=(u_i, v_i)$, $i=1,2,\ldots\,Q$, and challenges him, for each query $q_i$, to find $\textit{winner}(\textit{game}(T(q_i)))$, where $T(q_i)$ is the _transformed tree_ created from applying the reparenting query $q_i=(u_i, v_i)$ to the original tree $T_{\textit{orig}}$ as follows:
 
 1. Take a copy of the original tree $T_{\textit{orig}}$, along with the $c_v$ Coins on each node $v$.
 2. Since this tree is _rooted_ at 1, it makes sense to refer to a _parent_ of a node.  In our copy of $T_{\textit{orig}}$, sever the node $u_i$ from its original parent i.e. remove the edge between $u_i$ and its original parent.
