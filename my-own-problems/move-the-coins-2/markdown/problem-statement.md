@@ -47,7 +47,9 @@ More formally, Bob is given the following:
 
 Let $\textit{BobWinQ}$ be the set of $i$ such that $\textit{winner}(\textit{game}(T(q_i)))=\text{Bob}$; then you must compute the value:
 
-$\sum\limits_{i \in \textit{BobWinQ}}2^i$
+$$
+\sum\limits_{i \in \textit{BobWinQ}}2^i
+$$
 
 Since this value can be very large, please output it mod $10^9+7$.
 
