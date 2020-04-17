@@ -38,3 +38,16 @@ As an example, assume that the below is our $T_\textit{orig}$ with a set of $c_v
 Assuming we want to apply the reparenting query $q=(6,3)$.  Then we compute $T((6,3))$ as follows:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent2of2.png)
+
+More formally, Bob is given the following:
+
+1. An original tree $T_\textit{orig}$
+2. A list $c_i$ for $i=1,2,\ldots,N$ describing the number of Coins initially placed on node $v$ of $T_\textit{orig}$
+3. A list of reparenting queries $q_i=(u_i, v_i$)$ for $i=1,2,\ldots,Q$
+
+Let $\textit{BobWinQ}$ be the set of $i$ such that $\textit{winner}(\textit{game}(T(q_i)))=\text{Bob}$; then you must compute the value:
+
+$\sum\limits_{i \in \textit{BobWinQ}}2^i$
+
+Since this value can be very large, please output it mod $10^9+7$.
+
