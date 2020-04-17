@@ -62,5 +62,10 @@ Since this value can be very large, please output it mod $10^9+7$.
 - The next line contains a single integer $Q$ denoting the number of reparenting queries.
 - The next $Q$ lines each consist of two space-separated integers $u_i$ and $v_i$ denoting the $i^\text{th}$ reparenting query $q_i=(u_i, v_i)$.
 
+### Output
+
+For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^i$ over each $i$ such that $\textit{winner}(\textit{game}(T(q_i))) =$ Bob.
+
+
 
 
