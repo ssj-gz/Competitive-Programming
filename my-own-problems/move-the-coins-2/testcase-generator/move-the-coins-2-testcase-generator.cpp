@@ -389,8 +389,11 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
                     {+2, 12.5},
                     {-3, 6.0},
                     {+3, 6.0},
-                    {-4, 1.5},
-                    {+4, 1.5}
+                    {-4, 1.0},
+                    {+4, 1.0},
+                    {+0, 1.0}, // Without the possibility of +0, an Alice-Win nodeToReparent is slightly more 
+                               // likely to have more than one query with the same newParentHeight, which is
+                               // a pattern that we want to squelch.
                     }, 1).front();
             if (adjustedHeight < 0 || adjustedHeight > pairToAdjust.nodeToReparent->data.nodeRelocateInfo.maxHeightOfNonDescendent)
             {
