@@ -74,6 +74,8 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 - $1 \le Q \le 200,000$
 - $1 \le a,b \le N$
 - $1 \le u_i,v_i \le N$
+- $u_i \ne 1$ for all valid $i$
+- the graph $T(q_i)$ will always be a _tree_ over the $N$ vertices for all valid $i$
 - $0 \le c_i \le 16$ for all valid $i$
 - the sum of $N$ over all $T$ testcases does not exceed $200,000$
 - the sum of $Q$ over all $T$ testcases does not exceed $200,000$
