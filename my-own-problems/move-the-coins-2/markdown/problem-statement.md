@@ -138,19 +138,30 @@ The first query is $q_1=(u_1, v_1)=(2,3)$, and we construct the corresponding $T
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-2of4.png)
 
-We see that $\textit{winner}(\textit{game}(T(q_1)))$ is Alice TODO - explanation
+We see that $\textit{winner}(\textit{game}(T(q_1)))$ is Alice.  For example, a winning strategy for Alice would be to move the coin in node $3$ 
+to node $4$; then we note that, whatever move Bob makes, Alice can "mirror" his move i.e. if on the next move Bob moves a coin from node $2$ to node $4$,
+there will still be a coin left on node $2$, so Alice can copy this move and also move a coin from node $2$ to node $4$.  It's easily verified that Alice
+can *always* perform this mirroring move no matter what Bob does, so Alice can always make a move after Bob.  Thus, Bob must be the first player who cannot
+move, and so loses $\textit{game}(T(q_1))$
 
 The second query is $q_2=(u_2, v_2)=(3,1)$, and we construct the corresponding $T(q_2)$ as show below:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-3of4.png)
 
-We see that $\textit{winner}(\textit{game}(T(q_2)))$ is Bob TODO - explanation,so we add $2$ to $\textit{BobWinQ}$.
+We see that $\textit{winner}(\textit{game}(T(q_2)))$ is Bob.   To see this, consider the number of coins on a node other than 1 at the end of each turn.  It's 
+hopefully clear that this number will always reduce by exactly one after each turn, no matter what move Alice or Bob make; therefore, since there are initially $4$
+coins on nodes other than node $1$, precisely $4$ turns will take place, and the player whose turn it is on the $5^{\text{th}}$ move (i.e. Alice) will lose.  
+
+Thus, $\textit{winner}(\textit{game}(T(q_2)))=$ Bob, and we add $2$ to $\textit{BobWinQ}$,
 
 The third and final query is $q_3=(u_3, v_3)=(3,2)$, and we construct the corresponding $T(q_3)$ as show below:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-4of4.png)
 
-Alice wins the game played on $T(q_3)$ TODO - explanation.
+Alice wins the game played on $T(q_3)$: if she moves the coin in node $2$ to node $3$ on her first move, then we have a similar situation to that of $q_2$ -
+yet again, there will be $4$ coins on nodes other than node $1$, and no matter what move each player makes on their turn, this number will reduce by exactly one each turn.  
+Thus, after Alice makes this first move, the game will continue for exactly $4$ more turns, and the player whose turn it is to move on the $6^{\text{th}}$ turn (i.e. Bob)
+will be unable to make a move, and so will lose.
 
 So we have $\textit{BobWinQ}=\{2\}$, so the sum we need to compute is
 
