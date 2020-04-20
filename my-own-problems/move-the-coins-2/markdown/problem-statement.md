@@ -160,4 +160,26 @@ $$
 
 Taking this modulo $10^9+7$, the final answer for this testcase is $4$.
 
-**Example case 2:** The original tree $T_{\textit{orig}}$ looks like this: TODO
+**Example case 2:** The original tree $T_{\textit{orig}}$ and the transformed trees for each of the three queries are as follows:
+
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX2.png)
+
+It can be shown that:
+
+$$
+\textit{winner}(\textit{game}(T(q_1))) = \text{Bob}
+$$
+$$
+\textit{winner}(\textit{game}(T(q_2))) = \text{Alice}
+$$
+$$
+\textit{winner}(\textit{game}(T(q_3))) = \text{Bob}
+$$
+
+Thus, only $q_1$ and $q_3$ lead to Bob wins, so $\textit{BobWinQ}=\{1,3\}$, and the sum we need to compute is:
+
+$$
+\sum\limits_{i \in \textit{BobWinQ}}2^i = 2^1+2^3=2+8=10
+$$
+
+Taking this modulo $10^9+7$, the final answer for this testcase is $10$.
