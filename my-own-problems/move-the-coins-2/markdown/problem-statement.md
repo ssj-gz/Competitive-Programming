@@ -152,7 +152,7 @@ The third and final query is $q_3=(u_3, v_3)=(3,2)$, and we construct the corres
 
 Alice wins the game played on $T(q_3)$ TODO - explanation.
 
-So we have $\textit{BobWinQ}={2}$, so the sum we need to compute is
+So we have $\textit{BobWinQ}=\{2\}$, so the sum we need to compute is
 
 $$
 \sum\limits_{i \in \textit{BobWinQ}}2^i = 2^2=4
