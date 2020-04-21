@@ -637,6 +637,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         int newParentHeight = -1;
         int numDescendants = 0;
         int dbgNumNonDescendants = 0;
+#if 1
         for (int height = 0; height <= maxNodeHeight; height++)
         {
             int dbgNumDescendantsAtHeight = 0;
@@ -666,7 +667,15 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 break;
             }
         }
+#endif
+        const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
+                [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightLookup, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
+                {
+                    const int numReparentingsUpToHeight = findNumNonDescendantsUpToHeight(nodeToReparent, height, numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
+                    return numOfReparentingThatReparentsNode < numReparentingsUpToHeight;
+                });
         cout << "newParentHeight: " << newParentHeight << " dbgNewParentHeight: " << dbgNewParent->height << endl;
+        assert(heightIter != allHeights.end());
         assert(newParentHeight == dbgNewParent->height);
         assert(newParentHeight != -1);
 
