@@ -185,6 +185,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         Node* nodeToReparent = nullptr;
         for (auto& node : nodes)
         {
+            cout << " node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << " sumOfNumCanReparentTo: " << sumOfNumCanReparentTo << " sumOfNumCanReparentTo: " << endl;
             if (sumOfNumCanReparentTo + node.numCanReparentTo > index)
             {
                 nodeToReparent = &node;
