@@ -146,8 +146,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
     vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
-    vector<vector<Node*>> nodesAtHeightLookupDummy;
-    computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
+    vector<vector<Node*>> nodesAtHeightLookup(maxNodeHeight + 1);
+    computeDFSInfo(rootNode, nodesAtHeightLookup);
 
     auto validReparentings = computeValidReparentings(nodes);
 
