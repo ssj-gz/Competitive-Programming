@@ -36,6 +36,7 @@ struct Node
     int height = -1;
     int id = -1;
     int numDescendants = -1; // Includes the node itself.
+    int numCanReparentTo = -1;
 
     int dfsBeginVisit = -1;
     int dfsEndVisit = -1;
@@ -148,7 +149,13 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
     auto rootNode = &(nodes.front());
     vector<vector<Node*>> nodesAtHeightLookup(maxNodeHeight + 1);
     computeDFSInfo(rootNode, nodesAtHeightLookup);
-
+    const int numNodes = nodes.size();
+    for (auto& node : nodes)
+    {
+        // We can reparent to any node that is not a descendant.
+        node.numCanReparentTo = numNodes - node.numDescendants;
+    }
+    
     auto validReparentings = computeValidReparentings(nodes);
 
     sort(validReparentings.begin(), validReparentings.end(),
