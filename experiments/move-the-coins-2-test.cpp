@@ -628,6 +628,30 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         assert(newParentHeight == dbgNewParent->height);
         assert(newParentHeight != -1);
 
+        // i.e. we now need to find the numOfReparentingThatReparentsNode's item in the original list
+        // that reparents nodeToReparent to a newParentHeight whose height is newParentHeight.
+        auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
+        if (heightIter != allHeights.begin())
+        {
+            numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(heightIter), numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
+        }
+        {
+            int dbgInterestingIndex = 0;
+            for (const auto& reparenting : validReparentings)
+            {
+                if (reparenting.first == nodeToReparent && reparenting.second->height == newParentHeight)
+                {
+                    if (dbgInterestingIndex == numOfReparentingForNodeAndNewHeight)
+                    {
+                        const auto dbgBlah = reparenting.second;
+                        cout << "blee: " << dbgBlah->id << " newParent: " << dbgNewParent->id << endl;
+                        assert(dbgBlah == dbgNewParent);
+                    }
+                    dbgInterestingIndex++;
+                }
+            }
+        }
+
         assert(nodeToReparent == dbgNodeToReparent);
         reparentingRemoved[dbgIndexInOriginalList] = true;
     }
