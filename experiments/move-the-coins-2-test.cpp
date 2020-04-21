@@ -126,8 +126,8 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
     return result;
 }
 
-#if 0
-vector<pair<Node*, Node*>> solveOptimised()
+#if 1
+vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& queries)
 {
     vector<pair<Node*, Node*>> result;
     
@@ -241,9 +241,13 @@ int main(int argc, char* argv[])
             cout << "solutionBruteForce: " << result.first->id << " " << result.second->id << endl;
         }
 #endif
-#if 0
-        const auto solutionOptimised = solveOptimised();
-        cout << "solutionOptimised:  " << solutionOptimised << endl;
+#if 1
+        const auto solutionOptimised = solveOptimised(nodes, queries);
+        cout << "solutionOptimised: " << endl;
+        for (const auto result : solutionOptimised)
+        {
+            cout << "solutionOptimised: " << result.first->id << " " << result.second->id << endl;
+        }
 
         assert(solutionOptimised == solutionBruteForce);
 #endif
