@@ -40,24 +40,24 @@ struct Node
     int dfsEndVisit = -1;
 };
 
-void fillInDFSVisit(Node* node, int& dfsVisitNum)
+void computeDFSInfo(Node* node, int& dfsVisitNum)
 {
     node->dfsBeginVisit = dfsVisitNum;
     dfsVisitNum++;
 
     for (auto child : node->children)
     {
-        fillInDFSVisit(child, dfsVisitNum);
+        computeDFSInfo(child, dfsVisitNum);
     }
 
     node->dfsEndVisit = dfsVisitNum;
     dfsVisitNum++;
 }
 
-void fillInDFSVisit(Node* rootNode)
+void computeDFSInfo(Node* rootNode)
 {
     int dfsVisitNum = 1;
-    fillInDFSVisit(rootNode, dfsVisitNum);
+    computeDFSInfo(rootNode, dfsVisitNum);
 }
 
 // Calculate the height of each node, and remove its parent from its list of "children".
@@ -99,7 +99,7 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 {
     vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
-    fillInDFSVisit(rootNode);
+    computeDFSInfo(rootNode);
 
     auto validReparentings = computeValidReparentings(nodes);
 
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 
             auto rootNode = &(nodes.front());
             fixParentChildAndHeights(rootNode);
-            fillInDFSVisit(rootNode);
+            computeDFSInfo(rootNode);
             const auto validReparentings = computeValidReparentings(nodes);
 
             const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
