@@ -593,12 +593,14 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         for (int height = 0; height <= maxNodeHeight; height++)
         {
             int dbgNumDescendantsAtHeight = 0;
+            int dbgSumOfProperDescendantsAtThisHeight = 0;
             for (const auto nodeAtHeight : nodesAtHeightLookup[height])
             {
                 if (nodeAtHeight->isDescendantOf(*nodeToReparent))
                 {
                     numDescendants++;
                     dbgNumDescendantsAtHeight++;
+                    dbgSumOfProperDescendantsAtThisHeight += nodeAtHeight->numDescendants - 1;
                 }
                 else
                 {
@@ -643,6 +645,23 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             {
                 assert(descendantsAtHeightBegin < descendantsAtHeightEnd);
                 numDescendantsAtHeight = descendantsAtHeightEnd - descendantsAtHeightBegin;
+                int blah = descendantsAtHeightBegin - nodesAtHeightLookup[height].begin();
+                int blah2 = descendantsAtHeightEnd - nodesAtHeightLookup[height].begin() - 1;
+                auto sumOfProperDescendantsAtThisHeight = numProperDescendantsForNodeAtHeightPrefixSum[height][blah2];
+                if (blah > 0)
+                    sumOfProperDescendantsAtThisHeight -= numProperDescendantsForNodeAtHeightPrefixSum[height][blah - 1];
+                for (const auto node : nodesAtHeightLookup[height])
+                {
+                    cout << " nodeAtHeight: " << node->id << " is descendant? " << node->isDescendantOf(*nodeToReparent) << " num proper descendants: " << (node->numDescendants - 1) << endl;
+                }
+                cout << "blah: " << blah << " blah2: " << blah2 << endl;
+                cout << "sumOfProperDescendantsAtThisHeight: " << sumOfProperDescendantsAtThisHeight << " dbgSumOfProperDescendantsAtThisHeight: " << dbgSumOfProperDescendantsAtThisHeight << endl;
+                for (int i = 0; i < numProperDescendantsForNodeAtHeightPrefixSum[height].size(); i++)
+                {
+                    cout << "i: " << i << " numProperDescendantsForNodeAtHeightPrefixSum[i]: " << numProperDescendantsForNodeAtHeightPrefixSum[height][i] << endl;
+                }
+                assert(sumOfProperDescendantsAtThisHeight == dbgSumOfProperDescendantsAtThisHeight);
+
             }
             cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " dbgNumDescendantsAtHeight: " << dbgNumDescendantsAtHeight << endl;
             assert(numDescendantsAtHeight == dbgNumDescendantsAtHeight);
