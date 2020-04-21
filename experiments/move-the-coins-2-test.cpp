@@ -177,6 +177,19 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         const auto dbgNewParent = queryResultIter->second;
         result.push_back(*queryResultIter);
 
+        int sumOfNumCanReparentTo = 0;
+        Node* nodeToReparent = nullptr;
+        for (auto& node : nodes)
+        {
+            if (sumOfNumCanReparentTo + node.numCanReparentTo > index)
+            {
+                nodeToReparent = &node;
+                break;
+            }
+
+        }
+        assert(nodeToReparent == dbgNodeToReparent);
+
         validReparentings.erase(queryResultIter);
     }
 
