@@ -676,6 +676,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 });
         cout << "newParentHeight: " << newParentHeight << " dbgNewParentHeight: " << dbgNewParent->height << endl;
         assert(heightIter != allHeights.end());
+        assert(*heightIter == dbgNewParent->height);
         assert(newParentHeight == dbgNewParent->height);
         assert(newParentHeight != -1);
 
