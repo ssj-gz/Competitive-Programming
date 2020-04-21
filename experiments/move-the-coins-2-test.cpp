@@ -459,6 +459,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
     const auto validReparentings = computeOrderedValidReparentings(nodes);
     vector<bool> reparentingRemoved(validReparentings.size(), false);
 
+    IndexRemapper indexRemapper;
+
     for (const auto query : queries)
     {
         const auto dbgIndexOriginal = query - 1; // Make 0-relative.
@@ -490,7 +492,9 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
         }
         assert(dbgNodeToReparent != nullptr && dbgNewParent != nullptr);
-        cout << " dbgIndexInOriginalList: " << dbgIndexInOriginalList << endl;
+        const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(dbgIndexOriginal);
+        cout << " dbgIndexInOriginalList: " << dbgIndexInOriginalList << " indexInOriginalList: " << indexInOriginalList << endl;
+        assert(indexInOriginalList == dbgIndexInOriginalList);
         //assert(0 <= dbgIndex && dbgIndex < validReparentings.size());
         //auto queryResultIter = validReparentings.begin() + dbgIndex;
         //const auto dbgNodeToReparent = queryResultIter->first;
