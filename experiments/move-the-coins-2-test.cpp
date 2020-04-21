@@ -176,24 +176,27 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         }
 
         int indexInOriginalList = 0;
-        int adjustedIndex = 0;
         Node* dbgNodeToReparent = nullptr;
         Node* dbgNewParent = nullptr;
-        while (true)
         {
-            if (!reparentingRemoved[indexInOriginalList])
+            int adjustedIndex = 0;
+            while (true)
             {
-                if (adjustedIndex == dbgIndexOriginal)
+                if (!reparentingRemoved[indexInOriginalList])
                 {
-                    dbgNodeToReparent = validReparentings[indexInOriginalList].first;
-                    dbgNewParent = validReparentings[indexInOriginalList].second;
-                    break;
+                    if (adjustedIndex == dbgIndexOriginal)
+                    {
+                        dbgNodeToReparent = validReparentings[indexInOriginalList].first;
+                        dbgNewParent = validReparentings[indexInOriginalList].second;
+                        break;
+                    }
+                    adjustedIndex++;
                 }
-                adjustedIndex++;
+                indexInOriginalList++;
             }
-            indexInOriginalList++;
         }
         assert(dbgNodeToReparent != nullptr && dbgNewParent != nullptr);
+        cout << " indexInOriginalList: " << indexInOriginalList << endl;
         //assert(0 <= dbgIndex && dbgIndex < validReparentings.size());
         //auto queryResultIter = validReparentings.begin() + dbgIndex;
         //const auto dbgNodeToReparent = queryResultIter->first;
@@ -203,7 +206,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
         int sumOfNumCanReparentTo = 0;
         Node* nodeToReparent = nullptr;
-        const int index = adjustedIndex;
+        const int index = indexInOriginalList;
         for (auto& node : nodes)
         {
             cout << " node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << " sumOfNumCanReparentTo: " << sumOfNumCanReparentTo << " sumOfNumCanReparentTo: " << endl;
