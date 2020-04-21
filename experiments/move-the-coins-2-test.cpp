@@ -168,13 +168,21 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             return lhs.second->id < rhs.second->id;
             });
 
+    cout << "validReparentings: " << endl;
+    for (int i = 0; i < validReparentings.size(); i++)
+    {
+        cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << endl;
+    }
+
     for (const auto query : queries)
     {
         const auto index = query - 1; // Make 0-relative.
+        cout << " query: index: " << index << endl;
         assert(0 <= index && index < validReparentings.size());
         auto queryResultIter = validReparentings.begin() + index;
         const auto dbgNodeToReparent = queryResultIter->first;
         const auto dbgNewParent = queryResultIter->second;
+        cout << "  dbgNodeToReparent: " << dbgNodeToReparent->id << " dbgNewParent: " << dbgNewParent-> id << endl;
         result.push_back(*queryResultIter);
 
         int sumOfNumCanReparentTo = 0;
@@ -188,6 +196,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
 
         }
+        cout << "nodeToReparent: " << nodeToReparent->id << endl;
         assert(nodeToReparent == dbgNodeToReparent);
 
         validReparentings.erase(queryResultIter);
