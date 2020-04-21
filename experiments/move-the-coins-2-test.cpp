@@ -644,7 +644,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                         });
                 const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[height].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
                 int sumOfProperDescendantsOfDescendantsAtHeight = 0;
-                //assert(hasDescendantsAtThisHeight); // TODO - figure out why this assertion doesn't always hold.
                 if (hasDescendantsAtThisHeight)
                 {
                     assert(descendantsAtHeightBegin < descendantsAtHeightEnd);
