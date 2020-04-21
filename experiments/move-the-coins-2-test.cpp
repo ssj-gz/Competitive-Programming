@@ -634,49 +634,17 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 }
             }
         }
-        int newParentHeight = -1;
         int numDescendants = 0;
         int dbgNumNonDescendants = 0;
-#if 1
-        for (int height = 0; height <= maxNodeHeight; height++)
-        {
-            int dbgNumDescendantsAtHeight = 0;
-            int dbgSumOfProperDescendantsAtThisHeight = 0;
-            for (const auto nodeAtHeight : nodesAtHeightLookup[height])
-            {
-                if (nodeAtHeight->isDescendantOf(*nodeToReparent))
-                {
-                    numDescendants++;
-                    dbgNumDescendantsAtHeight++;
-                    dbgSumOfProperDescendantsAtThisHeight += nodeAtHeight->numDescendants - 1;
-                }
-                else
-                {
-                    cout << "found non descendant at height " << height << " node id: " << nodeAtHeight->id << endl;
-                    dbgNumNonDescendants++;
-                }
-            }
-            cout << "height: " << height << " numDescendants: " << numDescendants << " dbgNumNonDescendants: " << dbgNumNonDescendants << endl;
-            const int numNonDescendantsUpToThisHeight = findNumNonDescendantsUpToHeight(nodeToReparent, height, numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
-            cout << "numNonDescendantsUpToThisHeight: " << numNonDescendantsUpToThisHeight << " dbgNumNonDescendants: " << dbgNumNonDescendants << endl;
-            assert(numNonDescendantsUpToThisHeight == dbgNumNonDescendants);
-
-            if (dbgNumNonDescendants > numOfReparentingThatReparentsNode)
-            {
-                newParentHeight = height;
-                break;
-            }
-        }
-#endif
         const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                 [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightLookup, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
                 {
                     const int numReparentingsUpToHeight = findNumNonDescendantsUpToHeight(nodeToReparent, height, numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
                     return numOfReparentingThatReparentsNode < numReparentingsUpToHeight;
                 });
-        cout << "newParentHeight: " << newParentHeight << " dbgNewParentHeight: " << dbgNewParent->height << endl;
         assert(heightIter != allHeights.end());
-        assert(*heightIter == dbgNewParent->height);
+        const int newParentHeight = *heightIter;
+        cout << "newParentHeight: " << newParentHeight << " dbgNewParentHeight: " << dbgNewParent->height << endl;
         assert(newParentHeight == dbgNewParent->height);
         assert(newParentHeight != -1);
 
