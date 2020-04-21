@@ -592,11 +592,13 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         int numNonDescendants = 0;
         for (int height = 0; height <= maxNodeHeight; height++)
         {
+            int dbgNumDescendantsAtHeight = 0;
             for (const auto nodeAtHeight : nodesAtHeightLookup[height])
             {
                 if (nodeAtHeight->isDescendantOf(*nodeToReparent))
                 {
                     numDescendants++;
+                    dbgNumDescendantsAtHeight++;
                 }
                 else
                 {
@@ -604,12 +606,12 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 }
             }
             cout << "height: " << height << " numDescendants: " << numDescendants << " numNonDescendants: " << numNonDescendants << endl;
-            const auto firstDescendantAtHeightIter = std::lower_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsBeginVisit,
+            const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsBeginVisit,
                     [](const Node* node, const int dfsBeginVisit)
                     {
                     return node->dfsBeginVisit < dfsBeginVisit;
                     });
-            const int numPreDescendants = firstDescendantAtHeightIter - nodesAtHeightLookup[height].begin();
+            const int numPreDescendants = descendantsAtHeightBegin - nodesAtHeightLookup[height].begin();
             int dbgNumPreDescendants = 0;
             for (const auto node : nodesAtHeightLookup[height])
             {
@@ -620,12 +622,12 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
             cout << "numPreDescendants: " << numPreDescendants << " dbgNumPreDescendants: " << dbgNumPreDescendants << endl;
             assert(numPreDescendants == dbgNumPreDescendants);
-            const auto firstPostDescendantAtHeightIter = std::upper_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsEndVisit,
+            const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsEndVisit,
                     [](const int dfsEndVisit, const Node* node)
                     {
                     return dfsEndVisit < node->dfsEndVisit;
                     });
-            const int numPostDescendants = nodesAtHeightLookup[height].end() - firstPostDescendantAtHeightIter;
+            const int numPostDescendants = nodesAtHeightLookup[height].end() - descendantsAtHeightEnd;
             int dbgNumPostDescendants = 0;
             for (const auto node : nodesAtHeightLookup[height])
             {
@@ -635,6 +637,16 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
             cout << "numPostDescendants: " << numPostDescendants << " dbgNumPostDescendants: " << dbgNumPostDescendants << endl;
             assert(numPostDescendants == dbgNumPostDescendants);
+            int numDescendantsAtHeight = 0;
+            const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[height].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
+            if (hasDescendantsAtThisHeight)
+            {
+                assert(descendantsAtHeightBegin < descendantsAtHeightEnd);
+                numDescendantsAtHeight = descendantsAtHeightEnd - descendantsAtHeightBegin;
+            }
+            cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " dbgNumDescendantsAtHeight: " << dbgNumDescendantsAtHeight << endl;
+            assert(numDescendantsAtHeight == dbgNumDescendantsAtHeight);
+
             if (numNonDescendants > numOfReparentingThatReparentsNode)
             {
                 newParentHeight = height;
