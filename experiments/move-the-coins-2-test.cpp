@@ -316,6 +316,8 @@ class AVLTreeIterator
         int numToLeft() const
         {
             const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
+            cout << "numInLeftSubTree: " << numInLeftSubTree << " m_numToLeftOffset: " << m_numToLeftOffset << endl;
+            cout << "numToLeft: " << m_numToLeftOffset + m_numInLeftSubTree << endl;
             return m_numToLeftOffset + m_numInLeftSubTree;
         }
         void followLeftChild()
@@ -335,11 +337,33 @@ class AVLTreeIterator
         int m_numInLeftSubTree = 0;
 };
 
+void printSubTree(AVLNode* subtreeRoot)
+{
+    if (subtreeRoot == nullptr)
+        return;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
+    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
+
+    if (subtreeRoot->leftChild)
+        printSubTree(subtreeRoot->leftChild);
+    if (subtreeRoot->rightChild)
+        printSubTree(subtreeRoot->rightChild);
+}
+
+void printTree(AVLTree& tree)
+{
+    printSubTree(tree.root());
+}
+
+
 class IndexRemapper
 {
     public:
         int remapNthRemainingToIndexAndRemove(int nthOfRemainingToChoose)
         {
+            cout << "remapNthRemainingToIndexAndRemove nthOfRemainingToChoose:"  << nthOfRemainingToChoose << endl;
+            cout << "tree:" << endl;
+            printTree(removedIndices);
             // Be optimistic and give remappedIndex the smallest possible value:
             // we'll correct our optimism as we go along :)
             int remappedIndex = nthOfRemainingToChoose;
@@ -351,6 +375,7 @@ class IndexRemapper
                 const int indexOfCurrentNode = treeIter.currentNode()->value;
                 const int numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
                 const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
+                cout << "indexOfCurrentNode: " << indexOfCurrentNode << " numRemovedUpToCurrentNodeIndex: " << numRemovedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << endl;
                 if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
                 {
                     // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
@@ -368,6 +393,7 @@ class IndexRemapper
             }
             // We've successfully found the index in the original array; now mark it as Removed.
             removedIndices.insertValue(remappedIndex);
+            cout << " remappedIndex: " << remappedIndex << endl;
             return remappedIndex;
         }
     private:
