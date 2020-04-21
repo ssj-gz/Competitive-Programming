@@ -167,7 +167,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
     cout << "validReparentings: " << endl;
     for (int i = 0; i < validReparentings.size(); i++)
     {
-        cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << endl;
+        cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << " height: " << validReparentings[i].second->height << endl;
     }
 
     for (const auto query : queries)
