@@ -536,6 +536,27 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
         const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
         auto nodeToReparent = &(nodes[nodeIndex]);
+
+        const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
+        cout << "numOfReparentingThatReparentsNode: " << numOfReparentingThatReparentsNode << endl;
+        {
+            int dbgIndex = 0;
+            for (int i = 0; i < validReparentings.size(); i++)
+            {
+                if (validReparentings[i].first == nodeToReparent)
+                {
+                    if (dbgIndex == numOfReparentingThatReparentsNode)
+                    {
+                        const auto newParent = validReparentings[i].second;
+                        cout << "newParent: " << newParent->id << endl;
+                        assert(newParent == dbgNewParent);
+                        break;
+                    }
+                    dbgIndex++;
+                }
+            }
+        }
+
         assert(nodeToReparent == dbgNodeToReparent);
         reparentingRemoved[dbgIndexInOriginalList] = true;
     }
