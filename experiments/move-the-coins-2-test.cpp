@@ -91,7 +91,6 @@ struct AVLNode
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
     int numDescendants = 1;
-    int sumOfDescendantValues = 0;
 
     int id = -1;
 };
@@ -244,7 +243,6 @@ class AVLTree
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->numDescendants = 1;
-            nodeToUpdate->sumOfDescendantValues = nodeToUpdate->value;
 
             auto leftChild = nodeToUpdate->leftChild;
 
@@ -253,7 +251,6 @@ class AVLTree
                 nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
                 nodeToUpdate->numDescendants += leftChild->numDescendants;
-                nodeToUpdate->sumOfDescendantValues += leftChild->sumOfDescendantValues;
             }
 
             auto rightChild = nodeToUpdate->rightChild;
@@ -262,7 +259,6 @@ class AVLTree
                 nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
                 nodeToUpdate->numDescendants += rightChild->numDescendants;
-                nodeToUpdate->sumOfDescendantValues += rightChild->sumOfDescendantValues;
             }
         }
 
