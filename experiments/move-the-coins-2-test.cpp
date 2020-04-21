@@ -82,7 +82,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
     }
 }
 
-vector<pair<Node*, Node*>> computeValidReparentings(vector<Node>& nodes)
+vector<pair<Node*, Node*>> computeOrderedValidReparentings(vector<Node>& nodes)
 {
     vector<pair<Node*, Node*>> validReparentings;
 
@@ -100,6 +100,17 @@ vector<pair<Node*, Node*>> computeValidReparentings(vector<Node>& nodes)
         }
     }
 
+    sort(validReparentings.begin(), validReparentings.end(),
+            [](const auto& lhs, const auto& rhs)
+            {
+            if (lhs.first->id != rhs.first->id)
+                return lhs.first->id < rhs.second->id;
+            if (lhs.second->height != rhs.second->height)
+                return lhs.second->height < rhs.second->height;
+            return lhs.second->id < rhs.second->id;
+            });
+
+
     return validReparentings;
 }
 
@@ -110,17 +121,7 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
     vector<vector<Node*>> nodesAtHeightLookupDummy;
     computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
 
-    auto validReparentings = computeValidReparentings(nodes);
-
-    sort(validReparentings.begin(), validReparentings.end(),
-            [](const auto& lhs, const auto& rhs)
-            {
-            if (lhs.first->id != rhs.first->id)
-                return lhs.first->id < rhs.second->id;
-            if (lhs.second->height != rhs.second->height)
-                return lhs.second->height < rhs.second->height;
-            return lhs.second->id < rhs.second->id;
-            });
+    auto validReparentings = computeOrderedValidReparentings(nodes);
 
     for (const auto query : queries)
     {
@@ -161,17 +162,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         cout << "node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << endl;
     }
     
-    auto validReparentings = computeValidReparentings(nodes);
-
-    sort(validReparentings.begin(), validReparentings.end(),
-            [](const auto& lhs, const auto& rhs)
-            {
-            if (lhs.first->id != rhs.first->id)
-                return lhs.first->id < rhs.second->id;
-            if (lhs.second->height != rhs.second->height)
-                return lhs.second->height < rhs.second->height;
-            return lhs.second->id < rhs.second->id;
-            });
+    auto validReparentings = computeOrderedValidReparentings(nodes);
 
     cout << "validReparentings: " << endl;
     for (int i = 0; i < validReparentings.size(); i++)
@@ -249,7 +240,7 @@ int main(int argc, char* argv[])
             fixParentChildAndHeights(rootNode);
             vector<vector<Node*>> nodesAtHeightLookupDummy;
             computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
-            const auto validReparentings = computeValidReparentings(nodes);
+            const auto validReparentings = computeOrderedValidReparentings(nodes);
 
             const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
 
