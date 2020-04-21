@@ -192,6 +192,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
 
         }
+        assert(nodeToReparent);
         cout << "nodeToReparent: " << nodeToReparent->id << endl;
         assert(nodeToReparent == dbgNodeToReparent);
 
