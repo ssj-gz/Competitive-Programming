@@ -533,31 +533,10 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         cout << "  dbgNodeToReparent: " << dbgNodeToReparent->id << " dbgNewParent: " << dbgNewParent-> id << endl;
         result.push_back({dbgNodeToReparent, dbgNewParent});
 
-        int sumOfNumCanReparentTo = 0;
-        Node* nodeToReparent = nullptr;
-        const int index = dbgIndexInOriginalList;
-        for (auto& node : nodes)
-        {
-            cout << " node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << " sumOfNumCanReparentTo: " << sumOfNumCanReparentTo << " sumOfNumCanReparentTo: " << endl;
-            if (sumOfNumCanReparentTo + node.numCanReparentTo > index)
-            {
-                nodeToReparent = &node;
-                break;
-            }
-            sumOfNumCanReparentTo += node.numCanReparentTo;
-
-        }
-        assert(nodeToReparent);
-        cout << "nodeToReparent: " << nodeToReparent->id << endl;
+        const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
+        const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
+        auto nodeToReparent = &(nodes[nodeIndex]);
         assert(nodeToReparent == dbgNodeToReparent);
-        {
-            int nodeIndex = -1;
-            const auto blah = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), index);
-            nodeIndex = blah - numCanReparentToPrefixSum.begin();
-            auto optNodeToReparent = &(nodes[nodeIndex]);
-            cout << "optNodeToReparent: " << optNodeToReparent->id << endl;
-            assert(optNodeToReparent == nodeToReparent);
-        }
         reparentingRemoved[dbgIndexInOriginalList] = true;
     }
 
