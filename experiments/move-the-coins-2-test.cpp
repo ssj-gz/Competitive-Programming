@@ -484,6 +484,13 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
     vector<bool> reparentingRemoved(validReparentings.size(), false);
 
     IndexRemapper indexRemapper;
+    vector<int64_t> numCanReparentToPrefixSum;
+    int64_t sumOfNumCanReparentTo = 0;
+    for (const auto& node : nodes)
+    {
+        sumOfNumCanReparentTo += node.numCanReparentTo;
+        numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
+    }
 
     for (const auto query : queries)
     {
@@ -543,6 +550,14 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         assert(nodeToReparent);
         cout << "nodeToReparent: " << nodeToReparent->id << endl;
         assert(nodeToReparent == dbgNodeToReparent);
+        {
+            int nodeIndex = -1;
+            const auto blah = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), index);
+            nodeIndex = blah - numCanReparentToPrefixSum.begin();
+            auto optNodeToReparent = &(nodes[nodeIndex]);
+            cout << "optNodeToReparent: " << optNodeToReparent->id << endl;
+            assert(optNodeToReparent == nodeToReparent);
+        }
         reparentingRemoved[dbgIndexInOriginalList] = true;
     }
 
