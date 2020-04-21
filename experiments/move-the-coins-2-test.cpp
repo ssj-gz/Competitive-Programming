@@ -41,24 +41,28 @@ struct Node
     int dfsEndVisit = -1;
 };
 
-void computeDFSInfo(Node* node, int& dfsVisitNum)
+void computeDFSInfo(Node* node, int& dfsVisitNum, vector<vector<Node*>>& nodesAtHeightLookup)
 {
     node->dfsBeginVisit = dfsVisitNum;
+    if (!nodesAtHeightLookup.empty()) // TODO - remove this condition - it's only there as the  testgen and brute force don't use nodesAtHeightLookup.
+    {
+        nodesAtHeightLookup[node->height].push_back(node);
+    }
     dfsVisitNum++;
 
     for (auto child : node->children)
     {
-        computeDFSInfo(child, dfsVisitNum);
+        computeDFSInfo(child, dfsVisitNum, nodesAtHeightLookup);
     }
 
     node->dfsEndVisit = dfsVisitNum;
     dfsVisitNum++;
 }
 
-void computeDFSInfo(Node* rootNode)
+void computeDFSInfo(Node* rootNode, vector<vector<Node*>>& nodesAtHeightLookup)
 {
     int dfsVisitNum = 1;
-    computeDFSInfo(rootNode, dfsVisitNum);
+    computeDFSInfo(rootNode, dfsVisitNum, nodesAtHeightLookup);
 }
 
 // Calculate the height of each node, and remove its parent from its list of "children".
@@ -102,7 +106,8 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 {
     vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
-    computeDFSInfo(rootNode);
+    vector<vector<Node*>> nodesAtHeightLookupDummy;
+    computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
 
     auto validReparentings = computeValidReparentings(nodes);
 
@@ -133,6 +138,12 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& queries)
 {
     vector<pair<Node*, Node*>> result;
+    int maxNodeHeight = -1;
+    for (const auto& node : nodes)
+    {
+        maxNodeHeight = max(maxNodeHeight, node.height);
+    }
+    assert(maxNodeHeight != -1);
     
     return result;
 }
@@ -174,7 +185,8 @@ int main(int argc, char* argv[])
 
             auto rootNode = &(nodes.front());
             fixParentChildAndHeights(rootNode);
-            computeDFSInfo(rootNode);
+            vector<vector<Node*>> nodesAtHeightLookupDummy;
+            computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
             const auto validReparentings = computeValidReparentings(nodes);
 
             const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
