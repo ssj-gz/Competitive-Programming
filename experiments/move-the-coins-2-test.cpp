@@ -191,6 +191,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 nodeToReparent = &node;
                 break;
             }
+            sumOfNumCanReparentTo += node.numCanReparentTo;
 
         }
         assert(nodeToReparent);
