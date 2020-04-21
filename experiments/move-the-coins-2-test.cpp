@@ -302,6 +302,40 @@ class AVLTree
 
 };
 
+class AVLTreeIterator
+{
+    public:
+        AVLTreeIterator(AVLNode* root)
+            : m_currentNode(root)
+        {
+        };
+        AVLNode* currentNode() const
+        {
+            return m_currentNode;
+        }
+        int numToLeft() const
+        {
+            const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
+            return m_numToLeftOffset + m_numInLeftSubTree;
+        }
+        void followLeftChild()
+        {
+            m_currentNode = m_currentNode->leftChild;
+        }
+        void followRightChild()
+        {
+            const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
+            m_numToLeftOffset += m_numInLeftSubTree + 1;
+            m_currentNode = m_currentNode->rightChild;
+        }
+    private:
+        AVLNode* m_currentNode = nullptr;
+
+        int m_numToLeftOffset = 0;
+        int m_numInLeftSubTree = 0;
+};
+
+
 
 vector<pair<Node*, Node*>> computeOrderedValidReparentings(vector<Node>& nodes)
 {
