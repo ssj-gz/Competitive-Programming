@@ -173,6 +173,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         const auto index = query - 1; // Make 0-relative.
         assert(0 <= index && index < validReparentings.size());
         auto queryResultIter = validReparentings.begin() + index;
+        const auto dbgNodeToReparent = queryResultIter->first;
+        const auto dbgNewParent = queryResultIter->second;
         result.push_back(*queryResultIter);
 
         validReparentings.erase(queryResultIter);
