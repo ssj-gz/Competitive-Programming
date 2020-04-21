@@ -104,7 +104,7 @@ vector<pair<Node*, Node*>> computeOrderedValidReparentings(vector<Node>& nodes)
             [](const auto& lhs, const auto& rhs)
             {
             if (lhs.first->id != rhs.first->id)
-                return lhs.first->id < rhs.second->id;
+                return lhs.first->id < rhs.first->id;
             if (lhs.second->height != rhs.second->height)
                 return lhs.second->height < rhs.second->height;
             return lhs.second->id < rhs.second->id;
