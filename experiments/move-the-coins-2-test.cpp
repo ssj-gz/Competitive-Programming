@@ -409,10 +409,37 @@ void choicesWithRemovals(const vector<int>& numOfRemainingToChoose, int numToCho
 class IndexRemapper
 {
     public:
-        int remapNthRemainingToIndexAndRemove(int nthRemaining)
+        int remapNthRemainingToIndexAndRemove(int nthOfRemainingToChoose)
         {
-            // TODO
-            return -1;
+            // Be optimistic and give remappedIndex the smallest possible value:
+            // we'll correct our optimism as we go along :)
+            int remappedIndex = nthOfRemainingToChoose;
+            auto currentNode = removedIndices.root();
+            int numRemovedUpToCurrentNodeIndexOffset = 0;
+            AVLTreeIterator treeIter(removedIndices.root());
+            while (treeIter.currentNode())
+            {
+                const int indexOfCurrentNode = treeIter.currentNode()->value;
+                const int numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
+                const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
+                if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
+                {
+                    // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
+                    // into left child.
+                    treeIter.followLeftChild();
+                }
+                else
+                {
+                    // Again, be optimistic about remappedIndex - we'll correct it as we go along.
+                    remappedIndex = max(remappedIndex, indexOfCurrentNode + (nthOfRemainingToChoose - numFreeUpToCurrentNodeIndex) + 1);
+                    // Required index is to the right of here; "recurse" into the right child.
+                    treeIter.followRightChild();
+                }
+
+            }
+            // We've successfully found the index in the original array; now mark it as Removed.
+            removedIndices.insertValue(remappedIndex);
+            return remappedIndex;
         }
     private:
         AVLTree removedIndices;
