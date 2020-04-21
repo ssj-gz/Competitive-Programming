@@ -39,6 +39,11 @@ struct Node
     int numDescendants = -1; // Includes the node itself.
     int numCanReparentTo = -1;
 
+    bool isDescendantOf(Node& otherNode)
+    {
+        return (dfsBeginVisit >= otherNode.dfsBeginVisit && dfsEndVisit <= otherNode.dfsEndVisit);
+    }
+
     int dfsBeginVisit = -1;
     int dfsEndVisit = -1;
 };
@@ -492,6 +497,16 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
     }
 
+    vector<int> numNodesUpToHeight(maxNodeHeight + 1);
+    {
+        int numNodes = 0;
+        for (int height = 0; height <= maxNodeHeight; height++)
+        {
+            numNodes += nodesAtHeightLookup[height].size();
+            numNodesUpToHeight.push_back(numNodes);
+        }
+    }
+
     for (const auto query : queries)
     {
         const auto dbgIndexOriginal = query - 1; // Make 0-relative.
@@ -537,9 +552,12 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
         auto nodeToReparent = &(nodes[nodeIndex]);
 
+        // i.e. we now need to find the numOfReparentingThatReparentsNode'th element in the original
+        // list that re-parents our nodeToReparent.
         const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
         cout << "numOfReparentingThatReparentsNode: " << numOfReparentingThatReparentsNode << endl;
         {
+            // TODO - remove this whole block.
             int dbgIndex = 0;
             for (int i = 0; i < validReparentings.size(); i++)
             {
@@ -556,6 +574,32 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 }
             }
         }
+        int newParentHeight = -1;
+        int numDescendants = 0;
+        int numNonDescendants = 0;
+        for (int height = 0; height <= maxNodeHeight; height++)
+        {
+            for (const auto nodeAtHeight : nodesAtHeightLookup[height])
+            {
+                if (nodeAtHeight->isDescendantOf(*nodeToReparent))
+                {
+                    numDescendants++;
+                }
+                else
+                {
+                    numNonDescendants++;
+                }
+            }
+            cout << "height: " << height << " numDescendants: " << numDescendants << " numNonDescendants: " << numNonDescendants << endl;
+            if (numNonDescendants > numOfReparentingThatReparentsNode)
+            {
+                newParentHeight = height;
+                break;
+            }
+        }
+        cout << "newParentHeight: " << newParentHeight << " dbgNewParentHeight: " << dbgNewParent->height << endl;
+        assert(newParentHeight == dbgNewParent->height);
+        assert(newParentHeight != -1);
 
         assert(nodeToReparent == dbgNodeToReparent);
         reparentingRemoved[dbgIndexInOriginalList] = true;
