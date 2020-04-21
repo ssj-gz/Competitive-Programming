@@ -317,8 +317,7 @@ class AVLTreeIterator
         {
             const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
             cout << "numInLeftSubTree: " << numInLeftSubTree << " m_numToLeftOffset: " << m_numToLeftOffset << endl;
-            cout << "numToLeft: " << m_numToLeftOffset + m_numInLeftSubTree << endl;
-            return m_numToLeftOffset + m_numInLeftSubTree;
+            return m_numToLeftOffset + numInLeftSubTree;
         }
         void followLeftChild()
         {
@@ -327,14 +326,13 @@ class AVLTreeIterator
         void followRightChild()
         {
             const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
-            m_numToLeftOffset += m_numInLeftSubTree + 1;
+            m_numToLeftOffset += numInLeftSubTree + 1;
             m_currentNode = m_currentNode->rightChild;
         }
     private:
         AVLNode* m_currentNode = nullptr;
 
         int m_numToLeftOffset = 0;
-        int m_numInLeftSubTree = 0;
 };
 
 void printSubTree(AVLNode* subtreeRoot)
