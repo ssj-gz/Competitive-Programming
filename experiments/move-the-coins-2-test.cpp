@@ -506,6 +506,19 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             numNodesUpToHeight.push_back(numNodes);
         }
     }
+    vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum(maxNodeHeight + 1);
+    {
+        for (int height = 0; height <= maxNodeHeight; height++)
+        {
+            const auto& nodesAtHeight = nodesAtHeightLookup[height];
+            int numProperDescendantsSum = 0;
+            for (const auto node : nodesAtHeight)
+            {
+                numProperDescendantsSum += node->numDescendants - 1; // "-1" as we want *proper* descendants.
+                numProperDescendantsForNodeAtHeightPrefixSum[height].push_back(numProperDescendantsSum);
+            }
+        }
+    }
 
     for (const auto query : queries)
     {
@@ -591,6 +604,22 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 }
             }
             cout << "height: " << height << " numDescendants: " << numDescendants << " numNonDescendants: " << numNonDescendants << endl;
+            const auto firstDescendantAtHeightIter = std::lower_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsBeginVisit,
+                    [](const Node* node, const int dfsBeginVisit)
+                    {
+                    return node->dfsBeginVisit < dfsBeginVisit;
+                    });
+            const int numPreDescendants = firstDescendantAtHeightIter - nodesAtHeightLookup[height].begin();
+            int dbgNumPreDescendants = 0;
+            for (const auto node : nodesAtHeightLookup[height])
+            {
+                cout << " nodeAtHeight dfsBeginVisit: " << node->dfsBeginVisit << " nodeToReparent->dfsBeginVisit: " << nodeToReparent->dfsBeginVisit << endl;
+                if (node->dfsBeginVisit >= nodeToReparent->dfsBeginVisit)
+                    break;
+                dbgNumPreDescendants++;
+            }
+            cout << "numPreDescendants: " << numPreDescendants << " dbgNumPreDescendants: " << dbgNumPreDescendants << endl;
+            assert(numPreDescendants == dbgNumPreDescendants);
             if (numNonDescendants > numOfReparentingThatReparentsNode)
             {
                 newParentHeight = height;
