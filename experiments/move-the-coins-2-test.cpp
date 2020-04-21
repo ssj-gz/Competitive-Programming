@@ -53,6 +53,7 @@ void computeDFSInfo(Node* node, int& dfsVisitNum, vector<vector<Node*>>& nodesAt
     node->dfsBeginVisit = dfsVisitNum;
     if (!nodesAtHeightLookup.empty()) // TODO - remove this condition - it's only there as the  testgen and brute force don't use nodesAtHeightLookup.
     {
+        cout << "Adding node at height: " << node->height << endl;
         nodesAtHeightLookup[node->height].push_back(node);
     }
     dfsVisitNum++;
@@ -503,7 +504,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         for (int height = 0; height <= maxNodeHeight; height++)
         {
             numNodes += nodesAtHeightLookup[height].size();
-            numNodesUpToHeight.push_back(numNodes);
+            cout << "height: " << height << " numNodes for numNodesUpToHeight: " << numNodes << endl;
+            numNodesUpToHeight[height] = numNodes;
         }
     }
     vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum(maxNodeHeight + 1);
@@ -604,6 +606,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 }
                 else
                 {
+                    cout << "found non descendant at height " << height << " node id: " << nodeAtHeight->id << endl;
                     dbgNumNonDescendants++;
                 }
             }
@@ -666,8 +669,12 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
             cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " dbgNumDescendantsAtHeight: " << dbgNumDescendantsAtHeight << endl;
             assert(numDescendantsAtHeight == dbgNumDescendantsAtHeight);
-            cout << "numNodesUpToHeight: " << numNodesUpToHeight[height] << " nodeToReparent->numDescendants: " << nodeToReparent->numDescendants << " sumOfProperDescendantsOfDescendantsAtHeight: " << sumOfProperDescendantsOfDescendantsAtHeight << endl;
-            const int numNonDescendantsUpToThisHeight = numNodesUpToHeight[height] - nodeToReparent->numDescendants + sumOfProperDescendantsOfDescendantsAtHeight;
+            cout << "height: " << height << " numNodesUpToHeight: " << numNodesUpToHeight[height] << " nodeToReparent->numDescendants: " << nodeToReparent->numDescendants << " sumOfProperDescendantsOfDescendantsAtHeight: " << sumOfProperDescendantsOfDescendantsAtHeight << " nodeToReparent->height: " << nodeToReparent->height << endl;
+            int numNonDescendantsUpToThisHeight = numNodesUpToHeight[height];
+            if (height >= nodeToReparent->height)
+            {
+                numNonDescendantsUpToThisHeight -= nodeToReparent->numDescendants - sumOfProperDescendantsOfDescendantsAtHeight;
+            }
             cout << "numNonDescendantsUpToThisHeight: " << numNonDescendantsUpToThisHeight << " dbgNumNonDescendants: " << dbgNumNonDescendants << endl;
             assert(numNonDescendantsUpToThisHeight == dbgNumNonDescendants);
 
