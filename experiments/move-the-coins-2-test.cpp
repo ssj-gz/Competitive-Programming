@@ -469,28 +469,28 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << " height: " << validReparentings[i].second->height << " removed? " << (reparentingRemoved[i] ? "true" : "false") << endl;
         }
 
-        int indexInOriginalList = 0;
+        int dbgIndexInOriginalList = 0;
         Node* dbgNodeToReparent = nullptr;
         Node* dbgNewParent = nullptr;
         {
             int adjustedIndex = 0;
             while (true)
             {
-                if (!reparentingRemoved[indexInOriginalList])
+                if (!reparentingRemoved[dbgIndexInOriginalList])
                 {
                     if (adjustedIndex == dbgIndexOriginal)
                     {
-                        dbgNodeToReparent = validReparentings[indexInOriginalList].first;
-                        dbgNewParent = validReparentings[indexInOriginalList].second;
+                        dbgNodeToReparent = validReparentings[dbgIndexInOriginalList].first;
+                        dbgNewParent = validReparentings[dbgIndexInOriginalList].second;
                         break;
                     }
                     adjustedIndex++;
                 }
-                indexInOriginalList++;
+                dbgIndexInOriginalList++;
             }
         }
         assert(dbgNodeToReparent != nullptr && dbgNewParent != nullptr);
-        cout << " indexInOriginalList: " << indexInOriginalList << endl;
+        cout << " dbgIndexInOriginalList: " << dbgIndexInOriginalList << endl;
         //assert(0 <= dbgIndex && dbgIndex < validReparentings.size());
         //auto queryResultIter = validReparentings.begin() + dbgIndex;
         //const auto dbgNodeToReparent = queryResultIter->first;
@@ -500,7 +500,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
         int sumOfNumCanReparentTo = 0;
         Node* nodeToReparent = nullptr;
-        const int index = indexInOriginalList;
+        const int index = dbgIndexInOriginalList;
         for (auto& node : nodes)
         {
             cout << " node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << " sumOfNumCanReparentTo: " << sumOfNumCanReparentTo << " sumOfNumCanReparentTo: " << endl;
@@ -515,7 +515,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         assert(nodeToReparent);
         cout << "nodeToReparent: " << nodeToReparent->id << endl;
         assert(nodeToReparent == dbgNodeToReparent);
-        reparentingRemoved[indexInOriginalList] = true;
+        reparentingRemoved[dbgIndexInOriginalList] = true;
     }
 
     return result;
