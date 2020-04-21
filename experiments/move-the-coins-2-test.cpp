@@ -203,7 +203,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
         int sumOfNumCanReparentTo = 0;
         Node* nodeToReparent = nullptr;
-        int index = query - 1; // TODO - account for indices removed in previous queries!
+        const int index = adjustedIndex;
         for (auto& node : nodes)
         {
             cout << " node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << " sumOfNumCanReparentTo: " << sumOfNumCanReparentTo << " sumOfNumCanReparentTo: " << endl;
