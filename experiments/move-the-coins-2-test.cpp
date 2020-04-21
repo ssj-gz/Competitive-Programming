@@ -35,6 +35,7 @@ struct Node
     Node* parent = nullptr;
     int height = -1;
     int id = -1;
+    int numDescendants = -1; // Includes the node itself.
 
     int dfsBeginVisit = -1;
     int dfsEndVisit = -1;
@@ -65,12 +66,14 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 {
     node->height = height;
     node->parent = parent;
+    node->numDescendants = 1; // This node.
 
     node->children.erase(remove(node->children.begin(), node->children.end(), parent), node->children.end());
 
     for (auto child : node->children)
     {
         fixParentChildAndHeights(child, node, height + 1);
+        node->numDescendants += child->numDescendants;
     }
 }
 
