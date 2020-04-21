@@ -155,6 +155,11 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         // We can reparent to any node that is not a descendant.
         node.numCanReparentTo = numNodes - node.numDescendants;
     }
+    cout << "solveOptimised - numNodes: " << numNodes << endl;
+    for (const auto& node : nodes)
+    {
+        cout << "node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << endl;
+    }
     
     auto validReparentings = computeValidReparentings(nodes);
 
