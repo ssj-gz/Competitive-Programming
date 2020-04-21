@@ -85,7 +85,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 
 struct AVLNode
 {
-    int value = -1;
+    int64_t value = -1;
     AVLNode *leftChild = nullptr;
     AVLNode *rightChild = nullptr;
     int balanceFactor = 0;
@@ -357,20 +357,20 @@ void printTree(AVLTree& tree)
 class IndexRemapper
 {
     public:
-        int remapNthRemainingToIndexAndRemove(int nthOfRemainingToChoose)
+        int64_t remapNthRemainingToIndexAndRemove(int64_t nthOfRemainingToChoose)
         {
             cout << "remapNthRemainingToIndexAndRemove nthOfRemainingToChoose:"  << nthOfRemainingToChoose << endl;
             cout << "tree:" << endl;
             printTree(removedIndices);
             // Be optimistic and give remappedIndex the smallest possible value:
             // we'll correct our optimism as we go along :)
-            int remappedIndex = nthOfRemainingToChoose;
+            int64_t remappedIndex = nthOfRemainingToChoose;
             auto currentNode = removedIndices.root();
             int numRemovedUpToCurrentNodeIndexOffset = 0;
             AVLTreeIterator treeIter(removedIndices.root());
             while (treeIter.currentNode())
             {
-                const int indexOfCurrentNode = treeIter.currentNode()->value;
+                const int64_t indexOfCurrentNode = treeIter.currentNode()->value;
                 const int numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
                 const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
                 cout << "indexOfCurrentNode: " << indexOfCurrentNode << " numRemovedUpToCurrentNodeIndex: " << numRemovedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << endl;
