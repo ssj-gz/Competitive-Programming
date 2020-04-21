@@ -165,16 +165,16 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
     const auto validReparentings = computeOrderedValidReparentings(nodes);
     vector<bool> reparentingRemoved(validReparentings.size(), false);
 
-    cout << "validReparentings: " << endl;
-    for (int i = 0; i < validReparentings.size(); i++)
-    {
-        cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << " height: " << validReparentings[i].second->height << endl;
-    }
-
     for (const auto query : queries)
     {
         const auto dbgIndexOriginal = query - 1; // Make 0-relative.
         cout << " query: dbgIndexOriginal: " << dbgIndexOriginal << endl;
+        cout << "validReparentings: " << endl;
+        for (int i = 0; i < validReparentings.size(); i++)
+        {
+            cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << " height: " << validReparentings[i].second->height << " removed? " << (reparentingRemoved[i] ? "true" : "false") << endl;
+        }
+
         int indexInOriginalList = 0;
         int adjustedIndex = 0;
         Node* dbgNodeToReparent = nullptr;
