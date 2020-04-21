@@ -172,10 +172,10 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
     for (const auto query : queries)
     {
-        const auto index = query - 1; // Make 0-relative.
-        cout << " query: index: " << index << endl;
-        assert(0 <= index && index < validReparentings.size());
-        auto queryResultIter = validReparentings.begin() + index;
+        const auto dbgIndex = query - 1; // Make 0-relative.
+        cout << " query: dbgIndex: " << dbgIndex << endl;
+        assert(0 <= dbgIndex && dbgIndex < validReparentings.size());
+        auto queryResultIter = validReparentings.begin() + dbgIndex;
         const auto dbgNodeToReparent = queryResultIter->first;
         const auto dbgNewParent = queryResultIter->second;
         cout << "  dbgNodeToReparent: " << dbgNodeToReparent->id << " dbgNewParent: " << dbgNewParent-> id << endl;
@@ -183,6 +183,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
         int sumOfNumCanReparentTo = 0;
         Node* nodeToReparent = nullptr;
+        int index = query - 1; // TODO - account for indices removed in previous queries!
         for (auto& node : nodes)
         {
             cout << " node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << " sumOfNumCanReparentTo: " << sumOfNumCanReparentTo << " sumOfNumCanReparentTo: " << endl;
