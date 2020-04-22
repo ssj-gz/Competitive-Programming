@@ -503,17 +503,12 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1Ref, AVLTree& tree2Ref)
 {
     auto tree1 = &tree1Ref;
     auto tree2 = &tree2Ref;
-    if (tree1->root() == nullptr)
-    {
-        swap(tree1, tree2);
-    }
     cout << "k: " << k << endl;
     cout << "tree1: " << endl;
     printTree(*tree1);
     cout << "tree2: " << endl;
     printTree(*tree2);
     auto currentNode1 = tree1->root();
-    assert(currentNode1);
     int numToLeftOffset1 = 0;
     while (currentNode1)
     {
