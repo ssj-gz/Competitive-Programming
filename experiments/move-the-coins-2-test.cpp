@@ -439,9 +439,8 @@ vector<pair<Node*, Node*>> computeOrderedValidReparentings(vector<Node>& nodes)
     return validReparentings;
 }
 
-vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
+int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
-    vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
     vector<vector<Node*>> nodesAtHeightLookupDummy;
     computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
@@ -459,7 +458,6 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 
         const auto nodeToReparent = queryResultIter->first;
         const auto newParent = queryResultIter->second;
-        result.push_back(*queryResultIter);
 
         validReparentings.erase(queryResultIter);
 
@@ -469,7 +467,7 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
         powerOf3 = (powerOf3 * 3) % Mod;
     }
 
-    return result;
+    return decryptionKey;
 }
 
 /**
@@ -556,7 +554,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 }
 
 
-vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
+int64_t solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
@@ -569,7 +567,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
     }
     assert(maxNodeHeight != -1);
 
-    vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
     vector<vector<Node*>> nodesAtHeightLookup(maxNodeHeight + 1);
     computeDFSInfo(rootNode, nodesAtHeightLookup);
@@ -691,11 +688,9 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         decryptionKey = (decryptionKey + powerOf3 * newParent->id) % Mod;
         powerOf2 = (powerOf2 * 2) % Mod;
         powerOf3 = (powerOf3 * 3) % Mod;
-
-        result.push_back({nodeToReparent, newParent});
     }
 
-    return result;
+    return decryptionKey;
 }
 
 int main(int argc, char* argv[])
@@ -811,19 +806,11 @@ int main(int argc, char* argv[])
 #ifdef BRUTE_FORCE
 #if 1
         const auto solutionBruteForce = solveBruteForce(nodes, encryptedQueries);
-        cout << "solutionBruteForce: " << endl;
-        for (const auto result : solutionBruteForce)
-        {
-            cout << "solutionBruteForce: " << result.first->id << " " << result.second->id << endl;
-        }
+        cout << "solutionBruteForce: " << solutionBruteForce << endl;
 #endif
 #if 1
         const auto solutionOptimised = solveOptimised(nodes, encryptedQueries);
-        cout << "solutionOptimised: " << endl;
-        for (const auto result : solutionOptimised)
-        {
-            cout << "solutionOptimised: " << result.first->id << " " << result.second->id << endl;
-        }
+        cout << "solutionOptimised: " << solutionOptimised << endl;
 
         assert(solutionOptimised == solutionBruteForce);
 #endif
