@@ -2,22 +2,12 @@
 // 
 // Solution to: https://www.codechef.com/problems/MVCN2TST
 //
-//#define SUBMISSION
-#ifdef SUBMISSION
-#define NDEBUG
-#else
-#define _GLIBCXX_DEBUG       // Iterator safety; out-of-bounds access for Containers, etc.
-#pragma GCC optimize "trapv" // abort() on (signed) integer overflow.
-#define BRUTE_FORCE
-#endif
 #include <iostream>
 #include <vector>
 #include <deque>
 #include <algorithm>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -53,10 +43,7 @@ struct Node
 void computeDFSInfo(Node* node, int& dfsVisitNum, vector<vector<Node*>>& nodesAtHeightLookup)
 {
     node->dfsBeginVisit = dfsVisitNum;
-    if (!nodesAtHeightLookup.empty()) // TODO - remove this condition - it's only there as the  testgen and brute force don't use nodesAtHeightLookup.
-    {
-        nodesAtHeightLookup[node->height].push_back(node);
-    }
+    nodesAtHeightLookup[node->height].push_back(node);
     dfsVisitNum++;
 
     for (auto child : node->children)
@@ -341,25 +328,6 @@ class AVLTreeIterator
         int m_numToLeftOffset = 0;
 };
 
-void printSubTree(AVLNode* subtreeRoot)
-{
-    if (subtreeRoot == nullptr)
-        return;
-    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
-    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
-
-    if (subtreeRoot->leftChild)
-        printSubTree(subtreeRoot->leftChild);
-    if (subtreeRoot->rightChild)
-        printSubTree(subtreeRoot->rightChild);
-}
-
-void printTree(AVLTree& tree)
-{
-    printSubTree(tree.root());
-}
-
-
 class IndexRemapper
 {
     public:
@@ -398,71 +366,6 @@ class IndexRemapper
     private:
         AVLTree removedIndices;
 };
-
-
-
-vector<pair<Node*, Node*>> computeOrderedValidReparentings(vector<Node>& nodes)
-{
-    vector<pair<Node*, Node*>> validReparentings;
-
-    for (auto& nodeToReparent : nodes)
-    {
-        if (nodeToReparent.parent == nullptr)
-            continue;
-
-        for (auto& newParent : nodes)
-        {
-            assert(newParent.dfsBeginVisit != -1 && newParent.dfsEndVisit != -1);
-            const bool newParentIsDescendant = (newParent.dfsBeginVisit >= nodeToReparent.dfsBeginVisit && newParent.dfsEndVisit <= nodeToReparent.dfsEndVisit);
-            if (!newParentIsDescendant)
-                validReparentings.push_back({&nodeToReparent, &newParent});
-        }
-    }
-
-    sort(validReparentings.begin(), validReparentings.end(),
-            [](const auto& lhs, const auto& rhs)
-            {
-            if (lhs.first->id != rhs.first->id)
-                return lhs.first->id < rhs.first->id;
-            if (lhs.second->height != rhs.second->height)
-                return lhs.second->height < rhs.second->height;
-            return lhs.second->id < rhs.second->id;
-            });
-
-
-    return validReparentings;
-}
-
-int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
-{
-    auto rootNode = &(nodes.front());
-    vector<vector<Node*>> nodesAtHeightLookupDummy;
-    computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
-
-    auto validReparentings = computeOrderedValidReparentings(nodes);
-    int64_t decryptionKey = 0;
-    int64_t powerOf2 = 2;
-    int64_t powerOf3 = 3;
-
-    for (const auto encryptedQuery : encryptedQueries)
-    {
-        const auto index = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
-        assert(0 <= index && index < validReparentings.size());
-        auto queryResultIter = validReparentings.begin() + index;
-
-        const auto nodeToReparent = queryResultIter->first;
-        const auto newParent = queryResultIter->second;
-
-        validReparentings.erase(queryResultIter);
-
-        decryptionKey = (decryptionKey + powerOf2 * nodeToReparent->id) % Mod;
-        decryptionKey = (decryptionKey + powerOf3 * newParent->id) % Mod;
-        powerOf2 = (powerOf2 * 2) % Mod;
-        powerOf3 = (powerOf3 * 3) % Mod;
-    }
-
-    return decryptionKey;
-}
 
 /**
  * Find the total number of nodes v such that both:
@@ -546,7 +449,6 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     }
     return kthAVLNode;
 }
-
 
 int64_t solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
@@ -690,82 +592,7 @@ int64_t solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQuer
 int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T;)
-        {
-            int64_t encryptionKey = 0;
-            int64_t powerOf2 = 2;
-            int64_t powerOf3 = 3;
-
-            const auto numNodes = 1 + rand() % 200;
-            vector<Node> nodes(numNodes);
-            for (int i = 0; i < numNodes; i++)
-                nodes[i].id = (i + 1);
-
-            vector<pair<Node*, Node*>> edges;
-
-            for (int childNodeIndex = 1; childNodeIndex < numNodes; childNodeIndex++)
-            {
-                const int parentIndex = rand() % childNodeIndex;
-                edges.push_back({&(nodes[parentIndex]), &(nodes[childNodeIndex])});
-            }
-            for (auto& edge : edges)
-            {
-                edge.first->children.push_back(edge.second);
-                edge.second->children.push_back(edge.first);
-            }
-
-            auto rootNode = &(nodes.front());
-            fixParentChildAndHeights(rootNode);
-            vector<vector<Node*>> nodesAtHeightLookupDummy;
-            computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
-            auto validReparentings = computeOrderedValidReparentings(nodes);
-
-            if (validReparentings.empty())
-                continue;
-            const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
-
-            vector<int64_t> encryptedQueries;
-            for (int queryNum = 0; queryNum < numQueries; queryNum++)
-            {
-                const int kthRemainingReparenting = rand() % validReparentings.size();
-                const auto nodeToReparent = validReparentings[kthRemainingReparenting].first;
-                const auto newParent = validReparentings[kthRemainingReparenting].second;
-                encryptedQueries.push_back((1 + kthRemainingReparenting) ^ encryptionKey);
-                validReparentings.erase(validReparentings.begin() + kthRemainingReparenting);
-
-                encryptionKey = (encryptionKey + powerOf2 * nodeToReparent->id) % Mod;
-                encryptionKey = (encryptionKey + powerOf3 * newParent->id) % Mod;
-                powerOf2 = (powerOf2 * 2) % Mod;
-                powerOf3 = (powerOf3 * 3) % Mod;
-            }
-
-            cout << numNodes << endl;
-            for (const auto edge : edges)
-            {
-                cout << edge.first->id << " " << edge.second->id << endl;
-            }
-            cout << numQueries << endl;
-            for (const auto encryptedQuery : encryptedQueries)
-            {
-                cout << encryptedQuery << endl;
-            }
-            t++;
-        }
-
-        return 0;
-    }
     
-    // TODO - read in testcase.
     const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
@@ -790,8 +617,6 @@ int main(int argc, char* argv[])
         auto rootNode = &(nodes.front());
         fixParentChildAndHeights(rootNode);
 
-        // TODO - eventually, we will need to make this online, using a decryption-key
-        // approach (similar to "Simple Markdown Editor").
         const auto numQueries = read<int>();
         vector<int64_t> encryptedQueries(numQueries);
         for (auto& encryptedQuery : encryptedQueries)
@@ -799,25 +624,10 @@ int main(int argc, char* argv[])
             encryptedQuery = read<int64_t>();
         }
 
-
-#ifdef BRUTE_FORCE
-#if 1
-        const auto solutionBruteForce = solveBruteForce(nodes, encryptedQueries);
-        cout << "solutionBruteForce: " << solutionBruteForce << endl;
-#endif
-#if 1
-        const auto solutionOptimised = solveOptimised(nodes, encryptedQueries);
-        cout << "solutionOptimised: " << solutionOptimised << endl;
-
-        assert(solutionOptimised == solutionBruteForce);
-#endif
-#else
         const auto solutionOptimised = solveOptimised(nodes, encryptedQueries);
         cout << solutionOptimised << endl;
-#endif
     }
 
     assert(cin);
 }
-
 
