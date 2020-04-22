@@ -55,7 +55,6 @@ void computeDFSInfo(Node* node, int& dfsVisitNum, vector<vector<Node*>>& nodesAt
     node->dfsBeginVisit = dfsVisitNum;
     if (!nodesAtHeightLookup.empty()) // TODO - remove this condition - it's only there as the  testgen and brute force don't use nodesAtHeightLookup.
     {
-        cout << "Adding node at height: " << node->height << endl;
         nodesAtHeightLookup[node->height].push_back(node);
     }
     dfsVisitNum++;
@@ -324,7 +323,6 @@ class AVLTreeIterator
         int numToLeft() const
         {
             const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
-            cout << "numInLeftSubTree: " << numInLeftSubTree << " m_numToLeftOffset: " << m_numToLeftOffset << endl;
             return m_numToLeftOffset + numInLeftSubTree;
         }
         void followLeftChild()
@@ -367,8 +365,6 @@ class IndexRemapper
     public:
         int64_t remapNthRemainingToIndexAndRemove(int64_t nthOfRemainingToChoose)
         {
-            cout << "remapNthRemainingToIndexAndRemove nthOfRemainingToChoose:"  << nthOfRemainingToChoose << endl;
-            cout << "tree:" << endl;
             // Be optimistic and give remappedIndex the smallest possible value:
             // we'll correct our optimism as we go along :)
             int64_t remappedIndex = nthOfRemainingToChoose;
@@ -380,7 +376,6 @@ class IndexRemapper
                 const int64_t indexOfCurrentNode = treeIter.currentNode()->value;
                 const int numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
                 const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
-                cout << "indexOfCurrentNode: " << indexOfCurrentNode << " numRemovedUpToCurrentNodeIndex: " << numRemovedUpToCurrentNodeIndex << " numFreeUpToCurrentNodeIndex: " << numFreeUpToCurrentNodeIndex << endl;
                 if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
                 {
                     // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
@@ -398,7 +393,6 @@ class IndexRemapper
             }
             // We've successfully found the index in the original array; now mark it as Removed.
             removedIndices.insertValue(remappedIndex);
-            cout << " remappedIndex: " << remappedIndex << endl;
             return remappedIndex;
         }
     private:
