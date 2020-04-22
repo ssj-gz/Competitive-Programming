@@ -706,7 +706,7 @@ int main(int argc, char* argv[])
         const int T = 1;
         cout << T << endl;
 
-        for (int t = 0; t < T; t++)
+        for (int t = 0; t < T;)
         {
             int64_t encryptionKey = 0;
             int64_t powerOf2 = 2;
@@ -736,6 +736,8 @@ int main(int argc, char* argv[])
             computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
             auto validReparentings = computeOrderedValidReparentings(nodes);
 
+            if (validReparentings.empty())
+                continue;
             const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
 
             vector<int64_t> encryptedQueries;
@@ -763,6 +765,7 @@ int main(int argc, char* argv[])
             {
                 cout << encryptedQuery << endl;
             }
+            t++;
         }
 
         return 0;
