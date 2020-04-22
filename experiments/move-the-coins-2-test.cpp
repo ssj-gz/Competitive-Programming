@@ -369,7 +369,6 @@ class IndexRemapper
         {
             cout << "remapNthRemainingToIndexAndRemove nthOfRemainingToChoose:"  << nthOfRemainingToChoose << endl;
             cout << "tree:" << endl;
-            printTree(removedIndices);
             // Be optimistic and give remappedIndex the smallest possible value:
             // we'll correct our optimism as we go along :)
             int64_t remappedIndex = nthOfRemainingToChoose;
