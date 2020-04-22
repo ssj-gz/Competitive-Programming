@@ -760,7 +760,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
         if (!newParentAVLNode)
         {
-            newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
+            newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, suffixesForHeight[newParentHeight], prefixesForHeight[newParentHeight]);
         }
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
