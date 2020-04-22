@@ -453,7 +453,7 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
 
     for (const auto query : queries)
     {
-        const auto index = query - 1; // Make 0-relative.
+        const auto index = (query ^ decryptionKey) - 1; // Make 0-relative.
         assert(0 <= index && index < validReparentings.size());
         auto queryResultIter = validReparentings.begin() + index;
 
@@ -633,7 +633,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
     for (const auto query : queries)
     {
-        const auto kthInRemainingToFind = query - 1; // Make 0-relative.
+        const auto kthInRemainingToFind = (query ^ decryptionKey) - 1; // Make 0-relative.
 
         const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
@@ -749,7 +749,7 @@ int main(int argc, char* argv[])
                 const int kthRemainingReparenting = rand() % validReparentings.size();
                 const auto nodeToReparent = validReparentings[kthRemainingReparenting].first;
                 const auto newParent = validReparentings[kthRemainingReparenting].second;
-                queries.push_back(1 + kthRemainingReparenting);
+                queries.push_back((1 + kthRemainingReparenting) ^ encryptionKey);
                 validReparentings.erase(validReparentings.begin() + kthRemainingReparenting);
 
                 encryptionKey = (encryptionKey + powerOf2 * nodeToReparent->id) % Mod;
