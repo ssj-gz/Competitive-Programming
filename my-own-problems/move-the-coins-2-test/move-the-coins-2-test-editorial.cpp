@@ -336,8 +336,6 @@ class IndexRemapper
             // Be optimistic and give remappedIndex the smallest possible value:
             // we'll correct our optimism as we go along :)
             int64_t remappedIndex = nthOfRemainingToChoose;
-            auto currentNode = removedIndices.root();
-            int numRemovedUpToCurrentNodeIndexOffset = 0;
             AVLTreeIterator treeIter(removedIndices.root());
             while (treeIter.currentNode())
             {
@@ -589,7 +587,7 @@ int64_t solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQuer
     return decryptionKey;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
     
