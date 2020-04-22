@@ -507,6 +507,11 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1Ref, AVLTree& tree2Ref)
     {
         swap(tree1, tree2);
     }
+    cout << "k: " << k << endl;
+    cout << "tree1: " << endl;
+    printTree(*tree1);
+    cout << "tree2: " << endl;
+    printTree(*tree2);
     auto currentNode1 = tree1->root();
     assert(currentNode1);
     int numToLeftOffset1 = 0;
@@ -560,7 +565,6 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1Ref, AVLTree& tree2Ref)
         }
     }
 
-    assert(false && "This shouldn't happen!");
     return nullptr;
 }
 
@@ -754,11 +758,17 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         cout << "numNonDescendantsToRight: " << numNonDescendantsToRight << endl;
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
-        cout << "prefix tree: " << endl;
-        printTree(prefixesForHeight[newParentHeight]);
-        cout << "suffix tree: " << endl;
-        printTree(suffixesForHeight[newParentHeight]);
-        const auto newParentId = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight])->value;
+        //cout << "prefix tree: " << endl;
+        //printTree(prefixesForHeight[newParentHeight]);
+        //cout << "suffix tree: " << endl;
+        //printTree(suffixesForHeight[newParentHeight]);
+        auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
+        if (!newParentAVLNode)
+        {
+            newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
+        }
+        assert(newParentAVLNode);
+        const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
         cout << "newParent: " << newParent->id << " dbgNewParent: " << dbgNewParent->id << endl;
         assert(newParent == dbgNewParent);
