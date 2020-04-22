@@ -499,16 +499,9 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
     return numNonDescendantsUpToThisHeight;
 }
 
-AVLNode* findKthFromPair(int k, AVLTree& tree1Ref, AVLTree& tree2Ref)
+AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 {
-    auto tree1 = &tree1Ref;
-    auto tree2 = &tree2Ref;
-    cout << "k: " << k << endl;
-    cout << "tree1: " << endl;
-    printTree(*tree1);
-    cout << "tree2: " << endl;
-    printTree(*tree2);
-    auto currentNode1 = tree1->root();
+    auto currentNode1 = tree1.root();
     int numToLeftOffset1 = 0;
     while (currentNode1)
     {
@@ -517,7 +510,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1Ref, AVLTree& tree2Ref)
         int numToLeftOffset2 = 0;
         int numToLeft2 = 0;
         int lastValue2 = -1;
-        auto currentNode2 = tree2->root();
+        auto currentNode2 = tree2.root();
         while (currentNode2)
         {
             lastValue2 = currentNode2->value;
