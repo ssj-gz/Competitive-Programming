@@ -706,7 +706,7 @@ int main(int argc, char* argv[])
             int64_t powerOf2 = 2;
             int64_t powerOf3 = 3;
 
-            const auto numNodes = 1 + rand() % 100;
+            const auto numNodes = 1 + rand() % 200;
             vector<Node> nodes(numNodes);
             for (int i = 0; i < numNodes; i++)
                 nodes[i].id = (i + 1);
