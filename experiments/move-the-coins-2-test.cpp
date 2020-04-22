@@ -736,14 +736,18 @@ int main(int argc, char* argv[])
             fixParentChildAndHeights(rootNode);
             vector<vector<Node*>> nodesAtHeightLookupDummy;
             computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
-            const auto validReparentings = computeOrderedValidReparentings(nodes);
+            auto validReparentings = computeOrderedValidReparentings(nodes);
 
             const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
 
             vector<int64_t> queries;
             for (int queryNum = 0; queryNum < numQueries; queryNum++)
             {
-                queries.push_back(1 + rand() % (validReparentings.size() - queryNum));
+                const int kthRemainingReparenting = rand() % validReparentings.size();
+                const auto nodeToReparent = validReparentings[kthRemainingReparenting].first;
+                const auto newParent = validReparentings[kthRemainingReparenting].second;
+                queries.push_back(1 + kthRemainingReparenting);
+                validReparentings.erase(validReparentings.begin() + kthRemainingReparenting);
             }
 
             cout << numNodes << endl;
