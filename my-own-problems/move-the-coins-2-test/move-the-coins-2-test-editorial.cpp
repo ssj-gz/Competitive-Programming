@@ -447,7 +447,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     return kthAVLNode;
 }
 
-int64_t solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
+int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
@@ -617,8 +617,7 @@ int main()
             encryptedQuery = read<int64_t>();
         }
 
-        const auto solutionOptimised = solveOptimised(nodes, encryptedQueries);
-        cout << solutionOptimised << endl;
+        cout << calcFinalDecryptionKey(nodes, encryptedQueries) << endl;
     }
 
     assert(cin);
