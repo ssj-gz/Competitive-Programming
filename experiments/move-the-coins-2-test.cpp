@@ -21,6 +21,8 @@
 
 using namespace std;
 
+const int64_t Mod = 1'000'000'007;
+
 template <typename T>
 T read()
 {
@@ -446,15 +448,26 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
     computeDFSInfo(rootNode, nodesAtHeightLookupDummy);
 
     auto validReparentings = computeOrderedValidReparentings(nodes);
+    int64_t decryptionKey = 0;
+    int64_t powerOf2 = 2;
+    int64_t powerOf3 = 3;
 
     for (const auto query : queries)
     {
         const auto index = query - 1; // Make 0-relative.
         assert(0 <= index && index < validReparentings.size());
         auto queryResultIter = validReparentings.begin() + index;
+
+        const auto nodeToReparent = queryResultIter->first;
+        const auto newParent = queryResultIter->second;
         result.push_back(*queryResultIter);
 
         validReparentings.erase(queryResultIter);
+
+        decryptionKey = (decryptionKey + powerOf2 * nodeToReparent->id) % Mod;
+        decryptionKey = (decryptionKey + powerOf3 * newParent->id) % Mod;
+        powerOf2 = (powerOf2 * 2) % Mod;
+        powerOf3 = (powerOf3 * 3) % Mod;
     }
 
     return result;
@@ -546,6 +559,10 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 
 vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& queries)
 {
+    int64_t decryptionKey = 0;
+    int64_t powerOf2 = 2;
+    int64_t powerOf3 = 3;
+
     int maxNodeHeight = -1;
     for (const auto& node : nodes)
     {
@@ -670,6 +687,11 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
+
+        decryptionKey = (decryptionKey + powerOf2 * nodeToReparent->id) % Mod;
+        decryptionKey = (decryptionKey + powerOf3 * newParent->id) % Mod;
+        powerOf2 = (powerOf2 * 2) % Mod;
+        powerOf3 = (powerOf3 * 3) % Mod;
 
         result.push_back({nodeToReparent, newParent});
     }
