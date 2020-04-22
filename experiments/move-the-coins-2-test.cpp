@@ -499,9 +499,16 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
     return numNonDescendantsUpToThisHeight;
 }
 
-AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
+AVLNode* findKthFromPair(int k, AVLTree& tree1Ref, AVLTree& tree2Ref)
 {
-    auto currentNode1 = tree1.root();
+    auto tree1 = &tree1Ref;
+    auto tree2 = &tree2Ref;
+    if (tree1->root() == nullptr)
+    {
+        swap(tree1, tree2);
+    }
+    auto currentNode1 = tree1->root();
+    assert(currentNode1);
     int numToLeftOffset1 = 0;
     while (currentNode1)
     {
@@ -510,7 +517,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
         int numToLeftOffset2 = 0;
         int numToLeft2 = 0;
         int lastValue2 = -1;
-        auto currentNode2 = tree2.root();
+        auto currentNode2 = tree2->root();
         while (currentNode2)
         {
             lastValue2 = currentNode2->value;
@@ -619,8 +626,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             }
         }
     }
-    vector<AVLTree> prefixesForHeight(maxNodeHeight + 1);
-    vector<AVLTree> suffixesForHeight(maxNodeHeight + 1);
+    vector<AVLTree> prefixesForHeight(maxNodeHeight + 1, AVLTree(true));
+    vector<AVLTree> suffixesForHeight(maxNodeHeight + 1, AVLTree(true));
     for (int height = 0; height <= maxNodeHeight; height++)
     {
         for (const auto nodeAtHeight : nodesAtHeightLookup[height])
@@ -736,12 +743,27 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 });
         const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[newParentHeight].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
         int numNonDescendantsToLeft = nodesAtHeightLookup[newParentHeight].size();
-        int numNonDescendantsToRight = nodesAtHeightLookup[newParentHeight].size();
+        int numNonDescendantsToRight = 0;
         if (hasDescendantsAtThisHeight)
         {
             numNonDescendantsToLeft = descendantsAtHeightBegin - nodesAtHeightLookup[newParentHeight].begin();
             numNonDescendantsToRight = nodesAtHeightLookup[newParentHeight].end() - descendantsAtHeightEnd;
         }
+        cout << "numOfReparentingForNodeAndNewHeight: " << numOfReparentingForNodeAndNewHeight << endl;
+        cout << "numNonDescendantsToLeft: " << numNonDescendantsToLeft << endl;
+        cout << "numNonDescendantsToRight: " << numNonDescendantsToRight << endl;
+        prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
+        suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
+        cout << "prefix tree: " << endl;
+        printTree(prefixesForHeight[newParentHeight]);
+        cout << "suffix tree: " << endl;
+        printTree(suffixesForHeight[newParentHeight]);
+        const auto newParentId = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight])->value;
+        auto newParent = &(nodes[newParentId - 1]);
+        cout << "newParent: " << newParent->id << " dbgNewParent: " << dbgNewParent->id << endl;
+        assert(newParent == dbgNewParent);
+
+#if 0
         int dbgNumNonDescendantsToLeft = 0;
         for (const auto node : nodesAtHeightLookup[newParentHeight])
         {
@@ -760,6 +782,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         cout << "numNonDescendantsToRight: " << numNonDescendantsToRight << " dbgNumNonDescendantsToRight: " << dbgNumNonDescendantsToRight << endl;
         assert(numNonDescendantsToLeft == dbgNumNonDescendantsToLeft);
         assert(numNonDescendantsToRight == dbgNumNonDescendantsToRight);
+#endif
+
 
         assert(nodeToReparent == dbgNodeToReparent);
         reparentingRemoved[dbgIndexInOriginalList] = true;
