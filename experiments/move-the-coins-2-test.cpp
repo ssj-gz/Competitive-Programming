@@ -507,27 +507,35 @@ AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
         const auto currentValue1 = tree1Iter.currentNode()->value;
         //cout << "currentValue1: " << currentValue1 << endl;
         int numToLeftOffset2 = 0;
+        int dbgNumToLeft2 = 0;
         int numToLeft2 = 0;
         auto currentNode2 = tree2.root();
+        AVLTreeIterator tree2Iter = tree2.root();
         while (currentNode2)
         {
+            assert(currentNode2 == tree2Iter.currentNode());
             const int numInLeftSubchild2 = (currentNode2->leftChild ? currentNode2->leftChild->numDescendants : 0);
             if (currentNode2->value < currentValue1)
             {
-                numToLeft2 = numToLeftOffset2 + numInLeftSubchild2 + 1;
+                dbgNumToLeft2 = numToLeftOffset2 + numInLeftSubchild2 + 1;
+                numToLeft2 = tree2Iter.numToLeft() + 1;
             }
             if (currentNode2->value > currentValue1)
             {
                 currentNode2 = currentNode2->leftChild;
+                tree2Iter.followLeftChild();
             }
             else
             {
                 currentNode2 = currentNode2->rightChild;
+                tree2Iter.followRightChild();
                 numToLeftOffset2 += 1 + numInLeftSubchild2;
             }
         }
         //cout << "lastValue2: " << lastValue2 << endl;
         //cout << "numToLeft2: " << numToLeft2 << endl;
+        cout << "numToLeft2: " << numToLeft2 << " dbgNumToLeft2: " << dbgNumToLeft2 << endl;
+        assert(numToLeft2 == dbgNumToLeft2);
 
         //const auto numInLeftSubchild1 = (currentNode1->leftChild ? currentNode1->leftChild->numDescendants : 0);
         const auto numToLeft1 = tree1Iter.numToLeft();
