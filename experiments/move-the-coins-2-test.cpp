@@ -439,7 +439,7 @@ vector<pair<Node*, Node*>> computeOrderedValidReparentings(vector<Node>& nodes)
     return validReparentings;
 }
 
-vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int64_t>& queries)
+vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     vector<pair<Node*, Node*>> result;
     auto rootNode = &(nodes.front());
@@ -451,9 +451,9 @@ vector<pair<Node*, Node*>> solveBruteForce(vector<Node>& nodes, const vector<int
     int64_t powerOf2 = 2;
     int64_t powerOf3 = 3;
 
-    for (const auto query : queries)
+    for (const auto encryptedQuery : encryptedQueries)
     {
-        const auto index = (query ^ decryptionKey) - 1; // Make 0-relative.
+        const auto index = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
         assert(0 <= index && index < validReparentings.size());
         auto queryResultIter = validReparentings.begin() + index;
 
@@ -556,7 +556,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 }
 
 
-vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& queries)
+vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
@@ -631,9 +631,9 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         allHeights.push_back(height);
     }
 
-    for (const auto query : queries)
+    for (const auto encryptedQuery : encryptedQueries)
     {
-        const auto kthInRemainingToFind = (query ^ decryptionKey) - 1; // Make 0-relative.
+        const auto kthInRemainingToFind = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
 
         const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
@@ -743,13 +743,13 @@ int main(int argc, char* argv[])
 
             const auto numQueries = validReparentings.empty() ? 0 : 1 + rand() % validReparentings.size();
 
-            vector<int64_t> queries;
+            vector<int64_t> encryptedQueries;
             for (int queryNum = 0; queryNum < numQueries; queryNum++)
             {
                 const int kthRemainingReparenting = rand() % validReparentings.size();
                 const auto nodeToReparent = validReparentings[kthRemainingReparenting].first;
                 const auto newParent = validReparentings[kthRemainingReparenting].second;
-                queries.push_back((1 + kthRemainingReparenting) ^ encryptionKey);
+                encryptedQueries.push_back((1 + kthRemainingReparenting) ^ encryptionKey);
                 validReparentings.erase(validReparentings.begin() + kthRemainingReparenting);
 
                 encryptionKey = (encryptionKey + powerOf2 * nodeToReparent->id) % Mod;
@@ -764,9 +764,9 @@ int main(int argc, char* argv[])
                 cout << edge.first->id << " " << edge.second->id << endl;
             }
             cout << numQueries << endl;
-            for (const auto query : queries)
+            for (const auto encryptedQuery : encryptedQueries)
             {
-                cout << query << endl;
+                cout << encryptedQuery << endl;
             }
         }
 
@@ -801,16 +801,16 @@ int main(int argc, char* argv[])
         // TODO - eventually, we will need to make this online, using a decryption-key
         // approach (similar to "Simple Markdown Editor").
         const auto numQueries = read<int>();
-        vector<int64_t> queries(numQueries);
-        for (auto& query : queries)
+        vector<int64_t> encryptedQueries(numQueries);
+        for (auto& encryptedQuery : encryptedQueries)
         {
-            query = read<int64_t>();
+            encryptedQuery = read<int64_t>();
         }
 
 
 #ifdef BRUTE_FORCE
 #if 1
-        const auto solutionBruteForce = solveBruteForce(nodes, queries);
+        const auto solutionBruteForce = solveBruteForce(nodes, encryptedQueries);
         cout << "solutionBruteForce: " << endl;
         for (const auto result : solutionBruteForce)
         {
@@ -818,7 +818,7 @@ int main(int argc, char* argv[])
         }
 #endif
 #if 1
-        const auto solutionOptimised = solveOptimised(nodes, queries);
+        const auto solutionOptimised = solveOptimised(nodes, encryptedQueries);
         cout << "solutionOptimised: " << endl;
         for (const auto result : solutionOptimised)
         {
