@@ -509,11 +509,9 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
         //cout << "currentValue1: " << currentValue1 << endl;
         int numToLeftOffset2 = 0;
         int numToLeft2 = 0;
-        int lastValue2 = -1;
         auto currentNode2 = tree2.root();
         while (currentNode2)
         {
-            lastValue2 = currentNode2->value;
             const int numInLeftSubchild2 = (currentNode2->leftChild ? currentNode2->leftChild->numDescendants : 0);
             if (currentNode2->value < currentValue1)
             {
@@ -706,22 +704,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         {
             numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(heightIter), numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
         }
-        {
-            int dbgInterestingIndex = 0;
-            for (const auto& reparenting : validReparentings)
-            {
-                if (reparenting.first == nodeToReparent && reparenting.second->height == newParentHeight)
-                {
-                    if (dbgInterestingIndex == numOfReparentingForNodeAndNewHeight)
-                    {
-                        const auto dbgBlah = reparenting.second;
-                        cout << "blee: " << dbgBlah->id << " newParent: " << dbgNewParent->id << endl;
-                        assert(dbgBlah == dbgNewParent);
-                    }
-                    dbgInterestingIndex++;
-                }
-            }
-        }
 
         const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[newParentHeight].begin(), nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->dfsBeginVisit,
                 [](const Node* node, const int dfsBeginVisit)
@@ -760,28 +742,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         auto newParent = &(nodes[newParentId - 1]);
         cout << "newParent: " << newParent->id << " dbgNewParent: " << dbgNewParent->id << endl;
         assert(newParent == dbgNewParent);
-
-#if 0
-        int dbgNumNonDescendantsToLeft = 0;
-        for (const auto node : nodesAtHeightLookup[newParentHeight])
-        {
-            if (node->isDescendantOf(*nodeToReparent))
-                break;
-            dbgNumNonDescendantsToLeft++;
-        }
-        int dbgNumNonDescendantsToRight = 0;
-        for (auto nodeAtHeightRevIter = nodesAtHeightLookup[newParentHeight].rbegin(); nodeAtHeightRevIter != nodesAtHeightLookup[newParentHeight].rend(); nodeAtHeightRevIter++)
-        {
-            if ((*nodeAtHeightRevIter)->isDescendantOf(*nodeToReparent))
-                break;
-            dbgNumNonDescendantsToRight++;
-        }
-        cout << "numNonDescendantsToLeft: " << numNonDescendantsToLeft << " dbgNumNonDescendantsToLeft: " << dbgNumNonDescendantsToLeft << endl;
-        cout << "numNonDescendantsToRight: " << numNonDescendantsToRight << " dbgNumNonDescendantsToRight: " << dbgNumNonDescendantsToRight << endl;
-        assert(numNonDescendantsToLeft == dbgNumNonDescendantsToLeft);
-        assert(numNonDescendantsToRight == dbgNumNonDescendantsToRight);
-#endif
-
 
         assert(nodeToReparent == dbgNodeToReparent);
         reparentingRemoved[dbgIndexInOriginalList] = true;
