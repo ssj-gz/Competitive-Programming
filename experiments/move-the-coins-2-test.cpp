@@ -575,11 +575,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         // We can reparent to any node that is not a descendant.
         node.numCanReparentTo = numNodes - node.numDescendants;
     }
-    cout << "solveOptimised - numNodes: " << numNodes << endl;
-    for (const auto& node : nodes)
-    {
-        cout << "node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << endl;
-    }
     
     IndexRemapper indexRemapper;
     vector<int64_t> numCanReparentToPrefixSum;
@@ -596,7 +591,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         for (int height = 0; height <= maxNodeHeight; height++)
         {
             numNodes += nodesAtHeightLookup[height].size();
-            cout << "height: " << height << " numNodes for numNodesUpToHeight: " << numNodes << endl;
             numNodesUpToHeight[height] = numNodes;
         }
     }
@@ -646,7 +640,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         // i.e. we now need to find the numOfReparentingThatReparentsNode'th element in the original
         // list that re-parents our nodeToReparent.
         const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
-        cout << "numOfReparentingThatReparentsNode: " << numOfReparentingThatReparentsNode << endl;
         const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                 [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightLookup, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
                 {
@@ -683,15 +676,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
             numNonDescendantsToLeft = descendantsAtHeightBegin - nodesAtHeightLookup[newParentHeight].begin();
             numNonDescendantsToRight = nodesAtHeightLookup[newParentHeight].end() - descendantsAtHeightEnd;
         }
-        cout << "numOfReparentingForNodeAndNewHeight: " << numOfReparentingForNodeAndNewHeight << endl;
-        cout << "numNonDescendantsToLeft: " << numNonDescendantsToLeft << endl;
-        cout << "numNonDescendantsToRight: " << numNonDescendantsToRight << endl;
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
-        //cout << "prefix tree: " << endl;
-        //printTree(prefixesForHeight[newParentHeight]);
-        //cout << "suffix tree: " << endl;
-        //printTree(suffixesForHeight[newParentHeight]);
         auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
         if (!newParentAVLNode)
         {
