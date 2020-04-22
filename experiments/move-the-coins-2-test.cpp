@@ -713,6 +713,10 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
+            int64_t encryptionKey = 0;
+            int64_t powerOf2 = 2;
+            int64_t powerOf3 = 3;
+
             const auto numNodes = 1 + rand() % 100;
             vector<Node> nodes(numNodes);
             for (int i = 0; i < numNodes; i++)
@@ -747,6 +751,11 @@ int main(int argc, char* argv[])
                 const auto newParent = validReparentings[kthRemainingReparenting].second;
                 queries.push_back(1 + kthRemainingReparenting);
                 validReparentings.erase(validReparentings.begin() + kthRemainingReparenting);
+
+                encryptionKey = (encryptionKey + powerOf2 * nodeToReparent->id) % Mod;
+                encryptionKey = (encryptionKey + powerOf3 * newParent->id) % Mod;
+                powerOf2 = (powerOf2 * 2) % Mod;
+                powerOf3 = (powerOf3 * 3) % Mod;
             }
 
             cout << numNodes << endl;
