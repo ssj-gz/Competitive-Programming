@@ -501,11 +501,10 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
 
 AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
 {
-    auto currentNode1 = tree1.root();
-    int numToLeftOffset1 = 0;
-    while (currentNode1)
+    AVLTreeIterator tree1Iter = tree1.root();
+    while (tree1Iter.currentNode())
     {
-        const auto currentValue1 = currentNode1->value;
+        const auto currentValue1 = tree1Iter.currentNode()->value;
         //cout << "currentValue1: " << currentValue1 << endl;
         int numToLeftOffset2 = 0;
         int numToLeft2 = 0;
@@ -530,24 +529,23 @@ AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
         //cout << "lastValue2: " << lastValue2 << endl;
         //cout << "numToLeft2: " << numToLeft2 << endl;
 
-        const auto numInLeftSubchild1 = (currentNode1->leftChild ? currentNode1->leftChild->numDescendants : 0);
-        const auto numToLeft1 = numToLeftOffset1 + numInLeftSubchild1;
+        //const auto numInLeftSubchild1 = (currentNode1->leftChild ? currentNode1->leftChild->numDescendants : 0);
+        const auto numToLeft1 = tree1Iter.numToLeft();
         const auto numToLeftInBoth = numToLeft1 + numToLeft2;
         //cout << "numToLeft1: " << numToLeft1 << " numToLeftInBoth: " << numToLeftInBoth << endl;
         if (numToLeftInBoth == k)
         {
             //cout << "Found: " << currentNode1->value << endl;
-            return currentNode1;
+            return tree1Iter.currentNode();
         }
 
         if (numToLeftInBoth > k)
         {
-            currentNode1 = currentNode1->leftChild;
+            tree1Iter.followLeftChild();
         }
         else
         {
-            currentNode1 = currentNode1->rightChild;
-            numToLeftOffset1 += 1 + numInLeftSubchild1;
+            tree1Iter.followRightChild();
         }
     }
 
