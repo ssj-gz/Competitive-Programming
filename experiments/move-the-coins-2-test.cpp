@@ -812,7 +812,7 @@ int main(int argc, char* argv[])
         assert(solutionOptimised == solutionBruteForce);
 #endif
 #else
-        const auto solutionOptimised = solveOptimised();
+        const auto solutionOptimised = solveOptimised(nodes, encryptedQueries);
         cout << solutionOptimised << endl;
 #endif
     }
