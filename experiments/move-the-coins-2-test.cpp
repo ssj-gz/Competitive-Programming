@@ -581,9 +581,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         cout << "node: " << node.id << " numCanReparentTo: " << node.numCanReparentTo << endl;
     }
     
-    const auto validReparentings = computeOrderedValidReparentings(nodes);
-    vector<bool> reparentingRemoved(validReparentings.size(), false);
-
     IndexRemapper indexRemapper;
     vector<int64_t> numCanReparentToPrefixSum;
     int64_t sumOfNumCanReparentTo = 0;
@@ -638,44 +635,9 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
     for (const auto query : queries)
     {
-        const auto dbgIndexOriginal = query - 1; // Make 0-relative.
-        cout << " query: dbgIndexOriginal: " << dbgIndexOriginal << endl;
-        cout << "validReparentings: " << endl;
-        for (int i = 0; i < validReparentings.size(); i++)
-        {
-            cout << "i: " << i << " nodeToReparent: " << validReparentings[i].first->id << " newParent: " << validReparentings[i].second->id << " height: " << validReparentings[i].second->height << " removed? " << (reparentingRemoved[i] ? "true" : "false") << endl;
-        }
+        const auto kthInRemainingToFind = query - 1; // Make 0-relative.
 
-        int dbgIndexInOriginalList = 0;
-        Node* dbgNodeToReparent = nullptr;
-        Node* dbgNewParent = nullptr;
-        {
-            int adjustedIndex = 0;
-            while (true)
-            {
-                if (!reparentingRemoved[dbgIndexInOriginalList])
-                {
-                    if (adjustedIndex == dbgIndexOriginal)
-                    {
-                        dbgNodeToReparent = validReparentings[dbgIndexInOriginalList].first;
-                        dbgNewParent = validReparentings[dbgIndexInOriginalList].second;
-                        break;
-                    }
-                    adjustedIndex++;
-                }
-                dbgIndexInOriginalList++;
-            }
-        }
-        assert(dbgNodeToReparent != nullptr && dbgNewParent != nullptr);
-        const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(dbgIndexOriginal);
-        cout << " dbgIndexInOriginalList: " << dbgIndexInOriginalList << " indexInOriginalList: " << indexInOriginalList << endl;
-        assert(indexInOriginalList == dbgIndexInOriginalList);
-        //assert(0 <= dbgIndex && dbgIndex < validReparentings.size());
-        //auto queryResultIter = validReparentings.begin() + dbgIndex;
-        //const auto dbgNodeToReparent = queryResultIter->first;
-        //const auto dbgNewParent = queryResultIter->second;
-        cout << "  dbgNodeToReparent: " << dbgNodeToReparent->id << " dbgNewParent: " << dbgNewParent-> id << endl;
-        result.push_back({dbgNodeToReparent, dbgNewParent});
+        const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
         const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
         const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
@@ -693,8 +655,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
                 });
         assert(heightIter != allHeights.end());
         const int newParentHeight = *heightIter;
-        cout << "newParentHeight: " << newParentHeight << " dbgNewParentHeight: " << dbgNewParent->height << endl;
-        assert(newParentHeight == dbgNewParent->height);
         assert(newParentHeight != -1);
 
         // i.e. we now need to find the numOfReparentingThatReparentsNode's item in the original list
@@ -740,11 +700,8 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
-        cout << "newParent: " << newParent->id << " dbgNewParent: " << dbgNewParent->id << endl;
-        assert(newParent == dbgNewParent);
 
-        assert(nodeToReparent == dbgNodeToReparent);
-        reparentingRemoved[dbgIndexInOriginalList] = true;
+        result.push_back({nodeToReparent, newParent});
     }
 
     return result;
