@@ -29,7 +29,6 @@ struct Node
     int height = -1;
     int id = -1;
     int numDescendants = -1; // Includes the node itself.
-    int numCanReparentTo = -1;
 
     bool isDescendantOf(Node& otherNode)
     {
@@ -465,18 +464,14 @@ int64_t solveOptimised(vector<Node>& nodes, const vector<int64_t>& encryptedQuer
     vector<vector<Node*>> nodesAtHeightLookup(maxNodeHeight + 1);
     computeDFSInfo(rootNode, nodesAtHeightLookup);
     const int numNodes = nodes.size();
-    for (auto& node : nodes)
-    {
-        // We can reparent to any node that is not a descendant.
-        node.numCanReparentTo = numNodes - node.numDescendants;
-    }
     
     IndexRemapper indexRemapper;
     vector<int64_t> numCanReparentToPrefixSum;
     int64_t sumOfNumCanReparentTo = 0;
     for (const auto& node : nodes)
     {
-        sumOfNumCanReparentTo += node.numCanReparentTo;
+        const auto numCanReparentNodeTo = numNodes - node.numDescendants; // Can reparent a node to any of its non-descendants.
+        sumOfNumCanReparentTo += numCanReparentNodeTo;
         numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
     }
 
