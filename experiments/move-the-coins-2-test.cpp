@@ -499,7 +499,7 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
     return numNonDescendantsUpToThisHeight;
 }
 
-AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
+AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
 {
     auto currentNode1 = tree1.root();
     int numToLeftOffset1 = 0;
@@ -554,8 +554,17 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     return nullptr;
 }
 
+AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
+{
+    auto kthAVLNode = findKthFromPairAux(k, tree1, tree2);
+    if (!kthAVLNode)
+    {
+        kthAVLNode = findKthFromPairAux(k, tree2, tree1);
+    }
+    return kthAVLNode;
+}
 
-#if 1
+
 vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int64_t>& queries)
 {
     int maxNodeHeight = -1;
@@ -678,11 +687,7 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
         }
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
-        auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
-        if (!newParentAVLNode)
-        {
-            newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, suffixesForHeight[newParentHeight], prefixesForHeight[newParentHeight]);
-        }
+        const auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
@@ -692,8 +697,6 @@ vector<pair<Node*, Node*>> solveOptimised(vector<Node>& nodes, const vector<int6
 
     return result;
 }
-#endif
-
 
 int main(int argc, char* argv[])
 {
