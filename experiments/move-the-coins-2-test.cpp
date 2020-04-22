@@ -713,7 +713,7 @@ int main(int argc, char* argv[])
 
         for (int t = 0; t < T; t++)
         {
-            const auto numNodes = 1 + rand() % 10;
+            const auto numNodes = 1 + rand() % 100;
             vector<Node> nodes(numNodes);
             for (int i = 0; i < numNodes; i++)
                 nodes[i].id = (i + 1);
