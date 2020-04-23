@@ -116,7 +116,7 @@ class AVLTree
                 m_rootForRevision.erase(m_rootForRevision.begin() + m_revisionNumber + 1, m_rootForRevision.end());
                 m_rootForRevision.push_back(m_root);
                 m_revisionNumber++;
-                assert(m_revisionNumber == m_rootForRevision.size() - 1);
+                assert(m_revisionNumber == static_cast<int>(m_rootForRevision.size()) - 1);
             }
         }
         void switchToRevision(int revisionNum)
@@ -566,6 +566,9 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             numNonDescendantsToLeft = descendantsAtHeightBegin - nodesAtHeightLookup[newParentHeight].begin();
             numNonDescendantsToRight = nodesAtHeightLookup[newParentHeight].end() - descendantsAtHeightEnd;
         }
+        // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
+        // left and the right of the descendant-range, respectively, in sorted order.
+        // Performing the switch is O(1).
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
         const auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
@@ -573,6 +576,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
 
+        // We've found the required reparenting (nodeToReparent, newParentId).
+        // Use it to update the decryptionKey.
         decryptionKey = (decryptionKey + powerOf2 * nodeToReparent->id) % Mod;
         decryptionKey = (decryptionKey + powerOf3 * newParent->id) % Mod;
         powerOf2 = (powerOf2 * 2) % Mod;
