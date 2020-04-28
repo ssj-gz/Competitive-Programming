@@ -369,11 +369,11 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
     {
         for (const auto nodeAtHeight : lookupInfo.nodesAtHeightLookup[height])
         {
-            lookupInfo.prefixesForHeight[height].insertValue(nodeAtHeight->id());
+            lookupInfo.prefixesForHeight[height].insertValue(nodeAtHeight->id() - 1);
         }
         for (auto nodeAtHeightRevIter = lookupInfo.nodesAtHeightLookup[height].rbegin(); nodeAtHeightRevIter != lookupInfo.nodesAtHeightLookup[height].rend(); nodeAtHeightRevIter++)
         {
-            lookupInfo.suffixesForHeight[height].insertValue((*nodeAtHeightRevIter)->id());
+            lookupInfo.suffixesForHeight[height].insertValue((*nodeAtHeightRevIter)->id() - 1);
         }
     }
     lookupInfo.numNodesUpToHeight.resize(lookupInfo.maxHeight + 1);
