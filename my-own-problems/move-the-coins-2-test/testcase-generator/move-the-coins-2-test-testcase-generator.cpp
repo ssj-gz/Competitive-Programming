@@ -153,7 +153,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     cout << "validReparentings: " << endl;
     for (const auto& reparenting : validReparentings)
     {
-        cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << endl;
+        cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << " newParentNode height: " << reparenting.second->data.height << endl;
     }
     for (auto& query : queries)
     {
