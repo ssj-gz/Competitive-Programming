@@ -322,6 +322,24 @@ namespace MVCN2TST
     };
 }
 
+void printSubTree(MVCN2TST::AVLNode* subtreeRoot)
+{
+    if (subtreeRoot == nullptr)
+        return;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
+    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
+
+    if (subtreeRoot->leftChild)
+        printSubTree(subtreeRoot->leftChild);
+    if (subtreeRoot->rightChild)
+        printSubTree(subtreeRoot->rightChild);
+}
+
+void printTree(MVCN2TST::AVLTree& tree)
+{
+    printSubTree(tree.root());
+}
+
 struct LookupInfo
 {
     int maxHeight = -1;
@@ -536,6 +554,11 @@ std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int k, MVCN2TST::AV
 
 int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
 {
+    cout << "findIndexOfInPair - k: " << k << endl;
+    cout << "tree1:" << endl;
+    printTree(tree1);
+    cout << "tree2:" << endl;
+    printTree(tree2);
     auto node1Info = findLastLessThanOrEqualTo(k, tree1);
     auto node2Info = findLastLessThanOrEqualTo(k, tree2);
     assert((node1Info.first && node1Info.first->value == k) || (node2Info.first && node2Info.first->value == k));

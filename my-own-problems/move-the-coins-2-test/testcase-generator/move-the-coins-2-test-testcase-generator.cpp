@@ -151,6 +151,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     const auto validReparentings = computeOrderedValidReparentings(allNodes);
     for (auto& query : queries)
     {
+        cout << "query - nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
         int64_t queryIndex = 0;
         if (query.nodeToReparent->id() - 1 >= 0)
             queryIndex += lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1];
