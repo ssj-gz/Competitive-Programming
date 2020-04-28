@@ -517,12 +517,16 @@ std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int k, MVCN2TST::AV
         
         if (treeIter.currentNode()->value == k)
             return {treeIter.currentNode(), treeIter.numToLeft()};
-        if (treeIter.currentNode()->value > k)
+        else if (treeIter.currentNode()->value > k)
             treeIter.followLeftChild();
-        if (treeIter.currentNode()->value < k)
+        else if (treeIter.currentNode()->value < k)
         {
             result = {treeIter.currentNode(), treeIter.numToLeft()}; // Best candidate so far.
             treeIter.followRightChild();
+        }
+        else
+        {
+            assert(false);
         }
 
 
