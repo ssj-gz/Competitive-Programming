@@ -554,11 +554,13 @@ std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int k, MVCN2TST::AV
 
 int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
 {
+#if 0
     cout << "findIndexOfInPair - k: " << k << endl;
     cout << "tree1:" << endl;
     printTree(tree1);
     cout << "tree2:" << endl;
     printTree(tree2);
+#endif
     auto node1Info = findLastLessThanOrEqualTo(k, tree1);
     auto node2Info = findLastLessThanOrEqualTo(k, tree2);
     assert((node1Info.first && node1Info.first->value == k) || (node2Info.first && node2Info.first->value == k));
@@ -579,11 +581,13 @@ int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
             index ++;
         }
     }
+#if 0
     const int numToLeft1 = node1Info.second;
     cout << "node1 node: " << (node1Info.first ? node1Info.first->value : -1) << " numToLeft1: " << numToLeft1 << endl;
     const int numToLeft2 = node2Info.second;
     cout << "node2 node: " << (node2Info.first ? node2Info.first->value : -1) << " numToLeft2: " << numToLeft2 << endl;
     cout << "index: " << index << endl;
+#endif
     return index;
 }
 
