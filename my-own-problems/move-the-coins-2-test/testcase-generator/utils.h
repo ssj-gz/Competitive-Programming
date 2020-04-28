@@ -329,6 +329,7 @@ struct LookupInfo
     vector<MVCN2TST::AVLTree> prefixesForHeight;
     vector<MVCN2TST::AVLTree> suffixesForHeight;
     vector<int> numNodesUpToHeight;
+    vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum;
 };
 
 LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
@@ -363,6 +364,19 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
         {
             numNodes += lookupInfo.nodesAtHeightLookup[height].size();
             lookupInfo.numNodesUpToHeight[height] = numNodes;
+        }
+    }
+    lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum.resize(lookupInfo.maxHeight + 1);
+    {
+        for (int height = 0; height <= lookupInfo.maxHeight; height++)
+        {
+            const auto& nodesAtHeight = lookupInfo.nodesAtHeightLookup[height];
+            int numProperDescendantsSum = 0;
+            for (const auto node : nodesAtHeight)
+            {
+                numProperDescendantsSum += node->data.numDescendants - 1; // "-1" as we want *proper* descendants.
+                lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum[height].push_back(numProperDescendantsSum);
+            }
         }
     }
 
