@@ -164,6 +164,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     auto allNodes = treeGenerator.nodes();
     const auto validReparentingsOriginal = computeOrderedValidReparentings(allNodes);
     auto validReparentings = computeOrderedValidReparentings(allNodes);
+    vector<int> dbgRemovedIndices;
     cout << "validReparentingsOriginal: " << endl;
     for (const auto& reparenting : validReparentingsOriginal)
     {
@@ -237,7 +238,15 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         cout << "queryIndex: " << queryIndex << " debugQueryIndex: " << debugQueryIndex << endl;
         assert(queryIndex == debugQueryIndex);
 
+        cout << "dbgRemovedIndices: " << endl;
+        for (const auto x : dbgRemovedIndices)
+        {
+            cout << " " << x;
+        }
+        cout << endl;
+
         auto numRemovedIndicesToLeft = findLastLessThanOrEqualTo(queryIndex, removedIndices).second;
+        cout << "numRemovedIndicesToLeft: " << numRemovedIndicesToLeft << endl;
 
         query.asIndexInRemaining = queryIndex - numRemovedIndicesToLeft; // TODO - perform adjustment, taking into account indices that have been removed.
         cout << "asIndexInRemaining: " << query.asIndexInRemaining << endl;
@@ -246,6 +255,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         assert(validReparentings[query.asIndexInRemaining].second == query.newParentNode);
 
         removedIndices.insertValue(queryIndex);
+        dbgRemovedIndices.push_back(queryIndex);
         validReparentings.erase(validReparentings.begin() + query.asIndexInRemaining);
     }
 }
