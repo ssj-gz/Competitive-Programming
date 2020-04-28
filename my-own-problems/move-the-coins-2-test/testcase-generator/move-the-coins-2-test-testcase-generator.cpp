@@ -113,8 +113,7 @@ struct TestQuery
 
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
-    //  TODO - fill this in!
-    const auto lookupInfo = computeLookupInfo(treeGenerator);
+    auto lookupInfo = computeLookupInfo(treeGenerator);
     for (auto& query : queries)
     {
         int64_t queryIndex = 0;
@@ -122,7 +121,35 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
             queryIndex += lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1];
 
         const int newParentHeight = query.newParentNode->data.height;
+        auto nodeToReparent = query.nodeToReparent;
         queryIndex += findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+
+        const auto descendantsAtHeightBegin = std::lower_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsBeginVisit,
+                [](const TestNode<NodeData>* node, const int dfsBeginVisit)
+                {
+                return node->data.dfsBeginVisit < dfsBeginVisit;
+                });
+        const auto descendantsAtHeightEnd = std::upper_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsEndVisit,
+                [](const int dfsEndVisit, const TestNode<NodeData>* node)
+                {
+                return dfsEndVisit < node->data.dfsEndVisit;
+                });
+        const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != lookupInfo.nodesAtHeightLookup[newParentHeight].end() && (*descendantsAtHeightBegin)->data.dfsEndVisit <= nodeToReparent->data.dfsEndVisit;
+        int numNonDescendantsToLeft = lookupInfo.nodesAtHeightLookup[newParentHeight].size();
+        int numNonDescendantsToRight = 0;
+        if (hasDescendantsAtThisHeight)
+        {
+            numNonDescendantsToLeft = descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin();
+            numNonDescendantsToRight = lookupInfo.nodesAtHeightLookup[newParentHeight].end() - descendantsAtHeightEnd;
+        }
+        // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
+        // left and the right of the descendant-range, respectively, in sorted order.
+        // Performing the switch is O(1).
+        lookupInfo.prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
+        lookupInfo.suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
+
+        queryIndex += findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
+
 
         query.asQueryIndex = queryIndex;
     }
