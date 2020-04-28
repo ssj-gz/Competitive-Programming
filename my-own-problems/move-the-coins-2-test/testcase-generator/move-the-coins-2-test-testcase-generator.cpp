@@ -276,14 +276,107 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
+        // TODO - remove this - debugging only!
+        auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask1)
+                .withSeed(9734)
+                .withDescription("TODO - remove - debugging only!"));
+        {
+            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+
+            TreeGenerator<NodeData> treeGenerator;
+            treeGenerator.createNode();
+            const int numNodes = 2;
+            const int numQueries = 1;
+            treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+            const auto& lookupInfo = computeLookupInfo(treeGenerator);
+
+            vector<TestQuery> queries;
+            const auto allNodes = treeGenerator.nodes();
+            while (queries.size() < numQueries)
+            {
+                const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+
+                if (!newParent->data.isDescendantOf(*nodeToReparent))
+                {
+                    queries.push_back({nodeToReparent, newParent});
+                }
+            }
+
+            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+        }
     }
 
     // SUBTASK 2
     {
+        // TODO - remove this - debugging only!
+        auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask2)
+                .withSeed(9734)
+                .withDescription("TODO - remove - debugging only!"));
+        {
+            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+
+            TreeGenerator<NodeData> treeGenerator;
+            treeGenerator.createNode();
+            const int numNodes = 2;
+            const int numQueries = 1;
+
+            treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+            const auto& lookupInfo = computeLookupInfo(treeGenerator);
+
+            vector<TestQuery> queries;
+            const auto allNodes = treeGenerator.nodes();
+            while (queries.size() < numQueries)
+            {
+                const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+
+                if (!newParent->data.isDescendantOf(*nodeToReparent))
+                {
+                    queries.push_back({nodeToReparent, newParent});
+                }
+            }
+
+            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+        }
     }
 
     // SUBTASK 3
     {
+        {
+            // TODO - remove this - debugging only!
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(9734)
+                    .withDescription("TODO - remove - debugging only!"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+                const int numNodes = 2 + rand() % 20;
+                const int numQueries = 1 + rand() % 20;
+                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+                const auto& lookupInfo = computeLookupInfo(treeGenerator);
+
+                vector<TestQuery> queries;
+                const auto allNodes = treeGenerator.nodes();
+                while (queries.size() < numQueries)
+                {
+                    const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                    const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+
+                    if (!newParent->data.isDescendantOf(*nodeToReparent))
+                    {
+                        queries.push_back({nodeToReparent, newParent});
+                    }
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
