@@ -1,3 +1,4 @@
+#include "utils.h"
 #include <tree-generator.h>
 #include <testlib.h>
 #include "testcase-generator-lib.h"
