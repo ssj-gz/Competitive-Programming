@@ -245,7 +245,13 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         }
         cout << endl;
 
-        auto numRemovedIndicesToLeft = findLastLessThanOrEqualTo(queryIndex, removedIndices).second;
+        int numRemovedIndicesToLeft = 0;
+        const auto removedIndicesToLeftInfo = findLastLessThanOrEqualTo(queryIndex, removedIndices);
+        numRemovedIndicesToLeft += removedIndicesToLeftInfo.second;
+        if (removedIndicesToLeftInfo.first)
+        {
+            numRemovedIndicesToLeft++;
+        }
         cout << "numRemovedIndicesToLeft: " << numRemovedIndicesToLeft << endl;
 
         query.asIndexInRemaining = queryIndex - numRemovedIndicesToLeft; // TODO - perform adjustment, taking into account indices that have been removed.
