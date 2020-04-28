@@ -146,19 +146,31 @@ vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> computeOrderedValidRepare
 
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
+    cout << "setQueryIndexForQueries" << endl;
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
     const auto validReparentings = computeOrderedValidReparentings(allNodes);
+    cout << "validReparentings: " << endl;
+    for (const auto& reparenting : validReparentings)
+    {
+        cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << endl;
+    }
     for (auto& query : queries)
     {
         cout << "query - nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
         int64_t queryIndex = 0;
         if (query.nodeToReparent->id() - 1 >= 0)
-            queryIndex += lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1];
+        {
+            const auto numFromPriorNodesToReparent = lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1];
+            cout << "  numFromPriorNodesToReparent: " << numFromPriorNodesToReparent << endl;
+            queryIndex += numFromPriorNodesToReparent;
+        }
 
         const int newParentHeight = query.newParentNode->data.height;
         auto nodeToReparent = query.nodeToReparent;
-        queryIndex += findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+        const auto numFromSmallerNewParentHeights = findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+        cout << "  numFromSmallerNewParentHeights: " << numFromSmallerNewParentHeights << endl;
+        queryIndex += numFromSmallerNewParentHeights;
 
         const auto descendantsAtHeightBegin = std::lower_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsBeginVisit,
                 [](const TestNode<NodeData>* node, const int dfsBeginVisit)
@@ -184,7 +196,9 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         lookupInfo.prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         lookupInfo.suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
 
-        queryIndex += findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
+        const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
+        cout << "  numFromPriorNewParents: " << numFromPriorNewParents << endl;
+        queryIndex += numFromPriorNewParents;
 
         int64_t debugQueryIndex = 0;
         for (const auto& reparenting : validReparentings)
