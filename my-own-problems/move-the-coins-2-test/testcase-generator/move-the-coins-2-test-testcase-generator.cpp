@@ -120,6 +120,10 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         int64_t queryIndex = 0;
         if (query.nodeToReparent->id() - 1 >= 0)
             queryIndex += lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1];
+
+        const int newParentHeight = query.newParentNode->data.height;
+        queryIndex += findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+
         query.asQueryIndex = queryIndex;
     }
 }
