@@ -168,9 +168,12 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
 
         const int newParentHeight = query.newParentNode->data.height;
         auto nodeToReparent = query.nodeToReparent;
-        const auto numFromSmallerNewParentHeights = findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
-        cout << "  numFromSmallerNewParentHeights: " << numFromSmallerNewParentHeights << endl;
-        queryIndex += numFromSmallerNewParentHeights;
+        if (newParentHeight > 0)
+        {
+            const auto numFromSmallerNewParentHeights = findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight - 1, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+            cout << "  numFromSmallerNewParentHeights: " << numFromSmallerNewParentHeights << endl;
+            queryIndex += numFromSmallerNewParentHeights;
+        }
 
         const auto descendantsAtHeightBegin = std::lower_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsBeginVisit,
                 [](const TestNode<NodeData>* node, const int dfsBeginVisit)
