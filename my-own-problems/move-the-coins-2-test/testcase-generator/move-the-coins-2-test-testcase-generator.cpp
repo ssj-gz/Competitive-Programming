@@ -404,6 +404,9 @@ int main(int argc, char* argv[])
                         queries.push_back({nodeToReparent, newParent});
                     }
                 }
+                // Remove duplicates.
+                set<TestQuery> querySet(queries.begin(), queries.end());
+                queries.assign(querySet.begin(), querySet.end());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
