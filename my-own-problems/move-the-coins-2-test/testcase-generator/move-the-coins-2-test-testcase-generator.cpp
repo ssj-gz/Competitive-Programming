@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <set>
+#include <exception>
 
 using namespace std;
 
@@ -109,6 +110,14 @@ struct TestQuery
     TestNode<NodeData>* nodeToReparent = nullptr;
     TestNode<NodeData>* newParentNode = nullptr;
     int64_t asIndexInRemaining = -1;
+    bool operator<(const TestQuery& other) const
+    {
+        if (nodeToReparent != other.nodeToReparent)
+            return nodeToReparent < other.nodeToReparent;
+        if (newParentNode != other.newParentNode)
+            return newParentNode < other.newParentNode;
+        return asIndexInRemaining < other.asIndexInRemaining;
+    }
 };
 
 // TODO - remove this - debugging only!
@@ -146,6 +155,10 @@ vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> computeOrderedValidRepare
 
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
+    if (set<TestQuery>(queries.begin(), queries.end()).size() != queries.size())
+    {
+        throw std::invalid_argument("Queries contain duplicates!");
+    }
     cout << "setQueryIndexForQueries" << endl;
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
