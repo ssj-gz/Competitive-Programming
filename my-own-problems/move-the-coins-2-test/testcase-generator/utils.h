@@ -11,6 +11,7 @@ using namespace std;
 
 const int64_t Mod = 1'000'000'007;
 
+
 struct NodeData
 {
     int height = -1;
@@ -24,6 +25,12 @@ struct NodeData
 
     int dfsBeginVisit = -1;
     int dfsEndVisit = -1;
+};
+
+struct LookupInfo
+{
+    int maxHeight = -1;
+    vector<vector<TestNode<NodeData>*>> nodesAtHeightLookup;
 };
 
 void computeDFSInfo(TestNode<NodeData>* node, TestNode<NodeData>* parent, int& dfsVisitNum, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
@@ -319,6 +326,21 @@ namespace MVCN2TST
 
             int m_numToLeftOffset = 0;
     };
+}
+
+LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
+{
+    LookupInfo lookupInfo;
+    auto rootNode = tree.nodes().front();
+    fixParentChildAndHeights(rootNode);
+    lookupInfo.maxHeight = -1;
+    for (const auto& node : tree.nodes())
+    {
+        lookupInfo.maxHeight = max(lookupInfo.maxHeight, node->data.height);
+    }
+    lookupInfo.nodesAtHeightLookup.resize(lookupInfo.maxHeight + 1);
+    computeDFSInfo(rootNode, lookupInfo.nodesAtHeightLookup);
+    return lookupInfo;
 }
 
 class IndexRemapper
