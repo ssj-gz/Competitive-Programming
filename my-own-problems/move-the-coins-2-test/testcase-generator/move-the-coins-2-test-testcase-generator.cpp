@@ -111,6 +111,39 @@ struct TestQuery
     int64_t asQueryIndex = -1;
 };
 
+// TODO - remove this - debugging only!
+vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> computeOrderedValidReparentings(vector<TestNode<NodeData>*>& nodes)
+{
+    vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> validReparentings;
+
+    for (auto nodeToReparent : nodes)
+    {
+        if (nodeToReparent->data.height == 0)
+            continue;
+
+        for (auto newParent : nodes)
+        {
+            assert(newParent->data.dfsBeginVisit != -1 && newParent->data.dfsEndVisit != -1);
+            const bool newParentIsDescendant = (newParent->data.dfsBeginVisit >= nodeToReparent->data.dfsBeginVisit && newParent->data.dfsEndVisit <= nodeToReparent->data.dfsEndVisit);
+            if (!newParentIsDescendant)
+                validReparentings.push_back({nodeToReparent, newParent});
+        }
+    }
+
+    sort(validReparentings.begin(), validReparentings.end(),
+            [](const auto& lhs, const auto& rhs)
+            {
+            if (lhs.first->id() != rhs.first->id())
+                return lhs.first->id() < rhs.first->id();
+            if (lhs.second->data.height != rhs.second->data.height)
+                return lhs.second->data.height < rhs.second->data.height;
+            return lhs.second->id() < rhs.second->id();
+            });
+
+
+    return validReparentings;
+}
+
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
     auto lookupInfo = computeLookupInfo(treeGenerator);
