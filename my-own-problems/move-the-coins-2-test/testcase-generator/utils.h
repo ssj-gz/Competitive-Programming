@@ -328,6 +328,7 @@ struct LookupInfo
     vector<vector<TestNode<NodeData>*>> nodesAtHeightLookup;
     vector<MVCN2TST::AVLTree> prefixesForHeight;
     vector<MVCN2TST::AVLTree> suffixesForHeight;
+    vector<int> numNodesUpToHeight;
 };
 
 LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
@@ -355,6 +356,16 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
             lookupInfo.suffixesForHeight[height].insertValue((*nodeAtHeightRevIter)->id());
         }
     }
+    lookupInfo.numNodesUpToHeight.resize(lookupInfo.maxHeight + 1);
+    {
+        int numNodes = 0;
+        for (int height = 0; height <= lookupInfo.maxHeight; height++)
+        {
+            numNodes += lookupInfo.nodesAtHeightLookup[height].size();
+            lookupInfo.numNodesUpToHeight[height] = numNodes;
+        }
+    }
+
     return lookupInfo;
 }
 
