@@ -111,12 +111,15 @@ struct TestQuery
     int64_t asQueryIndex = -1;
 };
 
-void setQueryIndexForQueries(vector<TestQuery>& queries)
+void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
     //  TODO - fill this in!
+    const auto lookupInfo = computeLookupInfo(treeGenerator);
     for (auto& query : queries)
     {
         int64_t queryIndex = 0;
+        if (query.nodeToReparent->id() - 1 >= 0)
+            queryIndex += lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1];
         query.asQueryIndex = queryIndex;
     }
 }
@@ -124,7 +127,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries)
 void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
 {
     std::vector<TestQuery> queriesToWrite(originalQueries);
-    setQueryIndexForQueries(queriesToWrite);
+    setQueryIndexForQueries(queriesToWrite, treeGenerator);
 
     destTestcase.writeLine(treeGenerator.numNodes());
 
