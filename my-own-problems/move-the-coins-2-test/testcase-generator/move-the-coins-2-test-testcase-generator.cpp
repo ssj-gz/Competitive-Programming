@@ -147,6 +147,8 @@ vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> computeOrderedValidRepare
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
     auto lookupInfo = computeLookupInfo(treeGenerator);
+    auto allNodes = treeGenerator.nodes();
+    const auto validReparentings = computeOrderedValidReparentings(allNodes);
     for (auto& query : queries)
     {
         int64_t queryIndex = 0;
@@ -182,6 +184,21 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         lookupInfo.suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
 
         queryIndex += findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
+
+        int64_t debugQueryIndex = 0;
+        for (const auto& reparenting : validReparentings)
+        {
+            if (reparenting.first == query.nodeToReparent && reparenting.second == query.newParentNode)
+            {
+                break;
+            }
+            debugQueryIndex++;
+        }
+        
+        assert(debugQueryIndex != static_cast<int64_t>(validReparentings.size()));
+        cout << "queryIndex: " << queryIndex << " debugQueryIndex: " << debugQueryIndex << endl;
+        assert(queryIndex == debugQueryIndex);
+
 
 
         query.asQueryIndex = queryIndex;
