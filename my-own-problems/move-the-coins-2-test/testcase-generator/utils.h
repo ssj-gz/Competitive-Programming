@@ -27,12 +27,6 @@ struct NodeData
     int dfsEndVisit = -1;
 };
 
-struct LookupInfo
-{
-    int maxHeight = -1;
-    vector<vector<TestNode<NodeData>*>> nodesAtHeightLookup;
-};
-
 void computeDFSInfo(TestNode<NodeData>* node, TestNode<NodeData>* parent, int& dfsVisitNum, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
 {
     node->data.dfsBeginVisit = dfsVisitNum;
@@ -328,6 +322,14 @@ namespace MVCN2TST
     };
 }
 
+struct LookupInfo
+{
+    int maxHeight = -1;
+    vector<vector<TestNode<NodeData>*>> nodesAtHeightLookup;
+    vector<MVCN2TST::AVLTree> prefixesForHeight;
+    vector<MVCN2TST::AVLTree> suffixesForHeight;
+};
+
 LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
 {
     LookupInfo lookupInfo;
@@ -340,6 +342,19 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
     }
     lookupInfo.nodesAtHeightLookup.resize(lookupInfo.maxHeight + 1);
     computeDFSInfo(rootNode, lookupInfo.nodesAtHeightLookup);
+    lookupInfo.prefixesForHeight.resize(lookupInfo.maxHeight + 1, MVCN2TST::AVLTree(true));
+    lookupInfo.suffixesForHeight.resize(lookupInfo.maxHeight + 1, MVCN2TST::AVLTree(true));
+    for (int height = 0; height <= lookupInfo.maxHeight; height++)
+    {
+        for (const auto nodeAtHeight : lookupInfo.nodesAtHeightLookup[height])
+        {
+            lookupInfo.prefixesForHeight[height].insertValue(nodeAtHeight->id());
+        }
+        for (auto nodeAtHeightRevIter = lookupInfo.nodesAtHeightLookup[height].rbegin(); nodeAtHeightRevIter != lookupInfo.nodesAtHeightLookup[height].rend(); nodeAtHeightRevIter++)
+        {
+            lookupInfo.suffixesForHeight[height].insertValue((*nodeAtHeightRevIter)->id());
+        }
+    }
     return lookupInfo;
 }
 
