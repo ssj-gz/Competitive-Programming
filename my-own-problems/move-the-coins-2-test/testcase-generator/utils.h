@@ -13,55 +13,57 @@ const int64_t Mod = 1'000'000'007;
 
 struct NodeData
 {
-    vector<Node*> children;
-    Node* parent = nullptr;
     int height = -1;
     int id = -1;
     int numDescendants = -1; // Includes the node itself.
 
-    bool isDescendantOf(Node& otherNode)
+    bool isDescendantOf(TestNode<NodeData>& otherNode)
     {
-        return (dfsBeginVisit >= otherNode.dfsBeginVisit && dfsEndVisit <= otherNode.dfsEndVisit);
+        return (dfsBeginVisit >= otherNode.data.dfsBeginVisit && dfsEndVisit <= otherNode.data.dfsEndVisit);
     }
 
     int dfsBeginVisit = -1;
     int dfsEndVisit = -1;
 };
 
-void computeDFSInfo(Node* node, int& dfsVisitNum, vector<vector<Node*>>& nodesAtHeightLookup)
+void computeDFSInfo(TestNode<NodeData>* node, TestNode<NodeData>* parent, int& dfsVisitNum, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
 {
-    node->dfsBeginVisit = dfsVisitNum;
-    nodesAtHeightLookup[node->height].push_back(node);
+    node->data.dfsBeginVisit = dfsVisitNum;
+    nodesAtHeightLookup[node->data.height].push_back(node);
     dfsVisitNum++;
 
-    for (auto child : node->children)
+    for (auto childEdge : node->neighbours)
     {
-        computeDFSInfo(child, dfsVisitNum, nodesAtHeightLookup);
+        auto child = childEdge->otherNode(node);
+        if (child == parent)
+            continue;
+        computeDFSInfo(child, node, dfsVisitNum, nodesAtHeightLookup);
     }
 
-    node->dfsEndVisit = dfsVisitNum;
+    node->data.dfsEndVisit = dfsVisitNum;
     dfsVisitNum++;
 }
 
-void computeDFSInfo(Node* rootNode, vector<vector<Node*>>& nodesAtHeightLookup)
+void computeDFSInfo(TestNode<NodeData>* rootNode, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
 {
     int dfsVisitNum = 1;
-    computeDFSInfo(rootNode, dfsVisitNum, nodesAtHeightLookup);
+    computeDFSInfo(rootNode, nullptr, dfsVisitNum, nodesAtHeightLookup);
 }
 
 // Calculate the height of each node, and remove its parent from its list of "children".
-void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0)
+void fixParentChildAndHeights(TestNode<NodeData>* node, TestNode<NodeData>* parent = nullptr, int height = 0)
 {
-    node->height = height;
-    node->parent = parent;
-    node->numDescendants = 1; // This node.
+    node->data.height = height;
+    node->data.numDescendants = 1; // This node.
 
-    node->children.erase(remove(node->children.begin(), node->children.end(), parent), node->children.end());
-
-    for (auto child : node->children)
+    for (auto childEdge : node->neighbours)
     {
+        auto child = childEdge->otherNode(node);
+        if (child == parent)
+            continue;
+
         fixParentChildAndHeights(child, node, height + 1);
-        node->numDescendants += child->numDescendants;
+        node->data.numDescendants += child->data.numDescendants;
     }
 }
 
@@ -364,22 +366,22 @@ class IndexRemapper
  *
  *  Runs in O(N).
  */
-int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, const vector<int>& numNodesUpToHeight, const vector<vector<Node*>>& nodesAtHeightLookup,  const vector<vector<int>>& numProperDescendantsForNodeAtHeightPrefixSum)
+int findNumNonDescendantsUpToHeight(TestNode<NodeData>* nodeToReparent, const int height, const vector<int>& numNodesUpToHeight, const vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup,  const vector<vector<int>>& numProperDescendantsForNodeAtHeightPrefixSum)
 {
     int numNonDescendantsUpToThisHeight = numNodesUpToHeight[height];
-    if (height >= nodeToReparent->height)
+    if (height >= nodeToReparent->data.height)
     {
-        const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsBeginVisit,
-                [](const Node* node, const int dfsBeginVisit)
+        const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->data.dfsBeginVisit,
+                [](const TestNode<NodeData>* node, const int dfsBeginVisit)
                 {
-                return node->dfsBeginVisit < dfsBeginVisit;
+                return node->data.dfsBeginVisit < dfsBeginVisit;
                 });
-        const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsEndVisit,
-                [](const int dfsEndVisit, const Node* node)
+        const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->data.dfsEndVisit,
+                [](const int dfsEndVisit, const TestNode<NodeData>* node)
                 {
-                return dfsEndVisit < node->dfsEndVisit;
+                return dfsEndVisit < node->data.dfsEndVisit;
                 });
-        const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[height].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
+        const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[height].end() && (*descendantsAtHeightBegin)->data.dfsEndVisit <= nodeToReparent->data.dfsEndVisit;
         int sumOfProperDescendantsOfDescendantsAtHeight = 0;
         if (hasDescendantsAtThisHeight)
         {
@@ -390,7 +392,7 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
             if (firstDescendantIndex > 0)
                 sumOfProperDescendantsOfDescendantsAtHeight -= numProperDescendantsForNodeAtHeightPrefixSum[height][firstDescendantIndex - 1];
         }
-        numNonDescendantsUpToThisHeight -= nodeToReparent->numDescendants - sumOfProperDescendantsOfDescendantsAtHeight;
+        numNonDescendantsUpToThisHeight -= nodeToReparent->data.numDescendants - sumOfProperDescendantsOfDescendantsAtHeight;
     }
     return numNonDescendantsUpToThisHeight;
 }
@@ -439,7 +441,8 @@ MVCN2TST::AVLNode* findKthFromPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AV
     return kthAVLNode;
 }
 
-int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
+#if 0
+int64_t calcFinalDecryptionKey(vector<TestNode<NodeData>>& nodes, const vector<int64_t>& encryptedQueries)
 {
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
@@ -578,6 +581,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
 
     return decryptionKey;
 }
+#endif
 
 
 

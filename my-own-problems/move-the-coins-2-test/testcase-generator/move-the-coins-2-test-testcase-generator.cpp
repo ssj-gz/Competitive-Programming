@@ -104,10 +104,6 @@ std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo
 using MC2TTestCaseInfo = TestcaseInfo<SubtaskInfo>;
 using MC2TTestFileInfo = TestFileInfo<SubtaskInfo>;
 
-struct NodeData
-{
-};
-
 struct TestQuery
 {
     TestNode<NodeData>* nodeToReparent = nullptr;
