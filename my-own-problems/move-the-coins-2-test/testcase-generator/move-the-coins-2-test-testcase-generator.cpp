@@ -165,25 +165,29 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     const auto validReparentingsOriginal = computeOrderedValidReparentings(allNodes);
     auto validReparentings = computeOrderedValidReparentings(allNodes);
     vector<int> dbgRemovedIndices;
+#if 0
     cout << "validReparentingsOriginal: " << endl;
     for (const auto& reparenting : validReparentingsOriginal)
     {
         cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << " newParentNode height: " << reparenting.second->data.height << endl;
     }
+#endif
     MVCN2TST::AVLTree removedIndices;
     for (auto& query : queries)
     {
+#if 0
         cout << "query - nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
         cout << "validReparentings: " << endl;
         for (const auto& reparenting : validReparentings)
         {
             cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << " newParentNode height: " << reparenting.second->data.height << endl;
         }
+#endif
         int64_t queryIndex = 0;
         if (query.nodeToReparent->id() - 1 - 1 >= 0)
         {
             const auto numFromPriorNodesToReparent = lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1 - 1];
-            cout << "  numFromPriorNodesToReparent: " << numFromPriorNodesToReparent << endl;
+            //cout << "  numFromPriorNodesToReparent: " << numFromPriorNodesToReparent << endl;
             queryIndex += numFromPriorNodesToReparent;
         }
 
@@ -192,7 +196,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         if (newParentHeight > 0)
         {
             const auto numFromSmallerNewParentHeights = findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight - 1, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
-            cout << "  numFromSmallerNewParentHeights: " << numFromSmallerNewParentHeights << endl;
+            //cout << "  numFromSmallerNewParentHeights: " << numFromSmallerNewParentHeights << endl;
             queryIndex += numFromSmallerNewParentHeights;
         }
 
@@ -221,7 +225,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         lookupInfo.suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
 
         const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
-        cout << "  numFromPriorNewParents: " << numFromPriorNewParents << endl;
+        //cout << "  numFromPriorNewParents: " << numFromPriorNewParents << endl;
         queryIndex += numFromPriorNewParents;
 
         int64_t debugQueryIndex = 0;
@@ -238,12 +242,14 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         cout << "queryIndex: " << queryIndex << " debugQueryIndex: " << debugQueryIndex << endl;
         assert(queryIndex == debugQueryIndex);
 
+#if 0
         cout << "dbgRemovedIndices: " << endl;
         for (const auto x : dbgRemovedIndices)
         {
             cout << " " << x;
         }
         cout << endl;
+#endif
 
         int numRemovedIndicesToLeft = 0;
         const auto removedIndicesToLeftInfo = findLastLessThanOrEqualTo(queryIndex, removedIndices);
@@ -252,10 +258,10 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         {
             numRemovedIndicesToLeft++;
         }
-        cout << "numRemovedIndicesToLeft: " << numRemovedIndicesToLeft << endl;
+        //cout << "numRemovedIndicesToLeft: " << numRemovedIndicesToLeft << endl;
 
         query.asIndexInRemaining = queryIndex - numRemovedIndicesToLeft; // TODO - perform adjustment, taking into account indices that have been removed.
-        cout << "asIndexInRemaining: " << query.asIndexInRemaining << endl;
+        //cout << "asIndexInRemaining: " << query.asIndexInRemaining << endl;
 
         assert(validReparentings[query.asIndexInRemaining].first == query.nodeToReparent);
         assert(validReparentings[query.asIndexInRemaining].second == query.newParentNode);
