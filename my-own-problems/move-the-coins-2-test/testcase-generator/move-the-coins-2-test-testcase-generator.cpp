@@ -108,7 +108,7 @@ struct TestQuery
 {
     TestNode<NodeData>* nodeToReparent = nullptr;
     TestNode<NodeData>* newParentNode = nullptr;
-    int64_t asQueryIndex = -1;
+    int64_t asIndexInRemaining = -1;
 };
 
 // TODO - remove this - debugging only!
@@ -219,7 +219,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
 
 
 
-        query.asQueryIndex = queryIndex;
+        query.asIndexInRemaining = queryIndex; // TODO - perform adjustment, taking into account indices that have been removed.
     }
 }
 
@@ -238,7 +238,7 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
     destTestcase.writeLine(queriesToWrite.size());
     for (const auto& query : queriesToWrite)
     {
-        destTestcase.writeLine(query.asQueryIndex);
+        destTestcase.writeLine(query.asIndexInRemaining);
     }
 }
 
