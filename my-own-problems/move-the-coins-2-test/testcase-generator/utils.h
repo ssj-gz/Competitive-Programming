@@ -507,6 +507,39 @@ MVCN2TST::AVLNode* findKthFromPairAux(int k, MVCN2TST::AVLTree& tree1, MVCN2TST:
     return nullptr;
 }
 
+
+std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int k, MVCN2TST::AVLTree& tree)
+{
+    MVCN2TST::AVLTreeIterator treeIter = tree.root();
+    std::pair<MVCN2TST::AVLNode*, int> result = {nullptr, 0};
+    while (treeIter.currentNode())
+    {
+        
+        if (treeIter.currentNode()->value == k)
+            return {treeIter.currentNode(), treeIter.numToLeft()};
+        if (treeIter.currentNode()->value > k)
+            treeIter.followLeftChild();
+        if (treeIter.currentNode()->value < k)
+        {
+            result = {treeIter.currentNode(), treeIter.numToLeft()}; // Best candidate so far.
+            treeIter.followRightChild();
+        }
+
+
+    }
+    return result;
+}
+
+int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
+{
+    auto node1Info = findLastLessThanOrEqualTo(k, tree1);
+    auto node2Info = findLastLessThanOrEqualTo(k, tree2);
+    assert((node1Info.first && node1Info.first->value == k) || (node2Info.first && node2Info.first->value == k));
+    const int numToLeft1 = node1Info.second;
+    const int numToLeft2 = node2Info.second;
+    return numToLeft1 + numToLeft2 - 1;
+}
+
 MVCN2TST::AVLNode* findKthFromPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
 {
     auto kthAVLNode = findKthFromPairAux(k, tree1, tree2);
