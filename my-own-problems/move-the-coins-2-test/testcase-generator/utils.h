@@ -330,6 +330,7 @@ struct LookupInfo
     vector<MVCN2TST::AVLTree> suffixesForHeight;
     vector<int> numNodesUpToHeight;
     vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum;
+    vector<int64_t> numCanReparentToPrefixSum;
 };
 
 LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
@@ -379,6 +380,19 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
             }
         }
     }
+    {
+        int64_t sumOfNumCanReparentTo = 0;
+        auto nodesInIdOrder = tree.nodes();
+        const int numNodes = tree.numNodes();
+        sort(nodesInIdOrder.begin(), nodesInIdOrder.end(), [](const auto& lhsNode, const auto& rhsNode) { return lhsNode->id() < rhsNode->id(); });
+        for (const auto& node : nodesInIdOrder)
+        {
+            const auto numCanReparentNodeTo = numNodes - node->data.numDescendants; // Can reparent a node to any of its non-descendants.
+            sumOfNumCanReparentTo += numCanReparentNodeTo;
+            lookupInfo.numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
+        }
+    }
+
 
     return lookupInfo;
 }
