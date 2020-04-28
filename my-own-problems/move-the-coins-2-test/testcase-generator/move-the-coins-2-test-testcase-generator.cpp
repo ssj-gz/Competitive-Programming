@@ -111,8 +111,21 @@ struct TestQuery
     int64_t asQueryIndex = -1;
 };
 
-void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
+void setQueryIndexForQueries(vector<TestQuery>& queries)
 {
+    //  TODO - fill this in!
+    for (auto& query : queries)
+    {
+        int64_t queryIndex = 0;
+        query.asQueryIndex = queryIndex;
+    }
+}
+
+void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
+{
+    std::vector<TestQuery> queriesToWrite(originalQueries);
+    setQueryIndexForQueries(queriesToWrite);
+
     destTestcase.writeLine(treeGenerator.numNodes());
 
     for (const auto& edge : treeGenerator.edges())
@@ -120,10 +133,10 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
         destTestcase.writeLine(edge->nodeA->id(), edge->nodeB->id());
     }
 
-    destTestcase.writeLine(queries.size());
-    for (const auto& query : queries)
+    destTestcase.writeLine(queriesToWrite.size());
+    for (const auto& query : queriesToWrite)
     {
-        destTestcase.writeLine(query.nodeToReparent->id(), query.newParentNode->id());
+        destTestcase.writeLine(query.asQueryIndex);
     }
 }
 
