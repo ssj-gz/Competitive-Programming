@@ -162,15 +162,22 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     cout << "setQueryIndexForQueries" << endl;
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
-    const auto validReparentings = computeOrderedValidReparentings(allNodes);
-    cout << "validReparentings: " << endl;
-    for (const auto& reparenting : validReparentings)
+    const auto validReparentingsOriginal = computeOrderedValidReparentings(allNodes);
+    auto validReparentings = computeOrderedValidReparentings(allNodes);
+    cout << "validReparentingsOriginal: " << endl;
+    for (const auto& reparenting : validReparentingsOriginal)
     {
         cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << " newParentNode height: " << reparenting.second->data.height << endl;
     }
+    MVCN2TST::AVLTree removedIndices;
     for (auto& query : queries)
     {
         cout << "query - nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
+        cout << "validReparentings: " << endl;
+        for (const auto& reparenting : validReparentings)
+        {
+            cout << " nodeToReparent: " << reparenting.first->id() << " newParentNode: " << reparenting.second->id() << " newParentNode height: " << reparenting.second->data.height << endl;
+        }
         int64_t queryIndex = 0;
         if (query.nodeToReparent->id() - 1 - 1 >= 0)
         {
@@ -217,7 +224,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         queryIndex += numFromPriorNewParents;
 
         int64_t debugQueryIndex = 0;
-        for (const auto& reparenting : validReparentings)
+        for (const auto& reparenting : validReparentingsOriginal)
         {
             if (reparenting.first == query.nodeToReparent && reparenting.second == query.newParentNode)
             {
@@ -226,13 +233,20 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
             debugQueryIndex++;
         }
         
-        assert(debugQueryIndex != static_cast<int64_t>(validReparentings.size()));
+        assert(debugQueryIndex != static_cast<int64_t>(validReparentingsOriginal.size()));
         cout << "queryIndex: " << queryIndex << " debugQueryIndex: " << debugQueryIndex << endl;
         assert(queryIndex == debugQueryIndex);
 
+        auto numRemovedIndicesToLeft = findLastLessThanOrEqualTo(queryIndex, removedIndices).second;
 
+        query.asIndexInRemaining = queryIndex - numRemovedIndicesToLeft; // TODO - perform adjustment, taking into account indices that have been removed.
+        cout << "asIndexInRemaining: " << query.asIndexInRemaining << endl;
 
-        query.asIndexInRemaining = queryIndex; // TODO - perform adjustment, taking into account indices that have been removed.
+        assert(validReparentings[query.asIndexInRemaining].first == query.nodeToReparent);
+        assert(validReparentings[query.asIndexInRemaining].second == query.newParentNode);
+
+        removedIndices.insertValue(queryIndex);
+        validReparentings.erase(validReparentings.begin() + query.asIndexInRemaining);
     }
 }
 
