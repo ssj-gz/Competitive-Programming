@@ -424,8 +424,8 @@ class IndexRemapper
             while (treeIter.currentNode())
             {
                 const int64_t indexOfCurrentNode = treeIter.currentNode()->value;
-                const int numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
-                const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
+                const int64_t numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
+                const int64_t numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
                 if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
                 {
                     // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
