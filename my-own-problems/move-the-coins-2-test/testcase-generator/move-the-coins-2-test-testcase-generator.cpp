@@ -114,9 +114,9 @@ struct TestQuery
     bool operator<(const TestQuery& other) const
     {
         if (nodeToReparent != other.nodeToReparent)
-            return nodeToReparent < other.nodeToReparent;
+            return nodeToReparent->id() < other.nodeToReparent->id();
         if (newParentNode != other.newParentNode)
-            return newParentNode < other.newParentNode;
+            return newParentNode->id() < other.newParentNode->id();
         return asIndexInRemaining < other.asIndexInRemaining;
     }
 };
