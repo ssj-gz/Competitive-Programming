@@ -421,6 +421,9 @@ namespace Verifier
 
     int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries, vector<int64_t>& destDecryptedQueries)
     {
+        auto rootNode = &(nodes.front());
+        fixParentChildAndHeights(rootNode);
+
         int64_t decryptionKey = 0;
         int64_t powerOf2 = 2;
         int64_t powerOf3 = 3;
@@ -432,8 +435,6 @@ namespace Verifier
         }
         assert(maxNodeHeight != -1);
 
-        auto rootNode = &(nodes.front());
-        fixParentChildAndHeights(rootNode);
 
         vector<vector<Node*>> nodesAtHeightLookup(maxNodeHeight + 1);
         computeDFSInfo(rootNode, nodesAtHeightLookup);
