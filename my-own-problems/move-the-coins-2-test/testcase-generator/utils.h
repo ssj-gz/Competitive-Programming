@@ -523,7 +523,7 @@ MVCN2TST::AVLNode* findKthFromPairAux(int k, MVCN2TST::AVLTree& tree1, MVCN2TST:
 }
 
 
-std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int k, MVCN2TST::AVLTree& tree)
+std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int64_t k, MVCN2TST::AVLTree& tree)
 {
     MVCN2TST::AVLTreeIterator treeIter = tree.root();
     std::pair<MVCN2TST::AVLNode*, int> result = {nullptr, 0};
