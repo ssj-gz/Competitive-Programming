@@ -76,7 +76,7 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
 {
     assert(numToChoose <= numToChooseFrom);
     assert(numToChoose >= 0);
-    AVLTree removedIndices;
+    Internal::AVLTree removedIndices;
 
     // Create the sequence of indices to choose - here, we assume that we actually remove
     // the chosen index after choosing it.
