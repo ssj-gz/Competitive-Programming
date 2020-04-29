@@ -547,7 +547,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         testFileReader.addErrorUnless(static_cast<int>(visited.size()) == numNodes, "Tree is not connected!");
 
         vector<int64_t> destDecryptedQueries;
-        Verifier::calcFinalDecryptionKey(nodes, encryptedQueries, destDecryptedQueries);
+        const auto finalDecryptionKey = Verifier::calcFinalDecryptionKey(nodes, encryptedQueries, destDecryptedQueries);
+        cout << "verifier: finalDecryptionKey: " << finalDecryptionKey << endl;
         // TODO - validation of (decrypted) queries - making sure they lie within expected range (1 <= q_i <= L - i).
 
 
