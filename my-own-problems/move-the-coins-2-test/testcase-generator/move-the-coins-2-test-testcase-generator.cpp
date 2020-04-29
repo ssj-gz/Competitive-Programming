@@ -127,7 +127,6 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     {
         throw std::invalid_argument("Queries contain duplicates!");
     }
-    cout << "setQueryIndexForQueries" << endl;
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
     MVCN2TST::AVLTree removedIndices;
@@ -211,7 +210,6 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
 
     for (const auto& query : queriesToWrite)
     {
-        cout << " asIndexInRemaining: " << query.asIndexInRemaining << " nodeToReparent: " << query.nodeToReparent->id() << " newParentNode:" << query.newParentNode->id() << " newParentHeight: " << query.newParentNode->data.height << endl;
         const int64_t encryptedQuery = (query.asIndexInRemaining + 1) ^ encryptionKey;
         destTestcase.writeLine(encryptedQuery);
 
