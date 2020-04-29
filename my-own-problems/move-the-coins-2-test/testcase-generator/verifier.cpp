@@ -503,18 +503,18 @@ namespace Verifier
         {
             const int64_t decryptedQuery = encryptedQuery ^ decryptionKey;
             destDecryptedQueries.push_back(decryptedQuery);
-            const auto kthInRemainingToFind = decryptedQuery - 1; // Make 0-relative.
+            const int64_t kthInRemainingToFind = decryptedQuery - 1; // Make 0-relative.
             cout << "kthInRemainingToFind: " << kthInRemainingToFind << endl;
 
-            const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
+            const int64_t indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
             const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
-            const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
+            const int nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
             auto nodeToReparent = &(nodes[nodeIndex]);
 
             // i.e. we now need to find the numOfReparentingThatReparentsNode'th element in the original
             // list that re-parents our nodeToReparent.
-            const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
+            const int64_t numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
             cout << "numOfReparentingThatReparentsNode: " << numOfReparentingThatReparentsNode << endl;
             const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                     [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightLookup, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
@@ -528,7 +528,7 @@ namespace Verifier
 
             // i.e. we now need to find the numOfReparentingThatReparentsNode's item in the original list
             // that reparents nodeToReparent to a newParentHeight whose height is newParentHeight.
-            auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
+            int64_t numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
             cout << "numOfReparentingForNodeAndNewHeight initial: " << numOfReparentingForNodeAndNewHeight << endl;
             if (heightIter != allHeights.begin())
             {
@@ -561,7 +561,7 @@ namespace Verifier
             suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
             const auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
             assert(newParentAVLNode);
-            const auto newParentId = newParentAVLNode->value;
+            const int newParentId = newParentAVLNode->value;
             auto newParent = &(nodes[newParentId - 1]);
 
             // We've found the required reparenting (nodeToReparent, newParentId).
