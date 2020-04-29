@@ -118,7 +118,7 @@ class AVLTree
             else
                 return m_rootForRevision[m_revisionNumber];
         }
-        void insertValue(int newValue)
+        void insertValue(int64_t newValue)
         {
             if (!m_root)
                 m_root = createNode(newValue);
@@ -142,7 +142,7 @@ class AVLTree
     private:
         AVLNode* m_root = nullptr;
 
-        AVLNode* insertValue(int newValue, AVLNode* currentNode)
+        AVLNode* insertValue(int64_t newValue, AVLNode* currentNode)
         {
             if (m_isPersistent)
             {
@@ -269,7 +269,7 @@ class AVLTree
             }
         }
 
-        AVLNode* createNode(int value)
+        AVLNode* createNode(int64_t value)
         {
             auto newNode = createNode();
             newNode->value = value;
@@ -374,8 +374,8 @@ class IndexRemapper
             while (treeIter.currentNode())
             {
                 const int64_t indexOfCurrentNode = treeIter.currentNode()->value;
-                const int numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
-                const int numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
+                const int64_t numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
+                const int64_t numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
                 if (numFreeUpToCurrentNodeIndex >= nthOfRemainingToChoose + 1)
                 {
                     // We've overshot; the required remappedIndex is to the left of indexOfCurrentNode; "recurse"
