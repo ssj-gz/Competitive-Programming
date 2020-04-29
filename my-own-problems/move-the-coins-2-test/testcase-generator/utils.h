@@ -505,41 +505,6 @@ int findNumNonDescendantsUpToHeight(TestNode<NodeData>* nodeToReparent, const in
     return numNonDescendantsUpToThisHeight;
 }
 
-MVCN2TST::AVLNode* findKthFromPairAux(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
-{
-    MVCN2TST::AVLTreeIterator tree1Iter = tree1.root();
-    while (tree1Iter.currentNode())
-    {
-        const auto currentValue1 = tree1Iter.currentNode()->value;
-        int numToLeft2 = 0;
-        MVCN2TST::AVLTreeIterator tree2Iter = tree2.root();
-        while (tree2Iter.currentNode())
-        {
-            if (tree2Iter.currentNode()->value < currentValue1)
-                numToLeft2 = tree2Iter.numToLeft() + 1;
-            if (tree2Iter.currentNode()->value > currentValue1)
-                tree2Iter.followLeftChild();
-            else
-                tree2Iter.followRightChild();
-        }
-
-        const auto numToLeft1 = tree1Iter.numToLeft();
-        const auto numToLeftInBoth = numToLeft1 + numToLeft2;
-        if (numToLeftInBoth == k)
-        {
-            return tree1Iter.currentNode();
-        }
-
-        if (numToLeftInBoth > k)
-            tree1Iter.followLeftChild();
-        else
-            tree1Iter.followRightChild();
-    }
-
-    return nullptr;
-}
-
-
 std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int64_t k, MVCN2TST::AVLTree& tree)
 {
     MVCN2TST::AVLTreeIterator treeIter = tree.root();
@@ -568,13 +533,6 @@ std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int64_t k, MVCN2TST
 
 int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
 {
-#if 0
-    cout << "findIndexOfInPair - k: " << k << endl;
-    cout << "tree1:" << endl;
-    printTree(tree1);
-    cout << "tree2:" << endl;
-    printTree(tree2);
-#endif
     auto node1Info = findLastLessThanOrEqualTo(k, tree1);
     auto node2Info = findLastLessThanOrEqualTo(k, tree2);
     assert((node1Info.first && node1Info.first->value == k) || (node2Info.first && node2Info.first->value == k));
