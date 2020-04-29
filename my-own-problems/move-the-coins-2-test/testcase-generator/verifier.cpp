@@ -9,8 +9,6 @@ using namespace std;
 
 namespace Verifier
 {
-    const int64_t Mod = 1'000'000'007;
-
     void computeDFSInfo(Node* node, int& dfsVisitNum, vector<vector<Node*>>& nodesAtHeightLookup)
     {
         node->dfsBeginVisit = dfsVisitNum;

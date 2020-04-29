@@ -286,9 +286,20 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
     }
 
     destTestcase.writeLine(queriesToWrite.size());
+
+    int64_t encryptionKey = 0;
+    int64_t powerOf2 = 2;
+    int64_t powerOf3 = 3;
+
     for (const auto& query : queriesToWrite)
     {
-        destTestcase.writeLine(query.asIndexInRemaining);
+        const int64_t encryptedQuery = query.asIndexInRemaining ^ encryptionKey;
+        destTestcase.writeLine(encryptedQuery);
+
+        encryptionKey = (encryptionKey + powerOf2 * query.nodeToReparent->id()) % Mod;
+        encryptionKey = (encryptionKey + powerOf3 * query.newParentNode->id()) % Mod;
+        powerOf2 = (powerOf2 * 2) % Mod;
+        powerOf3 = (powerOf3 * 3) % Mod;
     }
 }
 

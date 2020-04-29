@@ -9,9 +9,6 @@
 
 using namespace std;
 
-const int64_t Mod = 1'000'000'007;
-
-
 struct NodeData
 {
     int height = -1;
