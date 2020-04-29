@@ -549,8 +549,18 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         vector<int64_t> destDecryptedQueries;
         const auto finalDecryptionKey = Verifier::calcFinalDecryptionKey(nodes, encryptedQueries, destDecryptedQueries);
         cout << "verifier: finalDecryptionKey: " << finalDecryptionKey << endl;
-        // TODO - validation of (decrypted) queries - making sure they lie within expected range (1 <= q_i <= L - i).
 
+        int64_t totalNumValidReparentings = 0;
+        for (const auto& node : nodes)
+        {
+            totalNumValidReparentings += numNodes - node.numDescendants;
+        }
+        for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
+        {
+            testFileReader.addErrorUnless(destDecryptedQueries[queryIndex] >= 1, "Decrypted queries should be >= 1!");
+            const auto numValidReparentingsRemaining = totalNumValidReparentings - queryIndex;
+            testFileReader.addErrorUnless(destDecryptedQueries[queryIndex] <= numValidReparentingsRemaining, "The " + to_string(queryIndex + 1) + "th decrypted query should be <= " + to_string(numValidReparentingsRemaining) + "!");
+        }
 
         testFileReader.markTestcaseAsValidated();
     }
