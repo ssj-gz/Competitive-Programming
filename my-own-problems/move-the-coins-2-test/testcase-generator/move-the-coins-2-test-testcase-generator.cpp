@@ -379,6 +379,44 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            // TODO - remove this - debugging only!
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(9734)
+                    .withDescription("TODO - remove - debugging only!"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+                const int numNodes = 200'000;
+                const int numQueries = 200'000;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode();
+                treeGenerator.addNodeChain(rootNode, 80'000);
+                treeGenerator.addNodeChain(rootNode, 80'000);
+                const auto& lookupInfo = computeLookupInfo(treeGenerator);
+
+                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+
+                vector<TestQuery> queries;
+                const auto allNodes = treeGenerator.nodes();
+                while (static_cast<int>(queries.size()) < numQueries)
+                {
+                    const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                    const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+
+                    if (!newParent->data.isDescendantOf(*nodeToReparent))
+                    {
+                        queries.push_back({nodeToReparent, newParent});
+                    }
+                }
+                // Remove duplicates.
+                set<TestQuery> querySet(queries.begin(), queries.end());
+                queries.assign(querySet.begin(), querySet.end());
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
