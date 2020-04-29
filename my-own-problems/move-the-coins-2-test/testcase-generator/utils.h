@@ -595,24 +595,7 @@ int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
             index ++;
         }
     }
-#if 0
-    const int numToLeft1 = node1Info.second;
-    cout << "node1 node: " << (node1Info.first ? node1Info.first->value : -1) << " numToLeft1: " << numToLeft1 << endl;
-    const int numToLeft2 = node2Info.second;
-    cout << "node2 node: " << (node2Info.first ? node2Info.first->value : -1) << " numToLeft2: " << numToLeft2 << endl;
-    cout << "index: " << index << endl;
-#endif
     return index;
-}
-
-MVCN2TST::AVLNode* findKthFromPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
-{
-    auto kthAVLNode = findKthFromPairAux(k, tree1, tree2);
-    if (!kthAVLNode)
-    {
-        kthAVLNode = findKthFromPairAux(k, tree2, tree1);
-    }
-    return kthAVLNode;
 }
 
 #endif // UTILS_H
