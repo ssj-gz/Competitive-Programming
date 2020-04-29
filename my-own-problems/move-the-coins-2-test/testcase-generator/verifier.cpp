@@ -491,11 +491,20 @@ namespace Verifier
             allHeights.push_back(height);
         }
 
+        int64_t totalNumValidReparentings = 0;
+        for (const auto& node : nodes)
+        {
+            totalNumValidReparentings += numNodes - node.numDescendants;
+        }
+        cout << " totalNumValidReparentings: " << totalNumValidReparentings << endl;
+
+
         for (const auto encryptedQuery : encryptedQueries)
         {
             const int64_t decryptedQuery = encryptedQuery ^ decryptionKey;
             destDecryptedQueries.push_back(decryptedQuery);
             const auto kthInRemainingToFind = decryptedQuery - 1; // Make 0-relative.
+            cout << "kthInRemainingToFind: " << kthInRemainingToFind << endl;
 
             const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
@@ -506,6 +515,7 @@ namespace Verifier
             // i.e. we now need to find the numOfReparentingThatReparentsNode'th element in the original
             // list that re-parents our nodeToReparent.
             const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
+            cout << "numOfReparentingThatReparentsNode: " << numOfReparentingThatReparentsNode << endl;
             const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                     [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightLookup, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
                     {
@@ -519,9 +529,11 @@ namespace Verifier
             // i.e. we now need to find the numOfReparentingThatReparentsNode's item in the original list
             // that reparents nodeToReparent to a newParentHeight whose height is newParentHeight.
             auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
+            cout << "numOfReparentingForNodeAndNewHeight initial: " << numOfReparentingForNodeAndNewHeight << endl;
             if (heightIter != allHeights.begin())
             {
                 numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(heightIter), numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
+                cout << "numOfReparentingForNodeAndNewHeight adjusted: " << numOfReparentingForNodeAndNewHeight << endl;
             }
 
             const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[newParentHeight].begin(), nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->dfsBeginVisit,
