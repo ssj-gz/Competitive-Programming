@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "verifier.h"
 #include <tree-generator.h>
 #include <testlib.h>
 #include "testcase-generator-lib.h"
@@ -456,16 +457,11 @@ int main(int argc, char* argv[])
     return EXIT_SUCCESS;
 }
 
-struct Node
-{
-    std::vector<Node*> neighbours;
-    int nodeId = -1;
-};
-
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask)
 {
     using std::cout;
     using std::endl;
+    using Verifier::Node;
 
     int64_t totalNumNodes = 0;
 
@@ -481,7 +477,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         std::vector<Node> nodes(numNodes);
         for (int i = 0; i < numNodes; i++)
         {
-            nodes[i].nodeId = (i + 1);
+            nodes[i].id = (i + 1);
         }
         
         for (int i = 0; i < numNodes - 1; i++)
@@ -490,32 +486,30 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             testFileReader.addErrorUnless(0 <= edgeNodeAId && edgeNodeAId <= numNodes, "Invalid node id " + std::to_string(edgeNodeAId));
             testFileReader.addErrorUnless(0 <= edgeNodeBId && edgeNodeBId <= numNodes, "Invalid node id " + std::to_string(edgeNodeBId));
             
-            nodes[edgeNodeAId - 1].neighbours.push_back(&(nodes[edgeNodeBId - 1]));
-            nodes[edgeNodeBId - 1].neighbours.push_back(&(nodes[edgeNodeAId - 1]));
+            nodes[edgeNodeAId - 1].children.push_back(&(nodes[edgeNodeBId - 1]));
+            nodes[edgeNodeBId - 1].children.push_back(&(nodes[edgeNodeAId - 1]));
         }
 
         const auto [numQueries] = testFileReader.readLine<int>();
-        std::vector<int64_t> queries;
+        std::vector<int64_t> encryptedQueries;
         for (int i = 0; i < numQueries; i++)
         {
-            const auto& [query] = testFileReader.readLine<int64_t>();
-            queries.push_back(query);
+            const auto& [encryptedQuery] = testFileReader.readLine<int64_t>();
+            encryptedQueries.push_back(encryptedQuery);
         }
-        // TODO - validation of queries.
+        // TODO - validation of (encrypted) queries - making sure they lie within expected range.
 
 
-        int nodeId = 1;
         for (const auto& node : nodes)
         {
             std::set<Node*> distinctNeighbours;
-            for (const auto neighbour : node.neighbours)
+            for (const auto neighbour : node.children)
             {
-                testFileReader.addErrorUnless(neighbour != &node, "Node " + std::to_string(node.nodeId) + " is connected to itself!");
-                testFileReader.addErrorUnless(distinctNeighbours.find(neighbour) == distinctNeighbours.end(), "Node " + std::to_string(nodeId) + " is connected to node " + std::to_string(neighbour->nodeId) + " more than once!");
+                testFileReader.addErrorUnless(neighbour != &node, "Node " + std::to_string(node.id) + " is connected to itself!");
+                testFileReader.addErrorUnless(distinctNeighbours.find(neighbour) == distinctNeighbours.end(), "Node " + std::to_string(node.id) + " is connected to node " + std::to_string(neighbour->id) + " more than once!");
 
                 distinctNeighbours.insert(neighbour);
             }
-            nodeId++;
         }
 
         auto rootNode = &(nodes.front());
@@ -526,7 +520,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             std::vector<Node*> nextToExplore;
             for (const auto& node : toExplore)
             {
-                for (const auto neighbour : node->neighbours)
+                for (const auto neighbour : node->children)
                 {
                     if (visited.find(neighbour) == visited.end())
                     {
@@ -539,6 +533,11 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         }
 
         testFileReader.addErrorUnless(static_cast<int>(visited.size()) == numNodes, "Tree is not connected!");
+
+        vector<int64_t> destDecryptedQueries;
+        Verifier::calcFinalDecryptionKey(nodes, encryptedQueries, destDecryptedQueries);
+        // TODO - validation of (decrypted) queries - making sure they lie within expected range (1 <= q_i <= L - i).
+
 
         testFileReader.markTestcaseAsValidated();
     }
