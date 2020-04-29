@@ -431,7 +431,7 @@ int main(int argc, char* argv[])
 
                 vector<TestQuery> queries;
                 const auto allNodes = treeGenerator.nodes();
-                while (queries.size() < numQueries)
+                while (static_cast<int>(queries.size()) < numQueries)
                 {
                     const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
                     const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
