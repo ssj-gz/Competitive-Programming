@@ -504,7 +504,6 @@ namespace Verifier
             const int64_t decryptedQuery = encryptedQuery ^ decryptionKey;
             destDecryptedQueries.push_back(decryptedQuery);
             const int64_t kthInRemainingToFind = decryptedQuery - 1; // Make 0-relative.
-            cout << "kthInRemainingToFind: " << kthInRemainingToFind << endl;
 
             const int64_t indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
@@ -563,6 +562,8 @@ namespace Verifier
             assert(newParentAVLNode);
             const int newParentId = newParentAVLNode->value;
             auto newParent = &(nodes[newParentId - 1]);
+
+            cout << "kthInRemainingToFind: " << kthInRemainingToFind << " nodeToReparent:" << nodeToReparent->id << " newParent:" << newParent->id << " newParentHeight:" << newParentHeight << endl;
 
             // We've found the required reparenting (nodeToReparent, newParentId).
             // Use it to update the decryptionKey.

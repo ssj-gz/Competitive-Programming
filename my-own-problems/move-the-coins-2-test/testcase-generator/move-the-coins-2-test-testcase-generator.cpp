@@ -145,6 +145,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         if (newParentHeight > 0)
         {
             const auto numFromSmallerNewParentHeights = findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight - 1, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+            assert(numFromSmallerNewParentHeights >= 0);
             queryIndex += numFromSmallerNewParentHeights;
         }
 
@@ -184,6 +185,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         }
 
         query.asIndexInRemaining = queryIndex - numRemovedIndicesToLeft;
+        assert(query.asIndexInRemaining >= 0);
 
         removedIndices.insertValue(queryIndex);
     }
@@ -209,6 +211,7 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
 
     for (const auto& query : queriesToWrite)
     {
+        cout << " asIndexInRemaining: " << query.asIndexInRemaining << " nodeToReparent: " << query.nodeToReparent->id() << " newParentNode:" << query.newParentNode->id() << " newParentHeight: " << query.newParentNode->data.height << endl;
         const int64_t encryptedQuery = (query.asIndexInRemaining + 1) ^ encryptionKey;
         destTestcase.writeLine(encryptedQuery);
 
