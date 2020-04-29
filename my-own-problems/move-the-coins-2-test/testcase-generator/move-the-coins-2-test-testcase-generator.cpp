@@ -352,11 +352,13 @@ int main(int argc, char* argv[])
 
 
                 TreeGenerator<NodeData> treeGenerator;
-                treeGenerator.createNode();
+                auto rootNode = treeGenerator.createNode();
                 const int numNodes = 200'000;
                 const int numQueries = 200'000;
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
-                const auto& lookupInfo = computeLookupInfo(treeGenerator);
+
+                fixParentChildAndHeights(rootNode);
+                computeDFSInfo(rootNode);
 
                 vector<TestQuery> queries;
                 const auto allNodes = treeGenerator.nodes();
@@ -394,9 +396,12 @@ int main(int argc, char* argv[])
                 treeGenerator.addNodeChain(rootNode, 80'000);
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
+                fixParentChildAndHeights(rootNode);
+                computeDFSInfo(rootNode);
+
                 vector<TestQuery> queries;
                 const auto allNodes = treeGenerator.nodes();
-                const auto& lookupInfo = computeLookupInfo(treeGenerator);
+
                 while (static_cast<int>(queries.size()) < numQueries)
                 {
                     const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
