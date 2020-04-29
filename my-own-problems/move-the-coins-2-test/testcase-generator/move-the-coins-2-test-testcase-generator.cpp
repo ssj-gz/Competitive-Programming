@@ -394,12 +394,11 @@ int main(int argc, char* argv[])
                 auto rootNode = treeGenerator.createNode();
                 treeGenerator.addNodeChain(rootNode, 80'000);
                 treeGenerator.addNodeChain(rootNode, 80'000);
-                const auto& lookupInfo = computeLookupInfo(treeGenerator);
-
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 vector<TestQuery> queries;
                 const auto allNodes = treeGenerator.nodes();
+                const auto& lookupInfo = computeLookupInfo(treeGenerator);
                 while (static_cast<int>(queries.size()) < numQueries)
                 {
                     const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
