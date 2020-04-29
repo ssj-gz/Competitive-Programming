@@ -79,266 +79,263 @@ void fixParentChildAndHeights(TestNode<NodeData>* node, TestNode<NodeData>* pare
     }
 }
 
-namespace MVCN2TST
+struct AVLNode
 {
-    struct AVLNode
-    {
-        int64_t value = -1;
-        AVLNode *leftChild = nullptr;
-        AVLNode *rightChild = nullptr;
-        int balanceFactor = 0;
-        int maxDescendantDepth = 0;
-        int numDescendants = 1;
+    int64_t value = -1;
+    AVLNode *leftChild = nullptr;
+    AVLNode *rightChild = nullptr;
+    int balanceFactor = 0;
+    int maxDescendantDepth = 0;
+    int numDescendants = 1;
 
-        int id = -1;
-    };
+    int id = -1;
+};
 
-    class AVLTree
-    {
-        public:
-            AVLTree(bool isPersistent = false, int nodeBlockSize = 1)
-                : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
+class AVLTree
+{
+    public:
+        AVLTree(bool isPersistent = false, int nodeBlockSize = 1)
+            : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
+        {
+            if (m_isPersistent)
+                m_rootForRevision.push_back(nullptr);
+        }
+        AVLNode* root()
+        {
+            if (!m_isPersistent)
+                return m_root;
+            else
+                return m_rootForRevision[m_revisionNumber];
+        }
+        void insertValue(int64_t newValue)
+        {
+            if (!m_root)
+                m_root = createNode(newValue);
+            else
+                m_root = insertValue(newValue, m_root);
+
+            if (m_isPersistent)
             {
-                if (m_isPersistent)
-                    m_rootForRevision.push_back(nullptr);
+                m_rootForRevision.erase(m_rootForRevision.begin() + m_revisionNumber + 1, m_rootForRevision.end());
+                m_rootForRevision.push_back(m_root);
+                m_revisionNumber++;
+                assert(m_revisionNumber == static_cast<int>(m_rootForRevision.size()) - 1);
             }
-            AVLNode* root()
+        }
+        void switchToRevision(int revisionNum)
+        {
+            assert(m_isPersistent);
+            m_revisionNumber = revisionNum;
+        }
+
+    private:
+        AVLNode* m_root = nullptr;
+
+        AVLNode* insertValue(int64_t newValue, AVLNode* currentNode)
+        {
+            if (m_isPersistent)
             {
-                if (!m_isPersistent)
-                    return m_root;
+                auto newCurrentNode = createNode(currentNode->value);
+                *newCurrentNode = *currentNode;
+                currentNode = newCurrentNode;
+            }
+            if (newValue < currentNode->value)
+            {
+                // Values in the left subtree of node must be *strictly less* than
+                // that of currentNode.
+                assert(newValue < currentNode->value);
+                if (currentNode->leftChild)
+                    currentNode->leftChild = insertValue(newValue, currentNode->leftChild);
                 else
-                    return m_rootForRevision[m_revisionNumber];
+                    currentNode->leftChild = createNode(newValue);
             }
-            void insertValue(int64_t newValue)
+            else
             {
-                if (!m_root)
-                    m_root = createNode(newValue);
+                // Values in the right subtree of node must be *greater than or equal to* that
+                // that of currentNode.
+                assert(newValue >= currentNode->value);
+                if (currentNode->rightChild)
+                    currentNode->rightChild = insertValue(newValue, currentNode->rightChild);
                 else
-                    m_root = insertValue(newValue, m_root);
-
-                if (m_isPersistent)
-                {
-                    m_rootForRevision.erase(m_rootForRevision.begin() + m_revisionNumber + 1, m_rootForRevision.end());
-                    m_rootForRevision.push_back(m_root);
-                    m_revisionNumber++;
-                    assert(m_revisionNumber == static_cast<int>(m_rootForRevision.size()) - 1);
-                }
+                    currentNode->rightChild = createNode(newValue);
             }
-            void switchToRevision(int revisionNum)
-            {
-                assert(m_isPersistent);
-                m_revisionNumber = revisionNum;
-            }
+            updateInfoFromChildren(currentNode);
 
-        private:
-            AVLNode* m_root = nullptr;
-
-            AVLNode* insertValue(int64_t newValue, AVLNode* currentNode)
+            if (currentNode->balanceFactor < -1)
             {
-                if (m_isPersistent)
+                if (currentNode->leftChild->balanceFactor <= 0)
                 {
-                    auto newCurrentNode = createNode(currentNode->value);
-                    *newCurrentNode = *currentNode;
-                    currentNode = newCurrentNode;
-                }
-                if (newValue < currentNode->value)
-                {
-                    // Values in the left subtree of node must be *strictly less* than
-                    // that of currentNode.
-                    assert(newValue < currentNode->value);
-                    if (currentNode->leftChild)
-                        currentNode->leftChild = insertValue(newValue, currentNode->leftChild);
-                    else
-                        currentNode->leftChild = createNode(newValue);
+                    // Simple rotation.
+                    return rotateRight(currentNode);
                 }
                 else
                 {
-                    // Values in the right subtree of node must be *greater than or equal to* that
-                    // that of currentNode.
-                    assert(newValue >= currentNode->value);
-                    if (currentNode->rightChild)
-                        currentNode->rightChild = insertValue(newValue, currentNode->rightChild);
-                    else
-                        currentNode->rightChild = createNode(newValue);
+                    // Double-rotation.
+                    currentNode->leftChild = rotateLeft(currentNode->leftChild);
+                    return rotateRight(currentNode);
                 }
-                updateInfoFromChildren(currentNode);
-
-                if (currentNode->balanceFactor < -1)
+            }
+            if (currentNode->balanceFactor > +1)
+            {
+                if (currentNode->rightChild->balanceFactor >= 0)
                 {
-                    if (currentNode->leftChild->balanceFactor <= 0)
-                    {
-                        // Simple rotation.
-                        return rotateRight(currentNode);
-                    }
-                    else
-                    {
-                        // Double-rotation.
-                        currentNode->leftChild = rotateLeft(currentNode->leftChild);
-                        return rotateRight(currentNode);
-                    }
+                    // Simple rotation.
+                    return rotateLeft(currentNode);
                 }
-                if (currentNode->balanceFactor > +1)
+                else
                 {
-                    if (currentNode->rightChild->balanceFactor >= 0)
-                    {
-                        // Simple rotation.
-                        return rotateLeft(currentNode);
-                    }
-                    else
-                    {
-                        // Double-rotation.
-                        currentNode->rightChild = rotateRight(currentNode->rightChild);
-                        return rotateLeft(currentNode);
-                    }
-                }
-
-                return currentNode;
-            }
-
-            AVLNode* rotateRight(AVLNode* subtreeRoot)
-            {
-                auto newSubtreeRoot = subtreeRoot->leftChild;
-                if (m_isPersistent)
-                {
-                    // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
-                    // AVLTree's, we must copy-on-write.
-                    newSubtreeRoot = createNode(*newSubtreeRoot);
-                    subtreeRoot = createNode(*subtreeRoot);
-
-                }
-                auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
-                newSubtreeRoot->rightChild = subtreeRoot;
-                subtreeRoot->leftChild = previousNewSubtreeRootRightChild;
-
-                updateInfoFromChildren(subtreeRoot);
-
-                updateInfoFromChildren(newSubtreeRoot);
-                return newSubtreeRoot;
-            }
-            AVLNode* rotateLeft(AVLNode* subtreeRoot)
-            {
-                auto newSubtreeRoot = subtreeRoot->rightChild;
-                if (m_isPersistent)
-                {
-                    // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
-                    // AVLTree's, we must copy-on-write.
-                    newSubtreeRoot = createNode(*newSubtreeRoot);
-                    subtreeRoot = createNode(*subtreeRoot);
-                }
-                auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
-                newSubtreeRoot->leftChild = subtreeRoot;
-                subtreeRoot->rightChild = previousNewSubtreeRootLeftChild;
-                updateInfoFromChildren(subtreeRoot);
-
-                updateInfoFromChildren(newSubtreeRoot);
-                return newSubtreeRoot;
-            }
-
-            void updateInfoFromChildren(AVLNode* nodeToUpdate)
-            {
-                // If m_isPersistent, assume that nodeToUpdate is already a newly-created
-                // copy of the original nodeToUpdate.
-                nodeToUpdate->balanceFactor = 0;
-                nodeToUpdate->maxDescendantDepth = 0;
-                nodeToUpdate->numDescendants = 1;
-
-                auto leftChild = nodeToUpdate->leftChild;
-
-                if (leftChild)
-                {
-                    nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
-                    nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
-                    nodeToUpdate->numDescendants += leftChild->numDescendants;
-                }
-
-                auto rightChild = nodeToUpdate->rightChild;
-                if (rightChild)
-                {
-                    nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
-                    nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
-                    nodeToUpdate->numDescendants += rightChild->numDescendants;
+                    // Double-rotation.
+                    currentNode->rightChild = rotateRight(currentNode->rightChild);
+                    return rotateLeft(currentNode);
                 }
             }
 
-            AVLNode* createNode(int64_t value)
+            return currentNode;
+        }
+
+        AVLNode* rotateRight(AVLNode* subtreeRoot)
+        {
+            auto newSubtreeRoot = subtreeRoot->leftChild;
+            if (m_isPersistent)
             {
-                auto newNode = createNode();
-                newNode->value = value;
-                return newNode;
+                // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
+                // AVLTree's, we must copy-on-write.
+                newSubtreeRoot = createNode(*newSubtreeRoot);
+                subtreeRoot = createNode(*subtreeRoot);
+
+            }
+            auto previousNewSubtreeRootRightChild = newSubtreeRoot->rightChild;
+            newSubtreeRoot->rightChild = subtreeRoot;
+            subtreeRoot->leftChild = previousNewSubtreeRootRightChild;
+
+            updateInfoFromChildren(subtreeRoot);
+
+            updateInfoFromChildren(newSubtreeRoot);
+            return newSubtreeRoot;
+        }
+        AVLNode* rotateLeft(AVLNode* subtreeRoot)
+        {
+            auto newSubtreeRoot = subtreeRoot->rightChild;
+            if (m_isPersistent)
+            {
+                // We're modifying newSubtreeRoot and subtreeRoot, but with Persistent
+                // AVLTree's, we must copy-on-write.
+                newSubtreeRoot = createNode(*newSubtreeRoot);
+                subtreeRoot = createNode(*subtreeRoot);
+            }
+            auto previousNewSubtreeRootLeftChild = newSubtreeRoot->leftChild;
+            newSubtreeRoot->leftChild = subtreeRoot;
+            subtreeRoot->rightChild = previousNewSubtreeRootLeftChild;
+            updateInfoFromChildren(subtreeRoot);
+
+            updateInfoFromChildren(newSubtreeRoot);
+            return newSubtreeRoot;
+        }
+
+        void updateInfoFromChildren(AVLNode* nodeToUpdate)
+        {
+            // If m_isPersistent, assume that nodeToUpdate is already a newly-created
+            // copy of the original nodeToUpdate.
+            nodeToUpdate->balanceFactor = 0;
+            nodeToUpdate->maxDescendantDepth = 0;
+            nodeToUpdate->numDescendants = 1;
+
+            auto leftChild = nodeToUpdate->leftChild;
+
+            if (leftChild)
+            {
+                nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
+                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
+                nodeToUpdate->numDescendants += leftChild->numDescendants;
             }
 
-            AVLNode* createNode(const AVLNode& nodeToCopy)
+            auto rightChild = nodeToUpdate->rightChild;
+            if (rightChild)
             {
-                auto newNode = createNode();
-                *newNode = nodeToCopy;
-                return newNode;
+                nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
+                nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
+                nodeToUpdate->numDescendants += rightChild->numDescendants;
             }
+        }
 
-            AVLNode* createNode()
+        AVLNode* createNode(int64_t value)
+        {
+            auto newNode = createNode();
+            newNode->value = value;
+            return newNode;
+        }
+
+        AVLNode* createNode(const AVLNode& nodeToCopy)
+        {
+            auto newNode = createNode();
+            *newNode = nodeToCopy;
+            return newNode;
+        }
+
+        AVLNode* createNode()
+        {
+            if (m_nodes.empty() || static_cast<int>(m_nodes.back().size()) == m_nodeBlockSize)
             {
-                if (m_nodes.empty() || static_cast<int>(m_nodes.back().size()) == m_nodeBlockSize)
-                {
-                    m_nodes.push_back(vector<AVLNode>());
-                    m_nodes.back().reserve(m_nodeBlockSize);
-                }
-                m_nodes.back().push_back(AVLNode());
-                auto newNode = &(m_nodes.back().back());
-                newNode->id = m_nextNodeId;
-                m_nextNodeId++;
-                return newNode;
+                m_nodes.push_back(vector<AVLNode>());
+                m_nodes.back().reserve(m_nodeBlockSize);
             }
+            m_nodes.back().push_back(AVLNode());
+            auto newNode = &(m_nodes.back().back());
+            newNode->id = m_nextNodeId;
+            m_nextNodeId++;
+            return newNode;
+        }
 
-            bool m_isPersistent = false;
+        bool m_isPersistent = false;
 
-            int m_nodeBlockSize = 1;
-            deque<vector<AVLNode>> m_nodes;
+        int m_nodeBlockSize = 1;
+        deque<vector<AVLNode>> m_nodes;
 
-            int m_nextNodeId = 1;
+        int m_nextNodeId = 1;
 
-            int m_revisionNumber = 0;
-            vector<AVLNode*> m_rootForRevision;
+        int m_revisionNumber = 0;
+        vector<AVLNode*> m_rootForRevision;
 
-    };
+};
 
-    class AVLTreeIterator
-    {
-        public:
-            AVLTreeIterator(AVLNode* root)
-                : m_currentNode(root)
-            {
-            };
-            AVLNode* currentNode() const
-            {
-                return m_currentNode;
-            }
-            int numToLeft() const
-            {
-                const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
-                return m_numToLeftOffset + numInLeftSubTree;
-            }
-            void followLeftChild()
-            {
-                m_currentNode = m_currentNode->leftChild;
-            }
-            void followRightChild()
-            {
-                const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
-                m_numToLeftOffset += numInLeftSubTree + 1;
-                m_currentNode = m_currentNode->rightChild;
-            }
-        private:
-            AVLNode* m_currentNode = nullptr;
+class AVLTreeIterator
+{
+    public:
+        AVLTreeIterator(AVLNode* root)
+            : m_currentNode(root)
+        {
+        };
+        AVLNode* currentNode() const
+        {
+            return m_currentNode;
+        }
+        int numToLeft() const
+        {
+            const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
+            return m_numToLeftOffset + numInLeftSubTree;
+        }
+        void followLeftChild()
+        {
+            m_currentNode = m_currentNode->leftChild;
+        }
+        void followRightChild()
+        {
+            const auto numInLeftSubTree = (m_currentNode->leftChild ? m_currentNode->leftChild->numDescendants : 0);
+            m_numToLeftOffset += numInLeftSubTree + 1;
+            m_currentNode = m_currentNode->rightChild;
+        }
+    private:
+        AVLNode* m_currentNode = nullptr;
 
-            int m_numToLeftOffset = 0;
-    };
-}
+        int m_numToLeftOffset = 0;
+};
 
 struct LookupInfo
 {
     int maxHeight = -1;
     vector<vector<TestNode<NodeData>*>> nodesAtHeightLookup;
-    vector<MVCN2TST::AVLTree> prefixesForHeight;
-    vector<MVCN2TST::AVLTree> suffixesForHeight;
+    vector<AVLTree> prefixesForHeight;
+    vector<AVLTree> suffixesForHeight;
     vector<int> numNodesUpToHeight;
     vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum;
     vector<int64_t> numCanReparentToPrefixSum;
@@ -359,8 +356,8 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
     lookupInfo.nodesAtHeightLookup.resize(lookupInfo.maxHeight + 1);
     fillInNodesAtHeightLookup(tree.nodes(), lookupInfo.nodesAtHeightLookup);
 
-    lookupInfo.prefixesForHeight.resize(lookupInfo.maxHeight + 1, MVCN2TST::AVLTree(true));
-    lookupInfo.suffixesForHeight.resize(lookupInfo.maxHeight + 1, MVCN2TST::AVLTree(true));
+    lookupInfo.prefixesForHeight.resize(lookupInfo.maxHeight + 1, AVLTree(true));
+    lookupInfo.suffixesForHeight.resize(lookupInfo.maxHeight + 1, AVLTree(true));
     for (int height = 0; height <= lookupInfo.maxHeight; height++)
     {
         for (const auto nodeAtHeight : lookupInfo.nodesAtHeightLookup[height])
@@ -419,7 +416,7 @@ class IndexRemapper
             // Be optimistic and give remappedIndex the smallest possible value:
             // we'll correct our optimism as we go along :)
             int64_t remappedIndex = nthOfRemainingToChoose;
-            MVCN2TST::AVLTreeIterator treeIter(removedIndices.root());
+            AVLTreeIterator treeIter(removedIndices.root());
             while (treeIter.currentNode())
             {
                 const int64_t indexOfCurrentNode = treeIter.currentNode()->value;
@@ -445,7 +442,7 @@ class IndexRemapper
             return remappedIndex;
         }
     private:
-        MVCN2TST::AVLTree removedIndices;
+        AVLTree removedIndices;
 };
 
 /**
@@ -487,10 +484,10 @@ int findNumNonDescendantsUpToHeight(TestNode<NodeData>* nodeToReparent, const in
     return numNonDescendantsUpToThisHeight;
 }
 
-std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int64_t k, MVCN2TST::AVLTree& tree)
+std::pair<AVLNode*, int> findLastLessThanOrEqualTo(int64_t k, AVLTree& tree)
 {
-    MVCN2TST::AVLTreeIterator treeIter = tree.root();
-    std::pair<MVCN2TST::AVLNode*, int> result = {nullptr, 0};
+    AVLTreeIterator treeIter = tree.root();
+    std::pair<AVLNode*, int> result = {nullptr, 0};
     while (treeIter.currentNode())
     {
         
@@ -513,7 +510,7 @@ std::pair<MVCN2TST::AVLNode*, int> findLastLessThanOrEqualTo(int64_t k, MVCN2TST
     return result;
 }
 
-int findIndexOfInPair(int k, MVCN2TST::AVLTree& tree1, MVCN2TST::AVLTree& tree2)
+int findIndexOfInPair(int k, AVLTree& tree1, AVLTree& tree2)
 {
     auto node1Info = findLastLessThanOrEqualTo(k, tree1);
     auto node2Info = findLastLessThanOrEqualTo(k, tree2);

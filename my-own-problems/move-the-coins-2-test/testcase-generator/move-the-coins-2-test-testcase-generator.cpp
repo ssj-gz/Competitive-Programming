@@ -129,7 +129,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     }
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
-    MVCN2TST::AVLTree removedIndices;
+    AVLTree removedIndices;
     for (auto& query : queries)
     {
         int64_t queryIndex = 0;
