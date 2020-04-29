@@ -301,6 +301,7 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
         powerOf2 = (powerOf2 * 2) % Mod;
         powerOf3 = (powerOf3 * 3) % Mod;
     }
+    cout << "final encryptionKey: " << encryptionKey << endl;
 }
 
 void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
