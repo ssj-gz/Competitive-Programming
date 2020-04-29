@@ -506,7 +506,7 @@ namespace Verifier
             const auto kthInRemainingToFind = decryptedQuery - 1; // Make 0-relative.
             cout << "kthInRemainingToFind: " << kthInRemainingToFind << endl;
 
-            const int indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
+            const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
             const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
             const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
