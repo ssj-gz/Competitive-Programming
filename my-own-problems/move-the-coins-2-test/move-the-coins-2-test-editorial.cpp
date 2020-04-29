@@ -30,11 +30,6 @@ struct Node
     int id = -1;
     int numDescendants = -1; // Includes the node itself.
 
-    bool isDescendantOf(Node& otherNode)
-    {
-        return (dfsBeginVisit >= otherNode.dfsBeginVisit && dfsEndVisit <= otherNode.dfsEndVisit);
-    }
-
     int dfsBeginVisit = -1;
     int dfsEndVisit = -1;
 };
