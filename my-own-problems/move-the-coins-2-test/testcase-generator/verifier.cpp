@@ -494,7 +494,6 @@ namespace Verifier
         for (const auto encryptedQuery : encryptedQueries)
         {
             const int64_t decryptedQuery = encryptedQuery ^ decryptionKey;
-            cout << "encryptedQuery:" << encryptedQuery << " decryptedQuery: " << decryptedQuery << " decryptionKey: " << decryptionKey << endl;
             destDecryptedQueries.push_back(decryptedQuery);
             const auto kthInRemainingToFind = decryptedQuery - 1; // Make 0-relative.
 

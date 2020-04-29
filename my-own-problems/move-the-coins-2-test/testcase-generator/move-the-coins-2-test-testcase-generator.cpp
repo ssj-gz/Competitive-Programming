@@ -293,9 +293,7 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
 
     for (const auto& query : queriesToWrite)
     {
-        cout << "writeTestCase: unencrypted query: " << query.asIndexInRemaining << " nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
         const int64_t encryptedQuery = (query.asIndexInRemaining + 1) ^ encryptionKey;
-        cout << " encryptedQuery: " << encryptedQuery << endl;
         destTestcase.writeLine(encryptedQuery);
 
         encryptionKey = (encryptionKey + powerOf2 * query.nodeToReparent->id()) % Mod;
