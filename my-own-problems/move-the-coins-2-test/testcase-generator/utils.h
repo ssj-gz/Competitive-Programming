@@ -24,10 +24,9 @@ struct NodeData
     int dfsEndVisit = -1;
 };
 
-void computeDFSInfo(TestNode<NodeData>* node, TestNode<NodeData>* parent, int& dfsVisitNum, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
+void computeDFSInfo(TestNode<NodeData>* node, TestNode<NodeData>* parent, int& dfsVisitNum)
 {
     node->data.dfsBeginVisit = dfsVisitNum;
-    nodesAtHeightLookup[node->data.height].push_back(node);
     dfsVisitNum++;
 
     for (auto childEdge : node->neighbours)
@@ -35,17 +34,32 @@ void computeDFSInfo(TestNode<NodeData>* node, TestNode<NodeData>* parent, int& d
         auto child = childEdge->otherNode(node);
         if (child == parent)
             continue;
-        computeDFSInfo(child, node, dfsVisitNum, nodesAtHeightLookup);
+        computeDFSInfo(child, node, dfsVisitNum);
     }
 
     node->data.dfsEndVisit = dfsVisitNum;
     dfsVisitNum++;
 }
 
-void computeDFSInfo(TestNode<NodeData>* rootNode, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
+void computeDFSInfo(TestNode<NodeData>* rootNode)
 {
     int dfsVisitNum = 1;
-    computeDFSInfo(rootNode, nullptr, dfsVisitNum, nodesAtHeightLookup);
+    computeDFSInfo(rootNode, nullptr, dfsVisitNum);
+}
+
+void fillInNodesAtHeightLookup(const vector<TestNode<NodeData>*>& nodes, vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup)
+{
+    for (auto node : nodes)
+    {
+        nodesAtHeightLookup[node->data.height].push_back(node);
+    }
+    for (auto& nodesAtHeight : nodesAtHeightLookup)
+    {
+        sort(nodesAtHeight.begin(), nodesAtHeight.end(), [](const auto& lhs, const auto& rhs)
+                {
+                    return lhs->data.dfsBeginVisit < rhs->data.dfsBeginVisit;
+                });
+    }
 }
 
 // Calculate the height of each node, and remove its parent from its list of "children".
@@ -358,8 +372,11 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
     {
         lookupInfo.maxHeight = max(lookupInfo.maxHeight, node->data.height);
     }
+    computeDFSInfo(rootNode);
+
     lookupInfo.nodesAtHeightLookup.resize(lookupInfo.maxHeight + 1);
-    computeDFSInfo(rootNode, lookupInfo.nodesAtHeightLookup);
+    fillInNodesAtHeightLookup(tree.nodes(), lookupInfo.nodesAtHeightLookup);
+
     lookupInfo.prefixesForHeight.resize(lookupInfo.maxHeight + 1, MVCN2TST::AVLTree(true));
     lookupInfo.suffixesForHeight.resize(lookupInfo.maxHeight + 1, MVCN2TST::AVLTree(true));
     for (int height = 0; height <= lookupInfo.maxHeight; height++)
