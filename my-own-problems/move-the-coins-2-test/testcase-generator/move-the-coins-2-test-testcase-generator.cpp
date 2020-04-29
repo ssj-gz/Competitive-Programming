@@ -463,8 +463,6 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             const auto& [encryptedQuery] = testFileReader.readLine<int64_t>();
             encryptedQueries.push_back(encryptedQuery);
         }
-        // TODO - validation of (encrypted) queries - making sure they lie within expected range.
-
 
         for (const auto& node : nodes)
         {
