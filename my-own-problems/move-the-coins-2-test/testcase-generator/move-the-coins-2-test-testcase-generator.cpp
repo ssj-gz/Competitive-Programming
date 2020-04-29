@@ -352,8 +352,8 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
-                const int numNodes = 2 + rand() % 200;
-                const int numQueries = 1 + rand() % 200;
+                const int numNodes = 200'000;
+                const int numQueries = 200'000;
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
                 const auto& lookupInfo = computeLookupInfo(treeGenerator);
 
