@@ -75,7 +75,7 @@ namespace Verifier
                 else
                     return m_rootForRevision[m_revisionNumber];
             }
-            void insertValue(int newValue)
+            void insertValue(int64_t newValue)
             {
                 if (!m_root)
                     m_root = createNode(newValue);
@@ -99,7 +99,7 @@ namespace Verifier
         private:
             AVLNode* m_root = nullptr;
 
-            AVLNode* insertValue(int newValue, AVLNode* currentNode)
+            AVLNode* insertValue(int64_t newValue, AVLNode* currentNode)
             {
                 if (m_isPersistent)
                 {
@@ -226,7 +226,7 @@ namespace Verifier
                 }
             }
 
-            AVLNode* createNode(int value)
+            AVLNode* createNode(int64_t value)
             {
                 auto newNode = createNode();
                 newNode->value = value;
