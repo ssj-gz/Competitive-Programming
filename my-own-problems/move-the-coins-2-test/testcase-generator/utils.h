@@ -333,24 +333,6 @@ namespace MVCN2TST
     };
 }
 
-void printSubTree(MVCN2TST::AVLNode* subtreeRoot)
-{
-    if (subtreeRoot == nullptr)
-        return;
-    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
-    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
-
-    if (subtreeRoot->leftChild)
-        printSubTree(subtreeRoot->leftChild);
-    if (subtreeRoot->rightChild)
-        printSubTree(subtreeRoot->rightChild);
-}
-
-void printTree(MVCN2TST::AVLTree& tree)
-{
-    printSubTree(tree.root());
-}
-
 struct LookupInfo
 {
     int maxHeight = -1;
