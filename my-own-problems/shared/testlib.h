@@ -268,6 +268,14 @@ public:
         return next(to - from) + from;
     }
 
+    template <typename Container>
+    typename Container::value_type nextFrom(const Container& c)
+    {
+        assert(!c.empty());
+
+        return c[next(static_cast<int>(c.size()))];
+    };
+
 };
 
 const int random_t::lim = 25;
