@@ -292,8 +292,8 @@ int main(int argc, char* argv[])
             const auto allNodes = treeGenerator.nodes();
             while (queries.size() < numQueries)
             {
-                const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
-                const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                const auto nodeToReparent = rnd.nextFrom(allNodes);
+                const auto newParent = rnd.nextFrom(allNodes);
 
                 if (!newParent->data.isDescendantOf(*nodeToReparent))
                 {
