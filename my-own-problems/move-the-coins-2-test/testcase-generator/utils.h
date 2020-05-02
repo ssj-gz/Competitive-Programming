@@ -374,7 +374,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 
 
 
-TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent, TreeGenerator<NodeData>& tree, const int minNewParentHeight, const int maxNewParentHeight, LookupInfo& lookupInfo)
+TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent, const vector<TestNode<NodeData>*>& nodes, const int minNewParentHeight, const int maxNewParentHeight, LookupInfo& lookupInfo)
 {
     cout << "findRandomValidNewParent - nodeToReparent: " << nodeToReparent->id() << " minNewParentHeight: " << minNewParentHeight << " maxNewParentHeight: " << maxNewParentHeight << endl;
     assert(minNewParentHeight >= 0);
@@ -396,7 +396,6 @@ TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent,
     cout << " numReparentingWithNewHeightLEMax: " << numReparentingWithNewHeightLEMax << endl;
 
     vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> dbgValidReparentings;
-    auto nodes = tree.nodes();
     for (auto nodeToReparent : nodes)
     {
         for (auto newParent : nodes)
