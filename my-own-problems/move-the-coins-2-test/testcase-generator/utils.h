@@ -329,5 +329,59 @@ int findIndexOfInPair(int k, AVLTree& tree1, AVLTree& tree2)
     return index;
 }
 
+TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent, TreeGenerator<NodeData>& tree, const int minNewParentHeight, const int maxNewParentHeight, const LookupInfo& lookupInfo)
+{
+    assert(minNewParentHeight >= 0);
+    assert(maxNewParentHeight >= minNewParentHeight);
+    assert(maxNewParentHeight <= nodeToReparent->data.largestNonDescendantHeight);
+    int64_t minIndex = 0;
+    if (nodeToReparent->id() - 1 >= 0)
+    {
+        minIndex += lookupInfo.numCanReparentToPrefixSum[nodeToReparent->id() - 1];
+    }
+    int64_t numReparentingWithNewHeightLessThanMin = 0;
+    if (minNewParentHeight - 1 >= 0)
+        numReparentingWithNewHeightLessThanMin = findNumNonDescendantsUpToHeight(nodeToReparent, minNewParentHeight - 1, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+    int64_t numReparentingWithNewHeightLEMax = 0;
+    if (maxNewParentHeight - 1 >= 0)
+        numReparentingWithNewHeightLEMax = findNumNonDescendantsUpToHeight(nodeToReparent, maxNewParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+    const int64_t maxIndex = minIndex + numReparentingWithNewHeightLEMax - numReparentingWithNewHeightLessThanMin;
+
+    vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> dbgValidReparentings;
+    for (auto nodeToReparent : tree.nodes())
+    {
+        for (auto newParent : tree.nodes())
+        {
+            if (!newParent->data.isDescendantOf(*nodeToReparent))
+                dbgValidReparentings.push_back({nodeToReparent, newParent});
+        }
+    }
+    sort(dbgValidReparentings.begin(), dbgValidReparentings.end(), [](const auto& lhs, const auto& rhs)
+            {
+                if (lhs.first->id() != rhs.first->id())
+                    return lhs.first->id() < rhs.first->id();
+                if (lhs.second->data.height != rhs.second->data.height)
+                    return lhs.second->data.height != rhs.second->data.height;
+                return lhs.second->id() < rhs.second->id();
+            });
+
+    int dbgMinIndex = -1;
+    int dbgMaxIndex = -1;
+    for( int64_t dbgIndex = 0; dbgIndex < dbgValidReparentings.size(); dbgIndex++)
+    {
+        if (dbgMinIndex == -1 && dbgValidReparentings[dbgIndex].first == nodeToReparent && dbgValidReparentings[dbgIndex].second->data.height >= minNewParentHeight)
+            dbgMinIndex = dbgIndex;
+        if (dbgValidReparentings[dbgIndex].first == nodeToReparent && dbgValidReparentings[dbgIndex].second->data.height <= maxNewParentHeight)
+            dbgMaxIndex = dbgIndex;
+    }
+    cout << "minIndex: " << minIndex << " dbgMinIndex: " << dbgMinIndex << endl;
+    cout << "maxIndex: " << maxIndex << " dbgMaxIndex: " << dbgMaxIndex << endl;
+
+    assert(minIndex == dbgMinIndex);
+    assert(maxIndex == dbgMaxIndex);
+
+    return nullptr;
+}
+
 #endif // UTILS_H
 
