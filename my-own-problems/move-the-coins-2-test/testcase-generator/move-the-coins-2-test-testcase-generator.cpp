@@ -361,21 +361,23 @@ int main(int argc, char* argv[])
                 computeDFSInfo(rootNode);
                 const auto allNodes = treeGenerator.nodes();
 
-                auto lookupInfo = computeLookupInfo(treeGenerator);
                 vector<TestQuery> queries;
-                for(int i =0; i < numQueries; )
                 {
-                    auto nodeToReparent = rnd.nextFrom(allNodes);
-                    if (nodeToReparent->data.largestNonDescendantHeight == 0)
-                        continue;
-                    int minParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
-                    int maxParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
-                    if (maxParentHeight < minParentHeight)
-                        swap(minParentHeight, maxParentHeight);
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    for(int i =0; i < numQueries; )
+                    {
+                        auto nodeToReparent = rnd.nextFrom(allNodes);
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        int minParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
+                        int maxParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
+                        if (maxParentHeight < minParentHeight)
+                            swap(minParentHeight, maxParentHeight);
 
-                    auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, minParentHeight, maxParentHeight, lookupInfo);
-                    queries.push_back({nodeToReparent, newParent});
-                    i++;
+                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, minParentHeight, maxParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparent, newParent});
+                        i++;
+                    }
                 }
 
                 // Remove duplicates.
