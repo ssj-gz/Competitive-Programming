@@ -199,22 +199,6 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
 
     findLargestNonDescendants(rootNode);
 
-    for (auto nodeToReparent : tree.nodes())
-    {
-        int debugLargestNonDescendantHeight = 0;
-        for (auto node : tree.nodes())
-        {
-            if (!node->data.isDescendantOf(*nodeToReparent))
-            {
-                debugLargestNonDescendantHeight = max(debugLargestNonDescendantHeight, node->data.height);
-            }
-        }
-        //cout << "nodeToReparent: " << nodeToReparent->id() << " largestNonDescendantHeight: " << nodeToReparent->data.largestNonDescendantHeight << " debugLargestNonDescendantHeight: " << debugLargestNonDescendantHeight << endl;
-        assert(debugLargestNonDescendantHeight == nodeToReparent->data.largestNonDescendantHeight);
-
-    }
-
-
     return lookupInfo;
 }
 
