@@ -359,22 +359,29 @@ int main(int argc, char* argv[])
 
                 fixParentChildAndHeights(rootNode);
                 computeDFSInfo(rootNode);
-
-                vector<TestQuery> queries;
                 const auto allNodes = treeGenerator.nodes();
-                while (static_cast<int>(queries.size()) < numQueries)
-                {
-                    const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
-                    const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
 
-                    if (!newParent->data.isDescendantOf(*nodeToReparent))
-                    {
-                        queries.push_back({nodeToReparent, newParent});
-                    }
+                auto lookupInfo = computeLookupInfo(treeGenerator);
+                vector<TestQuery> queries;
+                for(int i =0; i < numQueries; )
+                {
+                    auto nodeToReparent = rnd.nextFrom(allNodes);
+                    if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                        continue;
+                    int minParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
+                    int maxParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
+                    if (maxParentHeight < minParentHeight)
+                        swap(minParentHeight, maxParentHeight);
+
+                    auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, minParentHeight, maxParentHeight, lookupInfo);
+                    queries.push_back({nodeToReparent, newParent});
+                    i++;
                 }
+
                 // Remove duplicates.
                 set<TestQuery> querySet(queries.begin(), queries.end());
                 queries.assign(querySet.begin(), querySet.end());
+                cout << "num queries: " << queries.size() << endl;
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
