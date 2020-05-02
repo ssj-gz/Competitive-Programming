@@ -15,6 +15,7 @@ struct NodeData
     int height = -1;
     int id = -1;
     int numDescendants = -1; // Includes the node itself.
+    int largestNonDescendantHeight = 0;
 
     bool isDescendantOf(TestNode<NodeData>& otherNode)
     {
@@ -91,6 +92,8 @@ struct LookupInfo
     vector<int64_t> numCanReparentToPrefixSum;
 };
 
+int findNumNonDescendantsUpToHeight(TestNode<NodeData>* nodeToReparent, const int height, const vector<int>& numNodesUpToHeight, const vector<vector<TestNode<NodeData>*>>& nodesAtHeightLookup,  const vector<vector<int>>& numProperDescendantsForNodeAtHeightPrefixSum);
+
 LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
 {
     LookupInfo lookupInfo;
@@ -152,6 +155,29 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
             sumOfNumCanReparentTo += numCanReparentNodeTo;
             lookupInfo.numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
         }
+    }
+
+    vector<int> allHeights;
+    for (int height = 0; height <= lookupInfo.maxHeight; height++)
+    {
+        allHeights.push_back(height);
+    }
+
+    for (auto nodeToReparent : tree.nodes())
+    {
+        auto largestNonDescendantHeightIter = upper_bound(allHeights.begin(), allHeights.end(), 0, [nodeToReparent, &lookupInfo](const int height, const int)
+                {
+                    return findNumNonDescendantsUpToHeight(nodeToReparent, height, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup,  lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum) > 0;
+                });
+        if (largestNonDescendantHeightIter == allHeights.end())
+        {
+            nodeToReparent->data.largestNonDescendantHeight = 0;
+        }
+        else
+        {
+            nodeToReparent->data.largestNonDescendantHeight = *largestNonDescendantHeightIter;
+        }
+
     }
 
 
