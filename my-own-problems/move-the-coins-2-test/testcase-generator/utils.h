@@ -449,7 +449,6 @@ TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent,
         newParent = nodes[newParentId];
     }
 
-    cout << "newParent: " << newParent->id() << endl;
     assert(!newParent->data.isDescendantOf(*nodeToReparent));
 
     return newParent;
