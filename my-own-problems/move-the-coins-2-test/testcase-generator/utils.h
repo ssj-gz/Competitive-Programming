@@ -345,11 +345,10 @@ TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent,
     if (minNewParentHeight - 1 >= 0)
         numReparentingWithNewHeightLessThanMin = findNumNonDescendantsUpToHeight(nodeToReparent, minNewParentHeight - 1, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
     minIndex += numReparentingWithNewHeightLessThanMin;
-    int64_t numReparentingWithNewHeightLEMax = 0;
-    if (maxNewParentHeight - 1 >= 0)
-        numReparentingWithNewHeightLEMax = findNumNonDescendantsUpToHeight(nodeToReparent, maxNewParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
+    const int64_t numReparentingWithNewHeightLEMax = findNumNonDescendantsUpToHeight(nodeToReparent, maxNewParentHeight, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
     cout << " numReparentingWithNewHeightLessThanMin: " << numReparentingWithNewHeightLessThanMin << endl;
-    const int64_t maxIndex = minIndex + numReparentingWithNewHeightLEMax - numReparentingWithNewHeightLessThanMin;
+    const int64_t maxIndex = minIndex + numReparentingWithNewHeightLEMax - numReparentingWithNewHeightLessThanMin - 1;
+    cout << " numReparentingWithNewHeightLEMax: " << numReparentingWithNewHeightLEMax << endl;
 
     vector<pair<TestNode<NodeData>*, TestNode<NodeData>*>> dbgValidReparentings;
     for (auto nodeToReparent : tree.nodes())
@@ -374,10 +373,10 @@ TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent,
     int dbgMaxIndex = -1;
     for( int64_t dbgIndex = 0; dbgIndex < dbgValidReparentings.size(); dbgIndex++)
     {
-        cout << "  dbgIndex: " << dbgIndex << " nodeToReparent: " << dbgValidReparentings[dbgIndex].first->id() << " newParent: " << dbgValidReparentings[dbgIndex].second->id() << " newParent height: " << dbgValidReparentings[dbgIndex].second->data.height << endl;
+        //cout << "  dbgIndex: " << dbgIndex << " nodeToReparent: " << dbgValidReparentings[dbgIndex].first->id() << " newParent: " << dbgValidReparentings[dbgIndex].second->id() << " newParent height: " << dbgValidReparentings[dbgIndex].second->data.height << endl;
         if (dbgMinIndex == -1 && dbgValidReparentings[dbgIndex].first == nodeToReparent && dbgValidReparentings[dbgIndex].second->data.height >= minNewParentHeight)
         {
-            cout << " setting dbgIndex to " << dbgIndex << endl;
+            //cout << " setting dbgIndex to " << dbgIndex << endl;
             dbgMinIndex = dbgIndex;
         }
         if (dbgValidReparentings[dbgIndex].first == nodeToReparent && dbgValidReparentings[dbgIndex].second->data.height <= maxNewParentHeight)
@@ -387,7 +386,7 @@ TestNode<NodeData>* findRandomValidNewParent(TestNode<NodeData>* nodeToReparent,
     cout << "maxIndex: " << maxIndex << " dbgMaxIndex: " << dbgMaxIndex << endl;
 
     assert(minIndex == dbgMinIndex);
-    //assert(maxIndex == dbgMaxIndex);
+    assert(maxIndex == dbgMaxIndex);
 
     return nullptr;
 }
