@@ -450,7 +450,6 @@ int main(int argc, char* argv[])
 
 
                 writeTestCase(treeGenerator, testcase, queries);
-                return 0;
             }
         }
         {
