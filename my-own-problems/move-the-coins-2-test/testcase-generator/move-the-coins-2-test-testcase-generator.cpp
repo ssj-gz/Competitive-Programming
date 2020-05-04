@@ -132,7 +132,9 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     AVLTree removedIndices;
     int queryNum = 0;
     int64_t numNonDescendantHeightSum = 0;
+    int64_t numDescendantHeightSum = 0;
     TestNode<NodeData>* previousNodeToReparent = nullptr;
+    set<pair<TestNode<NodeData>*, int>> blah;
     for (auto& query : queries)
     {
         queryNum++;
@@ -175,7 +177,8 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
             //cout << "queryNum: " << queryNum << " nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at height: " << lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         }
         previousNodeToReparent = nodeToReparent;
-        cout << " nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
+        const auto numDescendantsAtHeight = lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) ;
+        cout << " nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << numDescendantsAtHeight << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
         // left and the right of the descendant-range, respectively, in sorted order.
         // Performing the switch is O(1).
@@ -183,6 +186,17 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         lookupInfo.suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
 
         numNonDescendantHeightSum += (numNonDescendantsToLeft + numNonDescendantsToRight);
+        numDescendantHeightSum += numDescendantsAtHeight;
+
+
+        if (numDescendantsAtHeight > 1000)
+        {
+            if (blah.find({nodeToReparent, newParentHeight}) == blah.end())
+            {
+                cout << "blee: nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at newParentHeight: " << numDescendantsAtHeight << endl;
+            }
+            blah.insert({nodeToReparent, newParentHeight});
+        }
 
         const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
         queryIndex += numFromPriorNewParents;
@@ -201,6 +215,8 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         removedIndices.insertValue(queryIndex);
     }
     cout << "numNonDescendantHeightSum: " << numNonDescendantHeightSum << endl;
+    cout << "numDescendantHeightSum: " << numDescendantHeightSum << endl;
+    cout << "blah: " << blah.size() << endl;
 }
 
 void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
@@ -263,7 +279,24 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
         std::vector<TestNode<NodeData>*> nextLeafNodes;
         for (auto leafNode : leafNodes)
         {
-            const int numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
+            int numNewChildren = 0;
+            if (treeGenerator.numNodes() < 5000)
+            {
+                numNewChildren = 1 + (rnd.next(50) == 0 ? 1 : 0);
+            }
+            else
+            {
+#if 0
+                numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
+#else
+                numNewChildren = chooseWithWeighting<int>({
+                        {2, 70.0},
+                        {3, 5},
+                        {1, 25.0}
+                        }, 1).front();
+#endif
+            }
+
             for (int i = 0; i < numNewChildren; i++)
             {
                 nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
@@ -420,6 +453,7 @@ int main(int argc, char* argv[])
                     {
                         cout << "height: " << height << " # nodesAtHeight:"  << lookupInfo.nodesAtHeightLookup[height].size() << endl;
                     }
+#if 0
                     for(int i =0; i < 170'000; )
                     {
                         const int nodeToReparentHeight = rnd.next(1, lookupInfo.maxHeight - 1);
@@ -440,16 +474,30 @@ int main(int argc, char* argv[])
                     }
                     //addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
                     addRandomQueries(treeGenerator, queries, 170'000, lookupInfo);
+#else
+                    for (auto nodeToReparent : allNodes)
+                    {
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        for (int newParentHeight = 194; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
+                        {
+                            auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
+                            queries.push_back({nodeToReparent, newParent});
+                        }
+                    }
+#endif
                 }
 
                 for (const auto& query : queries)
                 {
-                    cout << "Bloo: " << query.nodeToReparent->id() << endl;
+                    //cout << "Bloo: " << query.nodeToReparent->id() << endl;
                 }
 
 
 
                 writeTestCase(treeGenerator, testcase, queries);
+    cout << "florp: " << 296 * 55'000 * sizeof(AVLNode) / 1024 / 1024 << endl;
+                return 0;
             }
         }
         {
