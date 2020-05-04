@@ -130,8 +130,12 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
     AVLTree removedIndices;
+    int queryNum = 0;
+    int64_t numNonDescendantHeightSum = 0;
+    TestNode<NodeData>* previousNodeToReparent = nullptr;
     for (auto& query : queries)
     {
+        queryNum++;
         int64_t queryIndex = 0;
         if (query.nodeToReparent->id() - 1 - 1 >= 0)
         {
@@ -166,11 +170,19 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
             numNonDescendantsToLeft = descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin();
             numNonDescendantsToRight = lookupInfo.nodesAtHeightLookup[newParentHeight].end() - descendantsAtHeightEnd;
         }
+        //if (nodeToReparent != previousNodeToReparent)
+        {
+            //cout << "queryNum: " << queryNum << " nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at height: " << lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
+        }
+        previousNodeToReparent = nodeToReparent;
+        cout << " nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
         // left and the right of the descendant-range, respectively, in sorted order.
         // Performing the switch is O(1).
         lookupInfo.prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         lookupInfo.suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
+
+        numNonDescendantHeightSum += (numNonDescendantsToLeft + numNonDescendantsToRight);
 
         const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
         queryIndex += numFromPriorNewParents;
@@ -188,6 +200,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
 
         removedIndices.insertValue(queryIndex);
     }
+    cout << "numNonDescendantHeightSum: " << numNonDescendantHeightSum << endl;
 }
 
 void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
@@ -223,6 +236,10 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
 
 void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
 {
+    for (const auto& query : queries)
+    {
+        cout << "Blaa: " << query.nodeToReparent->id() << endl;
+    }
     auto rootNode = treeGenerator.nodes().front();
     treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
     treeGenerator.scrambleEdgeOrder();
@@ -265,6 +282,43 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
 
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
+
+/**
+ * Also ensures that the queries contain no duplicates.
+ * Order of queries might be changed quite significiantly!
+ */
+void addRandomQueries(TreeGenerator<NodeData>& treeGenerator, vector<TestQuery>& queries, const int targetNumQueries, LookupInfo& lookupInfo)
+{
+    const auto allNodes = treeGenerator.nodes();
+    set<TestQuery> querySet(queries.begin(), queries.end());
+    cout << "Original num queries: " << queries.size() << " without dupes: " << querySet.size() << endl;
+    sort(queries.begin(), queries.end());
+    cout << "Original queries (sorted): " << endl;
+    for (const auto& query : queries)
+    {
+        cout << "nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
+    }
+#if 0
+    while (static_cast<int>(querySet.size()) < targetNumQueries)
+    {
+        auto nodeToReparent = rnd.nextFrom(allNodes);
+        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+            continue;
+
+        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, 0, nodeToReparent->data.largestNonDescendantHeight, lookupInfo);
+
+        querySet.insert({nodeToReparent, newParent});
+    }
+
+#endif
+    queries.assign(querySet.begin(), querySet.end());
+
+#if 0
+    assert(set<TestQuery>(queries.begin(), queries.end()).size() == queries.size());
+    assert(static_cast<int>(set<TestQuery>(queries.begin(), queries.end()).size()) == targetNumQueries);
+#endif
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -346,46 +400,57 @@ int main(int argc, char* argv[])
             // TODO - remove this - debugging only!
             auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(9734)
-                    .withDescription("TODO - remove - debugging only!"));
+                    .withDescription("Squat graph where all nodes have degree approximately 3 taking up ~120'000 nodes, then random nodes."));
             {
                 auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
 
                 TreeGenerator<NodeData> treeGenerator;
-                auto rootNode = treeGenerator.createNode();
                 const int numNodes = 200'000;
                 const int numQueries = 200'000;
-                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000);
 
-                fixParentChildAndHeights(rootNode);
-                computeDFSInfo(rootNode);
                 const auto allNodes = treeGenerator.nodes();
 
                 vector<TestQuery> queries;
                 {
                     auto lookupInfo = computeLookupInfo(treeGenerator);
-                    for(int i =0; i < numQueries; )
+                    cout << "lookupInfo.maxHeight: " << lookupInfo.maxHeight << endl;
+                    for (int height = 0; height <= lookupInfo.maxHeight; height++)
                     {
-                        auto nodeToReparent = rnd.nextFrom(allNodes);
-                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
-                            continue;
-                        int minParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
-                        int maxParentHeight = rnd.next(nodeToReparent->data.largestNonDescendantHeight + 1);
-                        if (maxParentHeight < minParentHeight)
-                            swap(minParentHeight, maxParentHeight);
+                        cout << "height: " << height << " # nodesAtHeight:"  << lookupInfo.nodesAtHeightLookup[height].size() << endl;
+                    }
+                    for(int i =0; i < 170'000; )
+                    {
+                        const int nodeToReparentHeight = rnd.next(1, lookupInfo.maxHeight - 1);
+                        auto nodeToReparent = rnd.nextFrom(lookupInfo.nodesAtHeightLookup[nodeToReparentHeight]);
+                        cout << "nodeToReparentHeight: " << nodeToReparentHeight << " # nodes at height: " << lookupInfo.nodesAtHeightLookup[nodeToReparentHeight].size() << " nodeToReparent: " << nodeToReparent->id() << endl;
 
-                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, minParentHeight, maxParentHeight, lookupInfo);
+                        const int newParentHeight = chooseWithWeighting<int>(
+                                {
+                                    {16, 70.0},
+                                    {15, 20.0},
+                                    {14, 8.0},
+                                    {13, 2.0}
+                                }, 1).front();
+
+                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
                         queries.push_back({nodeToReparent, newParent});
                         i++;
                     }
+                    //addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                    addRandomQueries(treeGenerator, queries, 170'000, lookupInfo);
                 }
 
-                // Remove duplicates.
-                set<TestQuery> querySet(queries.begin(), queries.end());
-                queries.assign(querySet.begin(), querySet.end());
-                cout << "num queries: " << queries.size() << endl;
+                for (const auto& query : queries)
+                {
+                    cout << "Bloo: " << query.nodeToReparent->id() << endl;
+                }
 
-                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+
+
+                writeTestCase(treeGenerator, testcase, queries);
+                return 0;
             }
         }
         {
@@ -425,7 +490,8 @@ int main(int argc, char* argv[])
                 set<TestQuery> querySet(queries.begin(), queries.end());
                 queries.assign(querySet.begin(), querySet.end());
 
-                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                //scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                writeTestCase(treeGenerator, testcase, queries);
             }
         }
     }
