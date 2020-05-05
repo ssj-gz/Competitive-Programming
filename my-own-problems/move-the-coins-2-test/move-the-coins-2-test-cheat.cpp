@@ -394,9 +394,18 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
             assert(descendantsAtHeightBegin < descendantsAtHeightEnd);
             int firstDescendantIndex = descendantsAtHeightBegin - nodesAtHeightLookup[height].begin();
             int lastDescendantIndex = descendantsAtHeightEnd - nodesAtHeightLookup[height].begin() - 1;
+#ifdef CHEAT_NO_PROPER_DESCENDANT_PREFIX_SUM
+            for (int i = firstDescendantIndex; i <= lastDescendantIndex; i++)
+            {
+                sumOfProperDescendantsOfDescendantsAtHeight += nodesAtHeightLookup[height][i]->numDescendants - 1;
+            }
+#else
             sumOfProperDescendantsOfDescendantsAtHeight = numProperDescendantsForNodeAtHeightPrefixSum[height][lastDescendantIndex];
             if (firstDescendantIndex > 0)
+            {
                 sumOfProperDescendantsOfDescendantsAtHeight -= numProperDescendantsForNodeAtHeightPrefixSum[height][firstDescendantIndex - 1];
+            }
+#endif
         }
         numNonDescendantsUpToThisHeight -= nodeToReparent->numDescendants - sumOfProperDescendantsOfDescendantsAtHeight;
     }
