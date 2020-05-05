@@ -74,6 +74,7 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withMaxNodesPerTestcase(10)
                                             .withMaxQueriesPerTestcase(10)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
+                                            .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
