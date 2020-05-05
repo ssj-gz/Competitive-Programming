@@ -532,8 +532,12 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         allHeights.push_back(height);
     }
 
+    int queryNum = 0;
     for (const auto encryptedQuery : encryptedQueries)
     {
+        queryNum++;
+        if (queryNum % 100 == 0)
+            cerr << "query " << queryNum << " of " << encryptedQueries.size() << endl;
         const auto kthInRemainingToFind = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
 
         const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
