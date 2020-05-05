@@ -497,7 +497,6 @@ int main(int argc, char* argv[])
 
                 writeTestCase(treeGenerator, testcase, queries);
     cout << "florp: " << 296 * 55'000 * sizeof(AVLNode) / 1024 / 1024 << endl;
-                return 0;
             }
         }
         {
