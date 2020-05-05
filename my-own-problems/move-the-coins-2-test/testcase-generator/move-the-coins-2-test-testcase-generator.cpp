@@ -300,7 +300,10 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
     treeGenerator.scrambleEdgeOrder();
 
-    writeTestCase(treeGenerator, destTestcase, queries);
+    auto scrambledQueries = queries;
+    shuffle(scrambledQueries.begin(), scrambledQueries.end());
+
+    writeTestCase(treeGenerator, destTestcase, scrambledQueries);
 }
 
 TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes)
