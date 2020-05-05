@@ -616,6 +616,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             }
             else
             {
+                cout << "Using cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
                 ordered_set& blah = nonDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
                 newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
             }
