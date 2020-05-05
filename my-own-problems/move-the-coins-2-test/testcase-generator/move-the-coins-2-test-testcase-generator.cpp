@@ -484,7 +484,8 @@ int main(int argc, char* argv[])
                         for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
                         {
                             const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
-                            numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
+                            if (descendantRange.numInRange() > 0)
+                                numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
                         }
                     }
                     WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
