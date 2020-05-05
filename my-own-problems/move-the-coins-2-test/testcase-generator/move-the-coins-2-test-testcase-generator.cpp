@@ -292,10 +292,6 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
 
 void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
 {
-    for (const auto& query : queries)
-    {
-        cout << "Blaa: " << query.nodeToReparent->id() << endl;
-    }
     auto rootNode = treeGenerator.nodes().front();
     treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
     treeGenerator.scrambleEdgeOrder();
