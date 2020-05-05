@@ -556,6 +556,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     using Verifier::Node;
 
     int64_t totalNumNodes = 0;
+    int64_t totalNumQueries = 0;
 
     const auto& [numTestCases] = testFileReader.readLine<int>();
     for (int t = 0; t < numTestCases; t++)
@@ -585,6 +586,10 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         const auto [numQueries] = testFileReader.readLine<int>();
         testFileReader.addErrorUnless(numQueries >= 1, "Number of queries should be >= 1, not " + std::to_string(numQueries) );
         testFileReader.addErrorUnless(numQueries <= containingSubtask.maxQueriesPerTestcase, "Number of queries for a testcase should be <= " + std::to_string(containingSubtask.maxQueriesPerTestcase) + " not " + std::to_string(numQueries) );
+
+        totalNumQueries += numQueries;
+        testFileReader.addErrorUnless(totalNumQueries <= containingSubtask.maxQueriesOverAllTestcases, "Total number of queries over all testcases should be <= " + std::to_string(containingSubtask.maxQueriesOverAllTestcases) + " not " + std::to_string(numQueries) );
+
         std::vector<int64_t> encryptedQueries;
         for (int i = 0; i < numQueries; i++)
         {
