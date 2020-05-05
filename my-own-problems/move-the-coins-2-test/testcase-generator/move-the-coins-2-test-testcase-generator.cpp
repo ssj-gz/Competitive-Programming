@@ -482,6 +482,7 @@ int main(int argc, char* argv[])
                 const int numNodes = 200'000;
                 const int numQueries = 200'000;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000);
+                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 const auto allNodes = treeGenerator.nodes();
 
@@ -489,33 +490,6 @@ int main(int argc, char* argv[])
                 map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
                 {
                     auto lookupInfo = computeLookupInfo(treeGenerator);
-                    cout << "lookupInfo.maxHeight: " << lookupInfo.maxHeight << endl;
-                    for (int height = 0; height <= lookupInfo.maxHeight; height++)
-                    {
-                        cout << "height: " << height << " # nodesAtHeight:"  << lookupInfo.nodesAtHeightLookup[height].size() << endl;
-                    }
-#if 0
-                    for(int i =0; i < 170'000; )
-                    {
-                        const int nodeToReparentHeight = rnd.next(1, lookupInfo.maxHeight - 1);
-                        auto nodeToReparent = rnd.nextFrom(lookupInfo.nodesAtHeightLookup[nodeToReparentHeight]);
-                        cout << "nodeToReparentHeight: " << nodeToReparentHeight << " # nodes at height: " << lookupInfo.nodesAtHeightLookup[nodeToReparentHeight].size() << " nodeToReparent: " << nodeToReparent->id() << endl;
-
-                        const int newParentHeight = chooseWithWeighting<int>(
-                                {
-                                {16, 70.0},
-                                {15, 20.0},
-                                {14, 8.0},
-                                {13, 2.0}
-                                }, 1).front();
-
-                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
-                        queries.push_back({nodeToReparent, newParent});
-                        i++;
-                    }
-                    //addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
-                    addRandomQueries(treeGenerator, queries, 170'000, lookupInfo);
-#else
                     for (auto nodeToReparent : allNodes)
                     {
                         if (nodeToReparent->data.largestNonDescendantHeight == 0)
@@ -534,15 +508,7 @@ int main(int argc, char* argv[])
                         queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
                     }
                     addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
-#endif
                 }
-
-                for (const auto& query : queries)
-                {
-                    //cout << "Bloo: " << query.nodeToReparent->id() << endl;
-                }
-
-
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
