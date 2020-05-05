@@ -154,7 +154,7 @@ Range descendantRangeFor(TestNode<NodeData>* nodeToReparent, int newParentHeight
     if (!hasDescendantsAtThisHeight)
         return {-1, -1};
 
-    return {descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), descendantsAtHeightEnd - lookupInfo.nodesAtHeightLookup[newParentHeight].begin() - 1};
+    return {static_cast<int>(descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin()), static_cast<int>(descendantsAtHeightEnd - lookupInfo.nodesAtHeightLookup[newParentHeight].begin() - 1)};
 }
 
 struct NodeAndHeightPair
