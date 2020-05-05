@@ -183,6 +183,40 @@ std::vector<T> chooseWithWeighting(const std::map<T, double>& valueWeight, const
     return chosenValues;
 }
 
+template <typename T>
+class WeightedChooser
+{
+    public:
+        WeightedChooser(const std::map<T, double>& valueWeight)
+        {
+            m_totalWeight = 0.0;
+            for (const auto& [value, weight] : valueWeight)
+            {
+                m_totalWeight += weight;
+                m_cumulativeWeightsAndValue.push_back({m_totalWeight, value});
+            }
+        }
+        T nextValue()
+        {
+            const auto randCumulativeWeight = rnd.next(0.0, m_totalWeight);
+            auto firstGEIter = std::lower_bound(m_cumulativeWeightsAndValue.begin(), m_cumulativeWeightsAndValue.end(), randCumulativeWeight, [](const auto& cumulativeWeightAndValue, const auto randCumulativeWeight)
+                    {
+                        return cumulativeWeightAndValue.weight < randCumulativeWeight;
+                    });
+            assert(firstGEIter != m_cumulativeWeightsAndValue.end());
+            assert(firstGEIter->weight >= randCumulativeWeight);
+            return firstGEIter->value;
+        }
+    private:
+        struct WeightAndValue
+        {
+            double weight = 0.0;
+            T value;
+        };
+        double m_totalWeight = 0.0;
+        std::vector<WeightAndValue> m_cumulativeWeightsAndValue;
+};
+
 
 #endif
 
