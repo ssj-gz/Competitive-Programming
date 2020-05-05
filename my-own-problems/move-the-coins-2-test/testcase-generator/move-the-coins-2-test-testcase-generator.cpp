@@ -234,7 +234,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         {
             if (blah.find({nodeToReparent, newParentHeight}) == blah.end())
             {
-                cout << "blee: nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at newParentHeight: " << numDescendantsAtHeight << endl;
+                //cout << "blee: nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at newParentHeight: " << numDescendantsAtHeight << endl;
             }
             blah.insert({nodeToReparent, newParentHeight});
         }
