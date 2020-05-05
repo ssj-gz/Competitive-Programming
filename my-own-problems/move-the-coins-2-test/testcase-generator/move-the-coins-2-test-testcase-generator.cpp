@@ -181,7 +181,6 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     int queryNum = 0;
     int64_t numNonDescendantHeightSum = 0;
     int64_t numDescendantHeightSum = 0;
-    TestNode<NodeData>* previousNodeToReparent = nullptr;
     set<pair<TestNode<NodeData>*, int>> blah;
     for (auto& query : queries)
     {
@@ -215,7 +214,6 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         {
             //cout << "queryNum: " << queryNum << " nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at height: " << lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         }
-        previousNodeToReparent = nodeToReparent;
         const auto numDescendantsAtHeight = lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) ;
         //cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " bloo.numInRange(): " << bloo.numInRange() << endl;
         //assert(numDescendantsAtHeight == bloo.numInRange());
