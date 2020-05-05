@@ -156,6 +156,18 @@ Range descendantRangeFor(TestNode<NodeData>* nodeToReparent, int newParentHeight
     return {descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), descendantsAtHeightEnd - lookupInfo.nodesAtHeightLookup[newParentHeight].begin() - 1};
 }
 
+struct NodeAndHeightPair
+{
+    TestNode<NodeData>* nodeToReparent = nullptr;
+    int newParentHeight = -1;
+    bool operator<(const NodeAndHeightPair& other) const
+    {
+        if (nodeToReparent != other.nodeToReparent)
+            return nodeToReparent->id() < other.nodeToReparent->id();
+        return newParentHeight < other.newParentHeight;
+    }
+};
+
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
     if (set<TestQuery>(queries.begin(), queries.end()).size() != queries.size())
@@ -206,7 +218,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         const auto numDescendantsAtHeight = lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) ;
         //cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " bloo.numInRange(): " << bloo.numInRange() << endl;
         //assert(numDescendantsAtHeight == bloo.numInRange());
-        cout << " nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << numDescendantsAtHeight << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
+        cout << "fleep nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << numDescendantsAtHeight << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
         // left and the right of the descendant-range, respectively, in sorted order.
         // Performing the switch is O(1).
@@ -474,6 +486,7 @@ int main(int argc, char* argv[])
                 const auto allNodes = treeGenerator.nodes();
 
                 vector<TestQuery> queries;
+                map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
                 {
                     auto lookupInfo = computeLookupInfo(treeGenerator);
                     cout << "lookupInfo.maxHeight: " << lookupInfo.maxHeight << endl;
@@ -490,10 +503,10 @@ int main(int argc, char* argv[])
 
                         const int newParentHeight = chooseWithWeighting<int>(
                                 {
-                                    {16, 70.0},
-                                    {15, 20.0},
-                                    {14, 8.0},
-                                    {13, 2.0}
+                                {16, 70.0},
+                                {15, 20.0},
+                                {14, 8.0},
+                                {13, 2.0}
                                 }, 1).front();
 
                         auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
@@ -507,12 +520,20 @@ int main(int argc, char* argv[])
                     {
                         if (nodeToReparent->data.largestNonDescendantHeight == 0)
                             continue;
-                        for (int newParentHeight = 194; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
+                        for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
                         {
-                            auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
-                            queries.push_back({nodeToReparent, newParent});
+                            const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
+                            numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
                         }
                     }
+                    WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
+                    for (int i = 0; i < numQueries; i++)
+                    {
+                        const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
+                        auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
+                    }
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
 #endif
                 }
 
@@ -523,8 +544,7 @@ int main(int argc, char* argv[])
 
 
 
-                writeTestCase(treeGenerator, testcase, queries);
-    cout << "florp: " << 296 * 55'000 * sizeof(AVLNode) / 1024 / 1024 << endl;
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
         {
