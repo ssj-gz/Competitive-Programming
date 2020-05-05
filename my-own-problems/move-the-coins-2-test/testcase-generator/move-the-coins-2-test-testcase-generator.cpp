@@ -363,8 +363,6 @@ void addRandomQueries(TreeGenerator<NodeData>& treeGenerator, vector<TestQuery>&
 {
     const auto allNodes = treeGenerator.nodes();
     set<TestQuery> querySet(queries.begin(), queries.end());
-    sort(queries.begin(), queries.end());
-#if 0
     while (static_cast<int>(querySet.size()) < targetNumQueries)
     {
         auto nodeToReparent = rnd.nextFrom(allNodes);
@@ -376,14 +374,10 @@ void addRandomQueries(TreeGenerator<NodeData>& treeGenerator, vector<TestQuery>&
         querySet.insert({nodeToReparent, newParent});
     }
 
-#endif
     queries.assign(querySet.begin(), querySet.end());
 
-#if 0
     assert(set<TestQuery>(queries.begin(), queries.end()).size() == queries.size());
     assert(static_cast<int>(set<TestQuery>(queries.begin(), queries.end()).size()) == targetNumQueries);
-#endif
-
 }
 
 int main(int argc, char* argv[])
