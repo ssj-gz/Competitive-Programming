@@ -121,6 +121,39 @@ struct TestQuery
     }
 };
 
+struct Range
+{
+    int leftIndex = -1;
+    int rightIndex = -1;
+    bool isValid() const
+    {
+        return (leftIndex >= 0 && rightIndex >= 0) && (leftIndex <= rightIndex);
+    }
+    int numInRange() const
+    {
+        return rightIndex - leftIndex + 1;
+    }
+};
+
+Range descendantRangeFor(TestNode<NodeData>* nodeToReparent, int newParentHeight, const LookupInfo& lookupInfo)
+{
+    const auto descendantsAtHeightBegin = std::lower_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsBeginVisit,
+            [](const TestNode<NodeData>* node, const int dfsBeginVisit)
+            {
+            return node->data.dfsBeginVisit < dfsBeginVisit;
+            });
+    const auto descendantsAtHeightEnd = std::upper_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsEndVisit,
+            [](const int dfsEndVisit, const TestNode<NodeData>* node)
+            {
+            return dfsEndVisit < node->data.dfsEndVisit;
+            });
+    const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != lookupInfo.nodesAtHeightLookup[newParentHeight].end() && (*descendantsAtHeightBegin)->data.dfsEndVisit <= nodeToReparent->data.dfsEndVisit;
+    if (!hasDescendantsAtThisHeight)
+        return {-1, -1};
+
+    return {descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), descendantsAtHeightEnd - lookupInfo.nodesAtHeightLookup[newParentHeight].begin() - 1};
+}
+
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
     if (set<TestQuery>(queries.begin(), queries.end()).size() != queries.size())
@@ -167,6 +200,8 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != lookupInfo.nodesAtHeightLookup[newParentHeight].end() && (*descendantsAtHeightBegin)->data.dfsEndVisit <= nodeToReparent->data.dfsEndVisit;
         int numNonDescendantsToLeft = lookupInfo.nodesAtHeightLookup[newParentHeight].size();
         int numNonDescendantsToRight = 0;
+        const auto bloo = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
+        assert(bloo.isValid() == hasDescendantsAtThisHeight);
         if (hasDescendantsAtThisHeight)
         {
             numNonDescendantsToLeft = descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin();
