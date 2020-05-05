@@ -218,7 +218,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         const auto numDescendantsAtHeight = lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) ;
         //cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " bloo.numInRange(): " << bloo.numInRange() << endl;
         //assert(numDescendantsAtHeight == bloo.numInRange());
-        cout << "fleep nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << numDescendantsAtHeight << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
+        //cout << "fleep nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << numDescendantsAtHeight << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
         // left and the right of the descendant-range, respectively, in sorted order.
         // Performing the switch is O(1).
@@ -363,13 +363,7 @@ void addRandomQueries(TreeGenerator<NodeData>& treeGenerator, vector<TestQuery>&
 {
     const auto allNodes = treeGenerator.nodes();
     set<TestQuery> querySet(queries.begin(), queries.end());
-    cout << "Original num queries: " << queries.size() << " without dupes: " << querySet.size() << endl;
     sort(queries.begin(), queries.end());
-    cout << "Original queries (sorted): " << endl;
-    for (const auto& query : queries)
-    {
-        cout << "nodeToReparent: " << query.nodeToReparent->id() << " newParentNode: " << query.newParentNode->id() << endl;
-    }
 #if 0
     while (static_cast<int>(querySet.size()) < targetNumQueries)
     {
