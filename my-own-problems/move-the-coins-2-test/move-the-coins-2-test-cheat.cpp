@@ -665,8 +665,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             for (int i = numNonDescendantsToLeft; i <= nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight - 1; i++)
             {
                 descendantsAtHeight.insertValue(compressedIdsAtHeightByDfs[newParentHeight][i]);
-                newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, descendantsAtHeight)];
             }
+            newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, descendantsAtHeight)];
         }
 #else
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
