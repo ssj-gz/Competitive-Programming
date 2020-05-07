@@ -438,37 +438,17 @@ AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
     {
         int numToLeft2 = 0;
         const auto currentValue1 = tree1Iter.currentNode()->value;
-        //cout << "currentValue1: " << currentValue1 << endl;
         while (tree2IterStack.size() > 1)
         {
             auto& tree2Iter = tree2IterStack.back();
-            if (tree2Iter.currentNode() == nullptr)
+            if (tree2Iter.currentNode() == nullptr || tree2Iter.currentNode()->minDescendantValue > currentValue1 || tree2Iter.currentNode()->maxDescendantValue < currentValue1 )
             {
-                //cout << " tree2Iter is null; backing up" << endl;
-                tree2IterStack.pop_back();
-                continue;
-            }
-            if (tree2Iter.currentNode()->minDescendantValue > currentValue1 || tree2Iter.currentNode()->maxDescendantValue < currentValue1 )
-            {
-                //cout << " values is not amongst descendants; backing up" << endl;
                 tree2IterStack.pop_back();
                 continue;
             }
             break;
         }
-        assert(tree2IterStack.size() > 0);
         auto tree2Iter = tree2IterStack.back();
-        if (tree2Iter.currentNode() == nullptr)
-        {
-            //cout << "adjusted tree2Iter is null; setting numToLeft2 to 0" << endl;
-            //numToLeft2 = 0;
-        }
-        else
-        {
-            //cout << "adjusted tree2Iter value is " << tree2Iter.currentNode()->value << endl;
-        }
-        //cout << " numToLeft2: " << numToLeft2 << endl;
-
 
         while (tree2Iter.currentNode())
         {
