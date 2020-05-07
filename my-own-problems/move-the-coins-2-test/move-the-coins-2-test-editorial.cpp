@@ -432,58 +432,6 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
 AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
 {
     AVLTreeIterator tree1Iter = tree1.root();
-    while (tree1Iter.currentNode())
-    {
-        const auto currentValue1 = tree1Iter.currentNode()->value;
-        int numToLeft2 = 0;
-        AVLTreeIterator tree2Iter = tree2.root();
-        while (tree2Iter.currentNode())
-        {
-            if (tree2Iter.currentNode()->value < currentValue1)
-                numToLeft2 = tree2Iter.numToLeft() + 1;
-            if (tree2Iter.currentNode()->value > currentValue1)
-                tree2Iter.followLeftChild();
-            else
-                tree2Iter.followRightChild();
-        }
-
-        const auto numToLeft1 = tree1Iter.numToLeft();
-        const auto numToLeftInBoth = numToLeft1 + numToLeft2;
-        if (numToLeftInBoth == k)
-        {
-            return tree1Iter.currentNode();
-        }
-
-        if (numToLeftInBoth > k)
-            tree1Iter.followLeftChild();
-        else
-            tree1Iter.followRightChild();
-    }
-
-    return nullptr;
-}
-
-AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
-{
-    auto kthAVLNode = findKthFromPairAux(k, tree1, tree2);
-    if (!kthAVLNode)
-    {
-        kthAVLNode = findKthFromPairAux(k, tree2, tree1);
-    }
-    return kthAVLNode;
-}
-
-
-AVLNode* findKthFromPairAuxNew(int k, AVLTree& tree1, AVLTree& tree2)
-{
-#if 0
-    cout << "findKthFromPairAuxNew k:" << k << endl;
-    cout << "tree1" << endl;
-    printTree(tree1);
-    cout << "tree2" << endl;
-    printTree(tree2);
-#endif
-    AVLTreeIterator tree1Iter = tree1.root();
     vector<AVLTreeIterator> tree2IterStack;
     tree2IterStack.push_back(AVLTreeIterator(tree2.root()));
     while (tree1Iter.currentNode())
@@ -555,14 +503,12 @@ AVLNode* findKthFromPairAuxNew(int k, AVLTree& tree1, AVLTree& tree2)
     return nullptr;
 }
 
-AVLNode* findKthFromPairNew(int k, AVLTree& tree1, AVLTree& tree2)
+AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 {
-    auto kthAVLNode = findKthFromPairAuxNew(k, tree1, tree2);
-    assert(kthAVLNode == findKthFromPairAux(k, tree1, tree2));
+    auto kthAVLNode = findKthFromPairAux(k, tree1, tree2);
     if (!kthAVLNode)
     {
-        kthAVLNode = findKthFromPairAuxNew(k, tree2, tree1);
-        assert(kthAVLNode == findKthFromPairAux(k, tree2, tree1));
+        kthAVLNode = findKthFromPairAux(k, tree2, tree1);
     }
     return kthAVLNode;
 }
@@ -691,7 +637,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // Performing the switch is O(1).
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
-        const auto newParentAVLNode = findKthFromPairNew(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
+        const auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
