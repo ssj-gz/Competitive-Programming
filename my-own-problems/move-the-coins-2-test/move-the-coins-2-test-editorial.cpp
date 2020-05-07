@@ -74,6 +74,8 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 struct AVLNode
 {
     int64_t value = -1;
+    int64_t minDescendantValue = std::numeric_limits<int64_t>::max();
+    int64_t maxDescendantValue = std::numeric_limits<int64_t>::min();
     AVLNode *leftChild = nullptr;
     AVLNode *rightChild = nullptr;
     int balanceFactor = 0;
@@ -231,6 +233,8 @@ class AVLTree
             nodeToUpdate->balanceFactor = 0;
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->numDescendants = 1;
+            nodeToUpdate->minDescendantValue = std::numeric_limits<int64_t>::max();
+            nodeToUpdate->maxDescendantValue = std::numeric_limits<int64_t>::min();
 
             auto leftChild = nodeToUpdate->leftChild;
 
@@ -239,6 +243,11 @@ class AVLTree
                 nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
                 nodeToUpdate->numDescendants += leftChild->numDescendants;
+                nodeToUpdate->minDescendantValue = min(nodeToUpdate->minDescendantValue, leftChild->minDescendantValue);
+                nodeToUpdate->minDescendantValue = min(nodeToUpdate->minDescendantValue, leftChild->value);
+                nodeToUpdate->maxDescendantValue = max(nodeToUpdate->maxDescendantValue, leftChild->maxDescendantValue);
+                nodeToUpdate->maxDescendantValue = max(nodeToUpdate->maxDescendantValue, leftChild->value);
+                nodeToUpdate->maxDescendantValue = std::numeric_limits<int64_t>::min();
             }
 
             auto rightChild = nodeToUpdate->rightChild;
@@ -246,6 +255,10 @@ class AVLTree
             {
                 nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
                 nodeToUpdate->maxDescendantDepth = max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
+                nodeToUpdate->minDescendantValue = min(nodeToUpdate->minDescendantValue, rightChild->minDescendantValue);
+                nodeToUpdate->minDescendantValue = min(nodeToUpdate->minDescendantValue, rightChild->value);
+                nodeToUpdate->maxDescendantValue = max(nodeToUpdate->maxDescendantValue, rightChild->maxDescendantValue);
+                nodeToUpdate->maxDescendantValue = max(nodeToUpdate->maxDescendantValue, rightChild->value);
                 nodeToUpdate->numDescendants += rightChild->numDescendants;
             }
         }
@@ -321,6 +334,24 @@ class AVLTreeIterator
 
         int m_numToLeftOffset = 0;
 };
+
+void printSubTree(AVLNode* subtreeRoot)
+{
+    if (subtreeRoot == nullptr)
+        return;
+    cout << "Node " << subtreeRoot->id << " has value: " << subtreeRoot->value << " minDescendantValue: " << subtreeRoot->minDescendantValue << " maxDescendantValue:" << subtreeRoot->maxDescendantValue << " balanceFactor: " << subtreeRoot->balanceFactor << " maxDescendantDepth: " << subtreeRoot->maxDescendantDepth << " numDescendants: " << subtreeRoot->numDescendants;
+    cout << " leftChild: " << (subtreeRoot->leftChild ? subtreeRoot->leftChild->id : -1) << " rightChild: " << (subtreeRoot->rightChild ? subtreeRoot->rightChild->id : -1) << endl;
+
+    if (subtreeRoot->leftChild)
+        printSubTree(subtreeRoot->leftChild);
+    if (subtreeRoot->rightChild)
+        printSubTree(subtreeRoot->rightChild);
+}
+
+void printTree(AVLTree& tree)
+{
+    printSubTree(tree.root());
+}
 
 class IndexRemapper
 {
@@ -438,6 +469,100 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     if (!kthAVLNode)
     {
         kthAVLNode = findKthFromPairAux(k, tree2, tree1);
+    }
+    return kthAVLNode;
+}
+
+
+AVLNode* findKthFromPairAuxNew(int k, AVLTree& tree1, AVLTree& tree2)
+{
+#if 0
+    cout << "findKthFromPairAuxNew k:" << k << endl;
+    cout << "tree1" << endl;
+    printTree(tree1);
+    cout << "tree2" << endl;
+    printTree(tree2);
+#endif
+    AVLTreeIterator tree1Iter = tree1.root();
+    vector<AVLTreeIterator> tree2IterStack;
+    tree2IterStack.push_back(AVLTreeIterator(tree2.root()));
+    while (tree1Iter.currentNode())
+    {
+        int numToLeft2 = 0;
+        const auto currentValue1 = tree1Iter.currentNode()->value;
+        //cout << "currentValue1: " << currentValue1 << endl;
+        while (tree2IterStack.size() > 1)
+        {
+            auto& tree2Iter = tree2IterStack.back();
+            if (tree2Iter.currentNode() == nullptr)
+            {
+                //cout << " tree2Iter is null; backing up" << endl;
+                tree2IterStack.pop_back();
+                continue;
+            }
+            if (tree2Iter.currentNode()->minDescendantValue > currentValue1 || tree2Iter.currentNode()->maxDescendantValue < currentValue1 )
+            {
+                //cout << " values is not amongst descendants; backing up" << endl;
+                tree2IterStack.pop_back();
+                continue;
+            }
+            break;
+        }
+        assert(tree2IterStack.size() > 0);
+        auto tree2Iter = tree2IterStack.back();
+        if (tree2Iter.currentNode() == nullptr)
+        {
+            //cout << "adjusted tree2Iter is null; setting numToLeft2 to 0" << endl;
+            //numToLeft2 = 0;
+        }
+        else
+        {
+            //cout << "adjusted tree2Iter value is " << tree2Iter.currentNode()->value << endl;
+        }
+        //cout << " numToLeft2: " << numToLeft2 << endl;
+
+
+        while (tree2Iter.currentNode())
+        {
+            if (tree2Iter.currentNode()->value < currentValue1)
+                numToLeft2 = tree2Iter.numToLeft() + 1;
+            if (tree2Iter.currentNode()->value > currentValue1)
+            {
+                tree2IterStack.push_back(tree2Iter);
+                tree2Iter.followLeftChild();
+            }
+            else
+            {
+                tree2IterStack.push_back(tree2Iter);
+                tree2Iter.followRightChild();
+            }
+        }
+
+        //cout << " numToLeft2 at checking point: " << numToLeft2 << endl;
+        const auto numToLeft1 = tree1Iter.numToLeft();
+        const auto numToLeftInBoth = numToLeft1 + numToLeft2;
+        if (numToLeftInBoth == k)
+        {
+            return tree1Iter.currentNode();
+        }
+
+        if (numToLeftInBoth > k)
+            tree1Iter.followLeftChild();
+        else
+            tree1Iter.followRightChild();
+    }
+
+    return nullptr;
+}
+
+AVLNode* findKthFromPairNew(int k, AVLTree& tree1, AVLTree& tree2)
+{
+    auto kthAVLNode = findKthFromPairAuxNew(k, tree1, tree2);
+    assert(kthAVLNode == findKthFromPairAux(k, tree1, tree2));
+    if (!kthAVLNode)
+    {
+        kthAVLNode = findKthFromPairAuxNew(k, tree2, tree1);
+        assert(kthAVLNode == findKthFromPairAux(k, tree2, tree1));
     }
     return kthAVLNode;
 }
@@ -566,7 +691,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // Performing the switch is O(1).
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
-        const auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
+        const auto newParentAVLNode = findKthFromPairNew(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
