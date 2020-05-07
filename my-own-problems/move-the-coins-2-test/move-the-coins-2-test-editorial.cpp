@@ -13,14 +13,27 @@ using namespace std;
 
 const int64_t Mod = 1'000'000'007;
 
+// Lots of input to read, so use ultra-fast reader.
+template <typename IntegralType>
+void scan_integer( IntegralType &x )
+{
+    int c = getchar_unlocked();
+    x = 0;
+    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
+    for( ;c>47 && c<58; c = getchar_unlocked() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
+}
+
 template <typename T>
 T read()
 {
     T toRead;
-    cin >> toRead;
+    scan_integer(toRead);
     assert(cin);
     return toRead;
 }
+
 
 struct Node
 {
@@ -79,8 +92,6 @@ struct AVLNode
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
     int numDescendants = 1;
-
-    int id = -1;
 };
 
 class AVLTree
@@ -90,7 +101,10 @@ class AVLTree
             : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
         {
             if (m_isPersistent)
+            {
+                m_rootForRevision.reserve(nodeBlockSize);
                 m_rootForRevision.push_back(nullptr);
+            }
         }
         AVLNode* root()
         {
@@ -273,8 +287,6 @@ class AVLTree
             }
             m_nodes.back().push_back(AVLNode());
             auto newNode = &(m_nodes.back().back());
-            newNode->id = m_nextNodeId;
-            m_nextNodeId++;
             return newNode;
         }
 
@@ -282,8 +294,6 @@ class AVLTree
 
         int m_nodeBlockSize = 1;
         deque<vector<AVLNode>> m_nodes;
-
-        int m_nextNodeId = 1;
 
         int m_revisionNumber = 0;
         vector<AVLNode*> m_rootForRevision;
@@ -492,14 +502,17 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             }
         }
     }
-    vector<AVLTree> prefixesForHeight(maxNodeHeight + 1, AVLTree(true, 10));
-    vector<AVLTree> suffixesForHeight(maxNodeHeight + 1, AVLTree(true, 10));
+    vector<AVLTree> prefixesForHeight(maxNodeHeight + 1);
+    vector<AVLTree> suffixesForHeight(maxNodeHeight + 1);
     for (int height = 0; height <= maxNodeHeight; height++)
     {
+
+        prefixesForHeight[height] = AVLTree(true, nodesAtHeightLookup[height].size() * 10);
         for (const auto nodeAtHeight : nodesAtHeightLookup[height])
         {
             prefixesForHeight[height].insertValue(nodeAtHeight->id);
         }
+        suffixesForHeight[height] = AVLTree(true, nodesAtHeightLookup[height].size() * 10);
         for (auto nodeAtHeightRevIter = nodesAtHeightLookup[height].rbegin(); nodeAtHeightRevIter != nodesAtHeightLookup[height].rend(); nodeAtHeightRevIter++)
         {
             suffixesForHeight[height].insertValue((*nodeAtHeightRevIter)->id);
