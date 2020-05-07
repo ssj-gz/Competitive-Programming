@@ -655,6 +655,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             if (descendantsForNodeAndHeight.find({nodeToReparent, newParentHeight}) == descendantsForNodeAndHeight.end())
             {
                 AVLTree& blah = descendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
+                blah = AVLTree(false, numDescendantsAtNewParentHeight);
                 for (int i = numNonDescendantsToLeft; i <= nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight - 1; i++)
                 {
                     blah.insertValue(compressedIdsAtHeightByDfs[newParentHeight][i]);
@@ -673,7 +674,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         }
         else
         {
-            AVLTree descendantsAtHeight(false, 10);
+            AVLTree descendantsAtHeight(false, numDescendantsAtNewParentHeight);
             for (int i = numNonDescendantsToLeft; i <= nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight - 1; i++)
             {
                 descendantsAtHeight.insertValue(compressedIdsAtHeightByDfs[newParentHeight][i]);
