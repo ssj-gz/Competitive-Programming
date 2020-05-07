@@ -456,6 +456,35 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
     return kthAVLNode;
 }
 
+int64_t findKthNotIn(int k, AVLTree& tree)
+{
+    // Be optimistic and give remappedIndex the smallest possible value:
+    // we'll correct our optimism as we go along :)
+    int64_t result = k;
+    AVLTreeIterator treeIter(tree.root());
+    while (treeIter.currentNode())
+    {
+        const int64_t indexOfCurrentNode = treeIter.currentNode()->value;
+        const int64_t numRemovedUpToCurrentNodeIndex = treeIter.numToLeft();
+        const int64_t numFreeUpToCurrentNodeIndex = indexOfCurrentNode - numRemovedUpToCurrentNodeIndex;
+        if (numFreeUpToCurrentNodeIndex >= k + 1)
+        {
+            // We've overshot; the required result is to the left of indexOfCurrentNode; "recurse"
+            // into left child.
+            treeIter.followLeftChild();
+        }
+        else
+        {
+            // Again, be optimistic about result - we'll correct it as we go along.
+            result = max(result, indexOfCurrentNode + (k - numFreeUpToCurrentNodeIndex) + 1);
+            // Required index is to the right of here; "recurse" into the right child.
+            treeIter.followRightChild();
+        }
+
+    }
+    return result;
+}
+
 int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     int64_t decryptionKey = 0;
@@ -473,7 +502,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     vector<vector<Node*>> nodesAtHeightLookup(maxNodeHeight + 1);
     computeDFSInfo(rootNode, nodesAtHeightLookup);
     const int numNodes = nodes.size();
-    
+
     IndexRemapper indexRemapper;
     vector<int64_t> numCanReparentToPrefixSum;
     int64_t sumOfNumCanReparentTo = 0;
@@ -521,18 +550,29 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         }
     }
 #else
-    using ordered_set = __gnu_pbds::tree< Node*, __gnu_pbds::null_type, less<>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
-    map<pair<Node*, int>, ordered_set> nonDescendantsForNodeAndHeight;
-    vector<ordered_set> nodeTreeAtHeight(maxNodeHeight + 1);
+    map<pair<Node*, int>, AVLTree> descendantsForNodeAndHeight;
+    vector<vector<int>> compressedIdsAtHeightByDfs(maxNodeHeight + 1);
+    vector<map<int, Node*>> nodeForCompressedIdAtHeight(maxNodeHeight + 1);
+
     for (int height = 0; height <= maxNodeHeight; height++)
     {
-
-        for (auto node : nodesAtHeightLookup[height])
+        const auto& nodesAtHeight = nodesAtHeightLookup[height];
+        map<Node*, int> compressedIdForNode;
+        vector<Node*> nodesAtHeightById = nodesAtHeight;
+        sort(nodesAtHeightById.begin(), nodesAtHeightById.end(), [](const auto& lhsNode, const auto& rhsNode)
+                {
+                    return lhsNode->id < rhsNode->id;
+                });
+        for (int compressedId = 0; compressedId < nodesAtHeightLookup[height].size(); compressedId++)
         {
-            nodeTreeAtHeight[height].insert(node);
+            nodeForCompressedIdAtHeight[height][compressedId] = nodesAtHeightById[compressedId];
+            compressedIdForNode[nodesAtHeightById[compressedId]] = compressedId;
+        }
+        for (const auto node : nodesAtHeight)
+        {
+            compressedIdsAtHeightByDfs[height].push_back(compressedIdForNode[node]);
         }
     }
-
 #endif
 
     vector<int> allHeights; // Used so we can leverage upper_bound for a binary search.
@@ -561,8 +601,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                 [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightLookup, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
                 {
-                    const int numReparentingsUpToHeight = findNumNonDescendantsUpToHeight(nodeToReparent, height, numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
-                    return numOfReparentingThatReparentsNode < numReparentingsUpToHeight;
+                const int numReparentingsUpToHeight = findNumNonDescendantsUpToHeight(nodeToReparent, height, numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
+                return numOfReparentingThatReparentsNode < numReparentingsUpToHeight;
                 });
         assert(heightIter != allHeights.end());
         const int newParentHeight = *heightIter;
@@ -600,38 +640,32 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         Node* newParent = nullptr;
         if (numDescendantsAtNewParentHeight >= cacheNumDescendantsCutoff)
         {
-            if (nonDescendantsForNodeAndHeight.find({nodeToReparent, newParentHeight}) == nonDescendantsForNodeAndHeight.end())
+            if (descendantsForNodeAndHeight.find({nodeToReparent, newParentHeight}) == descendantsForNodeAndHeight.end())
             {
-                ordered_set& blah = nonDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
-                for (int i = 0; i < numNonDescendantsToLeft; i++)
+                AVLTree& blah = descendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
+                for (int i = numNonDescendantsToLeft; i <= nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight - 1; i++)
                 {
-                    blah.insert(nodesAtHeightLookup[newParentHeight][i]);
+                    blah.insertValue(compressedIdsAtHeightByDfs[newParentHeight][i]);
                 }
-                for (int i = 0; i < numNonDescendantsToRight; i++)
-                {
-                    blah.insert(nodesAtHeightLookup[newParentHeight][nodesAtHeightLookup[newParentHeight].size() - 1 - i]);
-                }
-                newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
+                //newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
+                newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, blah)];
                 cout << "Added to cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
             }
             else
             {
                 cout << "Using cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
-                ordered_set& blah = nonDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
-                newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
+                AVLTree& blah = descendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
+                //newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
+                newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, blah)];
             }
         }
         else
         {
-            ordered_set& nonDescendantTree = nodeTreeAtHeight[newParentHeight];
-            for (int descendantIndex = numNonDescendantsToLeft; descendantIndex < nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight; descendantIndex++)
+            AVLTree descendantsAtHeight(false, 10);
+            for (int i = numNonDescendantsToLeft; i <= nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight - 1; i++)
             {
-                nonDescendantTree.erase(nodesAtHeightLookup[newParentHeight][descendantIndex]);
-            }
-            newParent = *nonDescendantTree.find_by_order(numOfReparentingForNodeAndNewHeight);
-            for (int descendantIndex = numNonDescendantsToLeft; descendantIndex < nodesAtHeightLookup[newParentHeight].size() - numNonDescendantsToRight; descendantIndex++)
-            {
-                nonDescendantTree.insert(nodesAtHeightLookup[newParentHeight][descendantIndex]);
+                descendantsAtHeight.insertValue(compressedIdsAtHeightByDfs[newParentHeight][i]);
+                newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, descendantsAtHeight)];
             }
         }
 #else
