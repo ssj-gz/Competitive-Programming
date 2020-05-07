@@ -18,11 +18,23 @@ using namespace std;
 
 const int64_t Mod = 1'000'000'007;
 
+// Lots of input to read, so use ultra-fast reader.
+template <typename IntegralType>
+void scan_integer( IntegralType &x )
+{
+    int c = getchar_unlocked();
+    x = 0;
+    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
+    for( ;c>47 && c<58; c = getchar_unlocked() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
+}
+
 template <typename T>
 T read()
 {
     T toRead;
-    cin >> toRead;
+    scan_integer(toRead);
     assert(cin);
     return toRead;
 }
@@ -649,11 +661,11 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
                 }
                 //newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
                 newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, blah)];
-                cout << "Added to cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
+                //cout << "Added to cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
             }
             else
             {
-                cout << "Using cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
+                //cout << "Using cache; numDescendantsAtNewParentHeight: " << numDescendantsAtNewParentHeight << endl;
                 AVLTree& blah = descendantsForNodeAndHeight[{nodeToReparent, newParentHeight}];
                 //newParent = *blah.find_by_order(numOfReparentingForNodeAndNewHeight);
                 newParent = nodeForCompressedIdAtHeight[newParentHeight][findKthNotIn(numOfReparentingForNodeAndNewHeight, blah)];
