@@ -369,6 +369,42 @@ class IndexRemapper
         AVLTree removedIndices{false, 10};
 };
 
+struct Range
+{
+    int leftIndex = -1;
+    int rightIndex = -1;
+    bool empty() const
+    {
+        return !(leftIndex >= 0 && rightIndex >= 0) && (leftIndex <= rightIndex);
+    }
+    int numInRange() const
+    {
+        if (empty())
+            return 0;
+        return rightIndex - leftIndex + 1;
+    }
+};
+
+Range descendantRangeFor(Node* nodeToReparent, int newParentHeight, const vector<vector<Node*>>& nodesAtHeightLookup)
+{
+    const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[newParentHeight].begin(), nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->dfsBeginVisit,
+            [](const Node* node, const int dfsBeginVisit)
+            {
+            return node->dfsBeginVisit < dfsBeginVisit;
+            });
+    const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightLookup[newParentHeight].begin(), nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->dfsEndVisit,
+            [](const int dfsEndVisit, const Node* node)
+            {
+            return dfsEndVisit < node->dfsEndVisit;
+            });
+    const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[newParentHeight].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
+    if (!hasDescendantsAtThisHeight)
+        return {-1, -1};
+
+    return {static_cast<int>(descendantsAtHeightBegin - nodesAtHeightLookup[newParentHeight].begin()), static_cast<int>(descendantsAtHeightEnd - nodesAtHeightLookup[newParentHeight].begin() - 1)};
+}
+
+
 /**
  * Find the total number of nodes v such that both:
  *  
@@ -382,26 +418,13 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
     int numNonDescendantsUpToThisHeight = numNodesUpToHeight[height];
     if (height >= nodeToReparent->height)
     {
-        const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsBeginVisit,
-                [](const Node* node, const int dfsBeginVisit)
-                {
-                return node->dfsBeginVisit < dfsBeginVisit;
-                });
-        const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightLookup[height].begin(), nodesAtHeightLookup[height].end(), nodeToReparent->dfsEndVisit,
-                [](const int dfsEndVisit, const Node* node)
-                {
-                return dfsEndVisit < node->dfsEndVisit;
-                });
-        const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[height].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
         int sumOfProperDescendantsOfDescendantsAtHeight = 0;
-        if (hasDescendantsAtThisHeight)
+        const auto descendantRange = descendantRangeFor(nodeToReparent, height, nodesAtHeightLookup);
+        if (!descendantRange.empty())
         {
-            assert(descendantsAtHeightBegin < descendantsAtHeightEnd);
-            int firstDescendantIndex = descendantsAtHeightBegin - nodesAtHeightLookup[height].begin();
-            int lastDescendantIndex = descendantsAtHeightEnd - nodesAtHeightLookup[height].begin() - 1;
-            sumOfProperDescendantsOfDescendantsAtHeight = numProperDescendantsForNodeAtHeightPrefixSum[height][lastDescendantIndex];
-            if (firstDescendantIndex > 0)
-                sumOfProperDescendantsOfDescendantsAtHeight -= numProperDescendantsForNodeAtHeightPrefixSum[height][firstDescendantIndex - 1];
+            sumOfProperDescendantsOfDescendantsAtHeight = numProperDescendantsForNodeAtHeightPrefixSum[height][descendantRange.rightIndex];
+            if (descendantRange.leftIndex > 0)
+                sumOfProperDescendantsOfDescendantsAtHeight -= numProperDescendantsForNodeAtHeightPrefixSum[height][descendantRange.leftIndex - 1];
         }
         numNonDescendantsUpToThisHeight -= nodeToReparent->numDescendants - sumOfProperDescendantsOfDescendantsAtHeight;
     }
@@ -556,23 +579,14 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(heightIter), numNodesUpToHeight, nodesAtHeightLookup, numProperDescendantsForNodeAtHeightPrefixSum);
         }
 
-        const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightLookup[newParentHeight].begin(), nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->dfsBeginVisit,
-                [](const Node* node, const int dfsBeginVisit)
-                {
-                return node->dfsBeginVisit < dfsBeginVisit;
-                });
-        const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightLookup[newParentHeight].begin(), nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->dfsEndVisit,
-                [](const int dfsEndVisit, const Node* node)
-                {
-                return dfsEndVisit < node->dfsEndVisit;
-                });
-        const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightLookup[newParentHeight].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
+        const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, nodesAtHeightLookup);
+
         int numNonDescendantsToLeft = nodesAtHeightLookup[newParentHeight].size();
         int numNonDescendantsToRight = 0;
-        if (hasDescendantsAtThisHeight)
+        if (!descendantRange.empty())
         {
-            numNonDescendantsToLeft = descendantsAtHeightBegin - nodesAtHeightLookup[newParentHeight].begin();
-            numNonDescendantsToRight = nodesAtHeightLookup[newParentHeight].end() - descendantsAtHeightEnd;
+            numNonDescendantsToLeft = descendantRange.leftIndex;
+            numNonDescendantsToRight = nodesAtHeightLookup[newParentHeight].size() - descendantRange.rightIndex - 1;
         }
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
         // left and the right of the descendant-range, respectively, in sorted order.
