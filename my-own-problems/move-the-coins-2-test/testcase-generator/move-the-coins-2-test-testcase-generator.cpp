@@ -548,7 +548,7 @@ int main(int argc, char* argv[])
                 auto rootNode = treeGenerator.createNode();
                 const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
                 const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
-                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+                addStrandsAndClumps(treeGenerator, numNodes - treeGenerator.numNodes(), 200);
 
                 fixParentChildAndHeights(rootNode);
                 computeDFSInfo(rootNode);
