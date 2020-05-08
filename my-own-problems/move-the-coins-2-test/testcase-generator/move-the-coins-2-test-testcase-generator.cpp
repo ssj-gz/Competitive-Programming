@@ -301,7 +301,7 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     writeTestCase(treeGenerator, destTestcase, scrambledQueries);
 }
 
-TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes)
+TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes, const std::map<int, double>& percentageProbOfNumChildrenBeforeSwitchOver, const int switchOverAfterNumNodes, const std::map<int, double>& percentageProbOfNumChildrenAfterSwitchOver)
 {
     auto rootNode = treeGenerator.createNode();
 
@@ -318,21 +318,13 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
         for (auto leafNode : leafNodes)
         {
             int numNewChildren = 0;
-            if (treeGenerator.numNodes() < 5000)
+            if (treeGenerator.numNodes() < switchOverAfterNumNodes)
             {
-                numNewChildren = 1 + (rnd.next(50) == 0 ? 1 : 0);
+                numNewChildren = chooseWithWeighting(percentageProbOfNumChildrenBeforeSwitchOver, 1).front();
             }
             else
             {
-#if 0
-                numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
-#else
-                numNewChildren = chooseWithWeighting<int>({
-                        {2, 70.0},
-                        {3, 5},
-                        {1, 25.0}
-                        }, 1).front();
-#endif
+                numNewChildren = chooseWithWeighting(percentageProbOfNumChildrenAfterSwitchOver, 1).front();
             }
 
             for (int i = 0; i < numNewChildren; i++)
@@ -467,7 +459,11 @@ int main(int argc, char* argv[])
                 TreeGenerator<NodeData> treeGenerator;
                 const int numNodes = 200'000;
                 const int numQueries = 200'000;
-                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000);
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000, { {1, 98.0}, {2, 2.0} }, 5000, {
+                        {2, 70.0},
+                        {3, 5},
+                        {1, 25.0}
+                        });
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 const auto allNodes = treeGenerator.nodes();
