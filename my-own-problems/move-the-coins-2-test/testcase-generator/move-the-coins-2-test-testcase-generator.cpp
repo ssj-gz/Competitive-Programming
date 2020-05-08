@@ -592,6 +592,49 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(4387543)
+                    .withDescription("Three long arms, then random strands and clumps added.  This is intended to stress-test Phase Two."));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                const int posOf3rdArmAlong1st = rnd.next(700, 800);
+                const auto arm3 = treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(48'000, 52'000));
+                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, 200);
+                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+
+                const auto allNodes = treeGenerator.nodes();
+
+                vector<TestNode<NodeData>*> firstHalvesOfArms;
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm1.begin(), arm1.begin() + arm1.size() / 2);
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm2.begin(), arm2.begin() + arm2.size() / 2);
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm3.begin(), arm3.begin() + arm3.size() / 2);
+
+                vector<TestNode<NodeData>*> secondHalvesOfArms;
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm1.begin() + arm1.size() / 2, arm1.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm2.begin() + arm2.size() / 2, arm2.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm3.begin() + arm3.size() / 2, arm3.end());
+
+                vector<TestQuery> queries;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    addWeightedQueries(firstHalvesOfArms, allNodes, queries, 3 * numQueries / 4, rnd.next(75.0, 85.0), lookupInfo);
+                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, (numQueries - queries.size()) / 2, rnd.next(75.0, 85.0), lookupInfo);
+                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size(), rnd.next(75.0, 85.0), lookupInfo);
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
