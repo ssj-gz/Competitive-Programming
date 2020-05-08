@@ -458,7 +458,7 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 const int numNodes = 200'000;
-                const int numQueries = 200'000;
+                const int numQueries = 150'000;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000, { {1, 98.0}, {2, 2.0} }, 5000, {
                         {2, 70.0},
                         {3, 5},
