@@ -371,6 +371,34 @@ void addRandomQueries(TreeGenerator<NodeData>& treeGenerator, vector<TestQuery>&
     assert(static_cast<int>(set<TestQuery>(queries.begin(), queries.end()).size()) == targetNumQueries);
 }
 
+void addStrandsAndClumps(TreeGenerator<NodeData>& treeGenerator, const int numNodes, const int numClumpsAndStrandsToAdd)
+{
+    // Roughly equal numbers of strands anad clumps.
+    const int numClumps = rnd.next(0.4, 0.6) * numClumpsAndStrandsToAdd;
+    const int numStrands = numClumpsAndStrandsToAdd - numClumps;
+    const int numNodesInClumps = rnd.next(0.4, 0.6) * numNodes;
+    const int numNodesInStrands = numNodes - numNodesInClumps;
+
+    auto allNodes = treeGenerator.nodes();
+    // Do the strands first; attaching clumps to strands rather than vice versa seems more interesting, somehow :)
+    const auto lengthOfStrand = chooseRandomValuesWithSum(numStrands, numNodesInStrands, 1);
+    for (int i = 0; i < numClumps; i++)
+    {
+        auto nodeToAddTo = rnd.nextFrom(allNodes);
+        const auto strand = treeGenerator.addNodeChain(nodeToAddTo, lengthOfStrand[i]);
+        allNodes.insert(allNodes.end(), strand.begin(), strand.end());
+    }
+    const auto lengthOfClump = chooseRandomValuesWithSum(numClumps, numNodesInClumps, 1);
+    for (int i = 0; i < numClumps; i++)
+    {
+        auto nodeToAddTo = rnd.nextFrom(allNodes);
+        for (int j = 0; j < lengthOfClump[i]; j++)
+        {
+            treeGenerator.createNode(nodeToAddTo);
+        }
+    }
+}
+
 int main(int argc, char* argv[])
 {
     TestSuite<SubtaskInfo> testsuite;
@@ -507,10 +535,9 @@ int main(int argc, char* argv[])
             }
         }
         {
-            // TODO - remove this - debugging only!
             auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(9734)
-                    .withDescription("TODO - remove - debugging only!"));
+                    .withSeed(384732)
+                    .withDescription("Two long arms, then random strands and clumps added.  This is intended to stress-test Phase Two."));
             {
                 auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
@@ -519,26 +546,40 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 80'000);
-                treeGenerator.addNodeChain(rootNode, 80'000);
+                const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
+                const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 fixParentChildAndHeights(rootNode);
                 computeDFSInfo(rootNode);
 
-                vector<TestQuery> queries;
                 const auto allNodes = treeGenerator.nodes();
 
-                while (static_cast<int>(queries.size()) < numQueries)
-                {
-                    const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
-                    const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                vector<TestNode<NodeData>*> firstHalvesOfArms;
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm1.begin(), arm1.begin() + arm1.size() / 2);
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm2.begin(), arm2.begin() + arm2.size() / 2);
 
-                    if (!newParent->data.isDescendantOf(*nodeToReparent))
+                vector<TestNode<NodeData>*> secondHalvesOfArms;
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm1.begin() + arm1.size() / 2, arm1.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm2.begin() + arm2.size() / 2, arm1.end());
+
+                vector<TestQuery> queries;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    while (queries.size() < numQueries / 2)
                     {
+                        auto nodeToReparent = rnd.nextFrom(firstHalvesOfArms);
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        const auto chooseLowerNode = rnd.next(0.0, 100.0) < 80.0;
+                        const auto newParentHeight = chooseLowerNode ? rnd.next(nodeToReparent->data.height, nodeToReparent->data.largestNonDescendantHeight) :
+                                                                       rnd.next(1, nodeToReparent->data.largestNonDescendantHeight);
+
+                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
                         queries.push_back({nodeToReparent, newParent});
                     }
                 }
+
                 // Remove duplicates.
                 set<TestQuery> querySet(queries.begin(), queries.end());
                 queries.assign(querySet.begin(), querySet.end());
