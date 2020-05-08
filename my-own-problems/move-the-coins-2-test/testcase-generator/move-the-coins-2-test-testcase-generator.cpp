@@ -448,10 +448,9 @@ int main(int argc, char* argv[])
     // SUBTASK 3
     {
         {
-            // TODO - remove this - debugging only!
             auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(9734)
-                    .withDescription("Squat graph where all nodes have degree approximately 3 taking up ~120'000 nodes, then random nodes."));
+                    .withDescription("Squat graph where all nodes have degree approximately 3 taking up ~120'000 nodes, then random nodes.  Some of the initial nodes of the squat graph are biased towards having a single child: this essentially increases the number of (nodeToReparent, newParentHeight) pairs where nodeToReparent has a large-ish number of descendants at height newParentHeight, which is good for making the cheat solutions time out."));
             {
                 auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
@@ -459,14 +458,25 @@ int main(int argc, char* argv[])
                 TreeGenerator<NodeData> treeGenerator;
                 const int numNodes = 200'000;
                 const int numQueries = 150'000;
-                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000, { {1, 98.0}, {2, 2.0} }, 5000, {
+                const int switchOverAfterNumNodes = 5000;
+                // The first switchOverAfterNumNodes nodes are biased towards having a single child: this means that  they will likely have the same
+                // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
+                // that have a large number of descendants, which is necessarily to cause CHEAT_PHASE_THREE to TLE.
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000, { {1, 98.0}, {2, 2.0} }, switchOverAfterNumNodes, {
                         {2, 70.0},
                         {3, 5},
                         {1, 25.0}
                         });
-                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+                // Disguise the special structure of the first switchOverAfterNumNodes by dangling small chains/ strands from them, randomly.
+                const int numStrandsToAdd = 800;
+                const auto strandLengthForPreSwitchOverNode = chooseRandomValuesWithSum(numStrandsToAdd, numNodes - treeGenerator.numNodes(), 0);
+                auto allNodes = treeGenerator.nodes();
+                for (int i = 0; i < strandLengthForPreSwitchOverNode.size(); i++)
+                {
+                    treeGenerator.addNodeChain(allNodes[i], strandLengthForPreSwitchOverNode[i]);
+                }
+                allNodes = treeGenerator.nodes();
 
-                const auto allNodes = treeGenerator.nodes();
 
                 vector<TestQuery> queries;
                 map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
