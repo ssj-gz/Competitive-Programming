@@ -548,10 +548,8 @@ int main(int argc, char* argv[])
                 auto rootNode = treeGenerator.createNode();
                 const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
                 const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
-                addStrandsAndClumps(treeGenerator, numNodes - treeGenerator.numNodes(), 200);
-
-                fixParentChildAndHeights(rootNode);
-                computeDFSInfo(rootNode);
+                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, 200);
+                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 const auto allNodes = treeGenerator.nodes();
 
@@ -561,31 +559,51 @@ int main(int argc, char* argv[])
 
                 vector<TestNode<NodeData>*> secondHalvesOfArms;
                 secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm1.begin() + arm1.size() / 2, arm1.end());
-                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm2.begin() + arm2.size() / 2, arm1.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm2.begin() + arm2.size() / 2, arm2.end());
 
                 vector<TestQuery> queries;
                 {
                     auto lookupInfo = computeLookupInfo(treeGenerator);
-                    while (queries.size() < numQueries / 2)
+                    while (queries.size() < 3 * numQueries / 4)
                     {
                         auto nodeToReparent = rnd.nextFrom(firstHalvesOfArms);
                         if (nodeToReparent->data.largestNonDescendantHeight == 0)
                             continue;
-                        const auto chooseLowerNode = rnd.next(0.0, 100.0) < 80.0;
+                        const auto chooseLowerNode = (nodeToReparent->data.largestNonDescendantHeight >= nodeToReparent->data.height) && (rnd.next(0.0, 100.0) < 80.0);
                         const auto newParentHeight = chooseLowerNode ? rnd.next(nodeToReparent->data.height, nodeToReparent->data.largestNonDescendantHeight) :
                                                                        rnd.next(1, nodeToReparent->data.largestNonDescendantHeight);
 
                         auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
                         queries.push_back({nodeToReparent, newParent});
                     }
+                    while (queries.size() < 7 * numQueries / 8)
+                    {
+                        auto nodeToReparent = rnd.nextFrom(secondHalvesOfArms);
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        const auto chooseLowerNode = (nodeToReparent->data.largestNonDescendantHeight >= nodeToReparent->data.height) && (rnd.next(0.0, 100.0) < 80.0);
+                        const auto newParentHeight = chooseLowerNode ? rnd.next(nodeToReparent->data.height, nodeToReparent->data.largestNonDescendantHeight) :
+                                                                       rnd.next(0, nodeToReparent->data.largestNonDescendantHeight);
+
+                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparent, newParent});
+                    }
+                    while (queries.size() < numQueries)
+                    {
+                        auto nodeToReparent = rnd.nextFrom(allNodes);
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        const auto chooseLowerNode = (nodeToReparent->data.largestNonDescendantHeight >= nodeToReparent->data.height) && (rnd.next(0.0, 100.0) < 80.0);
+                        const auto newParentHeight = chooseLowerNode ? rnd.next(nodeToReparent->data.height, nodeToReparent->data.largestNonDescendantHeight) :
+                                                                       rnd.next(1, nodeToReparent->data.largestNonDescendantHeight);
+
+                        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparent, newParent});
+                    }
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
                 }
 
-                // Remove duplicates.
-                set<TestQuery> querySet(queries.begin(), queries.end());
-                queries.assign(querySet.begin(), querySet.end());
-
-                //scrambleAndwriteTestcase(treeGenerator, testcase, queries);
-                writeTestCase(treeGenerator, testcase, queries);
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
     }
