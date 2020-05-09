@@ -41,7 +41,7 @@ struct Node
     int numDescendants = -1; // Includes the node itself.
     int numCanReparentTo = -1;
 
-    bool isDescendantOf(Node& otherNode)
+    bool isDescendantOf(const Node& otherNode) const
     {
         return (dfsBeginVisit >= otherNode.dfsBeginVisit && dfsEndVisit <= otherNode.dfsEndVisit);
     }
@@ -443,6 +443,53 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
     int64_t powerOf3 = 3;
+
+    auto stringOf = [](const int numInString, const string& stringToDuplicate)
+    {
+        string s;
+        for (int i = 0; i < numInString; i++)
+        {
+            s += stringToDuplicate;
+        }
+        return s;
+    };
+
+    const auto indent1 = stringOf(5, " ");
+    const int numNodes = nodes.size();
+    cout << indent1 << stringOf(numNodes - 1, " ") << "v" << endl;
+    cout << indent1;
+    for (int newParentId = 1; newParentId <= numNodes; newParentId++)
+    {
+        cout << newParentId << " ";
+    }
+    cout << endl;
+    cout << indent1 << stringOf(numNodes * 2 - 1, "─") << endl;
+    const auto indent2 = stringOf(2, " ");
+    for (const auto& nodeToReparent : nodes)
+    {
+        if (nodeToReparent.id == numNodes / 2 + 1)
+        {
+            cout << "u ";
+        }
+        else
+        {
+            cout << indent2;
+        }
+        cout << nodeToReparent.id << " " << "│";
+        for (const auto& newParent : nodes)
+        {
+            cout << (newParent.isDescendantOf(nodeToReparent) ? u8"\u2717" : u8"\u2713") << " ";
+        }
+        cout << endl;
+    }
+
+    for (auto& nodeToReparent : nodes)
+    {
+        for (auto& newParent : nodes)
+        {
+            cout << "nodeToReparent: " << nodeToReparent.id << " newParent: " << newParent.id << " isValid: " << (newParent.isDescendantOf(nodeToReparent) ? "✗" : "🗸") << endl;
+        }
+    }
 
     for (const auto encryptedQuery : encryptedQueries)
     {
