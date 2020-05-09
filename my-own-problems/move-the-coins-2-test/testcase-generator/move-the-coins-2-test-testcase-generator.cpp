@@ -563,7 +563,7 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 const int numNodes = subtask3.maxNodesOverAllTestcases;
-                const int numQueries = 3 * subtask3.maxQueriesOverAllTestcases / 4;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
                 const int switchOverAfterNumNodes = 5000;
                 // The first switchOverAfterNumNodes nodes are biased towards having a single child: this means that  they will likely have the same
                 // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
