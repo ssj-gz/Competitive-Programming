@@ -635,6 +635,92 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(329845743)
+                    .withDescription("Two testcases - one 100'000 nodes (and queries) which is a graph with 2% leaf preference; the other is 100'000 nodes (and queries!) and 98% leaf preference"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases / 2;
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 2.0);
+
+
+                const auto allNodes = treeGenerator.nodes();
+
+                vector<TestQuery> queries;
+                map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    for (auto nodeToReparent : allNodes)
+                    {
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
+                        {
+                            const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
+                            if (descendantRange.numInRange() > 0)
+                                numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
+                        }
+                    }
+                    WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
+                    for (int i = 0; i < numQueries; i++)
+                    {
+                        const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
+                        auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
+                    }
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases / 2;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases / 2;
+
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 98.0);
+
+
+                const auto allNodes = treeGenerator.nodes();
+
+                vector<TestQuery> queries;
+                map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    for (auto nodeToReparent : allNodes)
+                    {
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
+                        {
+                            const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
+                            if (descendantRange.numInRange() > 0)
+                                numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
+                        }
+                    }
+                    WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
+                    for (int i = 0; i < numQueries; i++)
+                    {
+                        const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
+                        auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
+                    }
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
+
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
