@@ -306,11 +306,7 @@ TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<
     auto rootNode = treeGenerator.createNode();
 
     std::vector<TestNode<NodeData>*> leafNodes;
-
-    for (int i = 0; i < 3; i++)
-    {
-        leafNodes.push_back(treeGenerator.createNode(rootNode));
-    }
+    leafNodes.push_back(rootNode);
 
     while (treeGenerator.numNodes() < approxNumNodes)
     {
