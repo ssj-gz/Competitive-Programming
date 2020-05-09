@@ -455,36 +455,45 @@ int main(int argc, char* argv[])
 
     // SUBTASK 2
     {
-        // TODO - remove this - debugging only!
-        auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask2)
-                .withSeed(9734)
-                .withDescription("TODO - remove - debugging only!"));
         {
-            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask2)
+                    .withSeed(23985)
+                    .withDescription("max testcases, mostly with about 900 nodes/ queries each"));
 
-
-            TreeGenerator<NodeData> treeGenerator;
-            treeGenerator.createNode();
-            const int numNodes = 2;
-            const int numQueries = 1;
-
-            treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
-            const auto& lookupInfo = computeLookupInfo(treeGenerator);
-
-            vector<TestQuery> queries;
-            const auto allNodes = treeGenerator.nodes();
-            while (queries.size() < numQueries)
+            for (int i = 0; i < subtask2.maxNumTestcases; i++)
             {
-                const auto nodeToReparent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
-                const auto newParent = allNodes[rnd.next(static_cast<int>(allNodes.size()))];
+                cout << "Generating testcase " << i << " of " << subtask2.maxNumTestcases << endl;
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
-                if (!newParent->data.isDescendantOf(*nodeToReparent))
+                const int numNodes = subtask2.maxNodesPerTestcase - rnd.next(100);
+                const int numQueries = subtask2.maxQueriesPerTestcase - rnd.next(100);
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const int numNodesPhase1 = rnd.next(numNodes);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(1.0, 100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
+                const auto allNodes = treeGenerator.nodes();
+                assert(allNodes.size() == numNodes);
+
+                computeLookupInfo(treeGenerator);
+
+                vector<TestQuery> allPossibleQueries;
+                for (auto nodeToReparent : allNodes)
                 {
-                    queries.push_back({nodeToReparent, newParent});
+                    for (auto newParent : allNodes)
+                    {
+                        if (!newParent->data.isDescendantOf(*nodeToReparent))
+                            allPossibleQueries.push_back({nodeToReparent, newParent});
+                    }
                 }
-            }
 
-            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                assert(!allPossibleQueries.empty());
+
+                const vector<TestQuery> queries = chooseKRandomFrom(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
+                assert(!queries.empty());
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
         }
     }
 
@@ -873,14 +882,12 @@ int main(int argc, char* argv[])
 
             const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 2);
             const auto numQueriesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxQueriesOverAllTestcases, 1);
-            int numBlee = 0;
             for (int i = 0; i < subtask3.maxNumTestcases; i++)
             {
                 auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
                 const int numNodes = numNodesForTestCase[i];
                 const int numQueries = numQueriesForTestCase[i];
-                cout << "Generating testcase " << i << " of " << subtask3.maxNumTestcases << " numNodes: " << numNodes << " numQueries: " << numQueries << endl;
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
                 const int numNodesPhase1 = rnd.next(numNodes);
@@ -894,33 +901,20 @@ int main(int argc, char* argv[])
                 vector<TestQuery> allPossibleQueries;
                 for (auto nodeToReparent : allNodes)
                 {
-                    //cout << " nodeToReparent: " << nodeToReparent->id() << endl;
                     for (auto newParent : allNodes)
                     {
-                        //cout << "  newParent: " << newParent->id() << endl;
                         if (!newParent->data.isDescendantOf(*nodeToReparent))
-                        {
                             allPossibleQueries.push_back({nodeToReparent, newParent});
-                            //cout << " newParent is NOT a descendant of nodeToReparent!" << endl;
-                        }
-                        else
-                        {
-                            //cout << " newParent is a descendant of nodeToReparent!" << endl;
-                        }
                     }
                 }
 
                 assert(!allPossibleQueries.empty());
 
                 const vector<TestQuery> queries = chooseKRandomFrom(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
-                cout << " #queries: " << queries.size()  << " #allPossibleQueries: " << allPossibleQueries.size() << endl;
-                if (queries.size() == allPossibleQueries.size())
-                    numBlee++;
                 assert(!queries.empty());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
             }
-            cout << "numBlee: " << numBlee << endl;
         }
 
 
