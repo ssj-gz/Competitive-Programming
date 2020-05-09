@@ -587,7 +587,6 @@ int main(int argc, char* argv[])
                 arms.insert(arms.end(), arm1.begin(), arm1.end());
                 arms.insert(arms.end(), arm2.begin(), arm2.end());
 
-
                 allNodes = treeGenerator.nodes();
                 // Disguise the special structure of the first switchOverAfterNumNodes by dangling small chains/ strands from them, randomly.
                 const int numStrandsToAdd = 800;
@@ -597,26 +596,18 @@ int main(int argc, char* argv[])
                     treeGenerator.addNodeChain(allNodes[i], strandLengthForPreSwitchOverNode[i]);
                 }
 
-
-
                 vector<TestQuery> queries;
                 map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
                 allNodes = treeGenerator.nodes();
                 {
                     auto lookupInfo = computeLookupInfo(treeGenerator);
-                    for (int i = 0; i <= lookupInfo.maxHeight; i++)
-                    {
-                        cout << "height: " << i << " num at height: " << lookupInfo.nodesAtHeightLookup[i].size() << endl;
-                    }
                     for (auto nodeToReparent : allNodes)
                     {
                         if (nodeToReparent->data.largestNonDescendantHeight == 0)
                             continue;
-                        cout << "nodeToReparent: " << nodeToReparent->id() << endl;
                         bool haveFoundDescendants = false;
                         for (int newParentHeight = 0; newParentHeight <= min(nodeToReparent->data.largestNonDescendantHeight, largestHeightInSquatPortion); newParentHeight++)
                         {
-                            //cout << " newParentHeight: " << newParentHeight << endl;
                             const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
                             if (descendantRange.numInRange() > 0)
                             {
