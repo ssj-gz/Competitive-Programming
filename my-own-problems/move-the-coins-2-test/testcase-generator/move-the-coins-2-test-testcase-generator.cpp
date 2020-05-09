@@ -397,7 +397,7 @@ void addStrandsAndClumps(TreeGenerator<NodeData>& treeGenerator, const int numNo
     auto allNodes = treeGenerator.nodes();
     // Do the strands first; attaching clumps to strands rather than vice versa seems more interesting, somehow :)
     const auto lengthOfStrand = chooseRandomValuesWithSum(numStrands, numNodesInStrands, 1);
-    for (int i = 0; i < numClumps; i++)
+    for (int i = 0; i < numStrands; i++)
     {
         auto nodeToAddTo = rnd.nextFrom(allNodes);
         const auto strand = treeGenerator.addNodeChain(nodeToAddTo, lengthOfStrand[i]);
