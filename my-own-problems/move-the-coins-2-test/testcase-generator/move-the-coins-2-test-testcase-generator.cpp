@@ -796,6 +796,77 @@ int main(int argc, char* argv[])
             }
         }
 
+        {
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(9734)
+                    .withDescription("Small, skeletal graph with 5 nodes at root, then a few more layers where the number of children is mostly 1, sometimes 2. Then a large number of clumps are distributed around the nodes of this small graph, until we have 200'000 nodes.  200'000 mostly random queries."));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+
+                TreeGenerator<NodeData> treeGenerator;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
+                // The first switchOverAfterNumNodes nodes are biased towards having a single child: this means that  they will likely have the same
+                // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
+                // that have a large number of descendants, which is necessarily to cause CHEAT_PHASE_THREE to TLE.
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 40, { {5, 100.0} }, 5, {
+                        {1, 90.0},
+                        {2, 10}
+                        });
+
+                const auto nodesInSquatGraph = treeGenerator.nodes();
+                const int numNodesInSquatGraph = nodesInSquatGraph.size();
+                const auto numInClumpForNode = chooseRandomValuesWithSum(numNodesInSquatGraph, numNodes - numNodesInSquatGraph, 1);
+                for (int i = 0; i < numNodesInSquatGraph; i++)
+                {
+                    for (int j = 0; j < numInClumpForNode[i]; j++)
+                    {
+                        treeGenerator.createNode(nodesInSquatGraph[i]);
+                    }
+                }
+                assert(treeGenerator.numNodes() == numNodes);
+
+                vector<TestQuery> queries;
+                const auto allNodes = treeGenerator.nodes();
+                map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    for (int height = 0; height <= lookupInfo.maxHeight; height++)
+                    {
+                        cout << " height: " << height << " nodesAtHeightLookup: " << lookupInfo.nodesAtHeightLookup[height].size() << endl;
+                    }
+                    for (auto nodeToReparent : allNodes)
+                    {
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        bool haveFoundDescendants = false;
+                        for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
+                        {
+                            const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
+                            if (descendantRange.numInRange() > 0)
+                            {
+                                numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
+                                haveFoundDescendants = true;
+                            }
+                            else if (haveFoundDescendants)
+                                break;
+                        }
+                    }
+                    WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
+                    for (int i = 0; i < 3 * numQueries / 4; i++)
+                    {
+                        const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
+                        auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
+                    }
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+        }
+
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
