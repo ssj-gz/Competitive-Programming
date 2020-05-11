@@ -19,6 +19,8 @@
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
+#define DIAGNOSTICS
+
 using namespace std;
 
 const int64_t Mod = 1'000'000'007;
@@ -444,6 +446,7 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
     int64_t powerOf2 = 2;
     int64_t powerOf3 = 3;
 
+#ifdef DIAGNOSTICS
     auto stringOf = [](const int numInString, const string& stringToDuplicate)
     {
         string s;
@@ -490,9 +493,23 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
             cout << "nodeToReparent: " << nodeToReparent.id << " newParent: " << newParent.id << " isValid: " << (newParent.isDescendantOf(nodeToReparent) ? "✗" : "🗸") << endl;
         }
     }
+    auto printL = [&validReparentings]()
+    {
+        cout << "L: "  << endl;
+        cout << "u  v  height(v)" << endl;
+        for (const auto reparenting : validReparentings)
+        {
+            cout << reparenting.first->id << "  " << reparenting.second->id << "     " << reparenting.second->height << endl;
+        }
+    };
+    printL();
+    cout << "#validReparentings: " << validReparentings.size() << endl;
+#endif
+    int queryNum = 0;
 
     for (const auto encryptedQuery : encryptedQueries)
     {
+        queryNum++;
         const auto index = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
         assert(0 <= index && index < validReparentings.size());
         auto queryResultIter = validReparentings.begin() + index;
@@ -501,6 +518,13 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
         const auto newParent = queryResultIter->second;
 
         validReparentings.erase(queryResultIter);
+
+#ifdef DIAGNOSTICS
+        cout << "$(u_" << queryNum << ", v_" << queryNum << ") = (" << nodeToReparent->id << ", " << newParent->id << ")$" << endl;
+        cout << "$\\textit{decryptionKey}=" << decryptionKey << " + 2^" << queryNum << "\\times" << nodeToReparent->id << " + 3^" << queryNum << " \\times " << newParent->id << "\\mod 10^9+7 = " << (powerOf2 * nodeToReparent->id) << " + " << (powerOf3 * newParent->id) << "\\mod 10^9+7 = " << ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id)) << " \\mod 10^9+7=" << ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id)) << "$" << endl;
+        cout << "New L: " << endl;
+        printL();
+#endif
 
         decryptionKey = (decryptionKey + powerOf2 * nodeToReparent->id) % Mod;
         decryptionKey = (decryptionKey + powerOf3 * newParent->id) % Mod;
