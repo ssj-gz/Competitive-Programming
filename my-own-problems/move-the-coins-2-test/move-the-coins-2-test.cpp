@@ -531,6 +531,9 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
         powerOf2 = (powerOf2 * 2) % Mod;
         powerOf3 = (powerOf3 * 3) % Mod;
     }
+#ifdef DIAGNOSTICS
+    cout << "The final $\\textit{decryptionKey}$ is $" << decryptionKey << "$" << endl;
+#endif
 
     return decryptionKey;
 }
