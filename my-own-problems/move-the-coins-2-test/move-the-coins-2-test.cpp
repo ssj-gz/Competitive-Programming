@@ -520,6 +520,7 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
         validReparentings.erase(queryResultIter);
 
 #ifdef DIAGNOSTICS
+        cout << "$\\textit{decryptedChoice_" << queryNum << "} = \\textit{decryptionKey} \\oplus \\textit{encryptedChoice_" << queryNum << "} = " << decryptionKey << " \\oplus " << encryptedQuery << " = " << (index + 1) << endl;
         cout << "$(u_" << queryNum << ", v_" << queryNum << ") = (" << nodeToReparent->id << ", " << newParent->id << ")$" << endl;
         cout << "$\\textit{decryptionKey}=" << decryptionKey << " + 2^" << queryNum << "\\times" << nodeToReparent->id << " + 3^" << queryNum << " \\times " << newParent->id << "\\mod 10^9+7 = " << (powerOf2 * nodeToReparent->id) << " + " << (powerOf3 * newParent->id) << "\\mod 10^9+7 = " << ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id)) << " \\mod 10^9+7=" << ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id)) << "$" << endl;
         cout << "New L: " << endl;
