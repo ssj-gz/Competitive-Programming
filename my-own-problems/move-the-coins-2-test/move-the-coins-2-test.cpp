@@ -523,17 +523,22 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
         validReparentings.erase(queryResultIter);
 
 #ifdef DIAGNOSTICS
-        cout << "$\\textit{decryptedChoice}_" << queryNum << " = \\textit{decryptionKey} \\oplus \\textit{encryptedChoice}_" << queryNum << " = " << decryptionKey << " \\oplus " << encryptedQuery << " = " << (index + 1) << "$" << endl;
-        cout << "$(u_" << queryNum << ", v_" << queryNum << ") = (" << nodeToReparent->id << ", " << newParent->id << ")$" << endl;
+        cout << endl;
+        cout << "$\\textit{encryptedChoice}_" << queryNum << " = " << encryptedQuery << "$" << endl << endl;
+        cout << "$\\textit{decryptedChoice}_" << queryNum << " = \\textit{decryptionKey} \\oplus \\textit{encryptedChoice}_" << queryNum << " = " << decryptionKey << " \\oplus " << encryptedQuery << " = " << (index + 1) << "$" << endl << endl;
+        cout << "$(u_" << queryNum << ", v_" << queryNum << ") = (" << nodeToReparent->id << ", " << newParent->id << ")$" << endl << endl;
+
         cout << "$$\\begin{eqnarray}" << endl;
-        cout << "\\textit{decryptionKey}&=&\\textit{decryptionKey}+2^" << queryNum << " \\times u_1 + 3^" << queryNum << " \\times v_1 \\mod{10^9+7}" << " \\nonumber \\\\" << endl;
+        cout << "\\textit{decryptionKey}&=&\\textit{decryptionKey}+2^" << queryNum << " \\times u_" << queryNum << " + 3^" << queryNum << " \\times v_" << queryNum << " \\mod{10^9+7}" << " \\nonumber \\\\" << endl;
         cout << "&=& " << decryptionKey << " + 2^" << queryNum << "\\times" << nodeToReparent->id << " + 3^" << queryNum << " \\times " << newParent->id << "\\mod{10^9+7}" << " \\nonumber \\\\" << endl;
-        cout << "&=& " << (powerOf2 * nodeToReparent->id) << " + " << (powerOf3 * newParent->id) << "\\mod{10^9+7}" << " \\nonumber \\\\" << endl;
-        cout << "&=& " << ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id)) << " \\mod{10^9+7}" << " \\nonumber \\\\" << endl;
-        cout << "&=&" << ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id))  << " \\nonumber \\\\" << endl;
-        cout << "\\end{eqnarray}$$" << endl;
+        cout << "&=& " << decryptionKey << " + " << (powerOf2 * nodeToReparent->id) << " + " << (powerOf3 * newParent->id) << "\\mod{10^9+7}" << " \\nonumber \\\\" << endl;
+        cout << "&=& " << decryptionKey + ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id)) << " \\mod{10^9+7}" << " \\nonumber \\\\" << endl;
+        cout << "&=&" << decryptionKey + ((powerOf2 * nodeToReparent->id) + (powerOf3 * newParent->id))  << " \\nonumber \\\\" << endl;
+        cout << "\\end{eqnarray}$$" << endl << endl;
+
         cout << "New L: " << endl;
         printL();
+        cout << endl;
 #endif
 
         decryptionKey = (decryptionKey + powerOf2 * nodeToReparent->id) % Mod;
