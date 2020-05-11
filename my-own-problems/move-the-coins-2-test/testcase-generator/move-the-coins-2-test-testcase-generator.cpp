@@ -421,35 +421,60 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
-        // TODO - remove this - debugging only!
         auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask1)
-                .withSeed(9734)
-                .withDescription("TODO - remove - debugging only!"));
+                .withSeed(20938851)
+                .withDescription("Sample"));
         {
-            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo().withDescription("Sample testcase 1of2"));
 
 
             TreeGenerator<NodeData> treeGenerator;
-            treeGenerator.createNode();
-            const int numNodes = 2;
-            const int numQueries = 1;
-            treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
-            const auto& lookupInfo = computeLookupInfo(treeGenerator);
+            const auto one = treeGenerator.createNode();
+            const auto two = treeGenerator.createNode();
+            const auto three = treeGenerator.createNode();
+            const auto four = treeGenerator.createNode();
+            const auto five = treeGenerator.createNode();
 
+            treeGenerator.addEdge(one, three);
+            treeGenerator.addEdge(one, two);
+            treeGenerator.addEdge(two, four);
+            treeGenerator.addEdge(two, five);
+
+            const int numQueries = 3;
             vector<TestQuery> queries;
-            const auto allNodes = treeGenerator.nodes();
-            while (queries.size() < numQueries)
-            {
-                const auto nodeToReparent = rnd.nextFrom(allNodes);
-                const auto newParent = rnd.nextFrom(allNodes);
+            auto lookupInfo = computeLookupInfo(treeGenerator);
+            addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+            shuffle(queries.begin(), queries.end());
 
-                if (!newParent->data.isDescendantOf(*nodeToReparent))
-                {
-                    queries.push_back({nodeToReparent, newParent});
-                }
-            }
+            writeTestCase(treeGenerator, testcase, queries);
+        }
+        {
+            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo().withDescription("Sample testcase 2of2"));
 
-            scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+
+            TreeGenerator<NodeData> treeGenerator;
+            const auto one = treeGenerator.createNode();
+            const auto two = treeGenerator.createNode();
+            const auto three = treeGenerator.createNode();
+            const auto four = treeGenerator.createNode();
+            const auto five = treeGenerator.createNode();
+            const auto six = treeGenerator.createNode();
+            const auto seven = treeGenerator.createNode();
+
+            treeGenerator.addEdge(one, seven);
+            treeGenerator.addEdge(two, one);
+            treeGenerator.addEdge(six, one);
+            treeGenerator.addEdge(five, four);
+            treeGenerator.addEdge(three, five);
+            treeGenerator.addEdge(one, five);
+
+            const int numQueries = 5;
+            vector<TestQuery> queries;
+            auto lookupInfo = computeLookupInfo(treeGenerator);
+            addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+            shuffle(queries.begin(), queries.end());
+
+            writeTestCase(treeGenerator, testcase, queries);
         }
     }
 
