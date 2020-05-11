@@ -64,9 +64,13 @@ For each test case, print a single line containing one integer ― TOOD
 
 ### Explanation
 
-**Example case 1:** The tree $T$ looks like TODO image.  There are $25$ reparentings $(u,v)$ - too many to draw all $T((u,v)$! - but here is a representative sampling.  Reparentings that are valid are marked with a "✓"; invalid ones with a "✗": 
+**Example case 1:** The tree $T$ looks like:
 
-TODO - image
+![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-T.png)
+
+There are $25$ reparentings $(u,v)$ - too many to draw all $T((u,v)$! - but here is a representative sampling.  Reparentings that are valid are marked with a "✓"; invalid ones with a "✗": 
+
+![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-reparentings.png)
 
 By computing all $25$ $T((u,v))$, which can form a table of whether $(u,v)$ is a valid reparenting (✓) or not (✗); for this testcase, it looks as follows:
 
@@ -187,11 +191,11 @@ We've now processed all $Q$ queries, and the final $\textit{decryptionKey}=126$;
 
 **Example case 2:** The initial tree $T$ is as below:
 
-TODO - image
+![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-T.png)
 
 There are $49$ possible reparentings; again, we only show a sample of the $49$ $(u,v)$s and their validity:
 
-TODO - image
+![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-reparentings.png)
 
 The whole table of reparentings validity is:
 
