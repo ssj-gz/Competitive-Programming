@@ -496,10 +496,13 @@ int64_t solveBruteForce(vector<Node>& nodes, const vector<int64_t>& encryptedQue
     auto printL = [&validReparentings]()
     {
         cout << "L: "  << endl;
-        cout << "u  v  height(v)" << endl;
+        cout << " #   u  v  height(v)" << endl;
+        int posInList = 1;
         for (const auto reparenting : validReparentings)
         {
+            cout << string(2 - to_string(posInList).size(), ' ') << posInList << ".  ";
             cout << reparenting.first->id << "  " << reparenting.second->id << "     " << reparenting.second->height << endl;
+            posInList++;
         }
     };
     printL();
