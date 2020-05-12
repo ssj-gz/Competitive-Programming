@@ -16,6 +16,7 @@ struct NodeData
     int id = -1;
     int numDescendants = -1; // Includes the node itself.
     int largestNonDescendantHeight = 0;
+    TestNode<NodeData>* parent = nullptr;
 
     bool isDescendantOf(TestNode<NodeData>& otherNode)
     {
@@ -69,6 +70,7 @@ void fixParentChildAndHeights(TestNode<NodeData>* node, TestNode<NodeData>* pare
 {
     node->data.height = height;
     node->data.numDescendants = 1; // This node.
+    node->data.parent = parent;
 
     for (auto childEdge : node->neighbours)
     {
