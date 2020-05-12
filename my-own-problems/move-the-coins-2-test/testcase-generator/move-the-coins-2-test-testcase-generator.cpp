@@ -793,7 +793,9 @@ int main(int argc, char* argv[])
                     auto lookupInfo = computeLookupInfo(treeGenerator);
                     addWeightedQueries(firstHalvesOfArms, allNodes, queries, 3 * numQueries / 4, rnd.next(75.0, 85.0), lookupInfo);
                     addWeightedQueries(secondHalvesOfArms, allNodes, queries, (numQueries - queries.size()) / 2, rnd.next(75.0, 85.0), lookupInfo);
-                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size(), rnd.next(75.0, 85.0), lookupInfo);
+                    const int numStrandCoveredQueries = 5000;
+                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
+                    addQueriesCoveredByStrands({arm1, arm2, arm3}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
                     addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
                 }
 
