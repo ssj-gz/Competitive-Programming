@@ -71,8 +71,8 @@ const int NoExplicitLimit = std::numeric_limits<int>::max();
 
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
-                                            .withMaxNodesPerTestcase(10)
-                                            .withMaxQueriesPerTestcase(10)
+                                            .withMaxNodesPerTestcase(100)
+                                            .withMaxQueriesPerTestcase(100)
                                             .withMaxNodesOverAllTestcases(NoExplicitLimit)
                                             .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withMaxNumTestcases(10);
@@ -461,60 +461,102 @@ int main(int argc, char* argv[])
 
     // SUBTASK 1
     {
-        auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask1)
-                .withSeed(20938851)
-                .withDescription("Sample"));
         {
-            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo().withDescription("Sample testcase 1of2"));
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask1)
+                    .withSeed(20938851)
+                    .withDescription("Sample"));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo().withDescription("Sample testcase 1of2"));
 
 
-            TreeGenerator<NodeData> treeGenerator;
-            const auto one = treeGenerator.createNode();
-            const auto two = treeGenerator.createNode();
-            const auto three = treeGenerator.createNode();
-            const auto four = treeGenerator.createNode();
-            const auto five = treeGenerator.createNode();
+                TreeGenerator<NodeData> treeGenerator;
+                const auto one = treeGenerator.createNode();
+                const auto two = treeGenerator.createNode();
+                const auto three = treeGenerator.createNode();
+                const auto four = treeGenerator.createNode();
+                const auto five = treeGenerator.createNode();
 
-            treeGenerator.addEdge(one, three);
-            treeGenerator.addEdge(one, two);
-            treeGenerator.addEdge(two, four);
-            treeGenerator.addEdge(two, five);
+                treeGenerator.addEdge(one, three);
+                treeGenerator.addEdge(one, two);
+                treeGenerator.addEdge(two, four);
+                treeGenerator.addEdge(two, five);
 
-            const int numQueries = 3;
-            vector<TestQuery> queries;
-            auto lookupInfo = computeLookupInfo(treeGenerator);
-            addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
-            shuffle(queries.begin(), queries.end());
+                const int numQueries = 3;
+                vector<TestQuery> queries;
+                auto lookupInfo = computeLookupInfo(treeGenerator);
+                addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                shuffle(queries.begin(), queries.end());
 
-            writeTestCase(treeGenerator, testcase, queries);
+                writeTestCase(treeGenerator, testcase, queries);
+            }
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo().withDescription("Sample testcase 2of2"));
+
+
+                TreeGenerator<NodeData> treeGenerator;
+                const auto one = treeGenerator.createNode();
+                const auto two = treeGenerator.createNode();
+                const auto three = treeGenerator.createNode();
+                const auto four = treeGenerator.createNode();
+                const auto five = treeGenerator.createNode();
+                const auto six = treeGenerator.createNode();
+                const auto seven = treeGenerator.createNode();
+
+                treeGenerator.addEdge(one, seven);
+                treeGenerator.addEdge(two, one);
+                treeGenerator.addEdge(six, one);
+                treeGenerator.addEdge(five, four);
+                treeGenerator.addEdge(three, five);
+                treeGenerator.addEdge(one, five);
+
+                const int numQueries = 5;
+                vector<TestQuery> queries;
+                auto lookupInfo = computeLookupInfo(treeGenerator);
+                addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                shuffle(queries.begin(), queries.end());
+
+                writeTestCase(treeGenerator, testcase, queries);
+            }
         }
         {
-            auto& testcase = testFile.newTestcase(MC2TTestCaseInfo().withDescription("Sample testcase 2of2"));
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask1)
+                    .withSeed(23984723)
+                    .withDescription("Misc tiny testcases; randomly generated"));
+            cout << "subtask1.maxNodesPerTestcase: " << subtask1.maxNodesPerTestcase << endl;
+            for (int i = 0; i < subtask1.maxNumTestcases; i++)
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
+                const int numNodes = subtask1.maxNodesPerTestcase - rnd.next(10);
+                const int numQueries = subtask1.maxQueriesPerTestcase - rnd.next(10);
+                cout << "numNodes: " << numNodes << " numQueries: " << numQueries << endl;
 
-            TreeGenerator<NodeData> treeGenerator;
-            const auto one = treeGenerator.createNode();
-            const auto two = treeGenerator.createNode();
-            const auto three = treeGenerator.createNode();
-            const auto four = treeGenerator.createNode();
-            const auto five = treeGenerator.createNode();
-            const auto six = treeGenerator.createNode();
-            const auto seven = treeGenerator.createNode();
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+                const int numNodesPhase1 = rnd.next(numNodes);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(1.0, 100.0));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
 
-            treeGenerator.addEdge(one, seven);
-            treeGenerator.addEdge(two, one);
-            treeGenerator.addEdge(six, one);
-            treeGenerator.addEdge(five, four);
-            treeGenerator.addEdge(three, five);
-            treeGenerator.addEdge(one, five);
+                const auto allNodes = treeGenerator.nodes();
+                computeLookupInfo(treeGenerator);
 
-            const int numQueries = 5;
-            vector<TestQuery> queries;
-            auto lookupInfo = computeLookupInfo(treeGenerator);
-            addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
-            shuffle(queries.begin(), queries.end());
+                vector<TestQuery> allPossibleQueries;
+                for (auto nodeToReparent : allNodes)
+                {
+                    for (auto newParent : allNodes)
+                    {
+                        if (!newParent->data.isDescendantOf(*nodeToReparent))
+                            allPossibleQueries.push_back({nodeToReparent, newParent});
+                    }
+                }
 
-            writeTestCase(treeGenerator, testcase, queries);
+                assert(!allPossibleQueries.empty());
+
+                const vector<TestQuery> queries = chooseKRandomFrom(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
+                assert(!queries.empty());
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
         }
     }
 
