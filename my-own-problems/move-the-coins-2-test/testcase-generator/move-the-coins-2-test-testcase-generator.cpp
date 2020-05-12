@@ -181,7 +181,6 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     int queryNum = 0;
     int64_t numNonDescendantHeightSum = 0;
     int64_t numDescendantHeightSum = 0;
-    set<pair<TestNode<NodeData>*, int>> blah;
     for (auto& query : queries)
     {
         queryNum++;
@@ -227,16 +226,6 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         numNonDescendantHeightSum += (numNonDescendantsToLeft + numNonDescendantsToRight);
         numDescendantHeightSum += numDescendantsAtHeight;
 
-
-        if (numDescendantsAtHeight > 1000)
-        {
-            if (blah.find({nodeToReparent, newParentHeight}) == blah.end())
-            {
-                //cout << "blee: nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at newParentHeight: " << numDescendantsAtHeight << endl;
-            }
-            blah.insert({nodeToReparent, newParentHeight});
-        }
-
         const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
         queryIndex += numFromPriorNewParents;
 
@@ -255,7 +244,6 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     }
     cout << "numNonDescendantHeightSum: " << numNonDescendantHeightSum << endl;
     cout << "numDescendantHeightSum: " << numDescendantHeightSum << endl;
-    cout << "blah: " << blah.size() << endl;
 }
 
 void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
