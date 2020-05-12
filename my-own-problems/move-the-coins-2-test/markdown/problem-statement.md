@@ -124,7 +124,7 @@ There are $25$ reparentings $(u,v)$ - too many to draw all $T((u,v)$! - but here
 
 ![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-reparentings.png)
 
-By computing all $25$ $T((u,v))$, which can form a table of whether $(u,v)$ is a valid reparenting (✓) or not (✗); for this testcase, it looks as follows:
+By computing all $25$ $T((u,v))$, we can form a table of whether $(u,v)$ is a valid reparenting (✓) or not (✗); for this testcase, it looks as follows:
 
 ```
          v
