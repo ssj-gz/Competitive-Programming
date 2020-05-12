@@ -20,6 +20,7 @@ struct NodeData
 
     bool isDescendantOf(TestNode<NodeData>& otherNode)
     {
+        assert(dfsBeginVisit != -1 && dfsEndVisit != -1 && otherNode.data.dfsBeginVisit != -1 && otherNode.data.dfsEndVisit != -1);
         return (dfsBeginVisit >= otherNode.data.dfsBeginVisit && dfsEndVisit <= otherNode.data.dfsEndVisit);
     }
 
