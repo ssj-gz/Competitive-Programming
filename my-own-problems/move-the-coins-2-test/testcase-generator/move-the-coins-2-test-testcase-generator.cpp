@@ -804,6 +804,57 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(107466890)
+                    .withDescription("Four long (~40k) arms originating at (or near) root; then random strands and clumps added.  This is (again) intended to stress-test Phase Two."));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
+
+                TreeGenerator<NodeData> treeGenerator;
+                auto rootNode = treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
+                const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(38'000, 42'000));
+                const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(38'000, 42'000));
+                const int posOf3rdArmAlong1st = rnd.next(500, 600);
+                const int posOf4thArmAlong2nd = rnd.next(900, 1000);
+                const auto arm3 = treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(38'000, 42'000));
+                const auto arm4 = treeGenerator.addNodeChain(arm2[posOf4thArmAlong2nd], rnd.next(38'000, 42'000));
+                vector<vector<TestNode<NodeData>*>> addedStrands;
+                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, rnd.next(200, 400), addedStrands);
+                treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
+
+                const auto allNodes = treeGenerator.nodes();
+
+                vector<TestNode<NodeData>*> firstHalvesOfArms;
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm1.begin(), arm1.begin() + arm1.size() / 2);
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm2.begin(), arm2.begin() + arm2.size() / 2);
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm3.begin(), arm3.begin() + arm3.size() / 2);
+                firstHalvesOfArms.insert(firstHalvesOfArms.end(), arm4.begin(), arm4.begin() + arm4.size() / 2);
+
+                vector<TestNode<NodeData>*> secondHalvesOfArms;
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm1.begin() + arm1.size() / 2, arm1.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm2.begin() + arm2.size() / 2, arm2.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm3.begin() + arm3.size() / 2, arm3.end());
+                secondHalvesOfArms.insert(secondHalvesOfArms.end(), arm4.begin() + arm4.size() / 2, arm4.end());
+
+                vector<TestQuery> queries;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    addWeightedQueries(firstHalvesOfArms, allNodes, queries, 3 * numQueries / 4, rnd.next(75.0, 85.0), lookupInfo);
+                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, (numQueries - queries.size()) / 2, rnd.next(75.0, 85.0), lookupInfo);
+                    const int numStrandCoveredQueries = 5000;
+                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
+                    addQueriesCoveredByStrands({arm1, arm2, arm3, arm4}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+            }
+
+        }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(329845743)
                     .withDescription("Two testcases - one 100'000 nodes (and queries) which is a graph with 2% leaf preference; the other is 100'000 nodes (and queries!) and 98% leaf preference"));
             {
