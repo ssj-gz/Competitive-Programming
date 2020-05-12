@@ -43,6 +43,11 @@ int main(int argc, char* argv[])
             }
         }
 
+#ifdef DIAGNOSTICS
+        cout << "Original:        " << buildingString << endl;
+        cout << "After explosion: " << buildingStringAfterExplosion << endl;
+#endif
+
         cout << count(buildingStringAfterExplosion.begin(), buildingStringAfterExplosion.end(), '0') << endl;
     }
 
