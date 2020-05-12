@@ -148,7 +148,7 @@ L:
 13.  5  4     2
 ```
 
-On to the $2^\text{nd}$ query! $\textit{encryptedChoice_2}=18$, so
+On to the $2^\text{nd}$ query! $\textit{encryptedChoice}_2=18$, so
 
 $\textit{decryptedChoice}_2 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_2 = 18 \oplus 23 = 5$
 
