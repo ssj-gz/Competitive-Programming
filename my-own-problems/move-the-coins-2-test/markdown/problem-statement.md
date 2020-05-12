@@ -5,10 +5,11 @@ TODO - overview
 
 
 ### Input
-- TODO
-- TODO
-- TODO
-- TODO
+- The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
+- The first line of each test case contains a single integer $N$.
+- Each of the next $N-1$ lines contains two space-separated integers $a$ and $b$ denoting that nodes $a$ and $b$ are connected by an edge.
+- The next line contains a single integer $Q$
+- The $i^\text{th}$ of the next $Q$ lines contains the $i^\text{th}$ encrypted choice, $\textit{encryptedChoice}_i$.
 
 ### Output
 For each test case, print a single line containing one integer ― TOOD
