@@ -415,6 +415,57 @@ void addStrandsAndClumps(TreeGenerator<NodeData>& treeGenerator, const int numNo
     }
 }
 
+/**
+ * Add queries, with nodeToReparent being in one of the arms, that are covered by a strand.
+ * A query q is set to be covered by a strand S if all of the  following hold:
+ *
+ *  * S is anchored at an ancestor of q.nodeToReparent in the same arm as q.nodeToReparent
+ *  * q.newParent.height <= the max height of the nodes in S.
+ *
+ */
+void addQueriesCoveredByStrands(const vector<vector<TestNode<NodeData>*>>& arms, const vector<vector<TestNode<NodeData>*>>& strands, const vector<TestNode<NodeData>*>& allNodes, const int numQueriesToAdd, vector<TestQuery>& queries, LookupInfo& lookupInfo)
+{
+    vector<std::pair<TestNode<NodeData>*, int>> nodeToReparentAndMaxHeights;
+
+    for (const auto& strand : strands)
+    {
+        auto strandRoot = strand.front()->data.parent;
+        const int maxHeightInStrand = strand.back()->data.height;
+
+        for (const auto& arm : arms)
+        {
+            bool haveFoundRootInArm = false;
+            for (auto nodeInArm : arm)
+            {
+                if (nodeInArm == strandRoot)
+                {
+                    haveFoundRootInArm = true;
+                    continue;
+                }
+                if (haveFoundRootInArm && nodeInArm->data.height <= maxHeightInStrand)
+                {
+                    nodeToReparentAndMaxHeights.push_back({nodeInArm, maxHeightInStrand});
+                    //cout << " node: " << nodeInArm->id() << " at height: " << nodeInArm->data.height << " is covered by strand rooted at " << strandRoot->id() << " which is at height: " << strandRoot->data.height << " with strand length: " << strand.size() << endl;
+                }
+            }
+        }
+    }
+    //cout << "nodeToReparentAndMaxHeights.size(): " << nodeToReparentAndMaxHeights.size() << endl;
+    for (int i = 0; i < numQueriesToAdd; i++)
+    {
+        const auto nodeToReparentAndMaxHeight = rnd.nextFrom(nodeToReparentAndMaxHeights);
+        const auto nodeToReparent = nodeToReparentAndMaxHeight.first;
+        const auto maxNewParentHeight = nodeToReparentAndMaxHeight.second;
+        const auto newParentHeight = rnd.next(nodeToReparent->data.height, maxNewParentHeight);
+
+        auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
+
+        //cout << " added strand-covered  query: nodeToReparent: " << nodeToReparent->id() << " newParent:" << newParent->id() << endl;
+
+        queries.push_back({nodeToReparent, newParent});
+    }
+}
+
 int main(int argc, char* argv[])
 {
     TestSuite<SubtaskInfo> testsuite;
@@ -696,7 +747,9 @@ int main(int argc, char* argv[])
                     auto lookupInfo = computeLookupInfo(treeGenerator);
                     addWeightedQueries(firstHalvesOfArms, allNodes, queries, 3 * numQueries / 4, rnd.next(75.0, 85.0), lookupInfo);
                     addWeightedQueries(secondHalvesOfArms, allNodes, queries, (numQueries - queries.size()) / 2, rnd.next(75.0, 85.0), lookupInfo);
-                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size(), rnd.next(75.0, 85.0), lookupInfo);
+                    const int numStrandCoveredQueries = 5000;
+                    addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
+                    addQueriesCoveredByStrands({arm1, arm2}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
                     addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
                 }
 
