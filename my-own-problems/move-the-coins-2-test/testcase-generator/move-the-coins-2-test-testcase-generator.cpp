@@ -386,7 +386,7 @@ void addWeightedQueries(const vector<TestNode<NodeData>*>& candidateNodesToRepar
     }
 }
 
-void addStrandsAndClumps(TreeGenerator<NodeData>& treeGenerator, const int numNodes, const int numClumpsAndStrandsToAdd)
+void addStrandsAndClumps(TreeGenerator<NodeData>& treeGenerator, const int numNodes, const int numClumpsAndStrandsToAdd, vector<vector<TestNode<NodeData>*>>& destStrands)
 {
     // Roughly equal numbers of strands anad clumps.
     const int numClumps = rnd.next(0.4, 0.6) * numClumpsAndStrandsToAdd;
@@ -401,6 +401,7 @@ void addStrandsAndClumps(TreeGenerator<NodeData>& treeGenerator, const int numNo
     {
         auto nodeToAddTo = rnd.nextFrom(allNodes);
         const auto strand = treeGenerator.addNodeChain(nodeToAddTo, lengthOfStrand[i]);
+        destStrands.push_back(strand);
         allNodes.insert(allNodes.end(), strand.begin(), strand.end());
     }
     const auto lengthOfClump = chooseRandomValuesWithSum(numClumps, numNodesInClumps, 1);
@@ -676,7 +677,8 @@ int main(int argc, char* argv[])
                 auto rootNode = treeGenerator.createNode();
                 const auto arm1 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
                 const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(78'000, 82'000));
-                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, 200);
+                vector<vector<TestNode<NodeData>*>> addedStrands;
+                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, 200, addedStrands);
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 const auto allNodes = treeGenerator.nodes();
@@ -717,7 +719,8 @@ int main(int argc, char* argv[])
                 const auto arm2 = treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
                 const int posOf3rdArmAlong1st = rnd.next(700, 800);
                 const auto arm3 = treeGenerator.addNodeChain(arm1[posOf3rdArmAlong1st], rnd.next(48'000, 52'000));
-                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, 200);
+                vector<vector<TestNode<NodeData>*>> addedStrands;
+                addStrandsAndClumps(treeGenerator, (numNodes - treeGenerator.numNodes()) / 2, 200, addedStrands);
                 treeGenerator.createNodesWithRandomParent(numNodes - treeGenerator.numNodes());
 
                 const auto allNodes = treeGenerator.nodes();
