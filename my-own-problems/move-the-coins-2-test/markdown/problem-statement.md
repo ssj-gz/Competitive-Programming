@@ -1,8 +1,53 @@
-TODO - overview
+Chef is preparing testcases for the ["Move the Coins 2"](https://www.codechef.com/problems/MOVCOIN2)!
+
+For each testcase, he needs to provide a tree $T$ over $N$ labelled $1,2,\dots,N$, rooted at node $1$, and a list of $Q$ distinct _valid reparentings_ on $T$.
+
+A _reparenting_ $r$ is a pair of nodes $(u,v)$ ($u \ne 1$) of $T$.  The result of applying the reparenting $r$ to $T$ is another graph $T(r)$ over the $N$ nodes formed as follows.
+
+We take a copy of the original $T$, and then remove the edge connecting $u$ to its parent.  We then add a new edge between the nodes $u$ and $v$ to get $T(u,v)$.
+
+As an example, imagine we have the tree $T$ as shown below:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX-reparent1of2.png)
+
+and we wish to apply the reparenting $r=(u,v)=(6,4)$ to it.  The resulting $T(r)$ would look like:
+
 ![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX-reparent2of2.png)
 
+A reparenting $r$ is _valid_ if the resulting $T(r)$ is still a _tree_ (that is, a connected graph with no cycles) over the $N$ nodes.
+
+Chef has $T$ already, and now just needs to find the $Q$ valid reparentings.  He does this by forming a list $L$ of all valid reparentings of $T$ and ordering them with a special order:
+
+Let $r=(u,v)$ and $r'=(u',v')$ be valid reparentings.  Then:
+
+- If $u \ne u'$, then $r < r'$ if $u < u'$, and $r > r'$ if $u > u'$
+- Otherwise i.e. if $u = u'$, if $\textit{height}(v) \ne \textit{height}(v')$, then $r <
+r'$ if $\textit{height}(v) < \textit{height}(v')$ and $r > r'$ if $\textit{height}(v) >
+\textit{height}(v')$
+- Otherwise i.e. if $u = u'$ and $\textit{height}(v) = \textit{height}(v')$, then $r <
+r'$ if $v < v'$ and $r > r'$ if $v > v'$.
+
+where $\textit{height}(u)$ is the distance between the node $u$ and the node $1$.
+
+He then picks $Q$ numbers $c_i$ and chooses the $c_1^\text{th}$ element from L, and removes it from $L$; then chooses the $c_2^\text{th}$ remaining element from $L$ and removes it, etc, eventually generating $Q$ distinct 
+valid reparentings.  Because Chef doesn't believe in making life easy for himself, these choices are _encrypted_, and he can't find the $\textit{decryptionKey}$ to decrypt a choice 
+until he has processed all choices before that one.
+
+More formally, initially $\textit{decryptionKey}=0$.  He reads the first encrypted choice, $\textit{encryptedChoice}_1$ and decrypts it to get $\textit{decryptedChoice}_1$ (i.e. $c_1$) using the general formula:
+
+$\textit{decryptedChoice}_i=\textit{decryptionKey} \oplus \textit{encryptedChoice}_i$
+
+(where $\oplus$ denotes the "xor" operator). 
+
+He then finds the $\textit{decryptedChoice}_1^\text{th}$ reparenting in $L$ - let's call it $r_1=(u_1,v_1)$.  He then removes $r_1$ from $L$, and updates his $\textit{decryptionKey}$ using $r_1$ using
+the $i=1$ case of the general formula:
+
+$\textit{decryptionKey}=\textit{decryptionKey}+2^i \times u_i + 3^i \times v_i \mod{10^9+7}$
+
+He is now ready for the next encrypted choice, $\textit{encryptedChoice}_1$.  He again decrypts it using the formula above; finds the $\textit{decryptedChoice}_1^\text{th}$ entry in $L$, $r_2=(u_2,v_2)$, removes it, 
+updates his $\textit{decryptionKey}$ with it, etc, until all $Q$ encrypted choices have been processed.
+
+Can you help Chef find his $Q$ distinct, valid reparentings? You need not them: just printing the final value of $decryptionKey$ will suffice to show that you can do it!
 
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
