@@ -301,7 +301,7 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
     writeTestCase(treeGenerator, destTestcase, scrambledQueries);
 }
 
-TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes, const std::map<int, double>& percentageProbOfNumChildrenBeforeSwitchOver, const int switchOverAfterNumNodes, const std::map<int, double>& percentageProbOfNumChildrenAfterSwitchOver)
+TestNode<NodeData>* buildGraphInLayers(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes, const std::map<int, double>& percentageProbOfNumChildrenBeforeSwitchOver, const int switchOverAfterNumNodes, const std::map<int, double>& percentageProbOfNumChildrenAfterSwitchOver)
 {
     auto rootNode = treeGenerator.createNode();
 
@@ -539,7 +539,7 @@ int main(int argc, char* argv[])
                 // The first switchOverAfterNumNodes nodes are biased towards having a single child: this means that  they will likely have the same
                 // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
                 // that have a large number of descendants, which is necessarily to cause CHEAT_PHASE_THREE to TLE.
-                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 180'000, { {1, 98.0}, {2, 2.0} }, switchOverAfterNumNodes, {
+                buildGraphInLayers(treeGenerator, 180'000, { {1, 98.0}, {2, 2.0} }, switchOverAfterNumNodes, {
                         {2, 70.0},
                         {3, 5},
                         {1, 25.0}
@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
                 // The first switchOverAfterNumNodes nodes are biased towards having a single child: this means that  they will likely have the same
                 // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
                 // that have a large number of descendants, which is necessarily to cause CHEAT_PHASE_THREE to TLE.
-                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100'000, { {1, 98.0}, {2, 2.0} }, switchOverAfterNumNodes, {
+                buildGraphInLayers(treeGenerator, 100'000, { {1, 98.0}, {2, 2.0} }, switchOverAfterNumNodes, {
                         {2, 70.0},
                         {3, 5},
                         {1, 25.0}
@@ -844,7 +844,7 @@ int main(int argc, char* argv[])
                 // The first switchOverAfterNumNodes nodes are biased towards having a single child: this means that  they will likely have the same
                 // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
                 // that have a large number of descendants, which is necessarily to cause CHEAT_PHASE_THREE to TLE.
-                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 40, { {5, 100.0} }, 5, {
+                buildGraphInLayers(treeGenerator, 40, { {5, 100.0} }, 5, {
                         {1, 90.0},
                         {2, 10}
                         });
