@@ -19,8 +19,6 @@
 
 #include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
-#define DIAGNOSTICS
-
 using namespace std;
 
 const int64_t Mod = 1'000'000'007;
