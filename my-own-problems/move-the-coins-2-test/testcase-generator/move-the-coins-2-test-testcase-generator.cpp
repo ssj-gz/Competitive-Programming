@@ -1100,6 +1100,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
 
     int64_t totalNumNodes = 0;
     int64_t totalNumQueries = 0;
+    const int64_t maxEncryptedKey = static_cast<int64_t>(1) << 36;
 
     const auto& [numTestCases] = testFileReader.readLine<int>();
     for (int t = 0; t < numTestCases; t++)
@@ -1137,6 +1138,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         for (int i = 0; i < numQueries; i++)
         {
             const auto& [encryptedQuery] = testFileReader.readLine<int64_t>();
+            assert(encryptedQuery < maxEncryptedKey);
             encryptedQueries.push_back(encryptedQuery);
         }
 
