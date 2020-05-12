@@ -12,7 +12,7 @@ TODO - overview
 - The $i^\text{th}$ of the next $Q$ lines contains the $i^\text{th}$ encrypted choice, $\textit{encryptedChoice}_i$.
 
 ### Output
-For each test case, print a single line containing one integer ― TOOD
+For each test case, print a single line containing one integer ― the final value of $\textit{decryptionKey}$ after processing all $Q$ choices.
 
 ### Constraints 
 - $1 \le T \le 1,000$
