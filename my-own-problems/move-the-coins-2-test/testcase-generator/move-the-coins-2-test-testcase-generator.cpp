@@ -1006,6 +1006,7 @@ int main(int argc, char* argv[])
             const auto numQueriesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxQueriesOverAllTestcases, 1);
             for (int i = 0; i < subtask3.maxNumTestcases; i++)
             {
+                cout << "Generating testcase " << i << " of " << subtask3.maxNumTestcases << endl;
                 auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
 
                 const int numNodes = numNodesForTestCase[i];
