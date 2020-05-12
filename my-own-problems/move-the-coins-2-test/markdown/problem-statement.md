@@ -18,6 +18,8 @@ For each test case, print a single line containing one integer ― TOOD
 - $1 \le N \le 200,000$
 - $1 \le Q \le 200,000$
 - $1 \le a, b \le N$
+- $0 \le \textit{encryptedChoice}_i \le 2^{36}$ for all valid $i$
+- $1 \le \textit{decryptedChoice}_i \le |L_{orig}| + 1 - i$ for all valid $i$
 - the sum of $N$ over all test cases does not exceed $200,000$
 - the sum of $Q$ over all test cases does not exceed $200,000$
 - TODO
