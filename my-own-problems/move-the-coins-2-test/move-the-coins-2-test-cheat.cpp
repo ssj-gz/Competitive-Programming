@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <deque>
 #include <algorithm>
 
@@ -495,6 +496,24 @@ int64_t findKthNotIn(int k, AVLTree& tree)
     return result;
 }
 
+#ifdef CHEAT_PHASE_THREE
+namespace std
+{
+    template <>
+        class hash<pair<Node*, int>>
+        {
+            public:
+                size_t operator()(const pair<Node*, int>& toHash) const
+                {
+                    const auto hash1 = hash<const Node*>()(toHash.first);
+                    const auto hash2 = hash<int>()(toHash.second);
+                    return hash1 ^ (hash2 + 0x9e3779b9 + (hash1<<6) + (hash1>>2));
+                }
+        };
+
+}
+#endif
+
 int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     int64_t decryptionKey = 0;
@@ -560,7 +579,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         }
     }
 #else
-    map<pair<Node*, int>, AVLTree> descendantsForNodeAndHeight;
+    unordered_map<pair<Node*, int>, AVLTree> descendantsForNodeAndHeight;
     vector<vector<int>> compressedIdsAtHeightByDfs(maxNodeHeight + 1);
     vector<map<int, Node*>> nodeForCompressedIdAtHeight(maxNodeHeight + 1);
 
@@ -595,8 +614,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     for (const auto encryptedQuery : encryptedQueries)
     {
         queryNum++;
-        if (queryNum % 100 == 0)
-            cerr << "query " << queryNum << " of " << encryptedQueries.size() << endl;
+        //if (queryNum % 100 == 0)
+            //cerr << "query " << queryNum << " of " << encryptedQueries.size() << endl;
         const auto kthInRemainingToFind = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
 
         const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
