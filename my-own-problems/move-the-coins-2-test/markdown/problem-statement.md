@@ -29,7 +29,7 @@ r'$ if $v < v'$ and $r > r'$ if $v > v'$.
 
 where $\textit{height}(u)$ is the distance between the node $u$ and the node $1$.
 
-He then picks $Q$ numbers $c_i$ and chooses the $c_1^\text{th}$ element from L, and removes it from $L$; then chooses the $c_2^\text{th}$ remaining element from $L$ and removes it, etc, eventually generating $Q$ distinct 
+He then picks $Q$ numbers $c_i$ and chooses the $c_1^\text{th}$ element from $L$, and removes it from $L$; then chooses the $c_2^\text{th}$ remaining element from $L$ and removes it, etc, eventually generating $Q$ distinct 
 valid reparentings.  Because Chef doesn't believe in making life easy for himself, these choices are _encrypted_, and he can't find the $\textit{decryptionKey}$ to decrypt a choice 
 until he has processed all choices before that one.
 
