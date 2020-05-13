@@ -47,7 +47,7 @@ $\textit{decryptionKey}=\textit{decryptionKey}+2^i \times u_i + 3^i \times v_i \
 He is now ready for the next encrypted choice, $\textit{encryptedChoice}_1$.  He again decrypts it using the formula above; finds the $\textit{decryptedChoice}_1^\text{th}$ entry in $L$, $r_2=(u_2,v_2)$, removes it, 
 updates his $\textit{decryptionKey}$ with it, etc, until all $Q$ encrypted choices have been processed.
 
-Can you help Chef find his $Q$ distinct, valid reparentings? You need not them: just printing the final value of $decryptionKey$ will suffice to show that you can do it!
+Can you help Chef find his $Q$ distinct, valid reparentings? You need not print them: just printing the final value of $decryptionKey$ will suffice to show that you can do it!
 
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
@@ -124,7 +124,7 @@ There are $25$ reparentings $(u,v)$ - too many to draw all $T((u,v)$! - but here
 
 ![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-reparentings.png)
 
-By computing all $25$ $T((u,v))$, we can form a table of whether $(u,v)$ is a valid reparenting (✓) or not (✗); for this testcase, it looks as follows:
+By computing all $25$ of them $T((u,v))$, we can form a table of whether $(u,v)$ is a valid reparenting (✓) or not (✗); for this testcase, it is as follows:
 
 ```
          v
@@ -137,8 +137,7 @@ u 3 │✓ ✓ ✗ ✓ ✓
   5 │✓ ✓ ✓ ✓ ✗ 
 ```
 
-
-Our initial list L, then, is formed by listing all $(u,v)$ with a ✓, and then sorting according to the ordering described above; this list $L$ then is:
+Our initial list $L$, then, is formed by listing all $(u,v)$ with a "✓", and then sorting according to the ordering described above; we get:
 
 ```
 L: 
@@ -249,7 +248,7 @@ There are $49$ possible reparentings; again, we only show a sample of the $49$ $
 
 ![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-reparentings.png)
 
-The whole table of reparentings validity is:
+The whole table of reparentings and their validity looks like:
 
 ```
            v
@@ -321,7 +320,7 @@ $$\begin{eqnarray}
 
 and remove $(3,5)$ from the $L$.  To save space, we won't be printing each updated $L$!
 
-Onto the next query. $\textit{encryptedChoice}_2 = 6$; decrypting:
+On to the next query. $\textit{encryptedChoice}_2 = 6$; decrypting:
 
 $\textit{decryptedChoice}_2 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_2 = 21 \oplus 6 = 19$
 
