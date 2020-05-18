@@ -185,11 +185,11 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     for (auto& query : queries)
     {
         queryNum++;
-        int64_t queryIndex = 0;
+        int64_t indexInOriginalList = 0;
         if (query.nodeToReparent->id() - 1 - 1 >= 0)
         {
             const auto numFromPriorNodesToReparent = lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1 - 1];
-            queryIndex += numFromPriorNodesToReparent;
+            indexInOriginalList += numFromPriorNodesToReparent;
         }
 
         const int newParentHeight = query.newParentNode->data.height;
@@ -198,7 +198,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         {
             const auto numFromSmallerNewParentHeights = findNumNonDescendantsUpToHeight(query.nodeToReparent, newParentHeight - 1, lookupInfo.numNodesUpToHeight, lookupInfo.nodesAtHeightLookup, lookupInfo.numProperDescendantsForNodeAtHeightPrefixSum);
             assert(numFromSmallerNewParentHeights >= 0);
-            queryIndex += numFromSmallerNewParentHeights;
+            indexInOriginalList += numFromSmallerNewParentHeights;
         }
 
         const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
@@ -222,20 +222,20 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         numDescendantHeightSum += numDescendantsAtHeight;
 
         const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
-        queryIndex += numFromPriorNewParents;
+        indexInOriginalList += numFromPriorNewParents;
 
         int numRemovedIndicesToLeft = 0;
-        const auto removedIndicesToLeftInfo = findLastLessThanOrEqualTo(queryIndex, removedIndices);
+        const auto removedIndicesToLeftInfo = findLastLessThanOrEqualTo(indexInOriginalList, removedIndices);
         numRemovedIndicesToLeft += removedIndicesToLeftInfo.second;
         if (removedIndicesToLeftInfo.first)
         {
             numRemovedIndicesToLeft++;
         }
 
-        query.asIndexInRemaining = queryIndex - numRemovedIndicesToLeft;
+        query.asIndexInRemaining = indexInOriginalList - numRemovedIndicesToLeft;
         assert(query.asIndexInRemaining >= 0);
 
-        removedIndices.insertValue(queryIndex);
+        removedIndices.insertValue(indexInOriginalList);
     }
     cout << "numNonDescendantHeightSum: " << numNonDescendantHeightSum << endl;
     cout << "numDescendantHeightSum: " << numDescendantHeightSum << endl;
