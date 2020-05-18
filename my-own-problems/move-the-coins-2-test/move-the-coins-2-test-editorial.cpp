@@ -588,7 +588,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
                     return numOfReparentingThatReparentsNode < numReparentingsUpToHeight;
                 });
         assert(heightIter != allHeights.end());
-        const int newParentHeight = *heightIter;
+        const auto newParentHeight = *heightIter;
         assert(newParentHeight != -1);
         // Phase Two complete.
 
@@ -603,8 +603,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
 
         const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, nodesAtHeightInDFSOrder);
 
-        int numNonDescendantsToLeft = nodesAtHeightInDFSOrder[newParentHeight].size();
-        int numNonDescendantsToRight = 0;
+        auto numNonDescendantsToLeft = nodesAtHeightInDFSOrder[newParentHeight].size();
+        auto numNonDescendantsToRight = 0;
         if (!descendantRange.empty())
         {
             numNonDescendantsToLeft = descendantRange.leftIndex;
