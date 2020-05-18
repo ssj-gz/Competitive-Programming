@@ -22,7 +22,7 @@ int findLongestValidPrefix(const string& expression)
 {
 #ifdef DIAGNOSTICS
     {
-        cout << "prefixLength: prefix: " + string(expression.size() - string("prefix:").size(), ' ') << " is valid: " << endl;
+        cout << "prefixLength: prefix: " + string(max<int>(0, expression.size() - string("prefix:").size()), ' ') << " is valid: " << endl;
         for (int prefixLength = 1; prefixLength <= static_cast<int>(expression.size()); prefixLength++)
         {
             const auto prefix = expression.substr(0, prefixLength);
