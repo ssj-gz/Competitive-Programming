@@ -73,7 +73,7 @@ void fixParentChildAndHeights(Node* node, Node* parent = nullptr, int height = 0
 {
     node->height = height;
     node->parent = parent;
-    node->numDescendants = 1; // This node.
+    node->numDescendants = 1; // A node is classed as a descendant of itself.
 
     node->children.erase(remove(node->children.begin(), node->children.end(), parent), node->children.end());
 
@@ -508,7 +508,6 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     auto rootNode = &(nodes.front());
     vector<vector<Node*>> nodesAtHeightInDFSOrder(maxNodeHeight + 1);
     computeDFSInfo(rootNode, nodesAtHeightInDFSOrder);
-    const auto numNodes = nodes.size();
     
     // The numCanReparentToPrefixSum lookup is for use with Phase One i.e.
     // finding the nodeToReparent of the required reparenting.
@@ -516,7 +515,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     int64_t sumOfNumCanReparentTo = 0;
     for (const auto& node : nodes)
     {
-        const auto numCanReparentNodeTo = numNodes - node.numDescendants; // Can reparent a node to any of its non-descendants.
+        const auto numCanReparentNodeTo = nodes.size() - node.numDescendants; // Can reparent a node to any of its non-descendants.
         sumOfNumCanReparentTo += numCanReparentNodeTo;
         numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
     }
