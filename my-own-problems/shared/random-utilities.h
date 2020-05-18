@@ -49,10 +49,13 @@ inline std::vector<int> chooseRandomValuesWithSum(const unsigned int numValues, 
 
 /**
  * @return a vector of \a numToChoose values randomly-chosen from \a toChooseFrom.
+ * Deprecated.  Use chooseKRandomFromNG instead - it's faster, but will likely
+ * result in difference choices, so it's not a "drop-in" replacement.
  */
 template<typename ValueType>
 std::vector<ValueType> chooseKRandomFrom(const unsigned int numToChoose, const std::vector<ValueType>& toChooseFrom)
 {
+    cout << "chooseKRandomFrom: numToChoose: " << numToChoose << " toChooseFrom: " << toChooseFrom.size() << endl;
     assert(numToChoose <= toChooseFrom.size());
     std::vector<ValueType> toChooseFromScrambled = toChooseFrom;
     shuffle(toChooseFromScrambled.begin(), toChooseFromScrambled.end());
@@ -138,6 +141,26 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
     assert(static_cast<int>(std::set<int>(chosenIndices.begin(), chosenIndices.end()).size()) == numToChoose);
 
     return chosenIndices;
+}
+
+/**
+ * @return a vector of \a numToChoose values randomly-chosen from \a toChooseFrom.
+ * The chosen values will be "distinct" in that the indices chosen from toChooseFrom are
+ * distinct i.e. the chosen values will definitely be distinct if all items in toChooseFrom are
+ * distinct, but may not be distinct otherwise.
+ */
+template<typename ValueType>
+std::vector<ValueType> chooseKRandomFromNG(const unsigned int numToChoose, const std::vector<ValueType>& toChooseFrom)
+{
+    std::vector<ValueType> chosenValues;
+    chosenValues.reserve(numToChoose);
+    for (const int64_t index : chooseKRandomIndicesFrom(numToChoose, toChooseFrom.size()))
+    {
+        chosenValues.push_back(toChooseFrom[index]);
+    }
+    assert(chosenValues.size() == numToChoose);
+
+    return chosenValues;
 }
 
 template <typename T>
