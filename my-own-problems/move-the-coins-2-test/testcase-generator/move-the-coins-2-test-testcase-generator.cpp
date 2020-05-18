@@ -694,8 +694,10 @@ int main(int argc, char* argv[])
                 // Add a couple of long arms.
                 auto allNodes = treeGenerator.nodes();
                 vector<TestNode<NodeData>*> arms;
-                const auto arm1 = treeGenerator.addNodeChain(rnd.nextFrom(allNodes), rnd.next(35'000, 45'000));
-                const auto arm2 = treeGenerator.addNodeChain(rnd.nextFrom(allNodes), rnd.next(35'000, 45'000));
+                const auto arm1Root = rnd.nextFrom(allNodes);
+                const auto arm2Root = rnd.nextFrom(allNodes);
+                const auto arm1 = treeGenerator.addNodeChain(arm1Root, rnd.next(35'000, 45'000));
+                const auto arm2 = treeGenerator.addNodeChain(arm2Root, rnd.next(35'000, 45'000));
                 arms.insert(arms.end(), arm1.begin(), arm1.end());
                 arms.insert(arms.end(), arm2.begin(), arm2.end());
 
