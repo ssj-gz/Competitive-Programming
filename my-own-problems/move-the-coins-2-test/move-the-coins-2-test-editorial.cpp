@@ -431,13 +431,25 @@ int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, cons
     return numNonDescendantsUpToThisHeight;
 }
 
+/**
+  * Imagine we placed all the elements of tree1 and all the elements of tree2
+  * into a list, and that this list contained no duplicates.  Imagine further
+  * that we then sorted this list.
+  * If the kth element in this list is present in tree1, then this function
+  * finds that kth element in:
+  *
+  *   O(log (|tree1|) * log (|tree2|))
+  *
+  * and returns the AVLNode in tree1 that holds that element.  If the kth
+  * element is not present in tree1, this function returns nullptr.
+  */
 AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
 {
     AVLTreeIterator tree1Iter = tree1.root();
     while (tree1Iter.currentNode())
     {
         const auto currentValue1 = tree1Iter.currentNode()->value;
-        int numToLeft2 = 0;
+        auto numToLeft2 = 0;
         AVLTreeIterator tree2Iter = tree2.root();
         while (tree2Iter.currentNode())
         {
@@ -465,11 +477,15 @@ AVLNode* findKthFromPairAux(int k, AVLTree& tree1, AVLTree& tree2)
     return nullptr;
 }
 
+/**
+ * See findKthFromPairAux.
+ */
 AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 {
     auto kthAVLNode = findKthFromPairAux(k, tree1, tree2);
     if (!kthAVLNode)
     {
+        // Element was not in tree1; assume it is in tree2.
         kthAVLNode = findKthFromPairAux(k, tree2, tree1);
     }
     return kthAVLNode;
