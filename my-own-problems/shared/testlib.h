@@ -42,7 +42,6 @@
  */
 
 #include <iostream>
-#include <cstring>
 #include <climits>
 #include <cmath>
 
@@ -115,23 +114,6 @@ public:
     random_t()
         : seed(3905348978240129619LL)
     {
-    }
-
-    /* Sets seed by command line. */
-    void setSeed(int argc, char* argv[])
-    {
-        random_t p;
-
-        seed = 3905348978240129619LL;
-        for (int i = 1; i < argc; i++)
-        {
-            std::size_t le = std::strlen(argv[i]);
-            for (std::size_t j = 0; j < le; j++)
-                seed = seed * multiplier + (unsigned int)(argv[i][j]) + addend;
-            seed += multiplier / addend;
-        }
-
-        seed = seed & mask;
     }
 
     /* Sets seed by given value. */ 
