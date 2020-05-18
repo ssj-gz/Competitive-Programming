@@ -630,7 +630,7 @@ int main(int argc, char* argv[])
                 const int numStrandsToAdd = 800;
                 const auto strandLengthForPreSwitchOverNode = chooseRandomValuesWithSum(numStrandsToAdd, numNodes - treeGenerator.numNodes(), 0);
                 auto allNodes = treeGenerator.nodes();
-                for (int i = 0; i < strandLengthForPreSwitchOverNode.size(); i++)
+                for (int i = 0; i < static_cast<int>(strandLengthForPreSwitchOverNode.size()); i++)
                 {
                     treeGenerator.addNodeChain(allNodes[i], strandLengthForPreSwitchOverNode[i]);
                 }
@@ -705,7 +705,7 @@ int main(int argc, char* argv[])
                 // Disguise the special structure of the first switchOverAfterNumNodes by dangling small chains/ strands from them, randomly.
                 const int numStrandsToAdd = 800;
                 const auto strandLengthForPreSwitchOverNode = chooseRandomValuesWithSum(numStrandsToAdd, numNodes - treeGenerator.numNodes(), 0);
-                for (int i = 0; i < strandLengthForPreSwitchOverNode.size(); i++)
+                for (int i = 0; i < static_cast<int>(strandLengthForPreSwitchOverNode.size()); i++)
                 {
                     treeGenerator.addNodeChain(allNodes[i], strandLengthForPreSwitchOverNode[i]);
                 }
@@ -770,7 +770,7 @@ int main(int argc, char* argv[])
                 const int numStrandsToAdd = 800;
                 const auto strandLengthForPreSwitchOverNode = chooseRandomValuesWithSum(numStrandsToAdd, numNodes - treeGenerator.numNodes(), 0);
                 auto allNodes = treeGenerator.nodes();
-                for (int i = 0; i < strandLengthForPreSwitchOverNode.size(); i++)
+                for (int i = 0; i < static_cast<int>(strandLengthForPreSwitchOverNode.size()); i++)
                 {
                     treeGenerator.addNodeChain(allNodes[i], strandLengthForPreSwitchOverNode[i]);
                 }
