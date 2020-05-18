@@ -2,7 +2,6 @@
 // 
 // Solution to: https://www.codechef.com/problems/S10E
 //
-//#define DIAGNOSTICS // Uncomment to have Diagnostic output - showing which individual days are Good or not, plus the reason why.
 #include <iostream>
 #include <vector>
 
