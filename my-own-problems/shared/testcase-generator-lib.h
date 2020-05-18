@@ -4,7 +4,6 @@
 #include <sstream>
 #include <fstream>
 #include <tuple>
-#include <type_traits>
 
 #include <testlib.h>
 
