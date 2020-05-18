@@ -477,10 +477,7 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 
 int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
-    int64_t decryptionKey = 0;
-    int64_t powerOf2 = 2;
-    int64_t powerOf3 = 3;
-
+    // Precompute various lookups.
     int maxNodeHeight = -1;
     for (const auto& node : nodes)
     {
@@ -493,7 +490,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     computeDFSInfo(rootNode, nodesAtHeightInDFSOrder);
     const int numNodes = nodes.size();
     
-    IndexRemapper indexRemapper;
+    // The numCanReparentToPrefixSum lookup is for use with Phase One i.e.
+    // finding the nodeToReparent of the required reparenting.
     vector<int64_t> numCanReparentToPrefixSum;
     int64_t sumOfNumCanReparentTo = 0;
     for (const auto& node : nodes)
@@ -503,6 +501,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         numCanReparentToPrefixSum.push_back(sumOfNumCanReparentTo);
     }
 
+    // The numNodesUpToHeight and numProperDescendantsForNodeAtHeightPrefixSum are used for Phase Two i.e. finding
+    // the height of the newParent in the required reparenting.
     vector<int> numNodesUpToHeight(maxNodeHeight + 1);
     {
         int numNodes = 0;
@@ -512,6 +512,9 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             numNodesUpToHeight[height] = numNodes;
         }
     }
+    // Consider the list of nodes at height h, in order of their visitation in the DFS we performed in computeDFSInfo.
+    // Then numProperDescendantsForNodeAtHeightPrefixSum[height][x] represents the sum of the 
+    // numbers of proper ancestors of the first (x - 1) nodes in this list.
     vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum(maxNodeHeight + 1);
     {
         for (int height = 0; height <= maxNodeHeight; height++)
@@ -525,11 +528,24 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             }
         }
     }
+    vector<int> allHeights; // Used so we can leverage upper_bound for a binary search.
+    for (int height = 0; height <= maxNodeHeight; height++)
+    {
+        allHeights.push_back(height);
+    }
+    // Compute the lookups for use with Phase Three i.e. finally computing the newParent for the required reparenting,
+    // having found the nodeToReparent and the height of the newParent in the previous two Phases, respectively.
+    // Again, consider the list of nodes at height h, in order of their visitation in the DFS.
+    // Then the xth revision of the prefixesForHeight[h] Persistent AVLTree represents a balance tree containing
+    // the ids of the first x nodes in this list, ordered numerically.
+    // Similarly, the xth revision of the suffixesForHeight[h] Persistent AVLTree represents a balance tree containing
+    // the ids of the *last* x nodes in this list, again ordered numerically.
     vector<AVLTree> prefixesForHeight(maxNodeHeight + 1);
     vector<AVLTree> suffixesForHeight(maxNodeHeight + 1);
     for (int height = 0; height <= maxNodeHeight; height++)
     {
-
+        // The "nodesAtHeightInDFSOrder[height].size() * 10"s are a crude estimate for the number of nodes the AVLTree might need:
+        // removing them has no effect on correctness, but results in a greater number of (expensive) calls to malloc/ free.
         prefixesForHeight[height] = AVLTree(true, nodesAtHeightInDFSOrder[height].size() * 10);
         for (const auto nodeAtHeight : nodesAtHeightInDFSOrder[height])
         {
@@ -542,24 +558,28 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         }
     }
 
-    vector<int> allHeights; // Used so we can leverage upper_bound for a binary search.
-    for (int height = 0; height <= maxNodeHeight; height++)
-    {
-        allHeights.push_back(height);
-    }
+    int64_t decryptionKey = 0;
+    int64_t powerOf2 = 2;
+    int64_t powerOf3 = 3;
+    IndexRemapper indexRemapper;
 
     for (const auto encryptedQuery : encryptedQueries)
     {
         const auto kthInRemainingToFind = (encryptedQuery ^ decryptionKey) - 1; // Make 0-relative.
 
+        // "Pretend" to remove this kthInRemainingToFind index, and figure out the index in the original list
+        // corresponding to kthInRemainingToFind.
         const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
 
+        // Phase One: compute nodeToReparent.  Easy :)
         const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
         const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
         auto nodeToReparent = &(nodes[nodeIndex]);
+        // Phase One complete.
 
-        // i.e. we now need to find the numOfReparentingThatReparentsNode'th element in the original
+        // We now need to find the numOfReparentingThatReparentsNode'th element in the original
         // list that re-parents our nodeToReparent.
+        // This takes up the two remaining Phases.  This block is Phase Two, where we just compute newParentHeight.
         const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
         const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                 [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightInDFSOrder, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
@@ -570,9 +590,11 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         assert(heightIter != allHeights.end());
         const int newParentHeight = *heightIter;
         assert(newParentHeight != -1);
+        // Phase Two complete.
 
-        // i.e. we now need to find the numOfReparentingThatReparentsNode's item in the original list
+        // We now need to find the numOfReparentingThatReparentsNode's item in the original list
         // that reparents nodeToReparent to a newParentHeight whose height is newParentHeight.
+        // This is the final phase, Phase Three.
         auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
         if (heightIter != allHeights.begin())
         {
@@ -597,6 +619,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         assert(newParentAVLNode);
         const auto newParentId = newParentAVLNode->value;
         auto newParent = &(nodes[newParentId - 1]);
+        // Phase Three complete.
 
         // We've found the required reparenting (nodeToReparent, newParentId).
         // Use it to update the decryptionKey.
