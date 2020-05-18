@@ -552,7 +552,7 @@ int main(int argc, char* argv[])
 
                 assert(!allPossibleQueries.empty());
 
-                const vector<TestQuery> queries = chooseKRandomFrom(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
+                const vector<TestQuery> queries = chooseKRandomFromNG(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
                 assert(!queries.empty());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
@@ -596,7 +596,7 @@ int main(int argc, char* argv[])
 
                 assert(!allPossibleQueries.empty());
 
-                const vector<TestQuery> queries = chooseKRandomFrom(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
+                const vector<TestQuery> queries = chooseKRandomFromNG(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
                 assert(!queries.empty());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
@@ -1077,7 +1077,7 @@ int main(int argc, char* argv[])
 
                 assert(!allPossibleQueries.empty());
 
-                const vector<TestQuery> queries = chooseKRandomFrom(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
+                const vector<TestQuery> queries = chooseKRandomFromNG(min<int>(allPossibleQueries.size(), numQueries), allPossibleQueries);
                 assert(!queries.empty());
 
                 scrambleAndwriteTestcase(treeGenerator, testcase, queries);
