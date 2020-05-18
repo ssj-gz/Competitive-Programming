@@ -580,7 +580,7 @@ int main(int argc, char* argv[])
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(1.0, 100.0));
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
                 const auto allNodes = treeGenerator.nodes();
-                assert(allNodes.size() == numNodes);
+                assert(static_cast<int>(allNodes.size()) == numNodes);
 
                 computeLookupInfo(treeGenerator);
 
@@ -1125,7 +1125,7 @@ int main(int argc, char* argv[])
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(1.0, 100.0));
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), rnd.next(1.0, 100.0));
                 const auto allNodes = treeGenerator.nodes();
-                assert(allNodes.size() == numNodes);
+                assert(static_cast<int>(allNodes.size()) == numNodes);
 
                 computeLookupInfo(treeGenerator);
 
