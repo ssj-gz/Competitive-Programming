@@ -210,14 +210,8 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
             numNonDescendantsToLeft = descendantRange.leftIndex;
             numNonDescendantsToRight = lookupInfo.nodesAtHeightLookup[newParentHeight].size() - descendantRange.rightIndex - 1;
         }
-        //if (nodeToReparent != previousNodeToReparent)
-        {
-            //cout << "queryNum: " << queryNum << " nodeToReparent: " << nodeToReparent->id() << " newParentHeight: " << newParentHeight << " numDescendants at height: " << lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
-        }
+
         const auto numDescendantsAtHeight = lookupInfo.nodesAtHeightLookup[newParentHeight].size() - (numNonDescendantsToLeft + numNonDescendantsToRight) ;
-        //cout << "numDescendantsAtHeight: " << numDescendantsAtHeight << " bloo.numInRange(): " << bloo.numInRange() << endl;
-        //assert(numDescendantsAtHeight == bloo.numInRange());
-        //cout << "fleep nodeToReparent: " << nodeToReparent->id() << " height: " << nodeToReparent->data.height << " newParentHeight: " << newParentHeight << " numDescendants at height: " << numDescendantsAtHeight << " nonDescendants at height: " << (numNonDescendantsToLeft + numNonDescendantsToRight) << endl;
         // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
         // left and the right of the descendant-range, respectively, in sorted order.
         // Performing the switch is O(1).
