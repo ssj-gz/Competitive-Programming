@@ -638,12 +638,12 @@ int main()
     
     const auto T = read<int>();
 
-    for (int t = 0; t < T; t++)
+    for (auto t = 0; t < T; t++)
     {
         const auto numNodes = read<int>();
 
         vector<Node> nodes(numNodes);
-        for (int i = 0; i < numNodes; i++)
+        for (auto i = 0; i < numNodes; i++)
         {
             nodes[i].id = i + 1;
         }
