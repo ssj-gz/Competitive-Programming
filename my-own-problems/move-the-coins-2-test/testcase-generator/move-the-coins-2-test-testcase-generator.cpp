@@ -170,6 +170,10 @@ struct NodeAndHeightPair
     }
 };
 
+/**
+ * For each query in \a queries, in the order given, populate its TestQuery::asIndexInRemaining
+ * field.
+ */
 void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>& treeGenerator)
 {
     if (set<TestQuery>(queries.begin(), queries.end()).size() != queries.size())
@@ -186,12 +190,14 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     {
         queryNum++;
         int64_t indexInOriginalList = 0;
+        // Account for nodeToReparent's id's contribution to indexInOriginalList.
         if (query.nodeToReparent->id() - 1 - 1 >= 0)
         {
             const auto numFromPriorNodesToReparent = lookupInfo.numCanReparentToPrefixSum[query.nodeToReparent->id() - 1 - 1];
             indexInOriginalList += numFromPriorNodesToReparent;
         }
 
+        // Account for newParentHeight's contribution to indexInOriginalList.
         const int newParentHeight = query.newParentNode->data.height;
         auto nodeToReparent = query.nodeToReparent;
         if (newParentHeight > 0)
@@ -201,6 +207,7 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
             indexInOriginalList += numFromSmallerNewParentHeights;
         }
 
+        // Finally, account for newParent's id's contribution to indexInOriginalList.
         const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
         const bool hasDescendantsAtThisHeight = descendantRange.isValid();
         int numNonDescendantsToLeft = lookupInfo.nodesAtHeightLookup[newParentHeight].size();
@@ -224,6 +231,8 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
         const auto numFromPriorNewParents = findIndexOfInPair(query.newParentNode->id() - 1, lookupInfo.prefixesForHeight[newParentHeight], lookupInfo.suffixesForHeight[newParentHeight]);
         indexInOriginalList += numFromPriorNewParents;
 
+        // We now know indexInOriginalList.  Deal with mapping it to asIndexInRemaining, and marking this indexInOriginalList
+        // as "removed".
         int numRemovedIndicesToLeft = 0;
         const auto removedIndicesToLeftInfo = findLastLessThanOrEqualTo(indexInOriginalList, removedIndices);
         numRemovedIndicesToLeft += removedIndicesToLeftInfo.second;
