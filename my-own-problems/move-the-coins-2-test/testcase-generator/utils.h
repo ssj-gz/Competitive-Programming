@@ -145,8 +145,8 @@ LookupInfo computeLookupInfo(TreeGenerator<NodeData>& tree)
     lookupInfo.nodesAtHeightLookup.resize(lookupInfo.maxHeight + 1);
     fillInNodesAtHeightLookup(tree.nodes(), lookupInfo.nodesAtHeightLookup);
 
-    lookupInfo.prefixesForHeight.resize(lookupInfo.maxHeight + 1, AVLTree(true));
-    lookupInfo.suffixesForHeight.resize(lookupInfo.maxHeight + 1, AVLTree(true));
+    lookupInfo.prefixesForHeight.resize(lookupInfo.maxHeight + 1, AVLTree(true, 10));
+    lookupInfo.suffixesForHeight.resize(lookupInfo.maxHeight + 1, AVLTree(true, 10));
     for (int height = 0; height <= lookupInfo.maxHeight; height++)
     {
         for (const auto nodeAtHeight : lookupInfo.nodesAtHeightLookup[height])

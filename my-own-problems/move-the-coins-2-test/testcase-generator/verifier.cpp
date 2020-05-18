@@ -221,8 +221,8 @@ namespace Verifier
                 }
             }
         }
-        vector<AVLTree> prefixesForHeight(maxNodeHeight + 1, AVLTree(true));
-        vector<AVLTree> suffixesForHeight(maxNodeHeight + 1, AVLTree(true));
+        vector<AVLTree> prefixesForHeight(maxNodeHeight + 1, AVLTree(true, 10));
+        vector<AVLTree> suffixesForHeight(maxNodeHeight + 1, AVLTree(true, 10));
         for (int height = 0; height <= maxNodeHeight; height++)
         {
             for (const auto nodeAtHeight : nodesAtHeightLookup[height])
