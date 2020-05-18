@@ -97,12 +97,11 @@ struct AVLNode
 class AVLTree
 {
     public:
-        AVLTree(bool isPersistent = false, int nodeBlockSize = 1)
-            : m_isPersistent{isPersistent}, m_nodeBlockSize{nodeBlockSize}
+        AVLTree(bool isPersistent = false)
+            : m_isPersistent{isPersistent}
         {
             if (m_isPersistent)
             {
-                m_rootForRevision.reserve(nodeBlockSize);
                 m_rootForRevision.push_back(nullptr);
             }
         }
@@ -280,20 +279,14 @@ class AVLTree
 
         AVLNode* createNode()
         {
-            if (m_nodes.empty() || static_cast<int>(m_nodes.back().size()) == m_nodeBlockSize)
-            {
-                m_nodes.push_back(vector<AVLNode>());
-                m_nodes.back().reserve(m_nodeBlockSize);
-            }
-            m_nodes.back().push_back(AVLNode());
-            auto newNode = &(m_nodes.back().back());
+            m_nodes.push_back(AVLNode());
+            auto newNode = &(m_nodes.back());
             return newNode;
         }
 
         bool m_isPersistent = false;
 
-        int m_nodeBlockSize = 1;
-        deque<vector<AVLNode>> m_nodes;
+        deque<AVLNode> m_nodes;
 
         int m_revisionNumber = 0;
         vector<AVLNode*> m_rootForRevision;
@@ -366,7 +359,7 @@ class IndexRemapper
             return remappedIndex;
         }
     private:
-        AVLTree removedIndices{false, 10};
+        AVLTree removedIndices{false};
 };
 
 struct Range
@@ -565,12 +558,12 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     {
         // The "nodesAtHeightInDFSOrder[height].size() * 10"s are a crude estimate for the number of nodes the AVLTree might need:
         // removing them has no effect on correctness, but results in a greater number of (expensive) calls to malloc/ free.
-        prefixesForHeight[height] = AVLTree(true, nodesAtHeightInDFSOrder[height].size() * 10);
+        prefixesForHeight[height] = AVLTree(true);
         for (const auto nodeAtHeight : nodesAtHeightInDFSOrder[height])
         {
             prefixesForHeight[height].insertValue(nodeAtHeight->id);
         }
-        suffixesForHeight[height] = AVLTree(true, nodesAtHeightInDFSOrder[height].size() * 10);
+        suffixesForHeight[height] = AVLTree(true);
         for (auto nodeAtHeightRevIter = nodesAtHeightInDFSOrder[height].rbegin(); nodeAtHeightRevIter != nodesAtHeightInDFSOrder[height].rend(); nodeAtHeightRevIter++)
         {
             suffixesForHeight[height].insertValue((*nodeAtHeightRevIter)->id);
