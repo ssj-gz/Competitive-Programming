@@ -18,13 +18,47 @@ T read()
     return toRead;
 }
 
-int findLongestValidPrefix(const string& string)
+int findLongestValidPrefix(const string& expression)
 {
+#ifdef DIAGNOSTICS
+    {
+        cout << "prefixLength: prefix: " + string(expression.size() - string("prefix:").size(), ' ') << " is valid: " << endl;
+        for (int prefixLength = 1; prefixLength <= static_cast<int>(expression.size()); prefixLength++)
+        {
+            const auto prefix = expression.substr(0, prefixLength);
+            auto numOpenBrackets = 0;
+            bool isValid = true;
+            for (const auto character : prefix)
+            {
+                if (character == '<')
+                {
+                    numOpenBrackets++;
+                }
+                else
+                {
+                    numOpenBrackets--;
+                }
+                if (numOpenBrackets < 0)
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (numOpenBrackets != 0)
+                isValid = false;
+
+            cout << prefixLength << string(string("prefixLength: ").size() - to_string(prefixLength).size(), ' ') << " " << prefix << string(expression.size() - prefixLength, ' ') << " " << (isValid ? "true" : "false") << endl;
+
+
+        }
+        cout << "==========" << endl;
+    }
+#endif
     auto longestValidPrefix = 0;
     auto numOpenBrackets = 0;
 
     auto prefixLength = 0;
-    for (const auto character : string)
+    for (const auto character : expression)
     {
         prefixLength++;
         if (character == '<')
@@ -52,8 +86,8 @@ int main(int argc, char* argv[])
 
     for (int t = 0; t < T; t++)
     {
-        const auto stringToParse = read<string>();
-        cout << findLongestValidPrefix(stringToParse) << endl;
+        const auto expression = read<string>();
+        cout << findLongestValidPrefix(expression) << endl;
 
     }
 
