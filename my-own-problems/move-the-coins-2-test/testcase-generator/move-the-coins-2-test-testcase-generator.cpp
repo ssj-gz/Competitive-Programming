@@ -140,12 +140,13 @@ struct Range
 
 Range descendantRangeFor(TestNode<NodeData>* nodeToReparent, int newParentHeight, const LookupInfo& lookupInfo)
 {
-    const auto descendantsAtHeightBegin = std::lower_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsBeginVisit,
+    const auto& nodesAtNewParentHeight = lookupInfo.nodesAtHeightLookup[newParentHeight];
+    const auto descendantsAtHeightBegin = std::lower_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsBeginVisit,
             [](const TestNode<NodeData>* node, const int dfsBeginVisit)
             {
             return node->data.dfsBeginVisit < dfsBeginVisit;
             });
-    const auto descendantsAtHeightEnd = std::upper_bound(lookupInfo.nodesAtHeightLookup[newParentHeight].begin(), lookupInfo.nodesAtHeightLookup[newParentHeight].end(), nodeToReparent->data.dfsEndVisit,
+    const auto descendantsAtHeightEnd = std::upper_bound(nodesAtNewParentHeight.begin(), nodesAtNewParentHeight.end(), nodeToReparent->data.dfsEndVisit,
             [](const int dfsEndVisit, const TestNode<NodeData>* node)
             {
             return dfsEndVisit < node->data.dfsEndVisit;
@@ -154,7 +155,7 @@ Range descendantRangeFor(TestNode<NodeData>* nodeToReparent, int newParentHeight
     if (!hasDescendantsAtThisHeight)
         return {-1, -1};
 
-    return {static_cast<int>(descendantsAtHeightBegin - lookupInfo.nodesAtHeightLookup[newParentHeight].begin()), static_cast<int>(descendantsAtHeightEnd - lookupInfo.nodesAtHeightLookup[newParentHeight].begin() - 1)};
+    return {static_cast<int>(descendantsAtHeightBegin - nodesAtNewParentHeight.begin()), static_cast<int>(descendantsAtHeightEnd - nodesAtNewParentHeight.begin() - 1)};
 }
 
 struct NodeAndHeightPair
