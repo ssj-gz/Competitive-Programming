@@ -574,7 +574,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // Phase One: compute nodeToReparent.  Easy :)
         const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
         const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
-        auto nodeToReparent = &(nodes[nodeIndex]);
+        const auto nodeToReparent = &(nodes[nodeIndex]);
         // Phase One complete.
 
         // We now need to find the numOfReparentingThatReparentsNode'th element in the original
