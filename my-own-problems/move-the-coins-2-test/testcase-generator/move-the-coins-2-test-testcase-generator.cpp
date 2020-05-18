@@ -791,7 +791,7 @@ int main(int argc, char* argv[])
                         for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
                         {
                             const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
-                            if (descendantRange.numInRange() > 0)
+                            if (descendantRange.numInRange() > 10)
                                 numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
                         }
                     }
@@ -801,15 +801,8 @@ int main(int argc, char* argv[])
                     {
                         const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
                         auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
-                        if (numDescendantsForNodeAndHeight[nodeToReparentAndHeight] > 1000 && chosenNodeAndHeightPairs.find(nodeToReparentAndHeight) == chosenNodeAndHeightPairs.end())
-                        {
-                            cout << "Adding new chosenNodeAndHeightPairs with numDescendantsForNodeAndHeight: " << numDescendantsForNodeAndHeight[nodeToReparentAndHeight] << endl;
-                            chosenNodeAndHeightPairs.insert(nodeToReparentAndHeight);
-                        }
                         queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
                     }
-                    cout << "# distinct queries: " << set<TestQuery>(queries.begin(), queries.end()).size() << endl;
-                    cout << "# distinct chosenNodeAndHeightPairs: " << chosenNodeAndHeightPairs.size() << endl;
                     addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
                 }
 
