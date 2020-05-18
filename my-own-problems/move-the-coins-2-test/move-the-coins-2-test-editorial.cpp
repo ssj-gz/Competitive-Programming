@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) - 2020-04-01
 // 
-// Solution to: https://www.codechef.com/problems/MVCN2TST
+// Editorial Solution for: https://www.codechef.com/problems/MVCN2TST
 //
 #include <iostream>
 #include <vector>
