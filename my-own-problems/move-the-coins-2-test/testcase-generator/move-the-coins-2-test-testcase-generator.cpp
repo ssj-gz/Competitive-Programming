@@ -748,6 +748,77 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(9734)
+                    .withDescription("Similar to the earlier 'squat graph' testcases.  Squat graph where all nodes have a strong bias towards one child (very rarely, two) for ~60'000, nodes, then switching towards a strong bias for two children.  This essentially increases the number of (nodeToReparent, newParentHeight) pairs where nodeToReparent has a large-ish number of descendants at height newParentHeight (even more than in the earlier squat graph testcases) which is good for making the cheat solutions time out."));
+            {
+                auto& testcase = testFile.newTestcase(MC2TTestCaseInfo());
+
+
+                TreeGenerator<NodeData> treeGenerator;
+                const int numNodes = subtask3.maxNodesOverAllTestcases;
+                const int numQueries = 3 * subtask3.maxQueriesOverAllTestcases / 4;
+                const int switchOverAfterNumNodes = 60'000;
+                // The first switchOverAfterNumNodes nodes are heavily biased towards having a single child: this means that  they will likely have the same
+                // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
+                // that have a large number of descendants, which is necessarily to cause CHEAT_PHASE_THREE to TLE.
+                buildGraphInLayers(treeGenerator, 180'000, { {1, 99.5}, {2, 0.5} }, switchOverAfterNumNodes, {
+                        {2, 70.0},
+                        {3, 5},
+                        {1, 25.0}
+                        });
+                // Disguise the special structure of the first switchOverAfterNumNodes by dangling small chains/ strands from them, randomly.
+                const int numStrandsToAdd = 800;
+                const auto strandLengthForPreSwitchOverNode = chooseRandomValuesWithSum(numStrandsToAdd, numNodes - treeGenerator.numNodes(), 0);
+                auto allNodes = treeGenerator.nodes();
+                for (int i = 0; i < strandLengthForPreSwitchOverNode.size(); i++)
+                {
+                    treeGenerator.addNodeChain(allNodes[i], strandLengthForPreSwitchOverNode[i]);
+                }
+                allNodes = treeGenerator.nodes();
+
+                vector<TestQuery> queries;
+                map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
+                {
+                    auto lookupInfo = computeLookupInfo(treeGenerator);
+                    for (int height = 0; height <= lookupInfo.maxHeight; height++)
+                    {
+                        cout << "height: " << height << " #nodes at height: " << lookupInfo.nodesAtHeightLookup[height].size() << endl;
+                    }
+                    for (auto nodeToReparent : allNodes)
+                    {
+                        if (nodeToReparent->data.largestNonDescendantHeight == 0)
+                            continue;
+                        for (int newParentHeight = 0; newParentHeight <= nodeToReparent->data.largestNonDescendantHeight; newParentHeight++)
+                        {
+                            const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
+                            if (descendantRange.numInRange() > 0)
+                                numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
+                        }
+                    }
+                    WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
+                    set<NodeAndHeightPair> chosenNodeAndHeightPairs;
+                    for (int i = 0; i < numQueries; i++)
+                    {
+                        const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
+                        auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
+                        if (numDescendantsForNodeAndHeight[nodeToReparentAndHeight] > 1000 && chosenNodeAndHeightPairs.find(nodeToReparentAndHeight) == chosenNodeAndHeightPairs.end())
+                        {
+                            cout << "Adding new chosenNodeAndHeightPairs with numDescendantsForNodeAndHeight: " << numDescendantsForNodeAndHeight[nodeToReparentAndHeight] << endl;
+                            chosenNodeAndHeightPairs.insert(nodeToReparentAndHeight);
+                        }
+                        queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
+                    }
+                    cout << "# distinct queries: " << set<TestQuery>(queries.begin(), queries.end()).size() << endl;
+                    cout << "# distinct chosenNodeAndHeightPairs: " << chosenNodeAndHeightPairs.size() << endl;
+                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                }
+
+                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(MC2TTestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(384732)
                     .withDescription("Two long arms, then random strands and clumps added.  This is intended to stress-test Phase Two."));
             {
