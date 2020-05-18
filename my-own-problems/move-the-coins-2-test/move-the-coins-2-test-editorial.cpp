@@ -385,23 +385,27 @@ struct Range
     }
 };
 
-Range descendantRangeFor(Node* nodeToReparent, int newParentHeight, const vector<vector<Node*>>& nodesAtHeightInDFSOrder)
+/**
+ * Returns the Range representing all nodes in nodesAtHeightInDFSOrder[height] that are descendants of nodeToReparent,
+ * or (-1, -1) if nodeToReparent has no descendants at that height.
+ */
+Range descendantRangeFor(Node* nodeToReparent, int height, const vector<vector<Node*>>& nodesAtHeightInDFSOrder)
 {
-    const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightInDFSOrder[newParentHeight].begin(), nodesAtHeightInDFSOrder[newParentHeight].end(), nodeToReparent->dfsBeginVisit,
+    const auto descendantsAtHeightBegin = std::lower_bound(nodesAtHeightInDFSOrder[height].begin(), nodesAtHeightInDFSOrder[height].end(), nodeToReparent->dfsBeginVisit,
             [](const Node* node, const int dfsBeginVisit)
             {
             return node->dfsBeginVisit < dfsBeginVisit;
             });
-    const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightInDFSOrder[newParentHeight].begin(), nodesAtHeightInDFSOrder[newParentHeight].end(), nodeToReparent->dfsEndVisit,
+    const auto descendantsAtHeightEnd = std::upper_bound(nodesAtHeightInDFSOrder[height].begin(), nodesAtHeightInDFSOrder[height].end(), nodeToReparent->dfsEndVisit,
             [](const int dfsEndVisit, const Node* node)
             {
             return dfsEndVisit < node->dfsEndVisit;
             });
-    const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightInDFSOrder[newParentHeight].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
+    const bool hasDescendantsAtThisHeight = descendantsAtHeightBegin != nodesAtHeightInDFSOrder[height].end() && (*descendantsAtHeightBegin)->dfsEndVisit <= nodeToReparent->dfsEndVisit;
     if (!hasDescendantsAtThisHeight)
         return {-1, -1};
 
-    return {static_cast<int>(descendantsAtHeightBegin - nodesAtHeightInDFSOrder[newParentHeight].begin()), static_cast<int>(descendantsAtHeightEnd - nodesAtHeightInDFSOrder[newParentHeight].begin() - 1)};
+    return {static_cast<int>(descendantsAtHeightBegin - nodesAtHeightInDFSOrder[height].begin()), static_cast<int>(descendantsAtHeightEnd - nodesAtHeightInDFSOrder[height].begin() - 1)};
 }
 
 
