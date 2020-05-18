@@ -183,12 +183,10 @@ void setQueryIndexForQueries(vector<TestQuery>& queries, TreeGenerator<NodeData>
     auto lookupInfo = computeLookupInfo(treeGenerator);
     auto allNodes = treeGenerator.nodes();
     AVLTree removedIndices;
-    int queryNum = 0;
     int64_t numNonDescendantHeightSum = 0;
     int64_t numDescendantHeightSum = 0;
     for (auto& query : queries)
     {
-        queryNum++;
         int64_t indexInOriginalList = 0;
         // Account for nodeToReparent's id's contribution to indexInOriginalList.
         if (query.nodeToReparent->id() - 1 - 1 >= 0)
