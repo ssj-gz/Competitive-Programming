@@ -488,7 +488,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     auto rootNode = &(nodes.front());
     vector<vector<Node*>> nodesAtHeightInDFSOrder(maxNodeHeight + 1);
     computeDFSInfo(rootNode, nodesAtHeightInDFSOrder);
-    const int numNodes = nodes.size();
+    const auto numNodes = nodes.size();
     
     // The numCanReparentToPrefixSum lookup is for use with Phase One i.e.
     // finding the nodeToReparent of the required reparenting.
@@ -505,8 +505,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     // the height of the newParent in the required reparenting.
     vector<int> numNodesUpToHeight(maxNodeHeight + 1);
     {
-        int numNodes = 0;
-        for (int height = 0; height <= maxNodeHeight; height++)
+        auto numNodes = 0;
+        for (auto height = 0; height <= maxNodeHeight; height++)
         {
             numNodes += nodesAtHeightInDFSOrder[height].size();
             numNodesUpToHeight[height] = numNodes;
@@ -517,10 +517,10 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     // numbers of proper ancestors of the first (x - 1) nodes in this list.
     vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum(maxNodeHeight + 1);
     {
-        for (int height = 0; height <= maxNodeHeight; height++)
+        for (auto height = 0; height <= maxNodeHeight; height++)
         {
             const auto& nodesAtHeight = nodesAtHeightInDFSOrder[height];
-            int numProperDescendantsSum = 0;
+            auto numProperDescendantsSum = 0;
             for (const auto node : nodesAtHeight)
             {
                 numProperDescendantsSum += node->numDescendants - 1; // "-1" as we want *proper* descendants.
@@ -529,7 +529,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         }
     }
     vector<int> allHeights; // Used so we can leverage upper_bound for a binary search.
-    for (int height = 0; height <= maxNodeHeight; height++)
+    for (auto height = 0; height <= maxNodeHeight; height++)
     {
         allHeights.push_back(height);
     }
@@ -542,7 +542,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     // the ids of the *last* x nodes in this list, again ordered numerically.
     vector<AVLTree> prefixesForHeight(maxNodeHeight + 1);
     vector<AVLTree> suffixesForHeight(maxNodeHeight + 1);
-    for (int height = 0; height <= maxNodeHeight; height++)
+    for (auto height = 0; height <= maxNodeHeight; height++)
     {
         // The "nodesAtHeightInDFSOrder[height].size() * 10"s are a crude estimate for the number of nodes the AVLTree might need:
         // removing them has no effect on correctness, but results in a greater number of (expensive) calls to malloc/ free.
