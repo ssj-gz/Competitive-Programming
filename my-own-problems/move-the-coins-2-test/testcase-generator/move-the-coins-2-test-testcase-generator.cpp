@@ -758,7 +758,7 @@ int main(int argc, char* argv[])
 
                 TreeGenerator<NodeData> treeGenerator;
                 const int numNodes = subtask3.maxNodesOverAllTestcases;
-                const int numQueries = 3 * subtask3.maxQueriesOverAllTestcases / 4;
+                const int numQueries = subtask3.maxQueriesOverAllTestcases;
                 const int switchOverAfterNumNodes = 60'000;
                 // The first switchOverAfterNumNodes nodes are heavily biased towards having a single child: this means that  they will likely have the same
                 // set of descendants at a given height as their children: this effectively multiplies the number of (nodeToReparent, newParentHeight) pairs
@@ -780,6 +780,7 @@ int main(int argc, char* argv[])
 
                 vector<TestQuery> queries;
                 map<NodeAndHeightPair, double> numDescendantsForNodeAndHeight;
+                vector<NodeAndHeightPair> nodeAndHeightsWithSmallishDescendants;
                 {
                     auto lookupInfo = computeLookupInfo(treeGenerator);
                     for (int height = 0; height <= lookupInfo.maxHeight; height++)
@@ -795,16 +796,29 @@ int main(int argc, char* argv[])
                             const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, lookupInfo);
                             if (descendantRange.numInRange() > 10)
                                 numDescendantsForNodeAndHeight[{nodeToReparent, newParentHeight}] = descendantRange.numInRange();
+                            if (descendantRange.numInRange() > 100 && descendantRange.numInRange() < 300 && lookupInfo.nodesAtHeightLookup[newParentHeight].size() < 300)
+                            {
+                                nodeAndHeightsWithSmallishDescendants.push_back({nodeToReparent, newParentHeight});
+                            }
                         }
                     }
                     WeightedChooser<NodeAndHeightPair> nodeAndHeightPairChooser(numDescendantsForNodeAndHeight);
                     set<NodeAndHeightPair> chosenNodeAndHeightPairs;
-                    for (int i = 0; i < numQueries; i++)
+                    for (int i = 0; i < 3 * numQueries / 4; i++)
                     {
                         const auto nodeToReparentAndHeight = nodeAndHeightPairChooser.nextValue();
                         auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
                         queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
                     }
+                    while (static_cast<int>(queries.size()) < numQueries)
+                    {
+                        const auto nodeToReparentAndHeight = rnd.nextFrom(nodeAndHeightsWithSmallishDescendants);
+
+                        auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
+                        queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
+
+                    }
+                    cout << "nodeAndHeightsWithSmallishDescendants: " << nodeAndHeightsWithSmallishDescendants.size() << endl;
                     addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
                 }
 
