@@ -4,8 +4,6 @@
 
 #include <cassert>
 
-//#define DIAGNOSTICS
-
 using namespace std;
 
 template <typename T>
