@@ -1,5 +1,6 @@
 #include <testlib.h>
 #include "testcase-generator-lib.h"
+#include "utils.h"
 
 #include <iostream>
 #include <cassert>
