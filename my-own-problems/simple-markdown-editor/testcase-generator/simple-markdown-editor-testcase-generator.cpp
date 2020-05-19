@@ -111,6 +111,9 @@ struct TestQuery
     int64_t queryPosition = -1;
     int64_t numToUndo = -1;
     int64_t numToRedo = -1;
+
+    int64_t encryptedArgument = -1;
+    int64_t encryptedArgument2 = -1;
 };
 
 void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
@@ -131,6 +134,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
         {
             case TestQuery::InsertFormatting:
                 {
+                    cout << " writing InsertFormatting" << endl;
                     const auto insertionPos = query.insertionPos - 1;
                     formattingCharsTree.insertFormattingChar(insertionPos);
                     destTestcase.writeLine<char, int64_t>('F', (insertionPos + 1) ^ encryptionKey);
@@ -138,6 +142,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
                 break;
             case TestQuery::InsertNonFormatting:
                 {
+                    cout << " writing InsertNonFormatting" << endl;
                     const auto insertionPos = query.insertionPos - 1;
                     const auto numToInsert = query.numToInsert;
                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
@@ -146,6 +151,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
                 break;
             case TestQuery::IsRangeFormatted:
                 {
+                    cout << " writing IsRangeFormatted" << endl;
                     const auto queryPosition = query.queryPosition - 1;
                     auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                     destTestcase.writeLine<char, int64_t>('Q', (queryPosition + 1) ^ encryptionKey);
@@ -159,6 +165,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
                 break;
             case TestQuery::Undo:
                 {
+                    cout << " writing Undo" << endl;
                     const int numToUndo = query.numToUndo;
                     formattingCharsTree.undo(numToUndo);
                     destTestcase.writeLine<char, int64_t>('U', numToUndo ^ encryptionKey);
@@ -166,6 +173,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
                 break;
             case TestQuery::Redo:
                 {
+                    cout << " writing Redo" << endl;
                     const int numToRedo = query.numToRedo;
                     formattingCharsTree.redo(numToRedo);
                     destTestcase.writeLine<char, int64_t>('R', numToRedo ^ encryptionKey);
@@ -195,9 +203,208 @@ int main(int argc, char* argv[])
                     .withDescription("Sample"));
             {
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo().withDescription("TODO"));
-                vector<TestQuery> queries;
 
-                writeTestCase(testcase, queries);
+                // TODO - remove this - testing/ debugging only!
+                const int T = 1;
+                for (int t = 0; t < T; t++)
+                {
+                    string document;
+                    int64_t decryptionKey = 0; 
+                    int64_t powerOf2 = 2;
+
+                    int queryNum = 1;
+
+                    vector<TestQuery> undoStack;
+                    int undoStackPointer = -1;
+
+                    const int numQueries = 1 + rand() % 100;
+                    cout << "numQueries: " << numQueries << endl;
+                    vector<TestQuery> queries;
+                    while (queries.size() < numQueries)
+                    {
+                        bool haveQuery = false;
+                        TestQuery query;
+                        int numFormatting = count(document.begin(), document.end(), '*');
+                        int numNonFormatting = count(document.begin(), document.end(), 'X');
+                        cout << "document: " << document << endl;
+                        while (!haveQuery)
+                        {
+                            const int queryType = rand() % 5;
+                            query.type = static_cast<TestQuery::Type>(queryType);
+                            cout << "candidate queryType: " << query.type << endl;
+                            if (queryType == TestQuery::Undo)
+                            {
+                                if (rand() % 4 >= 1)
+                                    continue; // Undos should be fairly rare.
+                                if (undoStackPointer == -1)
+                                    continue;
+                                else
+                                {
+                                    const int numToUndo = 1 + rand() % (undoStackPointer + 1);
+                                    query.numToUndo = numToUndo;
+                                    haveQuery = true;
+                                }
+                            }
+                            if (queryType == TestQuery::Redo)
+                            {
+                                if (rand() % 4 >= 1)
+                                    continue; // Redos should be fairly rare.
+                                if (undoStackPointer + 1 == undoStack.size())
+                                    continue;
+                                else
+                                {
+                                    const int numToRedo = 1 + rand() % (undoStack.size() - 1 - undoStackPointer);
+                                    query.numToRedo = numToRedo;
+                                    haveQuery = true;
+                                }
+                            }
+                            if (queryType == TestQuery::InsertFormatting)
+                            {
+                                const int pos = rand() % (document.size() + 1);
+                                query.insertionPos = pos + 1;
+                                haveQuery = true;
+                            }
+                            if (queryType == TestQuery::InsertNonFormatting)
+                            {
+                                const int pos = rand() % (document.size() + 1);
+                                query.insertionPos = pos + 1;
+                                const int num = 1 + rand() % 10;
+                                query.numToInsert = num;
+                                haveQuery = true;
+                            }
+                            if (queryType == TestQuery::IsRangeFormatted)
+                            {
+                                if (numNonFormatting == 0)
+                                    continue;
+                                else
+                                {
+                                    int nonFormattedToPick = rand() % numNonFormatting;
+                                    int numNonFormattedSoFar = 0;
+                                    int position = -1;
+                                    for (int i = 0; i < document.size(); i++)
+                                    {
+                                        if (document[i] == 'X')
+                                        {
+                                            if (numNonFormattedSoFar == nonFormattedToPick)
+                                            {
+                                                position = i;
+                                                break;
+                                            }
+                                            numNonFormattedSoFar++;
+                                        }
+                                    }
+                                    assert(position != -1);
+                                    query.queryPosition = position + 1;
+                                    haveQuery = true;
+                                }
+
+                            }
+
+                        }
+                        cout << "Keeping query with type: " << query.type << endl;
+
+                        queries.push_back(query);
+                        switch (query.type)
+                        {
+                            case TestQuery::InsertFormatting:
+                                {
+                                    const int insertionPos = query.insertionPos - 1;
+                                    //cerr << "InsertFormatting at " << insertionPos << endl;
+                                    document.insert(document.begin() + insertionPos, '*');
+                                    undoStackPointer++;
+                                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                                    TestQuery undoQuery = query;
+                                    undoQuery.insertionPos = insertionPos + 1;
+                                    undoStack.push_back(undoQuery);
+                                }
+                                break;
+                            case TestQuery::InsertNonFormatting:
+                                {
+                                    const int insertionPos = query.insertionPos - 1;
+                                    const int numToInsert = query.numToInsert;
+                                    //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+                                    const string charsToInsert(numToInsert, 'X');
+                                    document.insert(insertionPos, charsToInsert);
+                                    undoStackPointer++;
+                                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                                    TestQuery undoQuery = query;
+                                    undoQuery.insertionPos = insertionPos + 1;
+                                    undoQuery.numToInsert = numToInsert;
+                                    undoStack.push_back(undoQuery);
+                                }
+                                break;
+                            case TestQuery::IsRangeFormatted:
+                                {
+                                    const int queryPosition = query.queryPosition - 1;
+                                    assert(document[queryPosition] == 'X');
+                                    //cerr << "IsRangeFormatted at " << queryPosition << endl;
+                                    int queryAnswer = -1;
+                                    {
+                                        int openingFormatPos = -1;
+                                        for (int pos = 0; pos < document.size(); pos++)
+                                        {
+                                            if (document[pos] == '*')
+                                            {
+                                                if (openingFormatPos == -1)
+                                                {
+                                                    // Open formatting.
+                                                    openingFormatPos = pos;
+                                                }
+                                                else
+                                                {
+                                                    // Close formatting.
+                                                    if (openingFormatPos < queryPosition && queryPosition < pos)
+                                                    {
+                                                        queryAnswer = pos - openingFormatPos - 1;
+                                                    }
+                                                    openingFormatPos = -1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (queryAnswer == -1)
+                                        queryAnswer = 3'141'592;
+                                    decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                                    //cerr << "queryAnswer: " << queryAnswer << endl;
+                                }
+                                break;
+                            case TestQuery::Undo:
+                                {
+                                    const int numToUndo = query.numToUndo;
+                                    //cerr << "Undo " << numToUndo << endl;
+                                    for (int i = 0; i < numToUndo; i++)
+                                    {
+                                        const auto& queryToUndo = undoStack[undoStackPointer];
+                                        const auto removalPosition = queryToUndo.insertionPos - 1;
+                                        const auto numToRemove = (queryToUndo.type == TestQuery::InsertNonFormatting ? queryToUndo.numToInsert : 1);
+                                        document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
+                                        undoStackPointer--;
+                                    }
+                                }
+                                break;
+                            case TestQuery::Redo:
+                                {
+                                    const int numToRedo = query.numToRedo;
+                                    //cerr << "Redo " << numToRedo << endl;
+                                    for (int i = 0; i < numToRedo; i++)
+                                    {
+                                        undoStackPointer++;
+                                        const auto& queryToUndo = undoStack[undoStackPointer];
+                                        const auto insertionPos = queryToUndo.insertionPos - 1;
+                                        const auto charToInsert = queryToUndo.type == TestQuery::InsertNonFormatting ? 'X' : '*';
+                                        const auto numToInsert = queryToUndo.type == TestQuery::InsertNonFormatting ? queryToUndo.numToInsert : 1;
+                                        document.insert(insertionPos, string(numToInsert, charToInsert));
+                                    }
+
+                                }
+                                break;
+                        }
+
+                    }
+                    writeTestCase(testcase, queries);
+                }
+
+
             }
         }
     }
