@@ -26,19 +26,19 @@ struct Query
 {
     enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
     Type type;
-    int encryptedArgument = -1;
-    int encryptedArgument2 = -1;
+    int64_t encryptedArgument = -1;
+    int64_t encryptedArgument2 = -1;
 };
 
 struct AVLNode
 {
-    int leftNonFormattedRunSize = -1;
+    int64_t leftNonFormattedRunSize = -1;
     AVLNode *leftChild = nullptr;
     AVLNode *rightChild = nullptr;
     int balanceFactor = 0;
     int maxDescendantDepth = 0;
     int totalFormattedDescendants = 1;
-    int totalNonFormattedDescendants = 0;
+    int64_t totalNonFormattedDescendants = 0;
 
     bool isSentinelValue = false;
 };
@@ -57,9 +57,9 @@ class AVLTree
         {
             return m_rootForRevision[m_undoStackPointer];
         }
-        void insertFormattingChar(int position);
-        void insertNonFormattingChars(int position, int numToAdd);
-        int distBetweenEnclosingFormattedChars(int position);
+        void insertFormattingChar(int64_t position);
+        void insertNonFormattingChars(int64_t position, int64_t numToAdd);
+        int64_t distBetweenEnclosingFormattedChars(int64_t position);
         void undo(int numToUndo)
         {
             m_undoStackPointer -= numToUndo;
@@ -70,7 +70,7 @@ class AVLTree
         }
 
     private:
-        AVLNode* insertFormattingChar(int position, int sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter);
+        AVLNode* insertFormattingChar(int64_t position, int64_t sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter);
 
         AVLNode* rotateRight(AVLNode* subtreeRoot)
         {
@@ -133,9 +133,9 @@ class AVLTree
             }
         }
 
-        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int position, int adjustment);
+        AVLNode* adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int64_t position, int64_t adjustment);
 
-        AVLNode* createNode(int leftNonFormattedRunSize)
+        AVLNode* createNode(int64_t leftNonFormattedRunSize)
         {
             auto newNode = createNode();
             newNode->leftNonFormattedRunSize = leftNonFormattedRunSize;
@@ -162,7 +162,7 @@ class AVLTree
             return newNode;
         }
 
-        AVLTreeIterator findFirstNodeToRightOf(int position, AVLNode* root);
+        AVLTreeIterator findFirstNodeToRightOf(int64_t position, AVLNode* root);
 
         void updateUndoStackWithNewRoot(AVLNode* newRoot)
         {
@@ -191,11 +191,11 @@ class AVLTreeIterator
         {
             return m_currentNode;
         }
-        int currentNodePosition() const
+        int64_t currentNodePosition() const
         {
             return m_currentNodePosition;
         }
-        int numFormattingCharsToLeft() const
+        int64_t numFormattingCharsToLeft() const
         {
             return m_numToLeftOffset + m_numInLeftSubTree;
         }
@@ -213,12 +213,12 @@ class AVLTreeIterator
         }
     private:
         AVLNode* m_currentNode = nullptr;
-        int m_currentNodePosition = -1;
-        int m_numToLeftOffset = 0;
-        int m_sumToLeftOffset = 0;
+        int64_t m_currentNodePosition = -1;
+        int64_t m_numToLeftOffset = 0;
+        int64_t m_sumToLeftOffset = 0;
 
-        int m_numInLeftSubTree = 0;
-        int m_sumOfLeftSubTree = 0;
+        int64_t m_numInLeftSubTree = 0;
+        int64_t m_sumOfLeftSubTree = 0;
 
         void updateCurrentNodePosition()
         {
@@ -230,7 +230,7 @@ class AVLTreeIterator
         }
 };
 
-void AVLTree::insertFormattingChar(int position)
+void AVLTree::insertFormattingChar(int64_t position)
 {
     AVLNode* newRoot = nullptr;
     if (!root())
@@ -240,8 +240,8 @@ void AVLTree::insertFormattingChar(int position)
     else
     {
         const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
-        const int newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNode()->leftNonFormattedRunSize - (formattingCharToRightIter.currentNodePosition() - position);
-        const int adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNodePosition() - position;
+        const int64_t newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNode()->leftNonFormattedRunSize - (formattingCharToRightIter.currentNodePosition() - position);
+        const int64_t adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNodePosition() - position;
         assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
         assert(adjustedFormattingCharToRightSizeOfUnformattedToLeftRun >= 0);
         {
@@ -257,7 +257,7 @@ void AVLTree::insertFormattingChar(int position)
     updateUndoStackWithNewRoot(newRoot);
 }
 
-AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter)
+AVLNode* AVLTree::insertFormattingChar(int64_t position, int64_t sizeOfUnformattedToLeftRun, AVLTreeIterator& treeIter)
 {
     // We'll be altering this node whatever happens, so do a COW.
     auto currentNode = createNode(*treeIter.currentNode());
@@ -319,14 +319,14 @@ AVLNode* AVLTree::insertFormattingChar(int position, int sizeOfUnformattedToLeft
     return currentNode;
 }
 
-void AVLTree::insertNonFormattingChars(int position, int numToAdd)
+void AVLTree::insertNonFormattingChars(int64_t position, int64_t numToAdd)
 {
     AVLTreeIterator treeIter(root());
     auto newRoot = adjustRunToLeftOfNodeToRightOf(treeIter, position, numToAdd);
     updateUndoStackWithNewRoot(newRoot);
 }
 
-AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int position, int adjustment)
+AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int64_t position, int64_t adjustment)
 {
     auto subTreeRoot = treeIter.currentNode();
     if (!subTreeRoot)
@@ -356,7 +356,7 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int 
     return subTreeRoot;
 }
 
-AVLTreeIterator AVLTree::findFirstNodeToRightOf(int position, AVLNode* root)
+AVLTreeIterator AVLTree::findFirstNodeToRightOf(int64_t position, AVLNode* root)
 {
     AVLTreeIterator treeIter(root);
     AVLTreeIterator result(nullptr);
@@ -381,7 +381,7 @@ int64_t solveOptimised(const vector<Query>& queries)
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
 
-    vector<int> queryResults;
+    vector<int64_t> queryResults;
     AVLTree formattingCharsTree(10'000);
     // Add Sentinel node.
     formattingCharsTree.insertFormattingChar(0);
@@ -394,21 +394,21 @@ int64_t solveOptimised(const vector<Query>& queries)
         {
             case Query::InsertFormatting:
                 {
-                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                    const auto insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     formattingCharsTree.insertFormattingChar(insertionPos);
                 }
                 break;
             case Query::InsertNonFormatting:
                 {
-                    const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
-                    const int numToInsert = (query.encryptedArgument2 ^ decryptionKey);
+                    const auto insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                    const auto numToInsert = (query.encryptedArgument2 ^ decryptionKey);
                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                 }
                 break;
             case Query::IsRangeFormatted:
                 {
-                    const int queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
-                    int queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                    const auto queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
+                    auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                     if (queryAnswer == -1)
                         queryAnswer = 3'141'592;
                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
@@ -438,7 +438,7 @@ int64_t solveOptimised(const vector<Query>& queries)
     return decryptionKey;
 }
 
-int AVLTree::distBetweenEnclosingFormattedChars(int position)
+int64_t AVLTree::distBetweenEnclosingFormattedChars(int64_t position)
 {
     const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position, root());
 
@@ -469,7 +469,7 @@ int main()
         for (auto& query : queries)
         {
             const auto queryType = read<char>();
-            query.encryptedArgument = read<int>();
+            query.encryptedArgument = read<int64_t>();
             switch (queryType)
             {
                 case 'F':
@@ -477,7 +477,7 @@ int main()
                     break;
                 case 'N':
                     query.type = Query::InsertNonFormatting;
-                    query.encryptedArgument2 = read<int>();
+                    query.encryptedArgument2 = read<int64_t>();
                     break;
                 case 'Q':
                     query.type = Query::IsRangeFormatted;
