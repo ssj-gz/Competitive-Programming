@@ -43,6 +43,7 @@
 
 #include <iostream>
 #include <climits>
+#include <cassert>
 
 const long long __TESTLIB_LONGLONG_MAX = 9223372036854775807LL;
 
