@@ -453,7 +453,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     for (int t = 0; t < T; t++)
     {
         const auto [numQueries] = testFileReader.readLine<int>();
-        vector<TestQuery> queries(numQueries);
+        vector<TestQuery> queries;
         for (int i = 0; i < numQueries; i++)
         {
             const auto nextLine = testFileReader.peekLine();
@@ -498,6 +498,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                     testFileReader.addError("Unrecognised query type char: " + queryTypeChar);
                     break;
             }
+            queries.push_back(query);
         }
 
         int64_t decryptionKey = 0;
