@@ -9,6 +9,8 @@ using namespace std;
 
 constexpr int maxQueries = 200'000;
 
+const int64_t Mod = 1'000'000'007;
+
 struct SubtaskInfo
 {
     int subtaskId = -1;
@@ -109,14 +111,73 @@ struct TestQuery
     int64_t queryPosition = -1;
     int64_t numToUndo = -1;
     int64_t numToRedo = -1;
-
-    int64_t encryptedArgument1 = -1;
-    int64_t encryptedArgument2 = -1;
 };
 
-void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
+void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
 {
-    assert(false); // TODO
+    destTestcase.writeLine<int>(queries.size());
+    int64_t encryptionKey = 0;
+    int64_t powerOf2 = 2;
+
+    AVLTree formattingCharsTree(10'000);
+    // Add Sentinel node.
+    formattingCharsTree.insertFormattingChar(0);
+    formattingCharsTree.root()->isSentinelValue = true;
+
+    int queryNum = 1;
+    for (const auto& query : queries)
+    {
+        switch (query.type)
+        {
+            case TestQuery::InsertFormatting:
+                {
+                    const auto insertionPos = query.insertionPos - 1;
+                    formattingCharsTree.insertFormattingChar(insertionPos);
+                    destTestcase.writeLine<char, int64_t>('F', (insertionPos + 1) ^ encryptionKey);
+                }
+                break;
+            case TestQuery::InsertNonFormatting:
+                {
+                    const auto insertionPos = query.insertionPos - 1;
+                    const auto numToInsert = query.numToInsert;
+                    formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
+                    destTestcase.writeLine<char, int64_t, int64_t>('N', (insertionPos + 1) ^ encryptionKey, numToInsert ^ encryptionKey);
+                }
+                break;
+            case TestQuery::IsRangeFormatted:
+                {
+                    const auto queryPosition = query.queryPosition - 1;
+                    auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                    destTestcase.writeLine<char, int64_t>('Q', (queryPosition + 1) ^ encryptionKey);
+
+                    // Update encryptionKey for next queries.
+                    if (queryAnswer == -1)
+                        queryAnswer = 3'141'592;
+
+                    encryptionKey = (encryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                }
+                break;
+            case TestQuery::Undo:
+                {
+                    const int numToUndo = query.numToUndo;
+                    formattingCharsTree.undo(numToUndo);
+                    destTestcase.writeLine<char, int64_t>('U', numToUndo ^ encryptionKey);
+                }
+                break;
+            case TestQuery::Redo:
+                {
+                    const int numToRedo = query.numToRedo;
+                    formattingCharsTree.redo(numToRedo);
+                    destTestcase.writeLine<char, int64_t>('R', numToRedo ^ encryptionKey);
+                }
+                break;
+        }
+
+        queryNum++;
+        powerOf2 = (2 * powerOf2) % Mod;
+
+    }
+    cout << "final encryption key: " << encryptionKey << endl;
 }
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
