@@ -68,7 +68,6 @@ For each test case, print a single line containing one integer ― the final val
 - $1 \le \textit{decryptedChoice}_i \le |L_{orig}| + 1 - i$ for all valid $i$, where $L_{orig}$ is the original $L$ before any choices have been processed
 - the sum of $N$ over all test cases does not exceed $200,000$
 - the sum of $Q$ over all test cases does not exceed $200,000$
-- TODO
 
 ### Subtasks
 **Subtask #1 (5 points):** 
