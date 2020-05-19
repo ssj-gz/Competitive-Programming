@@ -3,6 +3,7 @@
 #include <cassert>
 #include <sstream>
 #include <fstream>
+#include <functional>
 
 #include <testlib.h>
 
