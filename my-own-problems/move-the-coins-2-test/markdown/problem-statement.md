@@ -73,10 +73,12 @@ For each test case, print a single line containing one integer ― the final val
 **Subtask #1 (5 points):** 
 - $T \le 100$
 - $N \le 100$
+- $Q \le 100$
 
 **Subtask #2 (10 points)**: 
 - $T \le 100$
 - $N \le 1,000$
+- $Q \le 1,000$
 
 **Subtask #3 (85 points)**: original constraints
 
