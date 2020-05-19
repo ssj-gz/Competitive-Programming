@@ -304,11 +304,11 @@ L:
 34.  7  4     2
 ```
 
-The initial value of the $\textit{decryptionKey}$ is $0$.  The first encrypted query $\textit{encryptedChoice}_1 = 9$.  We decrypt it:
+The initial value of the $\textit{decryptionKey}$ is $0$.  The first encrypted choice $\textit{encryptedChoice}_1 = 9$.  We decrypt it:
 
 $\textit{decryptedChoice}_1 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_1 = 0 \oplus 9 = 9$
 
-so the answer to the first query $(u_1, v_1)$ is the $9^\text{th}$ element in $L$ i.e. $(u_1, v_1)=(3,5)$.  We update our $\textit{decryptionKey}$:
+so the reparenting $(u_1, v_1)$ corresponding to the first choice is the $9^\text{th}$ element in $L$ i.e. $(u_1, v_1)=(3,5)$.  We update our $\textit{decryptionKey}$:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^1 \times u_1 + 3^1 \times v_1 \mod{10^9+7} \nonumber \\
@@ -320,12 +320,12 @@ $$\begin{eqnarray}
 
 and remove $(3,5)$ from the $L$.  To save space, we won't be printing each updated $L$!
 
-On to the next query. $\textit{encryptedChoice}_2 = 6$; decrypting:
+On to the next choice. $\textit{encryptedChoice}_2 = 6$; decrypting:
 
 $\textit{decryptedChoice}_2 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_2 = 21 \oplus 6 = 19$
 
  
-so the answer to the first query $(u_2, v_2)$ is the $9^\text{th}$ element in $L$ i.e. $(u_2, v_2) = (5, 2)$.  We update our $\textit{decryptionKey}$:
+so the reparenting $(u_2, v_2)$ corresponding to the $2^\text{nd}$ choice is the $9^\text{th}$ element in $L$ i.e. $(u_2, v_2) = (5, 2)$.  We update our $\textit{decryptionKey}$:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^2 \times u_2 + 3^2 \times v_2 \mod{10^9+7} \nonumber \\
@@ -369,11 +369,11 @@ $$\begin{eqnarray}
 
 and remove $(4,3)$ from $L$.
 
-Last query! $\textit{encryptedChoice}_5 = 602$; so
+Last choice! $\textit{encryptedChoice}_5 = 602$; so
 
 $\textit{decryptedChoice}_5 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_5 = 603 \oplus 602 = 1$
 
-The answer to the query is the $1^\text{st}$ element of $L$, which is $(u_5, v_5) = (2, 1)$.  Update $\textit{decryptionKey}$:
+The reparenting $(u_5, v_5)$ corresponding to the $5^\text{th}$ choice is the $1^\text{st}$ element of $L$, which is $(u_5, v_5) = (2, 1)$.  Update $\textit{decryptionKey}$:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^5 \times u_5 + 3^5 \times v_5 \mod{10^9+7} \nonumber \\
@@ -383,7 +383,7 @@ $$\begin{eqnarray}
 &=&910 \nonumber \\
 \end{eqnarray}$$
 
-We've now processed all $Q$ queries, and the final $\textit{decryptionKey}=910$; thus the answer for this testcase is $910$.
+We've now processed all $Q$ choices, and the final $\textit{decryptionKey}=910$; thus the answer for this testcase is $910$.
 
 
 
