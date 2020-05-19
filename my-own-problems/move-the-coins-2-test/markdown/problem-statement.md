@@ -47,7 +47,7 @@ $\textit{decryptionKey}=\textit{decryptionKey}+2^i \times u_i + 3^i \times v_i \
 He is now ready for the next encrypted choice, $\textit{encryptedChoice}_2$.  He again decrypts it using the formula above; finds the $\textit{decryptedChoice}_2^\text{th}$ entry in $L$, $r_2=(u_2,v_2)$, removes it, 
 updates his $\textit{decryptionKey}$ with it, etc, until all $Q$ encrypted choices have been processed.
 
-Can you help Chef find his $Q$ distinct, valid reparentings? You need not print them: just printing the final value of $decryptionKey$ will suffice to show that you can do it!
+Can you help Chef find his $Q$ distinct, valid reparentings corresponding to his encrypted choices? You need not print them: just printing the final value of $decryptionKey$ will suffice to show that you can do it!
 
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
