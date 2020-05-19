@@ -71,7 +71,7 @@ For each test case, print a single line containing one integer ― the final val
 
 ### Subtasks
 **Subtask #1 (5 points):** 
-- $T \le 100$
+- $T \le 10$
 - $N \le 100$
 - $Q \le 100$
 
