@@ -251,6 +251,16 @@ class TestFileReader
 
             return readValues;
         }
+
+        std::string peekLine()
+        {
+            const auto originalPos = m_testFileInStream.tellg();
+            const auto line = readLine();
+            const bool restoreToOriginalPosSuccess = m_testFileInStream.seekg(originalPos).good();
+            assert(restoreToOriginalPosSuccess);
+            return line;
+        }
+
         void markTestcaseAsValidated()
         {
             assert(!m_isTestFileMarkedAsValidated);
