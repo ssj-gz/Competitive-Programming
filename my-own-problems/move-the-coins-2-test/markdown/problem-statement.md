@@ -54,7 +54,7 @@ Can you help Chef find his $Q$ distinct, valid reparentings corresponding to his
 - The first line of each test case contains a single integer $N$.
 - Each of the next $N-1$ lines contains two space-separated integers $a$ and $b$ denoting that nodes $a$ and $b$ are connected by an edge.
 - The next line contains a single integer $Q$
-- The $i^\text{th}$ of the next $Q$ lines contains the $i^\text{th}$ encrypted choice, $\textit{encryptedChoice}_i$.
+- The $i^\text{th}$ of the next $Q$ lines contains the $i^\text{th}$ encrypted choice, $\textit{encryptedChoice}_i$ for $i=1,2,\dots,Q$.
 
 ### Output
 For each test case, print a single line containing one integer ― the final value of $\textit{decryptionKey}$ after processing all $Q$ choices.
