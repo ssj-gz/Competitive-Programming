@@ -33,7 +33,7 @@ He then picks $Q$ numbers $c_i$ and chooses the $c_1^\text{th}$ element from $L$
 valid reparentings.  Because Chef doesn't believe in making life easy for himself, these choices are _encrypted_, and he can't find the $\textit{decryptionKey}$ to decrypt a choice 
 until he has processed all choices before that one.
 
-More formally, initially $\textit{decryptionKey}=0$.  He reads the first encrypted choice, $\textit{encryptedChoice}_1$ and decrypts it to get $\textit{decryptedChoice}_1$ (i.e. $c_1$) using the general formula:
+More formally, initially $\textit{decryptionKey}=0$.  He reads the first encrypted choice, $\textit{encryptedChoice}_1$ and decrypts it to get $\textit{decryptedChoice}_1$ (i.e. $c_1$ using the earlier notation) using the general formula:
 
 $\textit{decryptedChoice}_i=\textit{decryptionKey} \oplus \textit{encryptedChoice}_i$
 
