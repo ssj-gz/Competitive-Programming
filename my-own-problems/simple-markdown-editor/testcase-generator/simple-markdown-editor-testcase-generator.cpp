@@ -447,6 +447,119 @@ int main(int argc, char* argv[])
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask)
 {
-    // TODO
-    return false;
+    const auto [T] = testFileReader.readLine<int>();
+
+
+    for (int t = 0; t < T; t++)
+    {
+        const auto [numQueries] = testFileReader.readLine<int>();
+        vector<TestQuery> queries(numQueries);
+        for (int i = 0; i < numQueries; i++)
+        {
+            const auto nextLine = testFileReader.peekLine();
+            cout << "Peek'd line: " << nextLine << endl;
+            TestQuery query;
+            char queryTypeChar = '\0';
+            if (nextLine[0] == 'N')
+            {
+                // Two args.
+                const auto [queryTypeCharTmp, encryptedArgumentTmp, encryptedArgument2Tmp] = testFileReader.readLine<char, int64_t, int64_t>();
+                queryTypeChar = queryTypeCharTmp;
+                query.encryptedArgument = encryptedArgumentTmp;
+                query.encryptedArgument2 = encryptedArgument2Tmp;
+            }
+            else
+            {
+                // Single arg.
+                // Two args.
+                const auto [queryTypeCharTmp, encryptedArgumentTmp] = testFileReader.readLine<char, int64_t>();
+                queryTypeChar = queryTypeCharTmp;
+                query.encryptedArgument = encryptedArgumentTmp;
+            }
+
+            switch (queryTypeChar)
+            {
+                case 'F':
+                    query.type = TestQuery::InsertFormatting;
+                    break;
+                case 'N':
+                    query.type = TestQuery::InsertNonFormatting;
+                    break;
+                case 'Q':
+                    query.type = TestQuery::IsRangeFormatted;
+                    break;
+                case 'U':
+                    query.type = TestQuery::Undo;
+                    break;
+                case 'R':
+                    query.type = TestQuery::Redo;
+                    break;
+                default:
+                    testFileReader.addError("Unrecognised query type char: " + queryTypeChar);
+                    break;
+            }
+        }
+
+        int64_t decryptionKey = 0;
+        int64_t powerOf2 = 2;
+
+        vector<int64_t> queryResults;
+        AVLTree formattingCharsTree(10'000);
+        // Add Sentinel node.
+        formattingCharsTree.insertFormattingChar(0);
+        formattingCharsTree.root()->isSentinelValue = true;
+
+        int queryNum = 1;
+        for (const auto& query : queries)
+        {
+            switch (query.type)
+            {
+                case TestQuery::InsertFormatting:
+                    {
+                        const auto insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                        formattingCharsTree.insertFormattingChar(insertionPos);
+                    }
+                    break;
+                case TestQuery::InsertNonFormatting:
+                    {
+                        const auto insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                        const auto numToInsert = (query.encryptedArgument2 ^ decryptionKey);
+                        formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
+                    }
+                    break;
+                case TestQuery::IsRangeFormatted:
+                    {
+                        const auto queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
+                        auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                        if (queryAnswer == -1)
+                            queryAnswer = 3'141'592;
+                        decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+
+                        queryResults.push_back(queryAnswer);
+                    }
+                    break;
+                case TestQuery::Undo:
+                    {
+                        const int numToUndo = (query.encryptedArgument ^ decryptionKey);
+                        formattingCharsTree.undo(numToUndo);
+                    }
+                    break;
+                case TestQuery::Redo:
+                    {
+                        const int numToRedo = (query.encryptedArgument ^ decryptionKey);
+                        formattingCharsTree.redo(numToRedo);
+                    }
+                    break;
+            }
+
+            queryNum++;
+            powerOf2 = (2 * powerOf2) % Mod;
+
+        }
+
+        cout << "verifier: final encryption key: " << decryptionKey << endl;
+
+    }
+
+    return true;
 }
