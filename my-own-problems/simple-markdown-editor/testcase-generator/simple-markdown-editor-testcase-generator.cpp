@@ -101,7 +101,16 @@ using SMETestFileInfo = TestFileInfo<SubtaskInfo>;
 
 struct TestQuery
 {
-    // TODO
+    enum Type { InsertFormatting, InsertNonFormatting, IsRangeFormatted, Undo, Redo };
+    Type type;
+    int64_t insertionPos = -1;
+    int64_t numToInsert = -1;
+    int64_t queryPosition = -1;
+    int64_t numToUndo = -1;
+    int64_t numToRedo = -1;
+
+    int64_t encryptedArgument1 = -1;
+    int64_t encryptedArgument2 = -1;
 };
 
 void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
