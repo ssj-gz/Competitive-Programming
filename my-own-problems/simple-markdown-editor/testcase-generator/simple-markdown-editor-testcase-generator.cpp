@@ -560,7 +560,11 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
 
         cout << "verifier: final encryption key: " << decryptionKey << endl;
 
+        testFileReader.markTestcaseAsValidated();
+
     }
+    testFileReader.markTestFileAsValidated();
+
 
     return true;
 }
