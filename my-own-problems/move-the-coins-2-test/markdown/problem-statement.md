@@ -158,11 +158,11 @@ L:
 14.  5  4     2
 ```
 
-We need to decrypt each $\textit{encryptedChoice}_i$ for each $i=1,2,\dots,Q$; find the corresponding $(u_i,v_i)$ in the current list $L$; remove it from $L$ and use it to update our $\textit{decryptionKey}$.  The initial value of the $\textit{decryptionKey}$ is $0$.  The first encrypted query $\textit{encryptedChoice}_1 = 5$.  We decrypt it:
+We need to decrypt each $\textit{encryptedChoice}_i$ for each $i=1,2,\dots,Q$; find the corresponding $(u_i,v_i)$ in the current list $L$; remove it from $L$ and use it to update our $\textit{decryptionKey}$.  The initial value of the $\textit{decryptionKey}$ is $0$.  The first encrypted choice $\textit{encryptedChoice}_1 = 5$.  We decrypt it:
 
 $\textit{decryptedChoice}_1 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_1 = 0 \oplus 5 = 5$
 
-so the answer to the 1st query is the $5^\text{th}$ entry in the current list $L$, which is $(u_1, v_1) = (3, 4)$.  We update our $\textit{decryptionKey}$ using the formula:
+so the reparenting corresponding to the 1st choice is the $5^\text{th}$ entry in the current list $L$, which is $(u_1, v_1) = (3, 4)$.  We update our $\textit{decryptionKey}$ using the formula:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^1 \times u_1 + 3^1 \times v_1 \mod{10^9+7} \nonumber \\
@@ -192,11 +192,11 @@ L:
 13.  5  4     2
 ```
 
-On to the $2^\text{nd}$ query! $\textit{encryptedChoice}_2=23$, so
+On to the $2^\text{nd}$ choice! $\textit{encryptedChoice}_2=23$, so
 
 $\textit{decryptedChoice}_2 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_2 = 18 \oplus 23 = 5$
 
-and so, again, the answer to the query is the $5^\text{th}$ element in our current $L$, which is $(u_2, v_2)=(3,5)$.  We update our $\textit{decryptionKey}$ again:
+and so, again, the reparenting $(u_2, v_2)$ corresponding to the $2^\text{nd}$ choice is the $5^\text{th}$ element in our current $L$, which is $(u_2, v_2)=(3,5)$.  We update our $\textit{decryptionKey}$ again:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^2 \times u_2 + 3^2 \times v_2 \mod{10^9+7} \nonumber \\
@@ -224,11 +224,11 @@ and remove the answer from our $L$, leaving $L$ as:
 12.  5  4     2
 ```
 
-On to the $3^\text{rd}$ and final query!  We decrypt $\textit{encryptedChoice}_3 = 72$:
+On to the $3^\text{rd}$ and final choice!  We decrypt $\textit{encryptedChoice}_3 = 72$:
 
 $\textit{decryptedChoice}_3 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_3 = 75 \oplus 72 = 3$
 
-and so the answer to this query is the $3^\text{rd}$ entry in $L$, which is $(u_3,v_3)=(3,1)$.  We use this to update $\textit{decryptionKey}$ for the final time:
+and so the reparenting $(u_3,v_3)$ corresponding to $3^\text{rd}$ choice is the $3^\text{rd}$ entry in $L$, which is $(u_3,v_3)=(3,1)$.  We use this to update $\textit{decryptionKey}$ for the final time:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^3 \times u_3 + 3^3 \times v_3 \mod{10^9+7} \nonumber \\
@@ -238,7 +238,7 @@ $$\begin{eqnarray}
 &=&126 \nonumber \\
 \end{eqnarray}$$
 
-We've now processed all $Q$ queries, and the final $\textit{decryptionKey}=126$; thus the answer for this testcase is $126$.
+We've now processed all $Q$ choices, and the final $\textit{decryptionKey}=126$; thus the answer for this testcase is $126$.
 
 **Example case 2:** The initial tree $T$ is as below:
 
