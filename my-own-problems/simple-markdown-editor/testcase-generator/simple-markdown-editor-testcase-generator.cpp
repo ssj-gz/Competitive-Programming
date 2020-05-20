@@ -212,6 +212,11 @@ int main(int argc, char* argv[])
                     int64_t decryptionKey = 0; 
                     int64_t powerOf2 = 2;
 
+                    AVLTree formattingCharsTree(10'000);
+                    // Add Sentinel node.
+                    formattingCharsTree.insertFormattingChar(0);
+                    formattingCharsTree.root()->isSentinelValue = true;
+
                     int queryNum = 1;
 
                     vector<TestQuery> undoStack;
@@ -226,7 +231,17 @@ int main(int argc, char* argv[])
                         TestQuery query;
                         int numFormatting = count(document.begin(), document.end(), '*');
                         int numNonFormatting = count(document.begin(), document.end(), 'X');
-                        cout << "document: " << document << endl;
+                        cout << "document:       " << document << endl;
+                        cout << "debug document: " << formattingCharsTree.documentString() << endl;
+                        assert(document == formattingCharsTree.documentString());
+                        cout << "undoStackPointer:       " << formattingCharsTree.undoStackPointer() << endl;
+                        cout << "debug undoStackPointer: " << undoStackPointer << endl;
+
+                        cout << "undoStackSize:       " << formattingCharsTree.undoStackSize() << endl;
+                        cout << "debug undoStackSize: " << undoStack.size() << endl;
+
+                        assert(undoStackPointer == formattingCharsTree.undoStackPointer());
+                        assert(undoStack.size() == formattingCharsTree.undoStackSize());
                         while (!haveQuery)
                         {
                             const int queryType = rand() % 5;
@@ -316,6 +331,7 @@ int main(int argc, char* argv[])
                                     TestQuery undoQuery = query;
                                     undoQuery.insertionPos = insertionPos + 1;
                                     undoStack.push_back(undoQuery);
+                                    formattingCharsTree.insertFormattingChar(insertionPos);
                                 }
                                 break;
                             case TestQuery::InsertNonFormatting:
@@ -331,6 +347,7 @@ int main(int argc, char* argv[])
                                     undoQuery.insertionPos = insertionPos + 1;
                                     undoQuery.numToInsert = numToInsert;
                                     undoStack.push_back(undoQuery);
+                                    formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                                 }
                                 break;
                             case TestQuery::IsRangeFormatted:
@@ -365,7 +382,9 @@ int main(int argc, char* argv[])
                                     if (queryAnswer == -1)
                                         queryAnswer = 3'141'592;
                                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
-                                    //cerr << "queryAnswer: " << queryAnswer << endl;
+                                    const auto dbgQueryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                                    cout << "queryAnswer: " << queryAnswer << endl;
+                                    cout << "dbgQueryAnswer: " << dbgQueryAnswer << endl;
                                 }
                                 break;
                             case TestQuery::Undo:
@@ -380,6 +399,7 @@ int main(int argc, char* argv[])
                                         document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
                                         undoStackPointer--;
                                     }
+                                    formattingCharsTree.undo(numToUndo);
                                 }
                                 break;
                             case TestQuery::Redo:
@@ -395,6 +415,7 @@ int main(int argc, char* argv[])
                                         const auto numToInsert = queryToUndo.type == TestQuery::InsertNonFormatting ? queryToUndo.numToInsert : 1;
                                         document.insert(insertionPos, string(numToInsert, charToInsert));
                                     }
+                                    formattingCharsTree.redo(numToRedo);
 
                                 }
                                 break;
