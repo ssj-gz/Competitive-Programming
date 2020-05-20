@@ -57,6 +57,13 @@ class AVLTree
             return root()->totalNonFormattedDescendants;
         }
 
+        string documentString()
+        {
+            string document = subtreeAsDocument(root());
+            document.pop_back(); // Remove the sentinel.
+            return document;
+        }
+
         void undo(int numToUndo)
         {
             m_undoStackPointer -= numToUndo;
@@ -166,6 +173,19 @@ class AVLTree
             m_undoStackPointer++;
             assert(m_undoStackPointer == static_cast<int>(m_rootForRevision.size()) - 1);
         }
+
+        string subtreeAsDocument(AVLNode* subtreeRoot)
+        {
+            if (!subtreeRoot)
+                return "";
+            string asDoc = subtreeAsDocument(subtreeRoot->leftChild);
+            asDoc += string(subtreeRoot->leftNonFormattedRunSize, 'X');
+            asDoc += "*";
+            asDoc += subtreeAsDocument(subtreeRoot->rightChild);
+
+            return asDoc;
+        }
+
 
         int m_nodeBlockSize = 1;
         deque<vector<AVLNode>> m_nodes;
