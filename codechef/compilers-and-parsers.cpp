@@ -47,7 +47,7 @@ int findLongestValidPrefix(const string& expression)
             if (numOpenBrackets != 0)
                 isValid = false;
 
-            cout << prefixLength << string(string("prefixLength: ").size() - to_string(prefixLength).size(), ' ') << " " << prefix << string(max<int>(string("prefix:").size(), expression.size()) - prefixLength, ' ') << " " << (isValid ? "true" : "false") << endl;
+            cout << prefixLength << string(string("prefixLength: ").size() - to_string(prefixLength).size(), ' ') << prefix << string(max<int>(string("prefix:").size(), expression.size()) - prefixLength, ' ') << "  " << (isValid ? "true" : "false") << endl;
 
 
         }
