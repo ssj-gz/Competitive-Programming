@@ -30,7 +30,7 @@ class AVLTree
         {
             m_rootForRevision.push_back(nullptr);
         }
-        AVLNode* root()
+        AVLNode* root() const
         {
             return m_rootForRevision[m_undoStackPointer];
         }
@@ -46,6 +46,15 @@ class AVLTree
         int undoStackSize() const
         {
             return m_rootForRevision.size() - 1;
+        }
+
+        int64_t numFormattingChars() const
+        {
+            return root()->totalFormattedDescendants - 1; // "-1" to discount the Sentinel node.
+        }
+        int64_t numNonFormattingChars() const
+        {
+            return root()->totalNonFormattedDescendants;
         }
 
         void undo(int numToUndo)
