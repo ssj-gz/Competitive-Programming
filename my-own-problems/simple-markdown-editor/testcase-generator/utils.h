@@ -41,7 +41,7 @@ class AVLTree
 
         int undoStackPointer() const
         {
-            return m_undoStackPointer;
+            return m_undoStackPointer - 2; // Match the definition in the Problem statement: should be -1 initially (hence - 1), but also need to subtract item resulting from adding sentinel node (the other -1).
         }
         int undoStackSize() const
         {
