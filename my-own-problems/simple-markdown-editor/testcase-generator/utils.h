@@ -37,6 +37,8 @@ class AVLTree
         void insertFormattingChar(int64_t position);
         void insertNonFormattingChars(int64_t position, int64_t numToAdd);
         int64_t distBetweenEnclosingFormattedChars(int64_t position);
+        AVLTreeIterator findFirstNodeAtOrToRightOf(int64_t position);
+
         void undo(int numToUndo)
         {
             m_undoStackPointer -= numToUndo;
@@ -138,8 +140,6 @@ class AVLTree
             auto newNode = &(m_nodes.back().back());
             return newNode;
         }
-
-        AVLTreeIterator findFirstNodeAtOrToRightOf(int64_t position);
 
         void updateUndoStackWithNewRoot(AVLNode* newRoot)
         {
