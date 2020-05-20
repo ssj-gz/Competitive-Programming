@@ -139,7 +139,7 @@ class AVLTree
             return newNode;
         }
 
-        AVLTreeIterator findFirstNodeToRightOf(int64_t position);
+        AVLTreeIterator findFirstNodeAtOrToRightOf(int64_t position);
 
         void updateUndoStackWithNewRoot(AVLNode* newRoot)
         {
@@ -216,7 +216,7 @@ void AVLTree::insertFormattingChar(int64_t position)
     }
     else
     {
-        const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position);
+        const AVLTreeIterator formattingCharToRightIter = findFirstNodeAtOrToRightOf(position);
         const int64_t newFormattingCharSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNode()->leftNonFormattedRunSize - (formattingCharToRightIter.currentNodePosition() - position);
         const int64_t adjustedFormattingCharToRightSizeOfUnformattedToLeftRun = formattingCharToRightIter.currentNodePosition() - position;
         assert(newFormattingCharSizeOfUnformattedToLeftRun >= 0);
@@ -333,7 +333,7 @@ AVLNode* AVLTree::adjustRunToLeftOfNodeToRightOf(AVLTreeIterator& treeIter, int6
     return subTreeRoot;
 }
 
-AVLTreeIterator AVLTree::findFirstNodeToRightOf(int64_t position)
+AVLTreeIterator AVLTree::findFirstNodeAtOrToRightOf(int64_t position)
 {
     AVLTreeIterator treeIter(root());
     AVLTreeIterator result(nullptr);
@@ -355,7 +355,7 @@ AVLTreeIterator AVLTree::findFirstNodeToRightOf(int64_t position)
 
 int64_t AVLTree::distBetweenEnclosingFormattedChars(int64_t position)
 {
-    const AVLTreeIterator formattingCharToRightIter = findFirstNodeToRightOf(position);
+    const AVLTreeIterator formattingCharToRightIter = findFirstNodeAtOrToRightOf(position);
 
     if (formattingCharToRightIter.currentNode()->isSentinelValue)
     {
