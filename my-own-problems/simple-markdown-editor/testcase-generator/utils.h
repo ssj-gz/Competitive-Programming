@@ -39,6 +39,15 @@ class AVLTree
         int64_t distBetweenEnclosingFormattedChars(int64_t position);
         AVLTreeIterator findFirstNodeAtOrToRightOf(int64_t position);
 
+        int undoStackPointer() const
+        {
+            return m_undoStackPointer;
+        }
+        int undoStackSize() const
+        {
+            return m_rootForRevision.size() - 1;
+        }
+
         void undo(int numToUndo)
         {
             m_undoStackPointer -= numToUndo;
