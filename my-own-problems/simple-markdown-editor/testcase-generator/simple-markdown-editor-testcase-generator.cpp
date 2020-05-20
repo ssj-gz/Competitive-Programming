@@ -227,6 +227,7 @@ int main(int argc, char* argv[])
                     const int numQueries = 500'000;
                     cout << "numQueries: " << numQueries << endl;
                     vector<TestQuery> queries;
+                    bool allowsUndoRedo = false;
                     while (queries.size() < numQueries)
                     {
                         cout << "Generating query: " << queries.size() + 1 << " documentLength: " << formattingCharsTree.documentLength() << " numInsertionQueries: " << numInsertionQueries << " numRangeQueries: "<< numRangeQueries << endl;
@@ -252,8 +253,7 @@ int main(int argc, char* argv[])
                             cout << "candidate queryType: " << query.type << endl;
                             if (queryType == TestQuery::Undo)
                             {
-#if 0
-                                if (rand() % 4 >= 1)
+                                if (!allowsUndoRedo || (rand() % 4 >= 1))
                                     continue; // Undos should be fairly rare.
                                 if (undoStackPointer == -1)
                                     continue;
@@ -263,13 +263,10 @@ int main(int argc, char* argv[])
                                     query.numToUndo = numToUndo;
                                     haveQuery = true;
                                 }
-#endif
-                                continue;
                             }
                             if (queryType == TestQuery::Redo)
                             {
-#if 0
-                                if (rand() % 4 >= 1)
+                                if (!allowsUndoRedo || (rand() % 4 >= 1))
                                     continue; // Redos should be fairly rare.
                                 if (undoStackPointer + 1 == undoStack.size())
                                     continue;
@@ -279,8 +276,6 @@ int main(int argc, char* argv[])
                                     query.numToRedo = numToRedo;
                                     haveQuery = true;
                                 }
-#endif
-                                continue;
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
