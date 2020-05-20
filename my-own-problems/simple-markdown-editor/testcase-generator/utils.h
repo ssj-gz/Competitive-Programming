@@ -57,6 +57,11 @@ class AVLTree
             return root()->totalNonFormattedDescendants;
         }
 
+        int64_t documentLength() const
+        {
+            return numFormattingChars() + numNonFormattingChars();
+        }
+
         string documentString()
         {
             string document = subtreeAsDocument(root());
