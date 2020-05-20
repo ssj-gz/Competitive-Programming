@@ -531,6 +531,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                 case TestQuery::IsRangeFormatted:
                     {
                         const auto queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
+                        const auto nextAtOrAfterQueryPos = formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition);
+                        testFileReader.addErrorUnless(nextAtOrAfterQueryPos.currentNodePosition() != queryPosition, "IsRangeFormatted where queryPosition points to a formatting char");
                         auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                         if (queryAnswer == -1)
                             queryAnswer = 3'141'592;
