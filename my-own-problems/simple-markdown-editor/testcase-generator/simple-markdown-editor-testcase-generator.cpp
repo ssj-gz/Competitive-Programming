@@ -457,7 +457,6 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         for (int i = 0; i < numQueries; i++)
         {
             const auto nextLine = testFileReader.peekLine();
-            cout << "Peek'd line: " << nextLine << endl;
             TestQuery query;
             char queryTypeChar = '\0';
             if (nextLine[0] == 'N')
