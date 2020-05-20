@@ -218,22 +218,25 @@ int main(int argc, char* argv[])
                     formattingCharsTree.root()->isSentinelValue = true;
 
                     int queryNum = 1;
+                    int numInsertionQueries = 0;
+                    int numRangeQueries = 0;
 
                     vector<TestQuery> undoStack;
                     int undoStackPointer = -1;
 
-                    const int numQueries = 1 + rand() % 100;
+                    const int numQueries = 500'000;
                     cout << "numQueries: " << numQueries << endl;
                     vector<TestQuery> queries;
                     while (queries.size() < numQueries)
                     {
+                        cout << "Generating query: " << queries.size() + 1 << " documentLength: " << formattingCharsTree.documentLength() << " numInsertionQueries: " << numInsertionQueries << " numRangeQueries: "<< numRangeQueries << endl;
                         bool haveQuery = false;
                         TestQuery query;
                         int numFormatting = count(document.begin(), document.end(), '*');
                         int numNonFormatting = count(document.begin(), document.end(), 'X');
-                        cout << "document:       " << document << endl;
-                        cout << "debug document: " << formattingCharsTree.documentString() << endl;
-                        assert(document == formattingCharsTree.documentString());
+                        //cout << "document:       " << document << endl;
+                        //cout << "debug document: " << formattingCharsTree.documentString() << endl;
+                        //assert(document == formattingCharsTree.documentString());
                         cout << "undoStackPointer:       " << formattingCharsTree.undoStackPointer() << endl;
                         cout << "debug undoStackPointer: " << undoStackPointer << endl;
 
@@ -249,6 +252,7 @@ int main(int argc, char* argv[])
                             cout << "candidate queryType: " << query.type << endl;
                             if (queryType == TestQuery::Undo)
                             {
+#if 0
                                 if (rand() % 4 >= 1)
                                     continue; // Undos should be fairly rare.
                                 if (undoStackPointer == -1)
@@ -259,9 +263,12 @@ int main(int argc, char* argv[])
                                     query.numToUndo = numToUndo;
                                     haveQuery = true;
                                 }
+#endif
+                                continue;
                             }
                             if (queryType == TestQuery::Redo)
                             {
+#if 0
                                 if (rand() % 4 >= 1)
                                     continue; // Redos should be fairly rare.
                                 if (undoStackPointer + 1 == undoStack.size())
@@ -272,6 +279,8 @@ int main(int argc, char* argv[])
                                     query.numToRedo = numToRedo;
                                     haveQuery = true;
                                 }
+#endif
+                                continue;
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
@@ -283,7 +292,7 @@ int main(int argc, char* argv[])
                             {
                                 const int pos = rand() % (document.size() + 1);
                                 query.insertionPos = pos + 1;
-                                const int num = 1 + rand() % 10;
+                                const int num = 1 + rand() % 1000;
                                 query.numToInsert = num;
                                 haveQuery = true;
                             }
@@ -332,6 +341,7 @@ int main(int argc, char* argv[])
                                     undoQuery.insertionPos = insertionPos + 1;
                                     undoStack.push_back(undoQuery);
                                     formattingCharsTree.insertFormattingChar(insertionPos);
+                                    numInsertionQueries++;
                                 }
                                 break;
                             case TestQuery::InsertNonFormatting:
@@ -348,6 +358,7 @@ int main(int argc, char* argv[])
                                     undoQuery.numToInsert = numToInsert;
                                     undoStack.push_back(undoQuery);
                                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
+                                    numInsertionQueries++;
                                 }
                                 break;
                             case TestQuery::IsRangeFormatted:
@@ -382,9 +393,14 @@ int main(int argc, char* argv[])
                                     if (queryAnswer == -1)
                                         queryAnswer = 3'141'592;
                                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
-                                    const auto dbgQueryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                                    auto dbgQueryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                                    if (dbgQueryAnswer == -1)
+                                        dbgQueryAnswer = 3'141'592;
+
                                     cout << "queryAnswer: " << queryAnswer << endl;
                                     cout << "dbgQueryAnswer: " << dbgQueryAnswer << endl;
+                                    assert(queryAnswer == dbgQueryAnswer);
+                                    numRangeQueries++;
                                 }
                                 break;
                             case TestQuery::Undo:
