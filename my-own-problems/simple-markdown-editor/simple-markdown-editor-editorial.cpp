@@ -13,12 +13,43 @@ using namespace std;
 
 const int64_t Mod = 1'000'000'007;
 
+// Lots of input to read, so use ultra-fast reader.
+void scan_integer( int64_t &x )
+{
+    int64_t c = getchar_unlocked();
+    x = 0;
+    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
+    for( ;c>47 && c<58; c = getchar_unlocked() ) {
+        x = (x << 1) + (x << 3) + c - 48;
+    }
+}
+
+void scan_char( char &x )
+{
+    int c = getchar_unlocked();
+    for( ; (c == ' '); c = getchar_unlocked() );
+    x = c;
+}
+
+char readChar()
+{
+    char toRead;
+    scan_char(toRead);
+    return toRead;
+}
+
+int64_t readInt()
+{
+    int64_t toRead;
+    scan_integer(toRead);
+    return toRead;
+}
+
 template <typename T>
 T read()
 {
     T toRead;
     cin >> toRead;
-    assert(cin);
     return toRead;
 }
 
@@ -48,8 +79,7 @@ class AVLTreeIterator;
 class AVLTree
 {
     public:
-        AVLTree(int nodeBlockSize = 1)
-            : m_nodeBlockSize{nodeBlockSize}
+        AVLTree()
         {
             m_rootForRevision.push_back(nullptr);
         }
@@ -152,13 +182,8 @@ class AVLTree
 
         AVLNode* createNode()
         {
-            if (m_nodes.empty() || static_cast<int>(m_nodes.back().size()) == m_nodeBlockSize)
-            {
-                m_nodes.push_back(vector<AVLNode>());
-                m_nodes.back().reserve(m_nodeBlockSize);
-            }
-            m_nodes.back().push_back(AVLNode());
-            auto newNode = &(m_nodes.back().back());
+            m_nodes.push_back(AVLNode());
+            auto newNode = &(m_nodes.back());
             return newNode;
         }
 
@@ -172,8 +197,7 @@ class AVLTree
             assert(m_undoStackPointer == static_cast<int>(m_rootForRevision.size()) - 1);
         }
 
-        int m_nodeBlockSize = 1;
-        deque<vector<AVLNode>> m_nodes;
+        deque<AVLNode> m_nodes;
 
         int m_undoStackPointer = 0;
         vector<AVLNode*> m_rootForRevision;
@@ -382,7 +406,7 @@ int64_t solveOptimised(const vector<Query>& queries)
     int64_t powerOf2 = 2;
 
     vector<int64_t> queryResults;
-    AVLTree formattingCharsTree(10'000);
+    AVLTree formattingCharsTree;
     // Add Sentinel node.
     formattingCharsTree.insertFormattingChar(0);
     formattingCharsTree.root()->isSentinelValue = true;
@@ -460,16 +484,16 @@ int main()
 {
     ios::sync_with_stdio(false);
     
-    const auto T = read<int>();
+    const auto T = readInt();
 
     for (int t = 0; t < T; t++)
     {
-        const int numQueries = read<int>();
+        const int numQueries = readInt();
         vector<Query> queries(numQueries);
         for (auto& query : queries)
         {
-            const auto queryType = read<char>();
-            query.encryptedArgument = read<int64_t>();
+            const auto queryType = readChar();
+            query.encryptedArgument = readInt();
             switch (queryType)
             {
                 case 'F':
@@ -477,7 +501,7 @@ int main()
                     break;
                 case 'N':
                     query.type = Query::InsertNonFormatting;
-                    query.encryptedArgument2 = read<int64_t>();
+                    query.encryptedArgument2 = readInt();
                     break;
                 case 'Q':
                     query.type = Query::IsRangeFormatted;
