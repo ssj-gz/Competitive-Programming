@@ -247,24 +247,6 @@ int main(int argc, char* argv[])
                         assert(undoStackPointer == formattingCharsTree.undoStackPointer());
                         assert(undoStack.size() == formattingCharsTree.undoStackSize());
 
-                        const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-                        const int numFormattingWithoutNonFormattingToLeft = numFormatting - numFormattingWithNonFormattingToLeft;
-                        int dbgNumFormattingWithNonFormattingToLeft = 0;
-                        int dbgNumFormattingWithoutNonFormattingToLeft = 0;
-                        for (int i = 0; i < document.size(); i++)
-                        {
-                            if (document[i] == '*')
-                            {
-                                if (i > 0 && document[i - 1] == 'X')
-                                    dbgNumFormattingWithNonFormattingToLeft++;
-                                else
-                                    dbgNumFormattingWithoutNonFormattingToLeft++;
-                            }
-                        }
-                        cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
-                        cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
-                        assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
-                        assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
                         while (!haveQuery)
                         {
                             const int queryType = rand() % 5;
@@ -404,6 +386,35 @@ int main(int argc, char* argv[])
                                             }
                                         }
                                     }
+                                    {
+                                        // TODO - the below is not yet implemented.
+                                        // Choose a position purely at random will bias in favour of long runs of 
+                                        // non-formatting chars: instead, pick a formatted char (that has at least one
+                                        // non-formatting char in the run to its left) and then pick a random position
+                                        // in that run.  Although - TODO - maybe we should bias towards the ends of the range
+                                        // as that makes it more likely to detect errors in the submitter's implementation?
+                                        // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
+                                        const auto documentWithSentinel = document + "*";
+                                        const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                        const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
+                                        int dbgNumFormattingWithNonFormattingToLeft = 0;
+                                        int dbgNumFormattingWithoutNonFormattingToLeft = 0;
+                                        for (int i = 0; i < documentWithSentinel.size(); i++)
+                                        {
+                                            if (documentWithSentinel[i] == '*')
+                                            {
+                                                if (i > 0 && documentWithSentinel[i - 1] == 'X')
+                                                    dbgNumFormattingWithNonFormattingToLeft++;
+                                                else
+                                                    dbgNumFormattingWithoutNonFormattingToLeft++;
+                                            }
+                                        }
+                                        cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
+                                        cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
+                                        assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
+                                        assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
+                                    }
+
                                     if (queryAnswer == -1)
                                         queryAnswer = 3'141'592;
                                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;

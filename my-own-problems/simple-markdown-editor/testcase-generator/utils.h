@@ -122,7 +122,7 @@ class AVLTree
             nodeToUpdate->maxDescendantDepth = 0;
             nodeToUpdate->totalFormattedDescendants = 1;
             nodeToUpdate->totalNonFormattedDescendants = nodeToUpdate->leftNonFormattedRunSize;
-            nodeToUpdate->totalFormattedDescendantsWithNonFormattedToLeft = (!nodeToUpdate->isSentinelValue && nodeToUpdate->leftNonFormattedRunSize > 0 ? 1 : 0);
+            nodeToUpdate->totalFormattedDescendantsWithNonFormattedToLeft = (nodeToUpdate->leftNonFormattedRunSize > 0 ? 1 : 0);
 
             auto leftChild = nodeToUpdate->leftChild;
 
@@ -153,7 +153,7 @@ class AVLTree
             auto newNode = createNode();
             newNode->leftNonFormattedRunSize = leftNonFormattedRunSize;
             newNode->totalNonFormattedDescendants = leftNonFormattedRunSize;
-            newNode->totalFormattedDescendantsWithNonFormattedToLeft = (!newNode->isSentinelValue && newNode->leftNonFormattedRunSize > 0 ? 1 : 0);
+            newNode->totalFormattedDescendantsWithNonFormattedToLeft = (newNode->leftNonFormattedRunSize > 0 ? 1 : 0);
             return newNode;
         }
 
