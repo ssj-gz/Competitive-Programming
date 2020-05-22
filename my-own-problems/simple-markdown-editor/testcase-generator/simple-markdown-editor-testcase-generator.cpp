@@ -280,35 +280,12 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
-                                AVLTreeIterator chosenFormattingCharIter(nullptr);
-                                {
-                                    const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
-                                    const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
+                                const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+                                const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
 
-                                    chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
-                                    const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
-                                    const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
-
-                                    int dbgNumFormattingCharsSoFar = 0;
-                                    const auto documentWithSentinel = document + "*";
-                                    int64_t dbgFormattingCharPos = 0;
-                                    for (int64_t i = 0; i < documentWithSentinel.size(); i++)
-                                    {
-                                        if (documentWithSentinel[i] == '*')
-                                        {
-                                            if (dbgNumFormattingCharsSoFar == formattedCharIndexToChoose)
-                                            {
-                                                dbgFormattingCharPos = i;
-                                            }
-                                            dbgNumFormattingCharsSoFar++;
-                                        }
-                                    }
-                                    cout << "numFormattingChars: " << numFormattingChars << " formattedCharIndexToChoose: " << formattedCharIndexToChoose << endl;
-                                    //cout << "documentWithSentinel: " << documentWithSentinel << endl;
-                                    cout << "formattedCharPos: " <<  formattedCharPos << " dbgFormattingCharPos: " << dbgFormattingCharPos << endl;
-                                    assert(formattedCharPos == dbgFormattingCharPos);
-
-                                }
+                                const auto chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
+                                const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
+                                const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
                                 const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
                                 assert(pos >= 0);
                                 query.insertionPos = pos + 1;
