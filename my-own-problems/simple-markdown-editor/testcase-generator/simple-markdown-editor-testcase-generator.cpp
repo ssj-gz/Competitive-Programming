@@ -288,7 +288,7 @@ int main(int argc, char* argv[])
                             {
                                 const int pos = rand() % (document.size() + 1);
                                 query.insertionPos = pos + 1;
-                                const int num = 1 + rand() % 1000;
+                                const int num = 1 + rand() % 100;
                                 query.numToInsert = num;
                                 haveQuery = true;
                             }
@@ -427,13 +427,16 @@ int main(int argc, char* argv[])
                                                 }
                                             }
                                         }
+                                        //cout << " documentWithSentinel: " << documentWithSentinel << " validFormattingToChoose: " << validFormattingToChoose << endl;
+                                        const int position = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose).currentNodePosition();
                                         cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
                                         cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
                                         assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
                                         assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
                                         assert(dbgPosition > 0);
                                         assert(documentWithSentinel[dbgPosition - 1] == 'X');
-                                        cout << "dbgPosition: " << dbgPosition << endl;
+                                        cout << "dbgPosition: " << dbgPosition << " position: " << position << " queryNum: " << queries.size() << endl;
+                                        assert(dbgPosition == position);
                                     }
 
                                     if (queryAnswer == -1)

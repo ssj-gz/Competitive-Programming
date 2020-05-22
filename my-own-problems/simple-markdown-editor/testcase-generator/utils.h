@@ -39,6 +39,7 @@ class AVLTree
         void insertNonFormattingChars(int64_t position, int64_t numToAdd);
         int64_t distBetweenEnclosingFormattedChars(int64_t position);
         AVLTreeIterator findFirstNodeAtOrToRightOf(int64_t position);
+        AVLTreeIterator findKthFormattingCharWithNonFormattingToLeft(int64_t k);
 
         int undoStackPointer() const
         {
@@ -395,6 +396,35 @@ AVLTreeIterator AVLTree::findFirstNodeAtOrToRightOf(int64_t position)
         else
         {
             treeIter.followRightChild();
+        }
+    }
+    assert(result.currentNode());
+    return result;
+}
+
+AVLTreeIterator AVLTree::findKthFormattingCharWithNonFormattingToLeft(int64_t k)
+{
+    AVLTreeIterator treeIter(root());
+    AVLTreeIterator result(nullptr);
+    int numOffset = 0;
+    while (treeIter.currentNode())
+    {
+        const int numInLeftSubTree = treeIter.currentNode()->leftChild ? treeIter.currentNode()->leftChild->totalFormattedDescendantsWithNonFormattedToLeft  : 0;
+        const int numAtNode = (treeIter.currentNode()->leftNonFormattedRunSize > 0 ? 1 : 0);
+        const int totalNumBefore = numInLeftSubTree + numOffset;
+        if (totalNumBefore == k && (treeIter.currentNode()->leftNonFormattedRunSize))
+        {
+            return treeIter;
+        }
+        else if (totalNumBefore + numAtNode < k + 1)
+        {
+            treeIter.followRightChild();
+            numOffset += numInLeftSubTree + numAtNode;
+        }
+        else
+        {
+            result = treeIter;
+            treeIter.followLeftChild();
         }
     }
     assert(result.currentNode());
