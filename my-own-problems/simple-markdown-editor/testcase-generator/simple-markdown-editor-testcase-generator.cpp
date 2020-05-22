@@ -397,6 +397,7 @@ int main(int argc, char* argv[])
                                         const auto documentWithSentinel = document + "*";
                                         const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                         const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
+                                        const int validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
                                         int dbgNumFormattingWithNonFormattingToLeft = 0;
                                         int dbgNumFormattingWithoutNonFormattingToLeft = 0;
                                         for (int i = 0; i < documentWithSentinel.size(); i++)
@@ -409,10 +410,30 @@ int main(int argc, char* argv[])
                                                     dbgNumFormattingWithoutNonFormattingToLeft++;
                                             }
                                         }
+                                        int validFormattingsSoFar = 0;
+                                        int dbgPosition = -1;
+                                        for (int i = 0; i < documentWithSentinel.size(); i++)
+                                        {
+                                            if (documentWithSentinel[i] == '*')
+                                            {
+                                                if (i > 0 && documentWithSentinel[i - 1] == 'X')
+                                                {
+                                                    if (validFormattingsSoFar == validFormattingToChoose)
+                                                    {
+                                                        dbgPosition = i;
+                                                        break;
+                                                    }
+                                                    validFormattingsSoFar++;
+                                                }
+                                            }
+                                        }
                                         cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
                                         cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
                                         assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
                                         assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
+                                        assert(dbgPosition > 0);
+                                        assert(documentWithSentinel[dbgPosition - 1] == 'X');
+                                        cout << "dbgPosition: " << dbgPosition << endl;
                                     }
 
                                     if (queryAnswer == -1)
