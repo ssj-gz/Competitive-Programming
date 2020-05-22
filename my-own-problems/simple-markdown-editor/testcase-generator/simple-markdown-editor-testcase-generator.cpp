@@ -345,6 +345,31 @@ int main(int argc, char* argv[])
                                     const int insertionPos = query.insertionPos - 1;
                                     const int numToInsert = query.numToInsert;
                                     //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
+
+                                    {
+                                        // TODO - eventually, we'll bias slightly in favour of inserting at formatted chars
+                                        // that have no non-formatting chars to their left - this is going to be a step towards that.
+                                        int dbgNumFormattedCharsWithoutNonFormattingToLeft = 0;
+                                        const auto documentWithSentinel = document + "*";
+                                        for (int i = 0; i < documentWithSentinel.size(); i++)
+                                        {
+                                            if (documentWithSentinel[i] == '*')
+                                            {
+                                                if (i > 0 && documentWithSentinel[i-1] == 'X')
+                                                {
+                                                }
+                                                else
+                                                {
+                                                    dbgNumFormattedCharsWithoutNonFormattingToLeft++;
+                                                }
+                                            }
+                                        }
+                                        const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                        //cout << "documentWithSentinel: " << documentWithSentinel << endl;
+                                        cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
+                                        cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
+                                        assert(dbgNumFormattedCharsWithoutNonFormattingToLeft == numFormattedCharsWithoutNonFormattingToLeft);
+                                    }
                                     const string charsToInsert(numToInsert, 'X');
                                     document.insert(insertionPos, charsToInsert);
                                     undoStackPointer++;
