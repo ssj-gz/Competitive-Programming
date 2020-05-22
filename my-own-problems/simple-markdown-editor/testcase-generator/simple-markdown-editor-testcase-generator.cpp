@@ -269,11 +269,11 @@ int main(int argc, char* argv[])
                             {
                                 if (!allowsUndoRedo || (rand() % 4 >= 1))
                                     continue; // Redos should be fairly rare.
-                                if (formattingCharsTree.undoStackPointer() + 1 == undoStack.size())
+                                if (formattingCharsTree.undoStackPointer() + 1 == formattingCharsTree.undoStackSize())
                                     continue;
                                 else
                                 {
-                                    const int numToRedo = 1 + rand() % (undoStack.size() - 1 - formattingCharsTree.undoStackPointer());
+                                    const int numToRedo = 1 + rand() % (formattingCharsTree.undoStackSize() - 1 - formattingCharsTree.undoStackPointer());
                                     query.numToRedo = numToRedo;
                                     haveQuery = true;
                                 }
