@@ -246,6 +246,25 @@ int main(int argc, char* argv[])
 
                         assert(undoStackPointer == formattingCharsTree.undoStackPointer());
                         assert(undoStack.size() == formattingCharsTree.undoStackSize());
+
+                        const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                        const int numFormattingWithoutNonFormattingToLeft = numFormatting - numFormattingWithNonFormattingToLeft;
+                        int dbgNumFormattingWithNonFormattingToLeft = 0;
+                        int dbgNumFormattingWithoutNonFormattingToLeft = 0;
+                        for (int i = 0; i < document.size(); i++)
+                        {
+                            if (document[i] == '*')
+                            {
+                                if (i > 0 && document[i - 1] == 'X')
+                                    dbgNumFormattingWithNonFormattingToLeft++;
+                                else
+                                    dbgNumFormattingWithoutNonFormattingToLeft++;
+                            }
+                        }
+                        cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
+                        cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
+                        assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
+                        assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
                         while (!haveQuery)
                         {
                             const int queryType = rand() % 5;
