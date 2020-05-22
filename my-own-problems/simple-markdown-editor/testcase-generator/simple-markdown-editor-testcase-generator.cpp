@@ -383,11 +383,44 @@ int main(int argc, char* argv[])
                                 break;
                             case TestQuery::IsRangeFormatted:
                                 {
-                                    const auto queryPosition = query.queryPosition;
+                                    const auto queryPosition = query.queryPosition - 1;
                                     auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                                     if (queryAnswer == -1)
                                         queryAnswer = 3'141'592;
                                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+
+#if 0
+                                    int64_t dbgQueryAnswer = -1;
+                                    assert(document[queryPosition] == 'X');
+                                    {
+                                        int openingFormatPos = -1;
+                                        for (int pos = 0; pos < document.size(); pos++)
+                                        {
+                                            if (document[pos] == '*')
+                                            {
+                                                if (openingFormatPos == -1)
+                                                {
+                                                    // Open formatting.
+                                                    openingFormatPos = pos;
+                                                }
+                                                else
+                                                {
+                                                    // Close formatting.
+                                                    if (openingFormatPos < queryPosition && queryPosition < pos)
+                                                    {
+                                                        dbgQueryAnswer = pos - openingFormatPos - 1;
+                                                    }
+                                                    openingFormatPos = -1;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (dbgQueryAnswer == -1)
+                                        dbgQueryAnswer = 3'141'592;
+                                    cout << "queryAnswer: " << queryAnswer << " dbgQueryAnswer: " << dbgQueryAnswer << endl;
+                                    assert(dbgQueryAnswer == queryAnswer);
+#endif
 
                                     numRangeQueries++;
                                 }
