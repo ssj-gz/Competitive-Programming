@@ -280,6 +280,42 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
+                                AVLTreeIterator chosenFormattingCharIter(nullptr);
+                                {
+                                    const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+                                    const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
+
+                                    chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
+                                    const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
+                                    const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
+
+                                    int dbgNumFormattingCharsSoFar = 0;
+                                    const auto documentWithSentinel = document + "*";
+                                    int64_t dbgFormattingCharPos = 0;
+                                    for (int64_t i = 0; i < documentWithSentinel.size(); i++)
+                                    {
+                                        if (documentWithSentinel[i] == '*')
+                                        {
+                                            if (dbgNumFormattingCharsSoFar == formattedCharIndexToChoose)
+                                            {
+                                                dbgFormattingCharPos = i;
+                                            }
+                                            dbgNumFormattingCharsSoFar++;
+                                        }
+                                    }
+                                    cout << "numFormattingChars: " << numFormattingChars << " formattedCharIndexToChoose: " << formattedCharIndexToChoose << endl;
+                                    //cout << "documentWithSentinel: " << documentWithSentinel << endl;
+                                    cout << "formattedCharPos: " <<  formattedCharPos << " dbgFormattingCharPos: " << dbgFormattingCharPos << endl;
+                                    assert(formattedCharPos == dbgFormattingCharPos);
+
+                                }
+                                const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
+                                assert(pos >= 0);
+                                query.insertionPos = pos + 1;
+                                haveQuery = true;
+                            }
+                            if (queryType == TestQuery::InsertNonFormatting)
+                            {
                                 const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                 const bool chooseFormattedCharWithoutNonFormattingToLeft = (numFormattedCharsWithoutNonFormattingToLeft > 0 && rnd.next(0.0, 100.0) <= 80.0);
                                 AVLTreeIterator chosenFormattingCharIter(nullptr);
@@ -301,6 +337,7 @@ int main(int argc, char* argv[])
                                         }
                                     }
                                     //cout << "documentWithSentinel: " << documentWithSentinel << endl;
+                                    const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                     cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
                                     cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
                                     assert(dbgNumFormattedCharsWithoutNonFormattingToLeft == numFormattedCharsWithoutNonFormattingToLeft);
@@ -363,13 +400,6 @@ int main(int argc, char* argv[])
                                     assert(formattedCharPos == dbgFormattingCharPos);
 
                                 }
-                                const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
-                                assert(pos >= 0);
-                                query.insertionPos = pos + 1;
-                                haveQuery = true;
-                            }
-                            if (queryType == TestQuery::InsertNonFormatting)
-                            {
                                 const int pos = rand() % (document.size() + 1);
                                 query.insertionPos = pos + 1;
                                 const int num = 1 + rand() % 100;
