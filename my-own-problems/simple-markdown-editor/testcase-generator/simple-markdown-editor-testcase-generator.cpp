@@ -282,6 +282,7 @@ int main(int argc, char* argv[])
                             {
                                 const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                 const bool chooseFormattedCharWithoutNonFormattingToLeft = (numFormattedCharsWithoutNonFormattingToLeft > 0 && rnd.next(0.0, 100.0) <= 80.0);
+                                AVLTreeIterator chosenFormattingCharIter(nullptr);
                                 if (chooseFormattedCharWithoutNonFormattingToLeft)
                                 {
                                     int dbgNumFormattedCharsWithoutNonFormattingToLeft = 0;
@@ -326,6 +327,8 @@ int main(int argc, char* argv[])
                                                 }
                                             }
                                         }
+
+                                        chosenFormattingCharIter = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose);
                                         const auto kthFormattingCharToChoosePos = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose).currentNodePosition();
                                         cout << "dbgKthFormattingCharToChoosePos: " << dbgKthFormattingCharToChoosePos << " kthFormattingCharToChoosePos: " << kthFormattingCharToChoosePos << endl;
                                         assert(dbgKthFormattingCharToChoosePos == kthFormattingCharToChoosePos);
@@ -336,9 +339,9 @@ int main(int argc, char* argv[])
                                     const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
                                     const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
 
-                                    const auto formattedCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
-                                    const auto formattedCharPos = formattedCharIter.currentNodePosition();
-                                    const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
+                                    chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
+                                    const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
+                                    const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
 
                                     int dbgNumFormattingCharsSoFar = 0;
                                     const auto documentWithSentinel = document + "*";
