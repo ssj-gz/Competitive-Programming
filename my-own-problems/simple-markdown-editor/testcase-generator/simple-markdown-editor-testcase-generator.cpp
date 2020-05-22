@@ -236,7 +236,6 @@ int main(int argc, char* argv[])
                         {
                             const int queryType = rand() % 5;
                             query.type = static_cast<TestQuery::Type>(queryType);
-                            cout << "candidate queryType: " << query.type << endl;
                             if (queryType == TestQuery::Undo)
                             {
                                 if (!allowsUndoRedo || (rand() % 4 >= 1))
@@ -337,7 +336,6 @@ int main(int argc, char* argv[])
                             case TestQuery::InsertFormatting:
                                 {
                                     const auto insertionPos = query.insertionPos - 1;
-                                    //cerr << "InsertFormatting at " << insertionPos << endl;
                                     formattingCharsTree.insertFormattingChar(insertionPos);
                                     numInsertionQueries++;
                                 }
@@ -346,9 +344,7 @@ int main(int argc, char* argv[])
                                 {
                                     const auto insertionPos = query.insertionPos - 1;
                                     const auto numToInsert = query.numToInsert;
-                                    //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
 
-                                    const string charsToInsert(numToInsert, 'X');
                                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                                     numInsertionQueries++;
                                 }
@@ -360,39 +356,6 @@ int main(int argc, char* argv[])
                                     if (queryAnswer == -1)
                                         queryAnswer = 3'141'592;
                                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
-
-#if 0
-                                    int64_t dbgQueryAnswer = -1;
-                                    assert(document[queryPosition] == 'X');
-                                    {
-                                        int openingFormatPos = -1;
-                                        for (int pos = 0; pos < document.size(); pos++)
-                                        {
-                                            if (document[pos] == '*')
-                                            {
-                                                if (openingFormatPos == -1)
-                                                {
-                                                    // Open formatting.
-                                                    openingFormatPos = pos;
-                                                }
-                                                else
-                                                {
-                                                    // Close formatting.
-                                                    if (openingFormatPos < queryPosition && queryPosition < pos)
-                                                    {
-                                                        dbgQueryAnswer = pos - openingFormatPos - 1;
-                                                    }
-                                                    openingFormatPos = -1;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    if (dbgQueryAnswer == -1)
-                                        dbgQueryAnswer = 3'141'592;
-                                    cout << "queryAnswer: " << queryAnswer << " dbgQueryAnswer: " << dbgQueryAnswer << endl;
-                                    assert(dbgQueryAnswer == queryAnswer);
-#endif
 
                                     numRangeQueries++;
                                 }
