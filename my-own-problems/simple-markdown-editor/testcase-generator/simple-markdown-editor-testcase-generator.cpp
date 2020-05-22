@@ -359,8 +359,60 @@ int main(int argc, char* argv[])
                                 break;
                             case TestQuery::IsRangeFormatted:
                                 {
-                                    const int queryPosition = query.queryPosition - 1;
-                                    assert(document[queryPosition] == 'X');
+                                    // TODO - the below is not yet implemented.
+                                    // Choose a position purely at random will bias in favour of long runs of 
+                                    // non-formatting chars: instead, pick a formatted char (that has at least one
+                                    // non-formatting char in the run to its left) and then pick a random position
+                                    // in that run.  Although - TODO - maybe we should bias towards the ends of the range
+                                    // as that makes it more likely to detect errors in the submitter's implementation?
+                                    // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
+                                    const auto documentWithSentinel = document + "*";
+                                    const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                    const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
+                                    const int validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+                                    int dbgNumFormattingWithNonFormattingToLeft = 0;
+                                    int dbgNumFormattingWithoutNonFormattingToLeft = 0;
+                                    for (int i = 0; i < documentWithSentinel.size(); i++)
+                                    {
+                                        if (documentWithSentinel[i] == '*')
+                                        {
+                                            if (i > 0 && documentWithSentinel[i - 1] == 'X')
+                                                dbgNumFormattingWithNonFormattingToLeft++;
+                                            else
+                                                dbgNumFormattingWithoutNonFormattingToLeft++;
+                                        }
+                                    }
+                                    int validFormattingsSoFar = 0;
+                                    int dbgPosition = -1;
+                                    for (int i = 0; i < documentWithSentinel.size(); i++)
+                                    {
+                                        if (documentWithSentinel[i] == '*')
+                                        {
+                                            if (i > 0 && documentWithSentinel[i - 1] == 'X')
+                                            {
+                                                if (validFormattingsSoFar == validFormattingToChoose)
+                                                {
+                                                    dbgPosition = i;
+                                                    break;
+                                                }
+                                                validFormattingsSoFar++;
+                                            }
+                                        }
+                                    }
+
+                                    const auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
+                                    const auto formattedCharPos = formattedCharIter.currentNodePosition();
+                                    const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
+                                    const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
+                                    cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
+                                    cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
+                                    assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
+                                    assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
+                                    assert(formattedCharPos > 0);
+                                    assert(documentWithSentinel[formattedCharPos - 1] == 'X');
+                                    cout << "dbgPosition: " << dbgPosition << " formattedCharPos: " << formattedCharPos << " queryNum: " << queries.size() << endl;
+                                    assert(dbgPosition == formattedCharPos);
+                                    assert(documentWithSentinel[queryPosition] == 'X');
                                     //cerr << "IsRangeFormatted at " << queryPosition << endl;
                                     int queryAnswer = -1;
                                     {
@@ -385,58 +437,6 @@ int main(int argc, char* argv[])
                                                 }
                                             }
                                         }
-                                    }
-                                    {
-                                        // TODO - the below is not yet implemented.
-                                        // Choose a position purely at random will bias in favour of long runs of 
-                                        // non-formatting chars: instead, pick a formatted char (that has at least one
-                                        // non-formatting char in the run to its left) and then pick a random position
-                                        // in that run.  Although - TODO - maybe we should bias towards the ends of the range
-                                        // as that makes it more likely to detect errors in the submitter's implementation?
-                                        // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
-                                        const auto documentWithSentinel = document + "*";
-                                        const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-                                        const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
-                                        const int validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
-                                        int dbgNumFormattingWithNonFormattingToLeft = 0;
-                                        int dbgNumFormattingWithoutNonFormattingToLeft = 0;
-                                        for (int i = 0; i < documentWithSentinel.size(); i++)
-                                        {
-                                            if (documentWithSentinel[i] == '*')
-                                            {
-                                                if (i > 0 && documentWithSentinel[i - 1] == 'X')
-                                                    dbgNumFormattingWithNonFormattingToLeft++;
-                                                else
-                                                    dbgNumFormattingWithoutNonFormattingToLeft++;
-                                            }
-                                        }
-                                        int validFormattingsSoFar = 0;
-                                        int dbgPosition = -1;
-                                        for (int i = 0; i < documentWithSentinel.size(); i++)
-                                        {
-                                            if (documentWithSentinel[i] == '*')
-                                            {
-                                                if (i > 0 && documentWithSentinel[i - 1] == 'X')
-                                                {
-                                                    if (validFormattingsSoFar == validFormattingToChoose)
-                                                    {
-                                                        dbgPosition = i;
-                                                        break;
-                                                    }
-                                                    validFormattingsSoFar++;
-                                                }
-                                            }
-                                        }
-                                        //cout << " documentWithSentinel: " << documentWithSentinel << " validFormattingToChoose: " << validFormattingToChoose << endl;
-                                        const int position = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose).currentNodePosition();
-                                        cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft << " dbgNumFormattingWithNonFormattingToLeft: " << dbgNumFormattingWithNonFormattingToLeft << endl;
-                                        cout << "numFormattingWithoutNonFormattingToLeft: " << numFormattingWithoutNonFormattingToLeft << " dbgNumFormattingWithoutNonFormattingToLeft: " << dbgNumFormattingWithoutNonFormattingToLeft << endl;
-                                        assert(numFormattingWithoutNonFormattingToLeft == dbgNumFormattingWithoutNonFormattingToLeft); 
-                                        assert(numFormattingWithNonFormattingToLeft == dbgNumFormattingWithNonFormattingToLeft); 
-                                        assert(dbgPosition > 0);
-                                        assert(documentWithSentinel[dbgPosition - 1] == 'X');
-                                        cout << "dbgPosition: " << dbgPosition << " position: " << position << " queryNum: " << queries.size() << endl;
-                                        assert(dbgPosition == position);
                                     }
 
                                     if (queryAnswer == -1)
