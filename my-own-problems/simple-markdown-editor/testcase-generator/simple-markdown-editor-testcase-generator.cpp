@@ -280,6 +280,57 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
+                                {
+                                    // TODO - eventually, we'll bias slightly in favour of inserting at formatted chars
+                                    // that have no non-formatting chars to their left - this is going to be a step towards that.
+                                    int dbgNumFormattedCharsWithoutNonFormattingToLeft = 0;
+                                    const auto documentWithSentinel = document + "*";
+                                    for (int i = 0; i < documentWithSentinel.size(); i++)
+                                    {
+                                        if (documentWithSentinel[i] == '*')
+                                        {
+                                            if (i > 0 && documentWithSentinel[i-1] == 'X')
+                                            {
+                                            }
+                                            else
+                                            {
+                                                dbgNumFormattedCharsWithoutNonFormattingToLeft++;
+                                            }
+                                        }
+                                    }
+                                    const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                    //cout << "documentWithSentinel: " << documentWithSentinel << endl;
+                                    cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
+                                    cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
+                                    assert(dbgNumFormattedCharsWithoutNonFormattingToLeft == numFormattedCharsWithoutNonFormattingToLeft);
+                                    if (numFormattedCharsWithoutNonFormattingToLeft > 0)
+                                    {
+                                        const auto kthFormattingCharToChoose = rnd.next(numFormattedCharsWithoutNonFormattingToLeft);
+                                        int dbgKthFormattingCharToChoosePos = 0;
+                                        int formattingCharsSoFar = 0;
+                                        for (int i = 0; i < documentWithSentinel.size(); i++)
+                                        {
+                                            if (documentWithSentinel[i] == '*')
+                                            {
+                                                if (i > 0 && documentWithSentinel[i-1] == 'X')
+                                                {
+                                                }
+                                                else
+                                                {
+                                                    if (formattingCharsSoFar == kthFormattingCharToChoose)
+                                                    {
+                                                        dbgKthFormattingCharToChoosePos = i;
+                                                        break;
+                                                    }
+                                                    formattingCharsSoFar++;
+                                                }
+                                            }
+                                        }
+                                        const auto kthFormattingCharToChoosePos = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose).currentNodePosition();
+                                        cout << "dbgKthFormattingCharToChoosePos: " << dbgKthFormattingCharToChoosePos << " kthFormattingCharToChoosePos: " << kthFormattingCharToChoosePos << endl;
+                                        assert(dbgKthFormattingCharToChoosePos == kthFormattingCharToChoosePos);
+                                    }
+                                }
                                 const int pos = rand() % (document.size() + 1);
                                 query.insertionPos = pos + 1;
                                 haveQuery = true;
@@ -346,57 +397,6 @@ int main(int argc, char* argv[])
                                     const int numToInsert = query.numToInsert;
                                     //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
 
-                                    {
-                                        // TODO - eventually, we'll bias slightly in favour of inserting at formatted chars
-                                        // that have no non-formatting chars to their left - this is going to be a step towards that.
-                                        int dbgNumFormattedCharsWithoutNonFormattingToLeft = 0;
-                                        const auto documentWithSentinel = document + "*";
-                                        for (int i = 0; i < documentWithSentinel.size(); i++)
-                                        {
-                                            if (documentWithSentinel[i] == '*')
-                                            {
-                                                if (i > 0 && documentWithSentinel[i-1] == 'X')
-                                                {
-                                                }
-                                                else
-                                                {
-                                                    dbgNumFormattedCharsWithoutNonFormattingToLeft++;
-                                                }
-                                            }
-                                        }
-                                        const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-                                        //cout << "documentWithSentinel: " << documentWithSentinel << endl;
-                                        cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
-                                        cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
-                                        assert(dbgNumFormattedCharsWithoutNonFormattingToLeft == numFormattedCharsWithoutNonFormattingToLeft);
-                                        if (numFormattedCharsWithoutNonFormattingToLeft > 0)
-                                        {
-                                            const auto kthFormattingCharToChoose = rnd.next(numFormattedCharsWithoutNonFormattingToLeft);
-                                            int dbgKthFormattingCharToChoosePos = 0;
-                                            int formattingCharsSoFar = 0;
-                                            for (int i = 0; i < documentWithSentinel.size(); i++)
-                                            {
-                                                if (documentWithSentinel[i] == '*')
-                                                {
-                                                    if (i > 0 && documentWithSentinel[i-1] == 'X')
-                                                    {
-                                                    }
-                                                    else
-                                                    {
-                                                        if (formattingCharsSoFar == kthFormattingCharToChoose)
-                                                        {
-                                                            dbgKthFormattingCharToChoosePos = i;
-                                                            break;
-                                                        }
-                                                        formattingCharsSoFar++;
-                                                    }
-                                                }
-                                            }
-                                            const auto kthFormattingCharToChoosePos = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose).currentNodePosition();
-                                            cout << "dbgKthFormattingCharToChoosePos: " << dbgKthFormattingCharToChoosePos << " kthFormattingCharToChoosePos: " << kthFormattingCharToChoosePos << endl;
-                                            assert(dbgKthFormattingCharToChoosePos == kthFormattingCharToChoosePos);
-                                        }
-                                    }
                                     const string charsToInsert(numToInsert, 'X');
                                     document.insert(insertionPos, charsToInsert);
                                     undoStackPointer++;
