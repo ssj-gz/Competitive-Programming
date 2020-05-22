@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
                     const int numQueries = 500'000;
                     cout << "numQueries: " << numQueries << endl;
                     vector<TestQuery> queries;
-                    bool allowsUndoRedo = false;
+                    bool allowsUndoRedo = true;
                     while (queries.size() < numQueries)
                     {
                         cout << "Generating query: " << queries.size() + 1 << " documentLength: " << formattingCharsTree.documentLength() << " numInsertionQueries: " << numInsertionQueries << " numRangeQueries: "<< numRangeQueries << endl;
