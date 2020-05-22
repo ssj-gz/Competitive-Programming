@@ -337,24 +337,7 @@ int main(int argc, char* argv[])
                                     const auto formattedCharPos = formattedCharIter.currentNodePosition();
                                     const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
                                     const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
-                                    auto nonFormattedToPick = rand() % numNonFormatting;
-                                    auto numNonFormattedSoFar = 0;
-                                    auto position = -1;
-
-                                    for (int i = 0; i < document.size(); i++)
-                                    {
-                                        if (document[i] == 'X')
-                                        {
-                                            if (numNonFormattedSoFar == nonFormattedToPick)
-                                            {
-                                                position = i;
-                                                break;
-                                            }
-                                            numNonFormattedSoFar++;
-                                        }
-                                    }
-                                    assert(position != -1);
-                                    query.queryPosition = position + 1;
+                                    query.queryPosition = queryPosition + 1;
                                     haveQuery = true;
                                 }
 
