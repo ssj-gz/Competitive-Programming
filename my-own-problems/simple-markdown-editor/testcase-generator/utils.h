@@ -41,6 +41,7 @@ class AVLTree
         AVLTreeIterator findFirstNodeAtOrToRightOf(int64_t position);
         AVLTreeIterator findKthFormattingCharWithNonFormattingToLeft(int64_t k);
         AVLTreeIterator findKthFormattingCharWithoutNonFormattingToLeft(int64_t k);
+        AVLTreeIterator findKthFormattingChar(int64_t k);
 
         int undoStackPointer() const
         {
@@ -397,6 +398,30 @@ AVLTreeIterator AVLTree::findFirstNodeAtOrToRightOf(int64_t position)
         else
         {
             treeIter.followRightChild();
+        }
+    }
+    assert(result.currentNode());
+    return result;
+}
+
+AVLTreeIterator AVLTree::findKthFormattingChar(int64_t k)
+{
+    AVLTreeIterator treeIter(root());
+    AVLTreeIterator result(nullptr);
+    while (treeIter.currentNode())
+    {
+        if (treeIter.numFormattingCharsToLeft() == k)
+        {
+            return treeIter;
+        }
+        else if (treeIter.numFormattingCharsToLeft() < k)
+        {
+            treeIter.followRightChild();
+        }
+        else
+        {
+            result = treeIter;
+            treeIter.followLeftChild();
         }
     }
     assert(result.currentNode());

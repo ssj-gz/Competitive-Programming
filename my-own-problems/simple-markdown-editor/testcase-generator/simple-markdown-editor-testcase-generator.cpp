@@ -280,9 +280,10 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
+                                const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                const bool chooseFormattedCharWithoutNonFormattingToLeft = (numFormattedCharsWithoutNonFormattingToLeft > 0 && rnd.next(0.0, 100.0) <= 80.0);
+                                if (chooseFormattedCharWithoutNonFormattingToLeft)
                                 {
-                                    // TODO - eventually, we'll bias slightly in favour of inserting at formatted chars
-                                    // that have no non-formatting chars to their left - this is going to be a step towards that.
                                     int dbgNumFormattedCharsWithoutNonFormattingToLeft = 0;
                                     const auto documentWithSentinel = document + "*";
                                     for (int i = 0; i < documentWithSentinel.size(); i++)
@@ -298,7 +299,6 @@ int main(int argc, char* argv[])
                                             }
                                         }
                                     }
-                                    const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                     //cout << "documentWithSentinel: " << documentWithSentinel << endl;
                                     cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
                                     cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
@@ -330,6 +330,35 @@ int main(int argc, char* argv[])
                                         cout << "dbgKthFormattingCharToChoosePos: " << dbgKthFormattingCharToChoosePos << " kthFormattingCharToChoosePos: " << kthFormattingCharToChoosePos << endl;
                                         assert(dbgKthFormattingCharToChoosePos == kthFormattingCharToChoosePos);
                                     }
+                                }
+                                else
+                                {
+                                    const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+                                    const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
+
+                                    const auto formattedCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
+                                    const auto formattedCharPos = formattedCharIter.currentNodePosition();
+                                    const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
+
+                                    int dbgNumFormattingCharsSoFar = 0;
+                                    const auto documentWithSentinel = document + "*";
+                                    int64_t dbgFormattingCharPos = 0;
+                                    for (int64_t i = 0; i < documentWithSentinel.size(); i++)
+                                    {
+                                        if (documentWithSentinel[i] == '*')
+                                        {
+                                            if (dbgNumFormattingCharsSoFar == formattedCharIndexToChoose)
+                                            {
+                                                dbgFormattingCharPos = i;
+                                            }
+                                            dbgNumFormattingCharsSoFar++;
+                                        }
+                                    }
+                                    cout << "numFormattingChars: " << numFormattingChars << " formattedCharIndexToChoose: " << formattedCharIndexToChoose << endl;
+                                    //cout << "documentWithSentinel: " << documentWithSentinel << endl;
+                                    cout << "formattedCharPos: " <<  formattedCharPos << " dbgFormattingCharPos: " << dbgFormattingCharPos << endl;
+                                    assert(formattedCharPos == dbgFormattingCharPos);
+
                                 }
                                 const int pos = rand() % (document.size() + 1);
                                 query.insertionPos = pos + 1;
