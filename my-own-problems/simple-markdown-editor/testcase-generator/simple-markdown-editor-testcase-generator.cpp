@@ -399,13 +399,13 @@ int main(int argc, char* argv[])
                                 break;
                             case TestQuery::Undo:
                                 {
-                                    const int numToUndo = query.numToUndo;
+                                    const auto numToUndo = query.numToUndo;
                                     formattingCharsTree.undo(numToUndo);
                                 }
                                 break;
                             case TestQuery::Redo:
                                 {
-                                    const int numToRedo = query.numToRedo;
+                                    const auto numToRedo = query.numToRedo;
                                     formattingCharsTree.redo(numToRedo);
 
                                 }
