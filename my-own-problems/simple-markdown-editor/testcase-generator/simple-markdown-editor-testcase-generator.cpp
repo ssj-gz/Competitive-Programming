@@ -233,8 +233,8 @@ int main(int argc, char* argv[])
                         cout << "Generating query: " << queries.size() + 1 << " documentLength: " << formattingCharsTree.documentLength() << " numInsertionQueries: " << numInsertionQueries << " numRangeQueries: "<< numRangeQueries << endl;
                         bool haveQuery = false;
                         TestQuery query;
-                        int numFormatting = count(document.begin(), document.end(), '*');
-                        int numNonFormatting = count(document.begin(), document.end(), 'X');
+                        const auto numFormatting = formattingCharsTree.numFormattingChars();
+                        const auto numNonFormatting = formattingCharsTree.numNonFormattingChars();
                         //cout << "document:       " << document << endl;
                         //cout << "debug document: " << formattingCharsTree.documentString() << endl;
                         //assert(document == formattingCharsTree.documentString());
