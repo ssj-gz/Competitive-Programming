@@ -363,7 +363,8 @@ int main(int argc, char* argv[])
                                     assert(formattedCharPos == dbgFormattingCharPos);
 
                                 }
-                                const int pos = rand() % (document.size() + 1);
+                                const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
+                                assert(pos >= 0);
                                 query.insertionPos = pos + 1;
                                 haveQuery = true;
                             }
