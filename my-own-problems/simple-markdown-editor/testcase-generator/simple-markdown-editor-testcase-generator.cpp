@@ -375,7 +375,7 @@ int main(int argc, char* argv[])
                                     const auto formattedCharPos = formattedCharIter.currentNodePosition();
                                     const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
                                     const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
-                                    int queryAnswer = -1;
+                                    int dbgQueryAnswer = -1;
                                     {
                                         int openingFormatPos = -1;
                                         for (int pos = 0; pos < document.size(); pos++)
@@ -392,7 +392,7 @@ int main(int argc, char* argv[])
                                                     // Close formatting.
                                                     if (openingFormatPos < queryPosition && queryPosition < pos)
                                                     {
-                                                        queryAnswer = pos - openingFormatPos - 1;
+                                                        dbgQueryAnswer = pos - openingFormatPos - 1;
                                                     }
                                                     openingFormatPos = -1;
                                                 }
@@ -400,16 +400,16 @@ int main(int argc, char* argv[])
                                         }
                                     }
 
-                                    if (queryAnswer == -1)
-                                        queryAnswer = 3'141'592;
-                                    decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
-                                    auto dbgQueryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                                     if (dbgQueryAnswer == -1)
                                         dbgQueryAnswer = 3'141'592;
+                                    decryptionKey = (decryptionKey + (dbgQueryAnswer * powerOf2) % Mod) % Mod;
+                                    auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+                                    if (queryAnswer == -1)
+                                        queryAnswer = 3'141'592;
 
-                                    cout << "queryAnswer: " << queryAnswer << endl;
                                     cout << "dbgQueryAnswer: " << dbgQueryAnswer << endl;
-                                    assert(queryAnswer == dbgQueryAnswer);
+                                    cout << "queryAnswer: " << queryAnswer << endl;
+                                    assert(dbgQueryAnswer == queryAnswer);
                                     numRangeQueries++;
                                 }
                                 break;
