@@ -208,7 +208,6 @@ int main(int argc, char* argv[])
                 const int T = 1;
                 for (int t = 0; t < T; t++)
                 {
-                    string document;
                     int64_t decryptionKey = 0; 
                     int64_t powerOf2 = 2;
 
@@ -221,9 +220,6 @@ int main(int argc, char* argv[])
                     int numInsertionQueries = 0;
                     int numRangeQueries = 0;
 
-                    vector<TestQuery> undoStack;
-                    int undoStackPointer = -1;
-
                     const int numQueries = 500'000;
                     cout << "numQueries: " << numQueries << endl;
                     vector<TestQuery> queries;
@@ -235,17 +231,6 @@ int main(int argc, char* argv[])
                         TestQuery query;
                         const auto numFormatting = formattingCharsTree.numFormattingChars();
                         const auto numNonFormatting = formattingCharsTree.numNonFormattingChars();
-                        //cout << "document:       " << document << endl;
-                        //cout << "debug document: " << formattingCharsTree.documentString() << endl;
-                        //assert(document == formattingCharsTree.documentString());
-                        cout << "undoStackPointer:       " << formattingCharsTree.undoStackPointer() << endl;
-                        cout << "debug undoStackPointer: " << undoStackPointer << endl;
-
-                        cout << "undoStackSize:       " << formattingCharsTree.undoStackSize() << endl;
-                        cout << "debug undoStackSize: " << undoStack.size() << endl;
-
-                        assert(undoStackPointer == formattingCharsTree.undoStackPointer());
-                        assert(undoStack.size() == formattingCharsTree.undoStackSize());
 
                         while (!haveQuery)
                         {
@@ -353,12 +338,6 @@ int main(int argc, char* argv[])
                                 {
                                     const auto insertionPos = query.insertionPos - 1;
                                     //cerr << "InsertFormatting at " << insertionPos << endl;
-                                    document.insert(document.begin() + insertionPos, '*');
-                                    undoStackPointer++;
-                                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                                    TestQuery undoQuery = query;
-                                    undoQuery.insertionPos = insertionPos + 1;
-                                    undoStack.push_back(undoQuery);
                                     formattingCharsTree.insertFormattingChar(insertionPos);
                                     numInsertionQueries++;
                                 }
@@ -370,13 +349,6 @@ int main(int argc, char* argv[])
                                     //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
 
                                     const string charsToInsert(numToInsert, 'X');
-                                    document.insert(insertionPos, charsToInsert);
-                                    undoStackPointer++;
-                                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                                    TestQuery undoQuery = query;
-                                    undoQuery.insertionPos = insertionPos + 1;
-                                    undoQuery.numToInsert = numToInsert;
-                                    undoStack.push_back(undoQuery);
                                     formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                                     numInsertionQueries++;
                                 }
@@ -428,31 +400,12 @@ int main(int argc, char* argv[])
                             case TestQuery::Undo:
                                 {
                                     const int numToUndo = query.numToUndo;
-                                    //cerr << "Undo " << numToUndo << endl;
-                                    for (int i = 0; i < numToUndo; i++)
-                                    {
-                                        const auto& queryToUndo = undoStack[undoStackPointer];
-                                        const auto removalPosition = queryToUndo.insertionPos - 1;
-                                        const auto numToRemove = (queryToUndo.type == TestQuery::InsertNonFormatting ? queryToUndo.numToInsert : 1);
-                                        document.erase(document.begin() + removalPosition, document.begin() + removalPosition + numToRemove);
-                                        undoStackPointer--;
-                                    }
                                     formattingCharsTree.undo(numToUndo);
                                 }
                                 break;
                             case TestQuery::Redo:
                                 {
                                     const int numToRedo = query.numToRedo;
-                                    //cerr << "Redo " << numToRedo << endl;
-                                    for (int i = 0; i < numToRedo; i++)
-                                    {
-                                        undoStackPointer++;
-                                        const auto& queryToUndo = undoStack[undoStackPointer];
-                                        const auto insertionPos = queryToUndo.insertionPos - 1;
-                                        const auto charToInsert = queryToUndo.type == TestQuery::InsertNonFormatting ? 'X' : '*';
-                                        const auto numToInsert = queryToUndo.type == TestQuery::InsertNonFormatting ? queryToUndo.numToInsert : 1;
-                                        document.insert(insertionPos, string(numToInsert, charToInsert));
-                                    }
                                     formattingCharsTree.redo(numToRedo);
 
                                 }
