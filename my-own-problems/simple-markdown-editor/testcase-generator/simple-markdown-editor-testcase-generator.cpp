@@ -293,91 +293,24 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertNonFormatting)
                             {
-                                const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft; // Includes sentinel, if sentinel has no formatting chars to left.
                                 const bool chooseFormattedCharWithoutNonFormattingToLeft = (numFormattedCharsWithoutNonFormattingToLeft > 0 && rnd.next(0.0, 100.0) <= 80.0);
                                 AVLTreeIterator chosenFormattingCharIter(nullptr);
                                 if (chooseFormattedCharWithoutNonFormattingToLeft)
                                 {
-                                    int dbgNumFormattedCharsWithoutNonFormattingToLeft = 0;
-                                    const auto documentWithSentinel = document + "*";
-                                    for (int i = 0; i < documentWithSentinel.size(); i++)
-                                    {
-                                        if (documentWithSentinel[i] == '*')
-                                        {
-                                            if (i > 0 && documentWithSentinel[i-1] == 'X')
-                                            {
-                                            }
-                                            else
-                                            {
-                                                dbgNumFormattedCharsWithoutNonFormattingToLeft++;
-                                            }
-                                        }
-                                    }
-                                    //cout << "documentWithSentinel: " << documentWithSentinel << endl;
-                                    const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-                                    cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
-                                    cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
-                                    assert(dbgNumFormattedCharsWithoutNonFormattingToLeft == numFormattedCharsWithoutNonFormattingToLeft);
-                                    if (numFormattedCharsWithoutNonFormattingToLeft > 0)
-                                    {
-                                        const auto kthFormattingCharToChoose = rnd.next(numFormattedCharsWithoutNonFormattingToLeft);
-                                        int dbgKthFormattingCharToChoosePos = 0;
-                                        int formattingCharsSoFar = 0;
-                                        for (int i = 0; i < documentWithSentinel.size(); i++)
-                                        {
-                                            if (documentWithSentinel[i] == '*')
-                                            {
-                                                if (i > 0 && documentWithSentinel[i-1] == 'X')
-                                                {
-                                                }
-                                                else
-                                                {
-                                                    if (formattingCharsSoFar == kthFormattingCharToChoose)
-                                                    {
-                                                        dbgKthFormattingCharToChoosePos = i;
-                                                        break;
-                                                    }
-                                                    formattingCharsSoFar++;
-                                                }
-                                            }
-                                        }
-
-                                        chosenFormattingCharIter = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose);
-                                        const auto kthFormattingCharToChoosePos = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose).currentNodePosition();
-                                        cout << "dbgKthFormattingCharToChoosePos: " << dbgKthFormattingCharToChoosePos << " kthFormattingCharToChoosePos: " << kthFormattingCharToChoosePos << endl;
-                                        assert(dbgKthFormattingCharToChoosePos == kthFormattingCharToChoosePos);
-                                    }
+                                    const auto chosenFormattingWithoutNonFormattingIndex = rnd.next(numFormattedCharsWithoutNonFormattingToLeft);
+                                    chosenFormattingCharIter = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(chosenFormattingWithoutNonFormattingIndex);
                                 }
                                 else
                                 {
                                     const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
-                                    const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
-
-                                    chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
-                                    const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
-                                    const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
-
-                                    int dbgNumFormattingCharsSoFar = 0;
-                                    const auto documentWithSentinel = document + "*";
-                                    int64_t dbgFormattingCharPos = 0;
-                                    for (int64_t i = 0; i < documentWithSentinel.size(); i++)
-                                    {
-                                        if (documentWithSentinel[i] == '*')
-                                        {
-                                            if (dbgNumFormattingCharsSoFar == formattedCharIndexToChoose)
-                                            {
-                                                dbgFormattingCharPos = i;
-                                            }
-                                            dbgNumFormattingCharsSoFar++;
-                                        }
-                                    }
-                                    cout << "numFormattingChars: " << numFormattingChars << " formattedCharIndexToChoose: " << formattedCharIndexToChoose << endl;
-                                    //cout << "documentWithSentinel: " << documentWithSentinel << endl;
-                                    cout << "formattedCharPos: " <<  formattedCharPos << " dbgFormattingCharPos: " << dbgFormattingCharPos << endl;
-                                    assert(formattedCharPos == dbgFormattingCharPos);
+                                    const int chosenFormattedCharIndex = rnd.next(numFormattingChars);
+                                    chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(chosenFormattedCharIndex);
 
                                 }
-                                const int pos = rand() % (document.size() + 1);
+                                assert(chosenFormattingCharIter.currentNode() != nullptr);
+                                const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
+                                assert(pos >= 0);
                                 query.insertionPos = pos + 1;
                                 const int num = 1 + rand() % 100;
                                 query.numToInsert = num;
@@ -389,9 +322,25 @@ int main(int argc, char* argv[])
                                     continue;
                                 else
                                 {
+                                    // Choose a position purely at random will bias in favour of long runs of 
+                                    // non-formatting chars: instead, pick a formatted char (that has at least one
+                                    // non-formatting char in the run to its left) and then pick a random position
+                                    // in that run.  Although - TODO - maybe we should bias towards the ends of the range
+                                    // as that makes it more likely to detect errors in the submitter's implementation?
+                                    // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
+                                    const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                    const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
+                                    const int validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+
+                                    // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
+                                    const auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
+                                    const auto formattedCharPos = formattedCharIter.currentNodePosition();
+                                    const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
+                                    const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
                                     int nonFormattedToPick = rand() % numNonFormatting;
                                     int numNonFormattedSoFar = 0;
                                     int position = -1;
+
                                     for (int i = 0; i < document.size(); i++)
                                     {
                                         if (document[i] == 'X')
@@ -451,23 +400,7 @@ int main(int argc, char* argv[])
                                 break;
                             case TestQuery::IsRangeFormatted:
                                 {
-                                    // TODO - the below is not yet implemented.
-                                    // Choose a position purely at random will bias in favour of long runs of 
-                                    // non-formatting chars: instead, pick a formatted char (that has at least one
-                                    // non-formatting char in the run to its left) and then pick a random position
-                                    // in that run.  Although - TODO - maybe we should bias towards the ends of the range
-                                    // as that makes it more likely to detect errors in the submitter's implementation?
-                                    // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
-                                    const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-                                    const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
-                                    const int validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
-
-                                    // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
-                                    const auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
-                                    const auto formattedCharPos = formattedCharIter.currentNodePosition();
-                                    const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
-                                    const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
-
+                                    const auto queryPosition = query.queryPosition;
                                     auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                                     if (queryAnswer == -1)
                                         queryAnswer = 3'141'592;
