@@ -369,6 +369,33 @@ int main(int argc, char* argv[])
                                         cout << "dbgNumFormattedCharsWithoutNonFormattingToLeft: " << dbgNumFormattedCharsWithoutNonFormattingToLeft << endl;
                                         cout << "numFormattedCharsWithoutNonFormattingToLeft: " << numFormattedCharsWithoutNonFormattingToLeft << endl;
                                         assert(dbgNumFormattedCharsWithoutNonFormattingToLeft == numFormattedCharsWithoutNonFormattingToLeft);
+                                        if (numFormattedCharsWithoutNonFormattingToLeft > 0)
+                                        {
+                                            const auto kthFormattingCharToChoose = rnd.next(numFormattedCharsWithoutNonFormattingToLeft);
+                                            int dbgKthFormattingCharToChoosePos = 0;
+                                            int formattingCharsSoFar = 0;
+                                            for (int i = 0; i < documentWithSentinel.size(); i++)
+                                            {
+                                                if (documentWithSentinel[i] == '*')
+                                                {
+                                                    if (i > 0 && documentWithSentinel[i-1] == 'X')
+                                                    {
+                                                    }
+                                                    else
+                                                    {
+                                                        if (formattingCharsSoFar == kthFormattingCharToChoose)
+                                                        {
+                                                            dbgKthFormattingCharToChoosePos = i;
+                                                            break;
+                                                        }
+                                                        formattingCharsSoFar++;
+                                                    }
+                                                }
+                                            }
+                                            const auto kthFormattingCharToChoosePos = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(kthFormattingCharToChoose).currentNodePosition();
+                                            cout << "dbgKthFormattingCharToChoosePos: " << dbgKthFormattingCharToChoosePos << " kthFormattingCharToChoosePos: " << kthFormattingCharToChoosePos << endl;
+                                            assert(dbgKthFormattingCharToChoosePos == kthFormattingCharToChoosePos);
+                                        }
                                     }
                                     const string charsToInsert(numToInsert, 'X');
                                     document.insert(insertionPos, charsToInsert);
