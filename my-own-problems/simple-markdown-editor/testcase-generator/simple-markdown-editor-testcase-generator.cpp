@@ -280,8 +280,8 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertFormatting)
                             {
-                                const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
-                                const int formattedCharIndexToChoose = rnd.next(numFormattingChars);
+                                const auto numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+                                const auto formattedCharIndexToChoose = rnd.next(numFormattingChars);
 
                                 const auto chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
                                 const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
@@ -303,8 +303,8 @@ int main(int argc, char* argv[])
                                 }
                                 else
                                 {
-                                    const int numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
-                                    const int chosenFormattedCharIndex = rnd.next(numFormattingChars);
+                                    const auto numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+                                    const auto chosenFormattedCharIndex = rnd.next(numFormattingChars);
                                     chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(chosenFormattedCharIndex);
 
                                 }
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
                                 const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
                                 assert(pos >= 0);
                                 query.insertionPos = pos + 1;
-                                const int num = 1 + rand() % 100;
+                                const auto num = 1 + rand() % 100;
                                 query.numToInsert = num;
                                 haveQuery = true;
                             }
@@ -328,18 +328,18 @@ int main(int argc, char* argv[])
                                     // in that run.  Although - TODO - maybe we should bias towards the ends of the range
                                     // as that makes it more likely to detect errors in the submitter's implementation?
                                     // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
-                                    const int numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-                                    const int numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
-                                    const int validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+                                    const auto numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+                                    const auto numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
+                                    const auto validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
 
                                     // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
                                     const auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
                                     const auto formattedCharPos = formattedCharIter.currentNodePosition();
                                     const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
                                     const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
-                                    int nonFormattedToPick = rand() % numNonFormatting;
-                                    int numNonFormattedSoFar = 0;
-                                    int position = -1;
+                                    auto nonFormattedToPick = rand() % numNonFormatting;
+                                    auto numNonFormattedSoFar = 0;
+                                    auto position = -1;
 
                                     for (int i = 0; i < document.size(); i++)
                                     {
@@ -368,7 +368,7 @@ int main(int argc, char* argv[])
                         {
                             case TestQuery::InsertFormatting:
                                 {
-                                    const int insertionPos = query.insertionPos - 1;
+                                    const auto insertionPos = query.insertionPos - 1;
                                     //cerr << "InsertFormatting at " << insertionPos << endl;
                                     document.insert(document.begin() + insertionPos, '*');
                                     undoStackPointer++;
@@ -382,8 +382,8 @@ int main(int argc, char* argv[])
                                 break;
                             case TestQuery::InsertNonFormatting:
                                 {
-                                    const int insertionPos = query.insertionPos - 1;
-                                    const int numToInsert = query.numToInsert;
+                                    const auto insertionPos = query.insertionPos - 1;
+                                    const auto numToInsert = query.numToInsert;
                                     //cerr << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
 
                                     const string charsToInsert(numToInsert, 'X');
