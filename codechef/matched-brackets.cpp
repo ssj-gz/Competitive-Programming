@@ -30,9 +30,11 @@ int main()
     vector<int> positionsOfUnmatchedOpenBrackets;
     auto nestingDepth = 0;
     auto largestNestingDepth = -1;
+    auto largestNestingDepthBeginPos = -1;
     auto largestNestingDepthPos = -1;
     auto largestDistBetweenMatchedBrackets = -1;
     auto largestDistBetweenMatchedBracketsPos = -1;
+    auto lastBalancePos = -1;
     for (auto pos = 0; pos < N; pos++)
     {
         if (brackets[pos] == 1) // Open bracket.
@@ -43,6 +45,7 @@ int main()
             {
                 largestNestingDepth = nestingDepth;
                 largestNestingDepthPos = pos;
+                largestNestingDepthBeginPos = lastBalancePos + 1;
             }
         }
         else // Close bracket.
@@ -56,8 +59,37 @@ int main()
             positionsOfUnmatchedOpenBrackets.pop_back();
             nestingDepth--;
             assert(nestingDepth >= 0);
+            if (nestingDepth == 0)
+                lastBalancePos = pos;
         }
     }
+#ifdef DIAGNOSTICS
+    {
+        string bracketString;
+        for (const auto bracketAsNum : brackets)
+        {
+            if (bracketAsNum == 1)
+                bracketString += "(";
+            else if (bracketAsNum == 2)
+                bracketString += ")";
+            else
+                assert(false);
+        }
+        auto repeatedString = [](const string& stringToRepeat, int numRepetitions)
+        {
+            string repeatedString;
+            for (int i = 0; i < numRepetitions; i++)
+                repeatedString += stringToRepeat;
+            return repeatedString;
+        };
+        cout << "Largest Nesting Depth: " << largestNestingDepth << ", occurring for the first time in below range:" << endl;
+        cout << bracketString << endl;
+        cout << repeatedString(" ", largestNestingDepthBeginPos) << u8"└" << repeatedString(u8"─", largestNestingDepthPos - largestNestingDepthBeginPos - 1) << u8"┘" << endl;
+        cout << "Largest dist between matched brackets: " << largestDistBetweenMatchedBrackets << ", occurring for the first time in below range:" << endl;
+        cout << bracketString << endl;
+        cout << repeatedString(" ", largestDistBetweenMatchedBracketsPos) << u8"└" << repeatedString(u8"─", largestDistBetweenMatchedBrackets - 2) << u8"┘" << endl;
+    }
+#endif
 
     cout << largestNestingDepth << " " << (largestNestingDepthPos + 1) << " " << largestDistBetweenMatchedBrackets << " " << (largestDistBetweenMatchedBracketsPos + 1) << endl;
 
