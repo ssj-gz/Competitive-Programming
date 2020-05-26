@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
                             query.type = static_cast<TestQuery::Type>(queryType);
                             if (queryType == TestQuery::Undo)
                             {
-                                if (!allowsUndoRedo || (rand() % 4 >= 1))
+                                if (!allowsUndoRedo || (rand() % 20 >= 1))
                                     continue; // Undos should be fairly rare.
                                 if (formattingCharsTree.undoStackPointer() == -1)
                                     continue;
