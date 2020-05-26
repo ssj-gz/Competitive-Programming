@@ -209,6 +209,9 @@ std::vector<T> chooseWithWeighting(const std::map<T, double>& valueWeight, const
     return chosenValues;
 }
 
+/**
+ * Deprecated - use WeightedChooser2 for new tests
+ */
 template <typename T>
 class WeightedChooser
 {
@@ -242,6 +245,47 @@ class WeightedChooser
         double m_totalWeight = 0.0;
         std::vector<WeightAndValue> m_cumulativeWeightsAndValue;
 };
+
+template <typename T>
+class WeightedChooser2
+{
+    public:
+        WeightedChooser2(const std::map<T, double>& valueWeight)
+        {
+            m_totalWeight = 0.0;
+            for (const auto& [value, weight] : valueWeight)
+            {
+                if (weight == 0) 
+                {
+                    // If we values with 0 probability weighting, I *think* there's a chance that they
+                    // will still end up being chosen; instead, excluse them from consideration entirely.
+                    continue;
+                }
+                m_totalWeight += weight;
+                m_cumulativeWeightsAndValue.push_back({m_totalWeight, value});
+            }
+        }
+        T nextValue()
+        {
+            const auto randCumulativeWeight = rnd.next(0.0, m_totalWeight);
+            auto firstGEIter = std::lower_bound(m_cumulativeWeightsAndValue.begin(), m_cumulativeWeightsAndValue.end(), randCumulativeWeight, [](const auto& cumulativeWeightAndValue, const auto randCumulativeWeight)
+                    {
+                        return cumulativeWeightAndValue.weight < randCumulativeWeight;
+                    });
+            assert(firstGEIter != m_cumulativeWeightsAndValue.end());
+            assert(firstGEIter->weight >= randCumulativeWeight);
+            return firstGEIter->value;
+        }
+    private:
+        struct WeightAndValue
+        {
+            double weight = 0.0;
+            T value;
+        };
+        double m_totalWeight = 0.0;
+        std::vector<WeightAndValue> m_cumulativeWeightsAndValue;
+};
+
 
 
 #endif
