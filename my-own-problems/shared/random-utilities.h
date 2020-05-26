@@ -2,6 +2,9 @@
 #define RANDOM_UTILITIES_H
 
 #include <numeric>
+#include <set>
+#include <map>
+#include <algorithm>
 #include <avl-tree.h>
 
 /**
@@ -55,7 +58,7 @@ inline std::vector<int> chooseRandomValuesWithSum(const unsigned int numValues, 
 template<typename ValueType>
 std::vector<ValueType> chooseKRandomFrom(const unsigned int numToChoose, const std::vector<ValueType>& toChooseFrom)
 {
-    cout << "chooseKRandomFrom: numToChoose: " << numToChoose << " toChooseFrom: " << toChooseFrom.size() << endl;
+    std::cout << "chooseKRandomFrom: numToChoose: " << numToChoose << " toChooseFrom: " << toChooseFrom.size() << std::endl;
     assert(numToChoose <= toChooseFrom.size());
     std::vector<ValueType> toChooseFromScrambled = toChooseFrom;
     shuffle(toChooseFromScrambled.begin(), toChooseFromScrambled.end());
