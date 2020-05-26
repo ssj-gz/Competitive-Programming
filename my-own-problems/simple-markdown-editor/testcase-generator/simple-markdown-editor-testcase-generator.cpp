@@ -189,6 +189,234 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
     cout << "final encryption key: " << encryptionKey << endl;
 }
 
+class QueryGenUtils
+{
+    public:
+        QueryGenUtils()
+        {
+            // Add Sentinel node.
+            formattingCharsTree.insertFormattingChar(0);
+            formattingCharsTree.root()->isSentinelValue = true;
+        }
+        void setUndoAndRedoAllowed(bool isAllowed)
+        {
+            m_undoAndRedoAllowed = isAllowed;
+        }
+
+        void addInsertFormattingCharQuery()
+        {
+            const auto numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+            const auto formattedCharIndexToChoose = rnd.next(numFormattingChars);
+
+            const auto chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
+            const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
+            const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
+            const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
+            assert(pos >= 0);
+            TestQuery newQuery;
+            newQuery.type = TestQuery::InsertFormatting;
+            newQuery.insertionPos = pos + 1;
+
+            addQuery(newQuery);
+        }
+
+        void addInsertNonFormattingCharQuery(int64_t numToInsert)
+        {
+            const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft; // Includes sentinel, if sentinel has no formatting chars to left.
+            const bool chooseFormattedCharWithoutNonFormattingToLeft = (numFormattedCharsWithoutNonFormattingToLeft > 0 && rnd.next(0.0, 100.0) <= 80.0);
+            AVLTreeIterator chosenFormattingCharIter(nullptr);
+            if (chooseFormattedCharWithoutNonFormattingToLeft)
+            {
+                const auto chosenFormattingWithoutNonFormattingIndex = rnd.next(numFormattedCharsWithoutNonFormattingToLeft);
+                chosenFormattingCharIter = formattingCharsTree.findKthFormattingCharWithoutNonFormattingToLeft(chosenFormattingWithoutNonFormattingIndex);
+            }
+            else
+            {
+                const auto numFormattingChars = formattingCharsTree.root()->totalFormattedDescendants; // Includes sentinel.
+                const auto chosenFormattedCharIndex = rnd.next(numFormattingChars);
+                chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(chosenFormattedCharIndex);
+
+            }
+            assert(chosenFormattingCharIter.currentNode() != nullptr);
+            const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
+            assert(pos >= 0);
+            TestQuery newQuery;
+            newQuery.type = TestQuery::InsertNonFormatting;
+            newQuery.insertionPos = pos + 1;
+            newQuery.numToInsert = numToInsert;
+
+            addQuery(newQuery);
+        }
+
+        void addIsRangeFormattedQuery()
+        {
+            assert(canRangeQuery());
+            // Choosing a position purely at random will bias in favour of long runs of 
+            // non-formatting chars: instead, pick a formatted char (that has at least one
+            // non-formatting char in the run to its left) and then pick a random position
+            // in that run.  Further, bias towards queries that are within a formatted range.
+            //
+            // We include the sentinel as a valid formatting char, here, otherwise we won't include 
+            // the very last run of non-formatting chars in queries.
+            const auto numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+            const auto numFormattingWithoutNonFormattingToLeft = (formattingCharsTree.numFormattingChars() + 1 /* The "+ 1" is for the Sentinel*/) - numFormattingWithNonFormattingToLeft;
+            auto validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+            auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
+            // Queries in a non-formatted range are boring (always have answer 3'141'592) - bias heavily towards ranges
+            // that are formatted.
+            const bool forcePickFormattedRange = numFormattingWithNonFormattingToLeft >= 2 && rnd.next(100) <= 95;
+            if (forcePickFormattedRange && formattedCharIter.numFormattingCharsToLeft() % 2 == 0 && !formattedCharIter.currentNode()->isSentinelValue)
+            {
+                // Pick the next formatted char - if it has leftNonFormattedRunSize > 0, prefer it.
+                // Otherwise, just stick with this being a query in an unformatted range - it's not worth the effot
+                // of hunting for a better one.
+                const auto nextFormattedCharIter = formattingCharsTree.findFirstNodeAtOrToRightOf(formattedCharIter.currentNodePosition() + 1);
+                if (nextFormattedCharIter.currentNode()->leftNonFormattedRunSize != 0)
+                    formattedCharIter = nextFormattedCharIter;
+            }
+
+            // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
+            // TODO - bias towards the beginning/ end of range, to make it harder for people to get the correct answer.
+            const auto formattedCharPos = formattedCharIter.currentNodePosition();
+            const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
+            WeightedChooser2<int64_t> distFromEdgeChooser({
+                    {1 , 3},
+                    {2 , 2},
+                    {3 , 3},
+                    {4 , 4},
+                    {5 , 5},
+                    {6 , 6},
+                    {-1 , 10},
+                    });
+
+            const auto distFromFormattedCharChoice = distFromEdgeChooser.nextValue();
+            int64_t distFromFormattedChar = -1;
+            if (distFromFormattedCharChoice != -1)
+            {
+                if (rand() % 2 == 0)
+                {
+                    distFromFormattedChar = distFromFormattedCharChoice;
+                }
+                else
+                {
+                    // Let distFromFormattedCharChoice represent distance *into* the run of formatted char,
+                    // not from the end of it.
+                    distFromFormattedChar = numNonFormattedCharsToChooseFrom - distFromFormattedCharChoice;
+                }
+                distFromFormattedChar = max<int64_t>(distFromFormattedChar, 1);
+                distFromFormattedChar = min<int64_t>(distFromFormattedChar, numNonFormattedCharsToChooseFrom);
+            }
+            else
+            {
+                // Choose any value.
+                distFromFormattedChar = (rnd.next(numNonFormattedCharsToChooseFrom)) + 1;
+            }
+            const auto queryPosition = formattedCharPos - distFromFormattedChar;
+            assert(formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition) == formattedCharIter);
+            assert(queryPosition != formattedCharIter.currentNodePosition() && "Chosen IsRangeFormatted queryPosition at a formatting char!");
+            TestQuery newQuery;
+            newQuery.type = TestQuery::IsRangeFormatted;
+            newQuery.queryPosition = queryPosition + 1;
+            
+            addQuery(newQuery);
+        }
+
+        void addUndoQuery()
+        {
+            assert(canUndo());
+            TestQuery newQuery;
+            const auto numToUndo = 1 + rand() % (formattingCharsTree.undoStackPointer() + 1);
+            newQuery.type = TestQuery::Undo;
+            newQuery.numToUndo = numToUndo;
+                
+            addQuery(newQuery);
+        }
+
+        void addRedoQuery()
+        {
+            assert(canRedo());
+            TestQuery newQuery;
+            const int numToRedo = 1 + rand() % (formattingCharsTree.undoStackSize() - 1 - formattingCharsTree.undoStackPointer());
+            newQuery.type = TestQuery::Redo;
+            newQuery.numToRedo = numToRedo;
+
+            addQuery(newQuery);
+        }
+
+        void addQuery(const TestQuery& query)
+        {
+            queries.push_back(query);
+            switch (query.type)
+            {
+                case TestQuery::InsertFormatting:
+                    {
+                        const auto insertionPos = query.insertionPos - 1;
+                        formattingCharsTree.insertFormattingChar(insertionPos);
+                        numInsertionQueries++;
+                    }
+                    break;
+                case TestQuery::InsertNonFormatting:
+                    {
+                        const auto insertionPos = query.insertionPos - 1;
+                        const auto numToInsert = query.numToInsert;
+
+                        formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
+                        numInsertionQueries++;
+                    }
+                    break;
+                case TestQuery::IsRangeFormatted:
+                    {
+                        const auto queryPosition = query.queryPosition - 1;
+                        auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
+
+                        numRangeQueries++;
+                    }
+                    break;
+                case TestQuery::Undo:
+                    {
+                        const auto numToUndo = query.numToUndo;
+                        formattingCharsTree.undo(numToUndo);
+                    }
+                    break;
+                case TestQuery::Redo:
+                    {
+                        const auto numToRedo = query.numToRedo;
+                        formattingCharsTree.redo(numToRedo);
+
+                    }
+                    break;
+            }
+        }
+
+        bool canUndo() const
+        {
+            if (!m_undoAndRedoAllowed)
+                return false;
+            if (formattingCharsTree.undoStackPointer() == -1)
+                return false;
+            return true;
+        }
+        bool canRedo() const
+        {
+            if (!m_undoAndRedoAllowed)
+                return false;
+            if (formattingCharsTree.undoStackPointer() + 1 == formattingCharsTree.undoStackSize())
+                return false;
+            return true;
+        }
+        bool canRangeQuery() const
+        {
+            return formattingCharsTree.numNonFormattingChars() > 0;
+        }
+
+        vector<TestQuery> queries;
+        AVLTree formattingCharsTree{10'000};
+        int numInsertionQueries = 0;
+        int numRangeQueries = 0;
+    private:
+        bool m_undoAndRedoAllowed = true;
+};
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
