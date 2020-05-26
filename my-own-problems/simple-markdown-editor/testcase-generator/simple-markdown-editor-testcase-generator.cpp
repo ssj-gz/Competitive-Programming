@@ -428,8 +428,36 @@ int main(int argc, char* argv[])
     {
         {
             auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask1)
+                    .withSeed(23985)
+                    .withDescription("TODO"));
+
+            auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+                vector<TestQuery> queries;
+
+            writeTestCase(testcase, queries);
+        }
+    }
+
+    // SUBTASK 2
+    {
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask2)
+                    .withSeed(23985)
+                    .withDescription("TODO"));
+
+            auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+                vector<TestQuery> queries;
+
+            writeTestCase(testcase, queries);
+        }
+    }
+
+    // SUBTASK 3
+    {
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(20938851)
-                    .withDescription("Sample"));
+                    .withDescription("debug testcase"));
             {
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo().withDescription("TODO"));
 
@@ -489,35 +517,6 @@ int main(int argc, char* argv[])
                     }
                     writeTestCase(testcase, testcaseGenUtils.queries);
                 }
-            }
-        }
-    }
-
-    // SUBTASK 2
-    {
-        {
-            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask2)
-                    .withSeed(23985)
-                    .withDescription("TODO"));
-
-            auto& testcase = testFile.newTestcase(SMETestCaseInfo());
-                vector<TestQuery> queries;
-
-            writeTestCase(testcase, queries);
-        }
-    }
-
-    // SUBTASK 3
-    {
-        {
-            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(9734)
-                    .withDescription("TODO"));
-            {
-                auto& testcase = testFile.newTestcase(SMETestCaseInfo());
-                vector<TestQuery> queries;
-
-                writeTestCase(testcase, queries);
             }
         }
     }
