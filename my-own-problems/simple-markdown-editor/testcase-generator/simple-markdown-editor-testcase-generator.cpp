@@ -314,13 +314,31 @@ int main(int argc, char* argv[])
                                     // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
                                     const auto numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                     const auto numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
-                                    const auto validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+                                    auto validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+                                    auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
+                                    // Queries in a non-formatted range are boring (always have answer 3'141'592) - bias heavily towards ranges
+                                    // that are formatted.
+                                    const bool forcePickFormattedRange = numFormattingWithNonFormattingToLeft >= 2 && rnd.next(100) <= 95;
+                                    cout << "forcePickFormattedRange: " << forcePickFormattedRange << endl;
+                                    cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft <<  endl;
+                                    if (forcePickFormattedRange && formattedCharIter.numFormattingCharsToLeft() % 2 == 0 && !formattedCharIter.currentNode()->isSentinelValue)
+                                    {
+                                        const auto nextFormattedCharIter = formattingCharsTree.findFirstNodeAtOrToRightOf(formattedCharIter.currentNodePosition() + 1);
+                                        if (nextFormattedCharIter.currentNode()->leftNonFormattedRunSize != 0)
+                                            formattedCharIter = nextFormattedCharIter;
+                                    }
+
+                                    //if (validFormattingToChoose % 2 == 0)
+                                    //{
+                                        //cout << "final blah: " << (validFormattingToChoose % 2 == 0) << endl;
+                                    //}
+                                    cout << "final blah: " << (formattedCharIter.numFormattingCharsToLeft() % 2) << " isSentinelValue: " << formattedCharIter.currentNode()->isSentinelValue << " numFormattingWithNonFormattingToLeft:" << numFormattingWithNonFormattingToLeft << endl;
 
                                     // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
-                                    const auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
                                     const auto formattedCharPos = formattedCharIter.currentNodePosition();
                                     const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
                                     const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
+                                    assert(formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition) == formattedCharIter);
                                     query.queryPosition = queryPosition + 1;
                                     haveQuery = true;
                                 }
@@ -485,6 +503,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         formattingCharsTree.root()->isSentinelValue = true;
 
         int queryNum = 1;
+        int64_t numQueriesInFormattedRange = 0;
+        int64_t numQueriesInNonFormattedRange = 0;
         for (const auto& query : queries)
         {
             switch (query.type)
@@ -509,7 +529,15 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                         testFileReader.addErrorUnless(nextAtOrAfterQueryPos.currentNodePosition() != queryPosition, "IsRangeFormatted where queryPosition points to a formatting char");
                         auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
                         if (queryAnswer == -1)
+                        {
                             queryAnswer = 3'141'592;
+                            numQueriesInNonFormattedRange++;
+                        }
+                        else
+                        {
+                            numQueriesInFormattedRange++;
+                        }
+
                         decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
 
                         queryResults.push_back(queryAnswer);
@@ -535,6 +563,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         }
 
         cout << "verifier: final encryption key: " << decryptionKey << endl;
+        cout << "numQueriesInNonFormattedRange: " << numQueriesInNonFormattedRange << endl;
+        cout << "numQueriesInFormattedRange: " << numQueriesInFormattedRange << endl;
 
         testFileReader.markTestcaseAsValidated();
 
