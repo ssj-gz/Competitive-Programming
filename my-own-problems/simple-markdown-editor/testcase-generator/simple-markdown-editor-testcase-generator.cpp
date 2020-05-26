@@ -358,7 +358,6 @@ int main(int argc, char* argv[])
                                             // Let distFromFormattedCharChoice represent distance *into* the run of formatted char,
                                             // not from the end of it.
                                             distFromFormattedChar = numNonFormattedCharsToChooseFrom - distFromFormattedCharChoice;
-                                            cout << "measuring from left: " << distFromFormattedChar << " numNonFormattedCharsToChooseFrom: " << numNonFormattedCharsToChooseFrom << endl;
                                         }
                                         distFromFormattedChar = max<int64_t>(distFromFormattedChar, 1);
                                         distFromFormattedChar = min<int64_t>(distFromFormattedChar, numNonFormattedCharsToChooseFrom);
@@ -369,8 +368,6 @@ int main(int argc, char* argv[])
                                         distFromFormattedChar = (rnd.next(numNonFormattedCharsToChooseFrom)) + 1;
                                     }
                                     const auto queryPosition = formattedCharPos - distFromFormattedChar;
-                                    cout << "distFromFormattedChar: " << distFromFormattedChar << " numNonFormattedCharsToChooseFrom: " << numNonFormattedCharsToChooseFrom << endl;
-
                                     assert(formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition) == formattedCharIter);
                                     assert(queryPosition != formattedCharIter.currentNodePosition() && "Chosen IsRangeFormatted queryPosition at a formatting char!");
                                     query.queryPosition = queryPosition + 1;
