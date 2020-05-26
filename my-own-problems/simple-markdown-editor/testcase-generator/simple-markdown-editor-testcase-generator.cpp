@@ -1,4 +1,5 @@
 #include <testlib.h>
+#include <random-utilities.h>
 #include "testcase-generator-lib.h"
 #include "utils.h"
 
@@ -334,8 +335,44 @@ int main(int argc, char* argv[])
                                     // TODO - bias towards the beginning/ end of range, to make it harder for people to get the correct answer.
                                     const auto formattedCharPos = formattedCharIter.currentNodePosition();
                                     const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
-                                    const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
+                                    WeightedChooser2<int64_t> distFromEdgeChooser({
+                                                                                {1 , 3},
+                                                                                {2 , 2},
+                                                                                {3 , 3},
+                                                                                {4 , 4},
+                                                                                {5 , 5},
+                                                                                {6 , 6},
+                                                                                {-1 , 10},
+                                                                              });
+
+                                    const auto distFromFormattedCharChoice = distFromEdgeChooser.nextValue();
+                                    int64_t distFromFormattedChar = -1;
+                                    if (distFromFormattedCharChoice != -1)
+                                    {
+                                        if (rand() % 2 == 0)
+                                        {
+                                            distFromFormattedChar = distFromFormattedCharChoice;
+                                        }
+                                        else
+                                        {
+                                            // Let distFromFormattedCharChoice represent distance *into* the run of formatted char,
+                                            // not from the end of it.
+                                            distFromFormattedChar = numNonFormattedCharsToChooseFrom - distFromFormattedCharChoice;
+                                            cout << "measuring from left: " << distFromFormattedChar << " numNonFormattedCharsToChooseFrom: " << numNonFormattedCharsToChooseFrom << endl;
+                                        }
+                                        distFromFormattedChar = max<int64_t>(distFromFormattedChar, 1);
+                                        distFromFormattedChar = min<int64_t>(distFromFormattedChar, numNonFormattedCharsToChooseFrom);
+                                    }
+                                    else
+                                    {
+                                        // Choose any value.
+                                        distFromFormattedChar = (rnd.next(numNonFormattedCharsToChooseFrom)) + 1;
+                                    }
+                                    const auto queryPosition = formattedCharPos - distFromFormattedChar;
+                                    cout << "distFromFormattedChar: " << distFromFormattedChar << " numNonFormattedCharsToChooseFrom: " << numNonFormattedCharsToChooseFrom << endl;
+
                                     assert(formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition) == formattedCharIter);
+                                    assert(queryPosition != formattedCharIter.currentNodePosition() && "Chosen IsRangeFormatted queryPosition at a formatting char!");
                                     query.queryPosition = queryPosition + 1;
                                     haveQuery = true;
                                 }
