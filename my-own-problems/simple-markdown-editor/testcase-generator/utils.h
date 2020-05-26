@@ -239,6 +239,10 @@ class AVLTreeIterator
             m_currentNode = m_currentNode->rightChild;
             updateCurrentNodePosition();
         }
+        bool operator==(const AVLTreeIterator& other) const
+        {
+            return currentNode() == other.currentNode();
+        }
     private:
         AVLNode* m_currentNode = nullptr;
         int64_t m_currentNodePosition = -1;
