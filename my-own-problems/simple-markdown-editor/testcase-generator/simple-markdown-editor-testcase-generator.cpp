@@ -306,12 +306,13 @@ int main(int argc, char* argv[])
                                     continue;
                                 else
                                 {
-                                    // Choose a position purely at random will bias in favour of long runs of 
+                                    // Choosing a position purely at random will bias in favour of long runs of 
                                     // non-formatting chars: instead, pick a formatted char (that has at least one
                                     // non-formatting char in the run to its left) and then pick a random position
-                                    // in that run.  Although - TODO - maybe we should bias towards the ends of the range
-                                    // as that makes it more likely to detect errors in the submitter's implementation?
-                                    // We include sentinel, here, otherwise we won't include the very last run of non-formatting chars.
+                                    // in that run.  Further, bias towards queries that are within a formatted range.
+                                    //
+                                    // We include the sentinel as a valid formatting char, here, otherwise we won't include 
+                                    // the very last run of non-formatting chars in queries.
                                     const auto numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
                                     const auto numFormattingWithoutNonFormattingToLeft = (numFormatting + 1 /*Sentinel*/) - numFormattingWithNonFormattingToLeft;
                                     auto validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
@@ -319,22 +320,18 @@ int main(int argc, char* argv[])
                                     // Queries in a non-formatted range are boring (always have answer 3'141'592) - bias heavily towards ranges
                                     // that are formatted.
                                     const bool forcePickFormattedRange = numFormattingWithNonFormattingToLeft >= 2 && rnd.next(100) <= 95;
-                                    cout << "forcePickFormattedRange: " << forcePickFormattedRange << endl;
-                                    cout << "numFormattingWithNonFormattingToLeft: " << numFormattingWithNonFormattingToLeft <<  endl;
                                     if (forcePickFormattedRange && formattedCharIter.numFormattingCharsToLeft() % 2 == 0 && !formattedCharIter.currentNode()->isSentinelValue)
                                     {
+                                        // Pick the next formatted char - if it has leftNonFormattedRunSize > 0, prefer it.
+                                        // Otherwise, just stick with this being a query in an unformatted range - it's not worth the effot
+                                        // of hunting for a better one.
                                         const auto nextFormattedCharIter = formattingCharsTree.findFirstNodeAtOrToRightOf(formattedCharIter.currentNodePosition() + 1);
                                         if (nextFormattedCharIter.currentNode()->leftNonFormattedRunSize != 0)
                                             formattedCharIter = nextFormattedCharIter;
                                     }
 
-                                    //if (validFormattingToChoose % 2 == 0)
-                                    //{
-                                        //cout << "final blah: " << (validFormattingToChoose % 2 == 0) << endl;
-                                    //}
-                                    cout << "final blah: " << (formattedCharIter.numFormattingCharsToLeft() % 2) << " isSentinelValue: " << formattedCharIter.currentNode()->isSentinelValue << " numFormattingWithNonFormattingToLeft:" << numFormattingWithNonFormattingToLeft << endl;
-
                                     // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
+                                    // TODO - bias towards the beginning/ end of range, to make it harder for people to get the correct answer.
                                     const auto formattedCharPos = formattedCharIter.currentNodePosition();
                                     const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
                                     const auto queryPosition = formattedCharPos - 1 - (rnd.next(numNonFormattedCharsToChooseFrom));
