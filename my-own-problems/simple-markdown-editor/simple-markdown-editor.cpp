@@ -349,13 +349,16 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #endif
     for (const auto& query : queries)
     {
-        cout << "Processing query " << queryNum << " decryptionKey: " << decryptionKey << endl;
+#ifdef DIAGNOSTICS
+        cout << "Processing query " << queryNum << " $\\textit{decryptionKey} = " << decryptionKey << "$"  << endl;
+#endif
         switch (query.type)
         {
             case Query::InsertFormatting:
                 {
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
 #ifdef DIAGNOSTICS
+                    cout << "Need to insert formatting char at position $" << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$" << endl;
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert formatting char here" << endl;
 #endif
@@ -375,6 +378,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
 #ifdef DIAGNOSTICS
+                    cout << "Need to insert " << "$" << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << " non-formatting chars at position $" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$" << endl;
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert " << numToInsert << " non-formatting chars here" << endl;
 #endif
