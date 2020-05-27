@@ -261,39 +261,115 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     int64_t powerOf2 = 2;
 
     vector<Query> undoStack;
+    vector<string> undoStackDocuments;
     int undoStackPointer = -1;
 
     int queryNum = 1;
     for (const auto& query : queries)
     {
         cout << "Processing query " << queryNum << " decryptionKey: " << decryptionKey << endl;
+#ifdef DIAGNOSTICS
+        cout << "Beginning of query " << queryNum << endl;
+        string undoStackStatusString = "undo stack: `[ ";
+        int undoStackStatusPointer = undoStackStatusString.size() - 1;
+        for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
+        {
+            //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
+            if (undoStackIndex  == undoStackPointer)
+            {
+                //cout << "Updating undoStackStatusPointer: " << undoStackStatusPointer << endl;
+                undoStackStatusPointer = undoStackStatusString.size();
+            }
+            undoStackStatusString += "\"";
+            undoStackStatusString += undoStackDocuments[undoStackIndex];
+            undoStackStatusString += "\"";
+            if (undoStackIndex != undoStackDocuments.size() - 1)
+                undoStackStatusString += ", ";
+        }
+        undoStackStatusString += "]`";
+        cout << undoStackStatusString << endl;
+        cout << string(undoStackStatusPointer, ' ') << "^" << endl;
+        cout << "document: " << document << endl;
+        const auto indentationLen = string("document: ").length();
+        auto repeatedString = [](const string& stringToRepeat, int numRepetitions)
+        {
+            string repeatedString;
+            for (int i = 0; i < numRepetitions; i++)
+                repeatedString += stringToRepeat;
+            return repeatedString;
+        };
+        const auto indentationSpaces = repeatedString(" ", indentationLen);
+        int formatRangeBegin = -1;
+
+        string formattedRangeDisplayString;
+        int formattedRangeDisplayStringLength = 0; // The formattedRangeDisplayStringLength string is UTF-8, so formattedRangeDisplayString.length() will give the incorrect answer.
+        for (int pos = 0; pos < document.size(); pos++)
+        {
+            if (document[pos] == '*')
+            {
+                //cout << "found * at pos: " << pos << " formatRangeBegin: " << formatRangeBegin << endl;
+                if (formatRangeBegin == -1)
+                {
+                    const int numSpacesToAddToDisplayString = pos - formattedRangeDisplayStringLength;
+                    formattedRangeDisplayString += repeatedString(" ", numSpacesToAddToDisplayString);
+                    formattedRangeDisplayStringLength += numSpacesToAddToDisplayString;
+                    formatRangeBegin = pos;
+                }
+                else
+                {
+                    const int numCharsToAddToDisplayString = pos + 1 - formattedRangeDisplayStringLength;
+                    //cout << "adding " << (pos + 1 - static_cast<int>(formattedRangeDisplayString.size()) - 2) << " things " << " formattedRangeDisplayString size: " << formattedRangeDisplayString.size() << endl;
+                    //cout << "formattedRangeDisplayString: >" << formattedRangeDisplayString << "<" << endl;
+                    formattedRangeDisplayString += u8"└" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┘";
+                    formattedRangeDisplayStringLength += numCharsToAddToDisplayString;
+                    formatRangeBegin = -1;
+                }
+                //cout << document << "<" << endl;
+                //cout << formattedRangeDisplayString << "<" << endl;
+            }
+        }
+        formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
+        cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << endl;
+
+
+#endif
         switch (query.type)
         {
             case Query::InsertFormatting:
                 {
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+#ifdef DIAGNOSTICS
+                    cout << indentationSpaces << repeatedString(" ", insertionPos) << " insert formatting char here" << endl;
+#endif
                     //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                    undoStackDocuments.erase(undoStackDocuments.begin() + undoStackPointer, undoStackDocuments.end());
                     Query undoQuery = query;
                     undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
                     undoStack.push_back(undoQuery);
+                    undoStackDocuments.push_back(document);
                 }
                 break;
             case Query::InsertNonFormatting:
                 {
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
+#ifdef DIAGNOSTICS
+                    cout << indentationSpaces << repeatedString(" ", insertionPos) << " insert " << numToInsert << " non-formatting chars here" << endl;
+#endif
                     //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     const string charsToInsert(numToInsert, 'X');
                     document.insert(insertionPos, charsToInsert);
                     undoStackPointer++;
                     undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
+                    undoStackDocuments.erase(undoStackDocuments.begin() + undoStackPointer, undoStackDocuments.end());
                     Query undoQuery = query;
                     undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
                     undoQuery.encryptedArgument2 = numToInsert; // Not strictly accurate - this is unencrypted!
                     undoStack.push_back(undoQuery);
+                    undoStackDocuments.push_back(document);
                 }
                 break;
             case Query::IsRangeFormatted:
@@ -325,11 +401,21 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                             }
                         }
                     }
-                    cout << "queryAnswer: " << queryAnswer << endl;
+                    //cout << "queryAnswer: " << queryAnswer << endl;
+                    //cout << "Changed decryptionKey to " << decryptionKey << endl;
+#ifdef DIAGNOSTICS
+                    cout << indentationSpaces << repeatedString(" ", queryPosition) << " query the size of formatting range around this point" << endl;
+                    if (queryAnswer == -1)
+                        cout << "The range of non-formatted chars around the query point is non-formatted; the answer to query #" << queryNum << " is $3141592$." << endl;
+                    else
+                        cout << "The range of non-formatted chars around the query point is formatted; and the number is this range is " << queryAnswer << "; the answer to query #" << queryNum << " query is $" << queryAnswer << "$" << endl;
+                    cout << "Updating $decryptionKey$: " << endl;
+                    cout << "$decryptionKey = decryptionKey + " << queryAnswer << "\\times  2^" << queryNum << "  = " << decryptionKey << " + " << queryAnswer << "\\times " << ((1 << queryNum))  << " = " << decryptionKey + ((1 << queryNum)) * queryAnswer << " \\mod 10^9+7 = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "$" << endl;
+
+#endif
                     if (queryAnswer == -1)
                         queryAnswer = 3'141'592;
                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
-                    cout << "Changed decryptionKey to " << decryptionKey << endl;
 
                     queryResults.push_back(queryAnswer);
                 }
