@@ -79,6 +79,7 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withMaxQueriesPerTestcase(1000)
                                             .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withAllowsUndoRedo(false)
+                                            .withMaxNumDocLength(1e9)
                                             .withMaxNumTestcases(100);
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
@@ -86,6 +87,7 @@ SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withMaxQueriesPerTestcase(maxQueries)
                                             .withMaxQueriesOverAllTestcases(maxQueries)
                                             .withAllowsUndoRedo(true)
+                                            .withMaxNumDocLength(1e9)
                                             .withMaxNumTestcases(1000);
                                         
 std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo)
@@ -599,6 +601,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
 {
     const auto [T] = testFileReader.readLine<int>();
 
+    cout << "maxDocLength: " << containingSubtask.maxDocLength << endl;
 
     for (int t = 0; t < T; t++)
     {
