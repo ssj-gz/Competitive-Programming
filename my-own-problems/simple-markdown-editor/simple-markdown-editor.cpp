@@ -278,7 +278,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     const auto indentationSpaces = repeatedString(" ", indentationLen);
     auto showStatus = [&](bool printDocument = true, bool printFormattedRangeDisplay = true, bool printUndoStack = true)
     {
-        cout << "```" << endl;
         if (printUndoStack)
         {
             string undoStackStatusString = "undo stack: `[ ";
@@ -341,11 +340,12 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
             cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
         }
-        cout << "```" << endl;
     };
 
     cout << "Initial status: " << endl;
+    cout << "```" << endl;
     showStatus(true, false, true);
+    cout << "```" << endl;
 #endif
     for (const auto& query : queries)
     {
@@ -359,8 +359,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
 #ifdef DIAGNOSTICS
                     cout << "Need to insert formatting char at position $" << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$" << endl;
+                    cout << "```" << endl;
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert formatting char here" << endl;
+                    cout << "```" << endl;
 #endif
                     //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
@@ -379,8 +381,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
 #ifdef DIAGNOSTICS
                     cout << "Need to insert " << "$" << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << " non-formatting chars at position $" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$" << endl;
+                    cout << "```" << endl;
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert " << numToInsert << " non-formatting chars here" << endl;
+                    cout << "```" << endl;
 #endif
                     //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     const string charsToInsert(numToInsert, 'X');
@@ -428,8 +432,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     //cout << "Changed decryptionKey to " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
                     cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$" << endl;
+                    cout << "```" << endl;
                     showStatus(true, true, false);
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "^" << " query the size of formatting range around this point" << endl;
+                    cout << "```" << endl;
                     if (queryAnswer == -1)
                         cout << "The range of non-formatted chars around the query point is non-formatted; the answer to query #" << queryNum << " is $3141592$." << endl;
                     else
@@ -485,7 +491,9 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 
 #ifdef DIAGNOSTICS
         cout << "After processing query " << queryNum << endl;
+        cout << "```" << endl;
         showStatus(true, false, true);
+        cout << "```" << endl;
 #endif
         //cout << "document: " << document << endl;
         //cout << "Undo stack: " << endl;
