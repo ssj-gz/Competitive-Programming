@@ -352,6 +352,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
 #ifdef DIAGNOSTICS
+                    showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert formatting char here" << endl;
 #endif
                     //cout << "InsertFormatting at " << insertionPos << endl;
@@ -370,6 +371,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
 #ifdef DIAGNOSTICS
+                    showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert " << numToInsert << " non-formatting chars here" << endl;
 #endif
                     //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
@@ -417,6 +419,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     //cout << "queryAnswer: " << queryAnswer << endl;
                     //cout << "Changed decryptionKey to " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
+                    showStatus(true, true, false);
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "^" << " query the size of formatting range around this point" << endl;
                     if (queryAnswer == -1)
                         cout << "The range of non-formatted chars around the query point is non-formatted; the answer to query #" << queryNum << " is $3141592$." << endl;
