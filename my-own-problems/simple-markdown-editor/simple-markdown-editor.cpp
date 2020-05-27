@@ -276,59 +276,68 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     const string headerString = "document: ";
     const auto indentationLen = string(headerString).length();
     const auto indentationSpaces = repeatedString(" ", indentationLen);
-    auto showStatus = [&]()
+    auto showStatus = [&](bool printDocument = true, bool printFormattedRangeDisplay = true, bool printUndoStack = true)
     {
-        string undoStackStatusString = "undo stack: `[ ";
-        int undoStackStatusPointer = undoStackStatusString.size() - 1;
-        for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
+        if (printUndoStack)
         {
-            //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
-            if (undoStackIndex  == undoStackPointer)
+            string undoStackStatusString = "undo stack: `[ ";
+            int undoStackStatusPointer = undoStackStatusString.size() - 1;
+            for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
             {
-                //cout << "Updating undoStackStatusPointer: " << undoStackStatusPointer << endl;
-                undoStackStatusPointer = undoStackStatusString.size();
+                //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
+                if (undoStackIndex  == undoStackPointer)
+                {
+                    //cout << "Updating undoStackStatusPointer: " << undoStackStatusPointer << endl;
+                    undoStackStatusPointer = undoStackStatusString.size();
+                }
+                undoStackStatusString += "\"";
+                undoStackStatusString += undoStackDocuments[undoStackIndex];
+                undoStackStatusString += "\"";
+                if (undoStackIndex != undoStackDocuments.size() - 1)
+                    undoStackStatusString += ", ";
             }
-            undoStackStatusString += "\"";
-            undoStackStatusString += undoStackDocuments[undoStackIndex];
-            undoStackStatusString += "\"";
-            if (undoStackIndex != undoStackDocuments.size() - 1)
-                undoStackStatusString += ", ";
+            undoStackStatusString += "]`";
+            cout << undoStackStatusString << endl;
+            cout << string(undoStackStatusPointer, ' ') << "^" << endl;
         }
-        undoStackStatusString += "]`";
-        cout << undoStackStatusString << endl;
-        cout << string(undoStackStatusPointer, ' ') << "^" << endl;
-        cout << "document: " << document << endl;
-        int formatRangeBegin = -1;
+        if (printDocument)
+        {
+            cout << "document: " << document << endl;
+        }
+        if (printFormattedRangeDisplay)
+        {
+            int formatRangeBegin = -1;
 
-        string formattedRangeDisplayString;
-        int formattedRangeDisplayStringLength = 0; // The formattedRangeDisplayStringLength string is UTF-8, so formattedRangeDisplayString.length() will give the incorrect answer.
-        for (int pos = 0; pos < document.size(); pos++)
-        {
-            if (document[pos] == '*')
+            string formattedRangeDisplayString;
+            int formattedRangeDisplayStringLength = 0; // The formattedRangeDisplayStringLength string is UTF-8, so formattedRangeDisplayString.length() will give the incorrect answer.
+            for (int pos = 0; pos < document.size(); pos++)
             {
-                //cout << "found * at pos: " << pos << " formatRangeBegin: " << formatRangeBegin << endl;
-                if (formatRangeBegin == -1)
+                if (document[pos] == '*')
                 {
-                    const int numSpacesToAddToDisplayString = pos - formattedRangeDisplayStringLength;
-                    formattedRangeDisplayString += repeatedString(" ", numSpacesToAddToDisplayString);
-                    formattedRangeDisplayStringLength += numSpacesToAddToDisplayString;
-                    formatRangeBegin = pos;
+                    //cout << "found * at pos: " << pos << " formatRangeBegin: " << formatRangeBegin << endl;
+                    if (formatRangeBegin == -1)
+                    {
+                        const int numSpacesToAddToDisplayString = pos - formattedRangeDisplayStringLength;
+                        formattedRangeDisplayString += repeatedString(" ", numSpacesToAddToDisplayString);
+                        formattedRangeDisplayStringLength += numSpacesToAddToDisplayString;
+                        formatRangeBegin = pos;
+                    }
+                    else
+                    {
+                        const int numCharsToAddToDisplayString = pos + 1 - formattedRangeDisplayStringLength;
+                        //cout << "adding " << (pos + 1 - static_cast<int>(formattedRangeDisplayString.size()) - 2) << " things " << " formattedRangeDisplayString size: " << formattedRangeDisplayString.size() << endl;
+                        //cout << "formattedRangeDisplayString: >" << formattedRangeDisplayString << "<" << endl;
+                        formattedRangeDisplayString += u8"└" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┘";
+                        formattedRangeDisplayStringLength += numCharsToAddToDisplayString;
+                        formatRangeBegin = -1;
+                    }
+                    //cout << document << "<" << endl;
+                    //cout << formattedRangeDisplayString << "<" << endl;
                 }
-                else
-                {
-                    const int numCharsToAddToDisplayString = pos + 1 - formattedRangeDisplayStringLength;
-                    //cout << "adding " << (pos + 1 - static_cast<int>(formattedRangeDisplayString.size()) - 2) << " things " << " formattedRangeDisplayString size: " << formattedRangeDisplayString.size() << endl;
-                    //cout << "formattedRangeDisplayString: >" << formattedRangeDisplayString << "<" << endl;
-                    formattedRangeDisplayString += u8"└" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┘";
-                    formattedRangeDisplayStringLength += numCharsToAddToDisplayString;
-                    formatRangeBegin = -1;
-                }
-                //cout << document << "<" << endl;
-                //cout << formattedRangeDisplayString << "<" << endl;
             }
+            formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
+            cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << endl;
         }
-        formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
-        cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << endl;
     };
 
     cout << "Initial status: " << endl;
