@@ -70,7 +70,8 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
                                             .withMaxQueriesPerTestcase(100)
                                             .withMaxQueriesOverAllTestcases(NoExplicitLimit)
-                                            .withAllowsUndoRedo(false)
+                                            .withAllowsUndoRedo(true)
+                                            .withMaxNumDocLength(1000)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
