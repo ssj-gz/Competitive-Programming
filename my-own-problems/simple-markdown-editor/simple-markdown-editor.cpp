@@ -278,6 +278,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     const auto indentationSpaces = repeatedString(" ", indentationLen);
     auto showStatus = [&](bool printDocument = true, bool printFormattedRangeDisplay = true, bool printUndoStack = true)
     {
+        cout << "```" << endl;
         if (printUndoStack)
         {
             string undoStackStatusString = "undo stack: `[ ";
@@ -338,6 +339,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
             cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << endl;
         }
+        cout << "```" << endl;
     };
 
     cout << "Initial status: " << endl;
