@@ -265,11 +265,19 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     int undoStackPointer = -1;
 
     int queryNum = 1;
-    for (const auto& query : queries)
-    {
-        cout << "Processing query " << queryNum << " decryptionKey: " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
-        cout << "Beginning of query " << queryNum << endl;
+    auto repeatedString = [](const string& stringToRepeat, int numRepetitions)
+    {
+        string repeatedString;
+        for (int i = 0; i < numRepetitions; i++)
+            repeatedString += stringToRepeat;
+        return repeatedString;
+    };
+    const string headerString = "document: ";
+    const auto indentationLen = string(headerString).length();
+    const auto indentationSpaces = repeatedString(" ", indentationLen);
+    auto showStatus = [&]()
+    {
         string undoStackStatusString = "undo stack: `[ ";
         int undoStackStatusPointer = undoStackStatusString.size() - 1;
         for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
@@ -290,15 +298,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         cout << undoStackStatusString << endl;
         cout << string(undoStackStatusPointer, ' ') << "^" << endl;
         cout << "document: " << document << endl;
-        const auto indentationLen = string("document: ").length();
-        auto repeatedString = [](const string& stringToRepeat, int numRepetitions)
-        {
-            string repeatedString;
-            for (int i = 0; i < numRepetitions; i++)
-                repeatedString += stringToRepeat;
-            return repeatedString;
-        };
-        const auto indentationSpaces = repeatedString(" ", indentationLen);
         int formatRangeBegin = -1;
 
         string formattedRangeDisplayString;
@@ -330,9 +329,14 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         }
         formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
         cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << endl;
+    };
 
-
+    cout << "Initial status: " << endl;
+    showStatus();
 #endif
+    for (const auto& query : queries)
+    {
+        cout << "Processing query " << queryNum << " decryptionKey: " << decryptionKey << endl;
         switch (query.type)
         {
             case Query::InsertFormatting:
@@ -451,6 +455,11 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 }
                 break;
         }
+
+#ifdef DIAGNOSTICS
+        cout << "After processing query " << queryNum << endl;
+        showStatus();
+#endif
         //cout << "document: " << document << endl;
         //cout << "Undo stack: " << endl;
         for (const auto x : undoStack)
