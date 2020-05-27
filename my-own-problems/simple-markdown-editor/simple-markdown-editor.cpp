@@ -427,6 +427,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     //cout << "queryAnswer: " << queryAnswer << endl;
                     //cout << "Changed decryptionKey to " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
+                    cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$" << endl;
                     showStatus(true, true, false);
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "^" << " query the size of formatting range around this point" << endl;
                     if (queryAnswer == -1)
@@ -447,6 +448,9 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             case Query::Undo:
                 {
                     const int numToUndo = query.encryptedArgument ^ decryptionKey;
+#ifdef DIAGNOSTICS
+                    cout << "Need to re-wind the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToUndo << "$ places" << endl;
+#endif
                     //cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
                     {
@@ -461,6 +465,9 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             case Query::Redo:
                 {
                     const int numToRedo = (query.encryptedArgument ^ decryptionKey);
+#ifdef DIAGNOSTICS
+                    cout << "Need to move forward the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToRedo << "$ places" << endl;
+#endif
                     //cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
                     {
