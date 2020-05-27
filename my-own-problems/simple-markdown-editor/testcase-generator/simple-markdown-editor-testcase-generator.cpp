@@ -533,7 +533,7 @@ int main(int argc, char* argv[])
                 const int T = 1;
                 for (int t = 0; t < T; t++)
                 {
-                    const int numQueries = 100;
+                    const int numQueries = 1000;
 
                     QueryGenUtils testcaseGenUtils;
                     testcaseGenUtils.setUndoAndRedoAllowed(true);
