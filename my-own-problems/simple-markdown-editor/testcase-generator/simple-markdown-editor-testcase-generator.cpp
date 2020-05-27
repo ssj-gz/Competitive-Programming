@@ -519,6 +519,71 @@ int main(int argc, char* argv[])
                 }
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(20938851)
+                    .withDescription("debug testcase (small)"));
+            {
+                auto& testcase = testFile.newTestcase(SMETestCaseInfo().withDescription("TODO"));
+
+                // TODO - remove this - testing/ debugging only!
+                const int T = 1;
+                for (int t = 0; t < T; t++)
+                {
+                    const int numQueries = 100;
+
+                    QueryGenUtils testcaseGenUtils;
+                    testcaseGenUtils.setUndoAndRedoAllowed(true);
+                    while (testcaseGenUtils.queries.size() < numQueries)
+                    {
+                        cout << "Generating query: " << testcaseGenUtils.queries.size() + 1 << " documentLength: " << testcaseGenUtils.formattingCharsTree.documentLength() << " numInsertionQueries: " << testcaseGenUtils.numInsertionQueries << " numRangeQueries: "<< testcaseGenUtils.numRangeQueries << endl;
+                        TestQuery query;
+
+                        const auto originalNumQueries = testcaseGenUtils.queries.size();
+                        while (testcaseGenUtils.queries.size() == originalNumQueries)
+                        {
+                            const int queryType = rand() % 5;
+                            query.type = static_cast<TestQuery::Type>(queryType);
+                            if (queryType == TestQuery::Undo)
+                            {
+                                if (!testcaseGenUtils.canUndo())
+                                    continue;
+                                if (rand() % 20 >= 1)
+                                    continue; // Undos should be fairly rare.
+
+                                testcaseGenUtils.addUndoQuery();
+                            }
+                            if (queryType == TestQuery::Redo)
+                            {
+                                if (!testcaseGenUtils.canRedo())
+                                    continue;
+                                if (rand() % 4 >= 1)
+                                    continue; // Redos should be fairly rare.
+                                testcaseGenUtils.addRedoQuery();
+                            }
+                            if (queryType == TestQuery::InsertFormatting)
+                            {
+                                testcaseGenUtils.addInsertFormattingCharQuery();
+                            }
+                            if (queryType == TestQuery::InsertNonFormatting)
+                            {
+                                const auto num = 1 + rand() % 100;
+                                testcaseGenUtils.addInsertNonFormattingCharQuery(num);
+                            }
+                            if (queryType == TestQuery::IsRangeFormatted)
+                            {
+                                if (!testcaseGenUtils.canRangeQuery())
+                                    continue;
+                                else
+                                    testcaseGenUtils.addIsRangeFormattedQuery();
+                            }
+
+                        }
+                    }
+                    writeTestCase(testcase, testcaseGenUtils.queries);
+                }
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
