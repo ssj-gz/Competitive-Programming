@@ -345,7 +345,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     };
 
     cout << "Initial status: " << endl;
-    showStatus();
+    showStatus(true, false, true);
 #endif
     for (const auto& query : queries)
     {
@@ -485,7 +485,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 
 #ifdef DIAGNOSTICS
         cout << "After processing query " << queryNum << endl;
-        showStatus();
+        showStatus(true, false, true);
 #endif
         //cout << "document: " << document << endl;
         //cout << "Undo stack: " << endl;
