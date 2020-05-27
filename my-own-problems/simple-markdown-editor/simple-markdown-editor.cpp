@@ -311,6 +311,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 
             string formattedRangeDisplayString;
             int formattedRangeDisplayStringLength = 0; // The formattedRangeDisplayStringLength string is UTF-8, so formattedRangeDisplayString.length() will give the incorrect answer.
+            int numFormattedRanges = 0;
             for (int pos = 0; pos < document.size(); pos++)
             {
                 if (document[pos] == '*')
@@ -331,13 +332,14 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                         formattedRangeDisplayString += u8"└" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┘";
                         formattedRangeDisplayStringLength += numCharsToAddToDisplayString;
                         formatRangeBegin = -1;
+                        numFormattedRanges++;
                     }
                     //cout << document << "<" << endl;
                     //cout << formattedRangeDisplayString << "<" << endl;
                 }
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
-            cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << endl;
+            cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
         }
         cout << "```" << endl;
     };
