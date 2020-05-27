@@ -521,7 +521,7 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(20938851)
+                    .withSeed(20938849)
                     .withDescription("debug testcase (small)"));
             {
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo().withDescription("TODO"));
@@ -546,9 +546,10 @@ int main(int argc, char* argv[])
                             query.type = static_cast<TestQuery::Type>(queryType);
                             if (queryType == TestQuery::Undo)
                             {
+                                cout << "canUndo: " << testcaseGenUtils.canUndo() << endl;
                                 if (!testcaseGenUtils.canUndo())
                                     continue;
-                                if (rand() % 20 >= 1)
+                                if (rand() % 3 >= 1)
                                     continue; // Undos should be fairly rare.
 
                                 testcaseGenUtils.addUndoQuery();
@@ -557,7 +558,7 @@ int main(int argc, char* argv[])
                             {
                                 if (!testcaseGenUtils.canRedo())
                                     continue;
-                                if (rand() % 4 >= 1)
+                                if (rand() % 3 >= 1)
                                     continue; // Redos should be fairly rare.
                                 testcaseGenUtils.addRedoQuery();
                             }
@@ -567,7 +568,7 @@ int main(int argc, char* argv[])
                             }
                             if (queryType == TestQuery::InsertNonFormatting)
                             {
-                                const auto num = 1 + rand() % 100;
+                                const auto num = 1 + rand() % 5;
                                 testcaseGenUtils.addInsertNonFormattingCharQuery(num);
                             }
                             if (queryType == TestQuery::IsRangeFormatted)
