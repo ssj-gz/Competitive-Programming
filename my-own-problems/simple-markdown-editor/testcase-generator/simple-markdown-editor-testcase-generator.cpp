@@ -717,6 +717,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                     break;
             }
 
+            testFileReader.addErrorUnless(formattingCharsTree.documentLength() <= containingSubtask.maxDocLength, "Document length should be <= " + to_string(containingSubtask.maxDocLength) + ", not " + to_string(formattingCharsTree.documentLength()));
+
             queryNum++;
             powerOf2 = (2 * powerOf2) % Mod;
 
