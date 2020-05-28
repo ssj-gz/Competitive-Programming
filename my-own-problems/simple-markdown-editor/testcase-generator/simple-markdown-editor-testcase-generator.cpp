@@ -255,6 +255,20 @@ class QueryGenUtils
             addIsRangeFormattedQueryAtOrAfterPos(0);
         }
 
+        void addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos()
+        {
+            const bool chooseAfterLastInsertionPos = (lastInsertionPos != -1) && (rnd.next(100) <= 95);
+            if (chooseAfterLastInsertionPos)
+            {
+                cout << "Choose IsRangeFormatted after " << lastInsertionPos << endl;
+                addIsRangeFormattedQueryAtOrAfterPos(lastInsertionPos);
+            }
+            else
+            {
+                addIsRangeFormattedQuery();
+            }
+        }
+
         void addIsRangeFormattedQueryAtOrAfterPos(int64_t minPos)
         {
             assert(canRangeQuery());
@@ -629,17 +643,7 @@ int main(int argc, char* argv[])
                                     continue;
                                 else
                                 {
-                                    const bool chooseAfterLastInsertionPos = (testcaseGenUtils.lastInsertionPos != -1) && (rnd.next(100) <= 95);
-                                    if (chooseAfterLastInsertionPos)
-                                    {
-                                        cout << "Choose IsRangeFormatted after " << testcaseGenUtils.lastInsertionPos << endl;
-                                        testcaseGenUtils.addIsRangeFormattedQueryAtOrAfterPos(testcaseGenUtils.lastInsertionPos);
-                                    }
-                                    else
-                                    {
-                                        testcaseGenUtils.addIsRangeFormattedQuery();
-                                    }
-
+                                    testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
                                 }
                             }
 
