@@ -590,7 +590,7 @@ int main(int argc, char* argv[])
                                 cout << "canUndo: " << testcaseGenUtils.canUndo() << endl;
                                 if (!testcaseGenUtils.canUndo())
                                     continue;
-                                if (rand() % 3 >= 1)
+                                if (rand() % 23 >= 1)
                                     continue; // Undos should be fairly rare.
 
                                 testcaseGenUtils.addUndoQuery();
