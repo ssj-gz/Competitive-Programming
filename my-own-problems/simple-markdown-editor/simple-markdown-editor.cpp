@@ -363,16 +363,26 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert formatting char here" << endl;
                     cout << "```" << endl;
+                    const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
                     //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
-                    undoStackPointer++;
-                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                    undoStackDocuments.erase(undoStackDocuments.begin() + undoStackPointer, undoStackDocuments.end());
+                    undoStack.erase(undoStack.begin() + (undoStackPointer + 1), undoStack.end());
+                    undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 1), undoStackDocuments.end());
                     Query undoQuery = query;
+#ifdef DIAGNOSTICS
+                    if (neededToEraseUndosToRight)
+                    {
+                        cout << "The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack: " << endl;
+                        cout << "```" << endl;
+                        showStatus(false, false, true);
+                        cout << "```" << endl;
+                    }
+#endif
                     undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
                     undoStack.push_back(undoQuery);
                     undoStackDocuments.push_back(document);
+                    undoStackPointer++;
                 }
                 break;
             case Query::InsertNonFormatting:
@@ -385,18 +395,28 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert " << numToInsert << " non-formatting chars here" << endl;
                     cout << "```" << endl;
+                    const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
                     //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     const string charsToInsert(numToInsert, 'X');
                     document.insert(insertionPos, charsToInsert);
-                    undoStackPointer++;
-                    undoStack.erase(undoStack.begin() + undoStackPointer, undoStack.end());
-                    undoStackDocuments.erase(undoStackDocuments.begin() + undoStackPointer, undoStackDocuments.end());
+                    undoStack.erase(undoStack.begin() + (undoStackPointer + 1), undoStack.end());
+                    undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 1), undoStackDocuments.end());
+#ifdef DIAGNOSTICS
+                    if (neededToEraseUndosToRight)
+                    {
+                        cout << "The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack: " << endl;
+                        cout << "```" << endl;
+                        showStatus(false, false, true);
+                        cout << "```" << endl;
+                    }
+#endif
                     Query undoQuery = query;
                     undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
                     undoQuery.encryptedArgument2 = numToInsert; // Not strictly accurate - this is unencrypted!
                     undoStack.push_back(undoQuery);
                     undoStackDocuments.push_back(document);
+                    undoStackPointer++;
                 }
                 break;
             case Query::IsRangeFormatted:
