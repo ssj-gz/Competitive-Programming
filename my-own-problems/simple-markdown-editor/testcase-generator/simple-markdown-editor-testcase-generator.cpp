@@ -661,7 +661,6 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
             else
             {
                 // Single arg.
-                // Two args.
                 const auto [queryTypeCharTmp, encryptedArgumentTmp] = testFileReader.readLine<char, int64_t>();
                 queryTypeChar = queryTypeCharTmp;
                 query.encryptedArgument = encryptedArgumentTmp;
