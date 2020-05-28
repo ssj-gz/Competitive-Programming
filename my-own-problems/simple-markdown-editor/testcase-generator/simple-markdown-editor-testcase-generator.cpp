@@ -836,6 +836,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                 case TestQuery::Undo:
                     {
                         const int numToUndo = (query.encryptedArgument ^ decryptionKey);
+                        testFileReader.addErrorUnless(formattingCharsTree.undoStackPointer() + 1 - numToUndo >= 0, "Tried to undo " + to_string(numToUndo) + " steps but can do at most " + to_string(formattingCharsTree.undoStackPointer() + 1) + " steps!");
                         formattingCharsTree.undo(numToUndo);
                     }
                     break;
