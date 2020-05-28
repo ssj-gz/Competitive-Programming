@@ -42,7 +42,7 @@ class AVLTree
         AVLTreeIterator findKthFormattingCharWithNonFormattingToLeft(int64_t k);
         AVLTreeIterator findKthFormattingCharWithoutNonFormattingToLeft(int64_t k);
         AVLTreeIterator findKthFormattingChar(int64_t k);
-        int numFormattingCharWithNonFormattingCharsToLeft(int64_t position);
+        int numFormattingCharWithNonFormattingCharsAtOrToLeft(int64_t position);
 
         int undoStackPointer() const
         {
@@ -491,7 +491,7 @@ AVLTreeIterator AVLTree::findKthFormattingCharWithoutNonFormattingToLeft(int64_t
     return result;
 }
 
-int AVLTree::numFormattingCharWithNonFormattingCharsToLeft(int64_t position)
+int AVLTree::numFormattingCharWithNonFormattingCharsAtOrToLeft(int64_t position)
 {
     AVLTreeIterator treeIter(root());
     int result = 0;
@@ -506,7 +506,7 @@ int AVLTree::numFormattingCharWithNonFormattingCharsToLeft(int64_t position)
         if (treeIter.currentNodePosition() == position)
         {
             //cout << " returning " << totalNumBefore << endl;
-            return totalNumBefore;
+            return totalNumBefore + numAtNode;
         }
         else if (treeIter.currentNodePosition() < position)
         {

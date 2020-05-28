@@ -266,8 +266,8 @@ class QueryGenUtils
             // We include the sentinel as a valid formatting char, here, otherwise we won't include 
             // the very last run of non-formatting chars in queries.
             const auto totalNumFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-            const auto numFormattingWithNonFormattingToLeftAfterMinPos = totalNumFormattingWithNonFormattingToLeft - formattingCharsTree.numFormattingCharWithNonFormattingCharsToLeft(minPos);
-            const auto numFormattingWithNonFormattingToLeftUpToMinPos = formattingCharsTree.numFormattingCharWithNonFormattingCharsToLeft(minPos);
+            const auto numFormattingWithNonFormattingToLeftAfterMinPos = totalNumFormattingWithNonFormattingToLeft - formattingCharsTree.numFormattingCharWithNonFormattingCharsAtOrToLeft(minPos);
+            const auto numFormattingWithNonFormattingToLeftUpToMinPos = formattingCharsTree.numFormattingCharWithNonFormattingCharsAtOrToLeft(minPos);
             //const auto numFormattingWithoutNonFormattingToLeft = (formattingCharsTree.numFormattingChars() + 1 /* The "+ 1" is for the Sentinel*/) - numFormattingWithNonFormattingToLeft;
             const int minNonFormattingWithNonFormattingToLeftIndex = numFormattingWithNonFormattingToLeftUpToMinPos;
             const int maxNonFormattingWithNonFormattingToLeftIndex = totalNumFormattingWithNonFormattingToLeft - 1;
@@ -540,14 +540,14 @@ int main(int argc, char* argv[])
                             for (int64_t position = 0; position < document.length(); position++)
                             {
                                 int dbgResult = 0;
-                                for (int i = 0; i < position; i++)
+                                for (int i = 0; i <= position; i++)
                                 {
                                     if (document[i] == '*' && (i > 0 && document[i - 1] == 'X'))
                                     {
                                         dbgResult++;
                                     }
                                 }
-                                const auto result = testcaseGenUtils.formattingCharsTree.numFormattingCharWithNonFormattingCharsToLeft(position);
+                                const auto result = testcaseGenUtils.formattingCharsTree.numFormattingCharWithNonFormattingCharsAtOrToLeft(position);
                                 //cout << "document: " << document << " position: " << position << endl;
                                 cout << "dbgResult: " << dbgResult << endl;
                                 cout << "result   : " << result    << endl;
