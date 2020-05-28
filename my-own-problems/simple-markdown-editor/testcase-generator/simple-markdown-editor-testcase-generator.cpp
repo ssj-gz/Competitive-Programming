@@ -517,6 +517,7 @@ int main(int argc, char* argv[])
                             }
 
                         }
+                        if (false)
                         {
                             const auto document = testcaseGenUtils.formattingCharsTree.documentString();
                             for (int64_t position = 0; position < document.length(); position++)
