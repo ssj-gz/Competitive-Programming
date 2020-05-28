@@ -802,6 +802,8 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                 case TestQuery::InsertFormatting:
                     {
                         const auto insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
+                        // We can insert "one past" the document length, but no further than that.
+                        testFileReader.addErrorUnless(insertionPos < formattingCharsTree.documentLength() + 1, "Attempt to insert formatting at 0-relative index " + to_string(insertionPos) + " when document length is " + to_string(formattingCharsTree.documentLength()));
                         formattingCharsTree.insertFormattingChar(insertionPos);
                     }
                     break;
