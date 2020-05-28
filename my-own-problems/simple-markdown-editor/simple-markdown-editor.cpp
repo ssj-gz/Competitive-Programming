@@ -261,7 +261,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     int64_t powerOf2 = 2;
 
     vector<Query> undoStack;
-    vector<string> undoStackDocuments;
+    vector<string> undoStackDocuments = { "" };
     int undoStackPointer = -1;
 
     int queryNum = 1;
@@ -281,11 +281,11 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         if (printUndoStack)
         {
             string undoStackStatusString = "undo stack: `[ ";
-            int undoStackStatusPointer = undoStackStatusString.size() - 1;
+            int undoStackStatusPointer = -1;
             for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
             {
                 //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
-                if (undoStackIndex  == undoStackPointer)
+                if (undoStackIndex  == undoStackPointer + 1)
                 {
                     //cout << "Updating undoStackStatusPointer: " << undoStackStatusPointer << endl;
                     undoStackStatusPointer = undoStackStatusString.size();
@@ -368,7 +368,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
                     undoStack.erase(undoStack.begin() + (undoStackPointer + 1), undoStack.end());
-                    undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 1), undoStackDocuments.end());
+                    undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 2), undoStackDocuments.end());
                     Query undoQuery = query;
 #ifdef DIAGNOSTICS
                     if (neededToEraseUndosToRight)
@@ -401,7 +401,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const string charsToInsert(numToInsert, 'X');
                     document.insert(insertionPos, charsToInsert);
                     undoStack.erase(undoStack.begin() + (undoStackPointer + 1), undoStack.end());
-                    undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 1), undoStackDocuments.end());
+                    undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 2), undoStackDocuments.end());
 #ifdef DIAGNOSTICS
                     if (neededToEraseUndosToRight)
                     {
