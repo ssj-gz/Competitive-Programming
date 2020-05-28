@@ -813,6 +813,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                         const auto numToInsert = (query.encryptedArgument2 ^ decryptionKey);
                         // We can insert "one past" the document length, but no further than that.
                         testFileReader.addErrorUnless(insertionPos < formattingCharsTree.documentLength() + 1, "Attempt to insert non-formatting at 0-relative index " + to_string(insertionPos) + " when document length is " + to_string(formattingCharsTree.documentLength()));
+                        testFileReader.addErrorUnless(numToInsert >= 1, "Attempt to insert " + to_string(numToInsert) + " non-formatting chars, which is < 1!");
                         formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                     }
                     break;
