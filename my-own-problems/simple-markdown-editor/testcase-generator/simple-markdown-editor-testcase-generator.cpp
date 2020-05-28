@@ -223,6 +223,15 @@ class QueryGenUtils
             addQuery(newQuery);
         }
 
+        void addInsertFormattingCharQuery(int64_t insertionPos) /* insertionPos is 0-relative */
+        {
+            TestQuery newQuery;
+            newQuery.type = TestQuery::InsertFormatting;
+            newQuery.insertionPos = insertionPos + 1;
+
+            addQuery(newQuery);
+        }
+
         void addInsertNonFormattingCharQuery(int64_t numToInsert)
         {
             const auto numFormattedCharsWithoutNonFormattingToLeft = (formattingCharsTree.root()->totalFormattedDescendants) -  formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft; // Includes sentinel, if sentinel has no formatting chars to left.
@@ -250,9 +259,28 @@ class QueryGenUtils
 
             addQuery(newQuery);
         }
+
+        void addInsertNonFormattingCharQuery(int64_t insertionPos, int64_t numToInsert) /* insertionPos is 0-relative */
+        {
+            TestQuery newQuery;
+            newQuery.type = TestQuery::InsertNonFormatting;
+            newQuery.insertionPos = insertionPos + 1;
+            newQuery.numToInsert = numToInsert;
+
+            addQuery(newQuery);
+        }
         void addIsRangeFormattedQuery()
         {
             addIsRangeFormattedQueryAtOrAfterPos(0);
+        }
+
+        void addIsRangeFormattedQuery(int64_t queryPosition)
+        {
+            TestQuery newQuery;
+            newQuery.type = TestQuery::IsRangeFormatted;
+            newQuery.queryPosition = queryPosition + 1;
+            
+            addQuery(newQuery);
         }
 
         void addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos()
@@ -372,11 +400,31 @@ class QueryGenUtils
             addQuery(newQuery);
         }
 
+        void addUndoQuery(int numToUndo)
+        {
+            assert(canUndo());
+            TestQuery newQuery;
+            newQuery.type = TestQuery::Undo;
+            newQuery.numToUndo = numToUndo;
+                
+            addQuery(newQuery);
+        }
+
         void addRedoQuery()
         {
             assert(canRedo());
             TestQuery newQuery;
             const int numToRedo = 1 + rand() % (formattingCharsTree.undoStackSize() - 1 - formattingCharsTree.undoStackPointer());
+            newQuery.type = TestQuery::Redo;
+            newQuery.numToRedo = numToRedo;
+
+            addQuery(newQuery);
+        }
+
+        void addRedoQuery(int numToRedo)
+        {
+            assert(canRedo());
+            TestQuery newQuery;
             newQuery.type = TestQuery::Redo;
             newQuery.numToRedo = numToRedo;
 
@@ -474,12 +522,27 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask1)
                     .withSeed(23985)
-                    .withDescription("TODO"));
+                    .withDescription("sample testfile"));
 
             auto& testcase = testFile.newTestcase(SMETestCaseInfo());
-                vector<TestQuery> queries;
 
-            writeTestCase(testcase, queries);
+            QueryGenUtils testcaseGenUtils;
+            testcaseGenUtils.addInsertNonFormattingCharQuery(0, 9);
+            testcaseGenUtils.addInsertFormattingCharQuery(3);
+            testcaseGenUtils.addInsertFormattingCharQuery(6);
+            testcaseGenUtils.addIsRangeFormattedQuery(4);
+            testcaseGenUtils.addInsertNonFormattingCharQuery(7, 3);
+            testcaseGenUtils.addInsertFormattingCharQuery(9);
+            testcaseGenUtils.addInsertFormattingCharQuery(0);
+            testcaseGenUtils.addIsRangeFormattedQuery(2);
+            testcaseGenUtils.addUndoQuery(3);
+            testcaseGenUtils.addIsRangeFormattedQuery(9);
+            testcaseGenUtils.addRedoQuery(1);
+            testcaseGenUtils.addInsertFormattingCharQuery(3);
+            testcaseGenUtils.addInsertFormattingCharQuery(9);
+            testcaseGenUtils.addIsRangeFormattedQuery(8);
+
+            writeTestCase(testcase, testcaseGenUtils.queries);
         }
     }
 
