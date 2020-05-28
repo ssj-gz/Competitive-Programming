@@ -50,7 +50,7 @@ class AVLTree
         }
         int undoStackSize() const
         {
-            return m_rootForRevision.size() - 2; // Match the definition in the Problem statement: should be 0 (hence -1) , but also need to subtract item resulting from adding sentinel node (the other -1).
+            return m_rootForRevision.size() - 2; // Match the definition in the Problem statement: should be 0 initially (hence -1) , but also need to subtract item resulting from adding sentinel node (the other -1).
         }
 
         int64_t numFormattingChars() const
