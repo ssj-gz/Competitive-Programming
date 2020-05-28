@@ -42,6 +42,7 @@ class AVLTree
         AVLTreeIterator findKthFormattingCharWithNonFormattingToLeft(int64_t k);
         AVLTreeIterator findKthFormattingCharWithoutNonFormattingToLeft(int64_t k);
         AVLTreeIterator findKthFormattingChar(int64_t k);
+        int numFormattingCharWithNonFormattingCharsToLeft(int64_t position);
 
         int undoStackPointer() const
         {
@@ -487,6 +488,40 @@ AVLTreeIterator AVLTree::findKthFormattingCharWithoutNonFormattingToLeft(int64_t
         }
     }
     assert(result.currentNode());
+    return result;
+}
+
+int AVLTree::numFormattingCharWithNonFormattingCharsToLeft(int64_t position)
+{
+    AVLTreeIterator treeIter(root());
+    int result = 0;
+    int numOffset = 0;
+    //cout << "numFormattingCharWithNonFormattingCharsToLeft - position: " << position << endl;
+    while (treeIter.currentNode())
+    {
+        const int numInLeftSubTree = treeIter.currentNode()->leftChild ? treeIter.currentNode()->leftChild->totalFormattedDescendantsWithNonFormattedToLeft  : 0;
+        const int numAtNode = (treeIter.currentNode()->leftNonFormattedRunSize > 0 ? 1 : 0);
+        const int totalNumBefore = numInLeftSubTree + numOffset;
+        //cout << "currentNodePosition: " << treeIter.currentNodePosition() << " numOffset: " << numOffset << " totalNumBefore: " << totalNumBefore << " numAtNode: " << numAtNode << endl;
+        if (treeIter.currentNodePosition() == position)
+        {
+            //cout << " returning " << totalNumBefore << endl;
+            return totalNumBefore;
+        }
+        else if (treeIter.currentNodePosition() < position)
+        {
+            treeIter.followRightChild();
+            result = totalNumBefore + numAtNode;
+            //cout << " Following right child; updating result to " << result << endl;
+            numOffset += numInLeftSubTree + numAtNode;
+        }
+        else
+        {
+            //cout << " Following left child" << endl;
+            treeIter.followLeftChild();
+        }
+    }
+    //cout << " returning last updated result: " << result << endl;
     return result;
 }
 
