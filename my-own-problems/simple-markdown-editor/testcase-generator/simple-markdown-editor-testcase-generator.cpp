@@ -555,7 +555,7 @@ int main(int argc, char* argv[])
                                 if (!testcaseGenUtils.canRangeQuery())
                                     continue;
                                 else
-                                    testcaseGenUtils.addIsRangeFormattedQuery();
+                                    testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
                             }
 
                         }
