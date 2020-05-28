@@ -250,8 +250,12 @@ class QueryGenUtils
 
             addQuery(newQuery);
         }
-
         void addIsRangeFormattedQuery()
+        {
+            addIsRangeFormattedQueryAtOrAfterPos(0);
+        }
+
+        void addIsRangeFormattedQueryAtOrAfterPos(int64_t minPos)
         {
             assert(canRangeQuery());
             // Choosing a position purely at random will bias in favour of long runs of 
@@ -261,13 +265,22 @@ class QueryGenUtils
             //
             // We include the sentinel as a valid formatting char, here, otherwise we won't include 
             // the very last run of non-formatting chars in queries.
-            const auto numFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-            const auto numFormattingWithoutNonFormattingToLeft = (formattingCharsTree.numFormattingChars() + 1 /* The "+ 1" is for the Sentinel*/) - numFormattingWithNonFormattingToLeft;
-            auto validFormattingToChoose = rnd.next(numFormattingWithNonFormattingToLeft);
+            const auto totalNumFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
+            const auto numFormattingWithNonFormattingToLeftAfterMinPos = totalNumFormattingWithNonFormattingToLeft - formattingCharsTree.numFormattingCharWithNonFormattingCharsToLeft(minPos);
+            const auto numFormattingWithNonFormattingToLeftUpToMinPos = formattingCharsTree.numFormattingCharWithNonFormattingCharsToLeft(minPos);
+            //const auto numFormattingWithoutNonFormattingToLeft = (formattingCharsTree.numFormattingChars() + 1 /* The "+ 1" is for the Sentinel*/) - numFormattingWithNonFormattingToLeft;
+            const int minNonFormattingWithNonFormattingToLeftIndex = numFormattingWithNonFormattingToLeftUpToMinPos;
+            const int maxNonFormattingWithNonFormattingToLeftIndex = totalNumFormattingWithNonFormattingToLeft - 1;
+            if (minNonFormattingWithNonFormattingToLeftIndex > maxNonFormattingWithNonFormattingToLeftIndex)
+            {
+                cout << "Can't choose! minPos: " << minPos << " minNonFormattingWithNonFormattingToLeftIndex: " << minNonFormattingWithNonFormattingToLeftIndex << " maxNonFormattingWithNonFormattingToLeftIndex: " << maxNonFormattingWithNonFormattingToLeftIndex << " document: " << formattingCharsTree.documentString() << endl;
+                addIsRangeFormattedQueryAtOrAfterPos(0);
+            }
+            auto validFormattingToChoose = rnd.next(minNonFormattingWithNonFormattingToLeftIndex, maxNonFormattingWithNonFormattingToLeftIndex);
             auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
             // Queries in a non-formatted range are boring (always have answer 3'141'592) - bias heavily towards ranges
             // that are formatted.
-            const bool forcePickFormattedRange = numFormattingWithNonFormattingToLeft >= 2 && rnd.next(100) <= 95;
+            const bool forcePickFormattedRange = numFormattingWithNonFormattingToLeftAfterMinPos >= 2 && rnd.next(100) <= 95;
             if (forcePickFormattedRange && formattedCharIter.numFormattingCharsToLeft() % 2 == 0 && !formattedCharIter.currentNode()->isSentinelValue)
             {
                 // Pick the next formatted char - if it has leftNonFormattedRunSize > 0, prefer it.
@@ -315,6 +328,7 @@ class QueryGenUtils
                 distFromFormattedChar = (rnd.next(numNonFormattedCharsToChooseFrom)) + 1;
             }
             const auto queryPosition = formattedCharPos - distFromFormattedChar;
+            assert(queryPosition >= minPos);
             assert(formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition) == formattedCharIter);
             assert(queryPosition != formattedCharIter.currentNodePosition() && "Chosen IsRangeFormatted queryPosition at a formatting char!");
             TestQuery newQuery;
@@ -354,6 +368,7 @@ class QueryGenUtils
                 case TestQuery::InsertFormatting:
                     {
                         const auto insertionPos = query.insertionPos - 1;
+                        lastInsertionPos = insertionPos;
                         formattingCharsTree.insertFormattingChar(insertionPos);
                         numInsertionQueries++;
                     }
@@ -362,6 +377,7 @@ class QueryGenUtils
                     {
                         const auto insertionPos = query.insertionPos - 1;
                         const auto numToInsert = query.numToInsert;
+                        lastInsertionPos = insertionPos;
 
                         formattingCharsTree.insertNonFormattingChars(insertionPos, numToInsert);
                         numInsertionQueries++;
@@ -416,6 +432,7 @@ class QueryGenUtils
         AVLTree formattingCharsTree{10'000};
         int numInsertionQueries = 0;
         int numRangeQueries = 0;
+        int lastInsertionPos = -1;
     private:
         bool m_undoAndRedoAllowed = true;
 };
