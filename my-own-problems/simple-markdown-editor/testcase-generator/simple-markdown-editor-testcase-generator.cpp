@@ -541,6 +541,9 @@ int main(int argc, char* argv[])
             testcaseGenUtils.addInsertFormattingCharQuery(3);
             testcaseGenUtils.addInsertFormattingCharQuery(9);
             testcaseGenUtils.addIsRangeFormattedQuery(8);
+            testcaseGenUtils.addUndoQuery(3);
+            testcaseGenUtils.addInsertNonFormattingCharQuery(4, 5);
+            testcaseGenUtils.addIsRangeFormattedQuery(6);
 
             writeTestCase(testcase, testcaseGenUtils.queries);
         }
