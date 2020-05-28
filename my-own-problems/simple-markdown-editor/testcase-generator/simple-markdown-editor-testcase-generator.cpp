@@ -266,15 +266,17 @@ class QueryGenUtils
             // We include the sentinel as a valid formatting char, here, otherwise we won't include 
             // the very last run of non-formatting chars in queries.
             const auto totalNumFormattingWithNonFormattingToLeft = formattingCharsTree.root()->totalFormattedDescendantsWithNonFormattedToLeft;
-            const auto numFormattingWithNonFormattingToLeftAfterMinPos = totalNumFormattingWithNonFormattingToLeft - formattingCharsTree.numFormattingCharWithNonFormattingCharsAtOrToLeft(minPos);
             const auto numFormattingWithNonFormattingToLeftUpToMinPos = formattingCharsTree.numFormattingCharWithNonFormattingCharsAtOrToLeft(minPos);
+            const auto numFormattingWithNonFormattingToLeftAfterMinPos = totalNumFormattingWithNonFormattingToLeft - numFormattingWithNonFormattingToLeftUpToMinPos;
             //const auto numFormattingWithoutNonFormattingToLeft = (formattingCharsTree.numFormattingChars() + 1 /* The "+ 1" is for the Sentinel*/) - numFormattingWithNonFormattingToLeft;
             const int minNonFormattingWithNonFormattingToLeftIndex = numFormattingWithNonFormattingToLeftUpToMinPos;
             const int maxNonFormattingWithNonFormattingToLeftIndex = totalNumFormattingWithNonFormattingToLeft - 1;
             if (minNonFormattingWithNonFormattingToLeftIndex > maxNonFormattingWithNonFormattingToLeftIndex)
             {
                 cout << "Can't choose! minPos: " << minPos << " minNonFormattingWithNonFormattingToLeftIndex: " << minNonFormattingWithNonFormattingToLeftIndex << " maxNonFormattingWithNonFormattingToLeftIndex: " << maxNonFormattingWithNonFormattingToLeftIndex << " document: " << formattingCharsTree.documentString() << endl;
+                // Can't choose one after this minPos: ignore minPos.
                 addIsRangeFormattedQueryAtOrAfterPos(0);
+                return;
             }
             auto validFormattingToChoose = rnd.next(minNonFormattingWithNonFormattingToLeftIndex, maxNonFormattingWithNonFormattingToLeftIndex);
             auto formattedCharIter = formattingCharsTree.findKthFormattingCharWithNonFormattingToLeft(validFormattingToChoose);
@@ -294,7 +296,7 @@ class QueryGenUtils
             // We've chosen the formatting char; now choose the position of the non-formatting char in the run to its left.
             // TODO - bias towards the beginning/ end of range, to make it harder for people to get the correct answer.
             const auto formattedCharPos = formattedCharIter.currentNodePosition();
-            const auto numNonFormattedCharsToChooseFrom = formattedCharIter.currentNode()->leftNonFormattedRunSize;
+            const auto numNonFormattedCharsToChooseFrom = min(formattedCharIter.currentNode()->leftNonFormattedRunSize, formattedCharPos - minPos);
             WeightedChooser2<int64_t> distFromEdgeChooser({
                     {1 , 3},
                     {2 , 2},
@@ -327,6 +329,13 @@ class QueryGenUtils
                 // Choose any value.
                 distFromFormattedChar = (rnd.next(numNonFormattedCharsToChooseFrom)) + 1;
             }
+            if (formattedCharPos <= minPos)
+            {
+                cout << "formattedCharPos: " << formattedCharPos << " minPos: " << minPos << " validFormattingToChoose: " << validFormattingToChoose << " minNonFormattingWithNonFormattingToLeftIndex: " << minNonFormattingWithNonFormattingToLeftIndex << " maxNonFormattingWithNonFormattingToLeftIndex: " << maxNonFormattingWithNonFormattingToLeftIndex << " numFormattingWithNonFormattingToLeftUpToMinPos: " << numFormattingWithNonFormattingToLeftUpToMinPos << endl;
+                cout << "document: " << formattingCharsTree.documentString()  << endl;
+                cout << "          " << string(minPos, ' ') << '^' << endl;
+            }
+            assert(formattedCharPos > minPos);
             const auto queryPosition = formattedCharPos - distFromFormattedChar;
             assert(queryPosition >= minPos);
             assert(formattingCharsTree.findFirstNodeAtOrToRightOf(queryPosition) == formattedCharIter);
@@ -394,12 +403,14 @@ class QueryGenUtils
                 case TestQuery::Undo:
                     {
                         const auto numToUndo = query.numToUndo;
+                        lastInsertionPos = -1; // lastInsertionPos is meaningless after Undo.
                         formattingCharsTree.undo(numToUndo);
                     }
                     break;
                 case TestQuery::Redo:
                     {
                         const auto numToRedo = query.numToRedo;
+                        lastInsertionPos = -1; // lastInsertionPos is meaningless after Redo.
                         formattingCharsTree.redo(numToRedo);
 
                     }
@@ -617,7 +628,19 @@ int main(int argc, char* argv[])
                                 if (!testcaseGenUtils.canRangeQuery())
                                     continue;
                                 else
-                                    testcaseGenUtils.addIsRangeFormattedQuery();
+                                {
+                                    const bool chooseAfterLastInsertionPos = (testcaseGenUtils.lastInsertionPos != -1) && (rnd.next(100) <= 95);
+                                    if (chooseAfterLastInsertionPos)
+                                    {
+                                        cout << "Choose IsRangeFormatted after " << testcaseGenUtils.lastInsertionPos << endl;
+                                        testcaseGenUtils.addIsRangeFormattedQueryAtOrAfterPos(testcaseGenUtils.lastInsertionPos);
+                                    }
+                                    else
+                                    {
+                                        testcaseGenUtils.addIsRangeFormattedQuery();
+                                    }
+
+                                }
                             }
 
                         }
