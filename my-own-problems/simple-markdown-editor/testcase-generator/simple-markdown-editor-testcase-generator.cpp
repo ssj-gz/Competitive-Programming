@@ -165,7 +165,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
                     if (queryAnswer == -1)
                         queryAnswer = 3'141'592;
 
-                    encryptionKey = (encryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                    encryptionKey = (encryptionKey + ((queryAnswer % Mod) * powerOf2) % Mod) % Mod;
                 }
                 break;
             case TestQuery::Undo:
@@ -834,7 +834,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                             numQueriesInFormattedRange++;
                         }
 
-                        decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                        decryptionKey = (decryptionKey + ((queryAnswer % Mod) * powerOf2) % Mod) % Mod;
 
                         queryResults.push_back(queryAnswer);
                     }
