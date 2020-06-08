@@ -65,6 +65,7 @@ struct SubtaskInfo
 };
 
 const int NoExplicitLimit = std::numeric_limits<int>::max();
+const auto maxDocLength = 1e15;
 
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
@@ -79,7 +80,7 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withMaxQueriesPerTestcase(1000)
                                             .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withAllowsUndoRedo(false)
-                                            .withMaxNumDocLength(1e9)
+                                            .withMaxNumDocLength(maxDocLength)
                                             .withMaxNumTestcases(100);
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
@@ -87,7 +88,7 @@ SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withMaxQueriesPerTestcase(maxQueries)
                                             .withMaxQueriesOverAllTestcases(maxQueries)
                                             .withAllowsUndoRedo(true)
-                                            .withMaxNumDocLength(1e9)
+                                            .withMaxNumDocLength(maxDocLength)
                                             .withMaxNumTestcases(1000);
                                         
 std::ostream& operator<<(std::ostream& outStream, const SubtaskInfo& subtaskInfo)
