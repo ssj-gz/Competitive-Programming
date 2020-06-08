@@ -466,7 +466,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #endif
                     if (queryAnswer == -1)
                         queryAnswer = 3'141'592;
-                    decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
+                    decryptionKey = (decryptionKey + ((queryAnswer % Mod) * powerOf2) % Mod) % Mod;
 
                     queryResults.push_back(queryAnswer);
                 }
