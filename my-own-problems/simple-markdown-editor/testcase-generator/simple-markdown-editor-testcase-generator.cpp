@@ -65,7 +65,7 @@ struct SubtaskInfo
 };
 
 const int NoExplicitLimit = std::numeric_limits<int>::max();
-const auto maxDocLength = 1e15;
+const auto maxDocLength = 1e9;
 
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
