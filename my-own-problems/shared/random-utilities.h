@@ -51,6 +51,44 @@ inline std::vector<int> chooseRandomValuesWithSum(const unsigned int numValues, 
 }
 
 /**
+ * @return a vector of \a numValues values, each of which is at least \a minValue, and
+ *         where the sum of all values is precisely \a targetSum
+ *
+ * Takes O(numValues + targetSum) steps and O(1) memory.
+ */
+inline std::vector<int64_t> chooseRandomValuesWithSum2(const int64_t numValues, const int64_t targetSum, const int64_t minValue)
+{
+    // See e.g. https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics).
+    // This simulates construction of the stars and bars list and so is memory-efficient.
+    int64_t numBars = numValues - 1; // The "-1" is part of a mechanism to add a "fake" sentinel bar at the "end" of the simulated list.
+    int64_t numStars = targetSum - minValue * numValues;
+
+    std::vector<int64_t> values;
+    int64_t numStarsInRun = 0;
+    while (static_cast<int64_t>(values.size()) < numValues)
+    {
+        const bool isBar = (numStars == 0) // This clause is the other part of the mechanism to add a "fake" sentinel bar at the "end" of the simulated list.
+                           || (rnd.next(numBars + numStars) >= numStars);
+        if (isBar)
+        {
+            values.push_back(minValue + numStarsInRun);
+            numStarsInRun = 0;
+            numBars--;
+        }
+        else
+        {
+            numStarsInRun++;
+            numStars--;
+        }
+    }
+    assert(values.size() == numValues);
+    assert(std::accumulate(values.begin(), values.end(), 0) == targetSum);
+    assert(*min_element(values.begin(), values.end()) >= minValue);
+
+    return values;
+}
+
+/**
  * @return a vector of \a numToChoose values randomly-chosen from \a toChooseFrom.
  * Deprecated.  Use chooseKRandomFromNG instead - it's faster, but will likely
  * result in difference choices, so it's not a "drop-in" replacement.
