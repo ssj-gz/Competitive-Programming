@@ -19,6 +19,7 @@ struct AVLNode
     int totalFormattedDescendantsWithNonFormattedToLeft = 0;
 
     bool isSentinelValue = false;
+    int id = -1;
 };
 
 class AVLTreeIterator;
@@ -72,6 +73,13 @@ class AVLTree
             string document = subtreeAsDocument(root());
             document.pop_back(); // Remove the sentinel.
             return document;
+        }
+
+        AVLNode* nodeWithId(int id)
+        {
+            auto node = m_nodeForId[id];
+            assert(node);
+            return node;
         }
 
         void undo(int numToUndo)
@@ -165,6 +173,7 @@ class AVLTree
         {
             auto newNode = createNode();
             *newNode = nodeToCopy;
+            m_nodeForId[newNode->id] = newNode;
             return newNode;
         }
 
@@ -177,6 +186,9 @@ class AVLTree
             }
             m_nodes.back().push_back(AVLNode());
             auto newNode = &(m_nodes.back().back());
+            newNode->id = m_nextNodeId;
+            m_nextNodeId++;
+            m_nodeForId[m_nextNodeId] = newNode;
             return newNode;
         }
 
@@ -206,6 +218,10 @@ class AVLTree
 
         int m_undoStackPointer = 0;
         vector<AVLNode*> m_rootForRevision;
+
+        int m_nextNodeId = 0;
+
+        std::map<int, AVLNode*> m_nodeForId;
 };
 
 class AVLTreeIterator
