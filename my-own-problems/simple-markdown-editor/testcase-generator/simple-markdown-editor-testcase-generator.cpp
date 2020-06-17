@@ -4,6 +4,8 @@
 #include "utils.h"
 
 #include <iostream>
+#include <fstream>
+
 #include <cassert>
 
 using namespace std;
@@ -557,7 +559,9 @@ int main(int argc, char* argv[])
                     .withSeed(23985)
                     .withDescription("100 testcases each with almost the full amount of queries, with each testcase resulting in a doc with maxDocLength.  Approx equal number of InsertNonFormatting, InsertFormatting, and IsRangeFormatted.  No undos or redos, of course."));
 
-            for (int t = 0; t < subtask2.maxNumTestcases; t++)
+            const auto numTestcases = subtask2.maxNumTestcases;
+            
+            for (int t = 0; t < numTestcases; t++)
             {
                 cout << "t: " << t << endl;
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo());
@@ -572,7 +576,45 @@ int main(int argc, char* argv[])
                 const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
                 const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
                 cout << "totalNumUnformattedCharsToAdd: " << totalNumUnformattedCharsToAdd << endl;
-                const auto numNonformattedCharToAddForQuery = chooseRandomValuesWithSum2(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
+
+                const auto numNonformattedCharToAddForQueryCacheFilename = "subtask2_A_" + to_string(t + 1) + "_" + to_string(numInsertNonFormattingQueries) + "_" + to_string(totalNumUnformattedCharsToAdd) + "-cache.txt";
+
+                cout << "Cache file name: " << numNonformattedCharToAddForQueryCacheFilename << endl;
+
+                std::ifstream cacheFileIn(numNonformattedCharToAddForQueryCacheFilename);
+                vector<int64_t> numNonformattedCharToAddForQuery;
+                if (cacheFileIn)
+                {
+                    cout << " using cache" << endl;
+                    for (int i = 0; i < numInsertNonFormattingQueries; i++)
+                    {
+                        int64_t numNonformattedCharToAdd;
+                        cacheFileIn >> numNonformattedCharToAdd;
+                        numNonformattedCharToAddForQuery.push_back(numNonformattedCharToAdd);
+                    }
+                    long long rndState;
+                    cacheFileIn >> rndState;
+                    rnd.restoreState(rndState);
+                    assert(cacheFileIn);
+                }
+                else
+                {
+                    cout << " can't use cache" << endl;
+                    // Laboriously compte the number of unformatted chars to add for each InsertNonFormatting query.
+                    numNonformattedCharToAddForQuery = chooseRandomValuesWithSum2(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
+                    // Cache results for next time.
+                    std::ofstream cacheFileOut(numNonformattedCharToAddForQueryCacheFilename);
+
+                    for (const auto numNonformattedCharToAdd : numNonformattedCharToAddForQuery)
+                    {
+                        cacheFileOut << numNonformattedCharToAdd << std::endl;
+                    }
+                    // Store the state of rnd, so it can be restored when loading this cache - otherwise, the random numbers
+                    // generated after loading a cache will be different than the ones generated from here.
+                    cacheFileOut << rnd.state() << endl;
+                    assert(cacheFileOut);
+                    cacheFileOut.close();
+                }
                 cout << "Blee" << endl;
 
                 vector<TestQuery::Type> queryTypes;
