@@ -318,7 +318,7 @@ class QueryGenUtils
             const int maxNonFormattingWithNonFormattingToLeftIndex = totalNumFormattingWithNonFormattingToLeft - 1;
             if (minNonFormattingWithNonFormattingToLeftIndex > maxNonFormattingWithNonFormattingToLeftIndex)
             {
-                cout << "Can't choose! minPos: " << minPos << " minNonFormattingWithNonFormattingToLeftIndex: " << minNonFormattingWithNonFormattingToLeftIndex << " maxNonFormattingWithNonFormattingToLeftIndex: " << maxNonFormattingWithNonFormattingToLeftIndex << " document: " << formattingCharsTree.documentString() << endl;
+                //cout << "Can't choose! minPos: " << minPos << " minNonFormattingWithNonFormattingToLeftIndex: " << minNonFormattingWithNonFormattingToLeftIndex << " maxNonFormattingWithNonFormattingToLeftIndex: " << maxNonFormattingWithNonFormattingToLeftIndex << " document: " << formattingCharsTree.documentString() << endl;
                 // Can't choose one after this minPos: ignore minPos.
                 addIsRangeFormattedQueryAtOrAfterPos(0);
                 return;
