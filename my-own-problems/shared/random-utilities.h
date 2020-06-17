@@ -65,8 +65,14 @@ inline std::vector<int64_t> chooseRandomValuesWithSum2(const int64_t numValues, 
 
     std::vector<int64_t> values;
     int64_t numStarsInRun = 0;
+    int numIterations = 0;
     while (static_cast<int64_t>(values.size()) < numValues)
     {
+        if (numIterations % 1'000'000 == 0)
+        {
+            // Give a quick progress update, as this function can be very slow.
+            std::cout << "numBars: " << numBars << " numStars: " << numStars << std::endl;
+        }
         const bool isBar = (numStars == 0) // This clause is the other part of the mechanism to add a "fake" sentinel bar at the "end" of the simulated list.
                            || (rnd.next(numBars + numStars) >= numStars);
         if (isBar)
@@ -80,6 +86,7 @@ inline std::vector<int64_t> chooseRandomValuesWithSum2(const int64_t numValues, 
             numStarsInRun++;
             numStars--;
         }
+        numIterations++;
     }
     assert(values.size() == numValues);
     assert(std::accumulate(values.begin(), values.end(), 0) == targetSum);
