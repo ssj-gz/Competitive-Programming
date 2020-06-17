@@ -123,6 +123,18 @@ public:
         seed = _seed;
     }
 
+    /* Retrieve the current state */
+    long long state() const
+    {
+        return seed;
+    }
+
+    /* If passed the result of a call to state(), restores the state to the state we were at when that call to state() was made */
+    void restoreState(long long state)
+    {
+        seed = state;
+    }
+
     /* Random value in range [0, n-1]. */
     int next(int n)
     {
