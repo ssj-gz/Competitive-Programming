@@ -569,7 +569,7 @@ int main(int argc, char* argv[])
                 const auto numQueries = subtask2.maxQueriesPerTestcase;
                 cout << "numQueries: " << numQueries << endl;
 
-                const auto queryMakeUp = chooseRandomValuesWithSum2(3, numQueries, 1);
+                const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
                 const auto numInsertFormattingQueries = queryMakeUp[0];
                 const auto numInsertNonFormattingQueries = queryMakeUp[1];
                 const auto numIsRangeFormattedQueries = queryMakeUp[2];
@@ -601,7 +601,7 @@ int main(int argc, char* argv[])
                 {
                     cout << " can't use cache" << endl;
                     // Laboriously compte the number of unformatted chars to add for each InsertNonFormatting query.
-                    numNonformattedCharToAddForQuery = chooseRandomValuesWithSum2(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
+                    numNonformattedCharToAddForQuery = chooseRandomValuesWithSum3(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
                     // Cache results for next time.
                     std::ofstream cacheFileOut(numNonformattedCharToAddForQueryCacheFilename);
 
