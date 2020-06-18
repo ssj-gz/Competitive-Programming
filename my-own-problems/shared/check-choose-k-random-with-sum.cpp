@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -12,6 +13,7 @@
 
 using namespace std;
 
+#if 0
 vector<int> chooseKWithSumExperimental(int numToChoose, int targetSum)
 {
     string blah(targetSum, ' ');
@@ -61,6 +63,35 @@ vector<int> chooseKWithSumExperimental(int numToChoose, int targetSum)
 
     return choices;
 }
+#endif
+
+namespace std
+{
+    template<>
+    struct hash<vector<int64_t>>
+    {
+        size_t operator()(const vector<int64_t>& toHash) const
+        {
+            uint64_t hash = 0;
+            for (const auto x : toHash)
+            {
+                hash = combineHashes(hash, x);
+            }
+            return hash;
+        }
+        uint64_t combineHashes(uint64_t hash1, const uint64_t hash2) const
+        {
+            // Largely arbitrary "hash combine" function, taken from
+            //
+            //   https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x
+            //
+            hash1 ^= hash2 + 0x9e3779b9 + (hash1<<6) + (hash1>>2);
+            return hash1;
+        }
+
+    };
+};
+
 
 int main()
 {
@@ -68,19 +99,24 @@ int main()
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    const auto numToChoose = 5;
+    const auto numToChoose = 6;
 
-    map<vector<int>, int> numOfChoice;
+    unordered_map<vector<int64_t>, int> numOfChoice;
+    numOfChoice.reserve(10'000'000);
+    //map<vector<int>, int> numOfChoice;
     for (int i = 0; i < 100'000'000; i++)
     {
-        const auto choice = chooseKWithSumExperimental(numToChoose, 10);
-        //const auto choice = chooseRandomValuesWithSum(numToChoose, 10, 0);
-        //const auto choice = chooseRandomValuesWithSum2(numToChoose, 10);
+        //const auto choice = chooseKWithSumExperimental(numToChoose, 30, 0);
+        //const auto choice = chooseRandomValuesWithSum(numToChoose, 100, 4);
+        //const auto choice = chooseRandomValuesWithSum2(numToChoose, 30, 0);
+        const auto choice = chooseRandomValuesWithSum3(numToChoose, 100, 7);
+#if 0
         for (const auto x : choice)
         {
             cout << x << " ";
         }
         cout << endl;
+#endif
 
         numOfChoice[choice]++;
 
@@ -97,7 +133,7 @@ int main()
             }
             // With a uniform way of choosing numToChoose numbers with a fixed sum, largestPercentageErrorVsAverage should
             // trend down to 0.
-            cout << "largestPercentageErrorVsAverage: " << largestPercentageErrorVsAverage << endl;
+            cout << "largestPercentageErrorVsAverage: " << largestPercentageErrorVsAverage << " num chosen: " << (i + 1) << endl;
             //for (const auto& [choice, numTimesChosen] : numOfChoice)
             //{
                 //cout << numTimesChosen << endl;
