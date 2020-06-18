@@ -88,7 +88,7 @@ inline std::vector<int64_t> chooseRandomValuesWithSum2(const int64_t numValues, 
         }
         numIterations++;
     }
-    assert(values.size() == numValues);
+    assert(static_cast<int64_t>(values.size()) == numValues);
     assert(std::accumulate(values.begin(), values.end(), 0) == targetSum);
     assert(*min_element(values.begin(), values.end()) >= minValue);
 
