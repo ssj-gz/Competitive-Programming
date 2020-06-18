@@ -718,27 +718,6 @@ int main(int argc, char* argv[])
                             }
 
                         }
-                        if (false)
-                        {
-                            const auto document = testcaseGenUtils.formattingCharsTree.documentString();
-                            for (int64_t position = 0; position < document.length(); position++)
-                            {
-                                int dbgResult = 0;
-                                for (int i = 0; i <= position; i++)
-                                {
-                                    if (document[i] == '*' && (i > 0 && document[i - 1] == 'X'))
-                                    {
-                                        dbgResult++;
-                                    }
-                                }
-                                const auto result = testcaseGenUtils.formattingCharsTree.numFormattingCharWithNonFormattingCharsAtOrToLeft(position);
-                                //cout << "document: " << document << " position: " << position << endl;
-                                cout << "dbgResult: " << dbgResult << endl;
-                                cout << "result   : " << result    << endl;
-                                assert(result == dbgResult);
-                            }
-
-                        }
                     }
                     writeTestCase(testcase, testcaseGenUtils.queries);
                 }
