@@ -215,8 +215,6 @@ class QueryGenUtils
             const auto formattedCharIndexToChoose = rnd.next(numFormattingChars);
 
             const auto chosenFormattingCharIter = formattingCharsTree.findKthFormattingChar(formattedCharIndexToChoose);
-            const auto formattedCharPos = chosenFormattingCharIter.currentNodePosition();
-            const auto numNonFormattedCharsToChooseFrom = chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize;
             const auto pos = chosenFormattingCharIter.currentNodePosition() - rnd.next(chosenFormattingCharIter.currentNode()->leftNonFormattedRunSize + 1);
             assert(pos >= 0);
             TestQuery newQuery;
