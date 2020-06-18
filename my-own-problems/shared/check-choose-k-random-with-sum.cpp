@@ -112,9 +112,15 @@ int main()
     gettimeofday(&time,NULL);
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
-    const auto numToChoose = 6;
-    const auto targetSum = 60;
-    const auto minValue = 3;
+#if 1
+    const auto numToChoose = 5;
+    const auto targetSum = 70;
+    const auto minValue = 5;
+#else
+    const auto numToChoose = 7;
+    const auto targetSum = 29;
+    const auto minValue = 4;
+#endif
 
     const auto numPossibleChoices = ncr(targetSum - minValue * (numToChoose - 0) + (numToChoose - 1), (numToChoose - 1));
 
@@ -154,7 +160,7 @@ int main()
         }
 #endif
 
-        if ((i % 10'000) == 0)
+        if ((i % 100'000) == 0)
         {
             cout << "i: " << i << endl;
 #if 1
