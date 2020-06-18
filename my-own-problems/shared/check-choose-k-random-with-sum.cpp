@@ -5,20 +5,50 @@
 #include <cassert>
 #include <numeric>
 
+#include "testlib.h"
+#include "random-utilities.h"
+
 #include <sys/time.h>
 
 using namespace std;
 
 vector<int> chooseKWithSumExperimental(int numToChoose, int targetSum)
 {
+    string blah(targetSum, ' ');
+    for (int i = 0; i < numToChoose - 1; i++)
+    {
+        const auto indexInRemaining = rand() % (targetSum - i);
+        //cout << "i: " << i << " indexInRemaining: " << indexInRemaining << endl;
+        //cout << "blah: >" << blah << "<" << endl;
+        int numEmptySpacesSeen = 0;
+        bool added = false;
+        for (int j = 0; j < blah.size(); j++)
+        {
+            if (blah[j] == ' ')
+            {
+                if (numEmptySpacesSeen == indexInRemaining)
+                {
+                    blah[j] = 'X';
+                    added = true;
+                    break;
+                }
+                numEmptySpacesSeen++;
+            }
+        }
+        assert(added);
+    }
+
+
     vector<int> prelimChoices;
     prelimChoices.push_back(0);
     prelimChoices.push_back(targetSum);
-
-    for (int i = 0; i < numToChoose - 1; i++)
+    for (int i = 0; i < blah.size(); i++)
     {
-        prelimChoices.push_back(rand() % (targetSum + 1));
+        if (blah[i] == 'X')
+            prelimChoices.push_back(i);
     }
+    //cout << "blah: " << blah << endl;
+
     sort(prelimChoices.begin(), prelimChoices.end());
 
     vector<int> choices;
@@ -30,84 +60,6 @@ vector<int> chooseKWithSumExperimental(int numToChoose, int targetSum)
     assert(accumulate(choices.begin(), choices.end(), 0) == targetSum);
 
     return choices;
-}
-
-inline std::vector<int> chooseRandomValuesWithSum(const int numValues, const int targetSum, const int minValue = 0)
-{
-    // See e.g. https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics).
-    const int numBars = numValues;
-    const int numStars = targetSum - minValue * numValues;
-    std::string starsAndBars;
-    for (int i = 0; i < numStars; i++)
-    {
-        starsAndBars.push_back('*');
-    }
-    for (int i = 0; i < numBars - 1; i++)
-    {
-        starsAndBars.push_back('-');
-    }
-    std::random_shuffle(starsAndBars.begin(), starsAndBars.end());
-    // Sentinel.
-    starsAndBars.push_back('-');
-
-    std::vector<int> values;
-    int numStarsInRun = 0;
-    for (const auto character : starsAndBars)
-    {
-        if (character == '-')
-        {
-            values.push_back(minValue + numStarsInRun);
-            numStarsInRun = 0;
-        }
-        else
-        {
-            numStarsInRun++;
-        }
-    }
-    assert(values.size() == numValues);
-    assert(std::accumulate(values.begin(), values.end(), 0) == targetSum);
-    assert(*min_element(values.begin(), values.end()) >= minValue);
-
-    return values;
-}
-
-inline std::vector<int> chooseRandomValuesWithSum2(const int64_t numValues, const int64_t targetSum, const int64_t minValue = 0)
-{
-    // See e.g. https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics).
-    // This simulates construction of the stars and bars list and so is memory-efficient.
-    int64_t numBars = numValues - 1; // The "-1" is part of a mechanism to add a "fake" sentinel bar at the "end" of the simulated list.
-    int64_t numStars = targetSum - minValue * numValues;
-
-    std::vector<int64_t> values;
-    int64_t numStarsInRun = 0;
-    int numIterations = 0;
-    while (static_cast<int64_t>(values.size()) < numValues)
-    {
-        if (numIterations % 1'000'000 == 0)
-        {
-            // Give a quick progress update, as this function can be very slow.
-            //std::cout << "numBars: " << numBars << " numStars: " << numStars << std::endl;
-        }
-        const bool isBar = (numStars == 0) // This clause is the other part of the mechanism to add a "fake" sentinel bar at the "end" of the simulated list.
-                           || ((rand() % (numBars + numStars)) >= numStars);
-        if (isBar)
-        {
-            values.push_back(minValue + numStarsInRun);
-            numStarsInRun = 0;
-            numBars--;
-        }
-        else
-        {
-            numStarsInRun++;
-            numStars--;
-        }
-        numIterations++;
-    }
-    assert(values.size() == numValues);
-    assert(std::accumulate(values.begin(), values.end(), 0) == targetSum);
-    assert(*min_element(values.begin(), values.end()) >= minValue);
-
-    return vector<int>(values.begin(), values.end());
 }
 
 int main()
@@ -122,7 +74,7 @@ int main()
     for (int i = 0; i < 100'000'000; i++)
     {
         const auto choice = chooseKWithSumExperimental(numToChoose, 10);
-        //const auto choice = chooseRandomValuesWithSum(numToChoose, 10);
+        //const auto choice = chooseRandomValuesWithSum(numToChoose, 10, 0);
         //const auto choice = chooseRandomValuesWithSum2(numToChoose, 10);
         for (const auto x : choice)
         {
