@@ -105,16 +105,19 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
  */
 inline std::vector<int64_t> chooseRandomValuesWithSum3(const int64_t numValues, const int64_t targetSum, const int64_t minValue)
 {
-    const auto adjustedTargetSum = targetSum - numValues * minValue;
+    const auto adjustedTargetSum = targetSum - numValues * minValue  
+        + (numValues - 1); // The distance between the numValues - 1 chosen indices will be at least 1, so we'll remove 1 each time; this compensates for that.
     auto indices  = chooseKRandomIndicesFrom(numValues - 1, adjustedTargetSum);
-    indices.insert(indices.begin(), 0);
-    indices.push_back(adjustedTargetSum);
+    indices.insert(indices.begin(), -1); // Sentinel (left)
+    indices.push_back(adjustedTargetSum); // Sentinel (right)
     assert(is_sorted(indices.begin(), indices.end()));
 
     std::vector<int64_t> chosenValues;
     for (size_t i = 1; i < indices.size(); i++)
     {
-        chosenValues.push_back(indices[i] - indices[i - 1] + minValue);
+        assert(indices[i] - indices[i - 1] >= 0);
+        chosenValues.push_back(indices[i] - indices[i - 1] + minValue 
+                - 1); // Since (indices[i] - indices[i - 1] >= 1), we must subtract 1 else all chosen numbers will always be >= minValue + 1!
     }
 
     assert(chosenValues.size() == numValues);
