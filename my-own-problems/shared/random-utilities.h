@@ -101,7 +101,7 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
  * @return a vector of \a numValues values, each of which is at least \a minValue, and
  *         where the sum of all values is precisely \a targetSum
  *
- * Takes O(numValues) steps and O(numValues) memory i.e. irrespective of targetSum
+ * Takes O(numValues x log(numValues)) steps and O(numValues) memory i.e. irrespective of targetSum
  */
 inline std::vector<int64_t> chooseRandomValuesWithSum3(const int64_t numValues, const int64_t targetSum, const int64_t minValue)
 {
