@@ -71,7 +71,7 @@ inline std::vector<int64_t> chooseRandomValuesWithSum2(const int64_t numValues, 
         if (numIterations % 1'000'000 == 0)
         {
             // Give a quick progress update, as this function can be very slow.
-            std::cout << "numBars: " << numBars << " numStars: " << numStars << std::endl;
+            //std::cout << "numBars: " << numBars << " numStars: " << numStars << std::endl;
         }
         const bool isBar = (numStars == 0) // This clause is the other part of the mechanism to add a "fake" sentinel bar at the "end" of the simulated list.
                            || (rnd.next(numBars + numStars) >= numStars);
@@ -93,6 +93,35 @@ inline std::vector<int64_t> chooseRandomValuesWithSum2(const int64_t numValues, 
     assert(*min_element(values.begin(), values.end()) >= minValue);
 
     return values;
+}
+
+std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChooseFrom);
+
+/**
+ * @return a vector of \a numValues values, each of which is at least \a minValue, and
+ *         where the sum of all values is precisely \a targetSum
+ *
+ * Takes O(numValues) steps and O(numValues) memory i.e. irrespective of targetSum
+ */
+inline std::vector<int64_t> chooseRandomValuesWithSum3(const int64_t numValues, const int64_t targetSum, const int64_t minValue)
+{
+    const auto adjustedTargetSum = targetSum - numValues * minValue;
+    auto indices  = chooseKRandomIndicesFrom(numValues - 1, adjustedTargetSum);
+    indices.insert(indices.begin(), 0);
+    indices.push_back(adjustedTargetSum);
+    assert(is_sorted(indices.begin(), indices.end()));
+
+    std::vector<int64_t> chosenValues;
+    for (size_t i = 1; i < indices.size(); i++)
+    {
+        chosenValues.push_back(indices[i] - indices[i - 1] + minValue);
+    }
+
+    assert(chosenValues.size() == numValues);
+    assert(std::accumulate(chosenValues.begin(), chosenValues.end(), 0) == targetSum);
+    assert(*min_element(chosenValues.begin(), chosenValues.end()) >= minValue);
+
+    return chosenValues;
 }
 
 /**
