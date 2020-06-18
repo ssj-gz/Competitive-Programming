@@ -460,6 +460,13 @@ class QueryGenUtils
                         const auto queryPosition = query.queryPosition - 1;
                         auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
 
+                        // Update encryptionKey for next queries.
+                        if (queryAnswer == -1)
+                            queryAnswer = 3'141'592;
+
+                        encryptionKey = (encryptionKey + ((queryAnswer % Mod) * powerOf2) % Mod) % Mod;
+
+
                         numRangeQueries++;
                     }
                     break;
@@ -479,6 +486,7 @@ class QueryGenUtils
                     }
                     break;
             }
+            powerOf2 = (powerOf2 * 2) % Mod;
         }
 
         bool canUndo() const
@@ -507,6 +515,8 @@ class QueryGenUtils
         int numInsertionQueries = 0;
         int numRangeQueries = 0;
         int lastInsertionPos = -1;
+        int64_t encryptionKey = 0;
+        int64_t powerOf2 = 2;
     private:
         bool m_undoAndRedoAllowed = true;
 };
