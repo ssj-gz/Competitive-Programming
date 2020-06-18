@@ -65,6 +65,19 @@ vector<int> chooseKWithSumExperimental(int numToChoose, int targetSum)
 }
 #endif
 
+int64_t ncr(int64_t n, int64_t r)
+{
+    if (n < r)
+        swap(r, n);
+    if (r == 0)
+        return 1;
+    if (n == 0)
+        return 0;
+    if (r > n / 2)
+        r = n - r;
+    return ncr( n-1, r-1 ) + ncr( n-1, r );
+}
+
 namespace std
 {
     template<>
@@ -100,16 +113,22 @@ int main()
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
 
     const auto numToChoose = 6;
+    const auto targetSum = 60;
+    const auto minValue = 3;
+
+    const auto numPossibleChoices = ncr(targetSum - minValue * (numToChoose - 0) + (numToChoose - 1), (numToChoose - 1));
 
     unordered_map<vector<int64_t>, int> numOfChoice;
-    numOfChoice.reserve(10'000'000);
+    numOfChoice.reserve(100'000'000);
+    //map<vector<int64_t>, int> numOfChoice;
     //map<vector<int>, int> numOfChoice;
-    for (int i = 0; i < 100'000'000; i++)
+    map<int, int> blee;
+    for (int i = 0; i < 1'000'000'000; i++)
     {
-        //const auto choice = chooseKWithSumExperimental(numToChoose, 30, 0);
-        //const auto choice = chooseRandomValuesWithSum(numToChoose, 100, 4);
-        //const auto choice = chooseRandomValuesWithSum2(numToChoose, 30, 0);
-        const auto choice = chooseRandomValuesWithSum3(numToChoose, 100, 7);
+        //const auto choice = chooseKWithSumExperimental(numToChoose, targetSum, minValue);
+        //const auto choice = chooseRandomValuesWithSum(numToChoose, targetSum, minValue);
+        //const auto choice = chooseRandomValuesWithSum2(numToChoose, targetSum, minValue);
+        const auto choice = chooseRandomValuesWithSum3(numToChoose, targetSum, minValue);
 #if 0
         for (const auto x : choice)
         {
@@ -118,22 +137,55 @@ int main()
         cout << endl;
 #endif
 
-        numOfChoice[choice]++;
-
-        if ((i % 1'000) == 0)
+        const auto blah = numOfChoice[choice]++;
+        if (blah != 0)
         {
+            blee[blah]--;
+            if (blee[blah] == 0)
+                blee.erase(blee.find(blah));
+        }
+        blee[blah + 1]++;
+#if 0
+        cout << "blah: " << blah << endl;
+        cout << "blee: " << endl;
+        for (const auto x : blee)
+        {
+            cout << " " << x.first << "," << x.second << endl;
+        }
+#endif
+
+        if ((i % 10'000) == 0)
+        {
+            cout << "i: " << i << endl;
+#if 1
             const auto totalNumChosen = i + 1;
-            const auto numPossibleChoices = numOfChoice.size();
+            //const auto numPossibleChoices = numOfChoice.size();
+            //const auto numPossibleChoices = 15890700;
             const auto averageTimesChosen = static_cast<double>(totalNumChosen) / numPossibleChoices;
             double largestPercentageErrorVsAverage = 0.0;
+#if 0
             for (const auto& [choice, numTimesChosen] : numOfChoice)
             {
                 const auto percentageErrorVsAverage = 100.0 - min<double>(averageTimesChosen, numTimesChosen) / max<double>(averageTimesChosen, numTimesChosen) * 100.0;
                 largestPercentageErrorVsAverage = max(largestPercentageErrorVsAverage, percentageErrorVsAverage);
             }
+#endif
+#if 1
+            {
+                const auto numTimesChosen = blee.begin()->first;
+                const auto percentageErrorVsAverage = 100.0 - min<double>(averageTimesChosen, numTimesChosen) / max<double>(averageTimesChosen, numTimesChosen) * 100.0;
+                largestPercentageErrorVsAverage = max(largestPercentageErrorVsAverage, percentageErrorVsAverage);
+            }
+            {
+                const auto numTimesChosen = std::prev(blee.end())->first;
+                const auto percentageErrorVsAverage = 100.0 - min<double>(averageTimesChosen, numTimesChosen) / max<double>(averageTimesChosen, numTimesChosen) * 100.0;
+                largestPercentageErrorVsAverage = max(largestPercentageErrorVsAverage, percentageErrorVsAverage);
+            }
+#endif
             // With a uniform way of choosing numToChoose numbers with a fixed sum, largestPercentageErrorVsAverage should
             // trend down to 0.
-            cout << "largestPercentageErrorVsAverage: " << largestPercentageErrorVsAverage << " num chosen: " << (i + 1) << endl;
+            cout << "largestPercentageErrorVsAverage: " << largestPercentageErrorVsAverage << " averageTimesChosen:" << averageTimesChosen << " num chosen: " << (i + 1) << " numOfChoice.size(): " << numOfChoice.size() << " numPossibleChoices: " << numPossibleChoices << endl;
+#endif
             //for (const auto& [choice, numTimesChosen] : numOfChoice)
             //{
                 //cout << numTimesChosen << endl;
