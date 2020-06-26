@@ -558,6 +558,79 @@ int main(int argc, char* argv[])
 
             writeTestCase(testcase, testcaseGenUtils.queries);
         }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask1)
+                    .withSeed(39784432)
+                    .withDescription("maxNumTestcases 'random' testcases"));
+
+            auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+
+            for (int t = 0; t < subtask1.maxNumTestcases; t++)
+            {
+                QueryGenUtils testcaseGenUtils;
+                const auto maxDocLength = subtask1.maxDocLength;
+                const auto numQueries = rnd.next(subtask1.maxQueriesPerTestcase - 50, subtask1.maxQueriesPerTestcase);
+                // At least one query per other query (undo/ redo, insert etc)
+                const auto numIsRangeFormattedQueries = rnd.next(50.0, 55.0) * numQueries / 100.0;
+                const auto numNonIsRangeFormattedQueries = numQueries - numIsRangeFormattedQueries;
+                const auto numUndoOrRedoQueries = static_cast<int>(numNonIsRangeFormattedQueries * rnd.next(3.0, 7.0) / 100.0);
+                cout << "numUndoOrRedoQueries: " << numUndoOrRedoQueries << endl;
+                const auto numInsertionQueries = numNonIsRangeFormattedQueries - numUndoOrRedoQueries;
+                const auto numUndoOrRedoRuns = rnd.next(1, numUndoOrRedoQueries);
+                const auto numInsertionRuns = numUndoOrRedoRuns;
+                const auto numIsRangeQueryRuns = numNonIsRangeFormattedQueries;
+
+                const auto numInsertionQueriesInRun = chooseRandomValuesWithSum3(numInsertionRuns, numInsertionQueries, 1);
+                const auto numUndoOrRedoQueriesInRun = chooseRandomValuesWithSum3(numUndoOrRedoRuns, numUndoOrRedoQueries, 1);
+                const auto numIsRangeFormattedQueriesInRun = chooseRandomValuesWithSum3(numIsRangeQueryRuns, numIsRangeFormattedQueries, 1);
+
+                int insertionQueriesRunIndex = 0;
+                int undoOrRedoQueriesRunIndex = 0;
+                int isRangeFormattedQueriesRunIndex = 0;
+
+                bool addedQuery = false;
+                string blah;
+                do 
+                {
+                    addedQuery = false;
+                    if (insertionQueriesRunIndex != numInsertionRuns)
+                    {
+                        for (int i = 0; i < numInsertionQueriesInRun[insertionQueriesRunIndex]; i++)
+                        {
+                            blah += (rnd.next(2) == 0 ? 'F' : 'N');
+                            assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
+                            for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
+                            {
+                                blah += 'Q';
+                            }
+                            isRangeFormattedQueriesRunIndex++;
+                            addedQuery = true;
+                        }
+                        insertionQueriesRunIndex++;
+                    }
+                    if (undoOrRedoQueriesRunIndex != numUndoOrRedoRuns)
+                    {
+                        for (int i = 0; i < numUndoOrRedoQueriesInRun[undoOrRedoQueriesRunIndex]; i++)
+                        {
+                            blah += (rnd.next(2) == 0 ? 'R' : 'U');
+                            assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
+                            for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
+                            {
+                                blah += 'Q';
+                            }
+                            isRangeFormattedQueriesRunIndex++;
+                            addedQuery = true;
+                        }
+                        undoOrRedoQueriesRunIndex++;
+                    }
+                } while (addedQuery);
+                cout << "blah:  " << blah << endl;
+                // TODO - rest of this - this just decides the "distribution" of the queries, but doesn't actually build any of them.
+                writeTestCase(testcase, testcaseGenUtils.queries);
+            }
+
+
+        }
     }
 
     // SUBTASK 2
