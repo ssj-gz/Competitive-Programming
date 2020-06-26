@@ -888,6 +888,9 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     const auto [T] = testFileReader.readLine<int>();
 
     cout << "maxDocLength: " << containingSubtask.maxDocLength << endl;
+    testFileReader.addErrorUnless(T >= 1, "Expected T >= 1, got T = " + to_string(T));
+    testFileReader.addErrorUnless(T <= containingSubtask.maxNumTestcases, "Expected T <= " + to_string(containingSubtask.maxNumTestcases) + " got T = " + to_string(T));
+
 
     for (int t = 0; t < T; t++)
     {
