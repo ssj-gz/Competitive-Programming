@@ -895,6 +895,10 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     for (int t = 0; t < T; t++)
     {
         const auto [numQueries] = testFileReader.readLine<int>();
+
+        testFileReader.addErrorUnless(numQueries >= 1, "Expected numQueries >= 1, got numQueries = " + to_string(numQueries));
+        testFileReader.addErrorUnless(numQueries <= containingSubtask.maxQueriesPerTestcase, "Expected numQueries <= " + to_string(containingSubtask.maxQueriesPerTestcase) + " got numQueries = " + to_string(numQueries));
+
         vector<TestQuery> queries;
         for (int i = 0; i < numQueries; i++)
         {
