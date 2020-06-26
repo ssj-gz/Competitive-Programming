@@ -892,12 +892,14 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
     testFileReader.addErrorUnless(T <= containingSubtask.maxNumTestcases, "Expected T <= " + to_string(containingSubtask.maxNumTestcases) + " got T = " + to_string(T));
 
 
+    int64_t totalNumQueries = 0;
     for (int t = 0; t < T; t++)
     {
         const auto [numQueries] = testFileReader.readLine<int>();
 
         testFileReader.addErrorUnless(numQueries >= 1, "Expected numQueries >= 1, got numQueries = " + to_string(numQueries));
         testFileReader.addErrorUnless(numQueries <= containingSubtask.maxQueriesPerTestcase, "Expected numQueries <= " + to_string(containingSubtask.maxQueriesPerTestcase) + " got numQueries = " + to_string(numQueries));
+        totalNumQueries += numQueries;
 
         vector<TestQuery> queries;
         for (int i = 0; i < numQueries; i++)
@@ -1030,6 +1032,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
         testFileReader.markTestcaseAsValidated();
 
     }
+    testFileReader.addErrorUnless(totalNumQueries <= containingSubtask.maxQueriesOverAllTestcases, "Expected total numQueries over all testcases <= " + to_string(containingSubtask.maxQueriesOverAllTestcases) + " got total num queries = " + to_string(totalNumQueries));
     testFileReader.markTestFileAsValidated();
 
 
