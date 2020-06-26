@@ -71,7 +71,7 @@ const auto maxDocLength = 1e9;
 
 SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withScore(5)
-                                            .withMaxQueriesPerTestcase(100)
+                                            .withMaxQueriesPerTestcase(100) // TODO - should this be 1000?
                                             .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withAllowsUndoRedo(true)
                                             .withMaxNumDocLength(1000)
