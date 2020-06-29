@@ -848,7 +848,28 @@ int main(int argc, char* argv[])
                 }
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(3498537)
+                    .withDescription("100 testcases worth of 'random' queries, with total queries equalling maxQueriesOverAllTestcases"));
+            {
 
+                const auto T = 100;
+                const auto numQueriesForTestcase = chooseRandomValuesWithSum3(T, subtask3.maxQueriesOverAllTestcases, 5);
+                const auto maxDocLength = subtask3.maxDocLength;
+
+                for (int t = 0; t < T; t++)
+                {
+                    auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+                    const int numQueries = numQueriesForTestcase[t];
+
+                    QueryGenUtils testcaseGenUtils;
+                    testcaseGenUtils.setUndoAndRedoAllowed(true);
+                    addRandomishQueries(testcaseGenUtils, numQueries, maxDocLength);
+                    writeTestCase(testcase, testcaseGenUtils.queries);
+                }
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
