@@ -688,7 +688,6 @@ int main(int argc, char* argv[])
                 const auto maxDocLength = subtask1.maxDocLength;
                 const auto numQueries = rnd.next(subtask1.maxQueriesPerTestcase - 50, subtask1.maxQueriesPerTestcase);
                 addRandomishQueries(testcaseGenUtils, numQueries, maxDocLength);
-                // TODO - rest of this - this just decides the "distribution" of the queries, but doesn't actually build any of them.
                 writeTestCase(testcase, testcaseGenUtils.queries);
             }
 
