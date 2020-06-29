@@ -690,8 +690,6 @@ int main(int argc, char* argv[])
                 addRandomishQueries(testcaseGenUtils, numQueries, maxDocLength);
                 writeTestCase(testcase, testcaseGenUtils.queries);
             }
-
-
         }
     }
 
