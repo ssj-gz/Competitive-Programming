@@ -563,10 +563,9 @@ int main(int argc, char* argv[])
                     .withSeed(39784432)
                     .withDescription("maxNumTestcases 'random' testcases"));
 
-            auto& testcase = testFile.newTestcase(SMETestCaseInfo());
-
             for (int t = 0; t < subtask1.maxNumTestcases; t++)
             {
+                auto& testcase = testFile.newTestcase(SMETestCaseInfo());
                 QueryGenUtils testcaseGenUtils;
                 const auto maxDocLength = subtask1.maxDocLength;
                 const auto numQueries = rnd.next(subtask1.maxQueriesPerTestcase - 50, subtask1.maxQueriesPerTestcase);
