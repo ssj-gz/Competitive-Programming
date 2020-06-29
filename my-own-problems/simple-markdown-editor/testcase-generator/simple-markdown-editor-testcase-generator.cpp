@@ -529,7 +529,11 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     const auto numUndoOrRedoQueries = static_cast<int>(numNonIsRangeFormattedQueries * rnd.next(3.0, 7.0) / 100.0);
     cout << "numUndoOrRedoQueries: " << numUndoOrRedoQueries << endl;
     const auto numInsertionQueries = numNonIsRangeFormattedQueries - numUndoOrRedoQueries;
-    const auto numUndoOrRedoRuns = rnd.next(1, numUndoOrRedoQueries);
+    int numUndoOrRedoRuns = 0;
+    if (numUndoOrRedoQueries > 0)
+    {
+        numUndoOrRedoRuns = rnd.next(1, numUndoOrRedoQueries);
+    }
     const auto numInsertionRuns = numUndoOrRedoRuns;
     const auto numIsRangeQueryRuns = numNonIsRangeFormattedQueries;
 
