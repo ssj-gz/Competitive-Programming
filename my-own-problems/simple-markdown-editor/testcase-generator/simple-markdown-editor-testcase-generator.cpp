@@ -538,7 +538,9 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     const auto numIsRangeQueryRuns = numNonIsRangeFormattedQueries;
 
     const auto numInsertionQueriesInRun = chooseRandomValuesWithSum3(numInsertionRuns, numInsertionQueries, 1);
-    const auto numUndoOrRedoQueriesInRun = chooseRandomValuesWithSum3(numUndoOrRedoRuns, numUndoOrRedoQueries, 1);
+    vector<int64_t> numUndoOrRedoQueriesInRun;
+    if (numUndoOrRedoRuns > 0)
+        numUndoOrRedoQueriesInRun = chooseRandomValuesWithSum3(numUndoOrRedoRuns, numUndoOrRedoQueries, 1);
     const auto numIsRangeFormattedQueriesInRun = chooseRandomValuesWithSum3(numIsRangeQueryRuns, numIsRangeFormattedQueries, 1);
 
     int insertionQueriesRunIndex = 0;
