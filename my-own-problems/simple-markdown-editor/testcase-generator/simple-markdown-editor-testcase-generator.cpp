@@ -603,7 +603,9 @@ int main(int argc, char* argv[])
                         if (!testcaseGenUtils.canRangeQuery() && numFormattedInsertions == 0)
                             numFormattedInsertions++;
                         const auto numNonFormattedInsertions = numInsertionQueriesToAdd - numFormattedInsertions;
-                        const auto numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, numCharsToAddToReachTargetLength - numNonFormattedInsertions - numFormattedInsertions, 1);
+                        vector<int64_t> numNonFormattedCharsToAddForQuery;
+                        if (numNonFormattedInsertions > 0)
+                            numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, numCharsToAddToReachTargetLength - numNonFormattedInsertions - numFormattedInsertions, 1);
 
                         vector<TestQuery::Type> insertionTypes;
                         for (int i = 0; i < numFormattedInsertions; i++)
