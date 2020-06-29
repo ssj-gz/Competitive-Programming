@@ -542,7 +542,6 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     int isRangeFormattedQueriesRunIndex = 0;
 
     bool addedQuery = false;
-    string blah;
     do 
     {
         addedQuery = false;
