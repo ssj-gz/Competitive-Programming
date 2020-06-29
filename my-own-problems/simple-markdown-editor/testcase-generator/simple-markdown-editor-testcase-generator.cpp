@@ -563,7 +563,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             const auto numCharsToAddToReachTargetLength = targetDocumentLength - testcaseGenUtils.formattingCharsTree.documentLength();
             cout << "numInsertionQueriesToAdd: " << numInsertionQueriesToAdd << " targetDocumentLength: " << targetDocumentLength << " numCharsToAddToReachTargetLength: " << numCharsToAddToReachTargetLength << endl;
             assert(numCharsToAddToReachTargetLength >= numInsertionQueriesToAdd);
-            auto numNonFormattedInsertions = rnd.next(0L, numInsertionQueriesToAdd);
+            auto numNonFormattedInsertions = rnd.next(static_cast<int64_t>(0), numInsertionQueriesToAdd);
             if (!testcaseGenUtils.canRangeQuery() && numNonFormattedInsertions == 0)
                 numNonFormattedInsertions++;
             const auto numFormattedInsertions = numInsertionQueriesToAdd - numNonFormattedInsertions;
@@ -658,7 +658,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     while (static_cast<int>(testcaseGenUtils.queries.size()) < numQueriesToAdd)
     {
         if (!testcaseGenUtils.canRangeQuery())
-            testcaseGenUtils.addInsertNonFormattingCharQuery(rnd.next(1L, maxDocLength - testcaseGenUtils.formattingCharsTree.documentLength()));
+            testcaseGenUtils.addInsertNonFormattingCharQuery(rnd.next(static_cast<int64_t>(1), maxDocLength - testcaseGenUtils.formattingCharsTree.documentLength()));
         testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
     }
 }
