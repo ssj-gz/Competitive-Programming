@@ -529,6 +529,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     assert(numIsRangeFormattedQueries >= numNonIsRangeFormattedQueries);
     const auto numUndoOrRedoQueries = static_cast<int>(numNonIsRangeFormattedQueries * rnd.next(3.0, 7.0) / 100.0);
     const auto numInsertionQueries = numNonIsRangeFormattedQueries - numUndoOrRedoQueries;
+    cout << "numNonIsRangeFormattedQueries: " << numNonIsRangeFormattedQueries << " numInsertionQueries: " << numInsertionQueries << " numUndoOrRedoQueries: " << numUndoOrRedoQueries << " numQueriesToAdd: " << numQueriesToAdd << endl;
     int numUndoOrRedoRuns = 0;
     if (numUndoOrRedoQueries > 0)
     {
@@ -827,132 +828,22 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
                     .withSeed(20938851)
-                    .withDescription("debug testcase"));
+                    .withDescription("Max testcases worth of 'random' queries, with total queries equalling maxQueriesOverAllTestcases"));
             {
-                auto& testcase = testFile.newTestcase(SMETestCaseInfo().withDescription("TODO"));
 
-                // TODO - remove this - testing/ debugging only!
-                const int T = 1;
+                const auto T = subtask3.maxNumTestcases;
+                const auto numQueriesForTestcase = chooseRandomValuesWithSum3(T, subtask3.maxQueriesOverAllTestcases, 5);
+                const auto maxDocLength = subtask3.maxDocLength;
+
+
                 for (int t = 0; t < T; t++)
                 {
-                    const int numQueries = 500'000;
+                    auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+                    const int numQueries = numQueriesForTestcase[t];
 
                     QueryGenUtils testcaseGenUtils;
                     testcaseGenUtils.setUndoAndRedoAllowed(true);
-                    while (testcaseGenUtils.queries.size() < numQueries)
-                    {
-                        cout << "Generating query: " << testcaseGenUtils.queries.size() + 1 << " documentLength: " << testcaseGenUtils.formattingCharsTree.documentLength() << " numInsertionQueries: " << testcaseGenUtils.numInsertionQueries << " numRangeQueries: "<< testcaseGenUtils.numRangeQueries << endl;
-                        TestQuery query;
-
-                        const auto originalNumQueries = testcaseGenUtils.queries.size();
-                        while (testcaseGenUtils.queries.size() == originalNumQueries)
-                        {
-                            const int queryType = rand() % 5;
-                            query.type = static_cast<TestQuery::Type>(queryType);
-                            if (queryType == TestQuery::Undo)
-                            {
-                                if (!testcaseGenUtils.canUndo())
-                                    continue;
-                                if (rand() % 20 >= 1)
-                                    continue; // Undos should be fairly rare.
-
-                                testcaseGenUtils.addUndoQuery();
-                            }
-                            if (queryType == TestQuery::Redo)
-                            {
-                                if (!testcaseGenUtils.canRedo())
-                                    continue;
-                                if (rand() % 4 >= 1)
-                                    continue; // Redos should be fairly rare.
-                                testcaseGenUtils.addRedoQuery();
-                            }
-                            if (queryType == TestQuery::InsertFormatting)
-                            {
-                                testcaseGenUtils.addInsertFormattingCharQuery();
-                            }
-                            if (queryType == TestQuery::InsertNonFormatting)
-                            {
-                                const auto num = 1 + rand() % 100;
-                                testcaseGenUtils.addInsertNonFormattingCharQuery(num);
-                            }
-                            if (queryType == TestQuery::IsRangeFormatted)
-                            {
-                                if (!testcaseGenUtils.canRangeQuery())
-                                    continue;
-                                else
-                                    testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
-                            }
-
-                        }
-                    }
-                    writeTestCase(testcase, testcaseGenUtils.queries);
-                }
-            }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(20938849)
-                    .withDescription("debug testcase (small)"));
-            {
-                auto& testcase = testFile.newTestcase(SMETestCaseInfo().withDescription("TODO"));
-
-                // TODO - remove this - testing/ debugging only!
-                const int T = 1;
-                for (int t = 0; t < T; t++)
-                {
-                    const int numQueries = 1000;
-
-                    QueryGenUtils testcaseGenUtils;
-                    testcaseGenUtils.setUndoAndRedoAllowed(true);
-                    while (testcaseGenUtils.queries.size() < numQueries)
-                    {
-                        cout << "Generating query: " << testcaseGenUtils.queries.size() + 1 << " documentLength: " << testcaseGenUtils.formattingCharsTree.documentLength() << " numInsertionQueries: " << testcaseGenUtils.numInsertionQueries << " numRangeQueries: "<< testcaseGenUtils.numRangeQueries << endl;
-                        TestQuery query;
-
-                        const auto originalNumQueries = testcaseGenUtils.queries.size();
-                        while (testcaseGenUtils.queries.size() == originalNumQueries)
-                        {
-                            const int queryType = rand() % 5;
-                            query.type = static_cast<TestQuery::Type>(queryType);
-                            if (queryType == TestQuery::Undo)
-                            {
-                                cout << "canUndo: " << testcaseGenUtils.canUndo() << endl;
-                                if (!testcaseGenUtils.canUndo())
-                                    continue;
-                                if (rand() % 23 >= 1)
-                                    continue; // Undos should be fairly rare.
-
-                                testcaseGenUtils.addUndoQuery();
-                            }
-                            if (queryType == TestQuery::Redo)
-                            {
-                                if (!testcaseGenUtils.canRedo())
-                                    continue;
-                                if (rand() % 3 >= 1)
-                                    continue; // Redos should be fairly rare.
-                                testcaseGenUtils.addRedoQuery();
-                            }
-                            if (queryType == TestQuery::InsertFormatting)
-                            {
-                                testcaseGenUtils.addInsertFormattingCharQuery();
-                            }
-                            if (queryType == TestQuery::InsertNonFormatting)
-                            {
-                                const auto num = 1 + rand() % 5;
-                                testcaseGenUtils.addInsertNonFormattingCharQuery(num);
-                            }
-                            if (queryType == TestQuery::IsRangeFormatted)
-                            {
-                                if (!testcaseGenUtils.canRangeQuery())
-                                    continue;
-                                else
-                                {
-                                    testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
-                                }
-                            }
-
-                        }
-                    }
+                    addRandomishQueries(testcaseGenUtils, numQueries, maxDocLength);
                     writeTestCase(testcase, testcaseGenUtils.queries);
                 }
             }
