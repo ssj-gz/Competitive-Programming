@@ -300,10 +300,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             cout << undoStackStatusString << endl;
             cout << string(undoStackStatusPointer, ' ') << "^" << endl;
         }
-        if (printDocument)
-        {
-            cout << "document: " << document << endl;
-        }
         if (printFormattedRangeDisplay)
         {
             int formatRangeBegin = -1;
@@ -328,7 +324,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                         const int numCharsToAddToDisplayString = pos + 1 - formattedRangeDisplayStringLength;
                         //cout << "adding " << (pos + 1 - static_cast<int>(formattedRangeDisplayString.size()) - 2) << " things " << " formattedRangeDisplayString size: " << formattedRangeDisplayString.size() << endl;
                         //cout << "formattedRangeDisplayString: >" << formattedRangeDisplayString << "<" << endl;
-                        formattedRangeDisplayString += u8"└" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┘";
+                        formattedRangeDisplayString += u8"┌" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┐";
                         formattedRangeDisplayStringLength += numCharsToAddToDisplayString;
                         formatRangeBegin = -1;
                         numFormattedRanges++;
@@ -339,6 +335,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
             cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
+        }
+        if (printDocument)
+        {
+            cout << "document: " << document << endl;
         }
     };
 
