@@ -379,8 +379,10 @@ struct Range
 };
 
 /**
- * Returns the Range representing all nodes in nodesAtHeightInDFSOrder[height] that are descendants of nodeToReparent,
- * or (-1, -1) if nodeToReparent has no descendants at that height.
+ * Returns the Range [begin, end] of indices in nodesAtHeightInDFSOrder[height] such that all nodes in that
+ * range are descendants of nodeToReparent, or (-1, -1) if nodeToReparent has no descendants at that height.
+ *
+ * Runs in O(log N).
  */
 Range descendantRangeFor(Node* nodeToReparent, int height, const vector<vector<Node*>>& nodesAtHeightInDFSOrder)
 {
@@ -408,7 +410,7 @@ Range descendantRangeFor(Node* nodeToReparent, int height, const vector<vector<N
  *  1. v.height <= height; and
  *  2. v is not a descendant of nodeToReparent
  *
- *  Runs in O(N).
+ *  Runs in O(log N).
  */
 int findNumNonDescendantsUpToHeight(Node* nodeToReparent, const int height, const vector<int>& numNodesUpToHeight, const vector<vector<Node*>>& nodesAtHeightInDFSOrder,  const vector<vector<int>>& numProperDescendantsForNodeAtHeightPrefixSum)
 {
@@ -593,14 +595,14 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // list that re-parents our nodeToReparent.
         // This takes up the two remaining Phases.  This block is Phase Two, where we just compute newParentHeight.
         const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
-        const auto heightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
+        const auto newParentHeightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                 [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightInDFSOrder, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
                 {
                     const auto numReparentingsUpToHeight = findNumNonDescendantsUpToHeight(nodeToReparent, height, numNodesUpToHeight, nodesAtHeightInDFSOrder, numProperDescendantsForNodeAtHeightPrefixSum);
                     return numOfReparentingThatReparentsNode < numReparentingsUpToHeight;
                 });
-        assert(heightIter != allHeights.end());
-        const auto newParentHeight = *heightIter;
+        assert(newParentHeightIter != allHeights.end());
+        const auto newParentHeight = *newParentHeightIter;
         assert(newParentHeight != -1);
         // Phase Two complete.
 
@@ -608,9 +610,9 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // that reparents nodeToReparent to a newParentHeight whose height is newParentHeight.
         // This is the final phase, Phase Three.
         auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
-        if (heightIter != allHeights.begin())
+        if (newParentHeightIter != allHeights.begin())
         {
-            numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(heightIter), numNodesUpToHeight, nodesAtHeightInDFSOrder, numProperDescendantsForNodeAtHeightPrefixSum);
+            numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(newParentHeightIter), numNodesUpToHeight, nodesAtHeightInDFSOrder, numProperDescendantsForNodeAtHeightPrefixSum);
         }
 
         const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, nodesAtHeightInDFSOrder);
