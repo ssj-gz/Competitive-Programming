@@ -603,7 +603,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
                     testcaseGenUtils.addInsertFormattingCharQuery();
                 }
                 // Follow each insertion with a range query.
-                assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
+                assert(isRangeFormattedQueriesRunIndex < static_cast<int>(numIsRangeFormattedQueriesInRun.size()));
                 for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
                 {
                     testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
@@ -641,7 +641,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
                 // Follow each undo/ redo with a range query.
                 if (testcaseGenUtils.canRangeQuery()) // It should be moderately rare that this *isn't* the case - we'll just add any "missed" queries at the end.
                 {
-                    assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
+                    assert(isRangeFormattedQueriesRunIndex < static_cast<int>(numIsRangeFormattedQueriesInRun.size()));
                     for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
                     {
                         testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
