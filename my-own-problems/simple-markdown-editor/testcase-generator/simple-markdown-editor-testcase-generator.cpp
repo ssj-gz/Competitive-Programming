@@ -603,7 +603,6 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
         if (undoOrRedoQueriesRunIndex != numUndoOrRedoRuns)
         {
             cout << "Adding Undo/ Redo run" << endl;
-            cout << "document: " << testcaseGenUtils.formattingCharsTree.documentString() << endl;
             cout << "undo stack size: " << testcaseGenUtils.formattingCharsTree.undoStackSize() << endl;
             cout << "undo stack pointer: " << testcaseGenUtils.formattingCharsTree.undoStackPointer() << endl;
             for (int i = 0; i < numUndoOrRedoQueriesInRun[undoOrRedoQueriesRunIndex]; i++)
