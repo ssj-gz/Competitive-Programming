@@ -595,13 +595,50 @@ int main(int argc, char* argv[])
                     addedQuery = false;
                     if (insertionQueriesRunIndex != numInsertionRuns)
                     {
-                        for (int i = 0; i < numInsertionQueriesInRun[insertionQueriesRunIndex]; i++)
+                        cout << "Adding insertion run" << endl;
+                        const auto numInsertionQueriesToAdd = numInsertionQueriesInRun[insertionQueriesRunIndex];
+                        const auto targetDocumentLength = rnd.next(testcaseGenUtils.formattingCharsTree.documentLength() + 1, maxDocLength);
+                        const auto numCharsToAddToReachTargetLength = targetDocumentLength - testcaseGenUtils.formattingCharsTree.documentLength();
+                        assert(numCharsToAddToReachTargetLength >= numInsertionQueriesToAdd);
+                        auto numFormattedInsertions = rnd.next(0L, numInsertionQueriesToAdd);
+                        if (!testcaseGenUtils.canRangeQuery() && numFormattedInsertions == 0)
+                            numFormattedInsertions++;
+                        const auto numNonFormattedInsertions = numInsertionQueriesToAdd - numFormattedInsertions;
+                        const auto numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, numCharsToAddToReachTargetLength - numNonFormattedInsertions - numFormattedInsertions, 1);
+
+                        vector<TestQuery::Type> insertionTypes;
+                        for (int i = 0; i < numFormattedInsertions; i++)
+                            insertionTypes.push_back(TestQuery::InsertFormatting);
+                        for (int i = 0; i < numNonFormattedInsertions; i++)
+                            insertionTypes.push_back(TestQuery::InsertNonFormatting);
+
+                        ::shuffle(insertionTypes.begin(), insertionTypes.end());
+                        if (!testcaseGenUtils.canRangeQuery() && insertionTypes.front() != TestQuery::InsertNonFormatting)
                         {
-                            blah += (rnd.next(2) == 0 ? 'F' : 'N');
+                            const auto firstNonFormattingIter = std::find(insertionTypes.begin(), insertionTypes.end(), TestQuery::InsertNonFormatting);
+                            assert(firstNonFormattingIter != insertionTypes.end());
+                            iter_swap(insertionTypes.begin(), firstNonFormattingIter);
+                        }
+
+                        cout << "numNonFormattedInsertions: " << numNonFormattedInsertions << " numFormattedInsertions: " << numFormattedInsertions << endl;
+
+                        int formattedInsertionIndex = 0;
+                        for (const auto& insertionType : insertionTypes)
+                        {
+                            if (insertionType == TestQuery::InsertNonFormatting)
+                            {
+                                testcaseGenUtils.addInsertNonFormattingCharQuery(numNonFormattedCharsToAddForQuery[formattedInsertionIndex]);
+                                formattedInsertionIndex++;
+                            }
+                            else
+                            {
+                                testcaseGenUtils.addInsertFormattingCharQuery();
+                            }
+                            // Follow each insertion with a range query.
                             assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
                             for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
                             {
-                                blah += 'Q';
+                                testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
                             }
                             isRangeFormattedQueriesRunIndex++;
                             addedQuery = true;
@@ -610,13 +647,34 @@ int main(int argc, char* argv[])
                     }
                     if (undoOrRedoQueriesRunIndex != numUndoOrRedoRuns)
                     {
+                        cout << "Adding Undo/ Redo run" << endl;
+                        cout << "document: " << testcaseGenUtils.formattingCharsTree.documentString() << endl;
+                        cout << "undo stack size: " << testcaseGenUtils.formattingCharsTree.undoStackSize() << endl;
+                        cout << "undo stack pointer: " << testcaseGenUtils.formattingCharsTree.undoStackPointer() << endl;
                         for (int i = 0; i < numUndoOrRedoQueriesInRun[undoOrRedoQueriesRunIndex]; i++)
                         {
-                            blah += (rnd.next(2) == 0 ? 'R' : 'U');
+                            assert(testcaseGenUtils.formattingCharsTree.undoStackSize() > 1);
+                            const auto currentUndoStackIndex = testcaseGenUtils.formattingCharsTree.undoStackPointer(); // 0-relative
+                            int newUndoStackIndex = -1;
+                            while (true)
+                            {
+                                newUndoStackIndex = rnd.next(0, testcaseGenUtils.formattingCharsTree.undoStackSize() - 1);
+                                if (newUndoStackIndex != currentUndoStackIndex)
+                                    break;
+                            }
+                            if (newUndoStackIndex < currentUndoStackIndex)
+                            {
+                                testcaseGenUtils.addUndoQuery(currentUndoStackIndex - newUndoStackIndex);
+                            }
+                            else
+                            {
+                                testcaseGenUtils.addRedoQuery(newUndoStackIndex - currentUndoStackIndex);
+                            }
+                            // Follow each undo/ redo with a range query.
                             assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
                             for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
                             {
-                                blah += 'Q';
+                                testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
                             }
                             isRangeFormattedQueriesRunIndex++;
                             addedQuery = true;
