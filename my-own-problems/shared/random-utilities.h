@@ -105,6 +105,7 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
  */
 inline std::vector<int64_t> chooseRandomValuesWithSum3(const int64_t numValues, const int64_t targetSum, const int64_t minValue)
 {
+    assert(numValues > 0 && "Can't make a sum with no values!");
     const auto adjustedTargetSum = targetSum - numValues * minValue  
         + (numValues - 1); // The distance between the numValues - 1 chosen indices will be at least 1, so we'll remove 1 each time; this compensates for that.
     auto indices  = chooseKRandomIndicesFrom(numValues - 1, adjustedTargetSum);
