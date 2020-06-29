@@ -558,10 +558,10 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             const auto targetDocumentLength = rnd.next(testcaseGenUtils.formattingCharsTree.documentLength() + 1, maxDocLength);
             const auto numCharsToAddToReachTargetLength = targetDocumentLength - testcaseGenUtils.formattingCharsTree.documentLength();
             assert(numCharsToAddToReachTargetLength >= numInsertionQueriesToAdd);
-            auto numFormattedInsertions = rnd.next(0L, numInsertionQueriesToAdd);
-            if (!testcaseGenUtils.canRangeQuery() && numFormattedInsertions == 0)
-                numFormattedInsertions++;
-            const auto numNonFormattedInsertions = numInsertionQueriesToAdd - numFormattedInsertions;
+            auto numNonFormattedInsertions = rnd.next(0L, numInsertionQueriesToAdd);
+            if (!testcaseGenUtils.canRangeQuery() && numNonFormattedInsertions == 0)
+                numNonFormattedInsertions++;
+            const auto numFormattedInsertions = numInsertionQueriesToAdd - numNonFormattedInsertions;
             vector<int64_t> numNonFormattedCharsToAddForQuery;
             if (numNonFormattedInsertions > 0)
                 numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, numCharsToAddToReachTargetLength - numNonFormattedInsertions - numFormattedInsertions, 1);
