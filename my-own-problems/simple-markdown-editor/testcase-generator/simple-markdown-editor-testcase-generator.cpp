@@ -10,7 +10,7 @@
 
 using namespace std;
 
-constexpr int maxQueries = 200'000;
+constexpr int maxQueries = 500'000;
 
 const int64_t Mod = 1'000'000'007;
 
