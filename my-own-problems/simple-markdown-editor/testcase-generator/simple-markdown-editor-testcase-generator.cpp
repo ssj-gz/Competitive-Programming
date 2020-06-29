@@ -652,6 +652,14 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             undoOrRedoQueriesRunIndex++;
         }
     } while (addedQuery);
+
+    // Make up and shortfall in generated queries with IsRangeFormatted queries.
+    while (static_cast<int>(testcaseGenUtils.queries.size()) < numQueriesToAdd)
+    {
+        if (!testcaseGenUtils.canRangeQuery())
+            testcaseGenUtils.addInsertNonFormattingCharQuery(rnd.next(1L, maxDocLength - testcaseGenUtils.formattingCharsTree.documentLength()));
+        testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+    }
 }
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
