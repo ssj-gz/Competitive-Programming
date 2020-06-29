@@ -524,10 +524,10 @@ class QueryGenUtils
 void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesToAdd, const int64_t maxDocLength)
 {
     // At least one query per other query (undo/ redo, insert etc)
-    const auto numIsRangeFormattedQueries = rnd.next(50.0, 55.0) * numQueriesToAdd / 100.0;
+    const auto numIsRangeFormattedQueries = static_cast<int>(rnd.next(51.0, 55.0) * numQueriesToAdd / 100.0 + 0.5); // At least half IsRangeFormatted queries.
     const auto numNonIsRangeFormattedQueries = numQueriesToAdd - numIsRangeFormattedQueries;
+    assert(numIsRangeFormattedQueries >= numNonIsRangeFormattedQueries);
     const auto numUndoOrRedoQueries = static_cast<int>(numNonIsRangeFormattedQueries * rnd.next(3.0, 7.0) / 100.0);
-    cout << "numUndoOrRedoQueries: " << numUndoOrRedoQueries << endl;
     const auto numInsertionQueries = numNonIsRangeFormattedQueries - numUndoOrRedoQueries;
     int numUndoOrRedoRuns = 0;
     if (numUndoOrRedoQueries > 0)
@@ -536,11 +536,14 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     }
     const auto numInsertionRuns = numUndoOrRedoRuns > 0 ? numUndoOrRedoRuns : 1;
     const auto numIsRangeQueryRuns = numNonIsRangeFormattedQueries;
+    assert(numIsRangeQueryRuns <= numIsRangeFormattedQueries);
 
+    cout << "numInsertionRuns: " << numInsertionRuns << " numInsertionQueries: " << numInsertionQueries << endl;
     const auto numInsertionQueriesInRun = chooseRandomValuesWithSum3(numInsertionRuns, numInsertionQueries, 1);
     vector<int64_t> numUndoOrRedoQueriesInRun;
     if (numUndoOrRedoRuns > 0)
         numUndoOrRedoQueriesInRun = chooseRandomValuesWithSum3(numUndoOrRedoRuns, numUndoOrRedoQueries, 1);
+    cout << "numIsRangeQueryRuns: " << numIsRangeQueryRuns << " numIsRangeFormattedQueries: " << numIsRangeFormattedQueries << endl;
     const auto numIsRangeFormattedQueriesInRun = chooseRandomValuesWithSum3(numIsRangeQueryRuns, numIsRangeFormattedQueries, 1);
 
     int insertionQueriesRunIndex = 0;
@@ -557,6 +560,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             const auto numInsertionQueriesToAdd = numInsertionQueriesInRun[insertionQueriesRunIndex];
             const auto targetDocumentLength = rnd.next(testcaseGenUtils.formattingCharsTree.documentLength() + 1, maxDocLength);
             const auto numCharsToAddToReachTargetLength = targetDocumentLength - testcaseGenUtils.formattingCharsTree.documentLength();
+            cout << "numInsertionQueriesToAdd: " << numInsertionQueriesToAdd << " targetDocumentLength: " << targetDocumentLength << " numCharsToAddToReachTargetLength: " << numCharsToAddToReachTargetLength << endl;
             assert(numCharsToAddToReachTargetLength >= numInsertionQueriesToAdd);
             auto numNonFormattedInsertions = rnd.next(0L, numInsertionQueriesToAdd);
             if (!testcaseGenUtils.canRangeQuery() && numNonFormattedInsertions == 0)
@@ -564,7 +568,10 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             const auto numFormattedInsertions = numInsertionQueriesToAdd - numNonFormattedInsertions;
             vector<int64_t> numNonFormattedCharsToAddForQuery;
             if (numNonFormattedInsertions > 0)
-                numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, numCharsToAddToReachTargetLength - numNonFormattedInsertions - numFormattedInsertions, 1);
+            {
+                cout << "numNonFormattedInsertions: " << numNonFormattedInsertions << " numFormattedInsertions: " << numFormattedInsertions << " numCharsToAddToReachTargetLength: " << numCharsToAddToReachTargetLength << endl;
+                numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, numCharsToAddToReachTargetLength - numFormattedInsertions, 1);
+            }
 
             vector<TestQuery::Type> insertionTypes;
             for (int i = 0; i < numFormattedInsertions; i++)
@@ -572,6 +579,7 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             for (int i = 0; i < numNonFormattedInsertions; i++)
                 insertionTypes.push_back(TestQuery::InsertNonFormatting);
 
+            cout << "numNonFormattedInsertions: " << numNonFormattedInsertions << " numFormattedInsertions: " << numFormattedInsertions << endl;
             ::shuffle(insertionTypes.begin(), insertionTypes.end());
             if (!testcaseGenUtils.canRangeQuery() && insertionTypes.front() != TestQuery::InsertNonFormatting)
             {
@@ -580,7 +588,6 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
                 iter_swap(insertionTypes.begin(), firstNonFormattingIter);
             }
 
-            cout << "numNonFormattedInsertions: " << numNonFormattedInsertions << " numFormattedInsertions: " << numFormattedInsertions << endl;
 
             int formattedInsertionIndex = 0;
             for (const auto& insertionType : insertionTypes)
@@ -612,12 +619,13 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
             cout << "undo stack pointer: " << testcaseGenUtils.formattingCharsTree.undoStackPointer() << endl;
             for (int i = 0; i < numUndoOrRedoQueriesInRun[undoOrRedoQueriesRunIndex]; i++)
             {
-                assert(testcaseGenUtils.formattingCharsTree.undoStackSize() > 1);
+                assert(testcaseGenUtils.formattingCharsTree.undoStackSize() >= 1);
                 const auto currentUndoStackIndex = testcaseGenUtils.formattingCharsTree.undoStackPointer(); // 0-relative
                 int newUndoStackIndex = -1;
                 while (true)
                 {
-                    newUndoStackIndex = rnd.next(0, testcaseGenUtils.formattingCharsTree.undoStackSize() - 1);
+                    newUndoStackIndex = rnd.next(-1, testcaseGenUtils.formattingCharsTree.undoStackSize() - 1);
+                    cout << "newUndoStackIndex: " << newUndoStackIndex << endl;
                     if (newUndoStackIndex != currentUndoStackIndex)
                         break;
                 }
@@ -630,10 +638,13 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
                     testcaseGenUtils.addRedoQuery(newUndoStackIndex - currentUndoStackIndex);
                 }
                 // Follow each undo/ redo with a range query.
-                assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
-                for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
+                if (testcaseGenUtils.canRangeQuery()) // It should be moderately rare that this *isn't* the case - we'll just add any "missed" queries at the end.
                 {
-                    testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                    assert(isRangeFormattedQueriesRunIndex < numIsRangeFormattedQueriesInRun.size());
+                    for (int j = 0; j < numIsRangeFormattedQueriesInRun[isRangeFormattedQueriesRunIndex]; j++)
+                    {
+                        testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                    }
                 }
                 isRangeFormattedQueriesRunIndex++;
                 addedQuery = true;
@@ -938,6 +949,7 @@ int main(int argc, char* argv[])
                 }
             }
         }
+
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
