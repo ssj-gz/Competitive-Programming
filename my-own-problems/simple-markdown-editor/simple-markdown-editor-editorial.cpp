@@ -1,6 +1,6 @@
 // Simon St James (ssjgz) - 2020-03-17
 // 
-// Editorial Solution to: TODO - problem link here!
+// Editorial Solution to: https://www.codechef.com/problems/SIMKDOWN
 //
 #include <iostream>
 #include <vector>
