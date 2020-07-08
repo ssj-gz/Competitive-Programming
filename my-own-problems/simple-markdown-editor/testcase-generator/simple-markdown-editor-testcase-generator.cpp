@@ -858,6 +858,90 @@ int main(int argc, char* argv[])
                 }
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(98645)
+                    .withDescription("125'000 insertions (biasing slightly towards Formatted chars, resulting in a string of length maxDocLength) each followed by a range query followed by 125'000 random Undo/ Redo operations, each followed by a range query (so 500'000 queries in total)."));
+            {
+
+                const auto maxDocLength = subtask3.maxDocLength;
+                const auto numInsertionQueries = subtask3.maxQueriesPerTestcase / 4;
+                const auto numFormattedInsertions = static_cast<int>(rnd.next(55.0, 65.0) * numInsertionQueries / 100.0);
+                const auto numNonFormattedInsertions = numInsertionQueries - numFormattedInsertions;
+
+                vector<TestQuery::Type> insertionTypes;
+                for (int i = 0; i < numNonFormattedInsertions; i++)
+                    insertionTypes.push_back(TestQuery::Type::InsertNonFormatting);
+                for (int i = 0; i < numFormattedInsertions; i++)
+                    insertionTypes.push_back(TestQuery::Type::InsertFormatting);
+
+                ::shuffle(insertionTypes.begin(), insertionTypes.end());
+                // Ensure the first insertion is a InsertNonFormatting, so that we can always add a IsRangeFormatted.
+                const auto firstNonFormattingIter = std::find(insertionTypes.begin(), insertionTypes.end(), TestQuery::Type::InsertNonFormatting);
+                assert(firstNonFormattingIter != insertionTypes.end());
+                iter_swap(insertionTypes.begin(), firstNonFormattingIter);
+
+                QueryGenUtils testcaseGenUtils;
+                auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+
+                const auto numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, maxDocLength - numFormattedInsertions, 1);
+                int nonFormattedInsertionIndex = 0;
+                int dbg = 0;
+                for (const auto& insertionType : insertionTypes)
+                {
+                    if (insertionType == TestQuery::Type::InsertFormatting)
+                    {
+                        testcaseGenUtils.addInsertFormattingCharQuery();
+                    }
+                    else if (insertionType == TestQuery::Type::InsertNonFormatting)
+                    {
+                        testcaseGenUtils.addInsertNonFormattingCharQuery(numNonFormattedCharsToAddForQuery[nonFormattedInsertionIndex]);
+                        nonFormattedInsertionIndex++;
+                        dbg++;
+                    }
+                    else
+                    {
+                        assert(false);
+                    }
+                    testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                }
+                cout << "Num phase 1 queries: " << testcaseGenUtils.queries.size() << endl;
+                assert(nonFormattedInsertionIndex == numNonFormattedCharsToAddForQuery.size());
+                assert(testcaseGenUtils.formattingCharsTree.documentLength() == maxDocLength);
+                const auto numUndoOrRedoQueries = (subtask3.maxQueriesPerTestcase - testcaseGenUtils.queries.size()) / 2;
+
+                cout << "numUndoOrRedoQueries: " << numUndoOrRedoQueries << endl;
+
+                for (int i = 0; i < numUndoOrRedoQueries; i++)
+                {
+                    const auto currentUndoStackIndex = testcaseGenUtils.formattingCharsTree.undoStackPointer(); // 0-relative
+                    int newUndoStackIndex = -1;
+                    while (true)
+                    {
+                        newUndoStackIndex = rnd.next(-1, testcaseGenUtils.formattingCharsTree.undoStackSize() - 1);
+                        if (newUndoStackIndex != currentUndoStackIndex)
+                            break;
+                    }
+                    if (newUndoStackIndex < currentUndoStackIndex)
+                    {
+                        testcaseGenUtils.addUndoQuery(currentUndoStackIndex - newUndoStackIndex);
+                    }
+                    else
+                    {
+                        testcaseGenUtils.addRedoQuery(newUndoStackIndex - currentUndoStackIndex);
+                    }
+                    // Follow each undo/ redo with a range query.
+                    if (testcaseGenUtils.canRangeQuery()) // It should be moderately rare that this *isn't* the case - we'll just add any "missed" queries at the end.
+                    {
+                        testcaseGenUtils.addIsRangeFormattedQuery();
+                    }
+                }
+                cout << "# queries: " << testcaseGenUtils.queries.size() << endl;
+                assert(static_cast<int>(testcaseGenUtils.queries.size()) == subtask3.maxQueriesPerTestcase);
+                writeTestCase(testcase, testcaseGenUtils.queries);
+
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
