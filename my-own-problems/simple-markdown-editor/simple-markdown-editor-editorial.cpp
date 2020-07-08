@@ -461,7 +461,7 @@ int main()
         for (auto& query : queries)
         {
             const auto queryType = read<char>();
-            query.encryptedArgument = read<int>();
+            query.encryptedArgument = read<int64_t>();
             switch (queryType)
             {
                 case 'F':
@@ -469,7 +469,7 @@ int main()
                     break;
                 case 'N':
                     query.type = Query::InsertNonFormatting;
-                    query.encryptedArgument2 = read<int>();
+                    query.encryptedArgument2 = read<int64_t>();
                     break;
                 case 'Q':
                     query.type = Query::IsRangeFormatted;
