@@ -654,8 +654,10 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     {
         if (!testcaseGenUtils.canRangeQuery())
             testcaseGenUtils.addInsertNonFormattingCharQuery(rnd.next(static_cast<int64_t>(1), maxDocLength - testcaseGenUtils.formattingCharsTree.documentLength()));
-        testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+        if (static_cast<int>(testcaseGenUtils.queries.size()) < numQueriesToAdd)
+            testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
     }
+    assert(static_cast<int>(testcaseGenUtils.queries.size()) == numQueriesToAdd);
 }
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
