@@ -509,7 +509,7 @@ class QueryGenUtils
         AVLTree formattingCharsTree{10'000};
         int numInsertionQueries = 0;
         int numRangeQueries = 0;
-        int lastInsertionPos = -1;
+        int64_t lastInsertionPos = -1;
         int64_t encryptionKey = 0;
         int64_t powerOf2 = 2;
     private:
