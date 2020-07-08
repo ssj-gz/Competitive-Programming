@@ -25,6 +25,10 @@ namespace Internal
                 if (m_isPersistent)
                     m_rootForRevision.push_back(nullptr);
             }
+            void setMaintainSumOfDescendentValues(const bool maintainSumOfDescendentValues)
+            {
+                m_maintainSumOfDescendentValues = maintainSumOfDescendentValues;
+            }
             AVLNode* root()
             {
                 if (!m_isPersistent)
@@ -164,7 +168,8 @@ namespace Internal
                 nodeToUpdate->balanceFactor = 0;
                 nodeToUpdate->maxDescendantDepth = 0;
                 nodeToUpdate->numDescendants = 1;
-                nodeToUpdate->sumOfDescendantValues = nodeToUpdate->value;
+                if (m_maintainSumOfDescendentValues)
+                    nodeToUpdate->sumOfDescendantValues = nodeToUpdate->value;
 
                 auto leftChild = nodeToUpdate->leftChild;
 
@@ -173,7 +178,8 @@ namespace Internal
                     nodeToUpdate->balanceFactor -= 1 + leftChild->maxDescendantDepth;
                     nodeToUpdate->maxDescendantDepth = std::max(nodeToUpdate->maxDescendantDepth, 1 + leftChild->maxDescendantDepth);
                     nodeToUpdate->numDescendants += leftChild->numDescendants;
-                    nodeToUpdate->sumOfDescendantValues += leftChild->sumOfDescendantValues;
+                    if (m_maintainSumOfDescendentValues)
+                        nodeToUpdate->sumOfDescendantValues += leftChild->sumOfDescendantValues;
                 }
 
                 auto rightChild = nodeToUpdate->rightChild;
@@ -182,7 +188,8 @@ namespace Internal
                     nodeToUpdate->balanceFactor += 1 + rightChild->maxDescendantDepth;
                     nodeToUpdate->maxDescendantDepth = std::max(nodeToUpdate->maxDescendantDepth, 1 + rightChild->maxDescendantDepth);
                     nodeToUpdate->numDescendants += rightChild->numDescendants;
-                    nodeToUpdate->sumOfDescendantValues += rightChild->sumOfDescendantValues;
+                    if (m_maintainSumOfDescendentValues)
+                        nodeToUpdate->sumOfDescendantValues += rightChild->sumOfDescendantValues;
                 }
             }
 
@@ -215,6 +222,7 @@ namespace Internal
             }
 
             bool m_isPersistent = false;
+            bool m_maintainSumOfDescendentValues = true;
 
             int m_nodeBlockSize = 1;
             std::deque<std::vector<AVLNode>> m_nodes;
