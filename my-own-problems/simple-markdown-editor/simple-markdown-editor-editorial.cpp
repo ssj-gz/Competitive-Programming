@@ -368,7 +368,7 @@ AVLTreeIterator AVLTree::findFirstNodeToRightOf(int64_t position, AVLNode* root)
     return result;
 }
 
-int64_t solveOptimised(const vector<Query>& queries)
+int64_t calcFinalDecryptionKey(const vector<Query>& queries)
 {
     int64_t decryptionKey = 0;
     int64_t powerOf2 = 2;
@@ -483,7 +483,7 @@ int main()
             }
         }
 
-        cout << solveOptimised(queries) << endl;
+        cout << calcFinalDecryptionKey(queries) << endl;
     }
 
     assert(cin);
