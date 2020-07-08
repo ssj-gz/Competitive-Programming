@@ -219,7 +219,7 @@ std::vector<int64_t> chooseKRandomIndicesFrom(int numToChoose, int64_t numToChoo
 
     std::sort(chosenIndices.begin(), chosenIndices.end());
     assert(static_cast<int>(chosenIndices.size()) == numToChoose);
-    assert(static_cast<int>(std::set<int>(chosenIndices.begin(), chosenIndices.end()).size()) == numToChoose);
+    assert(static_cast<int>(std::set<int64_t>(chosenIndices.begin(), chosenIndices.end()).size()) == numToChoose);
 
     return chosenIndices;
 }
