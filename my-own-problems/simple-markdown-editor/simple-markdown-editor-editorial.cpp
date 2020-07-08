@@ -13,38 +13,6 @@ using namespace std;
 
 const int64_t Mod = 1'000'000'007;
 
-// Lots of input to read, so use ultra-fast reader.
-void scan_integer( int64_t &x )
-{
-    int64_t c = getchar_unlocked();
-    x = 0;
-    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
-    for( ;c>47 && c<58; c = getchar_unlocked() ) {
-        x = (x << 1) + (x << 3) + c - 48;
-    }
-}
-
-void scan_char( char &x )
-{
-    int c = getchar_unlocked();
-    for( ; (c == ' '); c = getchar_unlocked() );
-    x = c;
-}
-
-char readChar()
-{
-    char toRead;
-    scan_char(toRead);
-    return toRead;
-}
-
-int64_t readInt()
-{
-    int64_t toRead;
-    scan_integer(toRead);
-    return toRead;
-}
-
 template <typename T>
 T read()
 {
@@ -484,16 +452,16 @@ int main()
 {
     ios::sync_with_stdio(false);
     
-    const auto T = readInt();
+    const auto T = read<int>();
 
     for (int t = 0; t < T; t++)
     {
-        const int numQueries = readInt();
+        const int numQueries = read<int>();
         vector<Query> queries(numQueries);
         for (auto& query : queries)
         {
-            const auto queryType = readChar();
-            query.encryptedArgument = readInt();
+            const auto queryType = read<char>();
+            query.encryptedArgument = read<int>();
             switch (queryType)
             {
                 case 'F':
@@ -501,7 +469,7 @@ int main()
                     break;
                 case 'N':
                     query.type = Query::InsertNonFormatting;
-                    query.encryptedArgument2 = readInt();
+                    query.encryptedArgument2 = read<int>();
                     break;
                 case 'Q':
                     query.type = Query::IsRangeFormatted;
