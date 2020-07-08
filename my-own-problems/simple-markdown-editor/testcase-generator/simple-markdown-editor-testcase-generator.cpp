@@ -908,9 +908,9 @@ int main(int argc, char* argv[])
                     testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
                 }
                 cout << "Num phase 1 queries: " << testcaseGenUtils.queries.size() << endl;
-                assert(nonFormattedInsertionIndex == numNonFormattedCharsToAddForQuery.size());
+                assert(nonFormattedInsertionIndex == static_cast<int>(numNonFormattedCharsToAddForQuery.size()));
                 assert(testcaseGenUtils.formattingCharsTree.documentLength() == maxDocLength);
-                const auto numUndoOrRedoQueries = (subtask3.maxQueriesPerTestcase - testcaseGenUtils.queries.size()) / 2;
+                const int numUndoOrRedoQueries = (subtask3.maxQueriesPerTestcase - testcaseGenUtils.queries.size()) / 2;
 
                 cout << "numUndoOrRedoQueries: " << numUndoOrRedoQueries << endl;
 
