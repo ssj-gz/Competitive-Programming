@@ -78,7 +78,7 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             .withMaxNumTestcases(10);
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
-                                            .withScore(10)
+                                            .withScore(40)
                                             .withMaxQueriesPerTestcase(1000)
                                             .withMaxQueriesOverAllTestcases(NoExplicitLimit)
                                             .withAllowsUndoRedo(false)
@@ -86,7 +86,7 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withMaxNumTestcases(100);
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
-                                            .withScore(85)
+                                            .withScore(55)
                                             .withMaxQueriesPerTestcase(maxQueries)
                                             .withMaxQueriesOverAllTestcases(maxQueries)
                                             .withAllowsUndoRedo(true)
