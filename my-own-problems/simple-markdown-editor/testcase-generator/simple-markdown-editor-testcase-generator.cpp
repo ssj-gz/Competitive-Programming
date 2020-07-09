@@ -729,12 +729,12 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo());
 
                 const auto numQueries = numQueriesForTestcases[t];
+                const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
 
                 const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
                 const auto numInsertFormattingQueries = queryMakeUp[0];
                 const auto numInsertNonFormattingQueries = queryMakeUp[1];
                 const auto numIsRangeFormattedQueries = queryMakeUp[2];
-                const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
                 const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
 
                 // Compute the number of unformatted chars to add for each InsertNonFormatting query.
@@ -820,12 +820,12 @@ int main(int argc, char* argv[])
             auto& testcase = testFile.newTestcase(SMETestCaseInfo());
 
             const auto numQueries = subtask2.maxQueriesPerTestcase;
+            const auto finalDocLength = subtask2.maxDocLength;
 
             const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
             const auto numInsertFormattingQueries = queryMakeUp[0];
             const auto numInsertNonFormattingQueries = queryMakeUp[1];
             const auto numIsRangeFormattedQueries = queryMakeUp[2];
-            const auto finalDocLength = subtask2.maxDocLength;
             const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
 
             // Compute the number of unformatted chars to add for each InsertNonFormatting query.
@@ -915,12 +915,12 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo());
 
                 const auto numQueries = numQueriesForTestcases[t];
+                const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
 
                 const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
                 const auto numInsertFormattingQueries = queryMakeUp[0];
                 const auto numInsertNonFormattingQueries = queryMakeUp[1];
                 const auto numIsRangeFormattedQueries = queryMakeUp[2];
-                const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
                 const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
 
                 // Compute the number of unformatted chars to add for each InsertNonFormatting query.
