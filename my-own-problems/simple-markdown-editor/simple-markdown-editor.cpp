@@ -298,7 +298,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             }
             undoStackStatusString += "]`";
             cout << undoStackStatusString << endl;
-            cout << string(undoStackStatusPointer, ' ') << "^ undo stack pointer" << endl;
+            cout << string(undoStackStatusPointer, ' ') << "^ undo stack pointer = " << (undoStackPointer + 2) << endl;
         }
         if (printFormattedRangeDisplay)
         {
