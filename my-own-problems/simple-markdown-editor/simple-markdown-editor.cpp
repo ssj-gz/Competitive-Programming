@@ -358,7 +358,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
 #ifdef DIAGNOSTICS
-                    cout << "Need to insert formatting char at position $" << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$" << endl;
+                    cout << "Need to insert formatting char at position $" << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert formatting char here" << endl;
@@ -390,7 +390,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
 #ifdef DIAGNOSTICS
-                    cout << "Need to insert " << "$" << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << "$ non-formatting chars at position $" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$" << endl;
+                    cout << "Need to insert " << "$" << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << "$ non-formatting chars at position $" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, false, false);
                     cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert " << numToInsert << " non-formatting chars here" << endl;
@@ -451,7 +451,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     //cout << "queryAnswer: " << queryAnswer << endl;
                     //cout << "Changed decryptionKey to " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
-                    cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$" << endl;
+                    cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, true, false);
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "^" << " query the size of formatting range around this point" << endl;
@@ -475,7 +475,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int numToUndo = query.encryptedArgument ^ decryptionKey;
 #ifdef DIAGNOSTICS
-                    cout << "Need to re-wind the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToUndo << "$ places" << endl;
+                    cout << "Need to re-wind the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToUndo << "$ places." << endl;
 #endif
                     //cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
@@ -492,7 +492,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int numToRedo = (query.encryptedArgument ^ decryptionKey);
 #ifdef DIAGNOSTICS
-                    cout << "Need to move forward the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToRedo << "$ places" << endl;
+                    cout << "Need to move forward the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToRedo << "$ places." << endl;
 #endif
                     //cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
