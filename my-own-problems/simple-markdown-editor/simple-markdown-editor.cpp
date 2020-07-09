@@ -373,7 +373,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #ifdef DIAGNOSTICS
                     if (neededToEraseUndosToRight)
                     {
-                        cout << "The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack: " << endl;
+                        cout << "The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: " << endl;
                         cout << "```" << endl;
                         showStatus(false, false, true);
                         cout << "```" << endl;
@@ -405,7 +405,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #ifdef DIAGNOSTICS
                     if (neededToEraseUndosToRight)
                     {
-                        cout << "The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack: " << endl;
+                        cout << "The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: " << endl;
                         cout << "```" << endl;
                         showStatus(false, false, true);
                         cout << "```" << endl;
