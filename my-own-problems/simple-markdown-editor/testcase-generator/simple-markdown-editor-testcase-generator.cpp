@@ -944,6 +944,167 @@ int main(int argc, char* argv[])
 
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(425435430)
+                    .withDescription("Phase 1: Approx 200k insertions interspersed with ~30k range queries - creating a document with size within 90% of maxDocLength. Then Phase 2: ~10 'waves' - each wave has a phase where we add a block of insertions, again bringing us close to maxDocLength, followed by a block of undos and redos.  The final undo/redo in a block brings undoStackPointer within 1000 or so of undoStackSize, so the document is still 'big' at the end of a wave.  All insertions/ undos/ redos in the waves are followed by at least one range query.  This stress-tests Undo and Redo, especially in the face of continuing insertions"));
+            {
+
+                const auto maxDocLength = subtask3.maxDocLength;
+
+                QueryGenUtils testcaseGenUtils;
+                auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+                
+                // Phase 1.
+                {
+                    const auto numInsertionQueries = 220'000;
+                    const auto numRangeQueries = 30'000;
+                    const auto numFormattedInsertions = static_cast<int>(rnd.next(55.0, 65.0) * numInsertionQueries / 100.0);
+                    const auto numNonFormattedInsertions = numInsertionQueries - numFormattedInsertions;
+
+                    vector<TestQuery::Type> insertionTypes;
+                    for (int i = 0; i < numNonFormattedInsertions; i++)
+                        insertionTypes.push_back(TestQuery::Type::InsertNonFormatting);
+                    for (int i = 0; i < numFormattedInsertions; i++)
+                        insertionTypes.push_back(TestQuery::Type::InsertFormatting);
+                    for (int i = 0; i < numRangeQueries; i++)
+                        insertionTypes.push_back(TestQuery::Type::IsRangeFormatted);
+
+                    ::shuffle(insertionTypes.begin(), insertionTypes.end());
+                    // Ensure the first insertion is a InsertNonFormatting, so that we can always add a IsRangeFormatted.
+                    const auto firstNonFormattingIter = std::find(insertionTypes.begin(), insertionTypes.end(), TestQuery::Type::InsertNonFormatting);
+                    assert(firstNonFormattingIter != insertionTypes.end());
+                    iter_swap(insertionTypes.begin(), firstNonFormattingIter);
+
+                    const auto numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedInsertions, rnd.next(90.0, 95.0) * maxDocLength / 100.0 - numFormattedInsertions, 1);
+                    int nonFormattedInsertionIndex = 0;
+                    for (const auto& insertionType : insertionTypes)
+                    {
+                        if (insertionType == TestQuery::Type::InsertFormatting)
+                        {
+                            testcaseGenUtils.addInsertFormattingCharQuery();
+                        }
+                        else if (insertionType == TestQuery::Type::InsertNonFormatting)
+                        {
+                            testcaseGenUtils.addInsertNonFormattingCharQuery(numNonFormattedCharsToAddForQuery[nonFormattedInsertionIndex]);
+                            nonFormattedInsertionIndex++;
+                        }
+                        else if (insertionType == TestQuery::Type::IsRangeFormatted)
+                        {
+                            testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
+                    }
+                    cout << "Num phase 1 queries: " << testcaseGenUtils.queries.size() << endl;
+                    assert(nonFormattedInsertionIndex == static_cast<int>(numNonFormattedCharsToAddForQuery.size()));
+                    cout << "Phase 1 doc length: " << testcaseGenUtils.formattingCharsTree.documentLength() << endl;
+                }
+                // Phase 2.
+                {
+                    const int numWaves = 10;
+                    const int numRemainingQueries = subtask3.maxQueriesPerTestcase - testcaseGenUtils.queries.size();
+                    const int numIsRangeFormattedQueries = numRemainingQueries * rnd.next(55.0, 60.0) / 100.0;
+                    const int numInsertions = (numRemainingQueries - numIsRangeFormattedQueries) * rnd.next(45.0, 55.0) / 100.0;
+                    const int numUndoOrRedoQueries = numRemainingQueries - numIsRangeFormattedQueries - numInsertions;
+
+                    const auto numInsertionsForWaves = chooseRandomValuesWithSum3(numWaves, numInsertions, 1);
+                    const auto numRangeQueriesForWaves = chooseRandomValuesWithSum3(numWaves, numIsRangeFormattedQueries, 1);
+                    const auto numUndoOrRedoQueriesForWaves = chooseRandomValuesWithSum3(numWaves, numUndoOrRedoQueries, 1);
+                    const auto numRangeQueriesInRun = chooseRandomValuesWithSum3(numInsertions + numUndoOrRedoQueries, numIsRangeFormattedQueries, 1);
+
+                    int rangeQueryRunIndex = 0;
+
+                    for (int waveIndex = 0; waveIndex < numWaves; waveIndex++)
+                    {
+                        cout << "Beginning wave; currentUndoStackSize: " << testcaseGenUtils.formattingCharsTree.undoStackSize() << " current undoStackPointer: " << testcaseGenUtils.formattingCharsTree.undoStackPointer() << " numFormattedChars: " << testcaseGenUtils.formattingCharsTree.numFormattingChars() << endl;
+                        // Insertions.
+                        const auto numInsertionsThisWave = numInsertionsForWaves[waveIndex];
+                        const int numFormattedCharInsertions = rnd.next(55.0, 60.0) / 100.0 * numInsertionsThisWave;
+                        const int numNonFormattedCharInsertions = numInsertionsThisWave - numFormattedCharInsertions;
+                        const auto currentDocLength = testcaseGenUtils.formattingCharsTree.documentLength();
+                        int64_t targetDocLength = 0;
+                        while (targetDocLength <= currentDocLength + numFormattedCharInsertions)
+                        {
+                            targetDocLength = maxDocLength * rnd.next(90.0, 95.0) / 100.0;
+                        }
+                        const auto numNonFormattedCharsToAddForQuery = chooseRandomValuesWithSum3(numNonFormattedCharInsertions, targetDocLength - currentDocLength, 1);
+                        vector<TestQuery::Type> insertionTypes;
+                        for (int i = 0; i < numFormattedCharInsertions; i++)
+                            insertionTypes.push_back(TestQuery::Type::InsertFormatting);
+                        for (int i = 0; i < numNonFormattedCharInsertions; i++)
+                            insertionTypes.push_back(TestQuery::Type::InsertNonFormatting);
+                        ::shuffle(insertionTypes.begin(), insertionTypes.end());
+                        int nonFormattedInsertionIndex = 0;
+                        for (const auto& insertionType : insertionTypes)
+                        {
+                            if (insertionType == TestQuery::Type::InsertFormatting)
+                            {
+                                testcaseGenUtils.addInsertFormattingCharQuery();
+                            }
+                            else if (insertionType == TestQuery::Type::InsertNonFormatting)
+                            {
+                                testcaseGenUtils.addInsertNonFormattingCharQuery(numNonFormattedCharsToAddForQuery[nonFormattedInsertionIndex]);
+                                nonFormattedInsertionIndex++;
+                            }
+                            else
+                            {
+                                assert(false);
+                            }
+                            assert(rangeQueryRunIndex < numRangeQueriesInRun.size());
+                            for (int i = 0; i < numRangeQueriesInRun[rangeQueryRunIndex]; i++)
+                            {
+                                testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                            }
+                            rangeQueryRunIndex++;
+                        }
+                        // Undos/ Redos.
+                        const auto numUndoOrRedoQueriesThisWave = numUndoOrRedoQueriesForWaves[waveIndex];
+                        for (int i = 0; i < numUndoOrRedoQueriesThisWave; i++)
+                        {
+                            const auto currentUndoStackIndex = testcaseGenUtils.formattingCharsTree.undoStackPointer(); // 0-relative
+                            int newUndoStackIndex = -1;
+                            while (true)
+                            {
+                                const int undoStackSize = testcaseGenUtils.formattingCharsTree.undoStackSize();
+                                if (i == numUndoOrRedoQueriesThisWave - 1)
+                                {
+                                    newUndoStackIndex = static_cast<int>(rnd.next(90.0, 97.0) / 100.0 * (undoStackSize - 1));
+                                }
+                                else
+                                {
+                                    newUndoStackIndex = rnd.next(0, undoStackSize - 1);
+                                }
+                                if (newUndoStackIndex != currentUndoStackIndex)
+                                    break;
+                            }
+                            if (newUndoStackIndex < currentUndoStackIndex)
+                            {
+                                testcaseGenUtils.addUndoQuery(currentUndoStackIndex - newUndoStackIndex);
+                            }
+                            else
+                            {
+                                testcaseGenUtils.addRedoQuery(newUndoStackIndex - currentUndoStackIndex);
+                            }
+                            cout << "Current stack index: " << testcaseGenUtils.formattingCharsTree.undoStackPointer() << endl;
+                            cout << "Adding range queries: " << numRangeQueriesInRun[rangeQueryRunIndex] << endl;
+                            assert(rangeQueryRunIndex < numRangeQueriesInRun.size());
+                            for (int i = 0; i < numRangeQueriesInRun[rangeQueryRunIndex]; i++)
+                            {
+                                testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                            }
+                            rangeQueryRunIndex++;
+                        }
+                    }
+                    cout << "# 'wave' testcase queries: " << testcaseGenUtils.queries.size() << endl;
+                    assert(static_cast<int>(testcaseGenUtils.queries.size()) == subtask3.maxQueriesPerTestcase);
+                }
+                writeTestCase(testcase, testcaseGenUtils.queries);
+
+            }
+        }
     }
 
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
