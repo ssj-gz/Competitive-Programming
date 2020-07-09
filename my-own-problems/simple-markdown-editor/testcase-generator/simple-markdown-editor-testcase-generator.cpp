@@ -722,7 +722,7 @@ int main(int argc, char* argv[])
                     .withDescription("100 testcases with each testcase resulting in a doc with maxDocLength, and total queries across all testcases equal to maxQueriesOverAllTestcases.  Approx equal number of InsertNonFormatting, InsertFormatting, and IsRangeFormatted.  No undos or redos, of course."));
 
             const auto numTestcases = 100;
-            const auto numQueriesForTestcases = chooseRandomValuesWithSum3(numTestcases, subtask3.maxQueriesOverAllTestcases, 1);
+            const auto numQueriesForTestcases = chooseRandomValuesWithSum3(numTestcases, subtask2.maxQueriesOverAllTestcases, 1);
             
             for (int t = 0; t < numTestcases; t++)
             {
@@ -819,7 +819,7 @@ int main(int argc, char* argv[])
 
             auto& testcase = testFile.newTestcase(SMETestCaseInfo());
 
-            const auto numQueries = subtask3.maxQueriesPerTestcase;
+            const auto numQueries = subtask2.maxQueriesPerTestcase;
 
             const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
             const auto numInsertFormattingQueries = queryMakeUp[0];
@@ -908,7 +908,7 @@ int main(int argc, char* argv[])
                     .withDescription("1000 testcases with each testcase resulting in a doc with maxDocLength, and total queries across all testcases equal to maxQueriesOverAllTestcases.  Approx equal number of InsertNonFormatting, InsertFormatting, and IsRangeFormatted.  No undos or redos, of course."));
 
             const auto numTestcases = subtask2.maxNumTestcases;
-            const auto numQueriesForTestcases = chooseRandomValuesWithSum3(numTestcases, subtask3.maxQueriesOverAllTestcases, 5);
+            const auto numQueriesForTestcases = chooseRandomValuesWithSum3(numTestcases, subtask2.maxQueriesOverAllTestcases, 5);
             
             for (int t = 0; t < numTestcases; t++)
             {
