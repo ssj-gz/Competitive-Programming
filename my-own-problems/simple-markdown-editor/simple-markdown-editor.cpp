@@ -350,7 +350,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     for (const auto& query : queries)
     {
 #ifdef DIAGNOSTICS
-        cout << "Processing query " << queryNum << " $\\textit{decryptionKey} = " << decryptionKey << "$"  << endl;
+        cout << "**Processing query " << queryNum << "**. $\\textit{decryptionKey} = " << decryptionKey << "$."  << endl;
 #endif
         switch (query.type)
         {
@@ -459,9 +459,9 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     if (queryAnswer == -1)
                         cout << "The range of non-formatted chars around the query point is non-formatted; the answer to query #" << queryNum << " is $3141592$." << endl;
                     else
-                        cout << "The range of non-formatted chars around the query point is formatted; and the number is this range is " << queryAnswer << "; the answer to query #" << queryNum << " query is $" << queryAnswer << "$" << endl;
-                    cout << "Updating $decryptionKey$: " << endl;
-                    cout << "$decryptionKey = decryptionKey + " << queryAnswer << "\\times  2^" << queryNum << "  = " << decryptionKey << " + " << queryAnswer << "\\times " << ((1 << queryNum))  << " = " << decryptionKey + ((1 << queryNum)) * queryAnswer << " \\mod 10^9+7 = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "$" << endl;
+                        cout << "The range of non-formatted chars around the query point is formatted; and the number is this range is " << queryAnswer << "; the answer to query #" << queryNum << " query is $" << queryAnswer << "$." << endl;
+                    cout << "\n\nUpdating $decryptionKey$: \n" << endl;
+                    cout << "$$\ndecryptionKey = decryptionKey + " << queryAnswer << "\\times  2^" << queryNum << "  = " << decryptionKey << " + " << queryAnswer << "\\times " << ((1 << queryNum))  << " = " << decryptionKey + ((1 << queryNum)) * queryAnswer << " \\mod 10^9+7 = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "\n$$" << endl;
 
 #endif
                     if (queryAnswer == -1)
@@ -510,10 +510,11 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         }
 
 #ifdef DIAGNOSTICS
-        cout << "After processing query " << queryNum << endl;
+        cout << "**State after processing query " << queryNum << "**:" << endl;
         cout << "```" << endl;
         showStatus(true, false, true);
         cout << "```" << endl;
+        cout << endl << endl;
 #endif
         //cout << "document: " << document << endl;
         //cout << "Undo stack: " << endl;
