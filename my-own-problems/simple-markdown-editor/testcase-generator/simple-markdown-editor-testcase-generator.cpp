@@ -1071,7 +1071,7 @@ int main(int argc, char* argv[])
                                 const int undoStackSize = testcaseGenUtils.formattingCharsTree.undoStackSize();
                                 if (i == numUndoOrRedoQueriesThisWave - 1)
                                 {
-                                    newUndoStackIndex = static_cast<int>(rnd.next(90.0, 97.0) / 100.0 * (undoStackSize - 1));
+                                    newUndoStackIndex = static_cast<int>(rnd.next(96.0, 99.0) / 100.0 * (undoStackSize - 1));
                                 }
                                 else
                                 {
