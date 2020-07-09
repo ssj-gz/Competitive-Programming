@@ -660,6 +660,87 @@ void addRandomishQueries(QueryGenUtils& testcaseGenUtils, const int numQueriesTo
     assert(static_cast<int>(testcaseGenUtils.queries.size()) == numQueriesToAdd);
 }
 
+void addRandomishQueriesNoUndosOrRedos(QueryGenUtils& testcaseGenUtils, const int numQueriesToAdd, const int64_t finalDocLength)
+{
+    const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueriesToAdd, 1);
+    const auto numInsertFormattingQueries = queryMakeUp[0];
+    const auto numInsertNonFormattingQueries = queryMakeUp[1];
+    const auto numIsRangeFormattedQueries = queryMakeUp[2];
+    const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
+
+    // Compute the number of unformatted chars to add for each InsertNonFormatting query.
+    const auto numNonformattedCharToAddForQuery = chooseRandomValuesWithSum3(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
+
+    vector<TestQuery::Type> queryTypes;
+    for (int i = 0; i < numInsertFormattingQueries; i++)
+        queryTypes.push_back(TestQuery::Type::InsertFormatting);
+    for (int i = 0; i < numInsertNonFormattingQueries; i++)
+        queryTypes.push_back(TestQuery::Type::InsertNonFormatting);
+    for (int i = 0; i < numIsRangeFormattedQueries; i++)
+        queryTypes.push_back(TestQuery::Type::IsRangeFormatted);
+    assert(static_cast<int>(queryTypes.size()) == numQueriesToAdd);
+
+    ::shuffle(queryTypes.begin(), queryTypes.end());
+
+    // Can't have a IsRangeFormatted before an InsertNonFormatting query, as IsRangeFormatted's
+    // queryPosition must point at at a non-formatting char.
+    int firstNonFormattedQueryIndex = -1;
+    for (int queryIndex = 0; queryIndex < numQueriesToAdd; queryIndex++)
+    {
+        if (queryTypes[queryIndex] == TestQuery::InsertNonFormatting)
+        {
+            firstNonFormattedQueryIndex = queryIndex;
+            break;
+        }
+    }
+    assert(firstNonFormattedQueryIndex != -1);
+    for (int queryIndex = 0; queryIndex < firstNonFormattedQueryIndex; queryIndex++)
+    {
+        if (queryTypes[queryIndex] == TestQuery::IsRangeFormatted)
+        {
+            swap(queryTypes[queryIndex], queryTypes[firstNonFormattedQueryIndex]);
+            break;
+        }
+    }
+
+    // Prefer to end with a IsRangeFormatted - else the preceding insertion queries are "wasted".
+    if (queryTypes.back() != TestQuery::IsRangeFormatted)
+    {
+        for (auto& queryType : queryTypes)
+        {
+            if (queryType == TestQuery::IsRangeFormatted)
+            {
+                swap(queryType, queryTypes.back());
+                break;
+            }
+        }
+    }
+    assert(queryTypes.back() == TestQuery::IsRangeFormatted);
+
+    int numNonFormattingCharInsertionsQueriesAdded = 0;
+    for (int queryIndex = 0; queryIndex < numQueriesToAdd; queryIndex++)
+    {
+        switch (queryTypes[queryIndex])
+        {
+            case TestQuery::Type::InsertFormatting:
+                testcaseGenUtils.addInsertFormattingCharQuery();
+                break;
+            case TestQuery::Type::InsertNonFormatting:
+                testcaseGenUtils.addInsertNonFormattingCharQuery(numNonformattedCharToAddForQuery[numNonFormattingCharInsertionsQueriesAdded]);
+                numNonFormattingCharInsertionsQueriesAdded++;
+                break;
+            case TestQuery::Type::IsRangeFormatted:
+                testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                break;
+            default:
+                assert(false);
+        }
+    }
+    assert(testcaseGenUtils.formattingCharsTree.documentLength() == finalDocLength);
+
+}
+
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
@@ -727,86 +808,13 @@ int main(int argc, char* argv[])
             for (int t = 0; t < numTestcases; t++)
             {
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+                QueryGenUtils testcaseGenUtils;
+                testcaseGenUtils.setUndoAndRedoAllowed(false);
 
                 const auto numQueries = numQueriesForTestcases[t];
                 const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
 
-                const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
-                const auto numInsertFormattingQueries = queryMakeUp[0];
-                const auto numInsertNonFormattingQueries = queryMakeUp[1];
-                const auto numIsRangeFormattedQueries = queryMakeUp[2];
-                const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
-
-                // Compute the number of unformatted chars to add for each InsertNonFormatting query.
-                const auto numNonformattedCharToAddForQuery = chooseRandomValuesWithSum3(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
-
-                vector<TestQuery::Type> queryTypes;
-                for (int i = 0; i < numInsertFormattingQueries; i++)
-                    queryTypes.push_back(TestQuery::Type::InsertFormatting);
-                for (int i = 0; i < numInsertNonFormattingQueries; i++)
-                    queryTypes.push_back(TestQuery::Type::InsertNonFormatting);
-                for (int i = 0; i < numIsRangeFormattedQueries; i++)
-                    queryTypes.push_back(TestQuery::Type::IsRangeFormatted);
-                assert(static_cast<int>(queryTypes.size()) == numQueries);
-
-                ::shuffle(queryTypes.begin(), queryTypes.end());
-               
-                // Can't have a IsRangeFormatted before an InsertNonFormatting query, as IsRangeFormatted's 
-                // queryPosition must point at at a non-formatting char.
-                int firstNonFormattedQueryIndex = -1;
-                for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
-                {
-                    if (queryTypes[queryIndex] == TestQuery::InsertNonFormatting)
-                    {
-                        firstNonFormattedQueryIndex = queryIndex;
-                        break;
-                    }
-                }
-                assert(firstNonFormattedQueryIndex != -1);
-                for (int queryIndex = 0; queryIndex < firstNonFormattedQueryIndex; queryIndex++)
-                {
-                    if (queryTypes[queryIndex] == TestQuery::IsRangeFormatted)
-                    {
-                        swap(queryTypes[queryIndex], queryTypes[firstNonFormattedQueryIndex]);
-                        break;
-                    }
-                }
-
-                // Prefer to end with a IsRangeFormatted - else the preceding insertion queries are "wasted".
-                if (queryTypes.back() != TestQuery::IsRangeFormatted)
-                {
-                    for (auto& queryType : queryTypes)
-                    {
-                        if (queryType == TestQuery::IsRangeFormatted)
-                        {
-                            swap(queryType, queryTypes.back());
-                            break;
-                        }
-                    }
-                }
-                assert(queryTypes.back() == TestQuery::IsRangeFormatted);
-
-                int numNonFormattingCharInsertionsQueriesAdded = 0;
-                QueryGenUtils testcaseGenUtils;
-                for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
-                {
-                    switch (queryTypes[queryIndex])
-                    {
-                        case TestQuery::Type::InsertFormatting:
-                            testcaseGenUtils.addInsertFormattingCharQuery();
-                            break;
-                        case TestQuery::Type::InsertNonFormatting:
-                            testcaseGenUtils.addInsertNonFormattingCharQuery(numNonformattedCharToAddForQuery[numNonFormattingCharInsertionsQueriesAdded]);
-                            numNonFormattingCharInsertionsQueriesAdded++;
-                            break;
-                        case TestQuery::Type::IsRangeFormatted:
-                            testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
-                            break;
-                        default:
-                            assert(false);
-                    }
-                }
-                assert(testcaseGenUtils.formattingCharsTree.documentLength() == finalDocLength);
+                addRandomishQueriesNoUndosOrRedos(testcaseGenUtils, numQueries, finalDocLength);
 
                 writeTestCase(testcase, testcaseGenUtils.queries);
             }
