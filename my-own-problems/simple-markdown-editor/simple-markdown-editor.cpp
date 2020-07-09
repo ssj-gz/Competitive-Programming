@@ -424,7 +424,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
                     assert(document[queryPosition] == 'X');
                     //cout << "IsRangeFormatted at " << queryPosition << endl;
-                    int queryAnswer = -1;
+                    int64_t queryAnswer = -1;
                     {
                         int openingFormatPos = -1;
                         for (int pos = 0; pos < document.size(); pos++)
