@@ -280,7 +280,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     {
         if (printUndoStack)
         {
-            string undoStackStatusString = "undo stack: `[ ";
+            string undoStackStatusString = "undo stack:  [ ";
             int undoStackStatusPointer = -1;
             for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
             {
@@ -296,7 +296,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 if (undoStackIndex != undoStackDocuments.size() - 1)
                     undoStackStatusString += ", ";
             }
-            undoStackStatusString += "]`";
+            undoStackStatusString += "] ";
             cout << undoStackStatusString << endl;
             cout << string(undoStackStatusPointer, ' ') << "^ undo stack pointer = " << (undoStackPointer + 2) << endl;
         }
