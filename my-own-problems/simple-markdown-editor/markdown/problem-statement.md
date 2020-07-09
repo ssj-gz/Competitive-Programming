@@ -28,18 +28,70 @@ More formally, Chef has a $\textit{decryptionKey}$ which is used to decrypt quer
 
 The 5 types of queries are encoded as follows:
 
-1. `F encryptedPositionToInsert`.  To process this query, he must first _decrypt_ `encryptedPositionToInsert` to get $\textit{positionToInsert}$ with his $\textit{decryptionKey}$ using the formula:
-$$
-\textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
-$$
-He must then process $\textit{insertFormattingChar}(\textit{positionToInsert})$.
-2. `N encryptedNumCharsToInsert encryptedPositionToInsert`. To process this query, he must first decrypt `encryptedNumCharsToInsert` to get $\textit{numCharsToInsert}$ using the formula:
-$$
-\textit{numCharsToInsert} = \textit{decryptionKey} \oplus \textit{encryptedNumCharsToInsert}
-$$
-and decrypt `encryptedPositionToInsert` to get $\textit{positionToInsert}$ using the formula:
-$$
-\textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
-$$
+1. Insert formatting char queries take the form:
+
+   ```F encryptedPositionToInsert```  
+
+    To process this query, he must first _decrypt_ `encryptedPositionToInsert` to get $\textit{positionToInsert}$ with his $\textit{decryptionKey}$ using the formula:
+    $$
+    \textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
+    $$
+    He must then process $\textit{insertFormattingChar}(\textit{positionToInsert})$.
+2.  Insert non-formatting char queries take the form:
+
+    ```N encryptedNumCharsToInsert encryptedPositionToInsert```
+
+    To process this query, he must first decrypt `encryptedNumCharsToInsert` to get $\textit{numCharsToInsert}$ using the formula:
+    $$
+    \textit{numCharsToInsert} = \textit{decryptionKey} \oplus \textit{encryptedNumCharsToInsert}
+    $$
+    and decrypt `encryptedPositionToInsert` to get $\textit{positionToInsert}$ using the formula:
+    $$
+    \textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
+    $$
+    He must then process $\textit{insertNonFormattingChars}(\textit{numCharsToInsert}, \textit{positionToInsert})$.
+3.  Undo queries take the form:
+  
+    ```U encryptedNumToUndo```
+    
+    To process this query, he must first decrypt `encryptedNumToUndo` to get $\textit{numToUndo}$ using the formula:
+
+    $$
+    \textit{numToUndo} = \textit{decryptionKey} \oplus \textit{encryptedNumToUndo}
+    $$
+    and then process $\textit{undo}(\textit{numToUndo})$.
+4.  Redo queries take the form:
+
+    ```R encryptedNumToRedo```
+
+    To process this query, he must first decrypt `encryptedNumToRedo` to get $\textit{numToRedo}$ using the formula:
+
+    $$
+    \textit{numToRedo} = \textit{decryptionKey} \oplus \textit{encryptedNumToRedo}
+    $$
+    and then process $\textit{redo}(\textit{numToRedo})$.
+5.  Num in formatted range queries take the form:
+
+    ```Q encryptedQueryPosition``` 
+
+    To process this query, he must first decrypt `encryptedQueryPosition` to get $\textit{queryPosition}$ using the formula:
+
+    $$
+    \textit{queryPosition} = \textit{decryptionKey} \oplus \textit{encryptedQueryPosition}
+    $$
+    and then process $\textit{numInFormattedRange}(\textit{queryPosition})$.
+
+    Once he has computed the answer to this query, $\textit{queryAnswer}$, he must use it to update his $\textit{decryptionKey}$ using the formula:
+
+    $$
+    \textit{decryptionKey} = \textit{queryAnswer} \times 2^i + \textit{decryptionKey} \mod{10^9}
+    $$
+
+    where $i$ is the number of this query.
+
+Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $\textit{decryptionKey}$ for each testcase!
+
+    
+
 
 
