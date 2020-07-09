@@ -150,8 +150,292 @@ Q 217007372
 217924875
 ```
 
+### Explanation
 
-    
+Initial status: 
+```
+undo stack:  [ ""] 
+               ↑ undo stack pointer = 1
+document: 
+```
+**Processing query 1**. $\textit{decryptionKey} = 0$.
+Need to insert $0 \oplus 9 = 9$ non-formatting chars at position $0\oplus 9 = 1$.
+```
+document: 
+          ↑ insert 9 non-formatting chars here
+```
+**State after processing query 1**:
+```
+undo stack:  [ "", "XXXXXXXXX"] 
+                   ↑ undo stack pointer = 2
+document: XXXXXXXXX
+```
 
+
+**Processing query 2**. $\textit{decryptionKey} = 0$.
+Need to insert formatting char at position $0\oplus 4 = 4$.
+```
+document: XXXXXXXXX
+             ↑ insert formatting char here
+```
+**State after processing query 2**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX"] 
+                                ↑ undo stack pointer = 3
+document: XXX*XXXXXX
+```
+
+
+**Processing query 3**. $\textit{decryptionKey} = 0$.
+Need to insert formatting char at position $0\oplus 7 = 7$.
+```
+document: XXX*XXXXXX
+                ↑ insert formatting char here
+```
+**State after processing query 3**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX"] 
+                                              ↑ undo stack pointer = 4
+document: XXX*XX*XXXX
+```
+
+
+**Processing query 4**. $\textit{decryptionKey} = 0$.
+Need to find the size of the formatted range around the position $0 \oplus 5 = 5$.
+```
+             ┌──┐     ← Formatted ranges
+document: XXX*XX*XXXX
+              ↑ query the size of formatting range around this point
+```
+The range of non-formatted chars around the query point is formatted; and the number is this range is 2; the answer to query #4 query is $2$.
+
+
+Updating $decryptionKey$: 
+
+$$
+decryptionKey = decryptionKey + 2\times  2^{4}  = 0 + 2\times 16 = 32 \mod 10^9+7 = 32
+$$
+**State after processing query 4**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX"] 
+                                              ↑ undo stack pointer = 4
+document: XXX*XX*XXXX
+```
+
+
+**Processing query 5**. $\textit{decryptionKey} = 32$.
+Need to insert $32 \oplus 35 = 3$ non-formatting chars at position $32\oplus 35 = 8$.
+```
+document: XXX*XX*XXXX
+                 ↑ insert 3 non-formatting chars here
+```
+**State after processing query 5**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX"] 
+                                                             ↑ undo stack pointer = 5
+document: XXX*XX*XXXXXXX
+```
+
+
+**Processing query 6**. $\textit{decryptionKey} = 32$.
+Need to insert formatting char at position $32\oplus 42 = 10$.
+```
+document: XXX*XX*XXXXXXX
+                   ↑ insert formatting char here
+```
+**State after processing query 6**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX"] 
+                                                                               ↑ undo stack pointer = 6
+document: XXX*XX*XX*XXXXX
+```
+
+
+**Processing query 7**. $\textit{decryptionKey} = 32$.
+Need to insert formatting char at position $32\oplus 33 = 1$.
+```
+document: XXX*XX*XX*XXXXX
+          ↑ insert formatting char here
+```
+**State after processing query 7**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX"] 
+                                                                                                  ↑ undo stack pointer = 7
+document: *XXX*XX*XX*XXXXX
+```
+
+
+**Processing query 8**. $\textit{decryptionKey} = 32$.
+Need to find the size of the formatted range around the position $32 \oplus 35 = 3$.
+```
+          ┌───┐  ┌──┐      ← Formatted ranges
+document: *XXX*XX*XX*XXXXX
+            ↑ query the size of formatting range around this point
+```
+The range of non-formatted chars around the query point is formatted; and the number is this range is 3; the answer to query #8 query is $3$.
+
+
+Updating $decryptionKey$: 
+
+$$
+decryptionKey = decryptionKey + 3\times  2^{8}  = 32 + 3\times 256 = 800 \mod 10^9+7 = 800
+$$
+**State after processing query 8**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX"] 
+                                                                                                  ↑ undo stack pointer = 7
+document: *XXX*XX*XX*XXXXX
+```
+
+
+**Processing query 9**. $\textit{decryptionKey} = 800$.
+Need to re-wind the undo stack pointer by $800\oplus803 = 3$ places.
+**State after processing query 9**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX"] 
+                                              ↑ undo stack pointer = 4
+document: XXX*XX*XXXX
+```
+
+
+**Processing query 10**. $\textit{decryptionKey} = 800$.
+Need to find the size of the formatted range around the position $800 \oplus 810 = 10$.
+```
+             ┌──┐     ← Formatted ranges
+document: XXX*XX*XXXX
+                   ↑ query the size of formatting range around this point
+```
+The range of non-formatted chars around the query point is non-formatted; the answer to query #10 is $3141592$.
+
+
+Updating $decryptionKey$: 
+
+$$
+decryptionKey = decryptionKey + 3141592\times  2^{10}  = 800 + 3141592\times 1024 = 3216991008 \mod 10^9+7 = 216990987
+$$
+**State after processing query 10**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX"] 
+                                              ↑ undo stack pointer = 4
+document: XXX*XX*XXXX
+```
+
+
+**Processing query 11**. $\textit{decryptionKey} = 216990987$.
+Need to move forward the undo stack pointer by $216990987\oplus216990986 = 1$ places.
+**State after processing query 11**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX"] 
+                                                             ↑ undo stack pointer = 5
+document: XXX*XX*XXXXXXX
+```
+
+
+**Processing query 12**. $\textit{decryptionKey} = 216990987$.
+Need to insert formatting char at position $216990987\oplus 216990991 = 4$.
+```
+document: XXX*XX*XXXXXXX
+             ↑ insert formatting char here
+```
+The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack: 
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX"] 
+                                                             ↑ undo stack pointer = 5
+```
+**State after processing query 12**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX"] 
+                                                                               ↑ undo stack pointer = 6
+document: XXX**XX*XXXXXXX
+```
+
+
+**Processing query 13**. $\textit{decryptionKey} = 216990987$.
+Need to insert formatting char at position $216990987\oplus 216990977 = 10$.
+```
+document: XXX**XX*XXXXXXX
+                   ↑ insert formatting char here
+```
+**State after processing query 13**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX"] 
+                                                                                                  ↑ undo stack pointer = 7
+document: XXX**XX*X*XXXXXX
+```
+
+
+**Processing query 14**. $\textit{decryptionKey} = 216990987$.
+Need to find the size of the formatted range around the position $216990987 \oplus 216990978 = 9$.
+```
+             ┌┐  ┌─┐       ← Formatted ranges
+document: XXX**XX*X*XXXXXX
+                  ↑ query the size of formatting range around this point
+```
+The range of non-formatted chars around the query point is formatted; and the number is this range is 1; the answer to query #14 query is $1$.
+
+
+Updating $decryptionKey$: 
+
+$$
+decryptionKey = decryptionKey + 1\times  2^{14}  = 216990987 + 1\times 16384 = 217007371 \mod 10^9+7 = 217007371
+$$
+**State after processing query 14**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX"] 
+                                                                                                  ↑ undo stack pointer = 7
+document: XXX**XX*X*XXXXXX
+```
+
+
+**Processing query 15**. $\textit{decryptionKey} = 217007371$.
+Need to re-wind the undo stack pointer by $217007371\oplus217007368 = 3$ places.
+**State after processing query 15**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX"] 
+                                              ↑ undo stack pointer = 4
+document: XXX*XX*XXXX
+```
+
+
+**Processing query 16**. $\textit{decryptionKey} = 217007371$.
+Need to insert $217007371 \oplus 217007374 = 5$ non-formatting chars at position $217007371\oplus 217007374 = 5$.
+```
+document: XXX*XX*XXXX
+              ↑ insert 5 non-formatting chars here
+```
+The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack: 
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX"] 
+                                              ↑ undo stack pointer = 4
+```
+**State after processing query 16**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XXXXXXX*XXXX"] 
+                                                             ↑ undo stack pointer = 5
+document: XXX*XXXXXXX*XXXX
+```
+
+
+**Processing query 17**. $\textit{decryptionKey} = 217007371$.
+Need to find the size of the formatted range around the position $217007371 \oplus 217007372 = 7$.
+```
+             ┌───────┐     ← Formatted ranges
+document: XXX*XXXXXXX*XXXX
+                ↑ query the size of formatting range around this point
+```
+The range of non-formatted chars around the query point is formatted; and the number is this range is 7; the answer to query #17 query is $7$.
+
+
+Updating $decryptionKey$: 
+
+$$
+decryptionKey = decryptionKey + 7\times  2^{17}  = 217007371 + 7\times 131072 = 217924875 \mod 10^9+7 = 217924875
+$$
+**State after processing query 17**:
+```
+undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XXXXXXX*XXXX"] 
+                                                             ↑ undo stack pointer = 5
+document: XXX*XXXXXXX*XXXX
+```
 
 
