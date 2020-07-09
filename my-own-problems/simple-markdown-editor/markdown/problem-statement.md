@@ -11,7 +11,6 @@ For example, given the document:
 
 ```
 XXX*XXXX*XX*XXXXXX*XX**XX*XXX
-12345678912345678912345678901  <-- This is just a visual aid to help you see the positions :)
 ```
 
 the first and second formatting chars are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
