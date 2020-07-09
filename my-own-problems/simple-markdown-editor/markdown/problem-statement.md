@@ -122,6 +122,29 @@ For each test case, print a single line containing one integer ― the final val
 
 **Subtask #3 (55 points)**: original constraints
 
+### Example Input
+```
+1
+17
+N 1 9
+F 4
+F 7
+Q 5
+N 40 35
+F 42
+F 33
+Q 35
+U 803
+Q 810
+R 216990986
+F 216990991
+F 216990977
+Q 216990978
+U 217007368
+N 217007374 217007374
+Q 217007372
+```
+
 
 
     
