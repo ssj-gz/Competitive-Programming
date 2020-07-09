@@ -1125,6 +1125,14 @@ int main(int argc, char* argv[])
                         testcaseGenUtils.addIsRangeFormattedQuery();
                     }
                 }
+                // Make up and shortfall in generated queries with IsRangeFormatted queries.
+                while (static_cast<int>(testcaseGenUtils.queries.size()) < subtask3.maxQueriesPerTestcase)
+                {
+                    if (!testcaseGenUtils.canRangeQuery())
+                        testcaseGenUtils.addInsertNonFormattingCharQuery(rnd.next(static_cast<int64_t>(1), maxDocLength - testcaseGenUtils.formattingCharsTree.documentLength()));
+                    if (static_cast<int>(testcaseGenUtils.queries.size()) < subtask3.maxQueriesPerTestcase)
+                        testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                }
                 cout << "# queries: " << testcaseGenUtils.queries.size() << endl;
                 assert(static_cast<int>(testcaseGenUtils.queries.size()) == subtask3.maxQueriesPerTestcase);
                 writeTestCase(testcase, testcaseGenUtils.queries);
