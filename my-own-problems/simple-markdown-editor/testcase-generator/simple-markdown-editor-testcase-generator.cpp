@@ -79,11 +79,11 @@ SubtaskInfo subtask1 = SubtaskInfo::create().withSubtaskId(1)
                                             
 SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
                                             .withScore(40)
-                                            .withMaxQueriesPerTestcase(1000)
-                                            .withMaxQueriesOverAllTestcases(NoExplicitLimit)
+                                            .withMaxQueriesPerTestcase(maxQueries)
+                                            .withMaxQueriesOverAllTestcases(maxQueries)
                                             .withAllowsUndoRedo(false)
                                             .withMaxNumDocLength(maxDocLength)
-                                            .withMaxNumTestcases(100);
+                                            .withMaxNumTestcases(1000);
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withScore(55)
@@ -719,15 +719,202 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask2)
                     .withSeed(23985)
-                    .withDescription("100 testcases each with almost the full amount of queries, with each testcase resulting in a doc with maxDocLength.  Approx equal number of InsertNonFormatting, InsertFormatting, and IsRangeFormatted.  No undos or redos, of course."));
+                    .withDescription("100 testcases with each testcase resulting in a doc with maxDocLength, and total queries across all testcases equal to maxQueriesOverAllTestcases.  Approx equal number of InsertNonFormatting, InsertFormatting, and IsRangeFormatted.  No undos or redos, of course."));
 
-            const auto numTestcases = subtask2.maxNumTestcases;
+            const auto numTestcases = 100;
+            const auto numQueriesForTestcases = chooseRandomValuesWithSum3(numTestcases, subtask3.maxQueriesOverAllTestcases, 1);
             
             for (int t = 0; t < numTestcases; t++)
             {
                 auto& testcase = testFile.newTestcase(SMETestCaseInfo());
 
-                const auto numQueries = subtask2.maxQueriesPerTestcase;
+                const auto numQueries = numQueriesForTestcases[t];
+
+                const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
+                const auto numInsertFormattingQueries = queryMakeUp[0];
+                const auto numInsertNonFormattingQueries = queryMakeUp[1];
+                const auto numIsRangeFormattedQueries = queryMakeUp[2];
+                const auto finalDocLength = rnd.next(subtask2.maxDocLength - 100, subtask2.maxDocLength);
+                const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
+
+                // Compute the number of unformatted chars to add for each InsertNonFormatting query.
+                const auto numNonformattedCharToAddForQuery = chooseRandomValuesWithSum3(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
+
+                vector<TestQuery::Type> queryTypes;
+                for (int i = 0; i < numInsertFormattingQueries; i++)
+                    queryTypes.push_back(TestQuery::Type::InsertFormatting);
+                for (int i = 0; i < numInsertNonFormattingQueries; i++)
+                    queryTypes.push_back(TestQuery::Type::InsertNonFormatting);
+                for (int i = 0; i < numIsRangeFormattedQueries; i++)
+                    queryTypes.push_back(TestQuery::Type::IsRangeFormatted);
+                assert(static_cast<int>(queryTypes.size()) == numQueries);
+
+                ::shuffle(queryTypes.begin(), queryTypes.end());
+               
+                // Can't have a IsRangeFormatted before an InsertNonFormatting query, as IsRangeFormatted's 
+                // queryPosition must point at at a non-formatting char.
+                int firstNonFormattedQueryIndex = -1;
+                for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
+                {
+                    if (queryTypes[queryIndex] == TestQuery::InsertNonFormatting)
+                    {
+                        firstNonFormattedQueryIndex = queryIndex;
+                        break;
+                    }
+                }
+                assert(firstNonFormattedQueryIndex != -1);
+                for (int queryIndex = 0; queryIndex < firstNonFormattedQueryIndex; queryIndex++)
+                {
+                    if (queryTypes[queryIndex] == TestQuery::IsRangeFormatted)
+                    {
+                        swap(queryTypes[queryIndex], queryTypes[firstNonFormattedQueryIndex]);
+                        break;
+                    }
+                }
+
+                // Prefer to end with a IsRangeFormatted - else the preceding insertion queries are "wasted".
+                if (queryTypes.back() != TestQuery::IsRangeFormatted)
+                {
+                    for (auto& queryType : queryTypes)
+                    {
+                        if (queryType == TestQuery::IsRangeFormatted)
+                        {
+                            swap(queryType, queryTypes.back());
+                            break;
+                        }
+                    }
+                }
+                assert(queryTypes.back() == TestQuery::IsRangeFormatted);
+
+                int numNonFormattingCharInsertionsQueriesAdded = 0;
+                QueryGenUtils testcaseGenUtils;
+                for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
+                {
+                    switch (queryTypes[queryIndex])
+                    {
+                        case TestQuery::Type::InsertFormatting:
+                            testcaseGenUtils.addInsertFormattingCharQuery();
+                            break;
+                        case TestQuery::Type::InsertNonFormatting:
+                            testcaseGenUtils.addInsertNonFormattingCharQuery(numNonformattedCharToAddForQuery[numNonFormattingCharInsertionsQueriesAdded]);
+                            numNonFormattingCharInsertionsQueriesAdded++;
+                            break;
+                        case TestQuery::Type::IsRangeFormatted:
+                            testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                            break;
+                        default:
+                            assert(false);
+                    }
+                }
+                assert(testcaseGenUtils.formattingCharsTree.documentLength() == finalDocLength);
+
+                writeTestCase(testcase, testcaseGenUtils.queries);
+            }
+
+        }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask2)
+                    .withSeed(48759843)
+                    .withDescription("Single testcase with maxQueriesPerTestcase testcases"));
+
+            auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+
+            const auto numQueries = subtask3.maxQueriesPerTestcase;
+
+            const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
+            const auto numInsertFormattingQueries = queryMakeUp[0];
+            const auto numInsertNonFormattingQueries = queryMakeUp[1];
+            const auto numIsRangeFormattedQueries = queryMakeUp[2];
+            const auto finalDocLength = subtask2.maxDocLength;
+            const auto totalNumUnformattedCharsToAdd = finalDocLength - numInsertFormattingQueries;
+
+            // Compute the number of unformatted chars to add for each InsertNonFormatting query.
+            const auto numNonformattedCharToAddForQuery = chooseRandomValuesWithSum3(numInsertNonFormattingQueries, totalNumUnformattedCharsToAdd, 1);
+
+            vector<TestQuery::Type> queryTypes;
+            for (int i = 0; i < numInsertFormattingQueries; i++)
+                queryTypes.push_back(TestQuery::Type::InsertFormatting);
+            for (int i = 0; i < numInsertNonFormattingQueries; i++)
+                queryTypes.push_back(TestQuery::Type::InsertNonFormatting);
+            for (int i = 0; i < numIsRangeFormattedQueries; i++)
+                queryTypes.push_back(TestQuery::Type::IsRangeFormatted);
+            assert(static_cast<int>(queryTypes.size()) == numQueries);
+
+            ::shuffle(queryTypes.begin(), queryTypes.end());
+
+            // Can't have a IsRangeFormatted before an InsertNonFormatting query, as IsRangeFormatted's 
+            // queryPosition must point at at a non-formatting char.
+            int firstNonFormattedQueryIndex = -1;
+            for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
+            {
+                if (queryTypes[queryIndex] == TestQuery::InsertNonFormatting)
+                {
+                    firstNonFormattedQueryIndex = queryIndex;
+                    break;
+                }
+            }
+            assert(firstNonFormattedQueryIndex != -1);
+            for (int queryIndex = 0; queryIndex < firstNonFormattedQueryIndex; queryIndex++)
+            {
+                if (queryTypes[queryIndex] == TestQuery::IsRangeFormatted)
+                {
+                    swap(queryTypes[queryIndex], queryTypes[firstNonFormattedQueryIndex]);
+                    break;
+                }
+            }
+
+            // Prefer to end with a IsRangeFormatted - else the preceding insertion queries are "wasted".
+            if (queryTypes.back() != TestQuery::IsRangeFormatted)
+            {
+                for (auto& queryType : queryTypes)
+                {
+                    if (queryType == TestQuery::IsRangeFormatted)
+                    {
+                        swap(queryType, queryTypes.back());
+                        break;
+                    }
+                }
+            }
+            assert(queryTypes.back() == TestQuery::IsRangeFormatted);
+
+            int numNonFormattingCharInsertionsQueriesAdded = 0;
+            QueryGenUtils testcaseGenUtils;
+            for (int queryIndex = 0; queryIndex < numQueries; queryIndex++)
+            {
+                switch (queryTypes[queryIndex])
+                {
+                    case TestQuery::Type::InsertFormatting:
+                        testcaseGenUtils.addInsertFormattingCharQuery();
+                        break;
+                    case TestQuery::Type::InsertNonFormatting:
+                        testcaseGenUtils.addInsertNonFormattingCharQuery(numNonformattedCharToAddForQuery[numNonFormattingCharInsertionsQueriesAdded]);
+                        numNonFormattingCharInsertionsQueriesAdded++;
+                        break;
+                    case TestQuery::Type::IsRangeFormatted:
+                        testcaseGenUtils.addIsRangeFormattedQueryBiasingTowardsAfterInsertionPos();
+                        break;
+                    default:
+                        assert(false);
+                }
+            }
+            assert(testcaseGenUtils.formattingCharsTree.documentLength() == finalDocLength);
+
+            writeTestCase(testcase, testcaseGenUtils.queries);
+
+        }
+        {
+            auto& testFile = testsuite.newTestFile(SMETestFileInfo().belongingToSubtask(subtask2)
+                    .withSeed(348754)
+                    .withDescription("1000 testcases with each testcase resulting in a doc with maxDocLength, and total queries across all testcases equal to maxQueriesOverAllTestcases.  Approx equal number of InsertNonFormatting, InsertFormatting, and IsRangeFormatted.  No undos or redos, of course."));
+
+            const auto numTestcases = subtask2.maxNumTestcases;
+            const auto numQueriesForTestcases = chooseRandomValuesWithSum3(numTestcases, subtask3.maxQueriesOverAllTestcases, 5);
+            
+            for (int t = 0; t < numTestcases; t++)
+            {
+                auto& testcase = testFile.newTestcase(SMETestCaseInfo());
+
+                const auto numQueries = numQueriesForTestcases[t];
 
                 const auto queryMakeUp = chooseRandomValuesWithSum3(3, numQueries, 1);
                 const auto numInsertFormattingQueries = queryMakeUp[0];
