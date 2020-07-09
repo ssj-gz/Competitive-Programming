@@ -349,7 +349,7 @@ class QueryGenUtils
             int64_t distFromFormattedChar = -1;
             if (distFromFormattedCharChoice != -1)
             {
-                if (rand() % 2 == 0)
+                if (rnd.next(2) == 0)
                 {
                     distFromFormattedChar = distFromFormattedCharChoice;
                 }
@@ -389,7 +389,7 @@ class QueryGenUtils
         {
             assert(canUndo());
             TestQuery newQuery;
-            const auto numToUndo = 1 + rand() % (formattingCharsTree.undoStackPointer() + 1);
+            const auto numToUndo = rnd.next(1, formattingCharsTree.undoStackPointer());
             newQuery.type = TestQuery::Undo;
             newQuery.numToUndo = numToUndo;
                 
@@ -410,7 +410,7 @@ class QueryGenUtils
         {
             assert(canRedo());
             TestQuery newQuery;
-            const int numToRedo = 1 + rand() % (formattingCharsTree.undoStackSize() - 1 - formattingCharsTree.undoStackPointer());
+            const int numToRedo = rnd.next(1, formattingCharsTree.undoStackSize() - 1 - formattingCharsTree.undoStackPointer() - 1);
             newQuery.type = TestQuery::Redo;
             newQuery.numToRedo = numToRedo;
 
