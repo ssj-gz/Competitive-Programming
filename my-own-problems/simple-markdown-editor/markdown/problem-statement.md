@@ -111,6 +111,18 @@ For each test case, print a single line containing one integer ― the final val
 - the sum of $Q$ over all test cases does not exceed $200,000$
 
 
+### Subtasks
+**Subtask #1 (5 points):** 
+- $T \le 10$
+- $Q \le 100$
+- The length of the document will never exceed $1000$ characters
+
+**Subtask #2 (40 points)**: 
+- Original constraints, but there will be no $\textit{undo}$ nor $\textit{redo}$ queries
+
+**Subtask #3 (55 points)**: original constraints
+
+
 
     
 
