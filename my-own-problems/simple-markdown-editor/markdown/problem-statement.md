@@ -96,6 +96,9 @@ Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to
 - The first line of each test case contains a single integer $Q$
 - Each of the next $Q$ lines begins with a single character equal to one of `N`, `F`, `U`, `R` or `Q`, denoting the type of the query to process, then a space, and then either two space-separated integers (if the single character was `N`) or two space-separated integers (otherwise), representing the encrypted arguments for that query
 
+### Output
+For each test case, print a single line containing one integer ― the final value of $\textit{decryptionKey}$ after processing all $Q$ queries.
+
 
 
     
