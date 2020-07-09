@@ -298,7 +298,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             }
             undoStackStatusString += "] ";
             cout << undoStackStatusString << endl;
-            cout << string(undoStackStatusPointer, ' ') << "^ undo stack pointer = " << (undoStackPointer + 2) << endl;
+            cout << string(undoStackStatusPointer, ' ') << "↑ undo stack pointer = " << (undoStackPointer + 2) << endl;
         }
         if (printFormattedRangeDisplay)
         {
@@ -361,7 +361,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << "Need to insert formatting char at position $" << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, false, false);
-                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert formatting char here" << endl;
+                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "↑" << " insert formatting char here" << endl;
                     cout << "```" << endl;
                     const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
@@ -393,7 +393,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << "Need to insert " << "$" << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << "$ non-formatting chars at position $" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, false, false);
-                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "^" << " insert " << numToInsert << " non-formatting chars here" << endl;
+                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "↑" << " insert " << numToInsert << " non-formatting chars here" << endl;
                     cout << "```" << endl;
                     const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
@@ -454,7 +454,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, true, false);
-                    cout << indentationSpaces << repeatedString(" ", queryPosition) << "^" << " query the size of formatting range around this point" << endl;
+                    cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " query the size of formatting range around this point" << endl;
                     cout << "```" << endl;
                     if (queryAnswer == -1)
                         cout << "The range of non-formatted chars around the query point is non-formatted; the answer to query #" << queryNum << " is $3141592$." << endl;
