@@ -309,7 +309,16 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << undoStackLine << endl;
                     if (undoStackStatusPointer != -1)
                     {
-                        cout << string(undoStackStatusPointer, ' ') << "↑ undo stack pointer = " << (undoStackPointer + 2) << endl;
+                        const auto undoStackPointerText = "undo stack pointer = " + to_string(undoStackPointer + 2);
+                        if (undoStackStatusPointer + undoStackPointerText.size() > columnWidth)
+                        {
+                            cout << string(undoStackStatusPointer - undoStackPointerText.size() - 1, ' ') + undoStackPointerText << " ↑" << endl;
+                        }
+
+                        else
+                        {
+                            cout << string(undoStackStatusPointer, ' ') << "↑ " + undoStackPointerText << endl;
+                        }
                         undoStackStatusPointer = -1;
                     }
                 };
