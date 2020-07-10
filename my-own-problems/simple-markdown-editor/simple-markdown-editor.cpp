@@ -280,25 +280,62 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     {
         if (printUndoStack)
         {
-            string undoStackStatusString = "undo stack:  [ ";
+            const int columnWidth = 72;
+            const string undoStackPrefix = "undo stack:  [ ";
+            const auto undoStackIndent = undoStackPrefix.size();
             int undoStackStatusPointer = -1;
+            int undoStackLineNum = 0;
+            string undoStackLine;
+
+            undoStackLine += undoStackPrefix;
+
             for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
             {
                 //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
                 if (undoStackIndex  == undoStackPointer + 1)
                 {
-                    //cout << "Updating undoStackStatusPointer: " << undoStackStatusPointer << endl;
-                    undoStackStatusPointer = undoStackStatusString.size();
+                    undoStackStatusPointer = undoStackLine.size();
                 }
-                undoStackStatusString += "\"";
-                undoStackStatusString += undoStackDocuments[undoStackIndex];
-                undoStackStatusString += "\"";
-                if (undoStackIndex != undoStackDocuments.size() - 1)
-                    undoStackStatusString += ", ";
+                string undoStackElement = "\"" + undoStackDocuments[undoStackIndex] + "\"";
+                const bool isFinalElement = (undoStackIndex == undoStackDocuments.size() - 1);
+                if (!isFinalElement)
+                    undoStackElement += ", ";
+                else
+                    undoStackElement += " ]";
+                const int lineLengthAfterAddingElement = (undoStackLine + undoStackElement).size();
+
+                auto flushLine = [&]()
+                {
+                    cout << undoStackLine << endl;
+                    if (undoStackStatusPointer != -1)
+                    {
+                        cout << string(undoStackStatusPointer, ' ') << "↑ undo stack pointer = " << (undoStackPointer + 2) << endl;
+                        undoStackStatusPointer = -1;
+                    }
+                };
+                if (lineLengthAfterAddingElement > columnWidth)
+                {
+                    if (undoStackIndex  == undoStackPointer + 1)
+                    {
+                        undoStackStatusPointer = -1;
+                    }
+                    flushLine();
+                    undoStackLine = string(undoStackIndent, ' ') + undoStackElement;
+                    if (undoStackIndex  == undoStackPointer + 1)
+                    {
+                        undoStackStatusPointer = undoStackIndent;
+                    }
+                }
+                else
+                {
+                    undoStackLine += undoStackElement;
+                }
+                if (isFinalElement)
+                    flushLine();
             }
-            undoStackStatusString += "] ";
-            cout << undoStackStatusString << endl;
-            cout << string(undoStackStatusPointer, ' ') << "↑ undo stack pointer = " << (undoStackPointer + 2) << endl;
+            //undoStackStatusString += "] ";
+            //cout << undoStackStatusString << endl;
+            //cout << string(undoStackStatusPointer, ' ') << "↑ undo stack pointer = " << (undoStackPointer + 2) << endl;
         }
         if (printFormattedRangeDisplay)
         {
