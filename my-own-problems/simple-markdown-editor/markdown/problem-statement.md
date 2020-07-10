@@ -23,9 +23,7 @@ Chef must implement the following queries.  Note that positions of characters in
 4. $\textit{redo}(\textit{numToRedo})$.  Chef must move the Undo Stack Pointer numToRedo revisions to the right.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
 5. $\textit{numInFormattedRange}(\textit{queryPosition})$. If the character at queryPosition - which is guaranteed to be a non-formatted char - is contained in a formatted range, then Chef's answer to the query is the number of non-formatting chars in this formatted range; otherwise, the answer to the query is 3'141'592.  The result of these queries is used to update the _decryption key_ necessary to unlock further queries.
 
-More formally, Chef has a $\textit{decryptionKey}$ which is used to decrypt queries, which has the initial value $0$.
-
-The 5 types of queries are encoded as follows:
+More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each query being one of the above types. Chef has a $\textit{decryptionKey}$ (with initial value $0$) which is used to decrypt these queries.  Each query $q_i$ is encoded in one of the following forms:
 
 1. Insert formatting char queries take the form:
 
