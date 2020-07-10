@@ -292,10 +292,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
             {
                 //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
-                if (undoStackIndex  == undoStackPointer + 1)
-                {
-                    undoStackStatusPointer = undoStackLine.size();
-                }
                 string undoStackElement = "\"" + undoStackDocuments[undoStackIndex] + "\"";
                 const bool isFinalElement = (undoStackIndex == undoStackDocuments.size() - 1);
                 if (!isFinalElement)
@@ -303,6 +299,12 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 else
                     undoStackElement += " ]";
                 const int lineLengthAfterAddingElement = (undoStackLine + undoStackElement).size();
+                const bool needToWrapBeforeThisElement = (lineLengthAfterAddingElement > columnWidth);
+
+                if (!needToWrapBeforeThisElement && undoStackIndex  == undoStackPointer + 1)
+                {
+                    undoStackStatusPointer = undoStackLine.size();
+                }
 
                 auto flushLine = [&]()
                 {
@@ -322,12 +324,8 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                         undoStackStatusPointer = -1;
                     }
                 };
-                if (lineLengthAfterAddingElement > columnWidth)
+                if (needToWrapBeforeThisElement)
                 {
-                    if (undoStackIndex  == undoStackPointer + 1)
-                    {
-                        undoStackStatusPointer = -1;
-                    }
                     flushLine();
                     undoStackLine = string(undoStackIndent, ' ') + undoStackElement;
                     if (undoStackIndex  == undoStackPointer + 1)
