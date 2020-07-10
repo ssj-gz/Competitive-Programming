@@ -1,6 +1,6 @@
 Inspired by some of the difficulties involved in creating testcases for "Move the Coins 2" (MOVCOIN2).
 
-You are given a tree T over N (2 <= N <= 100'000) nodes. Each nodes has a unique label drawn from  the numbers $1,2, \dots N$.  T is rooted at node 1.   A _reparenting_ $q=(u,v)$ is pair of nodes of T, with $u$ being called the _nodeToReparent_ and $v$ being called the _newParent_.
+You are given a tree T over N (2 <= N <= 200'000) nodes. Each nodes has a unique label drawn from  the numbers $1,2, \dots N$.  T is rooted at node 1.   A _reparenting_ $q=(u,v)$ is pair of nodes of T, with $u$ being called the _nodeToReparent_ and $v$ being called the _newParent_.
 
 The _graph resulting from reparenting $q$_, $T(q)$ is constructed as follows:
 
