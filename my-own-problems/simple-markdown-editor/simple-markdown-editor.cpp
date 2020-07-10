@@ -283,7 +283,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             const int columnWidth = 72;
             const string undoStackPrefix = "undo stack:  [ ";
             const auto undoStackIndent = undoStackPrefix.size();
-            int undoStackStatusPointer = -1;
+            int undoStackStatusPointerCol = -1;
             int undoStackLineNum = 0;
             string undoStackLine;
 
@@ -304,25 +304,25 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 
                 if (!needToWrapBeforeThisElement && undoStackPointerPointsToThisElement)
                 {
-                    undoStackStatusPointer = undoStackLine.size();
+                    undoStackStatusPointerCol = undoStackLine.size();
                 }
 
                 auto flushLine = [&]()
                 {
                     cout << undoStackLine << endl;
-                    if (undoStackStatusPointer != -1)
+                    if (undoStackStatusPointerCol != -1)
                     {
                         const auto undoStackPointerText = "undo stack pointer = " + to_string(undoStackPointer + 2);
-                        if (undoStackStatusPointer + undoStackPointerText.size() > columnWidth)
+                        if (undoStackStatusPointerCol + undoStackPointerText.size() > columnWidth)
                         {
-                            cout << string(undoStackStatusPointer - undoStackPointerText.size() - 1, ' ') + undoStackPointerText << " ↑" << endl;
+                            cout << string(undoStackStatusPointerCol - undoStackPointerText.size() - 1, ' ') + undoStackPointerText << " ↑" << endl;
                         }
 
                         else
                         {
-                            cout << string(undoStackStatusPointer, ' ') << "↑ " + undoStackPointerText << endl;
+                            cout << string(undoStackStatusPointerCol, ' ') << "↑ " + undoStackPointerText << endl;
                         }
-                        undoStackStatusPointer = -1;
+                        undoStackStatusPointerCol = -1;
                     }
                 };
                 if (needToWrapBeforeThisElement)
@@ -331,7 +331,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     undoStackLine = string(undoStackIndent, ' ') + undoStackElement;
                     if (undoStackPointerPointsToThisElement)
                     {
-                        undoStackStatusPointer = undoStackIndent;
+                        undoStackStatusPointerCol = undoStackIndent;
                     }
                 }
                 else
