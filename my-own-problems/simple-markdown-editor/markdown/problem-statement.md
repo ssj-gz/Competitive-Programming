@@ -29,7 +29,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
 
    ```F encryptedPositionToInsert```  
 
-    To process this query, he must first _decrypt_ `encryptedPositionToInsert` to get $\textit{positionToInsert}$ with his $\textit{decryptionKey}$ using the formula:
+    To process this query, Chef must first _decrypt_ `encryptedPositionToInsert` to get $\textit{positionToInsert}$ with his $\textit{decryptionKey}$ using the formula:
     $$
     \textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
     $$
@@ -38,7 +38,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
 
     ```N encryptedNumCharsToInsert encryptedPositionToInsert```
 
-    To process this query, he must first decrypt `encryptedNumCharsToInsert` to get $\textit{numCharsToInsert}$ using the formula:
+    To process this query, Chef must first decrypt `encryptedNumCharsToInsert` to get $\textit{numCharsToInsert}$ using the formula:
     $$
     \textit{numCharsToInsert} = \textit{decryptionKey} \oplus \textit{encryptedNumCharsToInsert}
     $$
@@ -51,7 +51,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
   
     ```U encryptedNumToUndo```
     
-    To process this query, he must first decrypt `encryptedNumToUndo` to get $\textit{numToUndo}$ using the formula:
+    To process this query, Chef must first decrypt `encryptedNumToUndo` to get $\textit{numToUndo}$ using the formula:
 
     $$
     \textit{numToUndo} = \textit{decryptionKey} \oplus \textit{encryptedNumToUndo}
@@ -61,7 +61,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
 
     ```R encryptedNumToRedo```
 
-    To process this query, he must first decrypt `encryptedNumToRedo` to get $\textit{numToRedo}$ using the formula:
+    To process this query, Chef must first decrypt `encryptedNumToRedo` to get $\textit{numToRedo}$ using the formula:
 
     $$
     \textit{numToRedo} = \textit{decryptionKey} \oplus \textit{encryptedNumToRedo}
@@ -71,14 +71,14 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
 
     ```Q encryptedQueryPosition``` 
 
-    To process this query, he must first decrypt `encryptedQueryPosition` to get $\textit{queryPosition}$ using the formula:
+    To process this query, Chef must first decrypt `encryptedQueryPosition` to get $\textit{queryPosition}$ using the formula:
 
     $$
     \textit{queryPosition} = \textit{decryptionKey} \oplus \textit{encryptedQueryPosition}
     $$
     and then process $\textit{numInFormattedRange}(\textit{queryPosition})$.
 
-    Once he has computed the answer to this query, $\textit{queryAnswer}$, he must use it to update his $\textit{decryptionKey}$ using the formula:
+    Once Chef has computed the answer to this query, $\textit{queryAnswer}$, he must use it to update his $\textit{decryptionKey}$ using the formula:
 
     $$
     \textit{decryptionKey} = \textit{queryAnswer} \times 2^i + \textit{decryptionKey} \mod{10^9}
