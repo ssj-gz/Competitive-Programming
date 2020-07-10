@@ -2,7 +2,7 @@ Chef has been tasked with the implemention of part of a simple markdown editor. 
 
 Initially, the document is empty, and the Undo Stack is a list containing a single element: this empty document.  The Undo Stack Pointer initially points at this element.
 
-The document is *parsed* into _formatted ranges_ and _non-formatted ranges_ of characters in the document as follows.
+The document is _parsed_ to give the list of _formatted ranges_ of characters in the document as follows:
 
 Take the first and second occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range.
 Take the third and fourth occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range; etc until no formatted chars remain.
