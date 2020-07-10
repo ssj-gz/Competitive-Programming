@@ -387,7 +387,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         }
     };
 
-    cout << "Initial status: " << endl;
+    cout << "**Initial status**: " << endl;
     cout << "```" << endl;
     showStatus(true, false, true);
     cout << "```" << endl;
