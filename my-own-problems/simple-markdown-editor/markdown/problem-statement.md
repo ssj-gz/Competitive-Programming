@@ -463,11 +463,8 @@ Updating $decryptionKey$:
 $$
 decryptionKey = decryptionKey + 7\times  2^{17}  = 217007371 + 7\times 131072 = 217924875 \mod 10^9+7 = 217924875
 $$
-**State after processing query 17**:
-```
-document: XXX*XXXXXXX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XXXXXXX*XXXX" ]
-               ↑ undo stack pointer = 5
-```
+
+
+That's all the queries processed, and the final value of $\textit{decryptionKey}$ is 217924875; so the answer for this testcase is 217924875.
+
 
