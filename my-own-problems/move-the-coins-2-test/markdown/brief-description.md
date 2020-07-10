@@ -1,11 +1,11 @@
 Inspired by some of the difficulties involved in creating testcases for "Move the Coins 2" (MOVCOIN2).
 
-You are given a tree T over N (2 <= N <= 100'000) nodes, rooted at node 1.  A _reparenting_ $q=(u,v)$ is pair of nodes of T, with $u$ being called the _nodeToReparent_ and $v$ being called the _newParent_.
+You are given a tree T over N (2 <= N <= 100'000) nodes. Each nodes has a unique label drawn from  the numbers $1,2, \dots N$.  T is rooted at node 1.   A _reparenting_ $q=(u,v)$ is pair of nodes of T, with $u$ being called the _nodeToReparent_ and $v$ being called the _newParent_.
 
 The _graph resulting from reparenting $q$_, $T(q)$ is constructed as follows:
 
 * Set $T(q)$ to be a copy of T
-* Remove the edge between the nodes u and u.parent (T is rooted, remember, so all nodes other than 1 have a parent)
+* Remove the edge between the nodes u and u.parent (T is rooted at node 1, remember, so all nodes other than 1 have a parent)
 * Add an edge between the nodes u and v
 
 A reparenting $q$ is said to be _valid_ if the resulting $T(q)$ is still a tree over the N nodes.
@@ -20,11 +20,11 @@ Let L be the list of all reparentings, ordered as follows.  Define the _height_ 
 For my MOVCOIN2 testcases, I wanted to find $Q$ distinct valid reparentings.  Do this by forming a sequence $c_i$, $i = 1,2, ..., Q$, $1 <= c_i <= |L| - i$.  Pick the $c_1$th reparenting in L and remove it from L - this is the first chosen reparenting. 
 Pick the $c_2$th reparenting in L and remove it from L; this is the 2nd chosen reparenting; etc.
 
-So the aim of the Problem is to calculate (and remove) the $c_i$th item in L, with the added twist that each $c_i$ is _encrypted_ in such a way that the $c_i$'s must be processed online.
+So the aim of the Problem is to calculate (and remove) the $c_i$th item in L, with the added twist that each $c_i$ is _encrypted_ in such a way that the $c_i$'s must be _processed online_.  The requirement that the $c_i$'s must be processed online makes things much more interesting :)
 
 SOLUTION
 
-Here's a brief sketch of the solution.  A documented implementation exists.
+Here's a brief sketch of the solution.  A documented implementation can be found here: http://campus.codechef.com/SITJMADM/viewsolution/33162695/
 
 First of all, let's figure out how to efficiently tell if a reparenting is _valid_ or not: it's hopefully easy to see that $q=(u,v)$ is a valid reparenting if and only if $v$ is not a descendant of $u$.  Thus, the size of |L| is likely to be $O(N^2)$ i.e. far too large to 
 
@@ -34,7 +34,7 @@ So: we've reduced the Problem now to finding, for a given index i, the ith eleme
 
 Phase 1: Finding the nodeToReparent (u) of the reparenting.
 
-This is very easy - note that for a node $u$ can be re-parenting to precisely $N - numDescendants(u)$ different nodes.  During the precomputation phase, we construct an array numCanReparentToPrefixSum, where numCanReparentToPrefixSum[u] is the number of all valid reparentings $q=(u',v)$ such that $u'<=u$ (this precomputation can be performed in $O(N)$).
+This is very easy - note that a node $u$ can be re-parented to precisely $N - numDescendants(u)$ different nodes.  During the precomputation phase, we construct an array numCanReparentToPrefixSum, where numCanReparentToPrefixSum[u] is the number of all valid reparentings $q=(u',v)$ such that $u'<=u$ (this precomputation can be performed in $O(N)$).
 
 Our desired nodeToReparent, then, is the first index such that numCanReparentToPrefixSum[nodeToReparent + 1] exceeds i (there might be a few off-by-one errors, here :)), which we can compute in $O(log |L|)=O(log N)$, concluding Phase 1.
 
@@ -48,7 +48,7 @@ This is a bit trickier, and fundamentally relies on an binary search over all O(
 
 With a few observations and precomputations, we can compute a given numNonDescendantsUpToHeight(nodeToReparent, h) in O(log N).
 
-A brief description of how: nodeToReparent can be reparented to any node whose height is < height(nodeToReparent), so we start off with this value (easily computed with a bit of precomputation).
+A brief description of how: nodeToReparent can always be reparented to *any* node whose height is < height(nodeToReparent), so we start off with this value (easily computed with a bit of precomputation).
 
 Counted the number of nodes x such that height(x) >= height(nodeToReparent) and height(x) <= h and x not a descendant of nodeToReparent is trickier.  Observe that calculating  the number of descendants d of nodeToReparent subject to height(nodeToReparent) <= height(d) <= h is sufficient to compute this, and call this value Y.  Let X be the set of descendants of nodeToReparent whose height is precisely h.  Then Y = numDescendants(nodeToReparent) - sum over all nodes z in X of the number of *proper descendants* of z.
 
@@ -60,7 +60,7 @@ We now need to find the kth element $q=(u,v)$ in L such that $u=nodeToReparent$ 
 
 Phase 3: Finally finding newParent
 
-There's probably plenty of ways of skinning this cat :) To re-cap: for some k, we need to find the kth node x at height h which is *not* a descendant of nodeToReparent.  Once again, the set X of possible x's is a contiguous subarray of nodesAtHeightInDfsOrder[h], and the left and right indices of this range can be computed in O(log N).  Thus, we need to find the kth node in this set.
+There's probably plenty of ways of skinning this cat :) To re-cap: for some k, we need to find the kth node (in order of node  x at height h which is *not* a descendant of nodeToReparent.  Once again, the set X of possible x's is a contiguous subarray of nodesAtHeightInDfsOrder[h], and the left and right indices of this range can be computed in O(log N).  Thus, we need to find the kth node in this set.
 
 The way I approached this is as follows.  In the precomputation step, compute, for each h, prefixesForHeight[h] and suffixesForHeight[h].  These are _persistent_ balance-trees, sorted by node label, computed by adding each element in nodesAtHeightInDfsOrder[h] in turn (for prefixesForHeight[h]) and adding each element in nodesAtHeightInDfsOrder[h] _in reverse order_ for suffixesForHeight[h].
 
