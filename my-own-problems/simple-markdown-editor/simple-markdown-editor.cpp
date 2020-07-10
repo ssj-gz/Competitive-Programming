@@ -300,8 +300,9 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     undoStackElement += " ]";
                 const int lineLengthAfterAddingElement = (undoStackLine + undoStackElement).size();
                 const bool needToWrapBeforeThisElement = (lineLengthAfterAddingElement > columnWidth);
+                const bool undoStackPointerPointsToThisElement = (undoStackIndex  == undoStackPointer + 1);
 
-                if (!needToWrapBeforeThisElement && undoStackIndex  == undoStackPointer + 1)
+                if (!needToWrapBeforeThisElement && undoStackPointerPointsToThisElement)
                 {
                     undoStackStatusPointer = undoStackLine.size();
                 }
@@ -328,7 +329,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     flushLine();
                     undoStackLine = string(undoStackIndent, ' ') + undoStackElement;
-                    if (undoStackIndex  == undoStackPointer + 1)
+                    if (undoStackPointerPointsToThisElement)
                     {
                         undoStackStatusPointer = undoStackIndent;
                     }
