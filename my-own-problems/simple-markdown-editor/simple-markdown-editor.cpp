@@ -511,9 +511,9 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " query the size of formatted range around this point" << endl;
                     cout << "```" << endl;
                     if (queryAnswer == -1)
-                        cout << "The range of non-formatted chars around the query point is non-formatted; the answer to query #" << queryNum << " is $3141592$." << endl;
+                        cout << "The queried position is not part of a formatted range; the answer to query #" << queryNum << " is $3141592$." << endl;
                     else
-                        cout << "The range of non-formatted chars around the query point is formatted; and the number is this range is " << queryAnswer << "; the answer to query #" << queryNum << " query is $" << queryAnswer << "$." << endl;
+                        cout << "The queried position is part of a formatted range and the number of non-formatted characters is this range is " << queryAnswer << "; the answer to query #" << queryNum << " query is $" << queryAnswer << "$." << endl;
                     if (queryAnswer == -1)
                         queryAnswer = 3'141'592;
                     cout << "\n\nUpdating $decryptionKey$: \n" << endl;
