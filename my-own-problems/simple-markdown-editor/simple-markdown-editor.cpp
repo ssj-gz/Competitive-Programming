@@ -512,15 +512,18 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " query the size of formatted range around this point" << endl;
                     cout << "```" << endl;
                     if (queryAnswer == -1)
+                    {
+                        queryAnswer = 3'141'592;
                         cout << "The queried position is not part of a formatted range; the answer to query #" << queryNum << " is $3141592$." << endl;
+                    }
                     else
                         cout << "The queried position is part of a formatted range and the number of non-formatted characters is this range is " << queryAnswer << "; the answer to query #" << queryNum << " is $" << queryAnswer << "$." << endl;
-                    if (queryAnswer == -1)
-                        queryAnswer = 3'141'592;
                     cout << "\n\nUpdating $decryptionKey$: \n" << endl;
                     cout << "$$\ndecryptionKey = decryptionKey + " << queryAnswer << "\\times  2^{" << queryNum << "}" << "  = " << decryptionKey << " + " << queryAnswer << "\\times " << ((1 << queryNum))  << " = " << decryptionKey + ((1 << queryNum)) * queryAnswer << " \\mod 10^9+7 = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "\n$$" << endl;
 
 #endif
+                    if (queryAnswer == -1)
+                        queryAnswer = 3'141'592;
                     decryptionKey = (decryptionKey + ((queryAnswer % Mod) * powerOf2) % Mod) % Mod;
 
                     queryResults.push_back(queryAnswer);
