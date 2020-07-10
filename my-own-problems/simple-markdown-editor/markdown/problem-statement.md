@@ -101,10 +101,10 @@ For each test case, print a single line containing one integer ― the final val
 - $1 \le T \le 1,000$
 - $1 \le Q \le 200,000$
 - The length of the document will never exceed $10^{18}$ characters
-- The character at the decrypted position `queryPosition` in the current revision of the document is always a `X`
-- The decrypted position `positionToInsert` is always in the range $1 \dots |d| + 1$, where $|d|$ is the length of the current document
-- The decrypted value `numToUndo` will never exceed the value of the current Undo Stack Pointer minus 1
-- The decrypted value `numToRedo` will never exceed the current Undo Stack size minus the value of the current Undo Stack Pointer
+- The character at the decrypted position $\textit{queryPosition}$ in the current revision of the document is always a `X`
+- The decrypted position $\textit{positionToInsert}$ is always in the range $1 \dots |d| + 1$, where $|d|$ is the length of the current document
+- The decrypted value $\textit{numToUndo}$ will never exceed the value of the current Undo Stack Pointer minus 1
+- The decrypted value $\textit{numToRedo}$ will never exceed the current Undo Stack size minus the value of the current Undo Stack Pointer
 - the sum of $Q$ over all test cases does not exceed $200,000$
 
 
