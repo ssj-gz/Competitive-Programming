@@ -278,6 +278,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     const auto indentationSpaces = repeatedString(" ", indentationLen);
     auto showStatus = [&](bool printDocument = true, bool printFormattedRangeDisplay = true, bool printUndoStack = true)
     {
+        if (printDocument)
+        {
+            cout << "document: " << document << endl;
+        }
         if (printUndoStack)
         {
             const int columnWidth = 72;
@@ -380,9 +384,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
             cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " ← Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
-        }
-        if (printDocument)
-        {
             cout << "document: " << document << endl;
         }
     };
@@ -507,7 +508,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #ifdef DIAGNOSTICS
                     cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
                     cout << "```" << endl;
-                    showStatus(true, true, false);
+                    showStatus(false, true, false);
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " query the size of formatted range around this point" << endl;
                     cout << "```" << endl;
                     if (queryAnswer == -1)
