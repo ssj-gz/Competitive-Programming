@@ -422,7 +422,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                         cout << "```" << endl;
                         showStatus(false, false, true);
                         cout << "```" << endl;
-                        cout << "\n\nWe can now perform the insertion.\n\n" << endl;
+                        cout << "\n\nWe can now perform the insertion, giving the updated document:\n\n" << endl;
+                        cout << "```" << endl;
+                        showStatus(true, false, false);
+                        cout << "```" << endl;
                     }
 #endif
                     undoQuery.encryptedArgument = insertionPos; // Not strictly accurate - this is unencrypted!
@@ -455,7 +458,11 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                         cout << "```" << endl;
                         showStatus(false, false, true);
                         cout << "```" << endl;
-                        cout << "\n\nWe can now perform the insertion.\n\n" << endl;
+                        cout << "\n\nWe can now perform the insertion, giving the updated document:\n\n" << endl;
+                        cout << "```" << endl;
+                        showStatus(true, false, false);
+                        cout << "```" << endl;
+
                     }
 #endif
                     Query undoQuery = query;
