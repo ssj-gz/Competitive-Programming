@@ -568,11 +568,18 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         }
 
 #ifdef DIAGNOSTICS
-        cout << "**State after processing query " << queryNum << "**:" << endl;
-        cout << "```" << endl;
-        showStatus(true, false, true);
-        cout << "```" << endl;
-        cout << endl << endl;
+        if (queryNum != static_cast<int>(queries.size()))
+        {
+            cout << "**State after processing query " << queryNum << "**:" << endl;
+            cout << "```" << endl;
+            showStatus(true, false, true);
+            cout << "```" << endl;
+            cout << endl << endl;
+        }
+        else
+        {
+            cout << "\n\nThat's all the queries processed, and the final value of $\\textit{decryptionKey}$ is " << decryptionKey << "; so the answer for this testcase is " << decryptionKey << "." << endl;
+        }
 #endif
         //cout << "document: " << document << endl;
         //cout << "Undo stack: " << endl;
