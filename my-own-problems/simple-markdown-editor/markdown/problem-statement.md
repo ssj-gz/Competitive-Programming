@@ -25,7 +25,7 @@ Chef must implement the following queries.  Note that positions of characters in
 
 More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each query being one of the above types. Chef has a $\textit{decryptionKey}$ (with initial value $0$) which is used to decrypt these queries.  Each query $q_i$ is encoded in one of the following forms:
 
-1. Insert formatting char queries take the form:
+1. $\textit{insertFormattingChar}$ queries take the form:
 
    ```F encryptedPositionToInsert```  
 
@@ -34,7 +34,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
     \textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
     $$
     He must then process $\textit{insertFormattingChar}(\textit{positionToInsert})$.
-2.  Insert non-formatting char queries take the form:
+2.  $\textit{insertNonFormattingChars}$ queries take the form:
 
     ```N encryptedNumCharsToInsert encryptedPositionToInsert```
 
@@ -47,7 +47,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
     \textit{positionToInsert} = \textit{decryptionKey} \oplus \textit{encryptedPositionToInsert}
     $$
     He must then process $\textit{insertNonFormattingChars}(\textit{numCharsToInsert}, \textit{positionToInsert})$.
-3.  Undo queries take the form:
+3.  $\textit{undo}$ queries take the form:
   
     ```U encryptedNumToUndo```
     
@@ -57,7 +57,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
     \textit{numToUndo} = \textit{decryptionKey} \oplus \textit{encryptedNumToUndo}
     $$
     and then process $\textit{undo}(\textit{numToUndo})$.
-4.  Redo queries take the form:
+4.  $\textit{redo}$ queries take the form:
 
     ```R encryptedNumToRedo```
 
@@ -67,7 +67,7 @@ More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each q
     \textit{numToRedo} = \textit{decryptionKey} \oplus \textit{encryptedNumToRedo}
     $$
     and then process $\textit{redo}(\textit{numToRedo})$.
-5.  Num in formatted range queries take the form:
+5.  $\textit{numInFormattedRange}$ queries take the form:
 
     ```Q encryptedQueryPosition``` 
 
