@@ -8,10 +8,6 @@
 
 #include <cassert>
 
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-#include <set> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-#include <vector> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
-
 using namespace std;
 
 template <typename T>
@@ -23,68 +19,12 @@ T read()
     return toRead;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
-        const int numChefs = 1 + rand() % 5;
-        const int numEmails = 1 + rand() % 5;
-        const int numCountries = 1 + rand() % 5;
-
-        auto randomName = []()
-        {
-            const int maxLetterIndex = 1 + rand() % 26;
-            string name;
-            const auto nameLen = 1 + rand() % 10;
-            for (int j = 0; j < nameLen; j++)
-            {
-                if (rand() % 2 == 0)
-                {
-                    name += 'a' + rand() % maxLetterIndex;
-                }
-                else
-                {
-                    name += 'A' + rand() % maxLetterIndex;
-                }
-            }
-            return name;
-        };
-
-        set<string> chefNameSet;
-        while (static_cast<int>(chefNameSet.size()) < numChefs)
-        {
-            chefNameSet.insert(randomName());
-        }
-        vector<string> countryNames;
-        for (int i = 0; i < numCountries; i++)
-        {
-            countryNames.push_back(randomName());
-        }
-
-        cout << numChefs << " " << numEmails << endl;
-        vector<string> chefNames(chefNameSet.begin(), chefNameSet.end());
-        for (int i = 0; i < numChefs; i++)
-        {
-            cout << chefNames[i] << " " << countryNames[rand() % numCountries] << endl;
-        }
-        for (int i = 0; i < numEmails; i++)
-        {
-            cout << chefNames[rand() % numChefs] << endl;
-        }
-
-
-        return 0;
-    }
-
-    ios::sync_with_stdio(false);
     
-    const int numChefs = read<int>();
-    const int numEmails = read<int>();
+    const auto numChefs = read<int>();
+    const auto numEmails = read<int>();
 
     map<string, string> countryForChef;
     for (int i = 0; i < numChefs; i++)
@@ -98,7 +38,7 @@ int main(int argc, char* argv[])
     map<string, int> numVotesForChef;
     map<string, int> numVotesForCountry;
 
-    for (int i = 0; i < numEmails; i++)
+    for (auto i = 0; i < numEmails; i++)
     {
         const auto emailSubject = read<string>();
         numVotesForChef[emailSubject]++;
