@@ -2,7 +2,7 @@ Chef is preparing testcases for the ["Move the Coins 2"](https://www.codechef.co
 
 For each testcase, he needs to provide a tree $T$ over $N$ nodes labelled $1,2,\dots,N$ and rooted at node $1$, and a list of $Q$ distinct _valid reparentings_ on $T$.
 
-A _reparenting_ $r$ is a pair of nodes $(u,v)$ ($u \ne 1$) of $T$.  The result of applying the reparenting $r$ to $T$ is another graph $T(r)$ over the $N$ nodes formed as follows.
+A _reparenting_ $r$ is a pair of nodes $(u,v)$ ($u \ne 1$) of $T$.  The result of applying the reparenting $r$ to $T$ is another graph $T(r)$ over the $N$ nodes formed as follows:
 
 We take a copy of the original $T$, and then remove the edge connecting $u$ to its parent.  We then add a new edge between the nodes $u$ and $v$ to get $T(r)$.
 
