@@ -16,7 +16,7 @@ and we wish to apply the reparenting $r=(u,v)=(6,4)$ to it.  The resulting $T(r)
 
 A reparenting $r$ is _valid_ if the resulting $T(r)$ is still a _tree_ (that is, a connected graph with no cycles) over the $N$ nodes.
 
-Chef has $T$ already, and now just needs to find the $Q$ valid reparentings.  He does this by forming a list $L$ of all valid reparentings of $T$ and ordering them with a special order.
+Chef has already decided on this tree $T$, and now just needs to find the $Q$ valid reparentings of $T$.  He does this by forming a list $L$ of all valid reparentings of $T$ and ordering them with a special order.
 
 Let $r=(u,v)$ and $r'=(u',v')$ be valid reparentings.  Then:
 
