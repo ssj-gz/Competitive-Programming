@@ -1,6 +1,6 @@
 Chef is preparing testcases for the ["Move the Coins 2"](https://www.codechef.com/problems/MOVCOIN2) Problem!
 
-For each testcase, he needs to provide a tree $T$ over $N$ labelled $1,2,\dots,N$, rooted at node $1$, and a list of $Q$ distinct _valid reparentings_ on $T$.
+For each testcase, he needs to provide a tree $T$ over $N$ nodes labelled $1,2,\dots,N$ and rooted at node $1$, and a list of $Q$ distinct _valid reparentings_ on $T$.
 
 A _reparenting_ $r$ is a pair of nodes $(u,v)$ ($u \ne 1$) of $T$.  The result of applying the reparenting $r$ to $T$ is another graph $T(r)$ over the $N$ nodes formed as follows.
 
