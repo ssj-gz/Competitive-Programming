@@ -54,7 +54,7 @@ int main() {
     vector<Rectangle> rectangles;
     set<Vertex> vertices;
 
-    // Should generate valid rectangles with distinct vertices, where each vertex coord in a multiple of
+    // Should generate valid rectangles with distinct vertices, where each vertex coord is a multiple of
     // p, and does not exceed maxCoordVal.
     // Since all coordinates are multiples of p, when the unordered_map grows to have p buckets, 
     // the coordinates will all end up in the same bucket.
