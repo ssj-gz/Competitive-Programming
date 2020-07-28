@@ -43,6 +43,7 @@ int main() {
     {
         int x = -1;
         int y = -1;
+        bool omitFromTestcase = false;
         bool operator<(const Vertex& other) const
         {
             if (x != other.x)
@@ -96,8 +97,7 @@ int main() {
     // Mark one random vertex as not-to-be-printed.
     auto& vertexToOmit = rectangles[rand() % rectangles.size()].vertices[rand() % 4];
     cerr << "Will omit the vertex: " << vertexToOmit.x << " " << vertexToOmit.y << endl;
-    vertexToOmit.x = -1;
-    vertexToOmit.y = -1;
+    vertexToOmit.omitFromTestcase = true;
 
     cout << 1 << endl;
     cout << numRectangles << endl;
@@ -105,7 +105,7 @@ int main() {
     {
         for (const auto& vertex : rectangle.vertices)
         {
-            if (vertex.x == -1 && vertex.y == -1)
+            if (vertex.omitFromTestcase)
                 continue;
             cout << vertex.x << " " << vertex.y << endl;
         }
