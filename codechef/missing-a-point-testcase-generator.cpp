@@ -18,15 +18,18 @@ const int N = 2e5;
  *    https://codeforces.com/blog/entry/62393
  *
  * Essentially, generates a constraints-conformant testcase where all 
- * Rectangle coords are the multiples of a known unordered_map bucket_count,
- * so they all get mapped to the same bucket, causing worse-case performance.
+ * Rectangle coords are the multiples of a known unordered_map bucket_count (p),
+ * so all coordinates get mapped to the same bucket, causing worse-case performance.
  *
  * Usually, we would pick p >= 100'000; however, the requirement that
  * coords have absolute value <= 1e9 makes this a little harder - the 
  * "maxCoordMultiplier" is quite small for such large p, and so we get
- * fewer *distinct* coordinates hashing to the same value.
+ * fewer *distinct* coordinates hashing to the same value, and the resulting
+ * testcase turns out *not* to cause a timeout for solutions using unordered_map.
  *
- * A smaller, but still reasonably large, value of p like 26267 is a good compromise.
+ * A smaller, but still reasonably large, value of p like 26267 is a good compromise;
+ * a sample unordered_map-based solution takes over one minute to process the testcase
+ * resulting from this choice of p.
  */
 
 
@@ -54,10 +57,11 @@ int main() {
     vector<Rectangle> rectangles;
     set<Vertex> vertices;
 
-    // Should generate valid rectangles with distinct vertices, where each vertex coord is a multiple of
-    // p, and does not exceed maxCoordVal.
+    // Should generate N valid rectangles, where all 4N vertices are distinct, and where each 
+    // vertex coord is a multiple of p not exceeding maxCoordVal.
     // Since all coordinates are multiples of p, when the unordered_map grows to have p buckets, 
-    // the coordinates will all end up in the same bucket.
+    // the coordinates will all end up in the same bucket, which is the worse-case scenario for an 
+    // unordered_map, efficiency-wise.
     for (int i = 0 ; i < maxCoordMultiplier / 2; i += 2)
     {
         for (int j = 0; j < maxCoordMultiplier / 2; j += 2)
@@ -72,11 +76,11 @@ int main() {
             rectangles.push_back(rectangle);
 
         }
-        if (rectangles.size() > 2e5)
+        if (rectangles.size() > N)
             break;
     }
 
-    while (rectangles.size() > 2e5)
+    while (rectangles.size() > N)
         rectangles.pop_back();
 
     const int numRectangles = rectangles.size();
