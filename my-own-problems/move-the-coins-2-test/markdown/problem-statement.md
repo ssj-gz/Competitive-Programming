@@ -4,7 +4,7 @@ For each testcase, he needs to provide a tree $T$ over $N$ nodes labelled $1,2,\
 
 A _reparenting_ $r$ is a pair of nodes $(u,v)$ ($u \ne 1$) of $T$.  The result of applying the reparenting $r$ to $T$ is another graph $T(r)$ over the $N$ nodes formed as follows:
 
-We take a copy of the original $T$, and then remove the edge connecting $u$ to its parent.  We then add a new edge between the nodes $u$ and $v$ to get $T(r)$.
+We take a copy of the original $T$, and in this copy we remove the edge connecting $u$ to its parent.  We then add a new edge between the nodes $u$ and $v$ to get $T(r)$.
 
 As an example, imagine we have the tree $T$ as shown below:
 
