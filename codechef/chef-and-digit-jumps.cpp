@@ -43,6 +43,11 @@ int solveOptimised(const vector<int>& digits)
     const int digitsLength = digits.size();
 
     vector<int> minDistToDigitIndex(digitsLength, -1);
+    vector<vector<int>> unvisitedIndicesWithDigit(10);
+    for (int index = 0; index < digitsLength; index++)
+    {
+        unvisitedIndicesWithDigit[digits[index]].push_back(index);
+    }
 
     vector<int> indicesToExplore;
     indicesToExplore.push_back(0);
@@ -69,13 +74,11 @@ int solveOptimised(const vector<int>& digits)
             visitIndex(index - 1);
             visitIndex(index + 1);
             const auto digitAtIndex = digits[index];
-            for (int index = 0; index < digitsLength; index++)
+            for (const auto unvisitedIndexWithThisDigit : unvisitedIndicesWithDigit[digitAtIndex])
             {
-                if (digits[index] == digitAtIndex)
-                {
-                    visitIndex(index);
-                }
+                visitIndex(unvisitedIndexWithThisDigit);
             }
+            unvisitedIndicesWithDigit[digitAtIndex].clear(); // We've just visited them all!
         }
 
         numSteps++;
