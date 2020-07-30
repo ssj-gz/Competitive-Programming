@@ -25,7 +25,7 @@ Let $r=(u,v)$ and $r'=(u',v')$ be valid reparentings.  Then:
 r'$ if $\textit{height}(v) < \textit{height}(v')$ and $r > r'$ if $\textit{height}(v) >
 \textit{height}(v')$
 - Otherwise i.e. if $u = u'$ and $\textit{height}(v) = \textit{height}(v')$, then $r <
-r'$ if $v < v'$ and $r > r'$ if $v > v'$.
+r'$ if $v < v'$ and $r > r'$ if $v > v'$
 
 where $\textit{height}(x)$ is the distance between the node $x$ and the node $1$.
 
