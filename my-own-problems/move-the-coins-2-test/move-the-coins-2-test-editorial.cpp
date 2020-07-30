@@ -13,23 +13,11 @@ using namespace std;
 
 const int64_t Mod = 1'000'000'007;
 
-// Lots of input to read, so use ultra-fast reader.
-template <typename IntegralType>
-void scan_integer( IntegralType &x )
-{
-    int c = getchar_unlocked();
-    x = 0;
-    for( ; ((c<48 || c>57)); c = getchar_unlocked() );
-    for( ;c>47 && c<58; c = getchar_unlocked() ) {
-        x = (x << 1) + (x << 3) + c - 48;
-    }
-}
-
 template <typename T>
 T read()
 {
     T toRead;
-    scan_integer(toRead);
+    cin >> toRead;
     assert(cin);
     return toRead;
 }
