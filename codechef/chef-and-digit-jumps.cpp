@@ -9,6 +9,8 @@
 
 using namespace std;
 
+#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
+
 template <typename T>
 T read()
 {
@@ -83,10 +85,27 @@ int findMinJumpsFromFirstTolastIndex(const vector<int>& digits)
     return minDistToDigitIndex[digitsLength - 1];
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     ios::sync_with_stdio(false);
-    
+    if (argc == 2 && string(argv[1]) == "--test")
+    {
+        struct timeval time;
+        gettimeofday(&time,NULL);
+        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
+
+        string digitString;
+        const auto digitsLength = 1 + rand() % 100'000;
+        for (int i = 0; i < digitsLength; i++)
+        {
+            digitString += '0' + (rand() % 10);
+        }
+        cout << digitString << endl;
+
+        return 0;
+    }
+
+
     const auto digitString = read<string>();
     vector<int> digits;
     for (const auto& digit : digitString)
