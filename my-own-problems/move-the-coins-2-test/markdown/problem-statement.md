@@ -326,7 +326,7 @@ On to the next choice. $\textit{encryptedChoice}_2 = 6$; decrypting:
 $\textit{decryptedChoice}_2 = \textit{decryptionKey} \oplus \textit{encryptedChoice}_2 = 21 \oplus 6 = 19$
 
  
-so the reparenting $(u_2, v_2)$ corresponding to the $2^\text{nd}$ choice is the $9^\text{th}$ element in $L$ i.e. $(u_2, v_2) = (5, 2)$.  We update our $\textit{decryptionKey}$:
+so the reparenting $(u_2, v_2)$ corresponding to the $2^\text{nd}$ choice is the $19^\text{th}$ element in $L$ i.e. $(u_2, v_2) = (5, 2)$.  We update our $\textit{decryptionKey}$:
 
 $$\begin{eqnarray}
 \textit{decryptionKey}&=&\textit{decryptionKey}+2^2 \times u_2 + 3^2 \times v_2 \mod{10^9+7} \nonumber \\
