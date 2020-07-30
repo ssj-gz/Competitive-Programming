@@ -2,20 +2,10 @@
 // 
 // Solution to: https://www.codechef.com/LRNDSA08/problems/DIGJUMP
 //
-//#define SUBMISSION
-#ifdef SUBMISSION
-#define NDEBUG
-#else
-#define _GLIBCXX_DEBUG       // Iterator safety; out-of-bounds access for Containers, etc.
-#pragma GCC optimize "trapv" // abort() on (signed) integer overflow.
-#define BRUTE_FORCE
-#endif
 #include <iostream>
 #include <vector>
 
 #include <cassert>
-
-#include <sys/time.h> // TODO - this is only for random testcase generation.  Remove it when you don't need new random testcases!
 
 using namespace std;
 
@@ -28,21 +18,13 @@ T read()
     return toRead;
 }
 
-#if 0
-int solveBruteForce(const vector<int>& digitString)
-{
-    int result = -1;
-    
-    return result;
-}
-#endif
-
-#if 1
-int solveOptimised(const vector<int>& digits)
+int findMinJumpsFromFirstTolastIndex(const vector<int>& digits)
 {
     const int digitsLength = digits.size();
 
     vector<int> minDistToDigitIndex(digitsLength, -1);
+    // The "unvisitedIndicesWithDigit" mechanism allows us to shrink
+    // the runtime to O(N).
     vector<vector<int>> unvisitedIndicesWithDigit(10);
     for (int index = 0; index < digitsLength; index++)
     {
@@ -57,6 +39,16 @@ int solveOptimised(const vector<int>& digits)
 
     while (!indicesToExplore.empty())
     {
+        // A bit of thought tells us that this loop 
+        // will only run a small number of times - this is because
+        // we can't go more than two steps without visiting an index
+        // with a so-far-unvisited digit, and there are only 10 possible 
+        // digits.
+        // The worst case I can think of occurs with the testcase:
+        //
+        //   00112233445566778899
+        //
+        // and this takes 19 steps.
         vector<int> nextIndicesToExplore;
 
         auto visitIndex = [&](int index)
@@ -67,6 +59,8 @@ int solveOptimised(const vector<int>& digits)
                 return;
             minDistToDigitIndex[index] = numSteps;
             nextIndicesToExplore.push_back(index);
+            // NB: doesn't update unvisitedIndicesWithDigit, but this
+            // is harmless.
         };
 
         for (const auto index : indicesToExplore)
@@ -78,7 +72,8 @@ int solveOptimised(const vector<int>& digits)
             {
                 visitIndex(unvisitedIndexWithThisDigit);
             }
-            unvisitedIndicesWithDigit[digitAtIndex].clear(); // We've just visited them all!
+            unvisitedIndicesWithDigit[digitAtIndex].clear(); // We've just visited them all! If we didn't clear this, 
+                                                             // the algorithm would end up as O(N^2).
         }
 
         numSteps++;
@@ -87,28 +82,10 @@ int solveOptimised(const vector<int>& digits)
     
     return minDistToDigitIndex[digitsLength - 1];
 }
-#endif
 
-
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
-    if (argc == 2 && string(argv[1]) == "--test")
-    {
-        struct timeval time;
-        gettimeofday(&time,NULL);
-        srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
-        cout << T << endl;
-
-        for (int t = 0; t < T; t++)
-        {
-        }
-
-        return 0;
-    }
     
     const auto digitString = read<string>();
     vector<int> digits;
@@ -116,7 +93,6 @@ int main(int argc, char* argv[])
     {
         digits.push_back(digit - '0');
     }
-    const auto solutionOptimised = solveOptimised(digits);
-    cout << solutionOptimised << endl;
+    cout << findMinJumpsFromFirstTolastIndex(digits) << endl;
     assert(cin);
 }
