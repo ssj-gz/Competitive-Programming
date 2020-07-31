@@ -37,21 +37,16 @@ int main(int argc, char* argv[])
         struct timeval time;
         gettimeofday(&time,NULL);
         srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-        // TODO - generate randomised test.
-        //const int T = rand() % 100 + 1;
-        const int T = 1;
+        const int T = rand() % 10 + 1;
         cout << T << endl;
 
         for (int t = 0; t < T; t++)
         {
-            const auto numStudents = 2 + rand() % 10'000;
-            //const auto maxEnrollableStudents = 1 + rand() % (numStudents - 1);
-            const auto maxEnrollableStudents = numStudents - 1;
+            const auto numStudents = 2 + rand() % 100;
+            const auto maxEnrollableStudents = 1 + rand() % (numStudents - 1);
             assert(maxEnrollableStudents < numStudents);
-            //const auto numExams = 1 + rand() % 4;
-            const auto numExams = 4;
-            //const auto maxExamScore = 1 + rand() % 1'000'000'000;
-            const auto maxExamScore = 1'000'000'000;
+            const auto numExams = 1 + rand() % 4;
+            const auto maxExamScore = 1 + rand() % 100;
 
             cout << numStudents << " " << maxEnrollableStudents << " " << numExams << " " << maxExamScore << endl;
 
@@ -59,21 +54,10 @@ int main(int argc, char* argv[])
             {
                 for (int examIndex = 0; examIndex < numExams; examIndex++)
                 {
-#if 0
                     const auto score = rand() % (maxExamScore + 1);
                     cout << score;
                     if (examIndex != numExams - 1)
                         cout << " ";
-#else
-                    int64_t score = 0;
-                    if (rand() % 2 == 0)
-                        score = rand() % 1000;
-                    else
-                        score = maxExamScore - rand() % 1000;
-                    cout << score;
-                    if (examIndex != numExams - 1)
-                        cout << " ";
-#endif
                 }
                 cout << endl;
             }
