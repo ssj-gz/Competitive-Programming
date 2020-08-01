@@ -19,7 +19,7 @@ T read()
     return toRead;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
 
@@ -32,28 +32,28 @@ int main(int argc, char* argv[])
         const auto numExams = read<int>();
         const auto maxExamScore = read<int>();
 
-        vector<int64_t> totalScoreForOtherStudent(numStudents - 1, 0);
-        for (int otherStudentIndex = 0; otherStudentIndex < numStudents - 1; otherStudentIndex++)
+        vector<int64_t> totalScoresForOtherStudents(numStudents - 1, 0);
+        for (auto& totalOtherStudentScore : totalScoresForOtherStudents)
         {
-            for (int examIndex = 0; examIndex < numExams; examIndex++)
+            for (int examNum = 0; examNum < numExams; examNum++)
             {
                 const auto score = read<int>();
-                totalScoreForOtherStudent[otherStudentIndex] += score;
+                totalOtherStudentScore += score;
             }
         }
 
-        int64_t sergeysScore = 0;
-        for (int examIndex = 0; examIndex < numExams - 1; examIndex++)
+        int64_t sergeyScoreSoFar = 0;
+        for (int examNum = 0; examNum < numExams - 1; examNum++)
         {
             const auto score = read<int>();
-            sergeysScore += score;
+            sergeyScoreSoFar += score;
         }
 
-        vector<int64_t> otherStudentScoresSorted = totalScoreForOtherStudent;
+        vector<int64_t> otherStudentScoresSorted = totalScoresForOtherStudents;
         sort(otherStudentScoresSorted.begin(), otherStudentScoresSorted.end());
 
-
-        const int64_t requiredTotalScoreForEnrollment = otherStudentScoresSorted[numStudents - maxEnrollableStudents - 1] + 1;
+        const int64_t requiredTotalSergeyScoreForEnrollment = otherStudentScoresSorted[numStudents - maxEnrollableStudents - 1] + 1;
+        const int64_t requiredSergeyFinalExamScore = max<int64_t>(0, requiredTotalSergeyScoreForEnrollment - sergeyScoreSoFar);
 #ifdef DIAGNOSTICS
         cout << "otherStudentScoresSorted: " << endl;
         for (const auto x  : otherStudentScoresSorted)
@@ -61,16 +61,16 @@ int main(int argc, char* argv[])
             cout << x << " ";
         }
         cout << endl;
-        cout << "requiredTotalScoreForEnrollment: " << requiredTotalScoreForEnrollment << endl;
-        cout << "sergeysScore: " << sergeysScore << endl;
+        cout << "requiredTotalSergeyScoreForEnrollment: " << requiredTotalSergeyScoreForEnrollment << endl;
+        cout << "sergeyScoreSoFar: " << sergeyScoreSoFar << endl;
 #endif
-        if (requiredTotalScoreForEnrollment > sergeysScore + maxExamScore)
+        if (requiredSergeyFinalExamScore > maxExamScore)
         {
             cout << "Impossible" << endl;
         }
         else
         {
-            cout << max<int64_t>(0, requiredTotalScoreForEnrollment - sergeysScore) << endl;
+            cout << requiredSergeyFinalExamScore << endl;
         }
     }
 
