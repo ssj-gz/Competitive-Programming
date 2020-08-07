@@ -894,10 +894,41 @@ int main(int argc, char* argv[])
                     const int numStrandCoveredQueries = 5000;
                     addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
                     addQueriesCoveredByStrands({arm1, arm2, arm3}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
-                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+
+                    addRandomQueries(treeGenerator, queries, numQueries - 1, lookupInfo);
+                    // Add one query that picks a random node n and chooses a query such that the result is the
+                    // first reparenting that reparents n.  This tests an edge-case in the Phase One code:
+                    // they must find the first numCanReparentToPrefixSum *strictly greater than* indexInOriginalList, rather
+                    // than the first that is *greater than or equal to* indexInOriginalList.
+                    auto nodeToReparent = rnd.nextFrom(allNodes);
+                    vector<TestNode<NodeData>*> nodesCanReparentTo;
+                    for (auto node : allNodes)
+                    {
+                        if (!node->data.isDescendantOf(*nodeToReparent))
+                            nodesCanReparentTo.push_back(node);
+                    }
+                    assert(!nodesCanReparentTo.empty());
+                    // We scramble the graph now, as we want the node ids to be finalised for this, as the "last" reparenting
+                    // depends on the node ids.
+                    treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
+                    treeGenerator.scrambleEdgeOrder();
+
+                    sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
+                            {
+                                if (node1->data.height != node2->data.height)
+                                    return node1->data.height < node2->data.height;
+                                return node1->id() < node2->id();
+                            });
+                    auto newParentNode = nodesCanReparentTo.back();
+                    queries.push_back({nodeToReparent, nodesCanReparentTo.front()});
+                    cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << " num possible new parents: " << nodesCanReparentTo.size() << endl;
                 }
 
-                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                // Do *NOT* use "scrambleAndwriteTestcase", as that would break the "final reparenting that reparents n"
+                // query.  We must shuffle the queries ourselves.
+                assert(queries.size() == numQueries);
+                shuffle(queries.begin(), queries.end());
+                writeTestCase(treeGenerator, testcase, queries);
             }
         }
         {
