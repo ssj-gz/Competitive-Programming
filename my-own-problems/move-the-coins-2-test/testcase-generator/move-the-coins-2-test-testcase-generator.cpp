@@ -895,7 +895,7 @@ int main(int argc, char* argv[])
                     addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
                     addQueriesCoveredByStrands({arm1, arm2, arm3}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
 
-                    addRandomQueries(treeGenerator, queries, numQueries - 1, lookupInfo);
+                    addRandomQueries(treeGenerator, queries, numQueries - 2, lookupInfo);
                     // Add a few queries targetting specific edge-cases.  For these, we need to scramble the node ids right now,
                     // as we want the node ids to be finalised, as the order of reparentings in the list of all reparentings
                     // depends on the node ids.
@@ -931,6 +931,28 @@ int main(int argc, char* argv[])
                         auto newParentNode = nodesCanReparentTo.front();
                         queries.push_back({nodeToReparent, newParentNode});
                         cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
+                    }
+                    auto nodesInIdOrder(allNodes);
+                    sort(nodesInIdOrder.begin(), nodesInIdOrder.end(), [](const auto node1, const auto node2)
+                            {
+                                return node1->id() < node2->id();
+                            });
+                    {
+                        // Pick the first possible reparenting.
+                        TestNode<NodeData>* nodeToReparent = nullptr;
+                        TestNode<NodeData>* newParentNode = nullptr;
+                        for (auto node : nodesInIdOrder)
+                        {
+                            const auto nodesCanReparentTo = findNodesCanReparentTo(node);
+                            if (!nodesCanReparentTo.empty())
+                            {
+                                nodeToReparent = node;
+                                newParentNode = nodesCanReparentTo.front();
+                                break;
+                            }
+                        }
+                        assert(nodeToReparent && newParentNode);
+                        queries.push_back({nodeToReparent, newParentNode});
                     }
                 }
 
