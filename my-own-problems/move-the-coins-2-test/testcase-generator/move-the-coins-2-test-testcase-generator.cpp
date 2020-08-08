@@ -378,9 +378,9 @@ void addWeightedQueries(const vector<TestNode<NodeData>*>& candidateNodesToRepar
         auto nodeToReparent = rnd.nextFrom(candidateNodesToReparent);
         if (nodeToReparent->data.largestNonDescendantHeight == 0)
             continue;
-        const auto chooseLowerNode = (nodeToReparent->data.largestNonDescendantHeight >= nodeToReparent->data.height) && (rnd.next(0.0, 100.0) < percentProbOfLargerNewParentHeight);
-        const auto newParentHeight = chooseLowerNode ? rnd.next(nodeToReparent->data.height, nodeToReparent->data.largestNonDescendantHeight) :
-                                                       rnd.next(1, nodeToReparent->data.largestNonDescendantHeight);
+        const auto chooseNodeWithLargerHeight = (nodeToReparent->data.largestNonDescendantHeight >= nodeToReparent->data.height) && (rnd.next(0.0, 100.0) < percentProbOfLargerNewParentHeight);
+        const auto newParentHeight = chooseNodeWithLargerHeight ? rnd.next(nodeToReparent->data.height, nodeToReparent->data.largestNonDescendantHeight) :
+                                                                  rnd.next(1, nodeToReparent->data.largestNonDescendantHeight);
 
         auto newParent = findRandomValidNewParent(nodeToReparent, allNodes, newParentHeight, newParentHeight, lookupInfo);
         queries.push_back({nodeToReparent, newParent});
