@@ -20,6 +20,7 @@ struct TestNode
     std::vector<TestEdge<NodeData>*> neighbours;
     int originalId = -1;
     int scrambledId = -1;
+    int forceScrambledId = -1;
     int id() const
     {
         return (scrambledId == -1) ? originalId : scrambledId;
@@ -209,6 +210,53 @@ class TreeGenerator
                 } 
                 assert(forceAsRootNode->scrambledId == 1);
             }
+        }
+        // Scrambles the order of the nodes, then re-ids them, in new order, with the first
+        // node in the new order having scrambledId 1, then next 2, etc.
+        // This respects the "forceScrambledId" of the Node, if any.
+        void scrambleNodeIdsAndReorderNG()
+        {
+            const int numNodes = this->numNodes();
+            std::vector<std::unique_ptr<TestNode<NodeData>>> newNodeOrder(numNodes);
+            auto oldNodeOrder = std::move(m_nodes);
+
+            for (auto& nodeUniquePtr : oldNodeOrder)
+            {
+                if (nodeUniquePtr->forceScrambledId != -1)
+                {
+                    assert(newNodeOrder[nodeUniquePtr->forceScrambledId - 1] == nullptr);
+                    newNodeOrder[nodeUniquePtr->forceScrambledId - 1] = std::move(nodeUniquePtr);
+                }
+            }
+            // Remove the "empty" nodes (the ones that had a forceScrambledId).
+            std::cout << "# oldNodeOrder before erase: " << oldNodeOrder.size() << std::endl;
+            oldNodeOrder.erase(std::remove_if(oldNodeOrder.begin(), oldNodeOrder.end(), [](const auto& nodeUniquePtr) { return nodeUniquePtr == nullptr; }), oldNodeOrder.end());
+            std::cout << "# oldNodeOrder after erase: " << oldNodeOrder.size() << std::endl;
+            ::shuffle(oldNodeOrder.begin(), oldNodeOrder.end());
+            auto firstEmptyNewSlotIter = newNodeOrder.begin();
+            for (auto& nodeToMoveUniquePtr : oldNodeOrder)
+            {
+                while (*firstEmptyNewSlotIter != nullptr)
+                {
+                    firstEmptyNewSlotIter++;
+                    assert(firstEmptyNewSlotIter != newNodeOrder.end());
+                }
+                *firstEmptyNewSlotIter = std::move(nodeToMoveUniquePtr);
+                (*firstEmptyNewSlotIter)->scrambledId = (firstEmptyNewSlotIter - newNodeOrder.begin()) + 1;
+            }
+
+            m_nodes = std::move(newNodeOrder);
+            assert(static_cast<int>(m_nodes.size()) == numNodes);
+
+            for (int i = 0; i < numNodes; i++)
+            {
+                assert(m_nodes[i]);
+                assert(m_nodes[i]->id() == i + 1);
+                if (m_nodes[i]->forceScrambledId != -1)
+                    assert(m_nodes[i]->id() == m_nodes[i]->forceScrambledId);
+
+            }
+
         }
         std::vector<TestNode<NodeData>*> nodes() const
         {
