@@ -921,8 +921,8 @@ int main(int argc, char* argv[])
                                     return node1->data.height < node2->data.height;
                                 return node1->id() < node2->id();
                             });
-                    auto newParentNode = nodesCanReparentTo.back();
-                    queries.push_back({nodeToReparent, nodesCanReparentTo.front()});
+                    auto newParentNode = nodesCanReparentTo.front();
+                    queries.push_back({nodeToReparent, newParentNode});
                     cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << " num possible new parents: " << nodesCanReparentTo.size() << endl;
                 }
 
