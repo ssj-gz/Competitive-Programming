@@ -916,8 +916,6 @@ int main(int argc, char* argv[])
                                 if (!node->data.isDescendantOf(*nodeToReparent))
                                     nodesCanReparentTo.push_back(node);
                             }
-                            assert(!nodesCanReparentTo.empty());
-
                             sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
                                     {
                                         if (node1->data.height != node2->data.height)
@@ -928,7 +926,9 @@ int main(int argc, char* argv[])
                         };
 
 
-                    auto newParentNode = findNodesCanReparentTo(nodeToReparent).front();
+                    const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
+                    assert(!nodesCanReparentTo.empty());
+                    auto newParentNode = nodesCanReparentTo.front();
                     queries.push_back({nodeToReparent, newParentNode});
                     cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
                 }
