@@ -900,6 +900,12 @@ int main(int argc, char* argv[])
                     // first reparenting that reparents n.  This tests an edge-case in the Phase One code:
                     // they must find the first numCanReparentToPrefixSum *strictly greater than* indexInOriginalList, rather
                     // than the first that is *greater than or equal to* indexInOriginalList.
+                    // We scramble the graph now, as we want the node ids to be finalised for this, as the "last" reparenting
+                    // depends on the node ids.
+                    treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
+                    treeGenerator.scrambleEdgeOrder();
+                    // Need to recompute DFS info, else "isDescendantOf" won't work.
+                    computeDFSInfo(rootNode);
                     auto nodeToReparent = rnd.nextFrom(allNodes);
                     vector<TestNode<NodeData>*> nodesCanReparentTo;
                     for (auto node : allNodes)
@@ -908,10 +914,6 @@ int main(int argc, char* argv[])
                             nodesCanReparentTo.push_back(node);
                     }
                     assert(!nodesCanReparentTo.empty());
-                    // We scramble the graph now, as we want the node ids to be finalised for this, as the "last" reparenting
-                    // depends on the node ids.
-                    treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
-                    treeGenerator.scrambleEdgeOrder();
 
                     sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
                             {
