@@ -569,7 +569,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
 
         // "Pretend" to remove this kthInRemainingToFind index, and figure out the index in the original list
         // corresponding to kthInRemainingToFind.
-        const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind);
+        const auto indexInOriginalList = indexRemapper.remapNthRemainingToIndexAndRemove(kthInRemainingToFind); // 0-relative.
 
         // Phase One: compute nodeToReparent.  Easy :)
         const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
