@@ -896,18 +896,13 @@ int main(int argc, char* argv[])
                     addQueriesCoveredByStrands({arm1, arm2, arm3}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
 
                     addRandomQueries(treeGenerator, queries, numQueries - 1, lookupInfo);
-                    // Add one query that picks a random node n and chooses a query such that the result is the
-                    // first reparenting that reparents n.  This tests an edge-case in the Phase One code:
-                    // they must find the first numCanReparentToPrefixSum *strictly greater than* indexInOriginalList, rather
-                    // than the first that is *greater than or equal to* indexInOriginalList.
-                    // We scramble the graph now, as we want the node ids to be finalised for this, as the "last" reparenting
+                    // Add a few queries targetting specific edge-cases.  For these, we need to scramble the node ids right now,
+                    // as we want the node ids to be finalised, as the order of reparentings in the list of all reparentings
                     // depends on the node ids.
                     treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
                     treeGenerator.scrambleEdgeOrder();
-                    // Need to recompute DFS info, else "isDescendantOf" won't work.
+                    // Need to recompute DFS info now that we've scrambled the node ids, else "isDescendantOf" won't work.
                     computeDFSInfo(rootNode);
-                    auto nodeToReparent = rnd.nextFrom(allNodes);
-
                     auto findNodesCanReparentTo = [&allNodes](auto nodeToReparent)
                         {
                             vector<TestNode<NodeData>*> nodesCanReparentTo;
@@ -925,12 +920,18 @@ int main(int argc, char* argv[])
                             return nodesCanReparentTo;
                         };
 
-
-                    const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
-                    assert(!nodesCanReparentTo.empty());
-                    auto newParentNode = nodesCanReparentTo.front();
-                    queries.push_back({nodeToReparent, newParentNode});
-                    cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
+                    {
+                        // Add one query that picks a random node n and chooses a query such that the result is the
+                        // first reparenting that reparents n.  This tests an edge-case in the Phase One code:
+                        // they must find the first numCanReparentToPrefixSum *strictly greater than* indexInOriginalList, rather
+                        // than the first that is *greater than or equal to* indexInOriginalList.
+                        auto nodeToReparent = rnd.nextFrom(allNodes);
+                        const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
+                        assert(!nodesCanReparentTo.empty());
+                        auto newParentNode = nodesCanReparentTo.front();
+                        queries.push_back({nodeToReparent, newParentNode});
+                        cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
+                    }
                 }
 
                 // Do *NOT* use "scrambleAndwriteTestcase", as that would break the "final reparenting that reparents n"
