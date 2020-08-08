@@ -290,6 +290,18 @@ void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<S
 
     writeTestCase(treeGenerator, destTestcase, scrambledQueries);
 }
+void scrambleAndwriteTestcaseNG(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
+{
+    auto rootNode = treeGenerator.nodes().front();
+    assert(rootNode->forceScrambledId == 1);
+    treeGenerator.scrambleNodeIdsAndReorderNG();
+    treeGenerator.scrambleEdgeOrder();
+
+    auto scrambledQueries = queries;
+    shuffle(scrambledQueries.begin(), scrambledQueries.end());
+
+    writeTestCase(treeGenerator, destTestcase, scrambledQueries);
+}
 
 TestNode<NodeData>* buildGraphInLayers(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes, const std::map<int, double>& percentageProbOfNumChildrenBeforeSwitchOver, const int switchOverAfterNumNodes, const std::map<int, double>& percentageProbOfNumChildrenAfterSwitchOver)
 {
@@ -899,8 +911,18 @@ int main(int argc, char* argv[])
                     // Add a few queries targetting specific edge-cases.  For these, we need to scramble the node ids right now,
                     // as we want the node ids to be finalised, as the order of reparentings in the list of all reparentings
                     // depends on the node ids.
-                    treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
-                    treeGenerator.scrambleEdgeOrder();
+                    //treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
+                    //treeGenerator.scrambleEdgeOrder();
+                    rootNode->forceScrambledId = 1;
+                    treeGenerator.scrambleNodeIdsAndReorderNG();
+                    int nodeId = 1;
+                    // Ensure that any subsequent calls to scrambleNodeIdsAndReorderNG
+                    for (auto node : treeGenerator.nodes())
+                    {
+                        assert(node->id() == nodeId);
+                        node->forceScrambledId = nodeId;
+                        nodeId++;
+                    }
                     // Need to recompute DFS info now that we've scrambled the node ids, else "isDescendantOf" won't work.
                     computeDFSInfo(rootNode);
                     auto findNodesCanReparentTo = [&allNodes](auto nodeToReparent)
@@ -982,11 +1004,11 @@ int main(int argc, char* argv[])
                     }
                 }
 
-                // Do *NOT* use "scrambleAndwriteTestcase", as that would break the "final reparenting that reparents n"
-                // query.  We must shuffle the queries ourselves.
+                // Must use "scrambleAndwriteTestcaseNG" instead of "scrambleAndwriteTestcase", as the latter 
+                // would break the "specific edge-case"  queries, which depend on each node having a specific
+                // Id.
                 assert(queries.size() == numQueries);
-                shuffle(queries.begin(), queries.end());
-                writeTestCase(treeGenerator, testcase, queries);
+                scrambleAndwriteTestcaseNG(treeGenerator, testcase, queries);
             }
         }
         {
