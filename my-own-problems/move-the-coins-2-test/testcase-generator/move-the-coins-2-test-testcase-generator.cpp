@@ -907,23 +907,30 @@ int main(int argc, char* argv[])
                     // Need to recompute DFS info, else "isDescendantOf" won't work.
                     computeDFSInfo(rootNode);
                     auto nodeToReparent = rnd.nextFrom(allNodes);
-                    vector<TestNode<NodeData>*> nodesCanReparentTo;
-                    for (auto node : allNodes)
-                    {
-                        if (!node->data.isDescendantOf(*nodeToReparent))
-                            nodesCanReparentTo.push_back(node);
-                    }
-                    assert(!nodesCanReparentTo.empty());
 
-                    sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
+                    auto findNodesCanReparentTo = [&allNodes](auto nodeToReparent)
+                        {
+                            vector<TestNode<NodeData>*> nodesCanReparentTo;
+                            for (auto node : allNodes)
                             {
-                                if (node1->data.height != node2->data.height)
-                                    return node1->data.height < node2->data.height;
-                                return node1->id() < node2->id();
-                            });
-                    auto newParentNode = nodesCanReparentTo.front();
+                                if (!node->data.isDescendantOf(*nodeToReparent))
+                                    nodesCanReparentTo.push_back(node);
+                            }
+                            assert(!nodesCanReparentTo.empty());
+
+                            sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
+                                    {
+                                        if (node1->data.height != node2->data.height)
+                                            return node1->data.height < node2->data.height;
+                                        return node1->id() < node2->id();
+                                    });
+                            return nodesCanReparentTo;
+                        };
+
+
+                    auto newParentNode = findNodesCanReparentTo(nodeToReparent).front();
                     queries.push_back({nodeToReparent, newParentNode});
-                    cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << " num possible new parents: " << nodesCanReparentTo.size() << endl;
+                    cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
                 }
 
                 // Do *NOT* use "scrambleAndwriteTestcase", as that would break the "final reparenting that reparents n"
