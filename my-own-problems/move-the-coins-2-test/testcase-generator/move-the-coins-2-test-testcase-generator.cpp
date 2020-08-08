@@ -1007,7 +1007,7 @@ int main(int argc, char* argv[])
                 // Must use "scrambleAndwriteTestcaseNG" instead of "scrambleAndwriteTestcase", as the latter 
                 // would break the "specific edge-case"  queries, which depend on each node having a specific
                 // Id.
-                assert(queries.size() == numQueries);
+                assert(static_cast<int>(queries.size()) == numQueries);
                 scrambleAndwriteTestcaseNG(treeGenerator, testcase, queries);
             }
         }
