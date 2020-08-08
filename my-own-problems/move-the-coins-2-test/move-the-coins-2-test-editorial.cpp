@@ -546,8 +546,6 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     vector<AVLTree> suffixesForHeight(maxNodeHeight + 1);
     for (auto height = 0; height <= maxNodeHeight; height++)
     {
-        // The "nodesAtHeightInDFSOrder[height].size() * 10"s are a crude estimate for the number of nodes the AVLTree might need:
-        // removing them has no effect on correctness, but results in a greater number of (expensive) calls to malloc/ free.
         prefixesForHeight[height] = AVLTree(true);
         for (const auto nodeAtHeight : nodesAtHeightInDFSOrder[height])
         {
