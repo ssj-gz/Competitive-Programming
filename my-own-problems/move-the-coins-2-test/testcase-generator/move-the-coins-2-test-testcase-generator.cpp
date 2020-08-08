@@ -895,7 +895,7 @@ int main(int argc, char* argv[])
                     addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
                     addQueriesCoveredByStrands({arm1, arm2, arm3}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
 
-                    addRandomQueries(treeGenerator, queries, numQueries - 3, lookupInfo);
+                    addRandomQueries(treeGenerator, queries, numQueries - 4, lookupInfo);
                     // Add a few queries targetting specific edge-cases.  For these, we need to scramble the node ids right now,
                     // as we want the node ids to be finalised, as the order of reparentings in the list of all reparentings
                     // depends on the node ids.
@@ -931,6 +931,14 @@ int main(int argc, char* argv[])
                         auto newParentNode = nodesCanReparentTo.front();
                         queries.push_back({nodeToReparent, newParentNode});
                         cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
+                    }
+                    {
+                        // Similar to the above, but we pick a random node and then the *last* node that node can be re-parented to.
+                        auto nodeToReparent = rnd.nextFrom(allNodes);
+                        const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
+                        assert(!nodesCanReparentTo.empty());
+                        auto newParentNode = nodesCanReparentTo.back();
+                        queries.push_back({nodeToReparent, newParentNode});
                     }
                     auto nodesInIdOrder(allNodes);
                     sort(nodesInIdOrder.begin(), nodesInIdOrder.end(), [](const auto node1, const auto node2)
