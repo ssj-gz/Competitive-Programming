@@ -920,10 +920,12 @@ int main(int argc, char* argv[])
                         auto newParent = findRandomValidNewParent(nodeToReparentAndHeight.nodeToReparent, allNodes, nodeToReparentAndHeight.newParentHeight, nodeToReparentAndHeight.newParentHeight, lookupInfo);
                         queries.push_back({nodeToReparentAndHeight.nodeToReparent, newParent});
                     }
-                    addRandomQueries(treeGenerator, queries, numQueries, lookupInfo);
+                    const auto numEdgeCaseQueries = 4;
+                    addRandomQueries(treeGenerator, queries, numQueries - numEdgeCaseQueries, lookupInfo);
+                    addEdgeCaseQueries(treeGenerator, queries);
                 }
 
-                scrambleAndwriteTestcase(treeGenerator, testcase, queries);
+                scrambleAndwriteTestcaseNG(treeGenerator, testcase, queries);
 
             }
         }
