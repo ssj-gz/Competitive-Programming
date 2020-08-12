@@ -340,6 +340,109 @@ TestNode<NodeData>* buildGraphInLayers(TreeGenerator<NodeData>& treeGenerator, c
     return rootNode;
 }
 
+/**
+ * Adds four queries that test some specific edge cases.  These queries require that the
+ * nodes all have fixed ids (i.e. that won't be changed by a subsequent call to scrambleNodeIdsAndReorder)
+ * so it calls scrambleNodeIdsAndReorder itself and then freezes the node ids.
+ * It assumes that the first created node is the rootNode.
+ */
+void addEdgeCaseQueries(TreeGenerator<NodeData>& treeGenerator, vector<TestQuery>& destQueries)
+{
+    const auto allNodes = treeGenerator.nodes();
+    auto rootNode = allNodes.front();
+    // Add a few queries targetting specific edge-cases.  For these, we need to scramble the node ids right now,
+    // as we want the node ids to be finalised, as the order of reparentings in the list of all reparentings
+    // depends on the node ids.
+    rootNode->forceScrambledId = 1;
+    treeGenerator.scrambleNodeIdsAndReorderNG();
+    int nodeId = 1;
+    // Ensure that any subsequent calls to scrambleNodeIdsAndReorderNG
+    for (auto node : treeGenerator.nodes())
+    {
+        assert(node->id() == nodeId);
+        node->forceScrambledId = nodeId;
+        nodeId++;
+    }
+    // Need to recompute DFS info now that we've scrambled the node ids, else "isDescendantOf" won't work.
+    computeDFSInfo(rootNode);
+    auto findNodesCanReparentTo = [&allNodes](auto nodeToReparent)
+    {
+        vector<TestNode<NodeData>*> nodesCanReparentTo;
+        for (auto node : allNodes)
+        {
+            if (!node->data.isDescendantOf(*nodeToReparent))
+                nodesCanReparentTo.push_back(node);
+        }
+        sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
+                {
+                if (node1->data.height != node2->data.height)
+                return node1->data.height < node2->data.height;
+                return node1->id() < node2->id();
+                });
+        return nodesCanReparentTo;
+    };
+
+    {
+        // Add one query that picks a random node n and chooses a query such that the result is the
+        // first reparenting that reparents n.  This tests an edge-case in the Phase One code:
+        // they must find the first numCanReparentToPrefixSum *strictly greater than* indexInOriginalList, rather
+        // than the first that is *greater than or equal to* indexInOriginalList.
+        auto nodeToReparent = rnd.nextFrom(allNodes);
+        const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
+        assert(!nodesCanReparentTo.empty());
+        auto newParentNode = nodesCanReparentTo.front();
+        destQueries.push_back({nodeToReparent, newParentNode});
+        cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
+    }
+    {
+        // Similar to the above, but we pick a random node and then the *last* node that node can be re-parented to.
+        auto nodeToReparent = rnd.nextFrom(allNodes);
+        const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
+        assert(!nodesCanReparentTo.empty());
+        auto newParentNode = nodesCanReparentTo.back();
+        destQueries.push_back({nodeToReparent, newParentNode});
+    }
+    auto nodesInIdOrder(allNodes);
+    sort(nodesInIdOrder.begin(), nodesInIdOrder.end(), [](const auto node1, const auto node2)
+            {
+            return node1->id() < node2->id();
+            });
+    {
+        // Pick the first possible reparenting.
+        TestNode<NodeData>* nodeToReparent = nullptr;
+        TestNode<NodeData>* newParentNode = nullptr;
+        for (auto node : nodesInIdOrder)
+        {
+            const auto nodesCanReparentTo = findNodesCanReparentTo(node);
+            if (!nodesCanReparentTo.empty())
+            {
+                nodeToReparent = node;
+                newParentNode = nodesCanReparentTo.front();
+                break;
+            }
+        }
+        assert(nodeToReparent && newParentNode);
+        destQueries.push_back({nodeToReparent, newParentNode});
+    }
+    {
+        // Pick the last possible reparenting.
+        TestNode<NodeData>* nodeToReparent = nullptr;
+        TestNode<NodeData>* newParentNode = nullptr;
+        for (auto nodeIter = nodesInIdOrder.rbegin(); nodeIter != nodesInIdOrder.rend(); nodeIter++)
+        {
+            const auto node = *nodeIter;
+            const auto nodesCanReparentTo = findNodesCanReparentTo(node);
+            if (!nodesCanReparentTo.empty())
+            {
+                nodeToReparent = node;
+                newParentNode = nodesCanReparentTo.back();
+                break;
+            }
+        }
+        assert(nodeToReparent && newParentNode);
+        destQueries.push_back({nodeToReparent, newParentNode});
+    }
+}
 
 
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
@@ -907,101 +1010,10 @@ int main(int argc, char* argv[])
                     addWeightedQueries(secondHalvesOfArms, allNodes, queries, numQueries - queries.size() - numStrandCoveredQueries, rnd.next(75.0, 85.0), lookupInfo);
                     addQueriesCoveredByStrands({arm1, arm2, arm3}, addedStrands, allNodes, numStrandCoveredQueries, queries, lookupInfo);
 
-                    addRandomQueries(treeGenerator, queries, numQueries - 4, lookupInfo);
-                    // Add a few queries targetting specific edge-cases.  For these, we need to scramble the node ids right now,
-                    // as we want the node ids to be finalised, as the order of reparentings in the list of all reparentings
-                    // depends on the node ids.
-                    //treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
-                    //treeGenerator.scrambleEdgeOrder();
-                    rootNode->forceScrambledId = 1;
-                    treeGenerator.scrambleNodeIdsAndReorderNG();
-                    int nodeId = 1;
-                    // Ensure that any subsequent calls to scrambleNodeIdsAndReorderNG
-                    for (auto node : treeGenerator.nodes())
-                    {
-                        assert(node->id() == nodeId);
-                        node->forceScrambledId = nodeId;
-                        nodeId++;
-                    }
-                    // Need to recompute DFS info now that we've scrambled the node ids, else "isDescendantOf" won't work.
-                    computeDFSInfo(rootNode);
-                    auto findNodesCanReparentTo = [&allNodes](auto nodeToReparent)
-                        {
-                            vector<TestNode<NodeData>*> nodesCanReparentTo;
-                            for (auto node : allNodes)
-                            {
-                                if (!node->data.isDescendantOf(*nodeToReparent))
-                                    nodesCanReparentTo.push_back(node);
-                            }
-                            sort(nodesCanReparentTo.begin(), nodesCanReparentTo.end(), [](const auto& node1, const auto& node2)
-                                    {
-                                        if (node1->data.height != node2->data.height)
-                                            return node1->data.height < node2->data.height;
-                                        return node1->id() < node2->id();
-                                    });
-                            return nodesCanReparentTo;
-                        };
+                    const auto numEdgeCaseQueries = 4;
+                    addRandomQueries(treeGenerator, queries, numQueries - numEdgeCaseQueries, lookupInfo);
 
-                    {
-                        // Add one query that picks a random node n and chooses a query such that the result is the
-                        // first reparenting that reparents n.  This tests an edge-case in the Phase One code:
-                        // they must find the first numCanReparentToPrefixSum *strictly greater than* indexInOriginalList, rather
-                        // than the first that is *greater than or equal to* indexInOriginalList.
-                        auto nodeToReparent = rnd.nextFrom(allNodes);
-                        const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
-                        assert(!nodesCanReparentTo.empty());
-                        auto newParentNode = nodesCanReparentTo.front();
-                        queries.push_back({nodeToReparent, newParentNode});
-                        cout << "magic: nodeToReparent: " << nodeToReparent->id() << " newParentNode: " << newParentNode->id() << endl;
-                    }
-                    {
-                        // Similar to the above, but we pick a random node and then the *last* node that node can be re-parented to.
-                        auto nodeToReparent = rnd.nextFrom(allNodes);
-                        const auto nodesCanReparentTo = findNodesCanReparentTo(nodeToReparent);
-                        assert(!nodesCanReparentTo.empty());
-                        auto newParentNode = nodesCanReparentTo.back();
-                        queries.push_back({nodeToReparent, newParentNode});
-                    }
-                    auto nodesInIdOrder(allNodes);
-                    sort(nodesInIdOrder.begin(), nodesInIdOrder.end(), [](const auto node1, const auto node2)
-                            {
-                                return node1->id() < node2->id();
-                            });
-                    {
-                        // Pick the first possible reparenting.
-                        TestNode<NodeData>* nodeToReparent = nullptr;
-                        TestNode<NodeData>* newParentNode = nullptr;
-                        for (auto node : nodesInIdOrder)
-                        {
-                            const auto nodesCanReparentTo = findNodesCanReparentTo(node);
-                            if (!nodesCanReparentTo.empty())
-                            {
-                                nodeToReparent = node;
-                                newParentNode = nodesCanReparentTo.front();
-                                break;
-                            }
-                        }
-                        assert(nodeToReparent && newParentNode);
-                        queries.push_back({nodeToReparent, newParentNode});
-                    }
-                    {
-                        // Pick the last possible reparenting.
-                        TestNode<NodeData>* nodeToReparent = nullptr;
-                        TestNode<NodeData>* newParentNode = nullptr;
-                        for (auto nodeIter = nodesInIdOrder.rbegin(); nodeIter != nodesInIdOrder.rend(); nodeIter++)
-                        {
-                            const auto node = *nodeIter;
-                            const auto nodesCanReparentTo = findNodesCanReparentTo(node);
-                            if (!nodesCanReparentTo.empty())
-                            {
-                                nodeToReparent = node;
-                                newParentNode = nodesCanReparentTo.back();
-                                break;
-                            }
-                        }
-                        assert(nodeToReparent && newParentNode);
-                        queries.push_back({nodeToReparent, newParentNode});
-                    }
+                    addEdgeCaseQueries(treeGenerator, queries);
                 }
 
                 // Must use "scrambleAndwriteTestcaseNG" instead of "scrambleAndwriteTestcase", as the latter 
