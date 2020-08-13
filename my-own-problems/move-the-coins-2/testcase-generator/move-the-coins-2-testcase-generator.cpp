@@ -1051,8 +1051,11 @@ int main(int argc, char* argv[])
             }
         }
         {
+            // seed: 283432 maxBobWinsForNode: 78
+            // seed: 4574835 maxBobWinsForNode: 37
+
             auto& testFile = testsuite.newTestFile(MC2TestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(283432) // Max Bob Wins: 78.
+                    .withSeed(4574835)
                     .withDescription("Duplicate of: 'Three long (~50k) arms originating at (or near) root; then 35% of remaining of bristles; the rest, leaves.  200k nodes total.  Queries mainly concentrate on the first halves of each of the three arms', except with a different seed and a ~50% chance of a node having a coin - I was worried that setting the number of nodes having a coin as >75% was exploitable in some way."));
             {
                 auto& testcase = testFile.newTestcase(MC2TestCaseInfo());
