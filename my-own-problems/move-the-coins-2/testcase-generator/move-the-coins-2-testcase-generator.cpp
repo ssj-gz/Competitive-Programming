@@ -588,7 +588,7 @@ int main(int argc, char* argv[])
                         findBobWinningRelocatedHeightsForNodes(treeGenerator, nodesAtHeight);
                         vector<TestQuery> queries;
                         queries = generateQueriesFromNodes(treeGenerator.nodes(), numQueries, rnd.next(30.0, 60.0), nodesAtHeight);
-                        assert(queries.size() == numQueries);
+                        assert(static_cast<int>(queries.size()) == numQueries);
                         scrambleAndwriteTestcase(treeGenerator, testcase, queries);
                         generatedTestcase = true;
                     }
