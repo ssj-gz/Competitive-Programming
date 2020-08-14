@@ -317,8 +317,9 @@ vector<TestQuery> generateQueriesFromNodes(const vector<TestNode<NodeData>*>& no
         randomBobWinsByNodeToReparent[nodeToReparent].push_back(newParentHeight);
     }
     vector<TestNode<NodeData>*> randomBobWinNodes;
-    for (const auto& [nodeToReparent, newParentHeights] : randomBobWinsByNodeToReparent)
+    for (const auto& [nodeToReparent, unusedNewParentHeights] : randomBobWinsByNodeToReparent)
     {
+        (void)unusedNewParentHeights;
         randomBobWinNodes.push_back(nodeToReparent);
     }
     // Give randomBobWinNodes a deterministic ordering.
