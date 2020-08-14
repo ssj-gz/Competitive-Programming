@@ -239,7 +239,7 @@ void findBobWinningRelocatedHeightsForNodes(const TreeGenerator<NodeData>& treeG
         if (cacheFileIn)
         {
             const auto allNodes = treeGenerator.nodes();
-            for (int i = 0; i < allNodes.size(); i++)
+            for (int i = 0; i < treeGenerator.numNodes(); i++)
             {
                 int nodeToReparentId;
                 cacheFileIn >> nodeToReparentId;
