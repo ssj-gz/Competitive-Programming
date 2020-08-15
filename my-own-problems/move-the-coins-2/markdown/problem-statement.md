@@ -31,7 +31,7 @@ Bob knows some elementary Game Theory, so given the _original tree_ $T_\textit{o
 
 The resulting tree is our $T(q_i)$.
 
-As an example, assume that the below is our $T_\textit{orig}$ and that we have our list of $c_v$ describing the number of Coins on a node (here, $c_1=0$, $c_2=2$, etc):
+As an example, assume that the below is our $T_\textit{orig}$ and that our list of $c_v$ describing the number of Coins on a node is as shown (i.e. $c_1=0$, $c_2=2$, etc):
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent1of2.png)
 
