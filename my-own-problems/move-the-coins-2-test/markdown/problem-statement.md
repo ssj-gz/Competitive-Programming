@@ -8,11 +8,11 @@ We take a copy of the original $T$, and in this copy we remove the edge connecti
 
 As an example, imagine we have the tree $T$ as shown below:
 
-![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX-reparent1of2.png)
+![](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX-reparent1of2.png)
 
 and we wish to apply the reparenting $r=(u,v)=(6,4)$ to it.  The resulting $T(r)$ would look like:
 
-![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX-reparent2of2.png)
+![](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX-reparent2of2.png)
 
 A reparenting $r$ is _valid_ if the resulting $T(r)$ is still a _tree_ (that is, a connected graph with no cycles) over the $N$ nodes.
 
@@ -119,11 +119,11 @@ For each test case, print a single line containing one integer ― the final val
 
 **Example case 1:** The tree $T$ looks like:
 
-![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-T.png)
+![](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-T.png)
 
 There are $25$ reparentings $(u,v)$ - too many to draw all $T((u,v)$! - but here is a representative sampling.  Reparentings that are valid are marked with a "✓"; invalid ones with a "✗": 
 
-![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-reparentings.png)
+![](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX1-reparentings.png)
 
 By computing all $25$ of the $T((u,v))$, we can form a table of whether $(u,v)$ is a valid reparenting (✓) or not (✗); for this testcase, it is as follows:
 
@@ -243,11 +243,11 @@ We've now processed all $Q$ choices, and the final $\textit{decryptionKey}=126$;
 
 **Example case 2:** The initial tree $T$ is as below:
 
-![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-T.png)
+![](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-T.png)
 
 There are $49$ possible reparentings; again, we only show a sample of the $49$ $(u,v)$s and their validity:
 
-![image](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-reparentings.png)
+![](http://campus.codechef.com/SITJMADM/content/MVCN2TST-EX2-reparentings.png)
 
 The whole table of reparentings and their validity looks like:
 
