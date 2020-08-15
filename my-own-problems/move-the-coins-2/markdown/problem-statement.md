@@ -31,11 +31,11 @@ Bob knows some elementary Game Theory, so given the _original tree_ $T_\textit{o
 
 The resulting tree is our $T(q_i)$.
 
-As an example, assume that the below is our $T_\textit{orig}$ with a set of $c_v$ giving the number of Coins on a node:
+As an example, assume that the below is our $T_\textit{orig}$ and that we have our list of $c_v$ describing the number of Coins on a node (here, $c_1=0$, $c_2=2$, etc):
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent1of2.png)
 
-Assuming we want to apply the reparenting query $q=(u,v)=(6,3)$.  Then we compute $T((6,3))$ as follows:
+Assume we want to apply the reparenting query $q=(u,v)=(6,3)$.  Then we compute $T((6,3))$ as follows:
 
 ![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent2of2.png)
 
