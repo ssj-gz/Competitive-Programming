@@ -9,15 +9,15 @@ Bob and Alice are playing a board game.  The board is in the form of a tree $T$ 
 
 For example, if the tree $T$ currently looks like this:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example-1of3.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_1.png)
 
 Then the current player can pick a Coin on any of nodes $v = 2, 4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the Coin $X$ steps towards $1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example-2of3.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_2.png)
 
 Let's assume they pick $X=2$, so they move the Coin to node $2$. Then the tree now looks like:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example-3of3.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_3.png)
 
 and it is the other player's turn to move.
 
@@ -33,11 +33,11 @@ The resulting tree is our $T(q_i)$.
 
 As an example, assume that the below is our $T_\textit{orig}$ and that our list of $c_v$ describing the number of Coins on a node is as shown (i.e. $c_1=0$, $c_2=2$, etc):
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent1of2.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_4.png)
 
 Assume we want to apply the reparenting query $q=(u,v)=(6,3)$.  Then we compute $T((6,3))$ as follows:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX-reparent2of2.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_5.png)
 
 Can you help Bob compute, for each of Alice's reparenting queries $q$, the winner of the game played on the transformed board $T(q)$?
 
@@ -134,11 +134,11 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 **Example case 1:** The original tree $T_{\textit{orig}}$ looks like this (the initial Coins specified by the $c_i$ have been added for clarity):
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-1of4.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_6.png)
 
 The first query is $q_1=(u_1, v_1)=(2,3)$, and we construct the corresponding $T(q_1)$ as show below:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-2of4.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_7.png)
 
 We see that $\textit{winner}(\textit{game}(T(q_1)))$ is Alice.  For example, a winning strategy for Alice would be to move the coin in node $3$ 
 to node $4$; then we note that, whatever move Bob makes, Alice can "mirror" his move i.e. if on the next move Bob moves a coin from node $2$ to node $4$,
@@ -148,7 +148,7 @@ move, and so loses $\textit{game}(T(q_1))$
 
 The second query is $q_2=(u_2, v_2)=(3,1)$, and we construct the corresponding $T(q_2)$ as show below:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-3of4.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_8.png)
 
 We see that $\textit{winner}(\textit{game}(T(q_2)))$ is Bob.   To see this, consider the number of coins on a node other than 1 at the end of each turn.  It's 
 hopefully clear that this number will always reduce by exactly one after each turn, no matter what move Alice or Bob make; therefore, since there are initially $4$
@@ -158,7 +158,7 @@ Thus, $\textit{winner}(\textit{game}(T(q_2)))=$ Bob, and we add $2$ to $\textit{
 
 The third and final query is $q_3=(u_3, v_3)=(3,2)$, and we construct the corresponding $T(q_3)$ as show below:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX1-4of4.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_9.png)
 
 Alice wins the game played on $T(q_3)$: if she moves the coin in node $2$ to node $3$ on her first move, then we have a similar situation to that of $q_2$ -
 yet again, there will be $4$ coins on nodes other than node $1$, and no matter what move each player makes on their turn, this number will reduce by exactly one each turn.  
@@ -175,7 +175,7 @@ Taking this modulo $10^9+7$, the final answer for this testcase is $4$.
 
 **Example case 2:** The original tree $T_{\textit{orig}}$ and the transformed trees for each of the three queries are as follows:
 
-![](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-EX2.png)
+![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/MOVCOIN2_10.png)
 
 It can be shown that:
 
