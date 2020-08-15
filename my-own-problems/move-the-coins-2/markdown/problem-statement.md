@@ -9,15 +9,15 @@ Bob and Alice are playing a board game.  The board is in the form of a tree $T$ 
 
 For example, if the tree $T$ currently looks like this:
 
-![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example1of3.png)
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example-1of3.png)
 
 Then the current player can pick a Coin on any of nodes $v = 2, 4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the Coin $X$ steps towards $1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
-![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example2of3.png)
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example-2of3.png)
 
 Let's assume they pick $X=2$, so they move the Coin to node $2$. Then the tree now looks like:
 
-![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example3of3.png)
+![image](http://campus.codechef.com/SITJMADM/content/MOVCOIN2-move-example-3of3.png)
 
 and it is the other player's turn to move.
 
