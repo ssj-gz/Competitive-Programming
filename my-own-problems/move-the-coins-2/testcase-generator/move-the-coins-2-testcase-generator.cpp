@@ -156,15 +156,18 @@ void writeTestCase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>
     }
 }
 
-void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& queries)
+void scrambleAndwriteTestcase(TreeGenerator<NodeData>& treeGenerator, Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQuery>& originalQueries)
 {
     auto rootNode = treeGenerator.nodes().front();
     treeGenerator.scrambleNodeIdsAndReorder(rootNode /* Ensure that the rootNode keeps its id of 1 */);
     treeGenerator.scrambleEdgeOrder();
 
-    cout << "num bob wins: " << count_if(queries.begin(), queries.end(), [](const auto& query) { return query.isBobWin; }) << endl;
+    cout << "num bob wins: " << count_if(originalQueries.begin(), originalQueries.end(), [](const auto& query) { return query.isBobWin; }) << endl;
 
-    writeTestCase(treeGenerator, destTestcase, queries);
+    auto scrambledQueries = originalQueries;
+    ::shuffle(scrambledQueries.begin(), scrambledQueries.end());
+
+    writeTestCase(treeGenerator, destTestcase, scrambledQueries);
 }
 
 /**
