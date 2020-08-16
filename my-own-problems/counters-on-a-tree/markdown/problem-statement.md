@@ -7,15 +7,15 @@ Bob and Alice are playing a board game.  The board is in the form of a tree $T_{
 
 For example, if the tree $T_{\textit{board}}$ currently looks like this and, for this game, we have chosen $R=1$:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-1of3.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-1of3.png)
 
 Then the current player can pick a Counter on any of nodes $v = 2, 4$ or $5$ (if there were any Counters on node $3$, picking one of those would also be an option). Let's assume they pick the Counter on $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-2of3.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-2of3.png)
 
 Let's assume they pick $X=2$, so they move the Counter to node $2$. Then the tree now looks like:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-3of3.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-3of3.png)
 
 and it is the other player's turn to move.
 
@@ -94,11 +94,11 @@ Although the tree $T_{\textit{board}}$ is undirected, *arrows* have been added a
 
 **Example case 1:** The original $T_{\textit{board}}$ looks like this:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-1of2.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-1of2.png)
 
 Let's examine each $\textit{game}(T_{\textit{board}},R)$ for $R=1,2,3$.
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-2of2.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX1-2of2.png)
 
 For $R = 1$:
 
@@ -132,43 +132,43 @@ Taking this modulo $10^9+7$, the answer for this testcase is $4$.
 
 **Example case 2:** The original $T_{\textit{board}}$ looks like:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-1of7.png)
 
 If we set $R$ to be the node $1$, then we play on the following tree:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-2of7.png)
 
 For $R = 1$, it can be shown that if both players play perfectly, the winner will be Bob - so $\textit{winner}(\textit{game}(T_{\textit{board}}, 1))$ is Bob.
 
 For $R = 2$, we have the following:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-3of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-3of7.png)
 
 and again, it can be shown that $\textit{winner}(\textit{game}(T_{\textit{board}}, 2))$ is Bob.
 
 
 For $R = 3$:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-4of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-4of7.png)
 
 Once again, $\textit{winner}(\textit{game}(T_{\textit{board}}, 3))$ can be shown to be Bob.
 
 $R = 4$:
 
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-5of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-5of7.png)
 
 This time, Alice will win if both players play perfectly i.e. $\textit{winner}(\textit{game}(T_{\textit{board}}, 4))$ is Alice.
 
 $R = 5$:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-6of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-6of7.png)
 
 Alice wins for $R = 5$, too; $\textit{winner}(\textit{game}(T_{\textit{board}}, 5))$ is Alice.
 
 Finally, $R = 6$:
 
-![image](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-7of7.png)
+![](http://campus.codechef.com/SITJMADM/content/COUNTREE-EX2-7of7.png)
 
 Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T_{\textit{board}}, 6))$ is Alice.
 
