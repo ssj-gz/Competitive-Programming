@@ -363,8 +363,8 @@ int main(int argc, char* argv[])
                     .withDescription("long-ish and jagged"));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 60k long arm then jagged, 85% with counter, XXXX02 Bob wins")
-                        .withSeed(1619071763));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 60k long arm then jagged, 85% with counter, 16 Bob wins")
+                        .withSeed(1149198243));
 
                 const auto numNodes = subtask3.maxNodesPerTestcase;
 
@@ -377,7 +377,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 80k long arm then jagged, 73% with counter, XXXX03 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 80k long arm then jagged, 73% with counter, 10 Bob wins")
                         .withSeed(1293843542));
 
                 TreeGenerator<NodeData> treeGenerator;
