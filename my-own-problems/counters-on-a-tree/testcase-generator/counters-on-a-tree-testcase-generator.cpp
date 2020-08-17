@@ -336,7 +336,7 @@ int main(int argc, char* argv[])
                     .withSeed(122));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; XXXX00 Bob wins"));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 13787 Bob wins"));
 
                 const auto numNodes = subtask3.maxNodesPerTestcase;
 
@@ -347,7 +347,7 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; XXXX01 Bob wins"));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 8515 Bob wins"));
 
                 const auto numNodes = subtask3.maxNodesPerTestcase;
 
