@@ -6,7 +6,7 @@
 #include <iostream>
 #include <set>
 
-constexpr int maxNodes = 100'000;
+constexpr int maxNodes = 200'000;
 constexpr int maxCounters = 16;
 constexpr int maxNumTestcases = 1000;
 
