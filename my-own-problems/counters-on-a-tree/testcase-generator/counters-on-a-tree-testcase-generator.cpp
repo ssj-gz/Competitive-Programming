@@ -406,14 +406,14 @@ int main(int argc, char* argv[])
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 73k long arm; 83% with counter; 6 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 146k long arm; 83% with counter; 6 Bob wins")
                         .withSeed(2643792404));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 73'000);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(11'000, 2.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15883, 89);
+                treeGenerator.addNodeChain(rootNode, 146'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(rnd.next(20'000, 22'000), 2.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(rnd.next(30'000, 32'000), 89);
                 addCounters(treeGenerator, 83.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
