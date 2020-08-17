@@ -394,14 +394,14 @@ int main(int argc, char* argv[])
                     .withDescription("long"));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 70k long arm; 78% with counter; 7 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 140k long arm; 78% with counter; 7 Bob wins")
                         .withSeed(595100017));
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 70'000);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(15'000, 3.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(14876, 80);
+                treeGenerator.addNodeChain(rootNode, 140'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(30'000, 3.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(29'752, 80);
                 addCounters(treeGenerator, 78.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
