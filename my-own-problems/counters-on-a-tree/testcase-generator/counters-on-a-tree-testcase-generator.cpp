@@ -672,6 +672,46 @@ int main(int argc, char* argv[])
 
             }
         }
+        {
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
+                    .withSeed(94543));
+
+            {
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 80'000 are random-ish; then three arms of length ~30'000 are attached to random nodes.  Then the remaining nodes are essentially random, again.  19 Bob Wins")
+                        .withSeed(2054723557));
+                TreeGenerator<NodeData> treeGenerator;
+                treeGenerator.createNode();
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
+                {
+
+                    const auto numRandomNodesToAdd = rnd.next(78'000, 82'000);
+                    treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numRandomNodesToAdd, rnd.next(99.0, 99.5));
+
+                }
+
+                const auto nodesWithoutArms = treeGenerator.nodes();
+                for (int i = 0; i < 3; i++)
+                {
+                    auto armRootNode = nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))];
+                    treeGenerator.addNodeChain(armRootNode, rnd.next(29'000, 31'000));
+                }
+
+                {
+                    const auto numRandomNodesToAdd = numNodes - treeGenerator.numNodes();
+                    const auto numPhases = 3;
+                    const auto numNodesToAddInPhase = chooseRandomValuesWithSum(numPhases, numRandomNodesToAdd, 1);
+
+                    for (int i = 0; i < numPhases; i++)
+                    {
+                        treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesToAddInPhase[i], rnd.next(0.0, 100.0));
+                    }
+                }
+
+                addCounters(treeGenerator, rnd.next(45.0, 55.0));
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
     }
     const bool validatedAndWrittenSuccessfully = testsuite.writeTestFiles();
     if (!validatedAndWrittenSuccessfully)
