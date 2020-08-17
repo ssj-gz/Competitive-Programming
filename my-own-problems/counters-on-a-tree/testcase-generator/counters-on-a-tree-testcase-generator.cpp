@@ -6,7 +6,7 @@
 #include <iostream>
 #include <set>
 
-constexpr int maxNodes = 200'000;
+constexpr int maxNodesOverAllTestcases = 200'000;
 constexpr int maxCounters = 16;
 constexpr int maxNumTestcases = 1000;
 
@@ -82,8 +82,8 @@ SubtaskInfo subtask2 = SubtaskInfo::create().withSubtaskId(2)
 
 SubtaskInfo subtask3 = SubtaskInfo::create().withSubtaskId(3)
                                             .withScore(85)
-                                            .withMaxNodesPerTestcase(maxNodes)
-                                            .withMaxNodesOverAllTestcases(2 * maxNodes)
+                                            .withMaxNodesPerTestcase(maxNodesOverAllTestcases)
+                                            .withMaxNodesOverAllTestcases(maxNodesOverAllTestcases)
                                             .withMaxNumCountersPerNode(maxCounters)
                                             .withMaxNumCountersOverAllNodes(NoExplicitLimit)
                                             .withMaxNumTestcases(maxNumTestcases);
