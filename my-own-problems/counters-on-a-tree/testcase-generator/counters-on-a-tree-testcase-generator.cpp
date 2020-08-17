@@ -349,9 +349,11 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - randomly generated with 7 percent preference for leaves; 70% with counter; 2747 Bob wins"));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'992, 7.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - 1, 7.0);
                 addCounters(treeGenerator, 70.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
