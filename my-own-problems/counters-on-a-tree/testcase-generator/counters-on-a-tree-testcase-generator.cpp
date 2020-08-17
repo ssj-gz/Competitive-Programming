@@ -677,8 +677,8 @@ int main(int argc, char* argv[])
                     .withSeed(94543));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 80'000 are random-ish; then three arms of length ~30'000 are attached to random nodes.  Then the remaining nodes are essentially random, again.  19 Bob Wins")
-                        .withSeed(2054723557));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 80'000 are random-ish; then three arms of length ~30'000 are attached to random nodes.  Then the remaining nodes are essentially random, again.  22 Bob Wins")
+                        .withSeed(2082190141));
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
                 const auto numNodes = subtask3.maxNodesPerTestcase;
