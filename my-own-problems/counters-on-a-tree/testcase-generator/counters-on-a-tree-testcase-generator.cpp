@@ -426,18 +426,20 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes four vertices with high degree; 78% with counter; 31166 Bob wins")
                         .withSeed(1018053492));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
                 auto node1 = treeGenerator.createNode(rootNode);
                 auto node2 = treeGenerator.createNode(rootNode);
                 auto node3 = treeGenerator.createNode(node1);
-                treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2, node3}, 70'000, 99.8, 
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2, node3}, 7 * numNodes / 100, 99.8, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
                         addNewNodeToSet = false;
                         removeParentFromSet = false;
                         });
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'998 - treeGenerator.numNodes(), 50);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 50);
 
                 addCounters(treeGenerator, 78.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
