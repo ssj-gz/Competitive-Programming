@@ -1,4 +1,4 @@
-Chef is preparing testcases for the ["Move the Coins 2"](https://www.codechef.com/SEPT20B/problems/MOVCOIN2) Problem!
+Chef is preparing testcases for the ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem) Problem!
 
 For each testcase, he needs to provide a tree $T$ over $N$ nodes labelled $1,2,\dots,N$ and rooted at node $1$, and a list of $Q$ distinct _valid reparentings_ on $T$.
 
