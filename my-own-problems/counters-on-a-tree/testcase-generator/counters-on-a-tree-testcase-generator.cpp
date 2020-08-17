@@ -363,14 +363,16 @@ int main(int argc, char* argv[])
                     .withDescription("long-ish and jagged"));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 30k long arm then jagged, 85% with counter, 15 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 60k long arm then jagged, 85% with counter, 15 Bob wins")
                         .withSeed(1619071763));
+
+                const auto numNodes = subtask3.maxNodesPerTestcase;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 30'000);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(50'000, 1.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(19902, 99.0);
+                treeGenerator.addNodeChain(rootNode, 60'000);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(rnd.next(38'000, 42'000), 99.0);
                 addCounters(treeGenerator, 85.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
