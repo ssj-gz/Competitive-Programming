@@ -482,30 +482,34 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes; 3 long arms; 82% with counter; 7 Bob wins")
                         .withSeed(3359440718));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 30'000);
-                treeGenerator.addNodeChain(rootNode, 29'176);
-                treeGenerator.addNodeChain(rootNode, 31'726);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((99'999 - treeGenerator.numNodes()) / 2, 2.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999 - treeGenerator.numNodes(), 60.0);
+                treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(48'000, 52'000));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 2.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 60.0);
 
                 addCounters(treeGenerator, 82.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes; 3 long arms; 86% with counter; 6 Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes; 3 long arms; approx 50% with counter; 6 Bob wins")
                         .withSeed(3247438039));
+
+                const auto numNodes = subtask3.maxNodesPerTestcase;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 25'283);
-                treeGenerator.addNodeChain(rootNode, 26'348);
-                treeGenerator.addNodeChain(rootNode, 34'736);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((99'999 - treeGenerator.numNodes()) / 2, 5.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999 - treeGenerator.numNodes(), 80.0);
+                treeGenerator.addNodeChain(rootNode, rnd.next(40'000, 52'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(40'000, 52'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(40'000, 52'000));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 5.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 80.0);
 
-                addCounters(treeGenerator, 86.0);
+                addCounters(treeGenerator, rnd.next(45.0, 55.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
         }
