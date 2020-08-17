@@ -338,9 +338,11 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes - randomly generated with 2 percent preference for leaves; 80% with counter; 9489 Bob wins"));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999, 2.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - 1, 2.0);
                 addCounters(treeGenerator, 80.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
@@ -659,18 +661,20 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("fat node with two long arms; 65% with counter; 7 Bob wins")
                                 .withSeed(3340030381));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode = treeGenerator.createNode();
-                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode}, 33'123, 99, 
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode}, 66'246, 99, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
                         addNewNodeToSet = false;
                         removeParentFromSet = false;
                         });
-                treeGenerator.addNodeChain(fatNode, rnd.next(20'000, 25'000));
-                treeGenerator.addNodeChain(fatNode, rnd.next(20'000, 25'000));
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 15.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 80.0);
+                treeGenerator.addNodeChain(fatNode, rnd.next(40'000, 50'000));
+                treeGenerator.addNodeChain(fatNode, rnd.next(40'000, 50'000));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 15.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 80.0);
 
                 addCounters(treeGenerator, 65.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
