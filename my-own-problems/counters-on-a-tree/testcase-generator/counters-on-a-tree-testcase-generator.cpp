@@ -448,25 +448,27 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes five vertices with high degree; 93% with counter; 33361 Bob wins")
                         .withSeed(2753439527));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
                 auto node1 = treeGenerator.createNode(rootNode);
                 auto node2 = treeGenerator.createNode(rootNode);
                 auto node3 = treeGenerator.createNode(node1);
                 auto node4 = treeGenerator.createNode(node2);
-                treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2}, 40'000, 99.8, 
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({rootNode, node1, node2}, 4 * numNodes / 10, 99.8, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
                         addNewNodeToSet = false;
                         removeParentFromSet = false;
                         });
-                treeGenerator.createNodesWithRandomParentPreferringFromSet({node1, node3, node4}, 30'000, 99.8, 
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({node1, node3, node4}, 3 * numNodes / 10, 99.8, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
                         addNewNodeToSet = false;
                         removeParentFromSet = false;
                         });
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'998 - treeGenerator.numNodes(), 80);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 80);
 
                 addCounters(treeGenerator, 93.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
