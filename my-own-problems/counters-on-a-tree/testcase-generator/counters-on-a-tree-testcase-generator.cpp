@@ -543,18 +543,19 @@ int main(int argc, char* argv[])
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 8735 Bob wins")
                         .withSeed(3724110391));
+                const auto numNodes = subtask3.maxNodesPerTestcase;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto fatNode1 = treeGenerator.createNode();
-                auto fatNode2 = treeGenerator.addNodeChain(fatNode1, 31'657).back();
-                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 60'000, 99, 
+                auto fatNode2 = treeGenerator.addNodeChain(fatNode1, rnd.next(58'000, 62'000)).back();
+                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 120'000, 99, 
                         [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
                         {
                         addNewNodeToSet = false;
                         removeParentFromSet = false;
                         });
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 5.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 80.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 5.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 80.0);
 
                 addCounters(treeGenerator, 72.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
