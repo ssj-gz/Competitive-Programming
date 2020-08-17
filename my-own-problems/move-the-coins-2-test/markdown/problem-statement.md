@@ -1,6 +1,6 @@
 Chef is preparing testcases for the ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem) Problem!
 
-For each testcase, he needs to provide a tree $T$ over $N$ nodes labelled $1,2,\dots,N$ and rooted at node $1$, and a list of $Q$ distinct _valid reparentings_ on $T$.
+For each testcase, he needs to provide a tree $T$ over $N$ nodes labelled $1,2,\dots,N$ and rooted at node $1$, and a list of $Q$ distinct _reparentings_ on $T$.  For the time being, he wants to generate only reparentings that are _valid_.
 
 A _reparenting_ $r$ is a pair of nodes $(u,v)$ ($u \ne 1$) of $T$.  The result of applying the reparenting $r$ to $T$ is another graph $T(r)$ over the $N$ nodes formed as follows:
 
