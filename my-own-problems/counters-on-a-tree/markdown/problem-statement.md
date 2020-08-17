@@ -1,19 +1,19 @@
-Bob and Alice are playing a board game.  The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of *Counters* around the board, with each node $v$ having $c_v$ Counters on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
+Bob and Alice are playing a board game.  The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of Coins around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
 
-1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Counters on the node numbered $v$.
+1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Coins on the node numbered $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
-3. A move consists of taking a single Counter ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$.
-4. If a player cannot make a move on their turn (i.e. because all the Counters are on node $R$), then the game ends and the other player is declared the winner.
+3. A move consists of taking a single Coin ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$.
+4. If a player cannot make a move on their turn (i.e. because all the Coins are on node $R$), then the game ends and the other player is declared the winner.
 
 For example, if the tree $T_{\textit{board}}$ currently looks like this and, for this game, we have chosen $R=1$:
 
 ![](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-1of3.png)
 
-Then the current player can pick a Counter on any of nodes $v = 2, 4$ or $5$ (if there were any Counters on node $3$, picking one of those would also be an option). Let's assume they pick the Counter on $5$, as shown below; then they can move the Counter $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
+Then the current player can pick a Coin on any of nodes $v = 2, 4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the Coin $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
 ![](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-2of3.png)
 
-Let's assume they pick $X=2$, so they move the Counter to node $2$. Then the tree now looks like:
+Let's assume they pick $X=2$, so they move the Coin to node $2$. Then the tree now looks like:
 
 ![](http://campus.codechef.com/SITJMADM/content/COUNTREE-move-example-3of3.png)
 
@@ -36,7 +36,7 @@ Since the result can be very large, please output it modulo $10^9+7$.
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
 - The first line of a testcase contains a single integer $N$.
 - Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes numbered $u$ and $v$ are connected by an edge.
-- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Counters that should be placed on the the node numbered $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
+- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Coins that should be placed on the the node numbered $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
 
 ### Output
 
@@ -90,7 +90,7 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 
 ### Explanation
 
-Although the tree $T_{\textit{board}}$ is undirected, *arrows* have been added along edges for clarity, indicating the direction in which Counters must be moved for each $R$. $R$ itself is highlighted in red.
+Although the tree $T_{\textit{board}}$ is undirected, *arrows* have been added along edges for clarity, indicating the direction in which Coins must be moved for each $R$. $R$ itself is highlighted in red.
 
 **Example case 1:** The original $T_{\textit{board}}$ looks like this:
 
@@ -104,23 +104,23 @@ For $R = 1$:
 
 Alice turns out to be the winner, here; on the first turn, she has two possible moves:
 
-1. Take the Counter in node $3$ and move it to node $2$; or
-1. Take the Counter in node $3$ and move it to node $1$.
+1. Take the Coin in node $3$ and move it to node $2$; or
+1. Take the Coin in node $3$ and move it to node $1$.
 
-If she does the latter, then at the end of her move, all Counters will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing perfectly, she does precisely that :)
+If she does the latter, then at the end of her move, all Coins will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing perfectly, she does precisely that :)
 
 For $R = 2$:
 
 Bob gets his revenge this time! Alice has two possible initial moves:
 
-1. Take the Counter in node $1$ and move it to node $2$; or
-1. Take the Counter in node $3$ and move it to node $2$.
+1. Take the Coin in node $1$ and move it to node $2$; or
+1. Take the Coin in node $3$ and move it to node $2$.
 
-In either case, at the end of her move there will be exactly one Counter remaining on a node other than $R = 2$.  Bob merely has to move this Counter to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
+In either case, at the end of her move there will be exactly one Coin remaining on a node other than $R = 2$.  Bob merely has to move this Coin to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
 
 For $R = 3$:
 
-Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to take the Counter in node $1$ and move it to node $3$).
+Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to take the Coin in node $1$ and move it to node $3$).
 
 We've figured out $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{BobWinR}=\{2\}$ and our desired sum is:
 
@@ -179,5 +179,3 @@ $$
 $$
 
 After taking this modulo $10^9+7$, the final answer is $14$.
-
-
