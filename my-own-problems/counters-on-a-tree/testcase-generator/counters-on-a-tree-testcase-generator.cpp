@@ -539,14 +539,16 @@ int main(int argc, char* argv[])
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes; 4 long arms; 68% with counter; 7 Bob wins")
                         .withSeed(2473290002));
 
+                const auto numNodes = subtask3.maxNodesPerTestcase;
+
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, 25'000);
-                treeGenerator.addNodeChain(rootNode, 21'778);
-                treeGenerator.addNodeChain(rootNode, 15'589);
-                treeGenerator.addNodeChain(rootNode, 18'112);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((99'999 - treeGenerator.numNodes()) / 2, 1.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(99'999 - treeGenerator.numNodes(), 90.0);
+                treeGenerator.addNodeChain(rootNode, rnd.next(38'000, 42'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(38'000, 42'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(38'000, 42'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(38'000, 42'000));
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 90.0);
 
                 addCounters(treeGenerator, 68.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
