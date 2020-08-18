@@ -4,7 +4,7 @@ Bob and Alice are playing a board game.  The board is in the form of a tree $T_{
 
 1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Coins on the node numbered $v$.
 2. Bob and Alice now take turns to make a move, with Alice making the first move.
-3. A move consists of taking a single Coin ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$.
+3. A move consists of taking a single Coin ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$ (**this is a small twist from the original Problem**)
 4. If a player cannot make a move on their turn (i.e. because all the Coins are on node $R$), then the game ends and the other player is declared the winner.
 
 For example, if the tree $T_{\textit{board}}$ currently looks like this and, for this game, we have chosen $R=1$:
