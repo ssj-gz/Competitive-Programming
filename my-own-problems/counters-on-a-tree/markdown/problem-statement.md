@@ -1,3 +1,5 @@
+A sequel to ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem), with a couple of twists!
+
 Bob and Alice are playing a board game.  The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of Coins around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
 
 1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Coins on the node numbered $v$.
