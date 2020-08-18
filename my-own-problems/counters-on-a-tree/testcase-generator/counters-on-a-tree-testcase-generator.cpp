@@ -172,6 +172,39 @@ void addCounters(TreeGenerator<NodeData>& treeGenerator, double percentageWithCo
 
 }
 
+TestNode<NodeData>* makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(TreeGenerator<NodeData>& treeGenerator, const int approxNumNodes)
+{
+    auto rootNode = treeGenerator.createNode();
+
+    std::vector<TestNode<NodeData>*> leafNodes;
+
+    for (int i = 0; i < 3; i++)
+    {
+        leafNodes.push_back(treeGenerator.createNode(rootNode));
+    }
+
+    while (treeGenerator.numNodes() < approxNumNodes)
+    {
+        std::vector<TestNode<NodeData>*> nextLeafNodes;
+        for (auto leafNode : leafNodes)
+        {
+            const int numNewChildren = 2 + (rnd.next(100) == 0 ? 1 : 0);
+            for (int i = 0; i < numNewChildren; i++)
+            {
+                nextLeafNodes.push_back(treeGenerator.createNode(leafNode));
+            }
+
+            if (treeGenerator.numNodes() >= approxNumNodes)
+                break;
+        }
+
+        leafNodes = nextLeafNodes;
+    }
+
+    return rootNode;
+}
+
+
 bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containingSubtask);
 
 int main(int argc, char* argv[])
@@ -707,6 +740,25 @@ int main(int argc, char* argv[])
                         treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesToAddInPhase[i], rnd.next(0.0, 100.0));
                     }
                 }
+
+                addCounters(treeGenerator, rnd.next(45.0, 55.0));
+                scrambleAndwriteTestcase(treeGenerator, testcase);
+            }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
+            {
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 100 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 1800.  Then finish off with random nodes.  Approx 50% coins.  33 Bob Wins")
+                        .withSeed(3138886060));
+                const int numNodes = subtask3.maxNodesPerTestcase;
+                TreeGenerator<NodeData> treeGenerator;
+                makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
+
+                treeGenerator.turnEdgesIntoPaths(1800);
+
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
+                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 98);
 
                 addCounters(treeGenerator, rnd.next(45.0, 55.0));
                 scrambleAndwriteTestcase(treeGenerator, testcase);
