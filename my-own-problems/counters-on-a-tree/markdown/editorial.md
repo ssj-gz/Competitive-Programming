@@ -1,12 +1,12 @@
 # PROBLEM LINK:
 
-[Practice](https://www.codechef.com/problems/MOVCOIN2)
-[Div-2 Contest](https://www.codechef.com/SEPT20B/problems/MOVCOIN2)
-[Div-1 Contest](https://www.codechef.com/SEPT20A/problems/MOVCOIN2)
+[Practice](https://www.codechef.com/problems/MOVCOIN2)  
+[Div-2 Contest](https://www.codechef.com/SEPT20B/problems/MOVCOIN2)  
+[Div-1 Contest](https://www.codechef.com/SEPT20A/problems/MOVCOIN2)  
 
-**Author:** [Simon St James](https://www.codechef.com/users/ssjgz)
-**Tester:** [Suchan Park](https://www.codechef.com/users/tncks0121)
-**Editorialist:** [Simon St James](https://www.codechef.com/users/ssjgz)
+**Author:** [Simon St James](https://www.codechef.com/users/ssjgz)  
+**Tester:** [Suchan Park](https://www.codechef.com/users/tncks0121)  
+**Editorialist:** [Simon St James](https://www.codechef.com/users/ssjgz)  
 
 # DIFFICULTY:
 CAKEWALK, SIMPLE, EASY, MEDIUM or HARD.
