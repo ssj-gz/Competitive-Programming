@@ -288,7 +288,7 @@ void doCentroidDecomposition(Node* startNode)
     }
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     ios::sync_with_stdio(false);
     auto readInt = [](){ int x; cin >> x; return x; };
