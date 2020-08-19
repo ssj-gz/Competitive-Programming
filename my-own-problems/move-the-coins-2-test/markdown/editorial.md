@@ -3,7 +3,6 @@
 [Practice](https://www.codechef.com/problems/MVCN2TST)
 [Div-2 Contest](https://www.codechef.com/SEPT20B/problems/MVCN2TST)
 [Div-1 Contest](https://www.codechef.com/SEPT20A/problems/MVCN2TST)
-In case the contest did not have two separate pages for Div-1 and Div-2, you can delete one of these above lines.
 
 **Author:** [Simon St James](https://www.codechef.com/users/ssjgz)
 **Tester:** [Suchan Park](https://www.codechef.com/users/tncks0121)
