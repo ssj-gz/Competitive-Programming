@@ -243,7 +243,7 @@ void doCentroidDecomposition(Node* startNode)
 {
     Node* centroid = findCentroid(startNode);
 
-    auto propagateDists = [](Node* node, int depth, DistTracker& distTracker)
+    auto propagateDists = [](Node* node, int depth [[maybe_unused]], DistTracker& distTracker)
                         {
                             node->grundyNumberIfRoot ^= distTracker.grundyNumber();
                         };
