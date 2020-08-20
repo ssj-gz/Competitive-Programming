@@ -492,6 +492,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     
     // The numCanReparentToPrefixSum lookup is for use with Phase One i.e.
     // finding the nodeToReparent of the required reparenting.
+    // THe value numCanReparentToPrefixSum[nodeId - 1] is the number of valid reparentings
+    // (x, y), where x's id is <= nodeId.
     vector<int64_t> numCanReparentToPrefixSum;
     int64_t sumOfNumCanReparentTo = 0;
     for (const auto& node : nodes)
@@ -514,7 +516,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
     }
     // Consider the list of nodes at height h, in order of their visitation in the DFS we performed in computeDFSInfo.
     // Then numProperDescendantsForNodeAtHeightPrefixSum[height][x] represents the sum of the 
-    // numbers of proper ancestors of the first (x - 1) nodes in this list.
+    // numbers of proper ancestors of the first x + 1 nodes in this list.
     vector<vector<int>> numProperDescendantsForNodeAtHeightPrefixSum(maxNodeHeight + 1);
     {
         for (auto height = 0; height <= maxNodeHeight; height++)
