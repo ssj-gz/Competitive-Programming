@@ -593,7 +593,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // Phase Two complete.
 
         // We now need to find the numOfReparentingThatReparentsNode's item in the original list
-        // that reparents nodeToReparent to a newParentHeight whose height is newParentHeight.
+        // that reparents nodeToReparent to a node whose height is newParentHeight.
         // This is the final phase, Phase Three.
         auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
         if (newParentHeightIter != allHeights.begin())
