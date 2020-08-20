@@ -573,14 +573,14 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
 
         // Phase One: compute nodeToReparent.  Easy :)
         const auto firstNodeExceedingIter = std::upper_bound(numCanReparentToPrefixSum.begin(), numCanReparentToPrefixSum.end(), indexInOriginalList);
-        const auto nodeIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
-        const auto nodeToReparent = &(nodes[nodeIndex]);
+        const auto nodeToReparentIndex = firstNodeExceedingIter - numCanReparentToPrefixSum.begin();
+        const auto nodeToReparent = &(nodes[nodeToReparentIndex]);
         // Phase One complete.
 
         // We now need to find the numOfReparentingThatReparentsNode'th element in the original
         // list that re-parents our nodeToReparent.
         // This takes up the two remaining Phases.  This block is Phase Two, where we just compute newParentHeight.
-        const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeIndex - 1]);
+        const auto numOfReparentingThatReparentsNode = indexInOriginalList - (nodeToReparentIndex == 0 ? 0 : numCanReparentToPrefixSum[nodeToReparentIndex - 1]);
         const auto newParentHeightIter = upper_bound(allHeights.begin(), allHeights.end(), numOfReparentingThatReparentsNode,
                 [nodeToReparent, &numNodesUpToHeight, &nodesAtHeightInDFSOrder, &numProperDescendantsForNodeAtHeightPrefixSum](const int numOfReparentingThatReparentsNode, const int height)
                 {
