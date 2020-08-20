@@ -610,9 +610,10 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
             numNonDescendantsToLeft = descendantRange.leftIndex;
             numNonDescendantsToRight = nodesAtHeightInDFSOrder[newParentHeight].size() - descendantRange.rightIndex - 1;
         }
-        // The AVLTree's prefixesForHeight and suffixesForHeight now represent the node ids to the
-        // left and the right of the descendant-range, respectively, in sorted order.
-        // Performing the switch is O(1).
+        // The AVLTree's "prefixesForHeight" and "suffixesForHeight" after the switch, will represent the node ids (in sorted order) to the
+        // left and the right (respectively) of the descendant-range of nodeToReparent in the list of nodes
+        // with height newParentHeight.
+        // Performing each switch is O(1).
         prefixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToLeft);
         suffixesForHeight[newParentHeight].switchToRevision(numNonDescendantsToRight);
         const auto newParentAVLNode = findKthFromPair(numOfReparentingForNodeAndNewHeight, prefixesForHeight[newParentHeight], suffixesForHeight[newParentHeight]);
