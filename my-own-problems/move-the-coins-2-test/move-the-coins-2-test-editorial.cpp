@@ -481,12 +481,10 @@ AVLNode* findKthFromPair(int k, AVLTree& tree1, AVLTree& tree2)
 int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encryptedQueries)
 {
     // Precompute various lookups.
-    int maxNodeHeight = -1;
-    for (const auto& node : nodes)
-    {
-        maxNodeHeight = max(maxNodeHeight, node.height);
-    }
-    assert(maxNodeHeight != -1);
+    const auto maxNodeHeight = (*max_element(nodes.begin(), nodes.end(), [](const auto& node1, const auto& node2)
+            {
+                return node1.height < node2.height;
+            })).height;
 
     auto rootNode = &(nodes.front());
     vector<vector<Node*>> nodesAtHeightInDFSOrder(maxNodeHeight + 1);
