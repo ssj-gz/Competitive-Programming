@@ -1,5 +1,5 @@
 // Simon St James (ssjgz) 16/3/18.
-// Setter's solution for "Counters on a Tree".
+// Setter's solution for "'Move the Coins' 2".
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
