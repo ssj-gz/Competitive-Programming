@@ -128,8 +128,7 @@ class AVLTree
         {
             if (m_isPersistent)
             {
-                auto newCurrentNode = createNode(currentNode->value);
-                *newCurrentNode = *currentNode;
+                auto newCurrentNode = createNode(*currentNode);
                 currentNode = newCurrentNode;
             }
             if (newValue < currentNode->value)
