@@ -591,7 +591,7 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         assert(newParentHeight != -1);
         // Phase Two complete.
 
-        // We now need to find the numOfReparentingThatReparentsNode's item in the original list
+        // We now need to find the numOfReparentingForNodeAndNewHeight'th item in the original list
         // that reparents nodeToReparent to a node whose height is newParentHeight.
         // This is the final phase, Phase Three.
         auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
