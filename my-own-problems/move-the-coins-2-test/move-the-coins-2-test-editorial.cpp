@@ -597,6 +597,8 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
         if (newParentHeightIter != allHeights.begin())
         {
+            // Adjust numOfReparentingForNodeAndNewHeight by skipping all reparentings that reparent nodeToReparent
+            // to a node with height < newParentHeight.
             numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(newParentHeightIter), numNodesUpToHeight, nodesAtHeightInDFSOrder, numProperDescendantsForNodeAtHeightPrefixSum);
         }
 
