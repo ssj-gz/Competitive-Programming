@@ -595,11 +595,11 @@ int64_t calcFinalDecryptionKey(vector<Node>& nodes, const vector<int64_t>& encry
         // that reparents nodeToReparent to a node whose height is newParentHeight.
         // This is the final phase, Phase Three.
         auto numOfReparentingForNodeAndNewHeight = numOfReparentingThatReparentsNode;
-        if (newParentHeightIter != allHeights.begin())
+        if (newParentHeight != 0)
         {
             // Adjust numOfReparentingForNodeAndNewHeight by skipping all reparentings that reparent nodeToReparent
             // to a node with height < newParentHeight.
-            numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, *std::prev(newParentHeightIter), numNodesUpToHeight, nodesAtHeightInDFSOrder, numProperDescendantsForNodeAtHeightPrefixSum);
+            numOfReparentingForNodeAndNewHeight -= findNumNonDescendantsUpToHeight(nodeToReparent, newParentHeight - 1, numNodesUpToHeight, nodesAtHeightInDFSOrder, numProperDescendantsForNodeAtHeightPrefixSum);
         }
 
         const auto descendantRange = descendantRangeFor(nodeToReparent, newParentHeight, nodesAtHeightInDFSOrder);
