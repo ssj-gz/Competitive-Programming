@@ -118,38 +118,33 @@ void findMaxDistance(Node* currentNode, Node* parentNode, int distance, int& max
 int grundyNumberForNode[maxDist];
 int distOfNode[maxDist];
 
-void findGrundyNumberForNode(Node* currentNode, Node* parentNode, int distance, int& index)
+void findGrundyNumberForNode(Node* currentNode, Node* parentNode, int distance, int& descendentIndex)
 {
-    //grundyNumberForNode[index].first = currentNode->grundyNumberIfRoot;
-    //grundyNumberForNode[index].second = distance;
-    grundyNumberForNode[index] = currentNode->grundyNumberIfRoot;
-    distOfNode[index] = distance;
-    index++;
+    grundyNumberForNode[descendentIndex] = currentNode->grundyNumberIfRoot;
+    distOfNode[descendentIndex] = distance;
+    descendentIndex++;
 
     for (const auto& child : currentNode->neighbours)
     {
         if (child == parentNode)
             continue;
 
-        findGrundyNumberForNode(child, currentNode, distance + 1, index);
+        findGrundyNumberForNode(child, currentNode, distance + 1, descendentIndex);
     }
-
 }
 
-void setGrundyNumberForNode(Node* currentNode, Node* parentNode, int& index)
+void setGrundyNumberForNode(Node* currentNode, Node* parentNode, int& descendentIndex)
 {
-    //currentNode->grundyNumberIfRoot = grundyNumberForNode[index].first;
-    currentNode->grundyNumberIfRoot = grundyNumberForNode[index];
-    index++;
+    currentNode->grundyNumberIfRoot = grundyNumberForNode[descendentIndex];
+    descendentIndex++;
 
     for (const auto& child : currentNode->neighbours)
     {
         if (child == parentNode)
             continue;
 
-        setGrundyNumberForNode(child, currentNode, index);
+        setGrundyNumberForNode(child, currentNode, descendentIndex);
     }
-
 }
 
 void dealWithCentroid(Node* currentNode, Node* parentNode, int distance, const bool centroidHasCoin, int& centroidGrundy)
@@ -167,8 +162,7 @@ void dealWithCentroid(Node* currentNode, Node* parentNode, int distance, const b
     }
 }
 
-
-int64_t blee = 0;
+int64_t approxNumComputations = 0;
 void doCentroidDecomposition(Node* startNode)
 {
     Node* centroid = findCentroid(startNode);
@@ -181,8 +175,9 @@ void doCentroidDecomposition(Node* startNode)
         int numCoinsAtDist[numNodesInComponent] = {};
         for (auto& neighbour : centroid->neighbours)
         {
-            int numDescendents = 0;
-            findGrundyNumberForNode(neighbour, centroid, 1, numDescendents);
+            int descendentIndex = 0;
+            findGrundyNumberForNode(neighbour, centroid, 1, descendentIndex);
+            const auto numDescendents = descendentIndex;
 
             int distancesWithCoins[maxMaxDistance] = {};
             int numDistanceWithCoin = 0;
@@ -204,11 +199,10 @@ void doCentroidDecomposition(Node* startNode)
                 }
             }
 
-            blee += static_cast<int64_t>(numDistanceWithCoin) * numDescendents;
+            approxNumComputations += static_cast<int64_t>(numDistanceWithCoin) * numDescendents;
 
-
-            int blah = 0;
-            setGrundyNumberForNode(neighbour, centroid, blah);
+            descendentIndex = 0;
+            setGrundyNumberForNode(neighbour, centroid, descendentIndex);
 
             int maxDistance = 0;
             findMaxDistance(neighbour, centroid, 1, maxDistance);
