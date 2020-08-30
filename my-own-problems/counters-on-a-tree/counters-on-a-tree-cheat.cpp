@@ -333,26 +333,24 @@ void doCentroidDecomposition(Node* startNode)
     {
         for (auto& neighbour : centroid->neighbours)
         {
-            //cout << "Neighbour: " << neighbour << endl;
             int maxDistance = 0;
             findMaxDistance(neighbour, centroid, 1, maxDistance);
+
             int numDescendents = 0;
-            //pair<int, int> grundyNumberForNode[numNodesInComponent] = {};
             findGrundyNumberForNode(neighbour, centroid, 1, numDescendents);
-            //cout << "numDescendents: " << numDescendents << endl;
             maxMaxDistance = max(maxMaxDistance, maxDistance);
+
             int numCoinsAtDist[maxMaxDistance] = {};
             findNumCoinsAtDist(neighbour, centroid, 1, numCoinsAtDist);
-            //cout << "Doing  thing; maxMaxDistance: " << maxMaxDistance << " numDescendents: " << numDescendents << endl;
-            //int distancesWithCoins
+
             int distancesWithCoins[maxMaxDistance] = {};
             int numDistanceWithCoin = 0;
-            for (int i = 0; i < maxMaxDistance; i++)
+            for (int distance = 0; distance < maxMaxDistance; distance++)
             {
-                assert(numCoinsAtDist[i] == 0 || numCoinsAtDist[i] == 1);
-                if (numCoinsAtDist[i] == 1)
+                assert(numCoinsAtDist[distance] == 0 || numCoinsAtDist[distance] == 1);
+                if (numCoinsAtDist[distance] == 1)
                 {
-                    distancesWithCoins[numDistanceWithCoin] = i;
+                    distancesWithCoins[numDistanceWithCoin] = distance;
                     numDistanceWithCoin++;
                 }
             }
