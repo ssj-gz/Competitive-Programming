@@ -767,14 +767,14 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Max nodes; one long (~173k nodes) path, the rest random; ~50% with counter; 9 Bob wins")
-                        .withSeed(2838337729));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Max nodes; one long (~123k nodes) path, the rest random; ~50% with counter; 10 Bob wins")
+                                                                       .withSeed(3526351307));
 
                 const auto numNodes = subtask3.maxNodesPerTestcase;
 
                 TreeGenerator<NodeData> treeGenerator;
                 auto rootNode = treeGenerator.createNode();
-                treeGenerator.addNodeChain(rootNode, rnd.next(171'000, 175'000));
+                treeGenerator.addNodeChain(rootNode, rnd.next(121'000, 125'000));
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 2.0);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodes - treeGenerator.numNodes(), 60.0);
 
