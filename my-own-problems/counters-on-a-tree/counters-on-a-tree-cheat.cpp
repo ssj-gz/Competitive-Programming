@@ -311,6 +311,22 @@ void setGrundyNumberForNode(Node* currentNode, Node* parentNode, int& index)
 
 }
 
+void blah(Node* currentNode, Node* parentNode, int distance, const bool centroidHasCoin, int& centroidGrundy)
+{
+    if (currentNode->hasCounter)
+        centroidGrundy ^= distance;
+    if (centroidHasCoin)
+        currentNode->grundyNumberIfRoot ^= distance;
+    for (const auto& child : currentNode->neighbours)
+    {
+        if (child == parentNode)
+            continue;
+
+        blah(child, currentNode, distance + 1, centroidHasCoin, centroidGrundy);
+    }
+}
+
+
 int64_t blee = 0;
 void doCentroidDecomposition(Node* startNode)
 {
@@ -369,22 +385,6 @@ void doCentroidDecomposition(Node* startNode)
                 }
             }
 
-            if (pass == 0)
-            {
-                for (int i = 0; i < numDistanceWithCoin; i++)
-                {
-                    const int distance = distancesWithCoins[i];
-                    centroid->grundyNumberIfRoot ^= distance;
-                }
-                if (centroid->hasCounter)
-                {
-                    for (int j = 0; j < numDescendents; j++)
-                    {
-                        grundyNumberForNode[j] ^= distOfNode[j];
-                    }
-                }
-
-            }
             blee += static_cast<int64_t>(numDistanceWithCoin) * numDescendents;
 
 
@@ -397,6 +397,10 @@ void doCentroidDecomposition(Node* startNode)
             findNumCoinsAtDist(neighbour, centroid, 1, numCoinsAtDist);
 
             //cout << "Blee: " << blee << endl;
+        }
+        if (pass == 0)
+        {
+            blah(centroid, nullptr, 0, centroid->hasCounter, centroid->grundyNumberIfRoot);
         }
         std::reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     }
