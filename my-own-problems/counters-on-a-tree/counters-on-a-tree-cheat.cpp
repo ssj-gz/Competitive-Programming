@@ -23,6 +23,7 @@ struct Node
 {
     bool hasCounter = false;
     vector<Node*> neighbours;
+    int id = -1;
 
     int grundyNumberIfRoot = 0;
 };
@@ -245,6 +246,7 @@ void findNumCoinsAtDist(Node* currentNode, Node* parentNode, int distance, int* 
     if (currentNode->hasCounter)
     {
         numCoinsAtDist[distance] = 1 - numCoinsAtDist[distance];
+        cout << " setting numCoinsAtDist[" << distance << "] to " << numCoinsAtDist[distance] << endl; 
     }
 
     for (const auto& child : currentNode->neighbours)
@@ -327,28 +329,33 @@ void doCentroidDecomposition(Node* startNode)
     const auto numNodesInComponent = countDescendants(startNode, nullptr);
 
 
-    //cout << "centroid: " << centroid << " numNodesInComponent: " << numNodesInComponent << " # neighbours: " << centroid->neighbours.size() << endl;
+    cout << "centroid: " << centroid->id << " hasCounter: " << centroid->hasCounter << " numNodesInComponent: " << numNodesInComponent << " # neighbours: " << centroid->neighbours.size() << endl;
     for (int pass = 0; pass < 2; pass++)
     {
+        cout << "pass " << pass << endl;
         int maxMaxDistance = 0;
         int numCoinsAtDist[numNodesInComponent] = {};
         for (auto& neighbour : centroid->neighbours)
         {
+            cout << "Neighbour: " << neighbour->id << endl;
             int numDescendents = 0;
             findGrundyNumberForNode(neighbour, centroid, 1, numDescendents);
 
             int distancesWithCoins[maxMaxDistance] = {};
             int numDistanceWithCoin = 0;
-            for (int distance = 0; distance < maxMaxDistance; distance++)
+            cout << "maxMaxDistance:" << maxMaxDistance << endl;
+            for (int distance = 0; distance <= maxMaxDistance; distance++)
             {
                 assert(numCoinsAtDist[distance] == 0 || numCoinsAtDist[distance] == 1);
                 if (numCoinsAtDist[distance] == 1)
                 {
                     distancesWithCoins[numDistanceWithCoin] = distance;
                     numDistanceWithCoin++;
+                    cout << " distance " << distance << " with coin" << endl;
                 }
             }
             //cout << "maxMaxDistance: " << maxMaxDistance << " numDistanceWithCoin: " << numDistanceWithCoin << " maxDistance: " << maxDistance << " numNodesInComponent: " << numNodesInComponent << endl;
+            cout << "Mass setting grundies" << endl;
             for (int i = 0; i < numDistanceWithCoin; i++)
             {
                 const int distance = distancesWithCoins[i];
@@ -427,9 +434,12 @@ int main()
         }
 
         int numNodesWithCounter = 0;
+        int nodeId = 1;
         for (auto& node : nodes)
         {
             const auto numCounters = readInt();
+            node.id = nodeId;
+            nodeId++;
 
             node.hasCounter = ((numCounters % 2) == 1);
             if (node.hasCounter)
@@ -447,6 +457,7 @@ int main()
         int64_t powerOf2 = 2; // 2 to the power of 1.
         for (auto& node : nodes)
         {
+            cout << "node: " << node.id << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << endl;
             if (node.grundyNumberIfRoot == 0)
             {
                 result = (result + powerOf2) % MOD;
