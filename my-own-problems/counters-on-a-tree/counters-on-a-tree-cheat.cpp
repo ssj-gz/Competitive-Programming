@@ -246,7 +246,6 @@ void findNumCoinsAtDist(Node* currentNode, Node* parentNode, int distance, int* 
     if (currentNode->hasCounter)
     {
         numCoinsAtDist[distance] = 1 - numCoinsAtDist[distance];
-        //cout << " setting numCoinsAtDist[" << distance << "] to " << numCoinsAtDist[distance] << endl; 
     }
 
     for (const auto& child : currentNode->neighbours)
@@ -311,7 +310,7 @@ void setGrundyNumberForNode(Node* currentNode, Node* parentNode, int& index)
 
 }
 
-void blah(Node* currentNode, Node* parentNode, int distance, const bool centroidHasCoin, int& centroidGrundy)
+void dealWithCentroid(Node* currentNode, Node* parentNode, int distance, const bool centroidHasCoin, int& centroidGrundy)
 {
     if (currentNode->hasCounter)
         centroidGrundy ^= distance;
@@ -322,7 +321,7 @@ void blah(Node* currentNode, Node* parentNode, int distance, const bool centroid
         if (child == parentNode)
             continue;
 
-        blah(child, currentNode, distance + 1, centroidHasCoin, centroidGrundy);
+        dealWithCentroid(child, currentNode, distance + 1, centroidHasCoin, centroidGrundy);
     }
 }
 
@@ -345,21 +344,17 @@ void doCentroidDecomposition(Node* startNode)
     const auto numNodesInComponent = countDescendants(startNode, nullptr);
 
 
-    //cout << "centroid: " << centroid->id << " hasCounter: " << centroid->hasCounter << " numNodesInComponent: " << numNodesInComponent << " # neighbours: " << centroid->neighbours.size() << endl;
     for (int pass = 0; pass < 2; pass++)
     {
-        //cout << "pass " << pass << endl;
         int maxMaxDistance = 0;
         int numCoinsAtDist[numNodesInComponent] = {};
         for (auto& neighbour : centroid->neighbours)
         {
-            //cout << "Neighbour: " << neighbour->id << endl;
             int numDescendents = 0;
             findGrundyNumberForNode(neighbour, centroid, 1, numDescendents);
 
             int distancesWithCoins[maxMaxDistance] = {};
             int numDistanceWithCoin = 0;
-            //cout << "maxMaxDistance:" << maxMaxDistance << endl;
             for (int distance = 0; distance <= maxMaxDistance; distance++)
             {
                 assert(numCoinsAtDist[distance] == 0 || numCoinsAtDist[distance] == 1);
@@ -367,21 +362,14 @@ void doCentroidDecomposition(Node* startNode)
                 {
                     distancesWithCoins[numDistanceWithCoin] = distance;
                     numDistanceWithCoin++;
-                    //cout << " distance " << distance << " with coin" << endl;
                 }
             }
-            //cout << "maxMaxDistance: " << maxMaxDistance << " numDistanceWithCoin: " << numDistanceWithCoin << " maxDistance: " << maxDistance << " numNodesInComponent: " << numNodesInComponent << endl;
-            //cout << "Mass setting grundies" << endl;
             for (int i = 0; i < numDistanceWithCoin; i++)
             {
                 const int distance = distancesWithCoins[i];
                 for (int j = 0; j < numDescendents; j++)
                 {
-#if 1
                     grundyNumberForNode[j] ^= (distance + distOfNode[j]);
-#else
-                    grundyNumberForNode[j] ^= (distance + j);
-#endif
                 }
             }
 
@@ -395,17 +383,13 @@ void doCentroidDecomposition(Node* startNode)
             findMaxDistance(neighbour, centroid, 1, maxDistance);
             maxMaxDistance = max(maxMaxDistance, maxDistance);
             findNumCoinsAtDist(neighbour, centroid, 1, numCoinsAtDist);
-
-            //cout << "Blee: " << blee << endl;
         }
         if (pass == 0)
         {
-            blah(centroid, nullptr, 0, centroid->hasCounter, centroid->grundyNumberIfRoot);
+            dealWithCentroid(centroid, nullptr, 0, centroid->hasCounter, centroid->grundyNumberIfRoot);
         }
         std::reverse(centroid->neighbours.begin(), centroid->neighbours.end());
     }
-
-
 
     for (auto& neighbour : centroid->neighbours)
     {
@@ -449,9 +433,6 @@ int main()
             if (node.hasCounter)
                 numNodesWithCounter++;
         }
-        //cout << "numNodesWithCounter: " << numNodesWithCounter << endl;
-        
-
 
         auto rootNode = &(nodes.front());
         doCentroidDecomposition(rootNode);
@@ -461,7 +442,6 @@ int main()
         int64_t powerOf2 = 2; // 2 to the power of 1.
         for (auto& node : nodes)
         {
-            //cout << "node: " << node.id << " grundyNumberIfRoot: " << node.grundyNumberIfRoot << endl;
             if (node.grundyNumberIfRoot == 0)
             {
                 result = (result + powerOf2) % MOD;
@@ -470,5 +450,4 @@ int main()
         }
         cout << result << endl;
     }
-    //cout << "blee: " << blee << endl;
 }
