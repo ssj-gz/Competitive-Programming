@@ -1,6 +1,7 @@
+// "Cheat" solution using Centroid Decomposition and then a "naive"
+// way of propagating grundy numbers within each centroid-subtree.
+// Is at least O(N^2), but runs incredibly quickly :(
 #pragma GCC optimize("Ofast")
-// Simon St James (ssjgz) 16/3/18.
-// Setter's solution for "'Move the Coins' 2".
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
