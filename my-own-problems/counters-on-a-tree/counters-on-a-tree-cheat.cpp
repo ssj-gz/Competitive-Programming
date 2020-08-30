@@ -370,6 +370,23 @@ void doCentroidDecomposition(Node* startNode)
                 }
             }
 
+            if (pass == 0)
+            {
+                for (int i = 0; i < numDistanceWithCoin; i++)
+                {
+                    const int distance = distancesWithCoins[i];
+                    centroid->grundyNumberIfRoot ^= distance;
+                }
+                if (centroid->hasCounter)
+                {
+                    for (int j = 0; j < numDescendents; j++)
+                    {
+                        grundyNumberForNode[j] ^= (distOfNode[j]);
+                    }
+                }
+
+            }
+
             int blah = 0;
             setGrundyNumberForNode(neighbour, centroid, blah);
 
@@ -420,7 +437,7 @@ int main()
             if (node.hasCounter)
                 numNodesWithCounter++;
         }
-        cout << "numNodesWithCounter: " << numNodesWithCounter << endl;
+        //cout << "numNodesWithCounter: " << numNodesWithCounter << endl;
         
 
 
@@ -440,5 +457,5 @@ int main()
         }
         cout << result << endl;
     }
-    cout << "blee: " << blee << endl;
+    //cout << "blee: " << blee << endl;
 }
