@@ -280,7 +280,7 @@ void findGrundyNumberForNode(Node* currentNode, Node* parentNode, int distance, 
     //grundyNumberForNode[index].first = currentNode->grundyNumberIfRoot;
     //grundyNumberForNode[index].second = distance;
     grundyNumberForNode[index] = currentNode->grundyNumberIfRoot;
-    distOfNode[index] = currentNode->grundyNumberIfRoot;
+    distOfNode[index] = distance;
     index++;
 
     for (const auto& child : currentNode->neighbours)
