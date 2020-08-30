@@ -326,22 +326,16 @@ void doCentroidDecomposition(Node* startNode)
 
     const auto numNodesInComponent = countDescendants(startNode, nullptr);
 
-    int maxMaxDistance = 0;
 
     //cout << "centroid: " << centroid << " numNodesInComponent: " << numNodesInComponent << " # neighbours: " << centroid->neighbours.size() << endl;
     for (int pass = 0; pass < 2; pass++)
     {
+        int maxMaxDistance = 0;
+        int numCoinsAtDist[numNodesInComponent] = {};
         for (auto& neighbour : centroid->neighbours)
         {
-            int maxDistance = 0;
-            findMaxDistance(neighbour, centroid, 1, maxDistance);
-
             int numDescendents = 0;
             findGrundyNumberForNode(neighbour, centroid, 1, numDescendents);
-            maxMaxDistance = max(maxMaxDistance, maxDistance);
-
-            int numCoinsAtDist[maxMaxDistance] = {};
-            findNumCoinsAtDist(neighbour, centroid, 1, numCoinsAtDist);
 
             int distancesWithCoins[maxMaxDistance] = {};
             int numDistanceWithCoin = 0;
@@ -379,16 +373,22 @@ void doCentroidDecomposition(Node* startNode)
                 {
                     for (int j = 0; j < numDescendents; j++)
                     {
-                        grundyNumberForNode[j] ^= (distOfNode[j]);
+                        grundyNumberForNode[j] ^= distOfNode[j];
                     }
                 }
 
             }
+            blee += static_cast<int64_t>(numDistanceWithCoin) * numDescendents;
+
 
             int blah = 0;
             setGrundyNumberForNode(neighbour, centroid, blah);
 
-            blee += static_cast<int64_t>(numDistanceWithCoin) * numDescendents;
+            int maxDistance = 0;
+            findMaxDistance(neighbour, centroid, 1, maxDistance);
+            maxMaxDistance = max(maxMaxDistance, maxDistance);
+            findNumCoinsAtDist(neighbour, centroid, 1, numCoinsAtDist);
+
             //cout << "Blee: " << blee << endl;
         }
         std::reverse(centroid->neighbours.begin(), centroid->neighbours.end());
