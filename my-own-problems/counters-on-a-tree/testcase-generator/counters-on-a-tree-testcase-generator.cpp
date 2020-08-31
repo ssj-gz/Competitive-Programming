@@ -748,13 +748,15 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 100 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 1800.  Then finish off with random nodes.  Approx 50% coins.  33 Bob Wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 200 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 2700.  Then finish off with random nodes.  Approx 50% coins.  XXX Bob Wins")
                         .withSeed(3138886060));
                 const int numNodes = subtask3.maxNodesPerTestcase;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
 
-                treeGenerator.turnEdgesIntoPaths(1800);
+                treeGenerator.turnEdgesIntoPaths(2700);
+
+                std::cout << "# nodes: " << treeGenerator.numNodes() << std::endl;
 
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 90);
                 treeGenerator.createNodesWithRandomParentPreferringLeafNodes((numNodes - treeGenerator.numNodes()) / 2, 1.0);
