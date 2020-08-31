@@ -442,25 +442,6 @@ int main(int argc, char* argv[])
                     .withDescription("fat with long"));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes; two nodes with high degree separated by long distance; 72% with counters; 8735 Bob wins")
-                        .withSeed(3724110391));
-
-                TreeGenerator<NodeData> treeGenerator;
-                auto fatNode1 = treeGenerator.createNode();
-                auto fatNode2 = treeGenerator.addNodeChain(fatNode1, 31'657).back();
-                treeGenerator.createNodesWithRandomParentPreferringFromSet({fatNode1, fatNode2}, 60'000, 99, 
-                        [](auto newNode, auto parent, const bool parentWasPreferred, bool& addNewNodeToSet, bool& removeParentFromSet)
-                        {
-                        addNewNodeToSet = false;
-                        removeParentFromSet = false;
-                        });
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes((100'000 - treeGenerator.numNodes()) / 2, 5.0);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(100'000 - treeGenerator.numNodes(), 80.0);
-
-                addCounters(treeGenerator, 72.0);
-                scrambleAndwriteTestcase(treeGenerator, testcase);
-            }
-            {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes; three nodes with high degree, two separated by long distance; 75% with counters; 354 Bob wins")
                         .withSeed(1994187731));
 
