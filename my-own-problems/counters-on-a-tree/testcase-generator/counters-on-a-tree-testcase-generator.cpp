@@ -426,11 +426,6 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 70.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withDescription("fat with long"));
-
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("max nodes; three nodes with high degree, two separated by long distance; 75% with counters; 354 Bob wins")
                         .withSeed(1994187731));
@@ -526,7 +521,7 @@ int main(int argc, char* argv[])
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 4/11ths of the nodes are random-ish; then three arms of length (3 * numNodes / 20) are attached to random nodes.  Then the remaining nodes are essentially random, again.  XXX Bob Wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 4/11ths of the nodes are random-ish; then three arms of length (3 * numNodes / 20) are attached to random nodes.  Then the remaining nodes are essentially random, again.  XXX1 Bob Wins")
                         .withSeed(0));
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
@@ -566,8 +561,8 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 200 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 2700.  Then finish off with random nodes.  Approx 50% coins.  XXX Bob Wins")
-                        .withSeed(3138886060));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 200 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 2700.  Then finish off with random nodes.  Approx 50% coins.  XXX2 Bob Wins")
+                        .withSeed(0));
                 const int numNodes = subtask3.maxNodesPerTestcase;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
@@ -587,7 +582,7 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Max nodes; one long (~XXXk nodes) path, the rest random; ~50% with counter; XXX Bob wins")
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Max nodes; one long (~XXXk nodes) path, the rest random; ~50% with counter; XXX3 Bob wins")
                                                                        .withSeed(0));
 
                 const auto numNodes = subtask3.maxNodesPerTestcase;
