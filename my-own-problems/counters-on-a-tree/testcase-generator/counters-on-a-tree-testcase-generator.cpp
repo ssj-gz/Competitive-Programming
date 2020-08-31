@@ -341,11 +341,6 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 70.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withDescription("long-ish and jagged"));
-
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 40k long arm then jagged, 73% with counter, 12 Bob wins")
                         .withSeed(1293843542));
@@ -358,6 +353,11 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 74.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
+        }
+        {
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
+                    .withDescription("long-ish and jagged"));
+
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 70k long arm; 78% with counter; 7 Bob wins")
                         .withSeed(595100017));
@@ -370,11 +370,6 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 78.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withDescription("fat"));
-
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes four vertices with high degree; 78% with counter; 31166 Bob wins")
                         .withSeed(1018053492));
@@ -395,11 +390,6 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 78.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withDescription("three long arms"));
-
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes; 3 long arms; 82% with counter; 7 Bob wins")
                         .withSeed(3359440718));
