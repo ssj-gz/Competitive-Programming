@@ -583,8 +583,8 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Max nodes; one long (~262k nodes) path, the rest random; ~50% with counter; XXX3 Bob wins")
-                                                                       .withSeed(0));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Max nodes; one long (~262k nodes) path, the rest random; ~50% with counter; 8 Bob wins")
+                                                                       .withSeed(1896609295));
 
                 const auto numNodes = subtask3.maxNodesPerTestcase;
 
