@@ -512,28 +512,6 @@ int main(int argc, char* argv[])
         }
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(113388)
-                    .withDescription("max testcases, mostly with about 200 nodes each but in total equalling maxNodesOverAllTestcases"));
-
-            int numNodesInTestFile = 0;
-            const auto numNodesForTestCase = chooseRandomValuesWithSum(subtask3.maxNumTestcases, subtask3.maxNodesOverAllTestcases, 1);
-            for (const auto numNodes : numNodesForTestCase)
-            {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo());
-
-                TreeGenerator<NodeData> treeGenerator;
-                treeGenerator.createNode(); // Need to create at least one node for randomised generation of other nodes.
-                const int numNodesPhase1 = rnd.next(numNodes);
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numNodesPhase1, rnd.next(100.0));
-                treeGenerator.createNodesWithRandomParentPreferringLeafNodes(treeGenerator.numNodes() - numNodes, rnd.next(100.0));
-                addCounters(treeGenerator, rnd.next(100.0));
-                scrambleAndwriteTestcase(treeGenerator, testcase);
-
-                numNodesInTestFile += numNodes;
-            }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
                     .withDescription("misc fat testcases"));
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("fat node where each 'tendril' has length at least two; 71% with counter; 22325 Bob wins")
