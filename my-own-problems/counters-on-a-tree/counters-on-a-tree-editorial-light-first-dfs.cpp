@@ -13,7 +13,7 @@
 
 using namespace std;
 
-constexpr auto maxDist = 100'000;
+constexpr auto maxDist = 300'000;
 constexpr int log2(int N, int exponent = 0, int powerOf2 = 1)
 {
         return (powerOf2 >= N) ? exponent : log2(N, exponent + 1, powerOf2 * 2);
