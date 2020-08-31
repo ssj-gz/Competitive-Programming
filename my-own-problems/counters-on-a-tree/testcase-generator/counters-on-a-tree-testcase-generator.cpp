@@ -358,11 +358,6 @@ int main(int argc, char* argv[])
                 addCounters(treeGenerator, 74.0);
                 scrambleAndwriteTestcase(treeGenerator, testcase);
             }
-        }
-        {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withDescription("long"));
-
             {
                 auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("almost max nodes - 70k long arm; 78% with counter; 7 Bob wins")
                         .withSeed(595100017));
