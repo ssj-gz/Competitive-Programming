@@ -706,19 +706,19 @@ int main(int argc, char* argv[])
             }
         }
         {
-            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3)
-                    .withSeed(94543));
+            auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 80'000 are random-ish; then three arms of length ~30'000 are attached to random nodes.  Then the remaining nodes are essentially random, again.  22 Bob Wins")
-                        .withSeed(2082190141));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 4/11ths of the nodes are random-ish; then three arms of length (3 * numNodes / 20) are attached to random nodes.  Then the remaining nodes are essentially random, again.  XXX Bob Wins")
+                        .withSeed(0));
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
                 const auto numNodes = subtask3.maxNodesPerTestcase;
 
                 {
 
-                    const auto numRandomNodesToAdd = rnd.next(78'000, 82'000);
+                    const auto expectedInitialSpindlyNodes = 4 * numNodes / 11;
+                    const auto numRandomNodesToAdd = rnd.next(expectedInitialSpindlyNodes - 2'000, expectedInitialSpindlyNodes + 2'000);
                     treeGenerator.createNodesWithRandomParentPreferringLeafNodes(numRandomNodesToAdd, rnd.next(99.0, 99.5));
 
                 }
@@ -727,7 +727,8 @@ int main(int argc, char* argv[])
                 for (int i = 0; i < 3; i++)
                 {
                     auto armRootNode = nodesWithoutArms[rnd.next(0, static_cast<int>(nodesWithoutArms.size()))];
-                    treeGenerator.addNodeChain(armRootNode, rnd.next(29'000, 31'000));
+                    const auto expectedArmLength = 3 * numNodes  / 20;
+                    treeGenerator.addNodeChain(armRootNode, rnd.next(expectedArmLength - 2'000, expectedArmLength + 2'000));
                 }
 
                 {
