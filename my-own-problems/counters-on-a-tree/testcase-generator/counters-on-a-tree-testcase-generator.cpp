@@ -562,8 +562,8 @@ int main(int argc, char* argv[])
         {
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 200 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 2700.  Then finish off with random nodes.  Approx 50% coins.  32 Bob Wins")
-                        .withSeed(963790161));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Start with a squat graph of 200 nodes where all nodes have degree at least 3.  Then turn all original edges into paths of length 2700.  Then finish off with random nodes.  Approx 50% coins.  33 Bob Wins")
+                        .withSeed(1819619976));
                 const int numNodes = subtask3.maxNodesPerTestcase;
                 TreeGenerator<NodeData> treeGenerator;
                 makeSquatGraphWhereAllNodesHaveDegreeAtLeast3(treeGenerator, 100);
