@@ -521,8 +521,8 @@ int main(int argc, char* argv[])
             auto& testFile = testsuite.newTestFile(CoTTestFileInfo().belongingToSubtask(subtask3));
 
             {
-                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 4/11ths of the nodes are random-ish; then three arms of length (3 * numNodes / 20) are attached to random nodes.  Then the remaining nodes are essentially random, again.  XXX1 Bob Wins")
-                        .withSeed(0));
+                auto& testcase = testFile.newTestcase(CoTTestCaseInfo().withDescription("Generic spindly graph, using maxNodes, with three long arms grafted onto it: first 4/11ths of the nodes are random-ish; then three arms of length (3 * numNodes / 20) are attached to random nodes.  Then the remaining nodes are essentially random, again.  18 Bob Wins")
+                        .withSeed(783124762));
                 TreeGenerator<NodeData> treeGenerator;
                 treeGenerator.createNode();
                 const auto numNodes = subtask3.maxNodesPerTestcase;
