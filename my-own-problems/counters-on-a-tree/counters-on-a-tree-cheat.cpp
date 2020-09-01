@@ -2,6 +2,8 @@
 // way of propagating grundy numbers within each centroid-subtree.
 // Is at least O(N^2), but runs incredibly quickly :(
 #pragma GCC optimize("Ofast")
+#pragma GCC target ("avx2")
+#pragma GCC optimization ("unroll-loops")
 #define SUBMISSION
 #ifdef SUBMISSION
 #define NDEBUG
