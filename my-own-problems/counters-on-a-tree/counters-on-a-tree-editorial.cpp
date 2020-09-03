@@ -20,7 +20,7 @@ constexpr auto maxBinaryDigits = log2(maxDist);
 
 struct Node
 {
-    bool hasCounter = false;
+    bool hasCoin = false;
     vector<Node*> neighbours;
 
     int grundyNumberIfRoot = 0;
@@ -249,7 +249,7 @@ void doCentroidDecomposition(Node* startNode)
                         };
     auto collectDists = [](Node* node, int depth, DistTracker& distTracker)
                         {
-                            if (node->hasCounter)
+                            if (node->hasCoin)
                                 distTracker.insertDist(depth);
                         };
 
@@ -268,7 +268,7 @@ void doCentroidDecomposition(Node* startNode)
         // Do it again, this time backwards ...  
         reverse(centroid->neighbours.begin(), centroid->neighbours.end());
         // ... and also include the centre, this time.
-        if (centroid->hasCounter)
+        if (centroid->hasCoin)
             distTracker.insertDist(0);
         for (auto& child : centroid->neighbours)
         {
@@ -310,9 +310,9 @@ int main()
 
         for (auto& node : nodes)
         {
-            const auto numCounters = readInt();
+            const auto numCoins = readInt();
 
-            node.hasCounter = ((numCounters % 2) == 1);
+            node.hasCoin = ((numCoins % 2) == 1);
         }
 
 
