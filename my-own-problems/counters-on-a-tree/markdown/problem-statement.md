@@ -1,32 +1,28 @@
 This is a sequel to the problem ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem) with a couple of twists!
 
-Alice and Bob are playing a board game. The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes (numbered $1$ through $N$). The game involves moving some coins around the board. For a node $R$ ($1 \le R \le N$), let's define a game $g(T_{\textit{board}}, R)$ with the following rules:
-1. A copy of $T_{\textit{board}}$ is taken and for each valid $v$, $c_v$ coins are placed in the node $v$.
-2. Bob and Alice alternate turns; Alice makes the first move.
-3. A move consists of taking a single coin from some node other than $R$ (let's denote it by $C$) and moving it to another node which lies on the path between $R$ and $C$ (including $R$, but not including $C$).
-4. If a player cannot make a move on their turn (i.e. all the coins are in the node $R$), this player loses the game.
+Alice and Bob are playing a board game. The board is a tree $T_{\textit{board}}$ with $N$ nodes (numbered $1$ through $N$). The game involves moving some coins around the board. For a node $R$ ($1 \le R \le N$), let's define a game $g(T_{\textit{board}}, R)$ with the following rules:
+1. Initially, a copy of $T_{\textit{board}}$ is taken and for each valid $v$, $c_v$ coins are placed in the node $v$.
+2. Bob and Alice alternate turns; Alice plays first.
+3. In each turn, the current player must take a single coin from some node other than $R$ (let's denote it by $C$) and move it to another node which lies on the path between $R$ and $C$ (including $R$, but not including $C$).
+4. If a player cannot move a coin during their turn (i.e. all the coins are in the node $R$), this player loses the game.
 
-For example, for the tree $T_{\textit{board}}$ in the figure below and $R=1$:
+For example, for the board in the figure below and $R=1$:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_1.png)
 
-The current player can pick a coin on any of nodes $2$, $4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the coin $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
+The current player may take a coin from one of the nodes $2$, $4$ or $5$ (if there were any coins in node $3$, taking one of those would also be an option). If they take a coin from node $5$, they can move it $X$ steps towards the node $R=1$, where $X$ is either $1$, $2$ or $3$ and the coin ends up in the node $4$, $2$ or $1$, respectively:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_2.png)
 
-Let's assume they pick $X=2$, so they move the Coin to node $2$. Then the tree now looks like:
+Let's assume that they pick $X=2$, so they move the coin to node $2$. At the end of this turn, the board is
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_3.png)
 
-and it is the other player's turn to move.
+and it is the other player's turn.
 
-Let $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ be whichever of Bob or Alice wins the $\textit{game}(T_{\textit{board}}, R)$, assuming both players play perfectly.
+Both players play optimally. Bob knows some elementary Game Theory, so he is able to very quickly predict the winner of any game. Unimpressed, Alice gives him a harder task: she challenges him to find the winner of $g(T_{\textit{board}}, R)$ for each valid $R$ ($1 \le R \le N$).
 
-Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T_{\textit{board}}, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find the winner of $g(T_{\textit{board}}, R)$ for each of $R = 1, 2, \ldots, N$.
-
-Can you help Bob figure out the answer? More formally, if $W$ is the set of $R$ such that the winner of $g(T_{\textit{board}}, R)$ is Bob, then you must calculate the value of $$\sum\limits_{R \in W}2^R \,.$$
-
-Since the result can be very large, please output it modulo $10^9+7$.
+Can you help Bob figure out the answer? Specifically, if $W$ is the set of all valid $R$ such that the winner of $g(T_{\textit{board}}, R)$ is Bob, then you must calculate $\sum_{R \in W} 2^R$ modulo $10^9+7$.
 
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
@@ -35,7 +31,7 @@ Since the result can be very large, please output it modulo $10^9+7$.
 - The last line contains $N$ space-separated integers $c_1, c_2, \ldots, c_N$.
 
 ### Output
-For each test case, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that the winner of $g(T_{\textit{board}}, R)$ is Bob.
+For each test case, print a single line containing one integer ― the sum of $2^R$ over all valid $R$ such that the winner of $g(T_{\textit{board}}, R)$ is Bob, modulo $10^9+7$.
 
 ### Constraints 
 - $1 \le T \le 1,000$
@@ -80,82 +76,41 @@ For each test case, print a single line containing one integer - the sum, modulo
 ```
 
 ### Explanation
-
-Although the tree $T_{\textit{board}}$ is undirected, *arrows* have been added along edges for clarity, indicating the direction in which Coins must be moved for each $R$. $R$ itself is highlighted in red.
+Although the tree $T_{\textit{board}}$ is undirected, arrows have been added along edges for clarity, indicating the directions in which coins must be moved for each $R$. The node $R$ itself is always highlighted in red.
 
 **Example case 1:** The original $T_{\textit{board}}$ looks like this:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_4.png)
 
-Let's examine each $\textit{game}(T_{\textit{board}},R)$ for $R=1,2,3$.
+Let's examine the games for $R = 1,2,3$.
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_5.png)
 
-For $R = 1$:
+For $R = 1$, Alice turns out to be the winner. On the first turn, she has two possible moves: move the coin from node $3$ to node $2$ or to node $1$. If she does the latter, then at the end of her turn, all coins are in node $R$, meaning that Bob is unable to move a coin during the next turn and Alice is the winner; since she is playing optimally, she does precisely that :)
 
-Alice turns out to be the winner, here; on the first turn, she has two possible moves: Take the Coin in node $3$ and move it to node $2$; or Take the Coin in node $3$ and move it to node $1$.
+For $R = 2$: Bob gets his revenge this time! Alice has two possible initial moves: move the coin from node $1$ to node $2$, or move the coin from node $3$ to node $2$. In either case, at the end of her turn, there is exactly one coin remaining in a node other than $R$. Bob merely has to move this coin to $R$ to leave Alice with no possible moves on her turn.
 
-If she does the latter, then at the end of her move, all Coins will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing perfectly, she does precisely that :)
+For $R = 3$, Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to move the coin from node $1$ to node $3$).
 
-For $R = 2$:
+We've figured out the winner of $g(T_{\textit{board}}, R)$ for all valid $R$, and it turns out that Bob only wins one game, when $R=2$; thus the answer is $2^2 \,\%\, (10^9+7) = 4$.
 
-Bob gets his revenge this time! Alice has two possible initial moves: Take the Coin in node $1$ and move it to node $2$; or Take the Coin in node $3$ and move it to node $2$.
+**Example case 2:** The original $T_{\textit{board}}$ looks like this:
 
-In either case, at the end of her move there will be exactly one Coin remaining on a node other than $R = 2$.  Bob merely has to move this Coin to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
-
-For $R = 3$:
-
-Alice wins again, using very similar reasoning to the $R = 1$ case (her winning move this time around is to take the Coin in node $1$ and move it to node $3$).
-
-We've figured out $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all $R=1,2,3$, and it turns out that Bob only wins the one game, when $R=2$; thus $\textit{BobWinR}=\{2\}$ and our desired sum is:
-
-$$
-\sum\limits_{R \in \textit{BobWinR}}2^R = 2^2 = 4
-$$
-
-Taking this modulo $10^9+7$, the answer for this testcase is $4$.
-
-**Example case 2:** The original $T_{\textit{board}}$ looks like:
+The boards for $R = 1, 2, 3, 4, 5, 6$ are, respectively:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_6.png)
 
-If we set $R$ to be the node $1$, then we play on the following tree:
-
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_7.png)
-
-For $R = 1$, it can be shown that if both players play perfectly, the winner will be Bob - so $\textit{winner}(\textit{game}(T_{\textit{board}}, 1))$ is Bob.
-
-For $R = 2$, we have the following:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_8.png)
 
-and again, it can be shown that $\textit{winner}(\textit{game}(T_{\textit{board}}, 2))$ is Bob.
-
-
-For $R = 3$:
-
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_9.png)
-
-Once again, $\textit{winner}(\textit{game}(T_{\textit{board}}, 3))$ can be shown to be Bob.
-
-$R = 4$:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_10.png)
 
-This time, Alice will win if both players play perfectly i.e. $\textit{winner}(\textit{game}(T_{\textit{board}}, 4))$ is Alice.
-
-$R = 5$:
-
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_11.png)
-
-Alice wins for $R = 5$, too; $\textit{winner}(\textit{game}(T_{\textit{board}}, 5))$ is Alice.
-
-Finally, $R = 6$:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_12.png)
 
-Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T_{\textit{board}}, 6))$ is Alice.
+It can be proved that Bob wins $g(T_{\textit{board}}, 1)$, $g(T_{\textit{board}}, 2)$ and $g(T_{\textit{board}}, 3)$, while Alice wins $g(T_{\textit{board}}, 4)$, $g(T_{\textit{board}}, 5)$ and $g(T_{\textit{board}}, 6)$. The answer is $(2^1 + 2^2 + 2^3) \,\%\, (10^9+7) = 14$.
 
-We now know $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all possible values of $R$, and we see that $\textit{BobWinR}=\{1, 2, 3\}$, so the value of our desired sum is $$\sum\limits_{R \in \textit{BobWinR}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14$$
-
-After taking this modulo $10^9+7$, the final answer is $14$.
