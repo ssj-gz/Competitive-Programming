@@ -1,17 +1,16 @@
-A sequel to ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem), with a couple of twists!
+This is a sequel to the problem ["Move the Coins"](https://www.hackerrank.com/challenges/move-the-coins/problem) with a couple of twists!
 
-Bob and Alice are playing a board game.  The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes, numbered from $1$ to $N$. The game involves moving a set of Coins around the board, with each node $v$ having $c_v$ Coins on it at the beginning of the game. For a node $R$ ($1 \le R \le N)$, define $\textit{game}(T_{\textit{board}}, R)$ as the game with the following rules:
+Alice and Bob are playing a board game. The board is in the form of a tree $T_{\textit{board}}$ with $N$ nodes (numbered $1$ through $N$). The game involves moving some coins around the board. For a node $R$ ($1 \le R \le N$), let's define a game $g(T_{\textit{board}}, R)$ with the following rules:
+1. A copy of $T_{\textit{board}}$ is taken and for each valid $v$, $c_v$ coins are placed in the node $v$.
+2. Bob and Alice alternate turns; Alice makes the first move.
+3. A move consists of taking a single coin from some node other than $R$ (let's denote it by $C$) and moving it to another node which lies on the path between $R$ and $C$ (including $R$, but not including $C$).
+4. If a player cannot make a move on their turn (i.e. all the coins are in the node $R$), this player loses the game.
 
-1. A copy of $T_{\textit{board}}$ is taken, and for each $v=1,2,\dots N$, we ensure that there are precisely $c_v$ Coins on the node numbered $v$.
-2. Bob and Alice now take turns to make a move, with Alice making the first move.
-3. A move consists of taking a single Coin ($C$, say) from some node other than $R$ and moving it to an *allowed* node. If $v_C$ is the node that $C$ is currently on, then the set of allowed nodes for this $C$ is the set of $u \ne v_C$ on the shortest path between nodes $v_C$ and $R$ (**this is a small twist from the original Problem**)
-4. If a player cannot make a move on their turn (i.e. because all the Coins are on node $R$), then the game ends and the other player is declared the winner.
-
-For example, if the tree $T_{\textit{board}}$ currently looks like this and, for this game, we have chosen $R=1$:
+For example, for the tree $T_{\textit{board}}$ in the figure below and $R=1$:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_1.png)
 
-Then the current player can pick a Coin on any of nodes $v = 2, 4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the Coin $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
+The current player can pick a coin on any of nodes $2$, $4$ or $5$ (if there were any Coins on node $3$, picking one of those would also be an option). Let's assume they pick the Coin on $5$, as shown below; then they can move the coin $X$ steps towards $R=1$, where $X=1,2$ or $3$, ending up on node $4$, $2$ or $1$, respectively:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_2.png)
 
@@ -23,51 +22,42 @@ and it is the other player's turn to move.
 
 Let $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ be whichever of Bob or Alice wins the $\textit{game}(T_{\textit{board}}, R)$, assuming both players play perfectly.
 
-Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T_{\textit{board}}, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for *all of* $R = 1, 2, \ldots , n$.
+Bob knows some elementary Game Theory, so is able to very quickly predict who will win $\textit{game}(T_{\textit{board}}, R)$ for a given $R$. Unimpressed, Alice gives him a harder task: she challenges him to find the winner of $g(T_{\textit{board}}, R)$ for each of $R = 1, 2, \ldots, N$.
 
-Can you help Bob figure out the answer? More formally, if $\textit{BobWinR}$ is the set of $R$ such that $\textit{winner}(\textit{game}(T_{\textit{board}}, R)) =$ Bob, then you must calculate the value of
-
-$$
-\sum\limits_{R \in \textit{BobWinR}}2^R
-$$
+Can you help Bob figure out the answer? More formally, if $W$ is the set of $R$ such that the winner of $g(T_{\textit{board}}, R)$ is Bob, then you must calculate the value of $$\sum\limits_{R \in W}2^R \,.$$
 
 Since the result can be very large, please output it modulo $10^9+7$.
 
 ### Input
-
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
-- The first line of a testcase contains a single integer $N$.
-- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ indicating that the nodes numbered $u$ and $v$ are connected by an edge.
-- The last line of the testcase contains $N$ space-separated integers $c_1, c_2, \ldots , c_N$, where $c_i$ denotes the number of Coins that should be placed on the the node numbered $i$ in the tree $T_{\textit{board}}$ at the beginning of a game.
+- The first line of each test case contains a single integer $N$.
+- Each of the next $N-1$ lines contains two space-separated integers $u$ and $v$ denoting that nodes $u$ and $v$ are connected by an edge.
+- The last line contains $N$ space-separated integers $c_1, c_2, \ldots, c_N$.
 
 ### Output
-
-For each testcase, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that $\textit{winner}(\textit{game}(T_{\textit{board}}, R)) =$ Bob.
+For each test case, print a single line containing one integer - the sum, modulo $10^9+7$, of $2^R$ over each $R$ such that the winner of $g(T_{\textit{board}}, R)$ is Bob.
 
 ### Constraints 
 - $1 \le T \le 1,000$
 - $1 \le N \le 300,000$
-- $1 \le u,v \le N$
-- $0 \le c_i \le 16$ for all valid $i$
-- the sum of $N$ over all $T$ testcases does not exceed $300,000$
+- $1 \le u, v \le N$
+- $0 \le c_i \le 16$ for each valid $i$
+- the sum of $N$ over all test cases does not exceed $300,000$
 
 ### Subtasks
 **Subtask #1 (5 points):** 
-
 - $T \le 10$
 - $N \le 10$
-- $c_i \le 6$ for all valid $i$
-- the sum of $c_i$ over all nodes $i$ in a testcase does not exceed $10$
+- $c_i \le 6$ for each valid $i$
+- $c_1 + c_2 + \ldots + c_N \le 10$
 
 **Subtask #2 (10 points)**: 
-
-* $T \le 100$ 
-* $N \le 1,000$
+- $T \le 100$ 
+- $N \le 1,000$
 
 **Subtask #3 (85 points)**: original constraints
 
 ### Example Input
-
 ```
 2
 3 
@@ -84,7 +74,6 @@ For each testcase, print a single line containing one integer - the sum, modulo 
 ```
 
 ### Example Output
-
 ```
 4
 14
@@ -104,19 +93,13 @@ Let's examine each $\textit{game}(T_{\textit{board}},R)$ for $R=1,2,3$.
 
 For $R = 1$:
 
-Alice turns out to be the winner, here; on the first turn, she has two possible moves:
-
-1. Take the Coin in node $3$ and move it to node $2$; or
-1. Take the Coin in node $3$ and move it to node $1$.
+Alice turns out to be the winner, here; on the first turn, she has two possible moves: Take the Coin in node $3$ and move it to node $2$; or Take the Coin in node $3$ and move it to node $1$.
 
 If she does the latter, then at the end of her move, all Coins will be in node $R=1$, meaning that Bob will not be able to make a move on his turn, leaving Alice the winner: since she is playing perfectly, she does precisely that :)
 
 For $R = 2$:
 
-Bob gets his revenge this time! Alice has two possible initial moves:
-
-1. Take the Coin in node $1$ and move it to node $2$; or
-1. Take the Coin in node $3$ and move it to node $2$.
+Bob gets his revenge this time! Alice has two possible initial moves: Take the Coin in node $1$ and move it to node $2$; or Take the Coin in node $3$ and move it to node $2$.
 
 In either case, at the end of her move there will be exactly one Coin remaining on a node other than $R = 2$.  Bob merely has to move this Coin to $R$ to leave Alice with no possible moves on her turn and leave him the winner!
 
@@ -157,7 +140,6 @@ Once again, $\textit{winner}(\textit{game}(T_{\textit{board}}, 3))$ can be shown
 
 $R = 4$:
 
-
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_10.png)
 
 This time, Alice will win if both players play perfectly i.e. $\textit{winner}(\textit{game}(T_{\textit{board}}, 4))$ is Alice.
@@ -174,10 +156,6 @@ Finally, $R = 6$:
 
 Once more, Alice wins in this case - $\textit{winner}(\textit{game}(T_{\textit{board}}, 6))$ is Alice.
 
-We now know $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all possible values of $R$, and we see that $\textit{BobWinR}=\{1, 2, 3\}$, so the value of our desired sum is:
-
-$$
-\sum\limits_{R \in \textit{BobWinR}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14
-$$
+We now know $\textit{winner}(\textit{game}(T_{\textit{board}}, R))$ for all possible values of $R$, and we see that $\textit{BobWinR}=\{1, 2, 3\}$, so the value of our desired sum is $$\sum\limits_{R \in \textit{BobWinR}}2^R = 2^1 + 2^2 + 2^3 = 2 + 4 + 8 = 14$$
 
 After taking this modulo $10^9+7$, the final answer is $14$.
