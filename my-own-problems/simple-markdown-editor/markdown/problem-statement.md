@@ -41,7 +41,6 @@ Chef must implement the query types listed below and then process a list ${q_1, 
     He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting chars in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
-
 Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $d$ for each testcase!
 
 ### Input
@@ -52,7 +51,6 @@ Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to
 ### Output
 For each test case, print a single line containing one integer ― the final value of $\textit{decryptionKey}$ after processing all $Q$ queries.
 
-
 ### Constraints 
 - $1 \le T \le 1,000$
 - $1 \le Q \le 200,000$
@@ -62,7 +60,6 @@ For each test case, print a single line containing one integer ― the final val
 - For queries beginning with `U`, the decrypted value $u$ will never exceed the value of the current Undo Stack Pointer minus 1
 - For queries beginning with `R`, the decrypted value $r$ will never exceed the current Undo Stack size minus the value of the current Undo Stack Pointer
 - the sum of $Q$ over all test cases does not exceed $200,000$
-
 
 ### Subtasks
 **Subtask #1 (5 points):** 
@@ -104,7 +101,6 @@ Q 217007372
 ```
 
 ### Explanation
-
 **Initial status**: 
 ```
 document: 
@@ -138,7 +134,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX" ]
                                 ↑ undo stack pointer = 3
 ```
 
-
 **Processing query 3**. $\textit{decryptionKey} = 0$.
 Need to insert formatting char at position $0\oplus 7 = 7$.
 ```
@@ -151,7 +146,6 @@ document: XXX*XX*XXXX
 undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
                                               ↑ undo stack pointer = 4
 ```
-
 
 **Processing query 4**. $\textit{decryptionKey} = 0$.
 Need to find the size of the formatted range around the position $0 \oplus 5 = 5$.
@@ -175,7 +169,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
                                               ↑ undo stack pointer = 4
 ```
 
-
 **Processing query 5**. $\textit{decryptionKey} = 32$.
 Need to insert $32 \oplus 35 = 3$ non-formatting chars at position $32\oplus 35 = 8$.
 ```
@@ -189,7 +182,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                "XXX*XX*XXXXXXX" ]
                ↑ undo stack pointer = 5
 ```
-
 
 **Processing query 6**. $\textit{decryptionKey} = 32$.
 Need to insert formatting char at position $32\oplus 42 = 10$.
@@ -205,7 +197,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                                  ↑ undo stack pointer = 6
 ```
 
-
 **Processing query 7**. $\textit{decryptionKey} = 32$.
 Need to insert formatting char at position $32\oplus 33 = 1$.
 ```
@@ -220,7 +211,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                              undo stack pointer = 7 ↑
 ```
 
-
 **Processing query 8**. $\textit{decryptionKey} = 32$.
 Need to find the size of the formatted range around the position $32 \oplus 35 = 3$.
 ```
@@ -229,7 +219,6 @@ document: *XXX*XX*XX*XXXXX
             ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatted characters is this range is 3; the answer to query #8 is $3$.
-
 
 Updating $decryptionKey$: 
 
@@ -244,10 +233,8 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                              undo stack pointer = 7 ↑
 ```
 
-
 **Processing query 9**. $\textit{decryptionKey} = 800$.
 Need to re-wind the undo stack pointer by $800\oplus803 = 3$ places.
-
 
 **State after processing query 9**:
 ```
@@ -257,7 +244,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
 ```
 
-
 **Processing query 10**. $\textit{decryptionKey} = 800$.
 Need to find the size of the formatted range around the position $800 \oplus 810 = 10$.
 ```
@@ -266,7 +252,6 @@ document: XXX*XX*XXXX
                    ↑ query the size of formatted range around this point
 ```
 The queried position is not part of a formatted range; the answer to query #10 is $3141592$.
-
 
 Updating $decryptionKey$: 
 
@@ -281,10 +266,8 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
 ```
 
-
 **Processing query 11**. $\textit{decryptionKey} = 216990987$.
 Need to move forward the undo stack pointer by $216990987\oplus216990986 = 1$ places.
-
 
 **State after processing query 11**:
 ```
@@ -293,7 +276,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
                ↑ undo stack pointer = 5
 ```
-
 
 **Processing query 12**. $\textit{decryptionKey} = 216990987$.
 Need to insert formatting char at position $216990987\oplus 216990991 = 4$.
@@ -308,9 +290,7 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                ↑ undo stack pointer = 5
 ```
 
-
 We can now perform the insertion, giving the updated document:
-
 
 ```
 document: XXX**XX*XXXXXXX
@@ -322,7 +302,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX" ]
                                  ↑ undo stack pointer = 6
 ```
-
 
 **Processing query 13**. $\textit{decryptionKey} = 216990987$.
 Need to insert formatting char at position $216990987\oplus 216990977 = 10$.
@@ -338,7 +317,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                              undo stack pointer = 7 ↑
 ```
 
-
 **Processing query 14**. $\textit{decryptionKey} = 216990987$.
 Need to find the size of the formatted range around the position $216990987 \oplus 216990978 = 9$.
 ```
@@ -347,7 +325,6 @@ document: XXX**XX*X*XXXXXX
                   ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatted characters is this range is 1; the answer to query #14 is $1$.
-
 
 Updating $decryptionKey$: 
 
@@ -362,10 +339,8 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                              undo stack pointer = 7 ↑
 ```
 
-
 **Processing query 15**. $\textit{decryptionKey} = 217007371$.
 Need to re-wind the undo stack pointer by $217007371\oplus217007368 = 3$ places.
-
 
 **State after processing query 15**:
 ```
@@ -374,7 +349,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                                               ↑ undo stack pointer = 4
                "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
 ```
-
 
 **Processing query 16**. $\textit{decryptionKey} = 217007371$.
 Need to insert $217007371 \oplus 217007374 = 5$ non-formatting chars at position $217007371\oplus 217007374 = 5$.
@@ -388,9 +362,7 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
                                               ↑ undo stack pointer = 4
 ```
 
-
 We can now perform the insertion, giving the updated document:
-
 
 ```
 document: XXX*XXXXXXX*XXXX
@@ -403,7 +375,6 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
                ↑ undo stack pointer = 5
 ```
 
-
 **Processing query 17**. $\textit{decryptionKey} = 217007371$.
 Need to find the size of the formatted range around the position $217007371 \oplus 217007372 = 7$.
 ```
@@ -413,14 +384,10 @@ document: XXX*XXXXXXX*XXXX
 ```
 The queried position is part of a formatted range and the number of non-formatted characters is this range is 7; the answer to query #17 is $7$.
 
-
 Updating $decryptionKey$: 
 
 $$
 decryptionKey = decryptionKey + 7\times  2^{17}  = 217007371 + 7\times 131072 = 217924875 \mod 10^9+7 = 217924875
 $$
 
-
 That's all the queries processed, and the final value of $\textit{decryptionKey}$ is 217924875; so the answer for this testcase is 217924875.
-
-
