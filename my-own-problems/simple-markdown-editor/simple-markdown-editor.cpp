@@ -295,7 +295,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 
             for (int undoStackIndex = 0; undoStackIndex < undoStackDocuments.size(); undoStackIndex++)
             {
-                //cout << "undoStackIndex: " << undoStackIndex << " undoStackPointer: " << undoStackPointer << endl;
                 string undoStackElement = "\"" + undoStackDocuments[undoStackIndex] + "\"";
                 const bool isFinalElement = (undoStackIndex == undoStackDocuments.size() - 1);
                 if (!isFinalElement)
@@ -345,9 +344,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 if (isFinalElement)
                     flushLine();
             }
-            //undoStackStatusString += "] ";
-            //cout << undoStackStatusString << endl;
-            //cout << string(undoStackStatusPointer, ' ') << "↑ undo stack pointer = " << (undoStackPointer + 2) << endl;
         }
         if (printFormattedRangeDisplay)
         {
@@ -360,7 +356,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             {
                 if (document[pos] == '*')
                 {
-                    //cout << "found * at pos: " << pos << " formatRangeBegin: " << formatRangeBegin << endl;
                     if (formatRangeBegin == -1)
                     {
                         const int numSpacesToAddToDisplayString = pos - formattedRangeDisplayStringLength;
@@ -371,15 +366,11 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     else
                     {
                         const int numCharsToAddToDisplayString = pos + 1 - formattedRangeDisplayStringLength;
-                        //cout << "adding " << (pos + 1 - static_cast<int>(formattedRangeDisplayString.size()) - 2) << " things " << " formattedRangeDisplayString size: " << formattedRangeDisplayString.size() << endl;
-                        //cout << "formattedRangeDisplayString: >" << formattedRangeDisplayString << "<" << endl;
                         formattedRangeDisplayString += u8"┌" + repeatedString(u8"─", numCharsToAddToDisplayString - 2)  + u8"┐";
                         formattedRangeDisplayStringLength += numCharsToAddToDisplayString;
                         formatRangeBegin = -1;
                         numFormattedRanges++;
                     }
-                    //cout << document << "<" << endl;
-                    //cout << formattedRangeDisplayString << "<" << endl;
                 }
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
@@ -411,7 +402,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << "```" << endl;
                     const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
-                    //cout << "InsertFormatting at " << insertionPos << endl;
                     document.insert(document.begin() + insertionPos, '*');
                     undoStack.erase(undoStack.begin() + (undoStackPointer + 1), undoStack.end());
                     undoStackDocuments.erase(undoStackDocuments.begin() + (undoStackPointer + 2), undoStackDocuments.end());
@@ -447,7 +437,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << "```" << endl;
                     const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
-                    //cout << "InsertNonFormatting " << numToInsert << " at " << insertionPos << endl;
                     const string charsToInsert(numToInsert, 'X');
                     document.insert(insertionPos, charsToInsert);
                     undoStack.erase(undoStack.begin() + (undoStackPointer + 1), undoStack.end());
@@ -478,7 +467,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int queryPosition = (query.encryptedArgument ^ decryptionKey) - 1;
                     assert(document[queryPosition] == 'X');
-                    //cout << "IsRangeFormatted at " << queryPosition << endl;
                     int64_t queryAnswer = -1;
                     {
                         int openingFormatPos = -1;
@@ -503,8 +491,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                             }
                         }
                     }
-                    //cout << "queryAnswer: " << queryAnswer << endl;
-                    //cout << "Changed decryptionKey to " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
                     cout << "Need to find the size of the formatted range around the position $p = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
                     cout << "```" << endl;
@@ -534,7 +520,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #ifdef DIAGNOSTICS
                     cout << "Need to re-wind the undo stack pointer by $u = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << numToUndo << "$ places.\n" << endl;
 #endif
-                    //cout << "Undo " << numToUndo << endl;
                     for (int i = 0; i < numToUndo; i++)
                     {
                         const auto& queryToUndo = undoStack[undoStackPointer];
@@ -551,7 +536,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
 #ifdef DIAGNOSTICS
                     cout << "Need to move forward the undo stack pointer by $r = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << numToRedo << "$ places.\n" << endl;
 #endif
-                    //cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
                     {
                         undoStackPointer++;
@@ -580,13 +564,6 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             cout << "\nThat's all the queries processed, and the final value of $d$ is " << decryptionKey << "; so the answer for this test case is " << decryptionKey << "." << endl;
         }
 #endif
-        //cout << "document: " << document << endl;
-        //cout << "Undo stack: " << endl;
-        for (const auto x : undoStack)
-        {
-            //cout << (x.type == Query::InsertNonFormatting ? 'X' : '*') << " " << x.encryptedArgument << endl;
-        }
-        //cout << "undoStackPointer: " << undoStackPointer << endl;
         queryNum++;
         bruteForceDocs.push_back(document);
 
