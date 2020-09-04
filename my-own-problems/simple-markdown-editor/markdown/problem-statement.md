@@ -2,8 +2,9 @@ Chef must has been asked to add some functionality to a simplified Markdown Edit
 
 The Editor must be able to _parse_ $D$ into a list of _formatted ranges_, as follows:
 
-Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range.
-Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range; etc until no formatting characters remain.
+* Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
+* Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
+* Continue this process until no formatting characters remain.
 
 For example, given the document:
 
