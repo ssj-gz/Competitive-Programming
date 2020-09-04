@@ -1088,7 +1088,7 @@ int main(int argc, char* argv[])
                         cout << 'N' << " " << query.encryptedArgument << " " << query.encryptedArgument2 << endl;
                         break;
                     case Query::IsRangeFormatted:
-                        cout << 'Q' << " " << query.encryptedArgument << endl;
+                        cout << '?' << " " << query.encryptedArgument << endl;
                         break;
                     case Query::Undo:
                         cout << 'U' << " " << query.encryptedArgument << endl;
@@ -1122,7 +1122,7 @@ int main(int argc, char* argv[])
                     query.type = Query::InsertNonFormatting;
                     query.encryptedArgument2 = read<int>();
                     break;
-                case 'Q':
+                case '?':
                     query.type = Query::IsRangeFormatted;
                     break;
                 case 'U':
