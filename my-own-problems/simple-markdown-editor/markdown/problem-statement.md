@@ -2,8 +2,8 @@ Chef must add some functionality to a simplified Markdown Editor.  The Editor co
 
 The Editor must _parse_ the current document to give a list of _formatted ranges_, as follows:
 
-Take the first and second occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range.
-Take the third and fourth occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range; etc until no formatted chars remain.
+Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range.
+Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range; etc until no formatted characters remain.
 
 For example, given the document:
 
@@ -11,7 +11,7 @@ For example, given the document:
 XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 ```
 
-the first and second formatting chars are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
+the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
 
 Initially, $D$ is the empty string; $S=\[D\]$, and $\textit{SP}$ points to $D$ in $S$ i.e. $\textit{SP}=1$.
 
@@ -38,7 +38,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
     The character at position $p$ is guaranteed to be a non-formatted char.
-    He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting chars in this formatted range; otherwise, $A=3141592$.
+    He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting characters in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
 Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $d$ for each test case!
