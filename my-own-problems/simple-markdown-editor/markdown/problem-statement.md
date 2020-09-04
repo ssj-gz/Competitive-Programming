@@ -1,4 +1,4 @@
-Chef must add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_, $D$; an _Undo Stack_, $S$ containing the list of document _revisions_; and an _Undo Stack Pointer_ $\textit{SP}$ pointing to the current document in $S$.  The document consists of only two characters: _Non-Formatting Characters_  (represented by `X`) and _Formatting Characters_ (represented by `*`).
+Chef must add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_, $D$; an _Undo Stack_, $S$ containing the list of document _revisions_; and an _Undo Stack Pointer_ $\textit{SP}$ pointing to the current document in $S$.  Each character in $D$ may only be one of the following: a _Non-Formatting Character_  (`X`) or a _Formatting Character_ (`*`).
 
 The Editor must _parse_ the current document to give a list of _formatted ranges_, as follows:
 
