@@ -35,7 +35,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
 4. `R er`
 
     Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
-    He must then handle this query identically to the `U` query, except that adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
+    He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
 5. `? ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
