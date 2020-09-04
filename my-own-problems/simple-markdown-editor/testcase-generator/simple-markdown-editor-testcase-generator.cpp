@@ -158,7 +158,7 @@ void writeTestCase(Testcase<SubtaskInfo>& destTestcase, const std::vector<TestQu
                 {
                     const auto queryPosition = query.queryPosition - 1;
                     auto queryAnswer = formattingCharsTree.distBetweenEnclosingFormattedChars(queryPosition);
-                    destTestcase.writeLine<char, int64_t>('Q', (queryPosition + 1) ^ encryptionKey);
+                    destTestcase.writeLine<char, int64_t>('?', (queryPosition + 1) ^ encryptionKey);
 
                     // Update encryptionKey for next queries.
                     if (queryAnswer == -1)
@@ -1219,7 +1219,7 @@ bool verifyTestFile(TestFileReader& testFileReader, const SubtaskInfo& containin
                 case 'N':
                     query.type = TestQuery::InsertNonFormatting;
                     break;
-                case 'Q':
+                case '?':
                     query.type = TestQuery::IsRangeFormatted;
                     break;
                 case 'U':
