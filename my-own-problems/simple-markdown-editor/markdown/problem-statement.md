@@ -68,7 +68,7 @@ For each test case, print a single line containing one integer ― the final val
 - The length of the document will never exceed $1000$ characters
 
 **Subtask #2 (40 points)**: 
-- Original constraints, except that there will be no $\textit{undo}$ nor $\textit{redo}$ queries
+- Original constraints, except that there will be no `U` nor `R` queries
 
 **Subtask #3 (55 points)**: original constraints
 
