@@ -15,7 +15,7 @@ the first and second formatting chars are at positions 4 and 9, so [4, 9] is a f
 
 Initially, the Undo Stack consists of just the initial, empty current document, and the Undo Stack Pointer points to this.
 
-Chef must implement the query types listed below and then process a list of $Q$ such queries, ${q_1, q_2, \dots q_Q}$.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
+Chef must implement the query types listed below and then process a list ${q_1, q_2, \dots q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
 
 1. `F ep`
 
