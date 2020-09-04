@@ -37,7 +37,8 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 5. `Q ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
-    He must then find the answer, $q$, to the query as follows: if, after parsing, the character at position $p$‒which is guaranteed to be a non-formatted char‒is contained in a formatted range, then $q$ is the number of non-formatting chars in this formatted range; otherwise, $q=3141592$.
+    The character at position $p$ is guaranteed to be a non-formatted char.
+    He must then find the answer, $q$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $q$ is the number of non-formatting chars in this formatted range; otherwise, $q=3141592$.
     Once he has found $q$, he must update his decryption key via $d = d + q \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
 
