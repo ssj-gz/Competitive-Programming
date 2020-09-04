@@ -15,7 +15,7 @@ XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 
 the first and second formatting chars are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
 
-Chef must implement the following queries.  Note that the queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
+Chef must implement the query types listed below and then process a list of $Q$ such queries, ${q_1, q_2, \dots q_Q}$.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
 
 1. `F ep`
 
@@ -34,7 +34,12 @@ Chef must implement the following queries.  Note that the queries are _encrypted
 
     Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
     He must then handle this query identically to the `U` query, except that he moves the Undo Stack Pointer $r$ revisions to the right.
-5. $\textit{numInFormattedRange}(\textit{queryPosition})$. If the character at $\textit{queryPosition}$ - which is guaranteed to be a non-formatted char - is contained in a formatted range, then Chef's answer to the query is the number of non-formatting chars in this formatted range; otherwise, the answer to the query is 3'141'592.
+5. `Q ep`
+
+    Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
+    He must then find the answer, $q$, to the query as follows: if the character at position $p$‒which is guaranteed to be a non-formatted char‒is contained in a formatted range, then $q$ is the number of non-formatting chars in this formatted range; otherwise, $q=3141592$.
+    Once he has found $q$, he must update his decryption key via $d = d + q \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
+
 
 More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each query being one of the above types. The queries are *encrypted* in such a way that Chef can't decrypt the next query until he has processed all previous queries i.e. the queries must be processed _online_.  Chef has a $\textit{decryptionKey}$ (with initial value $0$) which is used to decrypt these queries and which he updates after handling each $\textit{numInFormattedRange}$ query.  Each query $q_i$ is encoded in one of the following forms:
 
