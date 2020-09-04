@@ -396,7 +396,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     for (const auto& query : queries)
     {
 #ifdef DIAGNOSTICS
-        cout << "**Processing query " << queryNum << "**. $\\textit{decryptionKey} = " << decryptionKey << "$."  << endl;
+        cout << "**Processing query " << queryNum << "**. $d = " << decryptionKey << "$."  << endl;
 #endif
         switch (query.type)
         {
@@ -518,8 +518,8 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     }
                     else
                         cout << "The queried position is part of a formatted range and the number of non-formatted characters is this range is " << queryAnswer << "; the answer to query #" << queryNum << " is $" << queryAnswer << "$." << endl;
-                    cout << "\n\nUpdating $decryptionKey$: \n" << endl;
-                    cout << "$$\ndecryptionKey = decryptionKey + " << queryAnswer << "\\times  2^{" << queryNum << "}" << "  = " << decryptionKey << " + " << queryAnswer << "\\times " << ((1 << queryNum))  << " = " << decryptionKey + ((1 << queryNum)) * queryAnswer << " \\mod 10^9+7 = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "\n$$" << endl;
+                    cout << "\n\nUpdating $d$: \n" << endl;
+                    cout << "$$\nd = d + " << queryAnswer << "\\times  2^{" << queryNum << "}" << "  = " << decryptionKey << " + " << queryAnswer << "\\times " << ((1 << queryNum))  << " = " << decryptionKey + ((1 << queryNum)) * queryAnswer << " \\mod 10^9+7 = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "\n$$" << endl;
 
 #endif
                     if (queryAnswer == -1)
@@ -578,7 +578,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         }
         else
         {
-            cout << "\n\nThat's all the queries processed, and the final value of $\\textit{decryptionKey}$ is " << decryptionKey << "; so the answer for this testcase is " << decryptionKey << "." << endl;
+            cout << "\n\nThat's all the queries processed, and the final value of $d$ is " << decryptionKey << "; so the answer for this testcase is " << decryptionKey << "." << endl;
         }
 #endif
         //cout << "document: " << document << endl;
