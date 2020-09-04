@@ -22,7 +22,9 @@ Chef must implement the following queries.  Note that the queries are _encrypted
     Chef must decrypt $ep$ to give $p$ via $p=d \oplus ep$, where $\oplus$ denotes the Xor operator.
     He must then clear all elements in the Undo Stack to the right of the Undo Stack Pointer (if any); then insert a formatting character ('*') at the given $p$ in the current document to give the new current document.
     He must then append this to the Undo Stack and adjust the  Undo Stack Pointer to point to it.
-2. $\textit{insertNonFormattingChars}(\textit{numCharsToInsert}, \textit{positionToInsert})$.  Chef must handle this in an identical way to $\textit{insertFormattingChar}$, except instead of adding a formatting character, he must instead insert $\textit{numCharsToInsert}$ non-formatting characters ('X') at the given $\textit{positionToInsert}$ in the current document.
+2. `I ec ep`
+
+    Chef must decrypt $ec$ and $ep$ via $e = ec \oplus d$ and $p = ep \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character, he must instead insert $c$ non-formatting characters ('X') at the given $p$ in the current document.
 3. $\textit{undo}(\textit{numToUndo})$.  Chef must move the Undo Stack Pointer $\textit{numToUndo}$ revisions to the left.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
 4. $\textit{redo}(\textit{numToRedo})$.  Chef must move the Undo Stack Pointer $\textit{numToRedo}$ revisions to the right.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
 5. $\textit{numInFormattedRange}(\textit{queryPosition})$. If the character at $\textit{queryPosition}$ - which is guaranteed to be a non-formatted char - is contained in a formatted range, then Chef's answer to the query is the number of non-formatting chars in this formatted range; otherwise, the answer to the query is 3'141'592.
