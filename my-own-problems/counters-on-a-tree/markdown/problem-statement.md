@@ -96,9 +96,9 @@ We've figured out the winner of $g(T_{\textit{board}}, R)$ for all valid $R$, an
 
 **Example case 2:** The original $T_{\textit{board}}$ looks like this:
 
-The boards for $R = 1, 2, 3, 4, 5, 6$ are, respectively:
-
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_6.png)
+
+The boards for $R = 1, 2, 3, 4, 5, 6$ are, respectively:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_7.png)
 
@@ -113,4 +113,3 @@ The boards for $R = 1, 2, 3, 4, 5, 6$ are, respectively:
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MOVCOIN2/COUNTREE_12.png)
 
 It can be proved that Bob wins $g(T_{\textit{board}}, 1)$, $g(T_{\textit{board}}, 2)$ and $g(T_{\textit{board}}, 3)$, while Alice wins $g(T_{\textit{board}}, 4)$, $g(T_{\textit{board}}, 5)$ and $g(T_{\textit{board}}, 6)$. The answer is $(2^1 + 2^2 + 2^3) \,\%\, (10^9+7) = 14$.
-
