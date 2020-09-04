@@ -120,10 +120,10 @@ undo stack:  [ "", "XXXXXXXXX" ]
 ```
 
 **Processing query 2**.
-Need to insert formatting char at position $p = d \oplus 4 = 0\oplus 4 = 4$.
+Need to insert formatting character at position $p = d \oplus 4 = 0\oplus 4 = 4$.
 ```
 document: XXXXXXXXX
-             ↑ insert formatting char here
+             ↑ insert formatting character here
 ```
 **State after processing query 2**:
 ```
@@ -133,10 +133,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX" ]
 ```
 
 **Processing query 3**.
-Need to insert formatting char at position $p = d \oplus 7 = 0\oplus 7 = 7$.
+Need to insert formatting character at position $p = d \oplus 7 = 0\oplus 7 = 7$.
 ```
 document: XXX*XXXXXX
-                ↑ insert formatting char here
+                ↑ insert formatting character here
 ```
 **State after processing query 3**:
 ```
@@ -179,10 +179,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
 ```
 
 **Processing query 6**.
-Need to insert formatting char at position $p = d \oplus 42 = 32\oplus 42 = 10$.
+Need to insert formatting character at position $p = d \oplus 42 = 32\oplus 42 = 10$.
 ```
 document: XXX*XX*XXXXXXX
-                   ↑ insert formatting char here
+                   ↑ insert formatting character here
 ```
 **State after processing query 6**:
 ```
@@ -193,10 +193,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
 ```
 
 **Processing query 7**.
-Need to insert formatting char at position $p = d \oplus 33 = 32\oplus 33 = 1$.
+Need to insert formatting character at position $p = d \oplus 33 = 32\oplus 33 = 1$.
 ```
 document: XXX*XX*XX*XXXXX
-          ↑ insert formatting char here
+          ↑ insert formatting character here
 ```
 **State after processing query 7**:
 ```
@@ -269,10 +269,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
 ```
 
 **Processing query 12**.
-Need to insert formatting char at position $p = d \oplus 216990991 = 216990987\oplus 216990991 = 4$.
+Need to insert formatting character at position $p = d \oplus 216990991 = 216990987\oplus 216990991 = 4$.
 ```
 document: XXX*XX*XXXXXXX
-             ↑ insert formatting char here
+             ↑ insert formatting character here
 ```
 The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: 
 ```
@@ -295,10 +295,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
 ```
 
 **Processing query 13**.
-Need to insert formatting char at position $p = d \oplus 216990977 = 216990987\oplus 216990977 = 10$.
+Need to insert formatting character at position $p = d \oplus 216990977 = 216990987\oplus 216990977 = 10$.
 ```
 document: XXX**XX*XXXXXXX
-                   ↑ insert formatting char here
+                   ↑ insert formatting character here
 ```
 **State after processing query 13**:
 ```
