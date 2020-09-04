@@ -36,7 +36,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
 4. `R er`
 
     Chef must decrypt $\textit{er}$ to give $r$ via $r = d \oplus \textit{er}$.
-    He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$.
+    He must then handle this query identically to the `U` query, except that he adds $r$ to $\textit{SP}$.
 5. `? ep`
 
     Chef must decrypt $\textit{ep}$ to give $p$ via $p = d \oplus \textit{ep}$.
