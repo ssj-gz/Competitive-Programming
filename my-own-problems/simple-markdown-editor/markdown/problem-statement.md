@@ -34,7 +34,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 
     Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
     He must then handle this query identically to the `U` query, except that adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
-5. `Q ep`
+5. `? ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
     The character at position $p$ is guaranteed to be a non-formatting character.
@@ -46,7 +46,7 @@ Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
 - The first line of each test case contains a single integer $Q$
-- Each of the next $Q$ lines begins with a single character equal to one of `N`, `F`, `U`, `R` or `Q`, denoting the type of the query to process, then a space, and then either two space-separated integers (if the single character was `N`) or two space-separated integers (otherwise), representing the encrypted arguments for that query
+- Each of the next $Q$ lines begins with a single character equal to one of `N`, `F`, `U`, `R` or `?`, denoting the type of the query to process, then a space, and then either two space-separated integers (if the single character was `N`) or two space-separated integers (otherwise), representing the encrypted arguments for that query
 
 ### Output
 For each test case, print a single line containing one integer ― the final value of $d$ after processing all $Q$ queries.
@@ -55,7 +55,7 @@ For each test case, print a single line containing one integer ― the final val
 - $1 \le T \le 1,000$
 - $1 \le Q \le 200,000$
 - The length $D$ will never exceed $10^{18}$ characters
-- For queries of type `Q`, the character at the decrypted position $p$ in $D$ is always a `X`
+- For queries of type `?`, the character at the decrypted position $p$ in $D$ is always a `X`
 - For queries of type `N` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
 - After processing a query of type `U` or `R`, it is guaranteed that $\textit{SP}$ still satisfies $1 \le \textit{SP} \le |S|$
 - the sum of $Q$ over all test cases does not exceed $200,000$
@@ -78,20 +78,20 @@ For each test case, print a single line containing one integer ― the final val
 N 1 9
 F 4
 F 7
-Q 5
+? 5
 N 40 35
 F 42
 F 33
-Q 35
+? 35
 U 803
-Q 810
+? 810
 R 216990986
 F 216990991
 F 216990977
-Q 216990978
+? 216990978
 U 217007368
 N 217007374 217007374
-Q 217007372
+? 217007372
 ```
 
 ### Example Output
