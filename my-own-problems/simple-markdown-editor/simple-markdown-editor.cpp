@@ -506,7 +506,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     //cout << "queryAnswer: " << queryAnswer << endl;
                     //cout << "Changed decryptionKey to " << decryptionKey << endl;
 #ifdef DIAGNOSTICS
-                    cout << "Need to find the size of the formatted range around the position $" << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
+                    cout << "Need to find the size of the formatted range around the position $p = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(false, true, false);
                     cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " query the size of formatted range around this point" << endl;
