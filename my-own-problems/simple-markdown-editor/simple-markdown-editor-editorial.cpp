@@ -471,7 +471,7 @@ int main()
                     query.type = Query::InsertNonFormatting;
                     query.encryptedArgument2 = read<int64_t>();
                     break;
-                case 'Q':
+                case '?':
                     query.type = Query::IsRangeFormatted;
                     break;
                 case 'U':
