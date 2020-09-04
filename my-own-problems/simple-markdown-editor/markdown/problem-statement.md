@@ -120,7 +120,6 @@ undo stack:  [ "", "XXXXXXXXX" ]
                    ↑ undo stack pointer = 2
 ```
 
-
 **Processing query 2**. $d = 0$.
 Need to insert formatting char at position $0\oplus 4 = 4$.
 ```
@@ -155,7 +154,6 @@ document: XXX*XX*XXXX
               ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatted characters is this range is 2; the answer to query #4 is $2$.
-
 
 Updating $d$: 
 
