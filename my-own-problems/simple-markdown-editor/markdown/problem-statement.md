@@ -30,12 +30,12 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
 3. `U eu`
 
     Chef must decrypt $\textit{eu}$ to give $u$ via $u = d \oplus \textit{eu}$.
-    He must then move the Undo Stack Pointer $u$ revisions to the left i.e. subtract $u$ from $\textit{SP}$.  It is guaranteed that $u < \textit{SP}$.
+    He must then move the Undo Stack Pointer $u$ revisions to the left i.e. subtract $u$ from $\textit{SP}$.
     $D$ is then set to the document revision in $S$ that is pointed to by the new $\textit{SP}$.
 4. `R er`
 
     Chef must decrypt $\textit{er}$ to give $r$ via $r = d \oplus \textit{er}$.
-    He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
+    He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$.
 5. `? ep`
 
     Chef must decrypt $\textit{ep}$ to give $p$ via $p = d \oplus \textit{ep}$.
