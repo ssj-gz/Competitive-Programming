@@ -1,6 +1,6 @@
 Chef must add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_, $D$; an _Undo Stack_, $S$ containing the list of document _revisions_; and an _Undo Stack Pointer_ $\textit{SP}$ pointing to the current document in $S$.  Each character in $D$ may only be one of the following: a _Non-Formatting Character_  (`X`) or a _Formatting Character_ (`*`).
 
-The Editor must _parse_ $D$ to give a list of _formatted ranges_, as follows:
+The Editor must be able to _parse_ $D$ into a list of _formatted ranges_, as follows:
 
 Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range.
 Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range; etc until no formatted characters remain.
