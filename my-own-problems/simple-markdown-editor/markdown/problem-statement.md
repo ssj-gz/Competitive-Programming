@@ -3,7 +3,7 @@ Chef must add some functionality to a simplified Markdown Editor.  The Editor co
 The Editor must be able to _parse_ $D$ into a list of _formatted ranges_, as follows:
 
 Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range.
-Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range; etc until no formatted characters remain.
+Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range; etc until no formatting characters remain.
 
 For example, given the document:
 
@@ -37,7 +37,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 5. `Q ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
-    The character at position $p$ is guaranteed to be a non-formatted char.
+    The character at position $p$ is guaranteed to be a non-formatting char.
     He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting characters in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
