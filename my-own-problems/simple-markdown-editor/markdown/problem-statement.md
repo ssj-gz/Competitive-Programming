@@ -28,8 +28,8 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 3. `U eu`
 
     Chef must decrypt $eu$ to give $u$ via $u = eu \oplus d$.
-    He must then move the Undo Stack Pointer $u$ revisions to the left.
-    The document in the Undo Stack that is pointed to by the new Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
+    He must then move the Undo Stack Pointer $u$ revisions to the left i.e. subtract $u$ from $\textit{SP}$.  It is guaranteed that $u < \textit{SP}$.
+    $D$ is then set to the document revision in $S$ that is pointed to by the new $\textit{SP}$.
 4. `R er`
 
     Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
