@@ -153,7 +153,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 5
 ```
       ┌──┐     ← Formatted ranges
 D: XXX*XX*XXXX
-       ↑ query the size of formatted range around this point
+       ↑ check for formatted range around this point
 ```
 The position $p$ is part of a formatted range and the number of ``X``s is this range is 2; so $A = 2$.
 
@@ -212,7 +212,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 3
 ```
    ┌───┐  ┌──┐      ← Formatted ranges
 D: *XXX*XX*XX*XXXXX
-     ↑ query the size of formatted range around this point
+     ↑ check for formatted range around this point
 ```
 The position $p$ is part of a formatted range and the number of ``X``s is this range is 3; so $A = 3$.
 
@@ -242,7 +242,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 8
 ```
       ┌──┐     ← Formatted ranges
 D: XXX*XX*XXXX
-            ↑ query the size of formatted range around this point
+            ↑ check for formatted range around this point
 ```
 The position $p$ is not part of a formatted range; $A = 3141592$.
 
@@ -311,7 +311,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 ```
       ┌┐  ┌─┐       ← Formatted ranges
 D: XXX**XX*X*XXXXXX
-           ↑ query the size of formatted range around this point
+           ↑ check for formatted range around this point
 ```
 The position $p$ is part of a formatted range and the number of ``X``s is this range is 1; so $A = 1$.
 
@@ -365,7 +365,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 ```
       ┌───────┐     ← Formatted ranges
 D: XXX*XXXXXXX*XXXX
-         ↑ query the size of formatted range around this point
+         ↑ check for formatted range around this point
 ```
 The position $p$ is part of a formatted range and the number of ``X``s is this range is 7; so $A = 7$.
 
