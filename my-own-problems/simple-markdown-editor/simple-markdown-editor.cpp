@@ -423,7 +423,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                         cout << "```" << endl;
                         showStatus(false, false, true);
                         cout << "```" << endl;
-                        cout << "\n\nWe can now perform the insertion, giving the updated document:\n\n" << endl;
+                        cout << "\nWe can now perform the insertion, giving the updated document:\n" << endl;
                         cout << "```" << endl;
                         showStatus(true, false, false);
                         cout << "```" << endl;
