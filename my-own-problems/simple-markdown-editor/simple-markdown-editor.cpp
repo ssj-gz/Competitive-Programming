@@ -395,10 +395,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
 #ifdef DIAGNOSTICS
-                    cout << "Need to insert formatting character at position $p = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$." << endl;
+                    cout << "Need to insert a `*` at position $p = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << "\\oplus " << query.encryptedArgument << " = " << (insertionPos + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, false, false);
-                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "↑" << " insert formatting character here" << endl;
+                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "↑" << " insert * here" << endl;
                     cout << "```" << endl;
                     const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
