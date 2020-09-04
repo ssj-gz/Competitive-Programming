@@ -156,8 +156,7 @@ D: XXX*XX*XXXX
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 2; the answer to query #4 is $2$.
 
-Update $d$: $d = d + 2\times  2^{4}  = 0 + 2\times 16 = 32 \mod 10^9+7 = 32$.
-
+Update $d$: $d = (0 + 2 \cdot  2^{4}) \,\%\, (10^9+7)  = 32$.
 
 **State after processing query 4**:
 ```
@@ -216,8 +215,7 @@ D: *XXX*XX*XX*XXXXX
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 3; the answer to query #8 is $3$.
 
-Update $d$: $d = d + 3\times  2^{8}  = 32 + 3\times 256 = 800 \mod 10^9+7 = 800$.
-
+Update $d$: $d = (32 + 3 \cdot  2^{8}) \,\%\, (10^9+7)  = 800$.
 
 **State after processing query 8**:
 ```
@@ -247,8 +245,7 @@ D: XXX*XX*XXXX
 ```
 The queried position is not part of a formatted range; the answer to query #10 is $3141592$.
 
-Update $d$: $d = d + 3141592\times  2^{10}  = 800 + 3141592\times 1024 = 3216991008 \mod 10^9+7 = 216990987$.
-
+Update $d$: $d = (800 + 3141592 \cdot  2^{10}) \,\%\, (10^9+7)  = 216990987$.
 
 **State after processing query 10**:
 ```
@@ -317,8 +314,7 @@ D: XXX**XX*X*XXXXXX
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 1; the answer to query #14 is $1$.
 
-Update $d$: $d = d + 1\times  2^{14}  = 216990987 + 1\times 16384 = 217007371 \mod 10^9+7 = 217007371$.
-
+Update $d$: $d = (216990987 + 1 \cdot  2^{14}) \,\%\, (10^9+7)  = 217007371$.
 
 **State after processing query 14**:
 ```
@@ -372,8 +368,6 @@ D: XXX*XXXXXXX*XXXX
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 7; the answer to query #17 is $7$.
 
-Update $d$: $d = d + 7\times  2^{17}  = 217007371 + 7\times 131072 = 217924875 \mod 10^9+7 = 217924875$.
+Update $d$: $d = (217007371 + 7 \cdot  2^{17}) \,\%\, (10^9+7)  = 217924875$.
 
-
-
-That's all the queries processed, and the final value of $d$ is 217924875; so the answer for this test case is 217924875.
+That's all the queries processed, and the final value of $d$ is $217924875$; so the answer for this test case is $217924875$.
