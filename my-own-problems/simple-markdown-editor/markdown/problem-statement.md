@@ -22,7 +22,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
 1. `F ep`
 
     Chef must decrypt $ep$ to give $p$ via $p=d \oplus ep$, where $\oplus$ denotes the Xor operator.
-    He must then clear all elements in the $S$ to the right of $SP$ (if any); then insert a formatting character (`*`) at the given $p$ in $D$ to give the new current document $D$.
+    He must then clear all elements in the $S$ to the right of $\textit{SP}$ (if any); then insert a formatting character (`*`) at the given $p$ in $D$ to give the new current document $D$.
     He must then append the new $D$ to $S$ and adjust $\textit{SP}$ to point to it.
 2. `N ec ep`
 
