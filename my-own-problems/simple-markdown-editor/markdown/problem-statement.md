@@ -38,7 +38,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
     He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
 5. `? ep`
 
-    Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
+    Chef must decrypt $ep$ to give $p$ via $p = d \oplus ep$.
     It is guaranteed that $D[p] \neq$ `*`.
     He must then find the answer, $A$, to the query as follows: if, after parsing, the position $p$ is contained in a formatted range, then $A$ is the number of ``X``s in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = (d + A \cdot 2^i) \,\%\, (10^9+7)$, where $i$ is the number of this query.
