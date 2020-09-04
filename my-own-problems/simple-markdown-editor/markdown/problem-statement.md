@@ -22,7 +22,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
     Chef must decrypt $ep$ to give $p$ via $p=d \oplus ep$, where $\oplus$ denotes the Xor operator.
     He must then clear all elements in the $S$ to the right of $SP$ (if any); then insert a formatting character ('*') at the given $p$ in $D$ to give the new current document $D$.
     He must then append the new $D$ to $S$ and adjust $\textit{SP}$ to point to it.
-2. `I ec ep`
+2. `N ec ep`
 
     Chef must decrypt $ec$ and $ep$ via $e = ec \oplus d$ and $p = ep \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters ('X').
 3. `U eu`
@@ -56,7 +56,7 @@ For each test case, print a single line containing one integer ― the final val
 - $1 \le Q \le 200,000$
 - The length $D$ will never exceed $10^{18}$ characters
 - For queries of type `Q`, the character at the decrypted position $p$ in $D$ is always a `X`
-- For queries of type `I` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
+- For queries of type `N` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
 - After processing a query of type `U` or `R`, it is guaranteed that $\textit{SP}$ still satisfies $1 \le \textit{SP} \le |S|$
 - the sum of $Q$ over all test cases does not exceed $200,000$
 
