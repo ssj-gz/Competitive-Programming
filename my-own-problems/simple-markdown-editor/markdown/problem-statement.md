@@ -41,7 +41,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
     He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting chars in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
-Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $d$ for each testcase!
+Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $d$ for each test case!
 
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
@@ -388,4 +388,4 @@ $$
 d = d + 7\times  2^{17}  = 217007371 + 7\times 131072 = 217924875 \mod 10^9+7 = 217924875
 $$
 
-That's all the queries processed, and the final value of $d$ is 217924875; so the answer for this testcase is 217924875.
+That's all the queries processed, and the final value of $d$ is 217924875; so the answer for this test case is 217924875.
