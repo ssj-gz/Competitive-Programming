@@ -26,15 +26,15 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
     He must then append the new $D$ to $S$ and adjust $\textit{SP}$ to point to it.
 2. `N ec ep`
 
-    Chef must decrypt $\textit{ec}$ and $\textit{ep}$ via $c = \textit{ec} \oplus d$ and $p = \textit{ep} \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters (`X`).
+    Chef must decrypt $\textit{ec}$ and $\textit{ep}$ via $c = d \oplus \textit{ec}$ and $p = d \oplus \textit{ep}$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters (`X`).
 3. `U eu`
 
-    Chef must decrypt $\textit{eu}$ to give $u$ via $u = \textit{eu} \oplus d$.
+    Chef must decrypt $\textit{eu}$ to give $u$ via $u = d \oplus \textit{eu}$.
     He must then move the Undo Stack Pointer $u$ revisions to the left i.e. subtract $u$ from $\textit{SP}$.  It is guaranteed that $u < \textit{SP}$.
     $D$ is then set to the document revision in $S$ that is pointed to by the new $\textit{SP}$.
 4. `R er`
 
-    Chef must decrypt $\textit{er}$ to give $r$ via $r = \textit{er} \oplus d$.
+    Chef must decrypt $\textit{er}$ to give $r$ via $r = d \oplus \textit{er}$.
     He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
 5. `? ep`
 
