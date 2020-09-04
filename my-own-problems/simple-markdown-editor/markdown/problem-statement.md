@@ -21,24 +21,24 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
 
 1. `F ep`
 
-    Chef must decrypt $ep$ to give $p$ via $p=d \oplus ep$, where $\oplus$ denotes the Xor operator.
+    Chef must decrypt $\textit{ep}$ to give $p$ via $p=d \oplus \textit{ep}$, where $\oplus$ denotes the Xor operator.
     He must then clear all elements in the $S$ to the right of $\textit{SP}$ (if any); then insert a formatting character (`*`) at the given $p$ in $D$ to give the new current document $D$.
     He must then append the new $D$ to $S$ and adjust $\textit{SP}$ to point to it.
 2. `N ec ep`
 
-    Chef must decrypt $ec$ and $ep$ via $c = ec \oplus d$ and $p = ep \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters (`X`).
+    Chef must decrypt $\textit{ec}$ and $\textit{ep}$ via $c = \textit{ec} \oplus d$ and $p = \textit{ep} \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters (`X`).
 3. `U eu`
 
-    Chef must decrypt $eu$ to give $u$ via $u = eu \oplus d$.
+    Chef must decrypt $\textit{eu}$ to give $u$ via $u = \textit{eu} \oplus d$.
     He must then move the Undo Stack Pointer $u$ revisions to the left i.e. subtract $u$ from $\textit{SP}$.  It is guaranteed that $u < \textit{SP}$.
     $D$ is then set to the document revision in $S$ that is pointed to by the new $\textit{SP}$.
 4. `R er`
 
-    Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
+    Chef must decrypt $\textit{er}$ to give $r$ via $r = \textit{er} \oplus d$.
     He must then handle this query identically to the `U` query, except that he adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
 5. `? ep`
 
-    Chef must decrypt $ep$ to give $p$ via $p = d \oplus ep$.
+    Chef must decrypt $\textit{ep}$ to give $p$ via $p = d \oplus \textit{ep}$.
     It is guaranteed that $D[p] \neq$ `*`.
     He must then find the answer, $A$, to the query as follows: if, after parsing, there is some formatted range $F$ with $p \in F$, then $A$ is the number of ``X``s in the range $F$ in $D$; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = (d + A \cdot 2^i) \,\%\, (10^9+7)$, where $i$ is the number of this query.
