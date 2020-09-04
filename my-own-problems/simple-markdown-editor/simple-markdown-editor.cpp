@@ -550,7 +550,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 {
                     const int numToRedo = (query.encryptedArgument ^ decryptionKey);
 #ifdef DIAGNOSTICS
-                    cout << "Need to move forward the undo stack pointer by $" << decryptionKey << "\\oplus" << query.encryptedArgument << " = " << numToRedo << "$ places.\n" << endl;
+                    cout << "Need to move forward the undo stack pointer by $r = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << numToRedo << "$ places.\n" << endl;
 #endif
                     //cout << "Redo " << numToRedo << endl;
                     for (int i = 0; i < numToRedo; i++)
