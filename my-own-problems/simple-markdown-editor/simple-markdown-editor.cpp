@@ -396,7 +396,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     for (const auto& query : queries)
     {
 #ifdef DIAGNOSTICS
-        cout << "**Processing query " << queryNum << "**. $d = " << decryptionKey << "$."  << endl;
+        cout << "**Processing query " << queryNum << "**." << endl;
 #endif
         switch (query.type)
         {
