@@ -30,7 +30,10 @@ Chef must implement the following queries.  Note that the queries are _encrypted
     Chef must decrypt $eu$ to give $u$ via $u = eu \oplus d$.
     He must then move the Undo Stack Pointer $u$ revisions to the left.
     The document in the Undo Stack that is pointed to by the new Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
-4. $\textit{redo}(\textit{numToRedo})$.  Chef must move the Undo Stack Pointer $\textit{numToRedo}$ revisions to the right.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
+4. `R er`
+
+    Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
+    He must then handle this query identically to the `U` query, except that he moves the Undo Stack Pointer $r$ revisions to the right.
 5. $\textit{numInFormattedRange}(\textit{queryPosition})$. If the character at $\textit{queryPosition}$ - which is guaranteed to be a non-formatted char - is contained in a formatted range, then Chef's answer to the query is the number of non-formatting chars in this formatted range; otherwise, the answer to the query is 3'141'592.
 
 More formally, Chef must answer $Q$ queries ${q_1, q_2, \dots q_Q}$, with each query being one of the above types. The queries are *encrypted* in such a way that Chef can't decrypt the next query until he has processed all previous queries i.e. the queries must be processed _online_.  Chef has a $\textit{decryptionKey}$ (with initial value $0$) which is used to decrypt these queries and which he updates after handling each $\textit{numInFormattedRange}$ query.  Each query $q_i$ is encoded in one of the following forms:
