@@ -57,8 +57,7 @@ For each test case, print a single line containing one integer ― the final val
 - The length of the document will never exceed $10^{18}$ characters
 - For queries beginning with `Q`, the character at the decrypted position $p$ in the current revision of the document is always a `X`
 - For queries beginning with `I` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
-- For queries beginning with `U`, the decrypted value $u$ will never exceed the value of the current Undo Stack Pointer minus 1
-- For queries beginning with `R`, the decrypted value $r$ will never exceed the current Undo Stack size minus the value of the current Undo Stack Pointer
+- For queries beginning with `U` or `R`, it is guaranteed that after adjusting $\textit{SP}$, we still have $1 \le \textit{SP} \le |S|$
 - the sum of $Q$ over all test cases does not exceed $200,000$
 
 ### Subtasks
