@@ -41,7 +41,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
     The character at position $p$ in $D$ is guaranteed to be a non-formatting character.
     He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting characters in this formatted range; otherwise, $A=3141592$.
-    Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9+7}$, where $i$ is the number of this query.
+    Once he has found $A$, he must update his decryption key via $d = (d + A \cdot 2^i) \,\%\, (10^9+7)$, where $i$ is the number of this query.
 
 Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $d$ for each test case!
 
