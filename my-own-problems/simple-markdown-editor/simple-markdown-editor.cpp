@@ -495,7 +495,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     cout << "Need to find the size of the formatted range around the position $p = d \\oplus " << query.encryptedArgument << " = " << decryptionKey << " \\oplus " << query.encryptedArgument << " = " << (queryPosition + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(false, true, false);
-                    cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " query the size of formatted range around this point" << endl;
+                    cout << indentationSpaces << repeatedString(" ", queryPosition) << "↑" << " check for formatted range around this point" << endl;
                     cout << "```" << endl;
                     if (queryAnswer == -1)
                     {
