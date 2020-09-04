@@ -154,7 +154,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 5
 D: XXX*XX*XXXX
        ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of ``X``s is this range is 2; the answer to query #4 is $2$.
+The position $p$ is part of a formatted range and the number of ``X``s is this range is 2; so $A = 2$.
 
 Update $d$: $d = (0 + 2 \cdot  2^{4}) \,\%\, (10^9+7)  = 32$.
 
@@ -213,7 +213,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 3
 D: *XXX*XX*XX*XXXXX
      ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of ``X``s is this range is 3; the answer to query #8 is $3$.
+The position $p$ is part of a formatted range and the number of ``X``s is this range is 3; so $A = 3$.
 
 Update $d$: $d = (32 + 3 \cdot  2^{8}) \,\%\, (10^9+7)  = 800$.
 
@@ -243,7 +243,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 8
 D: XXX*XX*XXXX
             ↑ query the size of formatted range around this point
 ```
-The queried position is not part of a formatted range; the answer to query #10 is $3141592$.
+The position $p$ is not part of a formatted range; $A = 3141592$.
 
 Update $d$: $d = (800 + 3141592 \cdot  2^{10}) \,\%\, (10^9+7)  = 216990987$.
 
@@ -312,7 +312,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 D: XXX**XX*X*XXXXXX
            ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of ``X``s is this range is 1; the answer to query #14 is $1$.
+The position $p$ is part of a formatted range and the number of ``X``s is this range is 1; so $A = 1$.
 
 Update $d$: $d = (216990987 + 1 \cdot  2^{14}) \,\%\, (10^9+7)  = 217007371$.
 
@@ -366,7 +366,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 D: XXX*XXXXXXX*XXXX
          ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of ``X``s is this range is 7; the answer to query #17 is $7$.
+The position $p$ is part of a formatted range and the number of ``X``s is this range is 7; so $A = 7$.
 
 Update $d$: $d = (217007371 + 7 \cdot  2^{17}) \,\%\, (10^9+7)  = 217924875$.
 
