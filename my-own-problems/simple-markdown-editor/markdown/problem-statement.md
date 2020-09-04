@@ -1,7 +1,5 @@
 Chef must add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_; an _Undo Stack_ containing the list of document _revisions_; and an _Undo Stack Poninter_ pointing to the current document in the Undo Stack.  The document consists of only two characters: _Non-Formatting Characters_  (represented by `X`) and _Formatting Characters_ (represented by `*`).
 
-Initially, the Undo Stack consists of just the initial, empty current document, and the Undo Stack Pointer points to this.
-
 The Editor must _parse_ the current document to give a list of _formatted ranges_, as follows:
 
 Take the first and second occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range.
@@ -14,6 +12,8 @@ XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 ```
 
 the first and second formatting chars are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
+
+Initially, the Undo Stack consists of just the initial, empty current document, and the Undo Stack Pointer points to this.
 
 Chef must implement the query types listed below and then process a list of $Q$ such queries, ${q_1, q_2, \dots q_Q}$.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
 
