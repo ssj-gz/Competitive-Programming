@@ -39,7 +39,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its 
 5. `? ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
-    The character at position $p$ is guaranteed to be a non-formatting character.
+    The character at position $p$ in $D$ is guaranteed to be a non-formatting character.
     He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting characters in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
