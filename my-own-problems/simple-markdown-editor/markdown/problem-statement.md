@@ -60,7 +60,7 @@ For each test case, print a single line containing one integer ― the final val
 - The length of $D$ will never exceed $10^{18}$ characters
 - For queries of type `?`, the character at the decrypted position $p$ in $D$ is always `X`
 - For queries of type `N` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
-- After processing a query of type `U` or `R`, it is guaranteed that $\textit{SP}$ is still in the range $1 \dots |S|$
+- After processing a query of type `U` or `R`, it is guaranteed that $\textit{SP}$ remains in the range $1 \dots |S|$
 - the sum of $Q$ over all test cases does not exceed $200,000$
 
 ### Subtasks
