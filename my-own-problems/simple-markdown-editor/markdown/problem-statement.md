@@ -1,6 +1,6 @@
 Chef must add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_, $D$; an _Undo Stack_, $S$ containing the list of document _revisions_; and an _Undo Stack Pointer_ $\textit{SP}$ pointing to the current document in $S$.  Each character in $D$ may only be one of the following: a _Non-Formatting Character_  (`X`) or a _Formatting Character_ (`*`).
 
-The Editor must _parse_ the current document to give a list of _formatted ranges_, as follows:
+The Editor must _parse_ $D$ to give a list of _formatted ranges_, as follows:
 
 Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range.
 Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range; etc until no formatted characters remain.
@@ -13,18 +13,18 @@ XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 
 the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
 
-Initially, $D$ is the empty string; $S=\[D\]$, and $\textit{SP}$ points to $D$ in $S$ i.e. $\textit{SP}=1$.
+Initially, $D$ is the empty string; $S=[D]$, and $\textit{SP}$ points to $D$ in $S$ i.e. $\textit{SP}=1$.
 
 Chef must implement the query types listed below and then process a list ${q_1, q_2, \dots q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
 
 1. `F ep`
 
     Chef must decrypt $ep$ to give $p$ via $p=d \oplus ep$, where $\oplus$ denotes the Xor operator.
-    He must then clear all elements in the Undo Stack to the right of the Undo Stack Pointer (if any); then insert a formatting character ('*') at the given $p$ in the current document to give the new current document.
-    He must then append this to the Undo Stack and adjust the  Undo Stack Pointer to point to it.
+    He must then clear all elements in the $S$ to the right of $SP$ (if any); then insert a formatting character ('*') at the given $p$ in $D$ to give the new current document $D$.
+    He must then append the new $D$ to $S$ and adjust $\textit{SP}$ to point to it.
 2. `I ec ep`
 
-    Chef must decrypt $ec$ and $ep$ via $e = ec \oplus d$ and $p = ep \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character, he must instead insert $c$ non-formatting characters ('X') at the given $p$ in the current document.
+    Chef must decrypt $ec$ and $ep$ via $e = ec \oplus d$ and $p = ep \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters ('X').
 3. `U eu`
 
     Chef must decrypt $eu$ to give $u$ via $u = eu \oplus d$.
