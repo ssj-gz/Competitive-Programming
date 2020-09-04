@@ -9,7 +9,7 @@ As an example, consider the following tree $G$:
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MVCN2TST/MVCN2TST_1.png)
 
-We wish to apply the reparenting $r = (6, 4)$ to it. The resulting graph would be
+We wish to apply the reparenting $r = (6, 3)$ to it. The resulting graph would be
 
 ![](https://codechef_shared.s3.amazonaws.com/download/Images/SEPT20/MVCN2TST/MVCN2TST_2.png)
 
