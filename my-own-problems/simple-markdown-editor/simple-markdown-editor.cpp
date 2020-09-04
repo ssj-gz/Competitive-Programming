@@ -504,7 +504,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     }
                     else
                         cout << "The queried position is part of a formatted range and the number of non-formatting characters is this range is " << queryAnswer << "; the answer to query #" << queryNum << " is $" << queryAnswer << "$." << endl;
-                    cout << "\nUpdate $d$: $d = " << decryptionKey << " + " << queryAnswer << "\\times  2^{" << queryNum << "} \\mod 10^9+7 " << " = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "$.\n\n";
+                    cout << "\nUpdate $d$: $d = " << decryptionKey << " + " << queryAnswer << " \\cdot  2^{" << queryNum << "} \\mod 10^9+7 " << " = " << ((decryptionKey + ((1 << queryNum)) * queryAnswer) % Mod) << "$.\n\n";
 
 #endif
                     if (queryAnswer == -1)
