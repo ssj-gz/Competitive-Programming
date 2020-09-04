@@ -245,7 +245,6 @@ Next, $e_3 = 35$, so $c_3 = 59 \oplus 35 = 24$, $(u_3, v_3) = (6, 7)$, we update
 
 Next, $e_4 = 313$, so $c_4 = 296 \oplus 313 = 17$, $(u_4, v_4) = (4, 3)$, we update $d$ to $(296 + 2^4 \cdot u_4 + 3^4 \cdot v_4) \,\%\, (10^9+7) = 603$ and remove $(4, 3)$ from $L$.
 
-The last of Chef's encrypted choices is $e_5 = 602$, so $c_5 = 603 \oplus 602 = 1$, $(u_5, v_5) = (2, 1)$. We update $d$ to $(296 + 2^5 \cdot u_5 + 3^5 \cdot v_5) \,\%\, (10^9+7) = 910$.
+The last of Chef's encrypted choices is $e_5 = 602$, so $c_5 = 603 \oplus 602 = 1$, $(u_5, v_5) = (2, 1)$. We update $d$ to $(603 + 2^5 \cdot u_5 + 3^5 \cdot v_5) \,\%\, (10^9+7) = 910$.
 
 We have now processed all $Q$ of Chef's choices, and the final decryption key is $d = 910$.
-
