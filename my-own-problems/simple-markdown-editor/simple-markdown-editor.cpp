@@ -574,7 +574,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             cout << "```" << endl;
             showStatus(true, false, true);
             cout << "```" << endl;
-            cout << endl << endl;
+            cout << endl;
         }
         else
         {
