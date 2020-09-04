@@ -54,7 +54,7 @@ For each test case, print a single line containing one integer ― the final val
 ### Constraints 
 - $1 \le T \le 1,000$
 - $1 \le Q \le 200,000$
-- The length of the document will never exceed $10^{18}$ characters
+- The length $D$ will never exceed $10^{18}$ characters
 - For queries of type `Q`, the character at the decrypted position $p$ in $D$ is always a `X`
 - For queries of type `I` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
 - After processing a query of type `U` or `R`, it is guaranteed that $\textit{SP}$ still satisfies $1 \le \textit{SP} \le |S|$
@@ -64,7 +64,7 @@ For each test case, print a single line containing one integer ― the final val
 **Subtask #1 (5 points):** 
 - $T \le 10$
 - $Q \le 100$
-- The length of the document will never exceed $1000$ characters
+- The length $D$ will never exceed $1000$ characters
 
 **Subtask #2 (40 points)**: 
 - Original constraints, except that there will be no `U` nor `R` queries
