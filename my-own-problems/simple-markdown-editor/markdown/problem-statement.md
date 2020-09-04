@@ -104,55 +104,55 @@ N 217007374 217007374
 ### Explanation
 **Initial status**: 
 ```
-document: 
-undo stack:  [ "" ]
-               ↑ undo stack pointer = 1
+D: 
+S: [ "" ]
+     ↑ SP = 1
 ```
 **Processing query 1**.
 Need to insert $c = d \oplus 9 = 0 \oplus 9 = 9$ non-formatting characters at position $p=0\oplus 9 = 1$.
 ```
-document: 
-          ↑ insert 9 non-formatting characters here
+D: 
+   ↑ insert 9 non-formatting characters here
 ```
 **State after processing query 1**:
 ```
-document: XXXXXXXXX
-undo stack:  [ "", "XXXXXXXXX" ]
-                   ↑ undo stack pointer = 2
+D: XXXXXXXXX
+S: [ "", "XXXXXXXXX" ]
+         ↑ SP = 2
 ```
 
 **Processing query 2**.
 Need to insert formatting character at position $p = d \oplus 4 = 0\oplus 4 = 4$.
 ```
-document: XXXXXXXXX
-             ↑ insert formatting character here
+D: XXXXXXXXX
+      ↑ insert formatting character here
 ```
 **State after processing query 2**:
 ```
-document: XXX*XXXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX" ]
-                                ↑ undo stack pointer = 3
+D: XXX*XXXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX" ]
+                      ↑ SP = 3
 ```
 
 **Processing query 3**.
 Need to insert formatting character at position $p = d \oplus 7 = 0\oplus 7 = 7$.
 ```
-document: XXX*XXXXXX
-                ↑ insert formatting character here
+D: XXX*XXXXXX
+         ↑ insert formatting character here
 ```
 **State after processing query 3**:
 ```
-document: XXX*XX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
-                                              ↑ undo stack pointer = 4
+D: XXX*XX*XXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
+                                    ↑ SP = 4
 ```
 
 **Processing query 4**.
 Need to find the size of the formatted range around the position $p = d \oplus 5 = 0 \oplus 5 = 5$.
 ```
-             ┌──┐     ← Formatted ranges
-document: XXX*XX*XXXX
-              ↑ query the size of formatted range around this point
+      ┌──┐     ← Formatted ranges
+D: XXX*XX*XXXX
+       ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 2; the answer to query #4 is $2$.
 
@@ -161,59 +161,58 @@ Update $d$: $d = d + 2\times  2^{4}  = 0 + 2\times 16 = 32 \mod 10^9+7 = 32$.
 
 **State after processing query 4**:
 ```
-document: XXX*XX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
-                                              ↑ undo stack pointer = 4
+D: XXX*XX*XXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
+                                    ↑ SP = 4
 ```
 
 **Processing query 5**.
 Need to insert $c = d \oplus 35 = 32 \oplus 35 = 3$ non-formatting characters at position $p=32\oplus 35 = 8$.
 ```
-document: XXX*XX*XXXX
-                 ↑ insert 3 non-formatting characters here
+D: XXX*XX*XXXX
+          ↑ insert 3 non-formatting characters here
 ```
 **State after processing query 5**:
 ```
-document: XXX*XX*XXXXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX" ]
-               ↑ undo stack pointer = 5
+D: XXX*XX*XXXXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX" ]
+                                                   ↑ SP = 5
 ```
 
 **Processing query 6**.
 Need to insert formatting character at position $p = d \oplus 42 = 32\oplus 42 = 10$.
 ```
-document: XXX*XX*XXXXXXX
-                   ↑ insert formatting character here
+D: XXX*XX*XXXXXXX
+            ↑ insert formatting character here
 ```
 **State after processing query 6**:
 ```
-document: XXX*XX*XX*XXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX" ]
-                                 ↑ undo stack pointer = 6
+D: XXX*XX*XX*XXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+     "XXX*XX*XX*XXXXX" ]
+     ↑ SP = 6
 ```
 
 **Processing query 7**.
 Need to insert formatting character at position $p = d \oplus 33 = 32\oplus 33 = 1$.
 ```
-document: XXX*XX*XX*XXXXX
-          ↑ insert formatting character here
+D: XXX*XX*XX*XXXXX
+   ↑ insert formatting character here
 ```
 **State after processing query 7**:
 ```
-document: *XXX*XX*XX*XXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
-                             undo stack pointer = 7 ↑
+D: *XXX*XX*XX*XXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+     "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
+                        ↑ SP = 7
 ```
 
 **Processing query 8**.
 Need to find the size of the formatted range around the position $p = d \oplus 35 = 32 \oplus 35 = 3$.
 ```
-          ┌───┐  ┌──┐      ← Formatted ranges
-document: *XXX*XX*XX*XXXXX
-            ↑ query the size of formatted range around this point
+   ┌───┐  ┌──┐      ← Formatted ranges
+D: *XXX*XX*XX*XXXXX
+     ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 3; the answer to query #8 is $3$.
 
@@ -222,10 +221,10 @@ Update $d$: $d = d + 3\times  2^{8}  = 32 + 3\times 256 = 800 \mod 10^9+7 = 800$
 
 **State after processing query 8**:
 ```
-document: *XXX*XX*XX*XXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
-                             undo stack pointer = 7 ↑
+D: *XXX*XX*XX*XXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+     "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
+                        ↑ SP = 7
 ```
 
 **Processing query 9**.
@@ -233,18 +232,18 @@ Need to re-wind the undo stack pointer by $u = d \oplus 803 = 800 \oplus 803 = 3
 
 **State after processing query 9**:
 ```
-document: XXX*XX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-                                              ↑ undo stack pointer = 4
-               "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
+D: XXX*XX*XXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+                                    ↑ SP = 4
+     "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
 ```
 
 **Processing query 10**.
 Need to find the size of the formatted range around the position $p = d \oplus 810 = 800 \oplus 810 = 10$.
 ```
-             ┌──┐     ← Formatted ranges
-document: XXX*XX*XXXX
-                   ↑ query the size of formatted range around this point
+      ┌──┐     ← Formatted ranges
+D: XXX*XX*XXXX
+            ↑ query the size of formatted range around this point
 ```
 The queried position is not part of a formatted range; the answer to query #10 is $3141592$.
 
@@ -253,10 +252,10 @@ Update $d$: $d = d + 3141592\times  2^{10}  = 800 + 3141592\times 1024 = 3216991
 
 **State after processing query 10**:
 ```
-document: XXX*XX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-                                              ↑ undo stack pointer = 4
-               "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
+D: XXX*XX*XXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+                                    ↑ SP = 4
+     "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
 ```
 
 **Processing query 11**.
@@ -264,58 +263,57 @@ Need to move forward the undo stack pointer by $r = d \oplus 216990986 = 2169909
 
 **State after processing query 11**:
 ```
-document: XXX*XX*XXXXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
-               ↑ undo stack pointer = 5
+D: XXX*XX*XXXXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+                                                   ↑ SP = 5
+     "XXX*XX*XX*XXXXX", "*XXX*XX*XX*XXXXX" ]
 ```
 
 **Processing query 12**.
 Need to insert formatting character at position $p = d \oplus 216990991 = 216990987\oplus 216990991 = 4$.
 ```
-document: XXX*XX*XXXXXXX
-             ↑ insert formatting character here
+D: XXX*XX*XXXXXXX
+      ↑ insert formatting character here
 ```
 The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: 
 ```
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX" ]
-               ↑ undo stack pointer = 5
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX" ]
+                                                   ↑ SP = 5
 ```
 
 We can now perform the insertion, giving the updated document:
 
 ```
-document: XXX**XX*XXXXXXX
+D: XXX**XX*XXXXXXX
 ```
 **State after processing query 12**:
 ```
-document: XXX**XX*XXXXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX" ]
-                                 ↑ undo stack pointer = 6
+D: XXX**XX*XXXXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+     "XXX**XX*XXXXXXX" ]
+     ↑ SP = 6
 ```
 
 **Processing query 13**.
 Need to insert formatting character at position $p = d \oplus 216990977 = 216990987\oplus 216990977 = 10$.
 ```
-document: XXX**XX*XXXXXXX
-                   ↑ insert formatting character here
+D: XXX**XX*XXXXXXX
+            ↑ insert formatting character here
 ```
 **State after processing query 13**:
 ```
-document: XXX**XX*X*XXXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
-                             undo stack pointer = 7 ↑
+D: XXX**XX*X*XXXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+     "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
+                        ↑ SP = 7
 ```
 
 **Processing query 14**.
 Need to find the size of the formatted range around the position $p = d \oplus 216990978 = 216990987 \oplus 216990978 = 9$.
 ```
-             ┌┐  ┌─┐       ← Formatted ranges
-document: XXX**XX*X*XXXXXX
-                  ↑ query the size of formatted range around this point
+      ┌┐  ┌─┐       ← Formatted ranges
+D: XXX**XX*X*XXXXXX
+           ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 1; the answer to query #14 is $1$.
 
@@ -324,10 +322,10 @@ Update $d$: $d = d + 1\times  2^{14}  = 216990987 + 1\times 16384 = 217007371 \m
 
 **State after processing query 14**:
 ```
-document: XXX**XX*X*XXXXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
-                             undo stack pointer = 7 ↑
+D: XXX**XX*X*XXXXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+     "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
+                        ↑ SP = 7
 ```
 
 **Processing query 15**.
@@ -335,43 +333,42 @@ Need to re-wind the undo stack pointer by $u = d \oplus 217007368 = 217007371 \o
 
 **State after processing query 15**:
 ```
-document: XXX*XX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-                                              ↑ undo stack pointer = 4
-               "XXX*XX*XXXXXXX", "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
+D: XXX*XX*XXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX", 
+                                    ↑ SP = 4
+     "XXX**XX*XXXXXXX", "XXX**XX*X*XXXXXX" ]
 ```
 
 **Processing query 16**.
 Need to insert $c = d \oplus 217007374 = 217007371 \oplus 217007374 = 5$ non-formatting characters at position $p=217007371\oplus 217007374 = 5$.
 ```
-document: XXX*XX*XXXX
-              ↑ insert 5 non-formatting characters here
+D: XXX*XX*XXXX
+       ↑ insert 5 non-formatting characters here
 ```
 The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: 
 ```
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
-                                              ↑ undo stack pointer = 4
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
+                                    ↑ SP = 4
 ```
 
 We can now perform the insertion, giving the updated document:
 
 ```
-document: XXX*XXXXXXX*XXXX
+D: XXX*XXXXXXX*XXXX
 ```
 **State after processing query 16**:
 ```
-document: XXX*XXXXXXX*XXXX
-undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", 
-               "XXX*XXXXXXX*XXXX" ]
-               ↑ undo stack pointer = 5
+D: XXX*XXXXXXX*XXXX
+S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XXXXXXX*XXXX" ]
+                                                   ↑ SP = 5
 ```
 
 **Processing query 17**.
 Need to find the size of the formatted range around the position $p = d \oplus 217007372 = 217007371 \oplus 217007372 = 7$.
 ```
-             ┌───────┐     ← Formatted ranges
-document: XXX*XXXXXXX*XXXX
-                ↑ query the size of formatted range around this point
+      ┌───────┐     ← Formatted ranges
+D: XXX*XXXXXXX*XXXX
+         ↑ query the size of formatted range around this point
 ```
 The queried position is part of a formatted range and the number of non-formatting characters is this range is 7; the answer to query #17 is $7$.
 
