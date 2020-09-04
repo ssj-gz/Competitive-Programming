@@ -11,7 +11,7 @@ For example, given the document:
 XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 ```
 
-the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
+the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting character at position 28, but no eighth, so there can be no more formatted ranges.
 
 Initially, $D$ is the empty string; $S=[D]$, and $\textit{SP}$ points to $D$ in $S$ i.e. $\textit{SP}=1$.
 
@@ -37,7 +37,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 5. `Q ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
-    The character at position $p$ is guaranteed to be a non-formatting char.
+    The character at position $p$ is guaranteed to be a non-formatting character.
     He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting characters in this formatted range; otherwise, $A=3141592$.
     Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
