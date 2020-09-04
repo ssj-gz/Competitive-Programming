@@ -38,8 +38,8 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
     The character at position $p$ is guaranteed to be a non-formatted char.
-    He must then find the answer, $q$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $q$ is the number of non-formatting chars in this formatted range; otherwise, $q=3141592$.
-    Once he has found $q$, he must update his decryption key via $d = d + q \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
+    He must then find the answer, $A$, to the query as follows: if, after parsing, the character at position $p$ is contained in a formatted range, then $A$ is the number of non-formatting chars in this formatted range; otherwise, $A=3141592$.
+    Once he has found $A$, he must update his decryption key via $d = d + A \cdot 2^i \mod{10^9}$, where $i$ is the number of this query.
 
 
 Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to print the final value of $d$ for each testcase!
