@@ -1,6 +1,6 @@
-Chef has been tasked with the implemention of part of a simple markdown editor.  The simplification comes from the fact that the markdown document being edited can consist only of two characters: _Non-Formatting Characters_  (represented by `X`) and _Formatting Characters_ (represented by `*`).  The editor also has an _Undo Stack_ containing the list of document _revisions_, and an _Undo Stack Pointer_, pointing to the current revision of the document.
+Chef must add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_; an _Undo Stack_ containing the list of document _revisions_; and an _Undo Stack Poninter_ pointing to the current document in the Undo Stack.  The document consists of only two characters: _Non-Formatting Characters_  (represented by `X`) and _Formatting Characters_ (represented by `*`).
 
-Initially, the document is empty, and the Undo Stack is a list containing a single element: this empty document.  The Undo Stack Pointer initially points at this element.
+Initially, the Undo Stack consists of just the initial, empty current document, and the Undo Stack Pointer points to this.
 
 The document is _parsed_ to give the list of _formatted ranges_ of characters in the document as follows:
 
