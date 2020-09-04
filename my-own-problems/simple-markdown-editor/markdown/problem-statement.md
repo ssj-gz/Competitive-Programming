@@ -15,9 +15,13 @@ XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 
 the first and second formatting chars are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting char at position 28, but no eighth, so there can be no more formatted ranges.
 
-Chef must implement the following queries.  Note that positions of characters in the document are always 1-relative.  
+Chef must implement the following queries.  Note that the queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
 
-1. $\textit{insertFormattingChar}(\textit{positionToInsert})$.  Chef must first clear all elements in the Undo Stack to the right of the Undo Stack Pointer (if any); then insert a formatting character ('*') at the given $\textit{positionToInsert}$ in the current document; then append the resulting document to the Undo Stack and increment the Undo Stack Pointer so that it points to the new current document.
+1. `F ep`
+
+    Chef must decrypt $ep$ to give $p$ via $p=d \oplus ep$, where $\oplus$ denotes the Xor operator.
+    He must then clear all elements in the Undo Stack to the right of the Undo Stack Pointer (if any); then insert a formatting character ('*') at the given $p$ in the current document to give the new current document.
+    He must then append this to the Undo Stack and adjust the  Undo Stack Pointer to point to it.
 2. $\textit{insertNonFormattingChars}(\textit{numCharsToInsert}, \textit{positionToInsert})$.  Chef must handle this in an identical way to $\textit{insertFormattingChar}$, except instead of adding a formatting character, he must instead insert $\textit{numCharsToInsert}$ non-formatting characters ('X') at the given $\textit{positionToInsert}$ in the current document.
 3. $\textit{undo}(\textit{numToUndo})$.  Chef must move the Undo Stack Pointer $\textit{numToUndo}$ revisions to the left.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
 4. $\textit{redo}(\textit{numToRedo})$.  Chef must move the Undo Stack Pointer $\textit{numToRedo}$ revisions to the right.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
