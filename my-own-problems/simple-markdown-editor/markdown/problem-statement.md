@@ -33,7 +33,7 @@ Chef must implement the query types listed below and then process a list ${q_1, 
 4. `R er`
 
     Chef must decrypt $er$ to give $r$ via $r = er \oplus d$.
-    He must then handle this query identically to the `U` query, except that he moves the Undo Stack Pointer $r$ revisions to the right.
+    He must then handle this query identically to the `U` query, except that adds $v$ to $\textit{SP}$. It is guaranteed that $r < |S| - \textit{SP}$.
 5. `Q ep`
 
     Chef must decrypt $ep$ to give $p$ via $p = \oplus ep$.
