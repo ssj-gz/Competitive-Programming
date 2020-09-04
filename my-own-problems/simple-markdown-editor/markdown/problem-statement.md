@@ -152,7 +152,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 5
 document: XXX*XX*XXXX
               ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatted characters is this range is 2; the answer to query #4 is $2$.
+The queried position is part of a formatted range and the number of non-formatting characters is this range is 2; the answer to query #4 is $2$.
 
 Update $d$: $d = d + 2\times  2^{4}  = 0 + 2\times 16 = 32 \mod 10^9+7 = 32$.
 
@@ -213,7 +213,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 3
 document: *XXX*XX*XX*XXXXX
             ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatted characters is this range is 3; the answer to query #8 is $3$.
+The queried position is part of a formatted range and the number of non-formatting characters is this range is 3; the answer to query #8 is $3$.
 
 Update $d$: $d = d + 3\times  2^{8}  = 32 + 3\times 256 = 800 \mod 10^9+7 = 800$.
 
@@ -315,7 +315,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 document: XXX**XX*X*XXXXXX
                   ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatted characters is this range is 1; the answer to query #14 is $1$.
+The queried position is part of a formatted range and the number of non-formatting characters is this range is 1; the answer to query #14 is $1$.
 
 Update $d$: $d = d + 1\times  2^{14}  = 216990987 + 1\times 16384 = 217007371 \mod 10^9+7 = 217007371$.
 
@@ -371,7 +371,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 document: XXX*XXXXXXX*XXXX
                 ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatted characters is this range is 7; the answer to query #17 is $7$.
+The queried position is part of a formatted range and the number of non-formatting characters is this range is 7; the answer to query #17 is $7$.
 
 Update $d$: $d = d + 7\times  2^{17}  = 217007371 + 7\times 131072 = 217924875 \mod 10^9+7 = 217924875$.
 
