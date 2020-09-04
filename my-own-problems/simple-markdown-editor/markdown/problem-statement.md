@@ -18,7 +18,7 @@ Initially, $D$ is the empty string; $S=[D]$, and $\textit{SP}$ points to $D$ in 
 
 Chef must extend the Editor to handle five specific types of query, and then process a list ${q_1, q_2, \dots, q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$.
 
-Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and its arguments and instructions for handling are as follows:
+Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and the arguments and instructions for handling each type are as follows:
 
 1. `F ep`
 
