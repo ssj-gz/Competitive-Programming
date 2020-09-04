@@ -430,10 +430,10 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                     const int insertionPos = (query.encryptedArgument ^ decryptionKey) - 1;
                     const int numToInsert = query.encryptedArgument2 ^ decryptionKey;
 #ifdef DIAGNOSTICS
-                    cout << "Need to insert " << "$c = d \\oplus " << query.encryptedArgument2 << " = " << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << "$ non-formatting characters at position $p=" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$." << endl;
+                    cout << "Need to insert " << "$c = d \\oplus " << query.encryptedArgument2 << " = " << decryptionKey << " \\oplus " << query.encryptedArgument2 << " = " << numToInsert << "$ ``X``s at position $p=" << decryptionKey << "\\oplus " << query.encryptedArgument2 << " = " << (insertionPos + 1) << "$." << endl;
                     cout << "```" << endl;
                     showStatus(true, false, false);
-                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "↑" << " insert " << numToInsert << " non-formatting characters here" << endl;
+                    cout << indentationSpaces << repeatedString(" ", insertionPos) << "↑" << " insert " << numToInsert << " Xs here" << endl;
                     cout << "```" << endl;
                     const bool neededToEraseUndosToRight = undoStackPointer + 1 != undoStack.size();
 #endif
