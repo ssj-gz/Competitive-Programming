@@ -791,7 +791,6 @@ int64_t solveOptimised(const vector<Query>& queries, vector<string>& bruteForceD
                     if (queryAnswer == -1)
                         queryAnswer = 3'141'592;
                     decryptionKey = (decryptionKey + (queryAnswer * powerOf2) % Mod) % Mod;
-                    cout << "Changed decryptionKey to " << decryptionKey << endl;
 
                     //cout << "queryAnswer: " << queryAnswer << endl;
                     queryResults.push_back(queryAnswer);
