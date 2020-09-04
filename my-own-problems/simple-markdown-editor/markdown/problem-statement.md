@@ -109,10 +109,10 @@ S: [ "" ]
      ↑ SP = 1
 ```
 **Processing query 1**.
-Need to insert $c = d \oplus 9 = 0 \oplus 9 = 9$ non-formatting characters at position $p=0\oplus 9 = 1$.
+Need to insert $c = d \oplus 9 = 0 \oplus 9 = 9$ ``X``s at position $p=0\oplus 9 = 1$.
 ```
 D: 
-   ↑ insert 9 non-formatting characters here
+   ↑ insert 9 Xs here
 ```
 **State after processing query 1**:
 ```
@@ -122,10 +122,10 @@ S: [ "", "XXXXXXXXX" ]
 ```
 
 **Processing query 2**.
-Need to insert formatting character at position $p = d \oplus 4 = 0\oplus 4 = 4$.
+Need to insert a `*` at position $p = d \oplus 4 = 0\oplus 4 = 4$.
 ```
 D: XXXXXXXXX
-      ↑ insert formatting character here
+      ↑ insert * here
 ```
 **State after processing query 2**:
 ```
@@ -135,10 +135,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX" ]
 ```
 
 **Processing query 3**.
-Need to insert formatting character at position $p = d \oplus 7 = 0\oplus 7 = 7$.
+Need to insert a `*` at position $p = d \oplus 7 = 0\oplus 7 = 7$.
 ```
 D: XXX*XXXXXX
-         ↑ insert formatting character here
+         ↑ insert * here
 ```
 **State after processing query 3**:
 ```
@@ -154,7 +154,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 5
 D: XXX*XX*XXXX
        ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatting characters is this range is 2; the answer to query #4 is $2$.
+The queried position is part of a formatted range and the number of ``X``s is this range is 2; the answer to query #4 is $2$.
 
 Update $d$: $d = (0 + 2 \cdot  2^{4}) \,\%\, (10^9+7)  = 32$.
 
@@ -166,10 +166,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
 ```
 
 **Processing query 5**.
-Need to insert $c = d \oplus 35 = 32 \oplus 35 = 3$ non-formatting characters at position $p=32\oplus 35 = 8$.
+Need to insert $c = d \oplus 35 = 32 \oplus 35 = 3$ ``X``s at position $p=32\oplus 35 = 8$.
 ```
 D: XXX*XX*XXXX
-          ↑ insert 3 non-formatting characters here
+          ↑ insert 3 Xs here
 ```
 **State after processing query 5**:
 ```
@@ -179,10 +179,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX" ]
 ```
 
 **Processing query 6**.
-Need to insert formatting character at position $p = d \oplus 42 = 32\oplus 42 = 10$.
+Need to insert a `*` at position $p = d \oplus 42 = 32\oplus 42 = 10$.
 ```
 D: XXX*XX*XXXXXXX
-            ↑ insert formatting character here
+            ↑ insert * here
 ```
 **State after processing query 6**:
 ```
@@ -193,10 +193,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 ```
 
 **Processing query 7**.
-Need to insert formatting character at position $p = d \oplus 33 = 32\oplus 33 = 1$.
+Need to insert a `*` at position $p = d \oplus 33 = 32\oplus 33 = 1$.
 ```
 D: XXX*XX*XX*XXXXX
-   ↑ insert formatting character here
+   ↑ insert * here
 ```
 **State after processing query 7**:
 ```
@@ -213,7 +213,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 3
 D: *XXX*XX*XX*XXXXX
      ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatting characters is this range is 3; the answer to query #8 is $3$.
+The queried position is part of a formatted range and the number of ``X``s is this range is 3; the answer to query #8 is $3$.
 
 Update $d$: $d = (32 + 3 \cdot  2^{8}) \,\%\, (10^9+7)  = 800$.
 
@@ -267,10 +267,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 ```
 
 **Processing query 12**.
-Need to insert formatting character at position $p = d \oplus 216990991 = 216990987\oplus 216990991 = 4$.
+Need to insert a `*` at position $p = d \oplus 216990991 = 216990987\oplus 216990991 = 4$.
 ```
 D: XXX*XX*XXXXXXX
-      ↑ insert formatting character here
+      ↑ insert * here
 ```
 The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: 
 ```
@@ -292,10 +292,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 ```
 
 **Processing query 13**.
-Need to insert formatting character at position $p = d \oplus 216990977 = 216990987\oplus 216990977 = 10$.
+Need to insert a `*` at position $p = d \oplus 216990977 = 216990987\oplus 216990977 = 10$.
 ```
 D: XXX**XX*XXXXXXX
-            ↑ insert formatting character here
+            ↑ insert * here
 ```
 **State after processing query 13**:
 ```
@@ -312,7 +312,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 D: XXX**XX*X*XXXXXX
            ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatting characters is this range is 1; the answer to query #14 is $1$.
+The queried position is part of a formatted range and the number of ``X``s is this range is 1; the answer to query #14 is $1$.
 
 Update $d$: $d = (216990987 + 1 \cdot  2^{14}) \,\%\, (10^9+7)  = 217007371$.
 
@@ -336,10 +336,10 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 ```
 
 **Processing query 16**.
-Need to insert $c = d \oplus 217007374 = 217007371 \oplus 217007374 = 5$ non-formatting characters at position $p=217007371\oplus 217007374 = 5$.
+Need to insert $c = d \oplus 217007374 = 217007371 \oplus 217007374 = 5$ ``X``s at position $p=217007371\oplus 217007374 = 5$.
 ```
 D: XXX*XX*XXXX
-       ↑ insert 5 non-formatting characters here
+       ↑ insert 5 Xs here
 ```
 The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: 
 ```
@@ -366,7 +366,7 @@ Need to find the size of the formatted range around the position $p = d \oplus 2
 D: XXX*XXXXXXX*XXXX
          ↑ query the size of formatted range around this point
 ```
-The queried position is part of a formatted range and the number of non-formatting characters is this range is 7; the answer to query #17 is $7$.
+The queried position is part of a formatted range and the number of ``X``s is this range is 7; the answer to query #17 is $7$.
 
 Update $d$: $d = (217007371 + 7 \cdot  2^{17}) \,\%\, (10^9+7)  = 217924875$.
 
