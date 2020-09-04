@@ -578,7 +578,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         }
         else
         {
-            cout << "\n\nThat's all the queries processed, and the final value of $d$ is " << decryptionKey << "; so the answer for this testcase is " << decryptionKey << "." << endl;
+            cout << "\nThat's all the queries processed, and the final value of $d$ is " << decryptionKey << "; so the answer for this testcase is " << decryptionKey << "." << endl;
         }
 #endif
         //cout << "document: " << document << endl;
