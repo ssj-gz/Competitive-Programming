@@ -55,9 +55,9 @@ For each test case, print a single line containing one integer ― the final val
 - $1 \le T \le 1,000$
 - $1 \le Q \le 200,000$
 - The length of the document will never exceed $10^{18}$ characters
-- For queries beginning with `Q`, the character at the decrypted position $p$ in the current revision of the document is always a `X`
-- For queries beginning with `I` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
-- For queries beginning with `U` or `R`, it is guaranteed that after adjusting $\textit{SP}$, we still have $1 \le \textit{SP} \le |S|$
+- For queries of type `Q`, the character at the decrypted position $p$ in the current revision of the document is always a `X`
+- For queries of type `I` or `F`, the decrypted position $p$ is always in the range $1 \dots |D| + 1$
+- For queries of type `U` or `R`, it is guaranteed that after adjusting $\textit{SP}$, we still have $1 \le \textit{SP} \le |S|$
 - the sum of $Q$ over all test cases does not exceed $200,000$
 
 ### Subtasks
