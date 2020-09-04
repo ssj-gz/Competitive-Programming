@@ -58,7 +58,7 @@ For each test case, print a single line containing one integer ― the final val
 - $1 \le Q \le 200,000$
 - The length of the document will never exceed $10^{18}$ characters
 - For queries beginning with `Q`, the character at the decrypted position $p$ in the current revision of the document is always a `X`
-- The decrypted position $\textit{positionToInsert}$ is always in the range $1 \dots |d| + 1$, where $|d|$ is the length of the current document
+- For queries beginning with `I` or `F`, the decrypted position $p$ is always in the range $1 \dots D + 1$, where $D$ is the length of the current document
 - The decrypted value $\textit{numToUndo}$ will never exceed the value of the current Undo Stack Pointer minus 1
 - The decrypted value $\textit{numToRedo}$ will never exceed the current Undo Stack size minus the value of the current Undo Stack Pointer
 - the sum of $Q$ over all test cases does not exceed $200,000$
