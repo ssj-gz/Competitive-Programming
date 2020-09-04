@@ -2,7 +2,7 @@ Chef must add some functionality to a simplified Markdown Editor.  The Editor co
 
 Initially, the Undo Stack consists of just the initial, empty current document, and the Undo Stack Pointer points to this.
 
-The document is _parsed_ to give the list of _formatted ranges_ of characters in the document as follows:
+The Editor must _parse_ the current document to give a list of _formatted ranges_, as follows:
 
 Take the first and second occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range.
 Take the third and fourth occurrences of formatting chars in the document (if they exist); the positions of these form a formatted range; etc until no formatted chars remain.
