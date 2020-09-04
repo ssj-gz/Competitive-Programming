@@ -108,10 +108,10 @@ undo stack:  [ "" ]
                ↑ undo stack pointer = 1
 ```
 **Processing query 1**.
-Need to insert $c = d \oplus 9 = 0 \oplus 9 = 9$ non-formatting chars at position $p=0\oplus 9 = 1$.
+Need to insert $c = d \oplus 9 = 0 \oplus 9 = 9$ non-formatting characters at position $p=0\oplus 9 = 1$.
 ```
 document: 
-          ↑ insert 9 non-formatting chars here
+          ↑ insert 9 non-formatting characters here
 ```
 **State after processing query 1**:
 ```
@@ -166,10 +166,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
 ```
 
 **Processing query 5**.
-Need to insert $c = d \oplus 35 = 32 \oplus 35 = 3$ non-formatting chars at position $p=32\oplus 35 = 8$.
+Need to insert $c = d \oplus 35 = 32 \oplus 35 = 3$ non-formatting characters at position $p=32\oplus 35 = 8$.
 ```
 document: XXX*XX*XXXX
-                 ↑ insert 3 non-formatting chars here
+                 ↑ insert 3 non-formatting characters here
 ```
 **State after processing query 5**:
 ```
@@ -341,10 +341,10 @@ undo stack:  [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX",
 ```
 
 **Processing query 16**.
-Need to insert $c = d \oplus 217007374 = 217007371 \oplus 217007374 = 5$ non-formatting chars at position $p=217007371\oplus 217007374 = 5$.
+Need to insert $c = d \oplus 217007374 = 217007371 \oplus 217007374 = 5$ non-formatting characters at position $p=217007371\oplus 217007374 = 5$.
 ```
 document: XXX*XX*XXXX
-              ↑ insert 5 non-formatting chars here
+              ↑ insert 5 non-formatting characters here
 ```
 The undo stack has elements to the right of the pointer, which we need to erase; new Undo Stack after erase: 
 ```
