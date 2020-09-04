@@ -25,7 +25,11 @@ Chef must implement the following queries.  Note that the queries are _encrypted
 2. `I ec ep`
 
     Chef must decrypt $ec$ and $ep$ via $e = ec \oplus d$ and $p = ep \oplus d$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character, he must instead insert $c$ non-formatting characters ('X') at the given $p$ in the current document.
-3. $\textit{undo}(\textit{numToUndo})$.  Chef must move the Undo Stack Pointer $\textit{numToUndo}$ revisions to the left.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
+3. `U eu`
+
+    Chef must decrypt $eu$ to give $u$ via $u = eu \oplus d$.
+    He must then move the Undo Stack Pointer $u$ revisions to the left.
+    The document in the Undo Stack that is pointed to by the new Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
 4. $\textit{redo}(\textit{numToRedo})$.  Chef must move the Undo Stack Pointer $\textit{numToRedo}$ revisions to the right.  The document in the Undo Stack that is pointed to by the updated Undo Stack Pointer (which is guaranteed to exist) becomes the new current document.
 5. $\textit{numInFormattedRange}(\textit{queryPosition})$. If the character at $\textit{queryPosition}$ - which is guaranteed to be a non-formatted char - is contained in a formatted range, then Chef's answer to the query is the number of non-formatting chars in this formatted range; otherwise, the answer to the query is 3'141'592.
 
