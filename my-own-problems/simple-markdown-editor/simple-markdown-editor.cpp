@@ -273,14 +273,14 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             repeatedString += stringToRepeat;
         return repeatedString;
     };
-    const string headerString = "document: ";
+    const string headerString = "D: ";
     const auto indentationLen = string(headerString).length();
     const auto indentationSpaces = repeatedString(" ", indentationLen);
     auto showStatus = [&](bool printDocument = true, bool printFormattedRangeDisplay = true, bool printUndoStack = true)
     {
         if (printDocument)
         {
-            cout << "document: " << document << endl;
+            cout << "D: " << document << endl;
         }
         if (printUndoStack)
         {
@@ -384,7 +384,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
             cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " ← Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
-            cout << "document: " << document << endl;
+            cout << "D: " << document << endl;
         }
     };
 
