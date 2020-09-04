@@ -285,7 +285,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
         if (printUndoStack)
         {
             const int columnWidth = 72;
-            const string undoStackPrefix = "undo stack:  [ ";
+            const string undoStackPrefix = "S: [ ";
             const auto undoStackIndent = undoStackPrefix.size();
             int undoStackStatusPointerCol = -1;
             int undoStackLineNum = 0;
