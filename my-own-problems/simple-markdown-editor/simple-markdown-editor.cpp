@@ -1115,8 +1115,10 @@ int main(int argc, char* argv[])
         vector<string> bruteForceDocs;
         const auto solutionBruteForce = solveBruteForce(queries, bruteForceDocs);
         const auto solutionOptimised = solveOptimised(queries, bruteForceDocs);
+#ifndef DIAGNOSTICS
         cout << "solutionBruteForce: " << solutionBruteForce << endl;
         cout << "solutionOptimised:  " << solutionOptimised << endl;;
+#endif
         assert(solutionOptimised == solutionBruteForce);
 #endif
     }
