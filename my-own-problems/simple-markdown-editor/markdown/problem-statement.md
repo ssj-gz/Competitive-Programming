@@ -27,7 +27,7 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` each typ
     Finally, he must append the updated $D$ to $S$ and increment $\textit{SP}$ so that it points to it.
 2. `N ec ep`
 
-    Chef must decrypt $\textit{ec}$ and $\textit{ep}$ via $c = d \oplus \textit{ec}$ and $p = d \oplus \textit{ep}$. He must then handle this query identically to the `F` query, except that instead of adding a formatting character at position $p$ in $D$, he must insert $c$ non-formatting characters (`X`).
+    Chef must decrypt $\textit{ec}$ and $\textit{ep}$ via $c = d \oplus \textit{ec}$ and $p = d \oplus \textit{ep}$. He must then handle this query identically to the `F` query, except that instead of adding a `*` at position $p$ in $D$, he must insert $c$ non-formatting characters (`X`).
 3. `U eu`
 
     Chef must decrypt $\textit{eu}$ to give $u$ via $u = d \oplus \textit{eu}$.
