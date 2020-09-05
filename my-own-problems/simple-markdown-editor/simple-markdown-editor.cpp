@@ -374,7 +374,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
                 }
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
-            cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " ← Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
+            cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " ← Formatted ranges (P(D))" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
             cout << headerString << document << endl;
         }
     };
