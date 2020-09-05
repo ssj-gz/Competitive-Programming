@@ -1,6 +1,6 @@
 Chef must has been asked to add some functionality to a simplified Markdown Editor.  The Editor consists of the _current document_, $D$; an _Undo Stack_, $S$ containing the list of document _revisions_; and an _Undo Stack Pointer_ $\textit{SP}$ pointing to the current document in $S$.  $D$ is a string with each character being either a `X` (a _non-formatting character_)  or a `*` (a _formatting character_).
 
-The Editor must be able to _parse_ $D$ into a list of _formatted ranges_, as follows:
+The Editor must be able to _parse_ $D$ into a list $P(D)$ of _formatted ranges_, as follows:
 
 * Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
 * Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
@@ -12,7 +12,7 @@ For example, given the document:
 XXX*XXXX*XX*XXXXXX*XX**XX*XXX
 ```
 
-the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting character at position 28, but no eighth, so there can be no more formatted ranges.
+the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth are at positions 13 and 21, so [13, 21] is a formatted range; the fifth and sixth are at positions 24 and 25, so [24, 25] is a formatted range.  There is a seventh formatting character at position 28, but no eighth, so there can be no more formatted ranges, so $P(D)=[[4,9], [13,21], [24,25]]$.
 
 Initially, $D$ is the empty string; $S=[D]$, and $\textit{SP}$ points to $D$ in $S$ i.e. $\textit{SP}=1$.
 
