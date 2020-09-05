@@ -149,7 +149,7 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX" ]
 **Processing query 4**.
 Need to find the size of the formatted range around the position $p = d \oplus 5 = 0 \oplus 5 = 5$.
 ```
-      ┌──┐     ← Formatted ranges
+      ┌──┐     ← Formatted ranges (P(D))
 D: XXX*XX*XXXX
        ↑ check for formatted range around this point
 ```
@@ -208,7 +208,7 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 **Processing query 8**.
 Need to find the size of the formatted range around the position $p = d \oplus 35 = 32 \oplus 35 = 3$.
 ```
-   ┌───┐  ┌──┐      ← Formatted ranges
+   ┌───┐  ┌──┐      ← Formatted ranges (P(D))
 D: *XXX*XX*XX*XXXXX
      ↑ check for formatted range around this point
 ```
@@ -238,7 +238,7 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 **Processing query 10**.
 Need to find the size of the formatted range around the position $p = d \oplus 810 = 800 \oplus 810 = 10$.
 ```
-      ┌──┐     ← Formatted ranges
+      ┌──┐     ← Formatted ranges (P(D))
 D: XXX*XX*XXXX
             ↑ check for formatted range around this point
 ```
@@ -307,7 +307,7 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XX*XXXXXXX",
 **Processing query 14**.
 Need to find the size of the formatted range around the position $p = d \oplus 216990978 = 216990987 \oplus 216990978 = 9$.
 ```
-      ┌┐  ┌─┐       ← Formatted ranges
+      ┌┐  ┌─┐       ← Formatted ranges (P(D))
 D: XXX**XX*X*XXXXXX
            ↑ check for formatted range around this point
 ```
@@ -361,7 +361,7 @@ S: [ "", "XXXXXXXXX", "XXX*XXXXXX", "XXX*XX*XXXX", "XXX*XXXXXXX*XXXX" ]
 **Processing query 17**.
 Need to find the size of the formatted range around the position $p = d \oplus 217007372 = 217007371 \oplus 217007372 = 7$.
 ```
-      ┌───────┐     ← Formatted ranges
+      ┌───────┐     ← Formatted ranges (P(D))
 D: XXX*XXXXXXX*XXXX
          ↑ check for formatted range around this point
 ```
