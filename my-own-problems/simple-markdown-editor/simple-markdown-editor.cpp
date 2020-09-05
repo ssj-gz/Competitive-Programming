@@ -280,7 +280,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
     {
         if (printDocument)
         {
-            cout << "D: " << document << endl;
+            cout << headerString << document << endl;
         }
         if (printUndoStack)
         {
@@ -375,7 +375,7 @@ int64_t solveBruteForce(const vector<Query>& queries, vector<string>& bruteForce
             }
             formattedRangeDisplayString += repeatedString(" ", document.length() - formattedRangeDisplayStringLength);
             cout << repeatedString(" ", indentationLen) << formattedRangeDisplayString << " ← Formatted ranges" << (numFormattedRanges > 0 ? "" : " (none)") << endl;
-            cout << "D: " << document << endl;
+            cout << headerString << document << endl;
         }
     };
 
