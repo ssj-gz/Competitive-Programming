@@ -46,8 +46,8 @@ Help Chef answer the $Q$ queries.  To prove that you can do it, you only need to
 
 ### Input
 - The first line of the input contains a single integer $T$ denoting the number of test cases. The description of $T$ test cases follows.
-- The first line of each test case contains a single integer $Q$
-- Each of the next $Q$ lines begins with a single character equal to one of `N`, `F`, `U`, `R` or `?`, denoting the type of the query to process, then a space, and then either two space-separated integers (if the query type is `N`) or two space-separated integers (otherwise), representing the encrypted arguments for that query
+- The first line of each test case contains a single integer $Q$.
+- Each of the next $Q$ lines begins with a single character equal to one of `N`, `F`, `U`, `R` or `?`, denoting the type of the query to process, then a space, and then either two space-separated integers (if the query type is `N`) or two space-separated integers (otherwise), representing the encrypted arguments for that query.
 
 ### Output
 For each test case, print a single line containing one integer ― the final value of $d$ after processing all $Q$ queries.
