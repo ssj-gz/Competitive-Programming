@@ -6,7 +6,7 @@ The Editor must be able to _parse_ $D$ into a list $P(D)$ of _formatted ranges_,
 * Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
 * Continue this process until no formatting characters remain.
 
-For example, given the document:
+For example, given the following $D$:
 
 ```
 XXX*XXXX*XX*XXXXXX*XX**XX*XXX
