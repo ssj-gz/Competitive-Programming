@@ -2,8 +2,8 @@ Chef has been asked to add some functionality to a simplified Markdown Editor.  
 
 The Editor must be able to _parse_ $D$ into a list $P(D)$ of _formatted ranges_, as follows:
 
-* Take the first and second occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
-* Take the third and fourth occurrences of formatting characters in the document (if they exist); the positions of these form a formatted range
+* Take the first and second occurrences of formatting characters in the document (if they exist); their positions form a formatted range
+* Take the third and fourth occurrences of formatting characters in the document (if they exist); their positions form a formatted range
 * Continue this process until no formatting characters remain.
 
 For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth (at 13 and 21), give [13, 21]; the fifth and sixth (at 24 and 25), give [24, 25].  There is a seventh formatting character at position 28, but no eighth, so there can be no more formatted ranges and $P(D)=[[4,9], [13,21], [24,25]]$.
