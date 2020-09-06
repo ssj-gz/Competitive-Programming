@@ -5,7 +5,7 @@ The Editor must be able to _parse_ $D$ into a list $P(D)$ of _formatted ranges_,
 * Form a list $L$ of the positions of all formatting characters in $D$ in increasing order, and set $P(D)=[]$
 * While $|L| \ge 2$, append the _formatted range_ $[L(1), L(2)]$ to $P(D)$ and pop these first two items from the front of $L$
 
-For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, we get $L$ = [4, 9, 13, 21, 24, 25, 28].  $|L|=7$, so we append $[L[1], L[2]]=[4,9]$ to $P(D)$ and pop the first two elements from $L$.  Now $|L|=5$, and we append $[13,21]$ to $P(D)$ and pop the first two elements.  $|L|=3|$ so we append $[24, 25]$ and pop.  $|L|=1<2$ now so there are no more formatted ranges and the final $P(D)$ is $[[4,9], [13,21], [24,25]]$.
+For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, we get $L$ = [4, 9, 13, 21, 24, 25, 28].  $|L|=7$, so we append $[L[1], L[2]]=[4,9]$ to $P(D)$ and pop the first two elements from $L$.  Now $|L|=5$, and we append $[13,21]$ to $P(D)$ and pop the first two elements.  $|L|=3$ so we append $[24, 25]$ and pop.  $|L|=1<2$ now so there are no more formatted ranges and the final $P(D)$ is $[[4,9], [13,21], [24,25]]$.
 
 Chef must extend the Editor to handle five specific types of query, and then process a list ${q_1, q_2, \dots, q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$. Prior to processing the queries, we have $D=$ "", $S=[D]$ and $\textit{SP}=1$.
 
