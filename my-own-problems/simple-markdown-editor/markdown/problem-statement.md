@@ -9,7 +9,7 @@ For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, we get $L$ = [4, 9, 13,
 
 Chef must extend the Editor to handle five specific types of query, and then process a list ${q_1, q_2, \dots, q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$. Prior to processing the queries, we have $D=$ "", $S=[D]$ and $\textit{SP}=1$.
 
-Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` each types' arguments and instructions for handling are as follows:
+Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and each types' arguments and instructions for handling are as follows:
 
 1. `F ep`
 
