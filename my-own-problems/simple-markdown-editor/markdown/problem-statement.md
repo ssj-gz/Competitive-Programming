@@ -2,11 +2,12 @@ Chef has been asked to add some functionality to a simplified Markdown Editor.  
 
 The Editor must be able to _parse_ $D$ into a list $P(D)$ of _formatted ranges_, as follows:
 
-* Take the first and second occurrences of formatting characters in the document (if they exist); their positions form a formatted range
-* Take the third and fourth occurrences of formatting characters in the document (if they exist); their positions form a formatted range
-* Continue this process until no formatting characters remain.
+* Form a list $L$ of the positions of all formatting characters in $D$ in increasing order, and set $P(D)=[]$
+* If $L[0]$ and $L[1]$ exist, append the _formatted range_ $[L(0), L(1)]$ to $P(D)$
+* If $L[1]$ and $L[3]$ exist, append $[L(2), L(3)]$ to $P(D)$
+* Continue this process until no more pairs of positions exist in $L$
 
-For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, the first and second formatting characters are at positions 4 and 9, so [4, 9] is a formatted range; the third and fourth (at 13 and 21), give [13, 21]; the fifth and sixth (at 24 and 25), give [24, 25].  There is a seventh formatting character at position 28, but no eighth, so there can be no more formatted ranges and $P(D)=[[4,9], [13,21], [24,25]]$.
+For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, we get $L$ = [4, 9, 13, 21, 24, 25, 28].  $L[0]$ and $L[1]$ both exist, so we add $[4,9]$ to $P(D)$.  $L[2]$ and $L[3]$ both exist, so we append $[13,21]$ to $P(D)$.  $L[4]$ and $L[5]$ both exist, so we append $[24, 25]$.  $L[6]$ exists, but there is no $L[7]$ and so there are no more formatted ranges and $P(D)=[[4,9], [13,21], [24,25]]$.
 
 Chef must extend the Editor to handle five specific types of query, and then process a list ${q_1, q_2, \dots, q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$. Before processing the queries, we have $D=$ "", $S=[D]$ and $\textit{SP}=1$.
 
