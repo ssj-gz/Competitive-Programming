@@ -3,11 +3,9 @@ Chef has been asked to add some functionality to a simplified Markdown Editor.  
 The Editor must be able to _parse_ $D$ into a list $P(D)$ of _formatted ranges_, as follows:
 
 * Form a list $L$ of the positions of all formatting characters in $D$ in increasing order, and set $P(D)=[]$
-* If $L[0]$ and $L[1]$ exist, append the _formatted range_ $[L(0), L(1)]$ to $P(D)$
-* If $L[2]$ and $L[3]$ exist, append $[L(2), L(3)]$ to $P(D)$
-* Continue this process until no more pairs of positions exist in $L$
+* While $|L| \ge 2$, append the _formatted range_ $[L(0), L(1)]$ to $P(D)$ and pop these first two items from the front of $L$
 
-For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, we get $L$ = [4, 9, 13, 21, 24, 25, 28].  $L[0]$ and $L[1]$ both exist, so we add $[4,9]$ to $P(D)$.  $L[2]$ and $L[3]$ both exist, so we append $[13,21]$ to $P(D)$.  $L[4]$ and $L[5]$ both exist, so we append $[24, 25]$.  $L[6]$ exists, but there is no $L[7]$ and so there are no more formatted ranges and $P(D)=[[4,9], [13,21], [24,25]]$.
+For example, given $D=$ `XXX*XXXX*XX*XXXXXX*XX**XX*XXX`, we get $L$ = [4, 9, 13, 21, 24, 25, 28].  $|L|=7$, so we append $[L[0], L[1]]=[4,9]$ to $P(D)$ and pop the first two elements from $L$.  Now $|L|=5$, and we append $[13,21]$ to $P(D)$ and pop the first two elements.  $|L|=3|$ so we append $[24, 25]$ and pop.  $|L|=1<2$ now so there are no more formatted ranges and the final $P(D)$ is $[[4,9], [13,21], [24,25]]$.
 
 Chef must extend the Editor to handle five specific types of query, and then process a list ${q_1, q_2, \dots, q_Q}$ of $Q$ such queries.  Note that these queries are _encrypted_ so that they must be processed _online_.  The decryption uses a _decryption key_ $d$ which has initial value $0$. Prior to processing the queries, we have $D=$ "", $S=[D]$ and $\textit{SP}=1$.
 
