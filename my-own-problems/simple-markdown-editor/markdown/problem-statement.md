@@ -30,7 +30,6 @@ Each query $q_i$ is of one of the five types `F`, `N`, `U`, `R` and `?` and each
 5. `? ep`
 
     Chef must decrypt $\textit{ep}$ to give $p$ via $p = d \oplus \textit{ep}$.
-    It is guaranteed that $D[p] \neq$ `*`.
     He must then update his decryption key via $d = (d + A \cdot 2^i) \,\%\, (10^9+7)$, where $i$ is the number of this query and where $A$ is defined as follows: if there is some formatted range $I$ in $P(D)$ with $p \in I$, then $A$ is the number of ``X``s in the range $I$ in $D$; otherwise, $A=3141592$.
 
 Help Chef process the $Q$ queries.  To prove that you can do it, you need only print the final value of $d$ for each test case!
