@@ -34,7 +34,7 @@ As mentioned in the Brief Explanation, the pair $(u,v)$ is a valid reparenting i
 
 Again as mentioned, we don't actually remove elements from $L$; instead we track the indices of the elements of $L$ that we've removed and use this information to map each new $c_i$ to its corresponding index $X_i$ in the _original_ list $L$.  The idea behind this is quite simple: since I was already writing a persistent AVL Tree, I decided to use that to implement the remapping, though most people seem to use gcc's internal `__gnu_pbds::tree` tree.  The tracking and remapping is handled by the $\textit{IndexRemapper}$ class in my code.
 
-So the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easier problem.
+So having sidestepped the issue of removing elements from $L$, the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easier problem.
 
 Anyway, onto the first sub-problem, **Phase One**: finding $u$ ($\textit{nodeToReparent}$ in the code) of the remapped $c_i$ $X_i$ in the original list $L$, without constructing $L$!
 
