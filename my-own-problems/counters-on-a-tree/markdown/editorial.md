@@ -134,7 +134,7 @@ c. $u$ and $v$ are in different _branches_ of $T_i$
 
 If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of the following:
 
-1. for each $j=1,2,\dots,D$, efficiently propagating the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$;
+1. for each $j=1,2,\dots,D_i$, efficiently propagating the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$;
 2. propagating the contributions of all $v \in V_\textit{coin}\cap T_i$ to $c_i$; and 
 3. (if $c_i.\textit{hasCoin}$) propagating the contribution of $c_i$ to all other nodes in $T_i$
 
