@@ -43,7 +43,57 @@ Could contain more or less short descriptions of possible other approaches.
 **TODO - add publically-accessible link to the following: http://campus.codechef.com/SEP20TST/viewsolution/36836393/ . I can't inline the code here as it would exceed the forum post size limit!**
 [/details]
 
-[details="Tester's Solution"]
-indent whole code by 4 spaces
+[details="Tester's Solution (Kotlin)"]
+```kotlin
+   class MOVCOIN2_NAIVE (val br: java.io.BufferedReader, val bw: java.io.BufferedWriter) {
+       val MOD = 1000000007L
+       fun run() {
+           val N = br.readLine()!!.toInt()
+           require(N in 1..1000)
+   
+           val gph = List(N) { mutableListOf<Int>() }
+           repeat(N-1) {
+               val (u, v) = br.readLine()!!.split(' ').map(String::toInt)
+               gph[u-1].add(v-1)
+               gph[v-1].add(u-1)
+           }
+   
+           val C = br.readLine()!!.split(' ').map{ it.toInt() % 2 == 1 }
+   
+           fun getGrundyWithDFS (u: Int, d: Int, p: Int): Int {
+               var ret = if(C[u]) d else 0
+               for(v in gph[u]) if(v != p) ret = ret xor getGrundyWithDFS(v, d+1, u)
+               return ret
+           }
+   
+           var pow2 = 1L
+           var ans = 0L
+           for (i in 0 until N) {
+               pow2 = (pow2 * 2) % MOD
+               if (getGrundyWithDFS(i, 0, -1) == 0) {
+                   ans += pow2
+               }
+           }
+           ans %= MOD
+           bw.write("${ans}\n")
+       }
+   }
+   
+   fun main (args: Array<String>) {
+       val br = java.io.BufferedReader(java.io.InputStreamReader(System.`in`))
+       val bw = java.io.BufferedWriter(java.io.OutputStreamWriter(System.`out`))
+   
+       val T = br.readLine()!!.toInt()
+       require(T in 1..100)
+   
+       repeat(T) {
+           val solver = MOVCOIN2_NAIVE(br, bw)
+           solver.run()
+       }
+   
+       bw.flush()
+       require(br.readLine() == null)
+   }
+```
 [/details]
 
