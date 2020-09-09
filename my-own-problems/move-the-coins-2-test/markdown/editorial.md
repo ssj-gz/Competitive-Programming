@@ -17,7 +17,7 @@ Persistence, Graph Theory, AVL Tree, Segment Tree
 Given a rooted tree $G$, find the $c_i^{\text{th}}$ element in a list $L$ of pairs of nodes $(u,v)$ that form a valid reparenting, with a specific ordering on $L$, with each $c_i$ being processed online.
 
 # QUICK EXPLANATION:
-The reparenting $(u,v)$ is _valid_ if and only if $v$ is not a descendant of $u$.
+The reparenting $(u,v)$ is _valid_ if and only if $v$ is not a descendant of $u$.  As we find each reparenting, we _simulate_ its removal from $L$ by tracking which indices we have "removed" and adjusting each $c_i$ to point to the correct index in the _original_ $L$ using e.g. an order-statistic tree.
 
 The solution is broken down into three "phases", one for of the three clauses in the ordering:
 
