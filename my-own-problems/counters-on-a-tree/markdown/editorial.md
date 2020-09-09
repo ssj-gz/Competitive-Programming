@@ -87,10 +87,32 @@ Let's consider for the moment the special case where $T$ is simply a long chain 
                 result = result ^ distance
             return result
         }
+        clear()
+        {
+            allDistances = []
+        }
     private:
         allDistances = []
     
 ```
+
+Imagine further that we proceed along the chain of nodes from left to right, at each node $v$ performing the following steps:
+
+* _Propagate_ all the contributions of nodes that $\textit{hasCoin}$ we've seen so far to $v$ via $v.grundy=v.grundy \oplus \textit{distTracker}.\textit{grundyNumber}()$
+* If $v.hasCoin$, _collect_ the contribution of $v$ via $\textit{distTracker}.\textit{insertDist}(0)$
+* Move to the next node in the chain, calling $\textit{distTracker}.\textit{addToAllDists(1)$} as we go
+
+**TODO - animation showing this**
+
+This way, we _propagate_ the contribution of each $v$ that $\textit{hasCoin}$ to all nodes to $v$'s right.
+
+Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this time working in the opposite direction:
+
+**TODO - animation showing this**
+
+Now we've propagated the contribution of each $v$ that $\textit{hasCoin}$ to all nodes to $v$'s right _and_ all nodes to its left i.e. to all other nodes.  Thus, after performing these steps, $R.\textit{grundy}$ is set correctly for all $R$, and we've solved the problem.
+
+The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll show how to fix this later.  In the meantime, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v$'s that $\textit{hasCoin}$.
 
 
 # ALTERNATE EXPLANATION:
