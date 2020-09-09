@@ -17,7 +17,7 @@ Persistence, Graph Theory, AVL Tree, Segment Tree
 Given a rooted tree $G$, find the $c_i^{\text{th}}$ element in a list $L$ of pairs of nodes $(u,v)$ that form a valid reparenting, with a specific ordering on $L$, with each $c_i$ being processed online.
 
 # QUICK EXPLANATION:
-The reparenting $(u,v)$ is _valid_ if and only if $v$ is not a descendant of $u$.  As we find each reparenting, we _simulate_ its removal from $L$ by tracking which indices we have "removed" and adjusting each $c_i$ to point to the correct index in the _original_ $L$ using e.g. an order-statistic tree.
+The reparenting $(u,v)$ is _valid_ if and only if $v$ is not a descendant of $u$.  As we find each reparenting, we _simulate_ its removal from $L$ by mapping each $c_i$ to point to the correct index in the _original_ $L$ using e.g. an order-statistic tree, so the problem boils down to finding each requested element at a given index in the original $L$ online.
 
 The solution is broken down into three "phases", one for of the three clauses in the ordering:
 
@@ -28,19 +28,13 @@ Phase Two: Find the $\textit{newParentHeight}$.  We have our $nodeToReparent$, a
 Phase Three: Find the final $v$ ($\textit{newParent}$).  We have our $\textit{nodeToReparent}$ and $\textit{newParentHeight}$, and now just need to find the $Y^\text{th}$ element at height $newParentHeight$ that is not a descendant of $\textit{nodeToReparent}$, where the index $Y$ is easily found.  If we list all nodes with the given height in the order they are visited in a DFS ($\textit{nodesAtHeightInDFSOrder}(h)$) in another precomputation step, we see that the descendents of $\textit{nodeToReparent}$ all lie in an easily found interval $(l,r)$ in this list, so we want to find the $Y^\text{th}$ element _not_ in this interval.  By forming a _persistent_ AVL Tree of the elements of ($\textit{nodesAtHeightInDFSOrder}$) in the precomputation step, we can find in $\mathcal{O}(1)$ a pair of AVL Trees representing all (sorted) nodes to the left of $l$ and all to the right of $r$, respectively.  We can then adapt the standard algorithm for finding the $Y^\text{th}$ element in two sorted arrays to work with AVL Trees and find the final $\textit{newParent}$.
 
 # EXPLANATION:
-Very detailed explanation ideally with code snippets.
-Ideally editorialist should write his own solution
-and write editorial strictly following his solution.
+As is often the case, my solution is rather clunkier than other people's (the approach to Phase Three in particular), but I'm going to with my original solution regardless :)
 
-For adding mathematical expressions, LaTeX is required, which is nicely explained at https://en.wikibooks.org/wiki/LaTeX/Mathematics
+As mentioned in the Brief Explanation, the pair $(u,v)$ is a valid reparenting if and only if $v$ is not a descendent of $u$ in the (rooted) tree $G$.  The size of the list $L$ of valid reparentings is $\mathcal{O}(N^2)$; far too big to construct, let alone to erase from for all $Q$ queries, so we have to be a bit more cunning!
 
-Some examples of latex here. (Latex is always enclosed in between $ sign)
+Again as mentioned, we don't actually remove elements from $L$; instead we track the indices of the elements of $L$ that we've removed and use this information to map each new $c_i$ to its corresponding element in the _original_ list $L$.  The idea behind this is quite simple: since I was already writing a persistent AVL Tree, I decided to use that to implement the remapping, though most people seem to use gcc's `__gnu_pbds::tree`.  The tracking and remapping is handled by the $\textit{IndexRemapper}$ class in my code.
 
-$ans = \sum_{i = 1}^{N} a_i^k \bmod M$
-
-$\frac{num}{den}$
-
-$\leq$, $\geq$, $\neq$, $\pm$
+So the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easy problem.
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
