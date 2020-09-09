@@ -139,6 +139,8 @@ If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of 
 
 then from **C3**, we would have propagated the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
 
+Let's go back to optimising our $\textit{DistTracker}$.  Generally with problems involving xoring things together, it helps to take a bitwise approach, and this turns out to be the case here.  Let's have a look at the binary representation of an increasing series of numbers, and see how each bit flips as we go along.
+
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
 
