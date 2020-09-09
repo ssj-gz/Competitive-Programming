@@ -58,13 +58,13 @@ $$
 
 is $0$.
 
-Consider two coins $c_1$ and $c_2$, both on the same node $v$.  Their contribution to $R.\textit{grundy}$ is $\textit{dist}(R, v) \oplus \textit{dist}(R, v)$.  But $x \oplus x = 0$ for all $x$, so we can remove _both_ coins without affecting $R.\textit{grundy}$ (and so, the outcome of the game).  In general, for all nodes, we can remove pairs of coins from that node until none remain i.e. until the number of coins on the node is either $0$ or $1$ without affecting the outcome of game, so let's do that.  We say that a node $v$ $\textit{hasNode}$ if the number of coins on $v$ is odd.  We can now rephrase the formula for $R.\textit{grundy}$ to something node-centric rather than coin-centric:
+Consider two coins $c_1$ and $c_2$, both on the same node $v$.  Their contribution to $R.\textit{grundy}$ is $\textit{dist}(R, v) \oplus \textit{dist}(R, v)$.  But $x \oplus x = 0$ for all $x$, so we can remove _both_ coins without affecting $R.\textit{grundy}$ (and so, the outcome of the game).  In general, for all nodes, we can remove pairs of coins from that node until none remain i.e. until the number of coins on the node is either $0$ or $1$ without affecting the outcome of game, so let's do that.  We say that a node $v$ $\textit{hasCoin}$ if the number of coins on $v$ is odd, and set $V_\textit{coin}$ to be the set of all such $v$.  We can now rephrase the formula for $R.\textit{grundy}$ to something node-centric rather than coin-centric:
 
 $$
-R.\textit{grundy}=\bigoplus_{v|v.\textit{hasCoin}}{\textit{dist}(R,v)}
+R.\textit{grundy}=\bigoplus_{v \in V_{\textit{coin}} }{\textit{dist}(R,v)}
 $$
 
-Recalling the definitions of _contribution_ and _propagation_ from the Quick Explanation, we see that to solve the problem, we merely need to ensure that for each $v$ that $\textit{hasCoin}$ and every $R$, $v$'s contribution to is propagated to $R$.
+Recalling the definitions of _contribution_ and _propagation_ from the Quick Explanation, we see that to solve the problem, we merely need to ensure that for each $v \in V_{\textit{coin}}$ and every $R$, $v$'s contribution to $R$ is propagated to $R$.
 
 Let's consider for the moment the special case where $T$ is simply a long chain of nodes.  Imagine we had a $\textit{DistTracker}$ data structure with the below API (a simple implementation is also provided):
 
@@ -99,18 +99,18 @@ Let's consider for the moment the special case where $T$ is simply a long chain 
 Imagine further that we proceed along the chain of nodes from left to right, at each node $v$ performing the following steps:
 
 * _Propagate_ all the contributions of nodes that $\textit{hasCoin}$ we've seen so far to $v$ via $v.grundy=v.grundy \oplus \textit{distTracker}.\textit{grundyNumber}()$
-* If $v.hasCoin$, _collect_ the contribution of $v$ via $\textit{distTracker}.\textit{insertDist}(0)$
-* Move to the next node in the chain, calling $\textit{distTracker}.\textit{addToAllDists(1)$} as we go
+* If $v\in V_{\textit{coin}}$, _collect_ the contribution of $v$ via $\textit{distTracker}.\textit{insertDist}(0)$
+* Move to the next node in the chain, calling $\textit{distTracker}.\textit{addToAllDists}(1)$ to update the contributions we've collected as we go
 
 **TODO - animation showing this**
 
-This way, we _propagate_ the contribution of each $v$ that $\textit{hasCoin}$ to all nodes to $v$'s right.
+This way, we _collect_ then  _propagate_ the contribution of each $v\in V_{\textit{coin}}$ to all nodes to $v$'s right.
 
 Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this time working in the opposite direction:
 
 **TODO - animation showing this**
 
-Now we've propagated the contribution of each $v$ that $\textit{hasCoin}$ to all nodes to $v$'s right _and_ all nodes to its left i.e. to all other nodes.  Thus, after performing these steps, $R.\textit{grundy}$ is set correctly for all $R$, and we've solved the problem.
+Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ all nodes to its left i.e. to all other nodes.  Thus, after performing these steps, $R.\textit{grundy}$ is set correctly for all $R$, and we've solved the problem.
 
 The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll show how to fix this later.  In the meantime, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v$'s that $\textit{hasCoin}$.
 
