@@ -14,7 +14,7 @@ Hard **TODO - revisit this - seems to be easier than MOVCOIN2**
 Persistence, Graph Theory, AVL Tree, Segment Tree
 
 # PROBLEM:
-Given a rooted tree $G$, find the $c_i^{\text{th}}$ element in a list $L$ of pairs of nodes $(u,v)$ that form a valid reparenting, with a specific ordering on $L$, with each $c_i$ being processed online.
+Given a rooted tree $G$, find the $c_i^{\text{th}}$ element in a list $L$ of pairs of nodes $(u,v)$ that form a valid reparenting, with a specific ordering on $L$, and remove it from $L$, with each $c_i$ being processed online.  A _valid reparenting_ is a $(u,v)$ where severing $u$ from its parent in $G$ and adding an edge between $u$ and $v$ results in a tree.
 
 # QUICK EXPLANATION:
 The reparenting $(u,v)$ is _valid_ if and only if $v$ is not a descendant of $u$.  As we find each reparenting, we _simulate_ its removal from $L$ by mapping each $c_i$ to point to the corresponding index $X_i$ in the _original_ $L$ using e.g. an order-statistic tree, so the problem boils down to finding each requested element  at a given index $X_i$ in the original $L$, online.
