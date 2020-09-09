@@ -43,19 +43,29 @@ A naive implementation would have $\textit{addToAllDists}$ and $\textit{grundyNu
 We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ all contributions of $v$ with $v.\textit{hasCoin}$ and _propagate_ the contributions of these $v$s to all other nodes $R$, thus calculating all $R.\textit{grundy}$, as required.
 
 # EXPLANATION:
-Very detailed explanation ideally with code snippets.
-Ideally editorialist should write his own solution
-and write editorial strictly following his solution.
 
-For adding mathematical expressions, LaTeX is required, which is nicely explained at https://en.wikibooks.org/wiki/LaTeX/Mathematics
+As mentioned, this is the game of [Nim](https://en.wikipedia.org/wiki/Nim) in disguise: in Nim, we start with some number $M$ of piles, the $i^\textit{th}$ of which contains $p_i$ stones, and players take turns to choose a non-empty pile and take at least one stone from it, until a player cannot make a move, in which case they lose.  In the game $\textit{game}(T, R)$, let $v_c$ be the node containing the coin $c$; then the correspondence between the two games is as follows:
 
-Some examples of latex here. (Latex is always enclosed in between $ sign)
+* Each coin $c$ corresponds to a pile of size $\textit{dist}(R,v_c)$ in the game of Nim
+* Choosing a coin $c$ from a node not in $R$ and moving it strictly towards $R$ corresponds to choosing a non-empty pile of stones and taking at least one stone from it
+* The losing state - where all coins are in $R$ - corresponds to the losing state in Nim where all piles are empty.
 
-$ans = \sum_{i = 1}^{N} a_i^k \bmod M$
+The [Sprague-Grundy Theorem](https://en.wikipedia.org/wiki/Sprague-Grundy) makes a few interesting statements including the remarkable result that in the game of Nim, the second player wins if and only if the _Grundy Number_  for the game is $0$, where the grundy number is the xor-sum of all the pile sizes i.e. $p_1 \oplus p_2 \oplus \dots \oplus p_M$. Translating this into our game, we see that Bob wins if and only if the grundy number for the game $\textit{game}(T, R)$, $R.\textit{grundy}$ defined by:
 
-$\frac{num}{den}$
+$$
+R.\textit{grundy}=\bigoplus_{c}{\textit{dist}(R,v_c)}
+$$
 
-$\leq$, $\geq$, $\neq$, $\pm$
+is $0$.
+
+Consider two coins $c_1$ and $c_2$, both on the same node $v$.  Their contribution to $R.\textit{grundy}$ is $\textit{dist}(R, v) \oplus \textit{dist}(R, v)$.  But $x \oplus x = 0$ for all $x$, so we can remove _both_ coins without affecting $R.\textit{grundy}$ (and so, the outcome of the game).  In general, for all nodes, we can remove pairs of coins from that node until none remain i.e. until the number of coins on the node is either $0$ or $1$ without affecting the outcome of game, so let's do that.  We say that a node $v$ $\textit{hasNode}$ if the number of coins on $v$ is odd.  We can now rephrase the formula for $R.\textit{grundy}$ to something node-centric rather than coin-centric:
+
+$$
+R.\textit{grundy}=\bigoplus_{v|v.\textit{hasCoin}}{\textit{dist}(R,v)}
+$$
+
+Recalling the definitions of _contribution_ and _propagation_ from the Quick Explanation, we see that to solve the problem, we merely need to ensure that for each $v$ that $\textit{hasCoin}$ and every $R$, $v$'s contribution to is propagated to $R$.
+
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
