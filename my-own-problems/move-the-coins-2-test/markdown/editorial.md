@@ -84,15 +84,14 @@ As an example, here is the $L$ used in example test case 2 of the Problem, adjus
 
 and here is the table of $\textit{numCanReparentToPrefixSum}(u)$ for each $u$ for this example, in order ($u=1$ is omitted):
 
-```
-u   numCanReparentToPrefixSum(u)
-2   6
-3   12
-4   18
-5   22
-6   28
-7   34
-```
+| $u$ | $\textit{numCanReparentToPrefixSum}(u)$ |
+| :-: | :-------------------------------------: |
+|2    | 6                                       |
+|3    | 12                                      |
+|4    | 18                                      |
+|5    | 22                                      |
+|6    | 28                                      |
+|7    | 34                                      |
 
 If we look at the $17^\text{th}$ (0-relative!) element in $L$, we see that it reparents the node $4$.  
 If we look at the $18^\text{th}$ element in $L$, we see that it reparents the node $5$.  
