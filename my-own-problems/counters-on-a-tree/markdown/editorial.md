@@ -117,10 +117,10 @@ The naive implementation of $\textit{DistTracker}$ given above is too slow to be
 I won't go into much detail on [Centroid Decomposition](https://www.geeksforgeeks.org/centroid-decomposition-of-tree/) here as there are doubtless many resources about it, but here are the salient properties for our purposes:
 
 **C1:** Centroid Decomposition of $T$ creates $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $c_i$ that is the _centre_ of $T_i$  
-**C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N)$  
+**C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N\log N)$  
 **C3:** Let $u,v$ be any distinct pair of nodes, and let $P(u,v)=[u=p_0, p_1, \ldots, p_k=v]$ be the unique path between $u$ and $v$.  Then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and $c_i \in P$  
 
-Let's pick one of the $i$s.  Let $D$ be the degree of $c_i$ in $T_i$, and let $b_1, b_2, \dots, b_D$ be the neighbours of $c_i$ in $T_i$.  We partition the nodes other than $c_i$ of $T_i$ into $D$ _branches_, where the node $u$ is in branch $l$ if the first node in the unique path from $c_i$ to $u$ is $b_l$.  For example:
+Let's pick one of the $i$s.  Let $D_i$ be the degree of $c_i$ in $T_i$, and let $b_1, b_2, \dots, b_D$ be the neighbours of $c_i$ in $T_i$.  We partition the nodes other than $c_i$ of $T_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the first node in the unique path from $c_i$ to $u$ is $b_l$.  For example:
 
 **TODO - image here - medium size $T_i$ with $D = 4$**
 
@@ -133,8 +133,8 @@ b. $u$ and $v$ are in different _branches_ of $T_i$
 
 If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of the following:
 
-1. efficiently propagating the contributions of all $v \in V_\textit{coin}$ in each branch of $T_i$ to the nodes in the other $D-1$ branches of $T_i$;
-2. propagating the contributions of all $v \in V_\textit{coin}$ in $T_i$ to $c_i$; and 
+1. for each $j=1,2,\dots,D$, efficiently propagating the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$;
+2. propagating the contributions of all $v \in V_\textit{coin}\cap T_i$ to $c_i$; and 
 3. (if $c_i.\textit{hasCoin}$) propagating the contribution of $c_i$ to all other nodes in $T_i$
 
 then from **C3**, we would have propagated the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
