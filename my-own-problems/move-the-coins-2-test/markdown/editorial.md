@@ -4,12 +4,11 @@
 [Div-2 Contest](https://www.codechef.com/SEPT20B/problems/MVCN2TST)  
 [Div-1 Contest](https://www.codechef.com/SEPT20A/problems/MVCN2TST)  
 
-**Author:** [Simon St James](https://www.codechef.com/users/ssjgz)  
+**Author and Editorialist:** [Simon St James](https://www.codechef.com/users/ssjgz)  
 **Tester:** [Suchan Park](https://www.codechef.com/users/tncks0121)  
-**Editorialist:** [Simon St James](https://www.codechef.com/users/ssjgz)  
 
 # DIFFICULTY:
-HARD **TODO - revisit this - seems to be easier than MOVCOIN2**
+Hard **TODO - revisit this - seems to be easier than MOVCOIN2**
 
 # PREREQUISITES:
 Persistence, Graph Theory, AVL Tree, Segment Tree
@@ -48,15 +47,10 @@ Could contain more or less short descriptions of possible other approaches.
 
 # SOLUTIONS:
 
-[details="Setter's Solution"]
+[details="Setter's Solution (C++)"]
 indent whole code by 4 spaces
 [/details]
 
-[details="Tester's Solution"]
+[details="Tester's Solution (C++)"]
 indent whole code by 4 spaces
 [/details]
-
-[details="Editorialist's Solution"]
-indent whole code by 4 spaces
-[/details]
-
