@@ -42,7 +42,7 @@ There are no reparentings with $u=1$, so the first few elements of $L$ are taken
 
 As an example, here is the $L$ used in example test case 2 of the Problem, adjusted so that the indices are 0-relative:
 
-[details="Example Testcase 2 L"]
+[details="$L$ for Example Testcase 2"]
 
 | index      | $u$ | $v$ | $h(v)$ |
 | :--------: | :-: | :-: | :----: |
@@ -100,7 +100,7 @@ In general, hopefully the pattern is clear - _the node reparented by the $X_i^\t
 
 Now that we know our $\textit{nodeToReparent}$, we can restrict our attention to the sub-list of $L$ of reparentings that reparent $\textit{nodeToReparent}$; our final desired parenting is at some index $Y_i$ in this sublist.  How do we find $Y_i$? In focussing on this sublist, we are ignoring all the first elements of $L$ that reparent a node $x < \textit{nodeToReparent}$, so we must subtract this number from $X_i$.  By definition, this number is $\textit{numCanReparentToPrefixSum}(\textit{nodeToReparent} - 1)$.  The index $Y_i$ is called $\textit{numOfReparentingThatReparentsNode}$ in the code; I'll be sticking with $Y_i$ here, for obvious reasons :)
 
-So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeight}$) in the $Y_i^\textit{th}$ valid reparenting that reparents $\textit{nodeToReparent}$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $\textit{nodeToReparent}$ to node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$) and find the first $h$ that exceed $Y_i$.
+So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeight}$) in the $Y_i^\textit{th}$ valid reparenting that reparents $\textit{nodeToReparent}$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $\textit{nodeToReparent}$ to a node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$) and find the first $h$ such that this exceeds $Y_i$.
 
 How do we compute this $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$? We need to make a few simple observations.  Firstly, note that the case where $h < \textit{nodeToReparent.height}$ is trivial: no node with such a height $h$ can be a descendant of $\textit{nodeToReparent}$, and we can easily count such nodes using the precomputed $\textit{numNodesUpToHeight}$ lookup.
 
@@ -108,12 +108,14 @@ Now consider the following schematic, representing the less-trivial case:
 
 **TODO - diagram here - tree consisting of loads of tiny nodes, colour-coded/ with lines drawn round them indicating the breakdown described below**
 
+**TODO - in the below, I'm mixing up "set of nodes" and "number of nodes" - be consistent!**
+
 The desired number consists of the number of nodes in section $A$ (for "**A**bove" $\textit{nodeToReparent}$ - easily computed, as mentioned above), plus the total number of nodes in section $B$ (for "**B**etween $\textit{nodeToReparent}$ and height $h$") minus the number of nodes in $B$ that are descendents of $\textit{nodeToReparent}$ ‒ call this latter $\textit{BD}$.  Now, $\textit{BD}$ is equal to the total number of nodes that are descendents of $\textit{nodeToReparent}$ (call this $D$) minus the number of nodes $x$ that are descendents of $\textit{nodeToReparent}$ and have $x.\textit{height} > h$ (call this $\textit{DH})$.  How can we categorise the nodes in $\textit{DH}$? There are precisely the set of _proper descendents_ of all descendents $y$ of $\textit{nodeToReparent}$ with $y.\textit{height}=h$. If we can compute this sum of proper descendents, we can compute $\textit{findNumNonDescendantsUpToHeight}$.
 
 
 Now, in the precomputation step, we perform a DFS and use the common technique of logging, for each node $x$, the "time" at which we first visit $x$ ($x.\textit{dfsBeginVisit}$) and the time at which we finish exploring $x$ ($x.\textit{dfsEndVisit}$). This immediately gives us a handy tool for determining whether a node $y$ is a descendant of $x$: $y$ is a descendant of $x$ if and only if $y.\textit{dfsBeginVisit} > x.\textit{dfsBeginVisit}$ and $y.\textit{dfsEndVisit} < x.\textit{dfsEndVisit}$.  We use this information to form a list, for each $h$, of all nodes $x$ with $x.\textit{height} = h$ ordered by their $\textit{dfsBeginVisit}$, $\textit{nodesAtHeightInDFSOrder}(h)$.  (This list of lists will come in useful for Phase Three, too).
 
-As a consequence of the above handy fact, we see that the set of nodes at height $h$ that are descendents of a node $x$ form an _interval_ in $\textit{nodesAtHeightInDFSOrder}(h)$, and this interval $[l, r]$ can be found via a binary search on $\textit{nodesAtHeightInDFSOrder}(h)$ (see $\textit{descendantRangeFor}$ in the code).  So if, in our precomputation step, for each $h$, we compute a prefix sum array of the total number of proper descendents of each successive node in $\textit{nodesAtHeightInDFSOrder}(h)$ (\textit{sumOfProperDescendantsOfDescendantsAtHeight}), we can easily compute the size of $\textit{DH}$.  So we do that :)
+As a consequence of the above handy fact, we see that the set of nodes at height $h$ that are descendents of a node $x$ form an _interval_ in $\textit{nodesAtHeightInDFSOrder}(h)$, and this interval $[l, r]$ can be found via a binary search on $\textit{nodesAtHeightInDFSOrder}(h)$ (see $\textit{descendantRangeFor}$ in the code).  So if, in our precomputation step, for each $h$, we compute a prefix sum array of the total number of proper descendents of each successive node in $\textit{nodesAtHeightInDFSOrder}(h)$ ($\textit{sumOfProperDescendantsOfDescendantsAtHeight}$), we can easily compute the size of $\textit{DH}$.  So we do that :)
 
 So given a $\textit{nodeToReparent}$ and a height $h$, we can now compute $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$ in $\mathcal{O}(\log N)$, and we need to find the first $h$ such that this value exceeds $Y_i$.  We _could_ list all such $\textit{findNumNonDescendantsUpToHeight}$ for each height $h$, but this would result in an $\mathcal{O}(N^2)$ algorithm, so instead we use the fact that $\textit{findNumNonDescendantsUpToHeight}$ is non-decreasing with $h$ to perform an _Abstract Binary Search_ on $h$, finally finding the object of Phase Two: $\textit{newParentHeight}$.
 
@@ -129,7 +131,7 @@ How does this help? Imagine, in our precomputation step, for each $h$, we create
 
 **TODO - insert the Epic manim animation illustrating all this when I finally get it done!**
 
-Now, this doesn't help us to get the sorted array of the first $l-1$ elements of $H$ or the last $r-1$ elements of $H$ but it does give us, in $\mathcal{O}(1)$, a pair of _trees_ representing these sorted elements.  We can now adapt the "Find the $k^{\text{th}}$ Element of Two Sorted Arrays" to work with AVL Trees instead of arrays to find the object of Phase Three, $\textit{newParent}$ (see $\textit{findKthFromPair}$).
+Now, this doesn't help us to get the sorted _array_ of the first $l-1$ elements of $H$ or the last $r-1$ elements of $H$ but it does give us, in $\mathcal{O}(1)$, a pair of _trees_ representing these sorted elements.  We can now adapt the "Find the $k^{\text{th}}$ Element of Two Sorted Arrays" to work with AVL Trees instead of arrays to find the object of Phase Three, $\textit{newParent}$ (see $\textit{findKthFromPair}$).
 
 And that's it!
 
