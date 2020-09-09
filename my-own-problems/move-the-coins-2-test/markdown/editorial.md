@@ -43,43 +43,43 @@ There are no reparentings with $u=1$, so the first few elements of $L$ are taken
 As an example, here is the $L$ used in example test case 2 of the Problem, adjusted so that the indices are 0-relative:
 
 [details="Example Testcase 2 L"]
-```
- #   u  v  h
- 0.  2  1  0
- 1.  2  5  1
- 2.  2  6  1
- 3.  2  7  1
- 4.  2  3  2
- 5.  2  4  2
- 6.  3  1  0
- 7.  3  2  1
- 8.  3  5  1
- 9.  3  6  1
-10.  3  7  1
-11.  3  4  2
-12.  4  1  0
-13.  4  2  1
-14.  4  5  1
-15.  4  6  1
-16.  4  7  1
-17.  4  3  2
-18.  5  1  0
-19.  5  2  1
-20.  5  6  1
-21.  5  7  1
-22.  6  1  0
-23.  6  2  1
-24.  6  5  1
-25.  6  7  1
-26.  6  3  2
-27.  6  4  2
-28.  7  1  0
-29.  7  2  1
-30.  7  5  1
-31.  7  6  1
-32.  7  3  2
-33.  7  4  2
-```
+
+| index      | $u$ | $v$ | $h(v)$ |
+| :--------: | :-: | :-: | :----: |
+| 0.         | 2   | 1   | 0      |
+| 1.         | 2   | 5   | 1      |
+| 2.         | 2   | 6   | 1      |
+| 3.         | 2   | 7   | 1      |
+| 4.         | 2   | 3   | 2      |
+| 5.         | 2   | 4   | 2      |
+| 6.         | 3   | 1   | 0      |
+| 7.         | 3   | 2   | 1      |
+| 8.         | 3   | 5   | 1      |
+| 9.         | 3   | 6   | 1      |
+|10.         | 3   | 7   | 1      |
+|11.         | 3   | 4   | 2      |
+|12.         | 4   | 1   | 0      |
+|13.         | 4   | 2   | 1      |
+|14.         | 4   | 5   | 1      |
+|15.         | 4   | 6   | 1      |
+|16.         | 4   | 7   | 1      |
+|17.         | 4   | 3   | 2      |
+|18.         | 5   | 1   | 0      |
+|19.         | 5   | 2   | 1      |
+|20.         | 5   | 6   | 1      |
+|21.         | 5   | 7   | 1      |
+|22.         | 6   | 1   | 0      |
+|23.         | 6   | 2   | 1      |
+|24.         | 6   | 5   | 1      |
+|25.         | 6   | 7   | 1      |
+|26.         | 6   | 3   | 2      |
+|27.         | 6   | 4   | 2      |
+|28.         | 7   | 1   | 0      |
+|29.         | 7   | 2   | 1      |
+|30.         | 7   | 5   | 1      |
+|31.         | 7   | 6   | 1      |
+|32.         | 7   | 3   | 2      |
+|33.         | 7   | 4   | 2      |
 [/details]
 
 and here is the table of $\textit{numCanReparentToPrefixSum}(u)$ for each $u$ for this example, in order ($u=1$ is omitted):
@@ -110,6 +110,9 @@ Now consider the following schematic, representing the non-trivial case:
 **TODO - diagram here - tree consisting of loads of tiny nodes, colour-coded/ with lines drawn round them indicating the breakdown described below**
 
 The desired number consists of the number of nodes in section $A$ (for "**A**bove" $\textit{nodeToReparent}$ - easily computed, as mentioned above), plus the total number of nodes in section $B$ (for "**B**etween $\textit{nodeToReparent}$ and height $h$") minus the number of nodes in $B$ that are descendents of $\textit{nodeToReparent}$ ‒ call this latter $\textit{BD}$.  Now, $\textit{BD}$ is equal to the total number of nodes that are descendents of $\textit{nodeToReparent}$ (call this $D$) minus the number of nodes $x$ that are descendents of $\textit{nodeToReparent}$ and have $x.\textit{height} > h$ (call this $\textit{DH})$.  How can we categorise the nodes in $\textit{DH}$? There are precisely the set of _proper descendents_ of all descendents $y$ of $\textit{nodeToReparent}$ with $y.\textit{height}=h$.
+
+Now, in the precomputation step, we compute, for each $h$, the list $\textit{nodesAtHeightInDFSOrder}(h)$ - this can be accomplished using the standard technique of logging the "time" at which a DFS from the root of $G$ first encounters each node $u$ and 
+
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
