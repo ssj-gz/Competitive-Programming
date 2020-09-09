@@ -99,6 +99,18 @@ If we look at the $18^\text{th}$ element in $L$, we see that it reparents the no
 If we look at the $28^\text{th}$ element in $L$, we see that it reparents the node $7$.  
 In general, hopefully the pattern is clear - _the node reparented by the $X_i^\text{th}$ element of $L$ is the first $u$ such that $\textit{numCanReparentToPrefixSum}(u) > X_i$._  Since $\textit{numCanReparentToPrefixSum}$ is non-increasing, we can easily find this $u$ using a binary search, and so find our $\textit{nodeToReparent}$ in $\mathcal{O}(\log N)$, fulfilling Phase One.
 
+Now that we know our $\textit{nodeToReparent}$, we can restrict our attention to the sub-list of $L$ of reparentings that reparent $\textit{nodeToReparent}$; our final desired parenting is at some index $Y_i$ in this sublist.  How do we find $Y_i$? In focussing on this sublist, we are ignoring all the first elements of $L$ that reparent a node $x < \textit{nodeToReparent}$, so we must subtract this number from $X_i$.  By definition, this number is $\textit{numCanReparentToPrefixSum}(\textit{nodeToReparent} - 1)$.  The index $Y_i$ is called $\textit{numOfReparentingThatReparentsNode}$; I'll be sticking with $Y_i$ here, for obvious reasons :)
+
+So: for Phase Two, we need to find the height of $v$ ($\textit{newParentHeight}$) in the $Y_i^\textit{th}$ valid reparenting that reparents $\textit{nodeToReparent}$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $\textit{nodeToReparent}$ to node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$) and find the first $h$ that exceed $Y_i$.
+
+How do we compute this $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$? We need to make a few simple observations.  Firstly, note that the case where $h < \textit{nodeToReparent.height}$ is trivial: no node with such a height $h$ can be a descendant of $\textit{nodeToReparent}$, and we can easily count such nodes using the precomputed $\textit{numNodesUpToHeight}$ lookup.
+
+Now consider the following schematic, representing the non-trivial case:
+
+**TODO - diagram here - tree consisting of loads of tiny nodes, colour-coded/ with lines drawn round them indicating the breakdown described below**
+
+The desired number consists of the number of nodes in section $A$ (for "**A**bove" $\textit{nodeToReparent}$ - easily computed, as mentioned above), plus the total number of nodes in section $B$ (for "**B**etween $\textit{nodeToReparent}$ and height $h$") minus the number of nodes in $B$ that are descendents of $\textit{nodeToReparent}$ ‒ call this latter $\textit{BD}$.  Now, $\textit{BD}$ is equal to the total number of nodes that are descendents of $\textit{nodeToReparent}$ (call this $D$) minus the number of nodes $x$ that are descendents of $\textit{nodeToReparent}$ and have $x.\textit{height} > h$ (call this $\textit{DH})$.  How can we categorise the nodes in $\textit{DH}$? There are precisely the set of _proper descendents_ of all descendents $y$ of $\textit{nodeToReparent}$ with $y.\textit{height}=h$.
+
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
 
