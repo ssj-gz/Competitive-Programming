@@ -34,7 +34,70 @@ As mentioned in the Brief Explanation, the pair $(u,v)$ is a valid reparenting i
 
 Again as mentioned, we don't actually remove elements from $L$; instead we track the indices of the elements of $L$ that we've removed and use this information to map each new $c_i$ to its corresponding element in the _original_ list $L$.  The idea behind this is quite simple: since I was already writing a persistent AVL Tree, I decided to use that to implement the remapping, though most people seem to use gcc's internal `__gnu_pbds::tree` tree.  The tracking and remapping is handled by the $\textit{IndexRemapper}$ class in my code.
 
-So the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easy problem.
+So the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easier problem.
+
+Anyway, onto the first sub-problem, Phase One: finding $u$ ($\textit{nodeToReparent}$ in the code) of the remapped $c_i$ $X_i$ in the original list $L$, without constructing $L$!
+
+There are no reparentings with $u=1$, so the first few elements of $L$ are taken up by the valid reparentings that reparent node $2$ (if any); then the next few are those that reparent node $3$, etc.  For a given $u$, we can easily compute the number of valid reparentings $(u,v)$ that reparent $u$: it is simply the number of $v$ such that $v$ is not a descendent of $u$, which is $N-u.\textit{numDescendants}$).  We compute $u.\textit{numDescendants}$ for all $N$ $u$ in $\mathcal{O}(N)$ in a precomputation step, and then create a prefix sum array $\textit{numCanReparentToPrefixSum}$ such that $\textit{numCanReparentToPrefixSum}(u)$ is the total number of valid reparentings that reparent a node $x$ with $x \le u$.  
+
+As an example, here is the $L$ used in example test case 2 of the Problem, adjusted so that the indices are 0-relative:
+
+[details="Example Testcase 2 L"]
+```
+ #   u  v  h
+ 0.  2  1  0
+ 1.  2  5  1
+ 2.  2  6  1
+ 3.  2  7  1
+ 4.  2  3  2
+ 5.  2  4  2
+ 6.  3  1  0
+ 7.  3  2  1
+ 8.  3  5  1
+ 9.  3  6  1
+10.  3  7  1
+11.  3  4  2
+12.  4  1  0
+13.  4  2  1
+14.  4  5  1
+15.  4  6  1
+16.  4  7  1
+17.  4  3  2
+18.  5  1  0
+19.  5  2  1
+20.  5  6  1
+21.  5  7  1
+22.  6  1  0
+23.  6  2  1
+24.  6  5  1
+25.  6  7  1
+26.  6  3  2
+27.  6  4  2
+28.  7  1  0
+29.  7  2  1
+30.  7  5  1
+31.  7  6  1
+32.  7  3  2
+33.  7  4  2
+```
+[/details]
+
+and here is the table of $\textit{numCanReparentToPrefixSum}(u)$ for each $u$ for this example, in order ($u=1$ is omitted):
+
+```
+u   numCanReparentToPrefixSum(u)
+2   6
+3   12
+4   18
+5   22
+6   28
+7   34
+```
+
+If we look at the $17^\text{th}$ (0-relative!) element in $L$, we see that it reparents the node $4$.  
+If we look at the $18^\text{th}$ element in $L$, we see that it reparents the node $5$.  
+If we look at the $28^\text{th}$ element in $L$, we see that it reparents the node $7$.  
+In general, hopefully the pattern is clear - _the node reparented by the $X_i^\text{th}$ element of $L$ is the first $u$ such that $\textit{numCanReparentToPrefixSum}(u) > X_i$._  Since $\textit{numCanReparentToPrefixSum}$ is non-increasing, we can easily find this $u$ using a binary search, and so find our $\textit{nodeToReparent}$ in $\mathcal{O}(\log N)$, fulfilling Phase One.
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
