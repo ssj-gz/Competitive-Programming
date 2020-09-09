@@ -152,55 +152,200 @@ Could contain more or less short descriptions of possible other approaches.
 
 [details="Tester's Solution (Kotlin)"]
 ```kotlin
-   class MOVCOIN2_NAIVE (val br: java.io.BufferedReader, val bw: java.io.BufferedWriter) {
-       val MOD = 1000000007L
-       fun run() {
-           val N = br.readLine()!!.toInt()
-           require(N in 1..1000)
-   
-           val gph = List(N) { mutableListOf<Int>() }
-           repeat(N-1) {
-               val (u, v) = br.readLine()!!.split(' ').map(String::toInt)
-               gph[u-1].add(v-1)
-               gph[v-1].add(u-1)
-           }
-   
-           val C = br.readLine()!!.split(' ').map{ it.toInt() % 2 == 1 }
-   
-           fun getGrundyWithDFS (u: Int, d: Int, p: Int): Int {
-               var ret = if(C[u]) d else 0
-               for(v in gph[u]) if(v != p) ret = ret xor getGrundyWithDFS(v, d+1, u)
-               return ret
-           }
-   
-           var pow2 = 1L
-           var ans = 0L
-           for (i in 0 until N) {
-               pow2 = (pow2 * 2) % MOD
-               if (getGrundyWithDFS(i, 0, -1) == 0) {
-                   ans += pow2
-               }
-           }
-           ans %= MOD
-           bw.write("${ans}\n")
-       }
-   }
-   
-   fun main (args: Array<String>) {
-       val br = java.io.BufferedReader(java.io.InputStreamReader(System.`in`))
-       val bw = java.io.BufferedWriter(java.io.OutputStreamWriter(System.`out`))
-   
-       val T = br.readLine()!!.toInt()
-       require(T in 1..100)
-   
-       repeat(T) {
-           val solver = MOVCOIN2_NAIVE(br, bw)
-           solver.run()
-       }
-   
-       bw.flush()
-       require(br.readLine() == null)
-   }
+package MOVCOIN2
+
+class Movcoin2Solver(private val N: Int, private val gph: List<List<Int>>, private val hasToken: List<Boolean>) {
+    private class XorOfElementPlusConstant (elements: List<Int>, val constantMax: Int) {
+        private val MAX_BITS = 17
+
+        val xored = IntArray(constantMax+1)
+
+        init {
+            for(b in 0 until MAX_BITS) {
+                var l = (1 shl b)
+                var r = (1 shl (b+1)) - 1
+
+                var cnt = 0
+
+                val freq = IntArray(constantMax+1)
+                for(it in elements) {
+                    val target = it and ((1 shl (b+1)) - 1)
+                    freq[target] = (freq[target] ?: 0) + 1
+                    if (target in l..r) cnt++
+                }
+
+                for (d in 0..constantMax) {
+                    if (cnt % 2 == 1) xored[d] += 1 shl b
+
+                    cnt -= freq.getOrElse(r) { 0 }
+
+                    l--
+                    if(l < 0) l = (1 shl (b+1)) - 1
+                    r--
+                    if(r < 0) r = (1 shl (b+1)) - 1
+
+                    cnt += freq.getOrElse(l) { 0 }
+                }
+            }
+        }
+
+        fun getXorOfElementsPlus(constant: Int) = xored[constant]
+    }
+
+    private val marked = BooleanArray(N)
+
+    private val subtreeSize = IntArray(N)
+    private val getMaxSubtreeSizeWhenUIsRemoved = IntArray(N)
+
+    private fun getCentroidInComponentOf(root: Int): Int {
+        val queue: java.util.Queue<Pair<Int,Int>> = java.util.ArrayDeque<Pair<Int,Int>>()
+        val order = mutableListOf<Pair<Int,Int>>()
+
+        queue.add(Pair(root, -1))
+        while(!queue.isEmpty()) {
+            order.add(queue.peek())
+            val (u, p) = queue.poll()
+            subtreeSize[u] = 1
+            getMaxSubtreeSizeWhenUIsRemoved[u] = 0
+            for(v in gph[u]) if(!marked[v] && v != p) queue.add(Pair(v, u))
+        }
+
+        order.reverse()
+
+        for((u, p) in order) {
+            if(p >= 0) subtreeSize[p] += subtreeSize[u]
+        }
+
+        val numNodes = subtreeSize[root]
+
+        for((u, p) in order) {
+            getMaxSubtreeSizeWhenUIsRemoved[u] = maxOf(getMaxSubtreeSizeWhenUIsRemoved[u], numNodes - subtreeSize[u])
+            if (p >= 0) {
+                getMaxSubtreeSizeWhenUIsRemoved[p] = maxOf(getMaxSubtreeSizeWhenUIsRemoved[p], subtreeSize[u])
+            }
+            if (getMaxSubtreeSizeWhenUIsRemoved[u] <= numNodes / 2) {
+                return u
+            }
+        }
+
+        return -1
+    }
+
+    private fun getGrundys(): List<Int> {
+        val grundy = IntArray(N)
+
+        fun process(root: Int, initialD: Int) {
+            val order = mutableListOf<Pair<Int,Int>>()
+
+            val queue: java.util.Queue<Triple<Int,Int,Int>> = java.util.ArrayDeque<Triple<Int,Int,Int>>()
+
+            queue.add(Triple(root, -1, initialD))
+            while(!queue.isEmpty()) {
+                val (u, p, d) = queue.poll()
+                order.add(Pair(u, d))
+                for(v in gph[u]) if(!marked[v] && v != p) queue.add(Triple(v, u, d+1))
+            }
+
+            val distances = mutableListOf<Int>()
+            for((u, d) in order) if(hasToken[u]) distances.add(d)
+
+            val maxDistance = order.maxBy(Pair<Int,Int>::second)!!.second
+
+            val ds = XorOfElementPlusConstant(distances, maxDistance)
+            for((u, d) in order) grundy[u] = grundy[u] xor ds.getXorOfElementsPlus(d)
+        }
+
+        val queue: java.util.Queue<Int> = java.util.ArrayDeque<Int>()
+
+        queue.add(0)
+        process(0, 1)
+
+        while(!queue.isEmpty()) {
+            val q = queue.poll()
+
+            process(q, 1)
+
+            val u = getCentroidInComponentOf(q)
+            marked[u] = true
+            process(u, 0)
+
+            for(v in gph[u]) if(!marked[v]) queue.add(v)
+        }
+
+        //println(grundy.toList())
+        return grundy.toList()
+    }
+
+    private fun getAnswer(grundy: List<Int>): Long {
+        val MOD = 1000000007
+        var pow2 = 1
+        var ans = 0L
+        for(value in grundy) {
+            pow2 *= 2
+            pow2 %= MOD
+            if(value == 0) ans += pow2
+        }
+        return ans % MOD
+    }
+
+    fun run() = getAnswer(getGrundys())
+}
+
+class Movcoin2Connector(private val br: java.io.BufferedReader, private val bw: java.io.BufferedWriter) {
+    var sumN = 0
+
+    fun checkConstraints() {
+        require(sumN <= 200000)
+    }
+
+    fun run() {
+        val N = br.readLine()!!.toInt()
+        require(N in 1..200000)
+
+        val grp = IntArray(N) { it }
+        fun getGroup(x: Int): Int{
+            val parents = generateSequence(x, { grp[it] }).takeWhile { grp[it] != it }
+            val r = grp[parents.lastOrNull() ?: x]
+            parents.forEach{ grp[it] = r }
+            return r
+        }
+
+        val gph = List(N) { mutableListOf<Int>() }
+        repeat(N-1) {
+            val (a, b) = br.readLine()!!.split(' ').map{ it.toInt() - 1 }
+            gph[a].add(b)
+            gph[b].add(a)
+
+            val p = getGroup(a)
+            val q = getGroup(b)
+            require(p != q)
+            grp[p] = q
+        }
+
+        val C = br.readLine()!!.split(' ').map(String::toInt)
+        require(C.all{ it in 0..16 })
+
+        val solver = Movcoin2Solver(N, gph, C.map{ it % 2 == 1 })
+        bw.write("${solver.run()}\n")
+    }
+}
+
+fun main (args: Array<String>) {
+    val br = java.io.BufferedReader(java.io.InputStreamReader(System.`in`))
+    val bw = java.io.BufferedWriter(java.io.OutputStreamWriter(System.`out`))
+
+    val T = br.readLine()!!.toInt()
+    require(T in 1..1000)
+
+    val connector = Movcoin2Connector(br, bw)
+    repeat(T) {
+        connector.run()
+    }
+    connector.checkConstraints()
+
+    bw.flush()
+    require(br.readLine() == null)
+}
 ```
 [/details]
 
