@@ -139,7 +139,40 @@ If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of 
 
 then from **C3**, we would have propagated the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
 
-Let's go back to optimising our $\textit{DistTracker}$.  Generally with problems involving xoring things together, it helps to take a bitwise approach, and this turns out to be the case here.  Let's have a look at the binary representation of an increasing series of numbers, and see how each bit flips as we go along.
+**TODO - oops - forgot about the whole "propagate from one branch to another" bit, plus the animation**
+
+Let's go back to optimising our $\textit{DistTracker}$.  Generally with problems involving xoring things together, it helps to take a bitwise approach, and this turns out to be the case here.  Let's have a look at the binary representation of an increasing series of numbers, and see how each bit flips as we go along.  The numbers along the top are the bit number, with bit number $0$ being the least significant bit.
+
+| N | 5 | 4 | 3 | 2 | 1 | 0 |
+| - | - | - | - | - | - | - |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 
+| 1 | 0 | 0 | 0 | 0 | 0 | 1 | 
+| 2 | 0 | 0 | 0 | 0 | 1 | 0 | 
+| 3 | 0 | 0 | 0 | 0 | 1 | 1 | 
+| 4 | 0 | 0 | 0 | 1 | 0 | 0 | 
+| 5 | 0 | 0 | 0 | 1 | 0 | 1 | 
+| 6 | 0 | 0 | 0 | 1 | 1 | 0 | 
+| 7 | 0 | 0 | 0 | 1 | 1 | 1 | 
+| 8 | 0 | 0 | 1 | 0 | 0 | 0 | 
+
+We see that bit number 0 oscillates between 0 and 1 on each increment; bit number 1 is $0$ twice, then $1$ twice, etc; bit number $x$ is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, etc.  If we can easily tell how many of the distances we are tracking have their $x^{th}$ bit set, we can easily tell if the grundy number has its $x^{th}$ bit set - it's set if and only if the number of such distances is odd.
+
+Let's re-visit the original example, and this time track whether a distance representing the contribution of a coin has its $x^\text{th}$ bit set by scrolling it through the grid as shown: if a coin enters the red zone (called the "red-one-zone") on the $x^{th}$ row (zero-relative), then that distance has its $x^{th}$ bit set; if it leaves then that bit is unset.
+
+**TODO - animation showing this**
+
+Note that the grid doesn't have a **TODO** th row as, since it only has **TODO** nodes, the max distance between two nodes is **TODO**, and so a tracked distance can never enter the 1-red-zone for that row so we can ignore that row.  Similar logic is used to reduce $\textit{m_numBits}$ in the $\textit{DistTracker}$ implementation.
+
+The computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}$ is now $\mathcal{O}(1)$ instead of $\mathcal{O}(N)$ as it was before, so this is an improvement; however, we still have to move all coins on each call to $\textit{addToAllDists}$ leaving it as $\mathcal{O}(N)$, so this appears to have gained us little.
+
+However, what if, instead of adjusting all distances by to the right on a call to $\textit{addToAllDists}(1)$ and tracking which distances enter the 1-red-zone for each bit number $x$, why don't we scroll the $x$ 1-red-zones by $1$ in the opposite direction and count how many coins they hit or leave? Since $x$ is $\mathcal{O}(\log N)$, this turns an $\mathcal{O}()$ operation into a $\mathcal{O}(\log N)$ one, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
+
+**TODO - animation showing this**
+
+And that's it!
+
+**TODO - end less lamely, and do the complexity analysis, as well.  Should mention somewhere that reducing m_numBits gives _asymptotic_ gains i.e. without it, _creating_ a $\textit{DistTracker}$ for each Centroid $T_i$ would contribute $O(N^2)$ to the runtime**
+
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
