@@ -131,7 +131,13 @@ With this notation, **C3** can be rephrased as:
 a. $c_i$ is one of $u$ or $v$; or
 b. $u$ and $v$ are in different _branches_ of $T_i$
 
-If we could solve the problem of, for every $i=1,2,\ldots, M$, efficiently propagating the contributions of all $v \in V_\textit{coin}$ in each branch of $T_i$ to the nodes in the other $D-1$ branches of $T_i$, and of propagating the contributions of all $v \in V_\textit{coin}$ in $T_i$ to $c_i$, and of $c_i$ (if $c_i.\textit{hasCoin}$) to all other nodes in $T_i$, then we would propagate the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
+If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of the following:
+
+1. efficiently propagating the contributions of all $v \in V_\textit{coin}$ in each branch of $T_i$ to the nodes in the other $D-1$ branches of $T_i$;
+2. propagating the contributions of all $v \in V_\textit{coin}$ in $T_i$ to $c_i$; and 
+3. (if $c_i.\textit{hasCoin}$) propagating the contribution of $c_i$ to all other nodes in $T_i$
+
+then from **C3**, we would have propagated the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
