@@ -128,8 +128,9 @@ With this notation, **C3** can be rephrased as:
 
 **C3:** Let $u,v$ be any distinct pair of nodes; then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and either:
 
-a. $c_i$ is one of $u$ or $v$; or
-b. $u$ and $v$ are in different _branches_ of $T_i$
+a. $c_i=u$; or
+b. $c_i=v$; or
+c. $u$ and $v$ are in different _branches_ of $T_i$
 
 If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of the following:
 
