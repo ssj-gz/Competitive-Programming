@@ -96,7 +96,7 @@ Let's consider for the moment the special case where $T$ is simply a long chain 
     
 ```
 
-Imagine further that we proceed along the chain of nodes from left to right, at each node $v$ performing the following steps:
+Imagine further that we proceed along the chain of nodes from left to right performing at each node $v$ the following steps:
 
 * _Propagate_ all the contributions of nodes that $\textit{hasCoin}$ we've seen so far to $v$ via $v.grundy=v.grundy \oplus \textit{distTracker}.\textit{grundyNumber}()$
 * If $v\in V_{\textit{coin}}$, _collect_ the contribution of $v$ via $\textit{distTracker}.\textit{insertDist}(0)$
