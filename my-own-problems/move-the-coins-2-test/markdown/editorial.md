@@ -32,7 +32,7 @@ As is often the case, my solution is rather clunkier than other people's (the ap
 
 As mentioned in the Brief Explanation, the pair $(u,v)$ is a valid reparenting if and only if $v$ is not a descendent of $u$ in the (rooted) tree $G$.  The size of the list $L$ of valid reparentings is $\mathcal{O}(N^2)$; far too big to construct, let alone to erase from for all $Q$ queries, so we have to be a bit more cunning!
 
-Again as mentioned, we don't actually remove elements from $L$; instead we track the indices of the elements of $L$ that we've removed and use this information to map each new $c_i$ to its corresponding element in the _original_ list $L$.  The idea behind this is quite simple: since I was already writing a persistent AVL Tree, I decided to use that to implement the remapping, though most people seem to use gcc's `__gnu_pbds::tree`.  The tracking and remapping is handled by the $\textit{IndexRemapper}$ class in my code.
+Again as mentioned, we don't actually remove elements from $L$; instead we track the indices of the elements of $L$ that we've removed and use this information to map each new $c_i$ to its corresponding element in the _original_ list $L$.  The idea behind this is quite simple: since I was already writing a persistent AVL Tree, I decided to use that to implement the remapping, though most people seem to use gcc's internal `__gnu_pbds::tree` tree.  The tracking and remapping is handled by the $\textit{IndexRemapper}$ class in my code.
 
 So the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easy problem.
 
