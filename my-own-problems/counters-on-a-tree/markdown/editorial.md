@@ -114,6 +114,24 @@ Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all n
 
 The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll show how to fix this later.  In the meantime, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v$'s that $\textit{hasCoin}$.
 
+I won't go into much detail on [Centroid Decomposition](https://www.geeksforgeeks.org/centroid-decomposition-of-tree/) here as there are doubtless many resources about it, but here are the salient properties for our purposes:
+
+**C1:** Centroid Decomposition of $T$ creates $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $c_i$ that is the _centre_ of $T_i$  
+**C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N)$  
+**C3:** Let $u,v$ be any distinct pair of nodes, and let $P(u,v)=[u=p_0, p_1, \ldots, p_k=v]$ be the unique path between $u$ and $v$.  Then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and $c_i \in P$  
+
+Let's pick one of the $i$s.  Let $D$ be the degree of $c_i$ in $T_i$, and let $b_1, b_2, \dots, b_D$ be the neighbours of $c_i$ in $T_i$.  We partition the nodes other than $c_i$ of $T_i$ into $D$ _branches_, where the node $u$ is in branch $l$ if the first node in the unique path from $c_i$ to $u$ is $b_l$.  For example:
+
+**TODO - image here - medium size $T_i$ with $D = 4$**
+
+With this notation, **C3** can be rephrased as:
+
+**C3:** Let $u,v$ be any distinct pair of nodes; then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and either:
+
+a. $c_i$ is one of $u$ or $v$; or
+b. $u$ and $v$ are in different _branches_ of $T_i$
+
+If we could solve the problem of, for every $i=1,2,\ldots, M$, efficiently propagating the contributions of all $v \in V_\textit{coin}$ in each branch of $T_i$ to the nodes in the other $D-1$ branches of $T_i$, and of propagating the contributions of all $v \in V_\textit{coin}$ in $T_i$ to $c_i$, and of $c_i$ (if $c_i.\textit{hasCoin}$) to all other nodes in $T_i$, then we would propagate the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
