@@ -40,14 +40,10 @@ Could contain more or less short descriptions of possible other approaches.
 # SOLUTIONS:
 
 [details="Setter's Solution"]
-indent whole code by 4 spaces
+**TODO - add publically-accessible link to the following: http://campus.codechef.com/SEP20TST/viewsolution/36836393/ . I can't inline the code here as it would exceed the forum post size limit!**
 [/details]
 
 [details="Tester's Solution"]
-indent whole code by 4 spaces
-[/details]
-
-[details="Editorialist's Solution"]
 indent whole code by 4 spaces
 [/details]
 
