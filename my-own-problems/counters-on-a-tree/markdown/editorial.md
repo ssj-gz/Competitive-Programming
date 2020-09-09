@@ -66,6 +66,32 @@ $$
 
 Recalling the definitions of _contribution_ and _propagation_ from the Quick Explanation, we see that to solve the problem, we merely need to ensure that for each $v$ that $\textit{hasCoin}$ and every $R$, $v$'s contribution to is propagated to $R$.
 
+Let's consider for the moment the special case where $T$ is simply a long chain of nodes.  Imagine we had a $\textit{DistTracker}$ data structure with the below API (a simple implementation is also provided):
+
+```
+    class DistTracker
+    public:
+        insertDist(distance)
+        {
+            allDistances.append(distance)
+        }
+        addToAllDists(toAdd) 
+        { 
+            for each distance in allDistances:
+                distance += toAdd
+        }
+        grundyNumber() 
+        { 
+            result = 0
+            for each distance in allDistances:
+                result = result ^ distance
+            return result
+        }
+    private:
+        allDistances = []
+    
+```
+
 
 # ALTERNATE EXPLANATION:
 Could contain more or less short descriptions of possible other approaches.
