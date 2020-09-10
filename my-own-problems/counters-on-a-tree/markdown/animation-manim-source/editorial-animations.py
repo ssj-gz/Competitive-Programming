@@ -2,6 +2,7 @@ from manimlib.imports import *
 
 from ssjgz_scene import *
 from downarrow import *
+from digit_scroll_animation import *
 from graph import *
 
 class DistTracker():
@@ -134,7 +135,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         # Ok - move through the node chain!
         distTracker = DistTracker()
         tracked_distance_mobjects = []
-        for node in nodes:
+        for node_index,node in enumerate(nodes):
             # Propagate.
             propagate_text = TexMobject('propagate', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
             propagate_text.scale(disttracker_text_scale)
@@ -193,6 +194,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
                 shift_elements_to_right_by = 0
                 new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
                 new_tracked_distance_mobject.scale(disttracker_text_scale)
+                new_tracked_distance_mobject.digit = 0
                 shift_pairs = []
                 new_element_to_add = None
                 if not tracked_distance_mobjects:
@@ -237,7 +239,44 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
 
                 self.play(*animations)
 
+                self.remove(coin_copy)
+                self.add(new_tracked_distance_mobject)
                 tracked_distance_mobjects.append(new_tracked_distance_mobject)
+
+                distTracker.insertDist(0)
+
+            # Move to next node.    
+            if node_index != num_nodes - 1:
+
+                adjust_dists_text = TexMobject('adjustAllDistances(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                adjust_dists_text.scale(disttracker_text_scale)
+                adjust_dists_text.align_on_border(RIGHT)
+                adjust_dists_text.set_y(disttracker_title_display.get_y())
+                self.play(FadeInFrom(adjust_dists_text, DOWN))
+
+                current_grundy_value = distTracker.grundyNumber()
+                animations = []
+                for digit_mobject in tracked_distance_mobjects:
+                    new_digit_value = digit_mobject.digit + 1
+                    animations.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digit, new_digit_value, digitMObjectScale = disttracker_text_scale))
+
+                distTracker.adjustAllDistances(1)
+                new_grundy_value = distTracker.grundyNumber()
+                print("current_grundy_value:", current_grundy_value, " new_grundy_value:", new_grundy_value)
+
+                animations.append(create_scroll_digit_to_animation(grundy_value_mobject, current_grundy_value, new_grundy_value, digitMObjectScale = disttracker_text_scale))
+
+                animations.append(ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0]))
+                animations.append(FadeOutAndShift(adjust_dists_text, UP))
+
+                for digit_mobject in tracked_distance_mobjects:
+                    digit_mobject.digit = digit_mobject.digit + 1
+                
+                self.play(*animations)
+
+            if node_index == 3:
+                # TODO - remove this
+                return
 
 
                     
