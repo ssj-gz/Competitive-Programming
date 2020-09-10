@@ -187,39 +187,54 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
                           FadeOutAndShift(cross_out, UP))
             else:
                 shift_elements_to_right_by = 0
-                new_tracked_distance_mobject = TexMobject('0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
+                new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
                 new_tracked_distance_mobject.scale(disttracker_text_scale)
-                shift_elements_to_right_by = new_tracked_distance_mobject.get_width()
-                grundy_value_mobject_target = grundy_value_mobject.copy()
+                shift_pairs = []
                 new_element_to_add = None
                 if not tracked_distance_mobjects:
                     new_tracked_distance_mobject.next_to(grundy_number_label, RIGHT)
-                    new_tracked_distance_mobject.scale(disttracker_text_scale)
 
                     assert(not grundy_number_second_equals)
                     grundy_number_second_equals = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                     grundy_number_second_equals.scale(disttracker_text_scale)
                     grundy_number_second_equals.next_to(new_tracked_distance_mobject, RIGHT)
 
+                    grundy_value_mobject_target = grundy_value_mobject.copy()
                     grundy_value_mobject_target.next_to(grundy_number_second_equals, RIGHT)
+                    shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
 
                     new_element_to_add = grundy_number_second_equals
                 else:
                     xor_text = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                     xor_text.scale(disttracker_text_scale)
-                    shift_elements_to_right_by = shift_elements_to_right_by + xor_text.get_width()
+                    xor_text.next_to(tracked_distance_mobjects[-1], RIGHT)
+                    new_tracked_distance_mobject.next_to(xor_text, RIGHT)
+
+                    grundy_number_second_equals_target = grundy_number_second_equals.copy()
+                    grundy_number_second_equals_target.next_to(new_tracked_distance_mobject)
+
+                    grundy_value_mobject_target = grundy_value_mobject.copy()
+                    grundy_value_mobject_target.next_to(grundy_number_second_equals_target, RIGHT)
+
+                    shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
+                    shift_pairs.append([grundy_number_second_equals, grundy_number_second_equals_target])
 
                     new_element_to_add = xor_text
 
+
                 coin_copy = coin_mobject_for_node.copy()
 
-                self.play(Transform(coin_copy, new_tracked_distance_mobject),
-                          Transform(grundy_value_mobject, grundy_value_mobject_target),
-                          FadeIn(new_element_to_add))
+                animations = [Transform(coin_copy, new_tracked_distance_mobject),
+                              Transform(grundy_value_mobject, grundy_value_mobject_target),
+                              FadeIn(new_element_to_add),
+                              FadeOutAndShift(collect_text, UP)]
+                for shift_pair in shift_pairs:
+                    animations.append(Transform(shift_pair[0], shift_pair[1]))
+
+                self.play(*animations)
 
                 tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
-                return
 
                     
 
