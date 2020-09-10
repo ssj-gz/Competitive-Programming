@@ -57,6 +57,31 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
 
         scene.play(g.create_animation(run_time = 2))
 
+        coin_radius = node_radius / 2
+
+        def create_coin_for_node(node, coin_colour):
+            coin_mobject = Circle(color=BLACK, fill_opacity = 1, fill_color = coin_colour, radius = coin_radius)
+            node.config['coin_mobject'] = coin_mobject
+            coin_mobject.move_to([node.config['center_x'], node.config['center_y'], 0])
+            return coin_mobject
+
+        coin_mobjects = []
+        coin_mobjects.append(create_coin_for_node(nodes[0], RED))
+        coin_mobjects.append(create_coin_for_node(nodes[1], GREEN))
+        coin_mobjects.append(create_coin_for_node(nodes[4], BLUE))
+
+        if right_to_left:
+            # Simulate the left-to-right, so we have the correct starting
+            # grundy numbers.
+            distTracker = DistTracker()
+            for node_index,node in enumerate(nodes):
+                node.config['grundy_number'] = node.config['grundy_number'] ^ distTracker.grundyNumber()
+                if node.config['coin_mobject']:
+                    distTracker.insertDist(0)
+                distTracker.adjustAllDistances(1)
+
+            nodes.reverse()
+
         def arrow_tip_position_for_node(node):
             arrow_tip = [node.config['center_x'], node.config['center_y'], 0] + (node_diameter * 2 / 3) * UP
             return arrow_tip
@@ -70,32 +95,9 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
                 )
         scene.play(GrowFromCenter(arrow))
 
-        coin_radius = node_radius / 2
-
-        def create_coin_for_node(node, coin_colour):
-            coin_mobject = Circle(color=BLACK, fill_opacity = 1, fill_color = coin_colour, radius = coin_radius)
-            node.config['coin_mobject'] = coin_mobject
-            coin_mobject.move_to([node.config['center_x'], node.config['center_y'], 0])
-            return coin_mobject
-
-
-        coin_mobjects = []
-        coin_mobjects.append(create_coin_for_node(nodes[0], RED))
-        coin_mobjects.append(create_coin_for_node(nodes[1], GREEN))
-        coin_mobjects.append(create_coin_for_node(nodes[4], BLUE))
         scene.play(GrowFromCenter(coin_mobjects[0]),
                   GrowFromCenter(coin_mobjects[1]),
                   GrowFromCenter(coin_mobjects[2]))
-
-        if right_to_left:
-            # Simulate the left-to-right, so we have the correct starting
-            # grundy numbers.
-            distTracker = DistTracker()
-            for node_index,node in enumerate(nodes):
-                node.config['grundy_number'] = node.config['grundy_number'] ^ distTracker.grundyNumber()
-                if node.config['coin_mobject']:
-                    distTracker.insertDist(0)
-                distTracker.adjustAllDistances(1)
 
         grundy_node_tex_colour = "#2600ff"
         
@@ -315,5 +317,11 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
     def construct(self):
         super().construct()
         do_collect_and_propagate_along_node_chain_naive(self, right_to_left = False)
+        
+class MoveCoins2Editorial_2_collect_and_propagate_along_node_chain_right_to_left_naive(SSJGZScene):
+
+    def construct(self):
+        super().construct()
+        do_collect_and_propagate_along_node_chain_naive(self, right_to_left = True)
         
 
