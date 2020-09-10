@@ -140,6 +140,7 @@ from which it follows that doing the following for every $i=1,2,\ldots, M$:
 
 will propagate the contributions of all $v \in V_{coin}$ to all $u \in T$, as required.
 
+Both **1.** and **2.** can be done separately using a naive algorithm (although my implementation rolls them into **3.**).
 **TODO - oops - forgot about the whole "propagate from one branch to another" bit, plus the animation**
 
 Let's go back to optimising our $\textit{DistTracker}$.  Generally with problems involving xoring things together, it helps to take a bitwise approach, and this turns out to be the case here.  Let's have a look at the binary representation of an increasing series of numbers, and see how each bit flips as we go along.  The numbers along the top are the bit number, with bit number $0$ being the least significant bit.
