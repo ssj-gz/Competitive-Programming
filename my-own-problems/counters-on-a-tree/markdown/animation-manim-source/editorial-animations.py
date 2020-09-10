@@ -118,6 +118,8 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
         grundy_number_label.set_x(0)
 
+        grundy_number_second_equals = None
+
         disttracker_grundy_color = BLUE
         grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
         grundy_value_mobject.scale(disttracker_text_scale)
@@ -127,6 +129,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
 
         # Ok - move through the node chain!
         distTracker = DistTracker()
+        tracked_distance_mobjects = []
         for node in nodes:
             # Propagate.
             propagate_text = TexMobject('propagate', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -177,13 +180,50 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
             self.play(FadeInFrom(collect_text, DOWN))
 
             coin_mobject_for_node = node.config['coin_mobject']
-            if coin_mobject_for_node:
+            if not coin_mobject_for_node:
                 cross_out = Cross(collect_text)
                 self.play(Write(cross_out))
                 self.play(FadeOutAndShift(collect_text, UP),
                           FadeOutAndShift(cross_out, UP))
             else:
-                pass
+                shift_elements_to_right_by = 0
+                new_tracked_distance_mobject = TexMobject('0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
+                new_tracked_distance_mobject.scale(disttracker_text_scale)
+                shift_elements_to_right_by = new_tracked_distance_mobject.get_width()
+                grundy_value_mobject_target = grundy_value_mobject.copy()
+                new_element_to_add = None
+                if not tracked_distance_mobjects:
+                    new_tracked_distance_mobject.next_to(grundy_number_label, RIGHT)
+                    new_tracked_distance_mobject.scale(disttracker_text_scale)
+
+                    assert(not grundy_number_second_equals)
+                    grundy_number_second_equals = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    grundy_number_second_equals.scale(disttracker_text_scale)
+                    grundy_number_second_equals.next_to(new_tracked_distance_mobject, RIGHT)
+
+                    grundy_value_mobject_target.next_to(grundy_number_second_equals, RIGHT)
+
+                    new_element_to_add = grundy_number_second_equals
+                else:
+                    xor_text = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                    xor_text.scale(disttracker_text_scale)
+                    shift_elements_to_right_by = shift_elements_to_right_by + xor_text.get_width()
+
+                    new_element_to_add = xor_text
+
+                coin_copy = coin_mobject_for_node.copy()
+
+                self.play(Transform(coin_copy, new_tracked_distance_mobject),
+                          Transform(grundy_value_mobject, grundy_value_mobject_target),
+                          FadeIn(new_element_to_add))
+
+                tracked_distance_mobjects.append(new_tracked_distance_mobject)
+
+                return
+
+                    
+
+                
 
 
 
