@@ -162,13 +162,29 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
             node_grundy_target = node_grundy.copy()
             node_grundy_target.next_to(g.mobject_for_node[node], DOWN)
 
-
             self.play(FadeOutAndShift(propagate_text, UP),
                       FadeOut(node_grundy_to_fade_out),
                       FadeOut(grundy_value_to_move),
                       FadeOut(xor_symbol),
                       FadeOut(equal_symbol),
                       Transform(node_grundy, node_grundy_target))
+
+            # Collect.
+            collect_text = TexMobject('collect', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            collect_text.scale(disttracker_text_scale)
+            collect_text.align_on_border(RIGHT)
+            collect_text.set_y(disttracker_title_display.get_y())
+            self.play(FadeInFrom(collect_text, DOWN))
+
+            coin_mobject_for_node = node.config['coin_mobject']
+            if coin_mobject_for_node:
+                cross_out = Cross(collect_text)
+                self.play(Write(cross_out))
+                self.play(FadeOutAndShift(collect_text, UP),
+                          FadeOutAndShift(cross_out, UP))
+            else:
+                pass
+
 
 
 
