@@ -125,7 +125,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
         # DistTracker display.
         disttracker_text_scale = 1.5
         disttracker_top_y = 0
-        disttracker_title_display = TexMobject(r'DistTracker^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        disttracker_title_display = TexMobject(r'\textit{DistTracker}^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
         disttracker_title_display.scale(disttracker_text_scale)
         disttracker_title_display.align_on_border(LEFT)
         disttracker_title_display.set_y(disttracker_top_y + disttracker_title_display.get_height() / 2)
@@ -150,7 +150,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
         tracked_distance_mobjects = []
         for node_index,node in enumerate(nodes):
             # Propagate.
-            propagate_text = TexMobject('propagate', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            propagate_text = TexMobject(r'\textit{Propagate}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
             propagate_text.scale(disttracker_text_scale)
             propagate_text.align_on_border(RIGHT)
             propagate_text.set_y(disttracker_title_display.get_y())
@@ -191,7 +191,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
                       Transform(node_grundy, node_grundy_target))
 
             # Collect.
-            collect_text = TexMobject('collect', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            collect_text = TexMobject(r'\textit{Collect}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
             collect_text.scale(disttracker_text_scale)
             collect_text.align_on_border(RIGHT)
             collect_text.set_y(disttracker_title_display.get_y())
@@ -267,7 +267,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
             # Move to next node.    
             if node_index != num_nodes - 1:
 
-                adjust_dists_text = TexMobject('adjustAllDistances(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                adjust_dists_text = TexMobject(r'\textit{adjustAllDistances}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 adjust_dists_text.scale(disttracker_text_scale)
                 adjust_dists_text.align_on_border(RIGHT)
                 adjust_dists_text.set_y(disttracker_title_display.get_y())
