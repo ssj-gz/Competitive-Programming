@@ -120,7 +120,7 @@ We won't go into much detail on [Centroid Decomposition](https://www.geeksforgee
 **C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N\log N)$  
 **C3:** Let $u,v$ be any distinct pair of nodes, and let $P(u,v)=[u=p_0, p_1, \ldots, p_k=v]$ be the unique path between $u$ and $v$.  Then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and $c_i \in P(u,v)$  
 
-Let's pick one of the $i$s.  Let $D_i$ be the degree of $c_i$ in $T_i$, and let $b_1, b_2, \dots, b_D$ be the neighbours of $c_i$ in $T_i$.  We partition the nodes other than $c_i$ of $T_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the first node in the unique path from $c_i$ to $u$ is $b_l$.  For example:
+Let $D_i$ be the degree of $c_i$ in $T_i$, and let $b_1, b_2, \dots, b_D$ be the neighbours of $c_i$ in $T_i$.  We partition the $u\in T_i$, $u \ne c_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the first node in the unique path from $c_i$ to $u$ is $b_l$.  For example:
 
 **TODO - image here - medium size $T_i$ with $D = 4$**
 
