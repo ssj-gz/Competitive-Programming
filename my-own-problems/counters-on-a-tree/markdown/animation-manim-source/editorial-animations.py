@@ -87,6 +87,16 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
                   GrowFromCenter(coin_mobjects[1]),
                   GrowFromCenter(coin_mobjects[2]))
 
+        if right_to_left:
+            # Simulate the left-to-right, so we have the correct starting
+            # grundy numbers.
+            distTracker = DistTracker()
+            for node_index,node in enumerate(nodes):
+                node.config['grundy_number'] = node.config['grundy_number'] ^ distTracker.grundyNumber()
+                if node.config['coin_mobject']:
+                    distTracker.insertDist(0)
+                distTracker.adjustAllDistances(1)
+
         grundy_node_tex_colour = "#2600ff"
         
         grundy_tex_mobjects = []
@@ -101,13 +111,14 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
 
         scene.play(*grundy_tex_mobjects_appear_anims)
 
-        grundy_tex_mobjects_change_to_0_anims = []
-        for grundy_tex in grundy_tex_mobjects:
-            target_0_grundy_tex = TexMobject('0', color = grundy_node_tex_colour)
-            target_0_grundy_tex.move_to(grundy_tex)
-            grundy_tex_mobjects_change_to_0_anims.append(Transform(grundy_tex, target_0_grundy_tex))
+        grundy_tex_mobjects_change_to_value_anims = []
+        for node in nodes:
+            grundy_text = node.config['grundy_text']
+            target_value_grundy_tex = TexMobject(node.config['grundy_number'], color = grundy_node_tex_colour)
+            target_value_grundy_tex.move_to(grundy_text)
+            grundy_tex_mobjects_change_to_value_anims.append(Transform(grundy_text, target_value_grundy_tex))
 
-        scene.play(*grundy_tex_mobjects_change_to_0_anims)
+        scene.play(*grundy_tex_mobjects_change_to_value_anims)
 
         # DistTracker display.
         disttracker_text_scale = 1.5
