@@ -19,6 +19,7 @@ class DistTracker():
         result = 0
         for dist in self.distances:
             result = result ^ dist
+        return result
 
 class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive(SSJGZScene):
     def construct(self):
@@ -46,6 +47,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         for i in range(0, num_nodes):
             newNode = g.create_node(node_left, frame_height * proportion_of_frame_height_to_use / 2 - (arrow_total_length + arrow_dist_above_node), { 'radius' : node_radius})
             newNode.config['coin_mobject'] = None
+            newNode.config['grundy_number'] = 0
             if previous_node:
                 g.create_edge(previous_node, newNode, {})
             node_left = node_left + node_diameter + gap_between_nodes
@@ -124,6 +126,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         self.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
 
         # Ok - move through the node chain!
+        distTracker = DistTracker()
         for node in nodes:
             # Propagate.
             propagate_text = TexMobject('propagate', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -131,7 +134,42 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
             propagate_text.align_on_border(RIGHT)
             propagate_text.set_y(disttracker_title_display.get_y())
             self.play(FadeInFrom(propagate_text, DOWN))
-            self.play(FadeOutAndShift(propagate_text, UP))
+
+            grundy_value_to_move = grundy_value_mobject.copy()
+            node_grundy = node.config['grundy_text']
+            node_grundy_target = node_grundy.copy()
+            node_grundy_target.shift(DOWN)
+            xor_symbol = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            xor_symbol.next_to(node_grundy_target, RIGHT)
+            grundy_value_destination = TexMobject(str(distTracker.grundyNumber()), colour = BLACK, fill_opacity = 1, fill_color = disttracker_grundy_color)
+            grundy_value_destination.next_to(xor_symbol, RIGHT)
+            equal_symbol = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            equal_symbol.next_to(grundy_value_destination)
+
+            self.play(
+                      Transform(node_grundy, node_grundy_target),
+                      Transform(grundy_value_to_move, grundy_value_destination),
+                      FadeIn(xor_symbol),
+                      FadeIn(equal_symbol))
+
+            new_grundy_tex = TexMobject(str(node.config['grundy_number'] ^ distTracker.grundyNumber()), colour = BLACK, fill_opacity = 1, fill_color = grundy_node_tex_colour)
+            new_grundy_tex.next_to(equal_symbol, RIGHT)
+            self.play(FadeIn(new_grundy_tex))
+
+            node_grundy_to_fade_out = node_grundy.copy()
+            node_grundy.become(new_grundy_tex)
+            self.remove(new_grundy_tex)
+            node_grundy_target = node_grundy.copy()
+            node_grundy_target.next_to(g.mobject_for_node[node], DOWN)
+
+
+            self.play(FadeOutAndShift(propagate_text, UP),
+                      FadeOut(node_grundy_to_fade_out),
+                      FadeOut(grundy_value_to_move),
+                      FadeOut(xor_symbol),
+                      FadeOut(equal_symbol),
+                      Transform(node_grundy, node_grundy_target))
+
 
 
 
