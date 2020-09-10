@@ -195,9 +195,15 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
             collect_text.scale(disttracker_text_scale)
             collect_text.align_on_border(RIGHT)
             collect_text.set_y(disttracker_title_display.get_y())
-            scene.play(FadeInFrom(collect_text, DOWN))
 
             coin_mobject_for_node = node.config['coin_mobject']
+
+            if coin_mobject_for_node:
+                scene.play(FadeInFrom(collect_text, DOWN),
+                           WiggleOutThenIn(coin_mobject_for_node))
+            else:
+                scene.play(FadeInFrom(collect_text, DOWN))
+
             if not coin_mobject_for_node:
                 cross_out = Cross(collect_text)
                 scene.play(Write(cross_out))
