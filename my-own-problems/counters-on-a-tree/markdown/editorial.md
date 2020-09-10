@@ -17,7 +17,7 @@ Sprague-Grundy, Centroid Decomposition, Bit Manipulation, Ad-hoc
 Bob and Alice are playing a game on a board which is a tree, $T$.  Each node of $T$ has some number of coins placed on it.  For a node $R$, define $\textit{game}(T, R)$ to be the game played on $T$ in which players take turns to move a coin from some node other than $R$ strictly towards $R$.  The first player unable to make a move loses the game.  For each $R$, find the winner of $game(T,R)$, assuming both players play perfectly.
 
 # QUICK EXPLANATION:
-The game $\textit{game}(T, R)$ is equivalent to the game of Nim, where there is a one-to-one correspondence between coins on the board and piles of stones: for a coin $c$, if $v_c$ is the node containing $c$, then $c$ corresponds to a Nim pile of size $\textit{dist}(R,v_c)$.  Thus, the Sprague-Grundy Theorem can be used. Some simple observations show that the exact value of $c_v$ is not important; only its parity: we set $V_{\textit{coins}}$ to be the set of nodes $v$ such that $c_v$ is odd.
+The game $\textit{game}(T, R)$ is equivalent to the game of Nim, where there is a one-to-one correspondence between coins on the board and piles of stones: for a coin $c$, if $v_c$ is the node containing $c$, then $c$ corresponds to a Nim pile of size $\textit{dist}(R,v_c)$.  Thus, the Sprague-Grundy Theorem can be used. Some simple observations show that the exact value of $c_v$ is not important; only its parity: we set $V_{\textit{coin}}$ to be the set of nodes $v$ such that $c_v$ is odd.
 
 Define
 
@@ -38,9 +38,9 @@ class DistTracker
     grundyNumber() { ... } // Return the xor sum of all the contained distances 
 ```
 
-A naive implementation would have $\textit{addToAllDists}$ and $\textit{grundyNumber}$ taking $\mathcal{O}(N)$ each, but by observing the way bits in the binary representation of a number change when we increment it, and using some properties of xor, we can get all of $\textit{DistTracker}$'s operations down to $\mathcal{O}(\log N)$ or better.
+A naive implementation would have $\textit{addToAllDists}$ and $\textit{grundyNumber}$ taking $\mathcal{O}(N)$ each, but by observing how bits in the binary representation of a number change upon incrementing it and using some properties of xor, we can implement all of $\textit{DistTracker}$'s operations in $\mathcal{O}(\log N)$ or better.
 
-We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ all contributions of $v$ with $v\in V_{\textit{coin}}$ and _propagate_ the contributions of these $v$s to all other nodes $R$, thus calculating all $R.\textit{grundy}$, as required.
+We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ all contributions of $v$ with $v\in V_{\textit{coin}}$ and _propagate_ them to all nodes $R$, thus calculating all required $R.\textit{grundy}$.
 
 # EXPLANATION:
 
