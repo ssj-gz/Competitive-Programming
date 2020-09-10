@@ -86,17 +86,25 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         self.play(*grundy_tex_mobjects_change_to_0_anims)
 
         # DistTracker display.
+        disttracker_text_scale = 1.5
         disttracker_top_y = 0
         disttracker_title_display = TexMobject(r'DistTracker^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        disttracker_title_display.scale(disttracker_text_scale)
         disttracker_title_display.align_on_border(LEFT)
         disttracker_title_display.set_y(disttracker_top_y + disttracker_title_display.get_height() / 2)
 
         # Grundy number display.
         grundy_number_label = TexMobject(r'grundy number =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-        grundy_number_label.next_to(disttracker_title_display, DOWN)
+        grundy_number_label.scale(disttracker_text_scale)
+        grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
         grundy_number_label.set_x(0)
 
-        self.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label)))
+        disttracker_grundy_color = BLUE
+        grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
+        grundy_value_mobject.scale(disttracker_text_scale)
+        grundy_value_mobject.next_to(grundy_number_label, RIGHT)
+
+        self.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
 
 
 
