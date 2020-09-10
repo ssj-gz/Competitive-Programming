@@ -132,13 +132,13 @@ a. $c_i=u$; or
 b. $c_i=v$; or
 c. $u$ and $v$ are in different _branches_ of $T_i$
 
-If we could solve the problem of, for every $i=1,2,\ldots, M$ performing all of the following:
+from which it follows that doing the following for every $i=1,2,\ldots, M$:
 
-1. for each $j=1,2,\dots,D_i$, efficiently propagating the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$;
-2. propagating the contributions of all $v \in V_\textit{coin}\cap T_i$ to $c_i$; and 
-3. (if $c_i.\textit{hasCoin}$) propagating the contribution of $c_i$ to all other nodes in $T_i$
+1. for each $j=1,2,\dots,D_i$, propagate the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$; and
+2. propagate the contributions of all $v \in V_\textit{coin}\cap T_i$ to $c_i$; and 
+3. (if $c_i.\textit{hasCoin}$) propage the contribution of $c_i$ to all other nodes in $T_i$
 
-then from **C3**, we would have propagated the contributions of all $v \in V_{coin}$ to all $u \in T$, and will have solved the problem.
+will propagate the contributions of all $v \in V_{coin}$ to all $u \in T$, as required.
 
 **TODO - oops - forgot about the whole "propagate from one branch to another" bit, plus the animation**
 
