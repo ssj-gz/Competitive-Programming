@@ -8,6 +8,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
     def construct(self):
         super().construct()
 
+        # Graph, coins, and the Grundy numbers beneath the coins.
         num_nodes = 8
         frame_width = self.camera.get_frame_width()
         frame_height = self.camera.get_frame_height()
@@ -67,7 +68,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         grundy_tex_mobjects = []
         for node in nodes:
             node_mobject = g.mobject_for_node[node]
-            node_grundy_tex = TexMobject('grundy', color = grundy_node_tex_colour)
+            node_grundy_tex = TexMobject('grundy', color = grundy_node_tex_colour, fill_opacity = 1, fill_color = grundy_node_tex_colour)
             node_grundy_tex.next_to(node_mobject, DOWN)
             grundy_tex_mobjects.append(node_grundy_tex)
             node.config['grundy_text'] = node_grundy_tex
@@ -83,3 +84,19 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
             grundy_tex_mobjects_change_to_0_anims.append(Transform(grundy_tex, target_0_grundy_tex))
 
         self.play(*grundy_tex_mobjects_change_to_0_anims)
+
+        # DistTracker display.
+        disttracker_top_y = 0
+        disttracker_title_display = TexMobject(r'DistTracker^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        disttracker_title_display.align_on_border(LEFT)
+        disttracker_title_display.set_y(disttracker_top_y + disttracker_title_display.get_height() / 2)
+
+        # Grundy number display.
+        grundy_number_label = TexMobject(r'grundy number =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        grundy_number_label.next_to(disttracker_title_display, DOWN)
+        grundy_number_label.set_x(0)
+
+        self.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label)))
+
+
+
