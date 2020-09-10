@@ -22,12 +22,12 @@ The game $\textit{game}(T, R)$ is equivalent to the game of Nim, where there is 
 Define
 
 $$
-R.\textit{grundy}=\bigoplus_{v|v.\textit{hasCoin}}{\textit{dist}(R,v)}
+R.\textit{grundy}=\bigoplus_{v\in V_{\textit{coin}}}{\textit{dist}(R,v)}
 $$
 
 Then by the Sprague-Grundy Theorem, the second player (Bob) wins $\textit{game}(T, R)$ if and only if $R.\textit{grundy}=0$, so we need only calculate this value for all $R$.
 
-For nodes $u$ and $v$ where $v.\textit{hasCoin}$, define the _contribution of $v$ to $u$ as $\textit{dist}(u,v)$_, and the act of updating $u.\textit{grundy}=u.\textit{grundy}\oplus \textit{dist}(u,v)$ as _propagating $v$'s contribution to $u$_.
+For nodes $u$ and $v$ where $v\in V_{\textit{coin}}$, define the _contribution of $v$ to $u$ as $\textit{dist}(u,v)$_, and the act of updating $u.\textit{grundy}=u.\textit{grundy}\oplus \textit{dist}(u,v)$ as _propagating $v$'s contribution to $u$_.
 
 We form a $\textit{DistTracker}$ data structure with the following API:
 
@@ -40,7 +40,7 @@ class DistTracker
 
 A naive implementation would have $\textit{addToAllDists}$ and $\textit{grundyNumber}$ taking $\mathcal{O}(N)$ each, but by observing the way bits in the binary representation of a number change when we increment it, and using some properties of xor, we can get all of $\textit{DistTracker}$'s operations down to $\mathcal{O}(\log N)$ or better.
 
-We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ all contributions of $v$ with $v.\textit{hasCoin}$ and _propagate_ the contributions of these $v$s to all other nodes $R$, thus calculating all $R.\textit{grundy}$, as required.
+We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ all contributions of $v$ with $v\in V_{\textit{coin}}$ and _propagate_ the contributions of these $v$s to all other nodes $R$, thus calculating all $R.\textit{grundy}$, as required.
 
 # EXPLANATION:
 
