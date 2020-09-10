@@ -45,3 +45,41 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
                 )
         self.play(GrowFromCenter(arrow))
 
+        coin_radius = node_radius / 2
+
+        def create_coin_for_node(node, coin_colour):
+            coin_mobject = Circle(color=BLACK, fill_opacity = 1, fill_color = coin_colour, radius = coin_radius)
+            node.config['coin_mobject'] = coin_mobject
+            coin_mobject.move_to([node.config['center_x'], node.config['center_y'], 0])
+            return coin_mobject
+
+
+        coin_mobjects = []
+        coin_mobjects.append(create_coin_for_node(nodes[0], RED))
+        coin_mobjects.append(create_coin_for_node(nodes[1], GREEN))
+        coin_mobjects.append(create_coin_for_node(nodes[4], BLUE))
+        self.play(GrowFromCenter(coin_mobjects[0]),
+                  GrowFromCenter(coin_mobjects[1]),
+                  GrowFromCenter(coin_mobjects[2]))
+
+        grundy_node_tex_colour = "#2600ff"
+        
+        grundy_tex_mobjects = []
+        for node in nodes:
+            node_mobject = g.mobject_for_node[node]
+            node_grundy_tex = TexMobject('grundy', color = grundy_node_tex_colour)
+            node_grundy_tex.next_to(node_mobject, DOWN)
+            grundy_tex_mobjects.append(node_grundy_tex)
+            node.config['grundy_text'] = node_grundy_tex
+
+        grundy_tex_mobjects_appear_anims = list(map(lambda n: GrowFromCenter(n), grundy_tex_mobjects))
+
+        self.play(*grundy_tex_mobjects_appear_anims)
+
+        grundy_tex_mobjects_change_to_0_anims = []
+        for grundy_tex in grundy_tex_mobjects:
+            target_0_grundy_tex = TexMobject('0', color = grundy_node_tex_colour)
+            target_0_grundy_tex.move_to(grundy_tex)
+            grundy_tex_mobjects_change_to_0_anims.append(Transform(grundy_tex, target_0_grundy_tex))
+
+        self.play(*grundy_tex_mobjects_change_to_0_anims)
