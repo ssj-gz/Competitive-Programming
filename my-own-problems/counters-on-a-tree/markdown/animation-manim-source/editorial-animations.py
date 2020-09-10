@@ -22,6 +22,9 @@ class DistTracker():
             result = result ^ dist
         return result
 
+    def clear(self):
+        self.distances = []
+
 def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False):
         # Graph, coins, and the Grundy numbers beneath the coins.
         num_nodes = 8
