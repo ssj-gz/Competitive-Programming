@@ -56,8 +56,12 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
 
         self.play(g.create_animation(run_time = 2))
 
+        def arrow_tip_position_for_node(node):
+            arrow_tip = [node.config['center_x'], node.config['center_y'], 0] + (node_diameter * 2 / 3) * UP
+            return arrow_tip
+
         arrow = create_down_arrow(
-                arrow_tip = [nodes[0].config['center_x'], nodes[0].config['center_y'], 0] + (node_diameter * 2 / 3) * UP,
+                arrow_tip = arrow_tip_position_for_node(nodes[0]),
                 arrow_total_length = arrow_total_length,
                 arrow_stem_thickness = arrow_total_length / 4,
                 arrow_tip_base_width = node_diameter * 2 / 3,
