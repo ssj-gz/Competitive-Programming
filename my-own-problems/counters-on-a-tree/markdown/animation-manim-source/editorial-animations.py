@@ -45,6 +45,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         nodes = []
         for i in range(0, num_nodes):
             newNode = g.create_node(node_left, frame_height * proportion_of_frame_height_to_use / 2 - (arrow_total_length + arrow_dist_above_node), { 'radius' : node_radius})
+            newNode.config['coin_mobject'] = None
             if previous_node:
                 g.create_edge(previous_node, newNode, {})
             node_left = node_left + node_diameter + gap_between_nodes
@@ -121,6 +122,17 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         grundy_value_mobject.next_to(grundy_number_label, RIGHT)
 
         self.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
+
+        # Ok - move through the node chain!
+        for node in nodes:
+            # Propagate.
+            propagate_text = TexMobject('propagate', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            propagate_text.scale(disttracker_text_scale)
+            propagate_text.align_on_border(RIGHT)
+            propagate_text.set_y(disttracker_title_display.get_y())
+            self.play(FadeInFrom(propagate_text, DOWN))
+            self.play(FadeOutAndShift(propagate_text, UP))
+
 
 
 
