@@ -4,6 +4,22 @@ from ssjgz_scene import *
 from downarrow import *
 from graph import *
 
+class DistTracker():
+    def __init__(self):
+        self.distances = []
+
+    def insertDist(self, newDist):
+        self.distances.append(newDist)
+
+    def adjustAllDistances(self, toAdd):
+        for i,dist in enumerate(self.distances):
+            self.distances[i] = self.distances[i] + toAdd
+
+    def grundyNumber(self):
+        result = 0
+        for dist in self.distances:
+            result = result ^ dist
+
 class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive(SSJGZScene):
     def construct(self):
         super().construct()
