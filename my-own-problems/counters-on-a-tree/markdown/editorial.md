@@ -112,9 +112,9 @@ Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this
 
 Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ to its left i.e. to all nodes, and so have computed all $R.\textit{grundy}$, as required.  It turns out that Bob wins two of the games and Alice wins the rest.
 
-The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll show how to fix this later.  In the meantime, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v\in V_{coin}$'s on an arbitrary tree $T$.
+The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll fix this later but first, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v\in V_{coin}$'s on an arbitrary tree $T$.
 
-I won't go into much detail on [Centroid Decomposition](https://www.geeksforgeeks.org/centroid-decomposition-of-tree/) here as there are doubtless many resources about it, but here are the salient properties for our purposes:
+We won't go into much detail on [Centroid Decomposition](https://www.geeksforgeeks.org/centroid-decomposition-of-tree/) here as there are many resources about it, but here are the properties we care about:
 
 **C1:** Centroid Decomposition of $T$ creates $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $c_i$ that is the _centre_ of $T_i$  
 **C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N\log N)$  
