@@ -110,7 +110,7 @@ Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this
 
 **TODO - animation showing this**
 
-Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ all nodes to its left i.e. to all other nodes.  Thus, after performing these steps, $R.\textit{grundy}$ is set correctly for all $R$, and we've solved the problem.
+Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ to its left i.e. to all nodes, and so have computed all $R.\textit{grundy}$, as required.  It turns out that Bob wins two of the games and Alice wins the rest.
 
 The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll show how to fix this later.  In the meantime, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v\in V_{coin}$'s on an arbitrary tree $T$.
 
