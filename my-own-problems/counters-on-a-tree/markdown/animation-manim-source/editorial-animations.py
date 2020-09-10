@@ -118,10 +118,10 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
         disttracker_title_display.set_y(disttracker_top_y + disttracker_title_display.get_height() / 2)
 
         # Grundy number display.
-        grundy_number_label = TexMobject(r'grundy number =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+        grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
         grundy_number_label.scale(disttracker_text_scale)
         grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
-        grundy_number_label.set_x(0)
+        grundy_number_label.align_on_border(LEFT)
 
         grundy_number_second_equals = None
 
