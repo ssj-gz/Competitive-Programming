@@ -68,7 +68,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
         coin_mobjects = []
         coin_mobjects.append(create_coin_for_node(nodes[0], RED))
         coin_mobjects.append(create_coin_for_node(nodes[1], GREEN))
-        coin_mobjects.append(create_coin_for_node(nodes[4], BLUE))
+        coin_mobjects.append(create_coin_for_node(nodes[4], PURPLE))
 
         if right_to_left:
             # Simulate the left-to-right, so we have the correct starting
