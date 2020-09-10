@@ -252,7 +252,31 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
                 adjust_dists_text.scale(disttracker_text_scale)
                 adjust_dists_text.align_on_border(RIGHT)
                 adjust_dists_text.set_y(disttracker_title_display.get_y())
-                self.play(FadeInFrom(adjust_dists_text, DOWN))
+
+                def add_plus_one(digitMObject):
+                    plusOne = TexMobject("+1")
+                    plusOne.set_color(RED)
+                    plusOne.scale(disttracker_text_scale / 3)
+                    plusOne.next_to(digitMObject, TOP / 5)
+                    plusOne.shift((digitMObject.get_width() / 2, 0, 0))
+                    self.add(plusOne)
+                    return plusOne
+
+                addPlusOneAnims = []
+                fadePlusOneAnims = []
+                for digit_mobject in tracked_distance_mobjects:
+                    plusOne = add_plus_one(digit_mobject)
+
+                    fadedMovedPlusOne = plusOne.copy()
+                    fadedMovedPlusOne.set_opacity(0)
+                    fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
+
+                    addPlusOneAnims.append(GrowFromCenter(plusOne))
+
+                    fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
+
+                self.play(FadeInFrom(adjust_dists_text, DOWN),
+                          LaggedStart(*addPlusOneAnims))
 
                 current_grundy_value = distTracker.grundyNumber()
                 animations = []
@@ -272,19 +296,7 @@ class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right
                 for digit_mobject in tracked_distance_mobjects:
                     digit_mobject.digit = digit_mobject.digit + 1
                 
-                self.play(*animations)
-
-            if node_index == 3:
-                # TODO - remove this
-                return
-
-
-                    
-
-                
-
-
-
-
+                self.play(LaggedStart(*animations),
+                          LaggedStart(*fadePlusOneAnims))
 
 
