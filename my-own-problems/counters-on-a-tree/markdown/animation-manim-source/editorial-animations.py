@@ -224,7 +224,12 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                 to_add_mobjects.append(to_add_mobject)
 
-            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects))
+            addition_line_y = to_add_mobject[-1].get_y() - to_add_mobject[-1].get_height() / 2 - MED_SMALL_BUFF
+            addition_line_left = to_add_mobject[0].get_x() - to_add_mobject[0].get_width()
+            addition_line_right = to_add_mobject[0].get_x() + to_add_mobject[0].get_width()
+            addition_line_mobject = Line([addition_line_left, addition_line_y, 0], [addition_line_right, addition_line_y, 0], color = BLACK)
+
+            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), Write(addition_line_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
