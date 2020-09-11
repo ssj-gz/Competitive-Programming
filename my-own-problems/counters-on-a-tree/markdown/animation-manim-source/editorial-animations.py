@@ -588,6 +588,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         new_value = 0
                         if len(partial_grid.addition_coins_for_row[bitNum]) % 2 == 1:
                             new_value = power_of_2
+                            number_update_anims.append(WiggleOutThenIn(partial_grid.powers_of_two_mobjects[bitNum]))
 
                         number_update_anims.append(create_scroll_digit_to_animation(to_add_mobject, to_add_mobject.digitValue, new_value, digitMObjectScale = to_add_mobject.text_scale_factor))
                         to_add_mobject.digitValue = new_value
