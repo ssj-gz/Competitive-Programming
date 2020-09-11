@@ -36,7 +36,7 @@ Again as mentioned, we don't actually remove elements from $L$; instead we track
 
 So having sidestepped the issue of removing elements from $L$, the problem essentially becomes "find the $X_i^{\textit{th}}$ element in the original $L$, processing each $X_i$ online".  I haven't actually tried it, but I suspect that removing the requirement that the elements be found online would lead to a significantly easier problem.
 
-Anyway, onto the first sub-problem, **Phase One**: finding $u$ ($\textit{nodeToReparent}$ in the code) of the remapped $c_i$ $X_i$ in the original list $L$, without constructing $L$!
+Anyway, onto the first sub-problem, **Phase One**: finding $u_i$ ($\textit{nodeToReparent}$ in the code) of the remapped $c_i$ $X_i$ in the original list $L$, without constructing $L$!
 
 There are no reparentings with $u=1$, so the first few elements of $L$ are taken up by the valid reparentings that reparent node $2$ (if any); then the next few are those that reparent node $3$, etc.  For a given $u$, we can easily compute the number of valid reparentings $(u,v)$ that reparent $u$: it is simply the number of $v$ such that $v$ is not a descendent of $u$, which is $N-u.\textit{numDescendants}$.  We compute $u.\textit{numDescendants}$ for all $N$ $u$ in $\mathcal{O}(N)$ in a precomputation step, and then create a prefix sum array $\textit{numCanReparentToPrefixSum}$ such that $\textit{numCanReparentToPrefixSum}(u)$ is the total number of valid reparentings that reparent a node $x$ with $x \le u$.  
 
