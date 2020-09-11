@@ -173,7 +173,7 @@ We see that bit number 0 oscillates between 0 and 1 on each increment; bit numbe
 
 **TODO - animation showing this**
 
-Note that the grid doesn't have a **TODO** th row as, since it only has **TODO** nodes, the max distance between two nodes is **TODO**, and so a tracked distance can never enter the 1-red-zone for that row so we can ignore that row.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.
+Note that the fourth row of the grid is omitted: since the graph only has 8 nodes, the max distance between two nodes is seven, and so a tracked distance can never enter the red-one-zone for a fourth row and change the grundy number.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.
 
 The computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ has been reduced from $\mathcal{O}(N)$ to $\mathcal{O}(1)$, so this is an improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as it must still move all coins on each call, so we don't appear to have gained much.
 
