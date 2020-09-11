@@ -175,7 +175,7 @@ We see that bit number 0 oscillates between 0 and 1 on each increment; bit numbe
 
 Note that the grid doesn't have a **TODO** th row as, since it only has **TODO** nodes, the max distance between two nodes is **TODO**, and so a tracked distance can never enter the 1-red-zone for that row so we can ignore that row.  Similar logic is used to reduce $\textit{m\_numBits}$ in the $\textit{DistTracker}$ implementation.
 
-The computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ is now $\mathcal{O}(1)$ instead of $\mathcal{O}(N)$ as it was before, so this is an improvement; however, we still have to move all coins on each call to $\textit{addToAllDists}()$ leaving it as $\mathcal{O}(N)$, so this appears to have gained us little.
+The computation of the grundy number (the xor of all the tracked distances) has been rolled into $\textit{addToAllDists()}$, so $\textit{grundyNumber}()$ is now $\mathcal{O}(1)$ instead of $\mathcal{O}(N)$ as it was before, so this is an improvement; however, $\textit{addToAllDists}()$ remains $\mathcal{O}(N)$ as we still have to move all coins on each call, so we don't appear to have gained much.
 
 However, what if, instead of adjusting all distances by to the right on a call to $\textit{addToAllDists}(1)$ and tracking which distances enter the 1-red-zone for each bit number $x$, why don't we scroll the $x$ 1-red-zones by $1$ in the opposite direction and count how many coins they hit or leave? Since $x$ is $\mathcal{O}(\log N)$, this turns an $\mathcal{O}(N)$ operation into a $\mathcal{O}(\log N)$ one, so all operations on $\textit{DistTracker}$ are now $\mathcal{O}(\log N)$ in the worst case.
 
