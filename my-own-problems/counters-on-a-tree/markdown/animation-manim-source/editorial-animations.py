@@ -501,12 +501,13 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             # Do we need an addition representative in the right place?
                             in_red = coin.pos_in_row >= num_in_row / 2
 
-                            glarp = 0.2
+                            
                             if not was_in_red and in_red:
-                                coin.addition_representative.become(coin.copy())
+                                coin.addition_representative.become(Circle(radius = coin_radius, color = BLACK, fill_color = coin.get_fill_color()))
+                                coin.addition_representative.move_to(coin.get_center())
                                 coin.addition_representative.set_opacity(0)
                                 addition_representatives_to_show.append(coin.addition_representative)
-                                coin.addition_representative.shift([x_offset_to_new_pos, glarp, 0])
+                                coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
                                 print("bitNum:", bitNum, " coin gets added to additions:", repr(coin.addition_representative))
                                 partial_grid.addition_coins_for_row[bitNum].append(coin.addition_representative)
 
@@ -516,11 +517,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 addition_representatives_to_hide.append(coin.addition_representative)
 
                                 blah = coin.copy()
-                                blah.shift([0, glarp, 0])
                                 coin_addition_representative_transforms.append(Transform(coin.addition_representative, blah))
 
                         x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
-                        y = partial_grid.item_at[bitNum][0].get_y() + glarp #TODO - delete + 1
+                        y = partial_grid.item_at[bitNum][0].get_y()
                         print("bitNum:", bitNum, " partial_grid.addition_coins_for_row: ", partial_grid.addition_coins_for_row[bitNum])
                         for coin_addition_representative in partial_grid.addition_coins_for_row[bitNum]:
                             new = coin_addition_representative.copy()
