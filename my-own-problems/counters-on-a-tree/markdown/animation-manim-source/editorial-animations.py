@@ -384,6 +384,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         coin_copy.addition_representative = coin_copy.copy()
                         coin_copy.addition_representative.set_opacity(0)
                         coin_copy.addition_representative.cross = Cross(coin_copy.addition_representative)
+                        coin_copy.addition_representative.is_crossed = False
 
                     
                         coin_mobjects_to_transform.append(coin_copy)
@@ -508,6 +509,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 coin.addition_representative.become(coin.copy())
                                 coin.addition_representative.set_opacity(0)
                                 coin.addition_representative.cross.set_opacity(0)
+                                coin.addition_representative.is_crossed = False
                                 addition_representatives_to_show.append(coin.addition_representative)
                                 coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
                                 print("bitNum:", bitNum, " coin gets added to additions:", repr(coin.addition_representative))
@@ -524,8 +526,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 coin_addition_representative_transforms.append(Transform(coin.addition_representative, new))
 
                                 target_cross = coin.addition_representative.cross.copy()
-                                target_cross.set_opacity(0)
                                 target_cross.move_to(new.get_center())
+                                target_cross.set_opacity(0)
                                 coin_addition_representative_transforms.append(Transform(coin.addition_representative.cross, target_cross))
 
                         x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
@@ -537,7 +539,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             new.move_to([x, y, 0])
                             coin_addition_representative.cross.move_to(coin_addition_representative.get_center())
                             target_cross = coin_addition_representative.cross.copy()
-                            target_cross.set_opacity(0)
                             target_cross.move_to(new.get_center())
                             coin_addition_representative_transforms.append(Transform(coin_addition_representative, new))
                             coin_addition_representative_transforms.append(Transform(coin_addition_representative.cross, target_cross))
@@ -560,20 +561,22 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     for bitNum in range(0, NUM_BITS):
                         addition_coins_for_row = partial_grid.addition_coins_for_row[bitNum].copy()
                         while len(addition_coins_for_row) >= 2:
-                            addition_coins_for_row[0].cross.set_opacity(1)
-                            addition_coins_for_row[0].cross.move_to(addition_coins_for_row[0].get_center())
-                            number_update_anims.append(Write(addition_coins_for_row[0].cross))
-                            addition_coins_for_row.pop(0)
+                            for i in range(0,2):
+                                if not addition_coins_for_row[0].is_crossed:
+                                    scene.remove(addition_coins_for_row[0].cross)
+                                    addition_coins_for_row[0].cross = Cross(addition_coins_for_row[0])
+                                    number_update_anims.append(Write(addition_coins_for_row[0].cross))
+                                    addition_coins_for_row[0].is_crossed = True
+                                addition_coins_for_row.pop(0)
 
-                            addition_coins_for_row[0].cross.set_opacity(1)
-                            addition_coins_for_row[0].cross.move_to(addition_coins_for_row[0].get_center())
-                            number_update_anims.append(Write(addition_coins_for_row[0].cross))
-                            addition_coins_for_row.pop(0)
                         if addition_coins_for_row:
                             target_cross = addition_coins_for_row[0].cross
+                            target_cross.set_opacity(0)
                             number_update_anims.append(Transform(addition_coins_for_row[0].cross,target_cross))
+                            addition_coins_for_row[0].is_crossed = False
 
-                    scene.play(*number_update_anims)
+                    if number_update_anims:
+                        scene.play(*number_update_anims)
 
 
                     scene.play(*outtro_animations)
