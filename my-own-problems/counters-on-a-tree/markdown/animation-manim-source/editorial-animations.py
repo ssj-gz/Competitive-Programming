@@ -241,6 +241,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             grundy_value_mobject.text_scale_factor = text_scale_factor
             grundy_value_mobject.next_to(addition_line_mobject, DOWN)
 
+            grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            grundy_number_label.scale(text_scale_factor)
+            grundy_number_label.next_to(grundy_value_mobject, LEFT)
+
             partial_grid.to_add_mobjects = to_add_mobjects
             partial_grid.powers_of_two_mobjects = powers_of_two_mobjects
 
@@ -248,7 +252,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             for bitNum in range(0, NUM_BITS):
                 partial_grid.coin_mobjects_for_row.append([])
 
-            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject), Write(grundy_value_mobject))
+            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject), Write(grundy_number_label), Write(grundy_value_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
