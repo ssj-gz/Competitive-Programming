@@ -38,7 +38,7 @@ class DistTracker
     grundyNumber() { ... } // Return the xor sum of all the contained distances 
 ```
 
-In a naive implementation, at least on of these operations would be $\mathcal{O}(N)$, but by observing how bits in the binary representation of a number change upon incrementing it and using some properties of xor, we can implement all of $\textit{DistTracker}$'s operations in $\mathcal{O}(\log N)$ or better.
+In a naive implementation, at least one of these operations would be $\mathcal{O}(N)$, but by observing how bits in the binary representation of a number change upon incrementing it and using some properties of xor, we can implement all of $\textit{DistTracker}$'s operations in $\mathcal{O}(\log N)$ or better.
 
 We then use Centroid Decomposition plus our $\textit{DistTracker}$ to _collect_ all contributions of $v$ with $v\in V_{\textit{coin}}$ and _propagate_ them to all nodes $R$, thus calculating all required $R.\textit{grundy}$.
 
