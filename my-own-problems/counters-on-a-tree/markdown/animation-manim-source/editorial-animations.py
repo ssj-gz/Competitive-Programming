@@ -383,6 +383,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                         coin_copy.addition_representative = coin_copy.copy()
                         coin_copy.addition_representative.set_opacity(0)
+                        coin_copy.addition_representative.cross = Cross(coin_copy.addition_representative)
+
                     
                         coin_mobjects_to_transform.append(coin_copy)
                         # TODO - handle the case where there are more than one coins
@@ -505,6 +507,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             if not was_in_red and in_red:
                                 coin.addition_representative.become(coin.copy())
                                 coin.addition_representative.set_opacity(0)
+                                coin.addition_representative.cross.set_opacity(0)
                                 addition_representatives_to_show.append(coin.addition_representative)
                                 coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
                                 print("bitNum:", bitNum, " coin gets added to additions:", repr(coin.addition_representative))
@@ -515,9 +518,15 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 partial_grid.addition_coins_for_row[bitNum].remove(coin.addition_representative)
                                 addition_representatives_to_hide.append(coin.addition_representative)
 
-                                blah = coin.copy()
-                                blah.shift([x_offset_to_new_pos, 0, 0])
-                                coin_addition_representative_transforms.append(Transform(coin.addition_representative, blah))
+                                # Move the addition representative back to the source node in the partial grid.
+                                new = coin.copy()
+                                new.shift([x_offset_to_new_pos, 0, 0])
+                                coin_addition_representative_transforms.append(Transform(coin.addition_representative, new))
+
+                                target_cross = coin.addition_representative.cross.copy()
+                                target_cross.set_opacity(0)
+                                target_cross.move_to(new.get_center())
+                                coin_addition_representative_transforms.append(Transform(coin.addition_representative.cross, target_cross))
 
                         x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
                         y = partial_grid.item_at[bitNum][0].get_y()
@@ -526,17 +535,46 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             new = Circle(radius = coin_radius, color = BLACK, fill_color = coin_addition_representative.get_fill_color())
                             new.set_opacity(1)
                             new.move_to([x, y, 0])
+                            coin_addition_representative.cross.move_to(coin_addition_representative.get_center())
+                            target_cross = coin_addition_representative.cross.copy()
+                            target_cross.set_opacity(0)
+                            target_cross.move_to(new.get_center())
                             coin_addition_representative_transforms.append(Transform(coin_addition_representative, new))
+                            coin_addition_representative_transforms.append(Transform(coin_addition_representative.cross, target_cross))
                             x = x + coin_radius * 2 + SMALL_BUFF
                             print(" new at:", new.get_x())
 
+                    # Advance the coins.
                     scene.play(*coin_advance_anims)
 
+                    # Update the addition representative coins.
                     for m in addition_representatives_to_show:
                         m.set_opacity(1)
                     scene.play(*coin_addition_representative_transforms)
                     for m in addition_representatives_to_hide:
                         m.set_opacity(0)
+
+                    # Add crosses and update all numbers.
+
+                    number_update_anims = []
+                    for bitNum in range(0, NUM_BITS):
+                        addition_coins_for_row = partial_grid.addition_coins_for_row[bitNum].copy()
+                        while len(addition_coins_for_row) >= 2:
+                            addition_coins_for_row[0].cross.set_opacity(1)
+                            addition_coins_for_row[0].cross.move_to(addition_coins_for_row[0].get_center())
+                            number_update_anims.append(Write(addition_coins_for_row[0].cross))
+                            addition_coins_for_row.pop(0)
+
+                            addition_coins_for_row[0].cross.set_opacity(1)
+                            addition_coins_for_row[0].cross.move_to(addition_coins_for_row[0].get_center())
+                            number_update_anims.append(Write(addition_coins_for_row[0].cross))
+                            addition_coins_for_row.pop(0)
+                        if addition_coins_for_row:
+                            target_cross = addition_coins_for_row[0].cross
+                            number_update_anims.append(Transform(addition_coins_for_row[0].cross,target_cross))
+
+                    scene.play(*number_update_anims)
+
 
                     scene.play(*outtro_animations)
 
