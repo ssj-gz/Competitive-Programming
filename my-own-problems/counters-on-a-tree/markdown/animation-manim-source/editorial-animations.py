@@ -201,6 +201,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             to_add_mobjects = []
             plus_sign_mobjects = []
             power_of_2 = 1
+            text_scale_factor = None
             for bitNum in range(0, NUM_BITS):
                 power_of_two_mobject = TexMobject('2^'+str(bitNum) + "=" + str(power_of_2), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 text_scale_factor = CELL_HEIGHT / power_of_two_mobject.get_height()
@@ -228,7 +229,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             addition_line_right = to_add_mobject[0].get_x() + to_add_mobject[0].get_width()
             addition_line_mobject = Line([addition_line_left, addition_line_y, 0], [addition_line_right, addition_line_y, 0], color = BLACK)
 
-            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject))
+            grundy_value_mobject.scale(text_scale_factor)
+            grundy_value_mobject.next_to(addition_line_mobject, DOWN)
+
+            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject), Write(grundy_value_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
