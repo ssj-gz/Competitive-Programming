@@ -151,6 +151,52 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         elif dist_tracker_implementation == 'partial_grid':
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
+            CELL_HEIGHT = 0.5
+            CELL_WIDTH = 0.5
+            NUM_BITS = 3
+            partial_grid = VGroup()
+            num_in_row = 2
+            partial_grid.item_at = []
+            red_one_zone_for_row = []
+            for row in range(0, NUM_BITS):
+                partial_grid.item_at.append([])
+                for col in range(0, num_in_row):
+                    square = Square(color=BLACK,fill_opacity=0, side_length = CELL_WIDTH)
+                    # Reposition so that top left is at origin.
+                    square.move_to([+CELL_WIDTH / 2, +CELL_HEIGHT / 2, 0])
+                    # Place in the correct place.
+                    square.shift([col * CELL_WIDTH, -row * CELL_HEIGHT, 0])
+                    print("square: get_center:", square.get_center())
+
+                    partial_grid.add(square)
+                    partial_grid.item_at[row].append(square)
+
+
+                red_one_zone_num_cells = num_in_row / 2
+                red_one_zone = Rectangle(color="#ff0000",fill_opacity=1, fill_color="#ff0000", width = CELL_WIDTH * red_one_zone_num_cells, height = CELL_HEIGHT)
+                red_one_zone_width = CELL_WIDTH * red_one_zone_num_cells
+                print("num_in_row:", num_in_row)
+                # Reposition so that top-left is at origin.
+                red_one_zone.shift([+red_one_zone_width / 2, +CELL_HEIGHT / 2, 0])
+                # Place in the correct place.
+                red_one_zone.shift([red_one_zone_width, -row * CELL_HEIGHT, 0])
+                print("red_one_zone: get_center():", red_one_zone.get_center(), " CELL_WIDTH:", CELL_WIDTH)
+                scene.add(red_one_zone)
+                red_one_zone_for_row.append(red_one_zone)
+
+                num_in_row = num_in_row * 2
+
+            for red_one_zone in red_one_zone_for_row:
+                # Draw the red one zones *behind* the partial_grid.
+                scene.bring_to_back(red_one_zone)
+
+            scene.play(Write(partial_grid))
+            #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
+            #          Transform(grid, grid.copy()))
+            #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
+            #          Transform(grid, grid.copy()))
+            ##self.play(WiggleOutThenIn(grid))
+
 
 
         # Ok - move through the node chain!
