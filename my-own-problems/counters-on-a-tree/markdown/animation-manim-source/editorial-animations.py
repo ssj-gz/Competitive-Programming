@@ -200,7 +200,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             powers_of_two_mobjects = []
             power_of_2 = 1
             for bitNum in range(0, NUM_BITS):
-                power_of_two_mobject = grundy_value_mobject = TexMobject('2^'+str(bitNum) + "=" + str(power_of_2), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                power_of_two_mobject = TexMobject('2^'+str(bitNum) + "=" + str(power_of_2), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 power_of_two_mobject.scale(CELL_HEIGHT / power_of_two_mobject.get_height())
                 power_of_two_mobject.next_to(partial_grid.item_at[NUM_BITS - 1][-1])
                 power_of_two_mobject.set_y(partial_grid.item_at[bitNum][0].get_y())
