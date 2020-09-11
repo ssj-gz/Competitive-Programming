@@ -145,8 +145,8 @@ Both **1.** and **2.** can be done separately using a naive algorithm (although 
 
 For each $i=1,2,\dots,M$, create a fresh $\textit{DistTracker}$ and perform the following steps:
 
-1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists(1)}$ when we visit a node for the first time, and $\textit{addToAllDists(-1)} when we have fully explored it
-2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $c_i$.
+1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ when we have fully explored it
+2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $c_i$.
 
 A BFS would also work and would likely be slightly more efficient: here's an example:
 
