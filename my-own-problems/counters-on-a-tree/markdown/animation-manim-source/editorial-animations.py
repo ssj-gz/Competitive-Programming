@@ -236,7 +236,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
             partial_grid.to_add_mobjects = to_add_mobjects
             partial_grid.powers_of_two_mobjects = powers_of_two_mobjects
+
             partial_grid.coin_mobjects_for_row = []
+            for bitNum in range(0, NUM_BITS):
+                partial_grid.coin_mobjects_for_row.append([])
 
             scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject), Write(grundy_value_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
@@ -374,7 +377,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         coin_target_mobject = coin_mobject_for_node.copy()
                         coin_target_mobject.move_to(partial_grid.item_at[bitNum][0])
                         coin_anims.append(Transform(coin_copy, coin_target_mobject))
-                        partial_grid.coin_mobjects_for_row.append(coin_copy)
+                        partial_grid.coin_mobjects_for_row[bitNum].append(coin_copy)
+                        coin_copy.pos_in_row = 0
 
                     scene.play(*coin_anims, *outtro_anims)
 
@@ -439,6 +443,15 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                               LaggedStart(*fadePlusOneAnims))
                 elif dist_tracker_implementation == 'partial_grid':
                     scene.play(*intro_animations)
+
+                    coin_advance_anims = []
+                    for bitNum in range(0, NUM_BITS):
+                        print("row:", bitNum, " num coins in row:", len(partial_grid.coin_mobjects_for_row[bitNum]))
+                        for coin in partial_grid.coin_mobjects_for_row[bitNum]:
+                            coin_advance_anims.append(ApplyMethod(coin.shift, [CELL_WIDTH, 0, 0]))
+
+                    scene.play(*coin_advance_anims)
+
                     scene.play(*outtro_animations)
 
 
