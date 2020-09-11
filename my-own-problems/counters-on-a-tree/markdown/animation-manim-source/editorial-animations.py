@@ -447,8 +447,16 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     coin_advance_anims = []
                     for bitNum in range(0, NUM_BITS):
                         print("row:", bitNum, " num coins in row:", len(partial_grid.coin_mobjects_for_row[bitNum]))
+                        num_in_row = len(partial_grid.item_at[bitNum])
                         for coin in partial_grid.coin_mobjects_for_row[bitNum]:
-                            coin_advance_anims.append(ApplyMethod(coin.shift, [CELL_WIDTH, 0, 0]))
+                            if coin.pos_in_row == num_in_row - 1:
+                                target_coin_at_row_begin = coin.copy()
+                                target_coin_at_row_begin.move_to(partial_grid.item_at[bitNum][0])
+
+                                coin_advance_anims.append(CounterclockwiseTransform(coin, target_coin_at_row_begin))
+                            else:
+                                coin_advance_anims.append(ApplyMethod(coin.shift, [CELL_WIDTH, 0, 0]))
+                            coin.pos_in_row = (coin.pos_in_row + 1) % num_in_row
 
                     scene.play(*coin_advance_anims)
 
