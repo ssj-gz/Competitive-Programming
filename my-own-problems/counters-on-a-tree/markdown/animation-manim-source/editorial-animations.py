@@ -197,6 +197,17 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 scene.bring_to_back(red_one_zone)
                 appear_red_one_zones_anims.append(Write(red_one_zone))
 
+
+                 # Powers of 2, to the right of the grid, one for each row/ bitNum.
+            powers_of_two_mobjects = []
+            for bitNum in range(0, NUM_BITS):
+                power_of_two_mobject = grundy_value_mobject = TexMobject('2^'+str(bitNum), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                power_of_two_mobject.scale(CELL_HEIGHT / power_of_two_mobject.get_height())
+                power_of_two_mobject.next_to(partial_grid.item_at[NUM_BITS - 1][-1])
+                power_of_two_mobject.set_y(partial_grid.item_at[bitNum][0].get_y())
+                powers_of_two_mobjects.append(power_of_two_mobject)
+                scene.add(power_of_two_mobject) # TODO - remove this
+
             scene.play(*intro_anims, Write(partial_grid), *appear_red_one_zones_anims)
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
