@@ -25,7 +25,7 @@ class DistTracker():
     def clear(self):
         self.distances = []
 
-def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False):
+def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implementation = 'naive', right_to_left = False):
         # Graph, coins, and the Grundy numbers beneath the coins.
         num_nodes = 8
         frame_width = scene.camera.get_frame_width()
@@ -122,28 +122,31 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
 
         scene.play(*grundy_tex_mobjects_change_to_value_anims)
 
-        # DistTracker display.
-        disttracker_text_scale = 1.5
+        # Set up DistTracker display.
+        grundy_value_mobject = None
         disttracker_top_y = 0
+        disttracker_text_scale = 1.5
         disttracker_title_display = TexMobject(r'\textit{DistTracker}^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
         disttracker_title_display.scale(disttracker_text_scale)
         disttracker_title_display.align_on_border(LEFT)
         disttracker_title_display.set_y(disttracker_top_y + disttracker_title_display.get_height() / 2)
 
-        # Grundy number display.
-        grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-        grundy_number_label.scale(disttracker_text_scale)
-        grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
-        grundy_number_label.align_on_border(LEFT)
+        if dist_tracker_implementation == 'naive':
 
-        grundy_number_second_equals = None
+            # Grundy number display.
+            grundy_number_label = TexMobject(r'\textit{grundy number} =', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+            grundy_number_label.scale(disttracker_text_scale)
+            grundy_number_label.next_to(disttracker_title_display, 2 * DOWN)
+            grundy_number_label.align_on_border(LEFT)
 
-        disttracker_grundy_color = BLUE
-        grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
-        grundy_value_mobject.scale(disttracker_text_scale)
-        grundy_value_mobject.next_to(grundy_number_label, RIGHT)
+            grundy_number_second_equals = None
 
-        scene.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
+            disttracker_grundy_color = BLUE
+            grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
+            grundy_value_mobject.scale(disttracker_text_scale)
+            grundy_value_mobject.next_to(grundy_number_label, RIGHT)
+
+            scene.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
 
         # Ok - move through the node chain!
         distTracker = DistTracker()
@@ -210,57 +213,58 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
                 scene.play(FadeOutAndShift(collect_text, UP),
                           FadeOutAndShift(cross_out, UP))
             else:
-                shift_elements_to_right_by = 0
-                new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
-                new_tracked_distance_mobject.scale(disttracker_text_scale)
-                new_tracked_distance_mobject.digit = 0
-                shift_pairs = []
-                new_element_to_add = None
-                if not tracked_distance_mobjects:
-                    new_tracked_distance_mobject.next_to(grundy_number_label, RIGHT)
+                if dist_tracker_implementation == 'naive':
+                    shift_elements_to_right_by = 0
+                    new_tracked_distance_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = coin_mobject_for_node.get_fill_color())
+                    new_tracked_distance_mobject.scale(disttracker_text_scale)
+                    new_tracked_distance_mobject.digit = 0
+                    shift_pairs = []
+                    new_element_to_add = None
+                    if not tracked_distance_mobjects:
+                        new_tracked_distance_mobject.next_to(grundy_number_label, RIGHT)
 
-                    assert(not grundy_number_second_equals)
-                    grundy_number_second_equals = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                    grundy_number_second_equals.scale(disttracker_text_scale)
-                    grundy_number_second_equals.next_to(new_tracked_distance_mobject, RIGHT)
+                        assert(not grundy_number_second_equals)
+                        grundy_number_second_equals = TexMobject(r'=', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        grundy_number_second_equals.scale(disttracker_text_scale)
+                        grundy_number_second_equals.next_to(new_tracked_distance_mobject, RIGHT)
 
-                    grundy_value_mobject_target = grundy_value_mobject.copy()
-                    grundy_value_mobject_target.next_to(grundy_number_second_equals, RIGHT)
-                    shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
+                        grundy_value_mobject_target = grundy_value_mobject.copy()
+                        grundy_value_mobject_target.next_to(grundy_number_second_equals, RIGHT)
+                        shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
 
-                    new_element_to_add = grundy_number_second_equals
-                else:
-                    xor_text = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
-                    xor_text.scale(disttracker_text_scale)
-                    xor_text.next_to(tracked_distance_mobjects[-1], RIGHT)
-                    new_tracked_distance_mobject.next_to(xor_text, RIGHT)
+                        new_element_to_add = grundy_number_second_equals
+                    else:
+                        xor_text = TexMobject(r'\oplus', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                        xor_text.scale(disttracker_text_scale)
+                        xor_text.next_to(tracked_distance_mobjects[-1], RIGHT)
+                        new_tracked_distance_mobject.next_to(xor_text, RIGHT)
 
-                    grundy_number_second_equals_target = grundy_number_second_equals.copy()
-                    grundy_number_second_equals_target.next_to(new_tracked_distance_mobject)
+                        grundy_number_second_equals_target = grundy_number_second_equals.copy()
+                        grundy_number_second_equals_target.next_to(new_tracked_distance_mobject)
 
-                    grundy_value_mobject_target = grundy_value_mobject.copy()
-                    grundy_value_mobject_target.next_to(grundy_number_second_equals_target, RIGHT)
+                        grundy_value_mobject_target = grundy_value_mobject.copy()
+                        grundy_value_mobject_target.next_to(grundy_number_second_equals_target, RIGHT)
 
-                    shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
-                    shift_pairs.append([grundy_number_second_equals, grundy_number_second_equals_target])
+                        shift_pairs.append([grundy_value_mobject, grundy_value_mobject_target])
+                        shift_pairs.append([grundy_number_second_equals, grundy_number_second_equals_target])
 
-                    new_element_to_add = xor_text
+                        new_element_to_add = xor_text
 
 
-                coin_copy = coin_mobject_for_node.copy()
+                    coin_copy = coin_mobject_for_node.copy()
 
-                animations = [Transform(coin_copy, new_tracked_distance_mobject),
-                              Transform(grundy_value_mobject, grundy_value_mobject_target),
-                              FadeIn(new_element_to_add),
-                              FadeOutAndShift(collect_text, UP)]
-                for shift_pair in shift_pairs:
-                    animations.append(Transform(shift_pair[0], shift_pair[1]))
+                    animations = [Transform(coin_copy, new_tracked_distance_mobject),
+                                  Transform(grundy_value_mobject, grundy_value_mobject_target),
+                                  FadeIn(new_element_to_add),
+                                  FadeOutAndShift(collect_text, UP)]
+                    for shift_pair in shift_pairs:
+                        animations.append(Transform(shift_pair[0], shift_pair[1]))
 
-                scene.play(*animations)
+                    scene.play(*animations)
 
-                scene.remove(coin_copy)
-                scene.add(new_tracked_distance_mobject)
-                tracked_distance_mobjects.append(new_tracked_distance_mobject)
+                    scene.remove(coin_copy)
+                    scene.add(new_tracked_distance_mobject)
+                    tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
                 distTracker.insertDist(0)
 
@@ -272,51 +276,52 @@ def do_collect_and_propagate_along_node_chain_naive(scene, right_to_left = False
                 adjust_dists_text.align_on_border(RIGHT)
                 adjust_dists_text.set_y(disttracker_title_display.get_y())
 
-                def add_plus_one(digitMObject):
-                    plusOne = TexMobject("+1")
-                    plusOne.set_color(RED)
-                    plusOne.scale(disttracker_text_scale / 3)
-                    plusOne.next_to(digitMObject, TOP / 5)
-                    plusOne.shift((digitMObject.get_width() / 2, 0, 0))
-                    scene.add(plusOne)
-                    return plusOne
+                if dist_tracker_implementation == 'naive':
+                    def add_plus_one(digitMObject):
+                        plusOne = TexMobject("+1")
+                        plusOne.set_color(RED)
+                        plusOne.scale(disttracker_text_scale / 3)
+                        plusOne.next_to(digitMObject, TOP / 5)
+                        plusOne.shift((digitMObject.get_width() / 2, 0, 0))
+                        scene.add(plusOne)
+                        return plusOne
 
-                addPlusOneAnims = []
-                fadePlusOneAnims = []
-                for digit_mobject in tracked_distance_mobjects:
-                    plusOne = add_plus_one(digit_mobject)
+                    addPlusOneAnims = []
+                    fadePlusOneAnims = []
+                    for digit_mobject in tracked_distance_mobjects:
+                        plusOne = add_plus_one(digit_mobject)
 
-                    fadedMovedPlusOne = plusOne.copy()
-                    fadedMovedPlusOne.set_opacity(0)
-                    fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
+                        fadedMovedPlusOne = plusOne.copy()
+                        fadedMovedPlusOne.set_opacity(0)
+                        fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
 
-                    addPlusOneAnims.append(GrowFromCenter(plusOne))
+                        addPlusOneAnims.append(GrowFromCenter(plusOne))
 
-                    fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
+                        fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
 
-                scene.play(FadeInFrom(adjust_dists_text, DOWN),
-                          LaggedStart(*addPlusOneAnims))
+                    scene.play(FadeInFrom(adjust_dists_text, DOWN),
+                              LaggedStart(*addPlusOneAnims))
 
-                current_grundy_value = distTracker.grundyNumber()
-                animations = []
-                for digit_mobject in tracked_distance_mobjects:
-                    new_digit_value = digit_mobject.digit + 1
-                    animations.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digit, new_digit_value, digitMObjectScale = disttracker_text_scale))
+                    current_grundy_value = distTracker.grundyNumber()
+                    animations = []
+                    for digit_mobject in tracked_distance_mobjects:
+                        new_digit_value = digit_mobject.digit + 1
+                        animations.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digit, new_digit_value, digitMObjectScale = disttracker_text_scale))
 
-                distTracker.adjustAllDistances(1)
-                new_grundy_value = distTracker.grundyNumber()
-                print("current_grundy_value:", current_grundy_value, " new_grundy_value:", new_grundy_value)
+                    distTracker.adjustAllDistances(1)
+                    new_grundy_value = distTracker.grundyNumber()
+                    print("current_grundy_value:", current_grundy_value, " new_grundy_value:", new_grundy_value)
 
-                animations.append(create_scroll_digit_to_animation(grundy_value_mobject, current_grundy_value, new_grundy_value, digitMObjectScale = disttracker_text_scale))
+                    animations.append(create_scroll_digit_to_animation(grundy_value_mobject, current_grundy_value, new_grundy_value, digitMObjectScale = disttracker_text_scale))
 
-                animations.append(ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0]))
-                animations.append(FadeOutAndShift(adjust_dists_text, UP))
+                    animations.append(ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0]))
+                    animations.append(FadeOutAndShift(adjust_dists_text, UP))
 
-                for digit_mobject in tracked_distance_mobjects:
-                    digit_mobject.digit = digit_mobject.digit + 1
-                
-                scene.play(LaggedStart(*animations),
-                          LaggedStart(*fadePlusOneAnims))
+                    for digit_mobject in tracked_distance_mobjects:
+                        digit_mobject.digit = digit_mobject.digit + 1
+                    
+                    scene.play(LaggedStart(*animations),
+                              LaggedStart(*fadePlusOneAnims))
 
 class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive(SSJGZScene):
 
