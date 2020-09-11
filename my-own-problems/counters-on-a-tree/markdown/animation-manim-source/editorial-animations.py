@@ -414,6 +414,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             # Move to next node.    
             if node_index != num_nodes - 1:
 
+                print("adjustAllDistances")
                 adjust_dists_text = TexMobject(r'\textit{adjustAllDistances}(1)', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 adjust_dists_text.scale(disttracker_text_scale)
                 adjust_dists_text.align_on_border(RIGHT)
@@ -496,24 +497,27 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                             # Do we need an addition representative in the right place?
                             in_red = coin.pos_in_row >= num_in_row / 2
-                            addition_animations = []
 
                             if not was_in_red and in_red:
                                 coin.addition_representative.become(coin)
                                 coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
+                                print("bitNum:", bitNum, " coin gets added to additions:", repr(coin.addition_representative))
                                 partial_grid.addition_coins_for_row[bitNum].append(coin.addition_representative)
 
                             elif was_in_red and not in_red:
+                                print("bitNum:", bitNum, " coin gets removed from additions:", repr(coin.addition_representative))
                                 partial_grid.addition_coins_for_row[bitNum].remove(coin.addition_representative)
-                                addition_animations.append(Transform(coin.addition_representative, coin))
+                                coin_addition_representative_transforms.append(Transform(coin.addition_representative, coin))
 
                         x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
                         y = partial_grid.item_at[bitNum][0].get_y()
+                        print("bitNum:", bitNum, " partial_grid.addition_coins_for_row: ", partial_grid.addition_coins_for_row[bitNum])
                         for coin_addition_representative in partial_grid.addition_coins_for_row[bitNum]:
                             new = coin_addition_representative.copy()
                             new.move_to([x, y, 0])
                             coin_addition_representative_transforms.append(Transform(coin_addition_representative, new))
                             x = x + coin_radius
+                            print(" new at:", new.get_x())
 
                     scene.play(*coin_advance_anims)
 
