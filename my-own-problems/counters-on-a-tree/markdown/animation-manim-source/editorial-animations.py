@@ -187,16 +187,17 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 # Place in the correct place.
                 red_one_zone.shift([grid_topleft_x + red_one_zone_width, grid_topleft_y - row * CELL_HEIGHT, 0])
                 print("red_one_zone: get_center():", red_one_zone.get_center(), " CELL_WIDTH:", CELL_WIDTH)
-                scene.add(red_one_zone)
                 red_one_zone_for_row.append(red_one_zone)
 
                 num_in_row = num_in_row * 2
 
+            appear_red_one_zones_anims = []
             for red_one_zone in red_one_zone_for_row:
                 # Draw the red one zones *behind* the partial_grid.
                 scene.bring_to_back(red_one_zone)
+                appear_red_one_zones_anims.append(Write(red_one_zone))
 
-            scene.play(*intro_anims, Write(partial_grid))
+            scene.play(*intro_anims, Write(partial_grid), *appear_red_one_zones_anims)
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
