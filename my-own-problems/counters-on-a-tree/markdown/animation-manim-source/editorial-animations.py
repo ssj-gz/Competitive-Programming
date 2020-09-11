@@ -156,6 +156,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         elif dist_tracker_implementation == 'partial_grid':
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
+            grundy_value_mobject.digitValue = 0
             CELL_HEIGHT = 0.75
             CELL_WIDTH = 0.75
             partial_grid = VGroup()
@@ -200,7 +201,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 scene.bring_to_back(red_one_zone)
 
 
-                 # Powers of 2, to the right of the grid, one for each row/ bitNum.
+            # Powers of 2, to the right of the grid, one for each row/ bitNum.
             powers_of_two_mobjects = []
             to_add_mobjects = []
             plus_sign_mobjects = []
@@ -219,14 +220,17 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 to_add_mobject = TexMobject('0', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 plus_object = TexMobject('+', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 to_add_mobject.scale(text_scale_factor)
+                to_add_mobject.text_scale_factor = text_scale_factor
                 plus_object.align_on_border(RIGHT)
                 plus_object.set_y(partial_grid.item_at[bitNum][0].get_y())
                 to_add_mobject.next_to(plus_object, LEFT)
                 if is_last:
                     plus_object.set_opacity(0)
 
+                to_add_mobject.digitValue = 0
                 to_add_mobjects.append(to_add_mobject)
                 plus_sign_mobjects.append(plus_object)
+
 
             addition_line_y = to_add_mobject[-1].get_y() - to_add_mobject[-1].get_height() / 2 - MED_SMALL_BUFF
             addition_line_left = to_add_mobject[0].get_x() - to_add_mobject[0].get_width()
@@ -234,6 +238,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             addition_line_mobject = Line([addition_line_left, addition_line_y, 0], [addition_line_right, addition_line_y, 0], color = BLACK)
 
             grundy_value_mobject.scale(text_scale_factor)
+            grundy_value_mobject.text_scale_factor = text_scale_factor
             grundy_value_mobject.next_to(addition_line_mobject, DOWN)
 
             partial_grid.to_add_mobjects = to_add_mobjects
@@ -556,8 +561,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         m.set_opacity(0)
 
                     # Add crosses and update all numbers.
-
                     number_update_anims = []
+                    power_of_2 = 1
                     for bitNum in range(0, NUM_BITS):
                         addition_coins_for_row = partial_grid.addition_coins_for_row[bitNum].copy()
                         while len(addition_coins_for_row) >= 2:
@@ -574,6 +579,19 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             target_cross.set_opacity(0)
                             number_update_anims.append(Transform(addition_coins_for_row[0].cross,target_cross))
                             addition_coins_for_row[0].is_crossed = False
+
+                        to_add_mobject = partial_grid.to_add_mobjects[bitNum]
+                        new_value = 0
+                        if len(partial_grid.addition_coins_for_row[bitNum]) % 2 == 1:
+                            new_value = power_of_2
+
+                        number_update_anims.append(create_scroll_digit_to_animation(to_add_mobject, to_add_mobject.digitValue, new_value, digitMObjectScale = to_add_mobject.text_scale_factor))
+                        to_add_mobject.digitValue = new_value
+
+                        power_of_2 = power_of_2 * 2
+
+                    number_update_anims.append(create_scroll_digit_to_animation(grundy_value_mobject, grundy_value_mobject.digitValue, distTracker.grundyNumber(), digitMObjectScale = grundy_value_mobject.text_scale_factor))
+                    grundy_value_mobject.digitValue = distTracker.grundyNumber()
 
                     if number_update_anims:
                         scene.play(*number_update_anims)
