@@ -474,7 +474,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         for coin in partial_grid.coin_mobjects_for_row[bitNum]:
                             if coin.pos_in_row == num_in_row - 1:
                                 target_coin_at_row_begin = coin.copy()
-                                target_coin_at_row_begin.move_to(partial_grid.item_at[bitNum][0])
+                                target_coin_at_row_begin.shift([-CELL_WIDTH * (num_in_row - 1), 0, 0])
 
                                 coin_advance_anims.append(CounterclockwiseTransform(coin, target_coin_at_row_begin))
                             else:
