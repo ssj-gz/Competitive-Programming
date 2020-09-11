@@ -191,11 +191,9 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                 num_in_row = num_in_row * 2
 
-            appear_red_one_zones_anims = []
             for red_one_zone in red_one_zone_for_row:
                 # Draw the red one zones *behind* the partial_grid.
                 scene.bring_to_back(red_one_zone)
-                appear_red_one_zones_anims.append(Write(red_one_zone))
 
 
                  # Powers of 2, to the right of the grid, one for each row/ bitNum.
@@ -209,7 +207,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 powers_of_two_mobjects.append(power_of_two_mobject)
                 power_of_2 = power_of_2 * 2
 
-            scene.play(*intro_anims, Write(partial_grid), *appear_red_one_zones_anims, *map(Write, powers_of_two_mobjects))
+            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
