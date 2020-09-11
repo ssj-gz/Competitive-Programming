@@ -503,8 +503,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                             
                             if not was_in_red and in_red:
-                                coin.addition_representative.become(Circle(radius = coin_radius, color = BLACK, fill_color = coin.get_fill_color()))
-                                coin.addition_representative.move_to(coin.get_center())
+                                coin.addition_representative.become(coin.copy())
                                 coin.addition_representative.set_opacity(0)
                                 addition_representatives_to_show.append(coin.addition_representative)
                                 coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
@@ -523,7 +522,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         y = partial_grid.item_at[bitNum][0].get_y()
                         print("bitNum:", bitNum, " partial_grid.addition_coins_for_row: ", partial_grid.addition_coins_for_row[bitNum])
                         for coin_addition_representative in partial_grid.addition_coins_for_row[bitNum]:
-                            new = coin_addition_representative.copy()
+                            new = Circle(radius = coin_radius, color = BLACK, fill_color = coin_addition_representative.get_fill_color())
                             new.set_opacity(1)
                             new.move_to([x, y, 0])
                             coin_addition_representative_transforms.append(Transform(coin_addition_representative, new))
