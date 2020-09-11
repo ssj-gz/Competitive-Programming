@@ -371,14 +371,37 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
                 elif dist_tracker_implementation == 'partial_grid':
-                    coin_anims = []
+                    coin_mobjects_to_transform = []
+
                     for bitNum in range(0, NUM_BITS):
                         coin_copy = coin_mobject_for_node.copy()
                         coin_target_mobject = coin_mobject_for_node.copy()
                         coin_target_mobject.move_to(partial_grid.item_at[bitNum][0])
-                        coin_anims.append(Transform(coin_copy, coin_target_mobject))
+                        coin_copy.target = coin_target_mobject
+                    
+                        coin_mobjects_to_transform.append(coin_copy)
+                        # TODO - handle the case where there are more than one coins
+                        # at the left of the row.
+                        for existing_coin in partial_grid.coin_mobjects_for_row[bitNum]:
+                            if existing_coin.pos_in_row == 0:
+                                reduced_coin_scale = 0.5
+                                reduced_coin_dx = -coin_target_mobject.get_width() / 4 * reduced_coin_scale
+                                reduced_coin_dy = -coin_target_mobject.get_height() / 4 * reduced_coin_scale
+                                coin_target_mobject.scale(reduced_coin_scale)
+                                coin_target_mobject.shift(-reduced_coin_dx, -reduced_coin_dy)
+                                existing_coin_target = existing_coin.copy()
+                                existing_coin_target.scale(reduced_coin_scale)
+                                existing_coin_target.shift(+reduced_coin_dx, +reduced_coin_dy)
+                                existing_coin.target = existing_coin_target
+                                coin_mobjects_to_transform.append(existing_coin)
+
+                        
                         partial_grid.coin_mobjects_for_row[bitNum].append(coin_copy)
                         coin_copy.pos_in_row = 0
+
+                    coin_anims = []
+                    for coin_mobject in coin_mobjects_to_transform:
+                        coin_anims.append(Transform(coin_mobject, coin_mobject.target))
 
                     scene.play(*coin_anims, *outtro_anims)
 
