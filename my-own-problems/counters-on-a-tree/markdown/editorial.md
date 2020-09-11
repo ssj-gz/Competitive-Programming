@@ -155,7 +155,7 @@ A BFS would also work and would likely be slightly more efficient: here's an exa
 Then we $\textit{clear}$ our $\textit{DistTracker}$ and repeat, this time with $i=M,M-1,\dots,2,1$.
 [/details]
 
-We now return to optimising our $\textit{DistTracker}$.  Generally with problems involving xoring things together, it helps to take a bitwise approach, and this turns out to be the case here.  Let's have a look at the binary representation of an increasing series of numbers, and see how each bit flips as we go along.  The numbers along the top are the bit number, with bit number $0$ being the least significant bit.
+We now return to optimising our $\textit{DistTracker}$.  It often helps to take a bitwise approach to problems involving xor sums, and this is the case here.  Let's have a look at the binary representation of an increasing series of numbers and observe how each bit changes.  The numbers along the top of the table are the bit number with bit number $0$ being the least significant bit.
 
 | N | 5 | 4 | 3 | 2 | 1 | 0 |
 | - | - | - | - | - | - | - |
