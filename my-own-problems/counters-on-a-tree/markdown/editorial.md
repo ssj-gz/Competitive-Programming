@@ -112,8 +112,9 @@ Let's $\textit{clear}()$ our $\textit{distTracker}$ and repeat the process, this
 
 Now we've propagated the contribution of each $v \in V_{\textit{coin}}$ to all nodes to $v$'s right _and_ to its left i.e. to all nodes, and so have computed all $R.\textit{grundy}$, as required.  It turns out that Bob wins two of the games and Alice wins the rest.
 
-The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll fix this later but first, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v\in V_{coin}$'s on an arbitrary tree $T$.
+The naive implementation of $\textit{DistTracker}$ given above is too slow to be of use: we'll fix this later but first, let's show how we can use Centroid Decomposition with our $\textit{DistTracker}$ to collect and propagate all $v\in V_{coin}$'s on an arbitrary tree $T$.  If you're already familiar with Centroid Decomposition, you may want to skip this part.
 
+[details="Using Centroid Decomposition to Propagate All Contributions"]
 We won't go into much detail on [Centroid Decomposition](https://www.geeksforgeeks.org/centroid-decomposition-of-tree/) here as there are many resources about it, but here are the properties we care about:
 
 **C1:** Centroid Decomposition of $T$ induces $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $c_i$ that is the _centre_ of $T_i$  
@@ -142,6 +143,7 @@ will propagate the contributions of all $v \in V_{coin}$ to all $u \in T$, as re
 
 Both **1.** and **2.** can be done separately using a naive algorithm (although my implementation rolls them into **3.**).
 **TODO - oops - forgot about the whole "propagate from one branch to another" bit, plus the animation**
+[/details]
 
 Let's go back to optimising our $\textit{DistTracker}$.  Generally with problems involving xoring things together, it helps to take a bitwise approach, and this turns out to be the case here.  Let's have a look at the binary representation of an increasing series of numbers, and see how each bit flips as we go along.  The numbers along the top are the bit number, with bit number $0$ being the least significant bit.
 
