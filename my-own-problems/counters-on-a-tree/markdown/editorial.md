@@ -66,7 +66,7 @@ $$
 
 Recalling the definitions of _contribution_ and _propagation_ from the Quick Explanation, we see that to solve the problem, we merely need to ensure that for each $v \in V_{\textit{coin}}$ and every $R$, $v$'s contribution to $R$ is propagated to $R$.
 
-Let's consider for the moment the special case where $T$ is simply a long chain of nodes.  Imagine we had a $\textit{DistTracker}$ data structure with the below API (a simple implementation is also provided):
+Let's consider for the moment the special case where $T$ is simply a long chain of nodes.  Imagine we had a $\textit{DistTracker}$ data structure with the below API (a naive implementation is also provided):
 
 ```
     class DistTracker
