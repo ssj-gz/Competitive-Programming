@@ -169,9 +169,7 @@ We now return to optimising our $\textit{DistTracker}$.  It often helps to take 
 | 7 | 0 | 0 | 0 | 1 | 1 | 1 | 
 | 8 | 0 | 0 | 1 | 0 | 0 | 0 | 
 
-We see that bit number 0 oscillates between 0 and 1 on each increment; bit number 1 is $0$ twice, then $1$ twice, etc; bit number $x$ is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, etc.  Note that the $x^{th}$ bit of the grundy number is set if and only if the number of tracked distances with their $x^{th}$ bit set is odd.
-
-Let's re-visit the original example, and this time track whether a distance representing the contribution of a coin has its $x^\text{th}$ bit set by scrolling it through the grid as shown: if a coin enters the red zone (called the "red-one-zone") on the $x^{th}$ row (zero-relative), then that distance has its $x^{th}$ bit set; if it leaves then that bit is unset.
+We see that bit number 0 oscillates between 0 and 1 on each increment; bit number 1 is $0$ twice, then $1$ twice, etc; bit number $x$ is $0$ $2^x$ times in a row, then $1$ $2^x$ times in a row, etc.  Note that the $x^{th}$ bit of the grundy number is set if and only if the number of tracked distances with their $x^{th}$ bit set is odd.  Let's revisit the original example, and this time track whether a distance representing the contribution of a coin has its $x^\text{th}$ bit set by scrolling it through the partial grid as shown: if a coin enters the red zone (called the "red-one-zone") on the $x^{th}$ row (zero-relative), then that distance has its $x^{th}$ bit set; if it leaves then that bit is unset.
 
 **TODO - animation showing this**
 
