@@ -124,6 +124,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         # Set up DistTracker display.
         grundy_value_mobject = None
+        disttracker_grundy_color = BLUE
+
         disttracker_top_y = 0
         disttracker_text_scale = 1.5
         disttracker_title_display = TexMobject(r'\textit{DistTracker}^\text{TM}', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -141,12 +143,15 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
             grundy_number_second_equals = None
 
-            disttracker_grundy_color = BLUE
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE)
             grundy_value_mobject.scale(disttracker_text_scale)
             grundy_value_mobject.next_to(grundy_number_label, RIGHT)
 
             scene.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
+
+        elif dist_tracker_implementation == 'partial_grid':
+            grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
+
 
         # Ok - move through the node chain!
         distTracker = DistTracker()
@@ -266,6 +271,9 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     scene.add(new_tracked_distance_mobject)
                     tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
+                elif dist_tracker_implementation == 'partial_grid':
+                    scene.play(FadeOutAndShift(collect_text, UP))
+
                 distTracker.insertDist(0)
 
             # Move to next node.    
@@ -275,6 +283,13 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 adjust_dists_text.scale(disttracker_text_scale)
                 adjust_dists_text.align_on_border(RIGHT)
                 adjust_dists_text.set_y(disttracker_title_display.get_y())
+
+                intro_animations = [FadeInFrom(adjust_dists_text, DOWN)]
+                outtro_animations = [FadeOutAndShift(adjust_dists_text, UP), ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0])]
+
+                current_grundy_value = distTracker.grundyNumber()
+                distTracker.adjustAllDistances(1)
+                new_grundy_value = distTracker.grundyNumber()
 
                 if dist_tracker_implementation == 'naive':
                     def add_plus_one(digitMObject):
@@ -299,29 +314,28 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                         fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
 
-                    scene.play(FadeInFrom(adjust_dists_text, DOWN),
+                    scene.play(*intro_animations,
                               LaggedStart(*addPlusOneAnims))
 
-                    current_grundy_value = distTracker.grundyNumber()
                     animations = []
                     for digit_mobject in tracked_distance_mobjects:
                         new_digit_value = digit_mobject.digit + 1
                         animations.append(create_scroll_digit_to_animation(digit_mobject, digit_mobject.digit, new_digit_value, digitMObjectScale = disttracker_text_scale))
 
-                    distTracker.adjustAllDistances(1)
-                    new_grundy_value = distTracker.grundyNumber()
                     print("current_grundy_value:", current_grundy_value, " new_grundy_value:", new_grundy_value)
 
                     animations.append(create_scroll_digit_to_animation(grundy_value_mobject, current_grundy_value, new_grundy_value, digitMObjectScale = disttracker_text_scale))
-
-                    animations.append(ApplyMethod(arrow.shift, [nodes[node_index + 1].config['center_x'] - node.config['center_x'], 0, 0]))
-                    animations.append(FadeOutAndShift(adjust_dists_text, UP))
+                    animations.extend(outtro_animations)
 
                     for digit_mobject in tracked_distance_mobjects:
                         digit_mobject.digit = digit_mobject.digit + 1
                     
                     scene.play(LaggedStart(*animations),
                               LaggedStart(*fadePlusOneAnims))
+                elif dist_tracker_implementation == 'partial_grid':
+                    scene.play(*intro_animations)
+                    scene.play(*outtro_animations)
+
 
 class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive(SSJGZScene):
 
@@ -334,5 +348,11 @@ class MoveCoins2Editorial_2_collect_and_propagate_along_node_chain_right_to_left
     def construct(self):
         super().construct()
         do_collect_and_propagate_along_node_chain_naive(self, right_to_left = True)
+
+class MoveCoins2Editorial_3_collect_and_propagate_along_node_chain_left_to_right_partial_grid(SSJGZScene):
+
+    def construct(self):
+        super().construct()
+        do_collect_and_propagate_along_node_chain_naive(self, dist_tracker_implementation = 'partial_grid', right_to_left = False)
         
 
