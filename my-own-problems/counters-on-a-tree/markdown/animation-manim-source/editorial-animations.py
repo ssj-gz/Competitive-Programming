@@ -199,6 +199,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                  # Powers of 2, to the right of the grid, one for each row/ bitNum.
             powers_of_two_mobjects = []
             to_add_mobjects = []
+            plus_sign_mobjects = []
             power_of_2 = 1
             for bitNum in range(0, NUM_BITS):
                 power_of_two_mobject = TexMobject('2^'+str(bitNum) + "=" + str(power_of_2), colour = BLACK, fill_opacity = 1, fill_color = BLACK)
@@ -210,26 +211,24 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 power_of_2 = power_of_2 * 2
 
                 is_last = (bitNum == NUM_BITS - 1)
-                to_add_text = '0+'
-                if is_last:
-                    to_add_text = '0'
-                to_add_mobject = TexMobject(to_add_text, colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                to_add_mobject = TexMobject('0', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                plus_object = TexMobject('+', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 to_add_mobject.scale(text_scale_factor)
-                to_add_mobject.align_on_border(RIGHT)
-                to_add_mobject.set_y(partial_grid.item_at[bitNum][0].get_y())
+                plus_object.align_on_border(RIGHT)
+                plus_object.set_y(partial_grid.item_at[bitNum][0].get_y())
+                to_add_mobject.next_to(plus_object, LEFT)
                 if is_last:
-                    to_add_mobject.move_to([+to_add_mobject.get_width() / 2, to_add_mobject.get_y(), 0])
-                    previous_to_add_object = to_add_mobjects[-1]
-                    to_add_mobject.shift([previous_to_add_object.get_x() - previous_to_add_object.get_width() / 2, 0, 0])
+                    plus_object.set_opacity(0)
 
                 to_add_mobjects.append(to_add_mobject)
+                plus_sign_mobjects.append(plus_object)
 
             addition_line_y = to_add_mobject[-1].get_y() - to_add_mobject[-1].get_height() / 2 - MED_SMALL_BUFF
             addition_line_left = to_add_mobject[0].get_x() - to_add_mobject[0].get_width()
             addition_line_right = to_add_mobject[0].get_x() + to_add_mobject[0].get_width()
             addition_line_mobject = Line([addition_line_left, addition_line_y, 0], [addition_line_right, addition_line_y, 0], color = BLACK)
 
-            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), Write(addition_line_mobject))
+            scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
