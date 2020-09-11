@@ -382,6 +382,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         coin_copy.target = coin_target_mobject
 
                         coin_copy.addition_representative = coin_copy.copy()
+                        coin_copy.addition_representative.set_opacity(0)
                     
                         coin_mobjects_to_transform.append(coin_copy)
                         # TODO - handle the case where there are more than one coins
@@ -473,6 +474,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                     coin_advance_anims = []
                     coin_addition_representative_transforms = []
+                    addition_representatives_to_hide = []
+                    addition_representatives_to_show = []
                     for bitNum in range(0, NUM_BITS):
                         print("row:", bitNum, " num coins in row:", len(partial_grid.coin_mobjects_for_row[bitNum]))
                         num_in_row = len(partial_grid.item_at[bitNum])
@@ -498,30 +501,42 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             # Do we need an addition representative in the right place?
                             in_red = coin.pos_in_row >= num_in_row / 2
 
+                            glarp = 0.2
                             if not was_in_red and in_red:
-                                coin.addition_representative.become(coin)
-                                coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
+                                coin.addition_representative.become(coin.copy())
+                                coin.addition_representative.set_opacity(0)
+                                addition_representatives_to_show.append(coin.addition_representative)
+                                coin.addition_representative.shift([x_offset_to_new_pos, glarp, 0])
                                 print("bitNum:", bitNum, " coin gets added to additions:", repr(coin.addition_representative))
                                 partial_grid.addition_coins_for_row[bitNum].append(coin.addition_representative)
 
                             elif was_in_red and not in_red:
                                 print("bitNum:", bitNum, " coin gets removed from additions:", repr(coin.addition_representative))
                                 partial_grid.addition_coins_for_row[bitNum].remove(coin.addition_representative)
-                                coin_addition_representative_transforms.append(Transform(coin.addition_representative, coin))
+                                addition_representatives_to_hide.append(coin.addition_representative)
+
+                                blah = coin.copy()
+                                blah.shift([0, glarp, 0])
+                                coin_addition_representative_transforms.append(Transform(coin.addition_representative, blah))
 
                         x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
-                        y = partial_grid.item_at[bitNum][0].get_y()
+                        y = partial_grid.item_at[bitNum][0].get_y() + glarp #TODO - delete + 1
                         print("bitNum:", bitNum, " partial_grid.addition_coins_for_row: ", partial_grid.addition_coins_for_row[bitNum])
                         for coin_addition_representative in partial_grid.addition_coins_for_row[bitNum]:
                             new = coin_addition_representative.copy()
+                            new.set_opacity(1)
                             new.move_to([x, y, 0])
                             coin_addition_representative_transforms.append(Transform(coin_addition_representative, new))
-                            x = x + coin_radius
+                            x = x + coin_radius * 2 + SMALL_BUFF
                             print(" new at:", new.get_x())
 
                     scene.play(*coin_advance_anims)
 
+                    for m in addition_representatives_to_show:
+                        m.set_opacity(1)
                     scene.play(*coin_addition_representative_transforms)
+                    for m in addition_representatives_to_hide:
+                        m.set_opacity(0)
 
                     scene.play(*outtro_animations)
 
