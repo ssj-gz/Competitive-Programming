@@ -135,6 +135,9 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         intro_anims = [Write(disttracker_title_display)]
 
+        partial_grid = None
+        NUM_BITS = 3
+
         if dist_tracker_implementation == 'naive':
 
             # Grundy number display.
@@ -155,7 +158,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
             CELL_HEIGHT = 0.75
             CELL_WIDTH = 0.75
-            NUM_BITS = 3
             partial_grid = VGroup()
             num_in_row = 2
             partial_grid.item_at = []
@@ -232,6 +234,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             grundy_value_mobject.scale(text_scale_factor)
             grundy_value_mobject.next_to(addition_line_mobject, DOWN)
 
+            partial_grid.to_add_mobjects = to_add_mobjects
+            partial_grid.powers_of_two_mobjects = powers_of_two_mobjects
+            partial_grid.coin_mobjects_for_row = []
+
             scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject), Write(grundy_value_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
@@ -294,6 +300,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
             coin_mobject_for_node = node.config['coin_mobject']
 
+            outtro_anims = [FadeOutAndShift(collect_text, UP)]
+
             if coin_mobject_for_node:
                 scene.play(FadeInFrom(collect_text, DOWN),
                            WiggleOutThenIn(coin_mobject_for_node))
@@ -353,14 +361,23 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     for shift_pair in shift_pairs:
                         animations.append(Transform(shift_pair[0], shift_pair[1]))
 
-                    scene.play(*animations)
+                    scene.play(*animations, *outtro_anims)
 
                     scene.remove(coin_copy)
                     scene.add(new_tracked_distance_mobject)
                     tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
                 elif dist_tracker_implementation == 'partial_grid':
-                    scene.play(FadeOutAndShift(collect_text, UP))
+                    coin_anims = []
+                    for bitNum in range(0, NUM_BITS):
+                        coin_copy = coin_mobject_for_node.copy()
+                        coin_target_mobject = coin_mobject_for_node.copy()
+                        coin_target_mobject.move_to(partial_grid.item_at[bitNum][0])
+                        coin_anims.append(Transform(coin_copy, coin_target_mobject))
+                        partial_grid.coin_mobjects_for_row.append(coin_copy)
+
+                    scene.play(*coin_anims, *outtro_anims)
+
 
                 distTracker.insertDist(0)
 
