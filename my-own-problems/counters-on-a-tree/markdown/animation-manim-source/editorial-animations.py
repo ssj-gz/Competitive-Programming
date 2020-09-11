@@ -153,19 +153,23 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         elif dist_tracker_implementation == 'partial_grid':
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
-            CELL_HEIGHT = 0.5
-            CELL_WIDTH = 0.5
+            CELL_HEIGHT = 0.75
+            CELL_WIDTH = 0.75
             NUM_BITS = 3
             partial_grid = VGroup()
             num_in_row = 2
             partial_grid.item_at = []
             red_one_zone_for_row = []
+
+            grid_topleft_x = -scene.camera.get_frame_width() / 2 + MED_LARGE_BUFF
+            grid_topleft_y = disttracker_title_display.get_y() - 3 * disttracker_title_display.get_height()
+
             for row in range(0, NUM_BITS):
                 partial_grid.item_at.append([])
                 for col in range(0, num_in_row):
                     square = Square(color=BLACK,fill_opacity=0, side_length = CELL_WIDTH)
                     # Reposition so that top left is at origin.
-                    square.move_to([+CELL_WIDTH / 2, +CELL_HEIGHT / 2, 0])
+                    square.move_to([grid_topleft_x +CELL_WIDTH / 2, grid_topleft_y +CELL_HEIGHT / 2, 0])
                     # Place in the correct place.
                     square.shift([col * CELL_WIDTH, -row * CELL_HEIGHT, 0])
                     print("square: get_center:", square.get_center())
@@ -181,7 +185,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 # Reposition so that top-left is at origin.
                 red_one_zone.shift([+red_one_zone_width / 2, +CELL_HEIGHT / 2, 0])
                 # Place in the correct place.
-                red_one_zone.shift([red_one_zone_width, -row * CELL_HEIGHT, 0])
+                red_one_zone.shift([grid_topleft_x + red_one_zone_width, grid_topleft_y - row * CELL_HEIGHT, 0])
                 print("red_one_zone: get_center():", red_one_zone.get_center(), " CELL_WIDTH:", CELL_WIDTH)
                 scene.add(red_one_zone)
                 red_one_zone_for_row.append(red_one_zone)
