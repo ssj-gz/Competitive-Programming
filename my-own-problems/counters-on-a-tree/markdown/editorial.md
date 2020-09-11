@@ -137,7 +137,7 @@ from which it follows that doing the following for every $i=1,2,\ldots, M$:
 
 1. for each $j=1,2,\dots,D_i$, propagate the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$; and
 2. propagate the contributions of all $v \in V_\textit{coin}\cap T_i$ to $c_i$; and 
-3. (if $c_i.\textit{hasCoin}$) propage the contribution of $c_i$ to all other nodes in $T_i$
+3. (if $c_i.\textit{hasCoin}$) propagate the contribution of $c_i$ to all other nodes in $T_i$
 
 will propagate the contributions of all $v \in V_{\textit{coin}}$ to all $u \in T$, as required.
 
