@@ -209,10 +209,18 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 powers_of_two_mobjects.append(power_of_two_mobject)
                 power_of_2 = power_of_2 * 2
 
-                to_add_mobject = TexMobject('0', colour = BLACK, fill_opacity = 1, fill_color = BLACK)
+                is_last = (bitNum == NUM_BITS - 1)
+                to_add_text = '0+'
+                if is_last:
+                    to_add_text = '0'
+                to_add_mobject = TexMobject(to_add_text, colour = BLACK, fill_opacity = 1, fill_color = BLACK)
                 to_add_mobject.scale(text_scale_factor)
                 to_add_mobject.align_on_border(RIGHT)
                 to_add_mobject.set_y(partial_grid.item_at[bitNum][0].get_y())
+                if is_last:
+                    to_add_mobject.move_to([+to_add_mobject.get_width() / 2, to_add_mobject.get_y(), 0])
+                    previous_to_add_object = to_add_mobjects[-1]
+                    to_add_mobject.shift([previous_to_add_object.get_x() - previous_to_add_object.get_width() / 2, 0, 0])
 
                 to_add_mobjects.append(to_add_mobject)
 
