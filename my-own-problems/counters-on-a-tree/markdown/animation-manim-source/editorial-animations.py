@@ -162,12 +162,14 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             num_in_row = 2
             partial_grid.item_at = []
             red_one_zone_for_row = []
+            partial_grid.addition_coins_for_row = []
 
             grid_topleft_x = -scene.camera.get_frame_width() / 2 + MED_LARGE_BUFF
             grid_topleft_y = disttracker_title_display.get_y() - 3 * disttracker_title_display.get_height()
 
             for row in range(0, NUM_BITS):
                 partial_grid.item_at.append([])
+                partial_grid.addition_coins_for_row.append([])
                 for col in range(0, num_in_row):
                     square = Square(color=BLACK,fill_opacity=0, side_length = CELL_WIDTH)
                     # Reposition so that top left is at origin.
@@ -378,6 +380,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         coin_target_mobject = coin_mobject_for_node.copy()
                         coin_target_mobject.move_to(partial_grid.item_at[bitNum][0])
                         coin_copy.target = coin_target_mobject
+
+                        coin_copy.addition_representative = coin_copy.copy()
                     
                         coin_mobjects_to_transform.append(coin_copy)
                         # TODO - handle the case where there are more than one coins
@@ -395,7 +399,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 existing_coin.target = existing_coin_target
                                 coin_mobjects_to_transform.append(existing_coin)
 
-                        
                         partial_grid.coin_mobjects_for_row[bitNum].append(coin_copy)
                         coin_copy.pos_in_row = 0
 
@@ -468,20 +471,53 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     scene.play(*intro_animations)
 
                     coin_advance_anims = []
+                    coin_addition_representative_transforms = []
                     for bitNum in range(0, NUM_BITS):
                         print("row:", bitNum, " num coins in row:", len(partial_grid.coin_mobjects_for_row[bitNum]))
                         num_in_row = len(partial_grid.item_at[bitNum])
+
                         for coin in partial_grid.coin_mobjects_for_row[bitNum]:
+                            was_in_red = coin.pos_in_row >= num_in_row / 2
+
+                            x_offset_to_new_pos = 0
+
                             if coin.pos_in_row == num_in_row - 1:
+                                # Wrap back to beginning.
                                 target_coin_at_row_begin = coin.copy()
                                 target_coin_at_row_begin.shift([-CELL_WIDTH * (num_in_row - 1), 0, 0])
 
                                 coin_advance_anims.append(CounterclockwiseTransform(coin, target_coin_at_row_begin))
                             else:
                                 coin_advance_anims.append(ApplyMethod(coin.shift, [CELL_WIDTH, 0, 0]))
+
+                            previous_pos = coin.pos_in_row
                             coin.pos_in_row = (coin.pos_in_row + 1) % num_in_row
+                            x_offset_to_new_pos = (coin.pos_in_row - previous_pos) * CELL_WIDTH
+
+                            # Do we need an addition representative in the right place?
+                            in_red = coin.pos_in_row >= num_in_row / 2
+                            addition_animations = []
+
+                            if not was_in_red and in_red:
+                                coin.addition_representative.become(coin)
+                                coin.addition_representative.shift([x_offset_to_new_pos, 0, 0])
+                                partial_grid.addition_coins_for_row[bitNum].append(coin.addition_representative)
+
+                            elif was_in_red and not in_red:
+                                partial_grid.addition_coins_for_row[bitNum].remove(coin.addition_representative)
+                                addition_animations.append(Transform(coin.addition_representative, coin))
+
+                        x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
+                        y = partial_grid.item_at[bitNum][0].get_y()
+                        for coin_addition_representative in partial_grid.addition_coins_for_row[bitNum]:
+                            new = coin_addition_representative.copy()
+                            new.move_to([x, y, 0])
+                            coin_addition_representative_transforms.append(Transform(coin_addition_representative, new))
+                            x = x + coin_radius
 
                     scene.play(*coin_advance_anims)
+
+                    scene.play(*coin_addition_representative_transforms)
 
                     scene.play(*outtro_animations)
 
