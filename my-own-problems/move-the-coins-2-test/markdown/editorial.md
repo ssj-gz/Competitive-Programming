@@ -102,13 +102,17 @@ Now that we know $\textit{nodeToReparent}$, we can restrict our attention to the
 
 So: for **Phase Two**, we need to find the height of $v$ ($\textit{newParentHeight}$) in the $Y_i^\textit{th}$ valid reparenting that reparents $\textit{nodeToReparent}$. In Phase One, we made a tally of all valid reparentings that reparented a node less than or equal $x$, and found the first such $x$ such that this tally exceeded $X_i$; we do a similar trick here in finding the number of reparentings that reparent $\textit{nodeToReparent}$ to a node with height $h$ ($\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$) and find the first $h$ such that this exceeds $Y_i$.
 
-How do we compute this $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$? We need to make a few simple observations.  Firstly, note that the case where $h < \textit{nodeToReparent.height}$ is trivial: no node with such a height $h$ can be a descendant of $\textit{nodeToReparent}$, and we can easily count such nodes using the precomputed $\textit{numNodesUpToHeight}$ lookup.
-
-Now consider the following schematic, representing the less-trivial case:
+How do we compute this $\textit{findNumNonDescendantsUpToHeight}(\textit{nodeToReparent}, h)$? Consider the following schematic:
 
 **TODO - diagram here - tree consisting of loads of tiny nodes, colour-coded/ with lines drawn round them indicating the breakdown described below**
 
-The set of nodes to which we can reparent consists of those in section $A$ (for "**A**bove" $\textit{nodeToReparent}$ ‒ easily computed, as mentioned above), plus those in section $B$ (for "**B**etween $\textit{nodeToReparent}$ and height $h$") minus those in $B$ that are descendents of $\textit{nodeToReparent}$ ‒ call this latter $\textit{BD}$.  Now, $\textit{BD}$ is equal to the set of nodes that are descendents of $\textit{nodeToReparent}$ (call this $D$) minus the set of nodes $x$ such that $x$ is a descendent of $\textit{nodeToReparent}$ and $x.\textit{height} > h$ (call this set $\textit{DH})$.  How can we categorise the nodes in $\textit{DH}$? They are precisely the set of _proper descendents_ of all $y$ such that $y$ is a descendent of $\textit{nodeToReparent}$ and $y.\textit{height}=h$. If we can compute this sum of proper descendents, we can compute $\textit{findNumNonDescendantsUpToHeight}$.
+The set of nodes to which we can reparent consists of: 
+
+* those in section $A$ (for "**A**bove" $\textit{nodeToReparent}$ ‒ easily computed; see $\textit{numNodesUpToHeight}$ in the code), plus those in section $B$ (for "**B**etween $\textit{nodeToReparent}$ and height $h$") minus those in $B$ that are descendents of $\textit{nodeToReparent}$ ‒ call this latter $\textit{BD}$
+* $\textit{BD}$ is equal to the set of nodes that are descendents of $\textit{nodeToReparent}$ (call this $D$) minus the set of nodes $x$ such that $x$ is a descendent of $\textit{nodeToReparent}$ and $x.\textit{height} > h$ (call this set $\textit{DH})$
+* $\textit{DH}$ is precisely the set of _proper descendents_ of all $y$ such that $y$ is a descendent of $\textit{nodeToReparent}$ and $y.\textit{height}=h$. 
+
+If we can compute this sum of proper descendents, we can compute $\textit{findNumNonDescendantsUpToHeight}$.
 
 Now, in the precomputation step, we perform a DFS and use the common technique of logging, for each node $x$, the "time" at which we first visit $x$ ($x.\textit{dfsBeginVisit}$) and the time at which we finish exploring $x$ ($x.\textit{dfsEndVisit}$). We then form a list, for each $h$, of all nodes $x$ with $x.\textit{height} = h$ ordered by their $\textit{dfsBeginVisit}$, $\textit{nodesAtHeightInDFSOrder}(h)$.  (This list of lists will come in useful for Phase Three, too).
 
