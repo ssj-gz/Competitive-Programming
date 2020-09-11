@@ -133,6 +133,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         disttracker_title_display.align_on_border(LEFT)
         disttracker_title_display.set_y(disttracker_top_y + disttracker_title_display.get_height() / 2)
 
+        intro_anims = [Write(disttracker_title_display)]
+
         if dist_tracker_implementation == 'naive':
 
             # Grundy number display.
@@ -147,7 +149,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             grundy_value_mobject.scale(disttracker_text_scale)
             grundy_value_mobject.next_to(grundy_number_label, RIGHT)
 
-            scene.play(AnimationGroup(Write(disttracker_title_display), Write(grundy_number_label), Write(grundy_value_mobject)))
+            scene.play(AnimationGroup(*intro_anims, Write(grundy_number_label), Write(grundy_value_mobject)))
 
         elif dist_tracker_implementation == 'partial_grid':
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
@@ -190,7 +192,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 # Draw the red one zones *behind* the partial_grid.
                 scene.bring_to_back(red_one_zone)
 
-            scene.play(Write(partial_grid))
+            scene.play(*intro_anims, Write(partial_grid))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
             #          Transform(grid, grid.copy()))
             #self.play(ApplyMethod(thing.shift, RIGHT * CELL_WIDTH),
