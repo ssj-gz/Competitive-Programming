@@ -117,11 +117,11 @@ The naive implementation of $\textit{DistTracker}$ given above is too slow to be
 [details="Using Centroid Decomposition to Propagate All Contributions"]
 We won't go into much detail on [Centroid Decomposition](https://www.geeksforgeeks.org/centroid-decomposition-of-tree/) here as there are many resources about it, but here are the properties we care about:
 
-**C1:** Centroid Decomposition of $T$ induces $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $c_i$ that is the _centre_ of $T_i$  
+**C1:** Centroid Decomposition of $T$ induces $M$ subtrees ($M$ is $\mathcal{O}(N)$) $T_i$ of $T$ each with a node $C_i$ that is the _centre_ of $T_i$  
 **C2:** The $\Sigma_{i=1}^M |T_i|$ is $\mathcal{O}(N\log N)$  
 **C3:** Let $u,v$ be any distinct pair of nodes, and let $P(u,v)=[u=p_0, p_1, \ldots, p_k=v]$ be the unique path between $u$ and $v$.  Then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and $c_i \in P(u,v)$  
 
-Let $D_i$ be the degree of $c_i$ in $T_i$, and let $b_1, b_2, \dots, b_{D_i}$ be the neighbours of $c_i$ in $T_i$.  We partition the $u\in T_i$, $u \ne c_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the unique path from $c_i$ to $u$ passes through $b_l$.  For example:
+Let $D_i$ be the degree of $C_i$ in $T_i$, and let $b_1, b_2, \dots, b_{D_i}$ be the neighbours of $C_i$ in $T_i$.  We partition the $u\in T_i$, $u \ne C_i$ into $D_i$ _branches_, where the node $u$ is in branch $l$ if the unique path from $C_i$ to $u$ passes through $b_l$.  For example:
 
 **TODO - image here - medium size $T_i$ with $D_i = 4$**
 
@@ -129,15 +129,15 @@ With this notation, **C3** can be rephrased as:
 
 **C3:** Let $u,v$ be any distinct pair of nodes; then there is precisely one $i$ such that $u$ and $v$ are in subtree $T_i$ and either:
 
-a. $c_i=u$; or
-b. $c_i=v$; or
+a. $C_i=u$; or
+b. $C_i=v$; or
 c. $u$ and $v$ are in different _branches_ of $T_i$
 
 from which it follows that doing the following for every $i=1,2,\ldots, M$:
 
 1. for each $j=1,2,\dots,D_i$, propagate the contributions of all $v \in V_\textit{coin}\cap B_j$ to the nodes in the other $D_i-1$ branches of $T_i$; and
-2. propagate the contributions of all $v \in V_\textit{coin}\cap T_i$ to $c_i$; and 
-3. (if $c_i.\textit{hasCoin}$) propagate the contribution of $c_i$ to all other nodes in $T_i$
+2. propagate the contributions of all $v \in V_\textit{coin}\cap T_i$ to $C_i$; and 
+3. (if $C_i.\textit{hasCoin}$) propagate the contribution of $C_i$ to all other nodes in $T_i$
 
 will propagate the contributions of all $v \in V_{\textit{coin}}$ to all $u \in T$, as required.
 
@@ -146,7 +146,7 @@ Both **1.** and **2.** can be done separately using a naive algorithm (although 
 For each $i=1,2,\dots,M$, create a fresh $\textit{DistTracker}$ and perform the following steps:
 
 1. Propagate the contributions to nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{addToAllDists}(1)$ when we visit a node for the first time, and $\textit{addToAllDists}(-1)$ when we have fully explored it
-2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $c_i$.
+2. Collect the contributions of nodes in branch $i$; that is, do a DFS from $b_i$, calling $\textit{insertDist}(d)$ when we encounter a node in $V_{\textit{coin}}$ at distance $d$ from $C_i$.
 
 A BFS would also work and would likely be slightly more efficient: here's an example:
 
