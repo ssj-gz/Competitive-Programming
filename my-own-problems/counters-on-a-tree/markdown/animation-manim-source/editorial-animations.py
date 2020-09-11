@@ -516,6 +516,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 addition_representatives_to_hide.append(coin.addition_representative)
 
                                 blah = coin.copy()
+                                blah.shift([x_offset_to_new_pos, 0, 0])
                                 coin_addition_representative_transforms.append(Transform(coin.addition_representative, blah))
 
                         x = partial_grid.powers_of_two_mobjects[bitNum].get_x() + powers_of_two_mobjects[bitNum].get_width()
