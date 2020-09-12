@@ -36,16 +36,17 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
     def construct(self):
         super().construct()
 
+        RED = "#ff0000"
         BLUE = "#0000ff"
         YELLOW = "#ffff00"
 
         g = Graph(self, globals()["Node"], globals()["NodeMObject"])
-        node_radius = 0.1
+        node_radius = 0.15
         root = g.create_node(0, 5, { 'radius' : node_radius, 'fill_color' : BLUE})
 
         last_node_layer = [root]
         nodes_at_height = [[root]]
-        tree_height = 10
+        tree_height = 11
         for height in range(1, tree_height):
             next_node_layer = []
 
@@ -101,23 +102,40 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
             new_node_mobject.move_to(node_mobject.get_center())
             return Transform(node_mobject, new_node_mobject)
 
+        for node in g.nodes:
+            node.config['is_descendent'] = False
 
         self.play(g.create_animation())
+
         node_to_reparent_height = 4
         node_to_reparent = nodes_at_height[node_to_reparent_height][2]
+        up_to_height = 8
+
+        height_label = TexMobject('h', color = BLACK, fill_color = BLACK)
+        height_label.next_to(g.mobject_for_node[nodes_at_height[up_to_height][-1]], RIGHT)
+
+
         self.play(create_change_node_color_anim(node_to_reparent, YELLOW))
+        self.play(Write(height_label))
 
         descendents = self.find_descendents_at_height(g, node_to_reparent, ignore_nodes = [node_to_reparent.config['parent']])
 
-        blah = []
-        print("descendents heights:", len(descendents))
+        highlight_descendents_anims = []
         for descendents_at_height in descendents:
-            print("blee:", str(descendents_at_height))
             for node in descendents_at_height:
-                blah.append(create_change_node_color_anim(node, YELLOW))
+                node.config['is_descendent'] = True
+                highlight_descendents_anims.append(create_change_node_color_anim(node, YELLOW))
 
-        print("Blah:", repr(blah))
-        self.play(*blah)
+        self.play(*highlight_descendents_anims)
+
+        show_non_descendents_up_to_height_anims = []
+        for height in range(0, up_to_height + 1):
+            for node in nodes_at_height[height]:
+                if not node.config['is_descendent']:
+                    show_non_descendents_up_to_height_anims.append(create_change_node_color_anim(node, RED))
+        
+        self.play(*show_non_descendents_up_to_height_anims)
+
 
 
 
