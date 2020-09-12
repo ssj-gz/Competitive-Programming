@@ -109,7 +109,17 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         for node in g.nodes:
             node.config['is_descendent'] = False
 
-        self.play(g.create_animation())
+        create_dividing_lines_anims = []
+        for height in range(0, tree_height - 1):
+            line_y = nodes_at_height[height][0].config['center_y'] + node_radius + gap_between_parent_and_child / 2
+            line = Line([-self.camera.get_frame_width(), line_y, 0],
+                        [+self.camera.get_frame_width(), line_y, 0], color = '#DDDDDD')
+            self.bring_to_back(line)
+
+            create_dividing_lines_anims.append(Write(line))
+                        
+
+        self.play(g.create_animation(), *create_dividing_lines_anims)
 
         node_to_reparent_height = 4
         node_to_reparent = nodes_at_height[node_to_reparent_height][2]
