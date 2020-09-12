@@ -305,8 +305,10 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         dots_target = Circle(radius = node_radius, color = BLACK, fill_color = MAGENTA, fill_opacity = 1) 
         dots_target.move_to(dots_text.get_center())
         dots_target.scale(descendents_of_text.get_height() / dots_target.get_height())
+        plural_s_text = TexMobject(r's', color = BLACK, fill_color = BLACK)
+        plural_s_text.next_to(dots_target, RIGHT, buff = SMALL_BUFF)
 
-        self.play(Transform(dots_text, dots_target), *last_descendent_row_anims)
+        self.play(Transform(dots_text, dots_target), *last_descendent_row_anims, Write(plural_s_text))
         self.save_thumbnail()
 
         self.wait(2)
