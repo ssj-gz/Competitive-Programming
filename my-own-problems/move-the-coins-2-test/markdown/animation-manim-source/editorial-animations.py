@@ -42,10 +42,11 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         RED = "#ff0000"
         BLUE = "#0000ff"
         YELLOW = "#ffff00"
+        GREY = "#999999"
 
         g = Graph(self, globals()["Node"], globals()["NodeMObject"])
         node_radius = 0.15
-        root = g.create_node(0, 5, { 'radius' : node_radius, 'fill_color' : BLUE})
+        root = g.create_node(0, 5, { 'radius' : node_radius, 'fill_color' : GREY})
 
         last_node_layer = [root]
         nodes_at_height = [[root]]
@@ -66,7 +67,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                         num_children = 1
 
                 for i in range(0, num_children):
-                    new_child = g.create_node(0, 0, {'radius' : node_radius, 'fill_color' : BLUE})
+                    new_child = g.create_node(0, 0, {'radius' : node_radius, 'fill_color' : GREY})
                     new_child.config['parent'] = node
                     g.create_edge(node, new_child, {})
                     next_node_layer.append(new_child)
@@ -125,14 +126,11 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         highlight_descendents_anims = []
         for descendents_at_height in descendents:
-            print("num descendents_at_height:", len(descendents_at_height))
-            highlight_descendents_anims = []
             for node in descendents_at_height:
                 node.config['is_descendent'] = True
                 highlight_descendents_anims.append(create_change_node_color_anim(node, YELLOW))
-            self.play(*highlight_descendents_anims)
 
-        #self.play(*highlight_descendents_anims)
+        self.play(*highlight_descendents_anims)
 
         show_non_descendents_up_to_height_anims = []
         for height in range(0, up_to_height + 1):
@@ -173,6 +171,19 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         blah = create_polygon_around_nodes(descendents, 0.1, RED)
         self.play(Write(blah))
+
+        split_red_anims = []
+        for height in range(0, up_to_height + 1):
+            for node in nodes_at_height[height]:
+                if node.config['is_descendent']:
+                    continue
+                if height < node_to_reparent_height:
+                    split_red_anims.append(create_change_node_color_anim(node, GREEN))
+                else:
+                    split_red_anims.append(create_change_node_color_anim(node, BLUE))
+
+        self.play(*split_red_anims)
+        self.wait(1)
 
 
 
