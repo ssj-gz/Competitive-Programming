@@ -485,7 +485,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         fadedMovedPlusOne.set_opacity(0)
                         fadedMovedPlusOne.shift((0, 3 * plusOne.get_height(), 0))
 
-                        addPlusOneAnims.append(GrowFromCenter(plusOne))
+                        addPlusOneAnims.append(FadeInFrom(plusOne, DOWN))
 
                         fadePlusOneAnims.append(Transform(plusOne, fadedMovedPlusOne))
 
