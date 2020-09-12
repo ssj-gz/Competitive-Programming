@@ -138,6 +138,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         partial_grid = None
         NUM_BITS = 3
 
+
         if dist_tracker_implementation == 'naive':
 
             # Grundy number display.
@@ -155,6 +156,22 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             scene.play(AnimationGroup(*intro_anims, Write(grundy_number_label), Write(grundy_value_mobject)))
 
         elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
+            def create_rectangle_aligned_to_cells(cell_col, cell_row, cell_horizontal_span):
+                cell = partial_grid.item_at[cell_row][cell_col]
+                cell_top_left_x = cell.get_x() - CELL_WIDTH / 2
+                cell_top_left_y = cell.get_y() + CELL_HEIGHT / 2
+
+                rectangle = Rectangle(color="#ff0000",fill_opacity=1, fill_color="#ff0000", width = CELL_WIDTH * cell_horizontal_span, height = CELL_HEIGHT)
+                rectangle_width = CELL_WIDTH * red_one_zone_num_cells
+                print("num_in_row:", num_in_row)
+                # Reposition so that top-left is at origin.
+                rectangle.shift([+rectangle_width / 2, -CELL_HEIGHT / 2, 0])
+                # Place in the correct place.
+                rectangle.shift([cell_top_left_x, cell_top_left_y, 0])
+
+                return rectangle
+
+
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
             grundy_value_mobject.digitValue = 0
             CELL_HEIGHT = 0.75
@@ -185,14 +202,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
 
                 red_one_zone_num_cells = num_in_row / 2
-                red_one_zone = Rectangle(color="#ff0000",fill_opacity=1, fill_color="#ff0000", width = CELL_WIDTH * red_one_zone_num_cells, height = CELL_HEIGHT)
-                red_one_zone_width = CELL_WIDTH * red_one_zone_num_cells
-                print("num_in_row:", num_in_row)
-                # Reposition so that top-left is at origin.
-                red_one_zone.shift([+red_one_zone_width / 2, +CELL_HEIGHT / 2, 0])
-                # Place in the correct place.
-                red_one_zone.shift([grid_topleft_x + red_one_zone_width, grid_topleft_y - row * CELL_HEIGHT, 0])
-                print("red_one_zone: get_center():", red_one_zone.get_center(), " CELL_WIDTH:", CELL_WIDTH)
+                red_one_zone = create_rectangle_aligned_to_cells(num_in_row // 2, row, num_in_row / 2)
                 red_one_zone_for_row.append(red_one_zone)
 
                 partial_grid.num_in_row.append(num_in_row)
