@@ -164,6 +164,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             partial_grid.item_at = []
             red_one_zone_for_row = []
             partial_grid.addition_coins_for_row = []
+            partial_grid.num_in_row = []
 
             grid_topleft_x = -scene.camera.get_frame_width() / 2 + MED_LARGE_BUFF
             grid_topleft_y = disttracker_title_display.get_y() - 3 * disttracker_title_display.get_height()
@@ -193,6 +194,8 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                 red_one_zone.shift([grid_topleft_x + red_one_zone_width, grid_topleft_y - row * CELL_HEIGHT, 0])
                 print("red_one_zone: get_center():", red_one_zone.get_center(), " CELL_WIDTH:", CELL_WIDTH)
                 red_one_zone_for_row.append(red_one_zone)
+
+                partial_grid.num_in_row.append(num_in_row)
 
                 num_in_row = num_in_row * 2
 
@@ -249,8 +252,10 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             partial_grid.powers_of_two_mobjects = powers_of_two_mobjects
 
             partial_grid.coin_mobjects_for_row = []
+            partial_grid.position_for_new_coins = []
             for bitNum in range(0, NUM_BITS):
                 partial_grid.coin_mobjects_for_row.append([])
+                partial_grid.position_for_new_coins.append(0)
 
             scene.play(*intro_anims, Write(partial_grid), *map(Write, powers_of_two_mobjects), *map(Write, red_one_zone_for_row), *map(Write, to_add_mobjects), *map(Write, plus_sign_mobjects), Write(addition_line_mobject), Write(grundy_number_label), Write(grundy_value_mobject))
             #self.play(ApplyMethod(thing.shift, LEFT * CELL_WIDTH),
@@ -387,7 +392,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     for bitNum in range(0, NUM_BITS):
                         coin_copy = coin_mobject_for_node.copy()
                         coin_target_mobject = coin_mobject_for_node.copy()
-                        coin_target_mobject.move_to(partial_grid.item_at[bitNum][0])
+                        coin_target_mobject.move_to(partial_grid.item_at[bitNum][partial_grid.position_for_new_coins[bitNum]])
                         coin_copy.target = coin_target_mobject
 
                         coin_copy.addition_representative = coin_copy.copy()
@@ -400,7 +405,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                         # TODO - handle the case where there are more than one coins
                         # at the left of the row.
                         for existing_coin in partial_grid.coin_mobjects_for_row[bitNum]:
-                            if existing_coin.pos_in_row == 0:
+                            if existing_coin.pos_in_row == partial_grid.position_for_new_coins[bitNum]:
                                 reduced_coin_scale = 0.5
                                 reduced_coin_dx = -coin_target_mobject.get_width() / 4 * reduced_coin_scale
                                 reduced_coin_dy = -coin_target_mobject.get_height() / 4 * reduced_coin_scale
@@ -413,7 +418,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 coin_mobjects_to_transform.append(existing_coin)
 
                         partial_grid.coin_mobjects_for_row[bitNum].append(coin_copy)
-                        coin_copy.pos_in_row = 0
+                        coin_copy.pos_in_row = partial_grid.position_for_new_coins[bitNum]
 
                     coin_anims = []
                     for coin_mobject in coin_mobjects_to_transform:
@@ -497,18 +502,23 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                             x_offset_to_new_pos = 0
 
-                            if coin.pos_in_row == num_in_row - 1:
-                                # Wrap back to beginning.
-                                target_coin_at_row_begin = coin.copy()
-                                target_coin_at_row_begin.shift([-CELL_WIDTH * (num_in_row - 1), 0, 0])
+                            if dist_tracker_implementation == 'partial_grid':
+                                # Scroll the coins.
+                                if coin.pos_in_row == num_in_row - 1:
+                                    # Wrap back to beginning.
+                                    target_coin_at_row_begin = coin.copy()
+                                    target_coin_at_row_begin.shift([-CELL_WIDTH * (num_in_row - 1), 0, 0])
 
-                                coin_advance_anims.append(CounterclockwiseTransform(coin, target_coin_at_row_begin))
+                                    coin_advance_anims.append(CounterclockwiseTransform(coin, target_coin_at_row_begin))
+                                else:
+                                    coin_advance_anims.append(ApplyMethod(coin.shift, [CELL_WIDTH, 0, 0]))
+
+                                previous_pos = coin.pos_in_row
+                                coin.pos_in_row = (coin.pos_in_row + 1) % num_in_row
+                                x_offset_to_new_pos = (coin.pos_in_row - previous_pos) * CELL_WIDTH
                             else:
-                                coin_advance_anims.append(ApplyMethod(coin.shift, [CELL_WIDTH, 0, 0]))
-
-                            previous_pos = coin.pos_in_row
-                            coin.pos_in_row = (coin.pos_in_row + 1) % num_in_row
-                            x_offset_to_new_pos = (coin.pos_in_row - previous_pos) * CELL_WIDTH
+                                # Scroll the red-one-zones.
+                                pass
 
                             # Do we need an addition representative in the right place?
                             in_red = coin.pos_in_row >= num_in_row / 2
@@ -555,12 +565,14 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                             print(" new at:", new.get_x())
 
                     # Advance the coins.
-                    scene.play(*coin_advance_anims)
+                    if dist_tracker_implementation == 'partial_grid':
+                        scene.play(*coin_advance_anims)
 
                     # Update the addition representative coins.
                     for m in addition_representatives_to_show:
                         m.set_opacity(1)
-                    scene.play(*coin_addition_representative_transforms)
+                    if coin_addition_representative_transforms:
+                        scene.play(*coin_addition_representative_transforms)
                     for m in addition_representatives_to_hide:
                         m.set_opacity(0)
 
@@ -604,6 +616,9 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
                     scene.play(*outtro_animations)
 
+                    if dist_tracker_implementation == 'optimised':
+                        for bitNum in range(0, NUM_BITS):
+                            partial_grid.position_for_new_coins[bitNum] = (partial_grid.position_for_new_coins[bitNum] + partial_grid.num_in_row[bitNum] - 1) % partial_grid.num_in_row[bitNum]
 
 class MoveCoins2Editorial_1_collect_and_propagate_along_node_chain_left_to_right_naive(SSJGZScene):
 
