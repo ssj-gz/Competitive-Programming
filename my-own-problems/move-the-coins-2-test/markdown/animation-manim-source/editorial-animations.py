@@ -48,7 +48,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         A_COLOUR = BLUE
         B_COLOUR = ORANGE
-        BD_COLOUR = "#009900"
+        AD_COLOUR = "#009900"
         DH_COLOUR = BLACK
         D_COLOUR = YELLOW
 
@@ -237,30 +237,30 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         nodes_equal_text = TexMobject(r'\text{nodes}=', color = BLACK, fill_color = BLACK)
         a_text = TexMobject(r'A', color = BLACK, fill_color = A_COLOUR)
         minus_text = TexMobject(r'-', color = BLACK, fill_color = BLACK)
-        bd_text = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
+        ad_text = TexMobject(r'\textit{AD}', color = BLACK, fill_color = AD_COLOUR)
 
-        new_text_objects = [red_text_2, nodes_equal_text, a_text, minus_text, bd_text]
+        new_text_objects = [red_text_2, nodes_equal_text, a_text, minus_text, ad_text]
         for i in range(1, len(new_text_objects)):
             new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
             previous_mobject = new_text_objects[i]
 
-        BD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, BD_COLOUR)
-        BDLabel = TexMobject('BD', color = BLACK, fill_color = BD_COLOUR)
-        BDLabel.next_to(BD, LEFT)
+        AD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, AD_COLOUR)
+        ADLabel = TexMobject('AD', color = BLACK, fill_color = AD_COLOUR)
+        ADLabel.next_to(AD, LEFT)
 
-        self.play(Write(ARect), Write(ALabel), Write(BD), Write(BDLabel), *map(Write, new_text_objects))
+        self.play(Write(ARect), Write(ALabel), Write(AD), Write(ADLabel), *map(Write, new_text_objects))
 
         self.wait(2)
 
-        bd_text_2 = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
-        bd_text_2.next_to(red_text_2, DOWN)
-        bd_text_2.align_on_border(LEFT)
+        ad_text_2 = TexMobject(r'\textit{AD}', color = BLACK, fill_color = AD_COLOUR)
+        ad_text_2.next_to(red_text_2, DOWN)
+        ad_text_2.align_on_border(LEFT)
         equal_text = TexMobject(r'=', color = BLACK, fill_color = BLACK)
         d_text = TexMobject(r'\textit{D}', color = BLACK, fill_color = D_COLOUR)
         minus_text_2 = TexMobject(r'-', color = BLACK, fill_color = BLACK)
         dh_text = TexMobject(r'\textit{DH}', color = BLACK, fill_color = DH_COLOUR)
 
-        new_text_objects = [bd_text_2, equal_text, d_text, minus_text_2, dh_text]
+        new_text_objects = [ad_text_2, equal_text, d_text, minus_text_2, dh_text]
         for i in range(1, len(new_text_objects)):
             new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
             previous_mobject = new_text_objects[i]
@@ -273,7 +273,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         self.wait(2)
 
         dh_text_2 = TexMobject(r'\textit{DH}', color = BLACK, fill_color = DH_COLOUR)
-        dh_text_2.next_to(bd_text_2, DOWN)
+        dh_text_2.next_to(ad_text_2, DOWN)
         dh_text_2.align_on_border(LEFT)
         equal_text_2 = TexMobject(r'=', color = BLACK, fill_color = BLACK)
         dots_text = TexMobject(r'... ', color = BLACK, fill_color = BLACK)
