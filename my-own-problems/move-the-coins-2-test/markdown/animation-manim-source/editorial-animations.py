@@ -300,19 +300,26 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         self.wait(2)
 
+        dh_text_2 = TexMobject(r'\textit{DH}', color = BLACK, fill_color = DH_COLOUR)
+        dh_text_2.next_to(bd_text_2, DOWN)
+        dh_text_2.align_on_border(LEFT)
+        equal_text_2 = TexMobject(r'=', color = BLACK, fill_color = BLACK)
+        descendents_of_text = TexMobject(r'\text{ descendents of }', color = BLACK, fill_color = BLACK)
+
+        last_descendent_row_mobjects = []
+        for node in descendents[up_to_height - node_to_reparent_height + 1]:
+            last_descendent_row_mobjects.append(g.mobject_for_node[node])
+
+        last_descendent_row_anims = []
+        for node_mobject in last_descendent_row_mobjects:
+            last_descendent_row_anims.append(ApplyMethod(node_mobject.set_color, DH_COLOUR))
+
+        new_text_objects = [dh_text_2, equal_text_2, descendents_of_text]
+        for i in range(1, len(new_text_objects)):
+            new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
+            previous_mobject = new_text_objects[i]
 
 
+        self.play(*last_descendent_row_anims, *map(Write, new_text_objects))
 
-
-
-
-
-                    
-
-
-
-
-
-
-
-
+        self.wait(2)

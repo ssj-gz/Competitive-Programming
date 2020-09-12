@@ -109,6 +109,7 @@ class NodeMObject(VMobject):
             value_mobject = TexMobject(str(self.value))
             value_mobject.set_color(BLACK)
             self.add(value_mobject)
+        self.circle = circle
 
     def copy(self):
         return self.deepcopy()
