@@ -41,11 +41,15 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         RED = "#ff0000"
         BLUE = "#0000ff"
+        GREEN = "#00ff00"
         YELLOW = "#ffff00"
         GREY = "#999999"
 
-        A_COLOUR = GREEN
+        A_COLOUR = PURPLE
         B_COLOUR = ORANGE
+        BD_COLOUR = "#009900"
+        DH_COLOUR = BLACK
+        D_COLOUR = YELLOW
 
         g = Graph(self, globals()["Node"], globals()["NodeMObject"])
         node_radius = 0.15
@@ -132,8 +136,14 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         height_label.next_to(g.mobject_for_node[nodes_at_height[up_to_height][-1]], RIGHT)
 
 
-        self.play(create_change_node_color_anim(node_to_reparent, YELLOW))
-        self.play(Write(height_label))
+        node_to_reparent_mobject = g.mobject_for_node[node_to_reparent]
+        node_to_reparent_label = TexMobject(r'\textit{nodeToReparent}', color = BLACK, fill_color = BLACK)
+        node_to_reparent_label.next_to(node_to_reparent_mobject, LEFT)
+
+        self.play(Write(node_to_reparent_label), WiggleOutThenIn(node_to_reparent_mobject, scale_value = 2))
+        self.play(Write(Cross(node_to_reparent_mobject)))
+        self.play(Write(height_label), FadeOut(node_to_reparent_label))
+        self.play(WiggleOutThenIn(height_label, scale_value = 2))
 
         descendents = self.find_descendents_at_height(g, node_to_reparent, ignore_nodes = [node_to_reparent.config['parent']])
 
@@ -180,7 +190,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 points.append(to_left_of_node_point)
 
             print("points:", points)
-            return Polygon(*points, fill_opacity = 0, color = colour)
+            return Polygon(*points, fill_opacity = 0, color = colour, stroke_width = 5)
 
         def create_rectangle_around_nodes(node_layers, dist_from_node, colour):
             rectangle_top = node_layers[0][0].config['center_y'] + node_radius + dist_from_node
@@ -192,15 +202,13 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 rectangle_left = min(rectangle_left, layer[0].config['center_x'] - node_radius - dist_from_node)
                 rectangle_right = max(rectangle_right, layer[-1].config['center_x'] + node_radius + dist_from_node)
 
-            rectangle = Rectangle(width = rectangle_right - rectangle_left, height = rectangle_top - rectangle_bottom, color = colour)
+            rectangle = Rectangle(width = rectangle_right - rectangle_left, height = rectangle_top - rectangle_bottom, color = colour, stroke_width = 5)
             # Shift so that top-left is at origin.
             rectangle.shift(rectangle.get_width() / 2 * RIGHT, rectangle.get_height() / 2 * DOWN)
             # Shift to correct position.
             rectangle.shift(rectangle_left * RIGHT + rectangle_top * UP)
             return rectangle
 
-        blah = create_polygon_around_nodes(descendents, 0.1, RED)
-        self.play(Write(blah))
 
         split_red_anims = []
         for height in range(0, up_to_height + 1):
@@ -212,16 +220,25 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 else:
                     split_red_anims.append(create_change_node_color_anim(node, BLUE))
 
-        ARect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.1, A_COLOUR)
+        ARect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.05, A_COLOUR)
         ALabel = TexMobject('A', color = BLACK, fill_color = A_COLOUR)
         ALabel.next_to(ARect, LEFT)
         self.play(*split_red_anims, Write(ARect), Write(ALabel))
 
-        BRect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height], 0.1, B_COLOUR)
+        BRect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height + 1], 0.2, B_COLOUR)
         BLabel = TexMobject('B', color = BLACK, fill_color = B_COLOUR)
         BLabel.next_to(BRect, LEFT)
         self.play(Write(BRect), Write(BLabel))
 
+        BD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, BD_COLOUR)
+        BDLabel = TexMobject('BD', color = BLACK, fill_color = BD_COLOUR)
+        BDLabel.next_to(BD, LEFT)
+        self.play(Write(BD), Write(BDLabel))
+
+        DH = create_polygon_around_nodes(descendents[len(descendents) - node_to_reparent_height + 2:len(descendents)], 0.1, DH_COLOUR)
+        DHLabel = TexMobject('DH', color = BLACK, fill_color = DH_COLOUR)
+        DHLabel.next_to(DH, DOWN)
+        self.play(Write(DH), Write(DHLabel))
 
         self.wait(1)
 
