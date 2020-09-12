@@ -44,6 +44,9 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         YELLOW = "#ffff00"
         GREY = "#999999"
 
+        A_COLOUR = GREEN
+        B_COLOUR = ORANGE
+
         g = Graph(self, globals()["Node"], globals()["NodeMObject"])
         node_radius = 0.15
         root = g.create_node(0, 5, { 'radius' : node_radius, 'fill_color' : GREY})
@@ -205,17 +208,19 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 if node.config['is_descendent']:
                     continue
                 if height < node_to_reparent_height:
-                    split_red_anims.append(create_change_node_color_anim(node, GREEN))
+                    split_red_anims.append(create_change_node_color_anim(node, A_COLOUR))
                 else:
                     split_red_anims.append(create_change_node_color_anim(node, BLUE))
 
-        self.play(*split_red_anims)
+        ARect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.1, A_COLOUR)
+        ALabel = TexMobject('A', color = BLACK, fill_color = A_COLOUR)
+        ALabel.next_to(ARect, LEFT)
+        self.play(*split_red_anims, Write(ARect), Write(ALabel))
 
-        rect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.1, YELLOW)
-        self.play(Write(rect))
-
-        rect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height], 0.1, YELLOW)
-        self.play(Write(rect))
+        BRect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height], 0.1, B_COLOUR)
+        BLabel = TexMobject('B', color = BLACK, fill_color = B_COLOUR)
+        BLabel.next_to(BRect, LEFT)
+        self.play(Write(BRect), Write(BLabel))
 
 
         self.wait(1)
