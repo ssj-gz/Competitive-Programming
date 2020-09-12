@@ -54,4 +54,5 @@ class SSJGZScene(Scene):
         for anim in background_anims:
             self.background_anims.append(anim)
 
-
+    def save_thumbnail(self):
+        Image.fromarray(self.get_frame()).save(self.__class__.__name__ + '_thumbnail.png')
