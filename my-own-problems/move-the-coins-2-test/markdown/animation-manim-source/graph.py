@@ -99,7 +99,10 @@ class NodeMObject(VMobject):
         self.config = config
 
         circle_radius = config['radius']
-        circle = Circle(radius=circle_radius,color=BLACK,fill_opacity=1, fill_color=WHITE)
+        fill_color = WHITE
+        if 'fill_color' in config:
+            fill_color = config['fill_color']
+        circle = Circle(radius=circle_radius,color=BLACK,fill_opacity=1, fill_color=fill_color)
         self.add(circle)
         if 'value' in config:
             self.value = config['value']
