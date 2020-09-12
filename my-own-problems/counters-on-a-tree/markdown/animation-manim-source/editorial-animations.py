@@ -8,11 +8,13 @@ from graph import *
 class DistTracker():
     def __init__(self):
         self.distances = []
+        self.numTimesAdjusted = 0
 
     def insertDist(self, newDist):
         self.distances.append(newDist)
 
     def adjustAllDistances(self, toAdd):
+        self.numTimesAdjusted = self.numTimesAdjusted + 1
         for i,dist in enumerate(self.distances):
             self.distances[i] = self.distances[i] + toAdd
 
@@ -22,8 +24,13 @@ class DistTracker():
             result = result ^ dist
         return result
 
+    def getNumTimesAdjusted(self):
+        return self.numTimesAdjusted
+        
+
     def clear(self):
         self.distances = []
+        self.numTimesAdjusted = 0
 
 def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implementation = 'naive', right_to_left = False):
         # Graph, coins, and the Grundy numbers beneath the coins.
@@ -595,7 +602,11 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                     red_one_zone_advance_anims.append(Transform(red_zone_info_for_row[i][0], partial_grid.create_rectangle_aligned_to_cells(None, red_zone_info_for_row[i][1][0], bitNum, 1 + red_zone_info_for_row[i][1][1] - red_zone_info_for_row[i][1][0])))
 
                         for coin in partial_grid.coin_mobjects_for_row[bitNum]:
-                            was_in_red = coin.pos_in_row >= num_in_row / 2
+                            if dist_tracker_implementation == 'partial_grid':
+                                was_in_red = coin.pos_in_row >= num_in_row / 2
+                            else:
+                                adjusted_coin_pos = (coin.pos_in_row + distTracker.getNumTimesAdjusted() - 1 + num_in_row) % num_in_row
+                                was_in_red = adjusted_coin_pos >= num_in_row / 2
 
                             x_offset_to_new_pos = 0
 
@@ -615,9 +626,14 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 x_offset_to_new_pos = (coin.pos_in_row - previous_pos) * CELL_WIDTH
 
                             # Do we need an addition representative in the right place?
-                            in_red = coin.pos_in_row >= num_in_row / 2
+                            if dist_tracker_implementation == 'partial_grid':
+                                in_red = coin.pos_in_row >= num_in_row / 2
+                            else:
+                                adjusted_coin_pos = (coin.pos_in_row + distTracker.getNumTimesAdjusted()) % num_in_row
+                                in_red = adjusted_coin_pos >= num_in_row / 2
 
                             
+                            print("bitNum:", bitNum, " coin:", repr(coin), " was_in_red:", was_in_red, " in_red:", in_red, " numTimesAdjusted:", distTracker.getNumTimesAdjusted())
                             if not was_in_red and in_red:
                                 coin.addition_representative.become(coin.copy())
                                 coin.addition_representative.set_opacity(0)
@@ -661,14 +677,14 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     # Advance the coins.
                     if dist_tracker_implementation == 'partial_grid':
                         scene.play(*coin_advance_anims)
+                    else:
+                        scene.play(*red_one_zone_advance_anims)
 
                     # Update the addition representative coins.
                     for m in addition_representatives_to_show:
                         m.set_opacity(1)
                     if coin_addition_representative_transforms:
                         scene.play(*coin_addition_representative_transforms)
-                    if red_one_zone_advance_anims:
-                        scene.play(*red_one_zone_advance_anims)
 
                     for m in addition_representatives_to_hide:
                         m.set_opacity(0)
