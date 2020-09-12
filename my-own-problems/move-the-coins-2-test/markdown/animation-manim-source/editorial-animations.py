@@ -336,5 +336,6 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         dots_target.scale(descendents_of_text.get_height() / dots_target.get_height())
 
         self.play(Transform(dots_text, dots_target), *last_descendent_row_anims)
+        self.save_thumbnail()
 
         self.wait(2)
