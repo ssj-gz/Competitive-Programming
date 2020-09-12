@@ -66,7 +66,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             return coin_mobject
 
         coin_mobjects = []
-        coin_mobjects.append(create_coin_for_node(nodes[0], RED))
+        coin_mobjects.append(create_coin_for_node(nodes[0], ORANGE))
         coin_mobjects.append(create_coin_for_node(nodes[1], GREEN))
         coin_mobjects.append(create_coin_for_node(nodes[4], PURPLE))
 
