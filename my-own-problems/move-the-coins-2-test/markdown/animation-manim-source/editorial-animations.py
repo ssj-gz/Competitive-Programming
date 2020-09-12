@@ -154,7 +154,10 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                 node.config['is_descendent'] = True
                 highlight_descendents_anims.append(create_change_node_color_anim(node, YELLOW))
 
-        self.play(*highlight_descendents_anims)
+        d_label = TexMobject(r'D', color = BLACK, fill_color = D_COLOUR)
+        d_label.next_to(node_to_reparent_mobject, DOWN)
+
+        self.play(*highlight_descendents_anims, Write(d_label))
 
         show_non_descendents_up_to_height_anims = []
         for height in range(0, up_to_height + 1):
