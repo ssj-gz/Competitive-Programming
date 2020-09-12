@@ -11,6 +11,8 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         ignore_nodes = ignore_nodes.copy()
 
         self.find_descendents_at_height_aux(graph, root, 1, nodes_at_height, ignore_nodes)
+        print("num layers:", len(nodes_at_height))
+
 
         return nodes_at_height
         
@@ -28,9 +30,10 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         if len(nodes_at_height) == height:
             nodes_at_height.append([])
-        nodes_at_height[height].extend(children)
+        nodes_at_height[height].append(root)
+        print("Appending a node at height:", height)
+        ignore_nodes.append(root)
         for child in children:
-            ignore_nodes.append(child)
             self.find_descendents_at_height_aux(graph, child, height + 1, nodes_at_height, ignore_nodes)
 
     def construct(self):
@@ -122,11 +125,14 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         highlight_descendents_anims = []
         for descendents_at_height in descendents:
+            print("num descendents_at_height:", len(descendents_at_height))
+            highlight_descendents_anims = []
             for node in descendents_at_height:
                 node.config['is_descendent'] = True
                 highlight_descendents_anims.append(create_change_node_color_anim(node, YELLOW))
+            self.play(*highlight_descendents_anims)
 
-        self.play(*highlight_descendents_anims)
+        #self.play(*highlight_descendents_anims)
 
         show_non_descendents_up_to_height_anims = []
         for height in range(0, up_to_height + 1):
@@ -135,6 +141,42 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                     show_non_descendents_up_to_height_anims.append(create_change_node_color_anim(node, RED))
         
         self.play(*show_non_descendents_up_to_height_anims)
+
+        def create_polygon_around_nodes(node_layers, dist_from_node, colour):
+            num_layers = len(node_layers)
+            node_layers = node_layers.copy()
+            for layer in node_layers:
+                layer.sort(key = lambda n: n.config['center_x'])
+                print("num in layer:", len(layer))
+            points = []
+            for top_node in node_layers[0]:
+                above_node_point = [top_node.config['center_x'], top_node.config['center_y'] + dist_from_node + node_radius, 0]
+                print("above_node_point:", above_node_point)
+                points.append(above_node_point)
+            for layer in node_layers:
+                right_node = layer[-1]
+                to_right_of_node_point = [right_node.config['center_x'] + dist_from_node + node_radius, right_node.config['center_y'], 0]
+                print("to_right_of_node_point:", to_right_of_node_point)
+                points.append(to_right_of_node_point)
+            for bottom_node in reversed(node_layers[-1]):
+                below_node_point = [bottom_node.config['center_x'], bottom_node.config['center_y'] - dist_from_node - node_radius, 0]
+                print("below_node_point:", below_node_point)
+                points.append(below_node_point)
+            for layer in reversed(node_layers):
+                left_node = layer[0]
+                to_left_of_node_point = [left_node.config['center_x'] - dist_from_node - node_radius, left_node.config['center_y'], 0]
+                print("to_left_of_node_point:", to_left_of_node_point)
+                points.append(to_left_of_node_point)
+
+            print("points:", points)
+            return Polygon(*points, fill_opacity = 0, color = colour)
+
+        blah = create_polygon_around_nodes(descendents, 0.1, RED)
+        self.play(Write(blah))
+
+
+
+
 
 
 
