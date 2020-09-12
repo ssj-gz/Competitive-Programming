@@ -154,7 +154,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
             scene.play(AnimationGroup(*intro_anims, Write(grundy_number_label), Write(grundy_value_mobject)))
 
-        elif dist_tracker_implementation == 'partial_grid':
+        elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
             grundy_value_mobject = TexMobject(r'0', colour = BLACK, fill_opacity = 1, fill_color = BLUE) # TODO
             grundy_value_mobject.digitValue = 0
             CELL_HEIGHT = 0.75
@@ -381,7 +381,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     scene.add(new_tracked_distance_mobject)
                     tracked_distance_mobjects.append(new_tracked_distance_mobject)
 
-                elif dist_tracker_implementation == 'partial_grid':
+                elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
                     coin_mobjects_to_transform = []
 
                     for bitNum in range(0, NUM_BITS):
@@ -481,7 +481,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     
                     scene.play(LaggedStart(*animations),
                               LaggedStart(*fadePlusOneAnims))
-                elif dist_tracker_implementation == 'partial_grid':
+                elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
                     scene.play(*intro_animations)
 
                     coin_advance_anims = []
@@ -623,4 +623,9 @@ class MoveCoins2Editorial_3_collect_and_propagate_along_node_chain_left_to_right
         super().construct()
         do_collect_and_propagate_along_node_chain_naive(self, dist_tracker_implementation = 'partial_grid', right_to_left = False)
         
+class MoveCoins2Editorial_4_collect_and_propagate_along_node_chain_left_to_right_optimised(SSJGZScene):
+
+    def construct(self):
+        super().construct()
+        do_collect_and_propagate_along_node_chain_naive(self, dist_tracker_implementation = 'optimised', right_to_left = False)
 
