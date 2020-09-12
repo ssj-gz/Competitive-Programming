@@ -166,7 +166,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         want_all_the_text.shift(3 * DOWN)
         red_text = TexMobject(r'\text{red }', color = BLACK, fill_color = RED)
         red_text.next_to(want_all_the_text)
-        nodes_text = TexMobject(r'\text{nodes}', color = BLACK, fill_color = BLACK)
+        nodes_text = TexMobject(r'\text{nodes}.', color = BLACK, fill_color = BLACK)
         nodes_text.next_to(red_text)
 
         self.play(*show_non_descendents_up_to_height_anims, Write(want_all_the_text), Write(red_text), Write(nodes_text))
@@ -250,21 +250,49 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         self.wait(2)
 
+        blue_text_2 = TexMobject(r'\text{Blue }', color = BLACK, fill_color = BLUE)
+        blue_text_2.next_to(want_all_the_text, DOWN)
+        blue_text_2.align_on_border(LEFT)
+        print("blue_text_2 pos:", blue_text_2.get_center())
+        nodes_equal_text = TexMobject(r'\text{nodes}=', color = BLACK, fill_color = BLACK)
+        b_text = TexMobject(r'B', color = BLACK, fill_color = B_COLOUR)
+        minus_text = TexMobject(r'-', color = BLACK, fill_color = BLACK)
+        bd_text = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
+
+        new_text_objects = [blue_text_2, nodes_equal_text, b_text, minus_text, bd_text]
+        for i in range(1, len(new_text_objects)):
+            new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
+            previous_mobject = new_text_objects[i]
+
         BRect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height + 1], 0.2, B_COLOUR)
         BLabel = TexMobject('B', color = BLACK, fill_color = B_COLOUR)
         BLabel.next_to(BRect, LEFT)
-        self.play(Write(BRect), Write(BLabel))
-
 
         BD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, BD_COLOUR)
         BDLabel = TexMobject('BD', color = BLACK, fill_color = BD_COLOUR)
         BDLabel.next_to(BD, LEFT)
-        self.play(Write(BD), Write(BDLabel))
+
+        self.play(Write(BRect), Write(BLabel), Write(BD), Write(BDLabel), *map(Write, new_text_objects))
+
+        self.wait(1)
+
+        bd_text_2 = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
+        bd_text_2.next_to(blue_text_2, DOWN)
+        bd_text_2.align_on_border(LEFT)
+        equal_text = TexMobject(r'=', color = BLACK, fill_color = BLACK)
+        d_text = TexMobject(r'\textit{D}', color = BLACK, fill_color = D_COLOUR)
+        minus_text_2 = TexMobject(r'-', color = BLACK, fill_color = BLACK)
+        dh_text = TexMobject(r'\textit{DH}', color = BLACK, fill_color = DH_COLOUR)
+
+        new_text_objects = [bd_text_2, equal_text, d_text, minus_text_2, dh_text]
+        for i in range(1, len(new_text_objects)):
+            new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
+            previous_mobject = new_text_objects[i]
 
         DH = create_polygon_around_nodes(descendents[len(descendents) - node_to_reparent_height + 2:len(descendents)], 0.1, DH_COLOUR)
         DHLabel = TexMobject('DH', color = BLACK, fill_color = DH_COLOUR)
         DHLabel.next_to(DH, DOWN)
-        self.play(Write(DH), Write(DHLabel))
+        self.play(Write(DH), Write(DHLabel), *map(Write, new_text_objects))
 
         self.wait(1)
 
