@@ -46,7 +46,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         GREY = "#999999"
         MAGENTA = "#aa00aa"
 
-        A_COLOUR = PURPLE
+        A_COLOUR = BLUE
         B_COLOUR = ORANGE
         BD_COLOUR = "#009900"
         DH_COLOUR = BLACK
@@ -223,66 +223,37 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
             return rectangle
 
 
-        split_red_anims = []
-        for height in range(0, up_to_height + 1):
-            for node in nodes_at_height[height]:
-                if node.config['is_descendent']:
-                    continue
-                if height < node_to_reparent_height:
-                    split_red_anims.append(create_change_node_color_anim(node, A_COLOUR))
-                else:
-                    split_red_anims.append(create_change_node_color_anim(node, BLUE))
-
-        a_text = TexMobject(r'A', color = BLACK, fill_color = A_COLOUR)
-        and_text = TexMobject(r'\text{ and }', color = BLACK, fill_color = BLACK)
-        blue_text = TexMobject(r'\text{ blue }', color = BLACK, fill_color = BLUE)
-        nodes_text_target = nodes_text.copy()
-
-        previous_mobject = want_all_the_text
-
-        new_text_objects = [want_all_the_text, a_text, and_text, blue_text, nodes_text_target]
-        for i in range(1, len(new_text_objects)):
-            new_text_objects[i].next_to(previous_mobject, RIGHT)
-            previous_mobject = new_text_objects[i]
 
         self.wait(2)
 
-        ARect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.05, A_COLOUR)
+        ARect = create_rectangle_around_nodes(nodes_at_height[0:up_to_height+1], 0.15, A_COLOUR)
         ALabel = TexMobject('A', color = BLACK, fill_color = A_COLOUR)
         ALabel.next_to(ARect, LEFT)
 
-        self.play(*split_red_anims, Write(ARect), Write(ALabel), Transform(red_text, a_text), Write(and_text), Write(blue_text), Transform(nodes_text, nodes_text_target))
 
-        self.wait(2)
-
-        blue_text_2 = TexMobject(r'\text{Blue }', color = BLACK, fill_color = BLUE)
-        blue_text_2.next_to(want_all_the_text, DOWN)
-        blue_text_2.align_on_border(LEFT)
-        print("blue_text_2 pos:", blue_text_2.get_center())
+        red_text_2 = TexMobject(r'\text{Red }', color = BLACK, fill_color = RED)
+        red_text_2.next_to(want_all_the_text, DOWN)
+        red_text_2.align_on_border(LEFT)
         nodes_equal_text = TexMobject(r'\text{nodes}=', color = BLACK, fill_color = BLACK)
-        b_text = TexMobject(r'B', color = BLACK, fill_color = B_COLOUR)
+        a_text = TexMobject(r'A', color = BLACK, fill_color = A_COLOUR)
         minus_text = TexMobject(r'-', color = BLACK, fill_color = BLACK)
         bd_text = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
 
-        new_text_objects = [blue_text_2, nodes_equal_text, b_text, minus_text, bd_text]
+        new_text_objects = [red_text_2, nodes_equal_text, a_text, minus_text, bd_text]
         for i in range(1, len(new_text_objects)):
             new_text_objects[i].next_to(new_text_objects[i - 1], RIGHT)
             previous_mobject = new_text_objects[i]
-
-        BRect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height + 1], 0.2, B_COLOUR)
-        BLabel = TexMobject('B', color = BLACK, fill_color = B_COLOUR)
-        BLabel.next_to(BRect, LEFT)
 
         BD = create_polygon_around_nodes(descendents[0:up_to_height - node_to_reparent_height + 2], 0.1, BD_COLOUR)
         BDLabel = TexMobject('BD', color = BLACK, fill_color = BD_COLOUR)
         BDLabel.next_to(BD, LEFT)
 
-        self.play(Write(BRect), Write(BLabel), Write(BD), Write(BDLabel), *map(Write, new_text_objects))
+        self.play(Write(ARect), Write(ALabel), Write(BD), Write(BDLabel), *map(Write, new_text_objects))
 
         self.wait(2)
 
         bd_text_2 = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
-        bd_text_2.next_to(blue_text_2, DOWN)
+        bd_text_2.next_to(red_text_2, DOWN)
         bd_text_2.align_on_border(LEFT)
         equal_text = TexMobject(r'=', color = BLACK, fill_color = BLACK)
         d_text = TexMobject(r'\textit{D}', color = BLACK, fill_color = D_COLOUR)
