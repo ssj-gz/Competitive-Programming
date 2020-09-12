@@ -157,9 +157,9 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
 
         elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
             def create_rectangle_aligned_to_cells(self, cell_col, cell_row, cell_horizontal_span, colour = "#ff0000"):
-                cell = partial_grid.item_at[cell_row][cell_col]
-                cell_top_left_x = cell.get_x() - CELL_WIDTH / 2
-                cell_top_left_y = cell.get_y() + CELL_HEIGHT / 2
+                first_cell = partial_grid.item_at[cell_row][0]
+                cell_top_left_x = first_cell.get_x() - CELL_WIDTH / 2 + cell_col * CELL_WIDTH
+                cell_top_left_y = first_cell.get_y() + CELL_HEIGHT / 2
                 print("create_rectangle_aligned_to_cells: cell_col:", cell_col, " cell_row:", cell_row, " cell_horizontal_span:" , cell_horizontal_span)
 
                 rectangle = Rectangle(color="#ff0000",fill_opacity=1, fill_color=colour, width = CELL_WIDTH * cell_horizontal_span, height = CELL_HEIGHT)
@@ -552,8 +552,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                         print("activating other rect")
                                         red_zone_info_for_row[1][1][0] = num_in_row - 1
                                         red_zone_info_for_row[1][1][1] = num_in_row - 1
-                                        blah = partial_grid.create_rectangle_aligned_to_cells(None, num_in_row - 1, bitNum, 0)
-                                        blah.shift(CELL_WIDTH * RIGHT)
+                                        blah = partial_grid.create_rectangle_aligned_to_cells(None, num_in_row, bitNum, 0)
                                         red_zone_info_for_row[1][0].become(blah) 
                                     else:
                                         print("not activating other rect (", red_zone_info_for_row[1][1][0], ")")
@@ -567,6 +566,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                     red_zone_info_for_row.append(blah)
                                     red_zone_info_for_row[1][1][0] = -1
                                     red_zone_info_for_row[1][1][1] = -1
+                                    red_zone_info_for_row[1][0].become(partial_grid.create_rectangle_aligned_to_cells(None, 0, bitNum, 0))
 
                                     # Activate other Rect?
                                     if red_zone_info_for_row[0][1][0] == -1:
@@ -574,17 +574,23 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                         print("activating other rect")
                                         red_zone_info_for_row[0][1][0] = num_in_row - 1
                                         red_zone_info_for_row[0][1][1] = num_in_row - 1
-                                        blah = partial_grid.create_rectangle_aligned_to_cells(None, num_in_row - 1, bitNum, 0)
-                                        blah.shift(CELL_WIDTH * RIGHT)
+                                        blah = partial_grid.create_rectangle_aligned_to_cells(None, num_in_row, bitNum, 0)
                                         red_zone_info_for_row[0][0].become(blah) 
                                     else:
                                         print("not activating other rect (", red_zone_info_for_row[0][1][0], ")")
+
+                            for i in range(0, 2):
+                                if red_zone_info_for_row[i][1][0] > 0 and (1 + red_zone_info_for_row[i][1][1] - red_zone_info_for_row[i][1][0]) < num_in_row // 2:
+                                    # The rightmost rectangle needs to keep its right-hand edge on the right of the grid until it fills num_in_row // 2 cells.
+                                    red_zone_info_for_row[i][1][1] = num_in_row - 1
+
 
                             print("After:")
                             for i in range(0, 2):
                                 print(red_zone_info_for_row[i][0].id, " [", red_zone_info_for_row[i][1][0], ", ", red_zone_info_for_row[i][1][1], "]")
 
                             for i in range(0, 2):
+                                scene.bring_to_back(red_zone_info_for_row[i][0])
                                 if red_zone_info_for_row[i][1][0] != -1:
                                     red_one_zone_advance_anims.append(Transform(red_zone_info_for_row[i][0], partial_grid.create_rectangle_aligned_to_cells(None, red_zone_info_for_row[i][1][0], bitNum, 1 + red_zone_info_for_row[i][1][1] - red_zone_info_for_row[i][1][0])))
 
