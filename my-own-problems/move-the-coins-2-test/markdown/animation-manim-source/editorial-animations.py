@@ -5,10 +5,39 @@ from graph import *
 
 class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descendents_up_to_height(SSJGZScene):
 
+    def find_descendents_at_height(self, graph, root, ignore_nodes = []):
+        nodes_at_height = []
+        nodes_at_height.append([root])
+        ignore_nodes = ignore_nodes.copy()
+
+        self.find_descendents_at_height_aux(graph, root, 1, nodes_at_height, ignore_nodes)
+
+        return nodes_at_height
+        
+
+    def find_descendents_at_height_aux(self, graph, root, height, nodes_at_height, ignore_nodes = []):
+        children = []
+        for edge in graph.edges:
+            neighbour = None
+            if root == edge.start_node:
+                neighbour = edge.end_node
+            elif root == edge.end_node:
+                neighbour = edge.start_node
+            if neighbour and neighbour not in ignore_nodes:
+                children.append(neighbour)
+
+        if len(nodes_at_height) == height:
+            nodes_at_height.append([])
+        nodes_at_height[height].extend(children)
+        for child in children:
+            ignore_nodes.append(child)
+            self.find_descendents_at_height_aux(graph, child, height + 1, nodes_at_height, ignore_nodes)
+
     def construct(self):
         super().construct()
 
         BLUE = "#0000ff"
+        YELLOW = "#ffff00"
 
         g = Graph(self, globals()["Node"], globals()["NodeMObject"])
         node_radius = 0.1
@@ -34,6 +63,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
                 for i in range(0, num_children):
                     new_child = g.create_node(0, 0, {'radius' : node_radius, 'fill_color' : BLUE})
+                    new_child.config['parent'] = node
                     g.create_edge(node, new_child, {})
                     next_node_layer.append(new_child)
 
@@ -62,8 +92,34 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         else:
             g.layout_tree(root, gap_between_parent_and_child, min_gap_between_siblings)
 
+        def create_change_node_color_anim(node, new_color):
+            node_mobject = g.mobject_for_node[node]
+            config = node.config
+            config['fill_color'] = new_color
+
+            new_node_mobject = NodeMObject(0, config)
+            new_node_mobject.move_to(node_mobject.get_center())
+            return Transform(node_mobject, new_node_mobject)
+
 
         self.play(g.create_animation())
+        node_to_reparent_height = 4
+        node_to_reparent = nodes_at_height[node_to_reparent_height][2]
+        self.play(create_change_node_color_anim(node_to_reparent, YELLOW))
+
+        descendents = self.find_descendents_at_height(g, node_to_reparent, ignore_nodes = [node_to_reparent.config['parent']])
+
+        blah = []
+        print("descendents heights:", len(descendents))
+        for descendents_at_height in descendents:
+            print("blee:", str(descendents_at_height))
+            for node in descendents_at_height:
+                blah.append(create_change_node_color_anim(node, YELLOW))
+
+        print("Blah:", repr(blah))
+        self.play(*blah)
+
+
 
                     
 
