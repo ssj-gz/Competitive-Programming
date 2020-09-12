@@ -37,7 +37,7 @@ for dir_name in $(seq -f "%05g" 0 99999); do
   fi
 
   cd ${dir_name}
-  convert *.png -layers OptimizeFrame -monitor "../${dir_name}.gif"
+  convert *.png -layers OptimizeFrame -monitor -delay 10 "../${dir_name}.gif" # 10 fps.
   cd -
 done
 
