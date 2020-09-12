@@ -179,6 +179,23 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
             print("points:", points)
             return Polygon(*points, fill_opacity = 0, color = colour)
 
+        def create_rectangle_around_nodes(node_layers, dist_from_node, colour):
+            rectangle_top = node_layers[0][0].config['center_y'] + node_radius + dist_from_node
+            rectangle_bottom = node_layers[-1][0].config['center_y'] - node_radius - dist_from_node
+
+            rectangle_left = 1000
+            rectangle_right = -1000
+            for layer in node_layers:
+                rectangle_left = min(rectangle_left, layer[0].config['center_x'] - node_radius - dist_from_node)
+                rectangle_right = max(rectangle_right, layer[-1].config['center_x'] + node_radius + dist_from_node)
+
+            rectangle = Rectangle(width = rectangle_right - rectangle_left, height = rectangle_top - rectangle_bottom, color = colour)
+            # Shift so that top-left is at origin.
+            rectangle.shift(rectangle.get_width() / 2 * RIGHT, rectangle.get_height() / 2 * DOWN)
+            # Shift to correct position.
+            rectangle.shift(rectangle_left * RIGHT + rectangle_top * UP)
+            return rectangle
+
         blah = create_polygon_around_nodes(descendents, 0.1, RED)
         self.play(Write(blah))
 
@@ -193,6 +210,14 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
                     split_red_anims.append(create_change_node_color_anim(node, BLUE))
 
         self.play(*split_red_anims)
+
+        rect = create_rectangle_around_nodes(nodes_at_height[0:node_to_reparent_height], 0.1, YELLOW)
+        self.play(Write(rect))
+
+        rect = create_rectangle_around_nodes(nodes_at_height[node_to_reparent_height:up_to_height], 0.1, YELLOW)
+        self.play(Write(rect))
+
+
         self.wait(1)
 
 
