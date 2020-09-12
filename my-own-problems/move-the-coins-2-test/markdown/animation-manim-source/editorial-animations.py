@@ -137,6 +137,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
 
         node_to_reparent_mobject = g.mobject_for_node[node_to_reparent]
+        self.bring_to_front(node_to_reparent_mobject)
         node_to_reparent_label = TexMobject(r'\textit{nodeToReparent}', color = BLACK, fill_color = BLACK)
         node_to_reparent_label.next_to(node_to_reparent_mobject, LEFT)
 
@@ -274,7 +275,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
 
         self.play(Write(BRect), Write(BLabel), Write(BD), Write(BDLabel), *map(Write, new_text_objects))
 
-        self.wait(1)
+        self.wait(2)
 
         bd_text_2 = TexMobject(r'\textit{BD}', color = BLACK, fill_color = BD_COLOUR)
         bd_text_2.next_to(blue_text_2, DOWN)
@@ -294,7 +295,7 @@ class MoveTheCoinsCreatingTestEditorial_1_schematic_for_finding_all_non_descende
         DHLabel.next_to(DH, DOWN)
         self.play(Write(DH), Write(DHLabel), *map(Write, new_text_objects))
 
-        self.wait(1)
+        self.wait(2)
 
 
 
