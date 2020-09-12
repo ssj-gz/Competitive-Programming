@@ -53,7 +53,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
         previous_node = None
         nodes = []
         for i in range(0, num_nodes):
-            newNode = g.create_node(node_left, frame_height * proportion_of_frame_height_to_use / 2 - (arrow_total_length + arrow_dist_above_node), { 'radius' : node_radius})
+            newNode = g.create_node(node_left + node_radius, frame_height * proportion_of_frame_height_to_use / 2 - (arrow_total_length + arrow_dist_above_node), { 'radius' : node_radius})
             newNode.config['coin_mobject'] = None
             newNode.config['grundy_number'] = 0
             if previous_node:
