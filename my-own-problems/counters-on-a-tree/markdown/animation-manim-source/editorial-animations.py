@@ -156,13 +156,13 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
             scene.play(AnimationGroup(*intro_anims, Write(grundy_number_label), Write(grundy_value_mobject)))
 
         elif dist_tracker_implementation == 'partial_grid' or dist_tracker_implementation == 'optimised':
-            def create_rectangle_aligned_to_cells(self, cell_col, cell_row, cell_horizontal_span):
+            def create_rectangle_aligned_to_cells(self, cell_col, cell_row, cell_horizontal_span, colour = "#ff0000"):
                 cell = partial_grid.item_at[cell_row][cell_col]
                 cell_top_left_x = cell.get_x() - CELL_WIDTH / 2
                 cell_top_left_y = cell.get_y() + CELL_HEIGHT / 2
                 print("create_rectangle_aligned_to_cells: cell_col:", cell_col, " cell_row:", cell_row, " cell_horizontal_span:" , cell_horizontal_span)
 
-                rectangle = Rectangle(color="#ff0000",fill_opacity=1, fill_color="#ff0000", width = CELL_WIDTH * cell_horizontal_span, height = CELL_HEIGHT)
+                rectangle = Rectangle(color="#ff0000",fill_opacity=1, fill_color=colour, width = CELL_WIDTH * cell_horizontal_span, height = CELL_HEIGHT)
                 rectangle_width = CELL_WIDTH * cell_horizontal_span
                 print("num_in_row:", num_in_row)
                 # Reposition so that top-left is at origin.
@@ -511,6 +511,82 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                     for bitNum in range(0, NUM_BITS):
                         print("row:", bitNum, " num coins in row:", len(partial_grid.coin_mobjects_for_row[bitNum]))
                         num_in_row = len(partial_grid.item_at[bitNum])
+                        
+                        if dist_tracker_implementation == 'optimised':
+
+                            # Scroll the red-one-zones.
+                            if len(partial_grid.red_one_zone_for_row[bitNum]) == 1:
+                                # First time scrolling; let's set things up the way we want them.
+                                red_one_zone = partial_grid.red_one_zone_for_row[bitNum]
+                                empty_red_one_zone = partial_grid.create_rectangle_aligned_to_cells(None, 0, 0, 0, GREEN)
+
+                                partial_grid.red_one_zone_for_row[bitNum] = [[red_one_zone, [num_in_row // 2, num_in_row - 1]],
+                                                                             [empty_red_one_zone, [-1, -1]]]
+                                red_one_zone.id = "R1"
+                                empty_red_one_zone.id = "R2"
+
+                            red_zone_info_for_row = partial_grid.red_one_zone_for_row[bitNum]
+
+                            print("Advancing red one zones: bitNum: ", bitNum)
+                            print("Before:")
+                            for i in range(0, 2):
+                                print(red_zone_info_for_row[i][0].id, " [", red_zone_info_for_row[i][1][0], ", ", red_zone_info_for_row[i][1][1], "]")
+
+
+                            for i in range(0, 2):
+                                if red_zone_info_for_row[i][1][0] != -1:
+                                    red_zone_info_for_row[i][1][0] = red_zone_info_for_row[i][1][0] - 1
+                                if red_zone_info_for_row[i][1][1] != -1:
+                                    red_zone_info_for_row[i][1][1] = red_zone_info_for_row[i][1][1] - 1
+
+                            if red_zone_info_for_row[0][1][0] == -1:
+                                print("left is -1, right is:", red_zone_info_for_row[0][1][1])
+                                if red_zone_info_for_row[0][1][1] != -1:
+                                    print("narrowing")
+                                    # Ok - just narrowing, not disappeared yet.
+                                    # Set the left cell back to 0.
+                                    red_zone_info_for_row[0][1][0] = 0
+                                    # Activate other Rect?
+                                    if red_zone_info_for_row[1][1][0] == -1:
+                                        # Yes.
+                                        print("activating other rect")
+                                        red_zone_info_for_row[1][1][0] = num_in_row - 1
+                                        red_zone_info_for_row[1][1][1] = num_in_row - 1
+                                        blah = partial_grid.create_rectangle_aligned_to_cells(None, num_in_row - 1, bitNum, 0)
+                                        blah.shift(CELL_WIDTH * RIGHT)
+                                        red_zone_info_for_row[1][0].become(blah) 
+                                    else:
+                                        print("not activating other rect (", red_zone_info_for_row[1][1][0], ")")
+
+
+
+                                else:
+                                    # Disappeared!
+                                    print("disappearing")
+                                    blah = red_zone_info_for_row.pop(0)
+                                    red_zone_info_for_row.append(blah)
+                                    red_zone_info_for_row[1][1][0] = -1
+                                    red_zone_info_for_row[1][1][1] = -1
+
+                                    # Activate other Rect?
+                                    if red_zone_info_for_row[0][1][0] == -1:
+                                        # Yes.
+                                        print("activating other rect")
+                                        red_zone_info_for_row[0][1][0] = num_in_row - 1
+                                        red_zone_info_for_row[0][1][1] = num_in_row - 1
+                                        blah = partial_grid.create_rectangle_aligned_to_cells(None, num_in_row - 1, bitNum, 0)
+                                        blah.shift(CELL_WIDTH * RIGHT)
+                                        red_zone_info_for_row[0][0].become(blah) 
+                                    else:
+                                        print("not activating other rect (", red_zone_info_for_row[0][1][0], ")")
+
+                            print("After:")
+                            for i in range(0, 2):
+                                print(red_zone_info_for_row[i][0].id, " [", red_zone_info_for_row[i][1][0], ", ", red_zone_info_for_row[i][1][1], "]")
+
+                            for i in range(0, 2):
+                                if red_zone_info_for_row[i][1][0] != -1:
+                                    red_one_zone_advance_anims.append(Transform(red_zone_info_for_row[i][0], partial_grid.create_rectangle_aligned_to_cells(None, red_zone_info_for_row[i][1][0], bitNum, 1 + red_zone_info_for_row[i][1][1] - red_zone_info_for_row[i][1][0])))
 
                         for coin in partial_grid.coin_mobjects_for_row[bitNum]:
                             was_in_red = coin.pos_in_row >= num_in_row / 2
@@ -531,74 +607,6 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                 previous_pos = coin.pos_in_row
                                 coin.pos_in_row = (coin.pos_in_row + 1) % num_in_row
                                 x_offset_to_new_pos = (coin.pos_in_row - previous_pos) * CELL_WIDTH
-                            else:
-                                # Scroll the red-one-zones.
-                                if len(partial_grid.red_one_zone_for_row[bitNum]) == 1:
-                                    # First time scrolling; let's set things up the way we want them.
-                                    red_one_zone = partial_grid.red_one_zone_for_row[bitNum]
-                                    empty_red_one_zone = partial_grid.create_rectangle_aligned_to_cells(None, 0, 0, 0)
-
-                                    partial_grid.red_one_zone_for_row[bitNum] = [[red_one_zone, [num_in_row // 2, num_in_row - 1]],
-                                                                                 [empty_red_one_zone, [-1, -1]]]
-                                    red_one_zone.id = "R1"
-                                    empty_red_one_zone.id = "R2"
-
-                                red_zone_info_for_row = partial_grid.red_one_zone_for_row[bitNum]
-
-                                print("Advancing red one zones: bitNum: ", bitNum)
-                                print("Before:")
-                                for i in range(0, 2):
-                                    print(red_zone_info_for_row[i][0].id, " [", red_zone_info_for_row[i][1][0], ", ", red_zone_info_for_row[i][1][1], "]")
-
-
-                                for i in range(0, 2):
-                                    if red_zone_info_for_row[i][1][0] != -1:
-                                        red_zone_info_for_row[i][1][0] = red_zone_info_for_row[i][1][0] - 1
-                                    if red_zone_info_for_row[i][1][1] != -1:
-                                        red_zone_info_for_row[i][1][1] = red_zone_info_for_row[i][1][1] - 1
-
-                                if red_zone_info_for_row[0][1][0] == -1:
-                                    print("left is -1, right is:", red_zone_info_for_row[0][1][1])
-                                    if red_zone_info_for_row[0][1][1] != -1:
-                                        print("narrowing")
-                                        # Ok - just narrowing, not disappeared yet.
-                                        # Set the left cell back to 0.
-                                        red_zone_info_for_row[0][1][0] = 0
-                                        # Activate other Rect?
-                                        if red_zone_info_for_row[1][1][0] == -1:
-                                            # Yes.
-                                            print("activating other rect")
-                                            red_zone_info_for_row[1][1][0] = num_in_row - 1
-                                            red_zone_info_for_row[1][1][1] = num_in_row - 1
-                                        else:
-                                            print("not activating other rect (", red_zone_info_for_row[1][1][0], ")")
-
-
-
-                                    else:
-                                        # Disappeared!
-                                        print("disappearing")
-                                        blah = red_zone_info_for_row.pop(0)
-                                        red_zone_info_for_row.append(blah)
-                                        red_zone_info_for_row[1][1][0] = -1
-                                        red_zone_info_for_row[1][1][1] = -1
-
-                                        # Activate other Rect?
-                                        if red_zone_info_for_row[0][1][0] == -1:
-                                            # Yes.
-                                            print("activating other rect")
-                                            red_zone_info_for_row[0][1][0] = num_in_row - 1
-                                            red_zone_info_for_row[0][1][1] = num_in_row - 1
-                                        else:
-                                            print("not activating other rect (", red_zone_info_for_row[0][1][0], ")")
-
-                                print("After:")
-                                for i in range(0, 2):
-                                    print(red_zone_info_for_row[i][0].id, " [", red_zone_info_for_row[i][1][0], ", ", red_zone_info_for_row[i][1][1], "]")
-
-                                for i in range(0, 2):
-                                    if red_zone_info_for_row[i][1][0] != -1:
-                                        red_one_zone_advance_anims.append(Transform(red_zone_info_for_row[0][0], partial_grid.create_rectangle_aligned_to_cells(None, red_zone_info_for_row[i][1][0], bitNum, 1 + red_zone_info_for_row[i][1][1] - red_zone_info_for_row[i][1][0])))
 
                             # Do we need an addition representative in the right place?
                             in_red = coin.pos_in_row >= num_in_row / 2
