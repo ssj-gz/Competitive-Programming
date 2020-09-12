@@ -566,7 +566,7 @@ def do_collect_and_propagate_along_node_chain_naive(scene, dist_tracker_implemen
                                     red_zone_info_for_row.append(blah)
                                     red_zone_info_for_row[1][1][0] = -1
                                     red_zone_info_for_row[1][1][1] = -1
-                                    red_zone_info_for_row[1][0].become(partial_grid.create_rectangle_aligned_to_cells(None, 0, bitNum, 0))
+                                    red_one_zone_advance_anims.append(Transform(red_zone_info_for_row[1][0], partial_grid.create_rectangle_aligned_to_cells(None, 0, bitNum, 0)))
 
                                     # Activate other Rect?
                                     if red_zone_info_for_row[0][1][0] == -1:
