@@ -10,9 +10,13 @@ new_batch_countdown=0
 dir_number=0
 dir_name=""
 
+first_png_filename=$(ls -1 *00000*.png)
+
 for i in $(seq -f "%05g" 0 99999); do
   echo $i
-  if [ ! -e "MoveCoins2Editorial_4_collect_and_propagate_along_node_chain_left_to_right_optimised_$i.png" ]; then
+  png_filename="${first_png_filename/00000/$i}"
+  echo "png_filename: ${png_filename}"
+  if [ ! -e "${png_filename}" ]; then
     break
   fi
   if [ ${new_batch_countdown} -eq 0 ]; then
@@ -21,7 +25,7 @@ for i in $(seq -f "%05g" 0 99999); do
       new_batch_countdown=${BATCH_SIZE}
       dir_number=$(($dir_number + 1))
   fi
-  cp -v "MoveCoins2Editorial_4_collect_and_propagate_along_node_chain_left_to_right_optimised_$i.png" ${dir_name}
+  cp -v "${png_filename}" ${dir_name}
   new_batch_countdown=$(($new_batch_countdown - 1))
   echo "new_batch_countdown: ${new_batch_countdown}"
 done
